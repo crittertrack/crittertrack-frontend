@@ -130,10 +130,8 @@ const LoginScreen = ({ setAuthToken, setUserId, isRegisterView, toggleView, show
               w-full p-4 {/* Reduced inner padding to help reduce height */}
               flex flex-col justify-center 
           ">
-            {/* Card Title made smaller: text-lg font-bold */}
-            <h2 className="text-lg font-bold text-gray-900 mb-3 text-center"> 
-              {isRegisterView ? 'Register' : 'Log In'}
-            </h2>
+            
+            {/* CARD TITLES (Log In / Register) REMOVED COMPLETELY */}
 
             {/* Reduced vertical spacing between form fields: space-y-3 */}
             <form className="space-y-3" onSubmit={handleSubmit}>
