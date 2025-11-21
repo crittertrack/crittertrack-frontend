@@ -82,32 +82,33 @@ const LoginScreen = ({ setAuthToken, setUserId, isRegisterView, toggleView, show
       {/* Wrapper for logo and card group, centered vertically */}
       <div className="flex-grow flex flex-col justify-center items-center w-full">
       
-        {/* 1. Logo (Now even bigger) */}
+        {/* 1. Logo (Reduced size) */}
         <div className="p-5 mb-2 flex flex-col items-center"> 
-          {/* Logo size significantly increased */}
-          <CustomAppLogo size="w-48 h-48 sm:w-56 sm:h-56" /> 
-          {/* Instruction text size increased */}
-          <p className="text-gray-600 text-lg sm:text-xl mt-6 text-center">
+          {/* Logo size kept smaller as requested previously */}
+          <CustomAppLogo size="w-36 h-36 sm:w-40 sm:h-40" /> 
+          {/* Reduced margin-top on instruction text: mt-6 -> mt-4 */}
+          <p className="text-gray-600 text-lg sm:text-xl mt-4 text-center"> 
             Please sign in or register to continue.
           </p>
         </div>
 
-        {/* 2. The Main Card Container (Wider horizontally) */}
+        {/* 2. The Main Card Container (Width is maintained, vertical space reduced) */}
         <div className="
-            w-full max-w-sm sm:max-w-lg  {/* Increased max-w for horizontal width to 'lg' */}                             
+            w-full max-w-sm sm:max-w-md                             
             bg-white rounded-xl shadow-2xl 
-            overflow-hidden flex flex-col mt-8
+            overflow-hidden flex flex-col mt-6 {/* Reduced margin-top: mt-8 -> mt-6 */}
         ">
           
           {/* Form Section */}
           <div className="
-              w-full p-6 sm:p-8 flex flex-col justify-center
+              w-full p-5 sm:p-6 flex flex-col justify-center {/* Reduced padding: p-6 sm:p-8 -> p-5 sm:p-6 */}
           ">
-            <h2 className="text-2xl font-extrabold text-gray-900 mb-6 text-center"> 
+            {/* Reduced margin-bottom on heading: mb-6 -> mb-4 */}
+            <h2 className="text-2xl font-extrabold text-gray-900 mb-4 text-center"> 
               {isRegisterView ? 'Register' : 'Log In'}
             </h2>
 
-            <form className="space-y-5" onSubmit={handleSubmit}> 
+            <form className="space-y-4" onSubmit={handleSubmit}> {/* Reduced space-y: space-y-5 -> space-y-4 */}
               <div>
                 <label htmlFor="email" className="block text-sm font-medium text-gray-700">Email Address</label>
                 <input
@@ -152,7 +153,7 @@ const LoginScreen = ({ setAuthToken, setUserId, isRegisterView, toggleView, show
                 </div>
               )}
 
-              <div className="pt-3">
+              <div className="pt-2"> {/* Reduced padding-top: pt-3 -> pt-2 */}
                 <button
                   type="submit"
                   disabled={loading}
@@ -174,7 +175,7 @@ const LoginScreen = ({ setAuthToken, setUserId, isRegisterView, toggleView, show
         </div>
         
         {/* 3. Toggle View Link */}
-        <div className="mt-6 text-center w-full max-w-sm sm:max-w-lg"> {/* Matched width with card */}
+        <div className="mt-4 text-center w-full max-w-sm sm:max-w-md"> {/* Reduced margin-top: mt-6 -> mt-4 */}
           <button
             onClick={toggleView}
             className="text-accent hover:text-accent/80 text-md font-semibold flex items-center justify-center w-full"
@@ -234,7 +235,6 @@ export default function App() {
     return (
       <>
         {/* Global Message Modal */}
-        {/* FIX: Removed extra parenthesis around the callback function in onClose */}
         {showModal && <ModalMessage title={modalMessage.title} message={modalMessage.message} onClose={() => setShowModal(false)} />}
         <LoginScreen 
           setAuthToken={setAuthToken}
