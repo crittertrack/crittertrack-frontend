@@ -399,7 +399,6 @@ const SpeciesSelector = ({ critters, onSelectSpecies, onCancel, setShowModal, se
   };
 
   const handleDeleteCustomSpecies = (speciesToDelete) => {
-    // Check if any existing critters use this species
     const linkedCritters = critters.filter(c => c.species.toLowerCase() === speciesToDelete.toLowerCase());
 
     if (linkedCritters.length > 0) {
@@ -523,12 +522,11 @@ const Dashboard = ({ onLogout, setShowModal, setModalMessage }) => {
   const token = sessionStorage.getItem('critterTrackToken');
 
   // NEW: Create a unique key for local storage based on the first few chars of the token
-  // This is a proxy for the user ID/email that is unique per user session.
   const userIdKey = token ? token.substring(0, 10) : 'GUEST';
 
   const fetchCritters = useCallback(async () => {
     if (!token) {
-        setError("Authentication token missing in session storage.");
+        setError("Authentication token missing.");
         setIsLoading(false);
         return;
     }
@@ -546,7 +544,7 @@ const Dashboard = ({ onLogout, setShowModal, setModalMessage }) => {
     } finally {
       setIsLoading(false);
     }
-  }, [token]);
+  }, [token]); // Use useCallback and include token in dependency array
 
   useEffect(() => {
     fetchCritters();
@@ -584,19 +582,21 @@ const Dashboard = ({ onLogout, setShowModal, setModalMessage }) => {
 
 
   if (isFormVisible) {
+      // 1. Species Selection Step
       if (!editingCritter && !selectedSpecies) {
           return (
               <SpeciesSelector 
                   critters={critters}
                   onSelectSpecies={handleSpeciesSelected} 
                   onCancel={handleCancelForm} 
-                  setShowModal={setShowModal}
-                  setModalMessage={setModalMessage}
-                  userIdKey={userIdKey} // PASS THE UNIQUE KEY FOR LOCAL STORAGE
+                  setShowModal={setShowModal} // PASSED MODAL HANDLERS
+                  setModalMessage={setModalMessage} // PASSED MODAL HANDLERS
+                  userIdKey={userIdKey} 
               />
           );
       }
       
+      // 2. Critter Form Step
       return (
           <div className="flex flex-col items-center w-full max-w-6xl">
               <button 
@@ -774,8 +774,8 @@ export default function App() {
         {userToken ? (
           <Dashboard 
             onLogout={handleLogout} 
-            setShowModal={setShowModal}
-            setModalMessage={setModalMessage}
+            setShowModal={setShowModal} // IMPORTANT: Pass modal handlers
+            setModalMessage={setModalMessage} // IMPORTANT: Pass modal handlers
           />
         ) : (
           renderAuthContent()
