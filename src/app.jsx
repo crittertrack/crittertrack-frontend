@@ -69,8 +69,8 @@ const LoginScreen = ({ setAuthToken, setUserId, isRegisterView, toggleView, show
         const endpoint = isRegisterView ? `${API_BASE_URL}/public/register` : `${API_BASE_URL}/public/login`;
         
         const payload = isRegisterView
-          ? { email, password, name: personalName } // Include name for registration
-          : { email, password };
+  ? { email, password, personalName: personalName } // FIX: Key is now 'personalName'
+  : { email, password };
   
         const response = await axios.post(endpoint, payload);
   
