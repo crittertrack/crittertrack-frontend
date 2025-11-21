@@ -544,7 +544,7 @@ export default function App() {
         <img
           src="/logo.png" // Update this path if your logo is elsewhere!
           alt="CritterTrack Pedigree App Logo"
-          className="mx-auto h-32 sm:h-48"
+          className="mx-auto h-24 sm:h-40"
         />
         <p className="text-lg text-gray-500 mt-2">
           {userToken ? 'Welcome back! Manage your registered critters.' : 'Please sign in or register to continue.'}
