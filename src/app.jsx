@@ -1,9 +1,8 @@
 import React, { useState, useEffect } from 'react';
 import axios from 'axios';
-import { LogOut, Cat, UserPlus, LogIn, ChevronLeft, Trash2, Edit, Save, PlusCircle, ArrowLeft, Loader2, RefreshCw } from 'lucide-react';
+import { LogOut, UserPlus, LogIn, ChevronLeft, Trash2, Edit, Save, PlusCircle, ArrowLeft, Loader2, RefreshCw } from 'lucide-react';
 
 // --- Global Constants ---
-// FIX: Removed process.env as it is not defined in the client-side environment.
 const API_BASE_URL = '/api'; 
 const SPECIES_OPTIONS = ['Mouse', 'Rat', 'Hamster'];
 
@@ -25,44 +24,25 @@ const ModalMessage = ({ title, message, onClose }) => (
 	</div>
 );
 
-// Simplified CritterTrack Logo Component (Re-used for Login screen)
-const Logo = ({ isRegisterView, toggleView }) => (
-    <div className="flex flex-col items-center mb-4 sm:mb-0">
-        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100" className="w-12 h-12">
-            {/* Pink Background Heart/Flower shape using custom colors */}
-            <path d="M50 85c-15-20-30-35-30-50 0-11 9-20 20-20s20 9 20 20c0 15-15 30-30 50z" fill="#fbcfe8" />
-            <path d="M50 85c15-20 30-35 30-50 0-11-9-20-20-20s-20 9-20 20c0 15 15 30 30 50z" fill="#fbcfe8" />
-            
-            {/* Green leaves/stem */}
-            <path d="M40 90l10-15 10 15z" fill="#10b981" />
-            
-            {/* Critters - simplified butterflies/moths */}
-            <path d="M40 30c-5-5-5-15 0-20 5 5 5 15 0 20z" fill="#ec4899" />
-            <path d="M60 30c5-5 5-15 0-20-5 5-5 15 0 20z" fill="#60a5fa" />
-            <circle cx="50" cy="28" r="4" fill="#fef08a" />
-        </svg>
-        <h1 className="text-xl font-bold text-gray-800 mt-1">CritterTrack</h1>
-        <p className="text-sm text-gray-500 mt-1">
-            {isRegisterView ? "Create your new account." : "Please sign in or register to continue."}
-        </p>
-        
-        {/* Toggle Button for Mobile/Branding Section */}
-        <button 
-            type="button" 
-            onClick={toggleView} 
-            className="mt-4 text-accent hover:text-accent/80 text-sm font-medium flex items-center md:hidden"
-        >
-            {isRegisterView ? 
-                <><ChevronLeft size={16} className="mr-1" /> Back to Login</> 
-                : 
-                <><UserPlus size={16} className="mr-1" /> Need an Account? Register Here</>
-            }
-        </button>
-    </div>
+// --- NEW Custom Logo Component using logo.png ---
+const CustomAppLogo = ({ size = 'w-20 h-20' }) => (
+    <img 
+        src="/logo.png" 
+        alt="CritterTrack Logo" 
+        // Applying classes to control size, fit, and add a subtle effect
+        className={`${size} object-contain rounded-lg shadow-md transition-transform duration-300 hover:scale-[1.02]`}
+        // Fallback for when the logo.png is not accessible or doesn't load
+        onError={(e) => { 
+            e.target.onerror = null; 
+            e.target.src = `https://placehold.co/80x80/D27096/ffffff?text=Logo`; 
+            // Change class to object-fill for the placeholder text to look correct
+            e.target.className = e.target.className.replace('object-contain', 'object-fill'); 
+        }}
+    />
 );
 
 
-// --- Login/Register Component (Using the New Layout) ---
+// --- Login/Register Component ---
 const LoginScreen = ({ setToken, setShowModal, setModalMessage, API_BASE_URL, isRegisterView, toggleView }) => {
     const [email, setEmail] = useState('');
     const [password, setPassword] = useState('');
@@ -139,12 +119,30 @@ const LoginScreen = ({ setToken, setShowModal, setModalMessage, API_BASE_URL, is
                     md:w-2/5 md:bg-page-bg md:py-12
                     border-b md:border-b-0 md:border-r border-page-bg
                 ">
-                    <Logo isRegisterView={isRegisterView} toggleView={toggleView} />
-                    <div className="mt-4 text-center hidden md:block">
-                         <p className="text-gray-600 text-sm">
-                             Manage your pedigrees, litters, and animal records efficiently.
-                         </p>
-                    </div>
+                    {/* Replaced old Logo component with the Custom Logo using the image file */}
+                    <CustomAppLogo size="w-24 h-24" /> 
+                    
+                    {/* Dynamic Text Based on View */}
+                    <h1 className="text-xl font-semibold text-gray-800 mt-4 mb-1 text-center">
+                        {isRegisterView ? 'Create your new account.' : 'Please sign in or register to continue.'}
+                    </h1>
+                    <p className="text-sm text-gray-600 mt-1 mb-6 text-center">
+                        Manage your pedigrees, litters, and animal records efficiently.
+                    </p>
+                    {/* End Dynamic Text */}
+
+                    {/* Toggle Button for Mobile/Branding Section */}
+                    <button 
+                        type="button" 
+                        onClick={toggleView} 
+                        className="mt-4 text-accent hover:text-accent/80 text-sm font-medium flex items-center md:hidden"
+                    >
+                        {isRegisterView ? 
+                            <><ChevronLeft size={16} className="mr-1" /> Back to Login</> 
+                            : 
+                            <><UserPlus size={16} className="mr-1" /> Need an Account? Register Here</>
+                        }
+                    </button>
                 </div>
 
                 {/* 2. Right Side: Auth Form */}
@@ -153,7 +151,7 @@ const LoginScreen = ({ setToken, setShowModal, setModalMessage, API_BASE_URL, is
                     md:w-3/5 md:py-12 md:px-16 
                     flex flex-col justify-center
                 ">
-                    <h2 className="text-3xl font-extrabold text-gray-900 mb-6 text-center md:text-left">
+                    <h2 className="text-3xl font-extrabold text-gray-900 mb-2 text-center md:text-left">
                         {isRegisterView ? 'Create Your Account' : 'Welcome Back'}
                     </h2>
                     <p className="text-sm text-gray-500 mb-6 text-center md:text-left">
@@ -373,7 +371,8 @@ const App = () => {
             {/* Main Header/Navigation */}
             <header className="w-full max-w-6xl bg-white rounded-xl shadow-md p-4 mb-6 flex justify-between items-center">
                 <div className="flex items-center space-x-3">
-                    <Cat size={32} className="text-accent" />
+                    {/* Replaced Cat icon with the Custom Logo using the image file */}
+                    <CustomAppLogo size="w-8 h-8" />
                     <h1 className="text-2xl font-bold text-gray-800">CritterTrack</h1>
                 </div>
                 <nav className="flex space-x-4 text-sm font-medium">
