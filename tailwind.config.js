@@ -11,8 +11,8 @@ module.exports = {
       colors: {
         // User-defined colors
         'page-bg': '#F1D1DC',
-        'primary': '#9CD6E1',
-        'primary-dark': '#7AA7B5', // A slightly darker shade for hover state
+        'primary': '#9ED4E0',
+        'primary-dark': '#79A7B3', // A slightly darker shade for hover state
         'accent': '#D27096',
       }
     },
