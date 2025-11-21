@@ -1,0 +1,19 @@
+/*
+This file contains the essential directives that the Tailwind CSS processor
+uses to inject all of the utility classes (like 'bg-white', 'text-xl', etc.)
+into your final compiled CSS bundle.
+*/
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/*
+We also add a custom rule here to set the 'Inter' font
+as the default for the entire application.
+*/
+@layer base {
+html {
+font-family: 'Inter', sans-serif;
+}
+}
