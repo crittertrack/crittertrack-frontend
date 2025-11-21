@@ -3,7 +3,7 @@ import axios from 'axios';
 import { LogOut, Cat, UserPlus, LogIn, ChevronLeft, Trash2, Edit, Save, PlusCircle, ArrowLeft, Loader2, RefreshCw } from 'lucide-react';
 
 // --- Global Constants ---
-// Using a simple path for the API base URL in this self-contained file.
+// Targeting the local API endpoints for authentication
 const API_BASE_URL = '/api'; 
 const SPECIES_OPTIONS = ['Mouse', 'Rat', 'Hamster'];
 
@@ -44,7 +44,7 @@ const LoginScreen = ({ setAuthToken, setUserId, isRegisterView, toggleView, show
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
-  const [personalName, setPersonalName] = useState(''); // NEW STATE for mandatory name
+  const [personalName, setPersonalName] = useState(''); 
   const [loading, setLoading] = useState(false);
 
   // Function to handle the login/register submission
@@ -66,6 +66,7 @@ const LoginScreen = ({ setAuthToken, setUserId, isRegisterView, toggleView, show
     }
 
     try {
+      // --- RESTORED AXIOS LOGIC ---
       const endpoint = isRegisterView ? `${API_BASE_URL}/public/register` : `${API_BASE_URL}/public/login`;
       
       const payload = isRegisterView
@@ -77,6 +78,7 @@ const LoginScreen = ({ setAuthToken, setUserId, isRegisterView, toggleView, show
       if (response.data.token) {
         setAuthToken(response.data.token);
         setUserId(response.data.userId);
+        showModalMessage('Success!', isRegisterView ? 'Registration successful. Welcome!' : 'Login successful. Welcome back!');
       } else {
         showModalMessage('Authentication Failed', response.data.message || 'An unknown error occurred.');
       }
@@ -131,8 +133,6 @@ const LoginScreen = ({ setAuthToken, setUserId, isRegisterView, toggleView, show
               flex flex-col justify-center 
           ">
             
-            {/* CARD TITLES (Log In / Register) REMOVED COMPLETELY */}
-
             {/* Reduced vertical spacing between form fields: space-y-3 */}
             <form className="space-y-3" onSubmit={handleSubmit}>
               
@@ -227,7 +227,7 @@ const LoginScreen = ({ setAuthToken, setUserId, isRegisterView, toggleView, show
                   ) : (
                       <LogIn className="w-5 h-5 mr-2" />
                   )}
-                  {isRegisterView ? 'Register' : 'Log In'}
+                  {loading ? 'Processing...' : isRegisterView ? 'Register' : 'Log In'}
                 </button>
               </div>
             </form>
