@@ -3,9 +3,8 @@ import axios from 'axios';
 import { LogOut, Cat, UserPlus, LogIn, ChevronLeft, Trash2, Edit, Save, PlusCircle, ArrowLeft, Loader2, RefreshCw } from 'lucide-react';
 
 // --- Global Constants ---
-// Use environment variable for the API base URL in production, fall back to proxy in development.
 const API_BASE_URL = process.env.REACT_APP_API_BASE_URL || '/api';
-const SPECIES_OPTIONS = ['Mouse', 'Rat', 'Hamster']; // NEW: Default species list
+const SPECIES_OPTIONS = ['Mouse', 'Rat', 'Hamster'];
 
 // --- Helper Components ---
 
@@ -48,10 +47,10 @@ const InputField = ({ id, label, type = 'text', value, onChange, required = fals
  * @typedef {object} Critter
  * @property {number} id
  * @property {string} name
- * @property {string} species
  * @property {number} age
  * @property {string} gender
  * @property {string} owner
+ * @property {string} species
  */
 
 // --- 1. Authentication/Registration Components ---
@@ -68,7 +67,6 @@ const AuthForm = ({ isRegister, setToken, setIsRegisterView, setShowModal, setMo
     setIsLoading(true);
     
     const endpoint = isRegister ? `${API_BASE_URL}/users/register` : `${API_BASE_URL}/users/login`;
-    // FIX: Changed 'name' key to 'personalName' to match backend requirement
     const payload = isRegister 
       ? { email, password, personalName: name, breederName: breederName || null } 
       : { email, password };
@@ -77,18 +75,16 @@ const AuthForm = ({ isRegister, setToken, setIsRegisterView, setShowModal, setMo
       const response = await axios.post(endpoint, payload);
 
       if (response.data.token) {
-        // Store token in session storage for persistence and state update
         sessionStorage.setItem('critterTrackToken', response.data.token);
         setToken(response.data.token);
       } else {
-        // Handle successful registration without a token (common pattern)
         if (isRegister) {
             setShowModal(true);
             setModalMessage({
                 title: 'Registration Success',
                 message: 'Your account has been created successfully. Please log in now.'
             });
-            setIsRegisterView(false); // Switch to login view
+            setIsRegisterView(false); 
         } else {
             throw new Error('Login failed: Token not received.');
         }
@@ -115,14 +111,13 @@ const AuthForm = ({ isRegister, setToken, setIsRegisterView, setShowModal, setMo
         <>
           <InputField 
             id="name" 
-            label="Personal Name" // LABEL CHANGED
+            label="Personal Name" 
             value={name} 
             onChange={setName} 
             required 
             disabled={isLoading}
           />
           
-          {/* NEW OPTIONAL BREEDER NAME FIELD */}
           <InputField 
             id="breederName" 
             label="Breeder Name (Optional)" 
@@ -173,12 +168,12 @@ const CritterForm = ({ onCritterSaved, initialCritter, token, onCancel }) => {
   const [critter, setCritter] = useState(initialCritter || { 
     name: '', 
     species: '', 
-    age: '', 
-    gender: 'Male', // Default to Male
-    owner: '' // This should eventually be pre-filled from user data
+    age: '', // Removed breed
+    gender: 'Male', 
+    owner: '' 
   });
   const [isLoading, setIsLoading] = useState(false);
-  const isEditing = !!initialCritter;
+  const isEditing = !!initialCritter && !!initialCritter.id;
 
   const handleChange = (field, value) => {
     setCritter(prev => ({ ...prev, [field]: value }));
@@ -199,30 +194,39 @@ const CritterForm = ({ onCritterSaved, initialCritter, token, onCancel }) => {
 
     try {
       if (isEditing) {
-        // Update Critter
         await axios.put(`${API_BASE_URL}/critters/${critter.id}`, payload, config);
       } else {
-        // Add new Critter
         await axios.post(`${API_BASE_URL}/critters`, payload, config);
       }
       onCritterSaved();
-      onCancel(); // Close form
+      onCancel(); 
     } catch (error) {
       console.error('Critter Save Error:', error.response?.data || error.message);
-      // In a real app, you would show a modal here
     } finally {
       setIsLoading(false);
     }
   };
 
-const isSpeciesDisabled = isLoading || (!!critter.species && !isEditing);
+  const isSpeciesDisabled = isLoading || (!!critter.species && !isEditing); 
 
   return (
     <div className="bg-white p-6 rounded-xl shadow-lg border border-gray-100 w-full max-w-md">
-      <h3 className="text-2xl font-bold text-gray-800 mb-6">{isEditing ? 'Edit Critter' : 'Add New Critter'}</h3>
+      <h3 className="text-2xl font-bold text-gray-800 mb-6">{isEditing ? 'Edit Critter' : `Add New ${critter.species || 'Critter'}`}</h3>
       <form onSubmit={handleSubmit}>
+        
         <InputField id="critterName" label="Name" value={critter.name} onChange={(val) => handleChange('name', val)} required disabled={isLoading} />
-        <InputField id="critterSpecies" label="Species" value={critter.species} onChange={(val) => handleChange('species', val)} required disabled={isSpeciesDisabled} />
+        
+        <InputField 
+          id="critterSpecies" 
+          label="Species" 
+          value={critter.species} 
+          onChange={(val) => handleChange('species', val)} 
+          required 
+          disabled={isSpeciesDisabled}
+        />
+        
+        {/* REMOVED: Breed InputField */}
+        
         <InputField id="critterAge" label="Age (Years)" type="number" value={critter.age} onChange={(val) => handleChange('age', val)} required disabled={isLoading} />
         <InputField id="critterOwner" label="Owner Name" value={critter.owner} onChange={(val) => handleChange('owner', val)} required disabled={isLoading} />
         
@@ -263,14 +267,12 @@ const isSpeciesDisabled = isLoading || (!!critter.species && !isEditing);
   );
 };
 
-
 const CritterCard = ({ critter, token, onCritterDeleted, onCritterUpdated }) => {
   const [isEditing, setIsEditing] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
 
   const handleDelete = async () => {
-    // In a real app, use a modal for confirmation instead of window.confirm
-    if (window.confirm(`Are you sure you want to delete ${critter.name}?`)) {
+    if (window.confirm(`Are you sure you want to delete ${critter.name} (${critter.species})?`)) {
         setIsLoading(true);
         try {
             await axios.delete(`${API_BASE_URL}/critters/${critter.id}`, {
@@ -279,21 +281,16 @@ const CritterCard = ({ critter, token, onCritterDeleted, onCritterUpdated }) => 
             onCritterDeleted(critter.id);
         } catch (error) {
             console.error('Critter Delete Error:', error.response?.data || error.message);
-            // Handle error display
         } finally {
             setIsLoading(false);
         }
     }
   };
   
-  // Quick fix: Since we aren't displaying critter-specific editing, let's just 
-  // route to the main form when Edit is clicked.
   const handleEditClick = () => {
       onCritterUpdated(critter); 
   };
   
-  // This component will only show the display card, editing is done via the main form
-
   return (
     <div className="bg-white p-5 rounded-xl shadow-lg border border-gray-100 flex flex-col justify-between transition-all hover:shadow-xl transform hover:-translate-y-0.5">
       <div>
@@ -304,7 +301,9 @@ const CritterCard = ({ critter, token, onCritterDeleted, onCritterUpdated }) => 
           </span>
         </div>
         <h4 className="text-xl font-bold text-gray-800 mb-1 truncate">{critter.name}</h4>
-        <p className="text-sm text-gray-600 mb-1">Species: {critter.species}</p>
+        
+        {/* Updated spacing and removed breed display */}
+        <p className="text-sm text-gray-600 mb-3">Species: {critter.species}</p>
         
         <div className="space-y-1 text-sm text-gray-700">
           <p><strong>Age:</strong> {critter.age} years</p>
@@ -404,6 +403,7 @@ const SpeciesSelector = ({ onSelectSpecies, onCancel }) => {
   );
 };
 
+
 const Dashboard = ({ onLogout }) => {
   /** @type {[Critter[], React.Dispatch<React.SetStateAction<Critter[]>>]} */
   const [critters, setCritters] = useState([]);
@@ -412,6 +412,7 @@ const Dashboard = ({ onLogout }) => {
   const [isFormVisible, setIsFormVisible] = useState(false);
   /** @type {[Critter | null, React.Dispatch<React.SetStateAction<Critter | null>>]} */
   const [editingCritter, setEditingCritter] = useState(null);
+  const [selectedSpecies, setSelectedSpecies] = useState(null); 
   
   const token = sessionStorage.getItem('critterTrackToken');
 
@@ -439,49 +440,41 @@ const Dashboard = ({ onLogout }) => {
 
   useEffect(() => {
     fetchCritters();
-  }, []); // Run only on initial mount
+  }, []); 
 
-  // Handler for opening the edit form
   const handleEditCritter = (critter) => {
     setEditingCritter(critter);
-	setSelectedSpecies(null);
+    setSelectedSpecies(null);
     setIsFormVisible(true);
   };
   
-  // Handler for successful save/update/delete
   const handleDataChange = () => {
-    // Re-fetch all data to ensure the list is up-to-date
     fetchCritters(); 
   };
   
-  // Handler for cancelling form or closing modal
   const handleCancelForm = () => {
       setIsFormVisible(false);
       setEditingCritter(null);
-	  setSelectedSpecies(null);
+      setSelectedSpecies(null);
   };
   
-  // NEW: Handler for when a species is chosen in the selector
   const handleSpeciesSelected = (species) => {
       setSelectedSpecies(species);
-      setIsFormVisible(true); // Keep form panel visible
+      setIsFormVisible(true);
   };
   
-  // NEW: Handler for starting the new two-step flow
   const startAddCritterFlow = () => {
       setEditingCritter(null);
       setSelectedSpecies(null);
       setIsFormVisible(true);
   };
   
-  // Handler for successful deletion from the CritterCard
   const handleCritterDeleted = (id) => {
       setCritters(prevCritters => prevCritters.filter(c => c.id !== id));
   };
 
-  // CONDITIONAL RENDERING LOGIC UPDATED
+
   if (isFormVisible) {
-      // Check 1: If we are not editing an existing critter AND a species hasn't been selected, show selector
       if (!editingCritter && !selectedSpecies) {
           return (
               <SpeciesSelector 
@@ -491,7 +484,6 @@ const Dashboard = ({ onLogout }) => {
           );
       }
       
-      // Check 2: If we are editing OR a species HAS been selected, show the CritterForm
       return (
           <div className="flex flex-col items-center w-full max-w-6xl">
               <button 
@@ -502,7 +494,7 @@ const Dashboard = ({ onLogout }) => {
               </button>
               <CritterForm 
                   token={token}
-                  initialCritter={editingCritter || { species: selectedSpecies }} // Pass selectedSpecies to form
+                  initialCritter={editingCritter || { species: selectedSpecies }}
                   onCritterSaved={handleDataChange}
                   onCancel={handleCancelForm}
               />
@@ -528,7 +520,7 @@ const Dashboard = ({ onLogout }) => {
               Refresh
             </button>
             <button
-              onClick={() => { setEditingCritter(null); setIsFormVisible(true); }}
+              onClick={startAddCritterFlow}
               className="flex items-center bg-primary hover:bg-primary-dark text-black font-bold py-2 px-4 rounded-xl transition duration-200 shadow-md hover:shadow-lg"
             >
               <PlusCircle size={20} className="mr-2" />
@@ -568,7 +560,7 @@ const Dashboard = ({ onLogout }) => {
                 critter={critter} 
                 token={token} 
                 onCritterDeleted={handleCritterDeleted}
-                onCritterUpdated={handleEditCritter} // Pass handler for editing
+                onCritterUpdated={handleEditCritter}
             />
           ))}
         </div>
@@ -596,14 +588,12 @@ export default function App() {
   const [showModal, setShowModal] = useState(false);
   const [modalMessage, setModalMessage] = useState({ title: '', message: '' });
 
-  // Function to handle logout and clear state
   const handleLogout = () => {
     sessionStorage.removeItem('critterTrackToken');
     setUserToken(null);
-    setIsRegisterView(false); // Reset to login view
+    setIsRegisterView(false);
   };
 
-  // Axios Interceptor for Authorization Header (runs before every request)
   useEffect(() => {
     const interceptor = axios.interceptors.request.use((config) => {
       const token = sessionStorage.getItem('critterTrackToken');
@@ -613,14 +603,12 @@ export default function App() {
       return config;
     });
 
-    // Cleanup function to remove the interceptor
     return () => {
       axios.interceptors.request.eject(interceptor);
     };
   }, [userToken]);
 
 
-  // Helper function to render the auth/reg forms
   const renderAuthContent = () => (
     <div className="flex flex-col items-center w-full max-w-sm">
       <AuthForm 
@@ -659,7 +647,7 @@ export default function App() {
       
       <header className="py-8 w-full max-w-6xl text-center">
         <img
-          src="/logo.png" // Update this path if your logo is elsewhere!
+          src="/logo.png"
           alt="CritterTrack Pedigree App Logo"
           className="mx-auto h-24 sm:h-40"
         />
