@@ -541,10 +541,12 @@ export default function App() {
       )}
       
       <header className="py-8 w-full max-w-6xl text-center">
-        <h1 className="text-5xl font-extrabold text-gray-800 tracking-tight">
-          CritterTrack Pedigree App
-        </h1>
-        <p className="text-lg text-gray-700 mt-2">
+        <img
+          src="/logo.png" // Update this path if your logo is elsewhere!
+          alt="CritterTrack Pedigree App Logo"
+          className="mx-auto h-16 sm:h-20"
+        />
+        <p className="text-lg text-gray-500 mt-2">
           {userToken ? 'Welcome back! Manage your registered critters.' : 'Please sign in or register to continue.'}
         </p>
       </header>
