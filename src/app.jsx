@@ -96,19 +96,17 @@ const LoginScreen = ({ setAuthToken, setUserId, isRegisterView, toggleView, show
       <div className="flex-grow flex flex-col justify-center items-center w-full">
       
         {/* 1. Logo and Instruction Text Group: Content centered with items-center */}
-        {/* Reduced vertical padding to compact the screen layout */}
-        <div className="py-3 flex flex-col items-center"> 
-          {/* Logo size kept smaller as requested previously */}
-          <CustomAppLogo size="w-36 h-36 sm:w-40 h-40" /> 
+        <div className="py-2 flex flex-col items-center {/* Reduced vertical padding to py-2 */}"> 
+          <CustomAppLogo size="w-32 h-32 sm:w-36 h-36" /> {/* Reduced logo size */}
           <p className="text-gray-600 text-lg sm:text-xl mt-4 text-center"> 
             Please sign in or register to continue.
           </p>
         </div>
 
         {/* 1.5. Toggle View Link (Above Card for Register View) */}
-        {/* Moved this section to appear above the card when registering */}
+        {/* Adjusted max-w to match the new card width */}
         {isRegisterView && (
-          <div className="mt-2 w-full max-w-xs sm:max-w-sm">
+          <div className="mt-2 w-full max-w-72 sm:max-w-xs">
             <button
               onClick={toggleView}
               className="text-accent hover:text-accent/80 text-md font-semibold flex items-center justify-center w-full"
@@ -118,11 +116,11 @@ const LoginScreen = ({ setAuthToken, setUserId, isRegisterView, toggleView, show
           </div>
         )}
 
-        {/* 2. The Main Card Container: Max width container centered by parent's items-center */}
+        {/* 2. The Main Card Container: Reduced max width for smaller card size */}
         <div className="
-            w-full max-w-xs sm:max-w-sm                             
+            w-full max-w-72 sm:max-w-xs                             
             bg-white rounded-xl shadow-2xl 
-            overflow-hidden flex flex-col mt-2 {/* Reduced top margin to mt-2 */}
+            overflow-hidden flex flex-col mt-2 
         ">
           
           {/* Form Section */}
@@ -130,13 +128,13 @@ const LoginScreen = ({ setAuthToken, setUserId, isRegisterView, toggleView, show
               w-full p-4 {/* Reduced inner padding to p-4 consistently */}
               flex flex-col justify-center 
           ">
-            <h2 className="text-2xl font-extrabold text-gray-900 mb-3 text-center {/* Reduced bottom margin to mb-3 */}"> 
+            <h2 className="text-2xl font-extrabold text-gray-900 mb-3 text-center"> 
               {isRegisterView ? 'Register' : 'Log In'}
             </h2>
 
             <form className="space-y-4" onSubmit={handleSubmit}>
               
-              {/* NEW Personal Name Field - Only for Registration */}
+              {/* Personal Name Field - Only for Registration */}
               {isRegisterView && (
                 <div>
                   <label htmlFor="name" className="block text-sm font-medium text-gray-700">Personal Name</label>
@@ -222,9 +220,9 @@ const LoginScreen = ({ setAuthToken, setUserId, isRegisterView, toggleView, show
         </div>
         
         {/* 3. Toggle View Link (Below Card for Login View) */}
-        {/* Only show the "Register Here" link below the card when NOT registering */}
+        {/* Adjusted max-w to match the new card width */}
         {!isRegisterView && (
-          <div className="mt-4 w-full max-w-xs sm:max-w-sm">
+          <div className="mt-4 w-full max-w-72 sm:max-w-xs">
             <button
               onClick={toggleView}
               className="text-accent hover:text-accent/80 text-md font-semibold flex items-center justify-center w-full"
