@@ -3,8 +3,8 @@ import axios from 'axios';
 import { LogOut, Cat, UserPlus, LogIn, ChevronLeft, Trash2, Edit, Save, PlusCircle, ArrowLeft, Loader2, RefreshCw } from 'lucide-react';
 
 // --- Global Constants ---
-// Targeting the local API endpoints for authentication
-const API_BASE_URL = '/api'; 
+// Targeting the Railway API endpoints for authentication
+const API_BASE_URL = 'https://crittertrack-pedigree-production.up.railway.app/api';
 const SPECIES_OPTIONS = ['Mouse', 'Rat', 'Hamster'];
 
 // --- Helper Components ---
