@@ -4,10 +4,7 @@ import { LogOut, Cat, UserPlus, LogIn, ChevronLeft, Trash2, Edit, Save, PlusCirc
 
 // --- Global Constants ---
 // The API_BASE_URL is dynamically set based on the environment.
-const API_BASE_URL = 
-  process.env.NODE_ENV === 'development' 
-    ? 'http://localhost:8080/api' // Local Development API (ADJUST PORT IF NEEDED)
-    : 'https://crittertrack-pedigree-production.up.railway.app/api'; // Production Railway Backend URL
+const API_BASE_URL = process.env.REACT_APP_API_BASE_URL || '/api';
 
 const SPECIES_OPTIONS = ['Mouse', 'Rat', 'Hamster'];
 
