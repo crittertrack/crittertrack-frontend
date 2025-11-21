@@ -30,7 +30,7 @@ const CustomAppLogo = ({ size = "w-10 h-10" }) => (
     <img 
         src="logo.png" 
         alt="CritterTrack Logo" 
-        // REMOVED: rounded-full to prevent cropping
+        // No rounded-full class for full logo visibility
         className={`${size} object-cover`} 
         onError={(e) => {
             e.target.onerror = null; 
@@ -76,20 +76,20 @@ const LoginScreen = ({ setAuthToken, setUserId, isRegisterView, toggleView, show
   };
 
   return (
-    // Set up main flex column, remove justify-center
+    // Set up main flex column
     <div className="min-h-screen bg-page-bg flex flex-col p-4 font-sans">
       
-      {/* New Wrapper: Takes available space and centers the logo/card group */}
+      {/* Wrapper for logo and card group, centered vertically */}
       <div className="flex-grow flex flex-col justify-center items-center w-full">
       
-        {/* 1. Logo (Separated from the card) */}
+        {/* 1. Logo (Now significantly bigger) */}
         <div className="p-5 mb-8"> 
-          <CustomAppLogo size="w-20 h-20 sm:w-24 sm:h-24" />             
+          <CustomAppLogo size="w-24 h-24 sm:w-32 sm:h-32" />             
         </div>
 
-        {/* 2. The Main Card Container: Now only contains the form and title */}
+        {/* 2. The Main Card Container (Now smaller, max-w-xs) */}
         <div className="
-            w-full max-w-sm sm:max-w-md                          
+            w-full max-w-xs sm:max-w-sm                          
             bg-white rounded-xl shadow-2xl 
             overflow-hidden flex flex-col
         ">
@@ -165,22 +165,23 @@ const LoginScreen = ({ setAuthToken, setUserId, isRegisterView, toggleView, show
                 </button>
               </div>
             </form>
-            
-            {/* Toggle View Link */}
-            <div className="mt-8 text-center">
-              <button
-                onClick={toggleView}
-                className="text-accent hover:text-accent/80 text-md font-semibold flex items-center justify-center w-full"
-              >
-                {isRegisterView ? 
-                  <><ChevronLeft size={18} className="mr-1" /> Back to Login</> 
-                  : 
-                  <><UserPlus size={18} className="mr-1" /> Need an Account? Register Here</>
-                }
-              </button>
-            </div>
           </div>
         </div>
+        
+        {/* 3. Toggle View Link (MOVED OUTSIDE CARD) */}
+        <div className="mt-8 text-center w-full max-w-xs sm:max-w-sm">
+          <button
+            onClick={toggleView}
+            className="text-accent hover:text-accent/80 text-md font-semibold flex items-center justify-center w-full"
+          >
+            {isRegisterView ? 
+              <><ChevronLeft size={18} className="mr-1" /> Back to Login</> 
+              : 
+              <><UserPlus size={18} className="mr-1" /> Need an Account? Register Here</>
+            }
+          </button>
+        </div>
+
       </div>
 
       {/* Footer is now a static element at the bottom of the flex column, with padding */}
