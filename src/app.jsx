@@ -96,55 +96,60 @@ const LoginScreen = ({ setAuthToken, setUserId, isRegisterView, toggleView, show
       <div className="flex-grow flex flex-col justify-center items-center w-full">
       
         {/* 1. Logo and Instruction Text Group: Content centered with items-center */}
-        <div className="py-2 flex flex-col items-center {/* Reduced vertical padding to py-2 */}"> 
-          <CustomAppLogo size="w-32 h-32 sm:w-36 h-36" /> {/* Reduced logo size */}
+        <div className="py-2 flex flex-col items-center"> 
+          {/* Logo size remains slightly enlarged */}
+          <CustomAppLogo size="w-36 h-36 sm:w-40 h-40" /> 
+          {/* Instruction text reverted to a slightly larger size: text-lg sm:text-xl */}
           <p className="text-gray-600 text-lg sm:text-xl mt-4 text-center"> 
             Please sign in or register to continue.
           </p>
         </div>
 
         {/* 1.5. Toggle View Link (Above Card for Register View) */}
-        {/* Adjusted max-w to match the new card width */}
+        {/* Card width remains increased: max-w-sm (24rem) on sm screens and max-w-80 (20rem) on mobile */}
         {isRegisterView && (
-          <div className="mt-2 w-full max-w-72 sm:max-w-xs">
+          <div className="mt-2 w-full max-w-80 sm:max-w-sm">
             <button
               onClick={toggleView}
-              className="text-accent hover:text-accent/80 text-md font-semibold flex items-center justify-center w-full"
+              className="text-accent hover:text-accent/80 text-sm font-semibold flex items-center justify-center w-full"
             >
               <ChevronLeft size={18} className="mr-1" /> Back to Login
             </button>
           </div>
         )}
 
-        {/* 2. The Main Card Container: Reduced max width for smaller card size */}
+        {/* 2. The Main Card Container: Wider (max-w-sm) and Shorter */}
         <div className="
-            w-full max-w-72 sm:max-w-xs                             
+            w-full max-w-80 sm:max-w-sm                             
             bg-white rounded-xl shadow-2xl 
             overflow-hidden flex flex-col mt-2 
         ">
           
           {/* Form Section */}
           <div className="
-              w-full p-4 {/* Reduced inner padding to p-4 consistently */}
+              w-full p-4 {/* Reduced inner padding to help reduce height */}
               flex flex-col justify-center 
           ">
-            <h2 className="text-2xl font-extrabold text-gray-900 mb-3 text-center"> 
+            {/* Card Title made smaller: text-lg font-bold */}
+            <h2 className="text-lg font-bold text-gray-900 mb-3 text-center"> 
               {isRegisterView ? 'Register' : 'Log In'}
             </h2>
 
-            <form className="space-y-4" onSubmit={handleSubmit}>
+            {/* Reduced vertical spacing between form fields: space-y-3 */}
+            <form className="space-y-3" onSubmit={handleSubmit}>
               
               {/* Personal Name Field - Only for Registration */}
               {isRegisterView && (
                 <div>
                   <label htmlFor="name" className="block text-sm font-medium text-gray-700">Personal Name</label>
+                  {/* Reduced vertical input padding: py-1.5 */}
                   <input
                     id="name"
                     name="name"
                     type="text"
                     autoComplete="name"
                     required
-                    className="mt-1 block w-full px-4 py-2 border border-gray-300 rounded-lg shadow-sm focus:ring-accent focus:border-accent transition duration-150 ease-in-out"
+                    className="mt-1 block w-full px-3 py-1.5 border border-gray-300 rounded-lg shadow-sm focus:ring-accent focus:border-accent transition duration-150 ease-in-out text-sm"
                     value={personalName}
                     onChange={(e) => setPersonalName(e.target.value)}
                   />
@@ -154,13 +159,14 @@ const LoginScreen = ({ setAuthToken, setUserId, isRegisterView, toggleView, show
               {/* Email Address Field */}
               <div>
                 <label htmlFor="email" className="block text-sm font-medium text-gray-700">Email Address</label>
+                {/* Reduced vertical input padding: py-1.5 */}
                 <input
                   id="email"
                   name="email"
                   type="email"
                   autoComplete="email"
                   required
-                  className="mt-1 block w-full px-4 py-2 border border-gray-300 rounded-lg shadow-sm focus:ring-accent focus:border-accent transition duration-150 ease-in-out"
+                  className="mt-1 block w-full px-3 py-1.5 border border-gray-300 rounded-lg shadow-sm focus:ring-accent focus:border-accent transition duration-150 ease-in-out text-sm"
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
                 />
@@ -169,13 +175,14 @@ const LoginScreen = ({ setAuthToken, setUserId, isRegisterView, toggleView, show
               {/* Password Field */}
               <div>
                 <label htmlFor="password" className="block text-sm font-medium text-gray-700">Password</label>
+                {/* Reduced vertical input padding: py-1.5 */}
                 <input
                   id="password"
                   name="password"
                   type="password"
                   autoComplete={isRegisterView ? 'new-password' : 'current-password'}
                   required
-                  className="mt-1 block w-full px-4 py-2 border border-gray-300 rounded-lg shadow-sm focus:ring-accent focus:border-accent transition duration-150 ease-in-out"
+                  className="mt-1 block w-full px-3 py-1.5 border border-gray-300 rounded-lg shadow-sm focus:ring-accent focus:border-accent transition duration-150 ease-in-out text-sm"
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
                 />
@@ -185,25 +192,27 @@ const LoginScreen = ({ setAuthToken, setUserId, isRegisterView, toggleView, show
               {isRegisterView && (
                 <div>
                   <label htmlFor="confirmPassword" className="block text-sm font-medium text-gray-700">Confirm Password</label>
+                  {/* Reduced vertical input padding: py-1.5 */}
                   <input
                     id="confirmPassword"
                     name="confirmPassword"
                     type="password"
                     autoComplete="new-password"
                     required
-                    className="mt-1 block w-full px-4 py-2 border border-gray-300 rounded-lg shadow-sm focus:ring-accent focus:border-accent transition duration-150 ease-in-out"
+                    className="mt-1 block w-full px-3 py-1.5 border border-gray-300 rounded-lg shadow-sm focus:ring-accent focus:border-accent transition duration-150 ease-in-out text-sm"
                     value={confirmPassword}
                     onChange={(e) => setConfirmPassword(e.target.value)}
                   />
                 </div>
               )}
 
-              <div className="pt-2">
+              {/* Reduced spacing before button: pt-1 */}
+              <div className="pt-1"> 
                 <button
                   type="submit"
                   disabled={loading}
-                  // Button uses the same light blue/green color as the logo box: bg-primary
-                  className="group relative w-full flex justify-center items-center py-2.5 px-4 border border-transparent text-lg font-bold rounded-lg text-black bg-primary hover:bg-primary-dark focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary transition duration-150 ease-in-out shadow-md hover:shadow-lg disabled:opacity-60"
+                  // Button text size remains smaller
+                  className="group relative w-full flex justify-center items-center py-2 px-4 border border-transparent text-base font-bold rounded-lg text-black bg-primary hover:bg-primary-dark focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary transition duration-150 ease-in-out shadow-md hover:shadow-lg disabled:opacity-60"
                 >
                   {loading ? (
                       <Loader2 className="w-5 h-5 animate-spin mr-2" />
@@ -220,12 +229,12 @@ const LoginScreen = ({ setAuthToken, setUserId, isRegisterView, toggleView, show
         </div>
         
         {/* 3. Toggle View Link (Below Card for Login View) */}
-        {/* Adjusted max-w to match the new card width */}
+        {/* Text size remains smaller: text-sm */}
         {!isRegisterView && (
-          <div className="mt-4 w-full max-w-72 sm:max-w-xs">
+          <div className="mt-4 w-full max-w-80 sm:max-w-sm">
             <button
               onClick={toggleView}
-              className="text-accent hover:text-accent/80 text-md font-semibold flex items-center justify-center w-full"
+              className="text-accent hover:text-accent/80 text-sm font-semibold flex items-center justify-center w-full"
             >
               <UserPlus size={18} className="mr-1" /> Need an Account? Register Here
             </button>
