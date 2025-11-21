@@ -17,7 +17,7 @@ const ModalMessage = ({ title, message, onClose }) => (
       <p className="text-gray-600 mb-6">{message}</p>
       <button 
         onClick={onClose} 
-        className="w-full bg-primary hover:-bg-primary-dark text-black font-semibold py-2 rounded-lg transition duration-150 shadow-md"
+        className="w-full bg-primary hover:bg-primary-dark text-black font-semibold py-2 rounded-lg transition duration-150 shadow-md"
       >
         Close
       </button>
@@ -44,6 +44,7 @@ const LoginScreen = ({ setAuthToken, setUserId, isRegisterView, toggleView, show
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
+  const [personalName, setPersonalName] = useState(''); // NEW STATE for mandatory name
   const [loading, setLoading] = useState(false);
 
   // Function to handle the login/register submission
@@ -56,10 +57,22 @@ const LoginScreen = ({ setAuthToken, setUserId, isRegisterView, toggleView, show
       setLoading(false);
       return;
     }
+    
+    // Additional check for name if registering
+    if (isRegisterView && !personalName.trim()) {
+        showModalMessage('Registration Error', 'Personal Name is required for registration.');
+        setLoading(false);
+        return;
+    }
 
     try {
       const endpoint = isRegisterView ? `${API_BASE_URL}/public/register` : `${API_BASE_URL}/public/login`;
-      const response = await axios.post(endpoint, { email, password });
+      
+      const payload = isRegisterView
+        ? { email, password, name: personalName } // Include name for registration
+        : { email, password };
+
+      const response = await axios.post(endpoint, payload);
 
       if (response.data.token) {
         setAuthToken(response.data.token);
@@ -76,38 +89,71 @@ const LoginScreen = ({ setAuthToken, setUserId, isRegisterView, toggleView, show
   };
 
   return (
-    // Set up main flex column
+    // The main container uses 'items-center' to ensure all children are centered horizontally
     <div className="min-h-screen bg-page-bg flex flex-col p-4 font-sans">
       
-      {/* Wrapper for logo and card group, centered vertically */}
+      {/* Wrapper for logo and card group, centered vertically and horizontally */}
       <div className="flex-grow flex flex-col justify-center items-center w-full">
       
-        {/* 1. Logo and Instruction Text Group */}
-        <div className="pt-5 pb-3 flex flex-col items-center">
+        {/* 1. Logo and Instruction Text Group: Content centered with items-center */}
+        {/* Reduced vertical padding to compact the screen layout */}
+        <div className="py-3 flex flex-col items-center"> 
           {/* Logo size kept smaller as requested previously */}
           <CustomAppLogo size="w-36 h-36 sm:w-40 h-40" /> 
-          {/* Reduced margin-top on instruction text: mt-6 -> mt-4 */}
           <p className="text-gray-600 text-lg sm:text-xl mt-4 text-center"> 
             Please sign in or register to continue.
           </p>
         </div>
 
-        {/* 2. The Main Card Container (Width is reduced for small screens and up) */}
+        {/* 1.5. Toggle View Link (Above Card for Register View) */}
+        {/* Moved this section to appear above the card when registering */}
+        {isRegisterView && (
+          <div className="mt-2 w-full max-w-xs sm:max-w-sm">
+            <button
+              onClick={toggleView}
+              className="text-accent hover:text-accent/80 text-md font-semibold flex items-center justify-center w-full"
+            >
+              <ChevronLeft size={18} className="mr-1" /> Back to Login
+            </button>
+          </div>
+        )}
+
+        {/* 2. The Main Card Container: Max width container centered by parent's items-center */}
         <div className="
-            w-full max-w-xs sm:max-w-sm {/* Reduced max-width from max-w-sm/sm:max-w-md to max-w-xs/sm:max-w-sm for a smaller card */}                             
+            w-full max-w-xs sm:max-w-sm                             
             bg-white rounded-xl shadow-2xl 
-            overflow-hidden flex flex-col mt-3
+            overflow-hidden flex flex-col mt-2 {/* Reduced top margin to mt-2 */}
         ">
           
           {/* Form Section */}
           <div className="
-              w-full p-4 sm:p-5 flex flex-col justify-center {/* Reduced inner padding from p-5/sm:p-6 to p-4/sm:p-5 */}
+              w-full p-4 {/* Reduced inner padding to p-4 consistently */}
+              flex flex-col justify-center 
           ">
-            <h2 className="text-2xl font-extrabold text-gray-900 mb-4 text-center"> 
+            <h2 className="text-2xl font-extrabold text-gray-900 mb-3 text-center {/* Reduced bottom margin to mb-3 */}"> 
               {isRegisterView ? 'Register' : 'Log In'}
             </h2>
 
             <form className="space-y-4" onSubmit={handleSubmit}>
+              
+              {/* NEW Personal Name Field - Only for Registration */}
+              {isRegisterView && (
+                <div>
+                  <label htmlFor="name" className="block text-sm font-medium text-gray-700">Personal Name</label>
+                  <input
+                    id="name"
+                    name="name"
+                    type="text"
+                    autoComplete="name"
+                    required
+                    className="mt-1 block w-full px-4 py-2 border border-gray-300 rounded-lg shadow-sm focus:ring-accent focus:border-accent transition duration-150 ease-in-out"
+                    value={personalName}
+                    onChange={(e) => setPersonalName(e.target.value)}
+                  />
+                </div>
+              )}
+
+              {/* Email Address Field */}
               <div>
                 <label htmlFor="email" className="block text-sm font-medium text-gray-700">Email Address</label>
                 <input
@@ -122,6 +168,7 @@ const LoginScreen = ({ setAuthToken, setUserId, isRegisterView, toggleView, show
                 />
               </div>
 
+              {/* Password Field */}
               <div>
                 <label htmlFor="password" className="block text-sm font-medium text-gray-700">Password</label>
                 <input
@@ -136,6 +183,7 @@ const LoginScreen = ({ setAuthToken, setUserId, isRegisterView, toggleView, show
                 />
               </div>
 
+              {/* Confirm Password Field - Only for Registration */}
               {isRegisterView && (
                 <div>
                   <label htmlFor="confirmPassword" className="block text-sm font-medium text-gray-700">Confirm Password</label>
@@ -173,23 +221,22 @@ const LoginScreen = ({ setAuthToken, setUserId, isRegisterView, toggleView, show
           </div>
         </div>
         
-        {/* 3. Toggle View Link */}
-        <div className="mt-4 text-center w-full max-w-xs sm:max-w-sm {/* Matched width to the card */}">
-          <button
-            onClick={toggleView}
-            className="text-accent hover:text-accent/80 text-md font-semibold flex items-center justify-center w-full"
-          >
-            {isRegisterView ? 
-              <><ChevronLeft size={18} className="mr-1" /> Back to Login</> 
-              : 
-              <><UserPlus size={18} className="mr-1" /> Need an Account? Register Here</>
-            }
-          </button>
-        </div>
+        {/* 3. Toggle View Link (Below Card for Login View) */}
+        {/* Only show the "Register Here" link below the card when NOT registering */}
+        {!isRegisterView && (
+          <div className="mt-4 w-full max-w-xs sm:max-w-sm">
+            <button
+              onClick={toggleView}
+              className="text-accent hover:text-accent/80 text-md font-semibold flex items-center justify-center w-full"
+            >
+              <UserPlus size={18} className="mr-1" /> Need an Account? Register Here
+            </button>
+          </div>
+        )}
 
       </div>
 
-      {/* Footer is now a static element at the bottom of the flex column, with padding */}
+      {/* Footer: Content centered with text-center */}
       <footer className="text-xs text-gray-500 text-center pt-4">
           CritterTrack © 2025 | Developed with care
       </footer>
@@ -248,10 +295,11 @@ export default function App() {
 
   // If logged in, show the main dashboard (placeholder for now)
   return (
+    // The main container uses 'items-center' to ensure all children are centered horizontally
     <div className="min-h-screen bg-page-bg p-6 flex flex-col items-center font-sans">
       {showModal && <ModalMessage title={modalMessage.title} message={modalMessage.message} onClose={() => setShowModal(false)} />}
       
-      {/* Header */}
+      {/* Header is max-w-4xl, centered by parent's items-center */}
       <header className="w-full max-w-4xl flex justify-between items-center bg-white p-4 rounded-xl shadow-lg mb-6">
         <div className="flex items-center space-x-2">
             <CustomAppLogo size="w-8 h-8" />
@@ -266,7 +314,7 @@ export default function App() {
         </button>
       </header>
 
-      {/* Content Placeholder */}
+      {/* Content Placeholder is max-w-4xl, centered by parent's items-center */}
       <main className="w-full max-w-4xl p-8 bg-white rounded-xl shadow-lg text-center">
         <Cat size={48} className="mx-auto text-primary mb-4" />
         <h2 className="text-xl font-semibold text-gray-700">Welcome, User {userId ? userId.substring(0, 8) : '...'}!</h2>
