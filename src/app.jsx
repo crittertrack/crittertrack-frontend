@@ -139,7 +139,9 @@ const LoginScreen = ({ setAuthToken, setUserId, isRegisterView, toggleView, show
               {/* Personal Name Field - Only for Registration */}
               {isRegisterView && (
                 <div>
-                  <label htmlFor="name" className="block text-sm font-medium text-gray-700">Personal Name</label>
+                  <label htmlFor="name" className="block text-sm font-medium text-gray-700">
+                    Personal Name <span className="text-red-500">*</span>
+                  </label>
                   {/* Reduced vertical input padding: py-1.5 */}
                   <input
                     id="name"
@@ -156,7 +158,9 @@ const LoginScreen = ({ setAuthToken, setUserId, isRegisterView, toggleView, show
 
               {/* Email Address Field */}
               <div>
-                <label htmlFor="email" className="block text-sm font-medium text-gray-700">Email Address</label>
+                <label htmlFor="email" className="block text-sm font-medium text-gray-700">
+                  Email Address <span className="text-red-500">*</span>
+                </label>
                 {/* Reduced vertical input padding: py-1.5 */}
                 <input
                   id="email"
@@ -172,7 +176,9 @@ const LoginScreen = ({ setAuthToken, setUserId, isRegisterView, toggleView, show
 
               {/* Password Field */}
               <div>
-                <label htmlFor="password" className="block text-sm font-medium text-gray-700">Password</label>
+                <label htmlFor="password" className="block text-sm font-medium text-gray-700">
+                  Password <span className="text-red-500">*</span>
+                </label>
                 {/* Reduced vertical input padding: py-1.5 */}
                 <input
                   id="password"
@@ -189,7 +195,9 @@ const LoginScreen = ({ setAuthToken, setUserId, isRegisterView, toggleView, show
               {/* Confirm Password Field - Only for Registration */}
               {isRegisterView && (
                 <div>
-                  <label htmlFor="confirmPassword" className="block text-sm font-medium text-gray-700">Confirm Password</label>
+                  <label htmlFor="confirmPassword" className="block text-sm font-medium text-gray-700">
+                    Confirm Password <span className="text-red-500">*</span>
+                  </label>
                   {/* Reduced vertical input padding: py-1.5 */}
                   <input
                     id="confirmPassword"
