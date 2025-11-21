@@ -171,7 +171,7 @@ const AuthForm = ({ isRegister, setToken, setIsRegisterView, setShowModal, setMo
 const CritterForm = ({ onCritterSaved, initialCritter, token, onCancel }) => {
   const [critter, setCritter] = useState(initialCritter || { 
     name: '', 
-    breed: '', 
+    species: '', 
     age: '', 
     gender: 'Male', // Default to Male
     owner: '' // This should eventually be pre-filled from user data
@@ -219,7 +219,7 @@ const CritterForm = ({ onCritterSaved, initialCritter, token, onCancel }) => {
       <h3 className="text-2xl font-bold text-gray-800 mb-6">{isEditing ? 'Edit Critter' : 'Add New Critter'}</h3>
       <form onSubmit={handleSubmit}>
         <InputField id="critterName" label="Name" value={critter.name} onChange={(val) => handleChange('name', val)} required disabled={isLoading} />
-        <InputField id="critterBreed" label="Breed" value={critter.breed} onChange={(val) => handleChange('breed', val)} required disabled={isLoading} />
+        <InputField id="critterSpecies" label="Species" value={critter.species} onChange={(val) => handleChange('species', val)} required disabled={isLoading} />
         <InputField id="critterAge" label="Age (Years)" type="number" value={critter.age} onChange={(val) => handleChange('age', val)} required disabled={isLoading} />
         <InputField id="critterOwner" label="Owner Name" value={critter.owner} onChange={(val) => handleChange('owner', val)} required disabled={isLoading} />
         
@@ -301,7 +301,7 @@ const CritterCard = ({ critter, token, onCritterDeleted, onCritterUpdated }) => 
           </span>
         </div>
         <h4 className="text-xl font-bold text-gray-800 mb-1 truncate">{critter.name}</h4>
-        <p className="text-sm text-gray-600 mb-3">{critter.breed}</p>
+        <p className="text-sm text-gray-600 mb-1">Species: {critter.species}</p>
         
         <div className="space-y-1 text-sm text-gray-700">
           <p><strong>Age:</strong> {critter.age} years</p>
