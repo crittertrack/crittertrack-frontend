@@ -1,10 +1,44 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import axios from 'axios';
-import { LogOut, Cat, UserPlus, LogIn, ChevronLeft, Trash2, Edit, Save, PlusCircle, ArrowLeft, Loader2, RefreshCw } from 'lucide-react';
+import { LogOut, Cat, UserPlus, LogIn, ChevronLeft, Trash2, Edit, Save, PlusCircle, ArrowLeft, Loader2, RefreshCw, XCircle } from 'lucide-react';
 
 // --- Global Constants ---
 const API_BASE_URL = process.env.REACT_APP_API_BASE_URL || '/api';
-const SPECIES_OPTIONS = ['Mouse', 'Rat', 'Hamster'];
+const DEFAULT_SPECIES_OPTIONS = ['Mouse', 'Rat', 'Hamster'];
+// Key for local storage is now a base, the full key will be generated in Dashboard
+const LOCAL_STORAGE_BASE_KEY = 'critterTrackCustomSpecies_'; 
+
+// --- Local Storage Helpers ---
+
+/**
+ * Loads custom species from local storage based on a unique user key.
+ * @param {string} userIdKey - A unique string (e.g., user ID or token prefix) for the current user.
+ * @returns {string[]} An array of custom species strings.
+ */
+const loadCustomSpecies = (userIdKey) => {
+  const key = LOCAL_STORAGE_BASE_KEY + userIdKey;
+  try {
+    const json = localStorage.getItem(key);
+    return json ? JSON.parse(json) : [];
+  } catch (error) {
+    console.error("Error loading custom species from localStorage:", error);
+    return [];
+  }
+};
+
+/**
+ * Saves the custom species list to local storage based on a unique user key.
+ * @param {string[]} speciesList - The updated list of custom species.
+ * @param {string} userIdKey - A unique string (e.g., user ID or token prefix) for the current user.
+ */
+const saveCustomSpecies = (speciesList, userIdKey) => {
+  const key = LOCAL_STORAGE_BASE_KEY + userIdKey;
+  try {
+    localStorage.setItem(key, JSON.stringify(speciesList));
+  } catch (error) {
+    console.error("Error saving custom species to localStorage:", error);
+  }
+};
 
 // --- Helper Components ---
 
@@ -42,7 +76,6 @@ const InputField = ({ id, label, type = 'text', value, onChange, required = fals
   </div>
 );
 
-// Critter Interface for Type Safety (or documentation)
 /**
  * @typedef {object} Critter
  * @property {number} id
@@ -168,7 +201,7 @@ const CritterForm = ({ onCritterSaved, initialCritter, token, onCancel }) => {
   const [critter, setCritter] = useState(initialCritter || { 
     name: '', 
     species: '', 
-    age: '', // Removed breed
+    age: '', 
     gender: 'Male', 
     owner: '' 
   });
@@ -187,6 +220,7 @@ const CritterForm = ({ onCritterSaved, initialCritter, token, onCancel }) => {
       headers: { Authorization: `Bearer ${token}` }
     };
     
+    // Ensure age is an integer for the API call
     const payload = { 
         ...critter, 
         age: parseInt(critter.age, 10) 
@@ -207,6 +241,7 @@ const CritterForm = ({ onCritterSaved, initialCritter, token, onCancel }) => {
     }
   };
 
+  // Species field is disabled if species is already set (after selection or when editing an existing critter)
   const isSpeciesDisabled = isLoading || (!!critter.species && !isEditing); 
 
   return (
@@ -222,10 +257,8 @@ const CritterForm = ({ onCritterSaved, initialCritter, token, onCancel }) => {
           value={critter.species} 
           onChange={(val) => handleChange('species', val)} 
           required 
-          disabled={isSpeciesDisabled}
+          disabled={isSpeciesDisabled} // Ensures species cannot be edited if set
         />
-        
-        {/* REMOVED: Breed InputField */}
         
         <InputField id="critterAge" label="Age (Years)" type="number" value={critter.age} onChange={(val) => handleChange('age', val)} required disabled={isLoading} />
         <InputField id="critterOwner" label="Owner Name" value={critter.owner} onChange={(val) => handleChange('owner', val)} required disabled={isLoading} />
@@ -268,7 +301,6 @@ const CritterForm = ({ onCritterSaved, initialCritter, token, onCancel }) => {
 };
 
 const CritterCard = ({ critter, token, onCritterDeleted, onCritterUpdated }) => {
-  const [isEditing, setIsEditing] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
 
   const handleDelete = async () => {
@@ -301,8 +333,6 @@ const CritterCard = ({ critter, token, onCritterDeleted, onCritterUpdated }) => 
           </span>
         </div>
         <h4 className="text-xl font-bold text-gray-800 mb-1 truncate">{critter.name}</h4>
-        
-        {/* Updated spacing and removed breed display */}
         <p className="text-sm text-gray-600 mb-3">Species: {critter.species}</p>
         
         <div className="space-y-1 text-sm text-gray-700">
@@ -332,9 +362,18 @@ const CritterCard = ({ critter, token, onCritterDeleted, onCritterUpdated }) => 
   );
 };
 
-const SpeciesSelector = ({ onSelectSpecies, onCancel }) => {
+// UPDATED: Species Selection Component
+const SpeciesSelector = ({ critters, onSelectSpecies, onCancel, setShowModal, setModalMessage, userIdKey }) => {
   const [customSpecies, setCustomSpecies] = useState('');
   const [showCustomInput, setShowCustomInput] = useState(false);
+  const [localCustomSpecies, setLocalCustomSpecies] = useState([]);
+  
+  // Load custom species on mount using the unique key
+  useEffect(() => {
+    if (userIdKey) {
+        setLocalCustomSpecies(loadCustomSpecies(userIdKey));
+    }
+  }, [userIdKey]);
 
   const handleSelect = (species) => {
     onSelectSpecies(species);
@@ -342,8 +381,40 @@ const SpeciesSelector = ({ onSelectSpecies, onCancel }) => {
 
   const handleCustomSubmit = (e) => {
     e.preventDefault();
-    if (customSpecies.trim()) {
-      onSelectSpecies(customSpecies.trim());
+    const newSpecies = customSpecies.trim();
+    if (newSpecies && ![...DEFAULT_SPECIES_OPTIONS, ...localCustomSpecies].map(s => s.toLowerCase()).includes(newSpecies.toLowerCase())) {
+        const newSpeciesList = [...localCustomSpecies, newSpecies];
+        setLocalCustomSpecies(newSpeciesList);
+        saveCustomSpecies(newSpeciesList, userIdKey); // Use unique key when saving
+        setCustomSpecies('');
+        setShowCustomInput(false);
+        onSelectSpecies(newSpecies);
+    } else {
+        setShowModal(true);
+        setModalMessage({
+            title: 'Species Error',
+            message: 'Species name is invalid or already exists.'
+        });
+    }
+  };
+
+  const handleDeleteCustomSpecies = (speciesToDelete) => {
+    // Check if any existing critters use this species
+    const linkedCritters = critters.filter(c => c.species.toLowerCase() === speciesToDelete.toLowerCase());
+
+    if (linkedCritters.length > 0) {
+        setShowModal(true);
+        setModalMessage({
+            title: 'Cannot Delete Species',
+            message: `You must first delete or re-assign the species of ${linkedCritters.length} critter(s) currently linked to "${speciesToDelete}" before deleting it.`
+        });
+        return;
+    }
+
+    if (window.confirm(`Are you sure you want to permanently delete the custom species "${speciesToDelete}"?`)) {
+        const newSpeciesList = localCustomSpecies.filter(s => s !== speciesToDelete);
+        setLocalCustomSpecies(newSpeciesList);
+        saveCustomSpecies(newSpeciesList, userIdKey); // Use unique key when saving
     }
   };
 
@@ -351,8 +422,9 @@ const SpeciesSelector = ({ onSelectSpecies, onCancel }) => {
     <div className="bg-white p-8 rounded-xl shadow-lg border border-gray-100 w-full max-w-lg">
       <h3 className="text-2xl font-bold text-gray-800 mb-6 text-center">Select Species</h3>
       
-      <div className="grid grid-cols-2 gap-4 mb-6">
-        {SPECIES_OPTIONS.map(species => (
+      {/* Default Species */}
+      <div className="grid grid-cols-2 gap-4 mb-6 border-b border-gray-200 pb-6">
+        {DEFAULT_SPECIES_OPTIONS.map(species => (
           <button
             key={species}
             onClick={() => handleSelect(species)}
@@ -363,6 +435,33 @@ const SpeciesSelector = ({ onSelectSpecies, onCancel }) => {
         ))}
       </div>
 
+      {/* Custom Species */}
+      {localCustomSpecies.length > 0 && (
+          <div className="mb-6">
+              <p className="text-sm font-semibold text-gray-700 mb-3">Your Custom Species:</p>
+              <div className="grid grid-cols-2 gap-3">
+                  {localCustomSpecies.map(species => (
+                    <div key={species} className="relative group">
+                        <button
+                          onClick={() => handleSelect(species)}
+                          className="w-full flex items-center justify-between p-3 border border-indigo-300 bg-indigo-50 rounded-lg text-md font-medium text-indigo-700 hover:bg-indigo-100 transition duration-150 pr-10"
+                        >
+                            <span className='truncate'>{species}</span>
+                        </button>
+                        <button
+                          onClick={(e) => { e.stopPropagation(); handleDeleteCustomSpecies(species); }}
+                          className="absolute right-0 top-0 bottom-0 px-2 flex items-center text-red-400 hover:text-red-600 transition duration-150"
+                          title={`Delete custom species: ${species}`}
+                        >
+                            <XCircle size={18} />
+                        </button>
+                    </div>
+                  ))}
+              </div>
+          </div>
+      )}
+
+      {/* Custom Species Input */}
       <div className="border-t border-gray-200 pt-6">
         {!showCustomInput ? (
           <button
@@ -389,6 +488,13 @@ const SpeciesSelector = ({ onSelectSpecies, onCancel }) => {
             >
               Set Species
             </button>
+            <button
+              type="button"
+              onClick={() => setShowCustomInput(false)}
+              className="bg-red-100 hover:bg-red-200 text-red-700 font-semibold py-3 px-6 rounded-xl transition duration-150 whitespace-nowrap"
+            >
+              Cancel
+            </button>
           </form>
         )}
       </div>
@@ -404,7 +510,7 @@ const SpeciesSelector = ({ onSelectSpecies, onCancel }) => {
 };
 
 
-const Dashboard = ({ onLogout }) => {
+const Dashboard = ({ onLogout, setShowModal, setModalMessage }) => {
   /** @type {[Critter[], React.Dispatch<React.SetStateAction<Critter[]>>]} */
   const [critters, setCritters] = useState([]);
   const [isLoading, setIsLoading] = useState(true);
@@ -416,9 +522,13 @@ const Dashboard = ({ onLogout }) => {
   
   const token = sessionStorage.getItem('critterTrackToken');
 
-  const fetchCritters = async () => {
+  // NEW: Create a unique key for local storage based on the first few chars of the token
+  // This is a proxy for the user ID/email that is unique per user session.
+  const userIdKey = token ? token.substring(0, 10) : 'GUEST';
+
+  const fetchCritters = useCallback(async () => {
     if (!token) {
-        setError("Authentication token missing.");
+        setError("Authentication token missing in session storage.");
         setIsLoading(false);
         return;
     }
@@ -436,11 +546,11 @@ const Dashboard = ({ onLogout }) => {
     } finally {
       setIsLoading(false);
     }
-  };
+  }, [token]);
 
   useEffect(() => {
     fetchCritters();
-  }, []); 
+  }, [fetchCritters]); 
 
   const handleEditCritter = (critter) => {
     setEditingCritter(critter);
@@ -460,7 +570,6 @@ const Dashboard = ({ onLogout }) => {
   
   const handleSpeciesSelected = (species) => {
       setSelectedSpecies(species);
-      setIsFormVisible(true);
   };
   
   const startAddCritterFlow = () => {
@@ -478,8 +587,12 @@ const Dashboard = ({ onLogout }) => {
       if (!editingCritter && !selectedSpecies) {
           return (
               <SpeciesSelector 
+                  critters={critters}
                   onSelectSpecies={handleSpeciesSelected} 
                   onCancel={handleCancelForm} 
+                  setShowModal={setShowModal}
+                  setModalMessage={setModalMessage}
+                  userIdKey={userIdKey} // PASS THE UNIQUE KEY FOR LOCAL STORAGE
               />
           );
       }
@@ -595,6 +708,7 @@ export default function App() {
   };
 
   useEffect(() => {
+    // Axios interceptor to automatically attach the token to all requests
     const interceptor = axios.interceptors.request.use((config) => {
       const token = sessionStorage.getItem('critterTrackToken');
       if (token) {
@@ -658,7 +772,11 @@ export default function App() {
 
       <main className="flex-grow p-4 w-full flex justify-center">
         {userToken ? (
-          <Dashboard onLogout={handleLogout} />
+          <Dashboard 
+            onLogout={handleLogout} 
+            setShowModal={setShowModal}
+            setModalMessage={setModalMessage}
+          />
         ) : (
           renderAuthContent()
         )}
