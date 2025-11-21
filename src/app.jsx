@@ -3,7 +3,8 @@ import axios from 'axios';
 import { LogOut, Cat, UserPlus, LogIn, ChevronLeft, Trash2, Edit, Save, PlusCircle, ArrowLeft, Loader2, RefreshCw } from 'lucide-react';
 
 // --- Global Constants ---
-const API_BASE_URL = '/api'; // Fixed: Removed process.env to avoid ReferenceError
+// Using a simple path for the API base URL in this self-contained file.
+const API_BASE_URL = '/api'; 
 const SPECIES_OPTIONS = ['Mouse', 'Rat', 'Hamster'];
 
 // --- Helper Components ---
@@ -44,6 +45,7 @@ const LoginScreen = ({ setAuthToken, setUserId, isRegisterView, toggleView, show
   const [confirmPassword, setConfirmPassword] = useState('');
   const [loading, setLoading] = useState(false);
 
+  // Function to handle the login/register submission
   const handleSubmit = async (e) => {
     e.preventDefault();
     setLoading(true);
@@ -73,129 +75,119 @@ const LoginScreen = ({ setAuthToken, setUserId, isRegisterView, toggleView, show
   };
 
   return (
-    <div className="min-h-screen bg-page-bg flex flex-col justify-center items-center p-4 font-sans">
+    // Set up main flex column, remove justify-center
+    <div className="min-h-screen bg-page-bg flex flex-col p-4 font-sans">
       
-      {/* The Main Container: Horizontal on desktop */}
-      <div className="
-          w-full max-w-sm 
-          md:max-w-4xl 
-          md:flex md:flex-row md:shadow-2xl md:min-h-[400px]
-          bg-white rounded-xl shadow-lg 
-          overflow-hidden p-0
-      ">
-        
-        {/* 1. Left Side: Logo and Branding - Accent Background */}
+      {/* New Wrapper: Takes available space and centers the logo/card group */}
+      <div className="flex-grow flex flex-col justify-center items-center w-full">
+      
+        {/* 1. Logo (Separated from the card) */}
         <div className="
-            flex flex-col items-center justify-center 
-            p-6 sm:p-8 
-            md:w-2/5 md:bg-accent md:py-12 {/* <-- ACCENT COLOR APPLIED HERE */}
-            border-b md:border-b-0 md:border-r border-page-bg
+          p-5 mb-8 
+          bg-primary rounded-3xl shadow-xl 
+          transform transition-all duration-300 hover:scale-[1.05]
         ">
-            <div className="p-3 bg-primary rounded-xl shadow-lg mb-2"> 
-                <CustomAppLogo size="w-24 h-24" /> 
-            </div>
-            
-            {/* Dynamic Text Based on View (Using white text for contrast on accent background) */}
-            <h1 className="text-xl font-semibold text-white mt-4 mb-1 text-center">
-                {isRegisterView ? 'Create your new account.' : 'Please sign in or register to continue.'}
-            </h1>
-            <p className="text-sm text-white/90 mt-1 mb-6 text-center">
-                Manage your pedigrees, litters, and animal records efficiently.
-            </p>
-            {/* End Dynamic Text */}
+          <CustomAppLogo size="w-20 h-20 sm:w-24 sm:h-24" />             
         </div>
 
-        {/* 2. Right Side: Form (Login or Register) */}
+        {/* 2. The Main Card Container: Now only contains the form and title */}
         <div className="
-            w-full p-6 sm:p-10 
-            md:w-3/5 md:py-12 md:px-16 
-            flex flex-col justify-center
+            w-full max-w-sm sm:max-w-md                          
+            bg-white rounded-xl shadow-2xl 
+            overflow-hidden flex flex-col
         ">
-          <h2 className="text-3xl font-extrabold text-gray-900 mb-6 text-center md:text-left">
-            {isRegisterView ? 'Register' : 'Welcome Back'}
-          </h2>
+          
+          {/* Form Section */}
+          <div className="
+              w-full p-8 sm:p-10 flex flex-col justify-center
+          ">
+            <h2 className="text-3xl font-extrabold text-gray-900 mb-8 text-center"> 
+              {isRegisterView ? 'Register' : 'Log In'}
+            </h2>
 
-          <form className="space-y-4" onSubmit={handleSubmit}>
-            <div>
-              <label htmlFor="email" className="block text-sm font-medium text-gray-700">Email Address</label>
-              <input
-                id="email"
-                name="email"
-                type="email"
-                autoComplete="email"
-                required
-                className="mt-1 block w-full px-4 py-2 border border-gray-300 rounded-lg shadow-sm focus:ring-accent focus:border-accent transition duration-150 ease-in-out"
-                value={email}
-                onChange={(e) => setEmail(e.target.value)}
-              />
-            </div>
-
-            <div>
-              <label htmlFor="password" className="block text-sm font-medium text-gray-700">Password</label>
-              <input
-                id="password"
-                name="password"
-                type="password"
-                autoComplete={isRegisterView ? 'new-password' : 'current-password'}
-                required
-                className="mt-1 block w-full px-4 py-2 border border-gray-300 rounded-lg shadow-sm focus:ring-accent focus:border-accent transition duration-150 ease-in-out"
-                value={password}
-                onChange={(e) => setPassword(e.target.value)}
-              />
-            </div>
-
-            {isRegisterView && (
+            <form className="space-y-6" onSubmit={handleSubmit}> 
               <div>
-                <label htmlFor="confirmPassword" className="block text-sm font-medium text-gray-700">Confirm Password</label>
+                <label htmlFor="email" className="block text-sm font-medium text-gray-700">Email Address</label>
                 <input
-                  id="confirmPassword"
-                  name="confirmPassword"
-                  type="password"
-                  autoComplete="new-password"
+                  id="email"
+                  name="email"
+                  type="email"
+                  autoComplete="email"
                   required
-                  className="mt-1 block w-full px-4 py-2 border border-gray-300 rounded-lg shadow-sm focus:ring-accent focus:border-accent transition duration-150 ease-in-out"
-                  value={confirmPassword}
-                  onChange={(e) => setConfirmPassword(e.target.value)}
+                  className="mt-1 block w-full px-4 py-3 border border-gray-300 rounded-lg shadow-sm focus:ring-accent focus:border-accent transition duration-150 ease-in-out"
+                  value={email}
+                  onChange={(e) => setEmail(e.target.value)}
                 />
               </div>
-            )}
 
-            <div className="pt-2">
+              <div>
+                <label htmlFor="password" className="block text-sm font-medium text-gray-700">Password</label>
+                <input
+                  id="password"
+                  name="password"
+                  type="password"
+                  autoComplete={isRegisterView ? 'new-password' : 'current-password'}
+                  required
+                  className="mt-1 block w-full px-4 py-3 border border-gray-300 rounded-lg shadow-sm focus:ring-accent focus:border-accent transition duration-150 ease-in-out"
+                  value={password}
+                  onChange={(e) => setPassword(e.target.value)}
+                />
+              </div>
+
+              {isRegisterView && (
+                <div>
+                  <label htmlFor="confirmPassword" className="block text-sm font-medium text-gray-700">Confirm Password</label>
+                  <input
+                    id="confirmPassword"
+                    name="confirmPassword"
+                    type="password"
+                    autoComplete="new-password"
+                    required
+                    className="mt-1 block w-full px-4 py-3 border border-gray-300 rounded-lg shadow-sm focus:ring-accent focus:border-accent transition duration-150 ease-in-out"
+                    value={confirmPassword}
+                    onChange={(e) => setConfirmPassword(e.target.value)}
+                  />
+                </div>
+              )}
+
+              <div className="pt-4">
+                <button
+                  type="submit"
+                  disabled={loading}
+                  // Button uses the same light blue/green color as the logo box: bg-primary
+                  className="group relative w-full flex justify-center items-center py-3 px-4 border border-transparent text-lg font-bold rounded-lg text-black bg-primary hover:bg-primary-dark focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary transition duration-150 ease-in-out shadow-md hover:shadow-lg disabled:opacity-60"
+                >
+                  {loading ? (
+                      <Loader2 className="w-5 h-5 animate-spin mr-2" />
+                  ) : isRegisterView ? (
+                      <UserPlus className="w-5 h-5 mr-2" />
+                  ) : (
+                      <LogIn className="w-5 h-5 mr-2" />
+                  )}
+                  {isRegisterView ? 'Register' : 'Log In'}
+                </button>
+              </div>
+            </form>
+            
+            {/* Toggle View Link */}
+            <div className="mt-8 text-center">
               <button
-                type="submit"
-                disabled={loading}
-                className="group relative w-full flex justify-center items-center py-2 px-4 border border-transparent text-lg font-medium rounded-lg text-black bg-primary hover:bg-primary-dark focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary transition duration-150 ease-in-out shadow-md hover:shadow-lg disabled:opacity-60"
+                onClick={toggleView}
+                className="text-accent hover:text-accent/80 text-md font-semibold flex items-center justify-center w-full"
               >
-                {loading ? (
-                    <Loader2 className="w-5 h-5 animate-spin mr-2" />
-                ) : isRegisterView ? (
-                    <UserPlus className="w-5 h-5 mr-2" />
-                ) : (
-                    <LogIn className="w-5 h-5 mr-2" />
-                )}
-                {isRegisterView ? 'Register' : 'Log In'}
+                {isRegisterView ? 
+                  <><ChevronLeft size={18} className="mr-1" /> Back to Login</> 
+                  : 
+                  <><UserPlus size={18} className="mr-1" /> Need an Account? Register Here</>
+                }
               </button>
             </div>
-          </form>
-          
-          {/* Toggle View Link */}
-          <div className="mt-6 text-center">
-            <button
-              onClick={toggleView}
-              className="text-accent hover:text-accent/80 text-sm font-medium flex items-center justify-center w-full"
-            >
-              {isRegisterView ? 
-                <><ChevronLeft size={16} className="mr-1" /> Back to Login</> 
-                : 
-                <><UserPlus size={16} className="mr-1" /> Need an Account? Register Here</>
-              }
-            </button>
           </div>
         </div>
       </div>
 
-      {/* Footer fixed at the bottom */}
-      <footer className="absolute bottom-4 text-xs text-gray-500 text-center">
+      {/* Footer is now a static element at the bottom of the flex column, with padding */}
+      <footer className="text-xs text-gray-500 text-center pt-4">
           CritterTrack © 2025 | Developed with care
       </footer>
     </div>
@@ -204,7 +196,7 @@ const LoginScreen = ({ setAuthToken, setUserId, isRegisterView, toggleView, show
 
 // --- Animal Management Components (Not displayed when not logged in) ---
 
-// ... (AnimalForm, AnimalList, and other components would go here if needed)
+// Placeholder components...
 
 // --- Main App Component ---
 export default function App() {
@@ -238,6 +230,7 @@ export default function App() {
   if (!authToken) {
     return (
       <>
+        {/* Global Message Modal */}
         {showModal && <ModalMessage title={modalMessage.title} message={modalMessage.message} onClose={() => setShowModal(false)} />}
         <LoginScreen 
           setAuthToken={setAuthToken}
