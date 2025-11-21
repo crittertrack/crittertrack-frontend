@@ -59,6 +59,7 @@ const AuthForm = ({ isRegister, setToken, setIsRegisterView, setShowModal, setMo
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [name, setName] = useState('');
+  const [breederName, setBreederName] = useState('');
   const [isLoading, setIsLoading] = useState(false);
 
   const handleSubmit = async (e) => {
@@ -66,7 +67,7 @@ const AuthForm = ({ isRegister, setToken, setIsRegisterView, setShowModal, setMo
     setIsLoading(true);
     
     const endpoint = isRegister ? `${API_BASE_URL}/users/register` : `${API_BASE_URL}/users/login`;
-    const payload = isRegister ? { email, password, name } : { email, password };
+    const payload = isRegister ? { email, password, name, breederName: breederName || null } : { email, password };
 
     try {
       const response = await axios.post(endpoint, payload);
@@ -107,17 +108,29 @@ const AuthForm = ({ isRegister, setToken, setIsRegisterView, setShowModal, setMo
       <h2 className="text-3xl font-extrabold text-gray-800 mb-6 text-center">{title}</h2>
       
       {isRegister && (
-        <InputField 
-          id="name" 
-          label="Full Name" 
-          value={name} 
-          onChange={setName} 
-          required 
-          disabled={isLoading}
-        />
+        <>
+          <InputField 
+            id="name" 
+            label="Personal Name" // LABEL CHANGED
+            value={name} 
+            onChange={setName} 
+            required 
+            disabled={isLoading}
+          />
+          
+          {/* NEW OPTIONAL BREEDER NAME FIELD */}
+          <InputField 
+            id="breederName" 
+            label="Breeder Name (Optional)" 
+            value={breederName} 
+            onChange={setBreederName} 
+            required={false}
+            disabled={isLoading}
+          />
+        </>
       )}
       
-      <InputField 
+      <InputField
         id="email" 
         label="Email Address" 
         type="email"
