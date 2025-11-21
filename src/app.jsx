@@ -112,15 +112,17 @@ const LoginScreen = ({ setToken, setShowModal, setModalMessage, API_BASE_URL, is
                 overflow-hidden p-0
             ">
                 
-                {/* 1. Left Side: Logo and Branding */}
+                {/* 1. Left Side: Logo and Branding - Reverted background, added logo wrapper */}
                 <div className="
                     flex flex-col items-center justify-center 
                     p-6 sm:p-8 
-                    md:w-2/5 md:bg-page-bg md:py-12
+                    md:w-2/5 md:bg-page-bg/50 md:py-12 {/* <-- Reverted large panel background */}
                     border-b md:border-b-0 md:border-r border-page-bg
                 ">
-                    {/* Replaced old Logo component with the Custom Logo using the image file */}
-                    <CustomAppLogo size="w-24 h-24" /> 
+                    {/* NEW: Wrapper for the logo with the required background color (#9ED4E0 via bg-primary) */}
+                    <div className="p-3 bg-primary rounded-xl shadow-lg mb-2"> 
+                         <CustomAppLogo size="w-24 h-24" /> 
+                    </div>
                     
                     {/* Dynamic Text Based on View */}
                     <h1 className="text-xl font-semibold text-gray-800 mt-4 mb-1 text-center">
@@ -215,7 +217,8 @@ const LoginScreen = ({ setToken, setShowModal, setModalMessage, API_BASE_URL, is
                         <div className="pt-2">
                             <button
                                 type="submit"
-                                className="group relative w-full flex justify-center py-2 px-4 border border-transparent text-lg font-medium rounded-lg text-white bg-accent hover:bg-opacity-90 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-accent transition duration-150 ease-in-out shadow-md hover:shadow-lg disabled:bg-gray-400"
+                                // Button colors are now handled by the updated 'primary' definition in config.
+                                className="group relative w-full flex justify-center py-2 px-4 border border-transparent text-lg font-medium rounded-lg text-black bg-primary hover:bg-primary-dark focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-accent transition duration-150 ease-in-out shadow-md hover:shadow-lg disabled:bg-gray-400 disabled:text-gray-700"
                                 disabled={isLoading}
                             >
                                 {isLoading ? (
@@ -372,7 +375,9 @@ const App = () => {
             <header className="w-full max-w-6xl bg-white rounded-xl shadow-md p-4 mb-6 flex justify-between items-center">
                 <div className="flex items-center space-x-3">
                     {/* Replaced Cat icon with the Custom Logo using the image file */}
-                    <CustomAppLogo size="w-8 h-8" />
+                    <div className="p-2 bg-primary rounded-lg shadow-md">
+                        <CustomAppLogo size="w-8 h-8" />
+                    </div>
                     <h1 className="text-2xl font-bold text-gray-800">CritterTrack</h1>
                 </div>
                 <nav className="flex space-x-4 text-sm font-medium">
