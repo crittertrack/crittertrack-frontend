@@ -5,6 +5,7 @@ import { LogOut, Cat, UserPlus, LogIn, ChevronLeft, Trash2, Edit, Save, PlusCirc
 // --- Global Constants ---
 // Use environment variable for the API base URL in production, fall back to proxy in development.
 const API_BASE_URL = process.env.REACT_APP_API_BASE_URL || '/api';
+const SPECIES_OPTIONS = ['Mouse', 'Rat', 'Hamster']; // NEW: Default species list
 
 // --- Helper Components ---
 
@@ -47,7 +48,7 @@ const InputField = ({ id, label, type = 'text', value, onChange, required = fals
  * @typedef {object} Critter
  * @property {number} id
  * @property {string} name
- * @property {string} breed
+ * @property {string} species
  * @property {number} age
  * @property {string} gender
  * @property {string} owner
@@ -214,12 +215,14 @@ const CritterForm = ({ onCritterSaved, initialCritter, token, onCancel }) => {
     }
   };
 
+const isSpeciesDisabled = isLoading || (!!critter.species && !isEditing);
+
   return (
     <div className="bg-white p-6 rounded-xl shadow-lg border border-gray-100 w-full max-w-md">
       <h3 className="text-2xl font-bold text-gray-800 mb-6">{isEditing ? 'Edit Critter' : 'Add New Critter'}</h3>
       <form onSubmit={handleSubmit}>
         <InputField id="critterName" label="Name" value={critter.name} onChange={(val) => handleChange('name', val)} required disabled={isLoading} />
-        <InputField id="critterSpecies" label="Species" value={critter.species} onChange={(val) => handleChange('species', val)} required disabled={isLoading} />
+        <InputField id="critterSpecies" label="Species" value={critter.species} onChange={(val) => handleChange('species', val)} required disabled={isSpeciesDisabled} />
         <InputField id="critterAge" label="Age (Years)" type="number" value={critter.age} onChange={(val) => handleChange('age', val)} required disabled={isLoading} />
         <InputField id="critterOwner" label="Owner Name" value={critter.owner} onChange={(val) => handleChange('owner', val)} required disabled={isLoading} />
         
@@ -330,6 +333,77 @@ const CritterCard = ({ critter, token, onCritterDeleted, onCritterUpdated }) => 
   );
 };
 
+const SpeciesSelector = ({ onSelectSpecies, onCancel }) => {
+  const [customSpecies, setCustomSpecies] = useState('');
+  const [showCustomInput, setShowCustomInput] = useState(false);
+
+  const handleSelect = (species) => {
+    onSelectSpecies(species);
+  };
+
+  const handleCustomSubmit = (e) => {
+    e.preventDefault();
+    if (customSpecies.trim()) {
+      onSelectSpecies(customSpecies.trim());
+    }
+  };
+
+  return (
+    <div className="bg-white p-8 rounded-xl shadow-lg border border-gray-100 w-full max-w-lg">
+      <h3 className="text-2xl font-bold text-gray-800 mb-6 text-center">Select Species</h3>
+      
+      <div className="grid grid-cols-2 gap-4 mb-6">
+        {SPECIES_OPTIONS.map(species => (
+          <button
+            key={species}
+            onClick={() => handleSelect(species)}
+            className="flex items-center justify-center p-4 border border-gray-300 rounded-lg text-lg font-semibold text-gray-700 hover:bg-gray-100 transition duration-150"
+          >
+            {species}
+          </button>
+        ))}
+      </div>
+
+      <div className="border-t border-gray-200 pt-6">
+        {!showCustomInput ? (
+          <button
+            onClick={() => setShowCustomInput(true)}
+            className="w-full bg-gray-100 hover:bg-gray-200 text-gray-700 font-semibold py-3 rounded-xl transition duration-150 flex items-center justify-center"
+          >
+            <PlusCircle size={20} className="mr-2" />
+            Enter Custom Species
+          </button>
+        ) : (
+          <form onSubmit={handleCustomSubmit} className="flex space-x-3 items-end">
+            <div className="flex-grow">
+                <InputField
+                  id="customSpecies"
+                  label="Custom Species Name"
+                  value={customSpecies}
+                  onChange={setCustomSpecies}
+                  required
+                />
+            </div>
+            <button
+              type="submit"
+              className="bg-primary hover:bg-primary-dark text-black font-semibold py-3 px-6 rounded-xl transition duration-150 whitespace-nowrap"
+            >
+              Set Species
+            </button>
+          </form>
+        )}
+      </div>
+
+      <button 
+        onClick={onCancel}
+        className="mt-6 flex items-center text-red-500 hover:text-red-700 text-sm font-medium transition duration-150 mx-auto"
+      >
+        <ArrowLeft size={16} className="mr-1" /> Back to Dashboard
+      </button>
+    </div>
+  );
+};
+
 const Dashboard = ({ onLogout }) => {
   /** @type {[Critter[], React.Dispatch<React.SetStateAction<Critter[]>>]} */
   const [critters, setCritters] = useState([]);
@@ -370,6 +444,7 @@ const Dashboard = ({ onLogout }) => {
   // Handler for opening the edit form
   const handleEditCritter = (critter) => {
     setEditingCritter(critter);
+	setSelectedSpecies(null);
     setIsFormVisible(true);
   };
   
@@ -383,6 +458,20 @@ const Dashboard = ({ onLogout }) => {
   const handleCancelForm = () => {
       setIsFormVisible(false);
       setEditingCritter(null);
+	  setSelectedSpecies(null);
+  };
+  
+  // NEW: Handler for when a species is chosen in the selector
+  const handleSpeciesSelected = (species) => {
+      setSelectedSpecies(species);
+      setIsFormVisible(true); // Keep form panel visible
+  };
+  
+  // NEW: Handler for starting the new two-step flow
+  const startAddCritterFlow = () => {
+      setEditingCritter(null);
+      setSelectedSpecies(null);
+      setIsFormVisible(true);
   };
   
   // Handler for successful deletion from the CritterCard
@@ -390,7 +479,19 @@ const Dashboard = ({ onLogout }) => {
       setCritters(prevCritters => prevCritters.filter(c => c.id !== id));
   };
 
+  // CONDITIONAL RENDERING LOGIC UPDATED
   if (isFormVisible) {
+      // Check 1: If we are not editing an existing critter AND a species hasn't been selected, show selector
+      if (!editingCritter && !selectedSpecies) {
+          return (
+              <SpeciesSelector 
+                  onSelectSpecies={handleSpeciesSelected} 
+                  onCancel={handleCancelForm} 
+              />
+          );
+      }
+      
+      // Check 2: If we are editing OR a species HAS been selected, show the CritterForm
       return (
           <div className="flex flex-col items-center w-full max-w-6xl">
               <button 
@@ -401,7 +502,7 @@ const Dashboard = ({ onLogout }) => {
               </button>
               <CritterForm 
                   token={token}
-                  initialCritter={editingCritter}
+                  initialCritter={editingCritter || { species: selectedSpecies }} // Pass selectedSpecies to form
                   onCritterSaved={handleDataChange}
                   onCancel={handleCancelForm}
               />
