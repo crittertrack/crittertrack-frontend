@@ -1,14 +1,10 @@
 import React, { useState, useEffect } from 'react';
 import axios from 'axios';
-import { LogOut, Cat, UserPlus, LogIn, ChevronLeft } from 'lucide-react';
+import { LogOut, Cat, UserPlus, LogIn, ChevronLeft, Trash2, Edit, Save, PlusCircle, ArrowLeft, Loader2, RefreshCw } from 'lucide-react';
 
 // --- Global Constants ---
+// Use environment variable for the API base URL in production, fall back to proxy in development.
 const API_BASE_URL = process.env.REACT_APP_API_BASE_URL || '/api';
-
-// --- Define Custom Colors as Exact Hex Codes ---
-const BG_PINK_HEX = '#FFDEE9'; // Pink background
-const ACCENT_BLUE_HEX = '#A4E2F1'; // Light Blue for buttons/primary color
-const HOT_PINK_HEX = '#D37197'; // Hot Pink for the registration link
 
 // --- Helper Components ---
 
@@ -20,8 +16,7 @@ const ModalMessage = ({ title, message, onClose }) => (
       <p className="text-gray-600 mb-6">{message}</p>
       <button 
         onClick={onClose} 
-        // Using a standard Tailwind blue for contrast on the modal itself
-        className="w-full bg-blue-500 hover:bg-blue-600 text-white font-semibold py-2 rounded-lg transition duration-150 shadow-md"
+        className="w-full bg-indigo-600 hover:bg-indigo-700 text-white font-semibold py-2 rounded-lg transition duration-150 shadow-md"
       >
         Close
       </button>
@@ -29,288 +24,499 @@ const ModalMessage = ({ title, message, onClose }) => (
   </div>
 );
 
+// Form Input Component for consistency
+const InputField = ({ id, label, type = 'text', value, onChange, required = false, disabled = false }) => (
+  <div className="mb-4">
+    <label htmlFor={id} className="block text-sm font-medium text-gray-700 mb-1">
+      {label}
+    </label>
+    <input
+      type={type}
+      id={id}
+      value={value}
+      onChange={(e) => onChange(e.target.value)}
+      required={required}
+      disabled={disabled}
+      className="w-full px-3 py-2 border border-gray-300 rounded-lg shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 disabled:bg-gray-100 transition duration-150"
+    />
+  </div>
+);
+
+// Critter Interface for Type Safety (or documentation)
+/**
+ * @typedef {object} Critter
+ * @property {number} id
+ * @property {string} name
+ * @property {string} breed
+ * @property {number} age
+ * @property {string} gender
+ * @property {string} owner
+ */
+
 // --- 1. Authentication/Registration Components ---
 
 const AuthForm = ({ isRegister, setToken, setIsRegisterView, setShowModal, setModalMessage }) => {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
-  const [personalName, setPersonalName] = useState('');
-  const [breederName, setBreederName] = useState('');
-  const [loading, setLoading] = useState(false);
+  const [name, setName] = useState('');
+  const [isLoading, setIsLoading] = useState(false);
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    setLoading(true);
-
+    setIsLoading(true);
+    
     const endpoint = isRegister ? `${API_BASE_URL}/users/register` : `${API_BASE_URL}/users/login`;
-    const data = isRegister 
-      ? { email, password, personalName, breederName, showBreederName: !!breederName }
-      : { email, password };
+    const payload = isRegister ? { email, password, name } : { email, password };
 
     try {
-      const response = await axios.post(endpoint, data);
-      
-      if (isRegister) {
-        // Registration successful logic
-        setModalMessage({ 
-          title: 'Registration Successful!', 
-          message: 'Your account has been created. Please log in now to access your dashboard.' 
-        });
-        setShowModal(true);
-        // Clear form and switch back to Login view
-        setEmail('');
-        setPassword('');
-        setPersonalName('');
-        setBreederName('');
-        setIsRegisterView(false); // Switch to login view after registration
-        
+      const response = await axios.post(endpoint, payload);
+
+      if (response.data.token) {
+        // Store token in session storage for persistence and state update
+        sessionStorage.setItem('critterTrackToken', response.data.token);
+        setToken(response.data.token);
       } else {
-        // Login successful logic
-        const token = response.data?.token; // Added optional chaining for safer access
-        if (token) {
-            localStorage.setItem('userToken', token);
-            setToken(token); // This is the line that triggers the dashboard view!
-            // Clear credentials after success
-            setEmail('');
-            setPassword('');
+        // Handle successful registration without a token (common pattern)
+        if (isRegister) {
+            setShowModal(true);
+            setModalMessage({
+                title: 'Registration Success',
+                message: 'Your account has been created successfully. Please log in now.'
+            });
+            setIsRegisterView(false); // Switch to login view
         } else {
-             // Handle unexpected successful response without token
-             throw new Error("Login succeeded but no token was returned by the server. Check backend response format.");
+            throw new Error('Login failed: Token not received.');
         }
       }
-    } catch (err) {
-      console.error('Auth Error:', err.response?.data || err);
-      // Fallback message for network or unexpected error
-      const message = err.response?.data?.message || 'A network error occurred or the backend is unreachable.';
-      
-      setModalMessage({ 
-        title: isRegister ? 'Registration Failed' : 'Login Failed', 
-        message: message 
-      });
+    } catch (error) {
+      console.error('Auth Error:', error.response?.data || error.message);
       setShowModal(true);
+      setModalMessage({
+        title: isRegister ? 'Registration Failed' : 'Login Failed',
+        message: error.response?.data?.message || 'An unexpected error occurred. Please check your credentials and try again.'
+      });
     } finally {
-      setLoading(false);
+      setIsLoading(false);
+    }
+  };
+
+  const title = isRegister ? 'Create Account' : 'Welcome Back';
+
+  return (
+    <form onSubmit={handleSubmit} className="bg-white p-8 rounded-2xl shadow-xl w-full max-w-sm border border-gray-100">
+      <h2 className="text-3xl font-extrabold text-gray-800 mb-6 text-center">{title}</h2>
+      
+      {isRegister && (
+        <InputField 
+          id="name" 
+          label="Full Name" 
+          value={name} 
+          onChange={setName} 
+          required 
+          disabled={isLoading}
+        />
+      )}
+      
+      <InputField 
+        id="email" 
+        label="Email Address" 
+        type="email"
+        value={email} 
+        onChange={setEmail} 
+        required 
+        disabled={isLoading}
+      />
+      
+      <InputField 
+        id="password" 
+        label="Password" 
+        type="password"
+        value={password} 
+        onChange={setPassword} 
+        required 
+        disabled={isLoading}
+      />
+
+      <button
+        type="submit"
+        disabled={isLoading}
+        className="w-full flex items-center justify-center bg-indigo-600 hover:bg-indigo-700 text-white font-bold py-3 px-4 rounded-xl transition duration-200 shadow-md hover:shadow-lg disabled:bg-indigo-400"
+      >
+        {isLoading && <Loader2 size={20} className="animate-spin mr-2" />}
+        {isRegister ? 'Register' : 'Log In'}
+      </button>
+    </form>
+  );
+};
+
+
+// --- 2. Dashboard Components ---
+
+const CritterForm = ({ onCritterSaved, initialCritter, token, onCancel }) => {
+  const [critter, setCritter] = useState(initialCritter || { 
+    name: '', 
+    breed: '', 
+    age: '', 
+    gender: 'Male', // Default to Male
+    owner: '' // This should eventually be pre-filled from user data
+  });
+  const [isLoading, setIsLoading] = useState(false);
+  const isEditing = !!initialCritter;
+
+  const handleChange = (field, value) => {
+    setCritter(prev => ({ ...prev, [field]: value }));
+  };
+
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+    setIsLoading(true);
+
+    const config = {
+      headers: { Authorization: `Bearer ${token}` }
+    };
+    
+    const payload = { 
+        ...critter, 
+        age: parseInt(critter.age, 10) 
+    };
+
+    try {
+      if (isEditing) {
+        // Update Critter
+        await axios.put(`${API_BASE_URL}/critters/${critter.id}`, payload, config);
+      } else {
+        // Add new Critter
+        await axios.post(`${API_BASE_URL}/critters`, payload, config);
+      }
+      onCritterSaved();
+      onCancel(); // Close form
+    } catch (error) {
+      console.error('Critter Save Error:', error.response?.data || error.message);
+      // In a real app, you would show a modal here
+    } finally {
+      setIsLoading(false);
     }
   };
 
   return (
-    <div className="w-full max-w-md bg-white p-8 rounded-xl shadow-2xl border border-indigo-100">
-      <h2 className="text-3xl font-extrabold text-gray-800 text-center mb-6">
-        {isRegister ? 'Register Account' : 'Sign In'}
-      </h2>
-      <form onSubmit={handleSubmit} className="space-y-4">
-        <input 
-          type="email" 
-          placeholder="Email" 
-          value={email} 
-          onChange={(e) => setEmail(e.target.value)} 
-          required 
-          className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-indigo-500 focus:border-indigo-500"
-        />
-        <input 
-          type="password" 
-          placeholder="Password" 
-          value={password} 
-          onChange={(e) => setPassword(e.target.value)} 
-          required 
-          className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-indigo-500 focus:border-indigo-500"
-        />
+    <div className="bg-white p-6 rounded-xl shadow-lg border border-gray-100 w-full max-w-md">
+      <h3 className="text-2xl font-bold text-gray-800 mb-6">{isEditing ? 'Edit Critter' : 'Add New Critter'}</h3>
+      <form onSubmit={handleSubmit}>
+        <InputField id="critterName" label="Name" value={critter.name} onChange={(val) => handleChange('name', val)} required disabled={isLoading} />
+        <InputField id="critterBreed" label="Breed" value={critter.breed} onChange={(val) => handleChange('breed', val)} required disabled={isLoading} />
+        <InputField id="critterAge" label="Age (Years)" type="number" value={critter.age} onChange={(val) => handleChange('age', val)} required disabled={isLoading} />
+        <InputField id="critterOwner" label="Owner Name" value={critter.owner} onChange={(val) => handleChange('owner', val)} required disabled={isLoading} />
+        
+        <div className="mb-6">
+          <label className="block text-sm font-medium text-gray-700 mb-1">Gender</label>
+          <select
+            value={critter.gender}
+            onChange={(e) => handleChange('gender', e.target.value)}
+            className="w-full px-3 py-2 border border-gray-300 rounded-lg shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 transition duration-150"
+            disabled={isLoading}
+          >
+            <option value="Male">Male</option>
+            <option value="Female">Female</option>
+            <option value="Unknown">Unknown</option>
+          </select>
+        </div>
 
-        {isRegister && (
-          <>
-            <input 
-              type="text" 
-              placeholder="Your Personal Name" 
-              value={personalName} 
-              onChange={(e) => setPersonalName(e.target.value)} 
-              required 
-              className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-indigo-500 focus:border-indigo-500"
-            />
-            <input 
-              type="text" 
-              placeholder="Breeder Name (Optional)" 
-              value={breederName} 
-              onChange={(e) => setBreederName(e.target.value)} 
-              className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-indigo-500 focus:border-indigo-500"
-            />
-          </>
-        )}
-
-        <button 
-          type="submit" 
-          disabled={loading}
-          // Button uses the light blue accent color and dark text for contrast
-          className={`w-full text-gray-800 font-bold py-2.5 rounded-lg transition duration-150 shadow-md disabled:opacity-50 flex items-center justify-center hover:shadow-lg`}
-          style={{ backgroundColor: ACCENT_BLUE_HEX }}
-        >
-          {loading ? (
-            <svg className="animate-spin h-5 w-5 mr-3 text-gray-800" viewBox="0 0 24 24">
-              <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
-              <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
-            </svg>
-          ) : (
-            <>
-              {isRegister ? <UserPlus size={18} className="mr-2" /> : <LogIn size={18} className="mr-2" />}
-              {isRegister ? 'Create Account' : 'Sign In'}
-            </>
-          )}
-        </button>
+        <div className="flex justify-end space-x-3">
+          <button
+            type="button"
+            onClick={onCancel}
+            disabled={isLoading}
+            className="flex items-center bg-gray-200 hover:bg-gray-300 text-gray-800 font-semibold py-2 px-4 rounded-xl transition duration-150 disabled:opacity-50"
+          >
+            Cancel
+          </button>
+          <button
+            type="submit"
+            disabled={isLoading}
+            className="flex items-center bg-indigo-600 hover:bg-indigo-700 text-white font-semibold py-2 px-4 rounded-xl transition duration-150 shadow-md hover:shadow-lg disabled:bg-indigo-400"
+          >
+            {isLoading ? <Loader2 size={20} className="animate-spin mr-2" /> : <Save size={20} className="mr-1" />}
+            {isEditing ? 'Save Changes' : 'Add Critter'}
+          </button>
+        </div>
       </form>
     </div>
   );
 };
 
-// --- 2. Dashboard Component (Placeholder) ---
 
-const Dashboard = ({ onLogout }) => {
-  // This will eventually fetch and display user's animals and litters
-  const [view, setView] = useState('list'); // 'list' or 'add'
-  const [data, setData] = useState(null);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState(null);
-  const token = localStorage.getItem('userToken');
+const CritterCard = ({ critter, token, onCritterDeleted, onCritterUpdated }) => {
+  const [isEditing, setIsEditing] = useState(false);
+  const [isLoading, setIsLoading] = useState(false);
 
-  useEffect(() => {
-    // This is the protected fetch that requires the token.
-    const fetchUserData = async () => {
-      if (!token) {
-        setError("Missing authentication token.");
-        setLoading(false);
-        return;
-      }
-
-      try {
-        setLoading(true);
-        // We are using /api/animals now, which is a protected route.
-        const response = await axios.get(`${API_BASE_URL}/animals`, {
-          headers: {
-            Authorization: `Bearer ${token}`,
-          },
-        });
-        setData(response.data); // This data will be the list of animals
-        setError(null);
-      } catch (err) {
-        console.error("Dashboard Fetch Error:", err.response?.data || err);
-        if (err.response?.status === 401) {
-            setError("Session expired or token invalid. Please log in again.");
-            onLogout();
-        } else {
-            // Note: If the database is empty, /api/animals might return an empty array, which is fine.
-            // This error is for unexpected status codes or network issues.
-            setError(err.response?.data?.message || 'Failed to load dashboard data.');
+  const handleDelete = async () => {
+    // In a real app, use a modal for confirmation instead of window.confirm
+    if (window.confirm(`Are you sure you want to delete ${critter.name}?`)) {
+        setIsLoading(true);
+        try {
+            await axios.delete(`${API_BASE_URL}/critters/${critter.id}`, {
+                headers: { Authorization: `Bearer ${token}` }
+            });
+            onCritterDeleted(critter.id);
+        } catch (error) {
+            console.error('Critter Delete Error:', error.response?.data || error.message);
+            // Handle error display
+        } finally {
+            setIsLoading(false);
         }
-      } finally {
-        setLoading(false);
-      }
-    };
-
-    fetchUserData();
-  }, [token, onLogout]); // Re-fetch if token changes
-
-  if (loading) return <div className="text-center p-8"><p className="text-xl text-indigo-500">Loading Dashboard...</p></div>;
+    }
+  };
   
-  if (error) return (
-    <div className="bg-red-100 border border-red-400 text-red-700 p-4 rounded-lg shadow-md max-w-lg mx-auto">
-      <p className="font-bold">Error Loading Data:</p>
-      <p>{error}</p>
-      <button 
-        onClick={onLogout}
-        className="mt-4 flex items-center text-sm bg-red-500 hover:bg-red-600 text-white font-semibold py-2 px-4 rounded-full transition duration-150 shadow-md"
-      >
-        <LogOut size={16} className="mr-2" /> Force Log Out
-      </button>
-    </div>
-  );
+  // Quick fix: Since we aren't displaying critter-specific editing, let's just 
+  // route to the main form when Edit is clicked.
+  const handleEditClick = () => {
+      onCritterUpdated(critter); 
+  };
+  
+  // This component will only show the display card, editing is done via the main form
 
   return (
-    <div className="w-full max-w-6xl p-6 bg-white rounded-xl shadow-2xl border border-indigo-100">
-      <div className="flex justify-between items-center border-b pb-4 mb-4">
-        <h2 className="text-3xl font-bold text-gray-800 flex items-center">
-            <Cat size={24} className="mr-3 text-indigo-600" />
-            My Critter Registry
-        </h2>
+    <div className="bg-white p-5 rounded-xl shadow-lg border border-gray-100 flex flex-col justify-between transition-all hover:shadow-xl transform hover:-translate-y-0.5">
+      <div>
+        <div className="flex items-center justify-between mb-3">
+          <Cat size={32} className="text-indigo-600" />
+          <span className={`text-xs font-semibold px-3 py-1 rounded-full ${critter.gender === 'Male' ? 'bg-blue-100 text-blue-800' : critter.gender === 'Female' ? 'bg-pink-100 text-pink-800' : 'bg-gray-100 text-gray-800'}`}>
+            {critter.gender}
+          </span>
+        </div>
+        <h4 className="text-xl font-bold text-gray-800 mb-1 truncate">{critter.name}</h4>
+        <p className="text-sm text-gray-600 mb-3">{critter.breed}</p>
+        
+        <div className="space-y-1 text-sm text-gray-700">
+          <p><strong>Age:</strong> {critter.age} years</p>
+          <p><strong>Owner:</strong> {critter.owner}</p>
+          <p><strong>ID:</strong> {critter.id}</p>
+        </div>
+      </div>
+      
+      <div className="mt-4 flex space-x-2">
         <button 
-          onClick={onLogout}
-          className="flex items-center text-sm bg-red-500 hover:bg-red-600 text-white font-semibold py-2 px-4 rounded-full transition duration-150 shadow-md"
+          onClick={handleEditClick}
+          disabled={isLoading}
+          className="flex-1 flex items-center justify-center bg-yellow-500 hover:bg-yellow-600 text-white font-semibold py-2 px-3 rounded-lg text-sm transition duration-150 disabled:opacity-50"
         >
-          <LogOut size={16} className="mr-2" /> Log Out
+          <Edit size={16} className="mr-1" /> Edit
+        </button>
+        <button 
+          onClick={handleDelete}
+          disabled={isLoading}
+          className="flex-1 flex items-center justify-center bg-red-500 hover:bg-red-600 text-white font-semibold py-2 px-3 rounded-lg text-sm transition duration-150 disabled:opacity-50"
+        >
+          {isLoading ? <Loader2 size={16} className="animate-spin" /> : <Trash2 size={16} className="mr-1" />} Delete
         </button>
       </div>
-
-      <p className="text-gray-500 mb-6">
-        Welcome! You are successfully connected to the backend API.
-      </p>
-
-      {/* Placeholder for Animal List */}
-      <div className="mt-4">
-        <h3 className="text-2xl font-semibold text-indigo-600 mb-4">
-            {data?.length} Animals Registered (Placeholder Data)
-        </h3>
-        <ul className="space-y-3">
-          {data && data.length > 0 ? (
-            data.map((animal) => (
-              <li key={animal._id} className="bg-gray-50 p-3 rounded-lg border border-gray-200">
-                <span className="font-medium text-gray-700">{animal.name}</span> 
-                <span className="text-sm text-gray-500 ml-3">({animal.gender}, ID: {animal.id_public})</span>
-              </li>
-            ))
-          ) : (
-            <p className="text-gray-500 italic">You haven't added any animals yet. Time to register your first critter!</p>
-          )}
-        </ul>
-      </div>
-
     </div>
   );
 };
 
-// --- 3. Main App Component (Routing and State) ---
+const Dashboard = ({ onLogout }) => {
+  /** @type {[Critter[], React.Dispatch<React.SetStateAction<Critter[]>>]} */
+  const [critters, setCritters] = useState([]);
+  const [isLoading, setIsLoading] = useState(true);
+  const [error, setError] = useState(null);
+  const [isFormVisible, setIsFormVisible] = useState(false);
+  /** @type {[Critter | null, React.Dispatch<React.SetStateAction<Critter | null>>]} */
+  const [editingCritter, setEditingCritter] = useState(null);
+  
+  const token = sessionStorage.getItem('critterTrackToken');
 
-const App = () => {
-  const [userToken, setUserToken] = useState(localStorage.getItem('userToken'));
-  // Use state to track the current view between login/register
-  const [isRegisterView, setIsRegisterView] = useState(false); 
+  const fetchCritters = async () => {
+    if (!token) {
+        setError("Authentication token missing.");
+        setIsLoading(false);
+        return;
+    }
+
+    setIsLoading(true);
+    setError(null);
+    try {
+      const response = await axios.get(`${API_BASE_URL}/critters`, {
+        headers: { Authorization: `Bearer ${token}` }
+      });
+      setCritters(response.data);
+    } catch (err) {
+      console.error('Fetch Error:', err.response?.data || err.message);
+      setError('Failed to load critter data. Check backend connection and CORS configuration.');
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    fetchCritters();
+  }, []); // Run only on initial mount
+
+  // Handler for opening the edit form
+  const handleEditCritter = (critter) => {
+    setEditingCritter(critter);
+    setIsFormVisible(true);
+  };
+  
+  // Handler for successful save/update/delete
+  const handleDataChange = () => {
+    // Re-fetch all data to ensure the list is up-to-date
+    fetchCritters(); 
+  };
+  
+  // Handler for cancelling form or closing modal
+  const handleCancelForm = () => {
+      setIsFormVisible(false);
+      setEditingCritter(null);
+  };
+  
+  // Handler for successful deletion from the CritterCard
+  const handleCritterDeleted = (id) => {
+      setCritters(prevCritters => prevCritters.filter(c => c.id !== id));
+  };
+
+  if (isFormVisible) {
+      return (
+          <div className="flex flex-col items-center w-full max-w-6xl">
+              <button 
+                  onClick={handleCancelForm}
+                  className="mb-6 flex items-center text-indigo-600 hover:text-indigo-800 text-base font-medium transition duration-150"
+              >
+                  <ArrowLeft size={20} className="mr-1" /> Back to Dashboard
+              </button>
+              <CritterForm 
+                  token={token}
+                  initialCritter={editingCritter}
+                  onCritterSaved={handleDataChange}
+                  onCancel={handleCancelForm}
+              />
+          </div>
+      );
+  }
+
+  return (
+    <div className="w-full max-w-6xl">
+      <div className="flex justify-between items-center mb-6 p-4 bg-white rounded-xl shadow-md">
+        <h2 className="text-3xl font-bold text-gray-800 flex items-center">
+          <Cat size={32} className="mr-3 text-indigo-600" />
+          My Critters ({critters.length})
+        </h2>
+        <div className='flex space-x-3'>
+            <button
+              onClick={fetchCritters}
+              disabled={isLoading}
+              className="flex items-center bg-gray-200 hover:bg-gray-300 text-gray-800 font-semibold py-2 px-4 rounded-xl transition duration-150 disabled:opacity-50"
+              title="Refresh Data"
+            >
+              <RefreshCw size={18} className={isLoading ? "animate-spin mr-2" : "mr-2"} />
+              Refresh
+            </button>
+            <button
+              onClick={() => { setEditingCritter(null); setIsFormVisible(true); }}
+              className="flex items-center bg-indigo-600 hover:bg-indigo-700 text-white font-bold py-2 px-4 rounded-xl transition duration-200 shadow-md hover:shadow-lg"
+            >
+              <PlusCircle size={20} className="mr-2" />
+              Add New Critter
+            </button>
+        </div>
+      </div>
+
+      {isLoading && (
+        <div className="p-8 text-center text-gray-600">
+          <Loader2 size={32} className="animate-spin mx-auto mb-3" />
+          Loading Critter Data...
+        </div>
+      )}
+      
+      {error && !isLoading && (
+        <div className="p-4 bg-red-100 border border-red-400 text-red-700 rounded-xl mb-6" role="alert">
+            <p className="font-bold">Data Error</p>
+            <p>{error}</p>
+            <p className='mt-2 text-sm'>Please check your Vercel Environment Variables to ensure the backend URL is correct.</p>
+        </div>
+      )}
+
+      {!isLoading && !error && critters.length === 0 && (
+        <div className="p-12 text-center bg-white rounded-xl shadow-lg border-2 border-dashed border-gray-300">
+          <Cat size={48} className="text-gray-400 mx-auto mb-4" />
+          <p className="text-xl text-gray-600">No critters found.</p>
+          <p className="text-gray-500 mt-2">Start by adding your first companion above!</p>
+        </div>
+      )}
+
+      {!isLoading && critters.length > 0 && (
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+          {critters.map(critter => (
+            <CritterCard 
+                key={critter.id} 
+                critter={critter} 
+                token={token} 
+                onCritterDeleted={handleCritterDeleted}
+                onCritterUpdated={handleEditCritter} // Pass handler for editing
+            />
+          ))}
+        </div>
+      )}
+
+      <div className="mt-8 text-center">
+        <button
+          onClick={onLogout}
+          className="flex items-center mx-auto text-red-500 hover:text-red-700 font-medium py-2 px-4 rounded-lg transition duration-150"
+        >
+          <LogOut size={20} className="mr-2" />
+          Log Out
+        </button>
+      </div>
+    </div>
+  );
+};
+
+
+// --- 3. Main App Component ---
+
+export default function App() {
+  const [userToken, setUserToken] = useState(sessionStorage.getItem('critterTrackToken'));
+  const [isRegisterView, setIsRegisterView] = useState(false);
   const [showModal, setShowModal] = useState(false);
   const [modalMessage, setModalMessage] = useState({ title: '', message: '' });
 
-  // Handle token setting (used by AuthForm on successful login)
-  const handleSetToken = (token) => {
-    setUserToken(token);
-    // When the token is set, it automatically triggers the Dashboard view
-  };
-
-  // Handle logout
+  // Function to handle logout and clear state
   const handleLogout = () => {
-    localStorage.removeItem('userToken');
+    sessionStorage.removeItem('critterTrackToken');
     setUserToken(null);
-    setIsRegisterView(false); // Default to login view after logout
+    setIsRegisterView(false); // Reset to login view
   };
 
+  // Axios Interceptor for Authorization Header (runs before every request)
+  useEffect(() => {
+    const interceptor = axios.interceptors.request.use((config) => {
+      const token = sessionStorage.getItem('critterTrackToken');
+      if (token) {
+        config.headers.Authorization = `Bearer ${token}`;
+      }
+      return config;
+    });
+
+    // Cleanup function to remove the interceptor
+    return () => {
+      axios.interceptors.request.eject(interceptor);
+    };
+  }, [userToken]);
+
+
+  // Helper function to render the auth/reg forms
   const renderAuthContent = () => (
-    <div className="flex flex-col items-center">
-      {isRegisterView ? (
-        <AuthForm 
-          isRegister={true} 
-          setToken={handleSetToken} 
-          setIsRegisterView={setIsRegisterView} // Pass setter to switch to login on success
-          setShowModal={setShowModal}
-          setModalMessage={setModalMessage}
-        />
-      ) : (
-        <AuthForm 
-          isRegister={false} 
-          setToken={handleSetToken} 
-          setIsRegisterView={setIsRegisterView}
-          setShowModal={setShowModal}
-          setModalMessage={setModalMessage}
-        />
-      )}
+    <div className="flex flex-col items-center w-full max-w-sm">
+      <AuthForm 
+        isRegister={isRegisterView} 
+        setToken={setUserToken} 
+        setIsRegisterView={setIsRegisterView}
+        setShowModal={setShowModal}
+        setModalMessage={setModalMessage}
+      />
       
       <button 
         onClick={() => setIsRegisterView(!isRegisterView)}
-        // Hot Pink Text Color for contrast
-        className="mt-4 text-sm font-medium flex items-center hover:text-pink-700 transition duration-150"
-        style={{ color: HOT_PINK_HEX }}
+        className="mt-4 text-indigo-600 hover:text-indigo-800 text-sm font-medium flex items-center"
       >
         {isRegisterView ? 
           <><ChevronLeft size={16} className="mr-1" /> Back to Login</> 
@@ -323,17 +529,23 @@ const App = () => {
 
 
   return (
-    // Exact Pink Background
-    <div className="min-h-screen p-6 flex flex-col items-center" style={{ backgroundColor: BG_PINK_HEX }}>
-      <header className="py-10 w-full max-w-6xl text-center">
-        {/* Logo Image Path Check: This path requires the file to be in the project's public/ folder */}
-        <img 
-            src="/crittertrack-logo-new.png" 
-            alt="CritterTrack Pedigree App Logo" 
-            className="mx-auto h-24 sm:h-32 mb-2" 
+    <div className="min-h-screen bg-gray-50 p-6 flex flex-col items-center font-sans">
+      
+      {/* Global Message Modal */}
+      {showModal && (
+        <ModalMessage 
+          title={modalMessage.title} 
+          message={modalMessage.message} 
+          onClose={() => setShowModal(false)}
         />
+      )}
+      
+      <header className="py-8 w-full max-w-6xl text-center">
+        <h1 className="text-5xl font-extrabold text-gray-800 tracking-tight">
+          CritterTrack Pedigree App
+        </h1>
         <p className="text-lg text-gray-500 mt-2">
-          {userToken ? 'Welcome back!' : 'Please sign in or register to continue.'}
+          {userToken ? 'Welcome back! Manage your registered critters.' : 'Please sign in or register to continue.'}
         </p>
       </header>
 
@@ -345,19 +557,9 @@ const App = () => {
         )}
       </main>
       
-      <footer className="py-4 text-sm text-gray-400 w-full text-center">
-        &copy; 2024 CritterTrack Development
+      <footer className="py-4 text-center text-sm text-gray-400 w-full max-w-6xl">
+        CritterTrack &copy; {new Date().getFullYear()} | Deployed via Vercel
       </footer>
-
-      {showModal && (
-        <ModalMessage 
-          title={modalMessage.title} 
-          message={modalMessage.message} 
-          onClose={() => setShowModal(false)}
-        />
-      )}
     </div>
   );
-};
-
-export default App;
+}
