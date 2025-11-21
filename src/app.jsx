@@ -67,8 +67,9 @@ const AuthForm = ({ isRegister, setToken, setIsRegisterView, setShowModal, setMo
     setIsLoading(true);
     
     const endpoint = isRegister ? `${API_BASE_URL}/users/register` : `${API_BASE_URL}/users/login`;
+    // FIX: Changed 'name' key to 'personalName' to match backend requirement
     const payload = isRegister 
-      ? { email, password, name, breederName: breederName || null } 
+      ? { email, password, personalName: name, breederName: breederName || null } 
       : { email, password };
 
     try {
