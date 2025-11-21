@@ -82,8 +82,8 @@ const LoginScreen = ({ setAuthToken, setUserId, isRegisterView, toggleView, show
       {/* Wrapper for logo and card group, centered vertically */}
       <div className="flex-grow flex flex-col justify-center items-center w-full">
       
-        {/* 1. Logo (Reduced size) */}
-        <div className="p-5 mb-2 flex flex-col items-center"> 
+        {/* 1. Logo and Instruction Text Group */}
+        <div className="pt-5 pb-3 flex flex-col items-center"> {/* Tighter vertical control */}
           {/* Logo size kept smaller as requested previously */}
           <CustomAppLogo size="w-36 h-36 sm:w-40 sm:h-40" /> 
           {/* Reduced margin-top on instruction text: mt-6 -> mt-4 */}
@@ -96,7 +96,7 @@ const LoginScreen = ({ setAuthToken, setUserId, isRegisterView, toggleView, show
         <div className="
             w-full max-w-sm sm:max-w-md                             
             bg-white rounded-xl shadow-2xl 
-            overflow-hidden flex flex-col mt-6 {/* Reduced margin-top: mt-8 -> mt-6 */}
+            overflow-hidden flex flex-col mt-3 {/* Reduced margin-top: mt-6 -> mt-3 for tighter fit */}
         ">
           
           {/* Form Section */}
