@@ -84,18 +84,19 @@ const LoginScreen = ({ setAuthToken, setUserId, isRegisterView, toggleView, show
       
         {/* 1. Logo (Now even bigger) */}
         <div className="p-5 mb-2 flex flex-col items-center"> 
-          <CustomAppLogo size="w-32 h-32 sm:w-40 sm:h-40" />
-          {/* Grey instruction text under the logo */}
-          <p className="text-gray-600 text-sm mt-4 text-center">
+          {/* Logo size significantly increased */}
+          <CustomAppLogo size="w-48 h-48 sm:w-56 sm:h-56" /> 
+          {/* Instruction text size increased */}
+          <p className="text-gray-600 text-lg sm:text-xl mt-6 text-center">
             Please sign in or register to continue.
           </p>
         </div>
 
-        {/* 2. The Main Card Container (Now max-w-xs) */}
+        {/* 2. The Main Card Container (Wider horizontally) */}
         <div className="
-            w-full max-w-xs                              
+            w-full max-w-sm sm:max-w-lg  {/* Increased max-w for horizontal width to 'lg' */}                             
             bg-white rounded-xl shadow-2xl 
-            overflow-hidden flex flex-col mt-6
+            overflow-hidden flex flex-col mt-8
         ">
           
           {/* Form Section */}
@@ -172,8 +173,8 @@ const LoginScreen = ({ setAuthToken, setUserId, isRegisterView, toggleView, show
           </div>
         </div>
         
-        {/* 3. Toggle View Link (MOVED OUTSIDE CARD) */}
-        <div className="mt-6 text-center w-full max-w-xs">
+        {/* 3. Toggle View Link */}
+        <div className="mt-6 text-center w-full max-w-sm sm:max-w-lg"> {/* Matched width with card */}
           <button
             onClick={toggleView}
             className="text-accent hover:text-accent/80 text-md font-semibold flex items-center justify-center w-full"
@@ -233,6 +234,7 @@ export default function App() {
     return (
       <>
         {/* Global Message Modal */}
+        {/* FIX: Removed extra parenthesis around the callback function in onClose */}
         {showModal && <ModalMessage title={modalMessage.title} message={modalMessage.message} onClose={() => setShowModal(false)} />}
         <LoginScreen 
           setAuthToken={setAuthToken}
