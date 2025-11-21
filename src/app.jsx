@@ -30,7 +30,8 @@ const CustomAppLogo = ({ size = "w-10 h-10" }) => (
     <img 
         src="logo.png" 
         alt="CritterTrack Logo" 
-        className={`${size} rounded-full object-cover`}
+        // REMOVED: rounded-full to prevent cropping
+        className={`${size} object-cover`} 
         onError={(e) => {
             e.target.onerror = null; 
             e.target.src = "https://placehold.co/40x40/9ED4E0/ffffff?text=Logo";
@@ -82,11 +83,7 @@ const LoginScreen = ({ setAuthToken, setUserId, isRegisterView, toggleView, show
       <div className="flex-grow flex flex-col justify-center items-center w-full">
       
         {/* 1. Logo (Separated from the card) */}
-        <div className="
-          p-5 mb-8 
-          bg-primary rounded-3xl shadow-xl 
-          transform transition-all duration-300 hover:scale-[1.05]
-        ">
+        <div className="p-5 mb-8"> 
           <CustomAppLogo size="w-20 h-20 sm:w-24 sm:h-24" />             
         </div>
 
