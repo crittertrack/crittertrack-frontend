@@ -83,32 +83,31 @@ const LoginScreen = ({ setAuthToken, setUserId, isRegisterView, toggleView, show
       <div className="flex-grow flex flex-col justify-center items-center w-full">
       
         {/* 1. Logo and Instruction Text Group */}
-        <div className="pt-5 pb-3 flex flex-col items-center"> {/* Tighter vertical control */}
+        <div className="pt-5 pb-3 flex flex-col items-center">
           {/* Logo size kept smaller as requested previously */}
-          <CustomAppLogo size="w-36 h-36 sm:w-40 sm:h-40" /> 
+          <CustomAppLogo size="w-36 h-36 sm:w-40 h-40" /> 
           {/* Reduced margin-top on instruction text: mt-6 -> mt-4 */}
           <p className="text-gray-600 text-lg sm:text-xl mt-4 text-center"> 
             Please sign in or register to continue.
           </p>
         </div>
 
-        {/* 2. The Main Card Container (Width is maintained, vertical space reduced) */}
+        {/* 2. The Main Card Container (Width is reduced for small screens and up) */}
         <div className="
-            w-full max-w-sm sm:max-w-md                             
+            w-full max-w-xs sm:max-w-sm {/* Reduced max-width from max-w-sm/sm:max-w-md to max-w-xs/sm:max-w-sm for a smaller card */}                             
             bg-white rounded-xl shadow-2xl 
-            overflow-hidden flex flex-col mt-3 {/* Reduced margin-top: mt-6 -> mt-3 for tighter fit */}
+            overflow-hidden flex flex-col mt-3
         ">
           
           {/* Form Section */}
           <div className="
-              w-full p-5 sm:p-6 flex flex-col justify-center {/* Reduced padding: p-6 sm:p-8 -> p-5 sm:p-6 */}
+              w-full p-4 sm:p-5 flex flex-col justify-center {/* Reduced inner padding from p-5/sm:p-6 to p-4/sm:p-5 */}
           ">
-            {/* Reduced margin-bottom on heading: mb-6 -> mb-4 */}
             <h2 className="text-2xl font-extrabold text-gray-900 mb-4 text-center"> 
               {isRegisterView ? 'Register' : 'Log In'}
             </h2>
 
-            <form className="space-y-4" onSubmit={handleSubmit}> {/* Reduced space-y: space-y-5 -> space-y-4 */}
+            <form className="space-y-4" onSubmit={handleSubmit}>
               <div>
                 <label htmlFor="email" className="block text-sm font-medium text-gray-700">Email Address</label>
                 <input
@@ -153,7 +152,7 @@ const LoginScreen = ({ setAuthToken, setUserId, isRegisterView, toggleView, show
                 </div>
               )}
 
-              <div className="pt-2"> {/* Reduced padding-top: pt-3 -> pt-2 */}
+              <div className="pt-2">
                 <button
                   type="submit"
                   disabled={loading}
@@ -175,7 +174,7 @@ const LoginScreen = ({ setAuthToken, setUserId, isRegisterView, toggleView, show
         </div>
         
         {/* 3. Toggle View Link */}
-        <div className="mt-4 text-center w-full max-w-sm sm:max-w-md"> {/* Reduced margin-top: mt-6 -> mt-4 */}
+        <div className="mt-4 text-center w-full max-w-xs sm:max-w-sm {/* Matched width to the card */}">
           <button
             onClick={toggleView}
             className="text-accent hover:text-accent/80 text-md font-semibold flex items-center justify-center w-full"
