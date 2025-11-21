@@ -17,7 +17,7 @@ const ModalMessage = ({ title, message, onClose }) => (
       <p className="text-gray-600 mb-6">{message}</p>
       <button 
         onClick={onClose} 
-        className="w-full bg-primary hover:bg-primary-dark text-black font-semibold py-2 rounded-lg transition duration-150 shadow-md"
+        className="w-full bg-primary hover:-bg-primary-dark text-black font-semibold py-2 rounded-lg transition duration-150 shadow-md"
       >
         Close
       </button>
@@ -82,27 +82,31 @@ const LoginScreen = ({ setAuthToken, setUserId, isRegisterView, toggleView, show
       {/* Wrapper for logo and card group, centered vertically */}
       <div className="flex-grow flex flex-col justify-center items-center w-full">
       
-        {/* 1. Logo (Now significantly bigger) */}
-        <div className="p-5 mb-8"> 
-          <CustomAppLogo size="w-24 h-24 sm:w-32 sm:h-32" />             
+        {/* 1. Logo (Now even bigger) */}
+        <div className="p-5 mb-2 flex flex-col items-center"> 
+          <CustomAppLogo size="w-32 h-32 sm:w-40 sm:h-40" />
+          {/* Grey instruction text under the logo */}
+          <p className="text-gray-600 text-sm mt-4 text-center">
+            Please sign in or register to continue.
+          </p>
         </div>
 
-        {/* 2. The Main Card Container (Now smaller, max-w-xs) */}
+        {/* 2. The Main Card Container (Now max-w-xs) */}
         <div className="
-            w-full max-w-xs sm:max-w-sm                          
+            w-full max-w-xs                              
             bg-white rounded-xl shadow-2xl 
-            overflow-hidden flex flex-col
+            overflow-hidden flex flex-col mt-6
         ">
           
           {/* Form Section */}
           <div className="
-              w-full p-8 sm:p-10 flex flex-col justify-center
+              w-full p-6 sm:p-8 flex flex-col justify-center
           ">
-            <h2 className="text-3xl font-extrabold text-gray-900 mb-8 text-center"> 
+            <h2 className="text-2xl font-extrabold text-gray-900 mb-6 text-center"> 
               {isRegisterView ? 'Register' : 'Log In'}
             </h2>
 
-            <form className="space-y-6" onSubmit={handleSubmit}> 
+            <form className="space-y-5" onSubmit={handleSubmit}> 
               <div>
                 <label htmlFor="email" className="block text-sm font-medium text-gray-700">Email Address</label>
                 <input
@@ -111,7 +115,7 @@ const LoginScreen = ({ setAuthToken, setUserId, isRegisterView, toggleView, show
                   type="email"
                   autoComplete="email"
                   required
-                  className="mt-1 block w-full px-4 py-3 border border-gray-300 rounded-lg shadow-sm focus:ring-accent focus:border-accent transition duration-150 ease-in-out"
+                  className="mt-1 block w-full px-4 py-2 border border-gray-300 rounded-lg shadow-sm focus:ring-accent focus:border-accent transition duration-150 ease-in-out"
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
                 />
@@ -125,7 +129,7 @@ const LoginScreen = ({ setAuthToken, setUserId, isRegisterView, toggleView, show
                   type="password"
                   autoComplete={isRegisterView ? 'new-password' : 'current-password'}
                   required
-                  className="mt-1 block w-full px-4 py-3 border border-gray-300 rounded-lg shadow-sm focus:ring-accent focus:border-accent transition duration-150 ease-in-out"
+                  className="mt-1 block w-full px-4 py-2 border border-gray-300 rounded-lg shadow-sm focus:ring-accent focus:border-accent transition duration-150 ease-in-out"
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
                 />
@@ -140,19 +144,19 @@ const LoginScreen = ({ setAuthToken, setUserId, isRegisterView, toggleView, show
                     type="password"
                     autoComplete="new-password"
                     required
-                    className="mt-1 block w-full px-4 py-3 border border-gray-300 rounded-lg shadow-sm focus:ring-accent focus:border-accent transition duration-150 ease-in-out"
+                    className="mt-1 block w-full px-4 py-2 border border-gray-300 rounded-lg shadow-sm focus:ring-accent focus:border-accent transition duration-150 ease-in-out"
                     value={confirmPassword}
                     onChange={(e) => setConfirmPassword(e.target.value)}
                   />
                 </div>
               )}
 
-              <div className="pt-4">
+              <div className="pt-3">
                 <button
                   type="submit"
                   disabled={loading}
                   // Button uses the same light blue/green color as the logo box: bg-primary
-                  className="group relative w-full flex justify-center items-center py-3 px-4 border border-transparent text-lg font-bold rounded-lg text-black bg-primary hover:bg-primary-dark focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary transition duration-150 ease-in-out shadow-md hover:shadow-lg disabled:opacity-60"
+                  className="group relative w-full flex justify-center items-center py-2.5 px-4 border border-transparent text-lg font-bold rounded-lg text-black bg-primary hover:bg-primary-dark focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary transition duration-150 ease-in-out shadow-md hover:shadow-lg disabled:opacity-60"
                 >
                   {loading ? (
                       <Loader2 className="w-5 h-5 animate-spin mr-2" />
@@ -169,7 +173,7 @@ const LoginScreen = ({ setAuthToken, setUserId, isRegisterView, toggleView, show
         </div>
         
         {/* 3. Toggle View Link (MOVED OUTSIDE CARD) */}
-        <div className="mt-8 text-center w-full max-w-xs sm:max-w-sm">
+        <div className="mt-6 text-center w-full max-w-xs">
           <button
             onClick={toggleView}
             className="text-accent hover:text-accent/80 text-md font-semibold flex items-center justify-center w-full"
