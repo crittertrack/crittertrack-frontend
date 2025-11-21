@@ -7,7 +7,15 @@ module.exports = {
     "./src/**/*.{js,jsx,ts,tsx}",
   ],
   theme: {
-    extend: {},
+    extend: {
+      colors: {
+        // User-defined colors
+        'page-bg': '#F1D1DC',
+        'primary': '#8EBCC9',
+        'primary-dark': '#7AA7B5', // A slightly darker shade for hover state
+        'accent': '#D27096',
+      }
+    },
     fontFamily: {
       sans: ['Inter', 'sans-serif'],
     },

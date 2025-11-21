@@ -16,7 +16,7 @@ const ModalMessage = ({ title, message, onClose }) => (
       <p className="text-gray-600 mb-6">{message}</p>
       <button 
         onClick={onClose} 
-        className="w-full bg-indigo-600 hover:bg-indigo-700 text-white font-semibold py-2 rounded-lg transition duration-150 shadow-md"
+        className="w-full bg-primary hover:bg-primary-dark text-black font-semibold py-2 rounded-lg transition duration-150 shadow-md"
       >
         Close
       </button>
@@ -37,7 +37,7 @@ const InputField = ({ id, label, type = 'text', value, onChange, required = fals
       onChange={(e) => onChange(e.target.value)}
       required={required}
       disabled={disabled}
-      className="w-full px-3 py-2 border border-gray-300 rounded-lg shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 disabled:bg-gray-100 transition duration-150"
+      className="w-full px-3 py-2 border border-gray-300 rounded-lg shadow-sm focus:outline-none focus:ring-accent focus:border-accent disabled:bg-gray-100 transition duration-150"
     />
   </div>
 );
@@ -140,7 +140,7 @@ const AuthForm = ({ isRegister, setToken, setIsRegisterView, setShowModal, setMo
       <button
         type="submit"
         disabled={isLoading}
-        className="w-full flex items-center justify-center bg-indigo-600 hover:bg-indigo-700 text-white font-bold py-3 px-4 rounded-xl transition duration-200 shadow-md hover:shadow-lg disabled:bg-indigo-400"
+        className="w-full flex items-center justify-center bg-primary hover:bg-primary-dark text-black font-bold py-3 px-4 rounded-xl transition duration-200 shadow-md hover:shadow-lg disabled:bg-primary/70"
       >
         {isLoading && <Loader2 size={20} className="animate-spin mr-2" />}
         {isRegister ? 'Register' : 'Log In'}
@@ -212,7 +212,7 @@ const CritterForm = ({ onCritterSaved, initialCritter, token, onCancel }) => {
           <select
             value={critter.gender}
             onChange={(e) => handleChange('gender', e.target.value)}
-            className="w-full px-3 py-2 border border-gray-300 rounded-lg shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 transition duration-150"
+            className="w-full px-3 py-2 border border-gray-300 rounded-lg shadow-sm focus:outline-none focus:ring-accent focus:border-accent transition duration-150"
             disabled={isLoading}
           >
             <option value="Male">Male</option>
@@ -233,7 +233,7 @@ const CritterForm = ({ onCritterSaved, initialCritter, token, onCancel }) => {
           <button
             type="submit"
             disabled={isLoading}
-            className="flex items-center bg-indigo-600 hover:bg-indigo-700 text-white font-semibold py-2 px-4 rounded-xl transition duration-150 shadow-md hover:shadow-lg disabled:bg-indigo-400"
+            className="flex items-center bg-primary hover:bg-primary-dark text-black font-semibold py-2 px-4 rounded-xl transition duration-150 shadow-md hover:shadow-lg disabled:bg-primary/70"
           >
             {isLoading ? <Loader2 size={20} className="animate-spin mr-2" /> : <Save size={20} className="mr-1" />}
             {isEditing ? 'Save Changes' : 'Add Critter'}
@@ -279,7 +279,7 @@ const CritterCard = ({ critter, token, onCritterDeleted, onCritterUpdated }) => 
     <div className="bg-white p-5 rounded-xl shadow-lg border border-gray-100 flex flex-col justify-between transition-all hover:shadow-xl transform hover:-translate-y-0.5">
       <div>
         <div className="flex items-center justify-between mb-3">
-          <Cat size={32} className="text-indigo-600" />
+          <Cat size={32} className="text-accent" />
           <span className={`text-xs font-semibold px-3 py-1 rounded-full ${critter.gender === 'Male' ? 'bg-blue-100 text-blue-800' : critter.gender === 'Female' ? 'bg-pink-100 text-pink-800' : 'bg-gray-100 text-gray-800'}`}>
             {critter.gender}
           </span>
@@ -379,7 +379,7 @@ const Dashboard = ({ onLogout }) => {
           <div className="flex flex-col items-center w-full max-w-6xl">
               <button 
                   onClick={handleCancelForm}
-                  className="mb-6 flex items-center text-indigo-600 hover:text-indigo-800 text-base font-medium transition duration-150"
+                  className="mb-6 flex items-center text-accent hover:text-accent/80 text-base font-medium transition duration-150"
               >
                   <ArrowLeft size={20} className="mr-1" /> Back to Dashboard
               </button>
@@ -397,7 +397,7 @@ const Dashboard = ({ onLogout }) => {
     <div className="w-full max-w-6xl">
       <div className="flex justify-between items-center mb-6 p-4 bg-white rounded-xl shadow-md">
         <h2 className="text-3xl font-bold text-gray-800 flex items-center">
-          <Cat size={32} className="mr-3 text-indigo-600" />
+          <Cat size={32} className="mr-3 text-accent" />
           My Critters ({critters.length})
         </h2>
         <div className='flex space-x-3'>
@@ -412,7 +412,7 @@ const Dashboard = ({ onLogout }) => {
             </button>
             <button
               onClick={() => { setEditingCritter(null); setIsFormVisible(true); }}
-              className="flex items-center bg-indigo-600 hover:bg-indigo-700 text-white font-bold py-2 px-4 rounded-xl transition duration-200 shadow-md hover:shadow-lg"
+              className="flex items-center bg-primary hover:bg-primary-dark text-black font-bold py-2 px-4 rounded-xl transition duration-200 shadow-md hover:shadow-lg"
             >
               <PlusCircle size={20} className="mr-2" />
               Add New Critter
@@ -516,7 +516,7 @@ export default function App() {
       
       <button 
         onClick={() => setIsRegisterView(!isRegisterView)}
-        className="mt-4 text-indigo-600 hover:text-indigo-800 text-sm font-medium flex items-center"
+        className="mt-4 text-accent hover:text-accent/80 text-sm font-medium flex items-center"
       >
         {isRegisterView ? 
           <><ChevronLeft size={16} className="mr-1" /> Back to Login</> 
@@ -529,7 +529,7 @@ export default function App() {
 
 
   return (
-    <div className="min-h-screen bg-gray-50 p-6 flex flex-col items-center font-sans">
+    <div className="min-h-screen bg-page-bg p-6 flex flex-col items-center font-sans">
       
       {/* Global Message Modal */}
       {showModal && (
@@ -544,7 +544,7 @@ export default function App() {
         <h1 className="text-5xl font-extrabold text-gray-800 tracking-tight">
           CritterTrack Pedigree App
         </h1>
-        <p className="text-lg text-gray-500 mt-2">
+        <p className="text-lg text-gray-700 mt-2">
           {userToken ? 'Welcome back! Manage your registered critters.' : 'Please sign in or register to continue.'}
         </p>
       </header>
