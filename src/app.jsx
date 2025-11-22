@@ -69,8 +69,8 @@ const LoginScreen = ({ setAuthToken, setUserId, isRegisterView, toggleView, show
         const endpoint = isRegisterView ? `${API_BASE_URL}/public/register` : `${API_BASE_URL}/public/login`;
         
         const payload = isRegisterView
-  ? { email, password, personalName: personalName } // FIX: Key is now 'personalName'
-  : { email, password };
+          ? { email, password, personalName: personalName } // FIX: Key is now 'personalName'
+          : { email, password };
   
        const response = await axios.post(endpoint, payload);
 
@@ -80,8 +80,8 @@ const LoginScreen = ({ setAuthToken, setUserId, isRegisterView, toggleView, show
             showModalMessage('Registration Successful', response.data.message);
             
             // 2. Switch the component state back to the login view 
-            //    (ASSUMES you have a state setter named setIsRegisterView)
-            setIsRegisterView(false); 
+            //    (toggleView flips the boolean state 'isRegisterView' from true to false)
+            toggleView(); 
 
         } else {
             // LOGIN SUCCESS/FAILURE CHECK
@@ -95,6 +95,15 @@ const LoginScreen = ({ setAuthToken, setUserId, isRegisterView, toggleView, show
                 showModalMessage('Login Error', response.data.message || 'Login failed due to missing authentication token.');
             }
         }
+        // --- END CRITICAL FIX ---
+  
+      } catch (error) { // <--- FIXED: Added missing catch block
+          const msg = error.response?.data?.message || 'Failed to communicate with the server. Try again.';
+          showModalMessage('Request Error', msg);
+      } finally { // <--- FIXED: Added missing finally block and logic
+          setLoading(false);
+      }
+    }; // <--- FIXED: Added closing brace for handleSubmit function
   
     return (
       // The main container uses 'items-center' to ensure all children are centered horizontally
