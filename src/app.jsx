@@ -72,22 +72,29 @@ const LoginScreen = ({ setAuthToken, setUserId, isRegisterView, toggleView, show
   ? { email, password, personalName: personalName } // FIX: Key is now 'personalName'
   : { email, password };
   
-        const response = await axios.post(endpoint, payload);
-  
-        if (response.data.token) {
-          setAuthToken(response.data.token);
-          setUserId(response.data.userId);
-          showModalMessage('Success!', isRegisterView ? 'Registration successful. Welcome!' : 'Login successful. Welcome back!');
+       const response = await axios.post(endpoint, payload);
+
+        // --- CRITICAL FIX: Split Logic for Registration vs. Login ---
+        if (isRegisterView) {
+            // 1. REGISTRATION SUCCESS: Show modal with success message from backend
+            showModalMessage('Registration Successful', response.data.message);
+            
+            // 2. Switch the component state back to the login view 
+            //    (ASSUMES you have a state setter named setIsRegisterView)
+            setIsRegisterView(false); 
+
         } else {
-          showModalMessage('Authentication Failed', response.data.message || 'An unknown error occurred.');
+            // LOGIN SUCCESS/FAILURE CHECK
+            if (response.data.token) {
+                // LOGIN SUCCESS
+                setAuthToken(response.data.token);
+                setUserId(response.data.userId);
+                showModalMessage('Success!', 'Login successful. Welcome back!');
+            } else {
+                // LOGIN ERROR: Should only happen if login returns 200/201 without a token
+                showModalMessage('Login Error', response.data.message || 'Login failed due to missing authentication token.');
+            }
         }
-      } catch (error) {
-        const msg = error.response?.data?.message || 'Failed to communicate with the server. Try again.';
-        showModalMessage('Request Error', msg);
-      } finally {
-        setLoading(false);
-      }
-    };
   
     return (
       // The main container uses 'items-center' to ensure all children are centered horizontally
