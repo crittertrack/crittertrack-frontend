@@ -406,11 +406,14 @@ const UserProfileCard = ({ userProfile }) => {
             </div>
 
             <div className="w-full sm:w-auto sm:text-right space-y-2 pt-4 sm:pt-0 border-t sm:border-t-0 sm:border-l border-gray-200 sm:pl-6">
-                {/* UPDATED: Changed title to "Member ID" and added "CT-" prefix for a professional look */}
-                <div className="text-sm text-gray-600">
-                    <span className="font-semibold">Member ID:</span> 
-                    <span className="font-bold text-lg text-primary-dark">CT-{userProfile.id_public}</span>
+                
+                {/* UPDATED: Removed "Member ID" title. ID is now displayed directly and prominently. */}
+                <div className="mb-2"> 
+                    <span className="text-2xl font-extrabold text-primary-dark">
+                        CT-{userProfile.id_public}
+                    </span>
                 </div>
+
                 <div className="text-sm text-gray-600">
                     <span className="font-semibold">Member Since:</span> {formattedCreationDate}
                 </div>
@@ -579,7 +582,7 @@ const ProfileView = ({ userProfile, showModalMessage, fetchUserProfile, authToke
                 </div>
                 {/* End Updated Box */}
 
-                {/* UPDATED: Changed ID display for a more professional look */}
+                {/* Updated ID display (Settings View) */}
                 <div className="p-4 bg-gray-50 rounded-lg border border-gray-200">
                     <p className="text-lg font-semibold text-gray-700">Personal ID:</p>
                     <p className="text-3xl font-extrabold text-primary-dark">CT-{userProfile.id_public}</p> 
@@ -981,7 +984,7 @@ const App = () => {
             <h2 className="text-3xl font-bold text-gray-800 mb-6 flex items-center">
                 <BookOpen size={24} className="mr-3 text-primary-dark" />
                 Litter Management
-            </h2>
+            </p>
             <p className="text-gray-600">Litter management features are currently under development.</p>
           </div>
         );
