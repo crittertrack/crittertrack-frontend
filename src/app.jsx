@@ -45,7 +45,283 @@ const LoadingSpinner = () => (
   </div>
 );
 
-// --- Component: User Profile Card (New) ---
+// --- Component: Profile Image Placeholder ---
+const ProfileImagePlaceholder = ({ url, onFileChange, disabled }) => (
+    <div className="flex flex-col items-center space-y-3">
+        <div className="w-24 h-24 bg-gray-200 rounded-full flex items-center justify-center text-gray-500 overflow-hidden shadow-inner cursor-pointer" onClick={() => !disabled && document.getElementById('profileImageInput').click()}>
+            {url ? (
+                <img src={url} alt="Profile" className="w-full h-full object-cover" />
+            ) : (
+                <User size={50} />
+            )}
+        </div>
+        <input 
+            id="profileImageInput" 
+            type="file" 
+            accept="image/*" 
+            hidden 
+            onChange={onFileChange} 
+            disabled={disabled}
+        />
+        <button 
+            type="button" 
+            onClick={() => !disabled && document.getElementById('profileImageInput').click()}
+            disabled={disabled}
+            className="text-sm text-primary hover:text-primary-dark transition duration-150 disabled:opacity-50"
+        >
+            {url ? "Change Image" : "Upload Image"}
+        </button>
+    </div>
+);
+
+// --- Component: Profile Edit Form (New) ---
+const ProfileEditForm = ({ userProfile, showModalMessage, onSaveSuccess, onCancel, authToken }) => {
+    // Form states for profile data (to be sent to /users/profile)
+    const [personalName, setPersonalName] = useState(userProfile.personalName);
+    const [breederName, setBreederName] = useState(userProfile.breederName || '');
+    const [profileImageFile, setProfileImageFile] = useState(null); // File state for image upload (placeholder)
+    const [profileImageURL, setProfileImageURL] = useState(null); // URL for preview (or null for default)
+    const [profileLoading, setProfileLoading] = useState(false);
+
+    // Form states for security data (separate updates)
+    const [email, setEmail] = useState(userProfile.email);
+    const [currentPassword, setCurrentPassword] = useState('');
+    const [newPassword, setNewPassword] = useState('');
+    const [confirmNewPassword, setConfirmNewPassword] = useState('');
+    const [securityLoading, setSecurityLoading] = useState(false);
+    const [passwordLoading, setPasswordLoading] = useState(false);
+
+    // Helper for profile image preview
+    const handleImageChange = (e) => {
+        if (e.target.files && e.target.files[0]) {
+            const file = e.target.files[0];
+            setProfileImageFile(file);
+            setProfileImageURL(URL.createObjectURL(file));
+        }
+    };
+
+    // 1. Handle Profile Info Update (Personal Name, Breeder Name, Image)
+    const handleProfileUpdate = async (e) => {
+        e.preventDefault();
+        setProfileLoading(true);
+        
+        // Note: Actual image upload logic is complex and skipped here, treating it as a UI placeholder for now. 
+        // We will only send the text fields.
+
+        const payload = {
+            personalName: personalName,
+            breederName: breederName || null,
+        };
+
+        try {
+            await axios.put(`${API_BASE_URL}/users/profile`, payload, {
+                headers: { Authorization: `Bearer ${authToken}` }
+            });
+            showModalMessage('Success', 'Profile information updated successfully.');
+            await onSaveSuccess(); // Refresh user profile data in App
+        } catch (error) {
+            console.error('Profile Update Error:', error.response?.data || error.message);
+            showModalMessage('Error', error.response?.data?.message || 'Failed to update profile information.');
+        } finally {
+            setProfileLoading(false);
+        }
+    };
+
+    // 2. Handle Email Update
+    const handleEmailUpdate = async (e) => {
+        e.preventDefault();
+        if (email === userProfile.email) {
+            showModalMessage('Info', 'Email is already set to this value.');
+            return;
+        }
+
+        setSecurityLoading(true);
+        try {
+            // Assuming an endpoint for email change exists
+            await axios.put(`${API_BASE_URL}/auth/change-email`, { newEmail: email }, {
+                headers: { Authorization: `Bearer ${authToken}` }
+            });
+            showModalMessage('Email Changed', 'Your email has been updated. You may need to log in again with the new email.');
+            await onSaveSuccess(); // Refresh user profile data in App
+        } catch (error) {
+            console.error('Email Update Error:', error.response?.data || error.message);
+            showModalMessage('Error', error.response?.data?.message || 'Failed to update email address.');
+            setEmail(userProfile.email); // Revert on failure
+        } finally {
+            setSecurityLoading(false);
+        }
+    };
+    
+    // 3. Handle Password Update
+    const handlePasswordUpdate = async (e) => {
+        e.preventDefault();
+        if (!currentPassword || !newPassword || !confirmNewPassword) {
+            showModalMessage('Warning', 'All password fields are required to change your password.');
+            return;
+        }
+        if (newPassword !== confirmNewPassword) {
+            showModalMessage('Warning', 'New password and confirmation do not match.');
+            return;
+        }
+
+        setPasswordLoading(true);
+        try {
+            // Assuming an endpoint for password change exists
+            await axios.put(`${API_BASE_URL}/auth/change-password`, { currentPassword, newPassword }, {
+                headers: { Authorization: `Bearer ${authToken}` }
+            });
+            showModalMessage('Success', 'Your password has been changed successfully. You will need to re-login with the new password.');
+            
+            // Clear fields
+            setCurrentPassword('');
+            setNewPassword('');
+            setConfirmNewPassword('');
+
+        } catch (error) {
+            console.error('Password Update Error:', error.response?.data || error.message);
+            showModalMessage('Error', error.response?.data?.message || 'Failed to change password. Check your current password.');
+        } finally {
+            setPasswordLoading(false);
+        }
+    };
+
+
+    return (
+        <div className="w-full max-w-4xl bg-white p-6 rounded-xl shadow-lg">
+            
+            <div className="flex justify-between items-center mb-6 border-b pb-4">
+                <h2 className="text-3xl font-bold text-gray-800 flex items-center">
+                    <Settings size={24} className="mr-3 text-primary-dark" />
+                    Edit Profile
+                </h2>
+                <button
+                    onClick={onCancel}
+                    className="flex items-center text-gray-600 hover:text-gray-800 transition"
+                    disabled={profileLoading || securityLoading || passwordLoading}
+                >
+                    <ArrowLeft size={18} className="mr-1" /> Back to Profile
+                </button>
+            </div>
+
+
+            {/* 1. Personal & Breeder Info Form */}
+            <form onSubmit={handleProfileUpdate} className="mb-8 p-4 border border-gray-200 rounded-lg space-y-4">
+                <h3 className="text-xl font-semibold text-gray-800">General Information</h3>
+                
+                <div className="flex flex-col sm:flex-row items-start sm:items-center space-y-4 sm:space-y-0 sm:space-x-8">
+                    <ProfileImagePlaceholder 
+                        url={profileImageURL} 
+                        onFileChange={handleImageChange}
+                        disabled={profileLoading}
+                    />
+
+                    <div className="flex-grow space-y-4 w-full">
+                        <input
+                            type="text"
+                            placeholder="Personal Name *"
+                            value={personalName}
+                            onChange={(e) => setPersonalName(e.target.value)}
+                            required
+                            className="w-full p-3 border border-gray-300 rounded-lg focus:ring-primary focus:border-primary transition"
+                            disabled={profileLoading}
+                        />
+                        <input
+                            type="text"
+                            placeholder="Breeder Name (Optional)"
+                            value={breederName}
+                            onChange={(e) => setBreederName(e.target.value)}
+                            className="w-full p-3 border border-gray-300 rounded-lg focus:ring-primary focus:border-primary transition"
+                            disabled={profileLoading}
+                        />
+                    </div>
+                </div>
+
+                <div className="flex justify-end pt-2">
+                    <button
+                        type="submit"
+                        disabled={profileLoading}
+                        className="bg-accent hover:bg-accent/90 text-white font-bold py-2 px-4 rounded-lg shadow-md transition duration-150 flex items-center justify-center disabled:opacity-50"
+                    >
+                        {profileLoading ? <Loader2 className="animate-spin mr-2" size={20} /> : <Save size={20} className="mr-2" />}
+                        Save Profile Info
+                    </button>
+                </div>
+            </form>
+            
+            {/* 2. Email Update Form */}
+            <form onSubmit={handleEmailUpdate} className="mb-8 p-4 border border-gray-200 rounded-lg space-y-4">
+                <h3 className="text-xl font-semibold text-gray-800">Change Email</h3>
+                <input
+                    type="email"
+                    placeholder="New Email Address *"
+                    value={email}
+                    onChange={(e) => setEmail(e.target.value)}
+                    required
+                    className="w-full p-3 border border-gray-300 rounded-lg focus:ring-primary focus:border-primary transition"
+                    disabled={securityLoading}
+                />
+                
+                <div className="flex justify-end pt-2">
+                    <button
+                        type="submit"
+                        disabled={securityLoading}
+                        className="bg-primary-dark hover:bg-primary text-black font-bold py-2 px-4 rounded-lg shadow-md transition duration-150 flex items-center justify-center disabled:opacity-50"
+                    >
+                        {securityLoading ? <Loader2 className="animate-spin mr-2" size={20} /> : <RefreshCw size={20} className="mr-2" />}
+                        Update Email
+                    </button>
+                </div>
+            </form>
+            
+            {/* 3. Password Update Form */}
+            <form onSubmit={handlePasswordUpdate} className="mb-8 p-4 border border-gray-200 rounded-lg space-y-4">
+                <h3 className="text-xl font-semibold text-gray-800">Change Password</h3>
+                <input
+                    type="password"
+                    placeholder="Current Password *"
+                    value={currentPassword}
+                    onChange={(e) => setCurrentPassword(e.target.value)}
+                    required
+                    className="w-full p-3 border border-gray-300 rounded-lg focus:ring-primary focus:border-primary transition"
+                    disabled={passwordLoading}
+                />
+                <input
+                    type="password"
+                    placeholder="New Password *"
+                    value={newPassword}
+                    onChange={(e) => setNewPassword(e.target.value)}
+                    required
+                    className="w-full p-3 border border-gray-300 rounded-lg focus:ring-primary focus:border-primary transition"
+                    disabled={passwordLoading}
+                />
+                <input
+                    type="password"
+                    placeholder="Confirm New Password *"
+                    value={confirmNewPassword}
+                    onChange={(e) => setConfirmNewPassword(e.target.value)}
+                    required
+                    className="w-full p-3 border border-gray-300 rounded-lg focus:ring-primary focus:border-primary transition"
+                    disabled={passwordLoading}
+                />
+                
+                <div className="flex justify-end pt-2">
+                    <button
+                        type="submit"
+                        disabled={passwordLoading}
+                        className="bg-primary-dark hover:bg-primary text-black font-bold py-2 px-4 rounded-lg shadow-md transition duration-150 flex items-center justify-center disabled:opacity-50"
+                    >
+                        {passwordLoading ? <Loader2 className="animate-spin mr-2" size={20} /> : <Save size={20} className="mr-2" />}
+                        Set New Password
+                    </button>
+                </div>
+            </form>
+
+        </div>
+    );
+};
+
+
+// --- Component: User Profile Card (Existing, placed on Dashboard) ---
 const UserProfileCard = ({ userProfile }) => {
     if (!userProfile) return null;
 
@@ -56,7 +332,6 @@ const UserProfileCard = ({ userProfile }) => {
     // Placeholder for profile image
     const ProfileImage = () => (
         <div className="w-20 h-20 bg-gray-200 rounded-full flex items-center justify-center text-gray-500 overflow-hidden shadow-inner">
-            {/* Using a User icon as a placeholder for the profile image */}
             <User size={40} />
         </div>
     );
@@ -92,7 +367,6 @@ const UserProfileCard = ({ userProfile }) => {
 
 
 // --- Component: User Authentication (Login/Register) ---
-// Now accepts isRegister, setIsRegister, AND mainTitle as props
 const AuthView = ({ onLoginSuccess, showModalMessage, isRegister, setIsRegister, mainTitle }) => {
   // isRegister state is now managed by the parent App component
   const [email, setEmail] = useState('');
@@ -144,7 +418,6 @@ const AuthView = ({ onLoginSuccess, showModalMessage, isRegister, setIsRegister,
         {isRegister && (
             <input
                 type="text"
-                // UPDATED: Removed "(Required)" and added "*"
                 placeholder="Your Personal Name *" 
                 value={personalName}
                 onChange={(e) => setPersonalName(e.target.value)}
@@ -155,7 +428,6 @@ const AuthView = ({ onLoginSuccess, showModalMessage, isRegister, setIsRegister,
 
         <input
           type="email"
-          // UPDATED: Added "*"
           placeholder="Email *"
           value={email}
           onChange={(e) => setEmail(e.target.value)}
@@ -164,7 +436,6 @@ const AuthView = ({ onLoginSuccess, showModalMessage, isRegister, setIsRegister,
         />
         <input
           type="password"
-          // UPDATED: Added "*"
           placeholder="Password *"
           value={password}
           onChange={(e) => setPassword(e.target.value)}
@@ -194,13 +465,34 @@ const AuthView = ({ onLoginSuccess, showModalMessage, isRegister, setIsRegister,
 };
 
 
-// --- Component: Profile View (Stub) ---
-const ProfileView = ({ userProfile, showModalMessage, onSetCurrentView }) => {
-    // Determine the name to display
+// --- Component: Profile View (Container/View Mode) ---
+const ProfileView = ({ userProfile, showModalMessage, fetchUserProfile, authToken }) => {
+    // New state to manage the view mode
+    const [isEditing, setIsEditing] = useState(false);
+
+    if (!userProfile) return <LoadingSpinner />;
+
+    // Determine the name to display for view mode
     const displayName = userProfile.showBreederName && userProfile.breederName 
         ? userProfile.breederName 
         : userProfile.personalName;
 
+    if (isEditing) {
+        return (
+            <ProfileEditForm 
+                userProfile={userProfile}
+                showModalMessage={showModalMessage}
+                onSaveSuccess={() => {
+                    fetchUserProfile(authToken); // Refresh data
+                    setIsEditing(false); // Go back to view mode after save
+                }}
+                onCancel={() => setIsEditing(false)}
+                authToken={authToken}
+            />
+        );
+    }
+    
+    // View Mode
     return (
         <div className="w-full max-w-4xl bg-white p-6 rounded-xl shadow-lg">
             <h2 className="text-3xl font-bold text-gray-800 mb-6 flex items-center">
@@ -224,13 +516,12 @@ const ProfileView = ({ userProfile, showModalMessage, onSetCurrentView }) => {
                     <p className="text-xl text-gray-800">{userProfile.id_public}</p>
                     <p className="text-sm text-gray-500 mt-1">This is your public-facing ID.</p>
                 </div>
-                {/* TODO: Add profile update form here */}
             </div>
             <button
-                onClick={() => showModalMessage("Feature Not Ready", "Profile editing is coming soon!")}
-                className="mt-6 bg-accent hover:bg-accent/90 text-white font-semibold py-3 px-6 rounded-lg transition duration-150 shadow-md"
+                onClick={() => setIsEditing(true)}
+                className="mt-6 bg-accent hover:bg-accent/90 text-white font-semibold py-3 px-6 rounded-lg transition duration-150 shadow-md flex items-center"
             >
-                Edit Profile (Coming Soon)
+                <Edit size={20} className="mr-2" /> Edit Profile
             </button>
         </div>
     );
@@ -591,7 +882,8 @@ const App = () => {
   const renderView = () => {
     switch (currentView) {
       case 'profile':
-        return <ProfileView userProfile={userProfile} showModalMessage={showModalMessage} onSetCurrentView={setCurrentView} />;
+        // UPDATED: Pass fetchUserProfile and authToken for the edit form
+        return <ProfileView userProfile={userProfile} showModalMessage={showModalMessage} fetchUserProfile={fetchUserProfile} authToken={authToken} />;
       case 'add-animal':
         return (
           <AnimalForm 
@@ -715,8 +1007,8 @@ const App = () => {
         </div>
       </header>
 
-      {/* 2. NEW: User Profile Summary Card */}
-      {userProfile && <UserProfileCard userProfile={userProfile} />}
+      {/* 2. User Profile Summary Card */}
+      {currentView !== 'profile' && userProfile && <UserProfileCard userProfile={userProfile} />}
 
       {/* 3. Main Content Area */}
       <main className="w-full max-w-4xl flex-grow">
