@@ -46,11 +46,11 @@ const LoadingSpinner = () => (
 );
 
 // --- Component: User Authentication (Login/Register) ---
-const AuthView = ({ onLoginSuccess, showModalMessage }) => {
-  const [isRegister, setIsRegister] = useState(false);
+// Now accepts isRegister and setIsRegister as props
+const AuthView = ({ onLoginSuccess, showModalMessage, isRegister, setIsRegister }) => {
+  // isRegister state is now managed by the parent App component
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
-  // Re-introducing state for mandatory personal name during registration
   const [personalName, setPersonalName] = useState(''); 
   const [loading, setLoading] = useState(false);
 
@@ -59,7 +59,6 @@ const AuthView = ({ onLoginSuccess, showModalMessage }) => {
     setLoading(true);
     const endpoint = isRegister ? '/auth/register' : '/auth/login';
     
-    // Update payload to include personalName if registering
     const payload = isRegister 
         ? { email, password, personalName } 
         : { email, password };
@@ -69,9 +68,8 @@ const AuthView = ({ onLoginSuccess, showModalMessage }) => {
       
       if (isRegister) {
         showModalMessage('Registration Success', 'Your account has been created. Please log in.');
-        setIsRegister(false);
+        setIsRegister(false); // Switch to login view after success
       } else {
-        // Successful login: pass token to parent component
         onLoginSuccess(response.data.token);
       }
     } catch (error) {
@@ -85,15 +83,11 @@ const AuthView = ({ onLoginSuccess, showModalMessage }) => {
     }
   };
 
-  const mainTitle = isRegister ? 'Create Account' : 'Welcome Back';
 
   return (
+    // Card for the login/register form
     <div className="max-w-md w-full bg-white p-8 rounded-xl shadow-2xl">
-      <div className="flex justify-center mb-4">
-        {/* REPLACED placeholder icon with CustomAppLogo component which now uses the image */}
-        <CustomAppLogo size="w-20 h-20" /> 
-      </div>
-      <h2 className="text-3xl font-bold text-center text-gray-800 mb-6">{mainTitle}</h2>
+      {/* Logo and Title have been removed from here and moved to the parent component */}
       
       <form onSubmit={handleSubmit} className="space-y-4">
         {/* Personal Name input - mandatory only for registration */}
@@ -136,7 +130,7 @@ const AuthView = ({ onLoginSuccess, showModalMessage }) => {
 
       <div className="mt-6 text-center">
         <button 
-          onClick={() => setIsRegister(!isRegister)}
+          onClick={() => setIsRegister(!isRegister)} // Uses prop setter
           className="text-sm text-gray-500 hover:text-primary transition duration-150"
         >
           {isRegister ? 'Already have an account? Log In' : "Don't have an account? Register Here"}
@@ -468,11 +462,15 @@ const AnimalForm = ({ animalToEdit, onSave, onCancel, showModalMessage }) => {
 // --- Component: Main Application ---
 const App = () => {
   const [authToken, setAuthToken] = useState(localStorage.getItem('authToken') || null);
-  const [userProfile, setUserProfile] = useState(null); // NEW STATE: User Profile
-  const [currentView, setCurrentView] = useState('list'); // 'list', 'add-animal', 'edit-animal', 'profile', 'litters', 'pedigree'
+  const [userProfile, setUserProfile] = useState(null);
+  const [currentView, setCurrentView] = useState('list');
   const [animalToEdit, setAnimalToEdit] = useState(null);
   const [showModal, setShowModal] = useState(false);
   const [modalMessage, setModalMessage] = useState({ title: '', message: '' });
+  
+  // LIFTED STATE: Track if the user is on the Register screen or Login screen
+  const [isRegister, setIsRegister] = useState(false); 
+
 
   // Centralized Modal Handler
   const showModalMessage = useCallback((title, message) => {
@@ -485,7 +483,7 @@ const App = () => {
     if (authToken) {
       axios.defaults.headers.common['Authorization'] = `Bearer ${authToken}`;
       localStorage.setItem('authToken', authToken);
-      fetchUserProfile(authToken); // Fetch profile data on authentication
+      fetchUserProfile(authToken);
     } else {
       delete axios.defaults.headers.common['Authorization'];
       localStorage.removeItem('authToken');
@@ -495,13 +493,11 @@ const App = () => {
   }, [authToken]);
 
 
-  // NEW FUNCTION: Fetch the user's non-sensitive profile data
   const fetchUserProfile = useCallback(async (token) => {
     try {
         const response = await axios.get(`${API_BASE_URL}/users/profile`, {
             headers: { Authorization: `Bearer ${token}` }
         });
-        // Keeping the name fields in the ProfileView for future use, even if not collected during login
         setUserProfile(response.data); 
     } catch (error) {
         console.error('Failed to fetch user profile:', error);
@@ -514,6 +510,7 @@ const App = () => {
   const handleLoginSuccess = (token) => {
     setAuthToken(token);
     setCurrentView('list');
+    setIsRegister(false); // Reset to login state just in case
   };
 
   const handleLogout = () => {
@@ -539,8 +536,6 @@ const App = () => {
 
 
   const renderView = () => {
-    // AuthView is now rendered directly in the conditional return below for centering
-    // Only return views that require authentication here
     switch (currentView) {
       case 'profile':
         return <ProfileView userProfile={userProfile} showModalMessage={showModalMessage} onSetCurrentView={setCurrentView} />;
@@ -584,12 +579,30 @@ const App = () => {
     }
   };
   
-  // Conditional rendering for centering the AuthView when logged out
+  // Conditional rendering for the logged out state
   if (!authToken) {
+      const mainTitle = isRegister ? 'Create Account' : 'Welcome Back';
+      
       return (
-          <div className="min-h-screen bg-page-bg flex items-center justify-center p-6 font-sans">
+          // Use flex-col to stack logo/title and card, and items-center justify-center to center the block
+          <div className="min-h-screen bg-page-bg flex flex-col items-center justify-center p-6 font-sans">
               {showModal && <ModalMessage title={modalMessage.title} message={modalMessage.message} onClose={() => setShowModal(false)} />}
-              <AuthView onLoginSuccess={handleLoginSuccess} showModalMessage={showModalMessage} />
+              
+              {/* Logo and Title Block (ABOVE the card) */}
+              <div className="flex flex-col items-center mb-6 -mt-10"> {/* -mt for better vertical centering, mb for space */}
+                  <CustomAppLogo size="w-24 h-24" /> 
+                  <h1 className="text-4xl font-extrabold text-gray-900 mt-4">
+                      {mainTitle}
+                  </h1>
+              </div>
+
+              {/* Auth Card */}
+              <AuthView 
+                  onLoginSuccess={handleLoginSuccess} 
+                  showModalMessage={showModalMessage} 
+                  isRegister={isRegister} 
+                  setIsRegister={setIsRegister} 
+              />
           </div>
       );
   }
