@@ -407,7 +407,7 @@ const UserProfileCard = ({ userProfile }) => {
 
             <div className="w-full sm:w-auto sm:text-right space-y-2 pt-4 sm:pt-0 border-t sm:border-t-0 sm:border-l border-gray-200 sm:pl-6">
                 
-                {/* UPDATED: Removed "Member ID" title. ID is now displayed directly and prominently. */}
+                {/* UPDATED: Removed "Member ID" title. ID is now displayed directly and prominently with text-primary-dark color. */}
                 <div className="mb-2"> 
                     <span className="text-2xl font-extrabold text-primary-dark">
                         CT-{userProfile.id_public}
@@ -984,7 +984,7 @@ const App = () => {
             <h2 className="text-3xl font-bold text-gray-800 mb-6 flex items-center">
                 <BookOpen size={24} className="mr-3 text-primary-dark" />
                 Litter Management
-            </p>
+            </h2> {/* CORRECTED THE CLOSING TAG HERE */}
             <p className="text-gray-600">Litter management features are currently under development.</p>
           </div>
         );
