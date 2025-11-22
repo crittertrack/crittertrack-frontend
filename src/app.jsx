@@ -407,9 +407,9 @@ const UserProfileCard = ({ userProfile }) => {
 
             <div className="w-full sm:w-auto sm:text-right space-y-2 pt-4 sm:pt-0 border-t sm:border-t-0 sm:border-l border-gray-200 sm:pl-6">
                 
-                {/* UPDATED: Removed "Member ID" title. ID is now displayed directly and prominently with text-primary-dark color. */}
+                {/* UPDATED: ID color changed to text-accent (darker pink) */}
                 <div className="mb-2"> 
-                    <span className="text-2xl font-extrabold text-primary-dark">
+                    <span className="text-2xl font-extrabold text-accent">
                         CT-{userProfile.id_public}
                     </span>
                 </div>
@@ -585,7 +585,8 @@ const ProfileView = ({ userProfile, showModalMessage, fetchUserProfile, authToke
                 {/* Updated ID display (Settings View) */}
                 <div className="p-4 bg-gray-50 rounded-lg border border-gray-200">
                     <p className="text-lg font-semibold text-gray-700">Personal ID:</p>
-                    <p className="text-3xl font-extrabold text-primary-dark">CT-{userProfile.id_public}</p> 
+                    {/* UPDATED: ID color changed to text-accent (darker pink) */}
+                    <p className="text-3xl font-extrabold text-accent">CT-{userProfile.id_public}</p> 
                     <p className="text-sm text-gray-500 mt-2">This is your unique, public-facing system identifier.</p>
                 </div>
                 
@@ -984,7 +985,7 @@ const App = () => {
             <h2 className="text-3xl font-bold text-gray-800 mb-6 flex items-center">
                 <BookOpen size={24} className="mr-3 text-primary-dark" />
                 Litter Management
-            </h2> {/* CORRECTED THE CLOSING TAG HERE */}
+            </h2>
             <p className="text-gray-600">Litter management features are currently under development.</p>
           </div>
         );
