@@ -45,6 +45,52 @@ const LoadingSpinner = () => (
   </div>
 );
 
+// --- Component: User Profile Card (New) ---
+const UserProfileCard = ({ userProfile }) => {
+    if (!userProfile) return null;
+
+    const formattedCreationDate = userProfile.createdAt 
+        ? new Intl.DateTimeFormat('en-US', { year: 'numeric', month: 'long', day: 'numeric' }).format(new Date(userProfile.createdAt))
+        : 'N/A';
+    
+    // Placeholder for profile image
+    const ProfileImage = () => (
+        <div className="w-20 h-20 bg-gray-200 rounded-full flex items-center justify-center text-gray-500 overflow-hidden shadow-inner">
+            {/* Using a User icon as a placeholder for the profile image */}
+            <User size={40} />
+        </div>
+    );
+
+    return (
+        <div className="w-full max-w-4xl bg-white p-6 rounded-xl shadow-lg mb-6 flex flex-col sm:flex-row items-center sm:items-start space-y-4 sm:space-y-0 sm:space-x-6">
+            <ProfileImage />
+
+            <div className="flex-grow text-center sm:text-left">
+                <p className="text-sm font-semibold text-gray-500 uppercase">Account Holder</p>
+                <h3 className="text-3xl font-bold text-gray-900 mb-2">
+                    {userProfile.personalName}
+                </h3>
+                
+                {userProfile.breederName && (
+                    <div className="text-md text-gray-700">
+                        <span className="font-semibold">Breeder Name:</span> {userProfile.breederName}
+                    </div>
+                )}
+            </div>
+
+            <div className="w-full sm:w-auto sm:text-right space-y-2 pt-4 sm:pt-0 border-t sm:border-t-0 sm:border-l border-gray-200 sm:pl-6">
+                <div className="text-sm text-gray-600">
+                    <span className="font-semibold">Public ID:</span> <span className="font-bold">{userProfile.id_public}</span>
+                </div>
+                <div className="text-sm text-gray-600">
+                    <span className="font-semibold">Member Since:</span> {formattedCreationDate}
+                </div>
+            </div>
+        </div>
+    );
+};
+
+
 // --- Component: User Authentication (Login/Register) ---
 // Now accepts isRegister, setIsRegister, AND mainTitle as props
 const AuthView = ({ onLoginSuccess, showModalMessage, isRegister, setIsRegister, mainTitle }) => {
@@ -596,7 +642,7 @@ const App = () => {
               {showModal && <ModalMessage title={modalMessage.title} message={modalMessage.message} onClose={() => setShowModal(false)} />}
               
               {/* Logo Block (ABOVE the card) */}
-              <div className="flex flex-col items-center mb-4 -mt-16"> {/* mb-4 for space between logo and card */}
+              <div className="flex flex-col items-center mb-4 -mt-16"> 
                   <CustomAppLogo size="w-32 h-32" /> 
               </div>
 
@@ -621,7 +667,7 @@ const App = () => {
     <div className="min-h-screen bg-page-bg p-6 flex flex-col items-center font-sans">
       {showModal && <ModalMessage title={modalMessage.title} message={modalMessage.message} onClose={() => setShowModal(false)} />}
       
-      {/* Header - Only visible when logged in (authToken is true) */}
+      {/* 1. Header (Dashboard Card) */}
       <header className="w-full max-w-4xl flex justify-between items-center bg-white p-4 rounded-xl shadow-lg mb-6">
         <div className="flex items-center space-x-2">
             <CustomAppLogo size="w-8 h-8" />
@@ -669,7 +715,10 @@ const App = () => {
         </div>
       </header>
 
-      {/* Main Content */}
+      {/* 2. NEW: User Profile Summary Card */}
+      {userProfile && <UserProfileCard userProfile={userProfile} />}
+
+      {/* 3. Main Content Area */}
       <main className="w-full max-w-4xl flex-grow">
         {renderView()}
       </main>
