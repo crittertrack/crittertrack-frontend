@@ -27,11 +27,14 @@ const ModalMessage = ({ title, message, onClose }) => (
   </div>
 );
 
-// Custom logo component using the public/logo.png
+// Custom logo component updated to render an image from the public folder
 const CustomAppLogo = ({ size = "w-10 h-10" }) => (
-  <div className={`flex items-center justify-center ${size} bg-secondary rounded-full text-white shadow-inner`}>
-    <Cat className="text-gray-800" size={size === "w-8 h-8" ? 18 : 24} />
-  </div>
+  // Using the image tag to reference /logo.png from the public folder
+  <img 
+    src="/logo.png" 
+    alt="CritterTrack Logo" 
+    className={`${size} rounded-full shadow-md object-cover`}
+  />
 );
 
 // Loading Indicator
@@ -82,18 +85,14 @@ const AuthView = ({ onLoginSuccess, showModalMessage }) => {
     }
   };
 
-  // --- START MODIFIED CODE ---
-
-  // Removed the formTitle logic as we no longer need the 'Breeder Login'/'Register New Account' titles.
   const mainTitle = isRegister ? 'Create Account' : 'Welcome Back';
 
   return (
     <div className="max-w-md w-full bg-white p-8 rounded-xl shadow-2xl">
       <div className="flex justify-center mb-4">
-        {/* Implement logo.png at the top */}
+        {/* REPLACED placeholder icon with CustomAppLogo component which now uses the image */}
         <CustomAppLogo size="w-20 h-20" /> 
       </div>
-      {/* Implement text "Create Account" or "Welcome Back" */}
       <h2 className="text-3xl font-bold text-center text-gray-800 mb-6">{mainTitle}</h2>
       
       <form onSubmit={handleSubmit} className="space-y-4">
@@ -146,7 +145,6 @@ const AuthView = ({ onLoginSuccess, showModalMessage }) => {
     </div>
   );
 };
-// --- END MODIFIED CODE ---
 
 
 // --- Component: Profile View (Stub) ---
@@ -588,11 +586,9 @@ const App = () => {
   
   // Conditional rendering for centering the AuthView when logged out
   if (!authToken) {
-      // NOTE: The surrounding div already centers the card, fulfilling the centering requirement.
       return (
           <div className="min-h-screen bg-page-bg flex items-center justify-center p-6 font-sans">
               {showModal && <ModalMessage title={modalMessage.title} message={modalMessage.message} onClose={() => setShowModal(false)} />}
-              {/* No header here, fulfilling the request to remove "CritterTrack Dashboard" */}
               <AuthView onLoginSuccess={handleLoginSuccess} showModalMessage={showModalMessage} />
           </div>
       );
