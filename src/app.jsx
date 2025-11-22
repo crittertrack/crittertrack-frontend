@@ -46,8 +46,8 @@ const LoadingSpinner = () => (
 );
 
 // --- Component: User Authentication (Login/Register) ---
-// Now accepts isRegister and setIsRegister as props
-const AuthView = ({ onLoginSuccess, showModalMessage, isRegister, setIsRegister }) => {
+// Now accepts isRegister, setIsRegister, AND mainTitle as props
+const AuthView = ({ onLoginSuccess, showModalMessage, isRegister, setIsRegister, mainTitle }) => {
   // isRegister state is now managed by the parent App component
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
@@ -87,7 +87,11 @@ const AuthView = ({ onLoginSuccess, showModalMessage, isRegister, setIsRegister 
   return (
     // Card for the login/register form
     <div className="max-w-md w-full bg-white p-8 rounded-xl shadow-2xl">
-      {/* Logo and Title are intentionally outside this card for proper positioning */}
+      
+      {/* Title is now inside the card */}
+      <h2 className="text-3xl font-extrabold text-gray-900 mb-6 text-center">
+          {mainTitle}
+      </h2>
       
       <form onSubmit={handleSubmit} className="space-y-4">
         {/* Personal Name input - mandatory only for registration */}
@@ -591,20 +595,18 @@ const App = () => {
           <div className="min-h-screen bg-page-bg flex flex-col items-center justify-center p-6 font-sans">
               {showModal && <ModalMessage title={modalMessage.title} message={modalMessage.message} onClose={() => setShowModal(false)} />}
               
-              {/* Logo and Title Block (ABOVE the card) */}
-              <div className="flex flex-col items-center mb-6 -mt-16"> 
+              {/* Logo Block (ABOVE the card) */}
+              <div className="flex flex-col items-center mb-4 -mt-16"> {/* mb-4 for space between logo and card */}
                   <CustomAppLogo size="w-32 h-32" /> 
-                  <h1 className="text-4xl font-extrabold text-gray-900 mt-4">
-                      {mainTitle}
-                  </h1>
               </div>
 
-              {/* Auth Card */}
+              {/* Auth Card - Now receives the title */}
               <AuthView 
                   onLoginSuccess={handleLoginSuccess} 
                   showModalMessage={showModalMessage} 
                   isRegister={isRegister} 
                   setIsRegister={setIsRegister} 
+                  mainTitle={mainTitle} // Passing the title to the card
               />
           </div>
       );
