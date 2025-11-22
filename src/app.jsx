@@ -7,7 +7,7 @@ const API_BASE_URL = 'https://crittertrack-pedigree-production.up.railway.app/ap
 
 const SPECIES_OPTIONS = ['Mouse', 'Rat', 'Hamster'];
 const GENDER_OPTIONS = ['Male', 'Female'];
-const STATUS_OPTIONS = ['Pet', 'Breeding', 'Available', 'Retired'];
+const STATUS_OPTIONS = ['Pet', 'Breeding', 'Available', 'Retired', 'Deceased']; // ADDED 'Deceased'
 
 // --- Helper Components ---
 
@@ -407,7 +407,7 @@ const UserProfileCard = ({ userProfile }) => {
 
             <div className="w-full sm:w-auto sm:text-right space-y-2 pt-4 sm:pt-0 border-t sm:border-t-0 sm:border-l border-gray-200 sm:pl-6">
                 
-                {/* UPDATED: ID color changed to text-accent (darker pink) */}
+                {/* ID color is now text-accent (darker pink) */}
                 <div className="mb-2"> 
                     <span className="text-2xl font-extrabold text-accent">
                         CT-{userProfile.id_public}
@@ -585,9 +585,9 @@ const ProfileView = ({ userProfile, showModalMessage, fetchUserProfile, authToke
                 {/* Updated ID display (Settings View) */}
                 <div className="p-4 bg-gray-50 rounded-lg border border-gray-200">
                     <p className="text-lg font-semibold text-gray-700">Personal ID:</p>
-                    {/* UPDATED: ID color changed to text-accent (darker pink) */}
+                    {/* ID color is now text-accent (darker pink) */}
                     <p className="text-3xl font-extrabold text-accent">CT-{userProfile.id_public}</p> 
-                    <p className="text-sm text-gray-500 mt-2">This is your unique, public-facing system identifier.</p>
+                    {/* Removed: This is your unique, public-facing system identifier. */}
                 </div>
                 
                 <div className="p-4 bg-gray-50 rounded-lg border border-gray-200">
@@ -637,7 +637,7 @@ const AnimalList = ({ authToken, showModalMessage, onEditAnimal, onSetCurrentVie
         <div className="w-full max-w-4xl bg-white p-6 rounded-xl shadow-lg">
             <h2 className="text-3xl font-bold text-gray-800 mb-6 flex items-center">
                 <ClipboardList size={24} className="mr-3 text-primary-dark" />
-                My Animal Registry
+                My Animals {/* CHANGED title from 'My Animal Registry' to 'My Animals' */}
             </h2>
 
             <div className="flex justify-between items-center mb-4 space-x-4">
