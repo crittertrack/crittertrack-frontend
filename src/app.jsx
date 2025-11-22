@@ -7,7 +7,7 @@ const API_BASE_URL = 'https://crittertrack-pedigree-production.up.railway.app/ap
 
 const SPECIES_OPTIONS = ['Mouse', 'Rat', 'Hamster'];
 const GENDER_OPTIONS = ['Male', 'Female'];
-const STATUS_OPTIONS = ['Pet', 'Breeding', 'Available', 'Retired', 'Deceased']; // ADDED 'Deceased'
+const STATUS_OPTIONS = ['Pet', 'Breeding', 'Available', 'Retired', 'Deceased'];
 
 // --- Helper Components ---
 
@@ -610,12 +610,34 @@ const ProfileView = ({ userProfile, showModalMessage, fetchUserProfile, authToke
 const AnimalList = ({ authToken, showModalMessage, onEditAnimal, onSetCurrentView }) => {
     const [animals, setAnimals] = useState([]);
     const [loading, setLoading] = useState(true);
-    const [filter, setFilter] = useState('');
+    // Renamed 'filter' to 'statusFilter' for clarity
+    const [statusFilter, setStatusFilter] = useState(''); 
+    // New states for name search and gender filter
+    const [nameFilter, setNameFilter] = useState('');
+    const [genderFilter, setGenderFilter] = useState(''); // '' means All
 
     const fetchAnimals = useCallback(async () => {
         setLoading(true);
         try {
-            const response = await axios.get(`${API_BASE_URL}/animals?status=${filter}`, {
+            // Construct the query string with all filters
+            let params = [];
+            
+            if (statusFilter) {
+                params.push(`status=${statusFilter}`);
+            }
+            if (genderFilter) {
+                params.push(`gender=${genderFilter}`);
+            }
+            if (nameFilter) {
+                // Assuming the API supports a 'name' query parameter for search
+                params.push(`name=${encodeURIComponent(nameFilter)}`);
+            }
+
+            const queryString = params.length > 0 ? `?${params.join('&')}` : '';
+            
+            const url = `${API_BASE_URL}/animals${queryString}`;
+
+            const response = await axios.get(url, {
                 headers: { Authorization: `Bearer ${authToken}` }
             });
             setAnimals(response.data);
@@ -625,45 +647,80 @@ const AnimalList = ({ authToken, showModalMessage, onEditAnimal, onSetCurrentVie
         } finally {
             setLoading(false);
         }
-    }, [authToken, filter, showModalMessage]);
+    }, [authToken, statusFilter, genderFilter, nameFilter, showModalMessage]); // Added all filters to dependencies
 
     useEffect(() => {
         fetchAnimals();
     }, [fetchAnimals]);
 
-    const handleFilterChange = (e) => setFilter(e.target.value);
+    const handleStatusFilterChange = (e) => setStatusFilter(e.target.value);
+    const handleNameFilterChange = (e) => setNameFilter(e.target.value);
+    const handleGenderFilterChange = (gender) => setGenderFilter(gender);
 
     return (
         <div className="w-full max-w-4xl bg-white p-6 rounded-xl shadow-lg">
             <h2 className="text-3xl font-bold text-gray-800 mb-6 flex items-center">
                 <ClipboardList size={24} className="mr-3 text-primary-dark" />
-                My Animals {/* CHANGED title from 'My Animal Registry' to 'My Animals' */}
+                My Animals {/* CHANGED title to 'My Animals' */}
             </h2>
 
-            <div className="flex justify-between items-center mb-4 space-x-4">
-                <select
-                    value={filter}
-                    onChange={handleFilterChange}
-                    className="p-2 border border-gray-300 rounded-lg shadow-sm focus:ring-primary focus:border-primary transition"
-                >
-                    <option value="">All Statuses</option>
-                    {STATUS_OPTIONS.map(status => (
-                        <option key={status} value={status}>{status}</option>
+            <div className="space-y-4 mb-4">
+                
+                {/* 1. Gender Filter Buttons (All/Male/Female) */}
+                <div className="flex space-x-2">
+                    {['All', ...GENDER_OPTIONS].map(gender => (
+                        <button
+                            key={gender}
+                            onClick={() => handleGenderFilterChange(gender === 'All' ? '' : gender)}
+                            className={`px-4 py-2 text-sm font-semibold rounded-lg transition duration-150 shadow-sm
+                                ${genderFilter === (gender === 'All' ? '' : gender) 
+                                    ? 'bg-primary-dark text-black' 
+                                    : 'bg-gray-200 text-gray-700 hover:bg-gray-300'
+                                }`}
+                        >
+                            {gender}
+                        </button>
                     ))}
-                </select>
-                <button
-                    onClick={() => onSetCurrentView('add-animal')}
-                    className="bg-primary hover:bg-primary-dark text-black font-semibold py-2 px-4 rounded-lg transition duration-150 shadow-md flex items-center space-x-1"
-                >
-                    <PlusCircle size={18} />
-                    <span>Add New Animal</span>
-                </button>
+                </div>
+
+                <div className="flex justify-between items-center space-x-4">
+                    
+                    {/* 2. Status Filter Dropdown (Updated Text) */}
+                    <select
+                        value={statusFilter}
+                        onChange={handleStatusFilterChange}
+                        className="p-2 border border-gray-300 rounded-lg shadow-sm focus:ring-primary focus:border-primary transition w-1/3 min-w-[150px]"
+                    >
+                        <option value="">All</option> {/* CHANGED 'All Statuses' to 'All' */}
+                        {STATUS_OPTIONS.map(status => (
+                            <option key={status} value={status}>{status}</option>
+                        ))}
+                    </select>
+
+                    {/* 3. Name Search Input */}
+                    <input
+                        type="text"
+                        placeholder="Search by name..."
+                        value={nameFilter}
+                        onChange={handleNameFilterChange}
+                        className="p-2 border border-gray-300 rounded-lg shadow-sm focus:ring-primary focus:border-primary transition flex-grow"
+                    />
+
+
+                    <button
+                        onClick={() => onSetCurrentView('add-animal')}
+                        className="bg-primary hover:bg-primary-dark text-black font-semibold py-2 px-4 rounded-lg transition duration-150 shadow-md flex items-center space-x-1 whitespace-nowrap"
+                    >
+                        <PlusCircle size={18} />
+                        <span>Add New Animal</span>
+                    </button>
+                </div>
             </div>
 
             {loading ? <LoadingSpinner /> : (
                 <div className="space-y-4">
                     {animals.length === 0 ? (
-                        <p className="text-center text-gray-500 py-8">No animals found. Try adding one!</p>
+                        <p className="text-center text-gray-500 py-8">No animals found matching the filters.</p>
                     ) : (
                         animals.map(animal => (
                             <div key={animal._id} className="p-4 border border-gray-200 rounded-lg shadow-sm flex justify-between items-center hover:bg-gray-50 transition">
