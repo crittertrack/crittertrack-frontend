@@ -29,11 +29,11 @@ const ModalMessage = ({ title, message, onClose }) => (
 
 // Custom logo component updated to render an image from the public folder
 const CustomAppLogo = ({ size = "w-10 h-10" }) => (
-  // Using the image tag to reference /logo.png from the public folder
+  // Removed 'rounded-full' and 'object-cover' to prevent clipping and rounding
   <img 
     src="/logo.png" 
     alt="CritterTrack Logo" 
-    className={`${size} rounded-full shadow-md object-cover`}
+    className={`${size} shadow-md`} 
   />
 );
 
@@ -87,7 +87,7 @@ const AuthView = ({ onLoginSuccess, showModalMessage, isRegister, setIsRegister 
   return (
     // Card for the login/register form
     <div className="max-w-md w-full bg-white p-8 rounded-xl shadow-2xl">
-      {/* Logo and Title have been removed from here and moved to the parent component */}
+      {/* Logo and Title are intentionally outside this card for proper positioning */}
       
       <form onSubmit={handleSubmit} className="space-y-4">
         {/* Personal Name input - mandatory only for registration */}
