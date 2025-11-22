@@ -47,17 +47,19 @@ const AuthView = ({ onLoginSuccess, showModalMessage }) => {
   const [isRegister, setIsRegister] = useState(false);
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
-  const [personalName, setPersonalName] = useState('');
-  const [breederName, setBreederName] = useState('');
+  // Re-introducing state for mandatory personal name during registration
+  const [personalName, setPersonalName] = useState(''); 
   const [loading, setLoading] = useState(false);
 
   const handleSubmit = async (e) => {
     e.preventDefault();
     setLoading(true);
     const endpoint = isRegister ? '/auth/register' : '/auth/login';
+    
+    // Update payload to include personalName if registering
     const payload = isRegister 
-      ? { email, password, personalName, breederName, showBreederName: true } 
-      : { email, password };
+        ? { email, password, personalName } 
+        : { email, password };
 
     try {
       const response = await axios.post(`${API_BASE_URL}${endpoint}`, payload);
@@ -80,36 +82,33 @@ const AuthView = ({ onLoginSuccess, showModalMessage }) => {
     }
   };
 
-  const formTitle = isRegister ? 'Register New Account' : 'Breeder Login';
+  // --- START MODIFIED CODE ---
+
+  // Removed the formTitle logic as we no longer need the 'Breeder Login'/'Register New Account' titles.
+  const mainTitle = isRegister ? 'Create Account' : 'Welcome Back';
 
   return (
     <div className="max-w-md w-full bg-white p-8 rounded-xl shadow-2xl">
-      <div className="flex justify-center mb-6">
-        <CustomAppLogo size="w-16 h-16" />
+      <div className="flex justify-center mb-4">
+        {/* Implement logo.png at the top */}
+        <CustomAppLogo size="w-20 h-20" /> 
       </div>
-      <h2 className="text-3xl font-bold text-center text-gray-800 mb-6">{formTitle}</h2>
+      {/* Implement text "Create Account" or "Welcome Back" */}
+      <h2 className="text-3xl font-bold text-center text-gray-800 mb-6">{mainTitle}</h2>
       
       <form onSubmit={handleSubmit} className="space-y-4">
+        {/* Personal Name input - mandatory only for registration */}
         {isRegister && (
-          <>
             <input
-              type="text"
-              placeholder="Your Name (e.g., John Doe)"
-              value={personalName}
-              onChange={(e) => setPersonalName(e.target.value)}
-              required
-              className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-primary transition"
+                type="text"
+                placeholder="Your Personal Name (Required)"
+                value={personalName}
+                onChange={(e) => setPersonalName(e.target.value)}
+                required
+                className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-primary transition"
             />
-            <input
-              type="text"
-              placeholder="Breeder Name (e.g., Doe Rattery)"
-              value={breederName}
-              onChange={(e) => setBreederName(e.target.value)}
-              required
-              className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-primary transition"
-            />
-          </>
         )}
+
         <input
           type="email"
           placeholder="Email"
@@ -147,6 +146,8 @@ const AuthView = ({ onLoginSuccess, showModalMessage }) => {
     </div>
   );
 };
+// --- END MODIFIED CODE ---
+
 
 // --- Component: Profile View (Stub) ---
 const ProfileView = ({ userProfile, showModalMessage, onSetCurrentView }) => {
@@ -502,7 +503,8 @@ const App = () => {
         const response = await axios.get(`${API_BASE_URL}/users/profile`, {
             headers: { Authorization: `Bearer ${token}` }
         });
-        setUserProfile(response.data);
+        // Keeping the name fields in the ProfileView for future use, even if not collected during login
+        setUserProfile(response.data); 
     } catch (error) {
         console.error('Failed to fetch user profile:', error);
         showModalMessage('Authentication Error', 'Could not load user profile. Please log in again.');
@@ -539,10 +541,8 @@ const App = () => {
 
 
   const renderView = () => {
-    if (!authToken) {
-      return <AuthView onLoginSuccess={handleLoginSuccess} showModalMessage={showModalMessage} />;
-    }
-
+    // AuthView is now rendered directly in the conditional return below for centering
+    // Only return views that require authentication here
     switch (currentView) {
       case 'profile':
         return <ProfileView userProfile={userProfile} showModalMessage={showModalMessage} onSetCurrentView={setCurrentView} />;
@@ -585,6 +585,18 @@ const App = () => {
         );
     }
   };
+  
+  // Conditional rendering for centering the AuthView when logged out
+  if (!authToken) {
+      // NOTE: The surrounding div already centers the card, fulfilling the centering requirement.
+      return (
+          <div className="min-h-screen bg-page-bg flex items-center justify-center p-6 font-sans">
+              {showModal && <ModalMessage title={modalMessage.title} message={modalMessage.message} onClose={() => setShowModal(false)} />}
+              {/* No header here, fulfilling the request to remove "CritterTrack Dashboard" */}
+              <AuthView onLoginSuccess={handleLoginSuccess} showModalMessage={showModalMessage} />
+          </div>
+      );
+  }
 
   // Logged-in Dashboard Layout
   const displayName = userProfile?.showBreederName && userProfile?.breederName 
@@ -595,53 +607,52 @@ const App = () => {
     <div className="min-h-screen bg-page-bg p-6 flex flex-col items-center font-sans">
       {showModal && <ModalMessage title={modalMessage.title} message={modalMessage.message} onClose={() => setShowModal(false)} />}
       
-      {/* Header */}
+      {/* Header - Only visible when logged in (authToken is true) */}
       <header className="w-full max-w-4xl flex justify-between items-center bg-white p-4 rounded-xl shadow-lg mb-6">
         <div className="flex items-center space-x-2">
             <CustomAppLogo size="w-8 h-8" />
             <h1 className="text-2xl font-bold text-gray-800 hidden sm:block">CritterTrack Dashboard</h1>
         </div>
 
-        {authToken && (
-            <div className='flex items-center space-x-4'>
-                <span className='text-gray-600 text-sm hidden sm:block'>
-                    Welcome back, <span className='font-semibold text-gray-800'>{displayName}</span>
-                </span>
-                
-                <nav className="flex space-x-2">
-                    <button
-                        onClick={() => setCurrentView('list')}
-                        title="Animals"
-                        className={`p-2 rounded-lg transition duration-150 ${currentView === 'list' ? 'bg-primary shadow-inner text-gray-900' : 'text-gray-500 hover:bg-gray-100'}`}
-                    >
-                        <Cat size={20} />
-                    </button>
-                    <button
-                        onClick={() => setCurrentView('litters')}
-                        title="Litters"
-                        className={`p-2 rounded-lg transition duration-150 ${currentView === 'litters' ? 'bg-primary shadow-inner text-gray-900' : 'text-gray-500 hover:bg-gray-100'}`}
-                    >
-                        <ClipboardList size={20} />
-                    </button>
-                    <button
-                        onClick={() => setCurrentView('profile')}
-                        title="Profile"
-                        className={`p-2 rounded-lg transition duration-150 ${currentView === 'profile' ? 'bg-primary shadow-inner text-gray-900' : 'text-gray-500 hover:bg-gray-100'}`}
-                    >
-                        <User size={20} />
-                    </button>
-                </nav>
-
+        {/* Navigation and Logout buttons are only shown when logged in */}
+        <div className='flex items-center space-x-4'>
+            <span className='text-gray-600 text-sm hidden sm:block'>
+                Welcome back, <span className='font-semibold text-gray-800'>{displayName}</span>
+            </span>
+            
+            <nav className="flex space-x-2">
                 <button
-                    onClick={handleLogout}
-                    title="Log Out"
-                    className="bg-accent hover:bg-accent/80 text-white font-semibold py-2 px-4 rounded-lg transition duration-150 shadow-md flex items-center space-x-1"
+                    onClick={() => setCurrentView('list')}
+                    title="Animals"
+                    className={`p-2 rounded-lg transition duration-150 ${currentView === 'list' ? 'bg-primary shadow-inner text-gray-900' : 'text-gray-500 hover:bg-gray-100'}`}
                 >
-                    <LogOut size={18} className="hidden sm:inline" />
-                    <span className="text-sm">Logout</span>
+                    <Cat size={20} />
                 </button>
-            </div>
-        )}
+                <button
+                    onClick={() => setCurrentView('litters')}
+                    title="Litters"
+                    className={`p-2 rounded-lg transition duration-150 ${currentView === 'litters' ? 'bg-primary shadow-inner text-gray-900' : 'text-gray-500 hover:bg-gray-100'}`}
+                >
+                    <ClipboardList size={20} />
+                </button>
+                <button
+                    onClick={() => setCurrentView('profile')}
+                    title="Profile"
+                    className={`p-2 rounded-lg transition duration-150 ${currentView === 'profile' ? 'bg-primary shadow-inner text-gray-900' : 'text-gray-500 hover:bg-gray-100'}`}
+                >
+                    <User size={20} />
+                </button>
+            </nav>
+
+            <button
+                onClick={handleLogout}
+                title="Log Out"
+                className="bg-accent hover:bg-accent/80 text-white font-semibold py-2 px-4 rounded-lg transition duration-150 shadow-md flex items-center space-x-1"
+            >
+                <LogOut size={18} className="hidden sm:inline" />
+                <span className="text-sm">Logout</span>
+            </button>
+        </div>
       </header>
 
       {/* Main Content */}
