@@ -79,6 +79,12 @@ const ProfileEditForm = ({ userProfile, showModalMessage, onSaveSuccess, onCance
     // Form states for profile data (to be sent to /users/profile)
     const [personalName, setPersonalName] = useState(userProfile.personalName);
     const [breederName, setBreederName] = useState(userProfile.breederName || '');
+    
+    // NEW STATES FOR TOGGLES
+    // Default to true for personal name, as it was previously always shown.
+    const [showPersonalName, setShowPersonalName] = useState(userProfile.showPersonalName ?? true); 
+    const [showBreederName, setShowBreederName] = useState(userProfile.showBreederName ?? false); 
+    
     const [profileImageFile, setProfileImageFile] = useState(null); // File state for image upload (placeholder)
     const [profileImageURL, setProfileImageURL] = useState(null); // URL for preview (or null for default)
     const [profileLoading, setProfileLoading] = useState(false);
@@ -100,17 +106,20 @@ const ProfileEditForm = ({ userProfile, showModalMessage, onSaveSuccess, onCance
         }
     };
 
-    // 1. Handle Profile Info Update (Personal Name, Breeder Name, Image)
+    // 1. Handle Profile Info Update (Personal Name, Breeder Name, Image, and Visibility)
     const handleProfileUpdate = async (e) => {
         e.preventDefault();
         setProfileLoading(true);
         
         // Note: Actual image upload logic is complex and skipped here, treating it as a UI placeholder for now. 
-        // We will only send the text fields.
+        // We will only send the text fields and the new visibility flags.
 
         const payload = {
             personalName: personalName,
             breederName: breederName || null,
+            // NEW FIELDS
+            showPersonalName: showPersonalName,
+            showBreederName: showBreederName,
         };
 
         try {
@@ -233,6 +242,33 @@ const ProfileEditForm = ({ userProfile, showModalMessage, onSaveSuccess, onCance
                             className="w-full p-3 border border-gray-300 rounded-lg focus:ring-primary focus:border-primary transition"
                             disabled={profileLoading}
                         />
+
+                        {/* NEW TOGGLES */}
+                        <div className="pt-2 space-y-2">
+                            <label className="flex items-center space-x-2 text-sm text-gray-700">
+                                <input
+                                    type="checkbox"
+                                    checked={showPersonalName}
+                                    onChange={(e) => setShowPersonalName(e.target.checked)}
+                                    className="rounded text-primary-dark focus:ring-primary-dark"
+                                    disabled={profileLoading}
+                                />
+                                <span>Display **Personal Name** on your public profile card.</span>
+                            </label>
+                            {breederName && (
+                                <label className="flex items-center space-x-2 text-sm text-gray-700">
+                                    <input
+                                        type="checkbox"
+                                        checked={showBreederName}
+                                        onChange={(e) => setShowBreederName(e.target.checked)}
+                                        className="rounded text-primary-dark focus:ring-primary-dark"
+                                        disabled={profileLoading}
+                                    />
+                                    <span>Display **Breeder Name** on your public profile card.</span>
+                                </label>
+                            )}
+                        </div>
+                        
                     </div>
                 </div>
 
@@ -336,20 +372,37 @@ const UserProfileCard = ({ userProfile }) => {
         </div>
     );
 
+    // Get visibility status, defaulting to true for personal name if fields are new/null
+    const isPersonalNameVisible = userProfile.showPersonalName ?? true;
+    const isBreederNameVisible = userProfile.showBreederName ?? false;
+
+
     return (
         <div className="w-full max-w-4xl bg-white p-6 rounded-xl shadow-lg mb-6 flex flex-col sm:flex-row items-center sm:items-start space-y-4 sm:space-y-0 sm:space-x-6">
             <ProfileImage />
 
             <div className="flex-grow text-center sm:text-left">
                 <p className="text-sm font-semibold text-gray-500 uppercase">Account Holder</p>
-                <h3 className="text-3xl font-bold text-gray-900 mb-2">
-                    {userProfile.personalName}
-                </h3>
                 
-                {userProfile.breederName && (
-                    <div className="text-md text-gray-700">
-                        <span className="font-semibold">Breeder Name:</span> {userProfile.breederName}
+                {/* Personal Name */}
+                {isPersonalNameVisible && (
+                    <h3 className="text-3xl font-bold text-gray-900 mb-1">
+                        {userProfile.personalName}
+                    </h3>
+                )}
+                
+                {/* Breeder Name (Removed 'Breeder Name:' title) */}
+                {(isBreederNameVisible && userProfile.breederName) && (
+                    <div className="text-xl text-gray-700 font-semibold">
+                        {userProfile.breederName}
                     </div>
+                )}
+
+                {/* Fallback if both names are hidden */}
+                {(!isPersonalNameVisible && !isBreederNameVisible) && (
+                    <h3 className="text-2xl font-bold text-gray-500 mb-2">
+                        (Name Hidden)
+                    </h3>
                 )}
             </div>
 
@@ -472,11 +525,6 @@ const ProfileView = ({ userProfile, showModalMessage, fetchUserProfile, authToke
 
     if (!userProfile) return <LoadingSpinner />;
 
-    // Determine the name to display for view mode
-    const displayName = userProfile.showBreederName && userProfile.breederName 
-        ? userProfile.breederName 
-        : userProfile.personalName;
-
     if (isEditing) {
         return (
             <ProfileEditForm 
@@ -500,13 +548,36 @@ const ProfileView = ({ userProfile, showModalMessage, fetchUserProfile, authToke
                 Profile Settings
             </h2>
             <div className="space-y-4">
+                
+                {/* UPDATED: Public Visibility Status Box */}
                 <div className="p-4 bg-gray-50 rounded-lg border border-gray-200">
-                    <p className="text-lg font-semibold text-gray-700">Display Name:</p>
-                    <p className="text-2xl font-bold text-gray-900">{displayName}</p>
-                    <p className="text-sm text-gray-500 mt-1">
-                        {userProfile.showBreederName ? "Breeder Name is currently public." : "Personal Name is currently displayed."}
-                    </p>
+                    <p className="text-lg font-semibold text-gray-700 mb-2">Public Visibility Status</p>
+                    
+                    {/* Personal Name Status */}
+                    <div className="flex justify-between items-center py-1">
+                        <span className="text-base text-gray-800">Personal Name ({userProfile.personalName})</span>
+                        <span className={`px-3 py-1 text-xs font-semibold rounded-full ${
+                            (userProfile.showPersonalName ?? true) ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800'
+                        }`}>
+                            {(userProfile.showPersonalName ?? true) ? 'Visible' : 'Hidden'}
+                        </span>
+                    </div>
+
+                    {/* Breeder Name Status */}
+                    {userProfile.breederName && (
+                        <div className="flex justify-between items-center py-1 border-t border-gray-200 mt-2 pt-2">
+                            <span className="text-base text-gray-800">Breeder Name ({userProfile.breederName})</span>
+                            <span className={`px-3 py-1 text-xs font-semibold rounded-full ${
+                                userProfile.showBreederName ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800'
+                            }`}>
+                                {userProfile.showBreederName ? 'Visible' : 'Hidden'}
+                            </span>
+                        </div>
+                    )}
+                    
                 </div>
+                {/* End Updated Box */}
+
                 <div className="p-4 bg-gray-50 rounded-lg border border-gray-200">
                     <p className="text-lg font-semibold text-gray-700">Email:</p>
                     <p className="text-xl text-gray-800">{userProfile.email}</p>
@@ -1007,7 +1078,7 @@ const App = () => {
         </div>
       </header>
 
-      {/* 2. User Profile Summary Card */}
+      {/* 2. User Profile Summary Card (Not shown on the Profile page itself) */}
       {currentView !== 'profile' && userProfile && <UserProfileCard userProfile={userProfile} />}
 
       {/* 3. Main Content Area */}
