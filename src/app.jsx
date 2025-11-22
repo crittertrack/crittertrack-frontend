@@ -29,7 +29,7 @@ const ModalMessage = ({ title, message, onClose }) => (
 
 // Custom logo component updated to render an image from the public folder
 const CustomAppLogo = ({ size = "w-10 h-10" }) => (
-  // Removed 'rounded-full' and 'object-cover' to prevent clipping and rounding
+  // The size is controlled by the 'size' prop.
   <img 
     src="/logo.png" 
     alt="CritterTrack Logo" 
@@ -94,7 +94,8 @@ const AuthView = ({ onLoginSuccess, showModalMessage, isRegister, setIsRegister 
         {isRegister && (
             <input
                 type="text"
-                placeholder="Your Personal Name (Required)"
+                // UPDATED: Removed "(Required)" and added "*"
+                placeholder="Your Personal Name *" 
                 value={personalName}
                 onChange={(e) => setPersonalName(e.target.value)}
                 required
@@ -104,7 +105,8 @@ const AuthView = ({ onLoginSuccess, showModalMessage, isRegister, setIsRegister 
 
         <input
           type="email"
-          placeholder="Email"
+          // UPDATED: Added "*"
+          placeholder="Email *"
           value={email}
           onChange={(e) => setEmail(e.target.value)}
           required
@@ -112,7 +114,8 @@ const AuthView = ({ onLoginSuccess, showModalMessage, isRegister, setIsRegister 
         />
         <input
           type="password"
-          placeholder="Password"
+          // UPDATED: Added "*"
+          placeholder="Password *"
           value={password}
           onChange={(e) => setPassword(e.target.value)}
           required
@@ -589,8 +592,8 @@ const App = () => {
               {showModal && <ModalMessage title={modalMessage.title} message={modalMessage.message} onClose={() => setShowModal(false)} />}
               
               {/* Logo and Title Block (ABOVE the card) */}
-              <div className="flex flex-col items-center mb-6 -mt-10"> {/* -mt for better vertical centering, mb for space */}
-                  <CustomAppLogo size="w-24 h-24" /> 
+              <div className="flex flex-col items-center mb-6 -mt-16"> 
+                  <CustomAppLogo size="w-32 h-32" /> 
                   <h1 className="text-4xl font-extrabold text-gray-900 mt-4">
                       {mainTitle}
                   </h1>
