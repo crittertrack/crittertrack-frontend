@@ -382,7 +382,6 @@ const UserProfileCard = ({ userProfile }) => {
             <ProfileImage />
 
             <div className="flex-grow text-center sm:text-left">
-                <p className="text-sm font-semibold text-gray-500 uppercase">Account Holder</p>
                 
                 {/* Personal Name */}
                 {isPersonalNameVisible && (
@@ -407,8 +406,10 @@ const UserProfileCard = ({ userProfile }) => {
             </div>
 
             <div className="w-full sm:w-auto sm:text-right space-y-2 pt-4 sm:pt-0 border-t sm:border-t-0 sm:border-l border-gray-200 sm:pl-6">
+                {/* UPDATED: Changed title to "Member ID" and added "CT-" prefix for a professional look */}
                 <div className="text-sm text-gray-600">
-                    <span className="font-semibold">Public ID:</span> <span className="font-bold">{userProfile.id_public}</span>
+                    <span className="font-semibold">Member ID:</span> 
+                    <span className="font-bold text-lg text-primary-dark">CT-{userProfile.id_public}</span>
                 </div>
                 <div className="text-sm text-gray-600">
                     <span className="font-semibold">Member Since:</span> {formattedCreationDate}
@@ -549,7 +550,7 @@ const ProfileView = ({ userProfile, showModalMessage, fetchUserProfile, authToke
             </h2>
             <div className="space-y-4">
                 
-                {/* UPDATED: Public Visibility Status Box */}
+                {/* UPDATED: Public Visibility Status Box (Replaces old "Display Name" box) */}
                 <div className="p-4 bg-gray-50 rounded-lg border border-gray-200">
                     <p className="text-lg font-semibold text-gray-700 mb-2">Public Visibility Status</p>
                     
@@ -578,14 +579,16 @@ const ProfileView = ({ userProfile, showModalMessage, fetchUserProfile, authToke
                 </div>
                 {/* End Updated Box */}
 
+                {/* UPDATED: Changed ID display for a more professional look */}
+                <div className="p-4 bg-gray-50 rounded-lg border border-gray-200">
+                    <p className="text-lg font-semibold text-gray-700">Personal ID:</p>
+                    <p className="text-3xl font-extrabold text-primary-dark">CT-{userProfile.id_public}</p> 
+                    <p className="text-sm text-gray-500 mt-2">This is your unique, public-facing system identifier.</p>
+                </div>
+                
                 <div className="p-4 bg-gray-50 rounded-lg border border-gray-200">
                     <p className="text-lg font-semibold text-gray-700">Email:</p>
                     <p className="text-xl text-gray-800">{userProfile.email}</p>
-                </div>
-                <div className="p-4 bg-gray-50 rounded-lg border border-gray-200">
-                    <p className="text-lg font-semibold text-gray-700">Personal ID:</p>
-                    <p className="text-xl text-gray-800">{userProfile.id_public}</p>
-                    <p className="text-sm text-gray-500 mt-1">This is your public-facing ID.</p>
                 </div>
             </div>
             <button
