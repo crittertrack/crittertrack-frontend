@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import axios from 'axios';
-import { LogOut, Cat, UserPlus, LogIn, ChevronLeft, Trash2, Edit, Save, PlusCircle, ArrowLeft, Loader2, RefreshCw, User, ClipboardList, BookOpen, Settings } from 'lucide-react';
+import { LogOut, Cat, UserPlus, LogIn, ChevronLeft, Trash2, Edit, Save, PlusCircle, ArrowLeft, Loader2, RefreshCw, User, ClipboardList, BookOpen, Settings, Mail, Globe, Egg, Milk } from 'lucide-react';
 
 // --- Global Constants ---
 const API_BASE_URL = 'https://crittertrack-pedigree-production.up.railway.app/api';
@@ -80,11 +80,15 @@ const ProfileEditForm = ({ userProfile, showModalMessage, onSaveSuccess, onCance
     const [personalName, setPersonalName] = useState(userProfile.personalName);
     const [breederName, setBreederName] = useState(userProfile.breederName || '');
     
-    // NEW STATES FOR TOGGLES
-    // Default to true for personal name, as it was previously always shown.
+    // Existing Toggles
     const [showPersonalName, setShowPersonalName] = useState(userProfile.showPersonalName ?? true); 
     const [showBreederName, setShowBreederName] = useState(userProfile.showBreederName ?? false); 
     
+    // NEW STATES
+    const [websiteURL, setWebsiteURL] = useState(userProfile.websiteURL || '');
+    const [showWebsiteURL, setShowWebsiteURL] = useState(userProfile.showWebsiteURL ?? false);
+    const [showEmailPublic, setShowEmailPublic] = useState(userProfile.showEmailPublic ?? false); 
+
     const [profileImageFile, setProfileImageFile] = useState(null); // File state for image upload (placeholder)
     const [profileImageURL, setProfileImageURL] = useState(null); // URL for preview (or null for default)
     const [profileLoading, setProfileLoading] = useState(false);
@@ -111,15 +115,15 @@ const ProfileEditForm = ({ userProfile, showModalMessage, onSaveSuccess, onCance
         e.preventDefault();
         setProfileLoading(true);
         
-        // Note: Actual image upload logic is complex and skipped here, treating it as a UI placeholder for now. 
-        // We will only send the text fields and the new visibility flags.
-
         const payload = {
             personalName: personalName,
             breederName: breederName || null,
-            // NEW FIELDS
             showPersonalName: showPersonalName,
             showBreederName: showBreederName,
+            // NEW FIELDS
+            websiteURL: websiteURL || null,
+            showWebsiteURL: websiteURL ? showWebsiteURL : false, // Only show if URL is provided
+            showEmailPublic: showEmailPublic,
         };
 
         try {
@@ -242,9 +246,24 @@ const ProfileEditForm = ({ userProfile, showModalMessage, onSaveSuccess, onCance
                             className="w-full p-3 border border-gray-300 rounded-lg focus:ring-primary focus:border-primary transition"
                             disabled={profileLoading}
                         />
+                        
+                        {/* NEW: Website URL input */}
+                        <input
+                            type="url"
+                            name="websiteURL"
+                            placeholder="Website URL (Optional) e.g., https://example.com"
+                            value={websiteURL}
+                            onChange={(e) => setWebsiteURL(e.target.value)}
+                            className="w-full p-3 border border-gray-300 rounded-lg focus:ring-primary focus:border-primary transition"
+                            disabled={profileLoading}
+                        />
 
-                        {/* NEW TOGGLES */}
+
+                        {/* VISIBILITY TOGGLES */}
                         <div className="pt-2 space-y-2">
+                            <h4 className="text-base font-medium text-gray-800 pt-2 border-t border-gray-200">Public Profile Visibility:</h4>
+                            
+                            {/* Personal Name Toggle */}
                             <label className="flex items-center space-x-2 text-sm text-gray-700">
                                 <input
                                     type="checkbox"
@@ -255,6 +274,8 @@ const ProfileEditForm = ({ userProfile, showModalMessage, onSaveSuccess, onCance
                                 />
                                 <span>Display **Personal Name** on your public profile card.</span>
                             </label>
+                            
+                            {/* Breeder Name Toggle */}
                             {breederName && (
                                 <label className="flex items-center space-x-2 text-sm text-gray-700">
                                     <input
@@ -265,6 +286,32 @@ const ProfileEditForm = ({ userProfile, showModalMessage, onSaveSuccess, onCance
                                         disabled={profileLoading}
                                     />
                                     <span>Display **Breeder Name** on your public profile card.</span>
+                                </label>
+                            )}
+                            
+                            {/* NEW: Email Public Toggle */}
+                            <label className="flex items-center space-x-2 text-sm text-gray-700">
+                                <input
+                                    type="checkbox"
+                                    checked={showEmailPublic}
+                                    onChange={(e) => setShowEmailPublic(e.target.checked)}
+                                    className="rounded text-primary-dark focus:ring-primary-dark"
+                                    disabled={profileLoading}
+                                />
+                                <span>Display **Email Address** on your public profile card.</span>
+                            </label>
+
+                            {/* NEW: Website URL Toggle */}
+                            {websiteURL && (
+                                <label className="flex items-center space-x-2 text-sm text-gray-700">
+                                    <input
+                                        type="checkbox"
+                                        checked={showWebsiteURL}
+                                        onChange={(e) => setShowWebsiteURL(e.target.checked)}
+                                        className="rounded text-primary-dark focus:ring-primary-dark"
+                                        disabled={profileLoading}
+                                    />
+                                    <span>Display **Website URL** on your public profile card.</span>
                                 </label>
                             )}
                         </div>
@@ -403,6 +450,35 @@ const UserProfileCard = ({ userProfile }) => {
                         (Name Hidden)
                     </h3>
                 )}
+
+                {/* NEW: Contact Info (Email and Website) */}
+                <div className="mt-4 space-y-1 text-sm text-gray-700">
+                    {/* Email */}
+                    {(userProfile.showEmailPublic) && (
+                        <div className="flex items-center justify-center sm:justify-start space-x-2">
+                            <Mail size={16} className="text-gray-500" />
+                            <a href={`mailto:${userProfile.email}`} className="text-gray-700 hover:text-primary transition duration-150">
+                                {userProfile.email}
+                            </a>
+                        </div>
+                    )}
+                    
+                    {/* Website */}
+                    {(userProfile.websiteURL && userProfile.showWebsiteURL) && (
+                        <div className="flex items-center justify-center sm:justify-start space-x-2">
+                            <Globe size={16} className="text-gray-500" />
+                            <a 
+                                href={userProfile.websiteURL} 
+                                target="_blank" 
+                                rel="noopener noreferrer" 
+                                className="text-primary-dark hover:underline transition duration-150 truncate max-w-full sm:max-w-xs"
+                            >
+                                {/* Display the URL without protocol for cleaner look */}
+                                {userProfile.websiteURL.replace(/https?:\/\/(www.)?/, '')}
+                            </a>
+                        </div>
+                    )}
+                </div>
             </div>
 
             <div className="w-full sm:w-auto sm:text-right space-y-2 pt-4 sm:pt-0 border-t sm:border-t-0 sm:border-l border-gray-200 sm:pl-6">
@@ -553,7 +629,7 @@ const ProfileView = ({ userProfile, showModalMessage, fetchUserProfile, authToke
             </h2>
             <div className="space-y-4">
                 
-                {/* UPDATED: Public Visibility Status Box (Replaces old "Display Name" box) */}
+                {/* UPDATED: Public Visibility Status Box */}
                 <div className="p-4 bg-gray-50 rounded-lg border border-gray-200">
                     <p className="text-lg font-semibold text-gray-700 mb-2">Public Visibility Status</p>
                     
@@ -578,6 +654,28 @@ const ProfileView = ({ userProfile, showModalMessage, fetchUserProfile, authToke
                             </span>
                         </div>
                     )}
+
+                    {/* NEW: Email Status */}
+                    <div className="flex justify-between items-center py-1 border-t border-gray-200 mt-2 pt-2">
+                        <span className="text-base text-gray-800">Email Address ({userProfile.email})</span>
+                        <span className={`px-3 py-1 text-xs font-semibold rounded-full ${
+                            userProfile.showEmailPublic ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800'
+                        }`}>
+                            {userProfile.showEmailPublic ? 'Visible' : 'Hidden'}
+                        </span>
+                    </div>
+
+                    {/* NEW: Website URL Status (only if URL is set) */}
+                    {userProfile.websiteURL && (
+                        <div className="flex justify-between items-center py-1 border-t border-gray-200 mt-2 pt-2">
+                            <span className="text-base text-gray-800">Website URL ({userProfile.websiteURL})</span>
+                            <span className={`px-3 py-1 text-xs font-semibold rounded-full ${
+                                userProfile.showWebsiteURL ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800'
+                            }`}>
+                                {userProfile.showWebsiteURL ? 'Visible' : 'Hidden'}
+                            </span>
+                        </div>
+                    )}
                     
                 </div>
                 {/* End Updated Box */}
@@ -590,10 +688,7 @@ const ProfileView = ({ userProfile, showModalMessage, fetchUserProfile, authToke
                     {/* Removed: This is your unique, public-facing system identifier. */}
                 </div>
                 
-                <div className="p-4 bg-gray-50 rounded-lg border border-gray-200">
-                    <p className="text-lg font-semibold text-gray-700">Email:</p>
-                    <p className="text-xl text-gray-800">{userProfile.email}</p>
-                </div>
+                {/* Removed old email box, as visibility is now shown above */}
             </div>
             <button
                 onClick={() => setIsEditing(true)}
@@ -612,9 +707,13 @@ const AnimalList = ({ authToken, showModalMessage, onEditAnimal, onSetCurrentVie
     const [loading, setLoading] = useState(true);
     // Renamed 'filter' to 'statusFilter' for clarity
     const [statusFilter, setStatusFilter] = useState(''); 
-    // New states for name search and gender filter
+    // Existing states for name search and gender filter
     const [nameFilter, setNameFilter] = useState('');
     const [genderFilter, setGenderFilter] = useState(''); // '' means All
+    
+    // NEW FILTER STATES
+    const [statusFilterPregnant, setStatusFilterPregnant] = useState(false);
+    const [statusFilterNursing, setStatusFilterNursing] = useState(false);
 
     const fetchAnimals = useCallback(async () => {
         setLoading(true);
@@ -632,6 +731,13 @@ const AnimalList = ({ authToken, showModalMessage, onEditAnimal, onSetCurrentVie
                 // Assuming the API supports a 'name' query parameter for search
                 params.push(`name=${encodeURIComponent(nameFilter)}`);
             }
+            // NEW FILTERS
+            if (statusFilterPregnant) {
+                params.push(`isPregnant=true`);
+            }
+            if (statusFilterNursing) {
+                params.push(`isNursing=true`);
+            }
 
             const queryString = params.length > 0 ? `?${params.join('&')}` : '';
             
@@ -647,7 +753,7 @@ const AnimalList = ({ authToken, showModalMessage, onEditAnimal, onSetCurrentVie
         } finally {
             setLoading(false);
         }
-    }, [authToken, statusFilter, genderFilter, nameFilter, showModalMessage]); // Added all filters to dependencies
+    }, [authToken, statusFilter, genderFilter, nameFilter, statusFilterPregnant, statusFilterNursing, showModalMessage]); // Added new filters to dependencies
 
     useEffect(() => {
         fetchAnimals();
@@ -656,48 +762,121 @@ const AnimalList = ({ authToken, showModalMessage, onEditAnimal, onSetCurrentVie
     const handleStatusFilterChange = (e) => setStatusFilter(e.target.value);
     const handleNameFilterChange = (e) => setNameFilter(e.target.value);
     const handleGenderFilterChange = (gender) => setGenderFilter(gender);
+    
+    // NEW HANDLERS
+    const handleFilterPregnant = () => {
+        setStatusFilterPregnant(prev => !prev);
+        // Ensure only one of Pregnant/Nursing is active for a cleaner search
+        if (!statusFilterPregnant) {
+            setStatusFilterNursing(false); 
+        }
+    };
+
+    const handleFilterNursing = () => {
+        setStatusFilterNursing(prev => !prev);
+        // Ensure only one of Pregnant/Nursing is active for a cleaner search
+        if (!statusFilterNursing) {
+            setStatusFilterPregnant(false);
+        }
+    };
+
 
     return (
         <div className="w-full max-w-4xl bg-white p-6 rounded-xl shadow-lg">
             <h2 className="text-3xl font-bold text-gray-800 mb-6 flex items-center">
                 <ClipboardList size={24} className="mr-3 text-primary-dark" />
-                My Animals {/* CHANGED title to 'My Animals' */}
+                My Animals
             </h2>
 
             <div className="space-y-4 mb-4">
                 
                 {/* 1. Gender Filter Buttons (All/Male/Female) */}
                 <div className="flex space-x-2">
-                    {['All', ...GENDER_OPTIONS].map(gender => (
-                        <button
-                            key={gender}
-                            onClick={() => handleGenderFilterChange(gender === 'All' ? '' : gender)}
-                            className={`px-4 py-2 text-sm font-semibold rounded-lg transition duration-150 shadow-sm
-                                ${genderFilter === (gender === 'All' ? '' : gender) 
-                                    ? 'bg-primary-dark text-black' 
-                                    : 'bg-gray-200 text-gray-700 hover:bg-gray-300'
-                                }`}
-                        >
-                            {gender}
-                        </button>
-                    ))}
+                    {['All', ...GENDER_OPTIONS].map(gender => {
+                        const value = gender === 'All' ? '' : gender;
+                        const isCurrentSelected = genderFilter === value;
+                        
+                        let selectedClasses = '';
+                        
+                        if (isCurrentSelected) {
+                            switch (gender) {
+                                case 'Male':
+                                    // Requested: Same color as 'Add New Animal' (bg-primary)
+                                    selectedClasses = 'bg-primary text-black'; 
+                                    break;
+                                case 'Female':
+                                    // Requested: Same color as 'Logout' (bg-accent)
+                                    selectedClasses = 'bg-accent text-white'; 
+                                    break;
+                                case 'All':
+                                default:
+                                    // Default/All selection color
+                                    selectedClasses = 'bg-primary-dark text-black'; 
+                                    break;
+                            }
+                        } else {
+                            // Unselected style
+                            selectedClasses = 'bg-gray-200 text-gray-700 hover:bg-gray-300';
+                        }
+
+                        return (
+                            <button
+                                key={gender}
+                                onClick={() => handleGenderFilterChange(value)}
+                                className={`px-4 py-2 text-sm font-semibold rounded-lg transition duration-150 shadow-sm ${selectedClasses}`}
+                            >
+                                {gender}
+                            </button>
+                        );
+                    })}
                 </div>
 
+                {/* 2. Breeding Status Filters (NEW SECTION) */}
+                <div className="flex items-center space-x-2 pt-2 border-t border-gray-100"> 
+                    <span className='text-sm font-medium text-gray-700 self-center mr-2'>Breeding Status:</span>
+                    
+                    {/* Pregnant Filter Button */}
+                    <button
+                        onClick={handleFilterPregnant}
+                        className={`px-3 py-1 text-sm font-semibold rounded-lg transition duration-150 shadow-sm flex items-center space-x-1 ${
+                            statusFilterPregnant 
+                                ? 'bg-orange-500 text-white hover:bg-orange-600' 
+                                : 'bg-gray-200 text-gray-700 hover:bg-gray-300'
+                        }`}
+                    >
+                        <Egg size={16} />
+                        <span>Pregnant</span>
+                    </button>
+                    
+                    {/* Nursing Filter Button */}
+                    <button
+                        onClick={handleFilterNursing}
+                        className={`px-3 py-1 text-sm font-semibold rounded-lg transition duration-150 shadow-sm flex items-center space-x-1 ${
+                            statusFilterNursing
+                                ? 'bg-blue-500 text-white hover:bg-blue-600'
+                                : 'bg-gray-200 text-gray-700 hover:bg-gray-300'
+                        }`}
+                    >
+                        <Milk size={16} />
+                        <span>Nursing</span>
+                    </button>
+                </div>
+                
+                {/* 3. Status Filter Dropdown, Name Search, and Add Button */}
                 <div className="flex justify-between items-center space-x-4">
                     
-                    {/* 2. Status Filter Dropdown (Updated Text) */}
                     <select
                         value={statusFilter}
                         onChange={handleStatusFilterChange}
                         className="p-2 border border-gray-300 rounded-lg shadow-sm focus:ring-primary focus:border-primary transition w-1/3 min-w-[150px]"
                     >
-                        <option value="">All</option> {/* CHANGED 'All Statuses' to 'All' */}
+                        <option value="">All Statuses</option>
                         {STATUS_OPTIONS.map(status => (
                             <option key={status} value={status}>{status}</option>
                         ))}
                     </select>
 
-                    {/* 3. Name Search Input */}
+                    {/* Name Search Input */}
                     <input
                         type="text"
                         placeholder="Search by name..."
@@ -724,13 +903,27 @@ const AnimalList = ({ authToken, showModalMessage, onEditAnimal, onSetCurrentVie
                     ) : (
                         animals.map(animal => (
                             <div key={animal._id} className="p-4 border border-gray-200 rounded-lg shadow-sm flex justify-between items-center hover:bg-gray-50 transition">
-                                <div>
-                                    <p className="text-xl font-semibold text-gray-800">
-                                        {animal.prefix ? `${animal.prefix} ` : ''}{animal.name}
-                                    </p>
-                                    <p className="text-sm text-gray-600">
-                                        {animal.species} | {animal.gender} | {animal.status}
-                                    </p>
+                                <div className="flex items-center space-x-3">
+                                    <div>
+                                        <p className="text-xl font-semibold text-gray-800">
+                                            {animal.prefix ? `${animal.prefix} ` : ''}{animal.name}
+                                        </p>
+                                        <p className="text-sm text-gray-600">
+                                            {animal.species} | {animal.gender} | {animal.status}
+                                        </p>
+                                    </div>
+
+                                    {/* Visual Icons (NEW) */}
+                                    {animal.isPregnant && (
+                                        <div className="p-1 bg-orange-100 text-orange-600 rounded-full" title="Pregnant">
+                                            <Egg size={18} />
+                                        </div>
+                                    )}
+                                    {animal.isNursing && (
+                                        <div className="p-1 bg-blue-100 text-blue-600 rounded-full" title="Nursing">
+                                            <Milk size={18} />
+                                        </div>
+                                    )}
                                 </div>
                                 <button
                                     onClick={() => onEditAnimal(animal)}
@@ -762,12 +955,39 @@ const AnimalForm = ({ animalToEdit, onSave, onCancel, showModalMessage }) => {
         geneticCode: animalToEdit?.geneticCode || '',
         fatherId_public: animalToEdit?.fatherId_public || null,
         motherId_public: animalToEdit?.motherId_public || null,
+        // NEW FIELDS
+        isPregnant: animalToEdit?.isPregnant || false,
+        isNursing: animalToEdit?.isNursing || false,
     });
     const [loading, setLoading] = useState(false);
 
     const handleChange = (e) => {
-        const { name, value } = e.target;
-        setFormData(prev => ({ ...prev, [name]: value }));
+        const { name, value, type, checked } = e.target;
+        
+        if (type === 'checkbox') {
+            const isChecked = checked;
+            setFormData(prev => {
+                if (name === 'isPregnant' && isChecked) {
+                    // If marking pregnant, uncheck nursing
+                    return { ...prev, isPregnant: isChecked, isNursing: false };
+                }
+                if (name === 'isNursing' && isChecked) {
+                    // If marking nursing, uncheck pregnant
+                    return { ...prev, isNursing: isChecked, isPregnant: false };
+                }
+                return { ...prev, [name]: isChecked };
+            });
+        } else if (name === 'gender') {
+            // Reset breeding status if gender changes to Male
+            const newFormData = { ...formData, [name]: value };
+            if (value === 'Male') {
+                newFormData.isPregnant = false;
+                newFormData.isNursing = false;
+            }
+            setFormData(newFormData);
+        } else {
+            setFormData(prev => ({ ...prev, [name]: value }));
+        }
     };
 
     const handleSubmit = async (e) => {
@@ -854,6 +1074,42 @@ const AnimalForm = ({ animalToEdit, onSave, onCancel, showModalMessage }) => {
                         {STATUS_OPTIONS.map(opt => <option key={opt} value={opt}>{opt}</option>)}
                     </select>
                 </div>
+                
+                {/* NEW: Breeding Status Checkboxes */}
+                {(formData.gender === 'Female' && formData.status === 'Breeding') && (
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4 p-3 border border-gray-200 rounded-lg bg-gray-50">
+                        <label className="flex items-center space-x-2 text-gray-700">
+                            <input
+                                type="checkbox"
+                                name="isPregnant"
+                                checked={formData.isPregnant}
+                                onChange={handleChange} 
+                                className="rounded text-orange-500 focus:ring-orange-500"
+                                disabled={loading}
+                            />
+                            <span className="flex items-center space-x-1">
+                                <Egg size={18} className="text-orange-500" />
+                                <span>Mark as **Pregnant**</span>
+                            </span>
+                        </label>
+
+                        <label className="flex items-center space-x-2 text-gray-700">
+                            <input
+                                type="checkbox"
+                                name="isNursing"
+                                checked={formData.isNursing}
+                                onChange={handleChange} 
+                                className="rounded text-blue-500 focus:ring-blue-500"
+                                disabled={loading}
+                            />
+                            <span className="flex items-center space-x-1">
+                                <Milk size={18} className="text-blue-500" />
+                                <span>Mark as **Nursing**</span>
+                            </span>
+                        </label>
+                    </div>
+                )}
+
 
                 {/* Appearance & Genetics */}
                 <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
