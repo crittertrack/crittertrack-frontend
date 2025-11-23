@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import axios from 'axios';
-import { LogOut, Cat, UserPlus, LogIn, ChevronLeft, Trash2, Edit, Save, PlusCircle, ArrowLeft, Loader2, RefreshCw, User, ClipboardList, BookOpen, Settings, Mail, Globe, Sprout, Milk } from 'lucide-react';
+import { LogOut, Cat, UserPlus, LogIn, ChevronLeft, Trash2, Edit, Save, PlusCircle, ArrowLeft, Loader2, RefreshCw, User, ClipboardList, BookOpen, Settings, Mail, Globe, Egg, Milk } from 'lucide-react';
 
 // --- Global Constants ---
 const API_BASE_URL = 'https://crittertrack-pedigree-production.up.railway.app/api';
@@ -32,7 +32,8 @@ const CustomAppLogo = ({ size = "w-10 h-10" }) => (
   // The size is controlled by the 'size' prop.
   <img 
     src="/logo.png" 
-    alt="CritterTrack Logo" 
+    // UPDATED: CritterTrack -> Crittertrack
+    alt="Crittertrack Logo" 
     className={`${size} shadow-md`} 
   />
 );
@@ -48,7 +49,11 @@ const LoadingSpinner = () => (
 // --- Component: Profile Image Placeholder ---
 const ProfileImagePlaceholder = ({ url, onFileChange, disabled }) => (
     <div className="flex flex-col items-center space-y-3">
-        <div className="w-24 h-24 bg-gray-200 rounded-full flex items-center justify-center text-gray-500 overflow-hidden shadow-inner cursor-pointer" onClick={() => !disabled && document.getElementById('profileImageInput').click()}>
+        <div 
+            // UPDATED: Changed rounded-full to rounded-lg
+            className="w-24 h-24 bg-gray-200 rounded-lg flex items-center justify-center text-gray-500 overflow-hidden shadow-inner cursor-pointer" 
+            onClick={() => !disabled && document.getElementById('profileImageInput').click()}
+        >
             {url ? (
                 <img src={url} alt="Profile" className="w-full h-full object-cover" />
             ) : (
@@ -414,7 +419,8 @@ const UserProfileCard = ({ userProfile }) => {
     
     // Placeholder for profile image
     const ProfileImage = () => (
-        <div className="w-20 h-20 bg-gray-200 rounded-full flex items-center justify-center text-gray-500 overflow-hidden shadow-inner">
+        // UPDATED: Changed rounded-full to rounded-lg
+        <div className="w-20 h-20 bg-gray-200 rounded-lg flex items-center justify-center text-gray-500 overflow-hidden shadow-inner">
             <User size={40} />
         </div>
     );
@@ -831,7 +837,7 @@ const AnimalList = ({ authToken, showModalMessage, onEditAnimal, onSetCurrentVie
                     })}
                 </div>
 
-                {/* 2. Breeding Status Filters (UPDATED ICONS) */}
+                {/* 2. Breeding Status Filters */}
                 <div className="flex items-center space-x-2 pt-2 border-t border-gray-100"> 
                     <span className='text-sm font-medium text-gray-700 self-center mr-2'>Breeding Status:</span>
                     
@@ -844,20 +850,20 @@ const AnimalList = ({ authToken, showModalMessage, onEditAnimal, onSetCurrentVie
                                 : 'bg-gray-200 text-gray-700 hover:bg-gray-300'
                         }`}
                     >
-                        <Sprout size={16} /> {/* Icon: Sprout */}
+                        <Egg size={16} /> {/* Icon: Egg */}
                         <span>Pregnant</span>
                     </button>
                     
-                    {/* Nursing Filter Button (Custom Blue) */}
+                    {/* Nursing Filter Button (Primary/Yellow-Tan) */}
                     <button
                         onClick={handleFilterNursing}
                         className={`px-3 py-1 text-sm font-semibold rounded-lg transition duration-150 shadow-sm flex items-center space-x-1 ${
                             statusFilterNursing
-                                ? 'bg-blue-600 text-white hover:bg-blue-700' // Custom Blue
+                                ? 'bg-primary text-black hover:bg-primary-dark' // Primary color
                                 : 'bg-gray-200 text-gray-700 hover:bg-gray-300'
                         }`}
                     >
-                        <Milk size={16} /> {/* Icon: Milk (Replaced BabyBottle) */}
+                        <Milk size={16} /> {/* Icon: Milk */}
                         <span>Nursing</span>
                     </button>
                 </div>
@@ -914,15 +920,15 @@ const AnimalList = ({ authToken, showModalMessage, onEditAnimal, onSetCurrentVie
                                         </p>
                                     </div>
 
-                                    {/* Visual Icons (UPDATED ICONS) */}
+                                    {/* Visual Icons */}
                                     {animal.isPregnant && (
                                         <div className="p-1 bg-accent/20 text-accent rounded-full" title="Pregnant">
-                                            <Sprout size={18} /> {/* Icon: Sprout */}
+                                            <Egg size={18} /> {/* Icon: Egg */}
                                         </div>
                                     )}
                                     {animal.isNursing && (
                                         <div className="p-1 bg-blue-100 text-blue-600 rounded-full" title="Nursing">
-                                            <Milk size={18} /> {/* Icon: Milk (Replaced BabyBottle) */}
+                                            <Milk size={18} /> {/* Icon: Milk */}
                                         </div>
                                     )}
                                 </div>
@@ -1076,7 +1082,7 @@ const AnimalForm = ({ animalToEdit, onSave, onCancel, showModalMessage }) => {
                     </select>
                 </div>
                 
-                {/* NEW: Breeding Status Checkboxes (UPDATED ICONS) */}
+                {/* NEW: Breeding Status Checkboxes */}
                 {(formData.gender === 'Female' && formData.status === 'Breeding') && (
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-4 p-3 border border-gray-200 rounded-lg bg-gray-50">
                         <label className="flex items-center space-x-2 text-gray-700">
@@ -1089,7 +1095,7 @@ const AnimalForm = ({ animalToEdit, onSave, onCancel, showModalMessage }) => {
                                 disabled={loading}
                             />
                             <span className="flex items-center space-x-1">
-                                <Sprout size={18} className="text-accent" /> {/* Icon: Sprout */}
+                                <Egg size={18} className="text-accent" /> {/* Icon: Egg */}
                                 <span>Mark as **Pregnant**</span>
                             </span>
                         </label>
@@ -1104,7 +1110,7 @@ const AnimalForm = ({ animalToEdit, onSave, onCancel, showModalMessage }) => {
                                 disabled={loading}
                             />
                             <span className="flex items-center space-x-1">
-                                <Milk size={18} className="text-blue-500" /> {/* Icon: Milk (Replaced BabyBottle) */}
+                                <Milk size={18} className="text-blue-500" /> {/* Icon: Milk */}
                                 <span>Mark as **Nursing**</span>
                             </span>
                         </label>
@@ -1355,7 +1361,8 @@ const App = () => {
       <header className="w-full max-w-4xl flex justify-between items-center bg-white p-4 rounded-xl shadow-lg mb-6">
         <div className="flex items-center space-x-2">
             <CustomAppLogo size="w-8 h-8" />
-            <h1 className="text-2xl font-bold text-gray-800 hidden sm:block">CritterTrack Dashboard</h1>
+            {/* UPDATED: CritterTrack -> Crittertrack */}
+            <h1 className="text-2xl font-bold text-gray-800 hidden sm:block">Crittertrack Dashboard</h1>
         </div>
 
         {/* Navigation and Logout buttons are only shown when logged in */}
@@ -1409,7 +1416,8 @@ const App = () => {
 
       {/* Footer */}
       <footer className="w-full max-w-4xl mt-6 text-center text-sm text-gray-500 pt-4 border-t border-gray-200">
-        &copy; {new Date().getFullYear()} CritterTrack Pedigree System.
+        {/* UPDATED: CritterTrack -> Crittertrack */}
+        &copy; {new Date().getFullYear()} Crittertrack Pedigree System.
       </footer>
     </div>
   );
