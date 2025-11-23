@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import axios from 'axios';
-import { LogOut, Cat, UserPlus, LogIn, ChevronLeft, Trash2, Edit, Save, PlusCircle, ArrowLeft, Loader2, RefreshCw, User, ClipboardList, BookOpen, Settings, Mail, Globe, Egg, Milk } from 'lucide-react';
+import { LogOut, Cat, UserPlus, LogIn, ChevronLeft, Trash2, Edit, Save, PlusCircle, ArrowLeft, Loader2, RefreshCw, User, ClipboardList, BookOpen, Settings, Mail, Globe, Sprout, BabyBottle } from 'lucide-react';
 
 // --- Global Constants ---
 const API_BASE_URL = 'https://crittertrack-pedigree-production.up.railway.app/api';
@@ -831,33 +831,33 @@ const AnimalList = ({ authToken, showModalMessage, onEditAnimal, onSetCurrentVie
                     })}
                 </div>
 
-                {/* 2. Breeding Status Filters (NEW SECTION) */}
+                {/* 2. Breeding Status Filters (UPDATED ICONS) */}
                 <div className="flex items-center space-x-2 pt-2 border-t border-gray-100"> 
                     <span className='text-sm font-medium text-gray-700 self-center mr-2'>Breeding Status:</span>
                     
-                    {/* Pregnant Filter Button */}
+                    {/* Pregnant Filter Button (Dark Pink/Accent) */}
                     <button
                         onClick={handleFilterPregnant}
                         className={`px-3 py-1 text-sm font-semibold rounded-lg transition duration-150 shadow-sm flex items-center space-x-1 ${
                             statusFilterPregnant 
-                                ? 'bg-orange-500 text-white hover:bg-orange-600' 
+                                ? 'bg-accent text-white hover:bg-accent/80' // Dark Pink/Accent
                                 : 'bg-gray-200 text-gray-700 hover:bg-gray-300'
                         }`}
                     >
-                        <Egg size={16} />
+                        <Sprout size={16} /> {/* New Icon: Sprout */}
                         <span>Pregnant</span>
                     </button>
                     
-                    {/* Nursing Filter Button */}
+                    {/* Nursing Filter Button (Custom Blue) */}
                     <button
                         onClick={handleFilterNursing}
                         className={`px-3 py-1 text-sm font-semibold rounded-lg transition duration-150 shadow-sm flex items-center space-x-1 ${
                             statusFilterNursing
-                                ? 'bg-blue-500 text-white hover:bg-blue-600'
+                                ? 'bg-blue-600 text-white hover:bg-blue-700' // Custom Blue
                                 : 'bg-gray-200 text-gray-700 hover:bg-gray-300'
                         }`}
                     >
-                        <Milk size={16} />
+                        <BabyBottle size={16} /> {/* New Icon: BabyBottle */}
                         <span>Nursing</span>
                     </button>
                 </div>
@@ -865,12 +865,13 @@ const AnimalList = ({ authToken, showModalMessage, onEditAnimal, onSetCurrentVie
                 {/* 3. Status Filter Dropdown, Name Search, and Add Button */}
                 <div className="flex justify-between items-center space-x-4">
                     
+                    {/* Status Filter Dropdown */}
                     <select
                         value={statusFilter}
                         onChange={handleStatusFilterChange}
                         className="p-2 border border-gray-300 rounded-lg shadow-sm focus:ring-primary focus:border-primary transition w-1/3 min-w-[150px]"
                     >
-                        <option value="">All Statuses</option>
+                        <option value="">All</option> {/* Changed to "All" */}
                         {STATUS_OPTIONS.map(status => (
                             <option key={status} value={status}>{status}</option>
                         ))}
@@ -913,15 +914,15 @@ const AnimalList = ({ authToken, showModalMessage, onEditAnimal, onSetCurrentVie
                                         </p>
                                     </div>
 
-                                    {/* Visual Icons (NEW) */}
+                                    {/* Visual Icons (UPDATED ICONS) */}
                                     {animal.isPregnant && (
-                                        <div className="p-1 bg-orange-100 text-orange-600 rounded-full" title="Pregnant">
-                                            <Egg size={18} />
+                                        <div className="p-1 bg-accent/20 text-accent rounded-full" title="Pregnant">
+                                            <Sprout size={18} /> {/* New Icon: Sprout */}
                                         </div>
                                     )}
                                     {animal.isNursing && (
                                         <div className="p-1 bg-blue-100 text-blue-600 rounded-full" title="Nursing">
-                                            <Milk size={18} />
+                                            <BabyBottle size={18} /> {/* New Icon: BabyBottle */}
                                         </div>
                                     )}
                                 </div>
@@ -1075,7 +1076,7 @@ const AnimalForm = ({ animalToEdit, onSave, onCancel, showModalMessage }) => {
                     </select>
                 </div>
                 
-                {/* NEW: Breeding Status Checkboxes */}
+                {/* NEW: Breeding Status Checkboxes (UPDATED ICONS) */}
                 {(formData.gender === 'Female' && formData.status === 'Breeding') && (
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-4 p-3 border border-gray-200 rounded-lg bg-gray-50">
                         <label className="flex items-center space-x-2 text-gray-700">
@@ -1084,11 +1085,11 @@ const AnimalForm = ({ animalToEdit, onSave, onCancel, showModalMessage }) => {
                                 name="isPregnant"
                                 checked={formData.isPregnant}
                                 onChange={handleChange} 
-                                className="rounded text-orange-500 focus:ring-orange-500"
+                                className="rounded text-accent focus:ring-accent" 
                                 disabled={loading}
                             />
                             <span className="flex items-center space-x-1">
-                                <Egg size={18} className="text-orange-500" />
+                                <Sprout size={18} className="text-accent" /> {/* New Icon: Sprout */}
                                 <span>Mark as **Pregnant**</span>
                             </span>
                         </label>
@@ -1103,7 +1104,7 @@ const AnimalForm = ({ animalToEdit, onSave, onCancel, showModalMessage }) => {
                                 disabled={loading}
                             />
                             <span className="flex items-center space-x-1">
-                                <Milk size={18} className="text-blue-500" />
+                                <BabyBottle size={18} className="text-blue-500" /> {/* New Icon: BabyBottle */}
                                 <span>Mark as **Nursing**</span>
                             </span>
                         </label>
