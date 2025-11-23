@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import axios from 'axios';
-import { LogOut, Cat, UserPlus, LogIn, ChevronLeft, Trash2, Edit, Save, PlusCircle, ArrowLeft, Loader2, RefreshCw, User, ClipboardList, BookOpen, Settings, Mail, Globe, Sprout, BabyBottle } from 'lucide-react';
+import { LogOut, Cat, UserPlus, LogIn, ChevronLeft, Trash2, Edit, Save, PlusCircle, ArrowLeft, Loader2, RefreshCw, User, ClipboardList, BookOpen, Settings, Mail, Globe, Sprout, Milk } from 'lucide-react';
 
 // --- Global Constants ---
 const API_BASE_URL = 'https://crittertrack-pedigree-production.up.railway.app/api';
@@ -844,7 +844,7 @@ const AnimalList = ({ authToken, showModalMessage, onEditAnimal, onSetCurrentVie
                                 : 'bg-gray-200 text-gray-700 hover:bg-gray-300'
                         }`}
                     >
-                        <Sprout size={16} /> {/* New Icon: Sprout */}
+                        <Sprout size={16} /> {/* Icon: Sprout */}
                         <span>Pregnant</span>
                     </button>
                     
@@ -857,7 +857,7 @@ const AnimalList = ({ authToken, showModalMessage, onEditAnimal, onSetCurrentVie
                                 : 'bg-gray-200 text-gray-700 hover:bg-gray-300'
                         }`}
                     >
-                        <BabyBottle size={16} /> {/* New Icon: BabyBottle */}
+                        <Milk size={16} /> {/* Icon: Milk (Replaced BabyBottle) */}
                         <span>Nursing</span>
                     </button>
                 </div>
@@ -917,12 +917,12 @@ const AnimalList = ({ authToken, showModalMessage, onEditAnimal, onSetCurrentVie
                                     {/* Visual Icons (UPDATED ICONS) */}
                                     {animal.isPregnant && (
                                         <div className="p-1 bg-accent/20 text-accent rounded-full" title="Pregnant">
-                                            <Sprout size={18} /> {/* New Icon: Sprout */}
+                                            <Sprout size={18} /> {/* Icon: Sprout */}
                                         </div>
                                     )}
                                     {animal.isNursing && (
                                         <div className="p-1 bg-blue-100 text-blue-600 rounded-full" title="Nursing">
-                                            <BabyBottle size={18} /> {/* New Icon: BabyBottle */}
+                                            <Milk size={18} /> {/* Icon: Milk (Replaced BabyBottle) */}
                                         </div>
                                     )}
                                 </div>
@@ -1089,7 +1089,7 @@ const AnimalForm = ({ animalToEdit, onSave, onCancel, showModalMessage }) => {
                                 disabled={loading}
                             />
                             <span className="flex items-center space-x-1">
-                                <Sprout size={18} className="text-accent" /> {/* New Icon: Sprout */}
+                                <Sprout size={18} className="text-accent" /> {/* Icon: Sprout */}
                                 <span>Mark as **Pregnant**</span>
                             </span>
                         </label>
@@ -1104,7 +1104,7 @@ const AnimalForm = ({ animalToEdit, onSave, onCancel, showModalMessage }) => {
                                 disabled={loading}
                             />
                             <span className="flex items-center space-x-1">
-                                <BabyBottle size={18} className="text-blue-500" /> {/* New Icon: BabyBottle */}
+                                <Milk size={18} className="text-blue-500" /> {/* Icon: Milk (Replaced BabyBottle) */}
                                 <span>Mark as **Nursing**</span>
                             </span>
                         </label>
