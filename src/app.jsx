@@ -92,6 +92,7 @@ const ProfileEditForm = ({ userProfile, showModalMessage, onSaveSuccess, onCance
     // NEW STATES
     const [websiteURL, setWebsiteURL] = useState(userProfile.websiteURL || '');
     const [showWebsiteURL, setShowWebsiteURL] = useState(userProfile.showWebsiteURL ?? false);
+    // FIX: Using ?? false for robust initialization if the field is missing
     const [showEmailPublic, setShowEmailPublic] = useState(userProfile.showEmailPublic ?? false); 
 
     const [profileImageFile, setProfileImageFile] = useState(null); // File state for image upload (placeholder)
@@ -128,7 +129,7 @@ const ProfileEditForm = ({ userProfile, showModalMessage, onSaveSuccess, onCance
             // NEW FIELDS
             websiteURL: websiteURL || null,
             showWebsiteURL: websiteURL ? showWebsiteURL : false, // Only show if URL is provided
-            showEmailPublic: showEmailPublic,
+            showEmailPublic: showEmailPublic, // This sends the boolean state
         };
 
         try {
@@ -460,7 +461,8 @@ const UserProfileCard = ({ userProfile }) => {
                 {/* NEW: Contact Info (Email and Website) */}
                 <div className="mt-4 space-y-1 text-sm text-gray-700">
                     {/* Email */}
-                    {(userProfile.showEmailPublic) && (
+                    {/* FIX: Use ?? false to ensure reliable rendering if the field is initially missing from the profile object */}
+                    {((userProfile.showEmailPublic ?? false)) && (
                         <div className="flex items-center justify-center sm:justify-start space-x-2">
                             <Mail size={16} className="text-gray-500" />
                             <a href={`mailto:${userProfile.email}`} className="text-gray-700 hover:text-primary transition duration-150">
@@ -665,9 +667,10 @@ const ProfileView = ({ userProfile, showModalMessage, fetchUserProfile, authToke
                     <div className="flex justify-between items-center py-1 border-t border-gray-200 mt-2 pt-2">
                         <span className="text-base text-gray-800">Email Address ({userProfile.email})</span>
                         <span className={`px-3 py-1 text-xs font-semibold rounded-full ${
-                            userProfile.showEmailPublic ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800'
+                            // FIX: Using ?? false to ensure reliable display if the field is initially missing
+                            (userProfile.showEmailPublic ?? false) ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800'
                         }`}>
-                            {userProfile.showEmailPublic ? 'Visible' : 'Hidden'}
+                            {(userProfile.showEmailPublic ?? false) ? 'Visible' : 'Hidden'}
                         </span>
                     </div>
 
