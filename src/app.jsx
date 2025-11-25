@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useCallback } from 'react';
+import React, { useState, useEffect, useCallback, useRef } from 'react'; // Import useRef
 import axios from 'axios';
 import { LogOut, Cat, UserPlus, LogIn, ChevronLeft, Trash2, Edit, Save, PlusCircle, ArrowLeft, Loader2, RefreshCw, User, ClipboardList, BookOpen, Settings, Mail, Globe, Egg, Milk } from 'lucide-react';
 
@@ -8,6 +8,9 @@ const API_BASE_URL = 'https://crittertrack-pedigree-production.up.railway.app/ap
 const SPECIES_OPTIONS = ['Mouse', 'Rat', 'Hamster'];
 const GENDER_OPTIONS = ['Male', 'Female'];
 const STATUS_OPTIONS = ['Pet', 'Breeding', 'Available', 'Retired', 'Deceased'];
+
+// --- NEW GLOBAL CONSTANT FOR IDLE TIMEOUT ---
+const IDLE_TIMEOUT_MS = 15 * 60 * 1000; // 15 minutes in milliseconds
 
 // --- Helper Components ---
 
@@ -1216,6 +1219,10 @@ const App = () => {
   // LIFTED STATE: Track if the user is on the Register screen or Login screen
   const [isRegister, setIsRegister] = useState(false); 
 
+  // IDLE TIMER REFS
+  const timeoutRef = useRef(null);
+  const activeEvents = ['mousemove', 'keydown', 'scroll', 'click'];
+
 
   // Centralized Modal Handler
   const showModalMessage = useCallback((title, message) => {
@@ -1223,17 +1230,67 @@ const App = () => {
     setShowModal(true);
   }, []);
 
+  // Logout Handler (must be defined early)
+  const handleLogout = useCallback((isIdle = false) => {
+    setAuthToken(null);
+    setUserProfile(null);
+    setCurrentView('list');
+    showModalMessage(
+        'Logged Out', 
+        isIdle ? 'You have been logged out due to 15 minutes of inactivity.' : 'You have been successfully logged out.'
+    );
+  }, [showModalMessage]);
+
+  // Function to reset the idle timer
+  const resetTimer = useCallback(() => {
+    if (timeoutRef.current) {
+        clearTimeout(timeoutRef.current);
+    }
+    if (authToken) {
+        timeoutRef.current = setTimeout(() => {
+            handleLogout(true); // Auto-logout due to idle
+        }, IDLE_TIMEOUT_MS);
+    }
+  }, [authToken, handleLogout]);
+
+  // Effect for setting up event listeners for idle tracking
+  useEffect(() => {
+    if (authToken) {
+        // 1. Start timer and set up listeners
+        resetTimer(); 
+        
+        const eventHandler = () => resetTimer();
+        
+        activeEvents.forEach(event => {
+            window.addEventListener(event, eventHandler);
+        });
+        
+        // 2. Cleanup
+        return () => {
+            clearTimeout(timeoutRef.current);
+            activeEvents.forEach(event => {
+                window.removeEventListener(event, eventHandler);
+            });
+        };
+    } else {
+        // Clear timer if logged out
+        clearTimeout(timeoutRef.current);
+    }
+  }, [authToken, resetTimer]); // Depend on authToken and resetTimer
+
   // Set the default axios authorization header
   useEffect(() => {
     if (authToken) {
       axios.defaults.headers.common['Authorization'] = `Bearer ${authToken}`;
       localStorage.setItem('authToken', authToken);
       fetchUserProfile(authToken);
+      // Timer setup is now handled by the separate useEffect above
     } else {
       delete axios.defaults.headers.common['Authorization'];
       localStorage.removeItem('authToken');
       setUserProfile(null);
       setCurrentView('list');
+      // Timer cleanup is now handled by the separate useEffect above
     }
   }, [authToken]);
 
@@ -1258,12 +1315,6 @@ const App = () => {
     setIsRegister(false); // Reset to login state just in case
   };
 
-  const handleLogout = () => {
-    setAuthToken(null);
-    setUserProfile(null);
-    setCurrentView('list');
-    showModalMessage('Logged Out', 'You have been successfully logged out.');
-  };
 
   const handleEditAnimal = (animal) => {
     setAnimalToEdit(animal);
@@ -1399,7 +1450,8 @@ const App = () => {
             </nav>
 
             <button
-                onClick={handleLogout}
+                // Call the new dedicated logout handler
+                onClick={() => handleLogout(false)} 
                 title="Log Out"
                 className="bg-accent hover:bg-accent/80 text-white font-semibold py-2 px-4 rounded-lg transition duration-150 shadow-md flex items-center space-x-1"
             >
