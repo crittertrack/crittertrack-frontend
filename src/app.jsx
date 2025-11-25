@@ -379,9 +379,9 @@ const AnimalList = ({ authToken, showModalMessage, onEditAnimal, onSetCurrentVie
     const [genderFilter, setGenderFilter] = useState(''); 
     const [statusFilterPregnant, setStatusFilterPregnant] = useState(false);
     const [statusFilterNursing, setStatusFilterNursing] = useState(false);
-    
-    // NEW FILTER STATE
-    const [ownedFilter, setOwnedFilter] = useState('owned'); // 'all' or 'owned'
+    const [ownedFilter, setOwnedFilter] = useState('owned');
+    const [displayFilter, setDisplayFilter] = useState(false);
+    const [globalFilter, setGlobalFilter] = useState(false);
 
     const fetchAnimals = useCallback(async () => {
         setLoading(true);
@@ -404,8 +404,15 @@ const AnimalList = ({ authToken, showModalMessage, onEditAnimal, onSetCurrentVie
                 params.push(`isNursing=true`);
             }
             
-            // NEW: Add owned filter
-            if (ownedFilter === 'owned') {
+			if (displayFilter) {
+                params.push(`isDisplay=true`);
+            }
+			
+           if (globalFilter) {
+                params.push(`isGlobal=true`);
+            }
+			
+			if (ownedFilter === 'owned') {
                 params.push(`isOwned=true`);
             }
 
@@ -470,97 +477,31 @@ const AnimalList = ({ authToken, showModalMessage, onEditAnimal, onSetCurrentVie
                 My Animals
             </h2>
 
-            <div className="space-y-4 mb-6 p-4 border border-gray-100 rounded-lg bg-gray-50">
+            <div className="space-y-4 mb-6 p-4 border border-gray-100 rounded-xl bg-gray-50">
                 
-                <div className="flex justify-between items-center space-x-4">
-                    {/* 1. Owned/All Filter Toggles (NEW) */}
-                    <div className="flex space-x-2">
-                        {['Owned', 'All'].map(option => {
-                            const value = option.toLowerCase();
-                            const isSelected = ownedFilter === value;
-                            return (
-                                <button
-                                    key={value}
-                                    onClick={() => setOwnedFilter(value)}
-                                    className={`px-4 py-2 text-sm font-semibold rounded-lg transition duration-150 shadow-sm ${
-                                        isSelected 
-                                            ? 'bg-primary-dark text-black' 
-                                            : 'bg-gray-200 text-gray-700 hover:bg-gray-300'
-                                    }`}
-                                >
-                                    {option}
-                                </button>
-                            );
-                        })}
-                    </div>
-
-                    {/* Add New Animal button now redirects to the species selector */}
+                {/* ROW 1: Search & Add Button */}
+                <div className="flex space-x-4">
+                    {/* Name Search Input */}
+                    <input
+                        type="text"
+                        placeholder="Search by name..."
+                        value={nameFilter}
+                        onChange={handleNameFilterChange}
+                        className="p-2 border border-gray-300 rounded-lg shadow-sm focus:ring-primary focus:border-primary transition flex-grow"
+                    />
+                    
+                    {/* Add New Animal button */}
                     <button
-                        // UPDATED: Now sets the view to 'select-species'
                         onClick={() => onSetCurrentView('select-species')}
                         className="bg-primary hover:bg-primary-dark text-black font-semibold py-2 px-4 rounded-lg transition duration-150 shadow-md flex items-center space-x-1 whitespace-nowrap"
                     >
                         <PlusCircle size={18} />
-                        <span>Add New Animal</span>
+                        <span>Add Animal</span>
                     </button>
                 </div>
                 
-                {/* 2. Gender Filter Buttons (All/Male/Female) */}
-                <div className="flex space-x-2 pt-2 border-t border-gray-200">
-                    <span className='text-sm font-medium text-gray-700 self-center'>Gender:</span>
-                    {['All', ...GENDER_OPTIONS].map(gender => {
-                        const value = gender === 'All' ? '' : gender;
-                        const isCurrentSelected = genderFilter === value;
-                        
-                        let selectedClasses = isCurrentSelected 
-                                            ? (gender === 'Male' ? 'bg-primary text-black' : gender === 'Female' ? 'bg-accent text-white' : 'bg-primary-dark text-black')
-                                            : 'bg-gray-200 text-gray-700 hover:bg-gray-300';
-                        
-                        return (
-                            <button
-                                key={gender}
-                                onClick={() => handleGenderFilterChange(value)}
-                                className={`px-4 py-2 text-sm font-semibold rounded-lg transition duration-150 shadow-sm ${selectedClasses}`}
-                            >
-                                {gender}
-                            </button>
-                        );
-                    })}
-                </div>
-
-                {/* 3. Breeding Status Filters */}
-                <div className="flex items-center space-x-2 pt-2 border-t border-gray-200"> 
-                    <span className='text-sm font-medium text-gray-700 self-center mr-2'>Breeding Status:</span>
-                    
-                    {/* Pregnant Filter Button */}
-                    <button
-                        onClick={handleFilterPregnant}
-                        className={`px-3 py-1 text-sm font-semibold rounded-lg transition duration-150 shadow-sm flex items-center space-x-1 ${
-                            statusFilterPregnant 
-                                ? 'bg-accent text-white hover:bg-accent/80'
-                                : 'bg-gray-200 text-gray-700 hover:bg-gray-300'
-                        }`}
-                    >
-                        <Egg size={16} />
-                        <span>Pregnant</span>
-                    </button>
-                    
-                    {/* Nursing Filter Button */}
-                    <button
-                        onClick={handleFilterNursing}
-                        className={`px-3 py-1 text-sm font-semibold rounded-lg transition duration-150 shadow-sm flex items-center space-x-1 ${
-                            statusFilterNursing
-                                ? 'bg-primary text-black hover:bg-primary-dark'
-                                : 'bg-gray-200 text-gray-700 hover:bg-gray-300'
-                        }`}
-                    >
-                        <Milk size={16} />
-                        <span>Nursing</span>
-                    </button>
-                </div>
-                
-                {/* 4. Status Filter Dropdown and Name Search */}
-                <div className="flex space-x-4">
+                {/* ROW 2: Primary Filters (Status Dropdown, Gender Buttons) */}
+                <div className="flex space-x-4 pt-2 border-t border-gray-200">
                     
                     {/* Status Filter Dropdown */}
                     <select
@@ -573,15 +514,105 @@ const AnimalList = ({ authToken, showModalMessage, onEditAnimal, onSetCurrentVie
                             <option key={status} value={status}>{status}</option>
                         ))}
                     </select>
+                    
+                    {/* Gender Filter Buttons (All/Male/Female) */}
+                    <div className="flex space-x-2 flex-grow items-center">
+                        <span className='text-sm font-medium text-gray-700'>Gender:</span>
+                        {['All', ...GENDER_OPTIONS].map(gender => {
+                            const value = gender === 'All' ? '' : gender;
+                            const isCurrentSelected = genderFilter === value;
+                            
+                            let selectedClasses = isCurrentSelected 
+                                                ? (gender === 'Male' ? 'bg-primary-dark text-black' : gender === 'Female' ? 'bg-accent text-white' : 'bg-primary-dark text-black')
+                                                : 'bg-gray-200 text-gray-700 hover:bg-gray-300';
+                            
+                            return (
+                                <button
+                                    key={gender}
+                                    onClick={() => handleGenderFilterChange(value)}
+                                    className={`px-3 py-1.5 text-sm font-semibold rounded-lg transition duration-150 shadow-sm ${selectedClasses}`}
+                                >
+                                    {gender}
+                                </button>
+                            );
+                        })}
+                    </div>
+                </div>
 
-                    {/* Name Search Input */}
-                    <input
-                        type="text"
-                        placeholder="Search by name..."
-                        value={nameFilter}
-                        onChange={handleNameFilterChange}
-                        className="p-2 border border-gray-300 rounded-lg shadow-sm focus:ring-primary focus:border-primary transition flex-grow"
-                    />
+                {/* ROW 3: Secondary Toggles (Ownership, Breeding Status, Display) */}
+                <div className="flex flex-wrap items-center space-x-4 pt-2 border-t border-gray-200"> 
+                    <span className='text-sm font-medium text-gray-700'>Filter By:</span>
+                    
+                    {/* Owned/All Toggle */}
+                    {['Owned', 'All'].map(option => {
+                        const value = option.toLowerCase();
+                        const isSelected = ownedFilter === value;
+                        return (
+                            <button
+                                key={value}
+                                onClick={() => setOwnedFilter(value)}
+                                className={`px-3 py-1.5 text-sm font-semibold rounded-lg transition duration-150 shadow-sm ${
+                                    isSelected 
+                                        ? 'bg-primary text-black' 
+                                        : 'bg-gray-200 text-gray-700 hover:bg-gray-300'
+                                }`}
+                            >
+                                {option}
+                            </button>
+                        );
+                    })}
+                    
+                    {/* Pregnant Filter Toggle */}
+                    <button
+                        onClick={handleFilterPregnant}
+                        className={`px-3 py-1.5 text-sm font-semibold rounded-lg transition duration-150 shadow-sm flex items-center space-x-1 ${
+                            statusFilterPregnant 
+                                ? 'bg-accent text-white hover:bg-accent/80'
+                                : 'bg-gray-200 text-gray-700 hover:bg-gray-300'
+                        }`}
+                    >
+                        <Egg size={16} />
+                        <span>Pregnant</span>
+                    </button>
+                    
+                    {/* Nursing Filter Toggle */}
+                    <button
+                        onClick={handleFilterNursing}
+                        className={`px-3 py-1.5 text-sm font-semibold rounded-lg transition duration-150 shadow-sm flex items-center space-x-1 ${
+                            statusFilterNursing
+                                ? 'bg-blue-300 text-gray-800 hover:bg-blue-400'
+                                : 'bg-gray-200 text-gray-700 hover:bg-gray-300'
+                        }`}
+                    >
+                        <Milk size={16} />
+                        <span>Nursing</span>
+                    </button>
+
+                    {/* Display Filter Toggle (NEW) */}
+                    <button
+                        onClick={() => setDisplayFilter(prev => !prev)}
+                        className={`px-3 py-1.5 text-sm font-semibold rounded-lg transition duration-150 shadow-sm flex items-center space-x-1 ${
+                            displayFilter
+                                ? 'bg-indigo-300 text-gray-800 hover:bg-indigo-400'
+                                : 'bg-gray-200 text-gray-700 hover:bg-gray-300'
+                        }`}
+                    >
+                        <Cat size={16} />
+                        <span>Display</span>
+                    </button>
+                    
+                    {/* Global Filter Toggle (NEW - represents animals shared from other breeders) */}
+                    <button
+                        onClick={() => setGlobalFilter(prev => !prev)}
+                        className={`px-3 py-1.5 text-sm font-semibold rounded-lg transition duration-150 shadow-sm flex items-center space-x-1 ${
+                            globalFilter
+                                ? 'bg-yellow-300 text-gray-800 hover:bg-yellow-400'
+                                : 'bg-gray-200 text-gray-700 hover:bg-gray-300'
+                        }`}
+                    >
+                        <Globe size={16} />
+                        <span>Global</span>
+                    </button>
                 </div>
             </div>
 
@@ -616,6 +647,10 @@ const AnimalList = ({ authToken, showModalMessage, onEditAnimal, onSetCurrentVie
                                                         )}
                                                         {animal.isDisplay && (
                                                             <span className="text-xs bg-indigo-100 text-indigo-800 px-2 py-0.5 rounded-full font-medium">Display</span>
+                                                        )}
+                                                        {/* NEW: Global indicator */}
+                                                        {animal.isGlobal && ( 
+                                                            <span className="text-xs bg-yellow-100 text-yellow-800 px-2 py-0.5 rounded-full font-medium">Global</span>
                                                         )}
                                                     </div>
                                                 </div>
