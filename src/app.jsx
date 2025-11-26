@@ -1038,12 +1038,13 @@ const AuthView = ({ onLoginSuccess, showModalMessage, isRegister, setIsRegister,
                 <input type="password" placeholder="Password *" value={password} onChange={(e) => setPassword(e.target.value)} required 
                     className="w-full p-3 border border-gray-300 rounded-lg focus:ring-primary focus:border-primary transition" />
                 
-                <button type="submit" disabled={loading}
-                    className="w-full bg-primary-dark hover:bg-primary text-black font-bold py-3 rounded-lg transition duration-150 shadow-md flex items-center justify-center space-x-2 disabled:opacity-50"
-                >
-                    {loading ? <Loader2 className="animate-spin" size={20} /> : (isRegister ? <UserPlus size={20} /> : <LogIn size={20} />)}
-                    <span>{loading ? 'Processing...' : (isRegister ? 'Register' : 'Log In')}</span>
-                </button>
+                 <button
+          type="submit"
+          disabled={loading}
+          className="w-full bg-primary text-black font-bold py-3 rounded-lg shadow-md hover:bg-primary/90 transition duration-150 flex items-center justify-center disabled:opacity-50"
+        >
+          {loading ? <Loader2 className="animate-spin mr-2" size={20} /> : (isRegister ? <><UserPlus size={20} className="mr-2" /> Register</> : <><LogIn size={20} className="mr-2" /> Log In</>)}
+        </button>
             </form>
             
             <div className="mt-6 text-center">
