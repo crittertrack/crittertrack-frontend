@@ -1908,6 +1908,11 @@ const App = () => {
 	
     const handleLoginSuccess = (token) => {
         setAuthToken(token);
+        try {
+            localStorage.setItem('authToken', token);
+        } catch (e) {
+            console.warn('Could not persist authToken to localStorage', e);
+        }
         setCurrentView('list');
         setIsRegister(false);
     };
