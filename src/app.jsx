@@ -634,8 +634,8 @@ const AnimalImageUpload = ({ imageUrl, onFileChange, disabled = false }) => (
 // Returns a Promise that resolves to a Blob.
 async function compressImageFile(file, { maxWidth = 1200, maxHeight = 1200, quality = 0.8 } = {}) {
     if (!file || !file.type || !file.type.startsWith('image/')) throw new Error('Not an image file');
-    // Don't attempt to re-encode GIFs (could lose animation)
-    if (file.type === 'image/gif') return file;
+    // Reject GIFs (animations not allowed) — the server accepts PNG/JPEG only
+    if (file.type === 'image/gif') throw new Error('GIF_NOT_ALLOWED');
 
     const img = await new Promise((resolve, reject) => {
         const url = URL.createObjectURL(file);
@@ -679,8 +679,8 @@ async function compressImageFile(file, { maxWidth = 1200, maxHeight = 1200, qual
 // Returns a Blob (best-effort). Throws if input isn't an image.
 async function compressImageToMaxSize(file, maxBytes = 200 * 1024, opts = {}) {
     if (!file || !file.type || !file.type.startsWith('image/')) throw new Error('Not an image file');
-    // Don't attempt to re-encode GIFs (could lose animation) — return original
-    if (file.type === 'image/gif') return file;
+    // Reject GIFs (animations not allowed) — the server accepts PNG/JPEG only
+    if (file.type === 'image/gif') throw new Error('GIF_NOT_ALLOWED');
 
     // Start with original dimensions limits from opts or defaults
     let { maxWidth = 1200, maxHeight = 1200, startQuality = 0.85, minQuality = 0.35, qualityStep = 0.05, minDimension = 200 } = opts;
