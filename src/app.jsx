@@ -703,37 +703,36 @@ const AnimalForm = ({
     const currentId = animalToEdit?.id_public;
 
     return (
-        <>
-            {modalTarget && (
-                <ParentSearchModal
-                    title={modalTarget === 'father' ? 'Sire' : 'Dam'}
-                    currentId={currentId}
-                    onSelect={handleSelectPedigree}
-                    onClose={() => setModalTarget(null)}
-                    authToken={authToken}
-                    showModalMessage={showModalMessage}
-                    
-                    // --- NEW FILTERING PROPS ---
-                    requiredGender={requiredGender}
-                    birthDate={formData.birthDate}
-                />
-            )}
+    // --- THIS IS THE RESTORED BACKGROUND BOX ---
+    <div className="w-full max-w-2xl mx-auto bg-white p-6 rounded-xl shadow-lg">
+        {modalTarget && (
+            <ParentSearchModal
+                title={modalTarget === 'father' ? 'Sire' : 'Dam'}
+                currentId={currentId}
+                onSelect={handleSelectPedigree}
+                onClose={() => setModalTarget(null)}
+                authToken={authToken}
+                showModalMessage={showModalMessage}
+                requiredGender={requiredGender}
+                birthDate={formData.birthdate}
+            />
+        )}
 
             {!modalTarget && (
                 <>
                 <h2 className="text-3xl font-bold text-gray-800 mb-6 flex items-center justify-between">
-                        <span>
-                            <PlusCircle size={24} className="inline mr-2 text-primary" /> 
-                            {formTitle}
-                        </span>
-                        <button 
-                            onClick={onCancel} 
-                            className="text-gray-500 hover:text-gray-700 transition duration-150 p-2 rounded-lg"
-                            title="Back to List"
-                        >
-                            <ArrowLeft size={24} />
-                        </button>
-                    </h2>
+            <span>
+                <PlusCircle size={24} className="inline mr-2 text-primary" />
+                {formTitle}
+            </span>
+            <button
+                onClick={onCancel}
+                className="text-gray-500 hover:text-gray-700 transition duration-150 p-2 rounded-lg"
+                title="Back to List"
+            >
+                <ArrowLeft size={24} />
+            </button>
+        </h2>
 
                     <form onSubmit={handleSubmit} className="space-y-6">
                 
@@ -1923,7 +1922,7 @@ const App = () => {
             </main>
 
             <footer className="w-full max-w-4xl mt-6 text-center text-sm text-gray-500 pt-4 border-t border-gray-200">
-                &copy; {new Date().getFullYear()} Crittertrack Pedigree System.
+                &copy; {new Date().getFullYear()} CritterTrack Pedigree System.
             </footer>
         </div>
     );
