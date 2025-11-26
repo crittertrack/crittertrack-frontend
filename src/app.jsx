@@ -1287,6 +1287,14 @@ const AnimalList = ({ authToken, showModalMessage, onEditAnimal, onSetCurrentVie
                 });
             }
 
+            // Ensure only animals with the actual boolean flags are shown when those filters are enabled
+            if (statusFilterPregnant) {
+                data = data.filter(a => a.isPregnant === true);
+            }
+            if (statusFilterNursing) {
+                data = data.filter(a => a.isNursing === true);
+            }
+
             setAnimals(data);
         } catch (error) {
             console.error('Fetch animals error:', error);
@@ -1465,14 +1473,14 @@ const AnimalList = ({ authToken, showModalMessage, onEditAnimal, onSetCurrentVie
 
                     <button onClick={handleFilterPregnant}
                         className={`px-3 py-1.5 text-sm font-semibold rounded-lg transition duration-150 shadow-sm flex items-center space-x-1 ${ 
-                            statusFilterPregnant ? 'bg-accent text-white' : 'bg-gray-200 text-gray-700 hover:bg-gray-300'
+                            statusFilterPregnant ? 'bg-accent text-black' : 'bg-gray-200 text-gray-700 hover:bg-gray-300'
                         }`}
                     >
                         <Egg size={16} /> <span>Pregnant</span>
                     </button>
                     <button onClick={handleFilterNursing}
                         className={`px-3 py-1.5 text-sm font-semibold rounded-lg transition duration-150 shadow-sm flex items-center space-x-1 ${ 
-                            statusFilterNursing ? 'bg-blue-600 text-white' : 'bg-gray-200 text-gray-700 hover:bg-gray-300'
+                            statusFilterNursing ? 'bg-accent text-black' : 'bg-gray-200 text-gray-700 hover:bg-gray-300'
                         }`}
                     >
                         <Milk size={16} /> <span>Nursing</span>
