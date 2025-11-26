@@ -1049,7 +1049,7 @@ const AuthView = ({ onLoginSuccess, showModalMessage, isRegister, setIsRegister,
             
             <div className="mt-6 text-center">
                 <button type="button" onClick={() => setIsRegister(prev => !prev)}
-                    className="text-sm bg-accent hover:text-primary transition duration-150 font-medium"
+                    className="text-sm text-accent hover:text-primary transition duration-150 font-medium"
                 >
                     {isRegister ? 'Already have an account? Log In' : "Don't have an account? Register Here"}
                 </button>
