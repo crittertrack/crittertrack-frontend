@@ -785,28 +785,28 @@ const AnimalForm = ({
                 {/* PRIMARY INPUT FIELDS (THE MISSING SECTION) */}
                 {/* ------------------------------------------- */}
                 <div className="grid grid-cols-1 md:grid-cols-3 gap-4 border p-4 rounded-lg">
-                    
+                    					
+					{/* Prefix */}
+                    <div>
+                        <label className="block text-sm font-medium text-gray-700">Prefix (Optional)</label>
+                        <input type="text" name="prefix" value={formData.prefix} onChange={handleChange} 
+                            className="mt-1 block w-full p-2 border border-gray-300 rounded-md shadow-sm focus:ring-primary focus:border-primary" />
+                    </div>
+					
                     {/* Name */}
                     <div className="md:col-span-2">
                         <label className="block text-sm font-medium text-gray-700">Name</label>
                         <input type="text" name="name" value={formData.name} onChange={handleChange} required 
                             className="mt-1 block w-full p-2 border border-gray-300 rounded-md shadow-sm focus:ring-primary focus:border-primary" />
                     </div>
-                    
-                    {/* Prefix */}
+					
+					{/* Registry Code */}
                     <div>
-                        <label className="block text-sm font-medium text-gray-700">Prefix (Optional)</label>
-                        <input type="text" name="prefix" value={formData.prefix} onChange={handleChange} 
+                        <label className="block text-sm font-medium text-gray-700">Registry Code (Optional)</label>
+                        <input type="text" name="registryCode" value={formData.registryCode} onChange={handleChange} 
                             className="mt-1 block w-full p-2 border border-gray-300 rounded-md shadow-sm focus:ring-primary focus:border-primary" />
                     </div>
-                    
-                    {/* Species (Read-Only) */}
-                    <div>
-                        <label className="block text-sm font-medium text-gray-700">Species</label>
-                        <input type="text" name="species" value={formData.species} readOnly 
-                            className="mt-1 block w-full p-2 border border-gray-300 rounded-md shadow-sm bg-gray-100" />
-                    </div>
-                    
+                                                       
                     {/* Gender */}
                     <div>
                         <label className="block text-sm font-medium text-gray-700">Gender</label>
@@ -832,20 +832,6 @@ const AnimalForm = ({
                         </select>
                     </div>
                     
-                    {/* Registry Code */}
-                    <div>
-                        <label className="block text-sm font-medium text-gray-700">Registry Code (Optional)</label>
-                        <input type="text" name="registryCode" value={formData.registryCode} onChange={handleChange} 
-                            className="mt-1 block w-full p-2 border border-gray-300 rounded-md shadow-sm focus:ring-primary focus:border-primary" />
-                    </div>
-
-                    {/* Genetic Code */}
-                    <div>
-                        <label className="block text-sm font-medium text-gray-700">Genetic Code (Optional)</label>
-                        <input type="text" name="geneticCode" value={formData.geneticCode} onChange={handleChange} 
-                            className="mt-1 block w-full p-2 border border-gray-300 rounded-md shadow-sm focus:ring-primary focus:border-primary" />
-                    </div>
-                    
                     {/* Color */}
                     <div>
                         <label className="block text-sm font-medium text-gray-700">Color (Optional)</label>
@@ -857,6 +843,13 @@ const AnimalForm = ({
                     <div>
                         <label className="block text-sm font-medium text-gray-700">Coat (Optional)</label>
                         <input type="text" name="coat" value={formData.coat} onChange={handleChange} 
+                            className="mt-1 block w-full p-2 border border-gray-300 rounded-md shadow-sm focus:ring-primary focus:border-primary" />
+                    </div>
+					
+					{/* Genetic Code */}
+                    <div>
+                        <label className="block text-sm font-medium text-gray-700">Genetic Code (Optional)</label>
+                        <input type="text" name="geneticCode" value={formData.geneticCode} onChange={handleChange} 
                             className="mt-1 block w-full p-2 border border-gray-300 rounded-md shadow-sm focus:ring-primary focus:border-primary" />
                     </div>
                 </div>
