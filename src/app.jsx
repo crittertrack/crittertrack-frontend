@@ -623,10 +623,120 @@ const AnimalImageUpload = ({ imageUrl, onFileChange, disabled = false }) => (
                 Change Photo
                 <input type="file" accept="image/*" onChange={onFileChange} disabled={disabled} className="hidden" />
             </label>
-            <p className="text-sm text-gray-500 mt-2">Recommended 800x800px. Max 5MB.</p>
+            <p className="text-sm text-gray-500 mt-2">Images are automatically compressed for upload.</p>
         </div>
     </div>
 );
+
+
+// Compress an image File in the browser by resizing it to fit within max dimensions
+// and re-encoding to JPEG (or PNG for original PNG files). GIFs are returned as-is.
+// Returns a Promise that resolves to a Blob.
+async function compressImageFile(file, { maxWidth = 1200, maxHeight = 1200, quality = 0.8 } = {}) {
+    if (!file || !file.type || !file.type.startsWith('image/')) throw new Error('Not an image file');
+    // Don't attempt to re-encode GIFs (could lose animation)
+    if (file.type === 'image/gif') return file;
+
+    const img = await new Promise((resolve, reject) => {
+        const url = URL.createObjectURL(file);
+        const image = new Image();
+        image.onload = () => { URL.revokeObjectURL(url); resolve(image); };
+        image.onerror = (e) => { URL.revokeObjectURL(url); reject(new Error('Failed to load image for compression')); };
+        image.src = url;
+    });
+
+    const origWidth = img.width;
+    const origHeight = img.height;
+    let targetWidth = origWidth;
+    let targetHeight = origHeight;
+
+    // Calculate target size preserving aspect ratio
+    if (origWidth > maxWidth || origHeight > maxHeight) {
+        const widthRatio = maxWidth / origWidth;
+        const heightRatio = maxHeight / origHeight;
+        const ratio = Math.min(widthRatio, heightRatio);
+        targetWidth = Math.round(origWidth * ratio);
+        targetHeight = Math.round(origHeight * ratio);
+    }
+
+    const canvas = document.createElement('canvas');
+    canvas.width = targetWidth;
+    canvas.height = targetHeight;
+    const ctx = canvas.getContext('2d');
+    // Fill background white for JPEG to avoid black background on transparent PNGs
+    ctx.fillStyle = '#ffffff';
+    ctx.fillRect(0, 0, targetWidth, targetHeight);
+    ctx.drawImage(img, 0, 0, targetWidth, targetHeight);
+
+    // Use PNG output for original PNGs to preserve transparency, otherwise JPEG
+    const outputType = file.type === 'image/png' ? 'image/png' : 'image/jpeg';
+    const blob = await new Promise((resolve) => canvas.toBlob(resolve, outputType, quality));
+    return blob || file;
+}
+
+// Compress an image File to be under `maxBytes` if possible.
+// Tries decreasing quality first, then scales down dimensions and retries.
+// Returns a Blob (best-effort). Throws if input isn't an image.
+async function compressImageToMaxSize(file, maxBytes = 200 * 1024, opts = {}) {
+    if (!file || !file.type || !file.type.startsWith('image/')) throw new Error('Not an image file');
+    // Don't attempt to re-encode GIFs (could lose animation) — return original
+    if (file.type === 'image/gif') return file;
+
+    // Start with original dimensions limits from opts or defaults
+    let { maxWidth = 1200, maxHeight = 1200, startQuality = 0.85, minQuality = 0.35, qualityStep = 0.05, minDimension = 200 } = opts;
+
+    // Load original image to get dimensions
+    const image = await new Promise((resolve, reject) => {
+        const url = URL.createObjectURL(file);
+        const img = new Image();
+        img.onload = () => { URL.revokeObjectURL(url); resolve(img); };
+        img.onerror = (e) => { URL.revokeObjectURL(url); reject(new Error('Failed to load image for compression')); };
+        img.src = url;
+    });
+
+    let targetW = Math.min(image.width, maxWidth);
+    let targetH = Math.min(image.height, maxHeight);
+
+    // Helper to run compression with given dims and quality
+    const tryCompress = async (w, h, quality) => {
+        const canvas = document.createElement('canvas');
+        canvas.width = w;
+        canvas.height = h;
+        const ctx = canvas.getContext('2d');
+        ctx.fillStyle = '#ffffff';
+        ctx.fillRect(0, 0, w, h);
+        ctx.drawImage(image, 0, 0, w, h);
+        const outputType = file.type === 'image/png' ? 'image/png' : 'image/jpeg';
+        const blob = await new Promise((resolve) => canvas.toBlob(resolve, outputType, quality));
+        return blob;
+    };
+
+    // First pass: try with decreasing quality at initial dimensions
+    let quality = startQuality;
+    while (quality >= minQuality) {
+        const blob = await tryCompress(targetW, targetH, quality);
+        if (!blob) break;
+        if (blob.size <= maxBytes) return blob;
+        quality -= qualityStep;
+    }
+
+    // Second pass: gradually reduce dimensions and retry quality sweep
+    while (Math.max(targetW, targetH) > minDimension) {
+        targetW = Math.max(Math.round(targetW * 0.8), minDimension);
+        targetH = Math.max(Math.round(targetH * 0.8), minDimension);
+        quality = startQuality;
+        while (quality >= minQuality) {
+            const blob = await tryCompress(targetW, targetH, quality);
+            if (!blob) break;
+            if (blob.size <= maxBytes) return blob;
+            quality -= qualityStep;
+        }
+    }
+
+    // As a last resort, return the smallest we could create (use minQuality and minDimension)
+    const finalBlob = await tryCompress(minDimension, minDimension, minQuality);
+    return finalBlob || file;
+}
 
 
 const AnimalForm = ({ 
@@ -735,6 +845,9 @@ const AnimalForm = ({
 
             await onSave(method, url, formData);
 
+            // Notify other parts of the app that animals changed so lists refresh
+            try { window.dispatchEvent(new Event('animals-changed')); } catch (e) { /* ignore */ }
+
             showModalMessage('Success', `Animal ${formData.name} successfully ${animalToEdit ? 'updated' : 'added'}!`);
             onCancel(); 
         } catch (error) {
@@ -820,11 +933,34 @@ const AnimalForm = ({
                 {/* ------------------------------------------- */}
 
                 {/* Image Upload Placeholder */}
-                <AnimalImageUpload imageUrl={animalImagePreview} onFileChange={(e) => {
+                <AnimalImageUpload imageUrl={animalImagePreview} onFileChange={async (e) => {
                     if (e.target.files && e.target.files[0]) {
-                        const f = e.target.files[0];
-                        setAnimalImageFile(f);
-                        setAnimalImagePreview(URL.createObjectURL(f));
+                        const original = e.target.files[0];
+                        try {
+                            // Compress to target <=200KB if possible
+                            let compressedBlob;
+                            try {
+                                compressedBlob = await compressImageToMaxSize(original, 200 * 1024, { maxWidth: 1200, maxHeight: 1200, startQuality: 0.85 });
+                            } catch (err) {
+                                console.warn('Compression-to-size failed, falling back to single-pass compress:', err);
+                                compressedBlob = await compressImageFile(original, { maxWidth: 1200, maxHeight: 1200, quality: 0.8 });
+                            }
+                            // If compressImageFile returned the original File/Blob, wrap if needed
+                            const mime = compressedBlob.type || original.type;
+                            const baseName = original.name.replace(/\.[^/.]+$/, '');
+                            const ext = mime === 'image/png' ? '.png' : '.jpg';
+                            const compressedFile = new File([compressedBlob], `${baseName}${ext}`, { type: mime });
+                            // Warn if we couldn't reach target size (best-effort)
+                            if (compressedBlob.size > 200 * 1024) {
+                                showModalMessage('Image Compression', 'Image was compressed but is still larger than 200KB. It will be uploaded but consider using a smaller image.');
+                            }
+                            setAnimalImageFile(compressedFile);
+                            setAnimalImagePreview(URL.createObjectURL(compressedFile));
+                        } catch (err) {
+                            console.warn('Image compression failed, using original file', err);
+                            setAnimalImageFile(original);
+                            setAnimalImagePreview(URL.createObjectURL(original));
+                        }
                     }
                 }} disabled={loading} />
 
@@ -1093,11 +1229,25 @@ const ProfileEditForm = ({ userProfile, showModalMessage, onSaveSuccess, onCance
     const [securityLoading, setSecurityLoading] = useState(false);
     const [passwordLoading, setPasswordLoading] = useState(false);
 
-    const handleImageChange = (e) => {
+    const handleImageChange = async (e) => {
         if (e.target.files && e.target.files[0]) {
-            const file = e.target.files[0];
-            setProfileImageFile(file);
-            setProfileImageURL(URL.createObjectURL(file));
+            const original = e.target.files[0];
+            try {
+                const compressedBlob = await compressImageToMaxSize(original, 200 * 1024, { maxWidth: 1200, maxHeight: 1200, startQuality: 0.85 });
+                const mime = compressedBlob.type || original.type;
+                const baseName = original.name.replace(/\.[^/.]+$/, '');
+                const ext = mime === 'image/png' ? '.png' : '.jpg';
+                const compressedFile = new File([compressedBlob], `${baseName}${ext}`, { type: mime });
+                if (compressedBlob.size > 200 * 1024) {
+                    showModalMessage('Image Compression', 'Image was compressed but remains larger than 200KB. Consider using a smaller image for faster uploads.');
+                }
+                setProfileImageFile(compressedFile);
+                setProfileImageURL(URL.createObjectURL(compressedFile));
+            } catch (err) {
+                console.warn('Profile image compression failed, using original file', err);
+                setProfileImageFile(original);
+                setProfileImageURL(URL.createObjectURL(original));
+            }
         }
     };
 
@@ -1572,6 +1722,16 @@ const AnimalList = ({ authToken, showModalMessage, onEditAnimal, onViewAnimal, o
                 data = data.filter(a => a.isNursing === true);
             }
 
+            // Cache-bust any image URLs so updated uploads appear immediately
+            data = data.map(a => {
+                const img = a.imageUrl || a.photoUrl || null;
+                if (img) {
+                    const busted = img.includes('?') ? `${img}&t=${Date.now()}` : `${img}?t=${Date.now()}`;
+                    return { ...a, imageUrl: busted, photoUrl: busted };
+                }
+                return a;
+            });
+
             setAnimals(data);
         } catch (error) {
             console.error('Fetch animals error:', error);
@@ -1583,6 +1743,15 @@ const AnimalList = ({ authToken, showModalMessage, onEditAnimal, onViewAnimal, o
 
     useEffect(() => {
         fetchAnimals();
+    }, [fetchAnimals]);
+
+    // Refresh animals when other parts of the app signal a change (e.g., after upload/save)
+    useEffect(() => {
+        const handleAnimalsChanged = () => {
+            try { fetchAnimals(); } catch (e) { /* ignore */ }
+        };
+        window.addEventListener('animals-changed', handleAnimalsChanged);
+        return () => window.removeEventListener('animals-changed', handleAnimalsChanged);
     }, [fetchAnimals]);
 
     const groupedAnimals = useMemo(() => {
