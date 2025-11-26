@@ -1717,7 +1717,7 @@ const App = () => {
             clearTimeout(timeoutRef.current);
         }
         if (authToken) {
-            // Set new timer (Fix 3: JWT/Idle Timeout)
+            // Fix 3: JWT/Idle Timeout Logic
             timeoutRef.current = setTimeout(() => {
                 handleLogout(true); 
             }, IDLE_TIMEOUT_MS);
@@ -1803,6 +1803,20 @@ const App = () => {
         }
     };
 
+    // --- NEW: Function to delete an animal ---
+    const handleDeleteAnimal = async (id_public) => {
+        try {
+            await axios.delete(`${API_BASE_URL}/animals/${id_public}`);
+            
+            // Navigate back to the list and show success message
+            setCurrentView('list'); 
+            showModalMessage('Success', `Animal with ID ${id_public} has been successfully deleted.`);
+        } catch (error) {
+            console.error('Failed to delete animal:', error);
+            showModalMessage('Error', `Failed to delete animal: ${error.response?.data?.message || error.message}`);
+        }
+    };
+    // ------------------------------------------
 
     const renderView = () => {
         switch (currentView) {
@@ -1810,8 +1824,12 @@ const App = () => {
                 return <ProfileView userProfile={userProfile} showModalMessage={showModalMessage} fetchUserProfile={fetchUserProfile} authToken={authToken} />;
                 
             case 'select-species':
+                const speciesList = speciesOptions.join('/');
+                const selectorTitle = `Add New ${speciesList}/Custom`;
+
                 return (
                     <SpeciesSelector
+                        title={selectorTitle} 
                         speciesOptions={speciesOptions}
                         onSelectSpecies={(species) => {
                             setSpeciesToAdd(species);
@@ -1836,8 +1854,10 @@ const App = () => {
                     setCurrentView('select-species');
                     return null;
                 }
+                const addTitle = `Add New ${speciesToAdd}`; // Define a title for Add view
                 return (
                     <AnimalForm 
+                        formTitle={addTitle} // Pass title
                         onSave={handleSaveAnimal} 
                         onCancel={() => setCurrentView('list')} 
                         showModalMessage={showModalMessage} 
@@ -1850,11 +1870,18 @@ const App = () => {
                     setCurrentView('list');
                     return null;
                 }
+                
+                // 1. Change title on top to: Edit Name
+                const editTitle = `Edit ${animalToEdit.name}`;
+                
                 return (
                     <AnimalForm 
+                        formTitle={editTitle} // Pass new dynamic title
                         animalToEdit={animalToEdit}
                         onSave={handleSaveAnimal} 
                         onCancel={() => setCurrentView('list')} 
+                        // 2. Implement a delete animal button (by passing the handler)
+                        onDelete={() => handleDeleteAnimal(animalToEdit.id_public)} 
                         showModalMessage={showModalMessage} 
                         authToken={authToken}
                         species={speciesToAdd}
@@ -1917,7 +1944,7 @@ const App = () => {
         <div className="min-h-screen bg-page-bg p-6 flex flex-col items-center font-sans">
             {showModal && <ModalMessage title={modalMessage.title} message={modalMessage.message} onClose={() => setShowModal(false)} />}
             
-            {/* 1. Header (UI Reverted + Name Display Restored) */}
+            {/* 1. Header */}
             <header className="w-full max-w-4xl mb-6">
                 <div className="flex justify-between items-center bg-white p-4 rounded-xl shadow-lg border border-gray-200">
                     {/* Logo and App Title */}
