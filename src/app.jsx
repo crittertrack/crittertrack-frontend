@@ -989,11 +989,22 @@ const UserProfileCard = ({ userProfile }) => {
         ? new Intl.DateTimeFormat('en-US', { year: 'numeric', month: 'long', day: 'numeric' }).format(new Date(userProfile.createdAt))
         : 'N/A';
     
-    const ProfileImage = () => (
-        <div className="w-20 h-20 bg-gray-200 rounded-lg flex items-center justify-center text-gray-500 overflow-hidden shadow-inner">
-            <User size={40} />
-        </div>
-    );
+    const ProfileImage = () => {
+        const img = userProfile.profileImageUrl || userProfile.imageUrl || userProfile.avatarUrl || userProfile.avatar || userProfile.profile_image || null;
+        if (img) {
+            return (
+                <div className="w-20 h-20 bg-gray-200 rounded-lg flex items-center justify-center text-gray-500 overflow-hidden shadow-inner">
+                    <img src={img} alt={userProfile.personalName} className="w-full h-full object-cover" />
+                </div>
+            );
+        }
+
+        return (
+            <div className="w-20 h-20 bg-gray-200 rounded-lg flex items-center justify-center text-gray-500 overflow-hidden shadow-inner">
+                <User size={40} />
+            </div>
+        );
+    };
 
     const isPersonalNameVisible = userProfile.showPersonalName ?? true;
     const isBreederNameVisible = userProfile.showBreederName ?? false;
@@ -1075,7 +1086,7 @@ const ProfileEditForm = ({ userProfile, showModalMessage, onSaveSuccess, onCance
     const [showEmailPublic, setShowEmailPublic] = useState(userProfile.showEmailPublic ?? false); 
 
     const [profileImageFile, setProfileImageFile] = useState(null); 
-    const [profileImageURL, setProfileImageURL] = useState(null); 
+    const [profileImageURL, setProfileImageURL] = useState(userProfile.profileImageUrl || userProfile.imageUrl || userProfile.avatarUrl || userProfile.avatar || userProfile.profile_image || null); 
     const [profileLoading, setProfileLoading] = useState(false);
 
     const [email, setEmail] = useState(userProfile.email);
@@ -1116,7 +1127,11 @@ const ProfileEditForm = ({ userProfile, showModalMessage, onSaveSuccess, onCance
                     fd.append('type', 'profile');
                     const uploadResp = await axios.post(`${API_BASE_URL}/upload`, fd, { headers: { 'Content-Type': 'multipart/form-data', Authorization: `Bearer ${authToken}` } });
                     if (uploadResp?.data?.url) {
+                        // include multiple likely field names so backend/publicprofile table can pick it up
                         payload.profileImageUrl = uploadResp.data.url;
+                        payload.imageUrl = uploadResp.data.url;
+                        payload.avatarUrl = uploadResp.data.url;
+                        payload.profile_image = uploadResp.data.url;
                     }
                 } catch (uploadErr) {
                     console.error('Profile image upload failed:', uploadErr?.response?.data || uploadErr.message);
