@@ -57,36 +57,69 @@ const ProfileImagePlaceholder = ({ url, onFileChange, disabled }) => (
         </div>
         <input 
             id="profileImageInput" 
-            type="file" 
-            accept="image/*" 
-            hidden 
-            onChange={onFileChange} 
-            disabled={disabled}
-        />
-        <button 
-            type="button" 
-            onClick={() => !disabled && document.getElementById('profileImageInput').click()}
-            disabled={disabled}
-            className="text-sm text-primary hover:text-primary-dark transition duration-150 disabled:opacity-50"
-        >
-            {url ? "Change Image" : "Upload Image"}
-        </button>
-    </div>
-);
+            try {
+                let uploadedUrl = null;
 
-const AnimalImageUpload = ({ imageUrl, onFileChange, disabled }) => (
-    <div className="flex flex-col items-center space-y-3 p-4 border rounded-lg bg-gray-50">
-        <h4 className="font-semibold text-gray-700">Animal Photo (Optional)</h4>
-        <div 
-            className="w-32 h-32 bg-gray-200 rounded-lg flex items-center justify-center text-gray-500 overflow-hidden shadow-inner cursor-pointer" 
-            onClick={() => !disabled && document.getElementById('animalImageInput').click()}
-        >
-            {imageUrl ? (
-                <img src={imageUrl} alt="Animal" className="w-full h-full object-cover" />
-            ) : (
-                <Cat size={60} />
-            )}
-        </div>
+                if (profileImageFile) {
+                    // First try the dedicated upload endpoint
+                    try {
+                        const fd = new FormData();
+                        fd.append('file', profileImageFile);
+                        fd.append('type', 'profile');
+                        const uploadResp = await axios.post(`${API_BASE_URL}/upload`, fd, { headers: { 'Content-Type': 'multipart/form-data', Authorization: `Bearer ${authToken}` } });
+                        uploadedUrl = uploadResp?.data?.url || uploadResp?.data?.data?.url || uploadResp?.data?.path || null;
+                    } catch (uploadErr) {
+                        console.warn('Profile image upload to /upload failed, will try sending file with profile PUT:', uploadErr?.response?.data || uploadErr.message);
+                    }
+                }
+
+                if (uploadedUrl) {
+                    payload.profileImageUrl = uploadedUrl;
+                    payload.imageUrl = uploadedUrl;
+                    payload.avatarUrl = uploadedUrl;
+                    payload.profile_image = uploadedUrl;
+
+                    await axios.put(`${API_BASE_URL}/users/profile`, payload, {
+                        headers: { Authorization: `Bearer ${authToken}` }
+                    });
+                } else if (profileImageFile) {
+                    // Fallback: send multipart/form-data directly to profile endpoint including the file and fields
+                    try {
+                        const fd2 = new FormData();
+                        fd2.append('profileImage', profileImageFile);
+                        // also append fields
+                        fd2.append('personalName', personalName);
+                        fd2.append('breederName', breederName || '');
+                        fd2.append('showPersonalName', String(showPersonalName));
+                        fd2.append('showBreederName', String(showBreederName));
+                        fd2.append('websiteURL', websiteURL || '');
+                        fd2.append('showWebsiteURL', String(showWebsiteURL));
+                        fd2.append('showEmailPublic', String(showEmailPublic));
+
+                        await axios.put(`${API_BASE_URL}/users/profile`, fd2, {
+                            headers: { Authorization: `Bearer ${authToken}`, 'Content-Type': 'multipart/form-data' }
+                        });
+                    } catch (putErr) {
+                        console.error('Profile PUT with multipart failed:', putErr?.response?.data || putErr.message);
+                        showModalMessage('Error', 'Failed to save profile including image. Please try again.');
+                        setProfileLoading(false);
+                        return;
+                    }
+                } else {
+                    // No image file selected, just send JSON payload
+                    await axios.put(`${API_BASE_URL}/users/profile`, payload, {
+                        headers: { Authorization: `Bearer ${authToken}` }
+                    });
+                }
+
+                showModalMessage('Success', 'Profile information updated successfully.');
+                await onSaveSuccess(); 
+            } catch (error) {
+                console.error('Profile Update Error:', error.response?.data || error.message);
+                showModalMessage('Error', error.response?.data?.message || 'Failed to update profile information.');
+            } finally {
+                setProfileLoading(false);
+            }
         <input 
             id="animalImageInput" 
             type="file" 
