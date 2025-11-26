@@ -1523,41 +1523,55 @@ const AnimalList = ({ authToken, showModalMessage, onEditAnimal, onSetCurrentVie
         setAppliedNameFilter(term);
     };
 
-    const AnimalCard = ({ animal, onEditAnimal }) => (
-        <div className="flex justify-between items-center p-4 border-b last:border-b-0 hover:bg-gray-50 transition duration-150">
-            <div className="flex items-center space-x-3">
-                <div>
-                    <p className="text-xl font-semibold text-gray-800">
-                        {animal.prefix ? `${animal.prefix} ` : ''}{animal.name}
-                    </p>
-                    <p className="text-sm text-gray-600">
-                        {animal.gender} | {animal.status} | ID: **CT{animal.id_public}**
-                    </p>
-                    <div className='flex items-center space-x-2 mt-1'>
-                        {animal.isOwned && (
-                            <span className="text-xs bg-green-100 text-green-800 px-2 py-0.5 rounded-full font-medium">Owned</span>
+    const AnimalCard = ({ animal, onEditAnimal }) => {
+        const birth = animal.birthDate ? new Date(animal.birthDate).toLocaleDateString() : '';
+        const genderBadge = animal.gender ? (animal.gender === 'Male' ? 'M' : 'F') : '';
+        const imgSrc = animal.imageUrl || animal.photoUrl || null;
+
+        return (
+            <div className="w-full flex justify-center">
+                <div
+                    onClick={() => onEditAnimal(animal)}
+                    className="relative bg-white rounded-xl shadow-sm w-40 h-48 flex flex-col items-center overflow-hidden cursor-pointer hover:shadow-md transition"
+                >
+                    {/* Birthdate top-left */}
+                    {birth && (
+                        <div className="absolute top-2 left-2 text-xs text-gray-600 bg-white/80 px-2 py-0.5 rounded">
+                            {birth}
+                        </div>
+                    )}
+
+                    {/* Gender badge top-right */}
+                    {genderBadge && (
+                        <div className="absolute top-2 right-2 text-xs font-semibold text-white bg-primary px-2 py-0.5 rounded">
+                            {genderBadge}
+                        </div>
+                    )}
+
+                    {/* Centered profile image */}
+                    <div className="flex-1 flex items-center justify-center w-full px-2">
+                        {imgSrc ? (
+                            <img src={imgSrc} alt={animal.name} className="w-24 h-24 object-cover rounded-md" />
+                        ) : (
+                            <div className="w-24 h-24 bg-gray-100 rounded-md flex items-center justify-center text-gray-400">
+                                <Cat size={36} />
+                            </div>
                         )}
-                        {animal.isDisplay && (
-                            <span className="text-xs bg-blue-100 text-blue-800 px-2 py-0.5 rounded-full font-medium">Public</span>
-                        )}
+                    </div>
+
+                    {/* Prefix / Name under image */}
+                    <div className="w-full text-center px-2 pb-1">
+                        <div className="text-sm font-semibold text-gray-800 truncate">{animal.prefix ? `${animal.prefix} ` : ''}{animal.name}</div>
+                    </div>
+
+                    {/* ID bottom-right */}
+                    <div className="w-full px-2 pb-2 flex justify-end">
+                        <div className="text-xs text-gray-500">CT{animal.id_public}</div>
                     </div>
                 </div>
-                {animal.isPregnant && (
-                    <div className="p-1 bg-accent/20 text-accent rounded-full" title="Pregnant">
-                        <Egg size={18} />
-                    </div>
-                )}
-                {animal.isNursing && (
-                    <div className="p-1 bg-blue-100 text-primary rounded-full" title="Nursing">
-                        <Milk size={18} />
-                    </div>
-                )}
             </div>
-            <button onClick={() => onEditAnimal(animal)} className="text-primary hover:text-primary-dark p-2 rounded-full transition" >
-                <Edit size={20} />
-            </button>
-        </div>
-    );
+        );
+    };
 
     return (
         <div className="w-full max-w-4xl bg-white p-6 rounded-xl shadow-lg">
@@ -1681,7 +1695,7 @@ const AnimalList = ({ authToken, showModalMessage, onEditAnimal, onSetCurrentVie
                             <h3 className="text-lg font-bold bg-gray-100 p-4 border-b text-gray-700">
                                 {species} ({groupedAnimals[species].length})
                             </h3>
-                            <div className="divide-y divide-gray-100">
+                            <div className="p-4 grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-4">
                                 {groupedAnimals[species].map(animal => (
                                     <AnimalCard key={animal.id_public} animal={animal} onEditAnimal={onEditAnimal} />
                                 ))}
