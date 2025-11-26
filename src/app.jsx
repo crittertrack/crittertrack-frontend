@@ -1278,6 +1278,15 @@ const AnimalList = ({ authToken, showModalMessage, onEditAnimal, onSetCurrentVie
                     return name.includes(term) || registry.includes(term) || idPublic.includes(term.replace(/^ct-?/,'').toLowerCase());
                 });
             }
+
+            // Enforce that males are excluded when pregnant or nursing filters are active
+            if (statusFilterPregnant || statusFilterNursing) {
+                data = data.filter(a => {
+                    const gender = (a.gender || '').toString().toLowerCase();
+                    return gender !== 'male';
+                });
+            }
+
             setAnimals(data);
         } catch (error) {
             console.error('Fetch animals error:', error);
