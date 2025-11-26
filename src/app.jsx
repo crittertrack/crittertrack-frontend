@@ -1810,17 +1810,44 @@ const App = () => {
                     />
                 );
             case 'add-animal':
+                // If no species has been selected yet, show the selector first
+                if (!speciesToAdd) {
+                    return (
+                        <SpeciesSelector
+                            speciesOptions={speciesOptions}
+                            onSelectSpecies={(species) => {
+                                setSpeciesToAdd(species);
+                                setCurrentView('add-animal');
+                            }}
+                            onManageSpecies={() => setCurrentView('manage-species')}
+                        />
+                    );
+                }
+
+                // speciesToAdd is set — render the AnimalForm
                 const addFormTitle = `Add New ${speciesToAdd}`;
                 return (
-                    <AnimalForm 
-                        formTitle={addFormTitle} 
-                        animalToEdit={null} 
-                        species={speciesToAdd} 
-                        onSave={handleSaveAnimal} 
-                        onCancel={() => setCurrentView('list')} 
-                        onDelete={null} 
-                        authToken={authToken} 
+                    <AnimalForm
+                        formTitle={addFormTitle}
+                        animalToEdit={null}
+                        species={speciesToAdd}
+                        onSave={handleSaveAnimal}
+                        onCancel={() => { setCurrentView('list'); setSpeciesToAdd(null); }}
+                        onDelete={null}
+                        authToken={authToken}
                         showModalMessage={showModalMessage}
+                        API_BASE_URL={API_BASE_URL}
+                        X={X}
+                        Search={Search}
+                        Loader2={Loader2}
+                        LoadingSpinner={LoadingSpinner}
+                        PlusCircle={PlusCircle}
+                        ArrowLeft={ArrowLeft}
+                        Save={Save}
+                        Trash2={Trash2}
+                        GENDER_OPTIONS={GENDER_OPTIONS}
+                        STATUS_OPTIONS={STATUS_OPTIONS}
+                        AnimalImageUpload={AnimalImageUpload}
                     />
                 );
             case 'edit-animal':
