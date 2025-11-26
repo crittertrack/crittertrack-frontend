@@ -899,7 +899,7 @@ const AnimalForm = ({
                 </form>
                 </>
             )}
-        </>
+        </div>
     );
 };
 
