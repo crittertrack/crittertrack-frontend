@@ -1108,28 +1108,63 @@ const ProfileEditForm = ({ userProfile, showModalMessage, onSaveSuccess, onCance
         };
 
         try {
-            // If a profile image file was selected, upload first
+            let uploadSucceeded = false;
+            let uploadData = null;
+
             if (profileImageFile) {
                 try {
                     const fd = new FormData();
                     fd.append('file', profileImageFile);
                     fd.append('type', 'profile');
-                    const uploadResp = await axios.post(`${API_BASE_URL}/upload`, fd, { headers: { 'Content-Type': 'multipart/form-data', Authorization: `Bearer ${authToken}` } });
-                    if (uploadResp?.data?.url) {
-                        // include multiple likely field names so backend/publicprofile table can pick it up
-                        payload.profileImageUrl = uploadResp.data.url;
-                        payload.imageUrl = uploadResp.data.url;
-                        payload.avatarUrl = uploadResp.data.url;
-                        payload.profile_image = uploadResp.data.url;
+                    console.log('Profile: attempting upload to', `${API_BASE_URL}/upload`);
+                    const uploadResp = await axios.post(`${API_BASE_URL}/upload`, fd, { headers: { Authorization: `Bearer ${authToken}` } });
+                    console.log('Profile upload response:', uploadResp.status, uploadResp.data);
+                    if (uploadResp?.data) {
+                        uploadData = uploadResp.data;
+                        const returnedUrl = uploadResp.data.url || uploadResp.data.path || (uploadResp.data.data && (uploadResp.data.data.url || uploadResp.data.data.path));
+                        if (returnedUrl) {
+                            payload.profileImageUrl = returnedUrl;
+                            payload.imageUrl = returnedUrl;
+                            payload.avatarUrl = returnedUrl;
+                            payload.profile_image = returnedUrl;
+                            uploadSucceeded = true;
+                        }
                     }
                 } catch (uploadErr) {
                     console.error('Profile image upload failed:', uploadErr?.response?.data || uploadErr.message);
-                    showModalMessage('Image Upload', 'Failed to upload profile image. The profile will be saved without the image.');
+                    showModalMessage('Image Upload', 'Upload endpoint failed — will attempt fallback save (file included in profile PUT).');
                 }
             }
-            await axios.put(`${API_BASE_URL}/users/profile`, payload, {
-                headers: { Authorization: `Bearer ${authToken}` }
-            });
+
+            if (uploadSucceeded) {
+                console.log('Profile: sending JSON profile update with image URL', payload.profileImageUrl);
+                await axios.put(`${API_BASE_URL}/users/profile`, payload, {
+                    headers: { Authorization: `Bearer ${authToken}` }
+                });
+            } else if (profileImageFile) {
+                try {
+                    const form = new FormData();
+                    form.append('profileImage', profileImageFile);
+                    form.append('avatar', profileImageFile);
+                    form.append('file', profileImageFile);
+                    Object.keys(payload).forEach(k => {
+                        if (payload[k] !== undefined && payload[k] !== null) form.append(k, payload[k]);
+                    });
+                    console.log('Profile: attempting multipart PUT to users/profile with form keys:', Array.from(form.keys()));
+                    const profileResp = await axios.put(`${API_BASE_URL}/users/profile`, form, {
+                        headers: { Authorization: `Bearer ${authToken}` }
+                    });
+                    console.log('Profile multipart PUT response:', profileResp.status, profileResp.data);
+                } catch (fmErr) {
+                    console.error('Profile multipart PUT failed:', fmErr?.response?.data || fmErr.message);
+                    showModalMessage('Error', 'Failed to save profile with image. See console/network logs for details.');
+                    throw fmErr;
+                }
+            } else {
+                await axios.put(`${API_BASE_URL}/users/profile`, payload, {
+                    headers: { Authorization: `Bearer ${authToken}` }
+                });
+            }
             showModalMessage('Success', 'Profile information updated successfully.');
             await onSaveSuccess(); 
         } catch (error) {
