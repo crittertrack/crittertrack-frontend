@@ -1080,6 +1080,12 @@ const ProfileEditForm = ({ userProfile, showModalMessage, onSaveSuccess, onCance
     ); 
     const [profileLoading, setProfileLoading] = useState(false);
 
+    // Keep local preview in sync when parent `userProfile` updates (e.g., after save)
+    useEffect(() => {
+        const img = userProfile.profileImage || userProfile.profileImageUrl || userProfile.imageUrl || userProfile.avatarUrl || userProfile.avatar || userProfile.profile_image || null;
+        setProfileImageURL(img);
+    }, [userProfile]);
+
     const [email, setEmail] = useState(userProfile.email);
     const [currentPassword, setCurrentPassword] = useState('');
     const [newPassword, setNewPassword] = useState('');
