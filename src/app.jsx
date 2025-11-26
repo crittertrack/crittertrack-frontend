@@ -1873,7 +1873,9 @@ const App = () => {
             </footer>
         </div>
     );
-}; // <--- This must be the final closing brace of the App component.
+}; // <--- This line closes the 'const App = () => {' function.
 
-// The export must be outside of any function or component.
+// ----------------------------------------------------------------------
+// THIS MUST BE THE FINAL LINE OF CODE IN THE FILE, OUTSIDE ALL BRACES.
+// ----------------------------------------------------------------------
 export default App;
