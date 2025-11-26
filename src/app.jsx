@@ -1267,7 +1267,18 @@ const AnimalList = ({ authToken, showModalMessage, onEditAnimal, onSetCurrentVie
             const url = `${API_BASE_URL}/animals${queryString}`;
 
             const response = await axios.get(url, { headers: { Authorization: `Bearer ${authToken}` } });
-            setAnimals(response.data);
+            let data = response.data || [];
+            // Client-side fallback filtering in case the API doesn't apply the `name` filter reliably
+            if (appliedNameFilter) {
+                const term = appliedNameFilter.toLowerCase();
+                data = data.filter(a => {
+                    const name = (a.name || '').toString().toLowerCase();
+                    const registry = (a.registryCode || '').toString().toLowerCase();
+                    const idPublic = (a.id_public || '').toString().toLowerCase();
+                    return name.includes(term) || registry.includes(term) || idPublic.includes(term.replace(/^ct-?/,'').toLowerCase());
+                });
+            }
+            setAnimals(data);
         } catch (error) {
             console.error('Fetch animals error:', error);
             showModalMessage('Error', 'Failed to fetch animal list.');
