@@ -1717,8 +1717,9 @@ const App = () => {
             clearTimeout(timeoutRef.current);
         }
         if (authToken) {
+            // Set new timer (Fix 3: JWT/Idle Timeout)
             timeoutRef.current = setTimeout(() => {
-                handleLogout(true); // Auto-logout due to idle
+                handleLogout(true); 
             }, IDLE_TIMEOUT_MS);
         }
     }, [authToken, handleLogout]);
@@ -1806,7 +1807,6 @@ const App = () => {
     const renderView = () => {
         switch (currentView) {
             case 'profile':
-                // Assuming ProfileView and ProfileEditForm are correctly defined
                 return <ProfileView userProfile={userProfile} showModalMessage={showModalMessage} fetchUserProfile={fetchUserProfile} authToken={authToken} />;
                 
             case 'select-species':
@@ -1842,7 +1842,7 @@ const App = () => {
                         onCancel={() => setCurrentView('list')} 
                         showModalMessage={showModalMessage} 
                         authToken={authToken}
-                        species={speciesToAdd} // Pass the selected species
+                        species={speciesToAdd}
                     />
                 );
             case 'edit-animal':
@@ -1857,7 +1857,7 @@ const App = () => {
                         onCancel={() => setCurrentView('list')} 
                         showModalMessage={showModalMessage} 
                         authToken={authToken}
-                        species={speciesToAdd} // Pass the species of the animal being edited
+                        species={speciesToAdd}
                     />
                 );
             case 'litters':
@@ -1906,14 +1906,21 @@ const App = () => {
         );
     }
 
-    // Logged-in Dashboard Layout (UI REVERTED)
+    // Logged-in Dashboard Layout
+    
+    // Calculate display name for the header
+    const displayName = userProfile?.showBreederName && userProfile?.breederName 
+        ? userProfile.breederName 
+        : userProfile?.personalName || 'User';
+
     return (
         <div className="min-h-screen bg-page-bg p-6 flex flex-col items-center font-sans">
             {showModal && <ModalMessage title={modalMessage.title} message={modalMessage.message} onClose={() => setShowModal(false)} />}
             
-            {/* 1. Header (Reverted to simple navigation bar) */}
+            {/* 1. Header (UI Reverted + Name Display Restored) */}
             <header className="w-full max-w-4xl mb-6">
                 <div className="flex justify-between items-center bg-white p-4 rounded-xl shadow-lg border border-gray-200">
+                    {/* Logo and App Title */}
                     <div className="flex items-center space-x-4">
                         <h1 className="text-2xl font-black text-gray-900 flex items-center">
                             <CustomAppLogo size="w-6 h-6 mr-2" />
@@ -1921,39 +1928,47 @@ const App = () => {
                         </h1>
                     </div>
 
-                    {/* Navigation */}
-                    <nav className="flex space-x-2">
-                        <button
-                            onClick={() => setCurrentView('list')}
-                            title="My Animals"
-                            className={`p-2 rounded-lg transition duration-150 ${currentView === 'list' || currentView === 'add-animal' || currentView === 'edit-animal' ? 'bg-primary shadow-inner text-gray-900' : 'text-gray-500 hover:bg-gray-100'}`}
-                        >
-                            <Cat size={20} />
-                        </button>
-                        <button
-                            onClick={() => setCurrentView('litters')}
-                            title="Litters"
-                            className={`p-2 rounded-lg transition duration-150 ${currentView === 'litters' ? 'bg-primary shadow-inner text-gray-900' : 'text-gray-500 hover:bg-gray-100'}`}
-                        >
-                            <ClipboardList size={20} />
-                        </button>
-                        <button
-                            onClick={() => setCurrentView('profile')}
-                            title="Profile"
-                            className={`p-2 rounded-lg transition duration-150 ${currentView === 'profile' ? 'bg-primary shadow-inner text-gray-900' : 'text-gray-500 hover:bg-gray-100'}`}
-                        >
-                            <User size={20} />
-                        </button>
-                    </nav>
+                    {/* Navigation, Display Name, and Logout */}
+                    <div className='flex items-center space-x-4'>
+                        {/* RESTORED: Display Name */}
+                        <span className='text-gray-600 text-sm hidden sm:block'>
+                            Welcome, <span className='font-semibold text-gray-800'>{displayName}</span>
+                        </span>
 
-                    <button
-                        onClick={() => handleLogout(false)} 
-                        title="Log Out"
-                        className="bg-accent hover:bg-accent/80 text-white font-semibold py-2 px-4 rounded-lg transition duration-150 shadow-md flex items-center space-x-1"
-                    >
-                        <LogOut size={18} className="hidden sm:inline" />
-                        <span className="text-sm">Logout</span>
-                    </button>
+                        {/* Navigation */}
+                        <nav className="flex space-x-2">
+                            <button
+                                onClick={() => setCurrentView('list')}
+                                title="My Animals"
+                                className={`p-2 rounded-lg transition duration-150 ${currentView === 'list' || currentView === 'add-animal' || currentView === 'edit-animal' ? 'bg-primary shadow-inner text-gray-900' : 'text-gray-500 hover:bg-gray-100'}`}
+                            >
+                                <Cat size={20} />
+                            </button>
+                            <button
+                                onClick={() => setCurrentView('litters')}
+                                title="Litters"
+                                className={`p-2 rounded-lg transition duration-150 ${currentView === 'litters' ? 'bg-primary shadow-inner text-gray-900' : 'text-gray-500 hover:bg-gray-100'}`}
+                            >
+                                <ClipboardList size={20} />
+                            </button>
+                            <button
+                                onClick={() => setCurrentView('profile')}
+                                title="Profile"
+                                className={`p-2 rounded-lg transition duration-150 ${currentView === 'profile' ? 'bg-primary shadow-inner text-gray-900' : 'text-gray-500 hover:bg-gray-100'}`}
+                            >
+                                <User size={20} />
+                            </button>
+                        </nav>
+
+                        <button
+                            onClick={() => handleLogout(false)} 
+                            title="Log Out"
+                            className="bg-accent hover:bg-accent/80 text-white font-semibold py-2 px-4 rounded-lg transition duration-150 shadow-md flex items-center space-x-1"
+                        >
+                            <LogOut size={18} className="hidden sm:inline" />
+                            <span className="text-sm">Logout</span>
+                        </button>
+                    </div>
                 </div>
             </header>
 
