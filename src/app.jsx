@@ -489,12 +489,7 @@ const AnimalForm = ({
                 </button>
             </h2>
 
-            {/* Species Context Display (Smaller, permanent box for context) */}
-            <p className="text-lg font-semibold text-gray-700 mb-4 p-3 border border-gray-200 rounded-lg bg-gray-50">
-                Species: **{species}**
-            </p>
-
-            <form onSubmit={handleSubmit} className="space-y-6">
+                        <form onSubmit={handleSubmit} className="space-y-6">
                 
                 {/* Animal Photo (Stub) */}
                 <AnimalImageUpload imageUrl={null} onFileChange={() => showModalMessage('Stub', 'Image Upload Stub')} disabled={loading} />
