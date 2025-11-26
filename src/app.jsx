@@ -585,7 +585,37 @@ const AnimalForm = ({
                 </button>
             </h2>
 
-             <form onSubmit={handleSubmit} className="space-y-6">
+            <form onSubmit={handleSubmit} className="space-y-6">
+                
+                {/* ------------------------------------------- */}
+                {/* ALL STATUS & PRIVACY FLAGS (MOVED TO TOP) */}
+                {/* ------------------------------------------- */}
+                <div className="bg-primary/10 p-4 rounded-lg border-2 border-primary space-y-2">
+                    <h3 className="text-lg font-semibold text-gray-800">Status & Privacy Flags</h3>
+                    <div className="grid grid-cols-2 gap-4">
+                        <label className="flex items-center space-x-2 text-sm text-gray-700">
+                            <input type="checkbox" name="isOwned" checked={formData.isOwned} onChange={handleChange} 
+                                className="h-4 w-4 text-primary rounded border-gray-300 focus:ring-primary" />
+                            <span>Currently Owned by me</span>
+                        </label>
+                        <label className="flex items-center space-x-2 text-sm text-gray-700">
+                            <input type="checkbox" name="isDisplay" checked={formData.isDisplay} onChange={handleChange} 
+                                className="h-4 w-4 text-primary rounded border-gray-300 focus:ring-primary" />
+                            <span>Share on public profile</span>
+                        </label>
+                        <label className="flex items-center space-x-2 text-sm text-gray-700">
+                            <input type="checkbox" name="isPregnant" checked={formData.isPregnant} onChange={handleChange} 
+                                className="h-4 w-4 text-primary rounded border-gray-300 focus:ring-primary" />
+                            <span>Female is Pregnant 🥚</span>
+                        </label>
+                        <label className="flex items-center space-x-2 text-sm text-gray-700">
+                            <input type="checkbox" name="isNursing" checked={formData.isNursing} onChange={handleChange} 
+                                className="h-4 w-4 text-primary rounded border-gray-300 focus:ring-primary" />
+                            <span>Female is Nursing 🥛</span>
+                        </label>
+                    </div>
+                </div>
+                {/* ------------------------------------------- */}
                 
                 <AnimalImageUpload imageUrl={null} onFileChange={() => showModalMessage('Stub', 'Image Upload Stub')} disabled={loading} />
 
@@ -656,7 +686,7 @@ const AnimalForm = ({
                 </div>
                 
                 {/* ------------------------------------------- */}
-                {/* NEW: Pedigree Section */}
+                {/* Pedigree Section (Unchanged) */}
                 {/* ------------------------------------------- */}
                 <div className="bg-gray-50 p-4 rounded-lg border border-gray-200 space-y-4">
                     <h3 className="text-lg font-semibold text-gray-700 border-b pb-2">Pedigree: Sire and Dam 🌳</h3>
@@ -685,35 +715,7 @@ const AnimalForm = ({
                 </div>
                 {/* ------------------------------------------- */}
                 
-                {/* ------------------------------------------- */}
-                {/* NEW: Status & Privacy Settings Section */}
-                {/* ------------------------------------------- */}
-                <div className="bg-gray-50 p-4 rounded-lg border border-gray-200 space-y-4">
-                    <h3 className="text-lg font-semibold text-gray-700 border-b pb-2">Status & Privacy Settings</h3>
-                    <div className="grid grid-cols-2 gap-4">
-                         <label className="flex items-center space-x-2 text-sm text-gray-700">
-                            <input type="checkbox" name="isDisplay" checked={formData.isDisplay} onChange={handleChange} 
-                                className="h-4 w-4 text-primary rounded border-gray-300 focus:ring-primary" />
-                            <span>Share animal on public profile</span>
-                        </label>
-                        <label className="flex items-center space-x-2 text-sm text-gray-700">
-                            <input type="checkbox" name="isOwned" checked={formData.isOwned} onChange={handleChange} 
-                                className="h-4 w-4 text-primary rounded border-gray-300 focus:ring-primary" />
-                            <span>Currently Owned by me</span>
-                        </label>
-                        <label className="flex items-center space-x-2 text-sm text-gray-700">
-                            <input type="checkbox" name="isPregnant" checked={formData.isPregnant} onChange={handleChange} 
-                                className="h-4 w-4 text-primary rounded border-gray-300 focus:ring-primary" />
-                            <span>Female is Pregnant 🥚</span>
-                        </label>
-                        <label className="flex items-center space-x-2 text-sm text-gray-700">
-                            <input type="checkbox" name="isNursing" checked={formData.isNursing} onChange={handleChange} 
-                                className="h-4 w-4 text-primary rounded border-gray-300 focus:ring-primary" />
-                            <span>Female is Nursing 🥛</span>
-                        </label>
-                    </div>
-                </div>
-                {/* ------------------------------------------- */}
+                {/* Removed the now-empty Privacy Settings section */}
 
                 <div className="mt-8 flex justify-between items-center border-t pt-4">
                     <div className="flex space-x-4">
