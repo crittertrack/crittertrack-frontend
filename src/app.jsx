@@ -585,22 +585,22 @@ const AnimalForm = ({
                 </button>
             </h2>
 
-            <form onSubmit={handleSubmit} className="space-y-6">
+             <form onSubmit={handleSubmit} className="space-y-6">
                 
                 <AnimalImageUpload imageUrl={null} onFileChange={() => showModalMessage('Stub', 'Image Upload Stub')} disabled={loading} />
 
                 <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-    <div>
-        <label className="block text-sm font-medium text-gray-700 mb-1"> Prefix </label>
-        <input name="prefix" value={formData.prefix} onChange={handleChange}
-            className="p-2 border border-gray-300 rounded-lg shadow-sm focus:ring-primary focus:border-primary transition w-full" />
-    </div>
-    <div className="md:col-span-2">
-        <label className="block text-sm font-medium text-gray-700 mb-1"> Name * </label>
-        <input name="name" value={formData.name} onChange={handleChange} required
-            className="p-2 border border-gray-300 rounded-lg shadow-sm focus:ring-primary focus:border-primary transition w-full" />
-    </div>
-</div>
+                    <div>
+                        <label className="block text-sm font-medium text-gray-700 mb-1"> Prefix </label>
+                        <input name="prefix" value={formData.prefix} onChange={handleChange}
+                            className="p-2 border border-gray-300 rounded-lg shadow-sm focus:ring-primary focus:border-primary transition w-full" />
+                    </div>
+                    <div className="md:col-span-2">
+                        <label className="block text-sm font-medium text-gray-700 mb-1"> Name * </label>
+                        <input name="name" value={formData.name} onChange={handleChange} required
+                            className="p-2 border border-gray-300 rounded-lg shadow-sm focus:ring-primary focus:border-primary transition w-full" />
+                    </div>
+                </div>
                 
                 <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                     <div>
@@ -655,8 +655,11 @@ const AnimalForm = ({
                     </div>
                 </div>
                 
+                {/* ------------------------------------------- */}
+                {/* NEW: Pedigree Section */}
+                {/* ------------------------------------------- */}
                 <div className="bg-gray-50 p-4 rounded-lg border border-gray-200 space-y-4">
-                    <h3 className="text-lg font-semibold text-gray-700 border-b pb-2">Pedigree & Privacy Settings 🌳</h3>
+                    <h3 className="text-lg font-semibold text-gray-700 border-b pb-2">Pedigree: Sire and Dam 🌳</h3>
                     
                     <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                         <div className='flex flex-col'>
@@ -679,8 +682,15 @@ const AnimalForm = ({
                             </div>
                         </div>
                     </div>
-
-                    <div className="grid grid-cols-2 gap-4 pt-2 border-t border-gray-100">
+                </div>
+                {/* ------------------------------------------- */}
+                
+                {/* ------------------------------------------- */}
+                {/* NEW: Status & Privacy Settings Section */}
+                {/* ------------------------------------------- */}
+                <div className="bg-gray-50 p-4 rounded-lg border border-gray-200 space-y-4">
+                    <h3 className="text-lg font-semibold text-gray-700 border-b pb-2">Status & Privacy Settings</h3>
+                    <div className="grid grid-cols-2 gap-4">
                          <label className="flex items-center space-x-2 text-sm text-gray-700">
                             <input type="checkbox" name="isDisplay" checked={formData.isDisplay} onChange={handleChange} 
                                 className="h-4 w-4 text-primary rounded border-gray-300 focus:ring-primary" />
@@ -703,6 +713,7 @@ const AnimalForm = ({
                         </label>
                     </div>
                 </div>
+                {/* ------------------------------------------- */}
 
                 <div className="mt-8 flex justify-between items-center border-t pt-4">
                     <div className="flex space-x-4">
