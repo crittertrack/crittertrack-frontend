@@ -136,7 +136,7 @@ const ParentSearchModal = ({
             onClick={() => onSelect(animal.id_public)}
         >
             <div>
-                <p className="font-semibold text-gray-800">{animal.prefix} {animal.name} (CT-{animal.id_public})</p>
+                <p className="font-semibold text-gray-800">{animal.prefix} {animal.name} (CT{animal.id_public})</p>
                 <p className="text-sm text-gray-600">
                     {animal.species} | {animal.gender} | {animal.status}
                 </p>
@@ -155,7 +155,7 @@ const ParentSearchModal = ({
             return;
         }
 
-        // Detect ID searches (CT-1234 or 1234)
+        // Detect ID searches (CT1234 or 1234)
         const idMatch = trimmedSearchTerm.match(/^\s*(?:CT[- ]?)?(\d+)\s*$/i);
         const isIdSearch = !!idMatch;
         const idValue = isIdSearch ? idMatch[1] : null;
@@ -236,7 +236,7 @@ const ParentSearchModal = ({
                     <div className="flex space-x-2">
                         <input
                             type="text"
-                            placeholder={`Search by Name or ID (e.g., Minnie or CT-2468)...`}
+                            placeholder={`Search by Name or ID (e.g., Minnie or CT2468)...`}
                             value={searchTerm}
                             onChange={(e) => setSearchTerm(e.target.value)}
                             className="flex-grow p-2 border border-gray-300 rounded-lg focus:ring-primary focus:border-primary transition"
@@ -301,7 +301,7 @@ const LocalAnimalSearchModal = ({ title, currentId, onSelect, onClose, authToken
             onClick={() => onSelect(animal.id_public)}
         >
             <div>
-                <p className="font-semibold text-gray-800">{animal.prefix} {animal.name} (CT-{animal.id_public})</p>
+                <p className="font-semibold text-gray-800">{animal.prefix} {animal.name} (CT{animal.id_public})</p>
                 <p className="text-sm text-gray-600">
                     {animal.species} | {animal.gender} | {animal.status}
                 </p>
@@ -435,7 +435,7 @@ const UserSearchModal = ({ onClose, showModalMessage }) => {
                 )}
             </p>
             <p className="text-sm text-gray-600 ml-5">
-                Public ID: <span className="font-mono text-accent">CT-{user.id_public}</span>
+                Public ID: <span className="font-mono text-accent">CT{user.id_public}</span>
             </p>
             <div className="flex items-center space-x-4 mt-2 ml-5 text-sm">
                 {user.email && (
@@ -465,7 +465,7 @@ const UserSearchModal = ({ onClose, showModalMessage }) => {
                 <div className="flex space-x-2 mb-4">
                     <input
                         type="text"
-                        placeholder="Search by Name, Breeder Name, or ID (e.g., CT-2468)..."
+                        placeholder="Search by Name, Breeder Name, or ID (e.g., CT2468)..."
                         value={searchTerm}
                         onChange={(e) => setSearchTerm(e.target.value)}
                         className="flex-grow p-2 border border-gray-300 rounded-lg focus:ring-primary focus:border-primary transition"
@@ -911,7 +911,7 @@ const AnimalForm = ({
                                 className="flex items-center justify-between p-3 border border-gray-300 rounded-lg bg-white cursor-pointer hover:border-primary transition disabled:opacity-50"
                             >
                                 <span className={formData.fatherId_public ? "text-gray-800" : "text-gray-400"}>
-                                    {formData.fatherId_public ? `CT-${formData.fatherId_public}` : 'Click to Select Sire'}
+                                    {formData.fatherId_public ? `CT${formData.fatherId_public}` : 'Click to Select Sire'}
                                 </span>
                             </div>
                         </div>
@@ -922,7 +922,7 @@ const AnimalForm = ({
                                 className="flex items-center justify-between p-3 border border-gray-300 rounded-lg bg-white cursor-pointer hover:border-primary transition disabled:opacity-50"
                             >
                                 <span className={formData.motherId_public ? "text-gray-800" : "text-gray-400"}>
-                                    {formData.motherId_public ? `CT-${formData.motherId_public}` : 'Click to Select Dam'}
+                                    {formData.motherId_public ? `CT${formData.motherId_public}` : 'Click to Select Dam'}
                                 </span>
                             </div>
                         </div>
@@ -1027,9 +1027,9 @@ const UserProfileCard = ({ userProfile }) => {
 
             <div className="w-full sm:w-auto sm:text-right space-y-2 pt-4 sm:pt-0 border-t sm:border-t-0 sm:border-l border-gray-200 sm:pl-6">
                 
-                <div className="mb-2"> 
+                    <div className="mb-2"> 
                     <span className="text-2xl font-extrabold text-accent">
-                        CT-{userProfile.id_public}
+                        CT{userProfile.id_public}
                     </span>
                 </div>
 
@@ -1323,7 +1323,7 @@ const ProfileView = ({ userProfile, showModalMessage, fetchUserProfile, authToke
 
                 <div className="p-4 bg-gray-50 rounded-lg border border-gray-200">
                     <p className="text-lg font-semibold text-gray-700">Personal ID:</p>
-                    <p className="text-3xl font-extrabold text-accent">CT-{userProfile.id_public}</p>
+                    <p className="text-3xl font-extrabold text-accent">CT{userProfile.id_public}</p>
                 </div>
             </div>
             
@@ -1531,7 +1531,7 @@ const AnimalList = ({ authToken, showModalMessage, onEditAnimal, onSetCurrentVie
                         {animal.prefix ? `${animal.prefix} ` : ''}{animal.name}
                     </p>
                     <p className="text-sm text-gray-600">
-                        {animal.gender} | {animal.status} | ID: **CT-{animal.id_public}**
+                        {animal.gender} | {animal.status} | ID: **CT{animal.id_public}**
                     </p>
                     <div className='flex items-center space-x-2 mt-1'>
                         {animal.isOwned && (
