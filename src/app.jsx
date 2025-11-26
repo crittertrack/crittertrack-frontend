@@ -617,8 +617,17 @@ const AnimalForm = ({
     onDelete,              
     authToken,
     showModalMessage, 
+    API_BASE_URL,          // Ensure these are passed from the parent component (App)
+    X, 
+    Search, 
+    Loader2, 
+    LoadingSpinner,
+    PlusCircle, ArrowLeft, Save, Trash2,
+    GENDER_OPTIONS, STATUS_OPTIONS,
+    AnimalImageUpload // Assuming this component is defined elsewhere
 }) => {
     
+    // Initial state setup (using the passed props for options)
     const [formData, setFormData] = useState(
         animalToEdit ? {
             species: animalToEdit.species,
@@ -670,11 +679,8 @@ const AnimalForm = ({
     };
     
     const handleSelectPedigree = (id) => {
-        if (modalTarget === 'father') {
-            setFormData(prev => ({ ...prev, fatherId_public: id }));
-        } else if (modalTarget === 'mother') {
-            setFormData(prev => ({ ...prev, motherId_public: id }));
-        }
+        const idKey = modalTarget === 'father' ? 'fatherId_public' : 'motherId_public';
+        setFormData(prev => ({ ...prev, [idKey]: id }));
         setModalTarget(null);
     };
 
@@ -699,10 +705,11 @@ const AnimalForm = ({
     };
     
     const currentId = animalToEdit?.id_public;
-    const requiredGender = modalTarget === 'father' ? 'Male' : 'Female'; // Determine gender based on modal target
+    const requiredGender = modalTarget === 'father' ? 'Male' : 'Female';
 
     return (
         <div className="w-full max-w-2xl mx-auto bg-white p-6 rounded-xl shadow-lg">
+            {/* --- Parent Search Modal --- */}
             {modalTarget && ( 
                 <ParentSearchModal
                     title={modalTarget === 'father' ? 'Sire' : 'Dam'} 
@@ -738,7 +745,7 @@ const AnimalForm = ({
             <form onSubmit={handleSubmit} className="space-y-6">
                 
                 {/* ------------------------------------------- */}
-                {/* ALL STATUS & PRIVACY FLAGS (MOVED TO TOP) */}
+                {/* STATUS & PRIVACY FLAGS */}
                 {/* ------------------------------------------- */}
                 <div className="bg-primary/10 p-4 rounded-lg border-2 border-primary space-y-2">
                     <h3 className="text-lg font-semibold text-gray-800">Status & Privacy Flags</h3>
@@ -753,28 +760,110 @@ const AnimalForm = ({
                                 className="h-4 w-4 text-primary rounded border-gray-300 focus:ring-primary" />
                             <span>Share on public profile</span>
                         </label>
-                        <label className="flex items-center space-x-2 text-sm text-gray-700">
-                            <input type="checkbox" name="isPregnant" checked={formData.isPregnant} onChange={handleChange} 
-                                className="h-4 w-4 text-primary rounded border-gray-300 focus:ring-primary" />
-                            <span>Female is Pregnant 🥚</span>
-                        </label>
-                        <label className="flex items-center space-x-2 text-sm text-gray-700">
-                            <input type="checkbox" name="isNursing" checked={formData.isNursing} onChange={handleChange} 
-                                className="h-4 w-4 text-primary rounded border-gray-300 focus:ring-primary" />
-                            <span>Female is Nursing 🥛</span>
-                        </label>
+                        {formData.gender === 'Female' && (
+                            <>
+                                <label className="flex items-center space-x-2 text-sm text-gray-700">
+                                    <input type="checkbox" name="isPregnant" checked={formData.isPregnant} onChange={handleChange} 
+                                        className="h-4 w-4 text-primary rounded border-gray-300 focus:ring-primary" />
+                                    <span>Female is Pregnant 🥚</span>
+                                </label>
+                                <label className="flex items-center space-x-2 text-sm text-gray-700">
+                                    <input type="checkbox" name="isNursing" checked={formData.isNursing} onChange={handleChange} 
+                                        className="h-4 w-4 bg-blue-600 text-white rounded border-gray-300 focus:ring-blue-600" />
+                                    <span>Female is Nursing 🥛</span>
+                                </label>
+                            </>
+                        )}
                     </div>
                 </div>
                 {/* ------------------------------------------- */}
-                
+
+                {/* Image Upload Placeholder */}
                 <AnimalImageUpload imageUrl={null} onFileChange={() => showModalMessage('Stub', 'Image Upload Stub')} disabled={loading} />
 
-                <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                    {/* ... (rest of form fields) ... */}
+                {/* ------------------------------------------- */}
+                {/* PRIMARY INPUT FIELDS (THE MISSING SECTION) */}
+                {/* ------------------------------------------- */}
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-4 border p-4 rounded-lg">
+                    
+                    {/* Name */}
+                    <div className="md:col-span-2">
+                        <label className="block text-sm font-medium text-gray-700">Name</label>
+                        <input type="text" name="name" value={formData.name} onChange={handleChange} required 
+                            className="mt-1 block w-full p-2 border border-gray-300 rounded-md shadow-sm focus:ring-primary focus:border-primary" />
+                    </div>
+                    
+                    {/* Prefix */}
+                    <div>
+                        <label className="block text-sm font-medium text-gray-700">Prefix (Optional)</label>
+                        <input type="text" name="prefix" value={formData.prefix} onChange={handleChange} 
+                            className="mt-1 block w-full p-2 border border-gray-300 rounded-md shadow-sm focus:ring-primary focus:border-primary" />
+                    </div>
+                    
+                    {/* Species (Read-Only) */}
+                    <div>
+                        <label className="block text-sm font-medium text-gray-700">Species</label>
+                        <input type="text" name="species" value={formData.species} readOnly 
+                            className="mt-1 block w-full p-2 border border-gray-300 rounded-md shadow-sm bg-gray-100" />
+                    </div>
+                    
+                    {/* Gender */}
+                    <div>
+                        <label className="block text-sm font-medium text-gray-700">Gender</label>
+                        <select name="gender" value={formData.gender} onChange={handleChange} required 
+                            className="mt-1 block w-full p-2 border border-gray-300 rounded-md shadow-sm focus:ring-primary focus:border-primary" >
+                            {GENDER_OPTIONS.map(g => <option key={g} value={g}>{g}</option>)}
+                        </select>
+                    </div>
+                    
+                    {/* Birthdate */}
+                    <div>
+                        <label className="block text-sm font-medium text-gray-700">Birthdate</label>
+                        <input type="date" name="birthDate" value={formData.birthDate} onChange={handleChange} required 
+                            className="mt-1 block w-full p-2 border border-gray-300 rounded-md shadow-sm focus:ring-primary focus:border-primary" />
+                    </div>
+                    
+                    {/* Status */}
+                    <div>
+                        <label className="block text-sm font-medium text-gray-700">Status</label>
+                        <select name="status" value={formData.status} onChange={handleChange} required 
+                            className="mt-1 block w-full p-2 border border-gray-300 rounded-md shadow-sm focus:ring-primary focus:border-primary" >
+                            {STATUS_OPTIONS.map(s => <option key={s} value={s}>{s}</option>)}
+                        </select>
+                    </div>
+                    
+                    {/* Registry Code */}
+                    <div>
+                        <label className="block text-sm font-medium text-gray-700">Registry Code (Optional)</label>
+                        <input type="text" name="registryCode" value={formData.registryCode} onChange={handleChange} 
+                            className="mt-1 block w-full p-2 border border-gray-300 rounded-md shadow-sm focus:ring-primary focus:border-primary" />
+                    </div>
+
+                    {/* Genetic Code */}
+                    <div>
+                        <label className="block text-sm font-medium text-gray-700">Genetic Code (Optional)</label>
+                        <input type="text" name="geneticCode" value={formData.geneticCode} onChange={handleChange} 
+                            className="mt-1 block w-full p-2 border border-gray-300 rounded-md shadow-sm focus:ring-primary focus:border-primary" />
+                    </div>
+                    
+                    {/* Color */}
+                    <div>
+                        <label className="block text-sm font-medium text-gray-700">Color (Optional)</label>
+                        <input type="text" name="color" value={formData.color} onChange={handleChange} 
+                            className="mt-1 block w-full p-2 border border-gray-300 rounded-md shadow-sm focus:ring-primary focus:border-primary" />
+                    </div>
+                    
+                    {/* Coat */}
+                    <div>
+                        <label className="block text-sm font-medium text-gray-700">Coat (Optional)</label>
+                        <input type="text" name="coat" value={formData.coat} onChange={handleChange} 
+                            className="mt-1 block w-full p-2 border border-gray-300 rounded-md shadow-sm focus:ring-primary focus:border-primary" />
+                    </div>
                 </div>
+                {/* ------------------------------------------- */}
 
                 {/* ------------------------------------------- */}
-                {/* Pedigree Section (Parent Selector buttons) */}
+                {/* Pedigree Section */}
                 {/* ------------------------------------------- */}
                 <div className="bg-gray-50 p-4 rounded-lg border border-gray-200 space-y-4">
                     <h3 className="text-lg font-semibold text-gray-700 border-b pb-2">Pedigree: Sire and Dam 🌳</h3>
@@ -782,7 +871,7 @@ const AnimalForm = ({
                         <div className='flex flex-col'>
                             <label className='text-sm font-medium text-gray-600 mb-1'>Sire (Father) ID (Optional)</label>
                             <div 
-                                onClick={() => !loading && setModalTarget('father')} // <<< This sets modalTarget to 'father'
+                                onClick={() => !loading && setModalTarget('father')}
                                 className="flex items-center justify-between p-3 border border-gray-300 rounded-lg bg-white cursor-pointer hover:border-primary transition disabled:opacity-50"
                             >
                                 <span className={formData.fatherId_public ? "text-gray-800" : "text-gray-400"}>
@@ -793,7 +882,7 @@ const AnimalForm = ({
                         <div className='flex flex-col'>
                             <label className='text-sm font-medium text-gray-600 mb-1'>Dam (Mother) ID (Optional)</label>
                             <div 
-                                onClick={() => !loading && setModalTarget('mother')} // <<< This sets modalTarget to 'mother'
+                                onClick={() => !loading && setModalTarget('mother')}
                                 className="flex items-center justify-between p-3 border border-gray-300 rounded-lg bg-white cursor-pointer hover:border-primary transition disabled:opacity-50"
                             >
                                 <span className={formData.motherId_public ? "text-gray-800" : "text-gray-400"}>
@@ -805,7 +894,14 @@ const AnimalForm = ({
                 </div>
                 {/* ------------------------------------------- */}
                 
-                {/* ... (rest of form buttons) ... */}
+                {/* Remarks */}
+                <div className='mt-4'>
+                    <label className="block text-sm font-medium text-gray-700">Remarks / Notes</label>
+                    <textarea name="remarks" value={formData.remarks} onChange={handleChange} rows="3"
+                        className="mt-1 block w-full p-2 border border-gray-300 rounded-md shadow-sm focus:ring-primary focus:border-primary" />
+                </div>
+                
+                {/* Submit/Delete Buttons */}
                 <div className="mt-8 flex justify-between items-center border-t pt-4">
                     <div className="flex space-x-4">
                         <button type="button" onClick={onCancel} className="bg-gray-300 hover:bg-gray-400 text-gray-800 font-semibold py-2 px-4 rounded-lg transition duration-150 shadow-md"> Cancel </button>
