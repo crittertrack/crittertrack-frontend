@@ -1233,7 +1233,9 @@ const AnimalList = ({ authToken, showModalMessage, onEditAnimal, onSetCurrentVie
     const [animals, setAnimals] = useState([]);
     const [loading, setLoading] = useState(true);
     const [statusFilter, setStatusFilter] = useState('');
-    const [nameFilter, setNameFilter] = useState('');
+    // Manual search: `searchInput` is the controlled input, `appliedNameFilter` is sent to the API
+    const [searchInput, setSearchInput] = useState('');
+    const [appliedNameFilter, setAppliedNameFilter] = useState('');
     const [genderFilter, setGenderFilter] = useState('');
     const [statusFilterPregnant, setStatusFilterPregnant] = useState(false);
     const [statusFilterNursing, setStatusFilterNursing] = useState(false);
@@ -1249,8 +1251,8 @@ const AnimalList = ({ authToken, showModalMessage, onEditAnimal, onSetCurrentVie
             if (genderFilter) {
                 params.push(`gender=${genderFilter}`);
             }
-            if (nameFilter) {
-                params.push(`name=${encodeURIComponent(nameFilter)}`);
+            if (appliedNameFilter) {
+                params.push(`name=${encodeURIComponent(appliedNameFilter)}`);
             }
             if (statusFilterPregnant) {
                 params.push(`isPregnant=true`);
@@ -1272,7 +1274,7 @@ const AnimalList = ({ authToken, showModalMessage, onEditAnimal, onSetCurrentVie
         } finally {
             setLoading(false);
         }
-    }, [authToken, statusFilter, genderFilter, nameFilter, statusFilterPregnant, statusFilterNursing, ownedFilter, showModalMessage]);
+    }, [authToken, statusFilter, genderFilter, appliedNameFilter, statusFilterPregnant, statusFilterNursing, ownedFilter, showModalMessage]);
 
     useEffect(() => {
         fetchAnimals();
@@ -1292,13 +1294,27 @@ const AnimalList = ({ authToken, showModalMessage, onEditAnimal, onSetCurrentVie
     const speciesNames = Object.keys(groupedAnimals).sort();
 
     const handleStatusFilterChange = (e) => setStatusFilter(e.target.value);
-    const handleNameFilterChange = (e) => setNameFilter(e.target.value);
+    const handleSearchInputChange = (e) => setSearchInput(e.target.value);
     const handleGenderFilterChange = (gender) => setGenderFilter(gender);
     const handleFilterPregnant = () => { setStatusFilterPregnant(prev => !prev); setStatusFilterNursing(false); };
     const handleFilterNursing = () => { setStatusFilterNursing(prev => !prev); setStatusFilterPregnant(false); };
     
     const handleRefresh = () => {
         fetchAnimals();
+    };
+
+    const triggerSearch = () => {
+        const term = searchInput.trim();
+        if (!term) {
+            // empty -> clear filter and fetch all
+            setAppliedNameFilter('');
+            return;
+        }
+        if (term.length < 3) {
+            showModalMessage('Search Info', 'Please enter at least 3 characters to search.');
+            return;
+        }
+        setAppliedNameFilter(term);
     };
 
     const AnimalCard = ({ animal, onEditAnimal }) => (
@@ -1359,11 +1375,21 @@ const AnimalList = ({ authToken, showModalMessage, onEditAnimal, onSetCurrentVie
                     <input
                         type="text"
                         placeholder="Search by Animal Name..."
-                        value={nameFilter}
-                        onChange={handleNameFilterChange}
+                        value={searchInput}
+                        onChange={handleSearchInputChange}
+                        onKeyPress={(e) => { if (e.key === 'Enter') triggerSearch(); }}
                         className="flex-grow p-2 border border-gray-300 rounded-lg shadow-sm focus:ring-primary focus:border-primary transition"
                         disabled={loading}
                     />
+                    <button
+                        onClick={triggerSearch}
+                        disabled={loading}
+                        className="bg-primary hover:bg-primary/90 text-black font-semibold py-2 px-4 rounded-lg transition duration-150 shadow-md flex items-center space-x-1"
+                        title="Search"
+                    >
+                        <Search size={18} />
+                        <span className="hidden sm:inline">Search</span>
+                    </button>
                     <button 
                         onClick={() => onSetCurrentView('select-species')} 
                         className="bg-accent hover:bg-accent/90 text-white font-semibold py-2 px-4 rounded-lg transition duration-150 shadow-md flex items-center space-x-1 whitespace-nowrap"
