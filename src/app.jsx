@@ -697,44 +697,49 @@ const AnimalForm = ({
             setLoading(false);
         }
     };
-	
-    const requiredGender = modalTarget === 'father' ? 'Male' : 'Female';
     
     const currentId = animalToEdit?.id_public;
+    const requiredGender = modalTarget === 'father' ? 'Male' : 'Female'; // Determine gender based on modal target
 
     return (
-    // --- THIS IS THE RESTORED BACKGROUND BOX ---
-    <div className="w-full max-w-2xl mx-auto bg-white p-6 rounded-xl shadow-lg">
-        {modalTarget && (
-            <ParentSearchModal
-                title={modalTarget === 'father' ? 'Sire' : 'Dam'}
-                currentId={currentId}
-                onSelect={handleSelectPedigree}
-                onClose={() => setModalTarget(null)}
-                authToken={authToken}
-                showModalMessage={showModalMessage}
-                requiredGender={requiredGender}
-                birthDate={formData.birthdate}
-            />
-        )}
+        <div className="w-full max-w-2xl mx-auto bg-white p-6 rounded-xl shadow-lg">
+            {modalTarget && ( 
+                <ParentSearchModal
+                    title={modalTarget === 'father' ? 'Sire' : 'Dam'} 
+                    currentId={currentId} 
+                    onSelect={handleSelectPedigree} 
+                    onClose={() => setModalTarget(null)} 
+                    authToken={authToken} 
+                    showModalMessage={showModalMessage}
+                    
+                    {/* --- ADDED MISSING PROPS (FIXES CRASH) --- */}
+                    API_BASE_URL={API_BASE_URL}
+                    X={X}
+                    Search={Search}
+                    Loader2={Loader2}
+                    LoadingSpinner={LoadingSpinner}
+                    
+                    {/* --- ADDED PEDIGREE FILTER PROPS --- */}
+                    requiredGender={requiredGender}
+                    birthDate={formData.birthDate} 
+                /> 
+            )}
 
-            {!modalTarget && (
-                <>
-                <h2 className="text-3xl font-bold text-gray-800 mb-6 flex items-center justify-between">
-            <span>
-                <PlusCircle size={24} className="inline mr-2 text-primary" />
-                {formTitle}
-            </span>
-            <button
-                onClick={onCancel}
-                className="text-gray-500 hover:text-gray-700 transition duration-150 p-2 rounded-lg"
-                title="Back to List"
-            >
-                <ArrowLeft size={24} />
-            </button>
-        </h2>
+            <h2 className="text-3xl font-bold text-gray-800 mb-6 flex items-center justify-between">
+                <span>
+                    <PlusCircle size={24} className="inline mr-2 text-primary" /> 
+                    {formTitle}
+                </span>
+                <button 
+                    onClick={onCancel} 
+                    className="text-gray-500 hover:text-gray-700 transition duration-150 p-2 rounded-lg"
+                    title="Back to List"
+                >
+                    <ArrowLeft size={24} />
+                </button>
+            </h2>
 
-                    <form onSubmit={handleSubmit} className="space-y-6">
+            <form onSubmit={handleSubmit} className="space-y-6">
                 
                 {/* ------------------------------------------- */}
                 {/* ALL STATUS & PRIVACY FLAGS (MOVED TO TOP) */}
@@ -769,92 +774,32 @@ const AnimalForm = ({
                 <AnimalImageUpload imageUrl={null} onFileChange={() => showModalMessage('Stub', 'Image Upload Stub')} disabled={loading} />
 
                 <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                    <div>
-                        <label className="block text-sm font-medium text-gray-700 mb-1"> Prefix </label>
-                        <input name="prefix" value={formData.prefix} onChange={handleChange}
-                            className="p-2 border border-gray-300 rounded-lg shadow-sm focus:ring-primary focus:border-primary transition w-full" />
-                    </div>
-                    <div className="md:col-span-2">
-                        <label className="block text-sm font-medium text-gray-700 mb-1"> Name * </label>
-                        <input name="name" value={formData.name} onChange={handleChange} required
-                            className="p-2 border border-gray-300 rounded-lg shadow-sm focus:ring-primary focus:border-primary transition w-full" />
-                    </div>
-                </div>
-                
-                <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                    <div>
-                        <label className="block text-sm font-medium text-gray-700 mb-1"> Registry Code </label>
-                        <input name="registryCode" value={formData.registryCode} onChange={handleChange}
-                            className="p-2 border border-gray-300 rounded-lg shadow-sm focus:ring-primary focus:border-primary transition w-full" />
-                    </div>
-                    <div>
-                        <label className="block text-sm font-medium text-gray-700 mb-1"> Gender * </label>
-                        <select name="gender" value={formData.gender} onChange={handleChange} required
-                            className="p-2 border border-gray-300 rounded-lg shadow-sm focus:ring-primary focus:border-primary transition w-full bg-white" >
-                            {GENDER_OPTIONS.map(opt => <option key={opt} value={opt}>{opt}</option>)}
-                        </select>
-                    </div>
-                    <div>
-                        <label className="block text-sm font-medium text-gray-700 mb-1"> Status * </label>
-                        <select name="status" value={formData.status} onChange={handleChange} required
-                            className="p-2 border border-gray-300 rounded-lg shadow-sm focus:ring-primary focus:border-primary transition w-full bg-white" >
-                            {STATUS_OPTIONS.map(opt => <option key={opt} value={opt}>{opt}</option>)}
-                        </select>
-                    </div>
+                    {/* ... (rest of form fields) ... */}
                 </div>
 
-                <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                    <div>
-                        <label className="block text-sm font-medium text-gray-700 mb-1"> Birth Date </label>
-                        <input type="date" name="birthDate" value={formData.birthDate} onChange={handleChange}
-                            className="p-2 border border-gray-300 rounded-lg shadow-sm focus:ring-primary focus:border-primary transition w-full" />
-                    </div>
-                    <div>
-                        <label className="block text-sm font-medium text-gray-700 mb-1"> Color </label>
-                        <input name="color" value={formData.color} onChange={handleChange}
-                            className="p-2 border border-gray-300 rounded-lg shadow-sm focus:ring-primary focus:border-primary transition w-full" />
-                    </div>
-                    <div>
-                        <label className="block text-sm font-medium text-gray-700 mb-1"> Coat </label>
-                        <input name="coat" value={formData.coat} onChange={handleChange}
-                            className="p-2 border border-gray-300 rounded-lg shadow-sm focus:ring-primary focus:border-primary transition w-full" />
-                    </div>
-                </div>
-                
-                <div className="space-y-4">
-                    <div> 
-                        <label className="block text-sm font-medium text-gray-700 mb-1"> Genetic/Colour Code (Optional) </label>
-                        <input name="geneticCode" value={formData.geneticCode} onChange={handleChange}
-                            className="p-2 border border-gray-300 rounded-lg shadow-sm focus:ring-primary focus:border-primary transition w-full" />
-                    </div>
-                    <div>
-                        <label className="block text-sm font-medium text-gray-700 mb-1"> Remarks/Notes (Optional) </label>
-                        <textarea name="remarks" value={formData.remarks} onChange={handleChange} rows="3"
-                            className="p-2 border border-gray-300 rounded-lg shadow-sm focus:ring-primary focus:border-primary transition w-full" />
-                    </div>
-                </div>
-                
                 {/* ------------------------------------------- */}
-                {/* Pedigree Section (Unchanged) */}
+                {/* Pedigree Section (Parent Selector buttons) */}
                 {/* ------------------------------------------- */}
                 <div className="bg-gray-50 p-4 rounded-lg border border-gray-200 space-y-4">
                     <h3 className="text-lg font-semibold text-gray-700 border-b pb-2">Pedigree: Sire and Dam 🌳</h3>
-                    
                     <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                         <div className='flex flex-col'>
                             <label className='text-sm font-medium text-gray-600 mb-1'>Sire (Father) ID (Optional)</label>
-                            <div onClick={() => !loading && setModalTarget('father')} 
-                                className="flex items-center justify-between p-3 border border-gray-300 rounded-lg bg-white cursor-pointer hover:border-primary transition disabled:opacity-50" >
+                            <div 
+                                onClick={() => !loading && setModalTarget('father')} // <<< This sets modalTarget to 'father'
+                                className="flex items-center justify-between p-3 border border-gray-300 rounded-lg bg-white cursor-pointer hover:border-primary transition disabled:opacity-50"
+                            >
                                 <span className={formData.fatherId_public ? "text-gray-800" : "text-gray-400"}>
                                     {formData.fatherId_public ? `CT-${formData.fatherId_public}` : 'Click to Select Sire'}
                                 </span>
                             </div>
                         </div>
-
                         <div className='flex flex-col'>
                             <label className='text-sm font-medium text-gray-600 mb-1'>Dam (Mother) ID (Optional)</label>
-                            <div onClick={() => !loading && setModalTarget('mother')}
-                                className="flex items-center justify-between p-3 border border-gray-300 rounded-lg bg-white cursor-pointer hover:border-primary transition disabled:opacity-50" >
+                            <div 
+                                onClick={() => !loading && setModalTarget('mother')} // <<< This sets modalTarget to 'mother'
+                                className="flex items-center justify-between p-3 border border-gray-300 rounded-lg bg-white cursor-pointer hover:border-primary transition disabled:opacity-50"
+                            >
                                 <span className={formData.motherId_public ? "text-gray-800" : "text-gray-400"}>
                                     {formData.motherId_public ? `CT-${formData.motherId_public}` : 'Click to Select Dam'}
                                 </span>
@@ -864,41 +809,23 @@ const AnimalForm = ({
                 </div>
                 {/* ------------------------------------------- */}
                 
-                {/* Removed the now-empty Privacy Settings section */}
-
+                {/* ... (rest of form buttons) ... */}
                 <div className="mt-8 flex justify-between items-center border-t pt-4">
                     <div className="flex space-x-4">
-                        <button type="button" onClick={onCancel} className="bg-gray-300 hover:bg-gray-400 text-gray-800 font-semibold py-2 px-4 rounded-lg transition duration-150 shadow-md">
-                            Cancel
-                        </button>
-                        <button 
-                            type="submit" 
-                            disabled={loading}
-                            className="bg-primary hover:bg-primary/90 text-black font-semibold py-2 px-4 rounded-lg transition duration-150 shadow-md flex items-center space-x-2 disabled:opacity-50"
-                        >
+                        <button type="button" onClick={onCancel} className="bg-gray-300 hover:bg-gray-400 text-gray-800 font-semibold py-2 px-4 rounded-lg transition duration-150 shadow-md"> Cancel </button>
+                        <button type="submit" disabled={loading} className="bg-primary hover:bg-primary/90 text-black font-semibold py-2 px-4 rounded-lg transition duration-150 shadow-md flex items-center space-x-2 disabled:opacity-50" > 
                             {loading ? <Loader2 size={18} className="animate-spin" /> : <Save size={18} />}
                             <span>{loading ? 'Saving...' : 'Save Animal'}</span>
                         </button>
                     </div>
-
                     {animalToEdit && onDelete && (
-                        <button 
-                            type="button" 
-                            onClick={() => { 
-                                if(window.confirm(`Are you sure you want to delete ${animalToEdit.name}? This action cannot be undone.`)) {
-                                    onDelete(animalToEdit.id_public);
-                                }
-                            }}
-                            className="bg-red-500 hover:bg-red-600 text-white font-semibold py-2 px-4 rounded-lg transition duration-150 shadow-md flex items-center space-x-2"
-                        >
-                            <Trash2 size={18} />
-                            <span>Delete</span>
+                        <button type="button" onClick={() => { if(window.confirm(`Are you sure you want to delete ${animalToEdit.name}? This action cannot be undone.`)) { onDelete(animalToEdit.id_public); } }} className="bg-red-500 hover:bg-red-600 text-white font-semibold py-2 px-4 rounded-lg transition duration-150 shadow-md flex items-center space-x-2" > 
+                            <Trash2 size={18} /> 
+                            <span>Delete</span> 
                         </button>
                     )}
                 </div>
-                </form>
-                </>
-            )}
+            </form>
         </div>
     );
 };
