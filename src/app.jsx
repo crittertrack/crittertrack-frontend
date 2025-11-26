@@ -1506,7 +1506,6 @@ const App = () => {
             showModalMessage('Authentication Error', 'Could not load user profile. Please log in again.');
             setAuthToken(null);
         }
-        }
     }, [showModalMessage]);
 	
     const handleLoginSuccess = (token) => {
