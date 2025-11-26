@@ -590,17 +590,17 @@ const AnimalForm = ({
                 <AnimalImageUpload imageUrl={null} onFileChange={() => showModalMessage('Stub', 'Image Upload Stub')} disabled={loading} />
 
                 <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                    <div className="md:col-span-2">
-                        <label className="block text-sm font-medium text-gray-700 mb-1"> Name * </label>
-                        <input name="name" value={formData.name} onChange={handleChange} required
-                            className="p-2 border border-gray-300 rounded-lg shadow-sm focus:ring-primary focus:border-primary transition w-full" />
-                    </div>
-                    <div>
-                        <label className="block text-sm font-medium text-gray-700 mb-1"> Prefix </label>
-                        <input name="prefix" value={formData.prefix} onChange={handleChange}
-                            className="p-2 border border-gray-300 rounded-lg shadow-sm focus:ring-primary focus:border-primary transition w-full" />
-                    </div>
-                </div>
+    <div>
+        <label className="block text-sm font-medium text-gray-700 mb-1"> Prefix </label>
+        <input name="prefix" value={formData.prefix} onChange={handleChange}
+            className="p-2 border border-gray-300 rounded-lg shadow-sm focus:ring-primary focus:border-primary transition w-full" />
+    </div>
+    <div className="md:col-span-2">
+        <label className="block text-sm font-medium text-gray-700 mb-1"> Name * </label>
+        <input name="name" value={formData.name} onChange={handleChange} required
+            className="p-2 border border-gray-300 rounded-lg shadow-sm focus:ring-primary focus:border-primary transition w-full" />
+    </div>
+</div>
                 
                 <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                     <div>
