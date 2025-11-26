@@ -703,6 +703,8 @@ const AnimalForm = ({
     );
     const [loading, setLoading] = useState(false);
     const [modalTarget, setModalTarget] = useState(null); 
+    const [animalImageFile, setAnimalImageFile] = useState(null);
+    const [animalImagePreview, setAnimalImagePreview] = useState(animalToEdit?.imageUrl || animalToEdit?.photoUrl || null);
 
     const handleChange = (e) => {
         const { name, value, type, checked } = e.target;
@@ -726,8 +728,24 @@ const AnimalForm = ({
         const url = animalToEdit ? `${API_BASE_URL}/animals/${animalToEdit.id_public}` : `${API_BASE_URL}/animals`;
 
         try {
+            // Upload animal image first (if selected)
+            if (animalImageFile) {
+                try {
+                    const fd = new FormData();
+                    fd.append('file', animalImageFile);
+                    fd.append('type', 'animal');
+                    const uploadResp = await axios.post(`${API_BASE_URL}/upload`, fd, { headers: { 'Content-Type': 'multipart/form-data', Authorization: `Bearer ${authToken}` } });
+                    if (uploadResp?.data?.url) {
+                        formData.imageUrl = uploadResp.data.url;
+                    }
+                } catch (uploadErr) {
+                    console.error('Animal image upload failed:', uploadErr?.response?.data || uploadErr.message);
+                    showModalMessage('Image Upload', 'Failed to upload animal image. The record will be saved without the image.');
+                }
+            }
+
             await onSave(method, url, formData);
-            
+
             showModalMessage('Success', `Animal ${formData.name} successfully ${animalToEdit ? 'updated' : 'added'}!`);
             onCancel(); 
         } catch (error) {
@@ -813,7 +831,13 @@ const AnimalForm = ({
                 {/* ------------------------------------------- */}
 
                 {/* Image Upload Placeholder */}
-                <AnimalImageUpload imageUrl={null} onFileChange={() => showModalMessage('Stub', 'Image Upload Stub')} disabled={loading} />
+                <AnimalImageUpload imageUrl={animalImagePreview} onFileChange={(e) => {
+                    if (e.target.files && e.target.files[0]) {
+                        const f = e.target.files[0];
+                        setAnimalImageFile(f);
+                        setAnimalImagePreview(URL.createObjectURL(f));
+                    }
+                }} disabled={loading} />
 
                 {/* ------------------------------------------- */}
                 {/* PRIMARY INPUT FIELDS (THE MISSING SECTION) */}
@@ -1084,6 +1108,21 @@ const ProfileEditForm = ({ userProfile, showModalMessage, onSaveSuccess, onCance
         };
 
         try {
+            // If a profile image file was selected, upload first
+            if (profileImageFile) {
+                try {
+                    const fd = new FormData();
+                    fd.append('file', profileImageFile);
+                    fd.append('type', 'profile');
+                    const uploadResp = await axios.post(`${API_BASE_URL}/upload`, fd, { headers: { 'Content-Type': 'multipart/form-data', Authorization: `Bearer ${authToken}` } });
+                    if (uploadResp?.data?.url) {
+                        payload.profileImageUrl = uploadResp.data.url;
+                    }
+                } catch (uploadErr) {
+                    console.error('Profile image upload failed:', uploadErr?.response?.data || uploadErr.message);
+                    showModalMessage('Image Upload', 'Failed to upload profile image. The profile will be saved without the image.');
+                }
+            }
             await axios.put(`${API_BASE_URL}/users/profile`, payload, {
                 headers: { Authorization: `Bearer ${authToken}` }
             });
@@ -1407,7 +1446,7 @@ const AuthView = ({ onLoginSuccess, showModalMessage, isRegister, setIsRegister,
     );
 };
 
-const AnimalList = ({ authToken, showModalMessage, onEditAnimal, onSetCurrentView }) => {
+const AnimalList = ({ authToken, showModalMessage, onEditAnimal, onViewAnimal, onSetCurrentView }) => {
     const [animals, setAnimals] = useState([]);
     const [loading, setLoading] = useState(true);
     const [statusFilter, setStatusFilter] = useState('');
@@ -1530,8 +1569,8 @@ const AnimalList = ({ authToken, showModalMessage, onEditAnimal, onSetCurrentVie
         return (
             <div className="w-full flex justify-center">
                 <div
-                    onClick={() => onEditAnimal(animal)}
-                    className="relative bg-white rounded-xl shadow-sm w-40 h-48 flex flex-col items-center overflow-hidden cursor-pointer hover:shadow-md transition"
+                    onClick={() => onViewAnimal(animal)}
+                    className="relative bg-white rounded-xl shadow-sm w-40 h-48 flex flex-col items-center overflow-hidden cursor-pointer hover:shadow-md transition border border-gray-300"
                 >
                     {/* Birthdate top-left */}
                     {birth && (
@@ -1557,11 +1596,15 @@ const AnimalList = ({ authToken, showModalMessage, onEditAnimal, onSetCurrentVie
                             </div>
                         )}
                     </div>
-
                     {/* Prefix / Name under image */}
                     <div className="w-full text-center px-2 pb-1">
                         <div className="text-sm font-semibold text-gray-800 truncate">{animal.prefix ? `${animal.prefix} ` : ''}{animal.name}</div>
                     </div>
+
+                    {/* Edit button bottom-left */}
+                    <button onClick={(e) => { e.stopPropagation(); onEditAnimal(animal); }} className="absolute bottom-2 left-2 p-1 rounded-full bg-white/90 hover:bg-white text-primary shadow-sm">
+                        <Edit size={14} />
+                    </button>
 
                     {/* ID bottom-right */}
                     <div className="w-full px-2 pb-2 flex justify-end">
@@ -1806,6 +1849,12 @@ const App = () => {
         setCurrentView('edit-animal');
     };
 
+    const [animalToView, setAnimalToView] = useState(null);
+    const handleViewAnimal = (animal) => {
+        setAnimalToView(animal);
+        setCurrentView('view-animal');
+    };
+
     const handleSaveAnimal = async (method, url, data) => {
         if (userProfile && !data.ownerId_public) {
             data.ownerId_public = userProfile.id_public;
@@ -1913,6 +1962,45 @@ const App = () => {
                         showModalMessage={showModalMessage}
                     />
                 );
+            case 'view-animal':
+                if (!animalToView) return null;
+                return (
+                    <div className="w-full max-w-4xl bg-white p-6 rounded-xl shadow-lg">
+                        <div className="flex items-start space-x-6">
+                            <div className="w-40 h-40 bg-gray-100 rounded-lg overflow-hidden flex items-center justify-center">
+                                { (animalToView.imageUrl || animalToView.photoUrl) ? (
+                                    <img src={animalToView.imageUrl || animalToView.photoUrl} alt={animalToView.name} className="w-full h-full object-cover" />
+                                ) : (
+                                    <Cat size={72} className="text-gray-400" />
+                                ) }
+                            </div>
+                            <div className="flex-1">
+                                <h2 className="text-2xl font-bold text-gray-800">{animalToView.prefix ? `${animalToView.prefix} ` : ''}{animalToView.name}</h2>
+                                <p className="text-sm text-gray-600">CT{animalToView.id_public} &nbsp; • &nbsp; {animalToView.species} &nbsp; • &nbsp; {animalToView.status}</p>
+                                <div className="mt-4 grid grid-cols-2 gap-4 text-sm text-gray-700">
+                                    <div><strong>Gender:</strong> {animalToView.gender}</div>
+                                    <div><strong>Birthdate:</strong> {animalToView.birthDate || '—'}</div>
+                                    <div><strong>Registry:</strong> {animalToView.registryCode || '—'}</div>
+                                    <div><strong>Owned:</strong> {animalToView.isOwned ? 'Yes' : 'No'}</div>
+                                    <div><strong>Pregnant:</strong> {animalToView.isPregnant ? 'Yes' : 'No'}</div>
+                                    <div><strong>Nursing:</strong> {animalToView.isNursing ? 'Yes' : 'No'}</div>
+                                    <div><strong>Sire (Father):</strong> {animalToView.fatherId_public ? `CT${animalToView.fatherId_public}` : '—'}</div>
+                                    <div><strong>Dam (Mother):</strong> {animalToView.motherId_public ? `CT${animalToView.motherId_public}` : '—'}</div>
+                                </div>
+                                {animalToView.remarks && (
+                                    <div className="mt-4">
+                                        <h4 className="font-semibold text-gray-800">Remarks</h4>
+                                        <p className="text-gray-700 mt-1">{animalToView.remarks}</p>
+                                    </div>
+                                )}
+                                <div className="mt-6 flex space-x-3">
+                                    <button onClick={() => { setAnimalToEdit(animalToView); setSpeciesToAdd(animalToView.species); setCurrentView('edit-animal'); }} className="bg-primary hover:bg-primary/90 text-black font-semibold py-2 px-4 rounded-lg">Edit</button>
+                                    <button onClick={() => setCurrentView('list')} className="bg-gray-200 hover:bg-gray-300 text-gray-700 font-medium py-2 px-4 rounded-lg">Back</button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                );
             case 'genetics-calculator': // NEW VIEW CASE
                 return (
                     <GeneticsCalculatorPlaceholder
@@ -1936,6 +2024,7 @@ const App = () => {
                         authToken={authToken} 
                         showModalMessage={showModalMessage} 
                         onEditAnimal={handleEditAnimal} 
+                        onViewAnimal={handleViewAnimal}
                         onSetCurrentView={setCurrentView}
                     />
                 );
