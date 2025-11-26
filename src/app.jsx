@@ -782,7 +782,7 @@ const AnimalForm = ({ animalToEdit, onSave, onCancel, showModalMessage, authToke
                 {/* 4. Move record setting above the general settings */}
                 <div className="bg-blue-50 p-4 rounded-lg border border-blue-200">
                     <h3 className="text-lg font-semibold text-blue-800 mb-3">Record Settings ⚙️</h3>
-                    <div className="flex flex-wrap items-center space-x-6 space-y-2">
+                    <div className="flex items-center space-x-6"> 
                         {/* isOwned Toggle */}
                         <label className="flex items-center text-gray-700">
                             <input
@@ -950,7 +950,7 @@ const AnimalForm = ({ animalToEdit, onSave, onCancel, showModalMessage, authToke
                     <div className="flex space-x-4">
                         <div className="flex-1">
                             <label className="block text-sm font-medium text-gray-700 mb-1">
-                                Color (Optional)
+                                Color/Markings (Optional)
                             </label>
                             <input
                                 type="text"
@@ -963,7 +963,7 @@ const AnimalForm = ({ animalToEdit, onSave, onCancel, showModalMessage, authToke
                         </div>
                         <div className="flex-1">
                             <label className="block text-sm font-medium text-gray-700 mb-1">
-                                Coat/Markings (Optional)
+                                Coat (Optional)
                             </label>
                             <input
                                 type="text"
