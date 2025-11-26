@@ -1645,7 +1645,9 @@ const App = () => {
         setAnimalToEdit(animal);
         setSpeciesToAdd(animal.species); // Pre-set species for the edit screen
         setCurrentView('edit-animal');
-		 // Fix 2: Inject ownerId_public into the payload
+    };
+
+    // Fix 2: Inject ownerId_public into the payload
     const handleSaveAnimal = async (method, url, data) => {
         // Inject required ownerId_public from the current user's profile
         if (userProfile && !data.ownerId_public) {
