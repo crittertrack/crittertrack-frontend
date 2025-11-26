@@ -10,7 +10,7 @@ const GENDER_OPTIONS = ['Male', 'Female'];
 const STATUS_OPTIONS = ['Pet', 'Breeder', 'Available', 'Retired', 'Deceased', 'Rehomed']; 
 
 // NEW: Default Species Options
-const DEFAULT_SPECIES_OPTIONS = ['Fancy Mouse', 'Rat', 'Hamster'];
+const DEFAULT_SPECIES_OPTIONS = ['Mouse', 'Rat', 'Hamster'];
 
 // UPDATED: Removed SPECIES_OPTIONS constant here.
 
@@ -1675,301 +1675,313 @@ const AuthView = ({ onLoginSuccess, showModalMessage, isRegister, setIsRegister,
 
 // --- Component: Main Application ---
 const App = () => {
-  const [authToken, setAuthToken] = useState(localStorage.getItem('authToken') || null);
-  const [userProfile, setUserProfile] = useState(null);
-  
-  // UPDATED: 'select-species' is the new default for adding an animal
-  const [currentView, setCurrentView] = useState('list'); 
-  const [animalToEdit, setAnimalToEdit] = useState(null);
-  
-  // NEW: Species state for the new animal to be passed to AnimalForm
-  const [speciesToAdd, setSpeciesToAdd] = useState(null); 
-  // NEW: Species Options state (initialized with defaults)
-  const [speciesOptions, setSpeciesOptions] = useState(DEFAULT_SPECIES_OPTIONS); 
+  const [authToken, setAuthToken] = useState(localStorage.getItem('authToken') || null);
+  const [userProfile, setUserProfile] = useState(null);
+  
+  // UPDATED: 'select-species' is the new default for adding an animal
+  const [currentView, setCurrentView] = useState('list'); 
+  const [animalToEdit, setAnimalToEdit] = useState(null);
+  
+  // NEW: Species state for the new animal to be passed to AnimalForm
+  const [speciesToAdd, setSpeciesToAdd] = useState(null); 
+  // NEW: Species Options state (initialized with defaults)
+  // ASSUMPTION: DEFAULT_SPECIES_OPTIONS has already been fixed to ['Mouse', 'Rat', 'Hamster']
+  const [speciesOptions, setSpeciesOptions] = useState(DEFAULT_SPECIES_OPTIONS); 
 
-  const [showModal, setShowModal] = useState(false);
-  const [modalMessage, setModalMessage] = useState({ title: '', message: '' });
-  const [isRegister, setIsRegister] = useState(false); 
+  const [showModal, setShowModal] = useState(false);
+  const [modalMessage, setModalMessage] = useState({ title: '', message: '' });
+  const [isRegister, setIsRegister] = useState(false); 
 
-  // IDLE TIMER REFS
-  const timeoutRef = useRef(null);
-  const activeEvents = ['mousemove', 'keydown', 'scroll', 'click'];
-
-
-  // Centralized Modal Handler
-  const showModalMessage = useCallback((title, message) => {
-    setModalMessage({ title, message });
-    setShowModal(true);
-  }, []);
-
-  // Logout Handler (must be defined early)
-  const handleLogout = useCallback((isIdle = false) => {
-    setAuthToken(null);
-    setUserProfile(null);
-    setCurrentView('list');
-    showModalMessage(
-        'Logged Out', 
-        isIdle ? 'You have been logged out due to 15 minutes of inactivity.' : 'You have been successfully logged out.'
-    );
-  }, [showModalMessage]);
-
-  // Function to reset the idle timer
-  const resetTimer = useCallback(() => {
-    if (timeoutRef.current) {
-        clearTimeout(timeoutRef.current);
-    }
-    if (authToken) {
-        timeoutRef.current = setTimeout(() => {
-            handleLogout(true); // Auto-logout due to idle
-        }, IDLE_TIMEOUT_MS);
-    }
-  }, [authToken, handleLogout]);
-
-  // Effect for setting up event listeners for idle tracking
-  useEffect(() => {
-    if (authToken) {
-        resetTimer(); 
-        const eventHandler = () => resetTimer();
-        activeEvents.forEach(event => {
-            window.addEventListener(event, eventHandler);
-        });
-        return () => {
-            clearTimeout(timeoutRef.current);
-            activeEvents.forEach(event => {
-                window.removeEventListener(event, eventHandler);
-            });
-        };
-    } else {
-        clearTimeout(timeoutRef.current);
-    }
-  }, [authToken, resetTimer]); 
-
-  // Set the default axios authorization header
-  useEffect(() => {
-    if (authToken) {
-      axios.defaults.headers.common['Authorization'] = `Bearer ${authToken}`;
-      localStorage.setItem('authToken', authToken);
-      fetchUserProfile(authToken);
-    } else {
-      delete axios.defaults.headers.common['Authorization'];
-      localStorage.removeItem('authToken');
-      setUserProfile(null);
-      setCurrentView('list');
-    }
-  }, [authToken]);
+  // IDLE TIMER REFS
+  const timeoutRef = useRef(null);
+  const activeEvents = ['mousemove', 'keydown', 'scroll', 'click'];
 
 
-  const fetchUserProfile = useCallback(async (token) => {
-    try {
-        const response = await axios.get(`${API_BASE_URL}/users/profile`, {
-            headers: { Authorization: `Bearer ${token}` }
-        });
-        setUserProfile(response.data); 
-    } catch (error) {
-        console.error('Failed to fetch user profile:', error);
-        showModalMessage('Authentication Error', 'Could not load user profile. Please log in again.');
-        setAuthToken(null);
-    }
-  }, [showModalMessage]);
+  // Centralized Modal Handler
+  const showModalMessage = useCallback((title, message) => {
+    setModalMessage({ title, message });
+    setShowModal(true);
+  }, []);
+
+  // Logout Handler (must be defined early)
+  const handleLogout = useCallback((isIdle = false) => {
+    setAuthToken(null);
+    setUserProfile(null);
+    setCurrentView('list');
+    showModalMessage(
+        'Logged Out', 
+        isIdle ? 'You have been logged out due to 15 minutes of inactivity.' : 'You have been successfully logged out.'
+    );
+  }, [showModalMessage]);
+
+  // Function to reset the idle timer
+  const resetTimer = useCallback(() => {
+    if (timeoutRef.current) {
+        clearTimeout(timeoutRef.current);
+    }
+    if (authToken) {
+        timeoutRef.current = setTimeout(() => {
+            handleLogout(true); // Auto-logout due to idle
+        }, IDLE_TIMEOUT_MS);
+    }
+  }, [authToken, handleLogout]);
+
+  // Effect for setting up event listeners for idle tracking (Fix 3 logic is here)
+  useEffect(() => {
+    if (authToken) {
+        resetTimer(); 
+        const eventHandler = () => resetTimer();
+        activeEvents.forEach(event => {
+            window.addEventListener(event, eventHandler);
+        });
+        return () => {
+            clearTimeout(timeoutRef.current);
+            activeEvents.forEach(event => {
+                window.removeEventListener(event, eventHandler);
+            });
+        };
+    } else {
+        clearTimeout(timeoutRef.current);
+    }
+  }, [authToken, resetTimer]); 
+
+  // Set the default axios authorization header
+  useEffect(() => {
+    if (authToken) {
+      axios.defaults.headers.common['Authorization'] = `Bearer ${authToken}`;
+      localStorage.setItem('authToken', authToken);
+      fetchUserProfile(authToken);
+    } else {
+      delete axios.defaults.headers.common['Authorization'];
+      localStorage.removeItem('authToken');
+      setUserProfile(null);
+      setCurrentView('list');
+    }
+  }, [authToken]);
 
 
-  const handleLoginSuccess = (token) => {
-    setAuthToken(token);
-    setCurrentView('list');
-    setIsRegister(false);
-  };
+  const fetchUserProfile = useCallback(async (token) => {
+    try {
+        const response = await axios.get(`${API_BASE_URL}/users/profile`, {
+            headers: { Authorization: `Bearer ${token}` }
+        });
+        setUserProfile(response.data); 
+    } catch (error) {
+        console.error('Failed to fetch user profile:', error);
+        showModalMessage('Authentication Error', 'Could not load user profile. Please log in again.');
+        setAuthToken(null);
+    }
+  }, [showModalMessage]);
 
 
-  const handleEditAnimal = (animal) => {
-    setAnimalToEdit(animal);
-    setSpeciesToAdd(animal.species); // Pre-set species for the edit screen
-    setCurrentView('edit-animal');
-  };
-
-  const handleSaveAnimal = async (method, url, data) => {
-    if (method === 'post') {
-        await axios.post(url, data);
-    } else if (method === 'put') {
-        await axios.put(url, data);
-    }
-  };
+  const handleLoginSuccess = (token) => {
+    setAuthToken(token);
+    setCurrentView('list');
+    setIsRegister(false);
+  };
 
 
-  const renderView = () => {
-    switch (currentView) {
-      case 'profile':
-        // Assuming ProfileView and ProfileEditForm are correctly defined
-        return <ProfileView userProfile={userProfile} showModalMessage={showModalMessage} fetchUserProfile={fetchUserProfile} authToken={authToken} />;
-        
-      case 'select-species':
-        return (
-            <SpeciesSelector
-                speciesOptions={speciesOptions}
-                onSelectSpecies={(species) => {
-                    setSpeciesToAdd(species);
-                    setCurrentView('add-animal');
-                }}
-                onManageSpecies={() => setCurrentView('manage-species')}
-            />
-        );
+  const handleEditAnimal = (animal) => {
+    setAnimalToEdit(animal);
+    setSpeciesToAdd(animal.species); // Pre-set species for the edit screen
+    setCurrentView('edit-animal');
+  };
 
-      case 'manage-species':
-        return (
-            <SpeciesManager
-                speciesOptions={speciesOptions}
-                setSpeciesOptions={setSpeciesOptions}
-                onCancel={() => setCurrentView('select-species')}
-                showModalMessage={showModalMessage}
-            />
-        );
+  // 🚨 FIX 2 APPLIED HERE: Inject ownerId_public into the payload
+  const handleSaveAnimal = async (method, url, data) => {
+    // Inject required ownerId_public from the current user's profile
+    if (userProfile && !data.ownerId_public) {
+        data.ownerId_public = userProfile.id_public; 
+    }
 
-      case 'add-animal':
-        if (!speciesToAdd) {
-            // Safety check: if somehow we reached here without species, go back
-            setCurrentView('select-species');
-            return null;
-        }
-        return (
-          <AnimalForm 
-            onSave={handleSaveAnimal} 
-            onCancel={() => setCurrentView('list')} 
-            showModalMessage={showModalMessage} 
-            authToken={authToken}
-            species={speciesToAdd} // Pass the selected species
-          />
-        );
-      case 'edit-animal':
-        if (!animalToEdit || !speciesToAdd) {
-             setCurrentView('list');
-             return null;
-        }
-        return (
-          <AnimalForm 
-            animalToEdit={animalToEdit}
-            onSave={handleSaveAnimal} 
-            onCancel={() => setCurrentView('list')} 
-            showModalMessage={showModalMessage} 
-            authToken={authToken}
-            species={speciesToAdd} // Pass the species of the animal being edited
-          />
-        );
-      case 'litters':
-        return (
-          <div className="w-full max-w-4xl bg-white p-6 rounded-xl shadow-lg">
-            <h2 className="text-3xl font-bold text-gray-800 mb-6 flex items-center">
-                <BookOpen size={24} className="mr-3 text-primary-dark" />
-                Litter Management
-            </h2>
-            <p className="text-gray-600">Litter management features are currently under development.</p>
-          </div>
-        );
-      case 'list':
-      default:
-        return (
-          <AnimalList
-            authToken={authToken}
-            showModalMessage={showModalMessage}
-            onEditAnimal={handleEditAnimal}
-            onSetCurrentView={setCurrentView}
-          />
-        );
-    }
-  };
-  
-  // Conditional rendering for the logged out state
-  if (!authToken) {
-      const mainTitle = isRegister ? 'Create Account' : 'Welcome Back';
-      
-      return (
-          <div className="min-h-screen bg-page-bg flex flex-col items-center justify-center p-6 font-sans">
-              {showModal && <ModalMessage title={modalMessage.title} message={modalMessage.message} onClose={() => setShowModal(false)} />}
-              
-              <div className="flex flex-col items-center mb-4 -mt-16"> 
-                  <CustomAppLogo size="w-32 h-32" /> 
-              </div>
+    try {
+      if (method === 'post') {
+          await axios.post(url, data);
+      } else if (method === 'put') {
+          await axios.put(url, data);
+      }
+    } catch (error) {
+      // Re-throw the error so the AnimalForm component can catch it and show a modal
+      throw error; 
+    }
+  };
 
-              <AuthView 
-                  onLoginSuccess={handleLoginSuccess} 
-                  showModalMessage={showModalMessage} 
-                  isRegister={isRegister} 
-                  setIsRegister={setIsRegister} 
-                  mainTitle={mainTitle}
-              />
-          </div>
-      );
-  }
 
-  // Logged-in Dashboard Layout (RESTORED)
-  const displayName = userProfile?.showBreederName && userProfile?.breederName 
-    ? userProfile.breederName 
-    : userProfile?.personalName || 'User';
+  const renderView = () => {
+    switch (currentView) {
+      case 'profile':
+        // Assuming ProfileView and ProfileEditForm are correctly defined
+        return <ProfileView userProfile={userProfile} showModalMessage={showModalMessage} fetchUserProfile={fetchUserProfile} authToken={authToken} />;
+        
+      case 'select-species':
+        return (
+            <SpeciesSelector
+                speciesOptions={speciesOptions}
+                onSelectSpecies={(species) => {
+                    setSpeciesToAdd(species);
+                    setCurrentView('add-animal');
+                }}
+                onManageSpecies={() => setCurrentView('manage-species')}
+            />
+        );
 
-  return (
-    <div className="min-h-screen bg-page-bg p-6 flex flex-col items-center font-sans">
-      {showModal && <ModalMessage title={modalMessage.title} message={modalMessage.message} onClose={() => setShowModal(false)} />}
-      
-      {/* 1. Header (Dashboard Card) */}
-      <header className="w-full max-w-4xl flex justify-between items-center bg-white p-4 rounded-xl shadow-lg mb-6">
-        <div className="flex items-center space-x-2">
-            <CustomAppLogo size="w-8 h-8" />
-            <h1 className="text-2xl font-bold text-gray-800 hidden sm:block">Crittertrack Dashboard</h1>
-        </div>
+      case 'manage-species':
+        return (
+            <SpeciesManager
+                speciesOptions={speciesOptions}
+                setSpeciesOptions={setSpeciesOptions}
+                onCancel={() => setCurrentView('select-species')}
+                showModalMessage={showModalMessage}
+            />
+        );
 
-        {/* Navigation and Logout buttons are only shown when logged in */}
-        <div className='flex items-center space-x-4'>
-            <span className='text-gray-600 text-sm hidden sm:block'>
-                Welcome back, <span className='font-semibold text-gray-800'>{displayName}</span>
-            </span>
-            
-            <nav className="flex space-x-2">
-                <button
-                    onClick={() => setCurrentView('list')}
-                    title="Animals"
-                    className={`p-2 rounded-lg transition duration-150 ${currentView === 'list' ? 'bg-primary shadow-inner text-gray-900' : 'text-gray-500 hover:bg-gray-100'}`}
-                >
-                    <Cat size={20} />
-                </button>
-                <button
-                    onClick={() => setCurrentView('litters')}
-                    title="Litters"
-                    className={`p-2 rounded-lg transition duration-150 ${currentView === 'litters' ? 'bg-primary shadow-inner text-gray-900' : 'text-gray-500 hover:bg-gray-100'}`}
-                >
-                    <ClipboardList size={20} />
-                </button>
-                <button
-                    onClick={() => setCurrentView('profile')}
-                    title="Profile"
-                    className={`p-2 rounded-lg transition duration-150 ${currentView === 'profile' ? 'bg-primary shadow-inner text-gray-900' : 'text-gray-500 hover:bg-gray-100'}`}
-                >
-                    <User size={20} />
-                </button>
-            </nav>
+      case 'add-animal':
+        if (!speciesToAdd) {
+            // Safety check: if somehow we reached here without species, go back
+            setCurrentView('select-species');
+            return null;
+        }
+        return (
+          <AnimalForm 
+            onSave={handleSaveAnimal} 
+            onCancel={() => setCurrentView('list')} 
+            showModalMessage={showModalMessage} 
+            authToken={authToken}
+            species={speciesToAdd} // Pass the selected species
+          />
+        );
+      case 'edit-animal':
+        if (!animalToEdit || !speciesToAdd) {
+             setCurrentView('list');
+             return null;
+        }
+        return (
+          <AnimalForm 
+            animalToEdit={animalToEdit}
+            onSave={handleSaveAnimal} 
+            onCancel={() => setCurrentView('list')} 
+            showModalMessage={showModalMessage} 
+            authToken={authToken}
+            species={speciesToAdd} // Pass the species of the animal being edited
+          />
+        );
+      case 'litters':
+        return (
+          <div className="w-full max-w-4xl bg-white p-6 rounded-xl shadow-lg">
+            <h2 className="text-3xl font-bold text-gray-800 mb-6 flex items-center">
+                <BookOpen size={24} className="mr-3 text-primary-dark" />
+                Litter Management
+            </h2>
+            <p className="text-gray-600">Litter management features are currently under development.</p>
+          </div>
+        );
+      case 'list':
+      default:
+        return (
+          <AnimalList
+            authToken={authToken}
+            showModalMessage={showModalMessage}
+            onEditAnimal={handleEditAnimal}
+            onSetCurrentView={setCurrentView}
+          />
+        );
+    }
+  };
+  
+  // Conditional rendering for the logged out state
+  if (!authToken) {
+      const mainTitle = isRegister ? 'Create Account' : 'Welcome Back';
+      
+      return (
+          <div className="min-h-screen bg-page-bg flex flex-col items-center justify-center p-6 font-sans">
+              {showModal && <ModalMessage title={modalMessage.title} message={modalMessage.message} onClose={() => setShowModal(false)} />}
+              
+              <div className="flex flex-col items-center mb-4 -mt-16"> 
+                  <CustomAppLogo size="w-32 h-32" /> 
+              </div>
 
-            <button
-                onClick={() => handleLogout(false)} 
-                title="Log Out"
-                className="bg-accent hover:bg-accent/80 text-white font-semibold py-2 px-4 rounded-lg transition duration-150 shadow-md flex items-center space-x-1"
-            >
-                <LogOut size={18} className="hidden sm:inline" />
-                <span className="text-sm">Logout</span>
-            </button>
-        </div>
-      </header>
+              <AuthView 
+                  onLoginSuccess={handleLoginSuccess} 
+                  showModalMessage={showModalMessage} 
+                  isRegister={isRegister} 
+                  setIsRegister={setIsRegister} 
+                  mainTitle={mainTitle}
+              />
+          </div>
+      );
+  }
 
-      {/* 2. User Profile Summary Card (Not shown on the Profile page itself) */}
-      {currentView !== 'profile' && userProfile && <UserProfileCard userProfile={userProfile} />}
+  // Logged-in Dashboard Layout
+  const displayName = userProfile?.showBreederName && userProfile?.breederName 
+    ? userProfile.breederName 
+    : userProfile?.personalName || 'User';
 
-      {/* 3. Main Content Area */}
-      <main className="w-full max-w-4xl flex-grow">
-        {renderView()}
-      </main>
+  return (
+    <div className="min-h-screen bg-page-bg p-6 flex flex-col items-center font-sans">
+      {showModal && <ModalMessage title={modalMessage.title} message={modalMessage.message} onClose={() => setShowModal(false)} />}
+      
+      {/* 1. Header (Dashboard Card) */}
+      <header className="w-full max-w-4xl flex justify-between items-center bg-white p-4 rounded-xl shadow-lg mb-6">
+        <div className="flex items-center space-x-2">
+            <CustomAppLogo size="w-8 h-8" />
+            <h1 className="text-2xl font-bold text-gray-800 hidden sm:block">Crittertrack Dashboard</h1>
+        </div>
 
-      {/* Footer */}
-      <footer className="w-full max-w-4xl mt-6 text-center text-sm text-gray-500 pt-4 border-t border-gray-200">
-        &copy; {new Date().getFullYear()} Crittertrack Pedigree System.
-      </footer>
-    </div>
-  );
+        {/* Navigation and Logout buttons are only shown when logged in */}
+        <div className='flex items-center space-x-4'>
+            <span className='text-gray-600 text-sm hidden sm:block'>
+                Welcome back, <span className='font-semibold text-gray-800'>{displayName}</span>
+            </span>
+            
+            <nav className="flex space-x-2">
+                <button
+                    onClick={() => setCurrentView('list')}
+                    title="Animals"
+                    className={`p-2 rounded-lg transition duration-150 ${currentView === 'list' ? 'bg-primary shadow-inner text-gray-900' : 'text-gray-500 hover:bg-gray-100'}`}
+                >
+                    <Cat size={20} />
+                </button>
+                <button
+                    onClick={() => setCurrentView('litters')}
+                    title="Litters"
+                    className={`p-2 rounded-lg transition duration-150 ${currentView === 'litters' ? 'bg-primary shadow-inner text-gray-900' : 'text-gray-500 hover:bg-gray-100'}`}
+                >
+                    <ClipboardList size={20} />
+                </button>
+                <button
+                    onClick={() => setCurrentView('profile')}
+                    title="Profile"
+                    className={`p-2 rounded-lg transition duration-150 ${currentView === 'profile' ? 'bg-primary shadow-inner text-gray-900' : 'text-gray-500 hover:bg-gray-100'}`}
+                >
+                    <User size={20} />
+                </button>
+            </nav>
+
+            <button
+                onClick={() => handleLogout(false)} 
+                title="Log Out"
+                className="bg-accent hover:bg-accent/80 text-white font-semibold py-2 px-4 rounded-lg transition duration-150 shadow-md flex items-center space-x-1"
+            >
+                <LogOut size={18} className="hidden sm:inline" />
+                <span className="text-sm">Logout</span>
+            </button>
+        </div>
+      </header>
+
+      {/* 2. User Profile Summary Card (Not shown on the Profile page itself) */}
+      {currentView !== 'profile' && userProfile && <UserProfileCard userProfile={userProfile} />}
+
+      {/* 3. Main Content Area */}
+      <main className="w-full max-w-4xl flex-grow">
+        {renderView()}
+      </main>
+
+      {/* Footer */}
+      <footer className="w-full max-w-4xl mt-6 text-center text-sm text-gray-500 pt-4 border-t border-gray-200">
+        &copy; {new Date().getFullYear()} Crittertrack Pedigree System.
+      </footer>
+    </div>
+  );
 };
 
 export default App;
