@@ -979,7 +979,7 @@ const UserProfileCard = ({ userProfile }) => {
         : 'N/A';
     
     const ProfileImage = () => {
-        const img = userProfile.profileImageUrl || userProfile.imageUrl || userProfile.avatarUrl || userProfile.avatar || userProfile.profile_image || null;
+        const img = userProfile.profileImage || userProfile.profileImageUrl || userProfile.imageUrl || userProfile.avatarUrl || userProfile.avatar || userProfile.profile_image || null;
         if (img) {
             return (
                 <div className="w-20 h-20 bg-gray-200 rounded-lg flex items-center justify-center text-gray-500 overflow-hidden shadow-inner">
@@ -1075,7 +1075,9 @@ const ProfileEditForm = ({ userProfile, showModalMessage, onSaveSuccess, onCance
     const [showEmailPublic, setShowEmailPublic] = useState(userProfile.showEmailPublic ?? false); 
 
     const [profileImageFile, setProfileImageFile] = useState(null); 
-    const [profileImageURL, setProfileImageURL] = useState(userProfile.profileImageUrl || userProfile.imageUrl || userProfile.avatarUrl || userProfile.avatar || userProfile.profile_image || null); 
+    const [profileImageURL, setProfileImageURL] = useState(
+        userProfile.profileImage || userProfile.profileImageUrl || userProfile.imageUrl || userProfile.avatarUrl || userProfile.avatar || userProfile.profile_image || null
+    ); 
     const [profileLoading, setProfileLoading] = useState(false);
 
     const [email, setEmail] = useState(userProfile.email);
@@ -1123,6 +1125,7 @@ const ProfileEditForm = ({ userProfile, showModalMessage, onSaveSuccess, onCance
                         uploadData = uploadResp.data;
                         const returnedUrl = uploadResp.data.url || uploadResp.data.path || (uploadResp.data.data && (uploadResp.data.data.url || uploadResp.data.data.path));
                         if (returnedUrl) {
+                            payload.profileImage = returnedUrl;
                             payload.profileImageUrl = returnedUrl;
                             payload.imageUrl = returnedUrl;
                             payload.avatarUrl = returnedUrl;
