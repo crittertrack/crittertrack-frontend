@@ -608,6 +608,27 @@ const SpeciesSelector = ({ speciesOptions, onSelectSpecies, onManageSpecies }) =
 );
 
 
+// Small helper component for animal image selection/preview
+const AnimalImageUpload = ({ imageUrl, onFileChange, disabled = false }) => (
+    <div className="flex items-center space-x-4">
+        <div className="w-28 h-28 bg-gray-100 rounded-lg overflow-hidden flex items-center justify-center border">
+            { imageUrl ? (
+                <img src={imageUrl} alt="Animal" className="w-full h-full object-cover" />
+            ) : (
+                <Cat size={36} className="text-gray-400" />
+            ) }
+        </div>
+        <div className="flex-1">
+            <label className={`inline-flex items-center px-4 py-2 bg-primary text-black rounded-md cursor-pointer ${disabled ? 'opacity-50 cursor-not-allowed' : 'hover:bg-primary/90'}`}>
+                Change Photo
+                <input type="file" accept="image/*" onChange={onFileChange} disabled={disabled} className="hidden" />
+            </label>
+            <p className="text-sm text-gray-500 mt-2">Recommended 800x800px. Max 5MB.</p>
+        </div>
+    </div>
+);
+
+
 const AnimalForm = ({ 
     formTitle,             
     animalToEdit,          
