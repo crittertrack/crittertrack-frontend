@@ -786,6 +786,13 @@ const AnimalForm = ({
                 {/* ------------------------------------------- */}
                 <div className="grid grid-cols-1 md:grid-cols-3 gap-4 border p-4 rounded-lg">
                     					
+					{/* Registry Code */}
+                    <div>
+                        <label className="block text-sm font-medium text-gray-700">Registry Code (Optional)</label>
+                        <input type="text" name="registryCode" value={formData.registryCode} onChange={handleChange} 
+                            className="mt-1 block w-full p-2 border border-gray-300 rounded-md shadow-sm focus:ring-primary focus:border-primary" />
+                    </div>
+					
 					{/* Prefix */}
                     <div>
                         <label className="block text-sm font-medium text-gray-700">Prefix (Optional)</label>
@@ -793,53 +800,21 @@ const AnimalForm = ({
                             className="mt-1 block w-full p-2 border border-gray-300 rounded-md shadow-sm focus:ring-primary focus:border-primary" />
                     </div>
 					
-                    {/* Name */}
-                    <div className="md:col-span-2">
+					{/* Name */}
+                    <div>
                         <label className="block text-sm font-medium text-gray-700">Name</label>
                         <input type="text" name="name" value={formData.name} onChange={handleChange} required 
                             className="mt-1 block w-full p-2 border border-gray-300 rounded-md shadow-sm focus:ring-primary focus:border-primary" />
                     </div>
 					
-					{/* Registry Code */}
-                    <div>
-                        <label className="block text-sm font-medium text-gray-700">Registry Code (Optional)</label>
-                        <input type="text" name="registryCode" value={formData.registryCode} onChange={handleChange} 
-                            className="mt-1 block w-full p-2 border border-gray-300 rounded-md shadow-sm focus:ring-primary focus:border-primary" />
-                    </div>
-                                                       
-                    {/* Gender */}
-                    <div>
-                        <label className="block text-sm font-medium text-gray-700">Gender</label>
-                        <select name="gender" value={formData.gender} onChange={handleChange} required 
-                            className="mt-1 block w-full p-2 border border-gray-300 rounded-md shadow-sm focus:ring-primary focus:border-primary" >
-                            {GENDER_OPTIONS.map(g => <option key={g} value={g}>{g}</option>)}
-                        </select>
-                    </div>
-                    
-                    {/* Birthdate */}
-                    <div>
-                        <label className="block text-sm font-medium text-gray-700">Birthdate</label>
-                        <input type="date" name="birthDate" value={formData.birthDate} onChange={handleChange} required 
-                            className="mt-1 block w-full p-2 border border-gray-300 rounded-md shadow-sm focus:ring-primary focus:border-primary" />
-                    </div>
-                    
-                    {/* Status */}
-                    <div>
-                        <label className="block text-sm font-medium text-gray-700">Status</label>
-                        <select name="status" value={formData.status} onChange={handleChange} required 
-                            className="mt-1 block w-full p-2 border border-gray-300 rounded-md shadow-sm focus:ring-primary focus:border-primary" >
-                            {STATUS_OPTIONS.map(s => <option key={s} value={s}>{s}</option>)}
-                        </select>
-                    </div>
-                    
-                    {/* Color */}
+					{/* Color */}
                     <div>
                         <label className="block text-sm font-medium text-gray-700">Color (Optional)</label>
                         <input type="text" name="color" value={formData.color} onChange={handleChange} 
                             className="mt-1 block w-full p-2 border border-gray-300 rounded-md shadow-sm focus:ring-primary focus:border-primary" />
                     </div>
-                    
-                    {/* Coat */}
+					
+					{/* Coat */}
                     <div>
                         <label className="block text-sm font-medium text-gray-700">Coat (Optional)</label>
                         <input type="text" name="coat" value={formData.coat} onChange={handleChange} 
@@ -851,6 +826,31 @@ const AnimalForm = ({
                         <label className="block text-sm font-medium text-gray-700">Genetic Code (Optional)</label>
                         <input type="text" name="geneticCode" value={formData.geneticCode} onChange={handleChange} 
                             className="mt-1 block w-full p-2 border border-gray-300 rounded-md shadow-sm focus:ring-primary focus:border-primary" />
+                    </div>
+					
+					{/* Gender */}
+                    <div>
+                        <label className="block text-sm font-medium text-gray-700">Gender</label>
+                        <select name="gender" value={formData.gender} onChange={handleChange} required 
+                            className="mt-1 block w-full p-2 border border-gray-300 rounded-md shadow-sm focus:ring-primary focus:border-primary" >
+                            {GENDER_OPTIONS.map(g => <option key={g} value={g}>{g}</option>)}
+                        </select>
+                    </div>
+					
+					 {/* Birthdate */}
+                    <div>
+                        <label className="block text-sm font-medium text-gray-700">Birthdate</label>
+                        <input type="date" name="birthDate" value={formData.birthDate} onChange={handleChange} required 
+                            className="mt-1 block w-full p-2 border border-gray-300 rounded-md shadow-sm focus:ring-primary focus:border-primary" />
+                    </div>
+					
+					{/* Status */}
+                    <div>
+                        <label className="block text-sm font-medium text-gray-700">Status</label>
+                        <select name="status" value={formData.status} onChange={handleChange} required 
+                            className="mt-1 block w-full p-2 border border-gray-300 rounded-md shadow-sm focus:ring-primary focus:border-primary" >
+                            {STATUS_OPTIONS.map(s => <option key={s} value={s}>{s}</option>)}
+                        </select>
                     </div>
                 </div>
                 {/* ------------------------------------------- */}
