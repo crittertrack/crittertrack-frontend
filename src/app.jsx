@@ -127,6 +127,7 @@ const ParentSearchModal = ({
     const [globalAnimals, setGlobalAnimals] = useState([]);
     const [loadingLocal, setLoadingLocal] = useState(false);
     const [loadingGlobal, setLoadingGlobal] = useState(false);
+    const [scope, setScope] = useState('both'); // 'local' | 'global' | 'both'
     
     // Simple component to render a list item
     const SearchResultItem = ({ animal, isGlobal }) => (
@@ -146,49 +147,69 @@ const ParentSearchModal = ({
 
     const handleSearch = async () => {
         const trimmedSearchTerm = searchTerm.trim();
-        
-        if (!trimmedSearchTerm || trimmedSearchTerm.length < 3) {
+
+        if (!trimmedSearchTerm || trimmedSearchTerm.length < 1) {
             setLocalAnimals([]);
             setGlobalAnimals([]);
-            showModalMessage('Search Info', 'Please enter at least 3 characters to search.');
+            showModalMessage('Search Info', 'Please enter a name or ID to search.');
             return;
         }
 
+        // Detect ID searches (CT-1234 or 1234)
+        const idMatch = trimmedSearchTerm.match(/^\s*(?:CT[- ]?)?(\d+)\s*$/i);
+        const isIdSearch = !!idMatch;
+        const idValue = isIdSearch ? idMatch[1] : null;
+
         // --- CONSTRUCT FILTER QUERIES ---
         const genderQuery = requiredGender ? `&gender=${requiredGender}` : '';
-        // Parent must be born BEFORE the animal being added/edited
-        const birthdateQuery = birthDate ? `&birthdateBefore=${birthDate}` : ''; 
-        
-        setLoadingLocal(true);
-        setLoadingGlobal(true);
+        const birthdateQuery = birthDate ? `&birthdateBefore=${birthDate}` : '';
 
-        // 1. Search Local Animals (with filters)
-        try {
-            const localResponse = await axios.get(
-                `${API_BASE_URL}/animals?name=${trimmedSearchTerm}${genderQuery}${birthdateQuery}`,
-                { headers: { Authorization: `Bearer ${authToken}` } }
-            );
-            const filteredLocal = localResponse.data.filter(a => a.id_public !== currentId);
-            setLocalAnimals(filteredLocal);
-        } catch (error) {
-            console.error('Local Search Error:', error);
-            showModalMessage('Search Error', 'Failed to search your animals.');
+        // Prepare promises depending on scope
+        setLoadingLocal(scope === 'local' || scope === 'both');
+        setLoadingGlobal(scope === 'global' || scope === 'both');
+
+        // Local search
+        if (scope === 'local' || scope === 'both') {
+            try {
+                const localUrl = isIdSearch
+                    ? `${API_BASE_URL}/animals?id_public=${encodeURIComponent(idValue)}`
+                    : `${API_BASE_URL}/animals?name=${encodeURIComponent(trimmedSearchTerm)}${genderQuery}${birthdateQuery}`;
+
+                const localResponse = await axios.get(localUrl, {
+                    headers: { Authorization: `Bearer ${authToken}` }
+                });
+                const filteredLocal = localResponse.data.filter(a => a.id_public !== currentId);
+                setLocalAnimals(filteredLocal);
+            } catch (error) {
+                console.error('Local Search Error:', error);
+                showModalMessage('Search Error', 'Failed to search your animals.');
+                setLocalAnimals([]);
+            } finally {
+                setLoadingLocal(false);
+            }
+        } else {
             setLocalAnimals([]);
-        } finally {
             setLoadingLocal(false);
         }
 
-        // 2. Search Global Display Animals (with filters)
-        try {
-            const globalResponse = await axios.get(
-                `${API_BASE_URL}/global/animals?name=${trimmedSearchTerm}&display=true${genderQuery}${birthdateQuery}`
-            );
-            const filteredGlobal = globalResponse.data.filter(a => a.id_public !== currentId);
-            setGlobalAnimals(filteredGlobal);
-        } catch (error) {
-            console.error('Global Search Error:', error);
+        // Global search
+        if (scope === 'global' || scope === 'both') {
+            try {
+                const globalUrl = isIdSearch
+                    ? `${API_BASE_URL}/global/animals?id_public=${encodeURIComponent(idValue)}&display=true`
+                    : `${API_BASE_URL}/global/animals?name=${encodeURIComponent(trimmedSearchTerm)}&display=true${genderQuery}${birthdateQuery}`;
+
+                const globalResponse = await axios.get(globalUrl);
+                const filteredGlobal = globalResponse.data.filter(a => a.id_public !== currentId);
+                setGlobalAnimals(filteredGlobal);
+            } catch (error) {
+                console.error('Global Search Error:', error);
+                setGlobalAnimals([]);
+            } finally {
+                setLoadingGlobal(false);
+            }
+        } else {
             setGlobalAnimals([]);
-        } finally {
             setLoadingGlobal(false);
         }
     };
@@ -201,22 +222,33 @@ const ParentSearchModal = ({
                     <button onClick={onClose} className="text-gray-500 hover:text-gray-800"><X size={24} /></button>
                 </div>
 
-                {/* Search Bar (Manual Search) */}
-                <div className="flex space-x-2 mb-4">
-                    <input
-                        type="text"
-                        placeholder={`Search ${title} by Name (Gender: ${requiredGender}, Born Before: ${birthDate || 'Any Date'})...`}
-                        value={searchTerm}
-                        onChange={(e) => setSearchTerm(e.target.value)}
-                        className="flex-grow p-2 border border-gray-300 rounded-lg focus:ring-primary focus:border-primary transition"
-                    />
-                    <button
-                        onClick={handleSearch}
-                        disabled={loadingLocal || loadingGlobal || searchTerm.trim().length < 3}
-                        className="bg-primary hover:bg-primary/90 text-black font-semibold py-2 px-4 rounded-lg transition duration-150 flex items-center disabled:opacity-50"
-                    >
-                        {loadingLocal || loadingGlobal ? <Loader2 className="animate-spin" size={20} /> : <Search size={20} />}
-                    </button>
+                {/* Scope Toggle + Search Bar (Manual Search) */}
+                <div className="mb-3">
+                    <div className="flex items-center space-x-2 mb-2">
+                        <span className="text-sm font-medium text-gray-600">Search Scope:</span>
+                        {['local','global','both'].map(s => (
+                            <button key={s} onClick={() => setScope(s)}
+                                className={`px-3 py-1.5 text-sm font-semibold rounded-lg transition duration-150 ${scope === s ? 'bg-primary text-black' : 'bg-gray-200 text-gray-700 hover:bg-gray-300'}`}>
+                                {s === 'both' ? 'Local + Global' : (s === 'local' ? 'Local' : 'Global')}
+                            </button>
+                        ))}
+                    </div>
+                    <div className="flex space-x-2">
+                        <input
+                            type="text"
+                            placeholder={`Search by Name or ID (e.g., CT-2468 or 2468). Filters: Gender=${requiredGender || 'Any'}, Born Before=${birthDate || 'Any'}...`}
+                            value={searchTerm}
+                            onChange={(e) => setSearchTerm(e.target.value)}
+                            className="flex-grow p-2 border border-gray-300 rounded-lg focus:ring-primary focus:border-primary transition"
+                        />
+                        <button
+                            onClick={handleSearch}
+                            disabled={(scope === 'local' || scope === 'both') && loadingLocal || (scope === 'global' || scope === 'both') && loadingGlobal || searchTerm.trim().length < 1}
+                            className="bg-primary hover:bg-primary/90 text-black font-semibold py-2 px-4 rounded-lg transition duration-150 flex items-center disabled:opacity-50"
+                        >
+                            { (loadingLocal || loadingGlobal) ? <Loader2 className="animate-spin" size={20} /> : <Search size={20} /> }
+                        </button>
+                    </div>
                 </div>
                 
                 {/* Results Area */}
@@ -826,7 +858,7 @@ const AnimalForm = ({
                     {/* --- NEW: EARSET ENTRY (CONDITIONAL ON SPECIES === 'Rat') --- */}
                     {formData.species === 'Rat' && (
                         <div>
-                            <label className="block text-sm font-medium text-gray-700">Earset (Rat Only)</label>
+                            <label className="block text-sm font-medium text-gray-700">Earset</label>
                             <input type="text" name="earset" value={formData.earset} onChange={handleChange} 
                                 className="mt-1 block w-full p-2 border border-gray-300 rounded-md shadow-sm focus:ring-primary focus:border-primary" />
                         </div>
@@ -873,7 +905,7 @@ const AnimalForm = ({
                     <h3 className="text-lg font-semibold text-gray-700 border-b pb-2">Pedigree: Sire and Dam 🌳</h3>
                     <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                         <div className='flex flex-col'>
-                            <label className='text-sm font-medium text-gray-600 mb-1'>Sire (Father) ID (Optional)</label>
+                            <label className='text-sm font-medium text-gray-600 mb-1'>Sire (Father)</label>
                             <div 
                                 onClick={() => !loading && setModalTarget('father')}
                                 className="flex items-center justify-between p-3 border border-gray-300 rounded-lg bg-white cursor-pointer hover:border-primary transition disabled:opacity-50"
@@ -884,7 +916,7 @@ const AnimalForm = ({
                             </div>
                         </div>
                         <div className='flex flex-col'>
-                            <label className='text-sm font-medium text-gray-600 mb-1'>Dam (Mother) ID (Optional)</label>
+                            <label className='text-sm font-medium text-gray-600 mb-1'>Dam (Mother)</label>
                             <div 
                                 onClick={() => !loading && setModalTarget('mother')}
                                 className="flex items-center justify-between p-3 border border-gray-300 rounded-lg bg-white cursor-pointer hover:border-primary transition disabled:opacity-50"
