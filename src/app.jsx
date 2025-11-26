@@ -107,10 +107,21 @@ const AnimalImageUpload = ({ imageUrl, onFileChange, disabled }) => (
 );
 
 
-// (Removed `PedigreeSearchModal`; consolidated search handling uses `ParentSearchModal`)
-
-// --- Pedigree Search Modal (Parent Selector - MANUAL SEARCH) ---
-const ParentSearchModal = ({ title, currentId, onSelect, onClose, authToken, showModalMessage, API_BASE_URL, X, Search, Loader2, LoadingSpinner }) => {
+const ParentSearchModal = ({ 
+    title, 
+    currentId, 
+    onSelect, 
+    onClose, 
+    authToken, 
+    showModalMessage, 
+    API_BASE_URL, 
+    X, 
+    Search, 
+    Loader2, 
+    LoadingSpinner,
+    requiredGender, // Filter: e.g., 'Male' or 'Female'
+    birthDate       // Filter: Date of the animal being bred
+}) => {
     const [searchTerm, setSearchTerm] = useState('');
     const [localAnimals, setLocalAnimals] = useState([]);
     const [globalAnimals, setGlobalAnimals] = useState([]);
@@ -136,7 +147,6 @@ const ParentSearchModal = ({ title, currentId, onSelect, onClose, authToken, sho
     const handleSearch = async () => {
         const trimmedSearchTerm = searchTerm.trim();
         
-        // Enforce a minimum of 3 characters for search
         if (!trimmedSearchTerm || trimmedSearchTerm.length < 3) {
             setLocalAnimals([]);
             setGlobalAnimals([]);
@@ -144,15 +154,20 @@ const ParentSearchModal = ({ title, currentId, onSelect, onClose, authToken, sho
             return;
         }
 
-        // Set loading states before fetching
+        // --- CONSTRUCT FILTER QUERIES ---
+        const genderQuery = requiredGender ? `&gender=${requiredGender}` : '';
+        // Parent must be born BEFORE the animal being added/edited
+        const birthdateQuery = birthDate ? `&birthdateBefore=${birthDate}` : ''; 
+        
         setLoadingLocal(true);
         setLoadingGlobal(true);
 
-        // --- 1. Search Local Animals ---
+        // 1. Search Local Animals (with filters)
         try {
-            const localResponse = await axios.get(`${API_BASE_URL}/animals?name=${trimmedSearchTerm}`, {
-                headers: { Authorization: `Bearer ${authToken}` }
-            });
+            const localResponse = await axios.get(
+                `${API_BASE_URL}/animals?name=${trimmedSearchTerm}${genderQuery}${birthdateQuery}`,
+                { headers: { Authorization: `Bearer ${authToken}` } }
+            );
             const filteredLocal = localResponse.data.filter(a => a.id_public !== currentId);
             setLocalAnimals(filteredLocal);
         } catch (error) {
@@ -163,14 +178,15 @@ const ParentSearchModal = ({ title, currentId, onSelect, onClose, authToken, sho
             setLoadingLocal(false);
         }
 
-        // --- 2. Search Global Display Animals ---
+        // 2. Search Global Display Animals (with filters)
         try {
-            const globalResponse = await axios.get(`${API_BASE_URL}/global/animals?name=${trimmedSearchTerm}&display=true`);
+            const globalResponse = await axios.get(
+                `${API_BASE_URL}/global/animals?name=${trimmedSearchTerm}&display=true${genderQuery}${birthdateQuery}`
+            );
             const filteredGlobal = globalResponse.data.filter(a => a.id_public !== currentId);
             setGlobalAnimals(filteredGlobal);
         } catch (error) {
             console.error('Global Search Error:', error);
-            // Silently fail if global search isn't implemented or fails
             setGlobalAnimals([]);
         } finally {
             setLoadingGlobal(false);
@@ -189,11 +205,10 @@ const ParentSearchModal = ({ title, currentId, onSelect, onClose, authToken, sho
                 <div className="flex space-x-2 mb-4">
                     <input
                         type="text"
-                        placeholder="Search by Animal Name (min 3 chars)..."
+                        placeholder={`Search ${title} by Name (Gender: ${requiredGender}, Born Before: ${birthDate || 'Any Date'})...`}
                         value={searchTerm}
                         onChange={(e) => setSearchTerm(e.target.value)}
                         className="flex-grow p-2 border border-gray-300 rounded-lg focus:ring-primary focus:border-primary transition"
-                        // Removed onKeyPress event to enforce manual search
                     />
                     <button
                         onClick={handleSearch}
@@ -224,7 +239,7 @@ const ParentSearchModal = ({ title, currentId, onSelect, onClose, authToken, sho
                     
                     {/* Updated no results check */}
                     {searchTerm.trim().length >= 3 && localAnimals.length === 0 && globalAnimals.length === 0 && !loadingLocal && !loadingGlobal && (
-                        <p className="text-center text-gray-500 py-4">No animals found matching your search term.</p>
+                        <p className="text-center text-gray-500 py-4">No animals found matching your search term or filters.</p>
                     )}
                 </div>
 
@@ -241,7 +256,205 @@ const ParentSearchModal = ({ title, currentId, onSelect, onClose, authToken, sho
     );
 };
 
-// (Removed `LocalAnimalSearchModal` and unused `Dashboard` component to simplify file.)
+
+
+const LocalAnimalSearchModal = ({ title, currentId, onSelect, onClose, authToken, showModalMessage, API_BASE_URL, X, Search, Loader2, LoadingSpinner }) => {
+    const [searchTerm, setSearchTerm] = useState('');
+    const [localAnimals, setLocalAnimals] = useState([]);
+    const [loadingLocal, setLoadingLocal] = useState(false);
+    
+    // Simple component to render a list item (No isGlobal tag needed)
+    const SearchResultItem = ({ animal }) => (
+        <div 
+            className="flex justify-between items-center p-3 border-b hover:bg-gray-50 cursor-pointer" 
+            onClick={() => onSelect(animal.id_public)}
+        >
+            <div>
+                <p className="font-semibold text-gray-800">{animal.prefix} {animal.name} (CT-{animal.id_public})</p>
+                <p className="text-sm text-gray-600">
+                    {animal.species} | {animal.gender} | {animal.status}
+                </p>
+            </div>
+        </div>
+    );
+
+    const handleSearch = async () => {
+        const trimmedSearchTerm = searchTerm.trim();
+        
+        if (!trimmedSearchTerm || trimmedSearchTerm.length < 3) {
+            setLocalAnimals([]);
+            showModalMessage('Search Info', 'Please enter at least 3 characters to search.');
+            return;
+        }
+
+        // --- Search Local Animals Only ---
+        setLoadingLocal(true);
+        try {
+            const localResponse = await axios.get(`${API_BASE_URL}/animals?name=${trimmedSearchTerm}`, {
+                headers: { Authorization: `Bearer ${authToken}` }
+            });
+            const filteredLocal = localResponse.data.filter(a => a.id_public !== currentId);
+            setLocalAnimals(filteredLocal);
+        } catch (error) {
+            console.error('Local Search Error:', error);
+            showModalMessage('Search Error', 'Failed to search your animals.');
+            setLocalAnimals([]);
+        } finally {
+            setLoadingLocal(false);
+        }
+    };
+
+    return (
+        <div className="fixed inset-0 bg-gray-600 bg-opacity-75 flex items-center justify-center p-4 z-50">
+            <div className="bg-white rounded-xl shadow-2xl p-6 w-full max-w-xl max-h-[90vh] flex flex-col">
+                <div className="flex justify-between items-center border-b pb-3 mb-4">
+                    <h3 className="text-xl font-bold text-gray-800">{title} Selector (Local Animals Only)</h3>
+                    <button onClick={onClose} className="text-gray-500 hover:text-gray-800"><X size={24} /></button>
+                </div>
+
+                {/* Search Bar (Manual Search) */}
+                <div className="flex space-x-2 mb-4">
+                    <input
+                        type="text"
+                        placeholder="Search your animals by Name (min 3 chars)..."
+                        value={searchTerm}
+                        onChange={(e) => setSearchTerm(e.target.value)}
+                        className="flex-grow p-2 border border-gray-300 rounded-lg focus:ring-primary focus:border-primary transition"
+                    />
+                    <button
+                        onClick={handleSearch}
+                        disabled={loadingLocal || searchTerm.trim().length < 3}
+                        className="bg-primary hover:bg-primary/90 text-black font-semibold py-2 px-4 rounded-lg transition duration-150 flex items-center disabled:opacity-50"
+                    >
+                        {loadingLocal ? <Loader2 className="animate-spin" size={20} /> : <Search size={20} />}
+                    </button>
+                </div>
+                
+                {/* Results Area */}
+                <div className="flex-grow overflow-y-auto space-y-4">
+                    {/* Local Results */}
+                    {loadingLocal ? <LoadingSpinner message="Searching your animals..." /> : localAnimals.length > 0 ? (
+                        <div className="border p-3 rounded-lg bg-white shadow-sm">
+                            <h4 className="font-bold text-gray-700 mb-2 border-b pb-1">Your Animals ({localAnimals.length})</h4>
+                            {localAnimals.map(animal => <SearchResultItem key={animal.id_public} animal={animal} />)}
+                        </div>
+                    ) : (
+                        searchTerm.trim().length >= 3 && !loadingLocal && (
+                            <p className="text-center text-gray-500 py-4">No local animals found matching your search term.</p>
+                        )
+                    )}
+                </div>
+
+                <div className="mt-4 pt-4 border-t">
+                    <button 
+                        onClick={() => onSelect(null)} 
+                        className="w-full text-sm text-gray-500 hover:text-red-500 transition"
+                    >
+                        Clear {title} ID
+                    </button>
+                </div>
+            </div>
+        </div>
+    );
+};const LocalAnimalSearchModal = ({ title, currentId, onSelect, onClose, authToken, showModalMessage, API_BASE_URL, X, Search, Loader2, LoadingSpinner }) => {
+    const [searchTerm, setSearchTerm] = useState('');
+    const [localAnimals, setLocalAnimals] = useState([]);
+    const [loadingLocal, setLoadingLocal] = useState(false);
+    
+    // Simple component to render a list item (No isGlobal tag needed)
+    const SearchResultItem = ({ animal }) => (
+        <div 
+            className="flex justify-between items-center p-3 border-b hover:bg-gray-50 cursor-pointer" 
+            onClick={() => onSelect(animal.id_public)}
+        >
+            <div>
+                <p className="font-semibold text-gray-800">{animal.prefix} {animal.name} (CT-{animal.id_public})</p>
+                <p className="text-sm text-gray-600">
+                    {animal.species} | {animal.gender} | {animal.status}
+                </p>
+            </div>
+        </div>
+    );
+
+    const handleSearch = async () => {
+        const trimmedSearchTerm = searchTerm.trim();
+        
+        if (!trimmedSearchTerm || trimmedSearchTerm.length < 3) {
+            setLocalAnimals([]);
+            showModalMessage('Search Info', 'Please enter at least 3 characters to search.');
+            return;
+        }
+
+        // --- Search Local Animals Only ---
+        setLoadingLocal(true);
+        try {
+            const localResponse = await axios.get(`${API_BASE_URL}/animals?name=${trimmedSearchTerm}`, {
+                headers: { Authorization: `Bearer ${authToken}` }
+            });
+            const filteredLocal = localResponse.data.filter(a => a.id_public !== currentId);
+            setLocalAnimals(filteredLocal);
+        } catch (error) {
+            console.error('Local Search Error:', error);
+            showModalMessage('Search Error', 'Failed to search your animals.');
+            setLocalAnimals([]);
+        } finally {
+            setLoadingLocal(false);
+        }
+    };
+
+    return (
+        <div className="fixed inset-0 bg-gray-600 bg-opacity-75 flex items-center justify-center p-4 z-50">
+            <div className="bg-white rounded-xl shadow-2xl p-6 w-full max-w-xl max-h-[90vh] flex flex-col">
+                <div className="flex justify-between items-center border-b pb-3 mb-4">
+                    <h3 className="text-xl font-bold text-gray-800">{title} Selector (Local Animals Only)</h3>
+                    <button onClick={onClose} className="text-gray-500 hover:text-gray-800"><X size={24} /></button>
+                </div>
+
+                {/* Search Bar (Manual Search) */}
+                <div className="flex space-x-2 mb-4">
+                    <input
+                        type="text"
+                        placeholder="Search your animals by Name (min 3 chars)..."
+                        value={searchTerm}
+                        onChange={(e) => setSearchTerm(e.target.value)}
+                        className="flex-grow p-2 border border-gray-300 rounded-lg focus:ring-primary focus:border-primary transition"
+                    />
+                    <button
+                        onClick={handleSearch}
+                        disabled={loadingLocal || searchTerm.trim().length < 3}
+                        className="bg-primary hover:bg-primary/90 text-black font-semibold py-2 px-4 rounded-lg transition duration-150 flex items-center disabled:opacity-50"
+                    >
+                        {loadingLocal ? <Loader2 className="animate-spin" size={20} /> : <Search size={20} />}
+                    </button>
+                </div>
+                
+                {/* Results Area */}
+                <div className="flex-grow overflow-y-auto space-y-4">
+                    {/* Local Results */}
+                    {loadingLocal ? <LoadingSpinner message="Searching your animals..." /> : localAnimals.length > 0 ? (
+                        <div className="border p-3 rounded-lg bg-white shadow-sm">
+                            <h4 className="font-bold text-gray-700 mb-2 border-b pb-1">Your Animals ({localAnimals.length})</h4>
+                            {localAnimals.map(animal => <SearchResultItem key={animal.id_public} animal={animal} />)}
+                        </div>
+                    ) : (
+                        searchTerm.trim().length >= 3 && !loadingLocal && (
+                            <p className="text-center text-gray-500 py-4">No local animals found matching your search term.</p>
+                        )
+                    )}
+                </div>
+
+                <div className="mt-4 pt-4 border-t">
+                    <button 
+                        onClick={() => onSelect(null)} 
+                        className="w-full text-sm text-gray-500 hover:text-red-500 transition"
+                    >
+                        Clear {title} ID
+                    </button>
+                </div>
+            </div>
+        </div>
+    );
+};
 
 
 
@@ -583,21 +796,27 @@ const AnimalForm = ({
             setLoading(false);
         }
     };
+	
+	const requiredGender = modalTarget === 'father' ? 'Male' : 'Female';
     
     const currentId = animalToEdit?.id_public;
 
     return (
-        <div className="w-full max-w-2xl mx-auto bg-white p-6 rounded-xl shadow-lg">
-            {modalTarget && ( 
-                <ParentSearchModal // <-- THIS IS THE CORRECTED LINE
-                    title={modalTarget === 'father' ? 'Sire' : 'Dam'} 
-                    currentId={currentId} 
-                    onSelect={handleSelectPedigree} 
-                    onClose={() => setModalTarget(null)} 
-                    authToken={authToken} 
-                    showModalMessage={showModalMessage}
-                /> 
-            )}
+    // ...
+    {modalTarget && (
+        <ParentSearchModal
+            title={modalTarget === 'father' ? 'Sire' : 'Dam'}
+            currentId={currentId}
+            onSelect={handleSelectPedigree}
+            onClose={() => setModalTarget(null)}
+            authToken={authToken}
+            showModalMessage={showModalMessage}
+            
+            // --- NEW FILTERING PROPS ---
+            requiredGender={requiredGender}
+            birthDate={formData.birthdate} // Pass the birthdate of the animal being created/edited
+        />
+    )}
 
             <h2 className="text-3xl font-bold text-gray-800 mb-6 flex items-center justify-between">
                 <span>
