@@ -1870,8 +1870,11 @@ const App = () => {
             {/* Footer */}
             <footer className="w-full max-w-4xl mt-6 text-center text-sm text-gray-500 pt-4 border-t border-gray-200">
                 &copy; {new Date().getFullYear()} Crittertrack Pedigree System.
-            </footer>
+           </footer>
         </div>
     );
 };
+// ------------------------------------------
+// THIS MUST BE THE LAST LINE OF THE FILE
+// ------------------------------------------
 export default App;
