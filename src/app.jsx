@@ -1883,7 +1883,16 @@ const App = () => {
     const fetchUserProfile = useCallback(async (token) => {
         try {
             const response = await axios.get(`${API_BASE_URL}/users/profile`, { headers: { Authorization: `Bearer ${token}` } });
-            setUserProfile(response.data); 
+            // Normalize profile image keys for UI compatibility and add a cache-busting query
+            const user = response.data || {};
+            const img = user.profileImage || user.profileImageUrl || user.imageUrl || user.avatarUrl || user.avatar || user.profile_image || null;
+            if (img) {
+                const busted = img.includes('?') ? `${img}&t=${Date.now()}` : `${img}?t=${Date.now()}`;
+                // prefer `profileImage` and also set `profileImageUrl` for backwards compatibility
+                user.profileImage = busted;
+                user.profileImageUrl = busted;
+            }
+            setUserProfile(user);
         } catch (error) {
             console.error('Failed to fetch user profile:', error);
             showModalMessage('Authentication Error', 'Could not load user profile. Please log in again.');
