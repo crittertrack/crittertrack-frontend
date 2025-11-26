@@ -828,7 +828,8 @@ const AnimalForm = ({
 
         try {
             // Upload animal image first (if selected)
-            if (animalImageFile) {
+                let uploadedFilename = null;
+                if (animalImageFile) {
                 try {
                     const fd = new FormData();
                     fd.append('file', animalImageFile);
@@ -837,13 +838,28 @@ const AnimalForm = ({
                     if (uploadResp?.data?.url) {
                         formData.imageUrl = uploadResp.data.url;
                     }
+                    if (uploadResp?.data?.filename) {
+                        uploadedFilename = uploadResp.data.filename;
+                    }
                 } catch (uploadErr) {
                     console.error('Animal image upload failed:', uploadErr?.response?.data || uploadErr.message);
                     showModalMessage('Image Upload', 'Failed to upload animal image. The record will be saved without the image.');
                 }
             }
 
-            await onSave(method, url, formData);
+            try {
+                await onSave(method, url, formData);
+            } catch (saveErr) {
+                // If we uploaded a file but the animal save failed, attempt cleanup to avoid orphan files.
+                if (uploadedFilename) {
+                    try {
+                        await axios.delete(`${API_BASE_URL}/upload/${uploadedFilename}`, { headers: { Authorization: `Bearer ${authToken}` } });
+                    } catch (cleanupErr) {
+                        console.warn('Failed to cleanup uploaded file after save failure:', cleanupErr?.response?.data || cleanupErr.message);
+                    }
+                }
+                throw saveErr;
+            }
 
             // Notify other parts of the app that animals changed so lists refresh
             try { window.dispatchEvent(new Event('animals-changed')); } catch (e) { /* ignore */ }
