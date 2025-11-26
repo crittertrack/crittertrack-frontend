@@ -788,49 +788,49 @@ const AnimalForm = ({
                     					
 					{/* Registry Code */}
                     <div>
-                        <label className="block text-sm font-medium text-gray-700">Registry Code (Optional)</label>
+                        <label className="block text-sm font-medium text-gray-700">Registry Code</label>
                         <input type="text" name="registryCode" value={formData.registryCode} onChange={handleChange} 
                             className="mt-1 block w-full p-2 border border-gray-300 rounded-md shadow-sm focus:ring-primary focus:border-primary" />
                     </div>
 					
 					{/* Prefix */}
                     <div>
-                        <label className="block text-sm font-medium text-gray-700">Prefix (Optional)</label>
+                        <label className="block text-sm font-medium text-gray-700">Prefix</label>
                         <input type="text" name="prefix" value={formData.prefix} onChange={handleChange} 
                             className="mt-1 block w-full p-2 border border-gray-300 rounded-md shadow-sm focus:ring-primary focus:border-primary" />
                     </div>
 					
 					{/* Name */}
                     <div>
-                        <label className="block text-sm font-medium text-gray-700">Name</label>
+                        <label className="block text-sm font-medium text-gray-700">Name*</label>
                         <input type="text" name="name" value={formData.name} onChange={handleChange} required 
                             className="mt-1 block w-full p-2 border border-gray-300 rounded-md shadow-sm focus:ring-primary focus:border-primary" />
                     </div>
 					
 					{/* Color */}
                     <div>
-                        <label className="block text-sm font-medium text-gray-700">Color (Optional)</label>
+                        <label className="block text-sm font-medium text-gray-700">Color</label>
                         <input type="text" name="color" value={formData.color} onChange={handleChange} 
                             className="mt-1 block w-full p-2 border border-gray-300 rounded-md shadow-sm focus:ring-primary focus:border-primary" />
                     </div>
 					
 					{/* Coat */}
                     <div>
-                        <label className="block text-sm font-medium text-gray-700">Coat (Optional)</label>
+                        <label className="block text-sm font-medium text-gray-700">Coat</label>
                         <input type="text" name="coat" value={formData.coat} onChange={handleChange} 
                             className="mt-1 block w-full p-2 border border-gray-300 rounded-md shadow-sm focus:ring-primary focus:border-primary" />
                     </div>
 					
 					{/* Genetic Code */}
                     <div>
-                        <label className="block text-sm font-medium text-gray-700">Genetic Code (Optional)</label>
+                        <label className="block text-sm font-medium text-gray-700">Genetic Code</label>
                         <input type="text" name="geneticCode" value={formData.geneticCode} onChange={handleChange} 
                             className="mt-1 block w-full p-2 border border-gray-300 rounded-md shadow-sm focus:ring-primary focus:border-primary" />
                     </div>
 					
 					{/* Gender */}
                     <div>
-                        <label className="block text-sm font-medium text-gray-700">Gender</label>
+                        <label className="block text-sm font-medium text-gray-700">Gender*</label>
                         <select name="gender" value={formData.gender} onChange={handleChange} required 
                             className="mt-1 block w-full p-2 border border-gray-300 rounded-md shadow-sm focus:ring-primary focus:border-primary" >
                             {GENDER_OPTIONS.map(g => <option key={g} value={g}>{g}</option>)}
@@ -839,14 +839,14 @@ const AnimalForm = ({
 					
 					 {/* Birthdate */}
                     <div>
-                        <label className="block text-sm font-medium text-gray-700">Birthdate</label>
+                        <label className="block text-sm font-medium text-gray-700">Birthdate*</label>
                         <input type="date" name="birthDate" value={formData.birthDate} onChange={handleChange} required 
                             className="mt-1 block w-full p-2 border border-gray-300 rounded-md shadow-sm focus:ring-primary focus:border-primary" />
                     </div>
 					
 					{/* Status */}
                     <div>
-                        <label className="block text-sm font-medium text-gray-700">Status</label>
+                        <label className="block text-sm font-medium text-gray-700">Status*</label>
                         <select name="status" value={formData.status} onChange={handleChange} required 
                             className="mt-1 block w-full p-2 border border-gray-300 rounded-md shadow-sm focus:ring-primary focus:border-primary" >
                             {STATUS_OPTIONS.map(s => <option key={s} value={s}>{s}</option>)}
