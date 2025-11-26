@@ -7,7 +7,7 @@ const API_BASE_URL = 'https://crittertrack-pedigree-production.up.railway.app/ap
 
 // UPDATED: 'Breeding' changed to 'Breeder'
 const GENDER_OPTIONS = ['Male', 'Female'];
-const STATUS_OPTIONS = ['Pet', 'Breeder', 'Available', 'Retired', 'Deceased']; 
+const STATUS_OPTIONS = ['Pet', 'Breeder', 'Available', 'Retired', 'Deceased', 'Rehomed']; 
 
 // NEW: Default Species Options
 const DEFAULT_SPECIES_OPTIONS = ['Fancy Mouse', 'Rat', 'Hamster'];
@@ -380,8 +380,6 @@ const AnimalList = ({ authToken, showModalMessage, onEditAnimal, onSetCurrentVie
     const [statusFilterPregnant, setStatusFilterPregnant] = useState(false);
     const [statusFilterNursing, setStatusFilterNursing] = useState(false);
     const [ownedFilter, setOwnedFilter] = useState('owned');
-    const [displayFilter, setDisplayFilter] = useState(false);
-    const [globalFilter, setGlobalFilter] = useState(false);
 
     const fetchAnimals = useCallback(async () => {
         setLoading(true);
@@ -402,14 +400,6 @@ const AnimalList = ({ authToken, showModalMessage, onEditAnimal, onSetCurrentVie
             }
             if (statusFilterNursing) {
                 params.push(`isNursing=true`);
-            }
-            
-			if (displayFilter) {
-                params.push(`isDisplay=true`);
-            }
-			
-           if (globalFilter) {
-                params.push(`isGlobal=true`);
             }
 			
 			if (ownedFilter === 'owned') {
@@ -509,7 +499,7 @@ const AnimalList = ({ authToken, showModalMessage, onEditAnimal, onSetCurrentVie
                         onChange={handleStatusFilterChange}
                         className="p-2 border border-gray-300 rounded-lg shadow-sm focus:ring-primary focus:border-primary transition w-1/3 min-w-[150px]"
                     >
-                        <option value="">All Statuses</option> 
+                        <option value="">All</option> 
                         {STATUS_OPTIONS.map(status => (
                             <option key={status} value={status}>{status}</option>
                         ))}
@@ -539,7 +529,7 @@ const AnimalList = ({ authToken, showModalMessage, onEditAnimal, onSetCurrentVie
                     </div>
                 </div>
 
-                {/* ROW 3: Secondary Toggles (Ownership, Breeding Status, Display) */}
+                {/* ROW 3: Secondary Toggles (Ownership, Breeding Status) */}
                 <div className="flex flex-wrap items-center space-x-4 pt-2 border-t border-gray-200"> 
                     <span className='text-sm font-medium text-gray-700'>Filter By:</span>
                     
@@ -586,33 +576,7 @@ const AnimalList = ({ authToken, showModalMessage, onEditAnimal, onSetCurrentVie
                     >
                         <Milk size={16} />
                         <span>Nursing</span>
-                    </button>
-
-                    {/* Display Filter Toggle (NEW) */}
-                    <button
-                        onClick={() => setDisplayFilter(prev => !prev)}
-                        className={`px-3 py-1.5 text-sm font-semibold rounded-lg transition duration-150 shadow-sm flex items-center space-x-1 ${
-                            displayFilter
-                                ? 'bg-indigo-300 text-gray-800 hover:bg-indigo-400'
-                                : 'bg-gray-200 text-gray-700 hover:bg-gray-300'
-                        }`}
-                    >
-                        <Cat size={16} />
-                        <span>Display</span>
-                    </button>
-                    
-                    {/* Global Filter Toggle (NEW - represents animals shared from other breeders) */}
-                    <button
-                        onClick={() => setGlobalFilter(prev => !prev)}
-                        className={`px-3 py-1.5 text-sm font-semibold rounded-lg transition duration-150 shadow-sm flex items-center space-x-1 ${
-                            globalFilter
-                                ? 'bg-yellow-300 text-gray-800 hover:bg-yellow-400'
-                                : 'bg-gray-200 text-gray-700 hover:bg-gray-300'
-                        }`}
-                    >
-                        <Globe size={16} />
-                        <span>Global</span>
-                    </button>
+                    </button>                                
                 </div>
             </div>
 
@@ -644,13 +608,6 @@ const AnimalList = ({ authToken, showModalMessage, onEditAnimal, onSetCurrentVie
                                                     <div className='flex items-center space-x-2 mt-1'>
                                                         {animal.isOwned && (
                                                             <span className="text-xs bg-green-100 text-green-800 px-2 py-0.5 rounded-full font-medium">Owned</span>
-                                                        )}
-                                                        {animal.isDisplay && (
-                                                            <span className="text-xs bg-indigo-100 text-indigo-800 px-2 py-0.5 rounded-full font-medium">Display</span>
-                                                        )}
-                                                        {/* NEW: Global indicator */}
-                                                        {animal.isGlobal && ( 
-                                                            <span className="text-xs bg-yellow-100 text-yellow-800 px-2 py-0.5 rounded-full font-medium">Global</span>
                                                         )}
                                                     </div>
                                                 </div>
@@ -705,8 +662,6 @@ const AnimalForm = ({ animalToEdit, onSave, onCancel, showModalMessage, authToke
         motherId_public: animalToEdit?.motherId_public || null,
         isPregnant: animalToEdit?.isPregnant || false,
         isNursing: animalToEdit?.isNursing || false,
-        // NEW TOGGLES
-        isDisplay: animalToEdit?.isDisplay || false,
         isOwned: animalToEdit?.isOwned ?? true, // Default to owned for new animals
     });
     const [loading, setLoading] = useState(false);
