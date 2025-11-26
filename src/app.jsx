@@ -236,7 +236,7 @@ const ParentSearchModal = ({
                     <div className="flex space-x-2">
                         <input
                             type="text"
-                            placeholder={`Search by Name or ID (e.g., CT-2468 or 2468). Filters: Gender=${requiredGender || 'Any'}, Born Before=${birthDate || 'Any'}...`}
+                            placeholder={`Search by Name or ID (e.g., Minnie or CT-2468)...`}
                             value={searchTerm}
                             onChange={(e) => setSearchTerm(e.target.value)}
                             className="flex-grow p-2 border border-gray-300 rounded-lg focus:ring-primary focus:border-primary transition"
