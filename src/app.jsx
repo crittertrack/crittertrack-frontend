@@ -1138,9 +1138,12 @@ const ProfileEditForm = ({ userProfile, showModalMessage, onSaveSuccess, onCance
 
             if (uploadSucceeded) {
                 console.log('Profile: sending JSON profile update with image URL', payload.profileImageUrl);
-                await axios.put(`${API_BASE_URL}/users/profile`, payload, {
+                const resp = await axios.put(`${API_BASE_URL}/users/profile`, payload, {
                     headers: { Authorization: `Bearer ${authToken}` }
                 });
+                // Try to obtain updated user object from response
+                const updatedUser = resp?.data?.user || resp?.data || null;
+                if (onSaveSuccess) await onSaveSuccess(updatedUser);
             } else if (profileImageFile) {
                 try {
                     const form = new FormData();
@@ -1155,18 +1158,23 @@ const ProfileEditForm = ({ userProfile, showModalMessage, onSaveSuccess, onCance
                         headers: { Authorization: `Bearer ${authToken}` }
                     });
                     console.log('Profile multipart PUT response:', profileResp.status, profileResp.data);
+                    const updatedUser = profileResp?.data?.user || profileResp?.data || null;
+                    if (onSaveSuccess) await onSaveSuccess(updatedUser);
                 } catch (fmErr) {
                     console.error('Profile multipart PUT failed:', fmErr?.response?.data || fmErr.message);
                     showModalMessage('Error', 'Failed to save profile with image. See console/network logs for details.');
                     throw fmErr;
                 }
             } else {
-                await axios.put(`${API_BASE_URL}/users/profile`, payload, {
+                const resp = await axios.put(`${API_BASE_URL}/users/profile`, payload, {
                     headers: { Authorization: `Bearer ${authToken}` }
                 });
+                const updatedUser = resp?.data?.user || resp?.data || null;
+                if (onSaveSuccess) await onSaveSuccess(updatedUser);
             }
             showModalMessage('Success', 'Profile information updated successfully.');
-            await onSaveSuccess(); 
+            // If onSaveSuccess wasn't called with an updatedUser above, call it now without args
+            if (onSaveSuccess) await onSaveSuccess(); 
         } catch (error) {
             console.error('Profile Update Error:', error.response?.data || error.message);
             showModalMessage('Error', error.response?.data?.message || 'Failed to update profile information.');
@@ -1331,7 +1339,7 @@ const ProfileEditForm = ({ userProfile, showModalMessage, onSaveSuccess, onCance
     );
 };
 
-const ProfileView = ({ userProfile, showModalMessage, fetchUserProfile, authToken }) => {
+const ProfileView = ({ userProfile, showModalMessage, fetchUserProfile, authToken, onProfileUpdated }) => {
     const [isEditing, setIsEditing] = useState(false);
 
     if (!userProfile) return <LoadingSpinner />;
@@ -1341,9 +1349,13 @@ const ProfileView = ({ userProfile, showModalMessage, fetchUserProfile, authToke
             <ProfileEditForm 
                 userProfile={userProfile} 
                 showModalMessage={showModalMessage} 
-                onSaveSuccess={() => { 
-                    fetchUserProfile(authToken); 
-                    setIsEditing(false); 
+                onSaveSuccess={(updatedUser) => { 
+                    if (updatedUser && typeof onProfileUpdated === 'function') {
+                        onProfileUpdated(updatedUser);
+                    } else {
+                        fetchUserProfile(authToken);
+                    }
+                    setIsEditing(false);
                 }} 
                 onCancel={() => setIsEditing(false)} 
                 authToken={authToken} 
@@ -1923,7 +1935,7 @@ const App = () => {
     const renderView = () => {
         switch (currentView) {
             case 'profile':
-                return <ProfileView userProfile={userProfile} showModalMessage={showModalMessage} fetchUserProfile={fetchUserProfile} authToken={authToken} />;
+                return <ProfileView userProfile={userProfile} showModalMessage={showModalMessage} fetchUserProfile={fetchUserProfile} authToken={authToken} onProfileUpdated={setUserProfile} />;
             case 'select-species':
                 const speciesList = speciesOptions.join('/');
                 const selectorTitle = `Add New ${speciesList}/Custom`;
