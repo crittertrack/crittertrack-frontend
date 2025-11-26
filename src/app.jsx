@@ -711,15 +711,11 @@ const AnimalForm = ({
                     onClose={() => setModalTarget(null)} 
                     authToken={authToken} 
                     showModalMessage={showModalMessage}
-                    
-                    {/* --- ADDED MISSING PROPS (FIXES CRASH) --- */}
                     API_BASE_URL={API_BASE_URL}
                     X={X}
                     Search={Search}
                     Loader2={Loader2}
                     LoadingSpinner={LoadingSpinner}
-                    
-                    {/* --- ADDED PEDIGREE FILTER PROPS --- */}
                     requiredGender={requiredGender}
                     birthDate={formData.birthDate} 
                 /> 
