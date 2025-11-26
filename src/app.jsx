@@ -1943,6 +1943,18 @@ const App = () => {
                         onDelete={handleDeleteAnimal}
                         authToken={authToken} 
                         showModalMessage={showModalMessage}
+                        API_BASE_URL={API_BASE_URL}
+                        X={X}
+                        Search={Search}
+                        Loader2={Loader2}
+                        LoadingSpinner={LoadingSpinner}
+                        PlusCircle={PlusCircle}
+                        ArrowLeft={ArrowLeft}
+                        Save={Save}
+                        Trash2={Trash2}
+                        GENDER_OPTIONS={GENDER_OPTIONS}
+                        STATUS_OPTIONS={STATUS_OPTIONS}
+                        AnimalImageUpload={AnimalImageUpload}
                     />
                 );
             case 'view-animal':
