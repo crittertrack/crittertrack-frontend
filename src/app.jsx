@@ -513,7 +513,7 @@ const AnimalList = ({ authToken, showModalMessage, onEditAnimal, onSetCurrentVie
                             const isCurrentSelected = genderFilter === value;
                             
                             let selectedClasses = isCurrentSelected 
-                                                ? (gender === 'Male' ? 'bg-primary-dark text-black' : gender === 'Female' ? 'bg-accent text-white' : 'bg-primary-dark text-black')
+                                                ? (gender === 'Male' ? 'bg-primary text-black' : gender === 'Female' ? 'bg-accent text-white' : 'bg-primary-dark text-black')
                                                 : 'bg-gray-200 text-gray-700 hover:bg-gray-300';
                             
                             return (
@@ -649,6 +649,7 @@ const AnimalForm = ({ animalToEdit, onSave, onCancel, showModalMessage, authToke
 
     const [formData, setFormData] = useState({
         species: species, // FIXED: Locked to the species passed by prop
+        registryCode: animalToEdit?.registryCode || '', // 2. NEW: Registry Code
         prefix: animalToEdit?.prefix || '',
         name: animalToEdit?.name || '',
         gender: animalToEdit?.gender || GENDER_OPTIONS[0],
@@ -663,6 +664,7 @@ const AnimalForm = ({ animalToEdit, onSave, onCancel, showModalMessage, authToke
         isPregnant: animalToEdit?.isPregnant || false,
         isNursing: animalToEdit?.isNursing || false,
         isOwned: animalToEdit?.isOwned ?? true, // Default to owned for new animals
+        isDisplay: animalToEdit?.isDisplay ?? false, // FIX: Added isDisplay state
     });
     const [loading, setLoading] = useState(false);
     
@@ -721,7 +723,7 @@ const AnimalForm = ({ animalToEdit, onSave, onCancel, showModalMessage, authToke
             const method = animalToEdit ? 'put' : 'post';
             const url = animalToEdit ? `${API_BASE_URL}/animals/${animalToEdit._id}` : `${API_BASE_URL}/animals`;
 
-            // Prepare payload (excluding file for now, handling image upload separately/later)
+            // Prepare payload
             const payload = {
                 ...formData,
                 fatherId_public: formData.fatherId_public || null, // Ensure null if cleared
@@ -743,7 +745,8 @@ const AnimalForm = ({ animalToEdit, onSave, onCancel, showModalMessage, authToke
     const currentId = animalToEdit?.id_public;
 
     return (
-        <div className="w-full max-w-4xl bg-white p-6 rounded-xl shadow-lg">
+        // 1. Input boxes can be a little smaller (using max-w-2xl for container)
+        <div className="w-full max-w-2xl mx-auto bg-white p-6 rounded-xl shadow-lg">
             {modalTarget && (
                 <PedigreeSearchModal
                     title={modalTarget === 'father' ? 'Sire' : 'Dam'}
@@ -755,186 +758,306 @@ const AnimalForm = ({ animalToEdit, onSave, onCancel, showModalMessage, authToke
                 />
             )}
             
-            <h2 className="text-3xl font-bold text-gray-800 mb-6 flex items-center">
-                <Cat size={24} className="mr-3 text-primary-dark" />
+            <h2 className="text-2xl font-bold text-gray-800 mb-6 flex items-center">
+                <PlusCircle size={22} className="inline mr-2 text-primary" />
                 {title}
             </h2>
             
-            <div className="text-lg font-semibold text-accent mb-4 p-3 border border-accent rounded-lg bg-accent/10">
-                Species: **{species}** (Cannot be changed)
+            <div className="text-sm font-semibold text-accent mb-4 p-3 border border-accent rounded-lg bg-accent/10">
+                Species: **{species}**
             </div>
 
             <form onSubmit={handleSubmit} className="space-y-6">
                 
-                {/* 1. Image and Basic Details */}
-                <div className="flex flex-col md:flex-row space-y-6 md:space-y-0 md:space-x-6">
+                {/* Animal Image Section */}
+                <div className="flex justify-center mb-6">
                     <AnimalImageUpload 
                         imageUrl={animalImageURL} 
                         onFileChange={handleImageChange}
                         disabled={loading}
                     />
-                    
-                    <div className="flex-grow grid grid-cols-1 sm:grid-cols-3 gap-4">
-                        <input
-                            type="text"
-                            name="prefix"
-                            placeholder="Prefix (Optional)"
-                            value={formData.prefix}
-                            onChange={handleChange}
-                            className="p-3 border border-gray-300 rounded-lg sm:col-span-1"
-                        />
-                        <input
-                            type="text"
-                            name="name"
-                            placeholder="Name *"
-                            value={formData.name}
-                            onChange={handleChange}
-                            className="p-3 border border-gray-300 rounded-lg sm:col-span-2"
-                            required
-                        />
+                </div>
+
+                {/* 1. RECORD SETTINGS (Moved to the Top) */}
+                {/* 4. Move record setting above the general settings */}
+                <div className="bg-blue-50 p-4 rounded-lg border border-blue-200">
+                    <h3 className="text-lg font-semibold text-blue-800 mb-3">Record Settings ⚙️</h3>
+                    <div className="flex flex-wrap items-center space-x-6 space-y-2">
+                        {/* isOwned Toggle */}
+                        <label className="flex items-center text-gray-700">
+                            <input
+                                type="checkbox"
+                                name="isOwned"
+                                checked={formData.isOwned}
+                                onChange={handleChange}
+                                className="mr-2 h-4 w-4 text-green-500 rounded border-gray-300 focus:ring-green-500"
+                                disabled={loading}
+                            />
+                            Owned by me
+                        </label>
                         
-                        <select
-                            name="gender"
-                            value={formData.gender}
-                            onChange={handleChange}
-                            className="p-3 border border-gray-300 rounded-lg"
-                            required
-                        >
-                            {GENDER_OPTIONS.map(opt => <option key={opt} value={opt}>{opt}</option>)}
-                        </select>
-                        <input
-                            type="date"
-                            name="birthDate"
-                            placeholder="Birth Date *"
-                            value={formData.birthDate}
-                            onChange={handleChange}
-                            className="p-3 border border-gray-300 rounded-lg"
-                            required
-                        />
-                        <select
-                            name="status"
-                            value={formData.status}
-                            onChange={handleChange}
-                            className="p-3 border border-gray-300 rounded-lg"
-                            required
-                        >
-                            {STATUS_OPTIONS.map(opt => <option key={opt} value={opt}>{opt}</option>)}
-                        </select>
+                        {/* isDisplay Toggle */}
+                        <label className="flex items-center text-gray-700">
+                            <input
+                                type="checkbox"
+                                name="isDisplay"
+                                checked={formData.isDisplay}
+                                onChange={handleChange}
+                                className="mr-2 h-4 w-4 text-indigo-600 rounded border-gray-300 focus:ring-indigo-500"
+                                disabled={loading}
+                            />
+                            Display Animal
+                        </label>
                     </div>
                 </div>
 
-                {/* 2. Ownership & Display Toggles */}
-                <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 p-4 border rounded-lg bg-gray-50">
-                    <h3 className="text-lg font-semibold text-gray-700 sm:col-span-3 border-b pb-2">Record Settings</h3>
+                {/* 2. GENERAL INFORMATION */}
+                <div className="space-y-4 pt-4 border-t border-gray-200">
+                    <h3 className="text-lg font-semibold text-gray-700 border-b pb-2">General Information 📋</h3>
                     
-                    {/* Owned/Unowned Toggle (NEW) */}
-                    <label className="flex items-center space-x-3 text-gray-700">
+                    {/* Registry Code (NEW) */}
+                    {/* 2. Add a box for registry code before prefix/name */}
+                    <div>
+                        <label className="block text-sm font-medium text-gray-700 mb-1">
+                            Registry Code (Optional)
+                        </label>
                         <input
-                            type="checkbox"
-                            name="isOwned"
-                            checked={formData.isOwned}
+                            type="text"
+                            name="registryCode"
+                            value={formData.registryCode}
                             onChange={handleChange}
-                            className="rounded text-green-500 focus:ring-green-500 w-5 h-5"
-                            disabled={loading}
+                            // 1. Input boxes are now smaller (max-w-xs)
+                            className="p-2 border border-gray-300 rounded-lg shadow-sm focus:ring-primary focus:border-primary transition w-full max-w-xs"
                         />
-                        <span className="font-medium">Owned Animal (Default: On)</span>
-                    </label>
-
-                    {/* Display Toggle (NEW) */}
-                    <label className="flex items-center space-x-3 text-gray-700">
-                        <input
-                            type="checkbox"
-                            name="isDisplay"
-                            checked={formData.isDisplay}
-                            onChange={handleChange}
-                            className="rounded text-indigo-500 focus:ring-indigo-500 w-5 h-5"
-                            disabled={loading}
-                        />
-                        <span className="font-medium">Public Display Animal</span>
-                    </label>
-
-                    {/* Breeding Status Checkboxes */}
-                    {(formData.gender === 'Female' && formData.status === 'Breeder') && (
-                        <>
-                            <label className="flex items-center space-x-2 text-gray-700">
-                                <input type="checkbox" name="isPregnant" checked={formData.isPregnant} onChange={handleChange} className="rounded text-accent focus:ring-accent" disabled={loading} />
-                                <span className="flex items-center space-x-1"><Egg size={18} className="text-accent" /><span>Pregnant</span></span>
+                    </div>
+                    
+                    {/* Prefix & Name */}
+                    <div className="flex space-x-4">
+                        <div className="flex-1">
+                            <label className="block text-sm font-medium text-gray-700 mb-1">
+                                Prefix (Optional)
                             </label>
-                            <label className="flex items-center space-x-2 text-gray-700">
-                                <input type="checkbox" name="isNursing" checked={formData.isNursing} onChange={handleChange} className="rounded text-blue-500 focus:ring-blue-500" disabled={loading} />
-                                <span className="flex items-center space-x-1"><Milk size={18} className="text-blue-500" /><span>Nursing</span></span>
+                            <input
+                                type="text"
+                                name="prefix"
+                                value={formData.prefix}
+                                onChange={handleChange}
+                                // 1. Input boxes are now smaller (max-w-xs)
+                                className="p-2 border border-gray-300 rounded-lg shadow-sm focus:ring-primary focus:border-primary transition w-full max-w-xs"
+                            />
+                        </div>
+                        <div className="flex-1">
+                            <label className="block text-sm font-medium text-gray-700 mb-1">
+                                Name *
                             </label>
-                        </>
+                            <input
+                                type="text"
+                                name="name"
+                                value={formData.name}
+                                onChange={handleChange}
+                                required
+                                // 1. Input boxes are now smaller (max-w-xs)
+                                className="p-2 border border-gray-300 rounded-lg shadow-sm focus:ring-primary focus:border-primary transition w-full max-w-xs"
+                            />
+                        </div>
+                    </div>
+                    
+                    {/* Gender & Status */}
+                    <div className="grid grid-cols-2 gap-4">
+                        <div className="flex-1">
+                            <label className="block text-sm font-medium text-gray-700 mb-1">
+                                Gender *
+                            </label>
+                            <select
+                                name="gender"
+                                value={formData.gender}
+                                onChange={handleChange}
+                                required
+                                // 1. Input boxes are now smaller (max-w-xs)
+                                className="p-2 border border-gray-300 rounded-lg shadow-sm focus:ring-primary focus:border-primary transition w-full max-w-xs"
+                            >
+                                {GENDER_OPTIONS.map(opt => <option key={opt} value={opt}>{opt}</option>)}
+                            </select>
+                        </div>
+                        <div className="flex-1">
+                            <label className="block text-sm font-medium text-gray-700 mb-1">
+                                Status *
+                            </label>
+                            <select
+                                name="status"
+                                value={formData.status}
+                                onChange={handleChange}
+                                required
+                                // 1. Input boxes are now smaller (max-w-xs)
+                                className="p-2 border border-gray-300 rounded-lg shadow-sm focus:ring-primary focus:border-primary transition w-full max-w-xs"
+                            >
+                                {STATUS_OPTIONS.map(opt => <option key={opt} value={opt}>{opt}</option>)}
+                            </select>
+                        </div>
+                        
+                        {/* Birth Date */}
+                        <div className="col-span-2">
+                            <label className="block text-sm font-medium text-gray-700 mb-1">
+                                Birth Date *
+                            </label>
+                            <input
+                                type="date"
+                                name="birthDate"
+                                value={formData.birthDate}
+                                onChange={handleChange}
+                                required
+                                // 1. Input boxes are now smaller (max-w-xs)
+                                className="p-2 border border-gray-300 rounded-lg shadow-sm focus:ring-primary focus:border-primary transition w-full max-w-xs"
+                            />
+                        </div>
+                    </div>
+                    
+                    {/* Breeding Status Toggles (Pregnant/Nursing) - Only for Female */}
+                    {formData.gender === 'Female' && (
+                        <div className="flex items-center space-x-6 pt-2 border-t border-gray-100">
+                            <label className="flex items-center text-gray-700">
+                                <input
+                                    type="checkbox"
+                                    name="isPregnant"
+                                    checked={formData.isPregnant}
+                                    onChange={handleChange}
+                                    className="mr-2 h-4 w-4 text-accent rounded border-gray-300 focus:ring-accent"
+                                    disabled={loading}
+                                />
+                                Pregnant
+                            </label>
+                            <label className="flex items-center text-gray-700">
+                                <input
+                                    type="checkbox"
+                                    name="isNursing"
+                                    checked={formData.isNursing}
+                                    onChange={handleChange}
+                                    className="mr-2 h-4 w-4 text-blue-500 rounded border-gray-300 focus:ring-blue-500"
+                                    disabled={loading}
+                                />
+                                Nursing
+                            </label>
+                        </div>
                     )}
                 </div>
 
-
-                {/* 3. Pedigree Info (Search Modals) */}
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4 p-4 border rounded-lg bg-gray-50">
-                    <h3 className="text-lg font-semibold text-gray-700 md:col-span-2 border-b pb-2">Pedigree</h3>
+                {/* 3. PHYSICAL/GENETIC DETAILS */}
+                {/* 3. Move color/coat/genetic code and remarks above the pedigree settings */}
+                <div className="space-y-4 pt-4 border-t border-gray-200">
+                    <h3 className="text-lg font-semibold text-gray-700 border-b pb-2">Physical & Genetic Details 🧬</h3>
                     
-                    {/* Sire (Father) Selector */}
-                    <div className='flex flex-col'>
-                        <label className='text-sm font-medium text-gray-600 mb-1'>Sire (Father) ID (Optional)</label>
-                        <div 
-                            onClick={() => setModalTarget('father')}
-                            className="flex items-center justify-between p-3 border border-gray-300 rounded-lg bg-white cursor-pointer hover:border-primary transition"
-                        >
-                            <span className={formData.fatherId_public ? "text-gray-800" : "text-gray-400"}>
-                                {formData.fatherId_public ? `CT-${formData.fatherId_public}` : 'Click to Search...'}
-                            </span>
-                            <Search size={18} className="text-gray-400" />
+                    {/* Color & Coat */}
+                    <div className="flex space-x-4">
+                        <div className="flex-1">
+                            <label className="block text-sm font-medium text-gray-700 mb-1">
+                                Color (Optional)
+                            </label>
+                            <input
+                                type="text"
+                                name="color"
+                                value={formData.color}
+                                onChange={handleChange}
+                                // 1. Input boxes are now smaller (max-w-xs)
+                                className="p-2 border border-gray-300 rounded-lg shadow-sm focus:ring-primary focus:border-primary transition w-full max-w-xs"
+                            />
+                        </div>
+                        <div className="flex-1">
+                            <label className="block text-sm font-medium text-gray-700 mb-1">
+                                Coat/Markings (Optional)
+                            </label>
+                            <input
+                                type="text"
+                                name="coat"
+                                value={formData.coat}
+                                onChange={handleChange}
+                                // 1. Input boxes are now smaller (max-w-xs)
+                                className="p-2 border border-gray-300 rounded-lg shadow-sm focus:ring-primary focus:border-primary transition w-full max-w-xs"
+                            />
                         </div>
                     </div>
+
+                    {/* Genetic Code/Traits */}
+                    <div>
+                        <label className="block text-sm font-medium text-gray-700 mb-1">
+                            Genetic Code/Traits (Optional)
+                        </label>
+                        <textarea
+                            name="geneticCode"
+                            value={formData.geneticCode}
+                            onChange={handleChange}
+                            rows="2"
+                            className="p-2 border border-gray-300 rounded-lg shadow-sm focus:ring-primary focus:border-primary transition w-full"
+                        />
+                    </div>
                     
-                    {/* Dam (Mother) Selector */}
-                    <div className='flex flex-col'>
-                        <label className='text-sm font-medium text-gray-600 mb-1'>Dam (Mother) ID (Optional)</label>
-                        <div 
-                            onClick={() => setModalTarget('mother')}
-                            className="flex items-center justify-between p-3 border border-gray-300 rounded-lg bg-white cursor-pointer hover:border-primary transition"
-                        >
-                            <span className={formData.motherId_public ? "text-gray-800" : "text-gray-400"}>
-                                {formData.motherId_public ? `CT-${formData.motherId_public}` : 'Click to Search...'}
-                            </span>
-                            <Search size={18} className="text-gray-400" />
+                    {/* Remarks (Moved here) */}
+                    <div>
+                        <label className="block text-sm font-medium text-gray-700 mb-1">
+                            Remarks/Notes (Optional)
+                        </label>
+                        <textarea
+                            name="remarks"
+                            value={formData.remarks}
+                            onChange={handleChange}
+                            rows="3"
+                            className="p-2 border border-gray-300 rounded-lg shadow-sm focus:ring-primary focus:border-primary transition w-full"
+                        />
+                    </div>
+                </div>
+
+
+                {/* 4. PEDIGREE SETTINGS (Moved to the Bottom) */}
+                <div className="bg-gray-50 p-4 rounded-lg border border-gray-200 space-y-4">
+                    <h3 className="text-lg font-semibold text-gray-700 border-b pb-2">Pedigree & Lineage 🌳</h3>
+                    
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                        {/* Sire (Father) Selector */}
+                        <div className='flex flex-col'>
+                            <label className='text-sm font-medium text-gray-600 mb-1'>Sire (Father) ID (Optional)</label>
+                            <div 
+                                onClick={() => !loading && setModalTarget('father')} 
+                                className="flex items-center justify-between p-3 border border-gray-300 rounded-lg bg-white cursor-pointer hover:border-primary transition disabled:opacity-50"
+                            >
+                                <span className={formData.fatherId_public ? "text-gray-800" : "text-gray-400"}>
+                                    {formData.fatherId_public ? `CT-${formData.fatherId_public}` : 'Click to Search...'}
+                                </span>
+                                <Search size={18} className="text-gray-400" />
+                            </div>
+                        </div>
+
+                        {/* Dam (Mother) Selector */}
+                        <div className='flex flex-col'>
+                            <label className='text-sm font-medium text-gray-600 mb-1'>Dam (Mother) ID (Optional)</label>
+                            <div 
+                                onClick={() => !loading && setModalTarget('mother')} 
+                                className="flex items-center justify-between p-3 border border-gray-300 rounded-lg bg-white cursor-pointer hover:border-primary transition disabled:opacity-50"
+                            >
+                                <span className={formData.motherId_public ? "text-gray-800" : "text-gray-400"}>
+                                    {formData.motherId_public ? `CT-${formData.motherId_public}` : 'Click to Search...'}
+                                </span>
+                                <Search size={18} className="text-gray-400" />
+                            </div>
                         </div>
                     </div>
                 </div>
 
-                {/* 4. Appearance & Genetics */}
-                <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                    <input type="text" name="color" placeholder="Color" value={formData.color} onChange={handleChange} className="p-3 border border-gray-300 rounded-lg" />
-                    <input type="text" name="coat" placeholder="Coat Type" value={formData.coat} onChange={handleChange} className="p-3 border border-gray-300 rounded-lg" />
-                    <input type="text" name="geneticCode" placeholder="Genetic Code (Optional)" value={formData.geneticCode} onChange={handleChange} className="p-3 border border-gray-300 rounded-lg" />
-                </div>
-
-                {/* 5. Remarks */}
-                <textarea
-                    name="remarks"
-                    placeholder="Remarks/Notes (Optional)"
-                    value={formData.remarks}
-                    onChange={handleChange}
-                    rows="3"
-                    className="w-full p-3 border border-gray-300 rounded-lg"
-                />
-
-                {/* 6. Buttons */}
-                <div className="flex justify-end space-x-4 pt-4">
+                {/* Submit/Cancel Buttons */}
+                <div className="flex justify-end space-x-3 pt-4 border-t border-gray-200">
                     <button
                         type="button"
                         onClick={onCancel}
-                        className="bg-gray-300 hover:bg-gray-400 text-gray-800 font-semibold py-2 px-4 rounded-lg transition duration-150 shadow-md flex items-center"
+                        className="px-4 py-2 text-sm font-medium text-gray-700 bg-gray-200 rounded-lg hover:bg-gray-300 transition"
+                        disabled={loading}
                     >
-                        <ArrowLeft size={18} className="mr-2" /> Cancel
+                        Cancel
                     </button>
                     <button
                         type="submit"
                         disabled={loading}
-                        className="bg-accent hover:bg-accent/90 text-white font-bold py-2 px-4 rounded-lg shadow-md transition duration-150 flex items-center justify-center disabled:opacity-50"
+                        className="px-4 py-2 text-sm font-medium text-black bg-primary hover:bg-primary-dark rounded-lg transition shadow-md flex items-center disabled:opacity-50"
                     >
-                        {loading ? <Loader2 className="animate-spin mr-2" size={20} /> : <Save size={20} className="mr-2" />}
-                        {animalToEdit ? 'Save Changes' : 'Add Animal'}
+                        {loading ? <Loader2 className="animate-spin mr-2" size={20} /> : <Save size={18} className="mr-2" />}
+                        {animalToEdit ? 'Save Changes' : 'Save Animal'}
                     </button>
                 </div>
             </form>
