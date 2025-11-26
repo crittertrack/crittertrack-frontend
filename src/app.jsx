@@ -639,6 +639,7 @@ const AnimalForm = ({
             status: animalToEdit.status || STATUS_OPTIONS[0],
             color: animalToEdit.color || '',
             coat: animalToEdit.coat || '',
+			earset: animalToEdit.earset || '', 
             remarks: animalToEdit.remarks || '',
             geneticCode: animalToEdit.geneticCode || '',
             fatherId_public: animalToEdit.fatherId_public || null,
@@ -657,6 +658,7 @@ const AnimalForm = ({
             status: STATUS_OPTIONS[0],
             color: '',
             coat: '',
+			earset: '', 
             remarks: '',
             geneticCode: '',
             fatherId_public: null,
@@ -819,6 +821,14 @@ const AnimalForm = ({
                         <label className="block text-sm font-medium text-gray-700">Coat</label>
                         <input type="text" name="coat" value={formData.coat} onChange={handleChange} 
                             className="mt-1 block w-full p-2 border border-gray-300 rounded-md shadow-sm focus:ring-primary focus:border-primary" />
+                    </div>
+					
+					{/* --- NEW: EARSET ENTRY (CONDITIONAL ON SPECIES === 'Rat') --- */}
+                    {formData.species === 'Rat' && (
+                        <div>
+                            <label className="block text-sm font-medium text-gray-700">Earset (Rat Only)</label>
+                            <input type="text" name="earset" value={formData.earset} onChange={handleChange} 
+                                className="mt-1 block w-full p-2 border border-gray-300 rounded-md shadow-sm focus:ring-primary focus:border-primary" />
                     </div>
 					
 					{/* Genetic Code */}
