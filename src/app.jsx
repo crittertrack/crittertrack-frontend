@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useCallback, useRef, useMemo } from 'react';
 import axios from 'axios';
-import { LogOut, Cat, UserPlus, LogIn, ChevronLeft, Trash2, Edit, Save, PlusCircle, ArrowLeft, Loader2, RefreshCw, User, ClipboardList, BookOpen, Settings, Mail, Globe, Egg, Milk, Search, X } from 'lucide-react';
+import { LogOut, Cat, UserPlus, LogIn, ChevronLeft, Trash2, Edit, Save, PlusCircle, ArrowLeft, Loader2, RefreshCw, User, ClipboardList, BookOpen, Settings, Mail, Globe, Egg, Milk, Search, X, Mars, Venus } from 'lucide-react';
 
 const API_BASE_URL = 'https://crittertrack-pedigree-production.up.railway.app/api';
 
@@ -1525,7 +1525,6 @@ const AnimalList = ({ authToken, showModalMessage, onEditAnimal, onSetCurrentVie
 
     const AnimalCard = ({ animal, onEditAnimal }) => {
         const birth = animal.birthDate ? new Date(animal.birthDate).toLocaleDateString() : '';
-        const genderBadge = animal.gender ? (animal.gender === 'Male' ? 'M' : 'F') : '';
         const imgSrc = animal.imageUrl || animal.photoUrl || null;
 
         return (
@@ -1542,9 +1541,9 @@ const AnimalList = ({ authToken, showModalMessage, onEditAnimal, onSetCurrentVie
                     )}
 
                     {/* Gender badge top-right */}
-                    {genderBadge && (
-                        <div className="absolute top-2 right-2 text-xs font-semibold text-white bg-primary px-2 py-0.5 rounded">
-                            {genderBadge}
+                    {animal.gender && (
+                        <div className={`absolute top-2 right-2 p-1 rounded-full ${animal.gender === 'Male' ? 'bg-primary' : 'bg-accent'}`} title={animal.gender}>
+                            {animal.gender === 'Male' ? <Mars size={14} className="text-white" /> : <Venus size={14} className="text-white" />}
                         </div>
                     )}
 
