@@ -915,6 +915,19 @@ const AnimalForm = ({
         setModalTarget(null);
     };
 
+    // Clear a selected parent (father or mother)
+    const clearParentSelection = (which) => {
+        if (which === 'father') {
+            setFormData(prev => ({ ...prev, fatherId_public: null }));
+            pedigreeRef.current.father = null;
+            setFatherInfo(null);
+        } else {
+            setFormData(prev => ({ ...prev, motherId_public: null }));
+            pedigreeRef.current.mother = null;
+            setMotherInfo(null);
+        }
+    };
+
     // When editing an existing animal, initialize parent info
     useEffect(() => {
         let mounted = true;
@@ -1230,9 +1243,20 @@ const AnimalForm = ({
                                     onClick={() => !loading && setModalTarget('father')}
                                     className="flex flex-col items-start p-3 border border-gray-300 rounded-lg bg-white cursor-pointer hover:border-primary transition disabled:opacity-50"
                                 >
-                                    <span className={formData.fatherId_public ? "text-gray-800 font-mono" : "text-gray-400"}>
-                                        {formData.fatherId_public ? `CT${formData.fatherId_public}` : 'Click to Select Sire'}
-                                    </span>
+                                    <div className="flex items-center space-x-2 w-full">
+                                        <span className={formData.fatherId_public ? "text-gray-800 font-mono" : "text-gray-400"}>
+                                            {formData.fatherId_public ? `CT${formData.fatherId_public}` : 'Click to Select Sire'}
+                                        </span>
+                                        {formData.fatherId_public && (
+                                            <button
+                                                onClick={(e) => { e.stopPropagation(); clearParentSelection('father'); }}
+                                                title="Clear sire selection"
+                                                className="text-sm text-red-500 hover:text-red-700 p-1 rounded"
+                                            >
+                                                <X size={14} />
+                                            </button>
+                                        )}
+                                    </div>
                                     {fatherInfo && (
                                         <span className="text-sm text-gray-600 mt-1 truncate">{fatherInfo.prefix ? `${fatherInfo.prefix} ` : ''}{fatherInfo.name}</span>
                                     )}
@@ -1244,9 +1268,20 @@ const AnimalForm = ({
                                 onClick={() => !loading && setModalTarget('mother')}
                                 className="flex flex-col items-start p-3 border border-gray-300 rounded-lg bg-white cursor-pointer hover:border-primary transition disabled:opacity-50"
                             >
-                                <span className={formData.motherId_public ? "text-gray-800 font-mono" : "text-gray-400"}>
-                                    {formData.motherId_public ? `CT${formData.motherId_public}` : 'Click to Select Dam'}
-                                </span>
+                                <div className="flex items-center space-x-2 w-full">
+                                    <span className={formData.motherId_public ? "text-gray-800 font-mono" : "text-gray-400"}>
+                                        {formData.motherId_public ? `CT${formData.motherId_public}` : 'Click to Select Dam'}
+                                    </span>
+                                    {formData.motherId_public && (
+                                        <button
+                                            onClick={(e) => { e.stopPropagation(); clearParentSelection('mother'); }}
+                                            title="Clear dam selection"
+                                            className="text-sm text-red-500 hover:text-red-700 p-1 rounded"
+                                        >
+                                            <X size={14} />
+                                        </button>
+                                    )}
+                                </div>
                                 {motherInfo && (
                                     <span className="text-sm text-gray-600 mt-1 truncate">{motherInfo.prefix ? `${motherInfo.prefix} ` : ''}{motherInfo.name}</span>
                                 )}
