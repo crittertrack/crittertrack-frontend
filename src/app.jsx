@@ -904,15 +904,17 @@ const AnimalForm = ({
         // Fetch a small summary for display (non-blocking for the user)
         if (id) {
             try {
+                console.debug('Selecting parent id:', id, 'for modalTarget:', modalTarget);
                 const info = await fetchAnimalSummary(id);
-                    if (modalTarget === 'father') {
-                        setFatherInfo(info);
-                        pedigreeRef.current.fatherBackendId = info?.backendId || null;
-                    }
-                    else {
-                        setMotherInfo(info);
-                        pedigreeRef.current.motherBackendId = info?.backendId || null;
-                    }
+                console.debug('Fetched parent summary:', info);
+                if (modalTarget === 'father') {
+                    setFatherInfo(info);
+                    pedigreeRef.current.fatherBackendId = info?.backendId || null;
+                }
+                else {
+                    setMotherInfo(info);
+                    pedigreeRef.current.motherBackendId = info?.backendId || null;
+                }
             } catch (err) {
                 console.warn('Failed to fetch parent summary', err);
             }
@@ -1028,9 +1030,16 @@ const AnimalForm = ({
                 payloadToSave.image_url = payloadToSave.image_url || returnedUrl;
             }
 
-            console.debug('Animal payload about to be saved:', payloadToSave);
-
+            // Expose the final payload to the page for easy runtime inspection in DevTools
             try {
+                try {
+                    window.__lastAnimalPayload = payloadToSave;
+                    console.debug('window.__lastAnimalPayload set (inspect in console)');
+                } catch (exposeErr) {
+                    console.warn('Could not set window.__lastAnimalPayload:', exposeErr);
+                }
+                console.debug('Animal payload about to be saved:', payloadToSave);
+
                 await onSave(method, url, payloadToSave);
             } catch (saveErr) {
                 // If we uploaded a file but the animal save failed, attempt cleanup to avoid orphan files.
@@ -1329,10 +1338,30 @@ const AnimalForm = ({
                 <div className="mt-8 flex justify-between items-center border-t pt-4">
                     <div className="flex space-x-4">
                         <button type="button" onClick={onCancel} className="bg-gray-300 hover:bg-gray-400 text-gray-800 font-semibold py-2 px-4 rounded-lg transition duration-150 shadow-md"> Cancel </button>
-                        <button type="submit" disabled={loading} className="bg-primary hover:bg-primary/90 text-black font-semibold py-2 px-4 rounded-lg transition duration-150 shadow-md flex items-center space-x-2 disabled:opacity-50" > 
-                            {loading ? <Loader2 size={18} className="animate-spin" /> : <Save size={18} />}
-                            <span>{loading ? 'Saving...' : 'Save Animal'}</span>
-                        </button>
+                            <button
+                                type="submit"
+                                disabled={loading}
+                                onClick={(e) => {
+                                    try {
+                                        console.log('Save button clicked (frontend debug)');
+                                        const form = e.target && e.target.closest ? e.target.closest('form') : document.querySelector('form');
+                                        if (form) {
+                                            console.log('form.checkValidity():', form.checkValidity());
+                                            Array.from(form.elements).forEach(el => {
+                                                if (el.willValidate && !el.checkValidity()) {
+                                                    console.warn('INVALID FIELD:', el.name || el.id || el.placeholder, el.validity, el.value);
+                                                }
+                                            });
+                                        }
+                                    } catch (err) {
+                                        console.error('Save-button debug failed', err);
+                                    }
+                                }}
+                                className="bg-primary hover:bg-primary/90 text-black font-semibold py-2 px-4 rounded-lg transition duration-150 shadow-md flex items-center space-x-2 disabled:opacity-50"
+                            >
+                                {loading ? <Loader2 size={18} className="animate-spin" /> : <Save size={18} />}
+                                <span>{loading ? 'Saving...' : 'Save Animal'}</span>
+                            </button>
                     </div>
                     {animalToEdit && onDelete && (
                         <button type="button" onClick={() => { if(window.confirm(`Are you sure you want to delete ${animalToEdit.name}? This action cannot be undone.`)) { onDelete(animalToEdit.id_public); } }} className="bg-red-500 hover:bg-red-600 text-white font-semibold py-2 px-4 rounded-lg transition duration-150 shadow-md flex items-center space-x-2" > 
