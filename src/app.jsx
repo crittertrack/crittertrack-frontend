@@ -102,7 +102,7 @@ const ParentSearchModal = ({
     const SearchResultItem = ({ animal, isGlobal }) => (
         <div 
             className="flex justify-between items-center p-3 border-b hover:bg-gray-50 cursor-pointer" 
-            onClick={() => onSelect(animal.id_public)}
+            onClick={() => onSelect(animal)}
         >
             <div>
                 <p className="font-semibold text-gray-800">{animal.prefix} {animal.name} (CT{animal.id_public})</p>
@@ -891,9 +891,10 @@ const AnimalForm = ({
         }));
     };
     
-        const handleSelectPedigree = async (id) => {
-        const idKey = modalTarget === 'father' ? 'fatherId_public' : 'motherId_public';
-        setFormData(prev => ({ ...prev, [idKey]: id }));
+        const handleSelectPedigree = async (idOrAnimal) => {
+            const id = idOrAnimal && typeof idOrAnimal === 'object' ? idOrAnimal.id_public : idOrAnimal;
+            const idKey = modalTarget === 'father' ? 'fatherId_public' : 'motherId_public';
+            setFormData(prev => ({ ...prev, [idKey]: id }));
         // Update ref immediately so save uses the latest selection even if state update is pending
         if (modalTarget === 'father') {
             pedigreeRef.current.father = id;
@@ -901,8 +902,19 @@ const AnimalForm = ({
             pedigreeRef.current.mother = id;
         }
 
-        // Fetch a small summary for display (non-blocking for the user)
-        if (id) {
+        // If caller passed the whole animal object, use it directly to avoid refetch
+        if (idOrAnimal && typeof idOrAnimal === 'object') {
+            const a = idOrAnimal;
+            const info = { id_public: a.id_public, prefix: a.prefix || '', name: a.name || '', backendId: a._id || a.id_backend || null };
+            if (modalTarget === 'father') {
+                setFatherInfo(info);
+                pedigreeRef.current.fatherBackendId = info.backendId;
+            } else {
+                setMotherInfo(info);
+                pedigreeRef.current.motherBackendId = info.backendId;
+            }
+        } else if (id) {
+            // Fetch a small summary for display (non-blocking for the user)
             try {
                 console.debug('Selecting parent id:', id, 'for modalTarget:', modalTarget);
                 const info = await fetchAnimalSummary(id);
@@ -2368,12 +2380,15 @@ const App = () => {
             data.ownerId_public = userProfile.id_public;
         }
         try {
+            console.debug('handleSaveAnimal called:', method, url, data);
+            const headers = authToken ? { Authorization: `Bearer ${authToken}` } : {};
             if (method === 'post') {
-                await axios.post(url, data);
+                await axios.post(url, data, { headers });
             } else if (method === 'put') {
-                await axios.put(url, data);
+                await axios.put(url, data, { headers });
             }
         } catch (error) {
+            console.error('handleSaveAnimal error:', error.response?.data || error.message || error);
             throw error;
         }
     };
