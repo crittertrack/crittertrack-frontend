@@ -861,7 +861,7 @@ const AnimalForm = ({
             const localResp = await axios.get(`${API_BASE_URL}/animals?id_public=${encodeURIComponent(idPublic)}`, { headers: { Authorization: `Bearer ${authToken}` } });
             if (Array.isArray(localResp.data) && localResp.data.length > 0) {
                 const a = localResp.data[0];
-                return { id_public: a.id_public, prefix: a.prefix || '', name: a.name || '' };
+                return { id_public: a.id_public, prefix: a.prefix || '', name: a.name || '', backendId: a._id || a.id_backend || null };
             }
         } catch (err) {
             // ignore and try global
@@ -871,7 +871,7 @@ const AnimalForm = ({
             const globalResp = await axios.get(`${API_BASE_URL}/global/animals?id_public=${encodeURIComponent(idPublic)}&display=true`);
             if (Array.isArray(globalResp.data) && globalResp.data.length > 0) {
                 const a = globalResp.data[0];
-                return { id_public: a.id_public, prefix: a.prefix || '', name: a.name || '' };
+                return { id_public: a.id_public, prefix: a.prefix || '', name: a.name || '', backendId: a._id || a.id_backend || null };
             }
         } catch (err) {
             // ignore
@@ -891,7 +891,7 @@ const AnimalForm = ({
         }));
     };
     
-    const handleSelectPedigree = async (id) => {
+        const handleSelectPedigree = async (id) => {
         const idKey = modalTarget === 'father' ? 'fatherId_public' : 'motherId_public';
         setFormData(prev => ({ ...prev, [idKey]: id }));
         // Update ref immediately so save uses the latest selection even if state update is pending
@@ -905,8 +905,14 @@ const AnimalForm = ({
         if (id) {
             try {
                 const info = await fetchAnimalSummary(id);
-                if (modalTarget === 'father') setFatherInfo(info);
-                else setMotherInfo(info);
+                    if (modalTarget === 'father') {
+                        setFatherInfo(info);
+                        pedigreeRef.current.fatherBackendId = info?.backendId || null;
+                    }
+                    else {
+                        setMotherInfo(info);
+                        pedigreeRef.current.motherBackendId = info?.backendId || null;
+                    }
             } catch (err) {
                 console.warn('Failed to fetch parent summary', err);
             }
@@ -989,6 +995,9 @@ const AnimalForm = ({
             // Prepare explicit payload to send to the API and log it for debugging
             // Merge in any immediate pedigree selections stored in `pedigreeRef` to avoid race conditions
             const payloadToSave = { ...formData };
+            // include backend objectIds for parents when available
+            if (pedigreeRef.current.fatherBackendId) payloadToSave.father = pedigreeRef.current.fatherBackendId;
+            if (pedigreeRef.current.motherBackendId) payloadToSave.mother = pedigreeRef.current.motherBackendId;
             if (pedigreeRef.current.father !== undefined) payloadToSave.fatherId_public = pedigreeRef.current.father;
             if (pedigreeRef.current.mother !== undefined) payloadToSave.motherId_public = pedigreeRef.current.mother;
 
