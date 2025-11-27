@@ -845,6 +845,35 @@ const AnimalForm = ({
     );
     // Keep a ref for immediate pedigree selection (avoids lost state if user selects then immediately saves)
     const pedigreeRef = useRef({ father: (animalToEdit && animalToEdit.fatherId_public) || null, mother: (animalToEdit && animalToEdit.motherId_public) || null });
+    // Small cached info for selected parents so we can show name/prefix next to CTID
+    const [fatherInfo, setFatherInfo] = useState(null); // { id_public, prefix, name }
+    const [motherInfo, setMotherInfo] = useState(null);
+
+    // Helper: fetch a summary for an animal by public id. Try local (authenticated) first, then global display.
+    const fetchAnimalSummary = async (idPublic) => {
+        if (!idPublic) return null;
+        try {
+            // Try local animals endpoint with auth (returns array)
+            const localResp = await axios.get(`${API_BASE_URL}/animals?id_public=${encodeURIComponent(idPublic)}`, { headers: { Authorization: `Bearer ${authToken}` } });
+            if (Array.isArray(localResp.data) && localResp.data.length > 0) {
+                const a = localResp.data[0];
+                return { id_public: a.id_public, prefix: a.prefix || '', name: a.name || '' };
+            }
+        } catch (err) {
+            // ignore and try global
+        }
+
+        try {
+            const globalResp = await axios.get(`${API_BASE_URL}/global/animals?id_public=${encodeURIComponent(idPublic)}&display=true`);
+            if (Array.isArray(globalResp.data) && globalResp.data.length > 0) {
+                const a = globalResp.data[0];
+                return { id_public: a.id_public, prefix: a.prefix || '', name: a.name || '' };
+            }
+        } catch (err) {
+            // ignore
+        }
+        return null;
+    };
     const [loading, setLoading] = useState(false);
     const [modalTarget, setModalTarget] = useState(null); 
     const [animalImageFile, setAnimalImageFile] = useState(null);
@@ -858,7 +887,7 @@ const AnimalForm = ({
         }));
     };
     
-    const handleSelectPedigree = (id) => {
+    const handleSelectPedigree = async (id) => {
         const idKey = modalTarget === 'father' ? 'fatherId_public' : 'motherId_public';
         setFormData(prev => ({ ...prev, [idKey]: id }));
         // Update ref immediately so save uses the latest selection even if state update is pending
@@ -867,8 +896,48 @@ const AnimalForm = ({
         } else {
             pedigreeRef.current.mother = id;
         }
+
+        // Fetch a small summary for display (non-blocking for the user)
+        if (id) {
+            try {
+                const info = await fetchAnimalSummary(id);
+                if (modalTarget === 'father') setFatherInfo(info);
+                else setMotherInfo(info);
+            } catch (err) {
+                console.warn('Failed to fetch parent summary', err);
+            }
+        } else {
+            // cleared selection
+            if (modalTarget === 'father') setFatherInfo(null);
+            else setMotherInfo(null);
+        }
+
         setModalTarget(null);
     };
+
+    // When editing an existing animal, initialize parent info
+    useEffect(() => {
+        let mounted = true;
+        (async () => {
+            if (animalToEdit) {
+                const fId = animalToEdit.fatherId_public || null;
+                const mId = animalToEdit.motherId_public || null;
+                if (fId) {
+                    try {
+                        const info = await fetchAnimalSummary(fId);
+                        if (mounted) setFatherInfo(info);
+                    } catch (e) { /* ignore */ }
+                }
+                if (mId) {
+                    try {
+                        const info = await fetchAnimalSummary(mId);
+                        if (mounted) setMotherInfo(info);
+                    } catch (e) { /* ignore */ }
+                }
+            }
+        })();
+        return () => { mounted = false; };
+    }, [animalToEdit]);
 
     const handleSubmit = async (e) => {
         e.preventDefault();
@@ -1157,24 +1226,30 @@ const AnimalForm = ({
                     <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                         <div className='flex flex-col'>
                             <label className='text-sm font-medium text-gray-600 mb-1'>Sire (Father)</label>
-                            <div 
-                                onClick={() => !loading && setModalTarget('father')}
-                                className="flex items-center justify-between p-3 border border-gray-300 rounded-lg bg-white cursor-pointer hover:border-primary transition disabled:opacity-50"
-                            >
-                                <span className={formData.fatherId_public ? "text-gray-800" : "text-gray-400"}>
-                                    {formData.fatherId_public ? `CT${formData.fatherId_public}` : 'Click to Select Sire'}
-                                </span>
-                            </div>
+                                <div 
+                                    onClick={() => !loading && setModalTarget('father')}
+                                    className="flex flex-col items-start p-3 border border-gray-300 rounded-lg bg-white cursor-pointer hover:border-primary transition disabled:opacity-50"
+                                >
+                                    <span className={formData.fatherId_public ? "text-gray-800 font-mono" : "text-gray-400"}>
+                                        {formData.fatherId_public ? `CT${formData.fatherId_public}` : 'Click to Select Sire'}
+                                    </span>
+                                    {fatherInfo && (
+                                        <span className="text-sm text-gray-600 mt-1 truncate">{fatherInfo.prefix ? `${fatherInfo.prefix} ` : ''}{fatherInfo.name}</span>
+                                    )}
+                                </div>
                         </div>
                         <div className='flex flex-col'>
                             <label className='text-sm font-medium text-gray-600 mb-1'>Dam (Mother)</label>
                             <div 
                                 onClick={() => !loading && setModalTarget('mother')}
-                                className="flex items-center justify-between p-3 border border-gray-300 rounded-lg bg-white cursor-pointer hover:border-primary transition disabled:opacity-50"
+                                className="flex flex-col items-start p-3 border border-gray-300 rounded-lg bg-white cursor-pointer hover:border-primary transition disabled:opacity-50"
                             >
-                                <span className={formData.motherId_public ? "text-gray-800" : "text-gray-400"}>
+                                <span className={formData.motherId_public ? "text-gray-800 font-mono" : "text-gray-400"}>
                                     {formData.motherId_public ? `CT${formData.motherId_public}` : 'Click to Select Dam'}
                                 </span>
+                                {motherInfo && (
+                                    <span className="text-sm text-gray-600 mt-1 truncate">{motherInfo.prefix ? `${motherInfo.prefix} ` : ''}{motherInfo.name}</span>
+                                )}
                             </div>
                         </div>
                     </div>
