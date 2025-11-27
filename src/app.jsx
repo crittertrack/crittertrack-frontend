@@ -843,6 +843,8 @@ const AnimalForm = ({
             isDisplay: false,
         }
     );
+    // Keep a ref for immediate pedigree selection (avoids lost state if user selects then immediately saves)
+    const pedigreeRef = useRef({ father: (animalToEdit && animalToEdit.fatherId_public) || null, mother: (animalToEdit && animalToEdit.motherId_public) || null });
     const [loading, setLoading] = useState(false);
     const [modalTarget, setModalTarget] = useState(null); 
     const [animalImageFile, setAnimalImageFile] = useState(null);
@@ -859,6 +861,12 @@ const AnimalForm = ({
     const handleSelectPedigree = (id) => {
         const idKey = modalTarget === 'father' ? 'fatherId_public' : 'motherId_public';
         setFormData(prev => ({ ...prev, [idKey]: id }));
+        // Update ref immediately so save uses the latest selection even if state update is pending
+        if (modalTarget === 'father') {
+            pedigreeRef.current.father = id;
+        } else {
+            pedigreeRef.current.mother = id;
+        }
         setModalTarget(null);
     };
 
@@ -893,7 +901,10 @@ const AnimalForm = ({
             }
 
             // Prepare explicit payload to send to the API and log it for debugging
+            // Merge in any immediate pedigree selections stored in `pedigreeRef` to avoid race conditions
             const payloadToSave = { ...formData };
+            if (pedigreeRef.current.father !== undefined) payloadToSave.fatherId_public = pedigreeRef.current.father;
+            if (pedigreeRef.current.mother !== undefined) payloadToSave.motherId_public = pedigreeRef.current.mother;
 
             // If an image URL was set by the upload step, also populate common alternate keys
             // so backend implementations that expect different field names still receive the URL.
