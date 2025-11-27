@@ -91,6 +91,7 @@ const ParentSearchModal = ({
     birthDate       // Filter: Date of the animal being bred
 }) => {
     const [searchTerm, setSearchTerm] = useState('');
+        const [hasSearched, setHasSearched] = useState(false);
     const [localAnimals, setLocalAnimals] = useState([]);
     const [globalAnimals, setGlobalAnimals] = useState([]);
     const [loadingLocal, setLoadingLocal] = useState(false);
@@ -113,7 +114,8 @@ const ParentSearchModal = ({
         </div>
     );
 
-    const handleSearch = async () => {
+        const handleSearch = async () => {
+            setHasSearched(true);
         const trimmedSearchTerm = searchTerm.trim();
 
         if (!trimmedSearchTerm || trimmedSearchTerm.length < 1) {
@@ -182,7 +184,7 @@ const ParentSearchModal = ({
         }
     };
 
-    return (
+        return (
         <div className="fixed inset-0 bg-gray-600 bg-opacity-75 flex items-center justify-center p-4 z-50">
             <div className="bg-white rounded-xl shadow-2xl p-6 w-full max-w-xl max-h-[90vh] flex flex-col">
                 <div className="flex justify-between items-center border-b pb-3 mb-4">
@@ -206,7 +208,7 @@ const ParentSearchModal = ({
                             type="text"
                             placeholder={`Search by Name or ID (e.g., Minnie or CT2468)...`}
                             value={searchTerm}
-                            onChange={(e) => setSearchTerm(e.target.value)}
+                            onChange={(e) => { setSearchTerm(e.target.value); setHasSearched(false); }}
                             className="flex-grow p-2 border border-gray-300 rounded-lg focus:ring-primary focus:border-primary transition"
                         />
                         <button
@@ -238,7 +240,7 @@ const ParentSearchModal = ({
                     )}
                     
                     {/* Updated no results check */}
-                    {searchTerm.trim().length >= 3 && localAnimals.length === 0 && globalAnimals.length === 0 && !loadingLocal && !loadingGlobal && (
+                    {hasSearched && searchTerm.trim().length >= 1 && localAnimals.length === 0 && globalAnimals.length === 0 && !loadingLocal && !loadingGlobal && (
                         <p className="text-center text-gray-500 py-4">No animals found matching your search term or filters.</p>
                     )}
                 </div>
@@ -259,6 +261,7 @@ const ParentSearchModal = ({
 
 const LocalAnimalSearchModal = ({ title, currentId, onSelect, onClose, authToken, showModalMessage, API_BASE_URL, X, Search, Loader2, LoadingSpinner }) => {
     const [searchTerm, setSearchTerm] = useState('');
+    const [hasSearched, setHasSearched] = useState(false);
     const [localAnimals, setLocalAnimals] = useState([]);
     const [loadingLocal, setLoadingLocal] = useState(false);
     
@@ -278,6 +281,7 @@ const LocalAnimalSearchModal = ({ title, currentId, onSelect, onClose, authToken
     );
 
     const handleSearch = async () => {
+        setHasSearched(true);
         const trimmedSearchTerm = searchTerm.trim();
         
         if (!trimmedSearchTerm || trimmedSearchTerm.length < 3) {
@@ -317,7 +321,7 @@ const LocalAnimalSearchModal = ({ title, currentId, onSelect, onClose, authToken
                         type="text"
                         placeholder="Search your animals by Name (min 3 chars)..."
                         value={searchTerm}
-                        onChange={(e) => setSearchTerm(e.target.value)}
+                        onChange={(e) => { setSearchTerm(e.target.value); setHasSearched(false); }}
                         className="flex-grow p-2 border border-gray-300 rounded-lg focus:ring-primary focus:border-primary transition"
                     />
                     <button
@@ -338,7 +342,7 @@ const LocalAnimalSearchModal = ({ title, currentId, onSelect, onClose, authToken
                             {localAnimals.map(animal => <SearchResultItem key={animal.id_public} animal={animal} />)}
                         </div>
                     ) : (
-                        searchTerm.trim().length >= 3 && !loadingLocal && (
+                        hasSearched && searchTerm.trim().length >= 3 && !loadingLocal && (
                             <p className="text-center text-gray-500 py-4">No local animals found matching your search term.</p>
                         )
                     )}
