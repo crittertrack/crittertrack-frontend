@@ -1890,7 +1890,7 @@ const AnimalList = ({ authToken, showModalMessage, onEditAnimal, onViewAnimal, o
             <div className="w-full flex justify-center">
                 <div
                     onClick={() => onViewAnimal(animal)}
-                    className="relative bg-white rounded-xl shadow-sm w-40 h-48 flex flex-col items-center overflow-hidden cursor-pointer hover:shadow-md transition border border-gray-300"
+                    className="relative bg-white rounded-xl shadow-sm w-44 h-56 flex flex-col items-center overflow-hidden cursor-pointer hover:shadow-md transition border border-gray-300 pt-3"
                 >
                     {/* Birthdate top-left */}
                     {birth && (
@@ -1901,13 +1901,13 @@ const AnimalList = ({ authToken, showModalMessage, onEditAnimal, onViewAnimal, o
 
                     {/* Gender badge top-right */}
                     {animal.gender && (
-                        <div className={`absolute top-2 right-2 p-1 rounded-full ${animal.gender === 'Male' ? 'bg-primary' : 'bg-accent'}`} title={animal.gender}>
-                            {animal.gender === 'Male' ? <Mars size={14} className="text-white" /> : <Venus size={14} className="text-white" />}
+                        <div className={`absolute top-2 right-2`} title={animal.gender}>
+                            {animal.gender === 'Male' ? <Mars size={16} strokeWidth={2.5} className="text-primary" /> : <Venus size={16} strokeWidth={2.5} className="text-accent" />}
                         </div>
                     )}
 
                     {/* Centered profile image */}
-                    <div className="flex-1 flex items-center justify-center w-full px-2">
+                    <div className="flex-1 flex items-center justify-center w-full px-2 mt-1">
                         {imgSrc ? (
                             <img src={imgSrc} alt={animal.name} className="w-24 h-24 object-cover rounded-md" />
                         ) : (
@@ -1921,10 +1921,7 @@ const AnimalList = ({ authToken, showModalMessage, onEditAnimal, onViewAnimal, o
                         <div className="text-sm font-semibold text-gray-800 truncate">{animal.prefix ? `${animal.prefix} ` : ''}{animal.name}</div>
                     </div>
 
-                    {/* Edit button bottom-left */}
-                    <button onClick={(e) => { e.stopPropagation(); onEditAnimal(animal); }} className="absolute bottom-2 left-2 p-1 rounded-full bg-white/90 hover:bg-white text-primary shadow-sm">
-                        <Edit size={14} />
-                    </button>
+                    {/* Edit is available when viewing full card; remove inline edit icon from dashboard cards */}
 
                     {/* ID bottom-right */}
                     <div className="w-full px-2 pb-2 flex justify-end">
