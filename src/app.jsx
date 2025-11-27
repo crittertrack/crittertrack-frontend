@@ -992,6 +992,20 @@ const AnimalForm = ({
             if (pedigreeRef.current.father !== undefined) payloadToSave.fatherId_public = pedigreeRef.current.father;
             if (pedigreeRef.current.mother !== undefined) payloadToSave.motherId_public = pedigreeRef.current.mother;
 
+            // Also include common alias fields and numeric conversions to match backend expectations
+            const fVal = pedigreeRef.current.father !== undefined && pedigreeRef.current.father !== null ? Number(pedigreeRef.current.father) : null;
+            const mVal = pedigreeRef.current.mother !== undefined && pedigreeRef.current.mother !== null ? Number(pedigreeRef.current.mother) : null;
+            if (fVal) {
+                payloadToSave.fatherId = fVal;
+                payloadToSave.father_id = fVal;
+                payloadToSave.father_public = fVal;
+            }
+            if (mVal) {
+                payloadToSave.motherId = mVal;
+                payloadToSave.mother_id = mVal;
+                payloadToSave.mother_public = mVal;
+            }
+
             // If an image URL was set by the upload step, also populate common alternate keys
             // so backend implementations that expect different field names still receive the URL.
             const returnedUrl = payloadToSave.imageUrl || payloadToSave.photoUrl || payloadToSave.profileImage || payloadToSave.image_path || null;
