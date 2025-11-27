@@ -738,6 +738,49 @@ async function compressImageToMaxSize(file, maxBytes = 200 * 1024, opts = {}) {
     return finalBlob || file;
 }
 
+// Attempt to compress an image in a Web Worker (public/imageWorker.js).
+// Returns a Blob on success, or null if worker not available or reports an error.
+const compressImageWithWorker = (file, maxBytes = 200 * 1024, opts = {}) => {
+    return new Promise((resolve, reject) => {
+        // Try to create a worker pointing to the public folder path
+        let worker;
+        try {
+            worker = new Worker('/imageWorker.js');
+        } catch (e) {
+            resolve(null); // Worker couldn't be created (e.g., bundler/public path issue)
+            return;
+        }
+
+        const id = Math.random().toString(36).slice(2);
+
+        const onMessage = (ev) => {
+            if (!ev.data || ev.data.id !== id) return;
+            if (ev.data.error) {
+                worker.removeEventListener('message', onMessage);
+                worker.terminate();
+                resolve(null);
+                return;
+            }
+            // Received blob
+            const blob = ev.data.blob;
+            worker.removeEventListener('message', onMessage);
+            worker.terminate();
+            resolve(blob);
+        };
+
+        worker.addEventListener('message', onMessage);
+
+        // Post file (structured clone) to worker
+        try {
+            worker.postMessage({ id, file, maxBytes, opts });
+        } catch (e) {
+            worker.removeEventListener('message', onMessage);
+            worker.terminate();
+            resolve(null);
+        }
+    });
+};
+
 
 const AnimalForm = ({ 
     formTitle,             
@@ -835,6 +878,8 @@ const AnimalForm = ({
                     fd.append('file', animalImageFile);
                     fd.append('type', 'animal');
                     const uploadResp = await axios.post(`${API_BASE_URL}/upload`, fd, { headers: { 'Content-Type': 'multipart/form-data', Authorization: `Bearer ${authToken}` } });
+                    console.debug('Animal image upload response:', uploadResp?.status, uploadResp?.data);
+                    // Build payload explicitly instead of mutating state directly
                     if (uploadResp?.data?.url) {
                         formData.imageUrl = uploadResp.data.url;
                     }
@@ -847,8 +892,26 @@ const AnimalForm = ({
                 }
             }
 
+            // Prepare explicit payload to send to the API and log it for debugging
+            const payloadToSave = { ...formData };
+
+            // If an image URL was set by the upload step, also populate common alternate keys
+            // so backend implementations that expect different field names still receive the URL.
+            const returnedUrl = payloadToSave.imageUrl || payloadToSave.photoUrl || payloadToSave.profileImage || payloadToSave.image_path || null;
+            if (returnedUrl) {
+                payloadToSave.imageUrl = payloadToSave.imageUrl || returnedUrl;
+                payloadToSave.photoUrl = payloadToSave.photoUrl || returnedUrl;
+                payloadToSave.profileImage = payloadToSave.profileImage || returnedUrl;
+                payloadToSave.profileImageUrl = payloadToSave.profileImageUrl || returnedUrl;
+                payloadToSave.image_path = payloadToSave.image_path || returnedUrl;
+                payloadToSave.photo = payloadToSave.photo || returnedUrl;
+                payloadToSave.image_url = payloadToSave.image_url || returnedUrl;
+            }
+
+            console.debug('Animal payload about to be saved:', payloadToSave);
+
             try {
-                await onSave(method, url, formData);
+                await onSave(method, url, payloadToSave);
             } catch (saveErr) {
                 // If we uploaded a file but the animal save failed, attempt cleanup to avoid orphan files.
                 if (uploadedFilename) {
@@ -953,13 +1016,25 @@ const AnimalForm = ({
                     if (e.target.files && e.target.files[0]) {
                         const original = e.target.files[0];
                         try {
-                            // Compress to target <=200KB if possible
-                            let compressedBlob;
+                            // Compress to target <=200KB if possible. Prefer a Web Worker-based compressor
+                            // (non-blocking) and fall back to the existing main-thread functions when unavailable.
+                            let compressedBlob = null;
+
                             try {
-                                compressedBlob = await compressImageToMaxSize(original, 200 * 1024, { maxWidth: 1200, maxHeight: 1200, startQuality: 0.85 });
-                            } catch (err) {
-                                console.warn('Compression-to-size failed, falling back to single-pass compress:', err);
-                                compressedBlob = await compressImageFile(original, { maxWidth: 1200, maxHeight: 1200, quality: 0.8 });
+                                compressedBlob = await compressImageWithWorker(original, 200 * 1024, { maxWidth: 1200, maxHeight: 1200, startQuality: 0.85 });
+                            } catch (werr) {
+                                console.warn('Worker compression failed unexpectedly:', werr);
+                                compressedBlob = null;
+                            }
+
+                            if (!compressedBlob) {
+                                // Worker not available or failed — fallback to main-thread compression
+                                try {
+                                    compressedBlob = await compressImageToMaxSize(original, 200 * 1024, { maxWidth: 1200, maxHeight: 1200, startQuality: 0.85 });
+                                } catch (err) {
+                                    console.warn('Compression-to-size failed, falling back to single-pass compress:', err);
+                                    compressedBlob = await compressImageFile(original, { maxWidth: 1200, maxHeight: 1200, quality: 0.8 });
+                                }
                             }
                             // If compressImageFile returned the original File/Blob, wrap if needed
                             const mime = compressedBlob.type || original.type;
