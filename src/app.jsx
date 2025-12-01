@@ -401,7 +401,10 @@ const UserSearchModal = ({ onClose, showModalMessage, onSelectUser, API_BASE_URL
         try {
             if (searchType === 'users') {
                 // Search for users/breeders
-                const response = await axios.get(`${API_BASE_URL}/public/profiles/search?query=${encodeURIComponent(searchTerm.trim())}&limit=50`);
+                const url = `${API_BASE_URL}/public/profiles/search?query=${encodeURIComponent(searchTerm.trim())}&limit=50`;
+                console.log('Fetching users from:', url);
+                const response = await axios.get(url);
+                console.log('User search response:', response.data);
                 setUserResults(response.data || []);
                 setAnimalResults([]);
             } else {
@@ -410,7 +413,9 @@ const UserSearchModal = ({ onClose, showModalMessage, onSelectUser, API_BASE_URL
                 const url = idMatch
                     ? `${API_BASE_URL}/global/animals?id_public=${encodeURIComponent(idMatch[1])}&display=true`
                     : `${API_BASE_URL}/global/animals?name=${encodeURIComponent(searchTerm.trim())}&display=true`;
+                console.log('Fetching animals from:', url);
                 const response = await axios.get(url);
+                console.log('Animal search response:', response.data);
                 setAnimalResults(response.data || []);
                 setUserResults([]);
             }
