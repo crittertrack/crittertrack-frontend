@@ -1021,16 +1021,18 @@ const AnimalForm = ({
             // Also include common alias fields and numeric conversions to match backend expectations
             const fVal = pedigreeRef.current.father !== undefined && pedigreeRef.current.father !== null ? Number(pedigreeRef.current.father) : null;
             const mVal = pedigreeRef.current.mother !== undefined && pedigreeRef.current.mother !== null ? Number(pedigreeRef.current.mother) : null;
-            if (fVal) {
-                payloadToSave.fatherId = fVal;
-                payloadToSave.father_id = fVal;
-                payloadToSave.father_public = fVal;
-            }
-            if (mVal) {
-                payloadToSave.motherId = mVal;
-                payloadToSave.mother_id = mVal;
-                payloadToSave.mother_public = mVal;
-            }
+            
+            // Always send father fields (even if null to clear)
+            payloadToSave.fatherId = fVal;
+            payloadToSave.father_id = fVal;
+            payloadToSave.father_public = fVal;
+            payloadToSave.sireId_public = fVal;
+            
+            // Always send mother fields (even if null to clear)
+            payloadToSave.motherId = mVal;
+            payloadToSave.mother_id = mVal;
+            payloadToSave.mother_public = mVal;
+            payloadToSave.damId_public = mVal;
 
             // If an image URL was set by the upload step, also populate common alternate keys
             // so backend implementations that expect different field names still receive the URL.
@@ -1952,27 +1954,19 @@ const AuthView = ({ onLoginSuccess, showModalMessage, isRegister, setIsRegister,
                 setLoading(true);
                 setNotFound(false);
                 try {
-                    // Try fetching from user's animals first
-                    const response = await axios.get(`${API_BASE_URL}/api/animals/${parentId}`, {
-                        headers: { Authorization: `Bearer ${authToken}` }
-                    });
-                    setParentData(response.data);
-                } catch (error) {
-                    console.error(`Error fetching ${parentType}:`, error);
-                    // If not found in user's animals, try public search
-                    try {
-                        const publicResponse = await axios.get(`${API_BASE_URL}/api/public/global/animals?id_public=${parentId}`);
-                        if (publicResponse.data && publicResponse.data.length > 0) {
-                            setParentData(publicResponse.data[0]);
-                        } else {
-                            setNotFound(true);
-                            setParentData(null);
-                        }
-                    } catch (publicError) {
-                        console.error(`Error fetching public ${parentType}:`, publicError);
+                    // Fetch from global public animals database
+                    const publicResponse = await axios.get(`${API_BASE_URL}/api/public/global/animals?id_public=${parentId}`);
+                    if (publicResponse.data && publicResponse.data.length > 0) {
+                        setParentData(publicResponse.data[0]);
+                    } else {
+                        // Animal exists in database but no data available
                         setNotFound(true);
                         setParentData(null);
                     }
+                } catch (error) {
+                    console.error(`Error fetching ${parentType}:`, error);
+                    setNotFound(true);
+                    setParentData(null);
                 } finally {
                     setLoading(false);
                 }
@@ -1997,10 +1991,24 @@ const AuthView = ({ onLoginSuccess, showModalMessage, isRegister, setIsRegister,
 
         if (notFound || !parentData) {
             return (
-                <div className="border-2 border-gray-300 rounded-lg p-4 text-center">
-                    <p className="text-xs font-semibold text-gray-600 mb-2">{parentType}</p>
-                    <p className="text-gray-500 text-sm">CT{parentId}</p>
-                    <p className="text-xs text-gray-400 mt-1">{notFound ? 'Not in your collection' : 'Data not available'}</p>
+                <div className="border-2 border-gray-300 rounded-lg overflow-hidden">
+                    <div className="bg-gray-50 px-3 py-2 border-b border-gray-300">
+                        <p className="text-xs font-semibold text-gray-600">{parentType}</p>
+                    </div>
+                    <div className="p-3 flex flex-col items-center">
+                        <div className="w-20 h-20 bg-gray-100 rounded-md overflow-hidden flex items-center justify-center mb-2">
+                            <Cat size={28} className="text-gray-300" />
+                        </div>
+                        <div className="text-center mb-1">
+                            <p className="text-sm font-semibold text-gray-600">Unknown</p>
+                        </div>
+                        <div className="text-center mb-2">
+                            <p className="text-xs text-gray-500">CT{parentId}</p>
+                        </div>
+                        <div className="w-full bg-gray-100 py-1 text-center border-t border-gray-300">
+                            <p className="text-xs font-medium text-gray-500">—</p>
+                        </div>
+                    </div>
                 </div>
             );
         }    const imgSrc = parentData.imageUrl || parentData.photoUrl || null;
