@@ -1936,35 +1936,50 @@ const AuthView = ({ onLoginSuccess, showModalMessage, isRegister, setIsRegister,
     );
 };
 
-const ParentCard = ({ parentId, parentType, authToken, API_BASE_URL, onViewAnimal }) => {
-    const [parentData, setParentData] = React.useState(null);
-    const [loading, setLoading] = React.useState(false);
+    const ParentCard = ({ parentId, parentType, authToken, API_BASE_URL, onViewAnimal }) => {
+        const [parentData, setParentData] = React.useState(null);
+        const [loading, setLoading] = React.useState(false);
+        const [notFound, setNotFound] = React.useState(false);
 
-    React.useEffect(() => {
-        if (!parentId) {
-            setParentData(null);
-            return;
-        }
-
-        const fetchParent = async () => {
-            setLoading(true);
-            try {
-                const response = await axios.get(`${API_BASE_URL}/api/animals/${parentId}`, {
-                    headers: { Authorization: `Bearer ${authToken}` }
-                });
-                setParentData(response.data);
-            } catch (error) {
-                console.error(`Error fetching ${parentType}:`, error);
+        React.useEffect(() => {
+            if (!parentId) {
                 setParentData(null);
-            } finally {
-                setLoading(false);
+                setNotFound(false);
+                return;
             }
-        };
 
-        fetchParent();
-    }, [parentId, parentType, authToken, API_BASE_URL]);
+            const fetchParent = async () => {
+                setLoading(true);
+                setNotFound(false);
+                try {
+                    // Try fetching from user's animals first
+                    const response = await axios.get(`${API_BASE_URL}/api/animals/${parentId}`, {
+                        headers: { Authorization: `Bearer ${authToken}` }
+                    });
+                    setParentData(response.data);
+                } catch (error) {
+                    console.error(`Error fetching ${parentType}:`, error);
+                    // If not found in user's animals, try public search
+                    try {
+                        const publicResponse = await axios.get(`${API_BASE_URL}/api/public/global/animals?id_public=${parentId}`);
+                        if (publicResponse.data && publicResponse.data.length > 0) {
+                            setParentData(publicResponse.data[0]);
+                        } else {
+                            setNotFound(true);
+                            setParentData(null);
+                        }
+                    } catch (publicError) {
+                        console.error(`Error fetching public ${parentType}:`, publicError);
+                        setNotFound(true);
+                        setParentData(null);
+                    }
+                } finally {
+                    setLoading(false);
+                }
+            };
 
-    if (!parentId) {
+            fetchParent();
+        }, [parentId, parentType, authToken, API_BASE_URL]);    if (!parentId) {
         return (
             <div className="border-2 border-dashed border-gray-300 rounded-lg p-4 text-center">
                 <p className="text-gray-500 text-sm">No {parentType} recorded</p>
@@ -1980,16 +1995,15 @@ const ParentCard = ({ parentId, parentType, authToken, API_BASE_URL, onViewAnima
         );
     }
 
-    if (!parentData) {
-        return (
-            <div className="border-2 border-gray-300 rounded-lg p-4 text-center">
-                <p className="text-gray-500 text-sm">{parentType}: CT{parentId}</p>
-                <p className="text-xs text-gray-400">Data not available</p>
-            </div>
-        );
-    }
-
-    const imgSrc = parentData.imageUrl || parentData.photoUrl || null;
+        if (notFound || !parentData) {
+            return (
+                <div className="border-2 border-gray-300 rounded-lg p-4 text-center">
+                    <p className="text-xs font-semibold text-gray-600 mb-2">{parentType}</p>
+                    <p className="text-gray-500 text-sm">CT{parentId}</p>
+                    <p className="text-xs text-gray-400 mt-1">{notFound ? 'Not in your collection' : 'Data not available'}</p>
+                </div>
+            );
+        }    const imgSrc = parentData.imageUrl || parentData.photoUrl || null;
 
     return (
         <div 
@@ -2688,13 +2702,23 @@ const App = () => {
                             </div>
                         </div>
 
-                        {/* Genetic Code / Remarks Section */}
+                        {/* Genetic Code Section */}
                         <div className="border-2 border-gray-300 rounded-lg p-6 mb-6">
-                            <h3 className="text-lg font-semibold text-gray-800 mb-3">Genetic Code / Remarks</h3>
+                            <h3 className="text-lg font-semibold text-gray-800 mb-3">Genetic Code</h3>
+                            {animalToView.geneticCode ? (
+                                <p className="text-gray-700 text-sm font-mono">{animalToView.geneticCode}</p>
+                            ) : (
+                                <p className="text-gray-500 text-sm italic">No genetic code recorded.</p>
+                            )}
+                        </div>
+
+                        {/* Remarks / Notes Section */}
+                        <div className="border-2 border-gray-300 rounded-lg p-6 mb-6">
+                            <h3 className="text-lg font-semibold text-gray-800 mb-3">Remarks / Notes</h3>
                             {animalToView.remarks ? (
                                 <p className="text-gray-700 text-sm">{animalToView.remarks}</p>
                             ) : (
-                                <p className="text-gray-500 text-sm italic">No remarks or genetic code recorded.</p>
+                                <p className="text-gray-500 text-sm italic">No remarks recorded.</p>
                             )}
                         </div>
 
