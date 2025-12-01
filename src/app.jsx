@@ -959,17 +959,20 @@ const AnimalForm = ({
             if (animalToEdit) {
                 const fId = animalToEdit.fatherId_public || null;
                 const mId = animalToEdit.motherId_public || null;
+                console.log('Loading parent info for animal:', animalToEdit.id_public, 'fatherId:', fId, 'motherId:', mId);
                 if (fId) {
                     try {
                         const info = await fetchAnimalSummary(fId);
+                        console.log('Fetched father info:', info, 'for fatherId:', fId);
                         if (mounted) setFatherInfo(info);
-                    } catch (e) { /* ignore */ }
+                    } catch (e) { console.error('Failed to fetch father info:', e); }
                 }
                 if (mId) {
                     try {
                         const info = await fetchAnimalSummary(mId);
+                        console.log('Fetched mother info:', info, 'for motherId:', mId);
                         if (mounted) setMotherInfo(info);
-                    } catch (e) { /* ignore */ }
+                    } catch (e) { console.error('Failed to fetch mother info:', e); }
                 }
             }
         })();
