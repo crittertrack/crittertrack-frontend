@@ -2569,14 +2569,6 @@ const App = () => {
                                     <div><strong>Gender:</strong> {animalToView.gender}</div>
                                     <div><strong>Birthdate:</strong> {formattedBirthDate}</div>
                                     <div><strong>Breedery ID:</strong> {animalToView.breederyId || animalToView.registryCode || '—'}</div>
-                                    <div className="flex items-center" title={animalToView.isOwned ? 'Owned' : 'Not Owned'}>
-                                        <strong className="mr-2">Owned:</strong>
-                                        {animalToView.isOwned ? (
-                                            <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="text-green-600"><path d="M20 6L9 17l-5-5"/></svg>
-                                        ) : (
-                                            <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="text-gray-400"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
-                                        )}
-                                    </div>
                                     {animalToView.gender !== 'Male' && (
                                         <>
                                             <div><strong>Pregnant:</strong> {animalToView.isPregnant ? 'Yes' : 'No'}</div>
