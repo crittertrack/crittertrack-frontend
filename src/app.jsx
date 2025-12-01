@@ -960,6 +960,19 @@ const AnimalForm = ({
 
     // Clear a selected parent (father or mother)
     const clearParentSelection = (which) => {
+        console.log(`[DEBUG] Clearing ${which} parent - Before:`, {
+            formData: {
+                fatherId_public: formData.fatherId_public,
+                motherId_public: formData.motherId_public
+            },
+            pedigreeRef: {
+                father: pedigreeRef.current.father,
+                mother: pedigreeRef.current.mother,
+                fatherBackendId: pedigreeRef.current.fatherBackendId,
+                motherBackendId: pedigreeRef.current.motherBackendId
+            }
+        });
+        
         if (which === 'father') {
             setFormData(prev => ({ ...prev, fatherId_public: null }));
             pedigreeRef.current.father = null;
@@ -971,6 +984,15 @@ const AnimalForm = ({
             pedigreeRef.current.motherBackendId = null;
             setMotherInfo(null);
         }
+        
+        console.log(`[DEBUG] Clearing ${which} parent - After:`, {
+            pedigreeRef: {
+                father: pedigreeRef.current.father,
+                mother: pedigreeRef.current.mother,
+                fatherBackendId: pedigreeRef.current.fatherBackendId,
+                motherBackendId: pedigreeRef.current.motherBackendId
+            }
+        });
     };
 
     // When editing an existing animal, initialize parent info
@@ -1038,6 +1060,15 @@ const AnimalForm = ({
             const finalFatherId = pedigreeRef.current.father !== undefined ? pedigreeRef.current.father : formData.fatherId_public;
             const finalMotherId = pedigreeRef.current.mother !== undefined ? pedigreeRef.current.mother : formData.motherId_public;
             
+            console.log('[DEBUG] Parent removal check:', {
+                pedigreeRefFather: pedigreeRef.current.father,
+                pedigreeRefMother: pedigreeRef.current.mother,
+                formDataFather: formData.fatherId_public,
+                formDataMother: formData.motherId_public,
+                finalFatherId,
+                finalMotherId
+            });
+            
             // include backend objectIds for parents when available (but not if null - clearing)
             if (pedigreeRef.current.fatherBackendId) {
                 payloadToSave.father = pedigreeRef.current.fatherBackendId;
@@ -1068,6 +1099,13 @@ const AnimalForm = ({
             payloadToSave.mother_id = mVal;
             payloadToSave.mother_public = mVal;
             payloadToSave.damId_public = mVal;
+            
+            console.log('[DEBUG] Final payload parent fields:', {
+                fatherId_public: payloadToSave.fatherId_public,
+                motherId_public: payloadToSave.motherId_public,
+                sireId_public: payloadToSave.sireId_public,
+                damId_public: payloadToSave.damId_public
+            });
 
             // If an image URL was set by the upload step, also populate common alternate keys
             // so backend implementations that expect different field names still receive the URL.
@@ -1991,7 +2029,7 @@ const AuthView = ({ onLoginSuccess, showModalMessage, isRegister, setIsRegister,
                 try {
                     // First try to fetch from user's own animals (they might own the parent)
                     try {
-                        const ownedResponse = await axios.get(`${API_BASE_URL}/api/animals/${parentId}`, {
+                        const ownedResponse = await axios.get(`${API_BASE_URL}/animals/${parentId}`, {
                             headers: { Authorization: `Bearer ${authToken}` }
                         });
                         if (ownedResponse.data) {
@@ -2005,7 +2043,7 @@ const AuthView = ({ onLoginSuccess, showModalMessage, isRegister, setIsRegister,
                     }
 
                     // Try fetching from global public animals database
-                    const publicResponse = await axios.get(`${API_BASE_URL}/api/public/global/animals?id_public=${parentId}`);
+                    const publicResponse = await axios.get(`${API_BASE_URL}/public/global/animals?id_public=${parentId}`);
                     if (publicResponse.data && publicResponse.data.length > 0) {
                         setParentData(publicResponse.data[0]);
                     } else {
@@ -2585,7 +2623,7 @@ const App = () => {
             // After saving, if we were editing an animal, refetch it to get updated data
             if (method === 'put' && animalToEdit) {
                 try {
-                    const refreshedAnimal = await axios.get(`${API_BASE_URL}/api/animals/${animalToEdit.id_public}`, {
+                    const refreshedAnimal = await axios.get(`${API_BASE_URL}/animals/${animalToEdit.id_public}`, {
                         headers: { Authorization: `Bearer ${authToken}` }
                     });
                     setAnimalToView(refreshedAnimal.data);
