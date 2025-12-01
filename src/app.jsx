@@ -2143,6 +2143,116 @@ const AnimalList = ({ authToken, showModalMessage, onEditAnimal, onViewAnimal, o
         );
     };
 
+    const ParentCard = ({ parentId, parentType, authToken, API_BASE_URL, onViewAnimal }) => {
+        const [parentData, setParentData] = React.useState(null);
+        const [loading, setLoading] = React.useState(false);
+
+        React.useEffect(() => {
+            if (!parentId) {
+                setParentData(null);
+                return;
+            }
+
+            const fetchParent = async () => {
+                setLoading(true);
+                try {
+                    const response = await axios.get(`${API_BASE_URL}/api/animals/${parentId}`, {
+                        headers: { Authorization: `Bearer ${authToken}` }
+                    });
+                    setParentData(response.data);
+                } catch (error) {
+                    console.error(`Error fetching ${parentType}:`, error);
+                    setParentData(null);
+                } finally {
+                    setLoading(false);
+                }
+            };
+
+            fetchParent();
+        }, [parentId, parentType, authToken, API_BASE_URL]);
+
+        if (!parentId) {
+            return (
+                <div className="border-2 border-dashed border-gray-300 rounded-lg p-4 text-center">
+                    <p className="text-gray-500 text-sm">No {parentType} recorded</p>
+                </div>
+            );
+        }
+
+        if (loading) {
+            return (
+                <div className="border-2 border-gray-300 rounded-lg p-4 flex justify-center items-center">
+                    <Loader2 size={24} className="animate-spin text-gray-400" />
+                </div>
+            );
+        }
+
+        if (!parentData) {
+            return (
+                <div className="border-2 border-gray-300 rounded-lg p-4 text-center">
+                    <p className="text-gray-500 text-sm">{parentType}: CT{parentId}</p>
+                    <p className="text-xs text-gray-400">Data not available</p>
+                </div>
+            );
+        }
+
+        const imgSrc = parentData.imageUrl || parentData.photoUrl || null;
+
+        return (
+            <div 
+                className="border-2 border-gray-300 rounded-lg overflow-hidden cursor-pointer hover:shadow-md transition-shadow"
+                onClick={() => onViewAnimal(parentData)}
+            >
+                <div className="bg-gray-50 px-3 py-2 border-b border-gray-300">
+                    <p className="text-xs font-semibold text-gray-600">{parentType}</p>
+                </div>
+                <div className="p-3 flex flex-col items-center">
+                    {/* Image */}
+                    <div className="w-20 h-20 bg-gray-100 rounded-md overflow-hidden flex items-center justify-center mb-2">
+                        {imgSrc ? (
+                            <img src={imgSrc} alt={parentData.name} className="w-full h-full object-cover" />
+                        ) : (
+                            <Cat size={28} className="text-gray-400" />
+                        )}
+                    </div>
+
+                    {/* Icon row */}
+                    <div className="flex justify-center items-center space-x-2 mb-2">
+                        {parentData.isOwned ? (
+                            <Heart size={12} className="text-black" />
+                        ) : (
+                            <HeartOff size={12} className="text-black" />
+                        )}
+                        {parentData.isDisplay ? (
+                            <Eye size={12} className="text-black" />
+                        ) : (
+                            <EyeOff size={12} className="text-black" />
+                        )}
+                        {parentData.isPregnant && <Egg size={12} className="text-black" />}
+                        {parentData.isNursing && <Milk size={12} className="text-black" />}
+                    </div>
+
+                    {/* Name */}
+                    <div className="text-center mb-1">
+                        <p className="text-sm font-semibold text-gray-800 truncate">
+                            {parentData.prefix ? `${parentData.prefix} ` : ''}{parentData.name}
+                        </p>
+                    </div>
+
+                    {/* ID */}
+                    <div className="text-center mb-2">
+                        <p className="text-xs text-gray-500">CT{parentData.id_public}</p>
+                    </div>
+
+                    {/* Status bar */}
+                    <div className="w-full bg-gray-100 py-1 text-center border-t border-gray-300">
+                        <p className="text-xs font-medium text-gray-700">{parentData.status || 'Unknown'}</p>
+                    </div>
+                </div>
+            </div>
+        );
+    };
+
     return (
         <div className="w-full max-w-4xl bg-white p-6 rounded-xl shadow-lg">
             <h2 className="text-3xl font-bold text-gray-800 mb-6 flex items-center justify-between">
@@ -2526,64 +2636,88 @@ const App = () => {
                     : '—';
                 return (
                     <div className="w-full max-w-4xl bg-white p-6 rounded-xl shadow-lg">
-                        <div className="flex items-start justify-between mb-4">
+                        <div className="flex items-start justify-between mb-6">
                             <button onClick={() => setCurrentView('list')} className="flex items-center text-gray-600 hover:text-gray-800 font-medium">
                                 <ArrowLeft size={20} className="mr-2" />
                                 Back to Dashboard
                             </button>
                             <button onClick={() => { setAnimalToEdit(animalToView); setSpeciesToAdd(animalToView.species); setCurrentView('edit-animal'); }} className="bg-primary hover:bg-primary/90 text-black font-semibold py-2 px-4 rounded-lg">Edit</button>
                         </div>
-                        <div className="flex items-start space-x-6">
-                            <div>
-                                <div className="w-40 h-40 bg-gray-100 rounded-lg overflow-hidden flex items-center justify-center">
-                                    { (animalToView.imageUrl || animalToView.photoUrl) ? (
-                                        <img src={animalToView.imageUrl || animalToView.photoUrl} alt={animalToView.name} className="w-full h-full object-cover" />
-                                    ) : (
-                                        <Cat size={72} className="text-gray-400" />
-                                    ) }
+
+                        {/* Main Info Section */}
+                        <div className="border-2 border-gray-300 rounded-lg p-6 mb-6">
+                            <div className="flex items-start space-x-6">
+                                <div>
+                                    <div className="w-40 h-40 bg-gray-100 rounded-lg overflow-hidden flex items-center justify-center">
+                                        { (animalToView.imageUrl || animalToView.photoUrl) ? (
+                                            <img src={animalToView.imageUrl || animalToView.photoUrl} alt={animalToView.name} className="w-full h-full object-cover" />
+                                        ) : (
+                                            <Cat size={72} className="text-gray-400" />
+                                        ) }
+                                    </div>
+                                    {/* Status bar */}
+                                    <div className="w-40 bg-gray-200 py-2 text-center mt-2 rounded border-2 border-gray-400">
+                                        <div className="text-sm font-semibold text-gray-800">{animalToView.status || 'Unknown'}</div>
+                                    </div>
+                                    {/* Icon row */}
+                                    <div className="w-40 flex justify-center items-center space-x-3 py-2">
+                                        {animalToView.isOwned ? (
+                                            <Heart size={18} className="text-black" />
+                                        ) : (
+                                            <HeartOff size={18} className="text-black" />
+                                        )}
+                                        {animalToView.isDisplay ? (
+                                            <Eye size={18} className="text-black" />
+                                        ) : (
+                                            <EyeOff size={18} className="text-black" />
+                                        )}
+                                        {animalToView.isPregnant && <Egg size={18} className="text-black" />}
+                                        {animalToView.isNursing && <Milk size={18} className="text-black" />}
+                                    </div>
                                 </div>
-                                {/* Status bar */}
-                                <div className="w-40 bg-gray-200 py-2 text-center mt-2 rounded border-2 border-gray-400">
-                                    <div className="text-sm font-semibold text-gray-800">{animalToView.status || 'Unknown'}</div>
-                                </div>
-                                {/* Icon row */}
-                                <div className="w-40 flex justify-center items-center space-x-3 py-2">
-                                    {animalToView.isOwned ? (
-                                        <Heart size={18} className="text-black" />
-                                    ) : (
-                                        <HeartOff size={18} className="text-black" />
-                                    )}
-                                    {animalToView.isDisplay ? (
-                                        <Eye size={18} className="text-black" />
-                                    ) : (
-                                        <EyeOff size={18} className="text-black" />
-                                    )}
-                                    {animalToView.isPregnant && <Egg size={18} className="text-black" />}
-                                    {animalToView.isNursing && <Milk size={18} className="text-black" />}
+                                <div className="flex-1">
+                                    <h2 className="text-2xl font-bold text-gray-800 mb-2">{animalToView.prefix ? `${animalToView.prefix} ` : ''}{animalToView.name}</h2>
+                                    <p className="text-sm text-gray-600 mb-4">{animalToView.species} &nbsp; • &nbsp; CT{animalToView.id_public}</p>
+                                    <div className="grid grid-cols-2 gap-x-6 gap-y-3 text-sm text-gray-700">
+                                        <div><strong>Gender:</strong> {animalToView.gender}</div>
+                                        <div><strong>Color:</strong> {animalToView.color || '—'}</div>
+                                        <div><strong>Coat:</strong> {animalToView.coat || '—'}</div>
+                                        <div><strong>Breedery ID:</strong> {animalToView.breederyId || animalToView.registryCode || '—'}</div>
+                                    </div>
                                 </div>
                             </div>
-                            <div className="flex-1">
-                                <h2 className="text-2xl font-bold text-gray-800">{animalToView.prefix ? `${animalToView.prefix} ` : ''}{animalToView.name}</h2>
-                                <p className="text-sm text-gray-600">{animalToView.species} &nbsp; • &nbsp; CT{animalToView.id_public}</p>
-                                <div className="mt-4 grid grid-cols-2 gap-4 text-sm text-gray-700">
-                                    <div><strong>Gender:</strong> {animalToView.gender}</div>
-                                    <div><strong>Birthdate:</strong> {formattedBirthDate}</div>
-                                    <div><strong>Breedery ID:</strong> {animalToView.breederyId || animalToView.registryCode || '—'}</div>
-                                    {animalToView.gender !== 'Male' && (
-                                        <>
-                                            <div><strong>Pregnant:</strong> {animalToView.isPregnant ? 'Yes' : 'No'}</div>
-                                            <div><strong>Nursing:</strong> {animalToView.isNursing ? 'Yes' : 'No'}</div>
-                                        </>
-                                    )}
-                                    <div><strong>Sire (Father):</strong> {animalToView.fatherId_public ? `CT${animalToView.fatherId_public}` : '—'}</div>
-                                    <div><strong>Dam (Mother):</strong> {animalToView.motherId_public ? `CT${animalToView.motherId_public}` : '—'}</div>
-                                </div>
-                                {animalToView.remarks && (
-                                    <div className="mt-4">
-                                        <h4 className="font-semibold text-gray-800">Remarks</h4>
-                                        <p className="text-gray-700 mt-1">{animalToView.remarks}</p>
-                                    </div>
-                                )}
+                        </div>
+
+                        {/* Genetic Code / Remarks Section */}
+                        <div className="border-2 border-gray-300 rounded-lg p-6 mb-6">
+                            <h3 className="text-lg font-semibold text-gray-800 mb-3">Genetic Code / Remarks</h3>
+                            {animalToView.remarks ? (
+                                <p className="text-gray-700 text-sm">{animalToView.remarks}</p>
+                            ) : (
+                                <p className="text-gray-500 text-sm italic">No remarks or genetic code recorded.</p>
+                            )}
+                        </div>
+
+                        {/* Parents Section */}
+                        <div className="border-2 border-gray-300 rounded-lg p-6">
+                            <h3 className="text-lg font-semibold text-gray-800 mb-4">Parents</h3>
+                            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                                {/* Mother Card */}
+                                <ParentCard 
+                                    parentId={animalToView.motherId_public} 
+                                    parentType="Mother"
+                                    authToken={authToken}
+                                    API_BASE_URL={API_BASE_URL}
+                                    onViewAnimal={handleViewAnimal}
+                                />
+                                {/* Father Card */}
+                                <ParentCard 
+                                    parentId={animalToView.fatherId_public} 
+                                    parentType="Father"
+                                    authToken={authToken}
+                                    API_BASE_URL={API_BASE_URL}
+                                    onViewAnimal={handleViewAnimal}
+                                />
                             </div>
                         </div>
                     </div>
