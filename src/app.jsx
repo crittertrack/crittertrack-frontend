@@ -2575,11 +2575,28 @@ const App = () => {
         try {
             console.debug('handleSaveAnimal called:', method, url, data);
             const headers = authToken ? { Authorization: `Bearer ${authToken}` } : {};
+            let response;
             if (method === 'post') {
-                await axios.post(url, data, { headers });
+                response = await axios.post(url, data, { headers });
             } else if (method === 'put') {
-                await axios.put(url, data, { headers });
+                response = await axios.put(url, data, { headers });
             }
+            
+            // After saving, if we were editing an animal, refetch it to get updated data
+            if (method === 'put' && animalToEdit) {
+                try {
+                    const refreshedAnimal = await axios.get(`${API_BASE_URL}/api/animals/${animalToEdit.id_public}`, {
+                        headers: { Authorization: `Bearer ${authToken}` }
+                    });
+                    setAnimalToView(refreshedAnimal.data);
+                } catch (refreshError) {
+                    console.error('Failed to refresh animal data after save:', refreshError);
+                    // Still use the old data if refresh fails
+                    setAnimalToView(animalToEdit);
+                }
+            }
+            
+            return response;
         } catch (error) {
             console.error('handleSaveAnimal error:', error.response?.data || error.message || error);
             throw error;
