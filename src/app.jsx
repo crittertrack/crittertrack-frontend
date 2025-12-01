@@ -382,81 +382,157 @@ const LocalAnimalSearchModal = ({ title, currentId, onSelect, onClose, authToken
 
 
 
-const UserSearchModal = ({ onClose, showModalMessage }) => {
+const UserSearchModal = ({ onClose, showModalMessage, onSelectUser, API_BASE_URL }) => {
     const [searchTerm, setSearchTerm] = useState('');
-    const [results, setResults] = useState([]);
+    const [searchType, setSearchType] = useState('users'); // 'users' or 'animals'
+    const [userResults, setUserResults] = useState([]);
+    const [animalResults, setAnimalResults] = useState([]);
     const [loading, setLoading] = useState(false);
 
     const handleSearch = async () => {
-        if (!searchTerm) {
-            setResults([]);
+        if (!searchTerm || searchTerm.trim().length < 2) {
+            setUserResults([]);
+            setAnimalResults([]);
             return;
         }
 
         setLoading(true);
         
-        // STUB: This is a frontend stub for the backend API call
-        // In a real application, this would call an API like:
-        // await axios.get(`${API_BASE_URL}/global/users?query=${searchTerm}`);
-        await new Promise(resolve => setTimeout(resolve, 800)); // Simulate API delay
-        
-        // Mock Data based on the search query
-        const query = searchTerm.toLowerCase();
-        const mockData = [
-            { id_public: '2468', personalName: 'Jane Doe', breederName: 'Whisker Haven', email: 'jane@example.com', websiteURL: 'http://whiskerhaven.com', isDisplay: true },
-            { id_public: '1357', personalName: 'John Smith', breederName: 'Ratty Ranch', email: 'john@example.com', websiteURL: null, isDisplay: false },
-            { id_public: '9999', personalName: 'Anonymous Breeder', breederName: null, email: null, websiteURL: 'http://pet-lines.net', isDisplay: true },
-        ].filter(user => 
-            user.personalName.toLowerCase().includes(query) || 
-            user.breederName?.toLowerCase().includes(query) ||
-            user.id_public.includes(query)
-        );
-        
-        setResults(mockData);
-        setLoading(false);
+        try {
+            if (searchType === 'users') {
+                // Search for users/breeders
+                const response = await axios.get(`${API_BASE_URL}/public/profiles/search?query=${encodeURIComponent(searchTerm.trim())}&limit=50`);
+                setUserResults(response.data || []);
+                setAnimalResults([]);
+            } else {
+                // Search for animals globally
+                const idMatch = searchTerm.trim().match(/^\s*(?:CT[- ]?)?(\d+)\s*$/i);
+                const url = idMatch
+                    ? `${API_BASE_URL}/global/animals?id_public=${encodeURIComponent(idMatch[1])}&display=true`
+                    : `${API_BASE_URL}/global/animals?name=${encodeURIComponent(searchTerm.trim())}&display=true`;
+                const response = await axios.get(url);
+                setAnimalResults(response.data || []);
+                setUserResults([]);
+            }
+        } catch (error) {
+            console.error('Search error:', error);
+            showModalMessage('Search Error', 'Failed to search. Please try again.');
+            setUserResults([]);
+            setAnimalResults([]);
+        } finally {
+            setLoading(false);
+        }
     };
 
-    const UserResultCard = ({ user }) => (
-        <div className="p-4 border-b last:border-b-0 hover:bg-gray-50 transition duration-150">
-            <p className="text-lg font-semibold text-gray-800 flex items-center">
-                <User size={18} className="mr-2 text-primary-dark" />
-                {user.personalName} 
-                {user.breederName && (
-                    <span className='ml-2 text-sm font-normal text-gray-500'>({user.breederName})</span>
-                )}
-            </p>
-            <p className="text-sm text-gray-600 ml-5">
-                Public ID: <span className="font-mono text-accent">CT{user.id_public}</span>
-            </p>
-            <div className="flex items-center space-x-4 mt-2 ml-5 text-sm">
-                {user.email && (
-                    <div className="flex items-center space-x-1 text-gray-600">
-                        <Mail size={14} />
-                        <span>Email available</span>
+    const UserResultCard = ({ user }) => {
+        const memberSince = user.createdAt 
+            ? new Intl.DateTimeFormat('en-US', { year: 'numeric', month: 'long' }).format(new Date(user.createdAt))
+            : 'Unknown';
+        
+        return (
+            <div 
+                className="p-4 border-b last:border-b-0 hover:bg-gray-50 transition duration-150 cursor-pointer"
+                onClick={() => {
+                    if (onSelectUser) onSelectUser(user);
+                }}
+            >
+                <div className="flex items-start space-x-3">
+                    {user.profileImage ? (
+                        <img src={user.profileImage} alt={user.breederName} className="w-12 h-12 rounded-lg object-cover" />
+                    ) : (
+                        <div className="w-12 h-12 bg-gray-200 rounded-lg flex items-center justify-center">
+                            <User size={24} className="text-gray-400" />
+                        </div>
+                    )}
+                    <div className="flex-grow">
+                        <p className="text-lg font-semibold text-gray-800">
+                            {user.breederName || 'Anonymous Breeder'}
+                        </p>
+                        <p className="text-sm text-gray-600">
+                            Public ID: <span className="font-mono text-accent">CT{user.id_public}</span>
+                        </p>
+                        <p className="text-xs text-gray-500 mt-1">
+                            Member since {memberSince}
+                        </p>
+                    </div>
+                </div>
+            </div>
+        );
+    };
+
+    const AnimalResultCard = ({ animal }) => (
+        <div 
+            className="p-4 border-b last:border-b-0 hover:bg-gray-50 transition duration-150 cursor-pointer"
+            onClick={() => {
+                // Will open view-only animal detail modal
+                if (window.handleViewPublicAnimal) {
+                    window.handleViewPublicAnimal(animal);
+                }
+            }}
+        >
+            <div className="flex items-start space-x-3">
+                {animal.imageUrl || animal.photoUrl ? (
+                    <img src={animal.imageUrl || animal.photoUrl} alt={animal.name} className="w-12 h-12 rounded-lg object-cover" />
+                ) : (
+                    <div className="w-12 h-12 bg-gray-200 rounded-lg flex items-center justify-center">
+                        <Cat size={24} className="text-gray-400" />
                     </div>
                 )}
-                {user.websiteURL && (
-                    <div className="flex items-center space-x-1 text-gray-600">
-                        <Globe size={14} />
-                        <a href={user.websiteURL} target="_blank" rel="noopener noreferrer" className="hover:underline">Website</a>
-                    </div>
-                )}
+                <div className="flex-grow">
+                    <p className="text-lg font-semibold text-gray-800">
+                        {animal.prefix && `${animal.prefix} `}{animal.name}
+                    </p>
+                    <p className="text-sm text-gray-600">
+                        {animal.species} • {animal.gender} • <span className="font-mono">CT{animal.id_public}</span>
+                    </p>
+                    {animal.color && <p className="text-xs text-gray-500 mt-1">{animal.color}</p>}
+                </div>
             </div>
         </div>
     );
+
+    const results = searchType === 'users' ? userResults : animalResults;
 
     return (
         <div className="fixed inset-0 bg-gray-600 bg-opacity-75 flex items-center justify-center p-4 z-50">
             <div className="bg-white rounded-xl shadow-2xl p-6 w-full max-w-xl max-h-[90vh] flex flex-col">
                 <div className="flex justify-between items-center border-b pb-3 mb-4">
-                    <h3 className="text-xl font-bold text-gray-800">Global Breeder Search 🔎</h3>
+                    <h3 className="text-xl font-bold text-gray-800">Global Search 🔎</h3>
                     <button onClick={onClose} className="text-gray-500 hover:text-gray-800"><X size={24} /></button>
+                </div>
+
+                {/* Search Type Toggle */}
+                <div className="flex space-x-2 mb-4">
+                    <button
+                        onClick={() => { setSearchType('users'); setUserResults([]); setAnimalResults([]); }}
+                        className={`flex-1 py-2 px-4 rounded-lg font-semibold transition ${
+                            searchType === 'users' 
+                                ? 'bg-primary text-black' 
+                                : 'bg-gray-200 text-gray-700 hover:bg-gray-300'
+                        }`}
+                    >
+                        <User size={16} className="inline mr-2" />
+                        Breeders
+                    </button>
+                    <button
+                        onClick={() => { setSearchType('animals'); setUserResults([]); setAnimalResults([]); }}
+                        className={`flex-1 py-2 px-4 rounded-lg font-semibold transition ${
+                            searchType === 'animals' 
+                                ? 'bg-primary text-black' 
+                                : 'bg-gray-200 text-gray-700 hover:bg-gray-300'
+                        }`}
+                    >
+                        <Cat size={16} className="inline mr-2" />
+                        Animals
+                    </button>
                 </div>
 
                 <div className="flex space-x-2 mb-4">
                     <input
                         type="text"
-                        placeholder="Search by Name, Breeder Name, or ID (e.g., CT2468)..."
+                        placeholder={searchType === 'users' 
+                            ? "Search by Name or ID (e.g., CT2468)..." 
+                            : "Search by Name or ID (e.g., CT123)..."}
                         value={searchTerm}
                         onChange={(e) => setSearchTerm(e.target.value)}
                         className="flex-grow p-2 border border-gray-300 rounded-lg focus:ring-primary focus:border-primary transition"
@@ -466,7 +542,7 @@ const UserSearchModal = ({ onClose, showModalMessage }) => {
                     />
                     <button
                         onClick={handleSearch}
-                        disabled={loading}
+                        disabled={loading || searchTerm.trim().length < 2}
                         className="bg-primary hover:bg-primary-dark text-black font-semibold py-2 px-4 rounded-lg transition duration-150 flex items-center disabled:opacity-50"
                     >
                         {loading ? <Loader2 className="animate-spin" size={20} /> : <Search size={20} />}
@@ -476,13 +552,22 @@ const UserSearchModal = ({ onClose, showModalMessage }) => {
                 <div className="flex-grow overflow-y-auto space-y-4 divide-y divide-gray-100">
                     {loading ? <LoadingSpinner /> : results.length > 0 ? (
                         <div className="border rounded-lg bg-white shadow-sm">
-                            <h4 className="font-bold text-gray-700 p-3 bg-gray-50 border-b">Public Profiles ({results.length})</h4>
-                            {results.map(user => <UserResultCard key={user.id_public} user={user} />)}
+                            <h4 className="font-bold text-gray-700 p-3 bg-gray-50 border-b">
+                                {searchType === 'users' ? `Breeders (${results.length})` : `Animals (${results.length})`}
+                            </h4>
+                            {searchType === 'users' 
+                                ? results.map(user => <UserResultCard key={user.id_public} user={user} />)
+                                : results.map(animal => <AnimalResultCard key={animal.id_public} animal={animal} />)
+                            }
                         </div>
                     ) : searchTerm && !loading ? (
-                        <p className="text-center text-gray-500 py-4">No public breeder profiles found matching your search.</p>
+                        <p className="text-center text-gray-500 py-4">
+                            No {searchType === 'users' ? 'breeders' : 'animals'} found matching your search.
+                        </p>
                     ) : (
-                        <p className="text-center text-gray-500 py-4">Enter a name or ID to search for other breeders.</p>
+                        <p className="text-center text-gray-500 py-4">
+                            Enter a name or ID to search for {searchType === 'users' ? 'breeders' : 'animals'}.
+                        </p>
                     )}
                 </div>
             </div>
@@ -2900,7 +2985,18 @@ const App = () => {
      return (
         <div className="min-h-screen bg-page-bg flex flex-col items-center p-6 font-sans">
             {showModal && <ModalMessage title={modalMessage.title} message={modalMessage.message} onClose={() => setShowModal(false)} />}
-            {showUserSearchModal && <UserSearchModal onClose={() => setShowUserSearchModal(false)} showModalMessage={showModalMessage} />} {/* NEW: User Search Modal */}
+            {showUserSearchModal && (
+                <UserSearchModal 
+                    onClose={() => setShowUserSearchModal(false)} 
+                    showModalMessage={showModalMessage} 
+                    API_BASE_URL={API_BASE_URL}
+                    onSelectUser={(user) => {
+                        setShowUserSearchModal(false);
+                        setViewingPublicProfile(user);
+                        setCurrentView('publicProfile');
+                    }}
+                />
+            )}
             
             <header className="w-full max-w-4xl bg-white p-4 rounded-xl shadow-lg mb-6 flex justify-between items-center">
                 <CustomAppLogo size="w-10 h-10" />
