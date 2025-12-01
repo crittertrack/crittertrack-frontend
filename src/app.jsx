@@ -2564,7 +2564,7 @@ const App = () => {
                             </div>
                             <div className="flex-1">
                                 <h2 className="text-2xl font-bold text-gray-800">{animalToView.prefix ? `${animalToView.prefix} ` : ''}{animalToView.name}</h2>
-                                <p className="text-sm text-gray-600">{animalToView.species} &nbsp; • &nbsp; CT{animalToView.id_public} &nbsp; • &nbsp; {animalToView.status}</p>
+                                <p className="text-sm text-gray-600">{animalToView.species} &nbsp; • &nbsp; CT{animalToView.id_public}</p>
                                 <div className="mt-4 grid grid-cols-2 gap-4 text-sm text-gray-700">
                                     <div><strong>Gender:</strong> {animalToView.gender}</div>
                                     <div><strong>Birthdate:</strong> {formattedBirthDate}</div>
