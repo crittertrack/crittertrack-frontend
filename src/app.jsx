@@ -99,20 +99,39 @@ const ParentSearchModal = ({
     const [scope, setScope] = useState('both'); // 'local' | 'global' | 'both'
     
     // Simple component to render a list item
-    const SearchResultItem = ({ animal, isGlobal }) => (
-        <div 
-            className="flex justify-between items-center p-3 border-b hover:bg-gray-50 cursor-pointer" 
-            onClick={() => onSelect(animal)}
-        >
-            <div>
-                <p className="font-semibold text-gray-800">{animal.prefix} {animal.name} (CT{animal.id_public})</p>
-                <p className="text-sm text-gray-600">
-                    {animal.species} | {animal.gender} | {animal.status}
-                </p>
+    const SearchResultItem = ({ animal, isGlobal }) => {
+        const imgSrc = animal.imageUrl || animal.photoUrl || null;
+        
+        return (
+            <div 
+                className="flex items-center space-x-3 p-3 border-b hover:bg-gray-50 cursor-pointer" 
+                onClick={() => onSelect(animal)}
+            >
+                {/* Thumbnail */}
+                <div className="w-16 h-16 bg-gray-100 rounded-md overflow-hidden flex-shrink-0 flex items-center justify-center">
+                    {imgSrc ? (
+                        <img src={imgSrc} alt={animal.name} className="w-full h-full object-cover" />
+                    ) : (
+                        <Cat size={24} className="text-gray-400" />
+                    )}
+                </div>
+                
+                {/* Info */}
+                <div className="flex-grow">
+                    <p className="font-semibold text-gray-800">
+                        {animal.prefix ? `${animal.prefix} ` : ''}{animal.name}
+                    </p>
+                    <p className="text-xs text-gray-500">CT{animal.id_public}</p>
+                    <p className="text-sm text-gray-600">
+                        {animal.species} • {animal.gender} • {animal.status || 'Unknown'}
+                    </p>
+                </div>
+                
+                {/* Badge */}
+                {isGlobal && <span className="text-xs text-blue-600 bg-blue-100 px-2 py-1 rounded-full flex-shrink-0">Global</span>}
             </div>
-            {isGlobal && <span className="text-xs text-blue-600 bg-blue-100 px-2 py-1 rounded-full">Global Breeder</span>}
-        </div>
-    );
+        );
+    };
 
         const handleSearch = async () => {
             setHasSearched(true);
