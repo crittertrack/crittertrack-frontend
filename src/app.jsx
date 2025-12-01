@@ -2654,16 +2654,6 @@ const AnimalList = ({ authToken, showModalMessage, onEditAnimal, onViewAnimal, o
         return () => window.removeEventListener('animals-changed', handleAnimalsChanged);
     }, [fetchAnimals]);
 
-    // Set up global handler for viewing public animals from search modal
-    useEffect(() => {
-        window.handleViewPublicAnimal = (animal) => {
-            setViewingPublicAnimal(animal);
-        };
-        return () => {
-            delete window.handleViewPublicAnimal;
-        };
-    }, [setViewingPublicAnimal]);
-
     const groupedAnimals = useMemo(() => {
         return animals.reduce((groups, animal) => {
             const species = animal.species || 'Unspecified Species';
