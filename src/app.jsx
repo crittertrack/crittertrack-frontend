@@ -1387,13 +1387,8 @@ const AnimalForm = ({
 const UserProfileCard = ({ userProfile }) => {
     if (!userProfile) return null;
 
-    console.log('UserProfile object:', userProfile);
-    console.log('All keys:', Object.keys(userProfile));
-    console.log('createdAt:', userProfile.createdAt);
-    console.log('created_at:', userProfile.created_at);
-
-    const formattedCreationDate = (userProfile.createdAt || userProfile.created_at)
-        ? new Intl.DateTimeFormat('en-US', { year: 'numeric', month: 'long', day: 'numeric' }).format(new Date(userProfile.createdAt || userProfile.created_at))
+    const formattedCreationDate = userProfile.creationDate
+        ? new Intl.DateTimeFormat('en-US', { year: 'numeric', month: 'long', day: 'numeric' }).format(new Date(userProfile.creationDate))
         : 'N/A';
     
     const ProfileImage = () => {
