@@ -2107,7 +2107,7 @@ const AnimalList = ({ authToken, showModalMessage, onEditAnimal, onViewAnimal, o
                     </div>
                     
                     {/* Status bar */}
-                    <div className="w-full bg-gray-100 py-1 text-center">
+                    <div className="w-full bg-gray-100 py-1 text-center border-t border-b border-gray-300">
                         <div className="text-xs font-medium text-gray-700">{animal.status || 'Unknown'}</div>
                     </div>
                     
