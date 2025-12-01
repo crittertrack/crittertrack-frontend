@@ -809,7 +809,7 @@ const AnimalForm = ({
     const [formData, setFormData] = useState(
         animalToEdit ? {
             species: animalToEdit.species,
-            registryCode: animalToEdit.registryCode || '',
+            breederyId: animalToEdit.breederyId || animalToEdit.registryCode || '',
             prefix: animalToEdit.prefix || '',
             name: animalToEdit.name || '',
             gender: animalToEdit.gender || GENDER_OPTIONS[0],
@@ -828,7 +828,7 @@ const AnimalForm = ({
             isDisplay: animalToEdit.isDisplay ?? false,
         } : {
             species: species, 
-            registryCode: '',
+            breederyId: '',
             prefix: '',
             name: '',
             gender: GENDER_OPTIONS[0],
@@ -1204,10 +1204,10 @@ const AnimalForm = ({
                 {/* ------------------------------------------- */}
                 <div className="grid grid-cols-1 md:grid-cols-3 gap-4 border p-4 rounded-lg">
                     					
-					{/* Registry Code */}
+					{/* Breedery ID */}
                     <div>
-                        <label className="block text-sm font-medium text-gray-700">Registry Code</label>
-                        <input type="text" name="registryCode" value={formData.registryCode} onChange={handleChange} 
+                        <label className="block text-sm font-medium text-gray-700">Breedery ID</label>
+                        <input type="text" name="breederyId" value={formData.breederyId} onChange={handleChange} 
                             className="mt-1 block w-full p-2 border border-gray-300 rounded-md shadow-sm focus:ring-primary focus:border-primary" />
                     </div>
 					
@@ -1977,7 +1977,7 @@ const AnimalList = ({ authToken, showModalMessage, onEditAnimal, onViewAnimal, o
                 const term = appliedNameFilter.toLowerCase();
                 data = data.filter(a => {
                     const name = (a.name || '').toString().toLowerCase();
-                    const registry = (a.registryCode || '').toString().toLowerCase();
+                    const registry = (a.breederyId || a.registryCode || '').toString().toLowerCase();
                     const idPublic = (a.id_public || '').toString().toLowerCase();
                     return name.includes(term) || registry.includes(term) || idPublic.includes(term.replace(/^ct-?/,'').toLowerCase());
                 });
@@ -2496,8 +2496,18 @@ const App = () => {
                 );
             case 'view-animal':
                 if (!animalToView) return null;
+                const formattedBirthDate = animalToView.birthDate
+                    ? new Intl.DateTimeFormat('en-US', { year: 'numeric', month: 'long', day: 'numeric' }).format(new Date(animalToView.birthDate))
+                    : '—';
                 return (
                     <div className="w-full max-w-4xl bg-white p-6 rounded-xl shadow-lg">
+                        <div className="flex items-start justify-between mb-4">
+                            <button onClick={() => setCurrentView('list')} className="flex items-center text-gray-600 hover:text-gray-800 font-medium">
+                                <ArrowLeft size={20} className="mr-2" />
+                                Back to Profile
+                            </button>
+                            <button onClick={() => { setAnimalToEdit(animalToView); setSpeciesToAdd(animalToView.species); setCurrentView('edit-animal'); }} className="bg-primary hover:bg-primary/90 text-black font-semibold py-2 px-4 rounded-lg">Edit</button>
+                        </div>
                         <div className="flex items-start space-x-6">
                             <div className="w-40 h-40 bg-gray-100 rounded-lg overflow-hidden flex items-center justify-center">
                                 { (animalToView.imageUrl || animalToView.photoUrl) ? (
@@ -2508,14 +2518,25 @@ const App = () => {
                             </div>
                             <div className="flex-1">
                                 <h2 className="text-2xl font-bold text-gray-800">{animalToView.prefix ? `${animalToView.prefix} ` : ''}{animalToView.name}</h2>
-                                <p className="text-sm text-gray-600">CT{animalToView.id_public} &nbsp; • &nbsp; {animalToView.species} &nbsp; • &nbsp; {animalToView.status}</p>
+                                <p className="text-sm text-gray-600">{animalToView.species} &nbsp; • &nbsp; CT{animalToView.id_public} &nbsp; • &nbsp; {animalToView.status}</p>
                                 <div className="mt-4 grid grid-cols-2 gap-4 text-sm text-gray-700">
                                     <div><strong>Gender:</strong> {animalToView.gender}</div>
-                                    <div><strong>Birthdate:</strong> {animalToView.birthDate || '—'}</div>
-                                    <div><strong>Registry:</strong> {animalToView.registryCode || '—'}</div>
-                                    <div><strong>Owned:</strong> {animalToView.isOwned ? 'Yes' : 'No'}</div>
-                                    <div><strong>Pregnant:</strong> {animalToView.isPregnant ? 'Yes' : 'No'}</div>
-                                    <div><strong>Nursing:</strong> {animalToView.isNursing ? 'Yes' : 'No'}</div>
+                                    <div><strong>Birthdate:</strong> {formattedBirthDate}</div>
+                                    <div><strong>Breedery ID:</strong> {animalToView.breederyId || animalToView.registryCode || '—'}</div>
+                                    <div className="flex items-center" title={animalToView.isOwned ? 'Owned' : 'Not Owned'}>
+                                        <strong className="mr-2">Owned:</strong>
+                                        {animalToView.isOwned ? (
+                                            <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="text-green-600"><path d="M20 6L9 17l-5-5"/></svg>
+                                        ) : (
+                                            <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="text-gray-400"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+                                        )}
+                                    </div>
+                                    {animalToView.gender !== 'Male' && (
+                                        <>
+                                            <div><strong>Pregnant:</strong> {animalToView.isPregnant ? 'Yes' : 'No'}</div>
+                                            <div><strong>Nursing:</strong> {animalToView.isNursing ? 'Yes' : 'No'}</div>
+                                        </>
+                                    )}
                                     <div><strong>Sire (Father):</strong> {animalToView.fatherId_public ? `CT${animalToView.fatherId_public}` : '—'}</div>
                                     <div><strong>Dam (Mother):</strong> {animalToView.motherId_public ? `CT${animalToView.motherId_public}` : '—'}</div>
                                 </div>
@@ -2525,10 +2546,6 @@ const App = () => {
                                         <p className="text-gray-700 mt-1">{animalToView.remarks}</p>
                                     </div>
                                 )}
-                                <div className="mt-6 flex space-x-3">
-                                    <button onClick={() => { setAnimalToEdit(animalToView); setSpeciesToAdd(animalToView.species); setCurrentView('edit-animal'); }} className="bg-primary hover:bg-primary/90 text-black font-semibold py-2 px-4 rounded-lg">Edit</button>
-                                    <button onClick={() => setCurrentView('list')} className="bg-gray-200 hover:bg-gray-300 text-gray-700 font-medium py-2 px-4 rounded-lg">Back</button>
-                                </div>
                             </div>
                         </div>
                     </div>
