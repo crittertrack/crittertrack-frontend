@@ -1936,6 +1936,116 @@ const AuthView = ({ onLoginSuccess, showModalMessage, isRegister, setIsRegister,
     );
 };
 
+const ParentCard = ({ parentId, parentType, authToken, API_BASE_URL, onViewAnimal }) => {
+    const [parentData, setParentData] = React.useState(null);
+    const [loading, setLoading] = React.useState(false);
+
+    React.useEffect(() => {
+        if (!parentId) {
+            setParentData(null);
+            return;
+        }
+
+        const fetchParent = async () => {
+            setLoading(true);
+            try {
+                const response = await axios.get(`${API_BASE_URL}/api/animals/${parentId}`, {
+                    headers: { Authorization: `Bearer ${authToken}` }
+                });
+                setParentData(response.data);
+            } catch (error) {
+                console.error(`Error fetching ${parentType}:`, error);
+                setParentData(null);
+            } finally {
+                setLoading(false);
+            }
+        };
+
+        fetchParent();
+    }, [parentId, parentType, authToken, API_BASE_URL]);
+
+    if (!parentId) {
+        return (
+            <div className="border-2 border-dashed border-gray-300 rounded-lg p-4 text-center">
+                <p className="text-gray-500 text-sm">No {parentType} recorded</p>
+            </div>
+        );
+    }
+
+    if (loading) {
+        return (
+            <div className="border-2 border-gray-300 rounded-lg p-4 flex justify-center items-center">
+                <Loader2 size={24} className="animate-spin text-gray-400" />
+            </div>
+        );
+    }
+
+    if (!parentData) {
+        return (
+            <div className="border-2 border-gray-300 rounded-lg p-4 text-center">
+                <p className="text-gray-500 text-sm">{parentType}: CT{parentId}</p>
+                <p className="text-xs text-gray-400">Data not available</p>
+            </div>
+        );
+    }
+
+    const imgSrc = parentData.imageUrl || parentData.photoUrl || null;
+
+    return (
+        <div 
+            className="border-2 border-gray-300 rounded-lg overflow-hidden cursor-pointer hover:shadow-md transition-shadow"
+            onClick={() => onViewAnimal(parentData)}
+        >
+            <div className="bg-gray-50 px-3 py-2 border-b border-gray-300">
+                <p className="text-xs font-semibold text-gray-600">{parentType}</p>
+            </div>
+            <div className="p-3 flex flex-col items-center">
+                {/* Image */}
+                <div className="w-20 h-20 bg-gray-100 rounded-md overflow-hidden flex items-center justify-center mb-2">
+                    {imgSrc ? (
+                        <img src={imgSrc} alt={parentData.name} className="w-full h-full object-cover" />
+                    ) : (
+                        <Cat size={28} className="text-gray-400" />
+                    )}
+                </div>
+
+                {/* Icon row */}
+                <div className="flex justify-center items-center space-x-2 mb-2">
+                    {parentData.isOwned ? (
+                        <Heart size={12} className="text-black" />
+                    ) : (
+                        <HeartOff size={12} className="text-black" />
+                    )}
+                    {parentData.isDisplay ? (
+                        <Eye size={12} className="text-black" />
+                    ) : (
+                        <EyeOff size={12} className="text-black" />
+                    )}
+                    {parentData.isPregnant && <Egg size={12} className="text-black" />}
+                    {parentData.isNursing && <Milk size={12} className="text-black" />}
+                </div>
+
+                {/* Name */}
+                <div className="text-center mb-1">
+                    <p className="text-sm font-semibold text-gray-800 truncate">
+                        {parentData.prefix ? `${parentData.prefix} ` : ''}{parentData.name}
+                    </p>
+                </div>
+
+                {/* ID */}
+                <div className="text-center mb-2">
+                    <p className="text-xs text-gray-500">CT{parentData.id_public}</p>
+                </div>
+
+                {/* Status bar */}
+                <div className="w-full bg-gray-100 py-1 text-center border-t border-gray-300">
+                    <p className="text-xs font-medium text-gray-700">{parentData.status || 'Unknown'}</p>
+                </div>
+            </div>
+        </div>
+    );
+};
+
 const AnimalList = ({ authToken, showModalMessage, onEditAnimal, onViewAnimal, onSetCurrentView }) => {
     const [animals, setAnimals] = useState([]);
     const [loading, setLoading] = useState(true);
@@ -2137,116 +2247,6 @@ const AnimalList = ({ authToken, showModalMessage, onEditAnimal, onViewAnimal, o
                     {/* Status bar at bottom */}
                     <div className="w-full bg-gray-100 py-1 text-center border-t border-gray-300 mt-auto">
                         <div className="text-xs font-medium text-gray-700">{animal.status || 'Unknown'}</div>
-                    </div>
-                </div>
-            </div>
-        );
-    };
-
-    const ParentCard = ({ parentId, parentType, authToken, API_BASE_URL, onViewAnimal }) => {
-        const [parentData, setParentData] = React.useState(null);
-        const [loading, setLoading] = React.useState(false);
-
-        React.useEffect(() => {
-            if (!parentId) {
-                setParentData(null);
-                return;
-            }
-
-            const fetchParent = async () => {
-                setLoading(true);
-                try {
-                    const response = await axios.get(`${API_BASE_URL}/api/animals/${parentId}`, {
-                        headers: { Authorization: `Bearer ${authToken}` }
-                    });
-                    setParentData(response.data);
-                } catch (error) {
-                    console.error(`Error fetching ${parentType}:`, error);
-                    setParentData(null);
-                } finally {
-                    setLoading(false);
-                }
-            };
-
-            fetchParent();
-        }, [parentId, parentType, authToken, API_BASE_URL]);
-
-        if (!parentId) {
-            return (
-                <div className="border-2 border-dashed border-gray-300 rounded-lg p-4 text-center">
-                    <p className="text-gray-500 text-sm">No {parentType} recorded</p>
-                </div>
-            );
-        }
-
-        if (loading) {
-            return (
-                <div className="border-2 border-gray-300 rounded-lg p-4 flex justify-center items-center">
-                    <Loader2 size={24} className="animate-spin text-gray-400" />
-                </div>
-            );
-        }
-
-        if (!parentData) {
-            return (
-                <div className="border-2 border-gray-300 rounded-lg p-4 text-center">
-                    <p className="text-gray-500 text-sm">{parentType}: CT{parentId}</p>
-                    <p className="text-xs text-gray-400">Data not available</p>
-                </div>
-            );
-        }
-
-        const imgSrc = parentData.imageUrl || parentData.photoUrl || null;
-
-        return (
-            <div 
-                className="border-2 border-gray-300 rounded-lg overflow-hidden cursor-pointer hover:shadow-md transition-shadow"
-                onClick={() => onViewAnimal(parentData)}
-            >
-                <div className="bg-gray-50 px-3 py-2 border-b border-gray-300">
-                    <p className="text-xs font-semibold text-gray-600">{parentType}</p>
-                </div>
-                <div className="p-3 flex flex-col items-center">
-                    {/* Image */}
-                    <div className="w-20 h-20 bg-gray-100 rounded-md overflow-hidden flex items-center justify-center mb-2">
-                        {imgSrc ? (
-                            <img src={imgSrc} alt={parentData.name} className="w-full h-full object-cover" />
-                        ) : (
-                            <Cat size={28} className="text-gray-400" />
-                        )}
-                    </div>
-
-                    {/* Icon row */}
-                    <div className="flex justify-center items-center space-x-2 mb-2">
-                        {parentData.isOwned ? (
-                            <Heart size={12} className="text-black" />
-                        ) : (
-                            <HeartOff size={12} className="text-black" />
-                        )}
-                        {parentData.isDisplay ? (
-                            <Eye size={12} className="text-black" />
-                        ) : (
-                            <EyeOff size={12} className="text-black" />
-                        )}
-                        {parentData.isPregnant && <Egg size={12} className="text-black" />}
-                        {parentData.isNursing && <Milk size={12} className="text-black" />}
-                    </div>
-
-                    {/* Name */}
-                    <div className="text-center mb-1">
-                        <p className="text-sm font-semibold text-gray-800 truncate">
-                            {parentData.prefix ? `${parentData.prefix} ` : ''}{parentData.name}
-                        </p>
-                    </div>
-
-                    {/* ID */}
-                    <div className="text-center mb-2">
-                        <p className="text-xs text-gray-500">CT{parentData.id_public}</p>
-                    </div>
-
-                    {/* Status bar */}
-                    <div className="w-full bg-gray-100 py-1 text-center border-t border-gray-300">
-                        <p className="text-xs font-medium text-gray-700">{parentData.status || 'Unknown'}</p>
                     </div>
                 </div>
             </div>
