@@ -541,7 +541,7 @@ const UserSearchModal = ({ onClose, showModalMessage, onSelectUser, API_BASE_URL
                         value={searchTerm}
                         onChange={(e) => setSearchTerm(e.target.value)}
                         className="flex-grow p-2 border border-gray-300 rounded-lg focus:ring-primary focus:border-primary transition"
-                        onKeyPress={(e) => {
+                        onKeyDown={(e) => {
                             if (e.key === 'Enter') handleSearch();
                         }}
                     />
