@@ -2106,11 +2106,6 @@ const AnimalList = ({ authToken, showModalMessage, onEditAnimal, onViewAnimal, o
                         )}
                     </div>
                     
-                    {/* Status bar */}
-                    <div className="w-full bg-gray-100 py-1 text-center border-t border-b border-gray-300">
-                        <div className="text-xs font-medium text-gray-700">{animal.status || 'Unknown'}</div>
-                    </div>
-                    
                     {/* Icon row */}
                     <div className="w-full flex justify-center items-center space-x-2 py-1">
                         {animal.isOwned ? (
@@ -2137,6 +2132,11 @@ const AnimalList = ({ authToken, showModalMessage, onEditAnimal, onViewAnimal, o
                     {/* ID bottom-right */}
                     <div className="w-full px-2 pb-2 flex justify-end">
                         <div className="text-xs text-gray-500">CT{animal.id_public}</div>
+                    </div>
+                    
+                    {/* Status bar at bottom */}
+                    <div className="w-full bg-gray-100 py-1 text-center border-t border-gray-300 mt-auto">
+                        <div className="text-xs font-medium text-gray-700">{animal.status || 'Unknown'}</div>
                     </div>
                 </div>
             </div>
@@ -2543,8 +2543,8 @@ const App = () => {
                                     ) }
                                 </div>
                                 {/* Status bar */}
-                                <div className="w-40 bg-gray-100 py-1 text-center mt-2 rounded">
-                                    <div className="text-xs font-medium text-gray-700">{animalToView.status || 'Unknown'}</div>
+                                <div className="w-40 bg-gray-200 py-2 text-center mt-2 rounded border-2 border-gray-400">
+                                    <div className="text-sm font-semibold text-gray-800">{animalToView.status || 'Unknown'}</div>
                                 </div>
                                 {/* Icon row */}
                                 <div className="w-40 flex justify-center items-center space-x-3 py-2">
