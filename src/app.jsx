@@ -575,6 +575,332 @@ const UserSearchModal = ({ onClose, showModalMessage, onSelectUser, API_BASE_URL
     );
 };
 
+// Public Profile View Component - Shows a breeder's public animals
+const PublicProfileView = ({ profile, onBack, onViewAnimal, API_BASE_URL }) => {
+    const [animals, setAnimals] = useState([]);
+    const [loading, setLoading] = useState(true);
+
+    useEffect(() => {
+        const fetchPublicAnimals = async () => {
+            try {
+                setLoading(true);
+                const response = await axios.get(`${API_BASE_URL}/public/animals/${profile.id_public}`);
+                setAnimals(response.data || []);
+            } catch (error) {
+                console.error('Error fetching public animals:', error);
+                setAnimals([]);
+            } finally {
+                setLoading(false);
+            }
+        };
+
+        if (profile) {
+            fetchPublicAnimals();
+        }
+    }, [profile, API_BASE_URL]);
+
+    const memberSince = profile.createdAt 
+        ? new Intl.DateTimeFormat('en-US', { year: 'numeric', month: 'long' }).format(new Date(profile.createdAt))
+        : 'Unknown';
+
+    const groupedAnimals = animals.reduce((groups, animal) => {
+        const species = animal.species || 'Unspecified';
+        if (!groups[species]) groups[species] = [];
+        groups[species].push(animal);
+        return groups;
+    }, {});
+
+    return (
+        <div className="w-full max-w-6xl bg-white p-6 rounded-xl shadow-lg">
+            <div className="flex justify-between items-start mb-6">
+                <button 
+                    onClick={onBack} 
+                    className="flex items-center text-gray-600 hover:text-gray-800 transition"
+                >
+                    <ArrowLeft size={18} className="mr-1" /> Back
+                </button>
+            </div>
+
+            {/* Profile Header */}
+            <div className="flex items-center space-x-4 mb-6 pb-6 border-b">
+                {profile.profileImage ? (
+                    <img src={profile.profileImage} alt={profile.breederName} className="w-24 h-24 rounded-lg object-cover shadow-md" />
+                ) : (
+                    <div className="w-24 h-24 bg-gray-200 rounded-lg flex items-center justify-center shadow-md">
+                        <User size={48} className="text-gray-400" />
+                    </div>
+                )}
+                <div>
+                    <h2 className="text-3xl font-bold text-gray-900">{profile.breederName || 'Anonymous Breeder'}</h2>
+                    <p className="text-gray-600">Public ID: <span className="font-mono text-accent">CT{profile.id_public}</span></p>
+                    <p className="text-sm text-gray-500 mt-1">Member since {memberSince}</p>
+                </div>
+            </div>
+
+            {/* Public Animals */}
+            <h3 className="text-2xl font-bold text-gray-800 mb-4">Public Animals ({animals.length})</h3>
+            {loading ? (
+                <LoadingSpinner />
+            ) : animals.length === 0 ? (
+                <div className="text-center py-12 text-gray-500">
+                    <Cat size={48} className="mx-auto mb-4 text-gray-300" />
+                    <p>This breeder has no public animals.</p>
+                </div>
+            ) : (
+                <div className="space-y-6">
+                    {Object.keys(groupedAnimals).sort().map(species => (
+                        <div key={species} className="bg-gray-50 p-4 rounded-lg">
+                            <h4 className="text-xl font-semibold text-gray-700 mb-3 flex items-center">
+                                <Cat size={20} className="mr-2" /> {species}
+                            </h4>
+                            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+                                {groupedAnimals[species].map(animal => (
+                                    <div 
+                                        key={animal.id_public}
+                                        onClick={() => onViewAnimal(animal)}
+                                        className="bg-white p-4 rounded-lg shadow hover:shadow-lg transition cursor-pointer"
+                                    >
+                                        {animal.imageUrl || animal.photoUrl ? (
+                                            <img 
+                                                src={animal.imageUrl || animal.photoUrl} 
+                                                alt={animal.name} 
+                                                className="w-full h-32 object-cover rounded-lg mb-3"
+                                            />
+                                        ) : (
+                                            <div className="w-full h-32 bg-gray-200 rounded-lg mb-3 flex items-center justify-center">
+                                                <Cat size={48} className="text-gray-400" />
+                                            </div>
+                                        )}
+                                        <p className="font-semibold text-gray-800">
+                                            {animal.prefix && `${animal.prefix} `}{animal.name}
+                                        </p>
+                                        <p className="text-sm text-gray-600">
+                                            {animal.gender} • <span className="font-mono text-xs">CT{animal.id_public}</span>
+                                        </p>
+                                        {animal.color && <p className="text-xs text-gray-500 mt-1">{animal.color}</p>}
+                                    </div>
+                                ))}
+                            </div>
+                        </div>
+                    ))}
+                </div>
+            )}
+        </div>
+    );
+};
+
+// View-Only Animal Detail Modal
+const ViewOnlyAnimalDetail = ({ animal, onClose, API_BASE_URL }) => {
+    if (!animal) return null;
+
+    const imgSrc = animal.imageUrl || animal.photoUrl || null;
+    const birthDate = animal.birthDate ? new Date(animal.birthDate).toLocaleDateString() : 'Unknown';
+
+    // Only show remarks and genetic code if they are marked as public
+    const showRemarks = animal.includeRemarks !== false && animal.remarks;
+    const showGeneticCode = animal.includeGeneticCode !== false && animal.geneticCode;
+
+    return (
+        <div className="fixed inset-0 bg-gray-600 bg-opacity-75 flex items-center justify-center p-4 z-50 overflow-y-auto">
+            <div className="bg-white rounded-xl shadow-2xl p-6 w-full max-w-4xl my-8">
+                <div className="flex justify-between items-center border-b pb-4 mb-6">
+                    <h2 className="text-3xl font-bold text-gray-900">
+                        {animal.prefix && `${animal.prefix} `}{animal.name}
+                    </h2>
+                    <button onClick={onClose} className="text-gray-500 hover:text-gray-800">
+                        <X size={28} />
+                    </button>
+                </div>
+
+                <div className="space-y-6">
+                    {/* Image */}
+                    {imgSrc && (
+                        <div className="w-full max-w-md mx-auto">
+                            <img 
+                                src={imgSrc} 
+                                alt={animal.name} 
+                                className="w-full rounded-lg shadow-lg object-cover max-h-96"
+                            />
+                        </div>
+                    )}
+
+                    {/* Main Info */}
+                    <div className="border-2 border-gray-300 rounded-lg p-6">
+                        <h3 className="text-lg font-semibold text-gray-800 mb-4">Basic Information</h3>
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                            <div>
+                                <p className="text-sm text-gray-600">Public ID</p>
+                                <p className="font-mono text-lg">CT{animal.id_public}</p>
+                            </div>
+                            <div>
+                                <p className="text-sm text-gray-600">Species</p>
+                                <p className="text-lg">{animal.species}</p>
+                            </div>
+                            <div>
+                                <p className="text-sm text-gray-600">Gender</p>
+                                <p className="text-lg">{animal.gender}</p>
+                            </div>
+                            <div>
+                                <p className="text-sm text-gray-600">Birth Date</p>
+                                <p className="text-lg">{birthDate}</p>
+                            </div>
+                            {animal.color && (
+                                <div>
+                                    <p className="text-sm text-gray-600">Color</p>
+                                    <p className="text-lg">{animal.color}</p>
+                                </div>
+                            )}
+                            {animal.coat && (
+                                <div>
+                                    <p className="text-sm text-gray-600">Coat</p>
+                                    <p className="text-lg">{animal.coat}</p>
+                                </div>
+                            )}
+                            {animal.breederyId && (
+                                <div>
+                                    <p className="text-sm text-gray-600">Breedery ID</p>
+                                    <p className="text-lg">{animal.breederyId}</p>
+                                </div>
+                            )}
+                            {animal.status && (
+                                <div>
+                                    <p className="text-sm text-gray-600">Status</p>
+                                    <p className="text-lg">{animal.status}</p>
+                                </div>
+                            )}
+                        </div>
+                    </div>
+
+                    {/* Genetic Code (only if public) */}
+                    {showGeneticCode && (
+                        <div className="border-2 border-gray-300 rounded-lg p-6">
+                            <h3 className="text-lg font-semibold text-gray-800 mb-2">Genetic Code</h3>
+                            <p className="text-gray-700 font-mono">{animal.geneticCode}</p>
+                        </div>
+                    )}
+
+                    {/* Remarks (only if public) */}
+                    {showRemarks && (
+                        <div className="border-2 border-gray-300 rounded-lg p-6">
+                            <h3 className="text-lg font-semibold text-gray-800 mb-2">Remarks / Notes</h3>
+                            <p className="text-gray-700 whitespace-pre-wrap">{animal.remarks}</p>
+                        </div>
+                    )}
+
+                    {/* Parents */}
+                    <div className="border-2 border-gray-300 rounded-lg p-6">
+                        <h3 className="text-lg font-semibold text-gray-800 mb-4">Parents</h3>
+                        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                            <ViewOnlyParentCard 
+                                parentId={animal.fatherId_public || animal.sireId_public} 
+                                parentType="Father"
+                                API_BASE_URL={API_BASE_URL}
+                            />
+                            <ViewOnlyParentCard 
+                                parentId={animal.motherId_public || animal.damId_public} 
+                                parentType="Mother"
+                                API_BASE_URL={API_BASE_URL}
+                            />
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    );
+};
+
+// View-Only Parent Card Component
+const ViewOnlyParentCard = ({ parentId, parentType, API_BASE_URL }) => {
+    const [parentData, setParentData] = useState(null);
+    const [loading, setLoading] = useState(false);
+    const [notFound, setNotFound] = useState(false);
+
+    React.useEffect(() => {
+        if (!parentId) {
+            setParentData(null);
+            setNotFound(false);
+            return;
+        }
+
+        const fetchParent = async () => {
+            setLoading(true);
+            setNotFound(false);
+            try {
+                // Try fetching from global public animals database
+                const publicResponse = await axios.get(`${API_BASE_URL}/global/animals?id_public=${parentId}&display=true`);
+                if (publicResponse.data && publicResponse.data.length > 0) {
+                    setParentData(publicResponse.data[0]);
+                } else {
+                    setNotFound(true);
+                    setParentData(null);
+                }
+            } catch (error) {
+                console.error(`Error fetching ${parentType}:`, error);
+                setNotFound(true);
+                setParentData(null);
+            } finally {
+                setLoading(false);
+            }
+        };
+
+        fetchParent();
+    }, [parentId, parentType, API_BASE_URL]);
+
+    if (!parentId || notFound) {
+        return (
+            <div className="border-2 border-dashed border-gray-300 rounded-lg p-4 text-center">
+                <p className="text-gray-500 text-sm">No {parentType.toLowerCase()} recorded</p>
+            </div>
+        );
+    }
+
+    if (loading) {
+        return (
+            <div className="border-2 border-gray-300 rounded-lg p-4 flex justify-center items-center">
+                <Loader2 size={24} className="animate-spin text-gray-400" />
+            </div>
+        );
+    }
+
+    if (!parentData) {
+        return (
+            <div className="border-2 border-dashed border-gray-300 rounded-lg p-4 text-center">
+                <p className="text-gray-500 text-sm">Loading {parentType.toLowerCase()} data...</p>
+            </div>
+        );
+    }
+
+    const imgSrc = parentData.imageUrl || parentData.photoUrl || null;
+
+    return (
+        <div className="border-2 border-gray-300 rounded-lg overflow-hidden">
+            <div className="bg-gray-50 px-3 py-2 border-b border-gray-300">
+                <p className="text-xs font-semibold text-gray-600">{parentType}</p>
+            </div>
+            <div className="p-4">
+                <div className="flex items-start space-x-3">
+                    {imgSrc ? (
+                        <img src={imgSrc} alt={parentData.name} className="w-16 h-16 rounded-lg object-cover" />
+                    ) : (
+                        <div className="w-16 h-16 bg-gray-200 rounded-lg flex items-center justify-center">
+                            <Cat size={32} className="text-gray-400" />
+                        </div>
+                    )}
+                    <div className="flex-grow">
+                        <p className="font-semibold text-gray-800">
+                            {parentData.prefix && `${parentData.prefix} `}{parentData.name}
+                        </p>
+                        <p className="text-xs text-gray-600 font-mono">CT{parentData.id_public}</p>
+                        {parentData.status && (
+                            <p className="text-xs text-gray-500 mt-1">{parentData.status}</p>
+                        )}
+                    </div>
+                </div>
+            </div>
+        </div>
+    );
+};
+
 const GeneticsCalculatorPlaceholder = ({ onCancel }) => (
     <div className="w-full max-w-4xl bg-white p-6 rounded-xl shadow-lg">
         <h2 className="text-3xl font-bold text-gray-800 mb-6 flex items-center justify-between">
@@ -2328,6 +2654,16 @@ const AnimalList = ({ authToken, showModalMessage, onEditAnimal, onViewAnimal, o
         return () => window.removeEventListener('animals-changed', handleAnimalsChanged);
     }, [fetchAnimals]);
 
+    // Set up global handler for viewing public animals from search modal
+    useEffect(() => {
+        window.handleViewPublicAnimal = (animal) => {
+            setViewingPublicAnimal(animal);
+        };
+        return () => {
+            delete window.handleViewPublicAnimal;
+        };
+    }, [setViewingPublicAnimal]);
+
     const groupedAnimals = useMemo(() => {
         return animals.reduce((groups, animal) => {
             const species = animal.species || 'Unspecified Species';
@@ -2584,6 +2920,8 @@ const App = () => {
     const [isRegister, setIsRegister] = useState(false); 
 
     const [showUserSearchModal, setShowUserSearchModal] = useState(false);
+    const [viewingPublicProfile, setViewingPublicProfile] = useState(null);
+    const [viewingPublicAnimal, setViewingPublicAnimal] = useState(null);
 
     const timeoutRef = useRef(null);
     const activeEvents = ['mousemove', 'keydown', 'scroll', 'click'];
@@ -2691,6 +3029,16 @@ const App = () => {
         setCurrentView('view-animal');
     };
 
+    // Set up global handler for viewing public animals from search modal
+    useEffect(() => {
+        window.handleViewPublicAnimal = (animal) => {
+            setViewingPublicAnimal(animal);
+        };
+        return () => {
+            delete window.handleViewPublicAnimal;
+        };
+    }, []);
+
     const handleSaveAnimal = async (method, url, data) => {
         if (userProfile && !data.ownerId_public) {
             data.ownerId_public = userProfile.id_public;
@@ -2739,6 +3087,15 @@ const App = () => {
 
     const renderView = () => {
         switch (currentView) {
+            case 'publicProfile':
+                return (
+                    <PublicProfileView 
+                        profile={viewingPublicProfile}
+                        onBack={() => { setViewingPublicProfile(null); setCurrentView('list'); }}
+                        onViewAnimal={(animal) => setViewingPublicAnimal(animal)}
+                        API_BASE_URL={API_BASE_URL}
+                    />
+                );
             case 'profile':
                 return <ProfileView userProfile={userProfile} showModalMessage={showModalMessage} fetchUserProfile={fetchUserProfile} authToken={authToken} onProfileUpdated={setUserProfile} />;
             case 'select-species':
@@ -2964,11 +3321,162 @@ const App = () => {
     };
 
     if (!authToken) {
+        // Allow unauthenticated users to access search and genetics calculator
         const mainTitle = isRegister ? 'Create Account' : 'Welcome Back';
+        
+        // Handle public profile viewing for non-logged-in users
+        if (viewingPublicProfile) {
+            return (
+                <div className="min-h-screen bg-page-bg flex flex-col items-center p-6 font-sans">
+                    {showModal && <ModalMessage title={modalMessage.title} message={modalMessage.message} onClose={() => setShowModal(false)} />}
+                    {viewingPublicAnimal && (
+                        <ViewOnlyAnimalDetail 
+                            animal={viewingPublicAnimal}
+                            onClose={() => setViewingPublicAnimal(null)}
+                            API_BASE_URL={API_BASE_URL}
+                        />
+                    )}
+                    
+                    <header className="w-full max-w-4xl bg-white p-4 rounded-xl shadow-lg mb-6 flex justify-between items-center">
+                        <CustomAppLogo size="w-10 h-10" />
+                        <div className="flex items-center space-x-3">
+                            <button 
+                                onClick={() => setShowUserSearchModal(true)}
+                                className="px-3 py-2 bg-primary hover:bg-primary-dark text-black font-semibold rounded-lg transition flex items-center"
+                            >
+                                <Search size={18} className="mr-1" /> Search
+                            </button>
+                            <button 
+                                onClick={() => { setViewingPublicProfile(null); setCurrentView('auth'); }}
+                                className="px-3 py-2 bg-gray-200 hover:bg-gray-300 text-gray-700 font-semibold rounded-lg transition flex items-center"
+                            >
+                                <LogIn size={18} className="mr-1" /> Login
+                            </button>
+                        </div>
+                    </header>
+                    
+                    {showUserSearchModal && (
+                        <UserSearchModal 
+                            onClose={() => setShowUserSearchModal(false)} 
+                            showModalMessage={showModalMessage} 
+                            API_BASE_URL={API_BASE_URL}
+                            onSelectUser={(user) => {
+                                setShowUserSearchModal(false);
+                                setViewingPublicProfile(user);
+                            }}
+                        />
+                    )}
+                    
+                    <PublicProfileView 
+                        profile={viewingPublicProfile}
+                        onBack={() => { setViewingPublicProfile(null); setCurrentView('auth'); }}
+                        onViewAnimal={(animal) => setViewingPublicAnimal(animal)}
+                        API_BASE_URL={API_BASE_URL}
+                    />
+                </div>
+            );
+        }
+        
+        // Genetics calculator for non-logged-in users
+        if (currentView === 'genetics-calculator') {
+            return (
+                <div className="min-h-screen bg-page-bg flex flex-col items-center p-6 font-sans">
+                    {showModal && <ModalMessage title={modalMessage.title} message={modalMessage.message} onClose={() => setShowModal(false)} />}
+                    
+                    <header className="w-full max-w-4xl bg-white p-4 rounded-xl shadow-lg mb-6 flex justify-between items-center">
+                        <CustomAppLogo size="w-10 h-10" />
+                        <div className="flex items-center space-x-3">
+                            <button 
+                                onClick={() => setShowUserSearchModal(true)}
+                                className="px-3 py-2 bg-primary hover:bg-primary-dark text-black font-semibold rounded-lg transition flex items-center"
+                            >
+                                <Search size={18} className="mr-1" /> Search
+                            </button>
+                            <button 
+                                onClick={() => setCurrentView('genetics-calculator')}
+                                className="px-3 py-2 bg-primary text-black font-semibold rounded-lg transition flex items-center"
+                            >
+                                <Cat size={18} className="mr-1" /> Genetics
+                            </button>
+                            <button 
+                                onClick={() => setCurrentView('auth')}
+                                className="px-3 py-2 bg-gray-200 hover:bg-gray-300 text-gray-700 font-semibold rounded-lg transition flex items-center"
+                            >
+                                <LogIn size={18} className="mr-1" /> Login
+                            </button>
+                        </div>
+                    </header>
+                    
+                    {showUserSearchModal && (
+                        <UserSearchModal 
+                            onClose={() => setShowUserSearchModal(false)} 
+                            showModalMessage={showModalMessage} 
+                            API_BASE_URL={API_BASE_URL}
+                            onSelectUser={(user) => {
+                                setShowUserSearchModal(false);
+                                setViewingPublicProfile(user);
+                            }}
+                        />
+                    )}
+                    
+                    {viewingPublicAnimal && (
+                        <ViewOnlyAnimalDetail 
+                            animal={viewingPublicAnimal}
+                            onClose={() => setViewingPublicAnimal(null)}
+                            API_BASE_URL={API_BASE_URL}
+                        />
+                    )}
+                    
+                    <GeneticsCalculatorPlaceholder onCancel={() => setCurrentView('auth')} />
+                </div>
+            );
+        }
+        
+        // Default auth view with search button
         return (
             <div className="min-h-screen bg-page-bg flex flex-col items-center justify-center p-6 font-sans">
                 {showModal && <ModalMessage title={modalMessage.title} message={modalMessage.message} onClose={() => setShowModal(false)} />}
-                <div className="flex flex-col items-center mb-4 -mt-16"> 
+                
+                {/* Public navigation header */}
+                <header className="w-full max-w-4xl bg-white p-4 rounded-xl shadow-lg mb-6 flex justify-between items-center">
+                    <CustomAppLogo size="w-10 h-10" />
+                    <div className="flex items-center space-x-3">
+                        <button 
+                            onClick={() => setShowUserSearchModal(true)}
+                            className="px-3 py-2 bg-primary hover:bg-primary-dark text-black font-semibold rounded-lg transition flex items-center"
+                        >
+                            <Search size={18} className="mr-1" /> Search
+                        </button>
+                        <button 
+                            onClick={() => setCurrentView('genetics-calculator')}
+                            className="px-3 py-2 bg-primary hover:bg-primary-dark text-black font-semibold rounded-lg transition flex items-center"
+                        >
+                            <Cat size={18} className="mr-1" /> Genetics
+                        </button>
+                    </div>
+                </header>
+                
+                {showUserSearchModal && (
+                    <UserSearchModal 
+                        onClose={() => setShowUserSearchModal(false)} 
+                        showModalMessage={showModalMessage} 
+                        API_BASE_URL={API_BASE_URL}
+                        onSelectUser={(user) => {
+                            setShowUserSearchModal(false);
+                            setViewingPublicProfile(user);
+                        }}
+                    />
+                )}
+                
+                {viewingPublicAnimal && (
+                    <ViewOnlyAnimalDetail 
+                        animal={viewingPublicAnimal}
+                        onClose={() => setViewingPublicAnimal(null)}
+                        API_BASE_URL={API_BASE_URL}
+                    />
+                )}
+                
+                <div className="flex flex-col items-center mb-4"> 
                     <CustomAppLogo size="w-32 h-32" /> 
                 </div>
                 <AuthView 
@@ -2995,6 +3503,13 @@ const App = () => {
                         setViewingPublicProfile(user);
                         setCurrentView('publicProfile');
                     }}
+                />
+            )}
+            {viewingPublicAnimal && (
+                <ViewOnlyAnimalDetail 
+                    animal={viewingPublicAnimal}
+                    onClose={() => setViewingPublicAnimal(null)}
+                    API_BASE_URL={API_BASE_URL}
                 />
             )}
             
