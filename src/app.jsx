@@ -2828,18 +2828,18 @@ const App = () => {
                         <div className="border-2 border-gray-300 rounded-lg p-6">
                             <h3 className="text-lg font-semibold text-gray-800 mb-4">Parents</h3>
                             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                                {/* Mother Card */}
-                                <ParentCard 
-                                    parentId={animalToView.motherId_public} 
-                                    parentType="Mother"
-                                    authToken={authToken}
-                                    API_BASE_URL={API_BASE_URL}
-                                    onViewAnimal={handleViewAnimal}
-                                />
                                 {/* Father Card */}
                                 <ParentCard 
                                     parentId={animalToView.fatherId_public} 
                                     parentType="Father"
+                                    authToken={authToken}
+                                    API_BASE_URL={API_BASE_URL}
+                                    onViewAnimal={handleViewAnimal}
+                                />
+                                {/* Mother Card */}
+                                <ParentCard 
+                                    parentId={animalToView.motherId_public} 
+                                    parentType="Mother"
                                     authToken={authToken}
                                     API_BASE_URL={API_BASE_URL}
                                     onViewAnimal={handleViewAnimal}
