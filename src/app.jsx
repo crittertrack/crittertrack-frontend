@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useCallback, useRef, useMemo } from 'react';
 import axios from 'axios';
-import { LogOut, Cat, UserPlus, LogIn, ChevronLeft, Trash2, Edit, Save, PlusCircle, ArrowLeft, Loader2, RefreshCw, User, ClipboardList, BookOpen, Settings, Mail, Globe, Egg, Milk, Search, X, Mars, Venus } from 'lucide-react';
+import { LogOut, Cat, UserPlus, LogIn, ChevronLeft, Trash2, Edit, Save, PlusCircle, ArrowLeft, Loader2, RefreshCw, User, ClipboardList, BookOpen, Settings, Mail, Globe, Egg, Milk, Search, X, Mars, Venus, Eye, EyeOff, Home } from 'lucide-react';
 
 const API_BASE_URL = 'https://crittertrack-pedigree-production.up.railway.app/api';
 
@@ -1346,7 +1346,10 @@ const AnimalForm = ({
                 {/* Submit/Delete Buttons */}
                 <div className="mt-8 flex justify-between items-center border-t pt-4">
                     <div className="flex space-x-4">
-                        <button type="button" onClick={onCancel} className="bg-gray-300 hover:bg-gray-400 text-gray-800 font-semibold py-2 px-4 rounded-lg transition duration-150 shadow-md"> Cancel </button>
+                        <button type="button" onClick={onCancel} className="bg-gray-300 hover:bg-gray-400 text-gray-800 font-semibold py-2 px-4 rounded-lg transition duration-150 shadow-md flex items-center space-x-2">
+                            <ArrowLeft size={18} />
+                            <span>{animalToEdit ? 'Back to Profile' : 'Cancel'}</span>
+                        </button>
                             <button
                                 type="submit"
                                 disabled={loading}
@@ -2102,6 +2105,28 @@ const AnimalList = ({ authToken, showModalMessage, onEditAnimal, onViewAnimal, o
                             </div>
                         )}
                     </div>
+                    
+                    {/* Status bar */}
+                    <div className="w-full bg-gray-100 py-1 text-center">
+                        <div className="text-xs font-medium text-gray-700">{animal.status || 'Unknown'}</div>
+                    </div>
+                    
+                    {/* Icon row */}
+                    <div className="w-full flex justify-center items-center space-x-2 py-1">
+                        {animal.isOwned ? (
+                            <Home size={14} className="text-green-600" />
+                        ) : (
+                            <Home size={14} className="text-gray-400" />
+                        )}
+                        {animal.isDisplay ? (
+                            <Eye size={14} className="text-blue-600" />
+                        ) : (
+                            <EyeOff size={14} className="text-gray-400" />
+                        )}
+                        {animal.isPregnant && <Egg size={14} className="text-orange-500" />}
+                        {animal.isNursing && <Milk size={14} className="text-blue-400" />}
+                    </div>
+                    
                     {/* Prefix / Name under image */}
                     <div className="w-full text-center px-2 pb-1">
                         <div className="text-sm font-semibold text-gray-800 truncate">{animal.prefix ? `${animal.prefix} ` : ''}{animal.name}</div>
@@ -2476,7 +2501,7 @@ const App = () => {
                         animalToEdit={animalToEdit} 
                         species={animalToEdit.species} 
                         onSave={handleSaveAnimal} 
-                        onCancel={() => setCurrentView('list')} 
+                        onCancel={() => { setAnimalToView(animalToEdit); setCurrentView('view-animal'); }} 
                         onDelete={handleDeleteAnimal}
                         authToken={authToken} 
                         showModalMessage={showModalMessage}
@@ -2509,12 +2534,33 @@ const App = () => {
                             <button onClick={() => { setAnimalToEdit(animalToView); setSpeciesToAdd(animalToView.species); setCurrentView('edit-animal'); }} className="bg-primary hover:bg-primary/90 text-black font-semibold py-2 px-4 rounded-lg">Edit</button>
                         </div>
                         <div className="flex items-start space-x-6">
-                            <div className="w-40 h-40 bg-gray-100 rounded-lg overflow-hidden flex items-center justify-center">
-                                { (animalToView.imageUrl || animalToView.photoUrl) ? (
-                                    <img src={animalToView.imageUrl || animalToView.photoUrl} alt={animalToView.name} className="w-full h-full object-cover" />
-                                ) : (
-                                    <Cat size={72} className="text-gray-400" />
-                                ) }
+                            <div>
+                                <div className="w-40 h-40 bg-gray-100 rounded-lg overflow-hidden flex items-center justify-center">
+                                    { (animalToView.imageUrl || animalToView.photoUrl) ? (
+                                        <img src={animalToView.imageUrl || animalToView.photoUrl} alt={animalToView.name} className="w-full h-full object-cover" />
+                                    ) : (
+                                        <Cat size={72} className="text-gray-400" />
+                                    ) }
+                                </div>
+                                {/* Status bar */}
+                                <div className="w-40 bg-gray-100 py-1 text-center mt-2 rounded">
+                                    <div className="text-xs font-medium text-gray-700">{animalToView.status || 'Unknown'}</div>
+                                </div>
+                                {/* Icon row */}
+                                <div className="w-40 flex justify-center items-center space-x-3 py-2">
+                                    {animalToView.isOwned ? (
+                                        <Home size={18} className="text-green-600" />
+                                    ) : (
+                                        <Home size={18} className="text-gray-400" />
+                                    )}
+                                    {animalToView.isDisplay ? (
+                                        <Eye size={18} className="text-blue-600" />
+                                    ) : (
+                                        <EyeOff size={18} className="text-gray-400" />
+                                    )}
+                                    {animalToView.isPregnant && <Egg size={18} className="text-orange-500" />}
+                                    {animalToView.isNursing && <Milk size={18} className="text-blue-400" />}
+                                </div>
                             </div>
                             <div className="flex-1">
                                 <h2 className="text-2xl font-bold text-gray-800">{animalToView.prefix ? `${animalToView.prefix} ` : ''}{animalToView.name}</h2>
