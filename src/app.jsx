@@ -1033,23 +1033,29 @@ const AnimalForm = ({
             // Prepare explicit payload to send to the API and log it for debugging
             // Merge in any immediate pedigree selections stored in `pedigreeRef` to avoid race conditions
             const payloadToSave = { ...formData };
+            
+            // Determine final parent values (pedigreeRef takes precedence if set, otherwise use formData)
+            const finalFatherId = pedigreeRef.current.father !== undefined ? pedigreeRef.current.father : formData.fatherId_public;
+            const finalMotherId = pedigreeRef.current.mother !== undefined ? pedigreeRef.current.mother : formData.motherId_public;
+            
             // include backend objectIds for parents when available (but not if null - clearing)
             if (pedigreeRef.current.fatherBackendId) {
                 payloadToSave.father = pedigreeRef.current.fatherBackendId;
-            } else if (pedigreeRef.current.father === null) {
+            } else if (finalFatherId === null) {
                 payloadToSave.father = null;
             }
             if (pedigreeRef.current.motherBackendId) {
                 payloadToSave.mother = pedigreeRef.current.motherBackendId;
-            } else if (pedigreeRef.current.mother === null) {
+            } else if (finalMotherId === null) {
                 payloadToSave.mother = null;
             }
-            if (pedigreeRef.current.father !== undefined) payloadToSave.fatherId_public = pedigreeRef.current.father;
-            if (pedigreeRef.current.mother !== undefined) payloadToSave.motherId_public = pedigreeRef.current.mother;
+            
+            payloadToSave.fatherId_public = finalFatherId;
+            payloadToSave.motherId_public = finalMotherId;
 
             // Also include common alias fields and numeric conversions to match backend expectations
-            const fVal = pedigreeRef.current.father !== undefined && pedigreeRef.current.father !== null ? Number(pedigreeRef.current.father) : null;
-            const mVal = pedigreeRef.current.mother !== undefined && pedigreeRef.current.mother !== null ? Number(pedigreeRef.current.mother) : null;
+            const fVal = finalFatherId !== null && finalFatherId !== undefined ? Number(finalFatherId) : null;
+            const mVal = finalMotherId !== null && finalMotherId !== undefined ? Number(finalMotherId) : null;
             
             // Always send father fields (even if null to clear)
             payloadToSave.fatherId = fVal;
