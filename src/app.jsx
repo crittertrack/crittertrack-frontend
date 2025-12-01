@@ -2003,7 +2003,8 @@ const AuthView = ({ onLoginSuccess, showModalMessage, isRegister, setIsRegister,
                     if (publicResponse.data && publicResponse.data.length > 0) {
                         setParentData(publicResponse.data[0]);
                     } else {
-                        // Animal exists in database but no data available
+                        // Animal not found in either collection - treat as if no parent recorded
+                        console.warn(`Parent CT${parentId} not found in local or public collections`);
                         setNotFound(true);
                         setParentData(null);
                     }
@@ -2018,7 +2019,8 @@ const AuthView = ({ onLoginSuccess, showModalMessage, isRegister, setIsRegister,
 
             fetchParent();
         }, [parentId, parentType, authToken, API_BASE_URL]);
-        }, [parentId, parentType, authToken, API_BASE_URL]);    if (!parentId) {
+
+    if (!parentId || notFound) {
         return (
             <div className="border-2 border-dashed border-gray-300 rounded-lg p-4 text-center">
                 <p className="text-gray-500 text-sm">No {parentType} recorded</p>
@@ -2034,29 +2036,15 @@ const AuthView = ({ onLoginSuccess, showModalMessage, isRegister, setIsRegister,
         );
     }
 
-        if (notFound || !parentData) {
-            return (
-                <div className="border-2 border-gray-300 rounded-lg overflow-hidden">
-                    <div className="bg-gray-50 px-3 py-2 border-b border-gray-300">
-                        <p className="text-xs font-semibold text-gray-600">{parentType}</p>
-                    </div>
-                    <div className="p-3 flex flex-col items-center">
-                        <div className="w-20 h-20 bg-gray-100 rounded-md overflow-hidden flex items-center justify-center mb-2">
-                            <Cat size={28} className="text-gray-300" />
-                        </div>
-                        <div className="text-center mb-1">
-                            <p className="text-sm font-semibold text-gray-600">Unknown</p>
-                        </div>
-                        <div className="text-center mb-2">
-                            <p className="text-xs text-gray-500">CT{parentId}</p>
-                        </div>
-                        <div className="w-full bg-gray-100 py-1 text-center border-t border-gray-300">
-                            <p className="text-xs font-medium text-gray-500">—</p>
-                        </div>
-                    </div>
-                </div>
-            );
-        }    const imgSrc = parentData.imageUrl || parentData.photoUrl || null;
+    if (!parentData) {
+        return (
+            <div className="border-2 border-dashed border-gray-300 rounded-lg p-4 text-center">
+                <p className="text-gray-500 text-sm">Loading {parentType} data...</p>
+            </div>
+        );
+    }
+
+    const imgSrc = parentData.imageUrl || parentData.photoUrl || null;
 
     return (
         <div 
