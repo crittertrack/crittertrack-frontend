@@ -1983,7 +1983,22 @@ const AuthView = ({ onLoginSuccess, showModalMessage, isRegister, setIsRegister,
                 setLoading(true);
                 setNotFound(false);
                 try {
-                    // Fetch from global public animals database
+                    // First try to fetch from user's own animals (they might own the parent)
+                    try {
+                        const ownedResponse = await axios.get(`${API_BASE_URL}/api/animals/${parentId}`, {
+                            headers: { Authorization: `Bearer ${authToken}` }
+                        });
+                        if (ownedResponse.data) {
+                            setParentData(ownedResponse.data);
+                            setLoading(false);
+                            return;
+                        }
+                    } catch (ownedError) {
+                        // Not in user's collection, try public database
+                        console.log(`Parent CT${parentId} not in user's collection, trying public database`);
+                    }
+
+                    // Try fetching from global public animals database
                     const publicResponse = await axios.get(`${API_BASE_URL}/api/public/global/animals?id_public=${parentId}`);
                     if (publicResponse.data && publicResponse.data.length > 0) {
                         setParentData(publicResponse.data[0]);
@@ -2002,6 +2017,7 @@ const AuthView = ({ onLoginSuccess, showModalMessage, isRegister, setIsRegister,
             };
 
             fetchParent();
+        }, [parentId, parentType, authToken, API_BASE_URL]);
         }, [parentId, parentType, authToken, API_BASE_URL]);    if (!parentId) {
         return (
             <div className="border-2 border-dashed border-gray-300 rounded-lg p-4 text-center">
