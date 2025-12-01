@@ -1308,9 +1308,6 @@ const AnimalForm = ({
                                             </button>
                                         )}
                                     </div>
-                                    {fatherInfo && (
-                                        <span className="text-sm text-gray-600 mt-1 truncate">{fatherInfo.prefix ? `${fatherInfo.prefix} ` : ''}{fatherInfo.name}</span>
-                                    )}
                                 </div>
                         </div>
                         <div className='flex flex-col'>
@@ -1333,9 +1330,6 @@ const AnimalForm = ({
                                         </button>
                                     )}
                                 </div>
-                                {motherInfo && (
-                                    <span className="text-sm text-gray-600 mt-1 truncate">{motherInfo.prefix ? `${motherInfo.prefix} ` : ''}{motherInfo.name}</span>
-                                )}
                             </div>
                         </div>
                     </div>
