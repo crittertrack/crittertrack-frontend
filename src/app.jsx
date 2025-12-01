@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useCallback, useRef, useMemo } from 'react';
 import axios from 'axios';
-import { LogOut, Cat, UserPlus, LogIn, ChevronLeft, Trash2, Edit, Save, PlusCircle, ArrowLeft, Loader2, RefreshCw, User, ClipboardList, BookOpen, Settings, Mail, Globe, Egg, Milk, Search, X, Mars, Venus, Eye, EyeOff, Home } from 'lucide-react';
+import { LogOut, Cat, UserPlus, LogIn, ChevronLeft, Trash2, Edit, Save, PlusCircle, ArrowLeft, Loader2, RefreshCw, User, ClipboardList, BookOpen, Settings, Mail, Globe, Egg, Milk, Search, X, Mars, Venus, Eye, EyeOff, Home, Heart, HeartOff } from 'lucide-react';
 
 const API_BASE_URL = 'https://crittertrack-pedigree-production.up.railway.app/api';
 
@@ -1348,7 +1348,7 @@ const AnimalForm = ({
                     <div className="flex space-x-4">
                         <button type="button" onClick={onCancel} className="bg-gray-300 hover:bg-gray-400 text-gray-800 font-semibold py-2 px-4 rounded-lg transition duration-150 shadow-md flex items-center space-x-2">
                             <ArrowLeft size={18} />
-                            <span>{animalToEdit ? 'Back to Profile' : 'Cancel'}</span>
+                            <span>Back to Profile</span>
                         </button>
                             <button
                                 type="submit"
@@ -2114,17 +2114,17 @@ const AnimalList = ({ authToken, showModalMessage, onEditAnimal, onViewAnimal, o
                     {/* Icon row */}
                     <div className="w-full flex justify-center items-center space-x-2 py-1">
                         {animal.isOwned ? (
-                            <Home size={14} className="text-green-600" />
+                            <Heart size={14} className="text-black" />
                         ) : (
-                            <Home size={14} className="text-gray-400" />
+                            <HeartOff size={14} className="text-black" />
                         )}
                         {animal.isDisplay ? (
-                            <Eye size={14} className="text-blue-600" />
+                            <Eye size={14} className="text-black" />
                         ) : (
-                            <EyeOff size={14} className="text-gray-400" />
+                            <EyeOff size={14} className="text-black" />
                         )}
-                        {animal.isPregnant && <Egg size={14} className="text-orange-500" />}
-                        {animal.isNursing && <Milk size={14} className="text-blue-400" />}
+                        {animal.isPregnant && <Egg size={14} className="text-black" />}
+                        {animal.isNursing && <Milk size={14} className="text-black" />}
                     </div>
                     
                     {/* Prefix / Name under image */}
@@ -2529,7 +2529,7 @@ const App = () => {
                         <div className="flex items-start justify-between mb-4">
                             <button onClick={() => setCurrentView('list')} className="flex items-center text-gray-600 hover:text-gray-800 font-medium">
                                 <ArrowLeft size={20} className="mr-2" />
-                                Back to Profile
+                                Back to Dashboard
                             </button>
                             <button onClick={() => { setAnimalToEdit(animalToView); setSpeciesToAdd(animalToView.species); setCurrentView('edit-animal'); }} className="bg-primary hover:bg-primary/90 text-black font-semibold py-2 px-4 rounded-lg">Edit</button>
                         </div>
@@ -2549,17 +2549,17 @@ const App = () => {
                                 {/* Icon row */}
                                 <div className="w-40 flex justify-center items-center space-x-3 py-2">
                                     {animalToView.isOwned ? (
-                                        <Home size={18} className="text-green-600" />
+                                        <Heart size={18} className="text-black" />
                                     ) : (
-                                        <Home size={18} className="text-gray-400" />
+                                        <HeartOff size={18} className="text-black" />
                                     )}
                                     {animalToView.isDisplay ? (
-                                        <Eye size={18} className="text-blue-600" />
+                                        <Eye size={18} className="text-black" />
                                     ) : (
-                                        <EyeOff size={18} className="text-gray-400" />
+                                        <EyeOff size={18} className="text-black" />
                                     )}
-                                    {animalToView.isPregnant && <Egg size={18} className="text-orange-500" />}
-                                    {animalToView.isNursing && <Milk size={18} className="text-blue-400" />}
+                                    {animalToView.isPregnant && <Egg size={18} className="text-black" />}
+                                    {animalToView.isNursing && <Milk size={18} className="text-black" />}
                                 </div>
                             </div>
                             <div className="flex-1">
