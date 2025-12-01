@@ -944,10 +944,12 @@ const AnimalForm = ({
         if (which === 'father') {
             setFormData(prev => ({ ...prev, fatherId_public: null }));
             pedigreeRef.current.father = null;
+            pedigreeRef.current.fatherBackendId = null;
             setFatherInfo(null);
         } else {
             setFormData(prev => ({ ...prev, motherId_public: null }));
             pedigreeRef.current.mother = null;
+            pedigreeRef.current.motherBackendId = null;
             setMotherInfo(null);
         }
     };
@@ -1012,9 +1014,17 @@ const AnimalForm = ({
             // Prepare explicit payload to send to the API and log it for debugging
             // Merge in any immediate pedigree selections stored in `pedigreeRef` to avoid race conditions
             const payloadToSave = { ...formData };
-            // include backend objectIds for parents when available
-            if (pedigreeRef.current.fatherBackendId) payloadToSave.father = pedigreeRef.current.fatherBackendId;
-            if (pedigreeRef.current.motherBackendId) payloadToSave.mother = pedigreeRef.current.motherBackendId;
+            // include backend objectIds for parents when available (but not if null - clearing)
+            if (pedigreeRef.current.fatherBackendId) {
+                payloadToSave.father = pedigreeRef.current.fatherBackendId;
+            } else if (pedigreeRef.current.father === null) {
+                payloadToSave.father = null;
+            }
+            if (pedigreeRef.current.motherBackendId) {
+                payloadToSave.mother = pedigreeRef.current.motherBackendId;
+            } else if (pedigreeRef.current.mother === null) {
+                payloadToSave.mother = null;
+            }
             if (pedigreeRef.current.father !== undefined) payloadToSave.fatherId_public = pedigreeRef.current.father;
             if (pedigreeRef.current.mother !== undefined) payloadToSave.motherId_public = pedigreeRef.current.mother;
 
