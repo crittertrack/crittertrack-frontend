@@ -3645,7 +3645,7 @@ const App = () => {
                         animalToEdit={animalToEdit} 
                         species={animalToEdit.species} 
                         onSave={handleSaveAnimal} 
-                        onCancel={() => { setAnimalToView(animalToEdit); setCurrentView('view-animal'); }} 
+                        onCancel={() => setCurrentView('list')} 
                         onDelete={handleDeleteAnimal}
                         authToken={authToken} 
                         showModalMessage={showModalMessage}
