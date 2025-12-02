@@ -745,8 +745,8 @@ const ViewOnlyAnimalDetail = ({ animal, onClose, API_BASE_URL }) => {
     const showGeneticCode = animal.includeGeneticCode !== false && animal.geneticCode;
 
     return (
-        <div className="fixed inset-0 bg-gray-600 bg-opacity-75 flex items-center justify-center p-4 z-50 overflow-y-auto">
-            <div className="bg-white rounded-xl shadow-2xl p-6 w-full max-w-4xl my-8">
+        <div className="fixed inset-0 bg-blue-900/75 flex items-center justify-center p-4 z-50 overflow-y-auto">
+            <div className="bg-white rounded-xl shadow-2xl p-6 w-full max-w-4xl my-8 mt-20">
                 <div className="flex justify-between items-center border-b pb-4 mb-6">
                     <h2 className="text-3xl font-bold text-gray-900">
                         {animal.prefix && `${animal.prefix} `}{animal.name}
@@ -757,29 +757,31 @@ const ViewOnlyAnimalDetail = ({ animal, onClose, API_BASE_URL }) => {
                 </div>
 
                 <div className="space-y-6">
-                    {/* Image */}
-                    {imgSrc && (
-                        <div className="w-full max-w-md mx-auto">
+                    {/* Image with ID, Species, Status below */}
+                    <div className="w-full max-w-md mx-auto">
+                        {imgSrc && (
                             <img 
                                 src={imgSrc} 
                                 alt={animal.name} 
                                 className="w-full rounded-lg shadow-lg object-cover max-h-96"
                             />
+                        )}
+                        <div className="mt-4 space-y-2 text-center">
+                            <p className="text-sm text-gray-600">
+                                <span className="font-mono text-lg font-semibold text-gray-900">CT{animal.id_public}</span>
+                            </p>
+                            <p className="text-base text-gray-700">
+                                <span className="font-medium">{animal.species}</span>
+                                {animal.status && <span className="mx-2">•</span>}
+                                {animal.status && <span className="font-medium">{animal.status}</span>}
+                            </p>
                         </div>
-                    )}
+                    </div>
 
                     {/* Main Info */}
                     <div className="border-2 border-gray-300 rounded-lg p-6">
                         <h3 className="text-lg font-semibold text-gray-800 mb-4">Basic Information</h3>
                         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                            <div>
-                                <p className="text-sm text-gray-600">Public ID</p>
-                                <p className="font-mono text-lg">CT{animal.id_public}</p>
-                            </div>
-                            <div>
-                                <p className="text-sm text-gray-600">Species</p>
-                                <p className="text-lg">{animal.species}</p>
-                            </div>
                             <div>
                                 <p className="text-sm text-gray-600">Gender</p>
                                 <p className="text-lg">{animal.gender}</p>
@@ -804,12 +806,6 @@ const ViewOnlyAnimalDetail = ({ animal, onClose, API_BASE_URL }) => {
                                 <div>
                                     <p className="text-sm text-gray-600">Breedery ID</p>
                                     <p className="text-lg">{animal.breederyId}</p>
-                                </div>
-                            )}
-                            {animal.status && (
-                                <div>
-                                    <p className="text-sm text-gray-600">Status</p>
-                                    <p className="text-lg">{animal.status}</p>
                                 </div>
                             )}
                         </div>
