@@ -1351,6 +1351,7 @@ const AnimalForm = ({
     const [fatherInfo, setFatherInfo] = useState(null); // { id_public, prefix, name }
     const [motherInfo, setMotherInfo] = useState(null);
     const [breederInfo, setBreederInfo] = useState(null); // { id_public, personalName, breederName, showBreederName }
+    const lastFetchedParentIds = useRef({ father: null, mother: null });
 
     // Helper: fetch a summary for an animal by public id. Try local (authenticated) first, then global display.
     const fetchAnimalSummary = async (idPublic) => {
@@ -1576,36 +1577,42 @@ const AnimalForm = ({
     // Fetch parent info when parent IDs change (for newly selected parents)
     useEffect(() => {
         const fetchParentNames = async () => {
-            console.log('[PARENT FETCH] formData.fatherId_public:', formData.fatherId_public, 'formData.motherId_public:', formData.motherId_public);
-            
-            // Fetch father info
-            if (formData.fatherId_public) {
-                try {
-                    const info = await fetchAnimalSummary(formData.fatherId_public);
-                    console.log('[PARENT FETCH] Fetched FATHER info for ID', formData.fatherId_public, ':', info);
-                    setFatherInfo(info);
-                } catch (e) { 
-                    console.error('[PARENT FETCH] Failed to fetch father info:', e);
+            // Fetch father info only if ID changed
+            if (formData.fatherId_public !== lastFetchedParentIds.current.father) {
+                lastFetchedParentIds.current.father = formData.fatherId_public;
+                
+                if (formData.fatherId_public) {
+                    try {
+                        const info = await fetchAnimalSummary(formData.fatherId_public);
+                        console.log('[PARENT FETCH] Fetched FATHER info for ID', formData.fatherId_public, ':', info);
+                        setFatherInfo(info);
+                    } catch (e) { 
+                        console.error('[PARENT FETCH] Failed to fetch father info:', e);
+                        setFatherInfo(null);
+                    }
+                } else {
+                    console.log('[PARENT FETCH] Clearing father info (no ID)');
                     setFatherInfo(null);
                 }
-            } else {
-                console.log('[PARENT FETCH] Clearing father info (no ID)');
-                setFatherInfo(null);
             }
             
-            // Fetch mother info
-            if (formData.motherId_public) {
-                try {
-                    const info = await fetchAnimalSummary(formData.motherId_public);
-                    console.log('[PARENT FETCH] Fetched MOTHER info for ID', formData.motherId_public, ':', info);
-                    setMotherInfo(info);
-                } catch (e) { 
-                    console.error('[PARENT FETCH] Failed to fetch mother info:', e);
+            // Fetch mother info only if ID changed
+            if (formData.motherId_public !== lastFetchedParentIds.current.mother) {
+                lastFetchedParentIds.current.mother = formData.motherId_public;
+                
+                if (formData.motherId_public) {
+                    try {
+                        const info = await fetchAnimalSummary(formData.motherId_public);
+                        console.log('[PARENT FETCH] Fetched MOTHER info for ID', formData.motherId_public, ':', info);
+                        setMotherInfo(info);
+                    } catch (e) { 
+                        console.error('[PARENT FETCH] Failed to fetch mother info:', e);
+                        setMotherInfo(null);
+                    }
+                } else {
+                    console.log('[PARENT FETCH] Clearing mother info (no ID)');
                     setMotherInfo(null);
                 }
-            } else {
-                console.log('[PARENT FETCH] Clearing mother info (no ID)');
-                setMotherInfo(null);
             }
         };
         
