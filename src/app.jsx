@@ -219,9 +219,9 @@ const PedigreeChart = ({ animalId, animalData, onClose, API_BASE_URL, authToken 
         const colorCoat = [animal.color, animal.coat].filter(Boolean).join(' / ') || 'N/A';
         
         return (
-            <div className="border-2 border-gray-400 rounded-lg p-2 bg-white relative flex gap-2">
+            <div className="border-2 border-gray-400 rounded-lg p-2 bg-white relative flex gap-2" style={{height: '100px'}}>
                 {/* Image */}
-                <div className="w-24 h-24 bg-gray-100 rounded-lg overflow-hidden flex items-center justify-center flex-shrink-0">
+                <div className="w-20 h-20 bg-gray-100 rounded-lg overflow-hidden flex items-center justify-center flex-shrink-0">
                     <AnimalImage src={imgSrc} alt={animal.name} className="w-full h-full object-cover" iconSize={48} />
                 </div>
                 
@@ -260,7 +260,7 @@ const PedigreeChart = ({ animalId, animalData, onClose, API_BASE_URL, authToken 
     const renderParentCard = (animal, title) => {
         if (!animal) {
             return (
-                <div className="border border-gray-300 rounded p-2 bg-gray-50 relative" style={{minHeight: '220px'}}>
+                <div className="border border-gray-300 rounded p-2 bg-gray-50 relative" style={{height: '80px'}}>
                     <div className="font-semibold text-xs text-gray-500 mb-2">{title}</div>
                     <div className="text-xs text-gray-400 text-center py-4">Unknown</div>
                 </div>
@@ -271,9 +271,9 @@ const PedigreeChart = ({ animalId, animalData, onClose, API_BASE_URL, authToken 
         const colorCoat = [animal.color, animal.coat].filter(Boolean).join(' / ') || 'N/A';
         
         return (
-            <div className="border border-gray-400 rounded p-2 bg-white relative flex gap-2">
+            <div className="border border-gray-400 rounded p-2 bg-white relative flex gap-2" style={{height: '80px'}}>
                 {/* Image */}
-                <div className="w-16 h-16 bg-gray-100 rounded-lg overflow-hidden flex items-center justify-center flex-shrink-0">
+                <div className="w-14 h-14 bg-gray-100 rounded-lg overflow-hidden flex items-center justify-center flex-shrink-0">
                     <AnimalImage src={imgSrc} alt={animal.name} className="w-full h-full object-cover" iconSize={28} />
                 </div>
                 
@@ -314,7 +314,7 @@ const PedigreeChart = ({ animalId, animalData, onClose, API_BASE_URL, authToken 
     const renderGrandparentCard = (animal) => {
         if (!animal) {
             return (
-                <div className="border border-gray-300 rounded p-1.5 bg-gray-50 flex items-center justify-center" style={{minHeight: '180px'}}>
+                <div className="border border-gray-300 rounded p-1.5 bg-gray-50 flex items-center justify-center" style={{height: '80px'}}>
                     <span className="text-xs text-gray-400">Unknown</span>
                 </div>
             );
@@ -324,7 +324,7 @@ const PedigreeChart = ({ animalId, animalData, onClose, API_BASE_URL, authToken 
         const colorCoat = [animal.color, animal.coat].filter(Boolean).join(' / ') || 'N/A';
         
         return (
-            <div className="border border-gray-300 rounded p-1.5 bg-white relative flex gap-1.5">
+            <div className="border border-gray-300 rounded p-1.5 bg-white relative flex gap-1.5" style={{height: '80px'}}>
                 {/* Image */}
                 <div className="w-12 h-12 bg-gray-100 rounded-lg overflow-hidden flex items-center justify-center flex-shrink-0">
                     <AnimalImage src={imgSrc} alt={animal.name} className="w-full h-full object-cover" iconSize={20} />
@@ -365,7 +365,7 @@ const PedigreeChart = ({ animalId, animalData, onClose, API_BASE_URL, authToken 
     const renderGreatGrandparentCard = (animal) => {
         if (!animal) {
             return (
-                <div className="border border-gray-300 rounded p-1 bg-gray-50 flex items-center justify-center" style={{minHeight: '150px'}}>
+                <div className="border border-gray-300 rounded p-1 bg-gray-50 flex items-center justify-center" style={{height: '80px'}}>
                     <span className="text-xs text-gray-400">Unknown</span>
                 </div>
             );
@@ -375,7 +375,7 @@ const PedigreeChart = ({ animalId, animalData, onClose, API_BASE_URL, authToken 
         const colorCoat = [animal.color, animal.coat].filter(Boolean).join(' / ') || 'N/A';
         
         return (
-            <div className="border border-gray-300 rounded p-1 bg-white relative flex gap-1">
+            <div className="border border-gray-300 rounded p-1 bg-white relative flex gap-1" style={{height: '80px'}}>
                 {/* Image */}
                 <div className="w-10 h-10 bg-gray-100 rounded-md overflow-hidden flex items-center justify-center flex-shrink-0">
                     <AnimalImage src={imgSrc} alt={animal.name} className="w-full h-full object-cover" iconSize={16} />
@@ -416,7 +416,7 @@ const PedigreeChart = ({ animalId, animalData, onClose, API_BASE_URL, authToken 
     const renderGreatGreatGrandparentCard = (animal) => {
         if (!animal) {
             return (
-                <div className="border border-gray-300 rounded p-0.5 bg-gray-50 flex items-center justify-center" style={{minHeight: '120px'}}>
+                <div className="border border-gray-300 rounded p-0.5 bg-gray-50 flex items-center justify-center" style={{height: '80px'}}>
                     <span className="text-xs text-gray-400">Unknown</span>
                 </div>
             );
@@ -425,7 +425,7 @@ const PedigreeChart = ({ animalId, animalData, onClose, API_BASE_URL, authToken 
         const colorCoat = [animal.color, animal.coat].filter(Boolean).join(' / ') || 'N/A';
         
         return (
-            <div className="border border-gray-200 rounded p-1 bg-white relative">
+            <div className="border border-gray-200 rounded p-1 bg-white relative" style={{height: '80px'}}>
                 {/* Name */}
                 <div className="font-semibold text-xs text-gray-800 truncate mb-0.5">
                     {animal.prefix && `${animal.prefix} `}{animal.name}
@@ -502,7 +502,7 @@ const PedigreeChart = ({ animalId, animalData, onClose, API_BASE_URL, authToken 
             <div className="flex flex-col w-full">
                 {/* Main Animal - Top Row */}
                 <div className="flex gap-2 mb-2">
-                    <div className="w-1/6">
+                    <div className="w-1/4">
                         {renderMainAnimalCard(subject)}
                     </div>
                 </div>
@@ -510,19 +510,19 @@ const PedigreeChart = ({ animalId, animalData, onClose, API_BASE_URL, authToken 
                 {/* Sire Lineage Section */}
                 <div className="flex w-full mb-2">
                     {/* Sire */}
-                    <div className="w-1/6">
+                    <div className="w-1/4">
                         {renderParentCard(father, 'Sire')}
                     </div>
                     {/* Paternal Grandfather */}
-                    <div className="w-1/6 ml-2">
+                    <div className="w-1/4 ml-2">
                         {renderGrandparentCard(paternalGrandfather)}
                     </div>
                     {/* Great-grandparents (PGF line) */}
-                    <div className="w-1/6 ml-2">
+                    <div className="w-1/4 ml-2">
                         {renderGreatGrandparentCard(pgfFather)}
                     </div>
                     {/* Great-great-grandparents */}
-                    <div className="flex-1 ml-2 flex gap-2">
+                    <div className="w-1/4 ml-2 flex gap-2">
                         <div className="flex-1">
                             {renderGreatGreatGrandparentCard(pgfFatherFather)}
                         </div>
@@ -533,14 +533,14 @@ const PedigreeChart = ({ animalId, animalData, onClose, API_BASE_URL, authToken 
                 </div>
 
                 <div className="flex w-full mb-2">
-                    <div className="w-1/6"></div>
-                    <div className="w-1/6 ml-2">
+                    <div className="w-1/4"></div>
+                    <div className="w-1/4 ml-2">
                         {renderGrandparentCard(paternalGrandmother)}
                     </div>
-                    <div className="w-1/6 ml-2">
+                    <div className="w-1/4 ml-2">
                         {renderGreatGrandparentCard(pgmFather)}
                     </div>
-                    <div className="flex-1 ml-2 flex gap-2">
+                    <div className="w-1/4 ml-2 flex gap-2">
                         <div className="flex-1">
                             {renderGreatGreatGrandparentCard(pgmFatherFather)}
                         </div>
@@ -551,12 +551,12 @@ const PedigreeChart = ({ animalId, animalData, onClose, API_BASE_URL, authToken 
                 </div>
 
                 <div className="flex w-full mb-2">
-                    <div className="w-1/6"></div>
-                    <div className="w-1/6 ml-2"></div>
-                    <div className="w-1/6 ml-2">
+                    <div className="w-1/4"></div>
+                    <div className="w-1/4 ml-2"></div>
+                    <div className="w-1/4 ml-2">
                         {renderGreatGrandparentCard(pgmMother)}
                     </div>
-                    <div className="flex-1 ml-2 flex gap-2">
+                    <div className="w-1/4 ml-2 flex gap-2">
                         <div className="flex-1">
                             {renderGreatGreatGrandparentCard(pgmMotherFather)}
                         </div>
@@ -568,16 +568,16 @@ const PedigreeChart = ({ animalId, animalData, onClose, API_BASE_URL, authToken 
 
                 {/* Dam Lineage Section */}
                 <div className="flex w-full mb-2">
-                    <div className="w-1/6">
+                    <div className="w-1/4">
                         {renderParentCard(mother, 'Dam')}
                     </div>
-                    <div className="w-1/6 ml-2">
+                    <div className="w-1/4 ml-2">
                         {renderGrandparentCard(maternalGrandfather)}
                     </div>
-                    <div className="w-1/6 ml-2">
+                    <div className="w-1/4 ml-2">
                         {renderGreatGrandparentCard(mgfFather)}
                     </div>
-                    <div className="flex-1 ml-2 flex gap-2">
+                    <div className="w-1/4 ml-2 flex gap-2">
                         <div className="flex-1">
                             {renderGreatGreatGrandparentCard(mgfFatherFather)}
                         </div>
@@ -588,14 +588,14 @@ const PedigreeChart = ({ animalId, animalData, onClose, API_BASE_URL, authToken 
                 </div>
 
                 <div className="flex w-full mb-2">
-                    <div className="w-1/6"></div>
-                    <div className="w-1/6 ml-2">
+                    <div className="w-1/4"></div>
+                    <div className="w-1/4 ml-2">
                         {renderGrandparentCard(maternalGrandmother)}
                     </div>
-                    <div className="w-1/6 ml-2">
+                    <div className="w-1/4 ml-2">
                         {renderGreatGrandparentCard(mgfMother)}
                     </div>
-                    <div className="flex-1 ml-2 flex gap-2">
+                    <div className="w-1/4 ml-2 flex gap-2">
                         <div className="flex-1">
                             {renderGreatGreatGrandparentCard(mgfMotherFather)}
                         </div>
@@ -606,12 +606,12 @@ const PedigreeChart = ({ animalId, animalData, onClose, API_BASE_URL, authToken 
                 </div>
 
                 <div className="flex w-full mb-2">
-                    <div className="w-1/6"></div>
-                    <div className="w-1/6 ml-2"></div>
-                    <div className="w-1/6 ml-2">
+                    <div className="w-1/4"></div>
+                    <div className="w-1/4 ml-2"></div>
+                    <div className="w-1/4 ml-2">
                         {renderGreatGrandparentCard(mgmFather)}
                     </div>
-                    <div className="flex-1 ml-2 flex gap-2">
+                    <div className="w-1/4 ml-2 flex gap-2">
                         <div className="flex-1">
                             {renderGreatGreatGrandparentCard(mgmFatherFather)}
                         </div>
@@ -622,12 +622,12 @@ const PedigreeChart = ({ animalId, animalData, onClose, API_BASE_URL, authToken 
                 </div>
 
                 <div className="flex w-full mb-2">
-                    <div className="w-1/6"></div>
-                    <div className="w-1/6 ml-2"></div>
-                    <div className="w-1/6 ml-2">
+                    <div className="w-1/4"></div>
+                    <div className="w-1/4 ml-2"></div>
+                    <div className="w-1/4 ml-2">
                         {renderGreatGrandparentCard(mgmMother)}
                     </div>
-                    <div className="flex-1 ml-2 flex gap-2">
+                    <div className="w-1/4 ml-2 flex gap-2">
                         <div className="flex-1">
                             {renderGreatGreatGrandparentCard(mgmMotherFather)}
                         </div>
@@ -695,10 +695,10 @@ const PedigreeChart = ({ animalId, animalData, onClose, API_BASE_URL, authToken 
                     {/* Content */}
                     <div className="p-6">
 
-                {/* Pedigree Chart */}
-                <div ref={pedigreeRef} className="bg-white p-6 rounded-lg border-2 border-gray-300">
+                {/* Pedigree Chart - A4 Landscape: 11.69" x 8.27" (1123px x 794px at 96dpi) */}
+                <div ref={pedigreeRef} className="bg-white p-6 rounded-lg border-2 border-gray-300" style={{width: '1123px', height: '794px', maxWidth: '1123px', maxHeight: '794px'}}>
                     {/* Header with Species and Owner Profile */}
-                    <div className="flex justify-between items-start mb-6">
+                    <div className="flex justify-between items-start mb-4">
                         {/* Species - Top Left */}
                         <div className="text-left">
                             <h3 className="text-lg font-bold text-gray-800">{pedigreeData?.species || 'Unknown Species'}</h3>
@@ -721,12 +721,12 @@ const PedigreeChart = ({ animalId, animalData, onClose, API_BASE_URL, authToken 
                     </div>
 
                     {/* Pedigree Tree */}
-                    <div className="overflow-x-auto">
+                    <div className="overflow-hidden">
                         {renderPedigreeTree(pedigreeData)}
                     </div>
 
                     {/* Footer */}
-                    <div className="mt-6 pt-4 border-t-2 border-gray-300 flex justify-between items-center text-sm text-gray-600">
+                    <div className="mt-4 pt-3 border-t-2 border-gray-300 flex justify-between items-center text-sm text-gray-600">
                         <div>{getOwnerDisplayName()}</div>
                         <div>{new Date().toLocaleDateString()}</div>
                     </div>
