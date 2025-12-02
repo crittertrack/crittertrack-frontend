@@ -219,9 +219,9 @@ const PedigreeChart = ({ animalId, animalData, onClose, API_BASE_URL, authToken 
         const GenderIcon = isMale ? Mars : Venus;
         
         return (
-            <div className={`border-2 border-gray-400 rounded-lg p-3 ${bgColor} relative flex gap-3 items-center`} style={{height: '160px'}}>
+            <div className={`border border-gray-400 rounded-lg p-3 ${bgColor} relative flex gap-3 items-center`} style={{height: '160px'}}>
                 {/* Image */}
-                <div className="w-32 h-32 bg-gray-100 rounded-lg overflow-hidden flex items-center justify-center flex-shrink-0 border-2 border-gray-300">
+                <div className="w-32 h-32 bg-gray-100 rounded-lg overflow-hidden flex items-center justify-center flex-shrink-0 border-2 border-gray-900">
                     {imgSrc ? (
                         <AnimalImage src={imgSrc} alt={animal.name} className="w-full h-full object-cover" iconSize={48} />
                     ) : (
@@ -294,7 +294,7 @@ const PedigreeChart = ({ animalId, animalData, onClose, API_BASE_URL, authToken 
         return (
             <div className={`border border-gray-400 rounded p-2 ${bgColor} relative flex gap-2 h-full items-center`}>
                 {/* Image - 1/3 width */}
-                <div className="w-1/3 aspect-square bg-gray-100 rounded border-2 border-gray-300 overflow-hidden flex items-center justify-center flex-shrink-0">
+                <div className="w-1/3 aspect-square bg-gray-100 rounded-lg border-2 border-gray-900 overflow-hidden flex items-center justify-center flex-shrink-0">
                     {imgSrc ? (
                         <AnimalImage src={imgSrc} alt={animal.name} className="w-full h-full object-cover" iconSize={28} />
                     ) : (
@@ -351,7 +351,7 @@ const PedigreeChart = ({ animalId, animalData, onClose, API_BASE_URL, authToken 
             return (
                 <div className={`border border-gray-400 rounded p-1.5 ${bgColor} flex gap-1.5 h-full items-center relative`}>
                     {/* Image placeholder - 1/3 width */}
-                    <div className="w-1/3 aspect-square bg-gray-100 rounded border-2 border-gray-300 overflow-hidden flex items-center justify-center flex-shrink-0">
+                    <div className="w-1/3 aspect-square bg-gray-100 rounded-lg border-2 border-gray-900 overflow-hidden flex items-center justify-center flex-shrink-0">
                         <Cat size={20} className="text-gray-400" />
                     </div>
                     {/* Text */}
@@ -371,7 +371,7 @@ const PedigreeChart = ({ animalId, animalData, onClose, API_BASE_URL, authToken 
         return (
             <div className={`border border-gray-400 rounded p-1.5 ${bgColor} relative flex gap-1.5 h-full items-center`}>
                 {/* Image - 1/3 width */}
-                <div className="w-1/3 aspect-square bg-gray-100 rounded border-2 border-gray-300 overflow-hidden flex items-center justify-center flex-shrink-0">
+                <div className="w-1/3 aspect-square bg-gray-100 rounded-lg border-2 border-gray-900 overflow-hidden flex items-center justify-center flex-shrink-0">
                     {imgSrc ? (
                         <AnimalImage src={imgSrc} alt={animal.name} className="w-full h-full object-cover" iconSize={20} />
                     ) : (
