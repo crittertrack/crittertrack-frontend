@@ -432,7 +432,13 @@ const UserSearchModal = ({ onClose, showModalMessage, onSelectUser, API_BASE_URL
     const UserResultCard = ({ user }) => {
         const memberSince = user.createdAt 
             ? new Intl.DateTimeFormat('en-US', { year: 'numeric', month: 'long' }).format(new Date(user.createdAt))
-            : 'Unknown';
+            : (user.updatedAt ? new Intl.DateTimeFormat('en-US', { year: 'numeric', month: 'long' }).format(new Date(user.updatedAt)) : 'Unknown');
+        
+        // Determine display name(s)
+        const showBothNames = user.showBreederName && user.personalName && user.breederName;
+        const displayName = showBothNames 
+            ? `${user.personalName} (${user.breederName})`
+            : (user.showBreederName && user.breederName ? user.breederName : user.personalName || 'Anonymous Breeder');
         
         return (
             <div 
@@ -443,7 +449,7 @@ const UserSearchModal = ({ onClose, showModalMessage, onSelectUser, API_BASE_URL
             >
                 <div className="flex items-start space-x-3">
                     {user.profileImage ? (
-                        <img src={user.profileImage} alt={user.breederName} className="w-12 h-12 rounded-lg object-cover" />
+                        <img src={user.profileImage} alt={displayName} className="w-12 h-12 rounded-lg object-cover" />
                     ) : (
                         <div className="w-12 h-12 bg-gray-200 rounded-lg flex items-center justify-center">
                             <User size={24} className="text-gray-400" />
@@ -451,7 +457,7 @@ const UserSearchModal = ({ onClose, showModalMessage, onSelectUser, API_BASE_URL
                     )}
                     <div className="flex-grow">
                         <p className="text-lg font-semibold text-gray-800">
-                            {user.breederName || 'Anonymous Breeder'}
+                            {displayName}
                         </p>
                         <p className="text-sm text-gray-600">
                             Public ID: <span className="font-mono text-accent">CT{user.id_public}</span>
