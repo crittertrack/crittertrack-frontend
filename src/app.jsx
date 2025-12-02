@@ -260,7 +260,7 @@ const PedigreeChart = ({ animalId, animalData, onClose, API_BASE_URL, authToken 
     const renderParentCard = (animal, title) => {
         if (!animal) {
             return (
-                <div className="border border-gray-300 rounded p-2 bg-gray-50 relative" style={{height: '80px'}}>
+                <div className="border border-gray-300 rounded p-2 bg-gray-50 relative h-full flex items-center justify-center">
                     <div className="font-semibold text-xs text-gray-500 mb-2">{title}</div>
                     <div className="text-xs text-gray-400 text-center py-4">Unknown</div>
                 </div>
@@ -271,7 +271,7 @@ const PedigreeChart = ({ animalId, animalData, onClose, API_BASE_URL, authToken 
         const colorCoat = [animal.color, animal.coat].filter(Boolean).join(' / ') || 'N/A';
         
         return (
-            <div className="border border-gray-400 rounded p-2 bg-white relative flex gap-2" style={{height: '80px'}}>
+            <div className="border border-gray-400 rounded p-2 bg-white relative flex gap-2 h-full">
                 {/* Image */}
                 <div className="w-14 h-14 bg-gray-100 rounded-lg overflow-hidden flex items-center justify-center flex-shrink-0">
                     <AnimalImage src={imgSrc} alt={animal.name} className="w-full h-full object-cover" iconSize={28} />
@@ -314,7 +314,7 @@ const PedigreeChart = ({ animalId, animalData, onClose, API_BASE_URL, authToken 
     const renderGrandparentCard = (animal) => {
         if (!animal) {
             return (
-                <div className="border border-gray-300 rounded p-1.5 bg-gray-50 flex items-center justify-center" style={{height: '80px'}}>
+                <div className="border border-gray-300 rounded p-1.5 bg-gray-50 flex items-center justify-center h-full">
                     <span className="text-xs text-gray-400">Unknown</span>
                 </div>
             );
@@ -324,7 +324,7 @@ const PedigreeChart = ({ animalId, animalData, onClose, API_BASE_URL, authToken 
         const colorCoat = [animal.color, animal.coat].filter(Boolean).join(' / ') || 'N/A';
         
         return (
-            <div className="border border-gray-300 rounded p-1.5 bg-white relative flex gap-1.5" style={{height: '80px'}}>
+            <div className="border border-gray-300 rounded p-1.5 bg-white relative flex gap-1.5 h-full">
                 {/* Image */}
                 <div className="w-12 h-12 bg-gray-100 rounded-lg overflow-hidden flex items-center justify-center flex-shrink-0">
                     <AnimalImage src={imgSrc} alt={animal.name} className="w-full h-full object-cover" iconSize={20} />
@@ -365,58 +365,7 @@ const PedigreeChart = ({ animalId, animalData, onClose, API_BASE_URL, authToken 
     const renderGreatGrandparentCard = (animal) => {
         if (!animal) {
             return (
-                <div className="border border-gray-300 rounded p-1 bg-gray-50 flex items-center justify-center" style={{height: '80px'}}>
-                    <span className="text-xs text-gray-400">Unknown</span>
-                </div>
-            );
-        }
-        
-        const imgSrc = animal.imageUrl || animal.photoUrl || null;
-        const colorCoat = [animal.color, animal.coat].filter(Boolean).join(' / ') || 'N/A';
-        
-        return (
-            <div className="border border-gray-300 rounded p-1 bg-white relative flex gap-1" style={{height: '80px'}}>
-                {/* Image */}
-                <div className="w-10 h-10 bg-gray-100 rounded-md overflow-hidden flex items-center justify-center flex-shrink-0">
-                    <AnimalImage src={imgSrc} alt={animal.name} className="w-full h-full object-cover" iconSize={16} />
-                </div>
-                
-                {/* Info */}
-                <div className="flex-1 min-w-0">
-                    {/* Name */}
-                    <div className="font-semibold text-xs text-gray-800 truncate mb-0.5">
-                        {animal.prefix && `${animal.prefix} `}{animal.name}
-                    </div>
-                    
-                    {/* Color/Coat */}
-                    <div className="text-xs text-gray-600 truncate mb-0.5">
-                        {colorCoat}
-                    </div>
-                    
-                    {/* Birth Date */}
-                    <div className="text-xs text-gray-500 mb-0.5">
-                        {animal.birthDate ? new Date(animal.birthDate).toLocaleDateString() : 'N/A'}
-                    </div>
-                    
-                    {/* Breeder */}
-                    <div className="text-xs text-gray-500 truncate mb-3">
-                        {animal.breederName || 'N/A'}
-                    </div>
-                </div>
-                
-                {/* CT ID - Bottom Right */}
-                <div className="absolute bottom-0.5 right-0.5 text-xs font-mono text-gray-400">
-                    CT{animal.id_public}
-                </div>
-            </div>
-        );
-    };
-
-    // Render card for great-great-grandparents (smallest, no image)
-    const renderGreatGreatGrandparentCard = (animal) => {
-        if (!animal) {
-            return (
-                <div className="border border-gray-300 rounded p-0.5 bg-gray-50 flex items-center justify-center" style={{height: '80px'}}>
+                <div className="border border-gray-300 rounded p-1 bg-gray-50 flex items-center justify-center h-full">
                     <span className="text-xs text-gray-400">Unknown</span>
                 </div>
             );
@@ -425,7 +374,7 @@ const PedigreeChart = ({ animalId, animalData, onClose, API_BASE_URL, authToken 
         const colorCoat = [animal.color, animal.coat].filter(Boolean).join(' / ') || 'N/A';
         
         return (
-            <div className="border border-gray-200 rounded p-1 bg-white relative" style={{height: '80px'}}>
+            <div className="border border-gray-300 rounded p-1 bg-white relative h-full flex flex-col justify-center">
                 {/* Name */}
                 <div className="font-semibold text-xs text-gray-800 truncate mb-0.5">
                     {animal.prefix && `${animal.prefix} `}{animal.name}
@@ -449,6 +398,33 @@ const PedigreeChart = ({ animalId, animalData, onClose, API_BASE_URL, authToken 
                 {/* CT ID - Bottom Right */}
                 <div className="absolute bottom-0.5 right-0.5 text-xs font-mono text-gray-400">
                     CT{animal.id_public}
+                </div>
+            </div>
+        );
+    };
+
+    // Render card for great-great-grandparents (smallest, no image)
+    const renderGreatGreatGrandparentCard = (animal) => {
+        if (!animal) {
+            return (
+                <div className="border border-gray-300 rounded px-1 py-0.5 bg-gray-50 flex items-center justify-center h-full">
+                    <span className="text-xs text-gray-400">Unknown</span>
+                </div>
+            );
+        }
+        
+        const colorCoat = [animal.color, animal.coat].filter(Boolean).join(' / ') || 'N/A';
+        
+        return (
+            <div className="border border-gray-200 rounded px-1 py-0.5 bg-white h-full flex flex-col justify-center">
+                {/* Name */}
+                <div className="font-semibold text-xs text-gray-800 truncate leading-tight">
+                    {animal.prefix && `${animal.prefix} `}{animal.name}
+                </div>
+                
+                {/* Color/Coat */}
+                <div className="text-xs text-gray-600 truncate leading-tight">
+                    {colorCoat}
                 </div>
             </div>
         );
@@ -480,161 +456,88 @@ const PedigreeChart = ({ animalId, animalData, onClose, API_BASE_URL, authToken 
         const mgmFather = maternalGrandmother?.father;
         const mgmMother = maternalGrandmother?.mother;
 
-        // Generation 4 (great-great-grandparents)
-        const pgfFatherFather = pgfFather?.father;
-        const pgfFatherMother = pgfFather?.mother;
-        const pgfMotherFather = pgfMother?.father;
-        const pgfMotherMother = pgfMother?.mother;
-        const pgmFatherFather = pgmFather?.father;
-        const pgmFatherMother = pgmFather?.mother;
-        const pgmMotherFather = pgmMother?.father;
-        const pgmMotherMother = pgmMother?.mother;
-        const mgfFatherFather = mgfFather?.father;
-        const mgfFatherMother = mgfFather?.mother;
-        const mgfMotherFather = mgfMother?.father;
-        const mgfMotherMother = mgfMother?.mother;
-        const mgmFatherFather = mgmFather?.father;
-        const mgmFatherMother = mgmFather?.mother;
-        const mgmMotherFather = mgmMother?.father;
-        const mgmMotherMother = mgmMother?.mother;
+        // Generation 4 (great-great-grandparents) - 16 total
+        const ggParents = [
+            pgfFather?.father, pgfFather?.mother,
+            pgfMother?.father, pgfMother?.mother,
+            pgmFather?.father, pgmFather?.mother,
+            pgmMother?.father, pgmMother?.mother,
+            mgfFather?.father, mgfFather?.mother,
+            mgfMother?.father, mgfMother?.mother,
+            mgmFather?.father, mgmFather?.mother,
+            mgmMother?.father, mgmMother?.mother
+        ];
+
+        // Calculate heights based on full height (794px - header/footer ~130px = ~664px for content)
+        const contentHeight = 664;
+        const parentHeight = contentHeight / 2; // ~332px for each parent
+        const grandparentHeight = contentHeight / 4; // ~166px for each grandparent
+        const greatGrandparentHeight = contentHeight / 8; // ~83px for each great-grandparent
+        const greatGreatGrandparentHeight = contentHeight / 16; // ~41.5px for each great-great-grandparent
 
         return (
-            <div className="flex flex-col w-full">
-                {/* Main Animal - Top Row */}
-                <div className="flex gap-2 mb-2">
-                    <div className="w-1/4">
-                        {renderMainAnimalCard(subject)}
-                    </div>
-                </div>
-
-                {/* Sire Lineage Section */}
-                <div className="flex w-full mb-2">
-                    {/* Sire */}
-                    <div className="w-1/4">
+            <div className="flex w-full" style={{height: `${contentHeight}px`}}>
+                {/* Column 1: Parents (2 rows, each takes 1/2 height) */}
+                <div className="w-1/4 flex flex-col">
+                    <div style={{height: `${parentHeight}px`}}>
                         {renderParentCard(father, 'Sire')}
                     </div>
-                    {/* Paternal Grandfather */}
-                    <div className="w-1/4 ml-2">
-                        {renderGrandparentCard(paternalGrandfather)}
-                    </div>
-                    {/* Great-grandparents (PGF line) */}
-                    <div className="w-1/4 ml-2">
-                        {renderGreatGrandparentCard(pgfFather)}
-                    </div>
-                    {/* Great-great-grandparents */}
-                    <div className="w-1/4 ml-2 flex gap-2">
-                        <div className="flex-1">
-                            {renderGreatGreatGrandparentCard(pgfFatherFather)}
-                        </div>
-                        <div className="flex-1">
-                            {renderGreatGreatGrandparentCard(pgfFatherMother)}
-                        </div>
-                    </div>
-                </div>
-
-                <div className="flex w-full mb-2">
-                    <div className="w-1/4"></div>
-                    <div className="w-1/4 ml-2">
-                        {renderGrandparentCard(paternalGrandmother)}
-                    </div>
-                    <div className="w-1/4 ml-2">
-                        {renderGreatGrandparentCard(pgmFather)}
-                    </div>
-                    <div className="w-1/4 ml-2 flex gap-2">
-                        <div className="flex-1">
-                            {renderGreatGreatGrandparentCard(pgmFatherFather)}
-                        </div>
-                        <div className="flex-1">
-                            {renderGreatGreatGrandparentCard(pgmFatherMother)}
-                        </div>
-                    </div>
-                </div>
-
-                <div className="flex w-full mb-2">
-                    <div className="w-1/4"></div>
-                    <div className="w-1/4 ml-2"></div>
-                    <div className="w-1/4 ml-2">
-                        {renderGreatGrandparentCard(pgmMother)}
-                    </div>
-                    <div className="w-1/4 ml-2 flex gap-2">
-                        <div className="flex-1">
-                            {renderGreatGreatGrandparentCard(pgmMotherFather)}
-                        </div>
-                        <div className="flex-1">
-                            {renderGreatGreatGrandparentCard(pgmMotherMother)}
-                        </div>
-                    </div>
-                </div>
-
-                {/* Dam Lineage Section */}
-                <div className="flex w-full mb-2">
-                    <div className="w-1/4">
+                    <div style={{height: `${parentHeight}px`}}>
                         {renderParentCard(mother, 'Dam')}
                     </div>
-                    <div className="w-1/4 ml-2">
+                </div>
+
+                {/* Column 2: Grandparents (4 rows, each takes 1/4 height) */}
+                <div className="w-1/4 flex flex-col">
+                    <div style={{height: `${grandparentHeight}px`}}>
+                        {renderGrandparentCard(paternalGrandfather)}
+                    </div>
+                    <div style={{height: `${grandparentHeight}px`}}>
+                        {renderGrandparentCard(paternalGrandmother)}
+                    </div>
+                    <div style={{height: `${grandparentHeight}px`}}>
                         {renderGrandparentCard(maternalGrandfather)}
                     </div>
-                    <div className="w-1/4 ml-2">
-                        {renderGreatGrandparentCard(mgfFather)}
-                    </div>
-                    <div className="w-1/4 ml-2 flex gap-2">
-                        <div className="flex-1">
-                            {renderGreatGreatGrandparentCard(mgfFatherFather)}
-                        </div>
-                        <div className="flex-1">
-                            {renderGreatGreatGrandparentCard(mgfFatherMother)}
-                        </div>
-                    </div>
-                </div>
-
-                <div className="flex w-full mb-2">
-                    <div className="w-1/4"></div>
-                    <div className="w-1/4 ml-2">
+                    <div style={{height: `${grandparentHeight}px`}}>
                         {renderGrandparentCard(maternalGrandmother)}
                     </div>
-                    <div className="w-1/4 ml-2">
+                </div>
+
+                {/* Column 3: Great-Grandparents (8 rows, each takes 1/8 height) */}
+                <div className="w-1/4 flex flex-col">
+                    <div style={{height: `${greatGrandparentHeight}px`}}>
+                        {renderGreatGrandparentCard(pgfFather)}
+                    </div>
+                    <div style={{height: `${greatGrandparentHeight}px`}}>
+                        {renderGreatGrandparentCard(pgfMother)}
+                    </div>
+                    <div style={{height: `${greatGrandparentHeight}px`}}>
+                        {renderGreatGrandparentCard(pgmFather)}
+                    </div>
+                    <div style={{height: `${greatGrandparentHeight}px`}}>
+                        {renderGreatGrandparentCard(pgmMother)}
+                    </div>
+                    <div style={{height: `${greatGrandparentHeight}px`}}>
+                        {renderGreatGrandparentCard(mgfFather)}
+                    </div>
+                    <div style={{height: `${greatGrandparentHeight}px`}}>
                         {renderGreatGrandparentCard(mgfMother)}
                     </div>
-                    <div className="w-1/4 ml-2 flex gap-2">
-                        <div className="flex-1">
-                            {renderGreatGreatGrandparentCard(mgfMotherFather)}
-                        </div>
-                        <div className="flex-1">
-                            {renderGreatGreatGrandparentCard(mgfMotherMother)}
-                        </div>
-                    </div>
-                </div>
-
-                <div className="flex w-full mb-2">
-                    <div className="w-1/4"></div>
-                    <div className="w-1/4 ml-2"></div>
-                    <div className="w-1/4 ml-2">
+                    <div style={{height: `${greatGrandparentHeight}px`}}>
                         {renderGreatGrandparentCard(mgmFather)}
                     </div>
-                    <div className="w-1/4 ml-2 flex gap-2">
-                        <div className="flex-1">
-                            {renderGreatGreatGrandparentCard(mgmFatherFather)}
-                        </div>
-                        <div className="flex-1">
-                            {renderGreatGreatGrandparentCard(mgmFatherMother)}
-                        </div>
+                    <div style={{height: `${greatGrandparentHeight}px`}}>
+                        {renderGreatGrandparentCard(mgmMother)}
                     </div>
                 </div>
 
-                <div className="flex w-full mb-2">
-                    <div className="w-1/4"></div>
-                    <div className="w-1/4 ml-2"></div>
-                    <div className="w-1/4 ml-2">
-                        {renderGreatGrandparentCard(mgmMother)}
-                    </div>
-                    <div className="w-1/4 ml-2 flex gap-2">
-                        <div className="flex-1">
-                            {renderGreatGreatGrandparentCard(mgmMotherFather)}
+                {/* Column 4: Great-Great-Grandparents (16 rows stacked, each takes 1/16 height) */}
+                <div className="w-1/4 flex flex-col">
+                    {ggParents.map((ggParent, index) => (
+                        <div key={index} style={{height: `${greatGreatGrandparentHeight}px`}}>
+                            {renderGreatGreatGrandparentCard(ggParent)}
                         </div>
-                        <div className="flex-1">
-                            {renderGreatGreatGrandparentCard(mgmMotherMother)}
-                        </div>
-                    </div>
+                    ))}
                 </div>
             </div>
         );
