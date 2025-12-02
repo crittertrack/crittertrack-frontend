@@ -748,16 +748,13 @@ const ViewOnlyAnimalDetail = ({ animal, onClose, API_BASE_URL }) => {
         <div className="fixed inset-0 bg-accent/10 flex items-center justify-center p-4 z-50 overflow-y-auto">
             <div className="bg-primary rounded-xl shadow-2xl p-6 w-full max-w-4xl max-h-[90vh] overflow-y-auto">
                 <div className="bg-white rounded-lg p-4 mb-6">
-                    <div className="flex justify-between items-center mb-4">
+                    <div className="flex justify-between items-center">
                         <button 
                             onClick={onClose} 
                             className="flex items-center text-gray-600 hover:text-gray-800 transition"
                         >
                             <ArrowLeft size={18} className="mr-1" /> Back
                         </button>
-                        <h2 className="text-3xl font-bold text-gray-900 absolute left-1/2 transform -translate-x-1/2">
-                            {animal.prefix && `${animal.prefix} `}{animal.name}
-                        </h2>
                         <button onClick={onClose} className="text-gray-500 hover:text-gray-800">
                             <X size={28} />
                         </button>
@@ -765,7 +762,7 @@ const ViewOnlyAnimalDetail = ({ animal, onClose, API_BASE_URL }) => {
                 </div>
 
                 <div className="space-y-6">
-                    {/* Image with ID, Species, Status below */}
+                    {/* Image with Name, ID, Species, Status below */}
                     <div className="w-full flex flex-col items-center">
                         {imgSrc && (
                             <img 
@@ -775,9 +772,12 @@ const ViewOnlyAnimalDetail = ({ animal, onClose, API_BASE_URL }) => {
                             />
                         )}
                         <div className="mt-4 space-y-2">
-                            <p className="text-center text-sm text-gray-600">
-                                <span className="font-mono text-lg font-semibold text-gray-900">CT{animal.id_public}</span>
-                                <span className="mx-2">•</span>
+                            <h2 className="text-3xl font-bold text-gray-900 text-center">
+                                {animal.prefix && `${animal.prefix} `}{animal.name}
+                            </h2>
+                            <p className="text-center">
+                                <span className="text-base font-medium text-gray-700">CT{animal.id_public}</span>
+                                <span className="mx-2 text-gray-400">•</span>
                                 <span className="text-base font-medium text-gray-700">{animal.species}</span>
                             </p>
                             {animal.status && (
