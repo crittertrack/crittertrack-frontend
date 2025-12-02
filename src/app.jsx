@@ -466,30 +466,34 @@ const PedigreeChart = ({ animalId, animalData, onClose, API_BASE_URL, authToken 
     };
 
     return (
-        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4 overflow-auto">
-            <div className="bg-white rounded-xl p-6 max-w-6xl w-full my-8">
-                {/* Header */}
-                <div className="flex justify-between items-center mb-6">
-                    <h2 className="text-2xl font-bold text-gray-800 flex items-center">
-                        <FileText className="mr-2" size={24} />
-                        Pedigree Chart
-                    </h2>
-                    <div className="flex items-center gap-2">
-                        <button
-                            onClick={downloadPDF}
-                            className="flex items-center gap-2 px-4 py-2 bg-primary hover:bg-primary/90 text-black font-semibold rounded-lg transition"
-                        >
-                            <Download size={18} />
-                            Download PDF
-                        </button>
-                        <button
-                            onClick={onClose}
-                            className="p-2 hover:bg-gray-100 rounded-lg transition"
-                        >
-                            <X size={24} />
-                        </button>
+        <div className="fixed inset-0 bg-black bg-opacity-50 z-50 overflow-y-auto">
+            <div className="min-h-screen flex items-center justify-center p-4 py-8">
+                <div className="bg-white rounded-xl shadow-2xl w-full max-w-6xl">
+                    {/* Header */}
+                    <div className="flex justify-between items-center px-6 py-4 border-b border-gray-200 bg-gray-50 rounded-t-xl">
+                        <h2 className="text-2xl font-bold text-gray-800 flex items-center">
+                            <FileText className="mr-2" size={24} />
+                            Pedigree Chart
+                        </h2>
+                        <div className="flex items-center gap-2">
+                            <button
+                                onClick={downloadPDF}
+                                className="flex items-center gap-2 px-4 py-2 bg-primary hover:bg-primary/90 text-black font-semibold rounded-lg transition"
+                            >
+                                <Download size={18} />
+                                Download PDF
+                            </button>
+                            <button
+                                onClick={onClose}
+                                className="p-2 hover:bg-gray-100 rounded-lg transition"
+                            >
+                                <X size={24} />
+                            </button>
+                        </div>
                     </div>
-                </div>
+
+                    {/* Content */}
+                    <div className="p-6">
 
                 {/* Pedigree Chart */}
                 <div ref={pedigreeRef} className="bg-white p-6 rounded-lg border-2 border-gray-300">
@@ -525,6 +529,8 @@ const PedigreeChart = ({ animalId, animalData, onClose, API_BASE_URL, authToken 
                     <div className="mt-6 pt-4 border-t-2 border-gray-300 flex justify-between items-center text-sm text-gray-600">
                         <div>{getOwnerDisplayName()}</div>
                         <div>{new Date().toLocaleDateString()}</div>
+                    </div>
+                </div>
                     </div>
                 </div>
             </div>
