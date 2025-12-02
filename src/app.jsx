@@ -185,8 +185,8 @@ const ParentSearchModal = ({
         if (scope === 'global' || scope === 'both') {
             try {
                 const globalUrl = isIdSearch
-                    ? `${API_BASE_URL}/global/animals?id_public=${encodeURIComponent(idValue)}&display=true`
-                    : `${API_BASE_URL}/global/animals?name=${encodeURIComponent(trimmedSearchTerm)}&display=true${genderQuery}${birthdateQuery}`;
+                    ? `${API_BASE_URL}/public/global/animals?id_public=${encodeURIComponent(idValue)}`
+                    : `${API_BASE_URL}/public/global/animals?name=${encodeURIComponent(trimmedSearchTerm)}${genderQuery}${birthdateQuery}`;
 
                 const globalResponse = await axios.get(globalUrl);
                 const filteredGlobal = globalResponse.data.filter(a => a.id_public !== currentId);
@@ -411,8 +411,8 @@ const UserSearchModal = ({ onClose, showModalMessage, onSelectUser, API_BASE_URL
                 // Search for animals globally
                 const idMatch = searchTerm.trim().match(/^\s*(?:CT[- ]?)?(\d+)\s*$/i);
                 const url = idMatch
-                    ? `${API_BASE_URL}/global/animals?id_public=${encodeURIComponent(idMatch[1])}&display=true`
-                    : `${API_BASE_URL}/global/animals?name=${encodeURIComponent(searchTerm.trim())}&display=true`;
+                    ? `${API_BASE_URL}/public/global/animals?id_public=${encodeURIComponent(idMatch[1])}`
+                    : `${API_BASE_URL}/public/global/animals?name=${encodeURIComponent(searchTerm.trim())}`;
                 console.log('Fetching animals from:', url);
                 const response = await axios.get(url);
                 console.log('Animal search response:', response.data);
@@ -879,7 +879,7 @@ const ViewOnlyParentCard = ({ parentId, parentType, API_BASE_URL }) => {
             setNotFound(false);
             try {
                 // Try fetching from global public animals database
-                const publicResponse = await axios.get(`${API_BASE_URL}/global/animals?id_public=${parentId}&display=true`);
+                const publicResponse = await axios.get(`${API_BASE_URL}/public/global/animals?id_public=${parentId}`);
                 if (publicResponse.data && publicResponse.data.length > 0) {
                     setParentData(publicResponse.data[0]);
                 } else {
@@ -1350,7 +1350,7 @@ const AnimalForm = ({
         }
 
         try {
-            const globalResp = await axios.get(`${API_BASE_URL}/global/animals?id_public=${encodeURIComponent(idPublic)}&display=true`);
+            const globalResp = await axios.get(`${API_BASE_URL}/public/global/animals?id_public=${encodeURIComponent(idPublic)}`);
             if (Array.isArray(globalResp.data) && globalResp.data.length > 0) {
                 const a = globalResp.data[0];
                 return { id_public: a.id_public, prefix: a.prefix || '', name: a.name || '', backendId: a._id || a.id_backend || null };
