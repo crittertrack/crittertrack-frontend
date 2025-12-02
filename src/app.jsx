@@ -431,8 +431,8 @@ const UserSearchModal = ({ onClose, showModalMessage, onSelectUser, API_BASE_URL
 
     const UserResultCard = ({ user }) => {
         const memberSince = user.createdAt 
-            ? new Intl.DateTimeFormat('en-US', { year: 'numeric', month: 'long' }).format(new Date(user.createdAt))
-            : (user.updatedAt ? new Intl.DateTimeFormat('en-US', { year: 'numeric', month: 'long' }).format(new Date(user.updatedAt)) : 'Unknown');
+            ? new Intl.DateTimeFormat('en-US', { year: 'numeric', month: 'long', day: 'numeric' }).format(new Date(user.createdAt))
+            : (user.updatedAt ? new Intl.DateTimeFormat('en-US', { year: 'numeric', month: 'long', day: 'numeric' }).format(new Date(user.updatedAt)) : 'Unknown');
         
         // Determine display name(s)
         const showBothNames = user.showBreederName && user.personalName && user.breederName;
@@ -611,8 +611,8 @@ const PublicProfileView = ({ profile, onBack, onViewAnimal, API_BASE_URL }) => {
     }, [profile, API_BASE_URL]);
 
     const memberSince = profile.createdAt 
-        ? new Intl.DateTimeFormat('en-US', { year: 'numeric', month: 'long' }).format(new Date(profile.createdAt))
-        : (profile.updatedAt ? new Intl.DateTimeFormat('en-US', { year: 'numeric', month: 'long' }).format(new Date(profile.updatedAt)) : 'Unknown');
+        ? new Intl.DateTimeFormat('en-US', { year: 'numeric', month: 'long', day: 'numeric' }).format(new Date(profile.createdAt))
+        : (profile.updatedAt ? new Intl.DateTimeFormat('en-US', { year: 'numeric', month: 'long', day: 'numeric' }).format(new Date(profile.updatedAt)) : 'Unknown');
 
     // Determine display name(s)
     const showBothNames = profile.showBreederName && profile.personalName && profile.breederName;
