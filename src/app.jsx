@@ -3399,7 +3399,7 @@ const NotificationPanel = ({ authToken, API_BASE_URL, onClose, showModalMessage 
                                                 <button
                                                     onClick={() => handleReject(notification._id)}
                                                     disabled={processing === notification._id}
-                                                    className="flex items-center space-x-1 border-2 border-black text-black hover:bg-gray-100 px-3 py-1 rounded text-sm disabled:opacity-50"
+                                                    className="flex items-center space-x-1 bg-primary border-2 border-black text-black hover:bg-primary/90 px-3 py-1 rounded text-sm disabled:opacity-50"
                                                 >
                                                     <XCircle size={14} />
                                                     <span>Reject</span>
