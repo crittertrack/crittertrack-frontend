@@ -2550,8 +2550,6 @@ const ProfileEditForm = ({ userProfile, showModalMessage, onSaveSuccess, onCance
                             </label>
                         )}
                         
-                        <h4 className="text-base font-medium text-gray-800 pt-4 border-t border-gray-200">Animal Privacy Settings:</h4>
-                        
                         <label className="flex items-center space-x-2 text-sm text-gray-700">
                             <input type="checkbox" checked={showGeneticCodePublic} onChange={(e) => setShowGeneticCodePublic(e.target.checked)} 
                                 className="rounded text-primary-dark focus:ring-primary-dark" disabled={profileLoading} />
