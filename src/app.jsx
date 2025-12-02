@@ -474,23 +474,14 @@ const PedigreeChart = ({ animalId, animalData, onClose, API_BASE_URL, authToken 
         const mgmFather = maternalGrandmother?.father;
         const mgmMother = maternalGrandmother?.mother;
 
-        // Calculate heights based on full height (794px - header ~48px - footer ~40px - main card ~168px - gaps = ~538px for content)
-        const contentHeight = 538;
-        const parentHeight = contentHeight / 2; // ~269px for each parent
-        const grandparentHeight = contentHeight / 4; // ~134.5px for each grandparent
-        const greatGrandparentHeight = contentHeight / 8; // ~67px for each great-grandparent
+        // Calculate heights based on full height (794px - padding 48px - top section ~170px - footer ~50px - gaps = ~526px for content)
+        const contentHeight = 526;
+        const parentHeight = contentHeight / 2; // ~263px for each parent
+        const grandparentHeight = contentHeight / 4; // ~131.5px for each grandparent
+        const greatGrandparentHeight = contentHeight / 8; // ~65.75px for each great-grandparent
 
         return (
-            <div className="flex flex-col gap-2 w-full">
-                {/* Main Animal - Top Row */}
-                <div className="flex">
-                    <div className="w-1/4">
-                        {renderMainAnimalCard(subject)}
-                    </div>
-                </div>
-
-                {/* Pedigree Grid: 3 columns */}
-                <div className="flex gap-2 w-full" style={{height: `${contentHeight}px`}}>
+            <div className="flex gap-2 w-full" style={{height: `${contentHeight}px`}}>
                     {/* Column 1: Parents (2 rows, each takes 1/2 height) */}
                     <div className="w-1/3 flex flex-col gap-2">
                         <div style={{height: `${parentHeight - 4}px`}}>
@@ -545,7 +536,6 @@ const PedigreeChart = ({ animalId, animalData, onClose, API_BASE_URL, authToken 
                         </div>
                     </div>
                 </div>
-            </div>
         );
     };
 
@@ -606,27 +596,35 @@ const PedigreeChart = ({ animalId, animalData, onClose, API_BASE_URL, authToken 
 
                 {/* Pedigree Chart - A4 Landscape: 11.69" x 8.27" (1123px x 794px at 96dpi) */}
                 <div ref={pedigreeRef} className="bg-white p-6 rounded-lg border-2 border-gray-300 relative" style={{width: '1123px', height: '794px', maxWidth: '1123px', maxHeight: '794px'}}>
-                    {/* Species - Centered Top */}
-                    <div className="absolute top-6 left-1/2 transform -translate-x-1/2">
-                        <h3 className="text-lg font-bold text-gray-800">{pedigreeData?.species || 'Unknown Species'}</h3>
-                    </div>
-
-                    {/* Owner Profile - Top Right */}
-                    <div className="absolute top-6 right-6 flex items-center gap-2">
-                        <div className="text-right">
-                            <div className="text-base font-semibold text-gray-800">{getOwnerDisplayName()}</div>
+                    {/* Top Row: 3 columns - Main Animal | Species | Owner */}
+                    <div className="flex gap-2 mb-2 items-start">
+                        {/* Left: Main Animal */}
+                        <div className="w-1/3">
+                            {pedigreeData && renderMainAnimalCard(pedigreeData)}
                         </div>
-                        <div className="w-12 h-12 bg-gray-200 rounded-lg overflow-hidden flex items-center justify-center">
-                            {ownerProfile?.profileImage ? (
-                                <img src={ownerProfile.profileImage} alt="Owner" className="w-full h-full object-cover" />
-                            ) : (
-                                <User size={24} className="text-gray-400" />
-                            )}
+                        
+                        {/* Middle: Species */}
+                        <div className="w-1/3 flex items-center justify-center">
+                            <h3 className="text-lg font-bold text-gray-800">{pedigreeData?.species || 'Unknown Species'}</h3>
+                        </div>
+                        
+                        {/* Right: Owner Profile */}
+                        <div className="w-1/3 flex items-center justify-end gap-2">
+                            <div className="text-right">
+                                <div className="text-base font-semibold text-gray-800">{getOwnerDisplayName()}</div>
+                            </div>
+                            <div className="w-12 h-12 bg-gray-200 rounded-lg overflow-hidden flex items-center justify-center">
+                                {ownerProfile?.profileImage ? (
+                                    <img src={ownerProfile.profileImage} alt="Owner" className="w-full h-full object-cover" />
+                                ) : (
+                                    <User size={24} className="text-gray-400" />
+                                )}
+                            </div>
                         </div>
                     </div>
 
                     {/* Pedigree Tree */}
-                    <div className="mt-12 overflow-hidden">
+                    <div className="overflow-hidden">
                         {renderPedigreeTree(pedigreeData)}
                     </div>
 
