@@ -3289,6 +3289,7 @@ const App = () => {
     const [viewingPublicProfile, setViewingPublicProfile] = useState(null);
     const [viewingPublicAnimal, setViewingPublicAnimal] = useState(null);
     const [viewAnimalBreederInfo, setViewAnimalBreederInfo] = useState(null);
+    const [animalToView, setAnimalToView] = useState(null);
 
     const timeoutRef = useRef(null);
     const activeEvents = ['mousemove', 'keydown', 'scroll', 'click'];
@@ -3433,7 +3434,6 @@ const App = () => {
         setCurrentView('edit-animal');
     };
 
-    const [animalToView, setAnimalToView] = useState(null);
     const handleViewAnimal = (animal) => {
         setAnimalToView(animal);
         setCurrentView('view-animal');
