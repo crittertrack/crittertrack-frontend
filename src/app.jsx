@@ -221,7 +221,7 @@ const PedigreeChart = ({ animalId, animalData, onClose, API_BASE_URL, authToken 
         const GenderIcon = isMale ? Mars : Venus;
         
         return (
-            <div className={`border border-gray-700 rounded-lg p-2 ${bgColor} relative flex gap-3 items-stretch`} style={{height: '160px'}}>
+            <div className={`border border-gray-700 rounded-lg p-2 ${bgColor} relative flex gap-3 items-center`} style={{height: '160px'}}>
                 {/* Image */}
                 <div className="w-32 h-32 bg-gray-100 rounded-lg overflow-hidden flex items-center justify-center flex-shrink-0 border-2 border-gray-900">
                     {imgSrc ? (
@@ -232,27 +232,27 @@ const PedigreeChart = ({ animalId, animalData, onClose, API_BASE_URL, authToken 
                 </div>
                 
                 {/* Info */}
-                <div className="flex-1 min-w-0 flex flex-col justify-between py-1">
+                <div className="flex-1 min-w-0 flex flex-col justify-start gap-1">
                     {/* Name */}
-                    <div className="text-sm text-gray-900 mb-0 line-clamp-2 leading-tight">
+                    <div className="text-sm text-gray-900 mb-0 leading-tight overflow-hidden" style={{lineHeight: '1.2', maxHeight: '2.4em'}}>
                         <span className="font-bold">Name: </span>
                         {animal.prefix && `${animal.prefix} `}{animal.name}
                     </div>
                     
                     {/* Variety */}
-                    <div className="text-xs text-gray-900 mb-0 line-clamp-2 leading-tight">
+                    <div className="text-xs text-gray-900 mb-0 leading-tight overflow-hidden" style={{lineHeight: '1.2', maxHeight: '2.4em'}}>
                         <span className="font-semibold">Variety: </span>
                         {colorCoat}
                     </div>
                     
                     {/* Birth Date */}
-                    <div className="text-xs text-gray-900 mb-0 leading-tight">
+                    <div className="text-xs text-gray-900 mb-0 leading-tight" style={{lineHeight: '1.2'}}>
                         <span className="font-semibold">Birthdate: </span>
                         {animal.birthDate ? new Date(animal.birthDate).toLocaleDateString() : 'N/A'}
                     </div>
                     
                     {/* Breeder */}
-                    <div className="text-xs text-gray-900 line-clamp-2 mb-0 leading-tight">
+                    <div className="text-xs text-gray-900 mb-0 leading-tight overflow-hidden" style={{lineHeight: '1.2', maxHeight: '2.4em'}}>
                         <span className="font-semibold">Breeder: </span>
                         {animal.breederName || 'N/A'}
                     </div>
@@ -294,7 +294,7 @@ const PedigreeChart = ({ animalId, animalData, onClose, API_BASE_URL, authToken 
         const colorCoat = [animal.color, animal.coat].filter(Boolean).join(' ') || 'N/A';
         
         return (
-            <div className={`border border-gray-700 rounded p-1.5 ${bgColor} relative flex gap-2 h-full items-stretch`}>
+            <div className={`border border-gray-700 rounded p-1.5 ${bgColor} relative flex gap-2 h-full items-center`}>
                 {/* Image - 1/3 width */}
                 <div className="w-1/3 aspect-square bg-gray-100 rounded-lg border-2 border-gray-900 overflow-hidden flex items-center justify-center flex-shrink-0">
                     {imgSrc ? (
@@ -305,27 +305,27 @@ const PedigreeChart = ({ animalId, animalData, onClose, API_BASE_URL, authToken 
                 </div>
                 
                 {/* Info */}
-                <div className="flex-1 min-w-0 flex flex-col justify-between py-1">
+                <div className="flex-1 min-w-0 flex flex-col justify-start gap-0.5">
                     {/* Name */}
-                    <div className="text-xs text-gray-900 mb-0 line-clamp-2 leading-tight">
+                    <div className="text-xs text-gray-900 mb-0 leading-tight overflow-hidden" style={{lineHeight: '1.2', maxHeight: '2.4em'}}>
                         <span className="font-semibold">Name: </span>
                         {animal.prefix && `${animal.prefix} `}{animal.name}
                     </div>
                     
                     {/* Variety */}
-                    <div className="text-xs text-gray-900 mb-0 line-clamp-2 leading-tight">
+                    <div className="text-xs text-gray-900 mb-0 leading-tight overflow-hidden" style={{lineHeight: '1.2', maxHeight: '2.4em'}}>
                         <span className="font-semibold">Variety: </span>
                         {colorCoat}
                     </div>
                     
                     {/* Birth Date */}
-                    <div className="text-xs text-gray-900 mb-0 leading-tight">
+                    <div className="text-xs text-gray-900 mb-0 leading-tight" style={{lineHeight: '1.2'}}>
                         <span className="font-semibold">Birthdate: </span>
                         {animal.birthDate ? new Date(animal.birthDate).toLocaleDateString() : 'N/A'}
                     </div>
                     
                     {/* Breeder */}
-                    <div className="text-xs text-gray-900 line-clamp-2 mb-0 leading-tight">
+                    <div className="text-xs text-gray-900 mb-0 leading-tight overflow-hidden" style={{lineHeight: '1.2', maxHeight: '2.4em'}}>
                         <span className="font-semibold">Breeder: </span>
                         {animal.breederName || 'N/A'}
                     </div>
@@ -371,7 +371,7 @@ const PedigreeChart = ({ animalId, animalData, onClose, API_BASE_URL, authToken 
         const colorCoat = [animal.color, animal.coat].filter(Boolean).join(' ') || 'N/A';
         
         return (
-            <div className={`border border-gray-700 rounded p-1 ${bgColor} relative flex gap-1.5 h-full items-stretch`}>
+            <div className={`border border-gray-700 rounded p-1 ${bgColor} relative flex gap-1.5 h-full items-center`}>
                 {/* Image - 1/3 width */}
                 <div className="w-1/3 aspect-square bg-gray-100 rounded-lg border-2 border-gray-900 overflow-hidden flex items-center justify-center flex-shrink-0">
                     {imgSrc ? (
@@ -382,27 +382,27 @@ const PedigreeChart = ({ animalId, animalData, onClose, API_BASE_URL, authToken 
                 </div>
                 
                 {/* Info */}
-                <div className="flex-1 min-w-0 flex flex-col justify-between py-0.5">
+                <div className="flex-1 min-w-0 flex flex-col justify-start gap-0.5">
                     {/* Name */}
-                    <div className="text-2xs text-gray-900 line-clamp-2 mb-0 leading-tight" style={{fontSize: '0.65rem'}}>
+                    <div className="text-gray-900 mb-0 leading-tight overflow-hidden" style={{fontSize: '0.65rem', lineHeight: '1.2', maxHeight: '2.4em'}}>
                         <span className="font-semibold">Name: </span>
                         {animal.prefix && `${animal.prefix} `}{animal.name}
                     </div>
                     
                     {/* Variety */}
-                    <div className="text-2xs text-gray-900 line-clamp-2 mb-0 leading-tight" style={{fontSize: '0.65rem'}}>
+                    <div className="text-gray-900 mb-0 leading-tight overflow-hidden" style={{fontSize: '0.65rem', lineHeight: '1.2', maxHeight: '2.4em'}}>
                         <span className="font-semibold">Variety: </span>
                         {colorCoat}
                     </div>
                     
                     {/* Birth Date */}
-                    <div className="text-2xs text-gray-900 mb-0 leading-tight" style={{fontSize: '0.65rem'}}>
+                    <div className="text-gray-900 mb-0 leading-tight" style={{fontSize: '0.65rem', lineHeight: '1.2'}}>
                         <span className="font-semibold">Birthdate: </span>
                         {animal.birthDate ? new Date(animal.birthDate).toLocaleDateString() : 'N/A'}
                     </div>
                     
                     {/* Breeder */}
-                    <div className="text-2xs text-gray-900 line-clamp-2 mb-0 leading-tight" style={{fontSize: '0.65rem'}}>
+                    <div className="text-gray-900 mb-0 leading-tight overflow-hidden" style={{fontSize: '0.65rem', lineHeight: '1.2', maxHeight: '2.4em'}}>
                         <span className="font-semibold">Breeder: </span>
                         {animal.breederName || 'N/A'}
                     </div>
@@ -440,21 +440,21 @@ const PedigreeChart = ({ animalId, animalData, onClose, API_BASE_URL, authToken 
         const colorCoat = [animal.color, animal.coat].filter(Boolean).join(' ') || 'N/A';
         
         return (
-            <div className={`border border-gray-700 rounded p-0.5 ${bgColor} relative h-full flex flex-col justify-between py-1`}>
+            <div className={`border border-gray-700 rounded p-0.5 ${bgColor} relative h-full flex flex-col justify-start gap-0.5`}>
                 {/* Name */}
-                <div className="text-gray-900 line-clamp-2 mb-0 leading-tight" style={{fontSize: '0.6rem'}}>
+                <div className="text-gray-900 mb-0 leading-tight overflow-hidden" style={{fontSize: '0.6rem', lineHeight: '1.2', maxHeight: '2.4em'}}>
                     <span className="font-semibold">Name: </span>
                     {animal.prefix && `${animal.prefix} `}{animal.name}
                 </div>
                 
                 {/* Variety */}
-                <div className="text-gray-900 line-clamp-2 mb-0 leading-tight" style={{fontSize: '0.6rem'}}>
+                <div className="text-gray-900 mb-0 leading-tight overflow-hidden" style={{fontSize: '0.6rem', lineHeight: '1.2', maxHeight: '2.4em'}}>
                     <span className="font-semibold">Variety: </span>
                     {colorCoat}
                 </div>
                 
                 {/* Breeder */}
-                <div className="text-gray-900 line-clamp-2 mb-0 leading-tight" style={{fontSize: '0.6rem'}}>
+                <div className="text-gray-900 mb-0 leading-tight overflow-hidden" style={{fontSize: '0.6rem', lineHeight: '1.2', maxHeight: '2.4em'}}>
                     <span className="font-semibold">Breeder: </span>
                     {animal.breederName || 'N/A'}
                 </div>
