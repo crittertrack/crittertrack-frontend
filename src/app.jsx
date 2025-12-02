@@ -1559,8 +1559,6 @@ const AnimalForm = ({
                         if (mounted) setBreederInfo(info);
                     } catch (e) { console.error('Failed to fetch breeder info:', e); }
                 }
-                    } catch (e) { console.error('Failed to fetch mother info:', e); }
-                }
             }
         })();
         return () => { mounted = false; };
