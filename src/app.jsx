@@ -41,6 +41,36 @@ const LoadingSpinner = () => (
   </div>
 );
 
+// Reusable animal image component with error handling
+const AnimalImage = ({ src, alt = "Animal", className = "w-full h-full object-cover", iconSize = 24 }) => {
+    const [imageError, setImageError] = useState(false);
+    const [imageSrc, setImageSrc] = useState(src);
+
+    useEffect(() => {
+        setImageSrc(src);
+        setImageError(false);
+    }, [src]);
+
+    const handleError = () => {
+        console.warn('Image failed to load:', imageSrc);
+        setImageError(true);
+    };
+
+    if (!imageSrc || imageError) {
+        return <Cat size={iconSize} className="text-gray-400" />;
+    }
+
+    return (
+        <img 
+            src={imageSrc} 
+            alt={alt} 
+            className={className}
+            onError={handleError}
+            loading="lazy"
+        />
+    );
+};
+
 // (Removed unused `AnimalListItem` component to reduce redundancy)
 
 const ProfileImagePlaceholder = ({ url, onFileChange, disabled }) => (
@@ -109,11 +139,7 @@ const ParentSearchModal = ({
             >
                 {/* Thumbnail */}
                 <div className="w-16 h-16 bg-gray-100 rounded-md overflow-hidden flex-shrink-0 flex items-center justify-center">
-                    {imgSrc ? (
-                        <img src={imgSrc} alt={animal.name} className="w-full h-full object-cover" />
-                    ) : (
-                        <Cat size={24} className="text-gray-400" />
-                    )}
+                    <AnimalImage src={imgSrc} alt={animal.name} className="w-full h-full object-cover" iconSize={24} />
                 </div>
                 
                 {/* Info */}
@@ -482,13 +508,9 @@ const UserSearchModal = ({ onClose, showModalMessage, onSelectUser, API_BASE_URL
             }}
         >
             <div className="flex items-start space-x-3">
-                {animal.imageUrl || animal.photoUrl ? (
-                    <img src={animal.imageUrl || animal.photoUrl} alt={animal.name} className="w-12 h-12 rounded-lg object-cover" />
-                ) : (
-                    <div className="w-12 h-12 bg-gray-200 rounded-lg flex items-center justify-center">
-                        <Cat size={24} className="text-gray-400" />
-                    </div>
-                )}
+                <div className="w-12 h-12 bg-gray-200 rounded-lg overflow-hidden flex items-center justify-center">
+                    <AnimalImage src={animal.imageUrl || animal.photoUrl} alt={animal.name} className="w-full h-full object-cover" iconSize={24} />
+                </div>
                 <div className="flex-grow">
                     <p className="text-lg font-semibold text-gray-800">
                         {animal.prefix && `${animal.prefix} `}{animal.name}
@@ -699,13 +721,9 @@ const PublicProfileView = ({ profile, onBack, onViewAnimal, API_BASE_URL }) => {
 
                                                 {/* Centered profile image */}
                                                 <div className="flex-1 flex items-center justify-center w-full px-2 mt-1">
-                                                    {imgSrc ? (
-                                                        <img src={imgSrc} alt={animal.name} className="w-24 h-24 object-cover rounded-md" />
-                                                    ) : (
-                                                        <div className="w-24 h-24 bg-gray-100 rounded-md flex items-center justify-center text-gray-400">
-                                                            <Cat size={36} />
-                                                        </div>
-                                                    )}
+                                                    <div className="w-24 h-24 bg-gray-100 rounded-md overflow-hidden flex items-center justify-center">
+                                                        <AnimalImage src={imgSrc} alt={animal.name} className="w-full h-full object-cover" iconSize={36} />
+                                                    </div>
                                                 </div>
                                                 
                                                 {/* Prefix / Name under image */}
@@ -828,13 +846,14 @@ const ViewOnlyAnimalDetail = ({ animal, onClose, API_BASE_URL, onViewProfile }) 
                 <div className="space-y-6">
                     {/* Image with Name, ID, Species, Status below */}
                     <div className="w-full flex flex-col items-center">
-                        {imgSrc && (
-                            <img 
+                        <div className="w-48 h-48 bg-gray-100 rounded-lg shadow-lg overflow-hidden flex items-center justify-center">
+                            <AnimalImage 
                                 src={imgSrc} 
                                 alt={animal.name} 
-                                className="w-48 h-48 rounded-lg shadow-lg object-cover"
+                                className="w-full h-full object-cover"
+                                iconSize={64}
                             />
-                        )}
+                        </div>
                         <div className="mt-4 space-y-2">
                             <h2 className="text-3xl font-bold text-gray-900 text-center">
                                 {animal.prefix && `${animal.prefix} `}{animal.name}
@@ -1185,11 +1204,7 @@ const SpeciesSelector = ({ speciesOptions, onSelectSpecies, onManageSpecies }) =
 const AnimalImageUpload = ({ imageUrl, onFileChange, disabled = false }) => (
     <div className="flex items-center space-x-4">
         <div className="w-28 h-28 bg-gray-100 rounded-lg overflow-hidden flex items-center justify-center border">
-            { imageUrl ? (
-                <img src={imageUrl} alt="Animal" className="w-full h-full object-cover" />
-            ) : (
-                <Cat size={36} className="text-gray-400" />
-            ) }
+            <AnimalImage src={imageUrl} alt="Animal" className="w-full h-full object-cover" iconSize={36} />
         </div>
         <div className="flex-1">
             <label className={`inline-flex items-center px-4 py-2 bg-primary text-black rounded-md cursor-pointer ${disabled ? 'opacity-50 cursor-not-allowed' : 'hover:bg-primary/90'}`}>
