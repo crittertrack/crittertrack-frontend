@@ -219,14 +219,18 @@ const PedigreeChart = ({ animalId, animalData, onClose, API_BASE_URL, authToken 
         const colorCoat = [animal.color, animal.coat].filter(Boolean).join(' / ') || 'N/A';
         
         return (
-            <div className="border-2 border-gray-400 rounded-lg p-2 bg-white relative flex gap-2" style={{height: '100px'}}>
+            <div className="border-2 border-gray-400 rounded-lg p-3 bg-white relative flex gap-3 items-center" style={{height: '160px'}}>
                 {/* Image */}
-                <div className="w-20 h-20 bg-gray-100 rounded-lg overflow-hidden flex items-center justify-center flex-shrink-0">
-                    <AnimalImage src={imgSrc} alt={animal.name} className="w-full h-full object-cover" iconSize={48} />
+                <div className="w-32 h-32 bg-gray-100 rounded-lg overflow-hidden flex items-center justify-center flex-shrink-0">
+                    {imgSrc ? (
+                        <AnimalImage src={imgSrc} alt={animal.name} className="w-full h-full object-cover" iconSize={48} />
+                    ) : (
+                        <Cat size={48} className="text-gray-400" />
+                    )}
                 </div>
                 
                 {/* Info */}
-                <div className="flex-1 min-w-0">
+                <div className="flex-1 min-w-0 flex flex-col justify-center">
                     {/* Name */}
                     <div className="font-bold text-sm text-gray-800 mb-1 truncate">
                         {animal.prefix && `${animal.prefix} `}{animal.name}
@@ -258,11 +262,17 @@ const PedigreeChart = ({ animalId, animalData, onClose, API_BASE_URL, authToken 
 
     // Render card for parents (medium with image)
     const renderParentCard = (animal, title) => {
+        const isSire = title === 'Sire';
+        const bgColor = isSire ? 'bg-[#d4f1f5]' : 'bg-[#f8e8ee]';
+        
         if (!animal) {
             return (
-                <div className="border border-gray-300 rounded p-2 bg-gray-50 relative h-full flex items-center justify-center">
-                    <div className="font-semibold text-xs text-gray-500 mb-2">{title}</div>
-                    <div className="text-xs text-gray-400 text-center py-4">Unknown</div>
+                <div className={`border border-gray-300 rounded p-2 ${bgColor} relative h-full flex items-center justify-center`}>
+                    <div className="text-center">
+                        <div className="font-semibold text-xs text-gray-500 mb-2">{title}</div>
+                        <Cat size={32} className="text-gray-300 mx-auto mb-2" />
+                        <div className="text-xs text-gray-400">Unknown</div>
+                    </div>
                 </div>
             );
         }
@@ -271,14 +281,18 @@ const PedigreeChart = ({ animalId, animalData, onClose, API_BASE_URL, authToken 
         const colorCoat = [animal.color, animal.coat].filter(Boolean).join(' / ') || 'N/A';
         
         return (
-            <div className="border border-gray-400 rounded p-2 bg-white relative flex gap-2 h-full">
+            <div className={`border border-gray-400 rounded p-2 ${bgColor} relative flex gap-2 h-full items-center`}>
                 {/* Image */}
-                <div className="w-14 h-14 bg-gray-100 rounded-lg overflow-hidden flex items-center justify-center flex-shrink-0">
-                    <AnimalImage src={imgSrc} alt={animal.name} className="w-full h-full object-cover" iconSize={28} />
+                <div className="w-20 h-20 bg-gray-100 rounded-lg overflow-hidden flex items-center justify-center flex-shrink-0">
+                    {imgSrc ? (
+                        <AnimalImage src={imgSrc} alt={animal.name} className="w-full h-full object-cover" iconSize={28} />
+                    ) : (
+                        <Cat size={28} className="text-gray-400" />
+                    )}
                 </div>
                 
                 {/* Info */}
-                <div className="flex-1 min-w-0">
+                <div className="flex-1 min-w-0 flex flex-col justify-center">
                     <div className="font-semibold text-xs text-gray-700 mb-1">{title}</div>
                     
                     {/* Name */}
@@ -315,7 +329,7 @@ const PedigreeChart = ({ animalId, animalData, onClose, API_BASE_URL, authToken 
         if (!animal) {
             return (
                 <div className="border border-gray-300 rounded p-1.5 bg-gray-50 flex items-center justify-center h-full">
-                    <span className="text-xs text-gray-400">Unknown</span>
+                    <Cat size={24} className="text-gray-300" />
                 </div>
             );
         }
@@ -324,14 +338,18 @@ const PedigreeChart = ({ animalId, animalData, onClose, API_BASE_URL, authToken 
         const colorCoat = [animal.color, animal.coat].filter(Boolean).join(' / ') || 'N/A';
         
         return (
-            <div className="border border-gray-300 rounded p-1.5 bg-white relative flex gap-1.5 h-full">
+            <div className="border border-gray-300 rounded p-1.5 bg-white relative flex gap-1.5 h-full items-center">
                 {/* Image */}
-                <div className="w-12 h-12 bg-gray-100 rounded-lg overflow-hidden flex items-center justify-center flex-shrink-0">
-                    <AnimalImage src={imgSrc} alt={animal.name} className="w-full h-full object-cover" iconSize={20} />
+                <div className="w-16 h-16 bg-gray-100 rounded-lg overflow-hidden flex items-center justify-center flex-shrink-0">
+                    {imgSrc ? (
+                        <AnimalImage src={imgSrc} alt={animal.name} className="w-full h-full object-cover" iconSize={20} />
+                    ) : (
+                        <Cat size={20} className="text-gray-400" />
+                    )}
                 </div>
                 
                 {/* Info */}
-                <div className="flex-1 min-w-0">
+                <div className="flex-1 min-w-0 flex flex-col justify-center">
                     {/* Name */}
                     <div className="font-semibold text-xs text-gray-800 truncate mb-0.5">
                         {animal.prefix && `${animal.prefix} `}{animal.name}
@@ -558,8 +576,8 @@ const PedigreeChart = ({ animalId, animalData, onClose, API_BASE_URL, authToken 
 
     return (
         <div className="fixed inset-0 bg-black bg-opacity-50 z-50 overflow-y-auto">
-            <div className="min-h-screen flex items-center justify-center p-4 py-8">
-                <div className="bg-white rounded-xl shadow-2xl w-full max-w-6xl">
+            <div className="min-h-screen flex items-start justify-center p-4 py-8">
+                <div className="bg-white rounded-xl shadow-2xl" style={{width: 'fit-content', maxWidth: '95vw'}}>
                     {/* Header */}
                     <div className="flex justify-between items-center px-6 py-4 border-b border-gray-200 bg-gray-50 rounded-t-xl">
                         <h2 className="text-2xl font-bold text-gray-800 flex items-center">
