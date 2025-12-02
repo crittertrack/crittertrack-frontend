@@ -382,7 +382,7 @@ const LocalAnimalSearchModal = ({ title, currentId, onSelect, onClose, authToken
 
 
 
-const UserSearchModal = ({ onClose, showModalMessage, onSelectUser, API_BASE_URL }) => {
+const UserSearchModal = ({ onClose, showModalMessage, onSelectUser, API_BASE_URL, modalTarget }) => {
     const [searchTerm, setSearchTerm] = useState('');
     const [searchType, setSearchType] = useState('users'); // 'users' or 'animals'
     const [userResults, setUserResults] = useState([]);
@@ -512,31 +512,33 @@ const UserSearchModal = ({ onClose, showModalMessage, onSelectUser, API_BASE_URL
                     <button onClick={onClose} className="text-gray-500 hover:text-gray-800"><X size={24} /></button>
                 </div>
 
-                {/* Search Type Toggle */}
-                <div className="flex space-x-2 mb-4">
-                    <button
-                        onClick={() => { setSearchType('users'); setUserResults([]); setAnimalResults([]); }}
-                        className={`flex-1 py-2 px-4 rounded-lg font-semibold transition ${
-                            searchType === 'users' 
-                                ? 'bg-primary text-black' 
-                                : 'bg-gray-200 text-gray-700 hover:bg-gray-300'
-                        }`}
-                    >
-                        <User size={16} className="inline mr-2" />
-                        Users
-                    </button>
-                    <button
-                        onClick={() => { setSearchType('animals'); setUserResults([]); setAnimalResults([]); }}
-                        className={`flex-1 py-2 px-4 rounded-lg font-semibold transition ${
-                            searchType === 'animals' 
-                                ? 'bg-primary text-black' 
-                                : 'bg-gray-200 text-gray-700 hover:bg-gray-300'
-                        }`}
-                    >
-                        <Cat size={16} className="inline mr-2" />
-                        Animals
-                    </button>
-                </div>
+                {/* Search Type Toggle - only show for pedigree (sire/dam), not for breeder */}
+                {modalTarget !== 'breeder' && (
+                    <div className="flex space-x-2 mb-4">
+                        <button
+                            onClick={() => { setSearchType('users'); setUserResults([]); setAnimalResults([]); }}
+                            className={`flex-1 py-2 px-4 rounded-lg font-semibold transition ${
+                                searchType === 'users' 
+                                    ? 'bg-primary text-black' 
+                                    : 'bg-gray-200 text-gray-700 hover:bg-gray-300'
+                            }`}
+                        >
+                            <User size={16} className="inline mr-2" />
+                            Users
+                        </button>
+                        <button
+                            onClick={() => { setSearchType('animals'); setUserResults([]); setAnimalResults([]); }}
+                            className={`flex-1 py-2 px-4 rounded-lg font-semibold transition ${
+                                searchType === 'animals' 
+                                    ? 'bg-primary text-black' 
+                                    : 'bg-gray-200 text-gray-700 hover:bg-gray-300'
+                            }`}
+                        >
+                            <Cat size={16} className="inline mr-2" />
+                            Animals
+                        </button>
+                    </div>
+                )}
 
                 <div className="flex space-x-2 mb-4">
                     <input
@@ -1525,6 +1527,7 @@ const AnimalForm = ({
 
     // Clear breeder selection
     const clearBreederSelection = () => {
+        console.log('[DEBUG] Clearing breeder selection');
         setFormData(prev => ({ ...prev, breederId_public: null }));
         setBreederInfo(null);
     };
@@ -1729,6 +1732,7 @@ const AnimalForm = ({
                     onSelectUser={handleSelectPedigree}
                     showModalMessage={showModalMessage}
                     API_BASE_URL={API_BASE_URL}
+                    modalTarget={modalTarget}
                 />
             )}
 
@@ -1976,11 +1980,22 @@ const AnimalForm = ({
                                 className="flex flex-col items-start p-3 border border-gray-300 rounded-lg bg-white cursor-pointer hover:border-primary transition disabled:opacity-50"
                             >
                                 <div className="flex items-center space-x-2 w-full">
-                                    <span className={formData.breederId_public ? "text-gray-800 font-mono" : "text-gray-400"}>
-                                        {formData.breederId_public ? `CT${formData.breederId_public}` : 'Click to Select Breeder (defaults to you)'}
-                                    </span>
+                                    {formData.breederId_public && breederInfo ? (
+                                        <span className="text-gray-800">
+                                            {breederInfo.showBreederName && breederInfo.personalName && breederInfo.breederName 
+                                                ? `${breederInfo.personalName} (${breederInfo.breederName})` 
+                                                : (breederInfo.showBreederName && breederInfo.breederName 
+                                                    ? breederInfo.breederName 
+                                                    : breederInfo.personalName || 'Anonymous Breeder')}
+                                        </span>
+                                    ) : (
+                                        <span className="text-gray-400">
+                                            {formData.breederId_public ? 'Loading...' : 'Click to Select Breeder (defaults to you)'}
+                                        </span>
+                                    )}
                                     {formData.breederId_public && (
                                         <button
+                                            type="button"
                                             onClick={(e) => { e.stopPropagation(); clearBreederSelection(); }}
                                             title="Clear breeder selection"
                                             className="text-sm text-red-500 hover:text-red-700 p-1 rounded"
