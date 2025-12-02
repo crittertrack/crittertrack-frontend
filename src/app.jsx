@@ -745,7 +745,7 @@ const ViewOnlyAnimalDetail = ({ animal, onClose, API_BASE_URL }) => {
     const showGeneticCode = animal.includeGeneticCode !== false && animal.geneticCode;
 
     return (
-        <div className="fixed inset-0 bg-primary/75 flex items-center justify-center p-4 z-50 overflow-y-auto">
+        <div className="fixed inset-0 bg-blue-900/75 flex items-center justify-center p-4 z-50 overflow-y-auto">
             <div className="bg-primary/10 rounded-xl shadow-2xl p-6 w-full max-w-4xl max-h-[90vh] overflow-y-auto">
                 <div className="flex justify-between items-center mb-6">
                     <button 
