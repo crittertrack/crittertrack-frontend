@@ -186,25 +186,20 @@ const PedigreeChart = ({ animalId, animalData, onClose, API_BASE_URL, authToken 
                 scale: 2,
                 backgroundColor: '#ffffff',
                 logging: false,
-                useCORS: true
+                useCORS: true,
+                width: 1123,
+                height: 794
             });
 
             const imgData = canvas.toDataURL('image/png');
             const pdf = new jsPDF({
                 orientation: 'landscape',
-                unit: 'mm',
-                format: 'a4'
+                unit: 'px',
+                format: [1123, 794]
             });
 
-            const pdfWidth = pdf.internal.pageSize.getWidth();
-            const pdfHeight = pdf.internal.pageSize.getHeight();
-            const imgWidth = canvas.width;
-            const imgHeight = canvas.height;
-            const ratio = Math.min(pdfWidth / imgWidth, pdfHeight / imgHeight);
-            const imgX = (pdfWidth - imgWidth * ratio) / 2;
-            const imgY = 10;
-
-            pdf.addImage(imgData, 'PNG', imgX, imgY, imgWidth * ratio, imgHeight * ratio);
+            // Add image at exact dimensions without scaling
+            pdf.addImage(imgData, 'PNG', 0, 0, 1123, 794);
             pdf.save(`pedigree-${pedigreeData?.name || 'chart'}.pdf`);
         } catch (error) {
             console.error('Error generating PDF:', error);
@@ -237,25 +232,25 @@ const PedigreeChart = ({ animalId, animalData, onClose, API_BASE_URL, authToken 
                 {/* Info */}
                 <div className="flex-1 min-w-0 flex flex-col justify-center">
                     {/* Name */}
-                    <div className="text-sm text-gray-800 mb-1 truncate">
+                    <div className="text-sm text-gray-900 mb-1 truncate">
                         <span className="font-bold">Name: </span>
                         {animal.prefix && `${animal.prefix} `}{animal.name}
                     </div>
                     
                     {/* Variety */}
-                    <div className="text-xs text-gray-600 mb-1 truncate">
+                    <div className="text-xs text-gray-900 mb-1 truncate">
                         <span className="font-semibold">Variety: </span>
                         {colorCoat}
                     </div>
                     
                     {/* Birth Date */}
-                    <div className="text-xs text-gray-500 mb-1">
+                    <div className="text-xs text-gray-900 mb-1">
                         <span className="font-semibold">Birthdate: </span>
                         {animal.birthDate ? new Date(animal.birthDate).toLocaleDateString() : 'N/A'}
                     </div>
                     
                     {/* Breeder */}
-                    <div className="text-xs text-gray-500 truncate mb-4">
+                    <div className="text-xs text-gray-900 truncate mb-4">
                         <span className="font-semibold">Breeder: </span>
                         {animal.breederName || 'N/A'}
                     </div>
@@ -310,25 +305,25 @@ const PedigreeChart = ({ animalId, animalData, onClose, API_BASE_URL, authToken 
                 {/* Info */}
                 <div className="flex-1 min-w-0 flex flex-col justify-center">
                     {/* Name */}
-                    <div className="text-xs text-gray-800 mb-1 truncate">
+                    <div className="text-xs text-gray-900 mb-1 truncate">
                         <span className="font-semibold">Name: </span>
                         {animal.prefix && `${animal.prefix} `}{animal.name}
                     </div>
                     
                     {/* Variety */}
-                    <div className="text-xs text-gray-600 mb-1 truncate">
+                    <div className="text-xs text-gray-900 mb-1 truncate">
                         <span className="font-semibold">Variety: </span>
                         {colorCoat}
                     </div>
                     
                     {/* Birth Date */}
-                    <div className="text-xs text-gray-500 mb-1">
+                    <div className="text-xs text-gray-900 mb-1">
                         <span className="font-semibold">Birthdate: </span>
                         {animal.birthDate ? new Date(animal.birthDate).toLocaleDateString() : 'N/A'}
                     </div>
                     
                     {/* Breeder */}
-                    <div className="text-xs text-gray-500 truncate mb-4">
+                    <div className="text-xs text-gray-900 truncate mb-4">
                         <span className="font-semibold">Breeder: </span>
                         {animal.breederName || 'N/A'}
                     </div>
@@ -387,25 +382,25 @@ const PedigreeChart = ({ animalId, animalData, onClose, API_BASE_URL, authToken 
                 {/* Info */}
                 <div className="flex-1 min-w-0 flex flex-col justify-center">
                     {/* Name */}
-                    <div className="text-xs text-gray-800 truncate mb-0.5">
+                    <div className="text-xs text-gray-900 truncate mb-0.5">
                         <span className="font-semibold">Name: </span>
                         {animal.prefix && `${animal.prefix} `}{animal.name}
                     </div>
                     
                     {/* Variety */}
-                    <div className="text-xs text-gray-600 truncate mb-0.5">
+                    <div className="text-xs text-gray-900 truncate mb-0.5">
                         <span className="font-semibold">Variety: </span>
                         {colorCoat}
                     </div>
                     
                     {/* Birth Date */}
-                    <div className="text-xs text-gray-500 mb-0.5">
+                    <div className="text-xs text-gray-900 mb-0.5">
                         <span className="font-semibold">Birthdate: </span>
                         {animal.birthDate ? new Date(animal.birthDate).toLocaleDateString() : 'N/A'}
                     </div>
                     
                     {/* Breeder */}
-                    <div className="text-xs text-gray-500 truncate mb-3">
+                    <div className="text-xs text-gray-900 truncate mb-3">
                         <span className="font-semibold">Breeder: </span>
                         {animal.breederName || 'N/A'}
                     </div>
@@ -445,19 +440,19 @@ const PedigreeChart = ({ animalId, animalData, onClose, API_BASE_URL, authToken 
         return (
             <div className={`border border-gray-400 rounded p-1 ${bgColor} relative h-full flex flex-col justify-center`}>
                 {/* Name */}
-                <div className="text-xs text-gray-800 truncate mb-0.5">
+                <div className="text-xs text-gray-900 truncate mb-0.5">
                     <span className="font-semibold">Name: </span>
                     {animal.prefix && `${animal.prefix} `}{animal.name}
                 </div>
                 
                 {/* Variety */}
-                <div className="text-xs text-gray-600 truncate mb-0.5">
+                <div className="text-xs text-gray-900 truncate mb-0.5">
                     <span className="font-semibold">Variety: </span>
                     {colorCoat}
                 </div>
                 
                 {/* Breeder */}
-                <div className="text-xs text-gray-500 truncate mb-3">
+                <div className="text-xs text-gray-900 truncate mb-3">
                     <span className="font-semibold">Breeder: </span>
                     {animal.breederName || 'N/A'}
                 </div>
