@@ -755,19 +755,18 @@ const ViewOnlyAnimalDetail = ({ animal, onClose, API_BASE_URL }) => {
                         >
                             <ArrowLeft size={18} className="mr-1" /> Back
                         </button>
+                        <h2 className="text-3xl font-bold text-gray-900 absolute left-1/2 transform -translate-x-1/2">
+                            {animal.prefix && `${animal.prefix} `}{animal.name}
+                        </h2>
                         <button onClick={onClose} className="text-gray-500 hover:text-gray-800">
                             <X size={28} />
                         </button>
                     </div>
-
-                    <h2 className="text-3xl font-bold text-gray-900 pb-4 border-b">
-                        {animal.prefix && `${animal.prefix} `}{animal.name}
-                    </h2>
                 </div>
 
                 <div className="space-y-6">
                     {/* Image with ID, Species, Status below */}
-                    <div className="w-full flex justify-center">
+                    <div className="w-full flex flex-col items-center">
                         {imgSrc && (
                             <img 
                                 src={imgSrc} 
