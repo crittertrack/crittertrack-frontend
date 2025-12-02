@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useCallback, useRef, useMemo } from 'react';
 import axios from 'axios';
-import { LogOut, Cat, UserPlus, LogIn, ChevronLeft, Trash2, Edit, Save, PlusCircle, ArrowLeft, Loader2, RefreshCw, User, ClipboardList, BookOpen, Settings, Mail, Globe, Egg, Milk, Search, X, Mars, Venus, Eye, EyeOff, Home, Heart, HeartOff } from 'lucide-react';
+import { LogOut, Cat, UserPlus, LogIn, ChevronLeft, Trash2, Edit, Save, PlusCircle, ArrowLeft, Loader2, RefreshCw, User, ClipboardList, BookOpen, Settings, Mail, Globe, Egg, Milk, Search, X, Mars, Venus, Eye, EyeOff, Home, Heart, HeartOff, Bell, Check, XCircle } from 'lucide-react';
 
 const API_BASE_URL = 'https://crittertrack-pedigree-production.up.railway.app/api';
 
@@ -3085,6 +3085,179 @@ const AnimalList = ({ authToken, showModalMessage, onEditAnimal, onViewAnimal, o
     );
 };
 
+// Notification Panel Component
+const NotificationPanel = ({ authToken, API_BASE_URL, onClose, showModalMessage }) => {
+    const [notifications, setNotifications] = useState([]);
+    const [loading, setLoading] = useState(true);
+    const [processing, setProcessing] = useState(null);
+
+    useEffect(() => {
+        fetchNotifications();
+    }, []);
+
+    const fetchNotifications = async () => {
+        try {
+            const response = await axios.get(`${API_BASE_URL}/notifications`, {
+                headers: { Authorization: `Bearer ${authToken}` }
+            });
+            setNotifications(response.data || []);
+        } catch (error) {
+            console.error('Error fetching notifications:', error);
+        } finally {
+            setLoading(false);
+        }
+    };
+
+    const handleApprove = async (notificationId) => {
+        setProcessing(notificationId);
+        try {
+            await axios.post(`${API_BASE_URL}/notifications/${notificationId}/approve`, {}, {
+                headers: { Authorization: `Bearer ${authToken}` }
+            });
+            showModalMessage('Approved', 'Request approved successfully');
+            fetchNotifications();
+        } catch (error) {
+            console.error('Error approving notification:', error);
+            showModalMessage('Error', 'Failed to approve request');
+        } finally {
+            setProcessing(null);
+        }
+    };
+
+    const handleReject = async (notificationId) => {
+        setProcessing(notificationId);
+        try {
+            await axios.post(`${API_BASE_URL}/notifications/${notificationId}/reject`, {}, {
+                headers: { Authorization: `Bearer ${authToken}` }
+            });
+            showModalMessage('Rejected', 'Request rejected and link removed');
+            fetchNotifications();
+        } catch (error) {
+            console.error('Error rejecting notification:', error);
+            showModalMessage('Error', 'Failed to reject request');
+        } finally {
+            setProcessing(null);
+        }
+    };
+
+    const handleMarkAsRead = async (notificationId) => {
+        try {
+            await axios.patch(`${API_BASE_URL}/notifications/${notificationId}/read`, {}, {
+                headers: { Authorization: `Bearer ${authToken}` }
+            });
+            fetchNotifications();
+        } catch (error) {
+            console.error('Error marking as read:', error);
+        }
+    };
+
+    const handleDelete = async (notificationId) => {
+        try {
+            await axios.delete(`${API_BASE_URL}/notifications/${notificationId}`, {
+                headers: { Authorization: `Bearer ${authToken}` }
+            });
+            fetchNotifications();
+        } catch (error) {
+            console.error('Error deleting notification:', error);
+        }
+    };
+
+    const pendingNotifications = notifications.filter(n => n.status === 'pending');
+    const otherNotifications = notifications.filter(n => n.status !== 'pending');
+
+    return (
+        <div className="fixed inset-0 bg-gray-600 bg-opacity-75 flex items-center justify-center p-4 z-50">
+            <div className="bg-white rounded-xl shadow-2xl w-full max-w-2xl max-h-[90vh] flex flex-col">
+                <div className="flex justify-between items-center border-b p-4">
+                    <h3 className="text-xl font-bold text-gray-800">Notifications</h3>
+                    <button onClick={onClose} className="text-gray-500 hover:text-gray-800">
+                        <X size={24} />
+                    </button>
+                </div>
+
+                <div className="flex-grow overflow-y-auto p-4 space-y-4">
+                    {loading ? (
+                        <div className="flex justify-center py-8">
+                            <Loader2 className="animate-spin" size={32} />
+                        </div>
+                    ) : notifications.length === 0 ? (
+                        <p className="text-center text-gray-500 py-8">No notifications</p>
+                    ) : (
+                        <>
+                            {pendingNotifications.length > 0 && (
+                                <div>
+                                    <h4 className="font-bold text-gray-700 mb-2">Pending Requests</h4>
+                                    {pendingNotifications.map(notification => (
+                                        <div key={notification._id} className={`border rounded-lg p-4 mb-2 ${!notification.read ? 'bg-blue-50 border-blue-300' : 'bg-white'}`}>
+                                            <p className="text-sm text-gray-700 mb-2">{notification.message}</p>
+                                            <p className="text-xs text-gray-500 mb-3">
+                                                {new Date(notification.createdAt).toLocaleString()}
+                                            </p>
+                                            <div className="flex space-x-2">
+                                                <button
+                                                    onClick={() => handleApprove(notification._id)}
+                                                    disabled={processing === notification._id}
+                                                    className="flex items-center space-x-1 bg-green-500 hover:bg-green-600 text-white px-3 py-1 rounded text-sm disabled:opacity-50"
+                                                >
+                                                    <Check size={14} />
+                                                    <span>Approve</span>
+                                                </button>
+                                                <button
+                                                    onClick={() => handleReject(notification._id)}
+                                                    disabled={processing === notification._id}
+                                                    className="flex items-center space-x-1 bg-red-500 hover:bg-red-600 text-white px-3 py-1 rounded text-sm disabled:opacity-50"
+                                                >
+                                                    <XCircle size={14} />
+                                                    <span>Reject</span>
+                                                </button>
+                                                {!notification.read && (
+                                                    <button
+                                                        onClick={() => handleMarkAsRead(notification._id)}
+                                                        className="text-xs text-gray-600 hover:text-gray-800 px-2"
+                                                    >
+                                                        Mark as read
+                                                    </button>
+                                                )}
+                                            </div>
+                                        </div>
+                                    ))}
+                                </div>
+                            )}
+
+                            {otherNotifications.length > 0 && (
+                                <div>
+                                    <h4 className="font-bold text-gray-700 mb-2">History</h4>
+                                    {otherNotifications.map(notification => (
+                                        <div key={notification._id} className="border rounded-lg p-4 mb-2 bg-gray-50">
+                                            <div className="flex justify-between items-start">
+                                                <div className="flex-grow">
+                                                    <p className="text-sm text-gray-700 mb-1">{notification.message}</p>
+                                                    <p className="text-xs text-gray-500">
+                                                        {new Date(notification.createdAt).toLocaleString()} • 
+                                                        <span className={`ml-1 ${notification.status === 'approved' ? 'text-green-600' : 'text-red-600'}`}>
+                                                            {notification.status}
+                                                        </span>
+                                                    </p>
+                                                </div>
+                                                <button
+                                                    onClick={() => handleDelete(notification._id)}
+                                                    className="text-gray-400 hover:text-red-600 ml-2"
+                                                >
+                                                    <X size={16} />
+                                                </button>
+                                            </div>
+                                        </div>
+                                    ))}
+                                </div>
+                            )}
+                        </>
+                    )}
+                </div>
+            </div>
+        </div>
+    );
+};
+
 const App = () => {
     const [authToken, setAuthToken] = useState(localStorage.getItem('authToken') || null);
     const [userProfile, setUserProfile] = useState(null);
@@ -3095,6 +3268,9 @@ const App = () => {
     const [showModal, setShowModal] = useState(false);
     const [modalMessage, setModalMessage] = useState({ title: '', message: '' });
     const [isRegister, setIsRegister] = useState(false); 
+    
+    const [showNotifications, setShowNotifications] = useState(false);
+    const [notificationCount, setNotificationCount] = useState(0);
 
     const [showUserSearchModal, setShowUserSearchModal] = useState(false);
     const [viewingPublicProfile, setViewingPublicProfile] = useState(null);
@@ -3182,6 +3358,27 @@ const App = () => {
             setAuthToken(null);
         }
     }, [showModalMessage]);
+
+    const fetchNotificationCount = useCallback(async () => {
+        if (!authToken) return;
+        try {
+            const response = await axios.get(`${API_BASE_URL}/notifications/unread-count`, {
+                headers: { Authorization: `Bearer ${authToken}` }
+            });
+            setNotificationCount(response.data?.count || 0);
+        } catch (error) {
+            console.error('Failed to fetch notification count:', error);
+        }
+    }, [authToken]);
+
+    useEffect(() => {
+        if (authToken) {
+            fetchNotificationCount();
+            // Poll for new notifications every 30 seconds
+            const interval = setInterval(fetchNotificationCount, 30000);
+            return () => clearInterval(interval);
+        }
+    }, [authToken, fetchNotificationCount]);
 	
     const handleLoginSuccess = (token) => {
         setAuthToken(token);
@@ -3740,6 +3937,23 @@ const App = () => {
                         <span className="text-sm hidden sm:inline">Search</span>
                         <Search size={20} className="sm:hidden" />
                     </button>
+
+                    {/* Notification Bell */}
+                    <button
+                        onClick={() => {
+                            setShowNotifications(true);
+                            fetchNotificationCount();
+                        }}
+                        className="relative flex items-center justify-center bg-gray-100 hover:bg-gray-200 text-gray-600 py-2 px-3 rounded-lg transition duration-150 shadow-sm"
+                        title="Notifications"
+                    >
+                        <Bell size={20} />
+                        {notificationCount > 0 && (
+                            <span className="absolute -top-1 -right-1 bg-red-500 text-white text-xs rounded-full w-5 h-5 flex items-center justify-center font-bold">
+                                {notificationCount > 9 ? '9+' : notificationCount}
+                            </span>
+                        )}
+                    </button>
                     
                     <div className="flex items-center space-x-2">
                         <button 
@@ -3753,6 +3967,18 @@ const App = () => {
                     </div>
                 </div>
             </header>
+
+            {showNotifications && (
+                <NotificationPanel
+                    authToken={authToken}
+                    API_BASE_URL={API_BASE_URL}
+                    onClose={() => {
+                        setShowNotifications(false);
+                        fetchNotificationCount();
+                    }}
+                    showModalMessage={showModalMessage}
+                />
+            )}
 
             {currentView !== 'profile' && userProfile && <UserProfileCard userProfile={userProfile} />}
 
