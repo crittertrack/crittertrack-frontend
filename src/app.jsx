@@ -737,6 +737,8 @@ const PublicProfileView = ({ profile, onBack, onViewAnimal, API_BASE_URL }) => {
 
 // View-Only Animal Detail Modal
 const ViewOnlyAnimalDetail = ({ animal, onClose, API_BASE_URL }) => {
+    const [breederInfo, setBreederInfo] = useState(null);
+    
     if (!animal) return null;
 
     const imgSrc = animal.imageUrl || animal.photoUrl || null;
@@ -745,6 +747,28 @@ const ViewOnlyAnimalDetail = ({ animal, onClose, API_BASE_URL }) => {
     // Only show remarks and genetic code if they are marked as public
     const showRemarks = animal.includeRemarks !== false && animal.remarks;
     const showGeneticCode = animal.includeGeneticCode !== false && animal.geneticCode;
+
+    // Fetch breeder info when component mounts or animal changes
+    React.useEffect(() => {
+        const fetchBreeder = async () => {
+            if (animal.breederId_public) {
+                try {
+                    const response = await axios.get(
+                        `${API_BASE_URL}/public/profiles/search?query=CT${animal.breederId_public}&limit=1`
+                    );
+                    if (response.data && response.data.length > 0) {
+                        setBreederInfo(response.data[0]);
+                    }
+                } catch (error) {
+                    console.error('Failed to fetch breeder info:', error);
+                    setBreederInfo(null);
+                }
+            } else {
+                setBreederInfo(null);
+            }
+        };
+        fetchBreeder();
+    }, [animal.breederId_public, API_BASE_URL]);
 
     return (
         <div className="fixed inset-0 bg-accent/10 flex items-center justify-center p-4 z-50 overflow-y-auto">
@@ -846,7 +870,19 @@ const ViewOnlyAnimalDetail = ({ animal, onClose, API_BASE_URL }) => {
                         <div className="bg-white border-2 border-gray-300 rounded-lg p-6">
                             <h3 className="text-lg font-semibold text-gray-800 mb-2">Breeder</h3>
                             <p className="text-gray-700">
-                                <span className="font-mono text-accent">CT{animal.breederId_public}</span>
+                                {breederInfo ? (
+                                    <>
+                                        {breederInfo.showBreederName && breederInfo.personalName && breederInfo.breederName 
+                                            ? `${breederInfo.personalName} (${breederInfo.breederName})` 
+                                            : (breederInfo.showBreederName && breederInfo.breederName 
+                                                ? breederInfo.breederName 
+                                                : breederInfo.personalName || 'Anonymous Breeder')}
+                                        {' '}
+                                        <span className="font-mono text-accent">(CT{animal.breederId_public})</span>
+                                    </>
+                                ) : (
+                                    <span className="font-mono text-accent">CT{animal.breederId_public}</span>
+                                )}
                             </p>
                         </div>
                     )}
