@@ -76,6 +76,7 @@ const AnimalImage = ({ src, alt = "Animal", className = "w-full h-full object-co
 // Pedigree Chart Component
 const PedigreeChart = ({ animalId, animalData, onClose, API_BASE_URL, authToken = null }) => {
     const [pedigreeData, setPedigreeData] = useState(null);
+    const [ownerProfile, setOwnerProfile] = useState(null);
     const [loading, setLoading] = useState(true);
     const pedigreeRef = useRef(null);
 
@@ -116,6 +117,26 @@ const PedigreeChart = ({ animalId, animalData, onClose, API_BASE_URL, authToken 
 
                     if (!animalInfo) return null;
 
+                    // Fetch breeder info for each animal
+                    if (animalInfo.breederId_public) {
+                        try {
+                            const breederResponse = await axios.get(
+                                `${API_BASE_URL}/public/profiles/search?query=CT${animalInfo.breederId_public}&limit=1`
+                            );
+                            if (breederResponse.data && breederResponse.data.length > 0) {
+                                const breeder = breederResponse.data[0];
+                                const breederName = breeder.showBreederName && breeder.personalName && breeder.breederName 
+                                    ? `${breeder.personalName} (${breeder.breederName})` 
+                                    : (breeder.showBreederName && breeder.breederName 
+                                        ? breeder.breederName 
+                                        : breeder.personalName || `CT${animalInfo.breederId_public}`);
+                                animalInfo.breederName = breederName;
+                            }
+                        } catch (error) {
+                            console.error(`Failed to fetch breeder for animal ${id}:`, error);
+                        }
+                    }
+
                     // Recursively fetch parents
                     const fatherId = animalInfo.fatherId_public || animalInfo.sireId_public;
                     const motherId = animalInfo.motherId_public || animalInfo.damId_public;
@@ -132,6 +153,21 @@ const PedigreeChart = ({ animalId, animalData, onClose, API_BASE_URL, authToken 
 
                 const data = await fetchAnimalWithAncestors(animalId || animalData?.id_public);
                 setPedigreeData(data);
+
+                // Fetch owner profile for the main animal
+                if (data?.ownerId_public || data?.breederId_public) {
+                    try {
+                        const ownerId = data.ownerId_public || data.breederId_public;
+                        const ownerResponse = await axios.get(
+                            `${API_BASE_URL}/public/profiles/search?query=CT${ownerId}&limit=1`
+                        );
+                        if (ownerResponse.data && ownerResponse.data.length > 0) {
+                            setOwnerProfile(ownerResponse.data[0]);
+                        }
+                    } catch (error) {
+                        console.error('Failed to fetch owner profile:', error);
+                    }
+                }
             } catch (error) {
                 console.error('Error fetching pedigree data:', error);
             } finally {
@@ -175,35 +211,164 @@ const PedigreeChart = ({ animalId, animalData, onClose, API_BASE_URL, authToken 
         }
     };
 
-    const renderAnimalCard = (animal, generation) => {
+    // Render card for main animal (larger with image)
+    const renderMainAnimalCard = (animal) => {
+        if (!animal) return null;
+        
+        const imgSrc = animal.imageUrl || animal.photoUrl || null;
+        const colorCoat = [animal.color, animal.coat].filter(Boolean).join(' / ') || 'N/A';
+        
+        return (
+            <div className="border-2 border-gray-400 rounded-lg p-3 bg-white">
+                {/* Image */}
+                <div className="w-full h-32 bg-gray-100 rounded-md overflow-hidden flex items-center justify-center mb-2">
+                    <AnimalImage src={imgSrc} alt={animal.name} className="w-full h-full object-cover" iconSize={48} />
+                </div>
+                
+                {/* Name */}
+                <div className="font-bold text-sm text-gray-800 mb-1">
+                    {animal.prefix && `${animal.prefix} `}{animal.name}
+                </div>
+                
+                {/* Color/Coat */}
+                <div className="text-xs text-gray-600 mb-1">
+                    {colorCoat}
+                </div>
+                
+                {/* Birth Date */}
+                <div className="text-xs text-gray-500 mb-1">
+                    {animal.birthDate ? new Date(animal.birthDate).toLocaleDateString() : 'Birth: N/A'}
+                </div>
+                
+                {/* Breeder */}
+                <div className="text-xs text-gray-500">
+                    Breeder: {animal.breederName || 'N/A'}
+                </div>
+            </div>
+        );
+    };
+
+    // Render card for parents (medium with image)
+    const renderParentCard = (animal, title) => {
         if (!animal) {
             return (
-                <div className="border border-gray-300 rounded p-2 bg-gray-50 h-20 flex items-center justify-center">
+                <div className="border border-gray-300 rounded p-2 bg-gray-50">
+                    <div className="font-semibold text-xs text-gray-500 mb-2">{title}</div>
+                    <div className="text-xs text-gray-400 text-center py-4">Unknown</div>
+                </div>
+            );
+        }
+        
+        const imgSrc = animal.imageUrl || animal.photoUrl || null;
+        const colorCoat = [animal.color, animal.coat].filter(Boolean).join(' / ') || 'N/A';
+        
+        return (
+            <div className="border border-gray-400 rounded p-2 bg-white">
+                <div className="font-semibold text-xs text-gray-700 mb-2">{title}</div>
+                
+                {/* Image */}
+                <div className="w-full h-20 bg-gray-100 rounded overflow-hidden flex items-center justify-center mb-2">
+                    <AnimalImage src={imgSrc} alt={animal.name} className="w-full h-full object-cover" iconSize={32} />
+                </div>
+                
+                {/* Name */}
+                <div className="font-semibold text-xs text-gray-800 mb-1">
+                    {animal.prefix && `${animal.prefix} `}{animal.name}
+                </div>
+                
+                {/* Color/Coat */}
+                <div className="text-xs text-gray-600 mb-1">
+                    {colorCoat}
+                </div>
+                
+                {/* Birth Date */}
+                <div className="text-xs text-gray-500 mb-1">
+                    {animal.birthDate ? new Date(animal.birthDate).toLocaleDateString() : 'N/A'}
+                </div>
+                
+                {/* Breeder */}
+                <div className="text-xs text-gray-500">
+                    {animal.breederName || 'N/A'}
+                </div>
+            </div>
+        );
+    };
+
+    // Render card for grandparents (with image)
+    const renderGrandparentCard = (animal) => {
+        if (!animal) {
+            return (
+                <div className="border border-gray-300 rounded p-2 bg-gray-50 h-full flex items-center justify-center">
                     <span className="text-xs text-gray-400">Unknown</span>
                 </div>
             );
         }
-
-        const genderIcon = animal.gender === 'Male' ? '♂' : animal.gender === 'Female' ? '♀' : '';
-        const cardBg = animal.gender === 'Male' ? 'bg-blue-50' : animal.gender === 'Female' ? 'bg-pink-50' : 'bg-gray-50';
-
+        
+        const imgSrc = animal.imageUrl || animal.photoUrl || null;
+        const colorCoat = [animal.color, animal.coat].filter(Boolean).join(' / ') || 'N/A';
+        
         return (
-            <div className={`border border-gray-300 rounded p-2 ${cardBg} h-20 text-xs`}>
-                <div className="flex items-start justify-between mb-1">
-                    <div className="font-semibold text-gray-800 truncate flex-1">
-                        {animal.prefix && <span className="text-gray-600">{animal.prefix} </span>}
-                        {animal.name}
-                    </div>
-                    <span className="ml-1 text-sm">{genderIcon}</span>
+            <div className="border border-gray-300 rounded p-2 bg-white">
+                {/* Image */}
+                <div className="w-full h-16 bg-gray-100 rounded overflow-hidden flex items-center justify-center mb-1">
+                    <AnimalImage src={imgSrc} alt={animal.name} className="w-full h-full object-cover" iconSize={24} />
                 </div>
-                <div className="text-gray-500 text-xs mb-1">
-                    {animal.variation || animal.morph || 'N/A'}
+                
+                {/* Name */}
+                <div className="font-semibold text-xs text-gray-800 truncate mb-1">
+                    {animal.prefix && `${animal.prefix} `}{animal.name}
                 </div>
-                <div className="text-gray-400 text-xs">
-                    {animal.birthDate ? new Date(animal.birthDate).toLocaleDateString() : ''}
+                
+                {/* Color/Coat */}
+                <div className="text-xs text-gray-600 truncate mb-1">
+                    {colorCoat}
                 </div>
-                <div className="text-gray-400 text-xs">
-                    #{animal.id_public || 'N/A'}
+                
+                {/* Birth Date */}
+                <div className="text-xs text-gray-500 mb-1">
+                    {animal.birthDate ? new Date(animal.birthDate).toLocaleDateString() : 'N/A'}
+                </div>
+                
+                {/* Breeder */}
+                <div className="text-xs text-gray-500 truncate">
+                    {animal.breederName || 'N/A'}
+                </div>
+            </div>
+        );
+    };
+
+    // Render card for great-grandparents (no image, compact)
+    const renderGreatGrandparentCard = (animal) => {
+        if (!animal) {
+            return (
+                <div className="border border-gray-300 rounded p-1.5 bg-gray-50 h-full flex items-center justify-center">
+                    <span className="text-xs text-gray-400">Unknown</span>
+                </div>
+            );
+        }
+        
+        const colorCoat = [animal.color, animal.coat].filter(Boolean).join(' / ') || 'N/A';
+        
+        return (
+            <div className="border border-gray-300 rounded p-1.5 bg-white">
+                {/* Name */}
+                <div className="font-semibold text-xs text-gray-800 truncate mb-0.5">
+                    {animal.prefix && `${animal.prefix} `}{animal.name}
+                </div>
+                
+                {/* Color/Coat */}
+                <div className="text-xs text-gray-600 truncate mb-0.5">
+                    {colorCoat}
+                </div>
+                
+                {/* Birth Date */}
+                <div className="text-xs text-gray-500 mb-0.5">
+                    {animal.birthDate ? new Date(animal.birthDate).toLocaleDateString() : 'N/A'}
+                </div>
+                
+                {/* Breeder */}
+                <div className="text-xs text-gray-500 truncate">
+                    {animal.breederName || 'N/A'}
                 </div>
             </div>
         );
@@ -236,46 +401,40 @@ const PedigreeChart = ({ animalId, animalData, onClose, API_BASE_URL, authToken 
         const mgmMother = maternalGrandmother?.mother;
 
         return (
-            <div className="grid grid-cols-4 gap-2 w-full">
-                {/* Generation 3 - Great-grandparents (rightmost) */}
-                <div className="flex flex-col gap-2">
-                    {renderAnimalCard(pgfFather, 3)}
-                    {renderAnimalCard(pgfMother, 3)}
-                    {renderAnimalCard(pgmFather, 3)}
-                    {renderAnimalCard(pgmMother, 3)}
-                    {renderAnimalCard(mgfFather, 3)}
-                    {renderAnimalCard(mgfMother, 3)}
-                    {renderAnimalCard(mgmFather, 3)}
-                    {renderAnimalCard(mgmMother, 3)}
+            <div className="flex gap-4">
+                {/* Left Column: Main Animal and Parents */}
+                <div className="flex flex-col gap-3" style={{width: '200px'}}>
+                    {/* Main Animal */}
+                    {renderMainAnimalCard(subject)}
+                    
+                    {/* Sire */}
+                    {renderParentCard(father, 'Sire')}
+                    
+                    {/* Dam */}
+                    {renderParentCard(mother, 'Dam')}
                 </div>
 
-                {/* Generation 2 - Grandparents */}
-                <div className="flex flex-col gap-2">
-                    <div className="flex flex-col gap-2">
-                        {renderAnimalCard(paternalGrandfather, 2)}
-                        {renderAnimalCard(paternalGrandmother, 2)}
-                    </div>
-                    <div className="flex flex-col gap-2 mt-2">
-                        {renderAnimalCard(maternalGrandfather, 2)}
-                        {renderAnimalCard(maternalGrandmother, 2)}
-                    </div>
+                {/* Grandparents Column */}
+                <div className="flex flex-col gap-2" style={{width: '180px'}}>
+                    {/* Paternal Grandparents */}
+                    {renderGrandparentCard(paternalGrandfather)}
+                    {renderGrandparentCard(paternalGrandmother)}
+                    
+                    {/* Maternal Grandparents */}
+                    {renderGrandparentCard(maternalGrandfather)}
+                    {renderGrandparentCard(maternalGrandmother)}
                 </div>
 
-                {/* Generation 1 - Parents */}
-                <div className="flex flex-col gap-2">
-                    <div className="h-40 flex items-center">
-                        {renderAnimalCard(father, 1)}
-                    </div>
-                    <div className="h-40 flex items-center mt-2">
-                        {renderAnimalCard(mother, 1)}
-                    </div>
-                </div>
-
-                {/* Generation 0 - Subject (leftmost) */}
-                <div className="flex items-center">
-                    <div className="w-full">
-                        {renderAnimalCard(subject, 0)}
-                    </div>
+                {/* Great-Grandparents Column */}
+                <div className="flex flex-col gap-1.5" style={{width: '160px'}}>
+                    {renderGreatGrandparentCard(pgfFather)}
+                    {renderGreatGrandparentCard(pgfMother)}
+                    {renderGreatGrandparentCard(pgmFather)}
+                    {renderGreatGrandparentCard(pgmMother)}
+                    {renderGreatGrandparentCard(mgfFather)}
+                    {renderGreatGrandparentCard(mgfMother)}
+                    {renderGreatGrandparentCard(mgmFather)}
+                    {renderGreatGrandparentCard(mgmMother)}
                 </div>
             </div>
         );
@@ -290,6 +449,21 @@ const PedigreeChart = ({ animalId, animalData, onClose, API_BASE_URL, authToken 
             </div>
         );
     }
+
+    const getOwnerDisplayName = () => {
+        if (!ownerProfile) return 'Unknown Owner';
+        
+        if (ownerProfile.showBreederName && ownerProfile.personalName && ownerProfile.breederName) {
+            return `${ownerProfile.personalName} (${ownerProfile.breederName})`;
+        }
+        if (ownerProfile.showBreederName && ownerProfile.breederName) {
+            return ownerProfile.breederName;
+        }
+        if (ownerProfile.personalName) {
+            return ownerProfile.personalName;
+        }
+        return `CT${pedigreeData?.ownerId_public || pedigreeData?.breederId_public || ''}`;
+    };
 
     return (
         <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4 overflow-auto">
@@ -319,28 +493,25 @@ const PedigreeChart = ({ animalId, animalData, onClose, API_BASE_URL, authToken 
 
                 {/* Pedigree Chart */}
                 <div ref={pedigreeRef} className="bg-white p-6 rounded-lg border-2 border-gray-300">
-                    {/* Title Section */}
-                    <div className="mb-6 text-center border-b-2 border-gray-300 pb-4">
-                        <h3 className="text-xl font-bold text-gray-800">
-                            {pedigreeData?.prefix && `${pedigreeData.prefix} `}
-                            {pedigreeData?.name || 'Unknown Animal'}
-                        </h3>
-                        <p className="text-sm text-gray-600">{pedigreeData?.species || 'Mus musculus'}</p>
-                        <div className="flex justify-center gap-8 mt-2 text-sm text-gray-600">
-                            <div>
-                                <span className="font-semibold">Name:</span> {pedigreeData?.prefix && `${pedigreeData.prefix} `}{pedigreeData?.name || 'N/A'}
+                    {/* Header with Species and Owner Profile */}
+                    <div className="flex justify-between items-start mb-6">
+                        {/* Species - Top Left */}
+                        <div className="text-left">
+                            <h3 className="text-lg font-bold text-gray-800">{pedigreeData?.species || 'Unknown Species'}</h3>
+                        </div>
+                        
+                        {/* Owner Profile - Top Right */}
+                        <div className="flex items-center gap-2">
+                            <div className="text-right">
+                                <div className="text-sm font-semibold text-gray-800">{getOwnerDisplayName()}</div>
+                                <div className="text-xs text-gray-500">Owner</div>
                             </div>
-                            <div>
-                                <span className="font-semibold">Variation/Morph:</span> {pedigreeData?.variation || pedigreeData?.morph || 'N/A'}
-                            </div>
-                            <div>
-                                <span className="font-semibold">Birth:</span> {pedigreeData?.birthDate ? new Date(pedigreeData.birthDate).toLocaleDateString() : 'N/A'}
-                            </div>
-                            <div>
-                                <span className="font-semibold">Breeder:</span> {pedigreeData?.breederName || 'N/A'}
-                            </div>
-                            <div>
-                                <span className="font-semibold">SimpleBreed.com ID:</span> #{pedigreeData?.id_public || 'N/A'}
+                            <div className="w-12 h-12 bg-gray-200 rounded-lg overflow-hidden flex items-center justify-center">
+                                {ownerProfile?.profileImage ? (
+                                    <img src={ownerProfile.profileImage} alt="Owner" className="w-full h-full object-cover" />
+                                ) : (
+                                    <User size={24} className="text-gray-400" />
+                                )}
                             </div>
                         </div>
                     </div>
@@ -352,9 +523,8 @@ const PedigreeChart = ({ animalId, animalData, onClose, API_BASE_URL, authToken 
 
                     {/* Footer */}
                     <div className="mt-6 pt-4 border-t-2 border-gray-300 flex justify-between items-center text-sm text-gray-600">
-                        <div>{pedigreeData?.breederName || 'Unknown Breeder'}</div>
+                        <div>{getOwnerDisplayName()}</div>
                         <div>{new Date().toLocaleDateString()}</div>
-                        <div>Created by simplebreed.com</div>
                     </div>
                 </div>
             </div>
