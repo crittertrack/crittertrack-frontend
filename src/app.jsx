@@ -747,14 +747,21 @@ const ViewOnlyAnimalDetail = ({ animal, onClose, API_BASE_URL }) => {
     return (
         <div className="fixed inset-0 bg-blue-900/75 flex items-center justify-center p-4 z-50 overflow-y-auto">
             <div className="bg-white rounded-xl shadow-2xl p-6 w-full max-w-4xl max-h-[90vh] overflow-y-auto">
-                <div className="flex justify-between items-center border-b pb-4 mb-6">
-                    <h2 className="text-3xl font-bold text-gray-900">
-                        {animal.prefix && `${animal.prefix} `}{animal.name}
-                    </h2>
+                <div className="flex justify-between items-center mb-6">
+                    <button 
+                        onClick={onClose} 
+                        className="flex items-center text-gray-600 hover:text-gray-800 transition"
+                    >
+                        <ArrowLeft size={18} className="mr-1" /> Back
+                    </button>
                     <button onClick={onClose} className="text-gray-500 hover:text-gray-800">
                         <X size={28} />
                     </button>
                 </div>
+
+                <h2 className="text-3xl font-bold text-gray-900 mb-6 pb-4 border-b">
+                    {animal.prefix && `${animal.prefix} `}{animal.name}
+                </h2>
 
                 <div className="space-y-6">
                     {/* Image with ID, Species, Status below */}
@@ -846,17 +853,6 @@ const ViewOnlyAnimalDetail = ({ animal, onClose, API_BASE_URL }) => {
                                 API_BASE_URL={API_BASE_URL}
                             />
                         </div>
-                    </div>
-
-                    {/* Back/Close Button */}
-                    <div className="flex justify-center pt-4">
-                        <button 
-                            onClick={onClose}
-                            className="flex items-center space-x-2 bg-gray-600 hover:bg-gray-700 text-white font-semibold py-3 px-6 rounded-lg transition duration-150"
-                        >
-                            <ArrowLeft size={20} />
-                            <span>Back to Profile</span>
-                        </button>
                     </div>
                 </div>
             </div>
