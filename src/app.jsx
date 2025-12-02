@@ -221,7 +221,7 @@ const PedigreeChart = ({ animalId, animalData, onClose, API_BASE_URL, authToken 
         const GenderIcon = isMale ? Mars : Venus;
         
         return (
-            <div className={`border border-gray-400 rounded-lg p-3 ${bgColor} relative flex gap-3 items-center`} style={{height: '160px'}}>
+            <div className={`border border-gray-700 rounded-lg p-3 ${bgColor} relative flex gap-3 items-center`} style={{height: '160px'}}>
                 {/* Image */}
                 <div className="w-32 h-32 bg-gray-100 rounded-lg overflow-hidden flex items-center justify-center flex-shrink-0 border-2 border-gray-900">
                     {imgSrc ? (
@@ -234,25 +234,25 @@ const PedigreeChart = ({ animalId, animalData, onClose, API_BASE_URL, authToken 
                 {/* Info */}
                 <div className="flex-1 min-w-0 flex flex-col justify-center">
                     {/* Name */}
-                    <div className="text-sm text-gray-900 mb-1 truncate">
+                    <div className="text-sm text-gray-900 mb-0.5 truncate">
                         <span className="font-bold">Name: </span>
                         {animal.prefix && `${animal.prefix} `}{animal.name}
                     </div>
                     
                     {/* Variety */}
-                    <div className="text-xs text-gray-900 mb-1 truncate">
+                    <div className="text-xs text-gray-900 mb-0.5 truncate">
                         <span className="font-semibold">Variety: </span>
                         {colorCoat}
                     </div>
                     
                     {/* Birth Date */}
-                    <div className="text-xs text-gray-900 mb-1">
+                    <div className="text-xs text-gray-900 mb-0.5">
                         <span className="font-semibold">Birthdate: </span>
                         {animal.birthDate ? new Date(animal.birthDate).toLocaleDateString() : 'N/A'}
                     </div>
                     
                     {/* Breeder */}
-                    <div className="text-xs text-gray-900 truncate mb-4">
+                    <div className="text-xs text-gray-900 truncate mb-1">
                         <span className="font-semibold">Breeder: </span>
                         {animal.breederName || 'N/A'}
                     </div>
@@ -264,7 +264,7 @@ const PedigreeChart = ({ animalId, animalData, onClose, API_BASE_URL, authToken 
                 </div>
                 
                 {/* CT ID - Bottom Right */}
-                <div className="absolute bottom-2 right-2 text-xs font-mono text-gray-400">
+                <div className="absolute bottom-2 right-2 text-xs font-mono text-gray-700">
                     CT{animal.id_public}
                 </div>
             </div>
@@ -278,7 +278,7 @@ const PedigreeChart = ({ animalId, animalData, onClose, API_BASE_URL, authToken 
         
         if (!animal) {
             return (
-                <div className={`border border-gray-400 rounded p-2 ${bgColor} relative h-full flex items-center justify-center`}>
+                <div className={`border border-gray-700 rounded p-2 ${bgColor} relative h-full flex items-center justify-center`}>
                     <div className="text-center">
                         <Cat size={32} className="text-gray-300 mx-auto mb-2" />
                         <div className="text-xs text-gray-400">Unknown</div>
@@ -294,7 +294,7 @@ const PedigreeChart = ({ animalId, animalData, onClose, API_BASE_URL, authToken 
         const colorCoat = [animal.color, animal.coat].filter(Boolean).join(' ') || 'N/A';
         
         return (
-            <div className={`border border-gray-400 rounded p-2 ${bgColor} relative flex gap-2 h-full items-center`}>
+            <div className={`border border-gray-700 rounded p-2 ${bgColor} relative flex gap-2 h-full items-center`}>
                 {/* Image - 1/3 width */}
                 <div className="w-1/3 aspect-square bg-gray-100 rounded-lg border-2 border-gray-900 overflow-hidden flex items-center justify-center flex-shrink-0">
                     {imgSrc ? (
@@ -307,25 +307,25 @@ const PedigreeChart = ({ animalId, animalData, onClose, API_BASE_URL, authToken 
                 {/* Info */}
                 <div className="flex-1 min-w-0 flex flex-col justify-center">
                     {/* Name */}
-                    <div className="text-xs text-gray-900 mb-1 truncate">
+                    <div className="text-xs text-gray-900 mb-0.5 truncate">
                         <span className="font-semibold">Name: </span>
                         {animal.prefix && `${animal.prefix} `}{animal.name}
                     </div>
                     
                     {/* Variety */}
-                    <div className="text-xs text-gray-900 mb-1 truncate">
+                    <div className="text-xs text-gray-900 mb-0.5 truncate">
                         <span className="font-semibold">Variety: </span>
                         {colorCoat}
                     </div>
                     
                     {/* Birth Date */}
-                    <div className="text-xs text-gray-900 mb-1">
+                    <div className="text-xs text-gray-900 mb-0.5">
                         <span className="font-semibold">Birthdate: </span>
                         {animal.birthDate ? new Date(animal.birthDate).toLocaleDateString() : 'N/A'}
                     </div>
                     
                     {/* Breeder */}
-                    <div className="text-xs text-gray-900 truncate mb-4">
+                    <div className="text-xs text-gray-900 truncate mb-1">
                         <span className="font-semibold">Breeder: </span>
                         {animal.breederName || 'N/A'}
                     </div>
@@ -337,7 +337,7 @@ const PedigreeChart = ({ animalId, animalData, onClose, API_BASE_URL, authToken 
                 </div>
                 
                 {/* CT ID - Bottom Right */}
-                <div className="absolute bottom-2 right-2 text-xs font-mono text-gray-400">
+                <div className="absolute bottom-2 right-2 text-xs font-mono text-gray-700">
                     CT{animal.id_public}
                 </div>
             </div>
@@ -351,7 +351,7 @@ const PedigreeChart = ({ animalId, animalData, onClose, API_BASE_URL, authToken 
         
         if (!animal) {
             return (
-                <div className={`border border-gray-400 rounded p-1.5 ${bgColor} flex gap-1.5 h-full items-center relative`}>
+                <div className={`border border-gray-700 rounded p-1.5 ${bgColor} flex gap-1.5 h-full items-center relative`}>
                     {/* Image placeholder - 1/3 width */}
                     <div className="w-1/3 aspect-square bg-gray-100 rounded-lg border-2 border-gray-900 overflow-hidden flex items-center justify-center flex-shrink-0">
                         <Cat size={20} className="text-gray-400" />
@@ -371,7 +371,7 @@ const PedigreeChart = ({ animalId, animalData, onClose, API_BASE_URL, authToken 
         const colorCoat = [animal.color, animal.coat].filter(Boolean).join(' ') || 'N/A';
         
         return (
-            <div className={`border border-gray-400 rounded p-1.5 ${bgColor} relative flex gap-1.5 h-full items-center`}>
+            <div className={`border border-gray-700 rounded p-1.5 ${bgColor} relative flex gap-1.5 h-full items-center`}>
                 {/* Image - 1/3 width */}
                 <div className="w-1/3 aspect-square bg-gray-100 rounded-lg border-2 border-gray-900 overflow-hidden flex items-center justify-center flex-shrink-0">
                     {imgSrc ? (
@@ -402,7 +402,7 @@ const PedigreeChart = ({ animalId, animalData, onClose, API_BASE_URL, authToken 
                     </div>
                     
                     {/* Breeder */}
-                    <div className="text-xs text-gray-900 truncate mb-3">
+                    <div className="text-xs text-gray-900 truncate mb-0.5">
                         <span className="font-semibold">Breeder: </span>
                         {animal.breederName || 'N/A'}
                     </div>
@@ -414,7 +414,7 @@ const PedigreeChart = ({ animalId, animalData, onClose, API_BASE_URL, authToken 
                 </div>
                 
                 {/* CT ID - Bottom Right */}
-                <div className="absolute bottom-1.5 right-1 text-xs font-mono text-gray-400">
+                <div className="absolute bottom-1.5 right-1 text-xs font-mono text-gray-700">
                     CT{animal.id_public}
                 </div>
             </div>
@@ -428,7 +428,7 @@ const PedigreeChart = ({ animalId, animalData, onClose, API_BASE_URL, authToken 
         
         if (!animal) {
             return (
-                <div className={`border border-gray-400 rounded p-1 ${bgColor} flex items-center justify-center h-full relative`}>
+                <div className={`border border-gray-700 rounded p-1 ${bgColor} flex items-center justify-center h-full relative`}>
                     <span className="text-xs text-gray-400">Unknown</span>
                     <div className="absolute top-0.5 right-0.5">
                         <GenderIcon size={12} className="text-gray-900" strokeWidth={2.5} />
@@ -440,7 +440,7 @@ const PedigreeChart = ({ animalId, animalData, onClose, API_BASE_URL, authToken 
         const colorCoat = [animal.color, animal.coat].filter(Boolean).join(' ') || 'N/A';
         
         return (
-            <div className={`border border-gray-400 rounded p-1 ${bgColor} relative h-full flex flex-col justify-center`}>
+            <div className={`border border-gray-700 rounded p-1 ${bgColor} relative h-full flex flex-col justify-center`}>
                 {/* Name */}
                 <div className="text-xs text-gray-900 truncate mb-0.5">
                     <span className="font-semibold">Name: </span>
@@ -454,7 +454,7 @@ const PedigreeChart = ({ animalId, animalData, onClose, API_BASE_URL, authToken 
                 </div>
                 
                 {/* Breeder */}
-                <div className="text-xs text-gray-900 truncate mb-3">
+                <div className="text-xs text-gray-900 truncate mb-0.5">
                     <span className="font-semibold">Breeder: </span>
                     {animal.breederName || 'N/A'}
                 </div>
@@ -465,7 +465,7 @@ const PedigreeChart = ({ animalId, animalData, onClose, API_BASE_URL, authToken 
                 </div>
                 
                 {/* CT ID - Bottom Right */}
-                <div className="absolute bottom-1.5 right-0.5 text-xs font-mono text-gray-400">
+                <div className="absolute bottom-1.5 right-0.5 text-xs font-mono text-gray-700">
                     CT{animal.id_public}
                 </div>
             </div>
@@ -660,15 +660,15 @@ const PedigreeChart = ({ animalId, animalData, onClose, API_BASE_URL, authToken 
                         </div>
                         
                         {/* Right: Owner Profile */}
-                        <div className="w-1/3 flex items-center justify-end gap-2">
+                        <div className="w-1/3 flex items-center justify-end gap-3">
                             <div className="text-right">
-                                <div className="text-base font-semibold text-gray-800">{getOwnerDisplayName()}</div>
+                                <div className="text-lg font-semibold text-gray-800">{getOwnerDisplayName()}</div>
                             </div>
-                            <div className="w-12 h-12 bg-gray-200 rounded-lg overflow-hidden flex items-center justify-center">
+                            <div className="w-16 h-16 bg-gray-200 rounded-lg overflow-hidden flex items-center justify-center">
                                 {ownerProfile?.profileImage ? (
                                     <img src={ownerProfile.profileImage} alt="Owner" className="w-full h-full object-cover" />
                                 ) : (
-                                    <User size={24} className="text-gray-400" />
+                                    <User size={32} className="text-gray-400" />
                                 )}
                             </div>
                         </div>
