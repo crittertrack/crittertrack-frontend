@@ -400,7 +400,7 @@ const UserSearchModal = ({ onClose, showModalMessage, onSelectUser, API_BASE_URL
         
         try {
             if (searchType === 'users') {
-                // Search for users/breeders
+                // Search for users
                 const url = `${API_BASE_URL}/public/profiles/search?query=${encodeURIComponent(searchTerm.trim())}&limit=50`;
                 console.log('Fetching users from:', url);
                 const response = await axios.get(url);
@@ -523,7 +523,7 @@ const UserSearchModal = ({ onClose, showModalMessage, onSelectUser, API_BASE_URL
                         }`}
                     >
                         <User size={16} className="inline mr-2" />
-                        Breeders
+                        Users
                     </button>
                     <button
                         onClick={() => { setSearchType('animals'); setUserResults([]); setAnimalResults([]); }}
@@ -564,7 +564,7 @@ const UserSearchModal = ({ onClose, showModalMessage, onSelectUser, API_BASE_URL
                     {loading ? <LoadingSpinner /> : results.length > 0 ? (
                         <div className="border rounded-lg bg-white shadow-sm">
                             <h4 className="font-bold text-gray-700 p-3 bg-gray-50 border-b">
-                                {searchType === 'users' ? `Breeders (${results.length})` : `Animals (${results.length})`}
+                                {searchType === 'users' ? `Users (${results.length})` : `Animals (${results.length})`}
                             </h4>
                             {searchType === 'users' 
                                 ? results.map(user => <UserResultCard key={user.id_public} user={user} />)
@@ -573,11 +573,11 @@ const UserSearchModal = ({ onClose, showModalMessage, onSelectUser, API_BASE_URL
                         </div>
                     ) : searchTerm && !loading ? (
                         <p className="text-center text-gray-500 py-4">
-                            No {searchType === 'users' ? 'breeders' : 'animals'} found matching your search.
+                            No {searchType === 'users' ? 'users' : 'animals'} found matching your search.
                         </p>
                     ) : (
                         <p className="text-center text-gray-500 py-4">
-                            Enter a name or ID to search for {searchType === 'users' ? 'breeders' : 'animals'}.
+                            Enter a name or ID to search for {searchType === 'users' ? 'users' : 'animals'}.
                         </p>
                     )}
                 </div>
@@ -3579,7 +3579,7 @@ const App = () => {
                     <button 
                         onClick={() => setShowUserSearchModal(true)} 
                         className="flex items-center justify-center bg-gray-100 hover:bg-gray-200 text-gray-600 py-2 px-3 rounded-lg transition duration-150 shadow-sm"
-                        title="Search Breeders by Name or ID"
+                        title="Search Users by Name or ID"
                     >
                         <Search size={20} className="mr-1 hidden sm:inline" />
                         <span className="text-sm hidden sm:inline">Search</span>
