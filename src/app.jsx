@@ -1567,6 +1567,28 @@ const AnimalForm = ({
         return () => { mounted = false; };
     }, [animalToEdit]);
 
+    // Fetch parent info when parent IDs change (for newly selected parents)
+    useEffect(() => {
+        let mounted = true;
+        (async () => {
+            if (formData.fatherId_public && !fatherInfo) {
+                try {
+                    const info = await fetchAnimalSummary(formData.fatherId_public);
+                    console.log('Fetched father info from formData:', info);
+                    if (mounted) setFatherInfo(info);
+                } catch (e) { console.error('Failed to fetch father info:', e); }
+            }
+            if (formData.motherId_public && !motherInfo) {
+                try {
+                    const info = await fetchAnimalSummary(formData.motherId_public);
+                    console.log('Fetched mother info from formData:', info);
+                    if (mounted) setMotherInfo(info);
+                } catch (e) { console.error('Failed to fetch mother info:', e); }
+            }
+        })();
+        return () => { mounted = false; };
+    }, [formData.fatherId_public, formData.motherId_public]);
+
     const handleSubmit = async (e) => {
         e.preventDefault();
         setLoading(true);
