@@ -474,11 +474,11 @@ const PedigreeChart = ({ animalId, animalData, onClose, API_BASE_URL, authToken 
         const mgmFather = maternalGrandmother?.father;
         const mgmMother = maternalGrandmother?.mother;
 
-        // Calculate heights based on full height (794px - header/footer ~130px = ~664px for content)
-        const contentHeight = 664;
-        const parentHeight = contentHeight / 2; // ~332px for each parent
-        const grandparentHeight = contentHeight / 4; // ~166px for each grandparent
-        const greatGrandparentHeight = contentHeight / 8; // ~83px for each great-grandparent
+        // Calculate heights based on full height (794px - header ~48px - footer ~40px - main card ~168px - gaps = ~538px for content)
+        const contentHeight = 538;
+        const parentHeight = contentHeight / 2; // ~269px for each parent
+        const grandparentHeight = contentHeight / 4; // ~134.5px for each grandparent
+        const greatGrandparentHeight = contentHeight / 8; // ~67px for each great-grandparent
 
         return (
             <div className="flex flex-col gap-2 w-full">
@@ -607,7 +607,7 @@ const PedigreeChart = ({ animalId, animalData, onClose, API_BASE_URL, authToken 
                 {/* Pedigree Chart - A4 Landscape: 11.69" x 8.27" (1123px x 794px at 96dpi) */}
                 <div ref={pedigreeRef} className="bg-white p-6 rounded-lg border-2 border-gray-300 relative" style={{width: '1123px', height: '794px', maxWidth: '1123px', maxHeight: '794px'}}>
                     {/* Species - Centered Top */}
-                    <div className="text-center mb-4">
+                    <div className="absolute top-6 left-1/2 transform -translate-x-1/2">
                         <h3 className="text-lg font-bold text-gray-800">{pedigreeData?.species || 'Unknown Species'}</h3>
                     </div>
 
@@ -626,12 +626,12 @@ const PedigreeChart = ({ animalId, animalData, onClose, API_BASE_URL, authToken 
                     </div>
 
                     {/* Pedigree Tree */}
-                    <div className="overflow-hidden">
+                    <div className="mt-12 overflow-hidden">
                         {renderPedigreeTree(pedigreeData)}
                     </div>
 
                     {/* Footer */}
-                    <div className="mt-4 pt-3 border-t-2 border-gray-300 flex justify-between items-center text-sm text-gray-600">
+                    <div className="absolute bottom-6 left-6 right-6 pt-3 border-t-2 border-gray-300 flex justify-between items-center text-sm text-gray-600">
                         <div>{getOwnerDisplayName()}</div>
                         <div>{new Date().toLocaleDateString()}</div>
                     </div>
