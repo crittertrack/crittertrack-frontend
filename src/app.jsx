@@ -747,21 +747,23 @@ const ViewOnlyAnimalDetail = ({ animal, onClose, API_BASE_URL }) => {
     return (
         <div className="fixed inset-0 bg-accent/10 flex items-center justify-center p-4 z-50 overflow-y-auto">
             <div className="bg-primary rounded-xl shadow-2xl p-6 w-full max-w-4xl max-h-[90vh] overflow-y-auto">
-                <div className="flex justify-between items-center mb-6">
-                    <button 
-                        onClick={onClose} 
-                        className="flex items-center text-gray-600 hover:text-gray-800 transition"
-                    >
-                        <ArrowLeft size={18} className="mr-1" /> Back
-                    </button>
-                    <button onClick={onClose} className="text-gray-500 hover:text-gray-800">
-                        <X size={28} />
-                    </button>
-                </div>
+                <div className="bg-white rounded-lg p-4 mb-6">
+                    <div className="flex justify-between items-center mb-4">
+                        <button 
+                            onClick={onClose} 
+                            className="flex items-center text-gray-600 hover:text-gray-800 transition"
+                        >
+                            <ArrowLeft size={18} className="mr-1" /> Back
+                        </button>
+                        <button onClick={onClose} className="text-gray-500 hover:text-gray-800">
+                            <X size={28} />
+                        </button>
+                    </div>
 
-                <h2 className="text-3xl font-bold text-gray-900 mb-6 pb-4 border-b">
-                    {animal.prefix && `${animal.prefix} `}{animal.name}
-                </h2>
+                    <h2 className="text-3xl font-bold text-gray-900 pb-4 border-b">
+                        {animal.prefix && `${animal.prefix} `}{animal.name}
+                    </h2>
+                </div>
 
                 <div className="space-y-6">
                     {/* Image with ID, Species, Status below */}
