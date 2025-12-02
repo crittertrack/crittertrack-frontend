@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useCallback, useRef, useMemo } from 'react';
 import axios from 'axios';
-import { LogOut, Cat, UserPlus, LogIn, ChevronLeft, Trash2, Edit, Save, PlusCircle, ArrowLeft, Loader2, RefreshCw, User, ClipboardList, BookOpen, Settings, Mail, Globe, Egg, Milk, Search, X, Mars, Venus, Eye, EyeOff, Home, Heart, HeartOff, Bell, Check, XCircle } from 'lucide-react';
+import { LogOut, Cat, UserPlus, LogIn, ChevronLeft, Trash2, Edit, Save, PlusCircle, ArrowLeft, Loader2, RefreshCw, User, ClipboardList, BookOpen, Settings, Mail, Globe, Egg, Milk, Search, X, Mars, Venus, Eye, EyeOff, Home, Heart, HeartOff, Bell, XCircle } from 'lucide-react';
 
 const API_BASE_URL = 'https://crittertrack-pedigree-production.up.railway.app/api';
 
@@ -3307,22 +3307,6 @@ const NotificationPanel = ({ authToken, API_BASE_URL, onClose, showModalMessage 
         }
     };
 
-    const handleApprove = async (notificationId) => {
-        setProcessing(notificationId);
-        try {
-            await axios.post(`${API_BASE_URL}/notifications/${notificationId}/approve`, {}, {
-                headers: { Authorization: `Bearer ${authToken}` }
-            });
-            showModalMessage('Approved', 'Request approved successfully');
-            fetchNotifications();
-        } catch (error) {
-            console.error('Error approving notification:', error);
-            showModalMessage('Error', 'Failed to approve request');
-        } finally {
-            setProcessing(null);
-        }
-    };
-
     const handleReject = async (notificationId) => {
         setProcessing(notificationId);
         try {
@@ -3413,20 +3397,12 @@ const NotificationPanel = ({ authToken, API_BASE_URL, onClose, showModalMessage 
                                             </div>
                                             <div className="flex space-x-2">
                                                 <button
-                                                    onClick={() => handleApprove(notification._id)}
-                                                    disabled={processing === notification._id}
-                                                    className="flex items-center space-x-1 bg-accent hover:bg-accent/90 text-white px-3 py-1 rounded text-sm disabled:opacity-50"
-                                                >
-                                                    <Check size={14} />
-                                                    <span>Approve</span>
-                                                </button>
-                                                <button
                                                     onClick={() => handleReject(notification._id)}
                                                     disabled={processing === notification._id}
                                                     className="flex items-center space-x-1 bg-red-500 hover:bg-red-600 text-white px-3 py-1 rounded text-sm disabled:opacity-50"
                                                 >
                                                     <XCircle size={14} />
-                                                    <span>Reject</span>
+                                                    <span>Reject & Remove Linkage</span>
                                                 </button>
                                                 {!notification.read && (
                                                     <button
