@@ -628,7 +628,7 @@ const PublicProfileView = ({ profile, onBack, onViewAnimal, API_BASE_URL }) => {
     }, {});
 
     return (
-        <div className="w-full max-w-6xl bg-white p-6 rounded-xl shadow-lg">
+        <div className="w-full max-w-6xl bg-primary/10 p-6 rounded-xl shadow-lg">
             <div className="flex justify-between items-start mb-6">
                 <button 
                     onClick={onBack} 
