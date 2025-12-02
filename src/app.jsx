@@ -738,6 +738,7 @@ const PublicProfileView = ({ profile, onBack, onViewAnimal, API_BASE_URL }) => {
 // View-Only Animal Detail Modal
 const ViewOnlyAnimalDetail = ({ animal, onClose, API_BASE_URL, onViewProfile }) => {
     const [breederInfo, setBreederInfo] = useState(null);
+    const [ownerPrivacySettings, setOwnerPrivacySettings] = useState(null);
     
     // Fetch breeder info when component mounts or animal changes
     React.useEffect(() => {
@@ -761,14 +762,39 @@ const ViewOnlyAnimalDetail = ({ animal, onClose, API_BASE_URL, onViewProfile }) 
         fetchBreeder();
     }, [animal?.breederId_public, API_BASE_URL]);
     
+    // Fetch owner's privacy settings
+    React.useEffect(() => {
+        const fetchOwnerPrivacy = async () => {
+            if (animal?.ownerId_public) {
+                try {
+                    const response = await axios.get(
+                        `${API_BASE_URL}/public/profiles/search?query=CT${animal.ownerId_public}&limit=1`
+                    );
+                    if (response.data && response.data.length > 0) {
+                        setOwnerPrivacySettings({
+                            showGeneticCodePublic: response.data[0].showGeneticCodePublic ?? false,
+                            showRemarksPublic: response.data[0].showRemarksPublic ?? false
+                        });
+                    }
+                } catch (error) {
+                    console.error('Failed to fetch owner privacy settings:', error);
+                    setOwnerPrivacySettings({ showGeneticCodePublic: false, showRemarksPublic: false });
+                }
+            } else {
+                setOwnerPrivacySettings({ showGeneticCodePublic: false, showRemarksPublic: false });
+            }
+        };
+        fetchOwnerPrivacy();
+    }, [animal?.ownerId_public, API_BASE_URL]);
+    
     if (!animal) return null;
 
     const imgSrc = animal.imageUrl || animal.photoUrl || null;
     const birthDate = animal.birthDate ? new Date(animal.birthDate).toLocaleDateString() : 'Unknown';
 
-    // Only show remarks and genetic code if they are marked as public
-    const showRemarks = animal.includeRemarks !== false && animal.remarks;
-    const showGeneticCode = animal.includeGeneticCode !== false && animal.geneticCode;
+    // Only show remarks and genetic code if owner's privacy settings allow AND data exists
+    const showRemarks = ownerPrivacySettings?.showRemarksPublic && animal.remarks;
+    const showGeneticCode = ownerPrivacySettings?.showGeneticCodePublic && animal.geneticCode;
 
     return (
         <div className="fixed inset-0 bg-accent/10 flex items-center justify-center p-4 z-50 overflow-y-auto">
@@ -2278,6 +2304,8 @@ const ProfileEditForm = ({ userProfile, showModalMessage, onSaveSuccess, onCance
     const [websiteURL, setWebsiteURL] = useState(userProfile.websiteURL || '');
     const [showWebsiteURL, setShowWebsiteURL] = useState(userProfile.showWebsiteURL ?? false);
     const [showEmailPublic, setShowEmailPublic] = useState(userProfile.showEmailPublic ?? false); 
+    const [showGeneticCodePublic, setShowGeneticCodePublic] = useState(userProfile.showGeneticCodePublic ?? false);
+    const [showRemarksPublic, setShowRemarksPublic] = useState(userProfile.showRemarksPublic ?? false); 
 
     const [profileImageFile, setProfileImageFile] = useState(null); 
     const [profileImageURL, setProfileImageURL] = useState(
@@ -2332,6 +2360,8 @@ const ProfileEditForm = ({ userProfile, showModalMessage, onSaveSuccess, onCance
             websiteURL: websiteURL || null,
             showWebsiteURL: websiteURL ? showWebsiteURL : false,
             showEmailPublic: showEmailPublic,
+            showGeneticCodePublic: showGeneticCodePublic,
+            showRemarksPublic: showRemarksPublic,
         };
 
         try {
@@ -2519,6 +2549,20 @@ const ProfileEditForm = ({ userProfile, showModalMessage, onSaveSuccess, onCance
                                 <span>Display **Website URL** on your public profile card.</span>
                             </label>
                         )}
+                        
+                        <h4 className="text-base font-medium text-gray-800 pt-4 border-t border-gray-200">Animal Privacy Settings:</h4>
+                        
+                        <label className="flex items-center space-x-2 text-sm text-gray-700">
+                            <input type="checkbox" checked={showGeneticCodePublic} onChange={(e) => setShowGeneticCodePublic(e.target.checked)} 
+                                className="rounded text-primary-dark focus:ring-primary-dark" disabled={profileLoading} />
+                            <span>Show **Genetic Code** on public animal views</span>
+                        </label>
+                        
+                        <label className="flex items-center space-x-2 text-sm text-gray-700">
+                            <input type="checkbox" checked={showRemarksPublic} onChange={(e) => setShowRemarksPublic(e.target.checked)} 
+                                className="rounded text-primary-dark focus:ring-primary-dark" disabled={profileLoading} />
+                            <span>Show **Remarks/Notes** on public animal views</span>
+                        </label>
                     </div>
                 </div>
 
