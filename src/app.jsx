@@ -1576,17 +1576,20 @@ const AnimalForm = ({
     // Fetch parent info when parent IDs change (for newly selected parents)
     useEffect(() => {
         const fetchParentNames = async () => {
+            console.log('[PARENT FETCH] formData.fatherId_public:', formData.fatherId_public, 'formData.motherId_public:', formData.motherId_public);
+            
             // Fetch father info
             if (formData.fatherId_public) {
                 try {
                     const info = await fetchAnimalSummary(formData.fatherId_public);
-                    console.log('Fetched father info from formData change:', info);
+                    console.log('[PARENT FETCH] Fetched FATHER info for ID', formData.fatherId_public, ':', info);
                     setFatherInfo(info);
                 } catch (e) { 
-                    console.error('Failed to fetch father info:', e);
+                    console.error('[PARENT FETCH] Failed to fetch father info:', e);
                     setFatherInfo(null);
                 }
             } else {
+                console.log('[PARENT FETCH] Clearing father info (no ID)');
                 setFatherInfo(null);
             }
             
@@ -1594,13 +1597,14 @@ const AnimalForm = ({
             if (formData.motherId_public) {
                 try {
                     const info = await fetchAnimalSummary(formData.motherId_public);
-                    console.log('Fetched mother info from formData change:', info);
+                    console.log('[PARENT FETCH] Fetched MOTHER info for ID', formData.motherId_public, ':', info);
                     setMotherInfo(info);
                 } catch (e) { 
-                    console.error('Failed to fetch mother info:', e);
+                    console.error('[PARENT FETCH] Failed to fetch mother info:', e);
                     setMotherInfo(null);
                 }
             } else {
+                console.log('[PARENT FETCH] Clearing mother info (no ID)');
                 setMotherInfo(null);
             }
         };
