@@ -219,30 +219,33 @@ const PedigreeChart = ({ animalId, animalData, onClose, API_BASE_URL, authToken 
         const colorCoat = [animal.color, animal.coat].filter(Boolean).join(' / ') || 'N/A';
         
         return (
-            <div className="border-2 border-gray-400 rounded-lg p-2 bg-white relative">
+            <div className="border-2 border-gray-400 rounded-lg p-2 bg-white relative flex gap-2">
                 {/* Image */}
-                <div className="w-full aspect-square bg-gray-100 rounded-lg overflow-hidden flex items-center justify-center mb-2">
+                <div className="w-24 h-24 bg-gray-100 rounded-lg overflow-hidden flex items-center justify-center flex-shrink-0">
                     <AnimalImage src={imgSrc} alt={animal.name} className="w-full h-full object-cover" iconSize={48} />
                 </div>
                 
-                {/* Name */}
-                <div className="font-bold text-sm text-gray-800 mb-1 truncate">
-                    {animal.prefix && `${animal.prefix} `}{animal.name}
-                </div>
-                
-                {/* Color/Coat */}
-                <div className="text-xs text-gray-600 mb-1 truncate">
-                    {colorCoat}
-                </div>
-                
-                {/* Birth Date */}
-                <div className="text-xs text-gray-500 mb-1">
-                    {animal.birthDate ? new Date(animal.birthDate).toLocaleDateString() : 'Birth: N/A'}
-                </div>
-                
-                {/* Breeder */}
-                <div className="text-xs text-gray-500 truncate mb-4">
-                    Breeder: {animal.breederName || 'N/A'}
+                {/* Info */}
+                <div className="flex-1 min-w-0">
+                    {/* Name */}
+                    <div className="font-bold text-sm text-gray-800 mb-1 truncate">
+                        {animal.prefix && `${animal.prefix} `}{animal.name}
+                    </div>
+                    
+                    {/* Color/Coat */}
+                    <div className="text-xs text-gray-600 mb-1 truncate">
+                        {colorCoat}
+                    </div>
+                    
+                    {/* Birth Date */}
+                    <div className="text-xs text-gray-500 mb-1">
+                        {animal.birthDate ? new Date(animal.birthDate).toLocaleDateString() : 'Birth: N/A'}
+                    </div>
+                    
+                    {/* Breeder */}
+                    <div className="text-xs text-gray-500 truncate mb-4">
+                        Breeder: {animal.breederName || 'N/A'}
+                    </div>
                 </div>
                 
                 {/* CT ID - Bottom Right */}
@@ -257,7 +260,7 @@ const PedigreeChart = ({ animalId, animalData, onClose, API_BASE_URL, authToken 
     const renderParentCard = (animal, title) => {
         if (!animal) {
             return (
-                <div className="border border-gray-300 rounded p-2 bg-gray-50">
+                <div className="border border-gray-300 rounded p-2 bg-gray-50 relative" style={{minHeight: '220px'}}>
                     <div className="font-semibold text-xs text-gray-500 mb-2">{title}</div>
                     <div className="text-xs text-gray-400 text-center py-4">Unknown</div>
                 </div>
@@ -268,32 +271,35 @@ const PedigreeChart = ({ animalId, animalData, onClose, API_BASE_URL, authToken 
         const colorCoat = [animal.color, animal.coat].filter(Boolean).join(' / ') || 'N/A';
         
         return (
-            <div className="border border-gray-400 rounded p-2 bg-white relative">
-                <div className="font-semibold text-xs text-gray-700 mb-2">{title}</div>
-                
+            <div className="border border-gray-400 rounded p-2 bg-white relative flex gap-2">
                 {/* Image */}
-                <div className="w-full aspect-square bg-gray-100 rounded-lg overflow-hidden flex items-center justify-center mb-1">
+                <div className="w-16 h-16 bg-gray-100 rounded-lg overflow-hidden flex items-center justify-center flex-shrink-0">
                     <AnimalImage src={imgSrc} alt={animal.name} className="w-full h-full object-cover" iconSize={28} />
                 </div>
                 
-                {/* Name */}
-                <div className="font-semibold text-xs text-gray-800 mb-1 truncate">
-                    {animal.prefix && `${animal.prefix} `}{animal.name}
-                </div>
-                
-                {/* Color/Coat */}
-                <div className="text-xs text-gray-600 mb-1 truncate">
-                    {colorCoat}
-                </div>
-                
-                {/* Birth Date */}
-                <div className="text-xs text-gray-500 mb-1">
-                    {animal.birthDate ? new Date(animal.birthDate).toLocaleDateString() : 'N/A'}
-                </div>
-                
-                {/* Breeder */}
-                <div className="text-xs text-gray-500 truncate mb-4">
-                    {animal.breederName || 'N/A'}
+                {/* Info */}
+                <div className="flex-1 min-w-0">
+                    <div className="font-semibold text-xs text-gray-700 mb-1">{title}</div>
+                    
+                    {/* Name */}
+                    <div className="font-semibold text-xs text-gray-800 mb-1 truncate">
+                        {animal.prefix && `${animal.prefix} `}{animal.name}
+                    </div>
+                    
+                    {/* Color/Coat */}
+                    <div className="text-xs text-gray-600 mb-1 truncate">
+                        {colorCoat}
+                    </div>
+                    
+                    {/* Birth Date */}
+                    <div className="text-xs text-gray-500 mb-1">
+                        {animal.birthDate ? new Date(animal.birthDate).toLocaleDateString() : 'N/A'}
+                    </div>
+                    
+                    {/* Breeder */}
+                    <div className="text-xs text-gray-500 truncate mb-4">
+                        {animal.breederName || 'N/A'}
+                    </div>
                 </div>
                 
                 {/* CT ID - Bottom Right */}
@@ -308,7 +314,7 @@ const PedigreeChart = ({ animalId, animalData, onClose, API_BASE_URL, authToken 
     const renderGrandparentCard = (animal) => {
         if (!animal) {
             return (
-                <div className="border border-gray-300 rounded p-1.5 bg-gray-50 h-full flex items-center justify-center">
+                <div className="border border-gray-300 rounded p-1.5 bg-gray-50 flex items-center justify-center" style={{minHeight: '180px'}}>
                     <span className="text-xs text-gray-400">Unknown</span>
                 </div>
             );
@@ -318,30 +324,33 @@ const PedigreeChart = ({ animalId, animalData, onClose, API_BASE_URL, authToken 
         const colorCoat = [animal.color, animal.coat].filter(Boolean).join(' / ') || 'N/A';
         
         return (
-            <div className="border border-gray-300 rounded p-1.5 bg-white relative">
+            <div className="border border-gray-300 rounded p-1.5 bg-white relative flex gap-1.5">
                 {/* Image */}
-                <div className="w-full aspect-square bg-gray-100 rounded-lg overflow-hidden flex items-center justify-center mb-1">
+                <div className="w-12 h-12 bg-gray-100 rounded-lg overflow-hidden flex items-center justify-center flex-shrink-0">
                     <AnimalImage src={imgSrc} alt={animal.name} className="w-full h-full object-cover" iconSize={20} />
                 </div>
                 
-                {/* Name */}
-                <div className="font-semibold text-xs text-gray-800 truncate mb-0.5">
-                    {animal.prefix && `${animal.prefix} `}{animal.name}
-                </div>
-                
-                {/* Color/Coat */}
-                <div className="text-xs text-gray-600 truncate mb-0.5">
-                    {colorCoat}
-                </div>
-                
-                {/* Birth Date */}
-                <div className="text-xs text-gray-500 mb-0.5">
-                    {animal.birthDate ? new Date(animal.birthDate).toLocaleDateString() : 'N/A'}
-                </div>
-                
-                {/* Breeder */}
-                <div className="text-xs text-gray-500 truncate mb-3">
-                    {animal.breederName || 'N/A'}
+                {/* Info */}
+                <div className="flex-1 min-w-0">
+                    {/* Name */}
+                    <div className="font-semibold text-xs text-gray-800 truncate mb-0.5">
+                        {animal.prefix && `${animal.prefix} `}{animal.name}
+                    </div>
+                    
+                    {/* Color/Coat */}
+                    <div className="text-xs text-gray-600 truncate mb-0.5">
+                        {colorCoat}
+                    </div>
+                    
+                    {/* Birth Date */}
+                    <div className="text-xs text-gray-500 mb-0.5">
+                        {animal.birthDate ? new Date(animal.birthDate).toLocaleDateString() : 'N/A'}
+                    </div>
+                    
+                    {/* Breeder */}
+                    <div className="text-xs text-gray-500 truncate mb-3">
+                        {animal.breederName || 'N/A'}
+                    </div>
                 </div>
                 
                 {/* CT ID - Bottom Right */}
@@ -356,7 +365,7 @@ const PedigreeChart = ({ animalId, animalData, onClose, API_BASE_URL, authToken 
     const renderGreatGrandparentCard = (animal) => {
         if (!animal) {
             return (
-                <div className="border border-gray-300 rounded p-1 bg-gray-50 h-full flex items-center justify-center">
+                <div className="border border-gray-300 rounded p-1 bg-gray-50 flex items-center justify-center" style={{minHeight: '150px'}}>
                     <span className="text-xs text-gray-400">Unknown</span>
                 </div>
             );
@@ -366,30 +375,33 @@ const PedigreeChart = ({ animalId, animalData, onClose, API_BASE_URL, authToken 
         const colorCoat = [animal.color, animal.coat].filter(Boolean).join(' / ') || 'N/A';
         
         return (
-            <div className="border border-gray-300 rounded p-1 bg-white relative">
+            <div className="border border-gray-300 rounded p-1 bg-white relative flex gap-1">
                 {/* Image */}
-                <div className="w-full aspect-square bg-gray-100 rounded-md overflow-hidden flex items-center justify-center mb-0.5">
+                <div className="w-10 h-10 bg-gray-100 rounded-md overflow-hidden flex items-center justify-center flex-shrink-0">
                     <AnimalImage src={imgSrc} alt={animal.name} className="w-full h-full object-cover" iconSize={16} />
                 </div>
                 
-                {/* Name */}
-                <div className="font-semibold text-xs text-gray-800 truncate mb-0.5">
-                    {animal.prefix && `${animal.prefix} `}{animal.name}
-                </div>
-                
-                {/* Color/Coat */}
-                <div className="text-xs text-gray-600 truncate mb-0.5">
-                    {colorCoat}
-                </div>
-                
-                {/* Birth Date */}
-                <div className="text-xs text-gray-500 mb-0.5">
-                    {animal.birthDate ? new Date(animal.birthDate).toLocaleDateString() : 'N/A'}
-                </div>
-                
-                {/* Breeder */}
-                <div className="text-xs text-gray-500 truncate mb-3">
-                    {animal.breederName || 'N/A'}
+                {/* Info */}
+                <div className="flex-1 min-w-0">
+                    {/* Name */}
+                    <div className="font-semibold text-xs text-gray-800 truncate mb-0.5">
+                        {animal.prefix && `${animal.prefix} `}{animal.name}
+                    </div>
+                    
+                    {/* Color/Coat */}
+                    <div className="text-xs text-gray-600 truncate mb-0.5">
+                        {colorCoat}
+                    </div>
+                    
+                    {/* Birth Date */}
+                    <div className="text-xs text-gray-500 mb-0.5">
+                        {animal.birthDate ? new Date(animal.birthDate).toLocaleDateString() : 'N/A'}
+                    </div>
+                    
+                    {/* Breeder */}
+                    <div className="text-xs text-gray-500 truncate mb-3">
+                        {animal.breederName || 'N/A'}
+                    </div>
                 </div>
                 
                 {/* CT ID - Bottom Right */}
@@ -404,7 +416,7 @@ const PedigreeChart = ({ animalId, animalData, onClose, API_BASE_URL, authToken 
     const renderGreatGreatGrandparentCard = (animal) => {
         if (!animal) {
             return (
-                <div className="border border-gray-300 rounded p-0.5 bg-gray-50 h-full flex items-center justify-center">
+                <div className="border border-gray-300 rounded p-0.5 bg-gray-50 flex items-center justify-center" style={{minHeight: '120px'}}>
                     <span className="text-xs text-gray-400">Unknown</span>
                 </div>
             );
