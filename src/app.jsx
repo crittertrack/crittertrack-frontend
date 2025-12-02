@@ -739,19 +739,10 @@ const PublicProfileView = ({ profile, onBack, onViewAnimal, API_BASE_URL }) => {
 const ViewOnlyAnimalDetail = ({ animal, onClose, API_BASE_URL }) => {
     const [breederInfo, setBreederInfo] = useState(null);
     
-    if (!animal) return null;
-
-    const imgSrc = animal.imageUrl || animal.photoUrl || null;
-    const birthDate = animal.birthDate ? new Date(animal.birthDate).toLocaleDateString() : 'Unknown';
-
-    // Only show remarks and genetic code if they are marked as public
-    const showRemarks = animal.includeRemarks !== false && animal.remarks;
-    const showGeneticCode = animal.includeGeneticCode !== false && animal.geneticCode;
-
     // Fetch breeder info when component mounts or animal changes
     React.useEffect(() => {
         const fetchBreeder = async () => {
-            if (animal.breederId_public) {
+            if (animal?.breederId_public) {
                 try {
                     const response = await axios.get(
                         `${API_BASE_URL}/public/profiles/search?query=CT${animal.breederId_public}&limit=1`
@@ -768,7 +759,16 @@ const ViewOnlyAnimalDetail = ({ animal, onClose, API_BASE_URL }) => {
             }
         };
         fetchBreeder();
-    }, [animal.breederId_public, API_BASE_URL]);
+    }, [animal?.breederId_public, API_BASE_URL]);
+    
+    if (!animal) return null;
+
+    const imgSrc = animal.imageUrl || animal.photoUrl || null;
+    const birthDate = animal.birthDate ? new Date(animal.birthDate).toLocaleDateString() : 'Unknown';
+
+    // Only show remarks and genetic code if they are marked as public
+    const showRemarks = animal.includeRemarks !== false && animal.remarks;
+    const showGeneticCode = animal.includeGeneticCode !== false && animal.geneticCode;
 
     return (
         <div className="fixed inset-0 bg-accent/10 flex items-center justify-center p-4 z-50 overflow-y-auto">
