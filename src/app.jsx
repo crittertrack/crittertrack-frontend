@@ -746,7 +746,7 @@ const ViewOnlyAnimalDetail = ({ animal, onClose, API_BASE_URL }) => {
 
     return (
         <div className="fixed inset-0 bg-blue-900/75 flex items-center justify-center p-4 z-50 overflow-y-auto">
-            <div className="bg-white rounded-xl shadow-2xl p-6 w-full max-w-4xl my-8 mt-20">
+            <div className="bg-white rounded-xl shadow-2xl p-6 w-full max-w-4xl max-h-[90vh] overflow-y-auto">
                 <div className="flex justify-between items-center border-b pb-4 mb-6">
                     <h2 className="text-3xl font-bold text-gray-900">
                         {animal.prefix && `${animal.prefix} `}{animal.name}
@@ -766,15 +766,19 @@ const ViewOnlyAnimalDetail = ({ animal, onClose, API_BASE_URL }) => {
                                 className="w-full rounded-lg shadow-lg object-cover max-h-96"
                             />
                         )}
-                        <div className="mt-4 space-y-2 text-center">
-                            <p className="text-sm text-gray-600">
+                        <div className="mt-4 space-y-2">
+                            <p className="text-center text-sm text-gray-600">
                                 <span className="font-mono text-lg font-semibold text-gray-900">CT{animal.id_public}</span>
+                                <span className="mx-2">•</span>
+                                <span className="text-base font-medium text-gray-700">{animal.species}</span>
                             </p>
-                            <p className="text-base text-gray-700">
-                                <span className="font-medium">{animal.species}</span>
-                                {animal.status && <span className="mx-2">•</span>}
-                                {animal.status && <span className="font-medium">{animal.status}</span>}
-                            </p>
+                            {animal.status && (
+                                <div className="flex justify-center">
+                                    <div className="bg-gray-100 px-4 py-1 rounded border border-gray-300">
+                                        <span className="text-xs font-medium text-gray-700">{animal.status}</span>
+                                    </div>
+                                </div>
+                            )}
                         </div>
                     </div>
 
