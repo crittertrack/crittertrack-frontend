@@ -1,6 +1,8 @@
 import React, { useState, useEffect, useCallback, useRef, useMemo } from 'react';
 import axios from 'axios';
-import { LogOut, Cat, UserPlus, LogIn, ChevronLeft, Trash2, Edit, Save, PlusCircle, ArrowLeft, Loader2, RefreshCw, User, ClipboardList, BookOpen, Settings, Mail, Globe, Egg, Milk, Search, X, Mars, Venus, Eye, EyeOff, Home, Heart, HeartOff, Bell, XCircle } from 'lucide-react';
+import { LogOut, Cat, UserPlus, LogIn, ChevronLeft, Trash2, Edit, Save, PlusCircle, ArrowLeft, Loader2, RefreshCw, User, ClipboardList, BookOpen, Settings, Mail, Globe, Egg, Milk, Search, X, Mars, Venus, Eye, EyeOff, Home, Heart, HeartOff, Bell, XCircle, Download, FileText } from 'lucide-react';
+import jsPDF from 'jspdf';
+import html2canvas from 'html2canvas';
 
 const API_BASE_URL = 'https://crittertrack-pedigree-production.up.railway.app/api';
 
@@ -68,6 +70,295 @@ const AnimalImage = ({ src, alt = "Animal", className = "w-full h-full object-co
             onError={handleError}
             loading="lazy"
         />
+    );
+};
+
+// Pedigree Chart Component
+const PedigreeChart = ({ animalId, animalData, onClose, API_BASE_URL, authToken = null }) => {
+    const [pedigreeData, setPedigreeData] = useState(null);
+    const [loading, setLoading] = useState(true);
+    const pedigreeRef = useRef(null);
+
+    useEffect(() => {
+        const fetchPedigreeData = async () => {
+            setLoading(true);
+            try {
+                // Recursive function to fetch animal and ancestors
+                const fetchAnimalWithAncestors = async (id, depth = 0) => {
+                    if (!id || depth > 3) return null; // Limit to 4 generations (0-3)
+
+                    let animalInfo = null;
+
+                    // Try to fetch from owned animals first if authToken is available
+                    if (authToken) {
+                        try {
+                            const ownedResponse = await axios.get(`${API_BASE_URL}/animals/${id}`, {
+                                headers: { Authorization: `Bearer ${authToken}` }
+                            });
+                            animalInfo = ownedResponse.data;
+                        } catch (error) {
+                            // Not owned, will try public
+                        }
+                    }
+
+                    // If not found in owned, try public database
+                    if (!animalInfo) {
+                        try {
+                            const publicResponse = await axios.get(`${API_BASE_URL}/public/global/animals?id_public=${id}`);
+                            if (publicResponse.data && publicResponse.data.length > 0) {
+                                animalInfo = publicResponse.data[0];
+                            }
+                        } catch (error) {
+                            console.error(`Failed to fetch animal ${id}:`, error);
+                            return null;
+                        }
+                    }
+
+                    if (!animalInfo) return null;
+
+                    // Recursively fetch parents
+                    const fatherId = animalInfo.fatherId_public || animalInfo.sireId_public;
+                    const motherId = animalInfo.motherId_public || animalInfo.damId_public;
+
+                    const father = fatherId ? await fetchAnimalWithAncestors(fatherId, depth + 1) : null;
+                    const mother = motherId ? await fetchAnimalWithAncestors(motherId, depth + 1) : null;
+
+                    return {
+                        ...animalInfo,
+                        father,
+                        mother
+                    };
+                };
+
+                const data = await fetchAnimalWithAncestors(animalId || animalData?.id_public);
+                setPedigreeData(data);
+            } catch (error) {
+                console.error('Error fetching pedigree data:', error);
+            } finally {
+                setLoading(false);
+            }
+        };
+
+        fetchPedigreeData();
+    }, [animalId, animalData, API_BASE_URL, authToken]);
+
+    const downloadPDF = async () => {
+        if (!pedigreeRef.current) return;
+
+        try {
+            const canvas = await html2canvas(pedigreeRef.current, {
+                scale: 2,
+                backgroundColor: '#ffffff',
+                logging: false,
+                useCORS: true
+            });
+
+            const imgData = canvas.toDataURL('image/png');
+            const pdf = new jsPDF({
+                orientation: 'landscape',
+                unit: 'mm',
+                format: 'a4'
+            });
+
+            const pdfWidth = pdf.internal.pageSize.getWidth();
+            const pdfHeight = pdf.internal.pageSize.getHeight();
+            const imgWidth = canvas.width;
+            const imgHeight = canvas.height;
+            const ratio = Math.min(pdfWidth / imgWidth, pdfHeight / imgHeight);
+            const imgX = (pdfWidth - imgWidth * ratio) / 2;
+            const imgY = 10;
+
+            pdf.addImage(imgData, 'PNG', imgX, imgY, imgWidth * ratio, imgHeight * ratio);
+            pdf.save(`pedigree-${pedigreeData?.name || 'chart'}.pdf`);
+        } catch (error) {
+            console.error('Error generating PDF:', error);
+        }
+    };
+
+    const renderAnimalCard = (animal, generation) => {
+        if (!animal) {
+            return (
+                <div className="border border-gray-300 rounded p-2 bg-gray-50 h-20 flex items-center justify-center">
+                    <span className="text-xs text-gray-400">Unknown</span>
+                </div>
+            );
+        }
+
+        const genderIcon = animal.gender === 'Male' ? '♂' : animal.gender === 'Female' ? '♀' : '';
+        const cardBg = animal.gender === 'Male' ? 'bg-blue-50' : animal.gender === 'Female' ? 'bg-pink-50' : 'bg-gray-50';
+
+        return (
+            <div className={`border border-gray-300 rounded p-2 ${cardBg} h-20 text-xs`}>
+                <div className="flex items-start justify-between mb-1">
+                    <div className="font-semibold text-gray-800 truncate flex-1">
+                        {animal.prefix && <span className="text-gray-600">{animal.prefix} </span>}
+                        {animal.name}
+                    </div>
+                    <span className="ml-1 text-sm">{genderIcon}</span>
+                </div>
+                <div className="text-gray-500 text-xs mb-1">
+                    {animal.variation || animal.morph || 'N/A'}
+                </div>
+                <div className="text-gray-400 text-xs">
+                    {animal.birthDate ? new Date(animal.birthDate).toLocaleDateString() : ''}
+                </div>
+                <div className="text-gray-400 text-xs">
+                    #{animal.id_public || 'N/A'}
+                </div>
+            </div>
+        );
+    };
+
+    const renderPedigreeTree = (animal) => {
+        if (!animal) return null;
+
+        // Generation 0 (subject)
+        const subject = animal;
+        
+        // Generation 1 (parents)
+        const father = animal.father;
+        const mother = animal.mother;
+
+        // Generation 2 (grandparents)
+        const paternalGrandfather = father?.father;
+        const paternalGrandmother = father?.mother;
+        const maternalGrandfather = mother?.father;
+        const maternalGrandmother = mother?.mother;
+
+        // Generation 3 (great-grandparents)
+        const pgfFather = paternalGrandfather?.father;
+        const pgfMother = paternalGrandfather?.mother;
+        const pgmFather = paternalGrandmother?.father;
+        const pgmMother = paternalGrandmother?.mother;
+        const mgfFather = maternalGrandfather?.father;
+        const mgfMother = maternalGrandfather?.mother;
+        const mgmFather = maternalGrandmother?.father;
+        const mgmMother = maternalGrandmother?.mother;
+
+        return (
+            <div className="grid grid-cols-4 gap-2 w-full">
+                {/* Generation 3 - Great-grandparents (rightmost) */}
+                <div className="flex flex-col gap-2">
+                    {renderAnimalCard(pgfFather, 3)}
+                    {renderAnimalCard(pgfMother, 3)}
+                    {renderAnimalCard(pgmFather, 3)}
+                    {renderAnimalCard(pgmMother, 3)}
+                    {renderAnimalCard(mgfFather, 3)}
+                    {renderAnimalCard(mgfMother, 3)}
+                    {renderAnimalCard(mgmFather, 3)}
+                    {renderAnimalCard(mgmMother, 3)}
+                </div>
+
+                {/* Generation 2 - Grandparents */}
+                <div className="flex flex-col gap-2">
+                    <div className="flex flex-col gap-2">
+                        {renderAnimalCard(paternalGrandfather, 2)}
+                        {renderAnimalCard(paternalGrandmother, 2)}
+                    </div>
+                    <div className="flex flex-col gap-2 mt-2">
+                        {renderAnimalCard(maternalGrandfather, 2)}
+                        {renderAnimalCard(maternalGrandmother, 2)}
+                    </div>
+                </div>
+
+                {/* Generation 1 - Parents */}
+                <div className="flex flex-col gap-2">
+                    <div className="h-40 flex items-center">
+                        {renderAnimalCard(father, 1)}
+                    </div>
+                    <div className="h-40 flex items-center mt-2">
+                        {renderAnimalCard(mother, 1)}
+                    </div>
+                </div>
+
+                {/* Generation 0 - Subject (leftmost) */}
+                <div className="flex items-center">
+                    <div className="w-full">
+                        {renderAnimalCard(subject, 0)}
+                    </div>
+                </div>
+            </div>
+        );
+    };
+
+    if (loading) {
+        return (
+            <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
+                <div className="bg-white rounded-xl p-6 max-w-6xl w-full">
+                    <LoadingSpinner />
+                </div>
+            </div>
+        );
+    }
+
+    return (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4 overflow-auto">
+            <div className="bg-white rounded-xl p-6 max-w-6xl w-full my-8">
+                {/* Header */}
+                <div className="flex justify-between items-center mb-6">
+                    <h2 className="text-2xl font-bold text-gray-800 flex items-center">
+                        <FileText className="mr-2" size={24} />
+                        Pedigree Chart
+                    </h2>
+                    <div className="flex items-center gap-2">
+                        <button
+                            onClick={downloadPDF}
+                            className="flex items-center gap-2 px-4 py-2 bg-primary hover:bg-primary/90 text-black font-semibold rounded-lg transition"
+                        >
+                            <Download size={18} />
+                            Download PDF
+                        </button>
+                        <button
+                            onClick={onClose}
+                            className="p-2 hover:bg-gray-100 rounded-lg transition"
+                        >
+                            <X size={24} />
+                        </button>
+                    </div>
+                </div>
+
+                {/* Pedigree Chart */}
+                <div ref={pedigreeRef} className="bg-white p-6 rounded-lg border-2 border-gray-300">
+                    {/* Title Section */}
+                    <div className="mb-6 text-center border-b-2 border-gray-300 pb-4">
+                        <h3 className="text-xl font-bold text-gray-800">
+                            {pedigreeData?.prefix && `${pedigreeData.prefix} `}
+                            {pedigreeData?.name || 'Unknown Animal'}
+                        </h3>
+                        <p className="text-sm text-gray-600">{pedigreeData?.species || 'Mus musculus'}</p>
+                        <div className="flex justify-center gap-8 mt-2 text-sm text-gray-600">
+                            <div>
+                                <span className="font-semibold">Name:</span> {pedigreeData?.prefix && `${pedigreeData.prefix} `}{pedigreeData?.name || 'N/A'}
+                            </div>
+                            <div>
+                                <span className="font-semibold">Variation/Morph:</span> {pedigreeData?.variation || pedigreeData?.morph || 'N/A'}
+                            </div>
+                            <div>
+                                <span className="font-semibold">Birth:</span> {pedigreeData?.birthDate ? new Date(pedigreeData.birthDate).toLocaleDateString() : 'N/A'}
+                            </div>
+                            <div>
+                                <span className="font-semibold">Breeder:</span> {pedigreeData?.breederName || 'N/A'}
+                            </div>
+                            <div>
+                                <span className="font-semibold">SimpleBreed.com ID:</span> #{pedigreeData?.id_public || 'N/A'}
+                            </div>
+                        </div>
+                    </div>
+
+                    {/* Pedigree Tree */}
+                    <div className="overflow-x-auto">
+                        {renderPedigreeTree(pedigreeData)}
+                    </div>
+
+                    {/* Footer */}
+                    <div className="mt-6 pt-4 border-t-2 border-gray-300 flex justify-between items-center text-sm text-gray-600">
+                        <div>{pedigreeData?.breederName || 'Unknown Breeder'}</div>
+                        <div>{new Date().toLocaleDateString()}</div>
+                        <div>Created by simplebreed.com</div>
+                    </div>
+                </div>
+            </div>
+        </div>
     );
 };
 
@@ -757,6 +1048,7 @@ const PublicProfileView = ({ profile, onBack, onViewAnimal, API_BASE_URL }) => {
 const ViewOnlyAnimalDetail = ({ animal, onClose, API_BASE_URL, onViewProfile }) => {
     const [breederInfo, setBreederInfo] = useState(null);
     const [ownerPrivacySettings, setOwnerPrivacySettings] = useState(null);
+    const [showPedigree, setShowPedigree] = useState(false);
     
     // Fetch breeder info when component mounts or animal changes
     React.useEffect(() => {
@@ -947,7 +1239,16 @@ const ViewOnlyAnimalDetail = ({ animal, onClose, API_BASE_URL, onViewProfile }) 
 
                     {/* Parents */}
                     <div className="bg-white border-2 border-gray-300 rounded-lg p-6">
-                        <h3 className="text-lg font-semibold text-gray-800 mb-4">Parents</h3>
+                        <div className="flex justify-between items-center mb-4">
+                            <h3 className="text-lg font-semibold text-gray-800">Parents</h3>
+                            <button
+                                onClick={() => setShowPedigree(true)}
+                                className="flex items-center gap-2 px-3 py-1.5 bg-primary hover:bg-primary/90 text-black text-sm font-semibold rounded-lg transition"
+                            >
+                                <FileText size={16} />
+                                Pedigree
+                            </button>
+                        </div>
                         <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                             <ViewOnlyParentCard 
                                 parentId={animal.fatherId_public || animal.sireId_public} 
@@ -962,6 +1263,15 @@ const ViewOnlyAnimalDetail = ({ animal, onClose, API_BASE_URL, onViewProfile }) 
                         </div>
                     </div>
                 </div>
+
+                {/* Pedigree Chart Modal */}
+                {showPedigree && (
+                    <PedigreeChart
+                        animalData={animal}
+                        onClose={() => setShowPedigree(false)}
+                        API_BASE_URL={API_BASE_URL}
+                    />
+                )}
             </div>
         </div>
     );
@@ -3486,6 +3796,7 @@ const App = () => {
     const [viewingPublicAnimal, setViewingPublicAnimal] = useState(null);
     const [viewAnimalBreederInfo, setViewAnimalBreederInfo] = useState(null);
     const [animalToView, setAnimalToView] = useState(null);
+    const [showPedigreeChart, setShowPedigreeChart] = useState(false);
 
     const timeoutRef = useRef(null);
     const activeEvents = ['mousemove', 'keydown', 'scroll', 'click'];
@@ -3905,7 +4216,16 @@ const App = () => {
 
                         {/* Parents Section */}
                         <div className="border-2 border-gray-300 rounded-lg p-6">
-                            <h3 className="text-lg font-semibold text-gray-800 mb-4">Parents</h3>
+                            <div className="flex justify-between items-center mb-4">
+                                <h3 className="text-lg font-semibold text-gray-800">Parents</h3>
+                                <button
+                                    onClick={() => setShowPedigreeChart(true)}
+                                    className="flex items-center gap-2 px-3 py-1.5 bg-primary hover:bg-primary/90 text-black text-sm font-semibold rounded-lg transition"
+                                >
+                                    <FileText size={16} />
+                                    Pedigree
+                                </button>
+                            </div>
                             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                                 {/* Father Card */}
                                 <ParentCard 
@@ -3926,6 +4246,16 @@ const App = () => {
                             </div>
                         </div>
                     </div>
+
+                    {/* Pedigree Chart Modal */}
+                    {showPedigreeChart && animalToView && (
+                        <PedigreeChart
+                            animalData={animalToView}
+                            onClose={() => setShowPedigreeChart(false)}
+                            API_BASE_URL={API_BASE_URL}
+                            authToken={authToken}
+                        />
+                    )}
                 );
             case 'genetics-calculator': // NEW VIEW CASE
                 return (
