@@ -183,12 +183,14 @@ const PedigreeChart = ({ animalId, animalData, onClose, API_BASE_URL, authToken 
 
         try {
             const canvas = await html2canvas(pedigreeRef.current, {
-                scale: 2,
+                scale: 3,
                 backgroundColor: '#ffffff',
                 logging: false,
                 useCORS: true,
-                width: 1123,
-                height: 794
+                allowTaint: true,
+                letterRendering: true,
+                windowWidth: 1123,
+                windowHeight: 794
             });
 
             const imgData = canvas.toDataURL('image/png');
@@ -262,7 +264,7 @@ const PedigreeChart = ({ animalId, animalData, onClose, API_BASE_URL, authToken 
                 </div>
                 
                 {/* CT ID - Bottom Right */}
-                <div className="absolute bottom-1 right-2 text-xs font-mono text-gray-400">
+                <div className="absolute bottom-2 right-2 text-xs font-mono text-gray-400">
                     CT{animal.id_public}
                 </div>
             </div>
@@ -335,7 +337,7 @@ const PedigreeChart = ({ animalId, animalData, onClose, API_BASE_URL, authToken 
                 </div>
                 
                 {/* CT ID - Bottom Right */}
-                <div className="absolute bottom-1 right-2 text-xs font-mono text-gray-400">
+                <div className="absolute bottom-2 right-2 text-xs font-mono text-gray-400">
                     CT{animal.id_public}
                 </div>
             </div>
@@ -412,7 +414,7 @@ const PedigreeChart = ({ animalId, animalData, onClose, API_BASE_URL, authToken 
                 </div>
                 
                 {/* CT ID - Bottom Right */}
-                <div className="absolute bottom-0.5 right-1 text-xs font-mono text-gray-400">
+                <div className="absolute bottom-1.5 right-1 text-xs font-mono text-gray-400">
                     CT{animal.id_public}
                 </div>
             </div>
@@ -463,7 +465,7 @@ const PedigreeChart = ({ animalId, animalData, onClose, API_BASE_URL, authToken 
                 </div>
                 
                 {/* CT ID - Bottom Right */}
-                <div className="absolute bottom-0.5 right-0.5 text-xs font-mono text-gray-400">
+                <div className="absolute bottom-1.5 right-0.5 text-xs font-mono text-gray-400">
                     CT{animal.id_public}
                 </div>
             </div>
