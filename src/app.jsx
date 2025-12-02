@@ -843,6 +843,17 @@ const ViewOnlyAnimalDetail = ({ animal, onClose, API_BASE_URL }) => {
                             />
                         </div>
                     </div>
+
+                    {/* Back/Close Button */}
+                    <div className="flex justify-center pt-4">
+                        <button 
+                            onClick={onClose}
+                            className="flex items-center space-x-2 bg-gray-600 hover:bg-gray-700 text-white font-semibold py-3 px-6 rounded-lg transition duration-150"
+                        >
+                            <ArrowLeft size={20} />
+                            <span>Back to Profile</span>
+                        </button>
+                    </div>
                 </div>
             </div>
         </div>
