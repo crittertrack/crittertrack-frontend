@@ -745,8 +745,8 @@ const ViewOnlyAnimalDetail = ({ animal, onClose, API_BASE_URL }) => {
     const showGeneticCode = animal.includeGeneticCode !== false && animal.geneticCode;
 
     return (
-        <div className="fixed inset-0 bg-blue-900/75 flex items-center justify-center p-4 z-50 overflow-y-auto">
-            <div className="bg-accent rounded-xl shadow-2xl p-6 w-full max-w-4xl max-h-[90vh] overflow-y-auto">
+        <div className="fixed inset-0 bg-accent/10 flex items-center justify-center p-4 z-50 overflow-y-auto">
+            <div className="bg-primary rounded-xl shadow-2xl p-6 w-full max-w-4xl max-h-[90vh] overflow-y-auto">
                 <div className="flex justify-between items-center mb-6">
                     <button 
                         onClick={onClose} 
@@ -790,7 +790,7 @@ const ViewOnlyAnimalDetail = ({ animal, onClose, API_BASE_URL }) => {
                     </div>
 
                     {/* Main Info */}
-                    <div className="border-2 border-gray-300 rounded-lg p-6">
+                    <div className="bg-white border-2 border-gray-300 rounded-lg p-6">
                         <h3 className="text-lg font-semibold text-gray-800 mb-4">Basic Information</h3>
                         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                             <div>
@@ -824,7 +824,7 @@ const ViewOnlyAnimalDetail = ({ animal, onClose, API_BASE_URL }) => {
 
                     {/* Genetic Code (only if public) */}
                     {showGeneticCode && (
-                        <div className="border-2 border-gray-300 rounded-lg p-6">
+                        <div className="bg-white border-2 border-gray-300 rounded-lg p-6">
                             <h3 className="text-lg font-semibold text-gray-800 mb-2">Genetic Code</h3>
                             <p className="text-gray-700 font-mono">{animal.geneticCode}</p>
                         </div>
@@ -832,14 +832,14 @@ const ViewOnlyAnimalDetail = ({ animal, onClose, API_BASE_URL }) => {
 
                     {/* Remarks (only if public) */}
                     {showRemarks && (
-                        <div className="border-2 border-gray-300 rounded-lg p-6">
+                        <div className="bg-white border-2 border-gray-300 rounded-lg p-6">
                             <h3 className="text-lg font-semibold text-gray-800 mb-2">Remarks / Notes</h3>
                             <p className="text-gray-700 whitespace-pre-wrap">{animal.remarks}</p>
                         </div>
                     )}
 
                     {/* Parents */}
-                    <div className="border-2 border-gray-300 rounded-lg p-6">
+                    <div className="bg-white border-2 border-gray-300 rounded-lg p-6">
                         <h3 className="text-lg font-semibold text-gray-800 mb-4">Parents</h3>
                         <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                             <ViewOnlyParentCard 
