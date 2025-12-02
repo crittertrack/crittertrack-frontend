@@ -481,7 +481,7 @@ const PedigreeChart = ({ animalId, animalData, onClose, API_BASE_URL, authToken 
         const greatGrandparentHeight = contentHeight / 8; // ~83px for each great-grandparent
 
         return (
-            <div className="flex flex-col gap-4 w-full">
+            <div className="flex flex-col gap-2 w-full">
                 {/* Main Animal - Top Row */}
                 <div className="flex">
                     <div className="w-1/4">
@@ -576,8 +576,8 @@ const PedigreeChart = ({ animalId, animalData, onClose, API_BASE_URL, authToken 
 
     return (
         <div className="fixed inset-0 bg-black bg-opacity-50 z-50 overflow-y-auto">
-            <div className="min-h-screen flex items-start justify-center p-4 py-8">
-                <div className="bg-white rounded-xl shadow-2xl" style={{width: 'fit-content', maxWidth: '95vw'}}>
+            <div className="min-h-screen flex justify-center pt-8 pb-8">
+                <div className="bg-white rounded-xl shadow-2xl h-fit" style={{width: 'fit-content', maxWidth: '95vw'}}>
                     {/* Header */}
                     <div className="flex justify-between items-center px-6 py-4 border-b border-gray-200 bg-gray-50 rounded-t-xl">
                         <h2 className="text-2xl font-bold text-gray-800 flex items-center">
@@ -614,8 +614,7 @@ const PedigreeChart = ({ animalId, animalData, onClose, API_BASE_URL, authToken 
                     {/* Owner Profile - Top Right */}
                     <div className="absolute top-6 right-6 flex items-center gap-2">
                         <div className="text-right">
-                            <div className="text-sm font-semibold text-gray-800">{getOwnerDisplayName()}</div>
-                            <div className="text-xs text-gray-500">Owner</div>
+                            <div className="text-base font-semibold text-gray-800">{getOwnerDisplayName()}</div>
                         </div>
                         <div className="w-12 h-12 bg-gray-200 rounded-lg overflow-hidden flex items-center justify-center">
                             {ownerProfile?.profileImage ? (
