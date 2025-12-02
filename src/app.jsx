@@ -3288,6 +3288,7 @@ const App = () => {
     const [showUserSearchModal, setShowUserSearchModal] = useState(false);
     const [viewingPublicProfile, setViewingPublicProfile] = useState(null);
     const [viewingPublicAnimal, setViewingPublicAnimal] = useState(null);
+    const [viewAnimalBreederInfo, setViewAnimalBreederInfo] = useState(null);
 
     const timeoutRef = useRef(null);
     const activeEvents = ['mousemove', 'keydown', 'scroll', 'click'];
@@ -3371,6 +3372,28 @@ const App = () => {
             setAuthToken(null);
         }
     }, [showModalMessage]);
+
+    // Fetch breeder info when viewing an animal
+    useEffect(() => {
+        const fetchViewBreederInfo = async () => {
+            if (animalToView?.breederId_public && currentView === 'view-animal') {
+                try {
+                    const response = await axios.get(
+                        `${API_BASE_URL}/public/profiles/search?query=CT${animalToView.breederId_public}&limit=1`
+                    );
+                    if (response.data && response.data.length > 0) {
+                        setViewAnimalBreederInfo(response.data[0]);
+                    }
+                } catch (error) {
+                    console.error('Failed to fetch breeder info for view:', error);
+                    setViewAnimalBreederInfo(null);
+                }
+            } else {
+                setViewAnimalBreederInfo(null);
+            }
+        };
+        fetchViewBreederInfo();
+    }, [animalToView, currentView, API_BASE_URL]);
 
     const fetchNotificationCount = useCallback(async () => {
         if (!authToken) return;
@@ -3650,7 +3673,17 @@ const App = () => {
                                 <div>
                                     <strong>Breeder:</strong>{' '}
                                     {animalToView.breederId_public ? (
-                                        <span className="font-mono text-accent">CT{animalToView.breederId_public}</span>
+                                        viewAnimalBreederInfo ? (
+                                            <span>
+                                                {viewAnimalBreederInfo.showBreederName && viewAnimalBreederInfo.personalName && viewAnimalBreederInfo.breederName 
+                                                    ? `${viewAnimalBreederInfo.personalName} (${viewAnimalBreederInfo.breederName})` 
+                                                    : (viewAnimalBreederInfo.showBreederName && viewAnimalBreederInfo.breederName 
+                                                        ? viewAnimalBreederInfo.breederName 
+                                                        : viewAnimalBreederInfo.personalName || 'Anonymous Breeder')}
+                                            </span>
+                                        ) : (
+                                            <span className="font-mono text-accent">CT{animalToView.breederId_public}</span>
+                                        )
                                     ) : (
                                         <span className="text-gray-500 italic">Not specified</span>
                                     )}
