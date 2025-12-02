@@ -234,13 +234,13 @@ const PedigreeChart = ({ animalId, animalData, onClose, API_BASE_URL, authToken 
                 {/* Info */}
                 <div className="flex-1 min-w-0 flex flex-col justify-center">
                     {/* Name */}
-                    <div className="text-sm text-gray-900 mb-0.5 truncate">
+                    <div className="text-sm text-gray-900 mb-0.5 line-clamp-2">
                         <span className="font-bold">Name: </span>
                         {animal.prefix && `${animal.prefix} `}{animal.name}
                     </div>
                     
                     {/* Variety */}
-                    <div className="text-xs text-gray-900 mb-0.5 truncate">
+                    <div className="text-xs text-gray-900 mb-0.5 line-clamp-2">
                         <span className="font-semibold">Variety: </span>
                         {colorCoat}
                     </div>
@@ -252,7 +252,7 @@ const PedigreeChart = ({ animalId, animalData, onClose, API_BASE_URL, authToken 
                     </div>
                     
                     {/* Breeder */}
-                    <div className="text-xs text-gray-900 truncate mb-1">
+                    <div className="text-xs text-gray-900 line-clamp-2 mb-1">
                         <span className="font-semibold">Breeder: </span>
                         {animal.breederName || 'N/A'}
                     </div>
@@ -307,13 +307,13 @@ const PedigreeChart = ({ animalId, animalData, onClose, API_BASE_URL, authToken 
                 {/* Info */}
                 <div className="flex-1 min-w-0 flex flex-col justify-center">
                     {/* Name */}
-                    <div className="text-xs text-gray-900 mb-0.5 truncate">
+                    <div className="text-xs text-gray-900 mb-0.5 line-clamp-2">
                         <span className="font-semibold">Name: </span>
                         {animal.prefix && `${animal.prefix} `}{animal.name}
                     </div>
                     
                     {/* Variety */}
-                    <div className="text-xs text-gray-900 mb-0.5 truncate">
+                    <div className="text-xs text-gray-900 mb-0.5 line-clamp-2">
                         <span className="font-semibold">Variety: </span>
                         {colorCoat}
                     </div>
@@ -325,7 +325,7 @@ const PedigreeChart = ({ animalId, animalData, onClose, API_BASE_URL, authToken 
                     </div>
                     
                     {/* Breeder */}
-                    <div className="text-xs text-gray-900 truncate mb-1">
+                    <div className="text-xs text-gray-900 line-clamp-2 mb-1">
                         <span className="font-semibold">Breeder: </span>
                         {animal.breederName || 'N/A'}
                     </div>
@@ -384,13 +384,13 @@ const PedigreeChart = ({ animalId, animalData, onClose, API_BASE_URL, authToken 
                 {/* Info */}
                 <div className="flex-1 min-w-0 flex flex-col justify-center">
                     {/* Name */}
-                    <div className="text-xs text-gray-900 truncate mb-0.5">
+                    <div className="text-xs text-gray-900 line-clamp-2 mb-0.5">
                         <span className="font-semibold">Name: </span>
                         {animal.prefix && `${animal.prefix} `}{animal.name}
                     </div>
                     
                     {/* Variety */}
-                    <div className="text-xs text-gray-900 truncate mb-0.5">
+                    <div className="text-xs text-gray-900 line-clamp-2 mb-0.5">
                         <span className="font-semibold">Variety: </span>
                         {colorCoat}
                     </div>
@@ -402,7 +402,7 @@ const PedigreeChart = ({ animalId, animalData, onClose, API_BASE_URL, authToken 
                     </div>
                     
                     {/* Breeder */}
-                    <div className="text-xs text-gray-900 truncate mb-0.5">
+                    <div className="text-xs text-gray-900 line-clamp-2 mb-0.5">
                         <span className="font-semibold">Breeder: </span>
                         {animal.breederName || 'N/A'}
                     </div>
@@ -442,19 +442,19 @@ const PedigreeChart = ({ animalId, animalData, onClose, API_BASE_URL, authToken 
         return (
             <div className={`border border-gray-700 rounded p-1 ${bgColor} relative h-full flex flex-col justify-center`}>
                 {/* Name */}
-                <div className="text-xs text-gray-900 truncate mb-0.5">
+                <div className="text-xs text-gray-900 line-clamp-2 mb-0.5">
                     <span className="font-semibold">Name: </span>
                     {animal.prefix && `${animal.prefix} `}{animal.name}
                 </div>
                 
                 {/* Variety */}
-                <div className="text-xs text-gray-900 truncate mb-0.5">
+                <div className="text-xs text-gray-900 line-clamp-2 mb-0.5">
                     <span className="font-semibold">Variety: </span>
                     {colorCoat}
                 </div>
                 
                 {/* Breeder */}
-                <div className="text-xs text-gray-900 truncate mb-0.5">
+                <div className="text-xs text-gray-900 line-clamp-2 mb-0.5">
                     <span className="font-semibold">Breeder: </span>
                     {animal.breederName || 'N/A'}
                 </div>
