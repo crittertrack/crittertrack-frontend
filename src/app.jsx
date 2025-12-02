@@ -1778,6 +1778,11 @@ const AnimalForm = ({
                 sireId_public: payloadToSave.sireId_public,
                 damId_public: payloadToSave.damId_public
             });
+            
+            console.log('[DEBUG] Breeder field in payload:', {
+                breederId_public: payloadToSave.breederId_public,
+                ownerName: payloadToSave.ownerName
+            });
 
             // If an image URL was set by the upload step, also populate common alternate keys
             // so backend implementations that expect different field names still receive the URL.
