@@ -765,12 +765,12 @@ const ViewOnlyAnimalDetail = ({ animal, onClose, API_BASE_URL }) => {
 
                 <div className="space-y-6">
                     {/* Image with ID, Species, Status below */}
-                    <div className="w-full max-w-xs mx-auto">
+                    <div className="w-full flex justify-center">
                         {imgSrc && (
                             <img 
                                 src={imgSrc} 
                                 alt={animal.name} 
-                                className="w-full rounded-lg shadow-lg object-contain max-h-48"
+                                className="w-48 h-48 rounded-lg shadow-lg object-cover"
                             />
                         )}
                         <div className="mt-4 space-y-2">
