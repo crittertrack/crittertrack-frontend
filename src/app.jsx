@@ -670,33 +670,60 @@ const PublicProfileView = ({ profile, onBack, onViewAnimal, API_BASE_URL }) => {
                             <h4 className="text-xl font-semibold text-gray-700 mb-3 flex items-center">
                                 <Cat size={20} className="mr-2" /> {species}
                             </h4>
-                            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
-                                {groupedAnimals[species].map(animal => (
-                                    <div 
-                                        key={animal.id_public}
-                                        onClick={() => onViewAnimal(animal)}
-                                        className="bg-white p-4 rounded-lg shadow hover:shadow-lg transition cursor-pointer"
-                                    >
-                                        {animal.imageUrl || animal.photoUrl ? (
-                                            <img 
-                                                src={animal.imageUrl || animal.photoUrl} 
-                                                alt={animal.name} 
-                                                className="w-full h-32 object-cover rounded-lg mb-3"
-                                            />
-                                        ) : (
-                                            <div className="w-full h-32 bg-gray-200 rounded-lg mb-3 flex items-center justify-center">
-                                                <Cat size={48} className="text-gray-400" />
+                            <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-4">
+                                {groupedAnimals[species].map(animal => {
+                                    const birth = animal.birthDate ? new Date(animal.birthDate).toLocaleDateString() : '';
+                                    const imgSrc = animal.imageUrl || animal.photoUrl || null;
+                                    
+                                    return (
+                                        <div key={animal.id_public} className="w-full flex justify-center">
+                                            <div
+                                                onClick={() => onViewAnimal(animal)}
+                                                className="relative bg-white rounded-xl shadow-sm w-44 h-56 flex flex-col items-center overflow-hidden cursor-pointer hover:shadow-md transition border border-gray-300 pt-3"
+                                            >
+                                                {/* Birthdate top-left */}
+                                                {birth && (
+                                                    <div className="absolute top-2 left-2 text-xs text-gray-600 bg-white/80 px-2 py-0.5 rounded">
+                                                        {birth}
+                                                    </div>
+                                                )}
+
+                                                {/* Gender badge top-right */}
+                                                {animal.gender && (
+                                                    <div className="absolute top-2 right-2" title={animal.gender}>
+                                                        {animal.gender === 'Male' ? <Mars size={16} strokeWidth={2.5} className="text-primary" /> : <Venus size={16} strokeWidth={2.5} className="text-accent" />}
+                                                    </div>
+                                                )}
+
+                                                {/* Centered profile image */}
+                                                <div className="flex-1 flex items-center justify-center w-full px-2 mt-1">
+                                                    {imgSrc ? (
+                                                        <img src={imgSrc} alt={animal.name} className="w-24 h-24 object-cover rounded-md" />
+                                                    ) : (
+                                                        <div className="w-24 h-24 bg-gray-100 rounded-md flex items-center justify-center text-gray-400">
+                                                            <Cat size={36} />
+                                                        </div>
+                                                    )}
+                                                </div>
+                                                
+                                                {/* Prefix / Name under image */}
+                                                <div className="w-full text-center px-2 pb-1 mt-2">
+                                                    <div className="text-sm font-semibold text-gray-800 truncate">{animal.prefix ? `${animal.prefix} ` : ''}{animal.name}</div>
+                                                </div>
+
+                                                {/* ID bottom-right */}
+                                                <div className="w-full px-2 pb-2 flex justify-end">
+                                                    <div className="text-xs text-gray-500">CT{animal.id_public}</div>
+                                                </div>
+                                                
+                                                {/* Status bar at bottom */}
+                                                <div className="w-full bg-gray-100 py-1 text-center border-t border-gray-300 mt-auto">
+                                                    <div className="text-xs font-medium text-gray-700">{animal.status || 'Unknown'}</div>
+                                                </div>
                                             </div>
-                                        )}
-                                        <p className="font-semibold text-gray-800">
-                                            {animal.prefix && `${animal.prefix} `}{animal.name}
-                                        </p>
-                                        <p className="text-sm text-gray-600">
-                                            {animal.gender} • <span className="font-mono text-xs">CT{animal.id_public}</span>
-                                        </p>
-                                        {animal.color && <p className="text-xs text-gray-500 mt-1">{animal.color}</p>}
-                                    </div>
-                                ))}
+                                        </div>
+                                    );
+                                })}
                             </div>
                         </div>
                     ))}
