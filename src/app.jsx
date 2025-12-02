@@ -3588,11 +3588,12 @@ const App = () => {
             const response = await axios.get(`${API_BASE_URL}/notifications/unread-count`, {
                 headers: { Authorization: `Bearer ${authToken}` }
             });
+            console.log('[Notification Count] Response:', response.data);
             setNotificationCount(response.data?.count || 0);
         } catch (error) {
             console.error('Failed to fetch notification count:', error);
         }
-    }, [authToken]);
+    }, [authToken, API_BASE_URL]);
 
     useEffect(() => {
         if (authToken) {
