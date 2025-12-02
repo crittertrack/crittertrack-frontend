@@ -221,7 +221,7 @@ const PedigreeChart = ({ animalId, animalData, onClose, API_BASE_URL, authToken 
         const GenderIcon = isMale ? Mars : Venus;
         
         return (
-            <div className={`border border-gray-700 rounded-lg p-3 ${bgColor} relative flex gap-3 items-center`} style={{height: '160px'}}>
+            <div className={`border border-gray-700 rounded-lg p-2 ${bgColor} relative flex gap-3 items-center`} style={{height: '160px'}}>
                 {/* Image */}
                 <div className="w-32 h-32 bg-gray-100 rounded-lg overflow-hidden flex items-center justify-center flex-shrink-0 border-2 border-gray-900">
                     {imgSrc ? (
@@ -234,37 +234,37 @@ const PedigreeChart = ({ animalId, animalData, onClose, API_BASE_URL, authToken 
                 {/* Info */}
                 <div className="flex-1 min-w-0 flex flex-col justify-center">
                     {/* Name */}
-                    <div className="text-sm text-gray-900 mb-0.5 line-clamp-2">
+                    <div className="text-sm text-gray-900 mb-0 line-clamp-2">
                         <span className="font-bold">Name: </span>
                         {animal.prefix && `${animal.prefix} `}{animal.name}
                     </div>
                     
                     {/* Variety */}
-                    <div className="text-xs text-gray-900 mb-0.5 line-clamp-2">
+                    <div className="text-xs text-gray-900 mb-0 line-clamp-2">
                         <span className="font-semibold">Variety: </span>
                         {colorCoat}
                     </div>
                     
                     {/* Birth Date */}
-                    <div className="text-xs text-gray-900 mb-0.5">
+                    <div className="text-xs text-gray-900 mb-0">
                         <span className="font-semibold">Birthdate: </span>
                         {animal.birthDate ? new Date(animal.birthDate).toLocaleDateString() : 'N/A'}
                     </div>
                     
                     {/* Breeder */}
-                    <div className="text-xs text-gray-900 line-clamp-2 mb-1">
+                    <div className="text-xs text-gray-900 line-clamp-2 mb-0">
                         <span className="font-semibold">Breeder: </span>
                         {animal.breederName || 'N/A'}
                     </div>
                 </div>
                 
                 {/* Gender Icon - Top Right */}
-                <div className="absolute top-3 right-3">
+                <div className="absolute top-2 right-2">
                     <GenderIcon size={24} className="text-gray-900" strokeWidth={2.5} />
                 </div>
                 
                 {/* CT ID - Bottom Right */}
-                <div className="absolute bottom-2 right-2 text-xs font-mono text-gray-700">
+                <div className="absolute bottom-1 right-2 text-xs font-mono text-gray-700">
                     CT{animal.id_public}
                 </div>
             </div>
@@ -294,7 +294,7 @@ const PedigreeChart = ({ animalId, animalData, onClose, API_BASE_URL, authToken 
         const colorCoat = [animal.color, animal.coat].filter(Boolean).join(' ') || 'N/A';
         
         return (
-            <div className={`border border-gray-700 rounded p-2 ${bgColor} relative flex gap-2 h-full items-center`}>
+            <div className={`border border-gray-700 rounded p-1.5 ${bgColor} relative flex gap-2 h-full items-center`}>
                 {/* Image - 1/3 width */}
                 <div className="w-1/3 aspect-square bg-gray-100 rounded-lg border-2 border-gray-900 overflow-hidden flex items-center justify-center flex-shrink-0">
                     {imgSrc ? (
@@ -307,25 +307,25 @@ const PedigreeChart = ({ animalId, animalData, onClose, API_BASE_URL, authToken 
                 {/* Info */}
                 <div className="flex-1 min-w-0 flex flex-col justify-center">
                     {/* Name */}
-                    <div className="text-xs text-gray-900 mb-0.5 line-clamp-2">
+                    <div className="text-xs text-gray-900 mb-0 line-clamp-2">
                         <span className="font-semibold">Name: </span>
                         {animal.prefix && `${animal.prefix} `}{animal.name}
                     </div>
                     
                     {/* Variety */}
-                    <div className="text-xs text-gray-900 mb-0.5 line-clamp-2">
+                    <div className="text-xs text-gray-900 mb-0 line-clamp-2">
                         <span className="font-semibold">Variety: </span>
                         {colorCoat}
                     </div>
                     
                     {/* Birth Date */}
-                    <div className="text-xs text-gray-900 mb-0.5">
+                    <div className="text-xs text-gray-900 mb-0">
                         <span className="font-semibold">Birthdate: </span>
                         {animal.birthDate ? new Date(animal.birthDate).toLocaleDateString() : 'N/A'}
                     </div>
                     
                     {/* Breeder */}
-                    <div className="text-xs text-gray-900 line-clamp-2 mb-1">
+                    <div className="text-xs text-gray-900 line-clamp-2 mb-0">
                         <span className="font-semibold">Breeder: </span>
                         {animal.breederName || 'N/A'}
                     </div>
@@ -337,7 +337,7 @@ const PedigreeChart = ({ animalId, animalData, onClose, API_BASE_URL, authToken 
                 </div>
                 
                 {/* CT ID - Bottom Right */}
-                <div className="absolute bottom-2 right-2 text-xs font-mono text-gray-700">
+                <div className="absolute bottom-1 right-2 text-xs font-mono text-gray-700">
                     CT{animal.id_public}
                 </div>
             </div>
@@ -371,7 +371,7 @@ const PedigreeChart = ({ animalId, animalData, onClose, API_BASE_URL, authToken 
         const colorCoat = [animal.color, animal.coat].filter(Boolean).join(' ') || 'N/A';
         
         return (
-            <div className={`border border-gray-700 rounded p-1.5 ${bgColor} relative flex gap-1.5 h-full items-center`}>
+            <div className={`border border-gray-700 rounded p-1 ${bgColor} relative flex gap-1.5 h-full items-center`}>
                 {/* Image - 1/3 width */}
                 <div className="w-1/3 aspect-square bg-gray-100 rounded-lg border-2 border-gray-900 overflow-hidden flex items-center justify-center flex-shrink-0">
                     {imgSrc ? (
@@ -384,25 +384,25 @@ const PedigreeChart = ({ animalId, animalData, onClose, API_BASE_URL, authToken 
                 {/* Info */}
                 <div className="flex-1 min-w-0 flex flex-col justify-center">
                     {/* Name */}
-                    <div className="text-xs text-gray-900 line-clamp-2 mb-0.5">
+                    <div className="text-xs text-gray-900 line-clamp-2 mb-0">
                         <span className="font-semibold">Name: </span>
                         {animal.prefix && `${animal.prefix} `}{animal.name}
                     </div>
                     
                     {/* Variety */}
-                    <div className="text-xs text-gray-900 line-clamp-2 mb-0.5">
+                    <div className="text-xs text-gray-900 line-clamp-2 mb-0">
                         <span className="font-semibold">Variety: </span>
                         {colorCoat}
                     </div>
                     
                     {/* Birth Date */}
-                    <div className="text-xs text-gray-900 mb-0.5">
+                    <div className="text-xs text-gray-900 mb-0">
                         <span className="font-semibold">Birthdate: </span>
                         {animal.birthDate ? new Date(animal.birthDate).toLocaleDateString() : 'N/A'}
                     </div>
                     
                     {/* Breeder */}
-                    <div className="text-xs text-gray-900 line-clamp-2 mb-0.5">
+                    <div className="text-xs text-gray-900 line-clamp-2 mb-0">
                         <span className="font-semibold">Breeder: </span>
                         {animal.breederName || 'N/A'}
                     </div>
@@ -414,7 +414,7 @@ const PedigreeChart = ({ animalId, animalData, onClose, API_BASE_URL, authToken 
                 </div>
                 
                 {/* CT ID - Bottom Right */}
-                <div className="absolute bottom-1.5 right-1 text-xs font-mono text-gray-700">
+                <div className="absolute bottom-1 right-1 text-xs font-mono text-gray-700">
                     CT{animal.id_public}
                 </div>
             </div>
@@ -440,21 +440,21 @@ const PedigreeChart = ({ animalId, animalData, onClose, API_BASE_URL, authToken 
         const colorCoat = [animal.color, animal.coat].filter(Boolean).join(' ') || 'N/A';
         
         return (
-            <div className={`border border-gray-700 rounded p-1 ${bgColor} relative h-full flex flex-col justify-center`}>
+            <div className={`border border-gray-700 rounded p-0.5 ${bgColor} relative h-full flex flex-col justify-center`}>
                 {/* Name */}
-                <div className="text-xs text-gray-900 line-clamp-2 mb-0.5">
+                <div className="text-xs text-gray-900 line-clamp-2 mb-0">
                     <span className="font-semibold">Name: </span>
                     {animal.prefix && `${animal.prefix} `}{animal.name}
                 </div>
                 
                 {/* Variety */}
-                <div className="text-xs text-gray-900 line-clamp-2 mb-0.5">
+                <div className="text-xs text-gray-900 line-clamp-2 mb-0">
                     <span className="font-semibold">Variety: </span>
                     {colorCoat}
                 </div>
                 
                 {/* Breeder */}
-                <div className="text-xs text-gray-900 line-clamp-2 mb-0.5">
+                <div className="text-xs text-gray-900 line-clamp-2 mb-0">
                     <span className="font-semibold">Breeder: </span>
                     {animal.breederName || 'N/A'}
                 </div>
@@ -465,7 +465,7 @@ const PedigreeChart = ({ animalId, animalData, onClose, API_BASE_URL, authToken 
                 </div>
                 
                 {/* CT ID - Bottom Right */}
-                <div className="absolute bottom-1.5 right-0.5 text-xs font-mono text-gray-700">
+                <div className="absolute bottom-0.5 right-0.5 text-xs font-mono text-gray-700">
                     CT{animal.id_public}
                 </div>
             </div>
