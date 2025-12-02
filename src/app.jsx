@@ -232,7 +232,7 @@ const PedigreeChart = ({ animalId, animalData, onClose, API_BASE_URL, authToken 
                 </div>
                 
                 {/* Info */}
-                <div className="flex-1 min-w-0 flex flex-col justify-start gap-1">
+                <div className="flex-1 min-w-0 flex flex-col justify-start gap-2 py-2">
                     {/* Name */}
                     <div className="text-sm text-gray-900 mb-0 leading-tight overflow-hidden" style={{lineHeight: '1.2', maxHeight: '2.4em'}}>
                         <span className="font-bold">Name: </span>
@@ -305,7 +305,7 @@ const PedigreeChart = ({ animalId, animalData, onClose, API_BASE_URL, authToken 
                 </div>
                 
                 {/* Info */}
-                <div className="flex-1 min-w-0 flex flex-col justify-start gap-0.5">
+                <div className="flex-1 min-w-0 flex flex-col justify-start gap-1.5 py-1">
                     {/* Name */}
                     <div className="text-xs text-gray-900 mb-0 leading-tight overflow-hidden" style={{lineHeight: '1.2', maxHeight: '2.4em'}}>
                         <span className="font-semibold">Name: </span>
@@ -382,7 +382,7 @@ const PedigreeChart = ({ animalId, animalData, onClose, API_BASE_URL, authToken 
                 </div>
                 
                 {/* Info */}
-                <div className="flex-1 min-w-0 flex flex-col justify-start gap-0.5">
+                <div className="flex-1 min-w-0 flex flex-col justify-start gap-1 py-0.5">
                     {/* Name */}
                     <div className="text-gray-900 mb-0 leading-tight overflow-hidden" style={{fontSize: '0.65rem', lineHeight: '1.2', maxHeight: '2.4em'}}>
                         <span className="font-semibold">Name: </span>
@@ -440,7 +440,7 @@ const PedigreeChart = ({ animalId, animalData, onClose, API_BASE_URL, authToken 
         const colorCoat = [animal.color, animal.coat].filter(Boolean).join(' ') || 'N/A';
         
         return (
-            <div className={`border border-gray-700 rounded p-0.5 ${bgColor} relative h-full flex flex-col justify-start gap-0.5`}>
+            <div className={`border border-gray-700 rounded p-0.5 ${bgColor} relative h-full flex flex-col justify-start gap-1 py-1">
                 {/* Name */}
                 <div className="text-gray-900 mb-0 leading-tight overflow-hidden" style={{fontSize: '0.6rem', lineHeight: '1.2', maxHeight: '2.4em'}}>
                     <span className="font-semibold">Name: </span>
