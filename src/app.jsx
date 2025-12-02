@@ -736,7 +736,7 @@ const PublicProfileView = ({ profile, onBack, onViewAnimal, API_BASE_URL }) => {
 };
 
 // View-Only Animal Detail Modal
-const ViewOnlyAnimalDetail = ({ animal, onClose, API_BASE_URL }) => {
+const ViewOnlyAnimalDetail = ({ animal, onClose, API_BASE_URL, onViewProfile }) => {
     const [breederInfo, setBreederInfo] = useState(null);
     
     // Fetch breeder info when component mounts or animal changes
@@ -871,15 +871,16 @@ const ViewOnlyAnimalDetail = ({ animal, onClose, API_BASE_URL }) => {
                             <h3 className="text-lg font-semibold text-gray-800 mb-2">Breeder</h3>
                             <p className="text-gray-700">
                                 {breederInfo ? (
-                                    <>
+                                    <button
+                                        onClick={() => onViewProfile && onViewProfile(breederInfo)}
+                                        className="text-primary hover:text-primary-dark underline font-medium transition"
+                                    >
                                         {breederInfo.showBreederName && breederInfo.personalName && breederInfo.breederName 
                                             ? `${breederInfo.personalName} (${breederInfo.breederName})` 
                                             : (breederInfo.showBreederName && breederInfo.breederName 
                                                 ? breederInfo.breederName 
                                                 : breederInfo.personalName || 'Anonymous Breeder')}
-                                        {' '}
-                                        <span className="font-mono text-accent">(CT{animal.breederId_public})</span>
-                                    </>
+                                    </button>
                                 ) : (
                                     <span className="font-mono text-accent">CT{animal.breederId_public}</span>
                                 )}
@@ -3876,6 +3877,7 @@ const App = () => {
                             animal={viewingPublicAnimal}
                             onClose={() => setViewingPublicAnimal(null)}
                             API_BASE_URL={API_BASE_URL}
+                            onViewProfile={(user) => setViewingPublicProfile(user)}
                         />
                     )}
                     
@@ -3966,6 +3968,7 @@ const App = () => {
                             animal={viewingPublicAnimal}
                             onClose={() => setViewingPublicAnimal(null)}
                             API_BASE_URL={API_BASE_URL}
+                            onViewProfile={(user) => setViewingPublicProfile(user)}
                         />
                     )}
                     
@@ -4015,6 +4018,7 @@ const App = () => {
                         animal={viewingPublicAnimal}
                         onClose={() => setViewingPublicAnimal(null)}
                         API_BASE_URL={API_BASE_URL}
+                        onViewProfile={(user) => setViewingPublicProfile(user)}
                     />
                 )}
                 
@@ -4052,6 +4056,7 @@ const App = () => {
                     animal={viewingPublicAnimal}
                     onClose={() => setViewingPublicAnimal(null)}
                     API_BASE_URL={API_BASE_URL}
+                    onViewProfile={(user) => setViewingPublicProfile(user)}
                 />
             )}
             
