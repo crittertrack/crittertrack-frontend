@@ -218,10 +218,16 @@ const PedigreeChart = ({ animalId, animalData, onClose, API_BASE_URL, authToken 
         const imgSrc = animal.imageUrl || animal.photoUrl || null;
         const colorCoat = [animal.color, animal.coat].filter(Boolean).join(' / ') || 'N/A';
         
+        // Determine gender-based styling
+        const isMale = animal.gender === 'Male';
+        const bgColor = isMale ? 'bg-[#d4f1f5]' : 'bg-[#f8e8ee]';
+        const GenderIcon = isMale ? Mars : Venus;
+        const iconColor = isMale ? 'text-[#9ED4E0]' : 'text-[#F1D1DC]';
+        
         return (
-            <div className="border-2 border-gray-400 rounded-lg p-3 bg-white relative flex gap-3 items-center" style={{height: '160px'}}>
+            <div className={`border-2 border-gray-400 rounded-lg p-3 ${bgColor} relative flex gap-3 items-center`} style={{height: '160px'}}>
                 {/* Image */}
-                <div className="w-32 h-32 bg-gray-100 rounded-lg overflow-hidden flex items-center justify-center flex-shrink-0">
+                <div className="w-32 h-32 bg-gray-100 rounded-lg overflow-hidden flex items-center justify-center flex-shrink-0 border-2 border-gray-300">
                     {imgSrc ? (
                         <AnimalImage src={imgSrc} alt={animal.name} className="w-full h-full object-cover" iconSize={48} />
                     ) : (
@@ -252,6 +258,11 @@ const PedigreeChart = ({ animalId, animalData, onClose, API_BASE_URL, authToken 
                     </div>
                 </div>
                 
+                {/* Gender Icon - Top Right */}
+                <div className="absolute top-3 right-3">
+                    <GenderIcon size={20} className={iconColor} />
+                </div>
+                
                 {/* CT ID - Bottom Right */}
                 <div className="absolute bottom-1 right-2 text-xs font-mono text-gray-400">
                     CT{animal.id_public}
@@ -261,17 +272,20 @@ const PedigreeChart = ({ animalId, animalData, onClose, API_BASE_URL, authToken 
     };
 
     // Render card for parents (medium with image)
-    const renderParentCard = (animal, title) => {
-        const isSire = title === 'Sire';
+    const renderParentCard = (animal, isSire) => {
         const bgColor = isSire ? 'bg-[#d4f1f5]' : 'bg-[#f8e8ee]';
+        const GenderIcon = isSire ? Mars : Venus;
+        const iconColor = isSire ? 'text-[#9ED4E0]' : 'text-[#F1D1DC]';
         
         if (!animal) {
             return (
                 <div className={`border border-gray-300 rounded p-2 ${bgColor} relative h-full flex items-center justify-center`}>
                     <div className="text-center">
-                        <div className="font-semibold text-xs text-gray-500 mb-2">{title}</div>
                         <Cat size={32} className="text-gray-300 mx-auto mb-2" />
                         <div className="text-xs text-gray-400">Unknown</div>
+                    </div>
+                    <div className="absolute top-2 right-2">
+                        <GenderIcon size={16} className={iconColor} />
                     </div>
                 </div>
             );
@@ -282,8 +296,8 @@ const PedigreeChart = ({ animalId, animalData, onClose, API_BASE_URL, authToken 
         
         return (
             <div className={`border border-gray-400 rounded p-2 ${bgColor} relative flex gap-2 h-full items-center`}>
-                {/* Image */}
-                <div className="w-20 h-20 bg-gray-100 rounded-lg overflow-hidden flex items-center justify-center flex-shrink-0">
+                {/* Image - 1/3 width */}
+                <div className="w-1/3 aspect-square bg-gray-100 rounded border-2 border-gray-300 overflow-hidden flex items-center justify-center flex-shrink-0">
                     {imgSrc ? (
                         <AnimalImage src={imgSrc} alt={animal.name} className="w-full h-full object-cover" iconSize={28} />
                     ) : (
@@ -293,8 +307,6 @@ const PedigreeChart = ({ animalId, animalData, onClose, API_BASE_URL, authToken 
                 
                 {/* Info */}
                 <div className="flex-1 min-w-0 flex flex-col justify-center">
-                    <div className="font-semibold text-xs text-gray-700 mb-1">{title}</div>
-                    
                     {/* Name */}
                     <div className="font-semibold text-xs text-gray-800 mb-1 truncate">
                         {animal.prefix && `${animal.prefix} `}{animal.name}
@@ -316,6 +328,11 @@ const PedigreeChart = ({ animalId, animalData, onClose, API_BASE_URL, authToken 
                     </div>
                 </div>
                 
+                {/* Gender Icon - Top Right */}
+                <div className="absolute top-2 right-2">
+                    <GenderIcon size={16} className={iconColor} />
+                </div>
+                
                 {/* CT ID - Bottom Right */}
                 <div className="absolute bottom-1 right-2 text-xs font-mono text-gray-400">
                     CT{animal.id_public}
@@ -325,11 +342,18 @@ const PedigreeChart = ({ animalId, animalData, onClose, API_BASE_URL, authToken 
     };
 
     // Render card for grandparents (with image)
-    const renderGrandparentCard = (animal) => {
+    const renderGrandparentCard = (animal, isSire) => {
+        const bgColor = isSire ? 'bg-[#d4f1f5]' : 'bg-[#f8e8ee]';
+        const GenderIcon = isSire ? Mars : Venus;
+        const iconColor = isSire ? 'text-[#9ED4E0]' : 'text-[#F1D1DC]';
+        
         if (!animal) {
             return (
-                <div className="border border-gray-300 rounded p-1.5 bg-gray-50 flex items-center justify-center h-full">
+                <div className={`border border-gray-300 rounded p-1.5 ${bgColor} flex items-center justify-center h-full relative`}>
                     <Cat size={24} className="text-gray-300" />
+                    <div className="absolute top-1 right-1">
+                        <GenderIcon size={12} className={iconColor} />
+                    </div>
                 </div>
             );
         }
@@ -338,9 +362,9 @@ const PedigreeChart = ({ animalId, animalData, onClose, API_BASE_URL, authToken 
         const colorCoat = [animal.color, animal.coat].filter(Boolean).join(' / ') || 'N/A';
         
         return (
-            <div className="border border-gray-300 rounded p-1.5 bg-white relative flex gap-1.5 h-full items-center">
-                {/* Image */}
-                <div className="w-16 h-16 bg-gray-100 rounded-lg overflow-hidden flex items-center justify-center flex-shrink-0">
+            <div className={`border border-gray-300 rounded p-1.5 ${bgColor} relative flex gap-1.5 h-full items-center`}>
+                {/* Image - 1/3 width */}
+                <div className="w-1/3 aspect-square bg-gray-100 rounded border-2 border-gray-300 overflow-hidden flex items-center justify-center flex-shrink-0">
                     {imgSrc ? (
                         <AnimalImage src={imgSrc} alt={animal.name} className="w-full h-full object-cover" iconSize={20} />
                     ) : (
@@ -371,6 +395,11 @@ const PedigreeChart = ({ animalId, animalData, onClose, API_BASE_URL, authToken 
                     </div>
                 </div>
                 
+                {/* Gender Icon - Top Right */}
+                <div className="absolute top-1 right-1">
+                    <GenderIcon size={12} className={iconColor} />
+                </div>
+                
                 {/* CT ID - Bottom Right */}
                 <div className="absolute bottom-0.5 right-1 text-xs font-mono text-gray-400">
                     CT{animal.id_public}
@@ -379,12 +408,19 @@ const PedigreeChart = ({ animalId, animalData, onClose, API_BASE_URL, authToken 
         );
     };
 
-    // Render card for great-grandparents (with small image)
-    const renderGreatGrandparentCard = (animal) => {
+    // Render card for great-grandparents (text only, no image)
+    const renderGreatGrandparentCard = (animal, isSire) => {
+        const bgColor = isSire ? 'bg-[#d4f1f5]' : 'bg-[#f8e8ee]';
+        const GenderIcon = isSire ? Mars : Venus;
+        const iconColor = isSire ? 'text-[#9ED4E0]' : 'text-[#F1D1DC]';
+        
         if (!animal) {
             return (
-                <div className="border border-gray-300 rounded p-1 bg-gray-50 flex items-center justify-center h-full">
+                <div className={`border border-gray-300 rounded p-1 ${bgColor} flex items-center justify-center h-full relative`}>
                     <span className="text-xs text-gray-400">Unknown</span>
+                    <div className="absolute top-0.5 right-0.5">
+                        <GenderIcon size={10} className={iconColor} />
+                    </div>
                 </div>
             );
         }
@@ -392,7 +428,7 @@ const PedigreeChart = ({ animalId, animalData, onClose, API_BASE_URL, authToken 
         const colorCoat = [animal.color, animal.coat].filter(Boolean).join(' / ') || 'N/A';
         
         return (
-            <div className="border border-gray-300 rounded p-1 bg-white relative h-full flex flex-col justify-center">
+            <div className={`border border-gray-300 rounded p-1 ${bgColor} relative h-full flex flex-col justify-center`}>
                 {/* Name */}
                 <div className="font-semibold text-xs text-gray-800 truncate mb-0.5">
                     {animal.prefix && `${animal.prefix} `}{animal.name}
@@ -411,6 +447,11 @@ const PedigreeChart = ({ animalId, animalData, onClose, API_BASE_URL, authToken 
                 {/* Breeder */}
                 <div className="text-xs text-gray-500 truncate mb-3">
                     {animal.breederName || 'N/A'}
+                </div>
+                
+                {/* Gender Icon - Top Right */}
+                <div className="absolute top-0.5 right-0.5">
+                    <GenderIcon size={10} className={iconColor} />
                 </div>
                 
                 {/* CT ID - Bottom Right */}
@@ -485,54 +526,54 @@ const PedigreeChart = ({ animalId, animalData, onClose, API_BASE_URL, authToken 
                     {/* Column 1: Parents (2 rows, each takes 1/2 height) */}
                     <div className="w-1/3 flex flex-col gap-2">
                         <div style={{height: `${parentHeight - 4}px`}}>
-                            {renderParentCard(father, 'Sire')}
+                            {renderParentCard(father, true)}
                         </div>
                         <div style={{height: `${parentHeight - 4}px`}}>
-                            {renderParentCard(mother, 'Dam')}
+                            {renderParentCard(mother, false)}
                         </div>
                     </div>
 
                     {/* Column 2: Grandparents (4 rows, each takes 1/4 height) */}
                     <div className="w-1/3 flex flex-col gap-2">
                         <div style={{height: `${grandparentHeight - 6}px`}}>
-                            {renderGrandparentCard(paternalGrandfather)}
+                            {renderGrandparentCard(paternalGrandfather, true)}
                         </div>
                         <div style={{height: `${grandparentHeight - 6}px`}}>
-                            {renderGrandparentCard(paternalGrandmother)}
+                            {renderGrandparentCard(paternalGrandmother, false)}
                         </div>
                         <div style={{height: `${grandparentHeight - 6}px`}}>
-                            {renderGrandparentCard(maternalGrandfather)}
+                            {renderGrandparentCard(maternalGrandfather, true)}
                         </div>
                         <div style={{height: `${grandparentHeight - 6}px`}}>
-                            {renderGrandparentCard(maternalGrandmother)}
+                            {renderGrandparentCard(maternalGrandmother, false)}
                         </div>
                     </div>
 
                     {/* Column 3: Great-Grandparents (8 rows, each takes 1/8 height) */}
                     <div className="w-1/3 flex flex-col gap-2">
                         <div style={{height: `${greatGrandparentHeight - 7}px`}}>
-                            {renderGreatGrandparentCard(pgfFather)}
+                            {renderGreatGrandparentCard(pgfFather, true)}
                         </div>
                         <div style={{height: `${greatGrandparentHeight - 7}px`}}>
-                            {renderGreatGrandparentCard(pgfMother)}
+                            {renderGreatGrandparentCard(pgfMother, false)}
                         </div>
                         <div style={{height: `${greatGrandparentHeight - 7}px`}}>
-                            {renderGreatGrandparentCard(pgmFather)}
+                            {renderGreatGrandparentCard(pgmFather, true)}
                         </div>
                         <div style={{height: `${greatGrandparentHeight - 7}px`}}>
-                            {renderGreatGrandparentCard(pgmMother)}
+                            {renderGreatGrandparentCard(pgmMother, false)}
                         </div>
                         <div style={{height: `${greatGrandparentHeight - 7}px`}}>
-                            {renderGreatGrandparentCard(mgfFather)}
+                            {renderGreatGrandparentCard(mgfFather, true)}
                         </div>
                         <div style={{height: `${greatGrandparentHeight - 7}px`}}>
-                            {renderGreatGrandparentCard(mgfMother)}
+                            {renderGreatGrandparentCard(mgfMother, false)}
                         </div>
                         <div style={{height: `${greatGrandparentHeight - 7}px`}}>
-                            {renderGreatGrandparentCard(mgmFather)}
+                            {renderGreatGrandparentCard(mgmFather, true)}
                         </div>
                         <div style={{height: `${greatGrandparentHeight - 7}px`}}>
-                            {renderGreatGrandparentCard(mgmMother)}
+                            {renderGreatGrandparentCard(mgmMother, false)}
                         </div>
                     </div>
                 </div>
