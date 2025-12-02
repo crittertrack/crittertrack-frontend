@@ -499,150 +499,140 @@ const PedigreeChart = ({ animalId, animalData, onClose, API_BASE_URL, authToken 
         const mgmMotherMother = mgmMother?.mother;
 
         return (
-            <div className="flex flex-col gap-3 w-full">
+            <div className="flex flex-col w-full">
                 {/* Main Animal - Top Row */}
-                <div className="flex gap-2">
-                    <div style={{width: '200px'}}>
+                <div className="flex gap-2 mb-2">
+                    <div className="w-1/6">
                         {renderMainAnimalCard(subject)}
                     </div>
                 </div>
 
-                {/* Sire Row */}
-                <div className="flex gap-2 items-center">
-                    <div style={{width: '200px'}}>
+                {/* Sire Lineage Section */}
+                <div className="flex w-full mb-2">
+                    {/* Sire */}
+                    <div className="w-1/6">
                         {renderParentCard(father, 'Sire')}
                     </div>
-                    <div style={{width: '160px'}}>
+                    {/* Paternal Grandfather */}
+                    <div className="w-1/6 ml-2">
                         {renderGrandparentCard(paternalGrandfather)}
                     </div>
-                    <div className="flex gap-1.5">
-                        <div style={{width: '130px'}}>
-                            {renderGreatGrandparentCard(pgfFather)}
+                    {/* Great-grandparents (PGF line) */}
+                    <div className="w-1/6 ml-2">
+                        {renderGreatGrandparentCard(pgfFather)}
+                    </div>
+                    {/* Great-great-grandparents */}
+                    <div className="flex-1 ml-2 flex gap-2">
+                        <div className="flex-1">
+                            {renderGreatGreatGrandparentCard(pgfFatherFather)}
                         </div>
-                        <div className="flex gap-1">
-                            <div style={{width: '110px'}}>
-                                {renderGreatGreatGrandparentCard(pgfFatherFather)}
-                            </div>
-                            <div style={{width: '110px'}}>
-                                {renderGreatGreatGrandparentCard(pgfFatherMother)}
-                            </div>
+                        <div className="flex-1">
+                            {renderGreatGreatGrandparentCard(pgfFatherMother)}
                         </div>
                     </div>
                 </div>
 
-                <div className="flex gap-2 items-center">
-                    <div style={{width: '200px'}}></div>
-                    <div style={{width: '160px'}}>
+                <div className="flex w-full mb-2">
+                    <div className="w-1/6"></div>
+                    <div className="w-1/6 ml-2">
                         {renderGrandparentCard(paternalGrandmother)}
                     </div>
-                    <div className="flex gap-1.5">
-                        <div style={{width: '130px'}}>
-                            {renderGreatGrandparentCard(pgmFather)}
+                    <div className="w-1/6 ml-2">
+                        {renderGreatGrandparentCard(pgmFather)}
+                    </div>
+                    <div className="flex-1 ml-2 flex gap-2">
+                        <div className="flex-1">
+                            {renderGreatGreatGrandparentCard(pgmFatherFather)}
                         </div>
-                        <div className="flex gap-1">
-                            <div style={{width: '110px'}}>
-                                {renderGreatGreatGrandparentCard(pgmFatherFather)}
-                            </div>
-                            <div style={{width: '110px'}}>
-                                {renderGreatGreatGrandparentCard(pgmFatherMother)}
-                            </div>
+                        <div className="flex-1">
+                            {renderGreatGreatGrandparentCard(pgmFatherMother)}
                         </div>
                     </div>
                 </div>
 
-                <div className="flex gap-2 items-center">
-                    <div style={{width: '200px'}}></div>
-                    <div style={{width: '160px'}}></div>
-                    <div className="flex gap-1.5">
-                        <div style={{width: '130px'}}>
-                            {renderGreatGrandparentCard(pgmMother)}
+                <div className="flex w-full mb-2">
+                    <div className="w-1/6"></div>
+                    <div className="w-1/6 ml-2"></div>
+                    <div className="w-1/6 ml-2">
+                        {renderGreatGrandparentCard(pgmMother)}
+                    </div>
+                    <div className="flex-1 ml-2 flex gap-2">
+                        <div className="flex-1">
+                            {renderGreatGreatGrandparentCard(pgmMotherFather)}
                         </div>
-                        <div className="flex gap-1">
-                            <div style={{width: '110px'}}>
-                                {renderGreatGreatGrandparentCard(pgmMotherFather)}
-                            </div>
-                            <div style={{width: '110px'}}>
-                                {renderGreatGreatGrandparentCard(pgmMotherMother)}
-                            </div>
+                        <div className="flex-1">
+                            {renderGreatGreatGrandparentCard(pgmMotherMother)}
                         </div>
                     </div>
                 </div>
 
-                {/* Dam Row */}
-                <div className="flex gap-2 items-center">
-                    <div style={{width: '200px'}}>
+                {/* Dam Lineage Section */}
+                <div className="flex w-full mb-2">
+                    <div className="w-1/6">
                         {renderParentCard(mother, 'Dam')}
                     </div>
-                    <div style={{width: '160px'}}>
+                    <div className="w-1/6 ml-2">
                         {renderGrandparentCard(maternalGrandfather)}
                     </div>
-                    <div className="flex gap-1.5">
-                        <div style={{width: '130px'}}>
-                            {renderGreatGrandparentCard(mgfFather)}
+                    <div className="w-1/6 ml-2">
+                        {renderGreatGrandparentCard(mgfFather)}
+                    </div>
+                    <div className="flex-1 ml-2 flex gap-2">
+                        <div className="flex-1">
+                            {renderGreatGreatGrandparentCard(mgfFatherFather)}
                         </div>
-                        <div className="flex gap-1">
-                            <div style={{width: '110px'}}>
-                                {renderGreatGreatGrandparentCard(mgfFatherFather)}
-                            </div>
-                            <div style={{width: '110px'}}>
-                                {renderGreatGreatGrandparentCard(mgfFatherMother)}
-                            </div>
+                        <div className="flex-1">
+                            {renderGreatGreatGrandparentCard(mgfFatherMother)}
                         </div>
                     </div>
                 </div>
 
-                <div className="flex gap-2 items-center">
-                    <div style={{width: '200px'}}></div>
-                    <div style={{width: '160px'}}>
+                <div className="flex w-full mb-2">
+                    <div className="w-1/6"></div>
+                    <div className="w-1/6 ml-2">
                         {renderGrandparentCard(maternalGrandmother)}
                     </div>
-                    <div className="flex gap-1.5">
-                        <div style={{width: '130px'}}>
-                            {renderGreatGrandparentCard(mgfMother)}
+                    <div className="w-1/6 ml-2">
+                        {renderGreatGrandparentCard(mgfMother)}
+                    </div>
+                    <div className="flex-1 ml-2 flex gap-2">
+                        <div className="flex-1">
+                            {renderGreatGreatGrandparentCard(mgfMotherFather)}
                         </div>
-                        <div className="flex gap-1">
-                            <div style={{width: '110px'}}>
-                                {renderGreatGreatGrandparentCard(mgfMotherFather)}
-                            </div>
-                            <div style={{width: '110px'}}>
-                                {renderGreatGreatGrandparentCard(mgfMotherMother)}
-                            </div>
+                        <div className="flex-1">
+                            {renderGreatGreatGrandparentCard(mgfMotherMother)}
                         </div>
                     </div>
                 </div>
 
-                <div className="flex gap-2 items-center">
-                    <div style={{width: '200px'}}></div>
-                    <div style={{width: '160px'}}></div>
-                    <div className="flex gap-1.5">
-                        <div style={{width: '130px'}}>
-                            {renderGreatGrandparentCard(mgmFather)}
+                <div className="flex w-full mb-2">
+                    <div className="w-1/6"></div>
+                    <div className="w-1/6 ml-2"></div>
+                    <div className="w-1/6 ml-2">
+                        {renderGreatGrandparentCard(mgmFather)}
+                    </div>
+                    <div className="flex-1 ml-2 flex gap-2">
+                        <div className="flex-1">
+                            {renderGreatGreatGrandparentCard(mgmFatherFather)}
                         </div>
-                        <div className="flex gap-1">
-                            <div style={{width: '110px'}}>
-                                {renderGreatGreatGrandparentCard(mgmFatherFather)}
-                            </div>
-                            <div style={{width: '110px'}}>
-                                {renderGreatGreatGrandparentCard(mgmFatherMother)}
-                            </div>
+                        <div className="flex-1">
+                            {renderGreatGreatGrandparentCard(mgmFatherMother)}
                         </div>
                     </div>
                 </div>
 
-                <div className="flex gap-2 items-center">
-                    <div style={{width: '200px'}}></div>
-                    <div style={{width: '160px'}}></div>
-                    <div className="flex gap-1.5">
-                        <div style={{width: '130px'}}>
-                            {renderGreatGrandparentCard(mgmMother)}
+                <div className="flex w-full mb-2">
+                    <div className="w-1/6"></div>
+                    <div className="w-1/6 ml-2"></div>
+                    <div className="w-1/6 ml-2">
+                        {renderGreatGrandparentCard(mgmMother)}
+                    </div>
+                    <div className="flex-1 ml-2 flex gap-2">
+                        <div className="flex-1">
+                            {renderGreatGreatGrandparentCard(mgmMotherFather)}
                         </div>
-                        <div className="flex gap-1">
-                            <div style={{width: '110px'}}>
-                                {renderGreatGreatGrandparentCard(mgmMotherFather)}
-                            </div>
-                            <div style={{width: '110px'}}>
-                                {renderGreatGreatGrandparentCard(mgmMotherMother)}
-                            </div>
+                        <div className="flex-1">
+                            {renderGreatGreatGrandparentCard(mgmMotherMother)}
                         </div>
                     </div>
                 </div>
