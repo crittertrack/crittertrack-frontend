@@ -2549,6 +2549,10 @@ const ProfileEditForm = ({ userProfile, showModalMessage, onSaveSuccess, onCance
                                 <span>Display **Website URL** on your public profile card.</span>
                             </label>
                         )}
+                    </div>
+                    
+                    <div className="pt-4 space-y-2 border-t border-gray-200">
+                        <h4 className="text-base font-medium text-gray-800">Animal Privacy Settings:</h4>
                         
                         <label className="flex items-center space-x-2 text-sm text-gray-700">
                             <input type="checkbox" checked={showGeneticCodePublic} onChange={(e) => setShowGeneticCodePublic(e.target.checked)} 
@@ -2677,6 +2681,24 @@ const ProfileView = ({ userProfile, showModalMessage, fetchUserProfile, authToke
                             (userProfile.showEmailPublic ?? false) ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800'
                         }`}>
                             {(userProfile.showEmailPublic ?? false) ? 'Public' : 'Private'}
+                        </span>
+                    </div>
+                    
+                    <div className="flex justify-between items-center py-1">
+                        <span className="text-base text-gray-800">Genetic Code on Public Animals</span>
+                        <span className={`px-3 py-1 text-xs font-semibold rounded-full ${ 
+                            (userProfile.showGeneticCodePublic ?? false) ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800'
+                        }`}>
+                            {(userProfile.showGeneticCodePublic ?? false) ? 'Public' : 'Private'}
+                        </span>
+                    </div>
+                    
+                    <div className="flex justify-between items-center py-1">
+                        <span className="text-base text-gray-800">Remarks/Notes on Public Animals</span>
+                        <span className={`px-3 py-1 text-xs font-semibold rounded-full ${ 
+                            (userProfile.showRemarksPublic ?? false) ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800'
+                        }`}>
+                            {(userProfile.showRemarksPublic ?? false) ? 'Public' : 'Private'}
                         </span>
                     </div>
                 </div>
