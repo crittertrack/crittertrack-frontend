@@ -4111,6 +4111,7 @@ const App = () => {
                     ? new Intl.DateTimeFormat('en-US', { year: 'numeric', month: 'long', day: 'numeric' }).format(new Date(animalToView.birthDate))
                     : '—';
                 return (
+                    <>
                     <div className="w-full max-w-4xl bg-white p-6 rounded-xl shadow-lg">
                         <div className="flex items-start justify-between mb-6">
                             <button onClick={() => setCurrentView('list')} className="flex items-center text-gray-600 hover:text-gray-800 font-medium">
@@ -4256,6 +4257,7 @@ const App = () => {
                             authToken={authToken}
                         />
                     )}
+                    </>
                 );
             case 'genetics-calculator': // NEW VIEW CASE
                 return (
