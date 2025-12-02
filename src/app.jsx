@@ -1926,18 +1926,25 @@ const AnimalForm = ({
                                     className="flex flex-col items-start p-3 border border-gray-300 rounded-lg bg-white cursor-pointer hover:border-primary transition disabled:opacity-50"
                                 >
                                     <div className="flex items-center space-x-2 w-full">
+                                    {formData.fatherId_public && fatherInfo ? (
+                                        <span className="text-gray-800">
+                                            {fatherInfo.prefix && `${fatherInfo.prefix} `}{fatherInfo.name}
+                                        </span>
+                                    ) : (
                                         <span className={formData.fatherId_public ? "text-gray-800 font-mono" : "text-gray-400"}>
                                             {formData.fatherId_public ? `CT${formData.fatherId_public}` : 'Click to Select Sire'}
                                         </span>
-                                        {formData.fatherId_public && (
-                                            <button
-                                                onClick={(e) => { e.stopPropagation(); clearParentSelection('father'); }}
-                                                title="Clear sire selection"
-                                                className="text-sm text-red-500 hover:text-red-700 p-1 rounded"
-                                            >
-                                                <X size={14} />
-                                            </button>
-                                        )}
+                                    )}
+                                    {formData.fatherId_public && (
+                                        <button
+                                            type="button"
+                                            onClick={(e) => { e.stopPropagation(); clearParentSelection('father'); }}
+                                            title="Clear sire selection"
+                                            className="text-sm text-red-500 hover:text-red-700 p-1 rounded"
+                                        >
+                                            <X size={14} />
+                                        </button>
+                                    )}
                                     </div>
                                 </div>
                         </div>
@@ -1948,11 +1955,18 @@ const AnimalForm = ({
                                 className="flex flex-col items-start p-3 border border-gray-300 rounded-lg bg-white cursor-pointer hover:border-primary transition disabled:opacity-50"
                             >
                                 <div className="flex items-center space-x-2 w-full">
-                                    <span className={formData.motherId_public ? "text-gray-800 font-mono" : "text-gray-400"}>
-                                        {formData.motherId_public ? `CT${formData.motherId_public}` : 'Click to Select Dam'}
-                                    </span>
+                                    {formData.motherId_public && motherInfo ? (
+                                        <span className="text-gray-800">
+                                            {motherInfo.prefix && `${motherInfo.prefix} `}{motherInfo.name}
+                                        </span>
+                                    ) : (
+                                        <span className={formData.motherId_public ? "text-gray-800 font-mono" : "text-gray-400"}>
+                                            {formData.motherId_public ? `CT${formData.motherId_public}` : 'Click to Select Dam'}
+                                        </span>
+                                    )}
                                     {formData.motherId_public && (
                                         <button
+                                            type="button"
                                             onClick={(e) => { e.stopPropagation(); clearParentSelection('mother'); }}
                                             title="Clear dam selection"
                                             className="text-sm text-red-500 hover:text-red-700 p-1 rounded"
@@ -2007,7 +2021,7 @@ const AnimalForm = ({
                             </div>
                         </div>
                         <div className='flex flex-col'>
-                            <label className='text-sm font-medium text-gray-600 mb-1'>Owner Name (optional, local only)</label>
+                            <label className='text-sm font-medium text-gray-600 mb-1'>Owner Name</label>
                             <input 
                                 type="text" 
                                 name="ownerName" 
