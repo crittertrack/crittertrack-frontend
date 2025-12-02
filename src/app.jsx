@@ -3294,9 +3294,11 @@ const NotificationPanel = ({ authToken, API_BASE_URL, onClose, showModalMessage 
 
     const fetchNotifications = async () => {
         try {
+            console.log('[Notifications] Fetching from:', `${API_BASE_URL}/notifications`);
             const response = await axios.get(`${API_BASE_URL}/notifications`, {
                 headers: { Authorization: `Bearer ${authToken}` }
             });
+            console.log('[Notifications] Received:', response.data);
             setNotifications(response.data || []);
         } catch (error) {
             console.error('Error fetching notifications:', error);
