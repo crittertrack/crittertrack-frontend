@@ -612,7 +612,13 @@ const PublicProfileView = ({ profile, onBack, onViewAnimal, API_BASE_URL }) => {
 
     const memberSince = profile.createdAt 
         ? new Intl.DateTimeFormat('en-US', { year: 'numeric', month: 'long' }).format(new Date(profile.createdAt))
-        : 'Unknown';
+        : (profile.updatedAt ? new Intl.DateTimeFormat('en-US', { year: 'numeric', month: 'long' }).format(new Date(profile.updatedAt)) : 'Unknown');
+
+    // Determine display name(s)
+    const showBothNames = profile.showBreederName && profile.personalName && profile.breederName;
+    const displayName = showBothNames 
+        ? `${profile.personalName} (${profile.breederName})`
+        : (profile.showBreederName && profile.breederName ? profile.breederName : profile.personalName || 'Anonymous Breeder');
 
     const groupedAnimals = animals.reduce((groups, animal) => {
         const species = animal.species || 'Unspecified';
@@ -635,14 +641,14 @@ const PublicProfileView = ({ profile, onBack, onViewAnimal, API_BASE_URL }) => {
             {/* Profile Header */}
             <div className="flex items-center space-x-4 mb-6 pb-6 border-b">
                 {profile.profileImage ? (
-                    <img src={profile.profileImage} alt={profile.breederName} className="w-24 h-24 rounded-lg object-cover shadow-md" />
+                    <img src={profile.profileImage} alt={displayName} className="w-24 h-24 rounded-lg object-cover shadow-md" />
                 ) : (
                     <div className="w-24 h-24 bg-gray-200 rounded-lg flex items-center justify-center shadow-md">
                         <User size={48} className="text-gray-400" />
                     </div>
                 )}
                 <div>
-                    <h2 className="text-3xl font-bold text-gray-900">{profile.breederName || 'Anonymous Breeder'}</h2>
+                    <h2 className="text-3xl font-bold text-gray-900">{displayName}</h2>
                     <p className="text-gray-600">Public ID: <span className="font-mono text-accent">CT{profile.id_public}</span></p>
                     <p className="text-sm text-gray-500 mt-1">Member since {memberSince}</p>
                 </div>
