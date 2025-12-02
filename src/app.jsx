@@ -770,11 +770,14 @@ const ViewOnlyAnimalDetail = ({ animal, onClose, API_BASE_URL, onViewProfile }) 
                     const response = await axios.get(
                         `${API_BASE_URL}/public/profiles/search?query=CT${animal.ownerId_public}&limit=1`
                     );
+                    console.log('Owner privacy response:', response.data);
                     if (response.data && response.data.length > 0) {
-                        setOwnerPrivacySettings({
+                        const settings = {
                             showGeneticCodePublic: response.data[0].showGeneticCodePublic ?? false,
                             showRemarksPublic: response.data[0].showRemarksPublic ?? false
-                        });
+                        };
+                        console.log('Owner privacy settings:', settings);
+                        setOwnerPrivacySettings(settings);
                     }
                 } catch (error) {
                     console.error('Failed to fetch owner privacy settings:', error);
@@ -795,6 +798,15 @@ const ViewOnlyAnimalDetail = ({ animal, onClose, API_BASE_URL, onViewProfile }) 
     // Only show remarks and genetic code if owner's privacy settings allow AND data exists
     const showRemarks = ownerPrivacySettings?.showRemarksPublic && animal.remarks;
     const showGeneticCode = ownerPrivacySettings?.showGeneticCodePublic && animal.geneticCode;
+    
+    console.log('Animal data:', { 
+        ownerId_public: animal.ownerId_public,
+        hasRemarks: !!animal.remarks, 
+        hasGeneticCode: !!animal.geneticCode,
+        ownerPrivacySettings,
+        showRemarks,
+        showGeneticCode
+    });
 
     return (
         <div className="fixed inset-0 bg-accent/10 flex items-center justify-center p-4 z-50 overflow-y-auto">
