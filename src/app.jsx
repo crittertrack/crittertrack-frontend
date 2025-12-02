@@ -1571,23 +1571,38 @@ const AnimalForm = ({
     useEffect(() => {
         let mounted = true;
         (async () => {
-            if (formData.fatherId_public && !fatherInfo) {
+            // Fetch father info if we have an ID and either no info or the ID changed
+            if (formData.fatherId_public && (!fatherInfo || fatherInfo.id_public !== formData.fatherId_public)) {
                 try {
                     const info = await fetchAnimalSummary(formData.fatherId_public);
                     console.log('Fetched father info from formData:', info);
                     if (mounted) setFatherInfo(info);
-                } catch (e) { console.error('Failed to fetch father info:', e); }
+                } catch (e) { 
+                    console.error('Failed to fetch father info:', e);
+                    if (mounted) setFatherInfo(null);
+                }
+            } else if (!formData.fatherId_public && fatherInfo) {
+                // Clear father info if ID was removed
+                if (mounted) setFatherInfo(null);
             }
-            if (formData.motherId_public && !motherInfo) {
+            
+            // Fetch mother info if we have an ID and either no info or the ID changed
+            if (formData.motherId_public && (!motherInfo || motherInfo.id_public !== formData.motherId_public)) {
                 try {
                     const info = await fetchAnimalSummary(formData.motherId_public);
                     console.log('Fetched mother info from formData:', info);
                     if (mounted) setMotherInfo(info);
-                } catch (e) { console.error('Failed to fetch mother info:', e); }
+                } catch (e) { 
+                    console.error('Failed to fetch mother info:', e);
+                    if (mounted) setMotherInfo(null);
+                }
+            } else if (!formData.motherId_public && motherInfo) {
+                // Clear mother info if ID was removed
+                if (mounted) setMotherInfo(null);
             }
         })();
         return () => { mounted = false; };
-    }, [formData.fatherId_public, formData.motherId_public]);
+    }, [formData.fatherId_public, formData.motherId_public, fatherInfo, motherInfo]);
 
     const handleSubmit = async (e) => {
         e.preventDefault();
