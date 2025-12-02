@@ -839,6 +839,16 @@ const ViewOnlyAnimalDetail = ({ animal, onClose, API_BASE_URL }) => {
                         </div>
                     )}
 
+                    {/* Breeder */}
+                    {animal.breederId_public && (
+                        <div className="bg-white border-2 border-gray-300 rounded-lg p-6">
+                            <h3 className="text-lg font-semibold text-gray-800 mb-2">Breeder</h3>
+                            <p className="text-gray-700">
+                                <span className="font-mono text-accent">CT{animal.breederId_public}</span>
+                            </p>
+                        </div>
+                    )}
+
                     {/* Parents */}
                     <div className="bg-white border-2 border-gray-300 rounded-lg p-6">
                         <h3 className="text-lg font-semibold text-gray-800 mb-4">Parents</h3>
@@ -1304,6 +1314,8 @@ const AnimalForm = ({
             geneticCode: animalToEdit.geneticCode || '',
             fatherId_public: animalToEdit.fatherId_public || null,
             motherId_public: animalToEdit.motherId_public || null,
+            breederId_public: animalToEdit.breederId_public || null,
+            ownerName: animalToEdit.ownerName || '',
             isPregnant: animalToEdit.isPregnant || false,
             isNursing: animalToEdit.isNursing || false,
             isOwned: animalToEdit.isOwned ?? true,
@@ -1323,6 +1335,8 @@ const AnimalForm = ({
             geneticCode: '',
             fatherId_public: null,
             motherId_public: null,
+            breederId_public: null,
+            ownerName: '',
             isPregnant: false,
             isNursing: false,
             isOwned: true,
@@ -1334,6 +1348,7 @@ const AnimalForm = ({
     // Small cached info for selected parents so we can show name/prefix next to CTID
     const [fatherInfo, setFatherInfo] = useState(null); // { id_public, prefix, name }
     const [motherInfo, setMotherInfo] = useState(null);
+    const [breederInfo, setBreederInfo] = useState(null); // { id_public, personalName, breederName, showBreederName }
 
     // Helper: fetch a summary for an animal by public id. Try local (authenticated) first, then global display.
     const fetchAnimalSummary = async (idPublic) => {
@@ -1360,6 +1375,26 @@ const AnimalForm = ({
         }
         return null;
     };
+
+    // Helper: fetch breeder/user info by public id
+    const fetchBreederInfo = async (idPublic) => {
+        if (!idPublic) return null;
+        try {
+            const response = await axios.get(`${API_BASE_URL}/public/profiles/search?query=${idPublic}&limit=1`);
+            if (Array.isArray(response.data) && response.data.length > 0) {
+                const user = response.data[0];
+                return {
+                    id_public: user.id_public,
+                    personalName: user.personalName || '',
+                    breederName: user.breederName || '',
+                    showBreederName: user.showBreederName || false
+                };
+            }
+        } catch (err) {
+            console.warn('Failed to fetch breeder info:', err);
+        }
+        return null;
+    };
     const [loading, setLoading] = useState(false);
     const [modalTarget, setModalTarget] = useState(null); 
     const [animalImageFile, setAnimalImageFile] = useState(null);
@@ -1375,6 +1410,36 @@ const AnimalForm = ({
     
         const handleSelectPedigree = async (idOrAnimal) => {
             const id = idOrAnimal && typeof idOrAnimal === 'object' ? idOrAnimal.id_public : idOrAnimal;
+            
+            // Handle breeder selection differently
+            if (modalTarget === 'breeder') {
+                setFormData(prev => ({ ...prev, breederId_public: id }));
+                if (idOrAnimal && typeof idOrAnimal === 'object') {
+                    // User object from search
+                    const user = idOrAnimal;
+                    const info = {
+                        id_public: user.id_public,
+                        personalName: user.personalName || '',
+                        breederName: user.breederName || '',
+                        showBreederName: user.showBreederName || false
+                    };
+                    setBreederInfo(info);
+                } else if (id) {
+                    // Fetch user info
+                    try {
+                        const info = await fetchBreederInfo(id);
+                        setBreederInfo(info);
+                    } catch (err) {
+                        console.warn('Failed to fetch breeder info', err);
+                    }
+                } else {
+                    setBreederInfo(null);
+                }
+                setModalTarget(null);
+                return;
+            }
+            
+            // Handle parent selection
             const idKey = modalTarget === 'father' ? 'fatherId_public' : 'motherId_public';
             setFormData(prev => ({ ...prev, [idKey]: id }));
         // Update ref immediately so save uses the latest selection even if state update is pending
@@ -1458,14 +1523,21 @@ const AnimalForm = ({
         });
     };
 
-    // When editing an existing animal, initialize parent info
+    // Clear breeder selection
+    const clearBreederSelection = () => {
+        setFormData(prev => ({ ...prev, breederId_public: null }));
+        setBreederInfo(null);
+    };
+
+    // When editing an existing animal, initialize parent and breeder info
     useEffect(() => {
         let mounted = true;
         (async () => {
             if (animalToEdit) {
                 const fId = animalToEdit.fatherId_public || null;
                 const mId = animalToEdit.motherId_public || null;
-                console.log('Loading parent info for animal:', animalToEdit.id_public, 'fatherId:', fId, 'motherId:', mId);
+                const bId = animalToEdit.breederId_public || null;
+                console.log('Loading parent info for animal:', animalToEdit.id_public, 'fatherId:', fId, 'motherId:', mId, 'breederId:', bId);
                 if (fId) {
                     try {
                         const info = await fetchAnimalSummary(fId);
@@ -1478,6 +1550,15 @@ const AnimalForm = ({
                         const info = await fetchAnimalSummary(mId);
                         console.log('Fetched mother info:', info, 'for motherId:', mId);
                         if (mounted) setMotherInfo(info);
+                    } catch (e) { console.error('Failed to fetch mother info:', e); }
+                }
+                if (bId) {
+                    try {
+                        const info = await fetchBreederInfo(bId);
+                        console.log('Fetched breeder info:', info, 'for breederId:', bId);
+                        if (mounted) setBreederInfo(info);
+                    } catch (e) { console.error('Failed to fetch breeder info:', e); }
+                }
                     } catch (e) { console.error('Failed to fetch mother info:', e); }
                 }
             }
@@ -1625,7 +1706,7 @@ const AnimalForm = ({
     return (
         <div className="w-full max-w-2xl mx-auto bg-white p-6 rounded-xl shadow-lg">
             {/* --- Parent Search Modal --- */}
-            {modalTarget && ( 
+            {modalTarget && modalTarget !== 'breeder' && ( 
                 <ParentSearchModal
                     title={modalTarget === 'father' ? 'Sire' : 'Dam'} 
                     currentId={currentId} 
@@ -1641,6 +1722,16 @@ const AnimalForm = ({
                     requiredGender={requiredGender}
                     birthDate={formData.birthDate} 
                 /> 
+            )}
+
+            {/* --- Breeder Search Modal --- */}
+            {modalTarget === 'breeder' && (
+                <UserSearchModal
+                    onClose={() => setModalTarget(null)}
+                    onSelectUser={handleSelectPedigree}
+                    showModalMessage={showModalMessage}
+                    API_BASE_URL={API_BASE_URL}
+                />
             )}
 
             <h2 className="text-3xl font-bold text-gray-800 mb-6 flex items-center justify-between">
@@ -1869,6 +1960,50 @@ const AnimalForm = ({
                                     )}
                                 </div>
                             </div>
+                        </div>
+                    </div>
+                </div>
+                {/* ------------------------------------------- */}
+
+                {/* ------------------------------------------- */}
+                {/* Breeder & Owner Section */}
+                {/* ------------------------------------------- */}
+                <div className="bg-gray-50 p-4 rounded-lg border border-gray-200 space-y-4">
+                    <h3 className="text-lg font-semibold text-gray-700 border-b pb-2">Breeder & Owner</h3>
+                    <div className="space-y-4">
+                        <div className='flex flex-col'>
+                            <label className='text-sm font-medium text-gray-600 mb-1'>Breeder</label>
+                            <div 
+                                onClick={() => !loading && setModalTarget('breeder')}
+                                className="flex flex-col items-start p-3 border border-gray-300 rounded-lg bg-white cursor-pointer hover:border-primary transition disabled:opacity-50"
+                            >
+                                <div className="flex items-center space-x-2 w-full">
+                                    <span className={formData.breederId_public ? "text-gray-800 font-mono" : "text-gray-400"}>
+                                        {formData.breederId_public ? `CT${formData.breederId_public}` : 'Click to Select Breeder (defaults to you)'}
+                                    </span>
+                                    {formData.breederId_public && (
+                                        <button
+                                            onClick={(e) => { e.stopPropagation(); clearBreederSelection(); }}
+                                            title="Clear breeder selection"
+                                            className="text-sm text-red-500 hover:text-red-700 p-1 rounded"
+                                        >
+                                            <X size={14} />
+                                        </button>
+                                    )}
+                                </div>
+                            </div>
+                        </div>
+                        <div className='flex flex-col'>
+                            <label className='text-sm font-medium text-gray-600 mb-1'>Owner Name (optional, local only)</label>
+                            <input 
+                                type="text" 
+                                name="ownerName" 
+                                value={formData.ownerName} 
+                                onChange={handleChange}
+                                placeholder="Leave empty to not display"
+                                className="mt-1 block w-full p-2 border border-gray-300 rounded-md shadow-sm focus:ring-primary focus:border-primary" 
+                            />
+                            <p className="text-xs text-gray-500 mt-1">This field is only shown in your private view, not on public profiles.</p>
                         </div>
                     </div>
                 </div>
@@ -3296,6 +3431,26 @@ const App = () => {
                             ) : (
                                 <p className="text-gray-500 text-sm italic">No genetic code recorded.</p>
                             )}
+                        </div>
+
+                        {/* Breeder & Owner Section */}
+                        <div className="border-2 border-gray-300 rounded-lg p-6 mb-6">
+                            <h3 className="text-lg font-semibold text-gray-800 mb-3">Breeder & Owner</h3>
+                            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 text-sm text-gray-700">
+                                <div>
+                                    <strong>Breeder:</strong>{' '}
+                                    {animalToView.breederId_public ? (
+                                        <span className="font-mono text-accent">CT{animalToView.breederId_public}</span>
+                                    ) : (
+                                        <span className="text-gray-500 italic">Not specified</span>
+                                    )}
+                                </div>
+                                {animalToView.ownerName && (
+                                    <div>
+                                        <strong>Owner:</strong> {animalToView.ownerName}
+                                    </div>
+                                )}
+                            </div>
                         </div>
 
                         {/* Remarks / Notes Section */}
