@@ -182,6 +182,18 @@ const PedigreeChart = ({ animalId, animalData, onClose, API_BASE_URL, authToken 
         if (!pedigreeRef.current) return;
 
         try {
+            // Wait for all images to load
+            const images = pedigreeRef.current.querySelectorAll('img');
+            await Promise.all(
+                Array.from(images).map(img => {
+                    if (img.complete) return Promise.resolve();
+                    return new Promise((resolve, reject) => {
+                        img.onload = resolve;
+                        img.onerror = resolve; // Resolve even on error to continue
+                    });
+                })
+            );
+
             const canvas = await html2canvas(pedigreeRef.current, {
                 scale: 3,
                 backgroundColor: '#ffffff',
