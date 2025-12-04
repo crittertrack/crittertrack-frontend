@@ -2240,6 +2240,24 @@ const LitterManagement = ({ authToken, API_BASE_URL, userProfile, showModalMessa
         }
     };
 
+    const handleDeleteLitter = async (litterId) => {
+        if (!confirm('Are you sure you want to delete this litter? This will not delete the animals, only the litter record.')) {
+            return;
+        }
+
+        try {
+            await axios.delete(`${API_BASE_URL}/litters/${litterId}`, {
+                headers: { Authorization: `Bearer ${authToken}` }
+            });
+            
+            showModalMessage('Success', 'Litter deleted successfully!');
+            fetchLitters();
+        } catch (error) {
+            console.error('Error deleting litter:', error);
+            showModalMessage('Error', error.response?.data?.message || 'Failed to delete litter');
+        }
+    };
+
     const maleAnimals = myAnimals.filter(a => a.gender === 'Male');
     const femaleAnimals = myAnimals.filter(a => a.gender === 'Female');
 
@@ -2442,6 +2460,13 @@ const LitterManagement = ({ authToken, API_BASE_URL, userProfile, showModalMessa
                                             </p>
                                         )}
                                     </div>
+                                    <button
+                                        onClick={() => handleDeleteLitter(litter._id)}
+                                        className="text-red-500 hover:text-red-700 p-2"
+                                        title="Delete Litter"
+                                    >
+                                        <Trash2 size={20} />
+                                    </button>
                                 </div>
 
                                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-3">
