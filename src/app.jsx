@@ -4997,6 +4997,39 @@ const AnimalList = ({ authToken, showModalMessage, onEditAnimal, onViewAnimal, o
         fetchAnimals();
     };
 
+    const handleCalculateAllCOI = async () => {
+        if (!window.confirm('Calculate inbreeding coefficients for all animals? This may take a moment.')) {
+            return;
+        }
+
+        try {
+            setLoading(true);
+            let calculated = 0;
+            
+            for (const animal of animals) {
+                if (animal.fatherId_public || animal.motherId_public || animal.sireId_public || animal.damId_public) {
+                    try {
+                        await axios.get(`${API_BASE_URL}/animals/${animal.id_public}/inbreeding`, {
+                            params: { generations: 5 },
+                            headers: { Authorization: `Bearer ${authToken}` }
+                        });
+                        calculated++;
+                    } catch (error) {
+                        console.log(`Failed to calculate COI for ${animal.name}:`, error);
+                    }
+                }
+            }
+
+            showModalMessage('Success', `Calculated inbreeding coefficients for ${calculated} animals!`);
+            fetchAnimals();
+        } catch (error) {
+            console.error('Error calculating COI:', error);
+            showModalMessage('Error', 'Failed to calculate inbreeding coefficients');
+        } finally {
+            setLoading(false);
+        }
+    };
+
     const triggerSearch = () => {
         const term = searchInput.trim();
         if (!term) {
@@ -5095,14 +5128,24 @@ const AnimalList = ({ authToken, showModalMessage, onEditAnimal, onViewAnimal, o
                     <ClipboardList size={24} className="mr-3 text-primary-dark" />
                     My Animals ({animals.length})
                 </div>
-                <button 
-                    onClick={handleRefresh} 
-                    disabled={loading}
-                    className="text-gray-600 hover:text-primary transition disabled:opacity-50 flex items-center"
-                    title="Refresh List"
-                >
-                    {loading ? <Loader2 size={18} className="animate-spin" /> : <RefreshCw size={18} />}
-                </button>
+                <div className="flex items-center gap-2">
+                    <button 
+                        onClick={handleCalculateAllCOI} 
+                        disabled={loading}
+                        className="text-orange-600 hover:text-orange-700 transition disabled:opacity-50 flex items-center text-sm font-medium"
+                        title="Calculate Inbreeding Coefficients"
+                    >
+                        Calculate COI
+                    </button>
+                    <button 
+                        onClick={handleRefresh} 
+                        disabled={loading}
+                        className="text-gray-600 hover:text-primary transition disabled:opacity-50 flex items-center"
+                        title="Refresh List"
+                    >
+                        {loading ? <Loader2 size={18} className="animate-spin" /> : <RefreshCw size={18} />}
+                    </button>
+                </div>
             </h2>
 
             <div className="mb-6 p-4 border rounded-lg bg-gray-50 space-y-3">
