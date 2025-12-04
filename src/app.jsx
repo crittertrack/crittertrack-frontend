@@ -2028,6 +2028,8 @@ const LitterManagement = ({ authToken, API_BASE_URL, userProfile, showModalMessa
     });
     const [linkingAnimals, setLinkingAnimals] = useState(false);
     const [availableToLink, setAvailableToLink] = useState({ litter: null, animals: [] });
+    const [expandedLitter, setExpandedLitter] = useState(null);
+    const [searchQuery, setSearchQuery] = useState('');
 
     useEffect(() => {
         fetchLitters();
@@ -2261,6 +2263,30 @@ const LitterManagement = ({ authToken, API_BASE_URL, userProfile, showModalMessa
     const maleAnimals = myAnimals.filter(a => a.gender === 'Male');
     const femaleAnimals = myAnimals.filter(a => a.gender === 'Female');
 
+    // Filter litters based on search query
+    const filteredLitters = litters.filter(litter => {
+        if (!searchQuery) return true;
+        
+        const query = searchQuery.toLowerCase();
+        const sire = myAnimals.find(a => a.id_public === litter.sireId_public);
+        const dam = myAnimals.find(a => a.id_public === litter.damId_public);
+        
+        // Search by litter name
+        if (litter.breedingPairCodeName && litter.breedingPairCodeName.toLowerCase().includes(query)) return true;
+        
+        // Search by sire name or ID
+        if (sire && sire.name.toLowerCase().includes(query)) return true;
+        if (sire && sire.id_public.toString().includes(query)) return true;
+        if (litter.sireId_public.toString().includes(query)) return true;
+        
+        // Search by dam name or ID
+        if (dam && dam.name.toLowerCase().includes(query)) return true;
+        if (dam && dam.id_public.toString().includes(query)) return true;
+        if (litter.damId_public.toString().includes(query)) return true;
+        
+        return false;
+    });
+
     if (loading) {
         return (
             <div className="w-full max-w-6xl bg-white p-6 rounded-xl shadow-lg">
@@ -2434,83 +2460,246 @@ const LitterManagement = ({ authToken, API_BASE_URL, userProfile, showModalMessa
 
             {/* Litter List */}
             <div className="space-y-4">
-                {litters.length === 0 ? (
+                {/* Search Bar */}
+                {litters.length > 0 && (
+                    <div className="bg-gray-50 p-4 rounded-lg border-2 border-gray-200">
+                        <div className="relative">
+                            <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400" size={20} />
+                            <input
+                                type="text"
+                                placeholder="Search by litter name, sire name/ID, or dam name/ID..."
+                                value={searchQuery}
+                                onChange={(e) => setSearchQuery(e.target.value)}
+                                className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent"
+                            />
+                        </div>
+                    </div>
+                )}
+
+                {filteredLitters.length === 0 && litters.length > 0 ? (
+                    <div className="text-center py-12 bg-gray-50 rounded-lg">
+                        <Search size={48} className="text-gray-400 mx-auto mb-4" />
+                        <p className="text-gray-600">No litters match your search.</p>
+                    </div>
+                ) : filteredLitters.length === 0 ? (
                     <div className="text-center py-12 bg-gray-50 rounded-lg">
                         <BookOpen size={48} className="text-gray-400 mx-auto mb-4" />
                         <p className="text-gray-600">No litters yet. Create your first litter above!</p>
                     </div>
                 ) : (
-                    litters.map(litter => {
+                    filteredLitters.map(litter => {
                         const sire = myAnimals.find(a => a.id_public === litter.sireId_public);
                         const dam = myAnimals.find(a => a.id_public === litter.damId_public);
+                        const isExpanded = expandedLitter === litter._id;
+                        const offspringList = myAnimals.filter(a => 
+                            litter.offspringIds_public && litter.offspringIds_public.includes(a.id_public)
+                        );
                         
                         return (
-                            <div key={litter._id} className="border-2 border-gray-200 rounded-lg p-4 bg-white hover:shadow-md transition">
-                                <div className="flex justify-between items-start mb-3">
-                                    <div>
-                                        <h3 className="text-xl font-bold text-gray-800">
-                                            {litter.breedingPairCodeName || `Litter ${new Date(litter.birthDate).toLocaleDateString()}`}
-                                        </h3>
-                                        <p className="text-sm text-gray-600">
-                                            Born: {new Date(litter.birthDate).toLocaleDateString()} • {litter.numberBorn} offspring
-                                        </p>
+                            <div key={litter._id} className="border-2 border-gray-200 rounded-lg bg-white hover:shadow-md transition">
+                                {/* Compact Header - Always Visible */}
+                                <div 
+                                    className="p-3 cursor-pointer flex items-center justify-between hover:bg-gray-50"
+                                    onClick={() => setExpandedLitter(isExpanded ? null : litter._id)}
+                                >
+                                    <div className="flex-1 grid grid-cols-1 md:grid-cols-4 gap-2 items-center">
+                                        <div>
+                                            <p className="font-bold text-gray-800">
+                                                {litter.breedingPairCodeName || 'Unnamed Litter'}
+                                            </p>
+                                            <p className="text-xs text-gray-500">
+                                                {new Date(litter.birthDate).toLocaleDateString()}
+                                            </p>
+                                        </div>
+                                        <div className="text-sm">
+                                            <span className="text-gray-600">Sire:</span> {sire ? `${sire.name}` : `CT${litter.sireId_public}`}
+                                        </div>
+                                        <div className="text-sm">
+                                            <span className="text-gray-600">Dam:</span> {dam ? `${dam.name}` : `CT${litter.damId_public}`}
+                                        </div>
+                                        <div className="text-sm font-semibold text-gray-700">
+                                            {litter.numberBorn} offspring
+                                        </div>
+                                    </div>
+                                    <ChevronLeft 
+                                        size={20} 
+                                        className={`text-gray-400 transition-transform ${isExpanded ? '-rotate-90' : 'rotate-180'}`}
+                                    />
+                                </div>
+
+                                {/* Expanded Details */}
+                                {isExpanded && (
+                                    <div className="border-t-2 border-gray-200 p-4 bg-gray-50">
+                                        <div className="flex justify-end gap-2 mb-4">
+                                            <button
+                                                onClick={() => handleLinkAnimals(litter)}
+                                                className="flex items-center gap-1 bg-primary hover:bg-primary/90 text-black font-semibold px-3 py-2 rounded-lg text-sm"
+                                            >
+                                                <Link size={16} />
+                                                Link Animals
+                                            </button>
+                                            <button
+                                                onClick={(e) => {
+                                                    e.stopPropagation();
+                                                    handleDeleteLitter(litter._id);
+                                                }}
+                                                className="flex items-center gap-1 bg-red-500 hover:bg-red-600 text-white font-semibold px-3 py-2 rounded-lg text-sm"
+                                            >
+                                                <Trash2 size={16} />
+                                                Delete Litter
+                                            </button>
+                                        </div>
+
                                         {litter.pairingDate && (
-                                            <p className="text-sm text-gray-500">
-                                                Paired: {new Date(litter.pairingDate).toLocaleDateString()}
+                                            <p className="text-sm text-gray-600 mb-3">
+                                                <strong>Pairing Date:</strong> {new Date(litter.pairingDate).toLocaleDateString()}
                                             </p>
                                         )}
-                                    </div>
-                                    <button
-                                        onClick={() => handleDeleteLitter(litter._id)}
-                                        className="text-red-500 hover:text-red-700 p-2"
-                                        title="Delete Litter"
-                                    >
-                                        <Trash2 size={20} />
-                                    </button>
-                                </div>
 
-                                <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-3">
-                                    <div>
-                                        <p className="text-sm font-semibold text-gray-700 mb-1">Sire:</p>
-                                        {sire ? (
-                                            <button
-                                                onClick={() => onViewAnimal(sire)}
-                                                className="text-primary hover:underline"
-                                            >
-                                                {sire.prefix ? `${sire.prefix} ` : ''}{sire.name} - CT{sire.id_public}
-                                            </button>
-                                        ) : (
-                                            <span className="text-gray-500">CT{litter.sireId_public} (Not in your animals)</span>
+                                        {litter.notes && (
+                                            <div className="bg-white rounded-lg p-3 mb-4 border border-gray-200">
+                                                <p className="text-sm font-semibold text-gray-700 mb-1">Notes:</p>
+                                                <p className="text-sm text-gray-600">{litter.notes}</p>
+                                            </div>
                                         )}
-                                    </div>
-                                    <div>
-                                        <p className="text-sm font-semibold text-gray-700 mb-1">Dam:</p>
-                                        {dam ? (
-                                            <button
-                                                onClick={() => onViewAnimal(dam)}
-                                                className="text-primary hover:underline"
-                                            >
-                                                {dam.prefix ? `${dam.prefix} ` : ''}{dam.name} - CT{dam.id_public}
-                                            </button>
-                                        ) : (
-                                            <span className="text-gray-500">CT{litter.damId_public} (Not in your animals)</span>
-                                        )}
-                                    </div>
-                                </div>
 
-                                {litter.notes && (
-                                    <div className="bg-gray-50 rounded p-3 mb-3">
-                                        <p className="text-sm text-gray-700">{litter.notes}</p>
+                                        {/* Parent Cards */}
+                                        <div className="mb-4">
+                                            <h4 className="text-sm font-bold text-gray-700 mb-2">Parents</h4>
+                                            <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+                                                {/* Sire Card */}
+                                                {sire && (
+                                                    <div 
+                                                        onClick={() => onViewAnimal(sire)}
+                                                        className="relative bg-white rounded-lg shadow-sm border border-gray-300 p-3 cursor-pointer hover:shadow-md transition flex items-center gap-3"
+                                                    >
+                                                        <div className="w-20 h-20 bg-gray-100 rounded-md overflow-hidden flex-shrink-0">
+                                                            {sire.imageUrl || sire.photoUrl ? (
+                                                                <img src={sire.imageUrl || sire.photoUrl} alt={sire.name} className="w-full h-full object-cover" />
+                                                            ) : (
+                                                                <div className="w-full h-full flex items-center justify-center text-gray-400">
+                                                                    <Cat size={32} />
+                                                                </div>
+                                                            )}
+                                                        </div>
+                                                        <div className="flex-1 min-w-0">
+                                                            <div className="flex items-center gap-1 mb-1">
+                                                                <Mars size={14} className="text-primary flex-shrink-0" />
+                                                                <p className="font-bold text-gray-800 truncate">
+                                                                    {sire.prefix ? `${sire.prefix} ` : ''}{sire.name}
+                                                                </p>
+                                                            </div>
+                                                            <p className="text-xs text-gray-500">CT{sire.id_public}</p>
+                                                            <p className="text-xs text-gray-600">{sire.species}</p>
+                                                        </div>
+                                                    </div>
+                                                )}
+
+                                                {/* Dam Card */}
+                                                {dam && (
+                                                    <div 
+                                                        onClick={() => onViewAnimal(dam)}
+                                                        className="relative bg-white rounded-lg shadow-sm border border-gray-300 p-3 cursor-pointer hover:shadow-md transition flex items-center gap-3"
+                                                    >
+                                                        <div className="w-20 h-20 bg-gray-100 rounded-md overflow-hidden flex-shrink-0">
+                                                            {dam.imageUrl || dam.photoUrl ? (
+                                                                <img src={dam.imageUrl || dam.photoUrl} alt={dam.name} className="w-full h-full object-cover" />
+                                                            ) : (
+                                                                <div className="w-full h-full flex items-center justify-center text-gray-400">
+                                                                    <Cat size={32} />
+                                                                </div>
+                                                            )}
+                                                        </div>
+                                                        <div className="flex-1 min-w-0">
+                                                            <div className="flex items-center gap-1 mb-1">
+                                                                <Venus size={14} className="text-accent flex-shrink-0" />
+                                                                <p className="font-bold text-gray-800 truncate">
+                                                                    {dam.prefix ? `${dam.prefix} ` : ''}{dam.name}
+                                                                </p>
+                                                            </div>
+                                                            <p className="text-xs text-gray-500">CT{dam.id_public}</p>
+                                                            <p className="text-xs text-gray-600">{dam.species}</p>
+                                                        </div>
+                                                    </div>
+                                                )}
+                                            </div>
+                                        </div>
+
+                                        {/* Offspring Cards */}
+                                        {offspringList.length > 0 && (
+                                            <div>
+                                                <h4 className="text-sm font-bold text-gray-700 mb-2">Offspring ({offspringList.length})</h4>
+                                                <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-3">
+                                                    {offspringList.map(animal => (
+                                                        <div
+                                                            key={animal.id_public}
+                                                            onClick={() => onViewAnimal(animal)}
+                                                            className="relative bg-white rounded-lg shadow-sm h-52 flex flex-col items-center overflow-hidden cursor-pointer hover:shadow-md transition border border-gray-300 pt-2"
+                                                        >
+                                                            {/* Gender badge top-right */}
+                                                            {animal.gender && (
+                                                                <div className="absolute top-1.5 right-1.5">
+                                                                    {animal.gender === 'Male' 
+                                                                        ? <Mars size={14} strokeWidth={2.5} className="text-primary" /> 
+                                                                        : <Venus size={14} strokeWidth={2.5} className="text-accent" />
+                                                                    }
+                                                                </div>
+                                                            )}
+
+                                                            {/* Profile image */}
+                                                            <div className="flex-1 flex items-center justify-center w-full px-2 mt-1">
+                                                                {animal.imageUrl || animal.photoUrl ? (
+                                                                    <img 
+                                                                        src={animal.imageUrl || animal.photoUrl} 
+                                                                        alt={animal.name} 
+                                                                        className="w-20 h-20 object-cover rounded-md" 
+                                                                    />
+                                                                ) : (
+                                                                    <div className="w-20 h-20 bg-gray-100 rounded-md flex items-center justify-center text-gray-400">
+                                                                        <Cat size={32} />
+                                                                    </div>
+                                                                )}
+                                                            </div>
+                                                            
+                                                            {/* Icon row */}
+                                                            <div className="w-full flex justify-center items-center space-x-2 py-1">
+                                                                {animal.isOwned ? (
+                                                                    <Heart size={12} className="text-black" />
+                                                                ) : (
+                                                                    <HeartOff size={12} className="text-black" />
+                                                                )}
+                                                                {animal.showOnPublicProfile || animal.isDisplay ? (
+                                                                    <Eye size={12} className="text-black" />
+                                                                ) : (
+                                                                    <EyeOff size={12} className="text-black" />
+                                                                )}
+                                                                {animal.isPregnant && <Egg size={12} className="text-black" />}
+                                                                {animal.isNursing && <Milk size={12} className="text-black" />}
+                                                            </div>
+                                                            
+                                                            {/* Name */}
+                                                            <div className="w-full text-center px-2 pb-1">
+                                                                <div className="text-sm font-semibold text-gray-800 truncate">
+                                                                    {animal.prefix ? `${animal.prefix} ` : ''}{animal.name}
+                                                                </div>
+                                                            </div>
+
+                                                            {/* ID bottom-right */}
+                                                            <div className="w-full px-2 pb-2 flex justify-end">
+                                                                <div className="text-xs text-gray-500">CT{animal.id_public}</div>
+                                                            </div>
+                                                            
+                                                            {/* Status bar */}
+                                                            <div className="w-full bg-gray-100 py-1 text-center border-t border-gray-300 mt-auto">
+                                                                <div className="text-xs font-medium text-gray-700">{animal.status || 'Unknown'}</div>
+                                                            </div>
+                                                        </div>
+                                                    ))}
+                                                </div>
+                                            </div>
+                                        )}
                                     </div>
                                 )}
-
-                                <button
-                                    onClick={() => handleLinkAnimals(litter)}
-                                    className="text-sm text-primary hover:underline flex items-center gap-1"
-                                >
-                                    <Link size={14} />
-                                    Link existing animals to this litter
-                                </button>
                             </div>
                         );
                     })
