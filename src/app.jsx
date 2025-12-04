@@ -3786,19 +3786,19 @@ const AuthView = ({ onLoginSuccess, showModalMessage, isRegister, setIsRegister,
                 setLoading(true);
                 setNotFound(false);
                 try {
-                    // First try to fetch from user's own animals (they might own the parent)
+                    // Try to fetch from authenticated endpoint (can access any animal globally)
                     try {
-                        const ownedResponse = await axios.get(`${API_BASE_URL}/animals/${parentId}`, {
+                        const response = await axios.get(`${API_BASE_URL}/animals/any/${parentId}`, {
                             headers: { Authorization: `Bearer ${authToken}` }
                         });
-                        if (ownedResponse.data) {
-                            setParentData(ownedResponse.data);
+                        if (response.data) {
+                            setParentData(response.data);
                             setLoading(false);
                             return;
                         }
-                    } catch (ownedError) {
-                        // Not in user's collection, try public database
-                        console.log(`Parent CT${parentId} not in user's collection, trying public database`);
+                    } catch (authError) {
+                        // If authenticated endpoint fails, try public
+                        console.log(`Parent CT${parentId} not found in authenticated endpoint, trying public`);
                     }
 
                     // Try fetching from global public animals database
