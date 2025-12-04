@@ -2809,7 +2809,7 @@ const LitterManagement = ({ authToken, API_BASE_URL, userProfile, showModalMessa
 
                                                             {/* ID and COI bottom section */}
                                                             <div className="w-full px-2 pb-2 flex justify-between items-end">
-                                                                <div className="text-xs font-semibold text-orange-600">
+                                                                <div className="text-xs font-semibold text-black">
                                                                     {animal.inbreedingCoefficient != null ? (
                                                                         `COI: ${animal.inbreedingCoefficient.toFixed(2)}%`
                                                                     ) : (
@@ -5108,7 +5108,7 @@ const AnimalList = ({ authToken, showModalMessage, onEditAnimal, onViewAnimal, o
 
                     {/* ID and COI bottom section */}
                     <div className="w-full px-2 pb-2 flex justify-between items-end">
-                        <div className="text-xs font-semibold text-orange-600">
+                        <div className="text-xs font-semibold text-black">
                             {animal.inbreedingCoefficient != null ? (
                                 `COI: ${animal.inbreedingCoefficient.toFixed(2)}%`
                             ) : (
