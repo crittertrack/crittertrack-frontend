@@ -63,6 +63,7 @@ const GENE_LOCI = {
     name: 'Dominant Spotting',
     combinations: [
       'w/w',
+      'Rw/w', 'Rw/W (lethal)', 'Rw/Wsh (lethal)', 'Rw/Rw (lethal)',
       'Wsh/w', 'Wsh/Wsh (lethal)',
       'W/w', 'W/Wsh (lethal)', 'W/W (lethal)'
     ]
@@ -157,7 +158,8 @@ const calculatePhenotype = (genotype) => {
   // Check for lethal combinations
   if (genotype.A === 'Ay/Ay (lethal)') return 'LETHAL: Dominant Yellow Homozygous';
   if (genotype.W && genotype.W.includes('lethal')) return 'LETHAL: Dominant Spotting Homozygous';
-  if (genotype.Wsh === 'Wsh/Wsh (lethal)') return 'LETHAL: Rumpwhite Homozygous';
+  if (genotype.W && genotype.W.includes('Wsh/Wsh')) return 'LETHAL: Wsh Homozygous';
+  if (genotype.W && genotype.W.includes('Rw/')) return 'LETHAL: Rw Combination';
 
   let color = '';
   let pattern = '';
@@ -245,13 +247,17 @@ const calculatePhenotype = (genotype) => {
 
   // Markings
   if (genotype.S === 's/s') {
-    markings.push('Piebald');
+    markings.push('Pied');
   }
 
-  if (genotype.W && genotype.W.includes('W/')) {
-    markings.push('Dominant White Spotting');
-  } else if (genotype.W && genotype.W.includes('Wsh/')) {
+  if (genotype.W === 'W/w') {
+    markings.push('Variegated');
+  } else if (genotype.W === 'Wsh/w') {
+    markings.push('Banded');
+  } else if (genotype.W === 'Rw/w') {
     markings.push('Rumpwhite');
+  } else if (genotype.W && genotype.W.includes('W/') && genotype.W !== 'W/w') {
+    markings.push('Dominant White Spotting');
   }
 
   if (genotype.Spl && genotype.Spl.includes('Spl/')) {
