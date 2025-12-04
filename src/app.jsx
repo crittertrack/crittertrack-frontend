@@ -3,6 +3,7 @@ import axios from 'axios';
 import { LogOut, Cat, UserPlus, LogIn, ChevronLeft, Trash2, Edit, Save, PlusCircle, Plus, ArrowLeft, Loader2, RefreshCw, User, ClipboardList, BookOpen, Settings, Mail, Globe, Egg, Milk, Search, X, Mars, Venus, Eye, EyeOff, Home, Heart, HeartOff, Bell, XCircle, Download, FileText, Link } from 'lucide-react';
 import jsPDF from 'jspdf';
 import html2canvas from 'html2canvas';
+import MouseGeneticsCalculator from './components/MouseGeneticsCalculator';
 
 const API_BASE_URL = 'https://crittertrack-pedigree-production.up.railway.app/api';
 
@@ -5968,6 +5969,14 @@ const App = () => {
                         userProfile={userProfile}
                         showModalMessage={showModalMessage}
                         onViewAnimal={handleViewAnimal}
+                    />
+                );
+            case 'genetics-calculator':
+                return (
+                    <MouseGeneticsCalculator 
+                        onClose={() => setCurrentView('list')}
+                        API_BASE_URL={API_BASE_URL}
+                        authToken={authToken}
                     />
                 );
             case 'list':
