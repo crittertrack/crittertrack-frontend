@@ -1833,23 +1833,23 @@ const OffspringSection = ({ animalId, API_BASE_URL, authToken = null, onViewAnim
                 // Fetch current animal to know which parent we are
                 let animal = null;
                 try {
-                    const animalResponse = await axios.get(
-                        `${API_BASE_URL}/animals/${animalId}`,
-                        { headers }
-                    );
-                    animal = animalResponse.data;
-                } catch (err) {
-                    // Try public endpoint if private fails
-                    try {
-                        const publicResponse = await axios.get(
-                            `${API_BASE_URL}/public/global/animals?id_public=${animalId}`
+                    if (authToken) {
+                        // Authenticated: fetch from private endpoint
+                        const animalResponse = await axios.get(
+                            `${API_BASE_URL}/animals/${animalId}`,
+                            { headers }
                         );
-                        if (publicResponse.data && publicResponse.data.length > 0) {
-                            animal = publicResponse.data[0];
-                        }
-                    } catch (publicErr) {
-                        console.error('Error fetching current animal:', publicErr);
+                        animal = animalResponse.data;
+                    } else {
+                        // Unauthenticated: fetch from public endpoint
+                        const publicResponse = await axios.get(
+                            `${API_BASE_URL}/public/animal/${animalId}`
+                        );
+                        animal = publicResponse.data;
                     }
+                } catch (err) {
+                    console.error('Error fetching current animal:', err);
+                    // If public endpoint fails, animal will be null and we'll skip parent display
                 }
                 
                 setCurrentAnimal(animal);
