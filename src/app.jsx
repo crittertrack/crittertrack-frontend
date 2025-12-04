@@ -1878,39 +1878,40 @@ const OffspringSection = ({ animalId, API_BASE_URL, authToken = null, onViewAnim
                 <div className="space-y-6">
                     {offspring.map((litter, index) => (
                     <div key={litter.litterId || index} className="border-2 border-gray-200 rounded-lg p-4">
-                        {/* Litter Header with Parents and Info */}
-                        <div className="mb-4 pb-3 border-b border-gray-200">
-                            <div className="flex items-start gap-4 flex-wrap">
-                                {/* Father Card */}
-                                {(litter.sireId_public || litter.otherParentType === 'sire') && (
-                                    <ParentMiniCard 
-                                        parent={litter.otherParentType === 'sire' ? litter.otherParent : currentAnimal}
-                                        label="Father"
-                                    />
-                                )}
-                                
-                                {/* Mother Card */}
-                                {(litter.damId_public || litter.otherParentType === 'dam') && (
-                                    <ParentMiniCard 
-                                        parent={litter.otherParentType === 'dam' ? litter.otherParent : currentAnimal}
-                                        label="Mother"
-                                    />
-                                )}
+                        {/* Parent Cards at Top */}
+                        <div className="flex items-start gap-3 mb-3">
+                            {/* Father Card */}
+                            {(litter.sireId_public || litter.otherParentType === 'sire') && (
+                                <ParentMiniCard 
+                                    parent={litter.otherParentType === 'sire' ? litter.otherParent : currentAnimal}
+                                    label="Father"
+                                />
+                            )}
+                            
+                            {/* Mother Card */}
+                            {(litter.damId_public || litter.otherParentType === 'dam') && (
+                                <ParentMiniCard 
+                                    parent={litter.otherParentType === 'dam' ? litter.otherParent : currentAnimal}
+                                    label="Mother"
+                                />
+                            )}
+                        </div>
 
-                                {/* Birth Date and Number Born */}
-                                <div className="flex-grow">
-                                    {litter.litterName && (
-                                        <h4 className="text-md font-semibold text-gray-800 mb-1">
-                                            {litter.litterName}
-                                        </h4>
-                                    )}
-                                    <p className="text-sm text-gray-600">
-                                        Born: {new Date(litter.birthDate).toLocaleDateString()}
+                        {/* Litter Info - Centered */}
+                        <div className="flex justify-center mb-4">
+                            <div className="bg-gray-50 rounded-lg px-4 py-2 border border-gray-200 inline-block">
+                                {litter.litterName && (
+                                    <p className="text-sm font-semibold text-gray-800 text-center mb-1">
+                                        {litter.litterName}
                                     </p>
+                                )}
+                                <div className="flex items-center gap-3 text-sm text-gray-600">
+                                    <span>Born: {new Date(litter.birthDate).toLocaleDateString()}</span>
                                     {litter.numberBorn && (
-                                        <p className="text-sm text-gray-600">
-                                            {litter.numberBorn} born
-                                        </p>
+                                        <>
+                                            <span>•</span>
+                                            <span>{litter.numberBorn} born</span>
+                                        </>
                                     )}
                                 </div>
                             </div>
