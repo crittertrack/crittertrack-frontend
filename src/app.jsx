@@ -1759,23 +1759,101 @@ const ViewOnlyParentCard = ({ parentId, parentType, API_BASE_URL }) => {
     );
 };
 
+// Parent Mini Card Component for Offspring Section
+const ParentMiniCard = ({ parent, label }) => {
+    if (!parent) {
+        return (
+            <div className="flex items-center space-x-2 bg-gray-50 rounded-lg p-2 border border-gray-200" style={{ width: 'auto', minWidth: '180px' }}>
+                <div className="w-10 h-10 bg-gray-200 rounded-md flex items-center justify-center flex-shrink-0">
+                    <Cat size={20} className="text-gray-400" />
+                </div>
+                <div className="flex-grow">
+                    <p className="text-xs text-gray-500 italic">{label} unknown</p>
+                </div>
+            </div>
+        );
+    }
+
+    return (
+        <div className="flex items-center space-x-2 bg-gray-50 rounded-lg p-2 border border-gray-200" style={{ width: 'auto', minWidth: '180px' }}>
+            <div className="w-10 h-10 bg-gray-200 rounded-md overflow-hidden flex items-center justify-center flex-shrink-0">
+                {parent.imageUrl || parent.photoUrl ? (
+                    <img 
+                        src={parent.imageUrl || parent.photoUrl} 
+                        alt={parent.name}
+                        className="w-full h-full object-cover"
+                    />
+                ) : (
+                    <Cat size={20} className="text-gray-400" />
+                )}
+            </div>
+            <div className="flex items-center space-x-1 flex-grow">
+                {parent.gender && (
+                    <div>
+                        {parent.gender === 'Male' 
+                            ? <Mars size={12} strokeWidth={2.5} className="text-primary" /> 
+                            : <Venus size={12} strokeWidth={2.5} className="text-accent" />
+                        }
+                    </div>
+                )}
+                <div className="flex-grow min-w-0">
+                    <p className="text-xs font-semibold text-gray-800 truncate">
+                        {parent.prefix && `${parent.prefix} `}
+                        {parent.name}
+                    </p>
+                    <p className="text-xs text-gray-600 font-mono">
+                        CT{parent.id_public}
+                    </p>
+                </div>
+            </div>
+        </div>
+    );
+};
+
 // Offspring Section Component - shows offspring grouped by litter
 const OffspringSection = ({ animalId, API_BASE_URL, authToken = null, onViewAnimal }) => {
     const [offspring, setOffspring] = useState([]);
     const [loading, setLoading] = useState(true);
+    const [currentAnimal, setCurrentAnimal] = useState(null);
 
     useEffect(() => {
-        const fetchOffspring = async () => {
+        const fetchData = async () => {
             if (!animalId) return;
             
             setLoading(true);
             try {
                 const headers = authToken ? { Authorization: `Bearer ${authToken}` } : {};
-                const response = await axios.get(
+                
+                // Fetch offspring
+                const offspringResponse = await axios.get(
                     `${API_BASE_URL}/animals/${animalId}/offspring`,
                     { headers }
                 );
-                setOffspring(response.data || []);
+                
+                // Fetch current animal to know which parent we are
+                let animal = null;
+                try {
+                    const animalResponse = await axios.get(
+                        `${API_BASE_URL}/animals/${animalId}`,
+                        { headers }
+                    );
+                    animal = animalResponse.data;
+                } catch (err) {
+                    // Try public endpoint if private fails
+                    try {
+                        const publicResponse = await axios.get(
+                            `${API_BASE_URL}/public/global/animals?id_public=${animalId}`
+                        );
+                        if (publicResponse.data && publicResponse.data.length > 0) {
+                            animal = publicResponse.data[0];
+                        }
+                    } catch (publicErr) {
+                        console.error('Error fetching current animal:', publicErr);
+                    }
+                }
+                
+                setCurrentAnimal(animal);
+                setOffspring(offspringResponse.data || []);
             } catch (error) {
                 console.error('Error fetching offspring:', error);
                 setOffspring([]);
@@ -1784,7 +1862,7 @@ const OffspringSection = ({ animalId, API_BASE_URL, authToken = null, onViewAnim
             }
         };
 
-        fetchOffspring();
+        fetchData();
     }, [animalId, API_BASE_URL, authToken]);
 
     return (
@@ -1800,43 +1878,23 @@ const OffspringSection = ({ animalId, API_BASE_URL, authToken = null, onViewAnim
                 <div className="space-y-6">
                     {offspring.map((litter, index) => (
                     <div key={litter.litterId || index} className="border-2 border-gray-200 rounded-lg p-4">
-                        {/* Litter Header with Parent and Info */}
+                        {/* Litter Header with Parents and Info */}
                         <div className="mb-4 pb-3 border-b border-gray-200">
-                            <div className="flex items-start gap-4">
-                                {/* Other Parent Card */}
-                                {litter.otherParent && (
-                                    <div className="flex items-center space-x-3 bg-gray-50 rounded-lg p-3 border border-gray-200" style={{ width: 'auto', maxWidth: '300px' }}>
-                                        <div className="w-12 h-12 bg-gray-200 rounded-md overflow-hidden flex items-center justify-center flex-shrink-0">
-                                            {litter.otherParent.imageUrl || litter.otherParent.photoUrl ? (
-                                                <img 
-                                                    src={litter.otherParent.imageUrl || litter.otherParent.photoUrl} 
-                                                    alt={litter.otherParent.name}
-                                                    className="w-full h-full object-cover"
-                                                />
-                                            ) : (
-                                                <Cat size={24} className="text-gray-400" />
-                                            )}
-                                        </div>
-                                        <div className="flex items-center space-x-2 flex-grow">
-                                            {litter.otherParent.gender && (
-                                                <div>
-                                                    {litter.otherParent.gender === 'Male' 
-                                                        ? <Mars size={14} strokeWidth={2.5} className="text-primary" /> 
-                                                        : <Venus size={14} strokeWidth={2.5} className="text-accent" />
-                                                    }
-                                                </div>
-                                            )}
-                                            <div className="flex-grow">
-                                                <p className="text-sm font-semibold text-gray-800">
-                                                    {litter.otherParent.prefix && `${litter.otherParent.prefix} `}
-                                                    {litter.otherParent.name}
-                                                </p>
-                                                <p className="text-xs text-gray-600 font-mono">
-                                                    CT{litter.otherParent.id_public}
-                                                </p>
-                                            </div>
-                                        </div>
-                                    </div>
+                            <div className="flex items-start gap-4 flex-wrap">
+                                {/* Father Card */}
+                                {(litter.sireId_public || litter.otherParentType === 'sire') && (
+                                    <ParentMiniCard 
+                                        parent={litter.otherParentType === 'sire' ? litter.otherParent : currentAnimal}
+                                        label="Father"
+                                    />
+                                )}
+                                
+                                {/* Mother Card */}
+                                {(litter.damId_public || litter.otherParentType === 'dam') && (
+                                    <ParentMiniCard 
+                                        parent={litter.otherParentType === 'dam' ? litter.otherParent : currentAnimal}
+                                        label="Mother"
+                                    />
                                 )}
 
                                 {/* Birth Date and Number Born */}
