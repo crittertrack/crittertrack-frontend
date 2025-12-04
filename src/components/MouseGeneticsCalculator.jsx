@@ -221,7 +221,7 @@ const calculatePhenotype = (genotype) => {
   } else if (isBlack) {
     pattern = 'Self';
     if (isExtremeBlack) {
-      color = isBrown ? 'Extreme Chocolate' : 'Extreme Black';
+      color = isBrown ? 'Chocolate' : 'Extreme Black';
     } else {
       color = isBrown ? 'Chocolate' : 'Black';
     }
