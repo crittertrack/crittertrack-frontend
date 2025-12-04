@@ -2030,6 +2030,14 @@ const LitterManagement = ({ authToken, API_BASE_URL, userProfile, showModalMessa
     const [availableToLink, setAvailableToLink] = useState({ litter: null, animals: [] });
     const [expandedLitter, setExpandedLitter] = useState(null);
     const [searchQuery, setSearchQuery] = useState('');
+    const [addingOffspring, setAddingOffspring] = useState(null);
+    const [newOffspringData, setNewOffspringData] = useState({
+        name: '',
+        gender: '',
+        color: '',
+        coat: '',
+        remarks: ''
+    });
 
     useEffect(() => {
         fetchLitters();
@@ -2257,6 +2265,66 @@ const LitterManagement = ({ authToken, API_BASE_URL, userProfile, showModalMessa
         } catch (error) {
             console.error('Error deleting litter:', error);
             showModalMessage('Error', error.response?.data?.message || 'Failed to delete litter');
+        }
+    };
+
+    const handleAddOffspringToLitter = (litter) => {
+        const sire = myAnimals.find(a => a.id_public === litter.sireId_public);
+        setAddingOffspring(litter);
+        setNewOffspringData({
+            name: '',
+            gender: '',
+            color: '',
+            coat: '',
+            remarks: ''
+        });
+    };
+
+    const handleSaveNewOffspring = async () => {
+        if (!newOffspringData.name || !newOffspringData.gender) {
+            showModalMessage('Error', 'Name and gender are required');
+            return;
+        }
+
+        try {
+            const sire = myAnimals.find(a => a.id_public === addingOffspring.sireId_public);
+            
+            const animalData = {
+                name: newOffspringData.name,
+                species: sire.species,
+                gender: newOffspringData.gender,
+                birthDate: addingOffspring.birthDate,
+                status: 'Pet',
+                fatherId_public: addingOffspring.sireId_public,
+                motherId_public: addingOffspring.damId_public,
+                color: newOffspringData.color || null,
+                coat: newOffspringData.coat || null,
+                remarks: newOffspringData.remarks || null,
+                isOwned: true,
+                breederId_public: userProfile.id_public,
+                ownerId_public: userProfile.id_public
+            };
+
+            const response = await axios.post(`${API_BASE_URL}/animals`, animalData, {
+                headers: { Authorization: `Bearer ${authToken}` }
+            });
+
+            // Link to litter
+            const updatedOffspringIds = [...(addingOffspring.offspringIds_public || []), response.data.id_public];
+            await axios.put(`${API_BASE_URL}/litters/${addingOffspring._id}`, {
+                offspringIds_public: updatedOffspringIds,
+                numberBorn: updatedOffspringIds.length
+            }, {
+                headers: { Authorization: `Bearer ${authToken}` }
+            });
+
+            showModalMessage('Success', 'Offspring added to litter!');
+            setAddingOffspring(null);
+            fetchLitters();
+            fetchMyAnimals();
+        } catch (error) {
+            console.error('Error adding offspring:', error);
+            showModalMessage('Error', error.response?.data?.message || 'Failed to add offspring');
         }
     };
 
@@ -2627,7 +2695,7 @@ const LitterManagement = ({ authToken, API_BASE_URL, userProfile, showModalMessa
 
                                         {/* Offspring Cards */}
                                         {offspringList.length > 0 && (
-                                            <div>
+                                            <div className="mb-4">
                                                 <h4 className="text-sm font-bold text-gray-700 mb-2">Offspring ({offspringList.length})</h4>
                                                 <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-3">
                                                     {offspringList.map(animal => (
@@ -2697,6 +2765,93 @@ const LitterManagement = ({ authToken, API_BASE_URL, userProfile, showModalMessa
                                                     ))}
                                                 </div>
                                             </div>
+                                        )}
+
+                                        {/* Add Offspring Section */}
+                                        {addingOffspring && addingOffspring._id === litter._id ? (
+                                            <div className="bg-white rounded-lg border-2 border-primary p-4">
+                                                <h4 className="text-sm font-bold text-gray-700 mb-3">Add New Offspring</h4>
+                                                <div className="grid grid-cols-1 md:grid-cols-2 gap-3 mb-4">
+                                                    <div>
+                                                        <label className="block text-sm font-semibold text-gray-700 mb-1">Name *</label>
+                                                        <input
+                                                            type="text"
+                                                            value={newOffspringData.name}
+                                                            onChange={(e) => setNewOffspringData({...newOffspringData, name: e.target.value})}
+                                                            className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary"
+                                                            placeholder="Enter name"
+                                                        />
+                                                    </div>
+                                                    <div>
+                                                        <label className="block text-sm font-semibold text-gray-700 mb-1">Gender *</label>
+                                                        <select
+                                                            value={newOffspringData.gender}
+                                                            onChange={(e) => setNewOffspringData({...newOffspringData, gender: e.target.value})}
+                                                            className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary"
+                                                        >
+                                                            <option value="">Select gender</option>
+                                                            <option value="Male">Male</option>
+                                                            <option value="Female">Female</option>
+                                                        </select>
+                                                    </div>
+                                                    <div>
+                                                        <label className="block text-sm font-semibold text-gray-700 mb-1">Color</label>
+                                                        <input
+                                                            type="text"
+                                                            value={newOffspringData.color}
+                                                            onChange={(e) => setNewOffspringData({...newOffspringData, color: e.target.value})}
+                                                            className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary"
+                                                            placeholder="Optional"
+                                                        />
+                                                    </div>
+                                                    <div>
+                                                        <label className="block text-sm font-semibold text-gray-700 mb-1">Coat</label>
+                                                        <input
+                                                            type="text"
+                                                            value={newOffspringData.coat}
+                                                            onChange={(e) => setNewOffspringData({...newOffspringData, coat: e.target.value})}
+                                                            className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary"
+                                                            placeholder="Optional"
+                                                        />
+                                                    </div>
+                                                    <div className="md:col-span-2">
+                                                        <label className="block text-sm font-semibold text-gray-700 mb-1">Remarks</label>
+                                                        <textarea
+                                                            value={newOffspringData.remarks}
+                                                            onChange={(e) => setNewOffspringData({...newOffspringData, remarks: e.target.value})}
+                                                            className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary"
+                                                            rows="2"
+                                                            placeholder="Optional notes"
+                                                        />
+                                                    </div>
+                                                </div>
+                                                <div className="text-xs text-gray-500 mb-3">
+                                                    Autofilled: Species ({sire?.species}), Birth Date ({new Date(litter.birthDate).toLocaleDateString()}), Parents (CT{litter.sireId_public} × CT{litter.damId_public})
+                                                </div>
+                                                <div className="flex gap-2">
+                                                    <button
+                                                        onClick={handleSaveNewOffspring}
+                                                        className="flex items-center gap-1 bg-primary hover:bg-primary/90 text-black font-semibold px-4 py-2 rounded-lg"
+                                                    >
+                                                        <Plus size={16} />
+                                                        Save Offspring
+                                                    </button>
+                                                    <button
+                                                        onClick={() => setAddingOffspring(null)}
+                                                        className="bg-gray-300 hover:bg-gray-400 text-gray-800 font-semibold px-4 py-2 rounded-lg"
+                                                    >
+                                                        Cancel
+                                                    </button>
+                                                </div>
+                                            </div>
+                                        ) : (
+                                            <button
+                                                onClick={() => handleAddOffspringToLitter(litter)}
+                                                className="flex items-center gap-1 bg-green-500 hover:bg-green-600 text-white font-semibold px-3 py-2 rounded-lg text-sm"
+                                            >
+                                                <Plus size={16} />
+                                                Add Offspring
+                                            </button>
                                         )}
                                     </div>
                                 )}
