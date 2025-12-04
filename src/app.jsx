@@ -2636,7 +2636,7 @@ const LitterManagement = ({ authToken, API_BASE_URL, userProfile, showModalMessa
                                         </div>
                                         <div className="text-sm">
                                             {litter.inbreedingCoefficient != null ? (
-                                                <span className="font-semibold text-gray-700">
+                                                <span className="font-semibold text-black">
                                                     COI: {litter.inbreedingCoefficient.toFixed(2)}%
                                                 </span>
                                             ) : (
@@ -2807,16 +2807,9 @@ const LitterManagement = ({ authToken, API_BASE_URL, userProfile, showModalMessa
                                                                 </div>
                                                             </div>
 
-                                                            {/* ID and COI bottom section */}
-                                                            <div className="w-full px-2 pb-2 flex justify-between items-end">
-                                                                <div className="text-xs font-semibold text-black">
-                                                                    {animal.inbreedingCoefficient != null ? (
-                                                                        `COI: ${animal.inbreedingCoefficient.toFixed(2)}%`
-                                                                    ) : (
-                                                                        <span className="text-gray-400">COI: N/A</span>
-                                                                    )}
-                                                                </div>
-                                                                <div className="text-xs text-gray-500 ml-auto">CT{animal.id_public}</div>
+                                                            {/* ID bottom-right */}
+                                                            <div className="w-full px-2 pb-2 flex justify-end">
+                                                                <div className="text-xs text-gray-500">CT{animal.id_public}</div>
                                                             </div>
                                                             
                                                             {/* Status bar */}
@@ -5106,16 +5099,9 @@ const AnimalList = ({ authToken, showModalMessage, onEditAnimal, onViewAnimal, o
 
                     {/* Edit is available when viewing full card; remove inline edit icon from dashboard cards */}
 
-                    {/* ID and COI bottom section */}
-                    <div className="w-full px-2 pb-2 flex justify-between items-end">
-                        <div className="text-xs font-semibold text-black">
-                            {animal.inbreedingCoefficient != null ? (
-                                `COI: ${animal.inbreedingCoefficient.toFixed(2)}%`
-                            ) : (
-                                <span className="text-gray-400">COI: N/A</span>
-                            )}
-                        </div>
-                        <div className="text-xs text-gray-500 ml-auto">CT{animal.id_public}</div>
+                    {/* ID bottom-right */}
+                    <div className="w-full px-2 pb-2 flex justify-end">
+                        <div className="text-xs text-gray-500">CT{animal.id_public}</div>
                     </div>
                     
                     {/* Status bar at bottom */}
@@ -5828,6 +5814,7 @@ const App = () => {
                                         <div><strong>Color:</strong> {animalToView.color || '—'}</div>
                                         <div><strong>Coat:</strong> {animalToView.coat || '—'}</div>
                                         <div><strong>Breedery ID:</strong> {animalToView.breederyId || animalToView.registryCode || '—'}</div>
+                                        <div><strong>Inbreeding COI:</strong> {animalToView.inbreedingCoefficient != null ? `${animalToView.inbreedingCoefficient.toFixed(2)}%` : 'N/A'}</div>
                                     </div>
                                 </div>
                             </div>
