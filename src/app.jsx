@@ -2027,7 +2027,7 @@ const LitterManagement = ({ authToken, API_BASE_URL, userProfile, showModalMessa
         notes: ''
     });
     const [linkingAnimals, setLinkingAnimals] = useState(false);
-    const [availableToLink, setAvailableToLink] = useState([]);
+    const [availableToLink, setAvailableToLink] = useState({ litter: null, animals: [] });
 
     useEffect(() => {
         fetchLitters();
@@ -2181,18 +2181,50 @@ const LitterManagement = ({ authToken, API_BASE_URL, userProfile, showModalMessa
                 headers: { Authorization: `Bearer ${authToken}` }
             });
             
+            // Get offspring IDs already in this litter
+            const linkedIds = litter.offspringIds_public || [];
+            
             const matching = response.data.filter(animal => {
+                // Skip if already linked to this litter
+                if (linkedIds.includes(animal.id_public)) return false;
+                
                 const matchesSire = animal.fatherId_public === litter.sireId_public || animal.sireId_public === litter.sireId_public;
                 const matchesDam = animal.motherId_public === litter.damId_public || animal.damId_public === litter.damId_public;
                 const matchesBirthDate = animal.birthDate && new Date(animal.birthDate).toDateString() === new Date(litter.birthDate).toDateString();
                 return matchesSire && matchesDam && matchesBirthDate;
             });
 
-            setAvailableToLink(matching);
+            setAvailableToLink({ litter, animals: matching });
             setLinkingAnimals(true);
         } catch (error) {
             console.error('Error finding matching animals:', error);
             showModalMessage('Error', 'Failed to search for matching animals');
+        }
+    };
+
+    const handleAddToLitter = async (animalId) => {
+        try {
+            const updatedOffspringIds = [...(availableToLink.litter.offspringIds_public || []), animalId];
+            
+            await axios.put(`${API_BASE_URL}/litters/${availableToLink.litter._id}`, {
+                offspringIds_public: updatedOffspringIds
+            }, {
+                headers: { Authorization: `Bearer ${authToken}` }
+            });
+            
+            showModalMessage('Success', 'Animal linked to litter!');
+            
+            // Remove from available list
+            setAvailableToLink({
+                ...availableToLink,
+                animals: availableToLink.animals.filter(a => a.id_public !== animalId)
+            });
+            
+            // Refresh litters to show updated count
+            fetchLitters();
+        } catch (error) {
+            console.error('Error linking animal to litter:', error);
+            showModalMessage('Error', 'Failed to link animal to litter');
         }
     };
 
@@ -2460,14 +2492,14 @@ const LitterManagement = ({ authToken, API_BASE_URL, userProfile, showModalMessa
                         </div>
 
                         <div className="flex-grow overflow-y-auto p-4">
-                            {availableToLink.length === 0 ? (
-                                <p className="text-center text-gray-500 py-8">No matching animals found with the same parents and birth date.</p>
+                            {availableToLink.animals && availableToLink.animals.length === 0 ? (
+                                <p className="text-center text-gray-500 py-8">No unlinked animals found with matching parents and birth date.</p>
                             ) : (
                                 <div className="space-y-2">
                                     <p className="text-sm text-gray-600 mb-4">
-                                        Found {availableToLink.length} animal(s) with matching parents and birth date:
+                                        Found {availableToLink.animals?.length || 0} unlinked animal(s) with matching parents and birth date:
                                     </p>
-                                    {availableToLink.map(animal => (
+                                    {availableToLink.animals?.map(animal => (
                                         <div key={animal.id_public} className="border rounded-lg p-3 flex justify-between items-center">
                                             <div>
                                                 <p className="font-semibold">
@@ -2478,10 +2510,10 @@ const LitterManagement = ({ authToken, API_BASE_URL, userProfile, showModalMessa
                                                 </p>
                                             </div>
                                             <button
-                                                onClick={() => onViewAnimal(animal)}
-                                                className="text-primary hover:underline text-sm"
+                                                onClick={() => handleAddToLitter(animal.id_public)}
+                                                className="bg-primary hover:bg-primary/90 text-black font-semibold px-3 py-1 rounded text-sm"
                                             >
-                                                View
+                                                Add
                                             </button>
                                         </div>
                                     ))}
