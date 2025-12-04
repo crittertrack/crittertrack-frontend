@@ -4295,11 +4295,16 @@ const NotificationPanel = ({ authToken, API_BASE_URL, onClose, showModalMessage,
 
     const handleMarkAsRead = async (notificationId) => {
         try {
-            await axios.patch(`${API_BASE_URL}/notifications/${notificationId}/read`, {}, {
+            console.log('[handleMarkAsRead] Marking notification as read:', notificationId);
+            const response = await axios.patch(`${API_BASE_URL}/notifications/${notificationId}/read`, {}, {
                 headers: { Authorization: `Bearer ${authToken}` }
             });
+            console.log('[handleMarkAsRead] Response:', response.data);
             fetchNotifications();
-            if (onNotificationChange) onNotificationChange();
+            if (onNotificationChange) {
+                console.log('[handleMarkAsRead] Calling onNotificationChange');
+                onNotificationChange();
+            }
         } catch (error) {
             console.error('Error marking as read:', error);
         }
@@ -4307,11 +4312,15 @@ const NotificationPanel = ({ authToken, API_BASE_URL, onClose, showModalMessage,
 
     const handleDelete = async (notificationId) => {
         try {
+            console.log('[handleDelete] Deleting notification:', notificationId);
             await axios.delete(`${API_BASE_URL}/notifications/${notificationId}`, {
                 headers: { Authorization: `Bearer ${authToken}` }
             });
             fetchNotifications();
-            if (onNotificationChange) onNotificationChange();
+            if (onNotificationChange) {
+                console.log('[handleDelete] Calling onNotificationChange');
+                onNotificationChange();
+            }
         } catch (error) {
             console.error('Error deleting notification:', error);
         }
@@ -4375,6 +4384,13 @@ const NotificationPanel = ({ authToken, API_BASE_URL, onClose, showModalMessage,
                                                 >
                                                     <XCircle size={14} />
                                                     <span>Reject</span>
+                                                </button>
+                                                <button
+                                                    onClick={() => handleDelete(notification._id)}
+                                                    className="flex items-center space-x-1 bg-red-500 hover:bg-red-600 text-white px-3 py-1 rounded text-sm"
+                                                >
+                                                    <X size={14} />
+                                                    <span>Delete</span>
                                                 </button>
                                                 {!notification.read && (
                                                     <button
@@ -4553,10 +4569,12 @@ const App = () => {
     const fetchNotificationCount = useCallback(async () => {
         if (!authToken) return;
         try {
+            console.log('[fetchNotificationCount] Fetching notification count...');
             const response = await axios.get(`${API_BASE_URL}/notifications/unread-count`, {
                 headers: { Authorization: `Bearer ${authToken}` }
             });
-            console.log('[Notification Count] Response:', response.data);
+            console.log('[fetchNotificationCount] Response:', response.data);
+            console.log('[fetchNotificationCount] Setting count to:', response.data?.count || 0);
             setNotificationCount(response.data?.count || 0);
         } catch (error) {
             console.error('Failed to fetch notification count:', error);
