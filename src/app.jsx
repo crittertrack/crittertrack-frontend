@@ -2626,10 +2626,10 @@ const LitterManagement = ({ authToken, API_BASE_URL, userProfile, showModalMessa
                                             </p>
                                         </div>
                                         <div className="text-sm">
-                                            <span className="text-gray-600">Sire:</span> {sire ? `${sire.name}` : `CT${litter.sireId_public}`}
+                                            <span className="text-gray-600">Sire:</span> {sire ? `${sire.prefix ? sire.prefix + ' ' : ''}${sire.name}` : `CT${litter.sireId_public}`}
                                         </div>
                                         <div className="text-sm">
-                                            <span className="text-gray-600">Dam:</span> {dam ? `${dam.name}` : `CT${litter.damId_public}`}
+                                            <span className="text-gray-600">Dam:</span> {dam ? `${dam.prefix ? dam.prefix + ' ' : ''}${dam.name}` : `CT${litter.damId_public}`}
                                         </div>
                                         <div className="text-sm font-semibold text-gray-700">
                                             {litter.numberBorn} offspring
