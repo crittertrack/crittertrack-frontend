@@ -94,12 +94,14 @@ const PedigreeChart = ({ animalId, animalData, onClose, API_BASE_URL, authToken 
                     // Try to fetch from owned animals first if authToken is available
                     if (authToken) {
                         try {
-                            const ownedResponse = await axios.get(`${API_BASE_URL}/animals/${id}`, {
+                            // Use /animals/any endpoint which returns owned, public, OR related animals
+                            const response = await axios.get(`${API_BASE_URL}/animals/any/${id}`, {
                                 headers: { Authorization: `Bearer ${authToken}` }
                             });
-                            animalInfo = ownedResponse.data;
+                            animalInfo = response.data;
                         } catch (error) {
-                            // Not owned, will try public
+                            // Not owned/public/related, will skip this animal
+                            console.log(`Animal ${id} not accessible:`, error.message);
                         }
                     }
 
@@ -4247,7 +4249,7 @@ const AnimalList = ({ authToken, showModalMessage, onEditAnimal, onViewAnimal, o
 };
 
 // Notification Panel Component
-const NotificationPanel = ({ authToken, API_BASE_URL, onClose, showModalMessage }) => {
+const NotificationPanel = ({ authToken, API_BASE_URL, onClose, showModalMessage, onNotificationChange }) => {
     const [notifications, setNotifications] = useState([]);
     const [loading, setLoading] = useState(true);
     const [processing, setProcessing] = useState(null);
@@ -4279,6 +4281,7 @@ const NotificationPanel = ({ authToken, API_BASE_URL, onClose, showModalMessage 
             });
             showModalMessage('Rejected', 'Request rejected and link removed');
             fetchNotifications();
+            if (onNotificationChange) onNotificationChange();
         } catch (error) {
             console.error('Error rejecting notification:', error);
             showModalMessage('Error', 'Failed to reject request');
@@ -4293,6 +4296,7 @@ const NotificationPanel = ({ authToken, API_BASE_URL, onClose, showModalMessage 
                 headers: { Authorization: `Bearer ${authToken}` }
             });
             fetchNotifications();
+            if (onNotificationChange) onNotificationChange();
         } catch (error) {
             console.error('Error marking as read:', error);
         }
@@ -4304,6 +4308,7 @@ const NotificationPanel = ({ authToken, API_BASE_URL, onClose, showModalMessage 
                 headers: { Authorization: `Bearer ${authToken}` }
             });
             fetchNotifications();
+            if (onNotificationChange) onNotificationChange();
         } catch (error) {
             console.error('Error deleting notification:', error);
         }
@@ -5205,6 +5210,7 @@ const App = () => {
                         setShowNotifications(false);
                         fetchNotificationCount();
                     }}
+                    onNotificationChange={fetchNotificationCount}
                     showModalMessage={showModalMessage}
                 />
             )}
