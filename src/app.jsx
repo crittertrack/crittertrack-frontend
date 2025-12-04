@@ -1824,9 +1824,9 @@ const OffspringSection = ({ animalId, API_BASE_URL, authToken = null, onViewAnim
             try {
                 const headers = authToken ? { Authorization: `Bearer ${authToken}` } : {};
                 
-                // Fetch offspring
+                // Fetch offspring - use public endpoint (works for both authenticated and unauthenticated)
                 const offspringResponse = await axios.get(
-                    `${API_BASE_URL}/animals/${animalId}/offspring`,
+                    `${API_BASE_URL}/public/animal/${animalId}/offspring`,
                     { headers }
                 );
                 
