@@ -1958,22 +1958,24 @@ const OffspringSection = ({ animalId, API_BASE_URL, authToken = null, onViewAnim
                                             )}
                                         </div>
                                         
-                                        {/* Icon row */}
-                                        <div className="w-full flex justify-center items-center space-x-2 py-1">
-                                            {animal.isOwned ? (
-                                                <Heart size={12} className="text-black" />
-                                            ) : (
-                                                <HeartOff size={12} className="text-black" />
-                                            )}
-                                            {/* Show Eye icon if showOnPublicProfile is true, or if the animal is from PublicAnimal collection (has no showOnPublicProfile field) */}
-                                            {(animal.showOnPublicProfile !== undefined ? animal.showOnPublicProfile : true) ? (
-                                                <Eye size={12} className="text-black" />
-                                            ) : (
-                                                <EyeOff size={12} className="text-black" />
-                                            )}
-                                            {animal.isPregnant && <Egg size={12} className="text-black" />}
-                                            {animal.isNursing && <Milk size={12} className="text-black" />}
-                                        </div>
+                                        {/* Icon row - only show if authenticated (local view) */}
+                                        {authToken && (
+                                            <div className="w-full flex justify-center items-center space-x-2 py-1">
+                                                {animal.isOwned ? (
+                                                    <Heart size={12} className="text-black" />
+                                                ) : (
+                                                    <HeartOff size={12} className="text-black" />
+                                                )}
+                                                {/* Show Eye icon if showOnPublicProfile is true, or if the animal is from PublicAnimal collection (has no showOnPublicProfile field) */}
+                                                {(animal.showOnPublicProfile !== undefined ? animal.showOnPublicProfile : true) ? (
+                                                    <Eye size={12} className="text-black" />
+                                                ) : (
+                                                    <EyeOff size={12} className="text-black" />
+                                                )}
+                                                {animal.isPregnant && <Egg size={12} className="text-black" />}
+                                                {animal.isNursing && <Milk size={12} className="text-black" />}
+                                            </div>
+                                        )}
                                         
                                         {/* Name */}
                                         <div className="w-full text-center px-2 pb-1">
