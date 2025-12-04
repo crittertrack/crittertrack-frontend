@@ -1837,9 +1837,9 @@ const OffspringSection = ({ animalId, API_BASE_URL, authToken = null, onViewAnim
                 let animal = null;
                 try {
                     if (authToken) {
-                        // Authenticated: fetch from private endpoint
+                        // Authenticated: use /animals/any to access owned or related animals
                         const animalResponse = await axios.get(
-                            `${API_BASE_URL}/animals/${animalId}`,
+                            `${API_BASE_URL}/animals/any/${animalId}`,
                             { headers }
                         );
                         animal = animalResponse.data;
@@ -4591,8 +4591,16 @@ const App = () => {
 
     const handleViewAnimal = (animal) => {
         console.log('[handleViewAnimal] Viewing animal:', animal);
-        console.log('[handleViewAnimal] Father ID:', animal.fatherId_public, 'Mother ID:', animal.motherId_public);
-        setAnimalToView(animal);
+        
+        // Normalize parent field names (backend uses sireId_public/damId_public, frontend uses fatherId_public/motherId_public)
+        const normalizedAnimal = {
+            ...animal,
+            fatherId_public: animal.fatherId_public || animal.sireId_public,
+            motherId_public: animal.motherId_public || animal.damId_public
+        };
+        
+        console.log('[handleViewAnimal] Father ID:', normalizedAnimal.fatherId_public, 'Mother ID:', normalizedAnimal.motherId_public);
+        setAnimalToView(normalizedAnimal);
         setCurrentView('view-animal');
     };
 
