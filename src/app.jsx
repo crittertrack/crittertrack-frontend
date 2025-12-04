@@ -2241,7 +2241,7 @@ const LitterManagement = ({ authToken, API_BASE_URL, userProfile, showModalMessa
     };
 
     const handleDeleteLitter = async (litterId) => {
-        if (!confirm('Are you sure you want to delete this litter? This will not delete the animals, only the litter record.')) {
+        if (!window.confirm('Are you sure you want to delete this litter? This will not delete the animals, only the litter record.')) {
             return;
         }
 
