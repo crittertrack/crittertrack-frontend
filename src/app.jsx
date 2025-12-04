@@ -2175,6 +2175,11 @@ const LitterManagement = ({ authToken, API_BASE_URL, userProfile, showModalMessa
     };
 
     const handleLinkAnimals = async (litter) => {
+        setAvailableToLink({ litter, animals: [] });
+        setLinkingAnimals(true);
+    };
+
+    const handleSearchMatchingAnimals = async () => {
         try {
             // Search for animals with matching parents and birthdate
             const response = await axios.get(`${API_BASE_URL}/animals`, {
@@ -2182,20 +2187,19 @@ const LitterManagement = ({ authToken, API_BASE_URL, userProfile, showModalMessa
             });
             
             // Get offspring IDs already in this litter
-            const linkedIds = litter.offspringIds_public || [];
+            const linkedIds = availableToLink.litter.offspringIds_public || [];
             
             const matching = response.data.filter(animal => {
                 // Skip if already linked to this litter
                 if (linkedIds.includes(animal.id_public)) return false;
                 
-                const matchesSire = animal.fatherId_public === litter.sireId_public || animal.sireId_public === litter.sireId_public;
-                const matchesDam = animal.motherId_public === litter.damId_public || animal.damId_public === litter.damId_public;
-                const matchesBirthDate = animal.birthDate && new Date(animal.birthDate).toDateString() === new Date(litter.birthDate).toDateString();
+                const matchesSire = animal.fatherId_public === availableToLink.litter.sireId_public || animal.sireId_public === availableToLink.litter.sireId_public;
+                const matchesDam = animal.motherId_public === availableToLink.litter.damId_public || animal.damId_public === availableToLink.litter.damId_public;
+                const matchesBirthDate = animal.birthDate && new Date(animal.birthDate).toDateString() === new Date(availableToLink.litter.birthDate).toDateString();
                 return matchesSire && matchesDam && matchesBirthDate;
             });
 
-            setAvailableToLink({ litter, animals: matching });
-            setLinkingAnimals(true);
+            setAvailableToLink({ ...availableToLink, animals: matching });
         } catch (error) {
             console.error('Error finding matching animals:', error);
             showModalMessage('Error', 'Failed to search for matching animals');
@@ -2491,8 +2495,23 @@ const LitterManagement = ({ authToken, API_BASE_URL, userProfile, showModalMessa
                             </button>
                         </div>
 
+                        <div className="p-4 border-b bg-gray-50">
+                            <button
+                                onClick={handleSearchMatchingAnimals}
+                                className="w-full bg-primary hover:bg-primary/90 text-black font-semibold py-2 px-4 rounded-lg flex items-center justify-center gap-2"
+                            >
+                                <Search size={18} />
+                                Search for Matching Animals
+                            </button>
+                            <p className="text-xs text-gray-600 mt-2 text-center">
+                                Click to find animals with the same parents and birth date
+                            </p>
+                        </div>
+
                         <div className="flex-grow overflow-y-auto p-4">
-                            {availableToLink.animals && availableToLink.animals.length === 0 ? (
+                            {availableToLink.animals && availableToLink.animals.length === 0 && !availableToLink.litter ? (
+                                <p className="text-center text-gray-500 py-8">Click the search button above to find matching animals.</p>
+                            ) : availableToLink.animals && availableToLink.animals.length === 0 ? (
                                 <p className="text-center text-gray-500 py-8">No unlinked animals found with matching parents and birth date.</p>
                             ) : (
                                 <div className="space-y-2">
