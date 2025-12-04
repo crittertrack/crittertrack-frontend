@@ -1800,29 +1800,12 @@ const OffspringSection = ({ animalId, API_BASE_URL, authToken = null, onViewAnim
                 <div className="space-y-6">
                     {offspring.map((litter, index) => (
                     <div key={litter.litterId || index} className="border-2 border-gray-200 rounded-lg p-4">
-                        {/* Litter Header */}
+                        {/* Litter Header with Parent and Info */}
                         <div className="mb-4 pb-3 border-b border-gray-200">
-                            <div className="flex justify-between items-start mb-2">
-                                <div>
-                                    {litter.litterName && (
-                                        <h4 className="text-md font-semibold text-gray-800 mb-1">
-                                            {litter.litterName}
-                                        </h4>
-                                    )}
-                                    <p className="text-sm text-gray-600">
-                                        Born: {new Date(litter.birthDate).toLocaleDateString()}
-                                        {litter.numberBorn && ` • ${litter.numberBorn} born`}
-                                    </p>
-                                </div>
-                            </div>
-
-                            {/* Other Parent Info */}
-                            {litter.otherParent && (
-                                <div className="mt-3">
-                                    <p className="text-xs font-semibold text-gray-600 mb-2">
-                                        {litter.otherParentType === 'sire' ? 'Sire (Father)' : 'Dam (Mother)'}
-                                    </p>
-                                    <div className="flex items-center space-x-3 bg-gray-50 rounded-lg p-3 border border-gray-200">
+                            <div className="flex items-start gap-4">
+                                {/* Other Parent Card */}
+                                {litter.otherParent && (
+                                    <div className="flex items-center space-x-3 bg-gray-50 rounded-lg p-3 border border-gray-200" style={{ width: 'auto', maxWidth: '300px' }}>
                                         <div className="w-12 h-12 bg-gray-200 rounded-md overflow-hidden flex items-center justify-center flex-shrink-0">
                                             {litter.otherParent.imageUrl || litter.otherParent.photoUrl ? (
                                                 <img 
@@ -1854,8 +1837,25 @@ const OffspringSection = ({ animalId, API_BASE_URL, authToken = null, onViewAnim
                                             </div>
                                         </div>
                                     </div>
+                                )}
+
+                                {/* Birth Date and Number Born */}
+                                <div className="flex-grow">
+                                    {litter.litterName && (
+                                        <h4 className="text-md font-semibold text-gray-800 mb-1">
+                                            {litter.litterName}
+                                        </h4>
+                                    )}
+                                    <p className="text-sm text-gray-600">
+                                        Born: {new Date(litter.birthDate).toLocaleDateString()}
+                                    </p>
+                                    {litter.numberBorn && (
+                                        <p className="text-sm text-gray-600">
+                                            {litter.numberBorn} born
+                                        </p>
+                                    )}
                                 </div>
-                            )}
+                            </div>
                         </div>
 
                         {/* Offspring Animals */}
