@@ -156,20 +156,21 @@ const calculatePhenotype = (genotype) => {
   });
 
   // Check for lethal combinations
-  if (genotype.A === 'Ay/Ay (lethal)') return { phenotype: 'LETHAL: Dominant Yellow Homozygous', carriers: [] };
-  if (genotype.W && genotype.W.includes('lethal')) return { phenotype: 'LETHAL: Dominant Spotting Homozygous', carriers: [] };
-  if (genotype.W && genotype.W.includes('Wsh/Wsh')) return { phenotype: 'LETHAL: Wsh Homozygous', carriers: [] };
-  if (genotype.W && genotype.W.includes('Rw/')) return { phenotype: 'LETHAL: Rw Combination', carriers: [] };
+  if (genotype.A === 'Ay/Ay (lethal)') return { phenotype: 'LETHAL: Dominant Yellow Homozygous', carriers: [], hidden: [] };
+  if (genotype.W && genotype.W.includes('lethal')) return { phenotype: 'LETHAL: Dominant Spotting Homozygous', carriers: [], hidden: [] };
+  if (genotype.W && genotype.W.includes('Wsh/Wsh')) return { phenotype: 'LETHAL: Wsh Homozygous', carriers: [], hidden: [] };
+  if (genotype.W && genotype.W.includes('Rw/')) return { phenotype: 'LETHAL: Rw Combination', carriers: [], hidden: [] };
 
   let color = '';
   let pattern = '';
   let texture = '';
   let markings = [];
   let carriers = [];
+  let hidden = [];
 
   // Albino override
   if (genotype.C === 'c/c') {
-    return { phenotype: genotype.P === 'p/p' ? 'Pink-Eyed White (Albino)' : 'Pink-Eyed White (Albino)', carriers };
+    return { phenotype: genotype.P === 'p/p' ? 'Pink-Eyed White (Albino)' : 'Pink-Eyed White (Albino)', carriers, hidden };
   }
 
   // Recessive red/yellow
@@ -179,7 +180,7 @@ const calculatePhenotype = (genotype) => {
     } else {
       color = 'Recessive Red';
     }
-    return { phenotype: color, carriers };
+    return { phenotype: color, carriers, hidden };
   }
 
   // Dominant yellow
@@ -189,13 +190,13 @@ const calculatePhenotype = (genotype) => {
     } else {
       color = 'Dominant Red';
     }
-    return { phenotype: color, carriers };
+    return { phenotype: color, carriers, hidden };
   }
 
   // Viable yellow (brindle)
   if (genotype.A && genotype.A.startsWith('Avy/')) {
     color = 'Brindle';
-    return { phenotype: color, carriers };
+    return { phenotype: color, carriers, hidden };
   }
 
   // Base color determination
@@ -205,8 +206,6 @@ const calculatePhenotype = (genotype) => {
 
   // Track carriers for A-locus
   if (genotype.A === 'A/a' || genotype.A === 'A/ae') carriers.push('Black');
-  if (genotype.A === 'A/at') carriers.push('Tan');
-  if (genotype.A === 'at/a' || genotype.A === 'at/ae') carriers.push('Black');
 
   // Brown/Black base
   const isBrown = genotype.B === 'b/b';
@@ -232,7 +231,7 @@ const calculatePhenotype = (genotype) => {
     else if (color === 'Black Tan') color = 'Blue Tan';
     else if (color === 'Chocolate Tan') color = 'Lilac Tan';
   } else if (genotype.D === 'D/d') {
-    carriers.push('Blue/Dilution');
+    carriers.push('Blue');
   }
 
   if (genotype.P === 'p/p') {
@@ -284,10 +283,14 @@ const calculatePhenotype = (genotype) => {
     markings.push('Dominant White Spotting');
   }
 
+  // Splashed - dominant but only shows when C-dilutes are active (not C/C or C/-)
+  const hasCDilute = genotype.C && !genotype.C.startsWith('C/');
   if (genotype.Spl && genotype.Spl.includes('Spl/')) {
-    markings.push('Splashed');
-  } else if (genotype.Spl === 'Spl/spl') {
-    carriers.push('Splashed');
+    if (hasCDilute) {
+      markings.push('Splashed');
+    } else {
+      hidden.push('Splashed');
+    }
   }
 
   if (genotype.Rn && genotype.Rn.includes('Rn/')) {
@@ -302,10 +305,9 @@ const calculatePhenotype = (genotype) => {
     carriers.push('Silvered');
   }
 
+  // Mobr - sex-linked to X chromosome, dominant (always shows if present)
   if (genotype.Mobr && genotype.Mobr.includes('Mobr/')) {
     markings.push('xbrindle');
-  } else if (genotype.Mobr === 'Mobr/mobr') {
-    carriers.push('xbrindle');
   }
 
   if (genotype.Go === 'Go/Go') {
@@ -354,7 +356,7 @@ const calculatePhenotype = (genotype) => {
     result += ` (${texture})`;
   }
 
-  return { phenotype: result || 'Unknown', carriers };
+  return { phenotype: result || 'Unknown', carriers, hidden };
 };
 
 const MouseGeneticsCalculator = ({ API_BASE_URL, authToken }) => {
@@ -528,6 +530,11 @@ const MouseGeneticsCalculator = ({ API_BASE_URL, authToken }) => {
                 <span className="font-medium">Carriers:</span> {parent1Result.carriers.join(', ')}
               </p>
             )}
+            {parent1Result.hidden && parent1Result.hidden.length > 0 && (
+              <p className="text-xs text-gray-600 mt-1">
+                <span className="font-medium">Hidden:</span> {parent1Result.hidden.join(', ')}
+              </p>
+            )}
           </div>
         </div>
 
@@ -562,6 +569,11 @@ const MouseGeneticsCalculator = ({ API_BASE_URL, authToken }) => {
             {parent2Result.carriers && parent2Result.carriers.length > 0 && (
               <p className="text-xs text-gray-600 mt-2">
                 <span className="font-medium">Carriers:</span> {parent2Result.carriers.join(', ')}
+              </p>
+            )}
+            {parent2Result.hidden && parent2Result.hidden.length > 0 && (
+              <p className="text-xs text-gray-600 mt-1">
+                <span className="font-medium">Hidden:</span> {parent2Result.hidden.join(', ')}
               </p>
             )}
           </div>
