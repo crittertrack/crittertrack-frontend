@@ -2809,11 +2809,13 @@ const LitterManagement = ({ authToken, API_BASE_URL, userProfile, showModalMessa
 
                                                             {/* ID and COI bottom section */}
                                                             <div className="w-full px-2 pb-2 flex justify-between items-end">
-                                                                {animal.inbreedingCoefficient != null && (
-                                                                    <div className="text-xs font-semibold text-orange-600">
-                                                                        COI: {animal.inbreedingCoefficient.toFixed(2)}%
-                                                                    </div>
-                                                                )}
+                                                                <div className="text-xs font-semibold text-orange-600">
+                                                                    {animal.inbreedingCoefficient != null ? (
+                                                                        `COI: ${animal.inbreedingCoefficient.toFixed(2)}%`
+                                                                    ) : (
+                                                                        <span className="text-gray-400">COI: N/A</span>
+                                                                    )}
+                                                                </div>
                                                                 <div className="text-xs text-gray-500 ml-auto">CT{animal.id_public}</div>
                                                             </div>
                                                             
@@ -5106,11 +5108,13 @@ const AnimalList = ({ authToken, showModalMessage, onEditAnimal, onViewAnimal, o
 
                     {/* ID and COI bottom section */}
                     <div className="w-full px-2 pb-2 flex justify-between items-end">
-                        {animal.inbreedingCoefficient != null && (
-                            <div className="text-xs font-semibold text-orange-600">
-                                COI: {animal.inbreedingCoefficient.toFixed(2)}%
-                            </div>
-                        )}
+                        <div className="text-xs font-semibold text-orange-600">
+                            {animal.inbreedingCoefficient != null ? (
+                                `COI: ${animal.inbreedingCoefficient.toFixed(2)}%`
+                            ) : (
+                                <span className="text-gray-400">COI: N/A</span>
+                            )}
+                        </div>
                         <div className="text-xs text-gray-500 ml-auto">CT{animal.id_public}</div>
                     </div>
                     
