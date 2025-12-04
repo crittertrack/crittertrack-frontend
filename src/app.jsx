@@ -4293,27 +4293,6 @@ const NotificationPanel = ({ authToken, API_BASE_URL, onClose, showModalMessage,
         }
     };
 
-    const handleMarkAsRead = async (notificationId) => {
-        try {
-            console.log('[handleMarkAsRead] Marking notification as read:', notificationId);
-            const response = await axios.patch(`${API_BASE_URL}/notifications/${notificationId}/read`, {}, {
-                headers: { Authorization: `Bearer ${authToken}` }
-            });
-            console.log('[handleMarkAsRead] Response:', response.data);
-            
-            // Wait for the backend to process before refreshing
-            await fetchNotifications();
-            
-            if (onNotificationChange) {
-                console.log('[handleMarkAsRead] Calling onNotificationChange');
-                // Small delay to ensure backend count is updated
-                setTimeout(() => onNotificationChange(), 100);
-            }
-        } catch (error) {
-            console.error('Error marking as read:', error);
-        }
-    };
-
     const handleDelete = async (notificationId) => {
         try {
             console.log('[handleDelete] Deleting notification:', notificationId);
@@ -4400,14 +4379,6 @@ const NotificationPanel = ({ authToken, API_BASE_URL, onClose, showModalMessage,
                                                     <X size={14} />
                                                     <span>Delete</span>
                                                 </button>
-                                                {!notification.read && (
-                                                    <button
-                                                        onClick={() => handleMarkAsRead(notification._id)}
-                                                        className="text-xs text-gray-600 hover:text-gray-800 px-2"
-                                                    >
-                                                        Mark as read
-                                                    </button>
-                                                )}
                                             </div>
                                         </div>
                                     ))}
