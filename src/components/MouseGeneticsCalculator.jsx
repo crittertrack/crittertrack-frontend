@@ -281,10 +281,8 @@ const calculatePhenotype = (genotype) => {
   }
 
   // Texture
-  if (genotype.Re === 'Re/re') {
+  if (genotype.Re === 'Re/re' || genotype.Re === 'Re/Re') {
     texture = 'Astrex';
-  } else if (genotype.Re === 'Re/Re') {
-    texture = 'astrex';
   }
   if (genotype.Sa === 'sa/sa') {
     texture = texture ? `${texture} Satin` : 'Satin';
@@ -326,12 +324,12 @@ const MouseGeneticsCalculator = ({ API_BASE_URL, authToken }) => {
     Rn: 'rn/rn',
     Si: 'si/si',
     Mobr: 'mobr/mobr',
-    Go: 'go/go',
+    Go: 'Go/Go',
     Re: 'Re/Re',
     Sa: 'Sa/Sa',
-    Rst: 'rst/rst',
+    Rst: 'Rst/Rst',
     Fz: 'Fz/Fz',
-    Nu: 'Nu/Nu'
+    Nu: 'nu/nu'
   };
 
   const [parent1, setParent1] = useState(defaultGenotype);
@@ -450,7 +448,7 @@ const MouseGeneticsCalculator = ({ API_BASE_URL, authToken }) => {
 
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
         {/* Parent 1 */}
-        <div className="bg-blue-50 rounded-lg p-4">
+        <div className="bg-blue-50 rounded-lg p-4 border-2 border-blue-300">
           <h2 className="text-xl font-semibold text-blue-800 mb-4">Parent 1</h2>
           <div className="grid grid-cols-2 gap-3">
             {Object.entries(GENE_LOCI).map(([locus, data]) => (
@@ -481,7 +479,7 @@ const MouseGeneticsCalculator = ({ API_BASE_URL, authToken }) => {
         </div>
 
         {/* Parent 2 */}
-        <div className="bg-pink-50 rounded-lg p-4">
+        <div className="bg-pink-50 rounded-lg p-4 border-2 border-pink-300">
           <h2 className="text-xl font-semibold text-pink-800 mb-4">Parent 2</h2>
           <div className="grid grid-cols-2 gap-3">
             {Object.entries(GENE_LOCI).map(([locus, data]) => (
