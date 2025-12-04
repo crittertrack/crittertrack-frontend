@@ -2635,13 +2635,7 @@ const LitterManagement = ({ authToken, API_BASE_URL, userProfile, showModalMessa
                                             {litter.numberBorn} offspring
                                         </div>
                                         <div className="text-sm">
-                                            {litter.inbreedingCoefficient != null ? (
-                                                <span className="font-semibold text-black">
-                                                    COI: {litter.inbreedingCoefficient.toFixed(2)}%
-                                                </span>
-                                            ) : (
-                                                <span className="font-semibold text-black">COI: N/A</span>
-                                            )}
+                                            <span className="text-gray-600">COI:</span> {litter.inbreedingCoefficient != null ? `${litter.inbreedingCoefficient.toFixed(2)}%` : 'N/A'}
                                         </div>
                                     </div>
                                     <ChevronLeft 
