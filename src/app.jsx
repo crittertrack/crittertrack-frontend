@@ -2049,7 +2049,35 @@ const LitterManagement = ({ authToken, API_BASE_URL, userProfile, showModalMessa
             const response = await axios.get(`${API_BASE_URL}/litters`, {
                 headers: { Authorization: `Bearer ${authToken}` }
             });
-            setLitters(response.data || []);
+            const littersData = response.data || [];
+            
+            // Recalculate COI for each litter
+            for (const litter of littersData) {
+                try {
+                    const coiResponse = await axios.get(`${API_BASE_URL}/inbreeding/pairing`, {
+                        params: {
+                            sireId: litter.sireId_public,
+                            damId: litter.damId_public,
+                            generations: 5
+                        },
+                        headers: { Authorization: `Bearer ${authToken}` }
+                    });
+
+                    if (coiResponse.data.inbreedingCoefficient != null && 
+                        coiResponse.data.inbreedingCoefficient !== litter.inbreedingCoefficient) {
+                        await axios.put(`${API_BASE_URL}/litters/${litter._id}`, {
+                            inbreedingCoefficient: coiResponse.data.inbreedingCoefficient
+                        }, {
+                            headers: { Authorization: `Bearer ${authToken}` }
+                        });
+                        litter.inbreedingCoefficient = coiResponse.data.inbreedingCoefficient;
+                    }
+                } catch (error) {
+                    console.log(`Could not update COI for litter ${litter._id}:`, error);
+                }
+            }
+            
+            setLitters(littersData);
         } catch (error) {
             console.error('Error fetching litters:', error);
         } finally {
@@ -2062,7 +2090,24 @@ const LitterManagement = ({ authToken, API_BASE_URL, userProfile, showModalMessa
             const response = await axios.get(`${API_BASE_URL}/animals`, {
                 headers: { Authorization: `Bearer ${authToken}` }
             });
-            setMyAnimals(response.data || []);
+            const animalsData = response.data || [];
+            
+            // Recalculate COI for animals with parents
+            for (const animal of animalsData) {
+                if ((animal.fatherId_public || animal.motherId_public || animal.sireId_public || animal.damId_public)) {
+                    try {
+                        const coiResponse = await axios.get(`${API_BASE_URL}/animals/${animal.id_public}/inbreeding`, {
+                            params: { generations: 5 },
+                            headers: { Authorization: `Bearer ${authToken}` }
+                        });
+                        animal.inbreedingCoefficient = coiResponse.data.inbreedingCoefficient;
+                    } catch (error) {
+                        console.log(`Could not update COI for animal ${animal.id_public}:`, error);
+                    }
+                }
+            }
+            
+            setMyAnimals(animalsData);
         } catch (error) {
             console.error('Error fetching animals:', error);
         }
@@ -4987,33 +5032,26 @@ const AnimalList = ({ authToken, showModalMessage, onEditAnimal, onViewAnimal, o
             setLoading(true);
             
             // Fetch animals first
-            await fetchAnimals();
-            
-            // Calculate COI for animals that have parents but no COI yet
-            let calculated = 0;
             const currentAnimals = await axios.get(`${API_BASE_URL}/animals`, {
                 headers: { Authorization: `Bearer ${authToken}` }
             });
             
+            // Recalculate COI for all animals with parents
             for (const animal of currentAnimals.data) {
-                if ((animal.fatherId_public || animal.motherId_public || animal.sireId_public || animal.damId_public) 
-                    && animal.inbreedingCoefficient == null) {
+                if (animal.fatherId_public || animal.motherId_public || animal.sireId_public || animal.damId_public) {
                     try {
                         await axios.get(`${API_BASE_URL}/animals/${animal.id_public}/inbreeding`, {
                             params: { generations: 5 },
                             headers: { Authorization: `Bearer ${authToken}` }
                         });
-                        calculated++;
                     } catch (error) {
                         console.log(`Failed to calculate COI for ${animal.name}:`, error);
                     }
                 }
             }
 
-            // Refresh again if any were calculated
-            if (calculated > 0) {
-                await fetchAnimals();
-            }
+            // Refresh the list with updated COI values
+            await fetchAnimals();
         } catch (error) {
             console.error('Error refreshing:', error);
         } finally {
