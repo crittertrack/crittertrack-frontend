@@ -156,19 +156,20 @@ const calculatePhenotype = (genotype) => {
   });
 
   // Check for lethal combinations
-  if (genotype.A === 'Ay/Ay (lethal)') return 'LETHAL: Dominant Yellow Homozygous';
-  if (genotype.W && genotype.W.includes('lethal')) return 'LETHAL: Dominant Spotting Homozygous';
-  if (genotype.W && genotype.W.includes('Wsh/Wsh')) return 'LETHAL: Wsh Homozygous';
-  if (genotype.W && genotype.W.includes('Rw/')) return 'LETHAL: Rw Combination';
+  if (genotype.A === 'Ay/Ay (lethal)') return { phenotype: 'LETHAL: Dominant Yellow Homozygous', carriers: [] };
+  if (genotype.W && genotype.W.includes('lethal')) return { phenotype: 'LETHAL: Dominant Spotting Homozygous', carriers: [] };
+  if (genotype.W && genotype.W.includes('Wsh/Wsh')) return { phenotype: 'LETHAL: Wsh Homozygous', carriers: [] };
+  if (genotype.W && genotype.W.includes('Rw/')) return { phenotype: 'LETHAL: Rw Combination', carriers: [] };
 
   let color = '';
   let pattern = '';
   let texture = '';
   let markings = [];
+  let carriers = [];
 
   // Albino override
   if (genotype.C === 'c/c') {
-    return genotype.P === 'p/p' ? 'Pink-Eyed White (Albino)' : 'Pink-Eyed White (Albino)';
+    return { phenotype: genotype.P === 'p/p' ? 'Pink-Eyed White (Albino)' : 'Pink-Eyed White (Albino)', carriers };
   }
 
   // Recessive red/yellow
@@ -178,7 +179,7 @@ const calculatePhenotype = (genotype) => {
     } else {
       color = 'Recessive Red';
     }
-    return color;
+    return { phenotype: color, carriers };
   }
 
   // Dominant yellow
@@ -188,13 +189,13 @@ const calculatePhenotype = (genotype) => {
     } else {
       color = 'Dominant Red';
     }
-    return color;
+    return { phenotype: color, carriers };
   }
 
   // Viable yellow (brindle)
   if (genotype.A && genotype.A.startsWith('Avy/')) {
     color = 'Brindle';
-    return color;
+    return { phenotype: color, carriers };
   }
 
   // Base color determination
@@ -202,8 +203,14 @@ const calculatePhenotype = (genotype) => {
   const isTan = genotype.A && genotype.A.includes('at/') && !genotype.A.includes('A/');
   const isBlack = genotype.A && (genotype.A.includes('a/a') || genotype.A.includes('a/ae') || genotype.A.includes('ae/ae'));
 
+  // Track carriers for A-locus
+  if (genotype.A === 'A/a' || genotype.A === 'A/ae') carriers.push('Black');
+  if (genotype.A === 'A/at') carriers.push('Tan');
+  if (genotype.A === 'at/a' || genotype.A === 'at/ae') carriers.push('Black');
+
   // Brown/Black base
   const isBrown = genotype.B === 'b/b';
+  if (genotype.B === 'B/b') carriers.push('Chocolate');
   
   if (isAgouti) {
     pattern = 'Agouti';
@@ -224,12 +231,16 @@ const calculatePhenotype = (genotype) => {
     else if (color === 'Cinnamon') color = 'Argente';
     else if (color === 'Black Tan') color = 'Blue Tan';
     else if (color === 'Chocolate Tan') color = 'Lilac Tan';
+  } else if (genotype.D === 'D/d') {
+    carriers.push('Blue/Dilution');
   }
 
   if (genotype.P === 'p/p') {
     if (!color.includes('Fawn') && !color.includes('Red')) {
       color = `Pink-Eyed ${color}`;
     }
+  } else if (genotype.P === 'P/p') {
+    carriers.push('Pink-eye');
   }
 
   // C-locus modifications
@@ -244,10 +255,23 @@ const calculatePhenotype = (genotype) => {
   if (genotype.C === 'ce/ce' || (genotype.C?.includes('ce/') && !genotype.C.includes('C/ce'))) {
     color = `Beige ${color}`;
   }
+  // C-locus carriers
+  if (genotype.C && genotype.C.includes('C/')) {
+    const recessive = genotype.C.split('/')[1];
+    if (recessive === 'c') carriers.push('Albino');
+    else if (recessive === 'ch') carriers.push('Himalayan');
+    else if (recessive === 'ce') carriers.push('Beige');
+    else if (recessive === 'cch') carriers.push('Chinchilla');
+  }
+
+  // E-locus carriers
+  if (genotype.E === 'E/e') carriers.push('Recessive Red');
 
   // Markings
   if (genotype.S === 's/s') {
     markings.push('Pied');
+  } else if (genotype.S === 'S/s') {
+    carriers.push('Pied');
   }
 
   if (genotype.W === 'W/w') {
@@ -262,39 +286,61 @@ const calculatePhenotype = (genotype) => {
 
   if (genotype.Spl && genotype.Spl.includes('Spl/')) {
     markings.push('Splashed');
+  } else if (genotype.Spl === 'Spl/spl') {
+    carriers.push('Splashed');
   }
 
   if (genotype.Rn && genotype.Rn.includes('Rn/')) {
     markings.push('Roan');
+  } else if (genotype.Rn === 'Rn/rn') {
+    carriers.push('Roan');
   }
 
   if (genotype.Si && genotype.Si.includes('Si/')) {
     markings.push('Silvered');
+  } else if (genotype.Si === 'Si/si') {
+    carriers.push('Silvered');
   }
 
   if (genotype.Mobr && genotype.Mobr.includes('Mobr/')) {
     markings.push('xbrindle');
+  } else if (genotype.Mobr === 'Mobr/mobr') {
+    carriers.push('xbrindle');
   }
 
   if (genotype.Go === 'Go/Go') {
     markings.push('Shorthair');
   } else if (genotype.Go === 'go/go') {
     markings.push('Longhair');
+  } else if (genotype.Go === 'Go/go') {
+    carriers.push('Longhair');
   }
 
   // Texture
   if (genotype.Re === 'Re/re' || genotype.Re === 'Re/Re') {
     texture = 'Astrex';
+  } else if (genotype.Re === 're/Re') {
+    carriers.push('Astrex');
   }
+  
   if (genotype.Sa === 'sa/sa') {
     texture = texture ? `${texture} Satin` : 'Satin';
+  } else if (genotype.Sa === 'Sa/sa') {
+    carriers.push('Satin');
   }
+  
   if (genotype.Rst === 'rst/rst') {
     texture = texture ? `${texture} Rosette` : 'Rosette';
+  } else if (genotype.Rst === 'Rst/rst') {
+    carriers.push('Rosette');
   }
+  
   if (genotype.Fz === 'fz/fz') {
     texture = texture ? `${texture} Fuzz` : 'Fuzz';
+  } else if (genotype.Fz === 'Fz/fz') {
+    carriers.push('Fuzz');
   }
+  
   if (genotype.Nu === 'Nu/Nu' || genotype.Nu === 'Nu/nu') {
     texture = 'Dominant Hairless';
   }
@@ -308,7 +354,7 @@ const calculatePhenotype = (genotype) => {
     result += ` (${texture})`;
   }
 
-  return result || 'Unknown';
+  return { phenotype: result || 'Unknown', carriers };
 };
 
 const MouseGeneticsCalculator = ({ API_BASE_URL, authToken }) => {
@@ -347,8 +393,8 @@ const MouseGeneticsCalculator = ({ API_BASE_URL, authToken }) => {
     setParent2({ ...parent2, [locus]: value });
   };
 
-  const parent1Phenotype = calculatePhenotype(parent1);
-  const parent2Phenotype = calculatePhenotype(parent2);
+  const parent1Result = calculatePhenotype(parent1);
+  const parent2Result = calculatePhenotype(parent2);
 
   // Example varieties
   const EXAMPLE_TABS = {
@@ -474,9 +520,14 @@ const MouseGeneticsCalculator = ({ API_BASE_URL, authToken }) => {
           </div>
           <div className="mt-4 p-3 bg-white rounded-lg border-2 border-blue-500">
             <p className="text-sm font-medium text-gray-700 mb-1">Phenotype:</p>
-            <p className={`text-lg font-semibold ${parent1Phenotype.includes('LETHAL') ? 'text-red-600' : 'text-blue-800'}`}>
-              {parent1Phenotype}
+            <p className={`text-lg font-semibold ${parent1Result.phenotype.includes('LETHAL') ? 'text-red-600' : 'text-blue-800'}`}>
+              {parent1Result.phenotype}
             </p>
+            {parent1Result.carriers && parent1Result.carriers.length > 0 && (
+              <p className="text-xs text-gray-600 mt-2">
+                <span className="font-medium">Carriers:</span> {parent1Result.carriers.join(', ')}
+              </p>
+            )}
           </div>
         </div>
 
@@ -505,9 +556,14 @@ const MouseGeneticsCalculator = ({ API_BASE_URL, authToken }) => {
           </div>
           <div className="mt-4 p-3 bg-white rounded-lg border-2 border-pink-500">
             <p className="text-sm font-medium text-gray-700 mb-1">Phenotype:</p>
-            <p className={`text-lg font-semibold ${parent2Phenotype.includes('LETHAL') ? 'text-red-600' : 'text-pink-800'}`}>
-              {parent2Phenotype}
+            <p className={`text-lg font-semibold ${parent2Result.phenotype.includes('LETHAL') ? 'text-red-600' : 'text-pink-800'}`}>
+              {parent2Result.phenotype}
             </p>
+            {parent2Result.carriers && parent2Result.carriers.length > 0 && (
+              <p className="text-xs text-gray-600 mt-2">
+                <span className="font-medium">Carriers:</span> {parent2Result.carriers.join(', ')}
+              </p>
+            )}
           </div>
         </div>
       </div>
