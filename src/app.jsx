@@ -1878,8 +1878,8 @@ const OffspringSection = ({ animalId, API_BASE_URL, authToken = null, onViewAnim
                 <div className="space-y-6">
                     {offspring.map((litter, index) => (
                     <div key={litter.litterId || index} className="border-2 border-gray-200 rounded-lg p-4">
-                        {/* Parent Cards at Top */}
-                        <div className="flex items-start gap-3 mb-3">
+                        {/* Parent Cards at Top - Centered */}
+                        <div className="flex items-start gap-3 mb-3 justify-center">
                             {/* Father Card */}
                             {(litter.sireId_public || litter.otherParentType === 'sire') && (
                                 <ParentMiniCard 
