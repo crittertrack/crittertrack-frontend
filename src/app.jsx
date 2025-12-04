@@ -1965,7 +1965,8 @@ const OffspringSection = ({ animalId, API_BASE_URL, authToken = null, onViewAnim
                                             ) : (
                                                 <HeartOff size={12} className="text-black" />
                                             )}
-                                            {animal.isDisplay ? (
+                                            {/* Show Eye icon if showOnPublicProfile is true, or if the animal is from PublicAnimal collection (has no showOnPublicProfile field) */}
+                                            {(animal.showOnPublicProfile !== undefined ? animal.showOnPublicProfile : true) ? (
                                                 <Eye size={12} className="text-black" />
                                             ) : (
                                                 <EyeOff size={12} className="text-black" />
