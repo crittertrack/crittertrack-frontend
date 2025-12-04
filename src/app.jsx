@@ -4300,10 +4300,14 @@ const NotificationPanel = ({ authToken, API_BASE_URL, onClose, showModalMessage,
                 headers: { Authorization: `Bearer ${authToken}` }
             });
             console.log('[handleMarkAsRead] Response:', response.data);
-            fetchNotifications();
+            
+            // Wait for the backend to process before refreshing
+            await fetchNotifications();
+            
             if (onNotificationChange) {
                 console.log('[handleMarkAsRead] Calling onNotificationChange');
-                onNotificationChange();
+                // Small delay to ensure backend count is updated
+                setTimeout(() => onNotificationChange(), 100);
             }
         } catch (error) {
             console.error('Error marking as read:', error);
@@ -4316,10 +4320,14 @@ const NotificationPanel = ({ authToken, API_BASE_URL, onClose, showModalMessage,
             await axios.delete(`${API_BASE_URL}/notifications/${notificationId}`, {
                 headers: { Authorization: `Bearer ${authToken}` }
             });
-            fetchNotifications();
+            
+            // Wait for the backend to process before refreshing
+            await fetchNotifications();
+            
             if (onNotificationChange) {
                 console.log('[handleDelete] Calling onNotificationChange');
-                onNotificationChange();
+                // Small delay to ensure backend count is updated
+                setTimeout(() => onNotificationChange(), 100);
             }
         } catch (error) {
             console.error('Error deleting notification:', error);
