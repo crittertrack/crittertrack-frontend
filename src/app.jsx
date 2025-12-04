@@ -4993,21 +4993,22 @@ const AnimalList = ({ authToken, showModalMessage, onEditAnimal, onViewAnimal, o
     const handleFilterPregnant = () => { setStatusFilterPregnant(prev => !prev); setStatusFilterNursing(false); };
     const handleFilterNursing = () => { setStatusFilterNursing(prev => !prev); setStatusFilterPregnant(false); };
     
-    const handleRefresh = () => {
-        fetchAnimals();
-    };
-
-    const handleCalculateAllCOI = async () => {
-        if (!window.confirm('Calculate inbreeding coefficients for all animals? This may take a moment.')) {
-            return;
-        }
-
+    const handleRefresh = async () => {
         try {
             setLoading(true);
-            let calculated = 0;
             
-            for (const animal of animals) {
-                if (animal.fatherId_public || animal.motherId_public || animal.sireId_public || animal.damId_public) {
+            // Fetch animals first
+            await fetchAnimals();
+            
+            // Calculate COI for animals that have parents but no COI yet
+            let calculated = 0;
+            const currentAnimals = await axios.get(`${API_BASE_URL}/animals`, {
+                headers: { Authorization: `Bearer ${authToken}` }
+            });
+            
+            for (const animal of currentAnimals.data) {
+                if ((animal.fatherId_public || animal.motherId_public || animal.sireId_public || animal.damId_public) 
+                    && animal.inbreedingCoefficient == null) {
                     try {
                         await axios.get(`${API_BASE_URL}/animals/${animal.id_public}/inbreeding`, {
                             params: { generations: 5 },
@@ -5020,11 +5021,12 @@ const AnimalList = ({ authToken, showModalMessage, onEditAnimal, onViewAnimal, o
                 }
             }
 
-            showModalMessage('Success', `Calculated inbreeding coefficients for ${calculated} animals!`);
-            fetchAnimals();
+            // Refresh again if any were calculated
+            if (calculated > 0) {
+                await fetchAnimals();
+            }
         } catch (error) {
-            console.error('Error calculating COI:', error);
-            showModalMessage('Error', 'Failed to calculate inbreeding coefficients');
+            console.error('Error refreshing:', error);
         } finally {
             setLoading(false);
         }
@@ -5128,24 +5130,14 @@ const AnimalList = ({ authToken, showModalMessage, onEditAnimal, onViewAnimal, o
                     <ClipboardList size={24} className="mr-3 text-primary-dark" />
                     My Animals ({animals.length})
                 </div>
-                <div className="flex items-center gap-2">
-                    <button 
-                        onClick={handleCalculateAllCOI} 
-                        disabled={loading}
-                        className="text-orange-600 hover:text-orange-700 transition disabled:opacity-50 flex items-center text-sm font-medium"
-                        title="Calculate Inbreeding Coefficients"
-                    >
-                        Calculate COI
-                    </button>
-                    <button 
-                        onClick={handleRefresh} 
-                        disabled={loading}
-                        className="text-gray-600 hover:text-primary transition disabled:opacity-50 flex items-center"
-                        title="Refresh List"
-                    >
-                        {loading ? <Loader2 size={18} className="animate-spin" /> : <RefreshCw size={18} />}
-                    </button>
-                </div>
+                <button 
+                    onClick={handleRefresh} 
+                    disabled={loading}
+                    className="text-gray-600 hover:text-primary transition disabled:opacity-50 flex items-center"
+                    title="Refresh List"
+                >
+                    {loading ? <Loader2 size={18} className="animate-spin" /> : <RefreshCw size={18} />}
+                </button>
             </h2>
 
             <div className="mb-6 p-4 border rounded-lg bg-gray-50 space-y-3">
