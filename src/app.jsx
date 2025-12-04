@@ -3788,33 +3788,36 @@ const AuthView = ({ onLoginSuccess, showModalMessage, isRegister, setIsRegister,
                 setLoading(true);
                 setNotFound(false);
                 try {
+                    console.log(`[ParentCard] Fetching parent CT${parentId} of type ${parentType}`);
                     // Try to fetch from authenticated endpoint (can access any animal globally)
                     try {
                         const response = await axios.get(`${API_BASE_URL}/animals/any/${parentId}`, {
                             headers: { Authorization: `Bearer ${authToken}` }
                         });
                         if (response.data) {
+                            console.log(`[ParentCard] Found parent CT${parentId} via /animals/any:`, response.data);
                             setParentData(response.data);
                             setLoading(false);
                             return;
                         }
                     } catch (authError) {
                         // If authenticated endpoint fails, try public
-                        console.log(`Parent CT${parentId} not found in authenticated endpoint, trying public`);
+                        console.log(`[ParentCard] Parent CT${parentId} not found in /animals/any, trying public. Error:`, authError.response?.status, authError.response?.data);
                     }
 
                     // Try fetching from global public animals database
                     const publicResponse = await axios.get(`${API_BASE_URL}/public/global/animals?id_public=${parentId}`);
                     if (publicResponse.data && publicResponse.data.length > 0) {
+                        console.log(`[ParentCard] Found parent CT${parentId} via public endpoint`);
                         setParentData(publicResponse.data[0]);
                     } else {
                         // Animal not found in either collection - treat as if no parent recorded
-                        console.warn(`Parent CT${parentId} not found in local or public collections`);
+                        console.warn(`[ParentCard] Parent CT${parentId} not found in local or public collections`);
                         setNotFound(true);
                         setParentData(null);
                     }
                 } catch (error) {
-                    console.error(`Error fetching ${parentType}:`, error);
+                    console.error(`[ParentCard] Error fetching ${parentType}:`, error);
                     setNotFound(true);
                     setParentData(null);
                 } finally {
@@ -4587,6 +4590,8 @@ const App = () => {
     };
 
     const handleViewAnimal = (animal) => {
+        console.log('[handleViewAnimal] Viewing animal:', animal);
+        console.log('[handleViewAnimal] Father ID:', animal.fatherId_public, 'Mother ID:', animal.motherId_public);
         setAnimalToView(animal);
         setCurrentView('view-animal');
     };
