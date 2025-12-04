@@ -2107,6 +2107,8 @@ const LitterManagement = ({ authToken, API_BASE_URL, userProfile, showModalMessa
                 headers: { Authorization: `Bearer ${authToken}` }
             });
 
+            const litterId = litterResponse.data.litterId_backend;
+
             // Create offspring animals
             const offspringPromises = [];
             
@@ -2152,7 +2154,16 @@ const LitterManagement = ({ authToken, API_BASE_URL, userProfile, showModalMessa
                 );
             }
 
-            await Promise.all(offspringPromises);
+            const createdAnimals = await Promise.all(offspringPromises);
+
+            // Extract the IDs from created animals and update litter
+            const offspringIds = createdAnimals.map(response => response.data.id_public);
+            
+            await axios.put(`${API_BASE_URL}/litters/${litterId}`, {
+                offspringIds_public: offspringIds
+            }, {
+                headers: { Authorization: `Bearer ${authToken}` }
+            });
 
             showModalMessage('Success', `Litter created with ${totalOffspring} offspring!`);
             setShowAddForm(false);
@@ -2207,7 +2218,8 @@ const LitterManagement = ({ authToken, API_BASE_URL, userProfile, showModalMessa
             const updatedOffspringIds = [...(availableToLink.litter.offspringIds_public || []), animalId];
             
             await axios.put(`${API_BASE_URL}/litters/${availableToLink.litter._id}`, {
-                offspringIds_public: updatedOffspringIds
+                offspringIds_public: updatedOffspringIds,
+                numberBorn: updatedOffspringIds.length
             }, {
                 headers: { Authorization: `Bearer ${authToken}` }
             });
