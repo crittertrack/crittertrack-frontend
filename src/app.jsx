@@ -1787,26 +1787,18 @@ const OffspringSection = ({ animalId, API_BASE_URL, authToken = null, onViewAnim
         fetchOffspring();
     }, [animalId, API_BASE_URL, authToken]);
 
-    if (loading) {
-        return (
-            <div className="bg-white border-2 border-gray-300 rounded-lg p-6">
-                <h3 className="text-lg font-semibold text-gray-800 mb-4">Offspring</h3>
-                <div className="flex justify-center py-8">
-                    <Loader2 size={24} className="animate-spin text-gray-400" />
-                </div>
-            </div>
-        );
-    }
-
-    if (!offspring || offspring.length === 0) {
-        return null; // Don't show section if no offspring
-    }
-
     return (
         <div className="bg-white border-2 border-gray-300 rounded-lg p-6">
             <h3 className="text-lg font-semibold text-gray-800 mb-4">Offspring</h3>
-            <div className="space-y-6">
-                {offspring.map((litter, index) => (
+            {loading ? (
+                <div className="flex justify-center py-8">
+                    <Loader2 size={24} className="animate-spin text-gray-400" />
+                </div>
+            ) : (!offspring || offspring.length === 0) ? (
+                <p className="text-gray-500 text-sm italic">Offspring are not public or no offspring recorded.</p>
+            ) : (
+                <div className="space-y-6">
+                    {offspring.map((litter, index) => (
                     <div key={litter.litterId || index} className="border-2 border-gray-200 rounded-lg p-4">
                         {/* Litter Header */}
                         <div className="mb-4 pb-3 border-b border-gray-200">
@@ -1947,7 +1939,8 @@ const OffspringSection = ({ animalId, API_BASE_URL, authToken = null, onViewAnim
                         )}
                     </div>
                 ))}
-            </div>
+                </div>
+            )}
         </div>
     );
 };
