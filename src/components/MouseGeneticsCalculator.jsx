@@ -203,6 +203,7 @@ const calculatePhenotype = (genotype) => {
   const isAgouti = genotype.A && (genotype.A.includes('A/') || genotype.A.endsWith('/A'));
   const isTan = genotype.A && genotype.A.includes('at/') && !genotype.A.includes('A/');
   const isBlack = genotype.A && (genotype.A.includes('a/a') || genotype.A.includes('a/ae') || genotype.A.includes('ae/ae'));
+  const isExtremeBlack = genotype.A === 'ae/ae';
 
   // Track carriers for A-locus
   if (genotype.A === 'A/a' || genotype.A === 'A/ae') carriers.push('Black');
@@ -219,7 +220,11 @@ const calculatePhenotype = (genotype) => {
     color = isBrown ? 'Chocolate Tan' : 'Black Tan';
   } else if (isBlack) {
     pattern = 'Self';
-    color = isBrown ? 'Chocolate' : 'Black';
+    if (isExtremeBlack) {
+      color = isBrown ? 'Extreme Chocolate' : 'Extreme Black';
+    } else {
+      color = isBrown ? 'Chocolate' : 'Black';
+    }
   }
 
   // Dilutions
