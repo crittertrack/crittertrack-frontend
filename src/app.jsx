@@ -78,6 +78,7 @@ const PedigreeChart = ({ animalId, animalData, onClose, API_BASE_URL, authToken 
     const [pedigreeData, setPedigreeData] = useState(null);
     const [ownerProfile, setOwnerProfile] = useState(null);
     const [loading, setLoading] = useState(true);
+    const [imagesLoaded, setImagesLoaded] = useState(false);
     const pedigreeRef = useRef(null);
 
     useEffect(() => {
@@ -177,6 +178,36 @@ const PedigreeChart = ({ animalId, animalData, onClose, API_BASE_URL, authToken 
 
         fetchPedigreeData();
     }, [animalId, animalData, API_BASE_URL, authToken]);
+
+    // Check when all images are loaded
+    useEffect(() => {
+        if (!pedigreeRef.current || loading) return;
+
+        const checkImagesLoaded = () => {
+            const images = pedigreeRef.current.querySelectorAll('img');
+            const allLoaded = Array.from(images).every(img => img.complete);
+            setImagesLoaded(allLoaded);
+        };
+
+        // Initial check
+        checkImagesLoaded();
+
+        // Listen for image load events
+        const images = pedigreeRef.current.querySelectorAll('img');
+        const handleImageLoad = () => checkImagesLoaded();
+        
+        images.forEach(img => {
+            img.addEventListener('load', handleImageLoad);
+            img.addEventListener('error', handleImageLoad);
+        });
+
+        return () => {
+            images.forEach(img => {
+                img.removeEventListener('load', handleImageLoad);
+                img.removeEventListener('error', handleImageLoad);
+            });
+        };
+    }, [loading, pedigreeData]);
 
     const downloadPDF = async () => {
         if (!pedigreeRef.current) return;
@@ -640,10 +671,16 @@ const PedigreeChart = ({ animalId, animalData, onClose, API_BASE_URL, authToken 
                         <div className="flex items-center gap-2">
                             <button
                                 onClick={downloadPDF}
-                                className="flex items-center gap-2 px-4 py-2 bg-primary hover:bg-primary/90 text-black font-semibold rounded-lg transition"
+                                disabled={!imagesLoaded}
+                                className={`flex items-center gap-2 px-4 py-2 font-semibold rounded-lg transition ${
+                                    imagesLoaded 
+                                        ? 'bg-primary hover:bg-primary/90 text-black cursor-pointer' 
+                                        : 'bg-gray-300 text-gray-500 cursor-not-allowed'
+                                }`}
+                                title={!imagesLoaded ? 'Waiting for images to load...' : 'Download PDF'}
                             >
                                 <Download size={18} />
-                                Download PDF
+                                {imagesLoaded ? 'Download PDF' : 'Loading...'}
                             </button>
                             <button
                                 onClick={onClose}
