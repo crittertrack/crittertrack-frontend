@@ -4757,7 +4757,10 @@ const App = () => {
                                 <ArrowLeft size={20} className="mr-2" />
                                 Back to Dashboard
                             </button>
-                            <button onClick={() => { setAnimalToEdit(animalToView); setSpeciesToAdd(animalToView.species); setCurrentView('edit-animal'); }} className="bg-primary hover:bg-primary/90 text-black font-semibold py-2 px-4 rounded-lg">Edit</button>
+                            {/* Only show edit button if user owns this animal */}
+                            {userProfile && animalToView.ownerId_public === userProfile.id_public && (
+                                <button onClick={() => { setAnimalToEdit(animalToView); setSpeciesToAdd(animalToView.species); setCurrentView('edit-animal'); }} className="bg-primary hover:bg-primary/90 text-black font-semibold py-2 px-4 rounded-lg">Edit</button>
+                            )}
                         </div>
 
                         {/* Main Info Section */}
