@@ -5468,7 +5468,6 @@ const App = () => {
     const [viewingPublicAnimal, setViewingPublicAnimal] = useState(null);
     const [viewAnimalBreederInfo, setViewAnimalBreederInfo] = useState(null);
     const [animalToView, setAnimalToView] = useState(null);
-    const [showGeneticsCalc, setShowGeneticsCalc] = useState(false);
     const [showPedigreeChart, setShowPedigreeChart] = useState(false);
 
     const timeoutRef = useRef(null);
@@ -5956,10 +5955,11 @@ const App = () => {
                     )}
                     </>
                 );
-            case 'genetics-calculator': // NEW VIEW CASE
+            case 'genetics-calculator':
                 return (
-                    <GeneticsCalculatorPlaceholder
-                        onCancel={() => setCurrentView('list')}
+                    <MouseGeneticsCalculator
+                        API_BASE_URL={API_BASE_URL}
+                        authToken={authToken}
                     />
                 );
             case 'litters':
@@ -6194,7 +6194,7 @@ const App = () => {
                         <BookOpen size={18} className="inline mr-1 hidden sm:inline" /> Litters
                     </button>
                     {/* NEW: Genetics Calculator Link */}
-                    <button onClick={() => setShowGeneticsCalc(true)} className={`px-2 py-2 sm:px-4 text-sm font-medium rounded-lg transition duration-150 ${showGeneticsCalc ? 'bg-primary text-black shadow-md' : 'text-gray-600 hover:bg-gray-100'}`}>
+                    <button onClick={() => setCurrentView('genetics-calculator')} className={`px-2 py-2 sm:px-4 text-sm font-medium rounded-lg transition duration-150 ${currentView === 'genetics-calculator' ? 'bg-primary text-black shadow-md' : 'text-gray-600 hover:bg-gray-100'}`}>
                         <Cat size={18} className="inline mr-1 hidden sm:inline" /> Genetics
                     </button>
                     <button onClick={() => setCurrentView('profile')} className={`px-2 py-2 sm:px-4 text-sm font-medium rounded-lg transition duration-150 ${currentView === 'profile' ? 'bg-primary text-black shadow-md' : 'text-gray-600 hover:bg-gray-100'}`}>
@@ -6254,14 +6254,6 @@ const App = () => {
                     }}
                     onNotificationChange={fetchNotificationCount}
                     showModalMessage={showModalMessage}
-                />
-            )}
-
-            {showGeneticsCalc && (
-                <MouseGeneticsCalculator 
-                    onClose={() => setShowGeneticsCalc(false)}
-                    API_BASE_URL={API_BASE_URL}
-                    authToken={authToken}
                 />
             )}
 

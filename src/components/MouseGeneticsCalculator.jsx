@@ -1,461 +1,513 @@
 import React, { useState } from 'react';
-import { Calculator, Book, X } from 'lucide-react';
+import { X, Book } from 'lucide-react';
 
-// Gene definitions based on mouse genetics
-const GENES = {
-    A: {
-        name: 'Agouti',
-        alleles: {
-            'Ay': { name: 'Dominant Yellow', dominant: true, lethal: true, info: 'Lethal when homozygous' },
-            'Avy': { name: 'Viable Yellow (Brindle)', dominant: true, info: 'Causes brindle pattern' },
-            'A': { name: 'Agouti', dominant: true, info: 'Wild-type agouti pattern' },
-            'at': { name: 'Tan', info: 'Tan belly pattern' },
-            'a': { name: 'Non-agouti (Black)', info: 'Solid color, no agouti banding' },
-            'ae': { name: 'Extreme Non-agouti', info: 'Very dark, minimal tan' }
-        }
-    },
-    B: {
-        name: 'Brown',
-        alleles: {
-            'B': { name: 'Black', dominant: true, info: 'Wild-type black pigment' },
-            'b': { name: 'Brown (Chocolate)', info: 'Brown/chocolate pigment' }
-        }
-    },
-    C: {
-        name: 'Color/Albino',
-        alleles: {
-            'C': { name: 'Full Color', dominant: true, info: 'Full color expression' },
-            'cch': { name: 'Chinchilla', info: 'Removes yellow/red pigment' },
-            'ce': { name: 'Extreme Dilution (Beige)', info: 'Beige with ruby eyes' },
-            'ch': { name: 'Himalayan (Pointed)', info: 'Temperature-sensitive coloring' },
-            'c': { name: 'Albino', info: 'No pigment, pink eyes white' }
-        }
-    },
-    D: {
-        name: 'Dilution',
-        alleles: {
-            'D': { name: 'Full Density', dominant: true, info: 'Full color density' },
-            'd': { name: 'Dilute (Blue)', info: 'Dilutes black to blue, brown to lilac' }
-        }
-    },
-    E: {
-        name: 'Extension',
-        alleles: {
-            'E': { name: 'Full Extension', dominant: true, info: 'Normal eumelanin extension' },
-            'e': { name: 'Recessive Yellow', info: 'Yellow/red color' }
-        }
-    },
-    P: {
-        name: 'Pink-eye',
-        alleles: {
-            'P': { name: 'Dark Eyes', dominant: true, info: 'Normal eye color' },
-            'p': { name: 'Pink Eyes', info: 'Pink/ruby eyes, dilutes color' }
-        }
-    },
-    S: {
-        name: 'Piebald Spotting',
-        alleles: {
-            'S': { name: 'Self (No Spotting)', dominant: true, info: 'No white spotting' },
-            's': { name: 'Piebald', info: 'White belly and feet spotting' }
-        }
-    },
-    W: {
-        name: 'Dominant Spotting',
-        alleles: {
-            'W': { name: 'Dominant Spot', lethal: true, info: 'Lethal when homozygous, causes banding' },
-            'Wsh': { name: 'Rumpwhite', lethal: true, info: 'Lethal when homozygous, variable white' },
-            'w': { name: 'No Spotting', info: 'No white spotting' }
-        }
-    }
+// Define all gene loci with their possible allele combinations
+const GENE_LOCI = {
+  A: {
+    name: 'Agouti',
+    combinations: [
+      'ae/ae',
+      'a/ae', 'a/a',
+      'at/ae', 'at/a', 'at/at',
+      'A/ae', 'A/a', 'A/at', 'A/A',
+      'Avy/ae', 'Avy/a', 'Avy/at', 'Avy/A', 'Avy/Avy',
+      'Ay/ae', 'Ay/a', 'Ay/at', 'Ay/A', 'Ay/Avy', 'Ay/Ay (lethal)'
+    ]
+  },
+  B: {
+    name: 'Brown',
+    combinations: [
+      'b/b',
+      'B/b', 'B/B'
+    ]
+  },
+  C: {
+    name: 'Color/Albino',
+    combinations: [
+      'c/c',
+      'ch/c', 'ch/ch',
+      'ce/c', 'ce/ch', 'ce/ce',
+      'cch/c', 'cch/ch', 'cch/ce', 'cch/cch',
+      'C/c', 'C/ch', 'C/ce', 'C/cch', 'C/C'
+    ]
+  },
+  D: {
+    name: 'Dilution',
+    combinations: [
+      'd/d',
+      'D/d', 'D/D'
+    ]
+  },
+  E: {
+    name: 'Extension',
+    combinations: [
+      'e/e',
+      'E/e', 'E/E'
+    ]
+  },
+  P: {
+    name: 'Pink-eye Dilution',
+    combinations: [
+      'p/p',
+      'P/p', 'P/P'
+    ]
+  },
+  S: {
+    name: 'Piebald Spotting',
+    combinations: [
+      's/s',
+      'S/s', 'S/S'
+    ]
+  },
+  W: {
+    name: 'Dominant Spotting',
+    combinations: [
+      'w/w',
+      'Wsh/w', 'Wsh/Wsh (lethal)',
+      'W/w', 'W/Wsh (lethal)', 'W/W (lethal)'
+    ]
+  },
+  Spl: {
+    name: 'Splotch',
+    combinations: [
+      'spl/spl',
+      'Spl/spl', 'Spl/Spl (lethal)'
+    ]
+  },
+  Rn: {
+    name: 'Roan',
+    combinations: [
+      'rn/rn',
+      'Rn/rn', 'Rn/Rn'
+    ]
+  },
+  Si: {
+    name: 'Silver',
+    combinations: [
+      'si/si',
+      'Si/si', 'Si/Si'
+    ]
+  },
+  Mobr: {
+    name: 'Mosaic/Brindled',
+    combinations: [
+      'mobr/mobr',
+      'Mobr/mobr', 'Mobr/Mobr'
+    ]
+  },
+  Go: {
+    name: 'Gondola',
+    combinations: [
+      'go/go',
+      'Go/go', 'Go/Go'
+    ]
+  },
+  Re: {
+    name: 'Rex',
+    combinations: [
+      're/re',
+      'Re/re', 'Re/Re'
+    ]
+  },
+  Sa: {
+    name: 'Satin',
+    combinations: [
+      'sa/sa',
+      'Sa/sa', 'Sa/Sa'
+    ]
+  },
+  Rst: {
+    name: 'Rough Coat',
+    combinations: [
+      'rst/rst',
+      'Rst/rst', 'Rst/Rst'
+    ]
+  },
+  Fz: {
+    name: 'Fuzzy',
+    combinations: [
+      'fz/fz',
+      'Fz/fz', 'Fz/Fz'
+    ]
+  },
+  Nu: {
+    name: 'Nude/Hairless',
+    combinations: [
+      'nu/nu',
+      'Nu/nu', 'Nu/Nu'
+    ]
+  }
 };
 
-// Color calculation rules
-const calculateColor = (genotype) => {
-    // Extract alleles
-    const A1 = genotype.A[0], A2 = genotype.A[1];
-    const B1 = genotype.B[0], B2 = genotype.B[1];
-    const C1 = genotype.C[0], C2 = genotype.C[1];
-    const D1 = genotype.D[0], D2 = genotype.D[1];
-    const E1 = genotype.E[0], E2 = genotype.E[1];
-    const P1 = genotype.P[0], P2 = genotype.P[1];
-
-    // Check for lethals
-    if ((A1 === 'Ay' && A2 === 'Ay')) return 'Lethal (Yellow homozygous)';
-    if ((genotype.W && genotype.W[0] === 'W' && genotype.W[1] === 'W')) return 'Lethal (W homozygous)';
-
-    // Albino overrides everything
-    if (C1 === 'c' && C2 === 'c') return 'Pink-Eyed White (Albino)';
-
-    // Recessive red
-    if (E1 === 'e' && E2 === 'e') {
-        if (P1 === 'p' && P2 === 'p') return 'Recessive Fawn';
-        return 'Recessive Red (Yellow)';
+// Calculate phenotype from genotype
+const calculatePhenotype = (genotype) => {
+  // Parse allele combinations
+  const parsed = {};
+  Object.keys(GENE_LOCI).forEach(locus => {
+    const combo = genotype[locus];
+    if (combo && combo.includes('(lethal)')) {
+      return 'LETHAL COMBINATION';
     }
-
-    // Dominant yellow/brindle
-    if (A1 === 'Ay' || A2 === 'Ay') {
-        if (P1 === 'p' && P2 === 'p') return 'Dominant Fawn';
-        return 'Dominant Yellow';
+    if (combo) {
+      const alleles = combo.replace(' (lethal)', '').split('/');
+      parsed[locus] = alleles;
     }
-    if (A1 === 'Avy' || A2 === 'Avy') return 'Brindle';
+  });
 
-    // Base color determination
-    let baseColor = 'Black';
-    let isAgouti = (A1 === 'A' || A2 === 'A');
-    let isTan = (A1 === 'at' || A2 === 'at') && !(A1 === 'A' || A2 === 'A');
+  // Check for lethal combinations
+  if (genotype.A === 'Ay/Ay (lethal)') return 'LETHAL: Dominant Yellow Homozygous';
+  if (genotype.W && genotype.W.includes('lethal')) return 'LETHAL: Dominant Spotting Homozygous';
+  if (genotype.Spl === 'Spl/Spl (lethal)') return 'LETHAL: Splotch Homozygous';
+  if (genotype.Wsh === 'Wsh/Wsh (lethal)') return 'LETHAL: Rumpwhite Homozygous';
 
-    // Brown modification
-    if (B1 === 'b' && B2 === 'b') {
-        baseColor = isAgouti ? 'Cinnamon' : 'Chocolate';
-    }
+  let color = '';
+  let pattern = '';
+  let texture = '';
+  let markings = [];
 
-    // Blue dilution
-    if (D1 === 'd' && D2 === 'd') {
-        if (baseColor === 'Black') baseColor = isAgouti ? 'Blue Agouti' : 'Blue';
-        else if (baseColor === 'Chocolate') baseColor = isAgouti ? 'Lilac Agouti' : 'Lilac';
-        else if (baseColor === 'Cinnamon') baseColor = 'Lilac Agouti';
-    }
+  // Albino override
+  if (genotype.C === 'c/c') {
+    return genotype.P === 'p/p' ? 'Pink-Eyed White (Albino)' : 'Pink-Eyed White (Albino)';
+  }
 
-    // Pink-eye dilution
-    if (P1 === 'p' && P2 === 'p') {
-        if (baseColor === 'Black') baseColor = isAgouti ? 'Argente' : 'Dove';
-        else if (baseColor === 'Chocolate') baseColor = isAgouti ? 'Silver Agouti' : 'Champagne';
-        else if (baseColor === 'Blue') baseColor = isAgouti ? 'Blue Argente' : 'Silver';
-        else if (baseColor === 'Lilac') baseColor = 'Lavender';
+  // Recessive red/yellow
+  if (genotype.E === 'e/e') {
+    if (genotype.P === 'p/p') {
+      color = 'Recessive Fawn';
+    } else {
+      color = 'Recessive Red (Yellow)';
     }
+    return color;
+  }
 
-    // C locus modifications
-    if (C1 === 'cch' || C2 === 'cch') {
-        if (C1 === 'cch' && C2 === 'cch') {
-            if (isAgouti) baseColor = 'Chinchilla';
-            else if (isTan) baseColor = 'Silver Fox';
-            else baseColor = 'Chinchilla (self)';
-        }
+  // Dominant yellow
+  if (genotype.A && (genotype.A.startsWith('Ay/'))) {
+    if (genotype.P === 'p/p') {
+      color = 'Dominant Fawn';
+    } else {
+      color = 'Dominant Yellow';
     }
-    if ((C1 === 'ch' || C2 === 'ch') && !(C1 === 'C' || C2 === 'C')) {
-        if (C1 === 'ch' && C2 === 'ch') baseColor = 'Sealpoint Siamese';
-        else baseColor = 'Himalayan';
-    }
-    if ((C1 === 'ce' || C2 === 'ce') && !(C1 === 'C' || C2 === 'C')) {
-        if (C1 === 'ce' && C2 === 'ce') baseColor = 'Beige (BEW)';
-    }
+    return color;
+  }
 
-    // Agouti/Tan patterns
-    if (isAgouti && baseColor === 'Black') baseColor = 'Agouti';
-    if (isTan) {
-        if (baseColor.includes('Black')) baseColor = 'Black Tan';
-        else if (baseColor.includes('Chocolate')) baseColor = 'Chocolate Tan';
-        else if (baseColor.includes('Blue')) baseColor = 'Blue Tan';
-        else baseColor = baseColor + ' Tan';
-    }
+  // Viable yellow (brindle)
+  if (genotype.A && genotype.A.startsWith('Avy/')) {
+    color = 'Brindle (Viable Yellow)';
+    return color;
+  }
 
-    return baseColor;
+  // Base color determination
+  const isAgouti = genotype.A && (genotype.A.includes('A/') || genotype.A.endsWith('/A'));
+  const isTan = genotype.A && genotype.A.includes('at/') && !genotype.A.includes('A/');
+  const isBlack = genotype.A && (genotype.A.includes('a/a') || genotype.A.includes('a/ae') || genotype.A.includes('ae/ae'));
+
+  // Brown/Black base
+  const isBrown = genotype.B === 'b/b';
+  
+  if (isAgouti) {
+    pattern = 'Agouti';
+    color = isBrown ? 'Cinnamon' : 'Agouti';
+  } else if (isTan) {
+    pattern = 'Tan';
+    color = isBrown ? 'Chocolate Tan' : 'Black Tan';
+  } else if (isBlack) {
+    pattern = 'Self';
+    color = isBrown ? 'Chocolate' : 'Black';
+  }
+
+  // Dilutions
+  if (genotype.D === 'd/d') {
+    if (color === 'Black') color = 'Blue';
+    else if (color === 'Chocolate') color = 'Lilac';
+    else if (color === 'Agouti') color = 'Silver Agouti';
+    else if (color === 'Cinnamon') color = 'Argente';
+    else if (color === 'Black Tan') color = 'Blue Tan';
+    else if (color === 'Chocolate Tan') color = 'Lilac Tan';
+  }
+
+  if (genotype.P === 'p/p') {
+    if (!color.includes('Fawn') && !color.includes('Yellow')) {
+      color = `Pink-Eyed ${color}`;
+    }
+  }
+
+  // C-locus modifications
+  if (genotype.C === 'cch/cch' || genotype.C?.includes('cch/')) {
+    if (!genotype.C.includes('C/cch')) {
+      color = `Chinchilla ${color}`;
+    }
+  }
+  if (genotype.C === 'ch/ch' || (genotype.C?.includes('ch/') && !genotype.C.includes('C/ch') && !genotype.C.includes('cch/ch'))) {
+    color = `Himalayan ${color}`;
+  }
+  if (genotype.C === 'ce/ce' || (genotype.C?.includes('ce/') && !genotype.C.includes('C/ce'))) {
+    color = `Beige ${color}`;
+  }
+
+  // Markings
+  if (genotype.S === 's/s') {
+    markings.push('Piebald');
+  } else if (genotype.S === 'S/s') {
+    markings.push('Banded');
+  }
+
+  if (genotype.W && genotype.W.includes('W/')) {
+    markings.push('Dominant White Spotting');
+  } else if (genotype.W && genotype.W.includes('Wsh/')) {
+    markings.push('Rumpwhite');
+  }
+
+  if (genotype.Spl && genotype.Spl.includes('Spl/')) {
+    markings.push('Splotch');
+  }
+
+  if (genotype.Rn && genotype.Rn.includes('Rn/')) {
+    markings.push('Roan');
+  }
+
+  if (genotype.Si && genotype.Si.includes('Si/')) {
+    markings.push('Silvered');
+  }
+
+  if (genotype.Mobr && genotype.Mobr.includes('Mobr/')) {
+    markings.push('Mosaic/Brindled');
+  }
+
+  if (genotype.Go && genotype.Go.includes('Go/')) {
+    markings.push('Gondola');
+  }
+
+  // Texture
+  if (genotype.Re === 're/re') {
+    texture = 'Rex';
+  }
+  if (genotype.Sa === 'sa/sa') {
+    texture = texture ? `${texture} Satin` : 'Satin';
+  }
+  if (genotype.Rst && genotype.Rst.includes('Rst/')) {
+    texture = texture ? `${texture} Rough` : 'Rough';
+  }
+  if (genotype.Fz === 'fz/fz') {
+    texture = texture ? `${texture} Fuzzy` : 'Fuzzy';
+  }
+  if (genotype.Nu === 'nu/nu') {
+    texture = 'Nude/Hairless';
+  }
+
+  // Combine results
+  let result = color;
+  if (markings.length > 0) {
+    result += ' ' + markings.join(', ');
+  }
+  if (texture) {
+    result += ` (${texture})`;
+  }
+
+  return result || 'Unknown';
 };
 
-const MouseGeneticsCalculator = ({ onClose, API_BASE_URL, authToken }) => {
-    const [showExamples, setShowExamples] = useState(false);
-    const [activeTab, setActiveTab] = useState('self');
-    
-    // Parent genotypes
-    const [parent1, setParent1] = useState({
-        A: ['A', 'a'],
-        B: ['B', 'B'],
-        C: ['C', 'C'],
-        D: ['D', 'D'],
-        E: ['E', 'E'],
-        P: ['P', 'P'],
-        S: ['S', 's'],
-        W: ['w', 'w']
-    });
+const MouseGeneticsCalculator = ({ API_BASE_URL, authToken }) => {
+  // Initialize with default genotypes
+  const defaultGenotype = {
+    A: 'A/A',
+    B: 'B/B',
+    C: 'C/C',
+    D: 'D/D',
+    E: 'E/E',
+    P: 'P/P',
+    S: 'S/S',
+    W: 'w/w',
+    Spl: 'spl/spl',
+    Rn: 'rn/rn',
+    Si: 'si/si',
+    Mobr: 'mobr/mobr',
+    Go: 'go/go',
+    Re: 'Re/Re',
+    Sa: 'Sa/Sa',
+    Rst: 'rst/rst',
+    Fz: 'Fz/Fz',
+    Nu: 'Nu/Nu'
+  };
 
-    const [parent2, setParent2] = useState({
-        A: ['A', 'a'],
-        B: ['B', 'B'],
-        C: ['C', 'C'],
-        D: ['D', 'D'],
-        E: ['E', 'E'],
-        P: ['P', 'P'],
-        S: ['S', 's'],
-        W: ['w', 'w']
-    });
+  const [parent1, setParent1] = useState(defaultGenotype);
+  const [parent2, setParent2] = useState(defaultGenotype);
+  const [showExamples, setShowExamples] = useState(false);
+  const [activeTab, setActiveTab] = useState('self');
 
-    const updateParentGene = (parent, gene, alleleIndex, value) => {
-        const setter = parent === 1 ? setParent1 : setParent2;
-        const current = parent === 1 ? parent1 : parent2;
-        
-        setter({
-            ...current,
-            [gene]: alleleIndex === 0 
-                ? [value, current[gene][1]]
-                : [current[gene][0], value]
-        });
-    };
+  const updateParent1 = (locus, value) => {
+    setParent1({ ...parent1, [locus]: value });
+  };
 
-    // Calculate offspring
-    const calculateOffspring = () => {
-        const results = {};
-        const genes = Object.keys(parent1);
+  const updateParent2 = (locus, value) => {
+    setParent2({ ...parent2, [locus]: value });
+  };
 
-        // Generate all combinations
-        genes.forEach(gene => {
-            const p1 = parent1[gene];
-            const p2 = parent2[gene];
-            
-            const combinations = [
-                [p1[0], p2[0]],
-                [p1[0], p2[1]],
-                [p1[1], p2[0]],
-                [p1[1], p2[1]]
-            ];
+  const parent1Phenotype = calculatePhenotype(parent1);
+  const parent2Phenotype = calculatePhenotype(parent2);
 
-            combinations.forEach(combo => {
-                const sorted = combo.sort((a, b) => {
-                    const alleles = Object.keys(GENES[gene].alleles);
-                    return alleles.indexOf(a) - alleles.indexOf(b);
-                });
-                
-                const key = sorted.join('');
-                if (!results[key]) results[key] = { count: 0, genotype: {} };
-                results[key].count++;
-                if (!results[key].genotype[gene]) results[key].genotype[gene] = sorted;
-            });
-        });
-
-        return results;
-    };
-
-    const EXAMPLE_TABS = {
-        self: {
-            name: 'Self Colors',
-            examples: [
-                { name: 'Black', genotype: 'aa BB CC DD EE PP', description: 'Solid black mouse' },
-                { name: 'Chocolate', genotype: 'aa bb CC DD EE PP', description: 'Solid brown/chocolate' },
-                { name: 'Blue', genotype: 'aa BB CC dd EE PP', description: 'Blue-gray dilute' },
-                { name: 'Lilac', genotype: 'aa bb CC dd EE PP', description: 'Dove-gray dilute chocolate' },
-                { name: 'Dove', genotype: 'aa BB CC DD EE pp', description: 'Pink-eyed dilute black' },
-                { name: 'Champagne', genotype: 'aa bb CC DD EE pp', description: 'Pink-eyed dilute chocolate' }
-            ]
-        },
-        agouti: {
-            name: 'Agouti Varieties',
-            examples: [
-                { name: 'Agouti', genotype: 'AA BB CC DD EE PP', description: 'Wild-type agouti' },
-                { name: 'Cinnamon', genotype: 'AA bb CC DD EE PP', description: 'Brown agouti' },
-                { name: 'Argente', genotype: 'AA BB CC DD EE pp', description: 'Pink-eyed agouti' },
-                { name: 'Silver Agouti', genotype: 'AA bb CC DD EE pp', description: 'Pink-eyed cinnamon' }
-            ]
-        },
-        tan: {
-            name: 'Tan Varieties',
-            examples: [
-                { name: 'Black Tan', genotype: 'atat BB CC DD EE PP', description: 'Black with tan belly' },
-                { name: 'Chocolate Tan', genotype: 'atat bb CC DD EE PP', description: 'Chocolate with tan belly' },
-                { name: 'Blue Tan', genotype: 'atat BB CC dd EE PP', description: 'Blue with tan belly' },
-                { name: 'Fox', genotype: 'atat BB cchcch DD EE PP', description: 'Chinchilla tan (silver fox)' }
-            ]
-        },
-        cdilute: {
-            name: 'C-Locus Dilutes',
-            examples: [
-                { name: 'Chinchilla', genotype: 'AA BB cchcch DD EE PP', description: 'Silvered agouti, no yellow' },
-                { name: 'Himalayan', genotype: 'aa BB chch DD EE PP', description: 'Points on extremities' },
-                { name: 'Siamese', genotype: 'aa BB chch DD EE PP', description: 'Darker pointed' },
-                { name: 'Beige (BEW)', genotype: 'aa BB cece DD EE PP', description: 'Beige with ruby eyes' },
-                { name: 'PEW', genotype: 'aa BB cc DD EE PP', description: 'Pink-eyed white (albino)' }
-            ]
-        },
-        marked: {
-            name: 'Marked Varieties',
-            examples: [
-                { name: 'Piebald', genotype: 'aa BB CC DD EE PP ss', description: 'White belly and feet' },
-                { name: 'Banded', genotype: 'aa BB CC DD EE PP Ww', description: 'White belt (Dutch)' },
-                { name: 'Rumpwhite', genotype: 'aa BB CC DD EE PP Wshw', description: 'Variable white rear' }
-            ]
-        },
-        yellow: {
-            name: 'Yellow/Red Varieties',
-            examples: [
-                { name: 'Dominant Yellow', genotype: 'Aya BB CC DD EE PP', description: 'Yellow with dark eyes' },
-                { name: 'Recessive Yellow', genotype: 'aa BB CC DD ee PP', description: 'Yellow (orange-red)' },
-                { name: 'Dominant Fawn', genotype: 'Aya BB CC DD EE pp', description: 'Pale yellow, pink eyes' },
-                { name: 'Recessive Fawn', genotype: 'aa BB CC DD ee pp', description: 'Pale yellow, pink eyes' },
-                { name: 'Brindle', genotype: 'Avya BB CC DD EE PP', description: 'Mottled yellow and agouti' }
-            ]
-        }
-    };
-
-    if (showExamples) {
-        return (
-            <div className="fixed inset-0 bg-gray-600 bg-opacity-75 flex items-center justify-center p-4 z-50">
-                <div className="bg-white rounded-xl shadow-2xl w-full max-w-4xl max-h-[90vh] flex flex-col">
-                    <div className="flex justify-between items-center border-b p-6">
-                        <h2 className="text-2xl font-bold text-gray-800 flex items-center gap-2">
-                            <Book size={28} className="text-primary" />
-                            Mouse Genetics Examples
-                        </h2>
-                        <button onClick={() => setShowExamples(false)} className="text-gray-500 hover:text-gray-800">
-                            <X size={24} />
-                        </button>
-                    </div>
-
-                    {/* Tabs */}
-                    <div className="flex gap-2 px-6 pt-4 border-b overflow-x-auto">
-                        {Object.keys(EXAMPLE_TABS).map(tabKey => (
-                            <button
-                                key={tabKey}
-                                onClick={() => setActiveTab(tabKey)}
-                                className={`px-4 py-2 font-semibold rounded-t-lg transition whitespace-nowrap ${
-                                    activeTab === tabKey 
-                                        ? 'bg-primary text-black border-b-2 border-primary' 
-                                        : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
-                                }`}
-                            >
-                                {EXAMPLE_TABS[tabKey].name}
-                            </button>
-                        ))}
-                    </div>
-
-                    {/* Tab Content */}
-                    <div className="flex-1 overflow-y-auto p-6">
-                        <div className="space-y-4">
-                            {EXAMPLE_TABS[activeTab].examples.map((example, idx) => (
-                                <div key={idx} className="border-2 border-gray-200 rounded-lg p-4 hover:shadow-md transition">
-                                    <h3 className="text-lg font-bold text-gray-800 mb-2">{example.name}</h3>
-                                    <p className="text-sm text-gray-600 mb-2">{example.description}</p>
-                                    <p className="text-xs font-mono bg-gray-100 p-2 rounded">{example.genotype}</p>
-                                </div>
-                            ))}
-                        </div>
-                    </div>
-                </div>
-            </div>
-        );
+  // Example varieties
+  const EXAMPLE_TABS = {
+    self: {
+      name: 'Self Colors',
+      examples: [
+        { name: 'Black', genotype: { A: 'a/a', B: 'B/B', C: 'C/C', D: 'D/D', E: 'E/E', P: 'P/P' }, description: 'Solid black mouse' },
+        { name: 'Chocolate', genotype: { A: 'a/a', B: 'b/b', C: 'C/C', D: 'D/D', E: 'E/E', P: 'P/P' }, description: 'Rich brown color' },
+        { name: 'Blue', genotype: { A: 'a/a', B: 'B/B', C: 'C/C', D: 'd/d', E: 'E/E', P: 'P/P' }, description: 'Blue-gray dilute' },
+        { name: 'Lilac', genotype: { A: 'a/a', B: 'b/b', C: 'C/C', D: 'd/d', E: 'E/E', P: 'P/P' }, description: 'Pinkish-gray dilute' },
+      ]
+    },
+    agouti: {
+      name: 'Agouti Varieties',
+      examples: [
+        { name: 'Agouti', genotype: { A: 'A/A', B: 'B/B', C: 'C/C', D: 'D/D', E: 'E/E', P: 'P/P' }, description: 'Wild-type coloring' },
+        { name: 'Cinnamon', genotype: { A: 'A/A', B: 'b/b', C: 'C/C', D: 'D/D', E: 'E/E', P: 'P/P' }, description: 'Brown agouti' },
+        { name: 'Silver Agouti', genotype: { A: 'A/A', B: 'B/B', C: 'C/C', D: 'd/d', E: 'E/E', P: 'P/P' }, description: 'Dilute agouti' },
+      ]
+    },
+    tan: {
+      name: 'Tan Varieties',
+      examples: [
+        { name: 'Black Tan', genotype: { A: 'at/at', B: 'B/B', C: 'C/C', D: 'D/D', E: 'E/E', P: 'P/P' }, description: 'Black with tan belly' },
+        { name: 'Chocolate Tan', genotype: { A: 'at/at', B: 'b/b', C: 'C/C', D: 'D/D', E: 'E/E', P: 'P/P' }, description: 'Chocolate with tan belly' },
+        { name: 'Blue Tan', genotype: { A: 'at/at', B: 'B/B', C: 'C/C', D: 'd/d', E: 'E/E', P: 'P/P' }, description: 'Blue with tan belly' },
+      ]
+    },
+    cdilute: {
+      name: 'C-Locus Dilutes',
+      examples: [
+        { name: 'Chinchilla', genotype: { A: 'A/A', B: 'B/B', C: 'cch/cch', D: 'D/D', E: 'E/E', P: 'P/P' }, description: 'Gray agouti' },
+        { name: 'Himalayan', genotype: { A: 'a/a', B: 'B/B', C: 'ch/ch', D: 'D/D', E: 'E/E', P: 'P/P' }, description: 'White with dark points' },
+        { name: 'PEW', genotype: { A: 'a/a', B: 'B/B', C: 'c/c', D: 'D/D', E: 'E/E', P: 'P/P' }, description: 'Pink-eyed white albino' },
+      ]
+    },
+    marked: {
+      name: 'Marked Varieties',
+      examples: [
+        { name: 'Piebald', genotype: { A: 'a/a', B: 'B/B', C: 'C/C', D: 'D/D', E: 'E/E', P: 'P/P', S: 's/s' }, description: 'White spotting' },
+        { name: 'Banded', genotype: { A: 'a/a', B: 'B/B', C: 'C/C', D: 'D/D', E: 'E/E', P: 'P/P', S: 'S/s' }, description: 'White band' },
+      ]
+    },
+    yellow: {
+      name: 'Yellow Varieties',
+      examples: [
+        { name: 'Dominant Yellow', genotype: { A: 'Ay/a', B: 'B/B', C: 'C/C', D: 'D/D', E: 'E/E', P: 'P/P' }, description: 'Yellow/orange' },
+        { name: 'Recessive Yellow', genotype: { A: 'a/a', B: 'B/B', C: 'C/C', D: 'D/D', E: 'e/e', P: 'P/P' }, description: 'Red/yellow' },
+        { name: 'Brindle', genotype: { A: 'Avy/a', B: 'B/B', C: 'C/C', D: 'D/D', E: 'E/E', P: 'P/P' }, description: 'Mottled yellow/black' },
+      ]
     }
+  };
 
-    return (
-        <div className="fixed inset-0 bg-gray-600 bg-opacity-75 flex items-center justify-center p-4 z-50 overflow-y-auto">
-            <div className="bg-white rounded-xl shadow-2xl w-full max-w-6xl my-8">
-                <div className="flex justify-between items-center border-b p-6">
-                    <h2 className="text-2xl font-bold text-gray-800 flex items-center gap-2">
-                        <Calculator size={28} className="text-primary" />
-                        Mouse Genetics Calculator
-                    </h2>
-                    <div className="flex gap-2">
-                        <button 
-                            onClick={() => setShowExamples(true)}
-                            className="bg-accent hover:bg-accent/90 text-white font-semibold px-4 py-2 rounded-lg flex items-center gap-2"
-                        >
-                            <Book size={18} />
-                            Examples
-                        </button>
-                        <button onClick={onClose} className="text-gray-500 hover:text-gray-800">
-                            <X size={24} />
-                        </button>
-                    </div>
+  return (
+    <div className="w-full max-w-6xl mx-auto bg-white rounded-xl shadow-lg p-6">
+      <div className="flex justify-between items-center mb-6">
+        <h1 className="text-2xl font-bold text-gray-800">Mouse Genetics Calculator</h1>
+        <button
+          onClick={() => setShowExamples(!showExamples)}
+          className="flex items-center gap-2 px-4 py-2 bg-orange-500 text-white rounded-lg hover:bg-orange-600 transition"
+        >
+          <Book size={18} />
+          {showExamples ? 'Hide' : 'Show'} Examples
+        </button>
+      </div>
+
+      {showExamples && (
+        <div className="mb-6 bg-gray-50 rounded-lg p-4">
+          <div className="flex gap-2 mb-4 overflow-x-auto">
+            {Object.keys(EXAMPLE_TABS).map(tabKey => (
+              <button
+                key={tabKey}
+                onClick={() => setActiveTab(tabKey)}
+                className={`px-4 py-2 rounded-lg whitespace-nowrap transition ${
+                  activeTab === tabKey
+                    ? 'bg-orange-500 text-white'
+                    : 'bg-white text-gray-700 hover:bg-orange-100'
+                }`}
+              >
+                {EXAMPLE_TABS[tabKey].name}
+              </button>
+            ))}
+          </div>
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            {EXAMPLE_TABS[activeTab].examples.map((example, idx) => (
+              <div key={idx} className="bg-white p-4 rounded-lg border border-gray-200">
+                <h3 className="font-semibold text-gray-800 mb-1">{example.name}</h3>
+                <p className="text-sm text-gray-600 mb-2">{example.description}</p>
+                <div className="text-xs text-gray-500 font-mono">
+                  {Object.entries(example.genotype).map(([locus, combo]) => (
+                    <span key={locus} className="mr-2">{locus}: {combo}</span>
+                  ))}
                 </div>
-
-                <div className="p-6">
-                    <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-6">
-                        {/* Parent 1 */}
-                        <div className="border-2 border-primary rounded-lg p-4">
-                            <h3 className="text-lg font-bold text-gray-800 mb-4">Parent 1</h3>
-                            {Object.keys(GENES).map(gene => (
-                                <div key={gene} className="mb-3">
-                                    <label className="text-sm font-semibold text-gray-700 mb-1 block">
-                                        {gene} - {GENES[gene].name}
-                                    </label>
-                                    <div className="flex gap-2">
-                                        <select
-                                            value={parent1[gene][0]}
-                                            onChange={(e) => updateParentGene(1, gene, 0, e.target.value)}
-                                            className="flex-1 px-2 py-1 border border-gray-300 rounded text-sm"
-                                        >
-                                            {Object.keys(GENES[gene].alleles).map(allele => (
-                                                <option key={allele} value={allele}>
-                                                    {allele} - {GENES[gene].alleles[allele].name}
-                                                </option>
-                                            ))}
-                                        </select>
-                                        <select
-                                            value={parent1[gene][1]}
-                                            onChange={(e) => updateParentGene(1, gene, 1, e.target.value)}
-                                            className="flex-1 px-2 py-1 border border-gray-300 rounded text-sm"
-                                        >
-                                            {Object.keys(GENES[gene].alleles).map(allele => (
-                                                <option key={allele} value={allele}>
-                                                    {allele} - {GENES[gene].alleles[allele].name}
-                                                </option>
-                                            ))}
-                                        </select>
-                                    </div>
-                                </div>
-                            ))}
-                            <div className="mt-4 p-3 bg-primary/10 rounded-lg">
-                                <p className="font-bold text-gray-800">Phenotype:</p>
-                                <p className="text-sm">{calculateColor(parent1)}</p>
-                            </div>
-                        </div>
-
-                        {/* Parent 2 */}
-                        <div className="border-2 border-accent rounded-lg p-4">
-                            <h3 className="text-lg font-bold text-gray-800 mb-4">Parent 2</h3>
-                            {Object.keys(GENES).map(gene => (
-                                <div key={gene} className="mb-3">
-                                    <label className="text-sm font-semibold text-gray-700 mb-1 block">
-                                        {gene} - {GENES[gene].name}
-                                    </label>
-                                    <div className="flex gap-2">
-                                        <select
-                                            value={parent2[gene][0]}
-                                            onChange={(e) => updateParentGene(2, gene, 0, e.target.value)}
-                                            className="flex-1 px-2 py-1 border border-gray-300 rounded text-sm"
-                                        >
-                                            {Object.keys(GENES[gene].alleles).map(allele => (
-                                                <option key={allele} value={allele}>
-                                                    {allele} - {GENES[gene].alleles[allele].name}
-                                                </option>
-                                            ))}
-                                        </select>
-                                        <select
-                                            value={parent2[gene][1]}
-                                            onChange={(e) => updateParentGene(2, gene, 1, e.target.value)}
-                                            className="flex-1 px-2 py-1 border border-gray-300 rounded text-sm"
-                                        >
-                                            {Object.keys(GENES[gene].alleles).map(allele => (
-                                                <option key={allele} value={allele}>
-                                                    {allele} - {GENES[gene].alleles[allele].name}
-                                                </option>
-                                            ))}
-                                        </select>
-                                    </div>
-                                </div>
-                            ))}
-                            <div className="mt-4 p-3 bg-accent/10 rounded-lg">
-                                <p className="font-bold text-gray-800">Phenotype:</p>
-                                <p className="text-sm">{calculateColor(parent2)}</p>
-                            </div>
-                        </div>
-                    </div>
-
-                    {/* Offspring Results */}
-                    <div className="border-2 border-gray-300 rounded-lg p-4">
-                        <h3 className="text-xl font-bold text-gray-800 mb-4">Expected Offspring</h3>
-                        <p className="text-sm text-gray-600 mb-4">
-                            This calculator shows simplified Punnett square results. Colors are approximations based on major genes.
-                        </p>
-                        <div className="bg-gray-50 p-4 rounded-lg">
-                            <p className="text-center text-gray-700">
-                                Breeding {calculateColor(parent1)} × {calculateColor(parent2)}
-                            </p>
-                            <p className="text-sm text-center text-gray-500 mt-2">
-                                Full offspring analysis requires complex interaction calculations
-                            </p>
-                        </div>
-                    </div>
-                </div>
-            </div>
+              </div>
+            ))}
+          </div>
         </div>
-    );
+      )}
+
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+        {/* Parent 1 */}
+        <div className="bg-blue-50 rounded-lg p-4">
+          <h2 className="text-xl font-semibold text-blue-800 mb-4">Parent 1</h2>
+          <div className="space-y-3">
+            {Object.entries(GENE_LOCI).map(([locus, data]) => (
+              <div key={locus}>
+                <label className="block text-sm font-medium text-gray-700 mb-1">
+                  {locus} - {data.name}
+                </label>
+                <select
+                  value={parent1[locus]}
+                  onChange={(e) => updateParent1(locus, e.target.value)}
+                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                >
+                  {data.combinations.map((combo) => (
+                    <option key={combo} value={combo}>
+                      {combo}
+                    </option>
+                  ))}
+                </select>
+              </div>
+            ))}
+          </div>
+          <div className="mt-4 p-3 bg-white rounded-lg border-2 border-blue-500">
+            <p className="text-sm font-medium text-gray-700 mb-1">Phenotype:</p>
+            <p className={`text-lg font-semibold ${parent1Phenotype.includes('LETHAL') ? 'text-red-600' : 'text-blue-800'}`}>
+              {parent1Phenotype}
+            </p>
+          </div>
+        </div>
+
+        {/* Parent 2 */}
+        <div className="bg-pink-50 rounded-lg p-4">
+          <h2 className="text-xl font-semibold text-pink-800 mb-4">Parent 2</h2>
+          <div className="space-y-3">
+            {Object.entries(GENE_LOCI).map(([locus, data]) => (
+              <div key={locus}>
+                <label className="block text-sm font-medium text-gray-700 mb-1">
+                  {locus} - {data.name}
+                </label>
+                <select
+                  value={parent2[locus]}
+                  onChange={(e) => updateParent2(locus, e.target.value)}
+                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-pink-500"
+                >
+                  {data.combinations.map((combo) => (
+                    <option key={combo} value={combo}>
+                      {combo}
+                    </option>
+                  ))}
+                </select>
+              </div>
+            ))}
+          </div>
+          <div className="mt-4 p-3 bg-white rounded-lg border-2 border-pink-500">
+            <p className="text-sm font-medium text-gray-700 mb-1">Phenotype:</p>
+            <p className={`text-lg font-semibold ${parent2Phenotype.includes('LETHAL') ? 'text-red-600' : 'text-pink-800'}`}>
+              {parent2Phenotype}
+            </p>
+          </div>
+        </div>
+      </div>
+    </div>
+  );
 };
 
 export default MouseGeneticsCalculator;
