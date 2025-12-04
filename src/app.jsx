@@ -2636,7 +2636,7 @@ const LitterManagement = ({ authToken, API_BASE_URL, userProfile, showModalMessa
                                         </div>
                                         <div className="text-sm">
                                             {litter.inbreedingCoefficient != null ? (
-                                                <span className="font-semibold text-orange-600">
+                                                <span className="font-semibold text-gray-700">
                                                     COI: {litter.inbreedingCoefficient.toFixed(2)}%
                                                 </span>
                                             ) : (
