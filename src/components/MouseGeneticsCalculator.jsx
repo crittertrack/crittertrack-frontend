@@ -276,7 +276,9 @@ const calculatePhenotype = (genotype) => {
     markings.push('xbrindle');
   }
 
-  if (genotype.Go === 'go/go') {
+  if (genotype.Go === 'Go/Go') {
+    markings.push('Shorthair');
+  } else if (genotype.Go === 'go/go') {
     markings.push('Longhair');
   }
 
