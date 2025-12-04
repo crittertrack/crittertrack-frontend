@@ -276,25 +276,27 @@ const calculatePhenotype = (genotype) => {
     markings.push('xbrindle');
   }
 
-  if (genotype.Go && genotype.Go.includes('Go/')) {
+  if (genotype.Go === 'go/go') {
     markings.push('Longhair');
   }
 
   // Texture
-  if (genotype.Re === 're/re') {
+  if (genotype.Re === 'Re/re') {
     texture = 'Astrex';
+  } else if (genotype.Re === 'Re/Re') {
+    texture = 'astrex';
   }
   if (genotype.Sa === 'sa/sa') {
     texture = texture ? `${texture} Satin` : 'Satin';
   }
-  if (genotype.Rst && genotype.Rst.includes('Rst/')) {
+  if (genotype.Rst === 'rst/rst') {
     texture = texture ? `${texture} Rosette` : 'Rosette';
   }
   if (genotype.Fz === 'fz/fz') {
     texture = texture ? `${texture} Fuzz` : 'Fuzz';
   }
-  if (genotype.Nu === 'nu/nu') {
-    texture = 'Nude/Hairless';
+  if (genotype.Nu === 'Nu/Nu' || genotype.Nu === 'Nu/nu') {
+    texture = 'Dominant Hairless';
   }
 
   // Combine results
