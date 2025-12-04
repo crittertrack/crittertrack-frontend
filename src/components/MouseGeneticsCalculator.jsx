@@ -68,10 +68,10 @@ const GENE_LOCI = {
     ]
   },
   Spl: {
-    name: 'Splotch',
+    name: 'Splashed',
     combinations: [
       'spl/spl',
-      'Spl/spl', 'Spl/Spl (lethal)'
+      'Spl/spl', 'Spl/Spl'
     ]
   },
   Rn: {
@@ -89,21 +89,21 @@ const GENE_LOCI = {
     ]
   },
   Mobr: {
-    name: 'Mosaic/Brindled',
+    name: 'xbrindle',
     combinations: [
       'mobr/mobr',
       'Mobr/mobr', 'Mobr/Mobr'
     ]
   },
   Go: {
-    name: 'Gondola',
+    name: 'Shorthair/Longhair',
     combinations: [
       'go/go',
       'Go/go', 'Go/Go'
     ]
   },
   Re: {
-    name: 'Rex',
+    name: 'Astrex',
     combinations: [
       're/re',
       'Re/re', 'Re/Re'
@@ -117,14 +117,14 @@ const GENE_LOCI = {
     ]
   },
   Rst: {
-    name: 'Rough Coat',
+    name: 'Rosette',
     combinations: [
       'rst/rst',
       'Rst/rst', 'Rst/Rst'
     ]
   },
   Fz: {
-    name: 'Fuzzy',
+    name: 'Fuzz',
     combinations: [
       'fz/fz',
       'Fz/fz', 'Fz/Fz'
@@ -157,7 +157,7 @@ const calculatePhenotype = (genotype) => {
   // Check for lethal combinations
   if (genotype.A === 'Ay/Ay (lethal)') return 'LETHAL: Dominant Yellow Homozygous';
   if (genotype.W && genotype.W.includes('lethal')) return 'LETHAL: Dominant Spotting Homozygous';
-  if (genotype.Spl === 'Spl/Spl (lethal)') return 'LETHAL: Splotch Homozygous';
+  if (genotype.Spl === 'Spl/Spl (lethal)') return 'LETHAL: Splashed Homozygous';
   if (genotype.Wsh === 'Wsh/Wsh (lethal)') return 'LETHAL: Rumpwhite Homozygous';
 
   let color = '';
@@ -258,7 +258,7 @@ const calculatePhenotype = (genotype) => {
   }
 
   if (genotype.Spl && genotype.Spl.includes('Spl/')) {
-    markings.push('Splotch');
+    markings.push('Splashed');
   }
 
   if (genotype.Rn && genotype.Rn.includes('Rn/')) {
@@ -270,25 +270,25 @@ const calculatePhenotype = (genotype) => {
   }
 
   if (genotype.Mobr && genotype.Mobr.includes('Mobr/')) {
-    markings.push('Mosaic/Brindled');
+    markings.push('xbrindle');
   }
 
   if (genotype.Go && genotype.Go.includes('Go/')) {
-    markings.push('Gondola');
+    markings.push('Longhair');
   }
 
   // Texture
   if (genotype.Re === 're/re') {
-    texture = 'Rex';
+    texture = 'Astrex';
   }
   if (genotype.Sa === 'sa/sa') {
     texture = texture ? `${texture} Satin` : 'Satin';
   }
   if (genotype.Rst && genotype.Rst.includes('Rst/')) {
-    texture = texture ? `${texture} Rough` : 'Rough';
+    texture = texture ? `${texture} Rosette` : 'Rosette';
   }
   if (genotype.Fz === 'fz/fz') {
-    texture = texture ? `${texture} Fuzzy` : 'Fuzzy';
+    texture = texture ? `${texture} Fuzz` : 'Fuzz';
   }
   if (genotype.Nu === 'nu/nu') {
     texture = 'Nude/Hairless';
@@ -447,16 +447,16 @@ const MouseGeneticsCalculator = ({ API_BASE_URL, authToken }) => {
         {/* Parent 1 */}
         <div className="bg-blue-50 rounded-lg p-4">
           <h2 className="text-xl font-semibold text-blue-800 mb-4">Parent 1</h2>
-          <div className="space-y-3">
+          <div className="grid grid-cols-2 gap-3">
             {Object.entries(GENE_LOCI).map(([locus, data]) => (
               <div key={locus}>
-                <label className="block text-sm font-medium text-gray-700 mb-1">
+                <label className="block text-xs font-medium text-gray-700 mb-1">
                   {locus} - {data.name}
                 </label>
                 <select
                   value={parent1[locus]}
                   onChange={(e) => updateParent1(locus, e.target.value)}
-                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  className="w-full px-2 py-1 text-sm border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
                 >
                   {data.combinations.map((combo) => (
                     <option key={combo} value={combo}>
@@ -478,16 +478,16 @@ const MouseGeneticsCalculator = ({ API_BASE_URL, authToken }) => {
         {/* Parent 2 */}
         <div className="bg-pink-50 rounded-lg p-4">
           <h2 className="text-xl font-semibold text-pink-800 mb-4">Parent 2</h2>
-          <div className="space-y-3">
+          <div className="grid grid-cols-2 gap-3">
             {Object.entries(GENE_LOCI).map(([locus, data]) => (
               <div key={locus}>
-                <label className="block text-sm font-medium text-gray-700 mb-1">
+                <label className="block text-xs font-medium text-gray-700 mb-1">
                   {locus} - {data.name}
                 </label>
                 <select
                   value={parent2[locus]}
                   onChange={(e) => updateParent2(locus, e.target.value)}
-                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-pink-500"
+                  className="w-full px-2 py-1 text-sm border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-pink-500"
                 >
                   {data.combinations.map((combo) => (
                     <option key={combo} value={combo}>
