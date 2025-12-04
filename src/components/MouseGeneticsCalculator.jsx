@@ -325,7 +325,7 @@ const MouseGeneticsCalculator = ({ API_BASE_URL, authToken }) => {
     Si: 'si/si',
     Mobr: 'mobr/mobr',
     Go: 'Go/Go',
-    Re: 'Re/Re',
+    Re: 're/re',
     Sa: 'Sa/Sa',
     Rst: 'Rst/Rst',
     Fz: 'Fz/Fz',
