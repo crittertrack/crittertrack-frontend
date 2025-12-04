@@ -156,7 +156,7 @@ const calculatePhenotype = (genotype) => {
   });
 
   // Check for lethal combinations
-  if (genotype.A === 'Ay/Ay (lethal)') return { phenotype: 'LETHAL: Dominant Yellow Homozygous', carriers: [], hidden: [] };
+  if (genotype.A === 'Ay/Ay (lethal)') return { phenotype: 'LETHAL: Homozygous Dominant Red', carriers: [], hidden: [] };
   if (genotype.W && genotype.W.includes('lethal')) return { phenotype: 'LETHAL: Dominant Spotting Homozygous', carriers: [], hidden: [] };
   if (genotype.W && genotype.W.includes('Wsh/Wsh')) return { phenotype: 'LETHAL: Wsh Homozygous', carriers: [], hidden: [] };
   if (genotype.W && genotype.W.includes('Rw/')) return { phenotype: 'LETHAL: Rw Combination', carriers: [], hidden: [] };
@@ -183,19 +183,35 @@ const calculatePhenotype = (genotype) => {
     return { phenotype: color, carriers, hidden };
   }
 
-  // Dominant yellow
+  // Dominant yellow/red (Ay)
   if (genotype.A && (genotype.A.startsWith('Ay/'))) {
+    // Track what Ay is paired with
+    if (genotype.A === 'Ay/ae') carriers.push('Extreme Black');
+    else if (genotype.A === 'Ay/a') carriers.push('Black');
+    else if (genotype.A === 'Ay/A') carriers.push('Agouti');
+    else if (genotype.A === 'Ay/Avy') carriers.push('Brindle');
+    
+    // Determine if it's tan variant
+    const isTanVariant = genotype.A === 'Ay/at';
+    
     if (genotype.P === 'p/p') {
-      color = 'Dominant Fawn';
+      color = isTanVariant ? 'Dominant Fawn Tan' : 'Dominant Fawn';
     } else {
-      color = 'Dominant Red';
+      color = isTanVariant ? 'Dominant Red Tan' : 'Dominant Red';
     }
     return { phenotype: color, carriers, hidden };
   }
 
-  // Viable yellow (brindle)
+  // Viable yellow (brindle - Avy)
   if (genotype.A && genotype.A.startsWith('Avy/')) {
-    color = 'Brindle';
+    // Track what Avy is paired with
+    if (genotype.A === 'Avy/ae') carriers.push('Extreme Black');
+    else if (genotype.A === 'Avy/a') carriers.push('Black');
+    else if (genotype.A === 'Avy/A') carriers.push('Agouti');
+    
+    // Determine if it's tan variant
+    const isTanVariant = genotype.A === 'Avy/at';
+    color = isTanVariant ? 'Brindle Tan' : 'Brindle';
     return { phenotype: color, carriers, hidden };
   }
 
@@ -204,9 +220,15 @@ const calculatePhenotype = (genotype) => {
   const isTan = genotype.A && genotype.A.includes('at/') && !genotype.A.includes('A/');
   const isBlack = genotype.A && (genotype.A.includes('a/a') || genotype.A.includes('a/ae') || genotype.A.includes('ae/ae'));
   const isExtremeBlack = genotype.A === 'ae/ae';
+  const isExtremeTan = genotype.A === 'at/ae';
 
   // Track carriers for A-locus
-  if (genotype.A === 'A/a' || genotype.A === 'A/ae') carriers.push('Black');
+  if (genotype.A === 'A/a') carriers.push('Black');
+  else if (genotype.A === 'A/ae') carriers.push('Extreme Black');
+  else if (genotype.A === 'A/at') {
+    // A/at is agouti tan (tan shows visually)
+  }
+  else if (genotype.A === 'a/ae') carriers.push('Extreme Black');
 
   // Brown/Black base
   const isBrown = genotype.B === 'b/b';
@@ -214,10 +236,19 @@ const calculatePhenotype = (genotype) => {
   
   if (isAgouti) {
     pattern = 'Agouti';
-    color = isBrown ? 'Cinnamon' : 'Agouti';
+    // Check for A/at (agouti tan)
+    if (genotype.A === 'A/at') {
+      color = isBrown ? 'Cinnamon Tan' : 'Agouti Tan';
+    } else {
+      color = isBrown ? 'Cinnamon' : 'Agouti';
+    }
   } else if (isTan) {
     pattern = 'Tan';
-    color = isBrown ? 'Chocolate Tan' : 'Black Tan';
+    if (isExtremeTan) {
+      color = isBrown ? 'Extreme Chocolate Tan' : 'Extreme Black Tan';
+    } else {
+      color = isBrown ? 'Chocolate Tan' : 'Black Tan';
+    }
   } else if (isBlack) {
     pattern = 'Self';
     if (isExtremeBlack) {
@@ -532,7 +563,7 @@ const MouseGeneticsCalculator = ({ API_BASE_URL, authToken }) => {
             </p>
             {parent1Result.carriers && parent1Result.carriers.length > 0 && (
               <p className="text-xs text-gray-600 mt-2">
-                <span className="font-medium">Carriers:</span> {parent1Result.carriers.join(', ')}
+                <span className="font-medium">Carried genes:</span> {parent1Result.carriers.join(', ')}
               </p>
             )}
             {parent1Result.hidden && parent1Result.hidden.length > 0 && (
@@ -573,7 +604,7 @@ const MouseGeneticsCalculator = ({ API_BASE_URL, authToken }) => {
             </p>
             {parent2Result.carriers && parent2Result.carriers.length > 0 && (
               <p className="text-xs text-gray-600 mt-2">
-                <span className="font-medium">Carriers:</span> {parent2Result.carriers.join(', ')}
+                <span className="font-medium">Carried genes:</span> {parent2Result.carriers.join(', ')}
               </p>
             )}
             {parent2Result.hidden && parent2Result.hidden.length > 0 && (
