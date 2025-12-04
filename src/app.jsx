@@ -1641,6 +1641,17 @@ const ViewOnlyAnimalDetail = ({ animal, onClose, API_BASE_URL, onViewProfile }) 
                             />
                         </div>
                     </div>
+
+                    {/* Offspring */}
+                    <OffspringSection
+                        animalId={animal.id_public}
+                        API_BASE_URL={API_BASE_URL}
+                        onViewAnimal={(offspring) => {
+                            if (window.handleViewPublicAnimal) {
+                                window.handleViewPublicAnimal(offspring);
+                            }
+                        }}
+                    />
                 </div>
 
                 {/* Pedigree Chart Modal */}
@@ -1743,6 +1754,199 @@ const ViewOnlyParentCard = ({ parentId, parentType, API_BASE_URL }) => {
                         )}
                     </div>
                 </div>
+            </div>
+        </div>
+    );
+};
+
+// Offspring Section Component - shows offspring grouped by litter
+const OffspringSection = ({ animalId, API_BASE_URL, authToken = null, onViewAnimal }) => {
+    const [offspring, setOffspring] = useState([]);
+    const [loading, setLoading] = useState(true);
+
+    useEffect(() => {
+        const fetchOffspring = async () => {
+            if (!animalId) return;
+            
+            setLoading(true);
+            try {
+                const headers = authToken ? { Authorization: `Bearer ${authToken}` } : {};
+                const response = await axios.get(
+                    `${API_BASE_URL}/animals/${animalId}/offspring`,
+                    { headers }
+                );
+                setOffspring(response.data || []);
+            } catch (error) {
+                console.error('Error fetching offspring:', error);
+                setOffspring([]);
+            } finally {
+                setLoading(false);
+            }
+        };
+
+        fetchOffspring();
+    }, [animalId, API_BASE_URL, authToken]);
+
+    if (loading) {
+        return (
+            <div className="bg-white border-2 border-gray-300 rounded-lg p-6">
+                <h3 className="text-lg font-semibold text-gray-800 mb-4">Offspring</h3>
+                <div className="flex justify-center py-8">
+                    <Loader2 size={24} className="animate-spin text-gray-400" />
+                </div>
+            </div>
+        );
+    }
+
+    if (!offspring || offspring.length === 0) {
+        return null; // Don't show section if no offspring
+    }
+
+    return (
+        <div className="bg-white border-2 border-gray-300 rounded-lg p-6">
+            <h3 className="text-lg font-semibold text-gray-800 mb-4">Offspring</h3>
+            <div className="space-y-6">
+                {offspring.map((litter, index) => (
+                    <div key={litter.litterId || index} className="border-2 border-gray-200 rounded-lg p-4">
+                        {/* Litter Header */}
+                        <div className="mb-4 pb-3 border-b border-gray-200">
+                            <div className="flex justify-between items-start mb-2">
+                                <div>
+                                    {litter.litterName && (
+                                        <h4 className="text-md font-semibold text-gray-800 mb-1">
+                                            {litter.litterName}
+                                        </h4>
+                                    )}
+                                    <p className="text-sm text-gray-600">
+                                        Born: {new Date(litter.birthDate).toLocaleDateString()}
+                                        {litter.numberBorn && ` • ${litter.numberBorn} born`}
+                                    </p>
+                                </div>
+                            </div>
+
+                            {/* Other Parent Info */}
+                            {litter.otherParent && (
+                                <div className="mt-3">
+                                    <p className="text-xs font-semibold text-gray-600 mb-2">
+                                        {litter.otherParentType === 'sire' ? 'Sire (Father)' : 'Dam (Mother)'}
+                                    </p>
+                                    <div className="flex items-center space-x-3 bg-gray-50 rounded-lg p-3 border border-gray-200">
+                                        <div className="w-12 h-12 bg-gray-200 rounded-md overflow-hidden flex items-center justify-center flex-shrink-0">
+                                            {litter.otherParent.imageUrl || litter.otherParent.photoUrl ? (
+                                                <img 
+                                                    src={litter.otherParent.imageUrl || litter.otherParent.photoUrl} 
+                                                    alt={litter.otherParent.name}
+                                                    className="w-full h-full object-cover"
+                                                />
+                                            ) : (
+                                                <Cat size={24} className="text-gray-400" />
+                                            )}
+                                        </div>
+                                        <div className="flex items-center space-x-2 flex-grow">
+                                            {litter.otherParent.gender && (
+                                                <div>
+                                                    {litter.otherParent.gender === 'Male' 
+                                                        ? <Mars size={14} strokeWidth={2.5} className="text-primary" /> 
+                                                        : <Venus size={14} strokeWidth={2.5} className="text-accent" />
+                                                    }
+                                                </div>
+                                            )}
+                                            <div className="flex-grow">
+                                                <p className="text-sm font-semibold text-gray-800">
+                                                    {litter.otherParent.prefix && `${litter.otherParent.prefix} `}
+                                                    {litter.otherParent.name}
+                                                </p>
+                                                <p className="text-xs text-gray-600 font-mono">
+                                                    CT{litter.otherParent.id_public}
+                                                </p>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            )}
+                        </div>
+
+                        {/* Offspring Animals */}
+                        {litter.offspring && litter.offspring.length > 0 ? (
+                            <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-3">
+                                {litter.offspring.map((animal) => (
+                                    <div
+                                        key={animal.id_public}
+                                        onClick={() => onViewAnimal && onViewAnimal(animal)}
+                                        className="relative bg-white rounded-lg shadow-sm h-52 flex flex-col items-center overflow-hidden cursor-pointer hover:shadow-md transition border border-gray-300 pt-2"
+                                    >
+                                        {/* Birthdate top-left */}
+                                        {animal.birthDate && (
+                                            <div className="absolute top-1.5 left-1.5 text-xs text-gray-600 bg-white/80 px-1.5 py-0.5 rounded">
+                                                {new Date(animal.birthDate).toLocaleDateString()}
+                                            </div>
+                                        )}
+
+                                        {/* Gender badge top-right */}
+                                        {animal.gender && (
+                                            <div className="absolute top-1.5 right-1.5">
+                                                {animal.gender === 'Male' 
+                                                    ? <Mars size={14} strokeWidth={2.5} className="text-primary" /> 
+                                                    : <Venus size={14} strokeWidth={2.5} className="text-accent" />
+                                                }
+                                            </div>
+                                        )}
+
+                                        {/* Profile image */}
+                                        <div className="flex-1 flex items-center justify-center w-full px-2 mt-1">
+                                            {animal.imageUrl || animal.photoUrl ? (
+                                                <img 
+                                                    src={animal.imageUrl || animal.photoUrl} 
+                                                    alt={animal.name} 
+                                                    className="w-20 h-20 object-cover rounded-md" 
+                                                />
+                                            ) : (
+                                                <div className="w-20 h-20 bg-gray-100 rounded-md flex items-center justify-center text-gray-400">
+                                                    <Cat size={32} />
+                                                </div>
+                                            )}
+                                        </div>
+                                        
+                                        {/* Icon row */}
+                                        <div className="w-full flex justify-center items-center space-x-2 py-1">
+                                            {animal.isOwned ? (
+                                                <Heart size={12} className="text-black" />
+                                            ) : (
+                                                <HeartOff size={12} className="text-black" />
+                                            )}
+                                            {animal.isDisplay ? (
+                                                <Eye size={12} className="text-black" />
+                                            ) : (
+                                                <EyeOff size={12} className="text-black" />
+                                            )}
+                                            {animal.isPregnant && <Egg size={12} className="text-black" />}
+                                            {animal.isNursing && <Milk size={12} className="text-black" />}
+                                        </div>
+                                        
+                                        {/* Name */}
+                                        <div className="w-full text-center px-2 pb-1">
+                                            <div className="text-sm font-semibold text-gray-800 truncate">
+                                                {animal.prefix ? `${animal.prefix} ` : ''}{animal.name}
+                                            </div>
+                                        </div>
+
+                                        {/* ID bottom-right */}
+                                        <div className="w-full px-2 pb-2 flex justify-end">
+                                            <div className="text-xs text-gray-500">CT{animal.id_public}</div>
+                                        </div>
+                                        
+                                        {/* Status bar */}
+                                        <div className="w-full bg-gray-100 py-1 text-center border-t border-gray-300 mt-auto">
+                                            <div className="text-xs font-medium text-gray-700">{animal.status || 'Unknown'}</div>
+                                        </div>
+                                    </div>
+                                ))}
+                            </div>
+                        ) : (
+                            <p className="text-sm text-gray-500 italic">No offspring recorded in this litter.</p>
+                        )}
+                    </div>
+                ))}
             </div>
         </div>
     );
@@ -4595,7 +4799,7 @@ const App = () => {
                         </div>
 
                         {/* Parents Section */}
-                        <div className="border-2 border-gray-300 rounded-lg p-6">
+                        <div className="border-2 border-gray-300 rounded-lg p-6 mb-6">
                             <div className="flex justify-between items-center mb-4">
                                 <h3 className="text-lg font-semibold text-gray-800">Parents</h3>
                                 <button
@@ -4625,6 +4829,14 @@ const App = () => {
                                 />
                             </div>
                         </div>
+
+                        {/* Offspring Section */}
+                        <OffspringSection
+                            animalId={animalToView.id_public}
+                            API_BASE_URL={API_BASE_URL}
+                            authToken={authToken}
+                            onViewAnimal={handleViewAnimal}
+                        />
                     </div>
 
                     {/* Pedigree Chart Modal */}
