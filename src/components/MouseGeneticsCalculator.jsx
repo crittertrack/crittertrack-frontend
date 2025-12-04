@@ -4,7 +4,7 @@ import { X, Book } from 'lucide-react';
 // Define all gene loci with their possible allele combinations
 const GENE_LOCI = {
   A: {
-    name: 'Agouti',
+    name: 'A-locus',
     combinations: [
       'ae/ae',
       'a/ae', 'a/a',
@@ -15,14 +15,14 @@ const GENE_LOCI = {
     ]
   },
   B: {
-    name: 'Brown',
+    name: 'B-locus',
     combinations: [
       'b/b',
       'B/b', 'B/B'
     ]
   },
   C: {
-    name: 'Color/Albino',
+    name: 'C-locus',
     combinations: [
       'c/c',
       'ch/c', 'ch/ch',
@@ -32,28 +32,28 @@ const GENE_LOCI = {
     ]
   },
   D: {
-    name: 'Dilution',
+    name: 'D-locus',
     combinations: [
       'd/d',
       'D/d', 'D/D'
     ]
   },
   E: {
-    name: 'Extension',
+    name: 'E-locus',
     combinations: [
       'e/e',
       'E/e', 'E/E'
     ]
   },
   P: {
-    name: 'Pink-eye Dilution',
+    name: 'P-locus',
     combinations: [
       'p/p',
       'P/p', 'P/P'
     ]
   },
   S: {
-    name: 'Piebald Spotting',
+    name: 'Pied',
     combinations: [
       's/s',
       'S/s', 'S/S'
@@ -157,7 +157,6 @@ const calculatePhenotype = (genotype) => {
   // Check for lethal combinations
   if (genotype.A === 'Ay/Ay (lethal)') return 'LETHAL: Dominant Yellow Homozygous';
   if (genotype.W && genotype.W.includes('lethal')) return 'LETHAL: Dominant Spotting Homozygous';
-  if (genotype.Spl === 'Spl/Spl (lethal)') return 'LETHAL: Splashed Homozygous';
   if (genotype.Wsh === 'Wsh/Wsh (lethal)') return 'LETHAL: Rumpwhite Homozygous';
 
   let color = '';
@@ -175,7 +174,7 @@ const calculatePhenotype = (genotype) => {
     if (genotype.P === 'p/p') {
       color = 'Recessive Fawn';
     } else {
-      color = 'Recessive Red (Yellow)';
+      color = 'Recessive Red';
     }
     return color;
   }
@@ -185,14 +184,14 @@ const calculatePhenotype = (genotype) => {
     if (genotype.P === 'p/p') {
       color = 'Dominant Fawn';
     } else {
-      color = 'Dominant Yellow';
+      color = 'Dominant Red';
     }
     return color;
   }
 
   // Viable yellow (brindle)
   if (genotype.A && genotype.A.startsWith('Avy/')) {
-    color = 'Brindle (Viable Yellow)';
+    color = 'Brindle';
     return color;
   }
 
@@ -226,7 +225,7 @@ const calculatePhenotype = (genotype) => {
   }
 
   if (genotype.P === 'p/p') {
-    if (!color.includes('Fawn') && !color.includes('Yellow')) {
+    if (!color.includes('Fawn') && !color.includes('Red')) {
       color = `Pink-Eyed ${color}`;
     }
   }
@@ -247,8 +246,6 @@ const calculatePhenotype = (genotype) => {
   // Markings
   if (genotype.S === 's/s') {
     markings.push('Piebald');
-  } else if (genotype.S === 'S/s') {
-    markings.push('Banded');
   }
 
   if (genotype.W && genotype.W.includes('W/')) {
