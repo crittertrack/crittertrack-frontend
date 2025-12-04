@@ -1824,11 +1824,12 @@ const OffspringSection = ({ animalId, API_BASE_URL, authToken = null, onViewAnim
             try {
                 const headers = authToken ? { Authorization: `Bearer ${authToken}` } : {};
                 
-                // Fetch offspring - use public endpoint (works for both authenticated and unauthenticated)
-                const offspringResponse = await axios.get(
-                    `${API_BASE_URL}/public/animal/${animalId}/offspring`,
-                    { headers }
-                );
+                // Fetch offspring - use different endpoints based on authentication
+                const offspringEndpoint = authToken 
+                    ? `${API_BASE_URL}/animals/${animalId}/offspring`  // Authenticated: private endpoint
+                    : `${API_BASE_URL}/public/animal/${animalId}/offspring`;  // Unauthenticated: public endpoint
+                
+                const offspringResponse = await axios.get(offspringEndpoint, { headers });
                 
                 // Fetch current animal to know which parent we are
                 let animal = null;
