@@ -2119,6 +2119,28 @@ const LitterManagement = ({ authToken, API_BASE_URL, userProfile, showModalMessa
 
             const litterId = litterResponse.data.litterId_backend;
 
+            // Calculate inbreeding coefficient for this pairing
+            try {
+                const coiResponse = await axios.get(`${API_BASE_URL}/inbreeding/pairing`, {
+                    params: {
+                        sireId: formData.sireId_public,
+                        damId: formData.damId_public,
+                        generations: 5
+                    },
+                    headers: { Authorization: `Bearer ${authToken}` }
+                });
+
+                if (coiResponse.data.inbreedingCoefficient != null) {
+                    await axios.put(`${API_BASE_URL}/litters/${litterId}`, {
+                        inbreedingCoefficient: coiResponse.data.inbreedingCoefficient
+                    }, {
+                        headers: { Authorization: `Bearer ${authToken}` }
+                    });
+                }
+            } catch (coiError) {
+                console.log('Could not calculate COI for litter:', coiError);
+            }
+
             // Create offspring animals
             const offspringPromises = [];
             
@@ -2168,6 +2190,18 @@ const LitterManagement = ({ authToken, API_BASE_URL, userProfile, showModalMessa
 
             // Extract the IDs from created animals and update litter
             const offspringIds = createdAnimals.map(response => response.data.id_public);
+            
+            // Calculate inbreeding for each offspring
+            for (const animalId of offspringIds) {
+                try {
+                    await axios.get(`${API_BASE_URL}/animals/${animalId}/inbreeding`, {
+                        params: { generations: 5 },
+                        headers: { Authorization: `Bearer ${authToken}` }
+                    });
+                } catch (coiError) {
+                    console.log(`Could not calculate COI for animal ${animalId}:`, coiError);
+                }
+            }
             
             await axios.put(`${API_BASE_URL}/litters/${litterId}`, {
                 offspringIds_public: offspringIds
@@ -2309,8 +2343,20 @@ const LitterManagement = ({ authToken, API_BASE_URL, userProfile, showModalMessa
                 headers: { Authorization: `Bearer ${authToken}` }
             });
 
+            const newAnimalId = response.data.id_public;
+
+            // Calculate inbreeding coefficient
+            try {
+                await axios.get(`${API_BASE_URL}/animals/${newAnimalId}/inbreeding`, {
+                    params: { generations: 5 },
+                    headers: { Authorization: `Bearer ${authToken}` }
+                });
+            } catch (coiError) {
+                console.log('Could not calculate COI for new offspring:', coiError);
+            }
+
             // Link to litter
-            const updatedOffspringIds = [...(addingOffspring.offspringIds_public || []), response.data.id_public];
+            const updatedOffspringIds = [...(addingOffspring.offspringIds_public || []), newAnimalId];
             await axios.put(`${API_BASE_URL}/litters/${addingOffspring._id}`, {
                 offspringIds_public: updatedOffspringIds,
                 numberBorn: updatedOffspringIds.length
@@ -2570,7 +2616,7 @@ const LitterManagement = ({ authToken, API_BASE_URL, userProfile, showModalMessa
                                     className="p-3 cursor-pointer flex items-center justify-between hover:bg-gray-50"
                                     onClick={() => setExpandedLitter(isExpanded ? null : litter._id)}
                                 >
-                                    <div className="flex-1 grid grid-cols-1 md:grid-cols-4 gap-2 items-center">
+                                    <div className="flex-1 grid grid-cols-1 md:grid-cols-5 gap-2 items-center">
                                         <div>
                                             <p className="font-bold text-gray-800">
                                                 {litter.breedingPairCodeName || 'Unnamed Litter'}
@@ -2587,6 +2633,15 @@ const LitterManagement = ({ authToken, API_BASE_URL, userProfile, showModalMessa
                                         </div>
                                         <div className="text-sm font-semibold text-gray-700">
                                             {litter.numberBorn} offspring
+                                        </div>
+                                        <div className="text-sm">
+                                            {litter.inbreedingCoefficient != null ? (
+                                                <span className="font-semibold text-orange-600">
+                                                    COI: {litter.inbreedingCoefficient.toFixed(2)}%
+                                                </span>
+                                            ) : (
+                                                <span className="text-gray-400 text-xs">COI: N/A</span>
+                                            )}
                                         </div>
                                     </div>
                                     <ChevronLeft 
@@ -2752,9 +2807,14 @@ const LitterManagement = ({ authToken, API_BASE_URL, userProfile, showModalMessa
                                                                 </div>
                                                             </div>
 
-                                                            {/* ID bottom-right */}
-                                                            <div className="w-full px-2 pb-2 flex justify-end">
-                                                                <div className="text-xs text-gray-500">CT{animal.id_public}</div>
+                                                            {/* ID and COI bottom section */}
+                                                            <div className="w-full px-2 pb-2 flex justify-between items-end">
+                                                                {animal.inbreedingCoefficient != null && (
+                                                                    <div className="text-xs font-semibold text-orange-600">
+                                                                        COI: {animal.inbreedingCoefficient.toFixed(2)}%
+                                                                    </div>
+                                                                )}
+                                                                <div className="text-xs text-gray-500 ml-auto">CT{animal.id_public}</div>
                                                             </div>
                                                             
                                                             {/* Status bar */}
@@ -5009,9 +5069,14 @@ const AnimalList = ({ authToken, showModalMessage, onEditAnimal, onViewAnimal, o
 
                     {/* Edit is available when viewing full card; remove inline edit icon from dashboard cards */}
 
-                    {/* ID bottom-right */}
-                    <div className="w-full px-2 pb-2 flex justify-end">
-                        <div className="text-xs text-gray-500">CT{animal.id_public}</div>
+                    {/* ID and COI bottom section */}
+                    <div className="w-full px-2 pb-2 flex justify-between items-end">
+                        {animal.inbreedingCoefficient != null && (
+                            <div className="text-xs font-semibold text-orange-600">
+                                COI: {animal.inbreedingCoefficient.toFixed(2)}%
+                            </div>
+                        )}
+                        <div className="text-xs text-gray-500 ml-auto">CT{animal.id_public}</div>
                     </div>
                     
                     {/* Status bar at bottom */}
