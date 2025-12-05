@@ -188,7 +188,47 @@ const calculatePhenotype = (genotype, originalGenotype = null) => {
   let carriers = [];
   let hidden = [];
 
-  // Albino override
+  // Check if this is ae/ae, a/ae, or a/a (non-agouti self colors)
+  const isExtremeBlack = genotype.A === 'ae/ae';
+  const isBlackHetero = genotype.A === 'a/ae';
+  const isBlack = genotype.A === 'a/a';
+  const isSelfBlackVariant = isExtremeBlack || isBlackHetero || isBlack;
+
+  // Special handling for self black variants with C-locus combinations
+  if (isSelfBlackVariant && genotype.C !== 'C/C') {
+    if (genotype.C === 'c/c') {
+      return { phenotype: 'Albino', carriers, hidden };
+    }
+    if (genotype.C === 'ch/c') {
+      return { phenotype: 'Himalayan', carriers, hidden };
+    }
+    if (genotype.C === 'ch/ch') {
+      return { phenotype: 'Siamese', carriers, hidden };
+    }
+    if (genotype.C === 'ce/c') {
+      return { phenotype: 'Bone', carriers, hidden };
+    }
+    if (genotype.C === 'ce/ch') {
+      return { phenotype: 'Colorpoint Beige', carriers, hidden };
+    }
+    if (genotype.C === 'ce/ce') {
+      return { phenotype: 'Beige', carriers, hidden };
+    }
+    if (genotype.C === 'cch/c') {
+      return { phenotype: 'Stone', carriers, hidden };
+    }
+    if (genotype.C === 'cch/ch') {
+      return { phenotype: 'Burmese', carriers, hidden };
+    }
+    if (genotype.C === 'cch/ce') {
+      return { phenotype: 'Mock Chocolate', carriers, hidden };
+    }
+    if (genotype.C === 'cch/cch') {
+      return { phenotype: 'Sepia', carriers, hidden };
+    }
+  }
+
+  // Albino override for other genotypes
   if (genotype.C === 'c/c') {
     return { phenotype: genotype.P === 'p/p' ? 'Pink-Eyed White (Albino)' : 'Pink-Eyed White (Albino)', carriers, hidden };
   }
