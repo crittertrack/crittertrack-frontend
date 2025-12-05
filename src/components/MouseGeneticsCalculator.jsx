@@ -157,7 +157,7 @@ const GENE_LOCI = {
 };
 
 // Calculate phenotype from genotype
-const calculatePhenotype = (genotype) => {
+const calculatePhenotype = (genotype, originalGenotype = null) => {
   // Parse allele combinations
   const parsed = {};
   Object.keys(GENE_LOCI).forEach(locus => {
@@ -170,6 +170,10 @@ const calculatePhenotype = (genotype) => {
       parsed[locus] = alleles;
     }
   });
+
+  // Track if coat genes were explicitly selected (not defaulted)
+  const coatGenesSelected = originalGenotype && 
+    ['Go', 'Re', 'Sa', 'Rst', 'Fz', 'Nu'].some(gene => originalGenotype[gene] && originalGenotype[gene] !== '');
 
   // Check for lethal combinations
   if (genotype.A === 'Ay/Ay (lethal)') return { phenotype: 'LETHAL: Homozygous Dominant Red', carriers: [], hidden: [] };
@@ -362,41 +366,46 @@ const calculatePhenotype = (genotype) => {
     markings.push('xbrindle');
   }
 
-  if (genotype.Go === 'Go/Go') {
-    markings.push('Shorthair');
-  } else if (genotype.Go === 'go/go') {
-    markings.push('Longhair');
-  } else if (genotype.Go === 'Go/go') {
-    carriers.push('Longhair');
+  // Only show hair length if coat genes were explicitly selected
+  if (coatGenesSelected) {
+    if (genotype.Go === 'Go/Go') {
+      markings.push('Shorthair');
+    } else if (genotype.Go === 'go/go') {
+      markings.push('Longhair');
+    } else if (genotype.Go === 'Go/go') {
+      carriers.push('Longhair');
+    }
   }
 
-  // Texture
-  if (genotype.Re === 'Re/re' || genotype.Re === 'Re/Re') {
-    texture = 'Astrex';
-  } else if (genotype.Re === 're/Re') {
-    carriers.push('Astrex');
-  }
-  
-  if (genotype.Sa === 'sa/sa') {
-    texture = texture ? `${texture} Satin` : 'Satin';
-  } else if (genotype.Sa === 'Sa/sa') {
-    carriers.push('Satin');
-  }
-  
-  if (genotype.Rst === 'rst/rst') {
-    texture = texture ? `${texture} Rosette` : 'Rosette';
-  } else if (genotype.Rst === 'Rst/rst') {
-    carriers.push('Rosette');
-  }
-  
-  if (genotype.Fz === 'fz/fz') {
-    texture = texture ? `${texture} Fuzz` : 'Fuzz';
-  } else if (genotype.Fz === 'Fz/fz') {
-    carriers.push('Fuzz');
-  }
-  
-  if (genotype.Nu === 'Nu/Nu' || genotype.Nu === 'Nu/nu') {
-    texture = 'Dominant Hairless';
+  // Texture - only show if coat genes were explicitly selected
+  if (coatGenesSelected) {
+    if (genotype.Re === 'Re/re' || genotype.Re === 'Re/Re') {
+      texture = 'Astrex';
+    } else if (genotype.Re === 're/Re') {
+      carriers.push('Astrex');
+    }
+    
+    if (genotype.Sa === 'sa/sa') {
+      texture = texture ? `${texture} Satin` : 'Satin';
+    } else if (genotype.Sa === 'Sa/sa') {
+      carriers.push('Satin');
+    }
+    
+    if (genotype.Rst === 'rst/rst') {
+      texture = texture ? `${texture} Rosette` : 'Rosette';
+    } else if (genotype.Rst === 'Rst/rst') {
+      carriers.push('Rosette');
+    }
+    
+    if (genotype.Fz === 'fz/fz') {
+      texture = texture ? `${texture} Fuzz` : 'Fuzz';
+    } else if (genotype.Fz === 'Fz/fz') {
+      carriers.push('Fuzz');
+    }
+    
+    if (genotype.Nu === 'Nu/Nu' || genotype.Nu === 'Nu/nu') {
+      texture = 'Dominant Hairless';
+    }
   }
 
   // Combine results
@@ -457,6 +466,14 @@ const MouseGeneticsCalculator = ({ API_BASE_URL, authToken }) => {
 
   // Function to apply defaults to genotype
   const applyDefaults = (genotype) => {
+    // Color/pattern genes - only apply defaults if NONE are selected
+    const colorGenes = ['A', 'B', 'C', 'D', 'E', 'P', 'S', 'W', 'Spl', 'Rn', 'Si', 'Mobr', 'U'];
+    const hasAnyColorGene = colorGenes.some(gene => genotype[gene] && genotype[gene] !== '');
+    
+    // Coat/texture genes - only apply defaults if NONE are selected
+    const coatGenes = ['Go', 'Re', 'Sa', 'Rst', 'Fz', 'Nu'];
+    const hasAnyCoatGene = coatGenes.some(gene => genotype[gene] && genotype[gene] !== '');
+    
     const defaults = {
       A: 'A/A',      // Agouti (wild type)
       B: 'B/B',      // Black (wild type)
@@ -481,7 +498,18 @@ const MouseGeneticsCalculator = ({ API_BASE_URL, authToken }) => {
     
     const filled = {};
     for (const locus in defaults) {
-      filled[locus] = genotype[locus] || defaults[locus];
+      // If this is a color gene and any color gene is selected, only use selected values
+      if (colorGenes.includes(locus) && hasAnyColorGene) {
+        filled[locus] = genotype[locus] || defaults[locus];
+      }
+      // If this is a coat gene and any coat gene is selected, skip defaults entirely
+      else if (coatGenes.includes(locus) && hasAnyCoatGene) {
+        filled[locus] = genotype[locus] || defaults[locus];
+      }
+      // Otherwise use normal defaulting
+      else {
+        filled[locus] = genotype[locus] || defaults[locus];
+      }
     }
     return filled;
   };
@@ -492,14 +520,25 @@ const MouseGeneticsCalculator = ({ API_BASE_URL, authToken }) => {
     const p1 = applyDefaults(parent1);
     const p2 = applyDefaults(parent2);
     
+    // Check if any coat genes were selected by either parent
+    const coatGenesSelected = ['Go', 'Re', 'Sa', 'Rst', 'Fz', 'Nu'].some(gene => 
+      (parent1[gene] && parent1[gene] !== '') || (parent2[gene] && parent2[gene] !== '')
+    );
+    
+    // Create a dummy "selected" genotype to pass to calculatePhenotype
+    const selectedGenotype = {};
+    if (coatGenesSelected) {
+      selectedGenotype.Go = 'selected'; // Mark as selected
+    }
+    
     const outcomes = {};
     const allLoci = Object.keys(GENE_LOCI);
     
     // Generate all possible offspring genotypes
     const generateOffspring = (locusIndex, currentGenotype) => {
       if (locusIndex >= allLoci.length) {
-        // Calculate phenotype for this genotype
-        const result = calculatePhenotype(currentGenotype);
+        // Calculate phenotype for this genotype, passing selected info
+        const result = calculatePhenotype(currentGenotype, selectedGenotype);
         const phenotype = result.phenotype;
         
         if (!outcomes[phenotype]) {
@@ -553,8 +592,8 @@ const MouseGeneticsCalculator = ({ API_BASE_URL, authToken }) => {
     return Object.values(parent).some(value => value !== '');
   };
 
-  const parent1Result = hasAnySelection(parent1) ? calculatePhenotype(applyDefaults(parent1)) : { phenotype: '', carriers: [], hidden: [] };
-  const parent2Result = hasAnySelection(parent2) ? calculatePhenotype(applyDefaults(parent2)) : { phenotype: '', carriers: [], hidden: [] };
+  const parent1Result = hasAnySelection(parent1) ? calculatePhenotype(applyDefaults(parent1), parent1) : { phenotype: '', carriers: [], hidden: [] };
+  const parent2Result = hasAnySelection(parent2) ? calculatePhenotype(applyDefaults(parent2), parent2) : { phenotype: '', carriers: [], hidden: [] };
 
   // Mapping of phenotype names to their defining loci (can be array for multiple)
   // For genotypes array phenotypes, use genotype index as key: "PhenotypeName:0", "PhenotypeName:1"
