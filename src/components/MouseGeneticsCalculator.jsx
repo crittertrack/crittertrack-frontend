@@ -556,8 +556,19 @@ const MouseGeneticsCalculator = ({ API_BASE_URL, authToken }) => {
     marked: {
       name: 'Marked',
       examples: [
-        { name: 'Pink Eye White', description: 'Possibilities: Red + Himalayan/Siamese | Himalayan/Siamese + Pink Eye Dilute (p/p) | Himalayan/Siamese + Pied or Dominant Spotting | Pink Eye Dilute + Pied + Dominant Spotting' },
-        { name: 'Black Eye White', description: 'Possibilities: Red + Bone/Stone | Bone/Stone + Pied or Dominant Spotting | Pied + Dominant Spotting' },
+        { name: 'Pink Eye White', note: 'Multiple genetic pathways possible:', genotypes: [
+          { E: 'e/e', C: 'ch/ch', P: 'P/P' },
+          { C: 'ch/ch', P: 'p/p' },
+          { C: 'ch/ch', S: 's/s' },
+          { C: 'ch/ch', W: 'W/-' },
+          { P: 'p/p', S: 's/s', W: 'W/-' }
+        ] },
+        { name: 'Black Eye White', note: 'Multiple genetic pathways possible:', genotypes: [
+          { E: 'e/e', C: 'c/ce' },
+          { C: 'c/ce', S: 's/s' },
+          { C: 'c/ce', W: 'W/-' },
+          { S: 's/s', W: 'W/-' }
+        ] },
         { name: 'Pied', genotype: { A: 'a/a', B: 'B/B', C: 'C/C', D: 'D/D', E: 'E/E', P: 'P/P', S: 's/s' } },
         { name: 'Dutch', genotype: { A: 'a/a', B: 'B/B', C: 'C/C', D: 'D/D', E: 'E/E', P: 'P/P', S: 's/s+' }, note: 'Kit selection markers necessary' },
         { name: 'Hereford', genotype: { A: 'a/a', B: 'B/B', C: 'C/C', D: 'D/D', E: 'E/E', P: 'P/P', S: 's/s+' }, note: 'Kit selection markers necessary' },
