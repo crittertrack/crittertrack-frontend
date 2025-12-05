@@ -556,14 +556,14 @@ const MouseGeneticsCalculator = ({ API_BASE_URL, authToken }) => {
     marked: {
       name: 'Marked',
       examples: [
-        { name: 'Pink Eye White', note: 'Multiple genetic pathways possible:', genotypes: [
+        { name: 'Pink Eye White', note: 'Possible combinations:', genotypes: [
           { E: 'e/e', C: 'ch/ch', P: 'P/P' },
           { C: 'ch/ch', P: 'p/p' },
           { C: 'ch/ch', S: 's/s' },
           { C: 'ch/ch', W: 'W/-' },
           { P: 'p/p', S: 's/s', W: 'W/-' }
         ] },
-        { name: 'Black Eye White', note: 'Multiple genetic pathways possible:', genotypes: [
+        { name: 'Black Eye White', note: 'Possible combinations:', genotypes: [
           { E: 'e/e', C: 'c/ce' },
           { C: 'c/ce', S: 's/s' },
           { C: 'c/ce', W: 'W/-' },
@@ -630,6 +630,9 @@ const MouseGeneticsCalculator = ({ API_BASE_URL, authToken }) => {
               {EXAMPLE_TABS[activeTab].examples.map((example, idx) => (
                 <div key={idx} className="bg-white p-4 rounded-lg border border-gray-200">
                   <h3 className="font-semibold text-gray-800 mb-2">{example.name}</h3>
+                  {example.note && (
+                    <p className="text-xs text-gray-500 italic mb-2">{example.note}</p>
+                  )}
                   {example.description ? (
                     <p className="text-xs text-gray-600">{example.description}</p>
                   ) : example.genotypes ? (
@@ -648,9 +651,6 @@ const MouseGeneticsCalculator = ({ API_BASE_URL, authToken }) => {
                         <span key={locus} className="mr-2">{combo}</span>
                       ))}
                     </div>
-                  )}
-                  {example.note && (
-                    <p className="text-xs text-gray-500 italic mt-2">{example.note}</p>
                   )}
                 </div>
               ))}
