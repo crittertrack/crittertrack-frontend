@@ -522,7 +522,7 @@ const MouseGeneticsCalculator = ({ API_BASE_URL, authToken }) => {
     'Lavender Fox': ['A', 'P'],
     'Silver Fox': ['A', 'P'],
     'Champagne Fox': ['A', 'P'],
-    'Chinchilla Fox': ['A'],
+    'Chinchilla Fox': ['A', 'C'],
     'Cream Fox': ['A', 'C'],
     'Sepia Fox': ['A', 'C'],
     'Beige Fox': ['A', 'C'],
