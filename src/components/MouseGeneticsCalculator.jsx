@@ -916,15 +916,12 @@ const MouseGeneticsCalculator = ({ API_BASE_URL, authToken }) => {
               const validCombinations = data.maleCombinations || data.combinations;
               return (
               <div key={locus}>
-                <label className="block text-xs font-medium text-gray-700 mb-1">
-                  {data.name}
-                </label>
                 <select
                   value={parent1[locus]}
                   onChange={(e) => updateParent1(locus, e.target.value)}
                   className="w-full px-2 py-1 text-sm border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
                 >
-                  <option value="">Select {data.name}...</option>
+                  <option value="">{locus}</option>
                   {validCombinations.map((combo) => (
                     <option key={combo} value={combo}>
                       {combo}
@@ -959,15 +956,12 @@ const MouseGeneticsCalculator = ({ API_BASE_URL, authToken }) => {
           <div className="grid grid-cols-2 gap-3">
             {Object.entries(GENE_LOCI).map(([locus, data]) => (
               <div key={locus}>
-                <label className="block text-xs font-medium text-gray-700 mb-1">
-                  {data.name}
-                </label>
                 <select
                   value={parent2[locus]}
                   onChange={(e) => updateParent2(locus, e.target.value)}
                   className="w-full px-2 py-1 text-sm border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-pink-500"
                 >
-                  <option value="">Select {data.name}...</option>
+                  <option value="">{locus}</option>
                   {data.combinations.map((combo) => (
                     <option key={combo} value={combo}>
                       {combo}
