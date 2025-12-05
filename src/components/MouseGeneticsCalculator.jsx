@@ -437,51 +437,120 @@ const MouseGeneticsCalculator = ({ API_BASE_URL, authToken }) => {
   // Example varieties
   const EXAMPLE_TABS = {
     self: {
-      name: 'Self Colors',
+      name: 'Self',
       examples: [
-        { name: 'Black', genotype: { A: 'a/a', B: 'B/B', C: 'C/C', D: 'D/D', E: 'E/E', P: 'P/P' }, description: 'Solid black mouse' },
-        { name: 'Chocolate', genotype: { A: 'a/a', B: 'b/b', C: 'C/C', D: 'D/D', E: 'E/E', P: 'P/P' }, description: 'Rich brown color' },
-        { name: 'Blue', genotype: { A: 'a/a', B: 'B/B', C: 'C/C', D: 'd/d', E: 'E/E', P: 'P/P' }, description: 'Blue-gray dilute' },
-        { name: 'Lilac', genotype: { A: 'a/a', B: 'b/b', C: 'C/C', D: 'd/d', E: 'E/E', P: 'P/P' }, description: 'Pinkish-gray dilute' },
+        { name: 'Extreme Black', genotype: { A: 'ae/ae', B: 'B/B', C: 'C/C', D: 'D/D', E: 'E/E', P: 'P/P' } },
+        { name: 'Black', genotype: { A: 'a/a', B: 'B/B', C: 'C/C', D: 'D/D', E: 'E/E', P: 'P/P' } },
+        { name: 'Chocolate', genotype: { A: 'a/a', B: 'b/b', C: 'C/C', D: 'D/D', E: 'E/E', P: 'P/P' } },
+        { name: 'Blue', genotype: { A: 'a/a', B: 'B/B', C: 'C/C', D: 'd/d', E: 'E/E', P: 'P/P' } },
+        { name: 'Red', genotype: { A: 'a/a', B: 'B/B', C: 'C/C', D: 'D/D', E: 'e/e', P: 'P/P' } },
+        { name: 'Dove', genotype: { A: 'a/a', B: 'b/b', C: 'C/C', D: 'd/d', E: 'E/E', P: 'P/P' } },
+        { name: 'Champagne', genotype: { A: 'a/a', B: 'B/B', C: 'C/C', D: 'D/D', E: 'E/E', P: 'p/p' } },
+        { name: 'Lilac', genotype: { A: 'a/a', B: 'b/b', C: 'C/C', D: 'd/d', E: 'E/E', P: 'P/P' } },
+        { name: 'Lavender', genotype: { A: 'a/a', B: 'b/b', C: 'C/C', D: 'd/d', E: 'E/E', P: 'p/p' } },
+        { name: 'Silver', genotype: { A: 'a/a', B: 'B/B', C: 'C/C', D: 'd/d', E: 'E/E', P: 'p/p' } },
+        { name: 'Fawn', genotype: { A: 'a/a', B: 'b/b', C: 'C/C', D: 'D/D', E: 'e/e', P: 'P/P' } },
+        { name: 'Amber', genotype: { A: 'a/a', B: 'b/b', C: 'C/C', D: 'd/d', E: 'e/e', P: 'P/P' } },
       ]
     },
-    agouti: {
-      name: 'Agouti Varieties',
+    ticked: {
+      name: 'Ticked',
       examples: [
-        { name: 'Agouti', genotype: { A: 'A/A', B: 'B/B', C: 'C/C', D: 'D/D', E: 'E/E', P: 'P/P' }, description: 'Wild-type coloring' },
-        { name: 'Cinnamon', genotype: { A: 'A/A', B: 'b/b', C: 'C/C', D: 'D/D', E: 'E/E', P: 'P/P' }, description: 'Brown agouti' },
-        { name: 'Silver Agouti', genotype: { A: 'A/A', B: 'B/B', C: 'C/C', D: 'd/d', E: 'E/E', P: 'P/P' }, description: 'Dilute agouti' },
+        { name: 'Agouti', genotype: { A: 'A/A', B: 'B/B', C: 'C/C', D: 'D/D', E: 'E/E', P: 'P/P' } },
+        { name: 'Brindle', genotype: { A: 'Avy/a', B: 'B/B', C: 'C/C', D: 'D/D', E: 'E/E', P: 'P/P' } },
+        { name: 'Argente', genotype: { A: 'A/A', B: 'B/B', C: 'C/C', D: 'D/D', E: 'E/E', P: 'p/p' } },
+        { name: 'Cinnamon', genotype: { A: 'A/A', B: 'b/b', C: 'C/C', D: 'D/D', E: 'E/E', P: 'P/P' } },
+        { name: 'Blue Agouti', genotype: { A: 'A/A', B: 'B/B', C: 'C/C', D: 'd/d', E: 'E/E', P: 'P/P' } },
+        { name: 'Cinnamon Argente', genotype: { A: 'A/A', B: 'b/b', C: 'C/C', D: 'D/D', E: 'E/E', P: 'p/p' } },
       ]
     },
     tan: {
-      name: 'Tan Varieties',
+      name: 'Tan',
       examples: [
-        { name: 'Black Tan', genotype: { A: 'at/at', B: 'B/B', C: 'C/C', D: 'D/D', E: 'E/E', P: 'P/P' }, description: 'Black with tan belly' },
-        { name: 'Chocolate Tan', genotype: { A: 'at/at', B: 'b/b', C: 'C/C', D: 'D/D', E: 'E/E', P: 'P/P' }, description: 'Chocolate with tan belly' },
-        { name: 'Blue Tan', genotype: { A: 'at/at', B: 'B/B', C: 'C/C', D: 'd/d', E: 'E/E', P: 'P/P' }, description: 'Blue with tan belly' },
+        { name: 'Black Tan', genotype: { A: 'at/at', B: 'B/B', C: 'C/C', D: 'D/D', E: 'E/E', P: 'P/P' } },
+        { name: 'Blue Tan', genotype: { A: 'at/at', B: 'B/B', C: 'C/C', D: 'd/d', E: 'E/E', P: 'P/P' } },
+        { name: 'Chocolate Tan', genotype: { A: 'at/at', B: 'b/b', C: 'C/C', D: 'D/D', E: 'E/E', P: 'P/P' } },
+        { name: 'Lilac Tan', genotype: { A: 'at/at', B: 'b/b', C: 'C/C', D: 'd/d', E: 'E/E', P: 'P/P' } },
+        { name: 'Dove Tan', genotype: { A: 'at/at', B: 'b/b', C: 'C/C', D: 'd/d', E: 'E/E', P: 'P/P' } },
+        { name: 'Agouti Tan', genotype: { A: 'A/at', B: 'B/B', C: 'C/C', D: 'D/D', E: 'E/E', P: 'P/P' } },
+        { name: 'Argente Tan', genotype: { A: 'at/at', B: 'B/B', C: 'C/C', D: 'D/D', E: 'E/E', P: 'p/p' } },
+        { name: 'Blue Agouti Tan', genotype: { A: 'A/at', B: 'B/B', C: 'C/C', D: 'd/d', E: 'E/E', P: 'P/P' } },
+        { name: 'Champagne Tan', genotype: { A: 'at/at', B: 'B/B', C: 'C/C', D: 'D/D', E: 'E/E', P: 'p/p' } },
+        { name: 'Cinnamon Argente Tan', genotype: { A: 'A/at', B: 'b/b', C: 'C/C', D: 'D/D', E: 'E/E', P: 'p/p' } },
+        { name: 'Cinnamon Tan', genotype: { A: 'A/at', B: 'b/b', C: 'C/C', D: 'D/D', E: 'E/E', P: 'P/P' } },
+        { name: 'Lavender Tan', genotype: { A: 'at/at', B: 'b/b', C: 'C/C', D: 'd/d', E: 'E/E', P: 'p/p' } },
+        { name: 'Silver Tan', genotype: { A: 'at/at', B: 'B/B', C: 'C/C', D: 'd/d', E: 'E/E', P: 'p/p' } },
+        { name: 'Sable', genotype: { A: 'at/at', B: 'B/B', C: 'cch/cch', D: 'D/D', E: 'E/E', P: 'P/P' } },
       ]
     },
     cdilute: {
-      name: 'C-Locus Dilutes',
+      name: 'C-locus',
       examples: [
-        { name: 'Chinchilla', genotype: { A: 'A/A', B: 'B/B', C: 'cch/cch', D: 'D/D', E: 'E/E', P: 'P/P' }, description: 'Gray agouti' },
-        { name: 'Himalayan', genotype: { A: 'a/a', B: 'B/B', C: 'ch/ch', D: 'D/D', E: 'E/E', P: 'P/P' }, description: 'White with dark points' },
-        { name: 'PEW', genotype: { A: 'a/a', B: 'B/B', C: 'c/c', D: 'D/D', E: 'E/E', P: 'P/P' }, description: 'Pink-eyed white albino' },
+        { name: 'Albino/PEW', genotype: { A: 'a/a', B: 'B/B', C: 'c/c', D: 'D/D', E: 'E/E', P: 'P/P' } },
+        { name: 'Himalayan', genotype: { A: 'a/a', B: 'B/B', C: 'ch/ch', D: 'D/D', E: 'E/E', P: 'P/P' } },
+        { name: 'Bone', genotype: { A: 'a/a', B: 'B/B', C: 'ce/ce', D: 'D/D', E: 'E/E', P: 'P/P' } },
+        { name: 'Beige', genotype: { A: 'a/a', B: 'b/b', C: 'ce/ce', D: 'D/D', E: 'E/E', P: 'P/P' } },
+        { name: 'Blue Beige', genotype: { A: 'a/a', B: 'b/b', C: 'ce/ce', D: 'd/d', E: 'E/E', P: 'P/P' } },
+        { name: 'Blue Burmese', genotype: { A: 'a/a', B: 'B/B', C: 'cch/ce', D: 'd/d', E: 'E/E', P: 'P/P' } },
+        { name: 'Blue Mock Choc', genotype: { A: 'a/a', B: 'B/B', C: 'ch/ce', D: 'd/d', E: 'E/E', P: 'P/P' } },
+        { name: 'Blue Sepia', genotype: { A: 'a/a', B: 'B/B', C: 'ch/cch', D: 'd/d', E: 'E/E', P: 'P/P' } },
+        { name: 'Blue Siamese', genotype: { A: 'a/a', B: 'B/B', C: 'ch/ch', D: 'd/d', E: 'E/E', P: 'P/P' } },
+        { name: 'Blue Stone', genotype: { A: 'a/a', B: 'B/B', C: 'ce/ce', D: 'd/d', E: 'E/E', P: 'P/P' } },
+        { name: 'Burmese', genotype: { A: 'a/a', B: 'B/B', C: 'cch/ce', D: 'D/D', E: 'E/E', P: 'P/P' } },
+        { name: 'Chocolate Sepia', genotype: { A: 'a/a', B: 'b/b', C: 'ch/cch', D: 'D/D', E: 'E/E', P: 'P/P' } },
+        { name: 'Chocolate Siamese', genotype: { A: 'a/a', B: 'b/b', C: 'ch/ch', D: 'D/D', E: 'E/E', P: 'P/P' } },
+        { name: 'Colorpoint Beige', genotype: { A: 'a/a', B: 'b/b', C: 'ch/ce', D: 'D/D', E: 'E/E', P: 'P/P' } },
+        { name: 'Colorpoint Blue', genotype: { A: 'a/a', B: 'B/B', C: 'ch/c', D: 'd/d', E: 'E/E', P: 'P/P' } },
+        { name: 'Colorpoint Chocolate', genotype: { A: 'a/a', B: 'b/b', C: 'ch/c', D: 'D/D', E: 'E/E', P: 'P/P' } },
+        { name: 'Cream', genotype: { A: 'a/a', B: 'b/b', C: 'cch/cch', D: 'D/D', E: 'E/E', P: 'P/P' } },
+        { name: 'Mock Chocolate', genotype: { A: 'a/a', B: 'B/B', C: 'ch/ce', D: 'D/D', E: 'E/E', P: 'P/P' } },
+        { name: 'Sealpoint Siamese', genotype: { A: 'a/a', B: 'B/B', C: 'ch/ch', D: 'D/D', E: 'E/E', P: 'P/P' } },
+        { name: 'Silveragouti', genotype: { A: 'A/A', B: 'B/B', C: 'cch/cch', D: 'D/D', E: 'E/E', P: 'P/P' } },
+        { name: 'Stone', genotype: { A: 'a/a', B: 'B/B', C: 'ce/ce', D: 'D/D', E: 'E/E', P: 'P/P' } },
+      ]
+    },
+    fox: {
+      name: 'Fox',
+      examples: [
+        { name: 'Sepia Fox', genotype: { A: 'at/at', B: 'B/B', C: 'ch/cch', D: 'D/D', E: 'E/E', P: 'P/P' } },
+        { name: 'Beige Fox', genotype: { A: 'at/at', B: 'b/b', C: 'ce/ce', D: 'D/D', E: 'E/E', P: 'P/P' } },
+        { name: 'Bone Fox', genotype: { A: 'at/at', B: 'B/B', C: 'ce/ce', D: 'D/D', E: 'E/E', P: 'P/P' } },
+        { name: 'Burmese Fox', genotype: { A: 'at/at', B: 'B/B', C: 'cch/ce', D: 'D/D', E: 'E/E', P: 'P/P' } },
+        { name: 'Colorpoint Beige Fox', genotype: { A: 'at/at', B: 'b/b', C: 'ch/ce', D: 'D/D', E: 'E/E', P: 'P/P' } },
+        { name: 'Cream Fox', genotype: { A: 'at/at', B: 'b/b', C: 'cch/cch', D: 'D/D', E: 'E/E', P: 'P/P' } },
+        { name: 'Himalayan Fox', genotype: { A: 'at/at', B: 'B/B', C: 'ch/ch', D: 'D/D', E: 'E/E', P: 'P/P' } },
+        { name: 'Mock Chocolate Fox', genotype: { A: 'at/at', B: 'B/B', C: 'ch/ce', D: 'D/D', E: 'E/E', P: 'P/P' } },
+        { name: 'Siamese Fox', genotype: { A: 'at/at', B: 'B/B', C: 'ch/ch', D: 'D/D', E: 'E/E', P: 'P/P' } },
+        { name: 'Stone Fox', genotype: { A: 'at/at', B: 'B/B', C: 'ce/ce', D: 'D/D', E: 'E/E', P: 'P/P' } },
+        { name: 'Blue Sepia Fox', genotype: { A: 'at/at', B: 'B/B', C: 'ch/cch', D: 'd/d', E: 'E/E', P: 'P/P' } },
+        { name: 'Chocolate Sepia Fox', genotype: { A: 'at/at', B: 'b/b', C: 'ch/cch', D: 'D/D', E: 'E/E', P: 'P/P' } },
       ]
     },
     marked: {
-      name: 'Marked Varieties',
+      name: 'Marked',
       examples: [
-        { name: 'Piebald', genotype: { A: 'a/a', B: 'B/B', C: 'C/C', D: 'D/D', E: 'E/E', P: 'P/P', S: 's/s' }, description: 'White spotting' },
-        { name: 'Banded', genotype: { A: 'a/a', B: 'B/B', C: 'C/C', D: 'D/D', E: 'E/E', P: 'P/P', S: 'S/s' }, description: 'White band' },
+        { name: 'Pied', genotype: { A: 'a/a', B: 'B/B', C: 'C/C', D: 'D/D', E: 'E/E', P: 'P/P', S: 's/s' } },
+        { name: 'Dutch', genotype: { A: 'a/a', B: 'B/B', C: 'C/C', D: 'D/D', E: 'E/E', P: 'P/P', S: 's/s' } },
+        { name: 'Hereford', genotype: { A: 'a/a', B: 'B/B', C: 'C/C', D: 'D/D', E: 'E/E', P: 'P/P', S: 's/s' } },
+        { name: 'Banded', genotype: { A: 'a/a', B: 'B/B', C: 'C/C', D: 'D/D', E: 'E/E', P: 'P/P', W: 'Wsh/w' } },
+        { name: 'Variegated', genotype: { A: 'a/a', B: 'B/B', C: 'C/C', D: 'D/D', E: 'E/E', P: 'P/P', W: 'W/w' } },
+        { name: 'Rumpwhite', genotype: { A: 'a/a', B: 'B/B', C: 'C/C', D: 'D/D', E: 'E/E', P: 'P/P', W: 'Rw/w' } },
+        { name: 'xbrindle', genotype: { A: 'a/a', B: 'B/B', C: 'C/C', D: 'D/D', E: 'E/E', P: 'P/P', Mobr: 'Mobr/mobr' } },
+        { name: 'Roan', genotype: { A: 'a/a', B: 'B/B', C: 'C/C', D: 'D/D', E: 'E/E', P: 'P/P', Rn: 'Rn/rn' } },
+        { name: 'Pearl/Silvered', genotype: { A: 'a/a', B: 'B/B', C: 'C/C', D: 'D/D', E: 'E/E', P: 'P/P', Si: 'Si/si' } },
       ]
     },
-    yellow: {
-      name: 'Yellow Varieties',
+    coats: {
+      name: 'Coats',
       examples: [
-        { name: 'Dominant Yellow', genotype: { A: 'Ay/a', B: 'B/B', C: 'C/C', D: 'D/D', E: 'E/E', P: 'P/P' }, description: 'Yellow/orange' },
-        { name: 'Recessive Yellow', genotype: { A: 'a/a', B: 'B/B', C: 'C/C', D: 'D/D', E: 'e/e', P: 'P/P' }, description: 'Red/yellow' },
-        { name: 'Brindle', genotype: { A: 'Avy/a', B: 'B/B', C: 'C/C', D: 'D/D', E: 'E/E', P: 'P/P' }, description: 'Mottled yellow/black' },
+        { name: 'Shorthair', genotype: { A: 'a/a', B: 'B/B', C: 'C/C', D: 'D/D', E: 'E/E', P: 'P/P', Go: 'Go/Go' } },
+        { name: 'Longhair', genotype: { A: 'a/a', B: 'B/B', C: 'C/C', D: 'D/D', E: 'E/E', P: 'P/P', Go: 'go/go' } },
+        { name: 'Astrex', genotype: { A: 'a/a', B: 'B/B', C: 'C/C', D: 'D/D', E: 'E/E', P: 'P/P', Re: 'Re/re' } },
+        { name: 'Texel', genotype: { A: 'a/a', B: 'B/B', C: 'C/C', D: 'D/D', E: 'E/E', P: 'P/P', Go: 'go/go', Re: 'Re/re' } },
+        { name: 'Satin', genotype: { A: 'a/a', B: 'B/B', C: 'C/C', D: 'D/D', E: 'E/E', P: 'P/P', Sa: 'sa/sa' } },
+        { name: 'Rosette', genotype: { A: 'a/a', B: 'B/B', C: 'C/C', D: 'D/D', E: 'E/E', P: 'P/P', Rst: 'rst/rst' } },
+        { name: 'Fuzz', genotype: { A: 'a/a', B: 'B/B', C: 'C/C', D: 'D/D', E: 'E/E', P: 'P/P', Fz: 'fz/fz' } },
+        { name: 'Dominant Hairless', genotype: { A: 'a/a', B: 'B/B', C: 'C/C', D: 'D/D', E: 'E/E', P: 'P/P', Nu: 'Nu/nu' } },
       ]
     }
   };
@@ -492,7 +561,7 @@ const MouseGeneticsCalculator = ({ API_BASE_URL, authToken }) => {
         <h1 className="text-2xl font-bold text-gray-800">Mouse Genetics Calculator</h1>
         <button
           onClick={() => setShowExamples(!showExamples)}
-          className="flex items-center gap-2 px-4 py-2 bg-orange-500 text-white rounded-lg hover:bg-orange-600 transition"
+          className="flex items-center gap-2 px-4 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600 transition"
         >
           <Book size={18} />
           {showExamples ? 'Hide' : 'Show'} Examples
@@ -508,8 +577,8 @@ const MouseGeneticsCalculator = ({ API_BASE_URL, authToken }) => {
                 onClick={() => setActiveTab(tabKey)}
                 className={`px-4 py-2 rounded-lg whitespace-nowrap transition ${
                   activeTab === tabKey
-                    ? 'bg-orange-500 text-white'
-                    : 'bg-white text-gray-700 hover:bg-orange-100'
+                    ? 'bg-gray-600 text-white'
+                    : 'bg-white text-gray-700 hover:bg-gray-100'
                 }`}
               >
                 {EXAMPLE_TABS[tabKey].name}
@@ -519,11 +588,10 @@ const MouseGeneticsCalculator = ({ API_BASE_URL, authToken }) => {
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             {EXAMPLE_TABS[activeTab].examples.map((example, idx) => (
               <div key={idx} className="bg-white p-4 rounded-lg border border-gray-200">
-                <h3 className="font-semibold text-gray-800 mb-1">{example.name}</h3>
-                <p className="text-sm text-gray-600 mb-2">{example.description}</p>
+                <h3 className="font-semibold text-gray-800 mb-2">{example.name}</h3>
                 <div className="text-xs text-gray-500 font-mono">
                   {Object.entries(example.genotype).map(([locus, combo]) => (
-                    <span key={locus} className="mr-2">{locus}: {combo}</span>
+                    <span key={locus} className="mr-2">{combo}</span>
                   ))}
                 </div>
               </div>
