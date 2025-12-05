@@ -557,7 +557,7 @@ const MouseGeneticsCalculator = ({ API_BASE_URL, authToken }) => {
       name: 'Marked',
       examples: [
         { name: 'Pink Eye White', note: 'Possible combinations:', genotypes: [
-          { E: 'e/e', C: 'ch/ch', P: 'p/p' },
+          { E: 'e/e', C: 'ch/ch' },
           { C: 'ch/ch', P: 'p/p' },
           { C: 'ch/ch', S: 's/s' },
           { C: 'ch/ch', W: 'W/-' },
