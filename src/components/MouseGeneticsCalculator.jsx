@@ -610,6 +610,7 @@ const MouseGeneticsCalculator = ({ API_BASE_URL, authToken }) => {
         <div className="w-full max-w-6xl mx-auto bg-white rounded-xl shadow-lg p-6">
           <div className="flex justify-between items-center mb-6">
             <h1 className="text-2xl font-bold text-gray-800">Mouse Genetics Calculator</h1>
+            {/*
             <button
               onClick={() => setShowExamples(true)}
               className="flex items-center gap-2 px-4 py-2 bg-primary text-black border-2 border-black rounded-lg hover:bg-primary-dark transition"
@@ -617,6 +618,7 @@ const MouseGeneticsCalculator = ({ API_BASE_URL, authToken }) => {
               <Book size={18} />
               View Examples
             </button>
+            */}
           </div>
 
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
