@@ -366,7 +366,7 @@ const calculatePhenotype = (genotype, originalGenotype = null) => {
     const excludedCLocus = ['C/C', 'c/c', 'C/ch', 'C/ce', 'C/c', 'C/cch'];
     if (genotype.C && !excludedCLocus.includes(genotype.C)) {
       const isTanVariant = genotype.A === 'Ay/at';
-      const baseName = isTanVariant ? 'Dominant Red Tan' : 'Dominant Red';
+      const baseName = isTanVariant ? 'Dominant Red Fox' : 'Dominant Red';
       
       if (genotype.C === 'ch/c') {
         return { phenotype: `${baseName} Himalayan`, carriers, hidden };
