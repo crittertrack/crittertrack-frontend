@@ -639,17 +639,29 @@ const MouseGeneticsCalculator = ({ API_BASE_URL, authToken }) => {
                     <div className="space-y-2">
                       {example.genotypes.map((genotype, gIdx) => (
                         <div key={gIdx} className="text-xs text-gray-500 font-mono">
-                          {Object.entries(genotype).map(([locus, combo]) => (
-                            <span key={locus} className="mr-2">{combo}</span>
-                          ))}
+                          {Object.entries(genotype).map(([locus, combo]) => {
+                            const locusInfo = GENE_LOCI[locus];
+                            const isWildtype = locusInfo && combo === locusInfo.combinations[0];
+                            return (
+                              <span key={locus} className={`mr-2 ${!isWildtype ? 'font-semibold' : ''}`}>
+                                {combo}
+                              </span>
+                            );
+                          })}
                         </div>
                       ))}
                     </div>
                   ) : (
                     <div className="text-xs text-gray-500 font-mono">
-                      {Object.entries(example.genotype).map(([locus, combo]) => (
-                        <span key={locus} className="mr-2">{combo}</span>
-                      ))}
+                      {Object.entries(example.genotype).map(([locus, combo]) => {
+                        const locusInfo = GENE_LOCI[locus];
+                        const isWildtype = locusInfo && combo === locusInfo.combinations[0];
+                        return (
+                          <span key={locus} className={`mr-2 ${!isWildtype ? 'font-semibold' : ''}`}>
+                            {combo}
+                          </span>
+                        );
+                      })}
                     </div>
                   )}
                 </div>
