@@ -381,6 +381,17 @@ const calculatePhenotype = (genotype, originalGenotype = null) => {
 
   // Viable yellow (brindle - Avy)
   if (genotype.A && genotype.A.startsWith('Avy/')) {
+    // Handle C/- carriers separately
+    if (genotype.C === 'C/c') {
+      carriers.push('Albino');
+    } else if (genotype.C === 'C/ch') {
+      carriers.push('Himalayan');
+    } else if (genotype.C === 'C/ce') {
+      carriers.push('Beige');
+    } else if (genotype.C === 'C/cch') {
+      carriers.push('Chinchilla');
+    }
+    
     // Check for C-locus dilutes (exclude C/C, c/c, and C/- carriers)
     const excludedCLocus = ['C/C', 'c/c', 'C/ch', 'C/ce', 'C/c', 'C/cch'];
     if (genotype.C && !excludedCLocus.includes(genotype.C)) {
