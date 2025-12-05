@@ -513,6 +513,7 @@ const MouseGeneticsCalculator = ({ API_BASE_URL, authToken }) => {
     'Blue Sepia': ['A', 'C', 'D'],
     'Chocolate Sepia': ['A', 'C', 'B'],
     'Cream': ['A', 'C'],
+    'Silveragouti': ['A', 'C'],
     'Siam Fox': ['A'],
     'Blue Fox': ['D'],
     'Chocolate Fox': ['B'],
