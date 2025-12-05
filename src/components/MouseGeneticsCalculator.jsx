@@ -548,8 +548,13 @@ const MouseGeneticsCalculator = ({ API_BASE_URL, authToken }) => {
     setOffspringResults(resultsArray);
   };
 
-  const parent1Result = calculatePhenotype(applyDefaults(parent1));
-  const parent2Result = calculatePhenotype(applyDefaults(parent2));
+  // Check if parent has any selections
+  const hasAnySelection = (parent) => {
+    return Object.values(parent).some(value => value !== '');
+  };
+
+  const parent1Result = hasAnySelection(parent1) ? calculatePhenotype(applyDefaults(parent1)) : { phenotype: '', carriers: [], hidden: [] };
+  const parent2Result = hasAnySelection(parent2) ? calculatePhenotype(applyDefaults(parent2)) : { phenotype: '', carriers: [], hidden: [] };
 
   // Mapping of phenotype names to their defining loci (can be array for multiple)
   // For genotypes array phenotypes, use genotype index as key: "PhenotypeName:0", "PhenotypeName:1"
