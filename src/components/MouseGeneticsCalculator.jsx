@@ -783,7 +783,7 @@ const MouseGeneticsCalculator = ({ API_BASE_URL, authToken }) => {
                       <img 
                         src={example.image} 
                         alt={example.name}
-                        className="w-16 h-16 object-cover rounded"
+                        className="w-16 h-16 object-contain rounded"
                       />
                     </div>
                   )}
