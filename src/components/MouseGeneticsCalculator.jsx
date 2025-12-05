@@ -612,7 +612,7 @@ const MouseGeneticsCalculator = ({ API_BASE_URL, authToken }) => {
             <h1 className="text-2xl font-bold text-gray-800">Mouse Genetics Calculator</h1>
             <button
               onClick={() => setShowExamples(true)}
-              className="flex items-center gap-2 px-4 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600 transition"
+              className="flex items-center gap-2 px-4 py-2 bg-primary text-white rounded-lg hover:bg-primary-dark transition"
             >
               <Book size={18} />
               View Examples
