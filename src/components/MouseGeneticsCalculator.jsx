@@ -779,11 +779,11 @@ const MouseGeneticsCalculator = ({ API_BASE_URL, authToken }) => {
                   )}
                   </div>
                   {example.image && (
-                    <div className="flex-shrink-0">
+                    <div className="flex-shrink-0 -mr-2">
                       <img 
                         src={example.image} 
                         alt={example.name}
-                        className="w-20 h-20 object-contain rounded"
+                        className="w-24 h-24 object-contain rounded"
                       />
                     </div>
                   )}
