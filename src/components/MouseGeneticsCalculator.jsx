@@ -739,14 +739,15 @@ const MouseGeneticsCalculator = ({ API_BASE_URL, authToken }) => {
             </div>
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
               {EXAMPLE_TABS[activeTab].examples.map((example, idx) => (
-                <div key={idx} className="bg-white p-4 rounded-lg border border-gray-200">
-                  <h3 className="font-semibold text-gray-800 mb-2">{example.name}</h3>
-                  {example.note && (
-                    <p className="text-xs text-gray-500 italic mb-2">{example.note}</p>
-                  )}
-                  {example.description ? (
-                    <p className="text-xs text-gray-600">{example.description}</p>
-                  ) : example.genotypes ? (
+                <div key={idx} className="bg-white p-4 rounded-lg border border-gray-200 flex gap-3">
+                  <div className="flex-1">
+                    <h3 className="font-semibold text-gray-800 mb-2">{example.name}</h3>
+                    {example.note && (
+                      <p className="text-xs text-gray-500 italic mb-2">{example.note}</p>
+                    )}
+                    {example.description ? (
+                      <p className="text-xs text-gray-600">{example.description}</p>
+                    ) : example.genotypes ? (
                     <div className="space-y-2">
                       {example.genotypes.map((genotype, gIdx) => (
                         <div key={gIdx} className="text-xs text-gray-500 font-mono">
@@ -774,6 +775,16 @@ const MouseGeneticsCalculator = ({ API_BASE_URL, authToken }) => {
                           </span>
                         );
                       })}
+                    </div>
+                  )}
+                  </div>
+                  {example.image && (
+                    <div className="flex-shrink-0">
+                      <img 
+                        src={example.image} 
+                        alt={example.name}
+                        className="w-16 h-16 object-cover rounded"
+                      />
                     </div>
                   )}
                 </div>
