@@ -206,6 +206,43 @@ const calculatePhenotype = (genotype, originalGenotype = null) => {
   const isAgouti = genotype.A === 'A/A';
   const isAgoutiVariant = isAgoutiExtremeHetero || isAgoutiHetero || isAgouti;
 
+  // Check if this is A/at (agouti tan)
+  const isAgoutiTan = genotype.A === 'A/at';
+
+  // Special handling for agouti tan (A/at) with C-locus combinations
+  if (isAgoutiTan && genotype.C !== 'C/C') {
+    if (genotype.C === 'c/c') {
+      return { phenotype: 'Albino Fox', carriers, hidden };
+    }
+    if (genotype.C === 'ch/c') {
+      return { phenotype: 'Agouti Himalayan Fox', carriers, hidden };
+    }
+    if (genotype.C === 'ch/ch') {
+      return { phenotype: 'Agouti Siamese Fox', carriers, hidden };
+    }
+    if (genotype.C === 'ce/c') {
+      return { phenotype: 'Agouti Bone Fox', carriers, hidden };
+    }
+    if (genotype.C === 'ce/ch') {
+      return { phenotype: 'Agouti Colorpoint Beige Fox', carriers, hidden };
+    }
+    if (genotype.C === 'ce/ce') {
+      return { phenotype: 'Agouti Beige Fox', carriers, hidden };
+    }
+    if (genotype.C === 'cch/c') {
+      return { phenotype: 'Agouti Stone Fox', carriers, hidden };
+    }
+    if (genotype.C === 'cch/ch') {
+      return { phenotype: 'Agouti Burmese Fox', carriers, hidden };
+    }
+    if (genotype.C === 'cch/ce') {
+      return { phenotype: 'Agouti Mock Chocolate Fox', carriers, hidden };
+    }
+    if (genotype.C === 'cch/cch') {
+      return { phenotype: 'Chinchilla', carriers, hidden };
+    }
+  }
+
   // Special handling for agouti variants with C-locus combinations
   if (isAgoutiVariant && genotype.C !== 'C/C') {
     if (genotype.C === 'c/c') {
@@ -243,7 +280,7 @@ const calculatePhenotype = (genotype, originalGenotype = null) => {
   // Special handling for tan/fox variants with C-locus combinations
   if (isTanVariant && genotype.C !== 'C/C') {
     if (genotype.C === 'c/c') {
-      return { phenotype: 'Albino', carriers, hidden };
+      return { phenotype: 'Albino Fox', carriers, hidden };
     }
     if (genotype.C === 'ch/c') {
       return { phenotype: 'Himalayan Fox', carriers, hidden };
@@ -272,6 +309,7 @@ const calculatePhenotype = (genotype, originalGenotype = null) => {
     if (genotype.C === 'cch/cch') {
       return { phenotype: 'Sepia Fox', carriers, hidden };
     }
+  }
   }
 
   // Special handling for self black variants with C-locus combinations
