@@ -6095,7 +6095,10 @@ const App = () => {
                         />
                     )}
                     
-                    <GeneticsCalculatorPlaceholder onCancel={() => setCurrentView('auth')} />
+                    <MouseGeneticsCalculator
+                        API_BASE_URL={API_BASE_URL}
+                        authToken={null}
+                    />
                 </div>
             );
         }
