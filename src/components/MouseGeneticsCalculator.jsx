@@ -4,7 +4,8 @@ import { X, Book } from 'lucide-react';
 // Define all gene loci with their possible allele combinations
 const GENE_LOCI = {
   A: {
-    name: 'A-locus',
+    name: 'Agouti',
+
     combinations: [
       'ae/ae',
       'a/ae', 'a/a',
@@ -15,14 +16,16 @@ const GENE_LOCI = {
     ]
   },
   B: {
-    name: 'B-locus',
+    name: 'Brown',
+
     combinations: [
       'b/b',
       'B/b', 'B/B'
     ]
   },
   C: {
-    name: 'C-locus',
+    name: 'Albino',
+
     combinations: [
       'c/c',
       'ch/c', 'ch/ch',
@@ -32,21 +35,24 @@ const GENE_LOCI = {
     ]
   },
   D: {
-    name: 'D-locus',
+    name: 'Dilution',
+
     combinations: [
       'd/d',
       'D/d', 'D/D'
     ]
   },
   E: {
-    name: 'E-locus',
+    name: 'Extension',
+
     combinations: [
       'e/e',
       'E/e', 'E/E'
     ]
   },
   P: {
-    name: 'P-locus',
+    name: 'Pink-eye',
+
     combinations: [
       'p/p',
       'P/p', 'P/P'
@@ -556,51 +562,64 @@ const MouseGeneticsCalculator = ({ API_BASE_URL, authToken }) => {
   };
 
   return (
-    <div className="w-full max-w-6xl mx-auto bg-white rounded-xl shadow-lg p-6">
-      <div className="flex justify-between items-center mb-6">
-        <h1 className="text-2xl font-bold text-gray-800">Mouse Genetics Calculator</h1>
-        <button
-          onClick={() => setShowExamples(!showExamples)}
-          className="flex items-center gap-2 px-4 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600 transition"
-        >
-          <Book size={18} />
-          {showExamples ? 'Hide' : 'Show'} Examples
-        </button>
-      </div>
-
-      {showExamples && (
-        <div className="mb-6 bg-gray-50 rounded-lg p-4">
-          <div className="flex gap-2 mb-4 overflow-x-auto">
-            {Object.keys(EXAMPLE_TABS).map(tabKey => (
-              <button
-                key={tabKey}
-                onClick={() => setActiveTab(tabKey)}
-                className={`px-4 py-2 rounded-lg whitespace-nowrap transition ${
-                  activeTab === tabKey
-                    ? 'bg-gray-600 text-white'
-                    : 'bg-white text-gray-700 hover:bg-gray-100'
-                }`}
-              >
-                {EXAMPLE_TABS[tabKey].name}
-              </button>
-            ))}
+    <>
+      {showExamples ? (
+        <div className="w-full max-w-6xl mx-auto bg-white rounded-xl shadow-lg p-6">
+          <div className="flex justify-between items-center mb-6">
+            <h1 className="text-2xl font-bold text-gray-800">Mouse Genetics Examples</h1>
+            <button
+              onClick={() => setShowExamples(false)}
+              className="flex items-center gap-2 px-4 py-2 bg-gray-500 text-white rounded-lg hover:bg-gray-600 transition"
+            >
+              <X size={18} />
+              Back to Calculator
+            </button>
           </div>
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            {EXAMPLE_TABS[activeTab].examples.map((example, idx) => (
-              <div key={idx} className="bg-white p-4 rounded-lg border border-gray-200">
-                <h3 className="font-semibold text-gray-800 mb-2">{example.name}</h3>
-                <div className="text-xs text-gray-500 font-mono">
-                  {Object.entries(example.genotype).map(([locus, combo]) => (
-                    <span key={locus} className="mr-2">{combo}</span>
-                  ))}
+
+          <div className="bg-gray-50 rounded-lg p-4">
+            <div className="flex gap-2 mb-4 overflow-x-auto">
+              {Object.keys(EXAMPLE_TABS).map(tabKey => (
+                <button
+                  key={tabKey}
+                  onClick={() => setActiveTab(tabKey)}
+                  className={`px-4 py-2 rounded-lg whitespace-nowrap transition ${
+                    activeTab === tabKey
+                      ? 'bg-gray-600 text-white'
+                      : 'bg-white text-gray-700 hover:bg-gray-100'
+                  }`}
+                >
+                  {EXAMPLE_TABS[tabKey].name}
+                </button>
+              ))}
+            </div>
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+              {EXAMPLE_TABS[activeTab].examples.map((example, idx) => (
+                <div key={idx} className="bg-white p-4 rounded-lg border border-gray-200">
+                  <h3 className="font-semibold text-gray-800 mb-2">{example.name}</h3>
+                  <div className="text-xs text-gray-500 font-mono">
+                    {Object.entries(example.genotype).map(([locus, combo]) => (
+                      <span key={locus} className="mr-2">{combo}</span>
+                    ))}
+                  </div>
                 </div>
-              </div>
-            ))}
+              ))}
+            </div>
           </div>
         </div>
-      )}
+      ) : (
+        <div className="w-full max-w-6xl mx-auto bg-white rounded-xl shadow-lg p-6">
+          <div className="flex justify-between items-center mb-6">
+            <h1 className="text-2xl font-bold text-gray-800">Mouse Genetics Calculator</h1>
+            <button
+              onClick={() => setShowExamples(true)}
+              className="flex items-center gap-2 px-4 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600 transition"
+            >
+              <Book size={18} />
+              View Examples
+            </button>
+          </div>
 
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
         {/* Parent 1 */}
         <div className="bg-blue-50 rounded-lg p-4 border-2 border-blue-300">
           <h2 className="text-xl font-semibold text-blue-800 mb-4">Parent 1</h2>
@@ -683,7 +702,9 @@ const MouseGeneticsCalculator = ({ API_BASE_URL, authToken }) => {
           </div>
         </div>
       </div>
-    </div>
+        </div>
+      )}
+    </>
   );
 };
 
