@@ -459,7 +459,7 @@ const MouseGeneticsCalculator = ({ API_BASE_URL, authToken }) => {
     'Blue': ['A', 'D'],
     'Lilac': ['A', 'B', 'D'],
     'Champagne': ['A', 'B', 'P'],
-    'Dove': ['P'],
+    'Dove': ['A', 'P'],
     'Lavender': ['A', 'B', 'D', 'P'],
     'Silver': ['A', 'D', 'P'],
     'Red:0': ['E'], // a/a e/e variant
@@ -734,7 +734,7 @@ const MouseGeneticsCalculator = ({ API_BASE_URL, authToken }) => {
                             const definingLoci = PHENOTYPE_LOCUS_MAP[lookupKey] || PHENOTYPE_LOCUS_MAP[example.name] || [];
                             const shouldBold = definingLoci.includes(locus);
                             return (
-                              <span key={locus} className={`mr-2 ${shouldBold ? 'font-bold' : ''}`}>
+                              <span key={locus} className={`mr-2 ${shouldBold ? 'font-bold text-black' : ''}`}>
                                 {combo}
                               </span>
                             );
@@ -748,7 +748,7 @@ const MouseGeneticsCalculator = ({ API_BASE_URL, authToken }) => {
                         const definingLoci = PHENOTYPE_LOCUS_MAP[example.name] || [];
                         const shouldBold = definingLoci.includes(locus);
                         return (
-                          <span key={locus} className={`mr-2 ${shouldBold ? 'font-bold' : ''}`}>
+                          <span key={locus} className={`mr-2 ${shouldBold ? 'font-bold text-black' : ''}`}>
                             {combo}
                           </span>
                         );
