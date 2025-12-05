@@ -100,6 +100,9 @@ const GENE_LOCI = {
     combinations: [
       'mobr/mobr',
       'Mobr/mobr', 'Mobr/Mobr'
+    ],
+    maleCombinations: [
+      'mobr/mobr'
     ]
   },
   Go: {
@@ -622,11 +625,14 @@ const MouseGeneticsCalculator = ({ API_BASE_URL, authToken }) => {
           </div>
 
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-        {/* Parent 1 */}
+        {/* Sire/Father */}
         <div className="bg-blue-50 rounded-lg p-4 border-2 border-blue-300">
-          <h2 className="text-xl font-semibold text-blue-800 mb-4">Parent 1</h2>
+          <h2 className="text-xl font-semibold text-blue-800 mb-4">Sire/Father</h2>
           <div className="grid grid-cols-2 gap-3">
-            {Object.entries(GENE_LOCI).map(([locus, data]) => (
+            {Object.entries(GENE_LOCI).map(([locus, data]) => {
+              // For Sire/Father, filter out Mobr combinations (males can't carry Mobr)
+              const validCombinations = data.maleCombinations || data.combinations;
+              return (
               <div key={locus}>
                 <label className="block text-xs font-medium text-gray-700 mb-1">
                   {locus} - {data.name}
@@ -636,14 +642,15 @@ const MouseGeneticsCalculator = ({ API_BASE_URL, authToken }) => {
                   onChange={(e) => updateParent1(locus, e.target.value)}
                   className="w-full px-2 py-1 text-sm border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
                 >
-                  {data.combinations.map((combo) => (
+                  {validCombinations.map((combo) => (
                     <option key={combo} value={combo}>
                       {combo}
                     </option>
                   ))}
                 </select>
               </div>
-            ))}
+              );
+            })}
           </div>
           <div className="mt-4 p-3 bg-white rounded-lg border-2 border-blue-500">
             <p className="text-sm font-medium text-gray-700 mb-1">Phenotype:</p>
@@ -663,9 +670,9 @@ const MouseGeneticsCalculator = ({ API_BASE_URL, authToken }) => {
           </div>
         </div>
 
-        {/* Parent 2 */}
+        {/* Dam/Mother */}
         <div className="bg-pink-50 rounded-lg p-4 border-2 border-pink-300">
-          <h2 className="text-xl font-semibold text-pink-800 mb-4">Parent 2</h2>
+          <h2 className="text-xl font-semibold text-pink-800 mb-4">Dam/Mother</h2>
           <div className="grid grid-cols-2 gap-3">
             {Object.entries(GENE_LOCI).map(([locus, data]) => (
               <div key={locus}>
