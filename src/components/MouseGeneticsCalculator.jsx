@@ -492,7 +492,7 @@ const MouseGeneticsCalculator = ({ API_BASE_URL, authToken }) => {
         { name: 'Cinnamon Tan', genotype: { A: 'A/at', B: 'b/b', C: 'C/C', D: 'D/D', E: 'E/E', P: 'P/P' } },
         { name: 'Lavender Tan', genotype: { A: 'at/a', B: 'b/b', C: 'C/C', D: 'd/d', E: 'E/E', P: 'p/p' } },
         { name: 'Silver Tan', genotype: { A: 'at/a', B: 'B/B', C: 'C/C', D: 'd/d', E: 'E/E', P: 'p/p' } },
-        { name: 'Sable', genotype: { A: 'at/a', B: 'B/B', C: 'cch/cch', D: 'D/D', E: 'E/E', P: 'P/P' } },
+        { name: 'Sable', genotype: { A: 'Ay/at', B: 'B/B', C: 'C/C', D: 'D/D', E: 'E/E', P: 'P/P' } },
       ]
     },
     cdilute: {
