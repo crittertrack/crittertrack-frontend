@@ -667,28 +667,28 @@ const MouseGeneticsCalculator = ({ API_BASE_URL, authToken }) => {
     marked: {
       name: 'Marked',
       examples: [
-        { name: 'Pink Eye White', note: 'Possible combinations:', genotypes: [
+        { name: 'Pink Eye White', image: '/crittertrack-images/albino-pew.png', note: 'Possible combinations:', genotypes: [
           { E: 'e/e', C: 'ch/ch' },
           { C: 'ch/ch', P: 'p/p' },
           { C: 'ch/ch', S: 's/s' },
           { C: 'ch/ch', W: 'W/-' },
           { P: 'p/p', S: 's/s', W: 'W/-' }
         ] },
-        { name: 'Black Eye White', note: 'Possible combinations:', genotypes: [
+        { name: 'Black Eye White', image: '/crittertrack-images/bew.png', note: 'Possible combinations:', genotypes: [
           { E: 'e/e', C: 'c/ce' },
           { C: 'c/ce', S: 's/s' },
           { C: 'c/ce', W: 'W/-' },
           { S: 's/s', W: 'W/-' }
         ] },
-        { name: 'Pied', genotype: { A: 'a/a', B: 'B/B', C: 'C/C', D: 'D/D', E: 'E/E', P: 'P/P', S: 's/s' } },
-        { name: 'Dutch', genotype: { A: 'a/a', B: 'B/B', C: 'C/C', D: 'D/D', E: 'E/E', P: 'P/P', S: 's/s+' }, note: 'Kit selection markers necessary' },
-        { name: 'Hereford', genotype: { A: 'a/a', B: 'B/B', C: 'C/C', D: 'D/D', E: 'E/E', P: 'P/P', S: 's/s+' }, note: 'Kit selection markers necessary' },
-        { name: 'Banded', genotype: { A: 'a/a', B: 'B/B', C: 'C/C', D: 'D/D', E: 'E/E', P: 'P/P', W: 'Wsh/w' } },
-        { name: 'Variegated', genotype: { A: 'a/a', B: 'B/B', C: 'C/C', D: 'D/D', E: 'E/E', P: 'P/P', W: 'W/w' } },
-        { name: 'Rumpwhite', genotype: { A: 'a/a', B: 'B/B', C: 'C/C', D: 'D/D', E: 'E/E', P: 'P/P', W: 'Rw/w' } },
-        { name: 'xbrindle', genotype: { A: 'a/a', B: 'B/B', C: 'C/C', D: 'D/D', E: 'E/E', P: 'P/P', Mobr: 'Mobr/mobr' } },
-        { name: 'Roan', genotype: { A: 'a/a', B: 'B/B', C: 'C/C', D: 'D/D', E: 'E/E', P: 'P/P', Rn: 'rn/rn' } },
-        { name: 'Pearl/Silvered', genotype: { A: 'a/a', B: 'B/B', C: 'C/C', D: 'D/D', E: 'E/E', P: 'P/P', Si: 'si/si' } },
+        { name: 'Pied', image: '/crittertrack-images/pied.png', genotype: { A: 'a/a', B: 'B/B', C: 'C/C', D: 'D/D', E: 'E/E', P: 'P/P', S: 's/s' } },
+        { name: 'Dutch', image: '/crittertrack-images/dutch.png', genotype: { A: 'a/a', B: 'B/B', C: 'C/C', D: 'D/D', E: 'E/E', P: 'P/P', S: 's/s+' }, note: 'Kit selection markers necessary' },
+        { name: 'Hereford', image: '/crittertrack-images/hereford.png', genotype: { A: 'a/a', B: 'B/B', C: 'C/C', D: 'D/D', E: 'E/E', P: 'P/P', S: 's/s+' }, note: 'Kit selection markers necessary' },
+        { name: 'Banded', image: '/crittertrack-images/banded.png', genotype: { A: 'a/a', B: 'B/B', C: 'C/C', D: 'D/D', E: 'E/E', P: 'P/P', W: 'Wsh/w' } },
+        { name: 'Variegated', image: '/crittertrack-images/variegated.png', genotype: { A: 'a/a', B: 'B/B', C: 'C/C', D: 'D/D', E: 'E/E', P: 'P/P', W: 'W/w' } },
+        { name: 'Rumpwhite', image: '/crittertrack-images/rumpwhite.png', genotype: { A: 'a/a', B: 'B/B', C: 'C/C', D: 'D/D', E: 'E/E', P: 'P/P', W: 'Rw/w' } },
+        { name: 'xbrindle', image: '/crittertrack-images/xbrindle.png', genotype: { A: 'a/a', B: 'B/B', C: 'C/C', D: 'D/D', E: 'E/E', P: 'P/P', Mobr: 'Mobr/mobr' } },
+        { name: 'Roan', image: '/crittertrack-images/roan.png', genotype: { A: 'a/a', B: 'B/B', C: 'C/C', D: 'D/D', E: 'E/E', P: 'P/P', Rn: 'rn/rn' } },
+        { name: 'Pearl/Silvered', image: '/crittertrack-images/pearl.png', genotype: { A: 'a/a', B: 'B/B', C: 'C/C', D: 'D/D', E: 'E/E', P: 'P/P', Si: 'si/si' } },
       ]
     },
     coats: {
