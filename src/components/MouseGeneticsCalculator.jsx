@@ -381,6 +381,13 @@ const calculatePhenotype = (genotype, originalGenotype = null) => {
 
   // Viable yellow (brindle - Avy)
   if (genotype.A && genotype.A.startsWith('Avy/')) {
+    // Check for C-locus dilutes (exclude C/C and c/c)
+    if (genotype.C && genotype.C !== 'C/C' && genotype.C !== 'c/c') {
+      // Check if it's tan variant
+      const isTanVariant = genotype.A === 'Avy/at';
+      return { phenotype: isTanVariant ? 'Snowtiger Fox' : 'Snowtiger', carriers, hidden };
+    }
+    
     // Track what Avy is paired with
     if (genotype.A === 'Avy/ae') carriers.push('Extreme Black');
     else if (genotype.A === 'Avy/a') carriers.push('Black');
