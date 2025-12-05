@@ -450,6 +450,92 @@ const MouseGeneticsCalculator = ({ API_BASE_URL, authToken }) => {
   const parent1Result = calculatePhenotype(parent1);
   const parent2Result = calculatePhenotype(parent2);
 
+  // Mapping of phenotype names to their defining locus
+  const PHENOTYPE_LOCUS_MAP = {
+    'Extreme Black': 'A',
+    'Black': 'A',
+    'Chocolate': 'B',
+    'Blue': 'D',
+    'Lilac': 'D', // Could be B or D, using D as the distinguisher from Chocolate
+    'Champagne': 'P',
+    'Dove': 'P',
+    'Lavender': 'P',
+    'Silver': 'P',
+    'Red': 'E', // Can be E or A
+    'Fawn': 'E', // Can be E or A
+    'Amber': 'E', // Can be E or A
+    'Agouti': 'A',
+    'Brindle': 'A',
+    'Argente': 'P',
+    'Cinnamon': 'B',
+    'Blue Agouti': 'D',
+    'Cinnamon Argente': 'B',
+    'Black Tan': 'A',
+    'Blue Tan': 'D',
+    'Chocolate Tan': 'B',
+    'Lilac Tan': 'D',
+    'Dove Tan': 'P',
+    'Agouti Tan': 'A',
+    'Argente Tan': 'P',
+    'Blue Agouti Tan': 'D',
+    'Champagne Tan': 'P',
+    'Cinnamon Argente Tan': 'B',
+    'Cinnamon Tan': 'B',
+    'Lavender Tan': 'P',
+    'Silver Tan': 'P',
+    'Sable': 'U',
+    'Albino': 'C',
+    'Bone': 'C',
+    'Blue Stone': 'C',
+    'Stone': 'C',
+    'Himalayan': 'C',
+    'Siamese': 'C',
+    'Blue Siamese': 'C',
+    'Chocolate Siamese': 'C',
+    'Burmese': 'C',
+    'Blue Burmese': 'C',
+    'Colorpoint Blue': 'C',
+    'Colorpoint Chocolate': 'C',
+    'Beige': 'C',
+    'Colorpoint Beige': 'C',
+    'Blue Beige': 'C',
+    'Mock Chocolate': 'C',
+    'Blue Mock Chocolate': 'C',
+    'Chinchilla': 'C',
+    'Chinchilla Beige': 'C',
+    'Blue Chinchilla': 'C',
+    'Platinum': 'C',
+    'Siam Fox': 'A',
+    'Blue Fox': 'D',
+    'Chocolate Fox': 'B',
+    'Lilac Fox': 'D',
+    'Dove Fox': 'P',
+    'Lavender Fox': 'P',
+    'Silver Fox': 'P',
+    'Champagne Fox': 'P',
+    'Chinchilla Fox': 'A',
+    'Cream Fox': 'A',
+    'Sepia Fox': 'A',
+    'Blue Sepia Fox': 'D',
+    'Chocolate Sepia Fox': 'B',
+    'Lilac Sepia Fox': 'D',
+    'Dove Sepia Fox': 'P',
+    'Lavender Sepia Fox': 'P',
+    'Silver Sepia Fox': 'P',
+    'Champagne Sepia Fox': 'P',
+    'Pink Eye White': 'P',
+    'Black Eye White': 'S',
+    'Pearl/Silvered': 'Si',
+    'Shorthair': 'Go',
+    'Longhair': 'Go',
+    'Satin': 'Sa',
+    'Astrex': 'Re',
+    'Texel': 'Re',
+    'Rosette': 'Rst',
+    'Fuzz': 'Fz',
+    'Dominant Hairless': 'Nu',
+  };
+
   // Example varieties
   const EXAMPLE_TABS = {
     self: {
@@ -640,10 +726,10 @@ const MouseGeneticsCalculator = ({ API_BASE_URL, authToken }) => {
                       {example.genotypes.map((genotype, gIdx) => (
                         <div key={gIdx} className="text-xs text-gray-500 font-mono">
                           {Object.entries(genotype).map(([locus, combo]) => {
-                            const locusInfo = GENE_LOCI[locus];
-                            const isWildtype = locusInfo && combo === locusInfo.combinations[0];
+                            const definingLocus = PHENOTYPE_LOCUS_MAP[example.name];
+                            const shouldBold = locus === definingLocus;
                             return (
-                              <span key={locus} className={`mr-2 ${isWildtype ? '' : 'font-bold'}`}>
+                              <span key={locus} className={`mr-2 ${shouldBold ? 'font-bold' : ''}`}>
                                 {combo}
                               </span>
                             );
@@ -654,10 +740,10 @@ const MouseGeneticsCalculator = ({ API_BASE_URL, authToken }) => {
                   ) : (
                     <div className="text-xs text-gray-500 font-mono">
                       {Object.entries(example.genotype).map(([locus, combo]) => {
-                        const locusInfo = GENE_LOCI[locus];
-                        const isWildtype = locusInfo && combo === locusInfo.combinations[0];
+                        const definingLocus = PHENOTYPE_LOCUS_MAP[example.name];
+                        const shouldBold = locus === definingLocus;
                         return (
-                          <span key={locus} className={`mr-2 ${isWildtype ? '' : 'font-bold'}`}>
+                          <span key={locus} className={`mr-2 ${shouldBold ? 'font-bold' : ''}`}>
                             {combo}
                           </span>
                         );
