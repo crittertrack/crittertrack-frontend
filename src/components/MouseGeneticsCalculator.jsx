@@ -99,7 +99,7 @@ const GENE_LOCI = {
     name: 'xbrindle',
     combinations: [
       'mobr/mobr',
-      'Mobr/mobr', 'Mobr/Mobr'
+      'Mobr/mobr'
     ],
     maleCombinations: [
       'mobr/mobr'
