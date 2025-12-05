@@ -412,26 +412,27 @@ const calculatePhenotype = (genotype) => {
 };
 
 const MouseGeneticsCalculator = ({ API_BASE_URL, authToken }) => {
-  // Initialize with default genotypes
+  // Initialize with empty/default genotypes
   const defaultGenotype = {
-    A: 'A/A',
-    B: 'B/B',
-    C: 'C/C',
-    D: 'D/D',
-    E: 'E/E',
-    P: 'P/P',
-    S: 'S/S',
-    W: 'w/w',
-    Spl: 'spl/spl',
-    Rn: 'rn/rn',
-    Si: 'si/si',
-    Mobr: 'mobr/mobr',
-    Go: 'Go/Go',
-    Re: 're/re',
-    Sa: 'Sa/Sa',
-    Rst: 'Rst/Rst',
-    Fz: 'Fz/Fz',
-    Nu: 'nu/nu'
+    A: '',
+    B: '',
+    C: '',
+    D: '',
+    E: '',
+    P: '',
+    S: '',
+    W: '',
+    Spl: '',
+    Rn: '',
+    Si: '',
+    Mobr: '',
+    Go: '',
+    Re: '',
+    Sa: '',
+    Rst: '',
+    Fz: '',
+    Nu: '',
+    U: ''
   };
 
   const [parent1, setParent1] = useState(defaultGenotype);
@@ -454,8 +455,43 @@ const MouseGeneticsCalculator = ({ API_BASE_URL, authToken }) => {
     return cleaned.split('/');
   };
 
+  // Function to apply defaults to genotype
+  const applyDefaults = (genotype) => {
+    const defaults = {
+      A: 'A/A',      // Agouti (wild type)
+      B: 'B/B',      // Black (wild type)
+      C: 'C/C',      // Full color (wild type)
+      D: 'D/D',      // Non-dilute (wild type)
+      E: 'E/E',      // Extension (wild type)
+      P: 'P/P',      // Black eye (wild type)
+      S: 'S/S',      // Non-pied (wild type)
+      W: 'w/w',      // No white spotting
+      Spl: 'spl/spl', // No splashed
+      Rn: 'rn/rn',   // No roan
+      Si: 'si/si',   // No silver
+      Mobr: 'mobr/mobr', // No xbrindle
+      Go: 'Go/Go',   // Shorthair (default)
+      Re: 're/re',   // No astrex
+      Sa: 'Sa/Sa',   // Non-satin
+      Rst: 'Rst/Rst', // No rosette
+      Fz: 'Fz/Fz',   // No fuzz
+      Nu: 'nu/nu',   // No nude
+      U: 'u/u'       // No umbrous
+    };
+    
+    const filled = {};
+    for (const locus in defaults) {
+      filled[locus] = genotype[locus] || defaults[locus];
+    }
+    return filled;
+  };
+
   // Function to calculate offspring outcomes
   const calculateOffspring = () => {
+    // Apply defaults to both parents before calculating
+    const p1 = applyDefaults(parent1);
+    const p2 = applyDefaults(parent2);
+    
     const outcomes = {};
     const allLoci = Object.keys(GENE_LOCI);
     
@@ -475,8 +511,8 @@ const MouseGeneticsCalculator = ({ API_BASE_URL, authToken }) => {
       }
       
       const locus = allLoci[locusIndex];
-      const parent1Alleles = getAlleles(parent1[locus]);
-      const parent2Alleles = getAlleles(parent2[locus]);
+      const parent1Alleles = getAlleles(p1[locus]);
+      const parent2Alleles = getAlleles(p2[locus]);
       
       // Create all possible combinations for this locus
       for (const p1Allele of parent1Alleles) {
@@ -512,8 +548,8 @@ const MouseGeneticsCalculator = ({ API_BASE_URL, authToken }) => {
     setOffspringResults(resultsArray);
   };
 
-  const parent1Result = calculatePhenotype(parent1);
-  const parent2Result = calculatePhenotype(parent2);
+  const parent1Result = calculatePhenotype(applyDefaults(parent1));
+  const parent2Result = calculatePhenotype(applyDefaults(parent2));
 
   // Mapping of phenotype names to their defining loci (can be array for multiple)
   // For genotypes array phenotypes, use genotype index as key: "PhenotypeName:0", "PhenotypeName:1"
@@ -881,13 +917,14 @@ const MouseGeneticsCalculator = ({ API_BASE_URL, authToken }) => {
               return (
               <div key={locus}>
                 <label className="block text-xs font-medium text-gray-700 mb-1">
-                  {locus} - {data.name}
+                  {data.name}
                 </label>
                 <select
                   value={parent1[locus]}
                   onChange={(e) => updateParent1(locus, e.target.value)}
                   className="w-full px-2 py-1 text-sm border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
                 >
+                  <option value="">Select {data.name}...</option>
                   {validCombinations.map((combo) => (
                     <option key={combo} value={combo}>
                       {combo}
@@ -923,13 +960,14 @@ const MouseGeneticsCalculator = ({ API_BASE_URL, authToken }) => {
             {Object.entries(GENE_LOCI).map(([locus, data]) => (
               <div key={locus}>
                 <label className="block text-xs font-medium text-gray-700 mb-1">
-                  {locus} - {data.name}
+                  {data.name}
                 </label>
                 <select
                   value={parent2[locus]}
                   onChange={(e) => updateParent2(locus, e.target.value)}
                   className="w-full px-2 py-1 text-sm border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-pink-500"
                 >
+                  <option value="">Select {data.name}...</option>
                   {data.combinations.map((combo) => (
                     <option key={combo} value={combo}>
                       {combo}
