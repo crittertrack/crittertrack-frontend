@@ -366,31 +366,32 @@ const calculatePhenotype = (genotype, originalGenotype = null) => {
     const excludedCLocus = ['C/C', 'c/c', 'C/ch', 'C/ce', 'C/c', 'C/cch'];
     if (genotype.C && !excludedCLocus.includes(genotype.C)) {
       const isTanVariant = genotype.A === 'Ay/at';
-      const baseName = isTanVariant ? 'Dominant Red Fox' : 'Dominant Red';
+      const baseName = 'Dominant Red';
+      const suffix = isTanVariant ? ' Fox' : '';
       
       if (genotype.C === 'ch/c') {
-        return { phenotype: `${baseName} Himalayan`, carriers, hidden };
+        return { phenotype: `${baseName} Himalayan${suffix}`, carriers, hidden };
       }
       if (genotype.C === 'ch/ch') {
-        return { phenotype: `${baseName} Siamese`, carriers, hidden };
+        return { phenotype: `${baseName} Siamese${suffix}`, carriers, hidden };
       }
       if (genotype.C === 'ce/c') {
-        return { phenotype: `${baseName} Bone`, carriers, hidden };
+        return { phenotype: `${baseName} Bone${suffix}`, carriers, hidden };
       }
       if (genotype.C === 'ce/ch') {
-        return { phenotype: `${baseName} Colorpoint Beige`, carriers, hidden };
+        return { phenotype: `${baseName} Colorpoint Beige${suffix}`, carriers, hidden };
       }
       if (genotype.C === 'ce/ce') {
-        return { phenotype: `${baseName} Beige`, carriers, hidden };
+        return { phenotype: `${baseName} Beige${suffix}`, carriers, hidden };
       }
       if (genotype.C === 'cch/c') {
-        return { phenotype: `${baseName} Stone`, carriers, hidden };
+        return { phenotype: `${baseName} Stone${suffix}`, carriers, hidden };
       }
       if (genotype.C === 'cch/ch') {
-        return { phenotype: `${baseName} Burmese`, carriers, hidden };
+        return { phenotype: `${baseName} Burmese${suffix}`, carriers, hidden };
       }
       if (genotype.C === 'cch/ce') {
-        return { phenotype: `${baseName} Mock Chocolate`, carriers, hidden };
+        return { phenotype: `${baseName} Mock Chocolate${suffix}`, carriers, hidden };
       }
       if (genotype.C === 'cch/cch') {
         return { phenotype: isTanVariant ? 'Cream Fox' : 'Cream', carriers, hidden };
