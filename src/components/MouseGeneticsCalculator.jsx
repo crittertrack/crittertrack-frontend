@@ -505,7 +505,7 @@ const MouseGeneticsCalculator = ({ API_BASE_URL, authToken }) => {
     cdilute: {
       name: 'C-locus',
       examples: [
-        { name: 'Albino/PEW', genotype: { A: 'a/a', B: 'B/B', C: 'c/c', D: 'D/D', E: 'E/E', P: 'P/P' } },
+        { name: 'Albino', genotype: { A: 'a/a', B: 'B/B', C: 'c/c', D: 'D/D', E: 'E/E', P: 'P/P' } },
         { name: 'Himalayan', genotype: { A: 'a/a', B: 'B/B', C: 'ch/ch', D: 'D/D', E: 'E/E', P: 'P/P' } },
         { name: 'Bone', genotype: { A: 'a/a', B: 'B/B', C: 'ce/ce', D: 'D/D', E: 'E/E', P: 'P/P' } },
         { name: 'Beige', genotype: { A: 'a/a', B: 'b/b', C: 'ce/ce', D: 'D/D', E: 'E/E', P: 'P/P' } },
@@ -548,6 +548,7 @@ const MouseGeneticsCalculator = ({ API_BASE_URL, authToken }) => {
     marked: {
       name: 'Marked',
       examples: [
+        { name: 'PEW', genotype: { A: 'a/a', B: 'B/B', C: 'c/c', D: 'D/D', E: 'E/E', P: 'P/P' } },
         { name: 'Pied', genotype: { A: 'a/a', B: 'B/B', C: 'C/C', D: 'D/D', E: 'E/E', P: 'P/P', S: 's/s' } },
         { name: 'Dutch', genotype: { A: 'a/a', B: 'B/B', C: 'C/C', D: 'D/D', E: 'E/E', P: 'P/P', S: 's/s' } },
         { name: 'Hereford', genotype: { A: 'a/a', B: 'B/B', C: 'C/C', D: 'D/D', E: 'E/E', P: 'P/P', S: 's/s' } },
