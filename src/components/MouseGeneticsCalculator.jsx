@@ -362,6 +362,41 @@ const calculatePhenotype = (genotype, originalGenotype = null) => {
 
   // Dominant yellow/red (Ay)
   if (genotype.A && (genotype.A.startsWith('Ay/'))) {
+    // Check for C-locus dilutes (exclude C/C and c/c)
+    const excludedCLocus = ['C/C', 'c/c', 'C/ch', 'C/ce', 'C/c', 'C/cch'];
+    if (genotype.C && !excludedCLocus.includes(genotype.C)) {
+      const isTanVariant = genotype.A === 'Ay/at';
+      const baseName = isTanVariant ? 'Dominant Red Tan' : 'Dominant Red';
+      
+      if (genotype.C === 'ch/c') {
+        return { phenotype: `${baseName} Himalayan`, carriers, hidden };
+      }
+      if (genotype.C === 'ch/ch') {
+        return { phenotype: `${baseName} Siamese`, carriers, hidden };
+      }
+      if (genotype.C === 'ce/c') {
+        return { phenotype: `${baseName} Bone`, carriers, hidden };
+      }
+      if (genotype.C === 'ce/ch') {
+        return { phenotype: `${baseName} Colorpoint Beige`, carriers, hidden };
+      }
+      if (genotype.C === 'ce/ce') {
+        return { phenotype: `${baseName} Beige`, carriers, hidden };
+      }
+      if (genotype.C === 'cch/c') {
+        return { phenotype: `${baseName} Stone`, carriers, hidden };
+      }
+      if (genotype.C === 'cch/ch') {
+        return { phenotype: `${baseName} Burmese`, carriers, hidden };
+      }
+      if (genotype.C === 'cch/ce') {
+        return { phenotype: `${baseName} Mock Chocolate`, carriers, hidden };
+      }
+      if (genotype.C === 'cch/cch') {
+        return { phenotype: `${baseName} Sepia`, carriers, hidden };
+      }
+    }
+    
     // Track what Ay is paired with
     if (genotype.A === 'Ay/ae') carriers.push('Extreme Black');
     else if (genotype.A === 'Ay/a') carriers.push('Black');
