@@ -468,12 +468,12 @@ const MouseGeneticsCalculator = ({ API_BASE_URL, authToken }) => {
     ticked: {
       name: 'Ticked',
       examples: [
-        { name: 'Agouti', genotype: { A: 'A/A', B: 'B/B', C: 'C/C', D: 'D/D', E: 'E/E', P: 'P/P' } },
+        { name: 'Agouti', genotype: { A: 'A/a', B: 'B/B', C: 'C/C', D: 'D/D', E: 'E/E', P: 'P/P' } },
         { name: 'Brindle', genotype: { A: 'Avy/a', B: 'B/B', C: 'C/C', D: 'D/D', E: 'E/E', P: 'P/P' } },
-        { name: 'Argente', genotype: { A: 'A/A', B: 'B/B', C: 'C/C', D: 'D/D', E: 'E/E', P: 'p/p' } },
-        { name: 'Cinnamon', genotype: { A: 'A/A', B: 'b/b', C: 'C/C', D: 'D/D', E: 'E/E', P: 'P/P' } },
-        { name: 'Blue Agouti', genotype: { A: 'A/A', B: 'B/B', C: 'C/C', D: 'd/d', E: 'E/E', P: 'P/P' } },
-        { name: 'Cinnamon Argente', genotype: { A: 'A/A', B: 'b/b', C: 'C/C', D: 'D/D', E: 'E/E', P: 'p/p' } },
+        { name: 'Argente', genotype: { A: 'A/a', B: 'B/B', C: 'C/C', D: 'D/D', E: 'E/E', P: 'p/p' } },
+        { name: 'Cinnamon', genotype: { A: 'A/a', B: 'b/b', C: 'C/C', D: 'D/D', E: 'E/E', P: 'P/P' } },
+        { name: 'Blue Agouti', genotype: { A: 'A/a', B: 'B/B', C: 'C/C', D: 'd/d', E: 'E/E', P: 'P/P' } },
+        { name: 'Cinnamon Argente', genotype: { A: 'A/a', B: 'b/b', C: 'C/C', D: 'D/D', E: 'E/E', P: 'p/p' } },
       ]
     },
     tan: {
