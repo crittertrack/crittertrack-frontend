@@ -393,7 +393,7 @@ const calculatePhenotype = (genotype, originalGenotype = null) => {
         return { phenotype: `${baseName} Mock Chocolate`, carriers, hidden };
       }
       if (genotype.C === 'cch/cch') {
-        return { phenotype: `${baseName} Sepia`, carriers, hidden };
+        return { phenotype: isTanVariant ? 'Cream Fox' : 'Cream', carriers, hidden };
       }
     }
     
