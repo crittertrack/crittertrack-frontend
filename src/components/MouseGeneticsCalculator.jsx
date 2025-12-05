@@ -921,7 +921,7 @@ const MouseGeneticsCalculator = ({ API_BASE_URL, authToken }) => {
                   onChange={(e) => updateParent1(locus, e.target.value)}
                   className="w-full px-2 py-1 text-sm border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
                 >
-                  <option value="">{locus}</option>
+                  <option value="">{locus} - {data.name}</option>
                   {validCombinations.map((combo) => (
                     <option key={combo} value={combo}>
                       {combo}
@@ -961,7 +961,7 @@ const MouseGeneticsCalculator = ({ API_BASE_URL, authToken }) => {
                   onChange={(e) => updateParent2(locus, e.target.value)}
                   className="w-full px-2 py-1 text-sm border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-pink-500"
                 >
-                  <option value="">{locus}</option>
+                  <option value="">{locus} - {data.name}</option>
                   {data.combinations.map((combo) => (
                     <option key={combo} value={combo}>
                       {combo}
