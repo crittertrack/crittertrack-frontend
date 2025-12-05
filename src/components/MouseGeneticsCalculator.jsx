@@ -212,7 +212,7 @@ const calculatePhenotype = (genotype, originalGenotype = null) => {
   // Special handling for agouti tan (A/at) with C-locus combinations
   if (isAgoutiTan && genotype.C !== 'C/C') {
     if (genotype.C === 'c/c') {
-      return { phenotype: 'Albino Fox', carriers, hidden };
+      return { phenotype: 'Albino', carriers, hidden };
     }
     if (genotype.C === 'ch/c') {
       return { phenotype: 'Agouti Himalayan Fox', carriers, hidden };
@@ -280,7 +280,7 @@ const calculatePhenotype = (genotype, originalGenotype = null) => {
   // Special handling for tan/fox variants with C-locus combinations
   if (isTanVariant && genotype.C !== 'C/C') {
     if (genotype.C === 'c/c') {
-      return { phenotype: 'Albino Fox', carriers, hidden };
+      return { phenotype: 'Albino', carriers, hidden };
     }
     if (genotype.C === 'ch/c') {
       return { phenotype: 'Himalayan Fox', carriers, hidden };
@@ -347,7 +347,7 @@ const calculatePhenotype = (genotype, originalGenotype = null) => {
 
   // Albino override for other genotypes
   if (genotype.C === 'c/c') {
-    return { phenotype: genotype.P === 'p/p' ? 'Pink-Eyed White (Albino)' : 'Pink-Eyed White (Albino)', carriers, hidden };
+    return { phenotype: 'Albino', carriers, hidden };
   }
 
   // Recessive red/yellow
