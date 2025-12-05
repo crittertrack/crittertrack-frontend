@@ -555,7 +555,7 @@ const MouseGeneticsCalculator = ({ API_BASE_URL, authToken }) => {
     'Longhair': ['Go'],
     'Satin': ['Sa'],
     'Astrex': ['Re'],
-    'Texel': ['Re'],
+    'Texel': ['Go', 'Re'],
     'Rosette': ['Rst'],
     'Fuzz': ['Fz'],
     'Dominant Hairless': ['Nu'],
