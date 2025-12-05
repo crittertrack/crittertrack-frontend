@@ -532,18 +532,18 @@ const MouseGeneticsCalculator = ({ API_BASE_URL, authToken }) => {
     fox: {
       name: 'Fox',
       examples: [
-        { name: 'Sepia Fox', genotype: { A: 'at/a', B: 'B/B', C: 'ch/cch', D: 'D/D', E: 'E/E', P: 'P/P' } },
-        { name: 'Beige Fox', genotype: { A: 'at/a', B: 'b/b', C: 'ce/ce', D: 'D/D', E: 'E/E', P: 'P/P' } },
-        { name: 'Bone Fox', genotype: { A: 'at/a', B: 'B/B', C: 'ce/ce', D: 'D/D', E: 'E/E', P: 'P/P' } },
-        { name: 'Burmese Fox', genotype: { A: 'at/a', B: 'B/B', C: 'cch/ce', D: 'D/D', E: 'E/E', P: 'P/P' } },
-        { name: 'Colorpoint Beige Fox', genotype: { A: 'at/a', B: 'b/b', C: 'ch/ce', D: 'D/D', E: 'E/E', P: 'P/P' } },
-        { name: 'Cream Fox', genotype: { A: 'at/a', B: 'b/b', C: 'cch/cch', D: 'D/D', E: 'E/E', P: 'P/P' } },
+        { name: 'Sepia Fox', genotype: { A: 'at/a', B: 'B/B', C: 'cch/cch', D: 'D/D', E: 'E/E', P: 'P/P' } },
+        { name: 'Beige Fox', genotype: { A: 'at/a', B: 'B/B', C: 'ce/ce', D: 'D/D', E: 'E/E', P: 'P/P' } },
+        { name: 'Bone Fox', genotype: { A: 'at/a', B: 'B/B', C: 'c/ce', D: 'D/D', E: 'E/E', P: 'P/P' } },
+        { name: 'Burmese Fox', genotype: { A: 'at/a', B: 'B/B', C: 'ch/cch', D: 'D/D', E: 'E/E', P: 'P/P' } },
+        { name: 'Colorpoint Beige Fox', genotype: { A: 'at/a', B: 'B/B', C: 'ce/ce', D: 'D/D', E: 'E/E', P: 'P/P' } },
+        { name: 'Cream Fox', genotype: { A: 'at/a', B: 'B/B', C: 'cch/cch', D: 'D/D', E: 'E/E', P: 'P/P' } },
         { name: 'Himalayan Fox', genotype: { A: 'at/a', B: 'B/B', C: 'ch/ch', D: 'D/D', E: 'E/E', P: 'P/P' } },
-        { name: 'Mock Chocolate Fox', genotype: { A: 'at/a', B: 'B/B', C: 'ch/ce', D: 'D/D', E: 'E/E', P: 'P/P' } },
+        { name: 'Mock Chocolate Fox', genotype: { A: 'at/a', B: 'B/B', C: 'ce/cch', D: 'D/D', E: 'E/E', P: 'P/P' } },
         { name: 'Siamese Fox', genotype: { A: 'at/a', B: 'B/B', C: 'ch/ch', D: 'D/D', E: 'E/E', P: 'P/P' } },
-        { name: 'Stone Fox', genotype: { A: 'at/a', B: 'B/B', C: 'ce/ce', D: 'D/D', E: 'E/E', P: 'P/P' } },
-        { name: 'Blue Sepia Fox', genotype: { A: 'at/a', B: 'B/B', C: 'ch/cch', D: 'd/d', E: 'E/E', P: 'P/P' } },
-        { name: 'Chocolate Sepia Fox', genotype: { A: 'at/a', B: 'b/b', C: 'ch/cch', D: 'D/D', E: 'E/E', P: 'P/P' } },
+        { name: 'Stone Fox', genotype: { A: 'at/a', B: 'B/B', C: 'c/ce', D: 'D/D', E: 'E/E', P: 'P/P' } },
+        { name: 'Blue Sepia Fox', genotype: { A: 'at/a', B: 'B/B', C: 'cch/cch', D: 'd/d', E: 'E/E', P: 'P/P' } },
+        { name: 'Chocolate Sepia Fox', genotype: { A: 'at/a', B: 'b/b', C: 'cch/cch', D: 'D/D', E: 'E/E', P: 'P/P' } },
       ]
     },
     marked: {
