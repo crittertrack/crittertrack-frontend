@@ -438,6 +438,7 @@ const MouseGeneticsCalculator = ({ API_BASE_URL, authToken }) => {
   const [parent2, setParent2] = useState(defaultGenotype);
   const [showExamples, setShowExamples] = useState(false);
   const [activeTab, setActiveTab] = useState('self');
+  const [offspringResults, setOffspringResults] = useState(null);
 
   const updateParent1 = (locus, value) => {
     setParent1({ ...parent1, [locus]: value });
@@ -445,6 +446,70 @@ const MouseGeneticsCalculator = ({ API_BASE_URL, authToken }) => {
 
   const updateParent2 = (locus, value) => {
     setParent2({ ...parent2, [locus]: value });
+  };
+
+  // Function to get possible alleles from a genotype combination
+  const getAlleles = (combination) => {
+    const cleaned = combination.replace(' (lethal)', '');
+    return cleaned.split('/');
+  };
+
+  // Function to calculate offspring outcomes
+  const calculateOffspring = () => {
+    const outcomes = {};
+    const allLoci = Object.keys(GENE_LOCI);
+    
+    // Generate all possible offspring genotypes
+    const generateOffspring = (locusIndex, currentGenotype) => {
+      if (locusIndex >= allLoci.length) {
+        // Calculate phenotype for this genotype
+        const result = calculatePhenotype(currentGenotype);
+        const phenotype = result.phenotype;
+        
+        if (!outcomes[phenotype]) {
+          outcomes[phenotype] = { count: 0, genotypes: [] };
+        }
+        outcomes[phenotype].count++;
+        outcomes[phenotype].genotypes.push(currentGenotype);
+        return;
+      }
+      
+      const locus = allLoci[locusIndex];
+      const parent1Alleles = getAlleles(parent1[locus]);
+      const parent2Alleles = getAlleles(parent2[locus]);
+      
+      // Create all possible combinations for this locus
+      for (const p1Allele of parent1Alleles) {
+        for (const p2Allele of parent2Alleles) {
+          // Sort alleles to create consistent genotype notation
+          const alleles = [p1Allele, p2Allele].sort((a, b) => {
+            // Dominant alleles (uppercase) come first
+            if (a[0] === a[0].toUpperCase() && b[0] === b[0].toLowerCase()) return -1;
+            if (a[0] === a[0].toLowerCase() && b[0] === b[0].toUpperCase()) return 1;
+            return a.localeCompare(b);
+          });
+          
+          const offspringCombo = `${alleles[0]}/${alleles[1]}`;
+          generateOffspring(locusIndex + 1, {
+            ...currentGenotype,
+            [locus]: offspringCombo
+          });
+        }
+      }
+    };
+    
+    generateOffspring(0, {});
+    
+    // Calculate percentages and sort by frequency
+    const totalCount = Object.values(outcomes).reduce((sum, o) => sum + o.count, 0);
+    const resultsArray = Object.entries(outcomes).map(([phenotype, data]) => ({
+      phenotype,
+      percentage: ((data.count / totalCount) * 100).toFixed(2),
+      count: data.count,
+      total: totalCount
+    })).sort((a, b) => b.percentage - a.percentage);
+    
+    setOffspringResults(resultsArray);
   };
 
   const parent1Result = calculatePhenotype(parent1);
@@ -892,6 +957,38 @@ const MouseGeneticsCalculator = ({ API_BASE_URL, authToken }) => {
           </div>
         </div>
       </div>
+
+          {/* Calculate Button */}
+          <div className="mt-6 flex justify-center">
+            <button
+              onClick={calculateOffspring}
+              className="px-8 py-3 bg-green-600 text-white text-lg font-semibold rounded-lg hover:bg-green-700 transition shadow-lg"
+            >
+              Calculate Offspring
+            </button>
+          </div>
+
+          {/* Offspring Results */}
+          {offspringResults && (
+            <div className="mt-6 bg-purple-50 rounded-lg p-6 border-2 border-purple-300">
+              <h2 className="text-xl font-semibold text-purple-800 mb-4">Possible Offspring Outcomes</h2>
+              <div className="space-y-2">
+                {offspringResults.map((result, idx) => (
+                  <div key={idx} className="bg-white p-3 rounded-lg border border-purple-200 flex justify-between items-center">
+                    <span className={`font-medium ${result.phenotype.includes('LETHAL') ? 'text-red-600' : 'text-gray-800'}`}>
+                      {result.phenotype}
+                    </span>
+                    <span className="text-purple-700 font-semibold">
+                      {result.percentage}%
+                      <span className="text-xs text-gray-500 ml-2">
+                        ({result.count}/{result.total})
+                      </span>
+                    </span>
+                  </div>
+                ))}
+              </div>
+            </div>
+          )}
         </div>
       )}
     </>
