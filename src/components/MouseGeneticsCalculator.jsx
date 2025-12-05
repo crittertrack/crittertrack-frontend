@@ -459,17 +459,23 @@ const MouseGeneticsCalculator = ({ API_BASE_URL, authToken }) => {
         { name: 'Black', genotype: { A: 'a/a', B: 'B/B', C: 'C/C', D: 'D/D', E: 'E/E', P: 'P/P' } },
         { name: 'Chocolate', genotype: { A: 'a/a', B: 'b/b', C: 'C/C', D: 'D/D', E: 'E/E', P: 'P/P' } },
         { name: 'Blue', genotype: { A: 'a/a', B: 'B/B', C: 'C/C', D: 'd/d', E: 'E/E', P: 'P/P' } },
-        { name: 'Red', genotype: { A: 'a/a', B: 'B/B', C: 'C/C', D: 'D/D', E: 'e/e', P: 'P/P' } },
-        { name: 'Red', genotype: { A: 'Ay/a', B: 'B/B', C: 'C/C', D: 'D/D', E: 'E/E', P: 'P/P' } },
+        { name: 'Red', genotypes: [
+          { A: 'a/a', B: 'B/B', C: 'C/C', D: 'D/D', E: 'e/e', P: 'P/P' },
+          { A: 'Ay/a', B: 'B/B', C: 'C/C', D: 'D/D', E: 'E/E', P: 'P/P' }
+        ] },
         { name: 'Lilac', genotype: { A: 'a/a', B: 'b/b', C: 'C/C', D: 'd/d', E: 'E/E', P: 'P/P' } },
         { name: 'Champagne', genotype: { A: 'a/a', B: 'b/b', C: 'C/C', D: 'D/D', E: 'E/E', P: 'p/p' } },
         { name: 'Dove', genotype: { A: 'a/a', B: 'B/B', C: 'C/C', D: 'D/D', E: 'E/E', P: 'p/p' } },
         { name: 'Lavender', genotype: { A: 'a/a', B: 'b/b', C: 'C/C', D: 'd/d', E: 'E/E', P: 'p/p' } },
         { name: 'Silver', genotype: { A: 'a/a', B: 'B/B', C: 'C/C', D: 'd/d', E: 'E/E', P: 'p/p' } },
-        { name: 'Fawn', genotype: { A: 'a/a', B: 'b/b', C: 'C/C', D: 'D/D', E: 'e/e', P: 'p/p' } },
-        { name: 'Fawn', genotype: { A: 'Ay/a', B: 'b/b', C: 'C/C', D: 'D/D', E: 'E/E', P: 'p/p' } },
-        { name: 'Amber', genotype: { A: 'a/a', B: 'b/b', C: 'C/C', D: 'd/d', E: 'e/e', P: 'P/P' } },
-        { name: 'Amber', genotype: { A: 'Ay/a', B: 'b/b', C: 'C/C', D: 'd/d', E: 'E/E', P: 'P/P' } },
+        { name: 'Fawn', genotypes: [
+          { A: 'a/a', B: 'b/b', C: 'C/C', D: 'D/D', E: 'e/e', P: 'p/p' },
+          { A: 'Ay/a', B: 'b/b', C: 'C/C', D: 'D/D', E: 'E/E', P: 'p/p' }
+        ] },
+        { name: 'Amber', genotypes: [
+          { A: 'a/a', B: 'b/b', C: 'C/C', D: 'd/d', E: 'e/e', P: 'P/P' },
+          { A: 'Ay/a', B: 'b/b', C: 'C/C', D: 'd/d', E: 'E/E', P: 'P/P' }
+        ] },
       ]
     },
     ticked: {
@@ -550,16 +556,17 @@ const MouseGeneticsCalculator = ({ API_BASE_URL, authToken }) => {
     marked: {
       name: 'Marked',
       examples: [
-        { name: 'PEW', genotype: { A: 'a/a', B: 'B/B', C: 'c/c', D: 'D/D', E: 'E/E', P: 'P/P' } },
-        { name: 'Pied', genotype: { A: 'a/a', B: 'B/B', C: 'C/C', D: 'D/D', E: 'E/E', P: 'P/P', S: 's/s' } },
-        { name: 'Dutch', genotype: { A: 'a/a', B: 'B/B', C: 'C/C', D: 'D/D', E: 'E/E', P: 'P/P', S: 's/s' } },
-        { name: 'Hereford', genotype: { A: 'a/a', B: 'B/B', C: 'C/C', D: 'D/D', E: 'E/E', P: 'P/P', S: 's/s' } },
-        { name: 'Banded', genotype: { A: 'a/a', B: 'B/B', C: 'C/C', D: 'D/D', E: 'E/E', P: 'P/P', W: 'Wsh/w' } },
-        { name: 'Variegated', genotype: { A: 'a/a', B: 'B/B', C: 'C/C', D: 'D/D', E: 'E/E', P: 'P/P', W: 'W/w' } },
-        { name: 'Rumpwhite', genotype: { A: 'a/a', B: 'B/B', C: 'C/C', D: 'D/D', E: 'E/E', P: 'P/P', W: 'Rw/w' } },
-        { name: 'xbrindle', genotype: { A: 'a/a', B: 'B/B', C: 'C/C', D: 'D/D', E: 'E/E', P: 'P/P', Mobr: 'Mobr/mobr' } },
-        { name: 'Roan', genotype: { A: 'a/a', B: 'B/B', C: 'C/C', D: 'D/D', E: 'E/E', P: 'P/P', Rn: 'Rn/rn' } },
-        { name: 'Pearl/Silvered', genotype: { A: 'a/a', B: 'B/B', C: 'C/C', D: 'D/D', E: 'E/E', P: 'P/P', Si: 'Si/si' } },
+        { name: 'Pink Eye White', description: 'Possibilities: Red + Himalayan/Siamese | Himalayan/Siamese + Pink Eye Dilute (p/p) | Himalayan/Siamese + Pied or Dominant Spotting | Pink Eye Dilute + Pied + Dominant Spotting' },
+        { name: 'Black Eye White', description: 'Possibilities: Red + Bone/Stone | Bone/Stone + Pied or Dominant Spotting | Pied + Dominant Spotting' },
+        { name: 'Pied', genotype: { B: 'B/B', C: 'C/C', D: 'D/D', E: 'E/E', P: 'P/P', S: 's/s' } },
+        { name: 'Dutch', genotype: { B: 'B/B', C: 'C/C', D: 'D/D', E: 'E/E', P: 'P/P', S: 's/s+' }, note: 'Kit selection markers necessary' },
+        { name: 'Hereford', genotype: { B: 'B/B', C: 'C/C', D: 'D/D', E: 'E/E', P: 'P/P', S: 's/s+' }, note: 'Kit selection markers necessary' },
+        { name: 'Banded', genotype: { B: 'B/B', C: 'C/C', D: 'D/D', E: 'E/E', P: 'P/P', W: 'Wsh/w' } },
+        { name: 'Variegated', genotype: { B: 'B/B', C: 'C/C', D: 'D/D', E: 'E/E', P: 'P/P', W: 'W/w' } },
+        { name: 'Rumpwhite', genotype: { B: 'B/B', C: 'C/C', D: 'D/D', E: 'E/E', P: 'P/P', W: 'Rw/w' } },
+        { name: 'xbrindle', genotype: { B: 'B/B', C: 'C/C', D: 'D/D', E: 'E/E', P: 'P/P', Mobr: 'Mobr/mobr' } },
+        { name: 'Roan', genotype: { B: 'B/B', C: 'C/C', D: 'D/D', E: 'E/E', P: 'P/P', Rn: 'rn/rn' } },
+        { name: 'Pearl/Silvered', genotype: { B: 'B/B', C: 'C/C', D: 'D/D', E: 'E/E', P: 'P/P', Si: 'si/si' } },
       ]
     },
     coats: {
@@ -612,11 +619,28 @@ const MouseGeneticsCalculator = ({ API_BASE_URL, authToken }) => {
               {EXAMPLE_TABS[activeTab].examples.map((example, idx) => (
                 <div key={idx} className="bg-white p-4 rounded-lg border border-gray-200">
                   <h3 className="font-semibold text-gray-800 mb-2">{example.name}</h3>
-                  <div className="text-xs text-gray-500 font-mono">
-                    {Object.entries(example.genotype).map(([locus, combo]) => (
-                      <span key={locus} className="mr-2">{combo}</span>
-                    ))}
-                  </div>
+                  {example.description ? (
+                    <p className="text-xs text-gray-600">{example.description}</p>
+                  ) : example.genotypes ? (
+                    <div className="space-y-2">
+                      {example.genotypes.map((genotype, gIdx) => (
+                        <div key={gIdx} className="text-xs text-gray-500 font-mono">
+                          {Object.entries(genotype).map(([locus, combo]) => (
+                            <span key={locus} className="mr-2">{combo}</span>
+                          ))}
+                        </div>
+                      ))}
+                    </div>
+                  ) : (
+                    <div className="text-xs text-gray-500 font-mono">
+                      {Object.entries(example.genotype).map(([locus, combo]) => (
+                        <span key={locus} className="mr-2">{combo}</span>
+                      ))}
+                    </div>
+                  )}
+                  {example.note && (
+                    <p className="text-xs text-gray-500 italic mt-2">{example.note}</p>
+                  )}
                 </div>
               ))}
             </div>
