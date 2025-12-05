@@ -1636,11 +1636,21 @@ const ViewOnlyAnimalDetail = ({ animal, onClose, API_BASE_URL, onViewProfile }) 
                                 parentId={animal.fatherId_public || animal.sireId_public} 
                                 parentType="Father"
                                 API_BASE_URL={API_BASE_URL}
+                                onViewAnimal={(parent) => {
+                                    if (window.handleViewPublicAnimal) {
+                                        window.handleViewPublicAnimal(parent);
+                                    }
+                                }}
                             />
                             <ViewOnlyParentCard 
                                 parentId={animal.motherId_public || animal.damId_public} 
                                 parentType="Mother"
                                 API_BASE_URL={API_BASE_URL}
+                                onViewAnimal={(parent) => {
+                                    if (window.handleViewPublicAnimal) {
+                                        window.handleViewPublicAnimal(parent);
+                                    }
+                                }}
                             />
                         </div>
                     </div>
@@ -1671,7 +1681,7 @@ const ViewOnlyAnimalDetail = ({ animal, onClose, API_BASE_URL, onViewProfile }) 
 };
 
 // View-Only Parent Card Component
-const ViewOnlyParentCard = ({ parentId, parentType, API_BASE_URL }) => {
+const ViewOnlyParentCard = ({ parentId, parentType, API_BASE_URL, onViewAnimal }) => {
     const [parentData, setParentData] = useState(null);
     const [loading, setLoading] = useState(false);
     const [notFound, setNotFound] = useState(false);
@@ -1734,7 +1744,10 @@ const ViewOnlyParentCard = ({ parentId, parentType, API_BASE_URL }) => {
     const imgSrc = parentData.imageUrl || parentData.photoUrl || null;
 
     return (
-        <div className="border-2 border-gray-300 rounded-lg overflow-hidden">
+        <div 
+            className="border-2 border-gray-300 rounded-lg overflow-hidden cursor-pointer hover:shadow-md transition-shadow"
+            onClick={() => onViewAnimal && onViewAnimal(parentData)}
+        >
             <div className="bg-gray-50 px-3 py-2 border-b border-gray-300">
                 <p className="text-xs font-semibold text-gray-600">{parentType}</p>
             </div>
@@ -1763,7 +1776,7 @@ const ViewOnlyParentCard = ({ parentId, parentType, API_BASE_URL }) => {
 };
 
 // Parent Mini Card Component for Offspring Section
-const ParentMiniCard = ({ parent, label }) => {
+const ParentMiniCard = ({ parent, label, onViewAnimal }) => {
     if (!parent) {
         return (
             <div className="flex items-center space-x-2 bg-gray-50 rounded-lg p-2 border border-gray-200" style={{ width: 'auto', minWidth: '180px' }}>
@@ -1778,7 +1791,11 @@ const ParentMiniCard = ({ parent, label }) => {
     }
 
     return (
-        <div className="flex items-center space-x-2 bg-gray-50 rounded-lg p-2 border border-gray-200" style={{ width: 'auto', minWidth: '180px' }}>
+        <div 
+            className="flex items-center space-x-2 bg-gray-50 rounded-lg p-2 border border-gray-200 cursor-pointer hover:bg-gray-100 transition" 
+            style={{ width: 'auto', minWidth: '180px' }}
+            onClick={() => onViewAnimal && onViewAnimal(parent)}
+        >
             <div className="w-10 h-10 bg-gray-200 rounded-md overflow-hidden flex items-center justify-center flex-shrink-0">
                 {parent.imageUrl || parent.photoUrl ? (
                     <img 
@@ -1889,6 +1906,7 @@ const OffspringSection = ({ animalId, API_BASE_URL, authToken = null, onViewAnim
                                 <ParentMiniCard 
                                     parent={litter.otherParentType === 'sire' ? litter.otherParent : currentAnimal}
                                     label="Father"
+                                    onViewAnimal={onViewAnimal}
                                 />
                             )}
                             
@@ -1897,6 +1915,7 @@ const OffspringSection = ({ animalId, API_BASE_URL, authToken = null, onViewAnim
                                 <ParentMiniCard 
                                     parent={litter.otherParentType === 'dam' ? litter.otherParent : currentAnimal}
                                     label="Mother"
+                                    onViewAnimal={onViewAnimal}
                                 />
                             )}
                         </div>
