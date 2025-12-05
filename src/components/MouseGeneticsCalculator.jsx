@@ -643,7 +643,7 @@ const MouseGeneticsCalculator = ({ API_BASE_URL, authToken }) => {
                             const locusInfo = GENE_LOCI[locus];
                             const isWildtype = locusInfo && combo === locusInfo.combinations[0];
                             return (
-                              <span key={locus} className={`mr-2 ${!isWildtype ? 'font-semibold' : ''}`}>
+                              <span key={locus} className={`mr-2 ${isWildtype ? '' : 'font-semibold'}`}>
                                 {combo}
                               </span>
                             );
@@ -657,7 +657,7 @@ const MouseGeneticsCalculator = ({ API_BASE_URL, authToken }) => {
                         const locusInfo = GENE_LOCI[locus];
                         const isWildtype = locusInfo && combo === locusInfo.combinations[0];
                         return (
-                          <span key={locus} className={`mr-2 ${!isWildtype ? 'font-semibold' : ''}`}>
+                          <span key={locus} className={`mr-2 ${isWildtype ? '' : 'font-semibold'}`}>
                             {combo}
                           </span>
                         );
