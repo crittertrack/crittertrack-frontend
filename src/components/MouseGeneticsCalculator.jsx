@@ -393,11 +393,11 @@ const calculatePhenotype = (genotype, originalGenotype = null) => {
   }
 
   // Base color determination
-  const isAgouti = genotype.A && (genotype.A.includes('A/') || genotype.A.endsWith('/A'));
-  const isTan = genotype.A && genotype.A.includes('at/') && !genotype.A.includes('A/');
-  const isBlack = genotype.A && (genotype.A.includes('a/a') || genotype.A.includes('a/ae') || genotype.A.includes('ae/ae'));
-  const isExtremeBlack = genotype.A === 'ae/ae';
-  const isExtremeTan = genotype.A === 'at/ae';
+  const isAgoutiPattern = genotype.A && (genotype.A.includes('A/') || genotype.A.endsWith('/A'));
+  const isTanPattern = genotype.A && genotype.A.includes('at/') && !genotype.A.includes('A/');
+  const isBlackPattern = genotype.A && (genotype.A.includes('a/a') || genotype.A.includes('a/ae') || genotype.A.includes('ae/ae'));
+  const isExtremeBlackPattern = genotype.A === 'ae/ae';
+  const isExtremeTanPattern = genotype.A === 'at/ae';
 
   // Track carriers for A-locus
   if (genotype.A === 'A/a') carriers.push('Black');
@@ -411,7 +411,7 @@ const calculatePhenotype = (genotype, originalGenotype = null) => {
   const isBrown = genotype.B === 'b/b';
   if (genotype.B === 'B/b') carriers.push('Chocolate');
   
-  if (isAgouti) {
+  if (isAgoutiPattern) {
     pattern = 'Agouti';
     // Check for A/at (agouti tan)
     if (genotype.A === 'A/at') {
@@ -419,16 +419,16 @@ const calculatePhenotype = (genotype, originalGenotype = null) => {
     } else {
       color = isBrown ? 'Cinnamon' : 'Agouti';
     }
-  } else if (isTan) {
+  } else if (isTanPattern) {
     pattern = 'Tan';
-    if (isExtremeTan) {
+    if (isExtremeTanPattern) {
       color = isBrown ? 'Extreme Chocolate Tan' : 'Extreme Black Tan';
     } else {
       color = isBrown ? 'Chocolate Tan' : 'Black Tan';
     }
-  } else if (isBlack) {
+  } else if (isBlackPattern) {
     pattern = 'Self';
-    if (isExtremeBlack) {
+    if (isExtremeBlackPattern) {
       color = isBrown ? 'Chocolate' : 'Extreme Black';
     } else {
       color = isBrown ? 'Chocolate' : 'Black';
