@@ -194,6 +194,46 @@ const calculatePhenotype = (genotype, originalGenotype = null) => {
   const isBlack = genotype.A === 'a/a';
   const isSelfBlackVariant = isExtremeBlack || isBlackHetero || isBlack;
 
+  // Check if this is at/ae, at/a, or at/at (tan/fox variants)
+  const isExtremeTan = genotype.A === 'at/ae';
+  const isTanHetero = genotype.A === 'at/a';
+  const isTan = genotype.A === 'at/at';
+  const isTanVariant = isExtremeTan || isTanHetero || isTan;
+
+  // Special handling for tan/fox variants with C-locus combinations
+  if (isTanVariant && genotype.C !== 'C/C') {
+    if (genotype.C === 'c/c') {
+      return { phenotype: 'Albino', carriers, hidden };
+    }
+    if (genotype.C === 'ch/c') {
+      return { phenotype: 'Himalayan Fox', carriers, hidden };
+    }
+    if (genotype.C === 'ch/ch') {
+      return { phenotype: 'Siamese Fox', carriers, hidden };
+    }
+    if (genotype.C === 'ce/c') {
+      return { phenotype: 'Bone Fox', carriers, hidden };
+    }
+    if (genotype.C === 'ce/ch') {
+      return { phenotype: 'Colorpoint Beige Fox', carriers, hidden };
+    }
+    if (genotype.C === 'ce/ce') {
+      return { phenotype: 'Beige Fox', carriers, hidden };
+    }
+    if (genotype.C === 'cch/c') {
+      return { phenotype: 'Stone Fox', carriers, hidden };
+    }
+    if (genotype.C === 'cch/ch') {
+      return { phenotype: 'Burmese Fox', carriers, hidden };
+    }
+    if (genotype.C === 'cch/ce') {
+      return { phenotype: 'Mock Chocolate Fox', carriers, hidden };
+    }
+    if (genotype.C === 'cch/cch') {
+      return { phenotype: 'Sepia Fox', carriers, hidden };
+    }
+  }
+
   // Special handling for self black variants with C-locus combinations
   if (isSelfBlackVariant && genotype.C !== 'C/C') {
     if (genotype.C === 'c/c') {
