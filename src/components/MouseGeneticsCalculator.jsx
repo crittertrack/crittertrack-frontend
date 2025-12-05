@@ -310,7 +310,6 @@ const calculatePhenotype = (genotype, originalGenotype = null) => {
       return { phenotype: 'Sepia Fox', carriers, hidden };
     }
   }
-  }
 
   // Special handling for self black variants with C-locus combinations
   if (isSelfBlackVariant && genotype.C !== 'C/C') {
