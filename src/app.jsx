@@ -4895,7 +4895,8 @@ const AuthView = ({ onLoginSuccess, showModalMessage, isRegister, setIsRegister,
                     >
                         {isRegister ? 'Already have an account? Log In' : "Don't have an account? Register Here"}
                     </button>
-            </div>
+                </div>
+            )}
         </div>
     );
 };
