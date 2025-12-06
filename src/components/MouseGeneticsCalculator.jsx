@@ -211,9 +211,18 @@ const calculatePhenotype = (genotype, originalGenotype = null) => {
 
   // Special handling for agouti tan (A/at) with C-locus combinations
   if (isAgoutiTan && genotype.C !== 'C/C') {
+    const hasSpl = genotype.Spl && genotype.Spl.includes('Spl/');
+    const excludedCForSpl = ['C/C', 'c/c', 'C/c', 'C/ce', 'C/ch', 'C/cch'];
+    
     if (genotype.C === 'c/c') {
       return { phenotype: 'Albino', carriers, hidden };
     }
+    
+    // If Spl is present with eligible C-dilutes, use Splashed
+    if (hasSpl && !excludedCForSpl.includes(genotype.C)) {
+      return { phenotype: 'Agouti Splashed Fox', carriers, hidden };
+    }
+    
     if (genotype.C === 'ch/c') {
       return { phenotype: 'Agouti Himalayan Fox', carriers, hidden };
     }
@@ -245,9 +254,18 @@ const calculatePhenotype = (genotype, originalGenotype = null) => {
 
   // Special handling for agouti variants with C-locus combinations
   if (isAgoutiVariant && genotype.C !== 'C/C') {
+    const hasSpl = genotype.Spl && genotype.Spl.includes('Spl/');
+    const excludedCForSpl = ['C/C', 'c/c', 'C/c', 'C/ce', 'C/ch', 'C/cch'];
+    
     if (genotype.C === 'c/c') {
       return { phenotype: 'Albino', carriers, hidden };
     }
+    
+    // If Spl is present with eligible C-dilutes, use Splashed
+    if (hasSpl && !excludedCForSpl.includes(genotype.C)) {
+      return { phenotype: 'Agouti Splashed', carriers, hidden };
+    }
+    
     if (genotype.C === 'ch/c') {
       return { phenotype: 'Agouti Himalayan', carriers, hidden };
     }
@@ -279,9 +297,18 @@ const calculatePhenotype = (genotype, originalGenotype = null) => {
 
   // Special handling for tan/fox variants with C-locus combinations
   if (isTanVariant && genotype.C !== 'C/C') {
+    const hasSpl = genotype.Spl && genotype.Spl.includes('Spl/');
+    const excludedCForSpl = ['C/C', 'c/c', 'C/c', 'C/ce', 'C/ch', 'C/cch'];
+    
     if (genotype.C === 'c/c') {
       return { phenotype: 'Albino', carriers, hidden };
     }
+    
+    // If Spl is present with eligible C-dilutes, use Splashed
+    if (hasSpl && !excludedCForSpl.includes(genotype.C)) {
+      return { phenotype: 'Tan Splashed Fox', carriers, hidden };
+    }
+    
     if (genotype.C === 'ch/c') {
       return { phenotype: 'Himalayan Fox', carriers, hidden };
     }
@@ -313,9 +340,18 @@ const calculatePhenotype = (genotype, originalGenotype = null) => {
 
   // Special handling for self black variants with C-locus combinations
   if (isSelfBlackVariant && genotype.C !== 'C/C') {
+    const hasSpl = genotype.Spl && genotype.Spl.includes('Spl/');
+    const excludedCForSpl = ['C/C', 'c/c', 'C/c', 'C/ce', 'C/ch', 'C/cch'];
+    
     if (genotype.C === 'c/c') {
       return { phenotype: 'Albino', carriers, hidden };
     }
+    
+    // If Spl is present with eligible C-dilutes, use Splashed
+    if (hasSpl && !excludedCForSpl.includes(genotype.C)) {
+      return { phenotype: 'Black Splashed', carriers, hidden };
+    }
+    
     if (genotype.C === 'ch/c') {
       return { phenotype: 'Himalayan', carriers, hidden };
     }
@@ -362,10 +398,18 @@ const calculatePhenotype = (genotype, originalGenotype = null) => {
 
   // Dominant yellow/red (Ay)
   if (genotype.A && (genotype.A.startsWith('Ay/'))) {
+    const hasSpl = genotype.Spl && genotype.Spl.includes('Spl/');
+    
     // Check for C-locus dilutes (exclude C/C and c/c)
     const excludedCLocus = ['C/C', 'c/c', 'C/ch', 'C/ce', 'C/c', 'C/cch'];
     if (genotype.C && !excludedCLocus.includes(genotype.C)) {
       const isTanVariant = genotype.A === 'Ay/at';
+      
+      // If Spl is present, use Splashed instead of C-dilute names
+      if (hasSpl) {
+        return { phenotype: isTanVariant ? 'Dominant Red Splashed Fox' : 'Dominant Red Splashed', carriers, hidden };
+      }
+      
       const baseName = 'Dominant Red';
       const suffix = isTanVariant ? ' Fox' : '';
       
@@ -438,16 +482,10 @@ const calculatePhenotype = (genotype, originalGenotype = null) => {
     return { phenotype: 'Recessive Red', carriers, hidden };
   }
 
-  // Recessive red (e/e)
-  if (genotype.E === 'e/e') {
-    if (genotype.A && genotype.A.includes('at')) {
-      return { phenotype: 'Recessive Red Tan', carriers, hidden };
-    }
-    return { phenotype: 'Recessive Red', carriers, hidden };
-  }
-
   // Viable yellow (brindle - Avy)
   if (genotype.A && genotype.A.startsWith('Avy/')) {
+    const hasSpl = genotype.Spl && genotype.Spl.includes('Spl/');
+    
     // Handle C/- carriers separately
     if (genotype.C === 'C/c') {
       carriers.push('Albino');
@@ -462,8 +500,13 @@ const calculatePhenotype = (genotype, originalGenotype = null) => {
     // Check for C-locus dilutes (exclude C/C, c/c, and C/- carriers)
     const excludedCLocus = ['C/C', 'c/c', 'C/ch', 'C/ce', 'C/c', 'C/cch'];
     if (genotype.C && !excludedCLocus.includes(genotype.C)) {
-      // Check if it's tan variant
       const isTanVariant = genotype.A === 'Avy/at';
+      
+      // If Spl is present, use Splashed instead of Snowtiger
+      if (hasSpl) {
+        return { phenotype: isTanVariant ? 'Brindle Splashed Fox' : 'Brindle Splashed', carriers, hidden };
+      }
+      
       return { phenotype: isTanVariant ? 'Snowtiger Fox' : 'Snowtiger', carriers, hidden };
     }
     
