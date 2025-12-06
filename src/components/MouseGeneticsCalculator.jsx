@@ -1416,7 +1416,7 @@ const MouseGeneticsCalculator = ({ API_BASE_URL, authToken }) => {
             </p>
             <p className="text-sm text-gray-700">
               <span className="font-medium">Genotype: </span>
-              {Object.entries(applyDefaults(parent1))
+              {Object.entries(parent1)
                 .filter(([_, value]) => value && value !== '')
                 .map(([locus, alleles]) => `${locus}: ${alleles}`)
                 .join(', ') || ''}
@@ -1464,7 +1464,7 @@ const MouseGeneticsCalculator = ({ API_BASE_URL, authToken }) => {
             </p>
             <p className="text-sm text-gray-700">
               <span className="font-medium">Genotype: </span>
-              {Object.entries(applyDefaults(parent2))
+              {Object.entries(parent2)
                 .filter(([_, value]) => value && value !== '')
                 .map(([locus, alleles]) => `${locus}: ${alleles}`)
                 .join(', ') || ''}
