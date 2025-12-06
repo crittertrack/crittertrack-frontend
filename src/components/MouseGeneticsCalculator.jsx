@@ -614,10 +614,10 @@ const calculatePhenotype = (genotype, originalGenotype = null) => {
 
   // Base color determination
   const isAgoutiPattern = genotype.A && (genotype.A.includes('A/') || genotype.A.endsWith('/A'));
-  const isTanPattern = genotype.A && genotype.A.includes('at/') && !genotype.A.includes('A/');
-  const isBlackPattern = genotype.A && (genotype.A.includes('a/a') || genotype.A.includes('a/ae') || genotype.A.includes('ae/ae'));
+  const isTanPattern = isTanVariant && !isAgoutiPattern;
+  const isBlackPattern = isSelfBlackVariant;
   const isExtremeBlackPattern = genotype.A === 'ae/ae';
-  const isExtremeTanPattern = genotype.A === 'at/ae';
+  const isExtremeTanPattern = genotype.A === 'at/ae' || genotype.A === 'ae/at';
 
   // Track carriers for A-locus
   if (genotype.A === 'A/a') carriers.push('Black');
