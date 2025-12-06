@@ -12,7 +12,7 @@ const GENE_LOCI = {
       'at/ae', 'at/a', 'at/at',
       'A/ae', 'A/a', 'A/at', 'A/A',
       'Avy/ae', 'Avy/a', 'Avy/at', 'Avy/A', 'Avy/Avy',
-      'Ay/ae', 'Ay/a', 'Ay/at', 'Ay/A', 'Ay/Avy', 'Ay/Ay (lethal)'
+      'Ay/ae', 'Ay/a', 'Ay/at', 'Ay/A', 'Ay/Avy'
     ]
   },
   B: {
@@ -69,9 +69,9 @@ const GENE_LOCI = {
     name: 'Dominant Spotting',
     combinations: [
       'w/w',
-      'Rw/w', 'Rw/W (lethal)', 'Rw/Wsh (lethal)', 'Rw/Rw (lethal)',
-      'Wsh/w', 'Wsh/Wsh (lethal)',
-      'W/w', 'W/Wsh (lethal)', 'W/W (lethal)'
+      'Rw/w',
+      'Wsh/w',
+      'W/w'
     ]
   },
   Spl: {
@@ -426,6 +426,7 @@ const calculatePhenotype = (genotype, originalGenotype = null) => {
     } else {
       color = isTanVariant ? 'Dominant Red Tan' : 'Dominant Red';
     }
+    if (genotype.S === 's/s') color += ' Pied';
     return { phenotype: color, carriers, hidden };
   }
 
@@ -493,10 +494,12 @@ const calculatePhenotype = (genotype, originalGenotype = null) => {
     // Handle pink-eyed dilution
     if (genotype.P === 'p/p') {
       color = isTanVariant ? 'Dove Brindle Tan' : isAgouti ? 'Argente Brindle' : 'Dove Brindle';
+      if (genotype.S === 's/s') color += ' Pied';
       return { phenotype: color, carriers, hidden };
     }
     
     color = isTanVariant ? 'Brindle Tan' : 'Brindle';
+    if (genotype.S === 's/s') color += ' Pied';
     return { phenotype: color, carriers, hidden };
   }
 
@@ -577,16 +580,30 @@ const calculatePhenotype = (genotype, originalGenotype = null) => {
   }
 
   // C-locus modifications
-  if (genotype.C === 'cch/cch' || genotype.C?.includes('cch/')) {
-    if (!genotype.C.includes('C/cch')) {
-      color = `Chinchilla ${color}`;
+  // Check if Spl is present to replace C-dilute names with 'Splashed'
+  const hasSpl = genotype.Spl && genotype.Spl.includes('Spl/');
+  const excludedCForSpl = ['C/C', 'c/c', 'C/c', 'C/ce', 'C/ch', 'C/cch'];
+  const shouldUseSplashed = hasSpl && genotype.C && !excludedCForSpl.includes(genotype.C);
+  
+  if (shouldUseSplashed) {
+    // Extract the base pattern (Agouti, Tan, Self, etc.) from color
+    let baseName = '';
+    if (color.includes('Agouti')) baseName = 'Agouti ';
+    else if (color.includes('Tan')) baseName = color.includes('Cinnamon Tan') ? 'Cinnamon ' : color.includes('Chocolate Tan') ? 'Chocolate ' : color.includes('Black Tan') ? 'Black ' : '';
+    color = `${baseName}Splashed`;
+  } else if (genotype.C !== 'c/c') {
+    // Normal C-locus modifications (skip if albino)
+    if (genotype.C === 'cch/cch' || genotype.C?.includes('cch/')) {
+      if (!genotype.C.includes('C/cch')) {
+        color = `Chinchilla ${color}`;
+      }
     }
-  }
-  if (genotype.C === 'ch/ch' || (genotype.C?.includes('ch/') && !genotype.C.includes('C/ch') && !genotype.C.includes('cch/ch'))) {
-    color = `Himalayan ${color}`;
-  }
-  if (genotype.C === 'ce/ce' || (genotype.C?.includes('ce/') && !genotype.C.includes('C/ce'))) {
-    color = `Beige ${color}`;
+    if (genotype.C === 'ch/ch' || (genotype.C?.includes('ch/') && !genotype.C.includes('C/ch') && !genotype.C.includes('cch/ch'))) {
+      color = `Himalayan ${color}`;
+    }
+    if (genotype.C === 'ce/ce' || (genotype.C?.includes('ce/') && !genotype.C.includes('C/ce'))) {
+      color = `Beige ${color}`;
+    }
   }
   // C-locus carriers
   if (genotype.C && genotype.C.includes('C/')) {
@@ -601,7 +618,8 @@ const calculatePhenotype = (genotype, originalGenotype = null) => {
   if (genotype.E === 'E/e') carriers.push('Recessive Red');
 
   // Markings
-  if (genotype.S === 's/s') {
+  // Don't add Pied if it's already in the color name (for Ay/Avy)
+  if (genotype.S === 's/s' && !color.includes('Pied')) {
     markings.push('Pied');
   } else if (genotype.S === 'S/s') {
     carriers.push('Pied');
@@ -617,12 +635,10 @@ const calculatePhenotype = (genotype, originalGenotype = null) => {
     markings.push('Dominant White Spotting');
   }
 
-  // Splashed - dominant but only shows when C-dilutes are active (not C/C or C/-)
-  const hasCDilute = genotype.C && !genotype.C.startsWith('C/');
+  // Splashed - now incorporated into color name when C-dilutes are present
+  // Only add to hidden if Spl is present but no C-dilutes
   if (genotype.Spl && genotype.Spl.includes('Spl/')) {
-    if (hasCDilute) {
-      markings.push('Splashed');
-    } else {
+    if (!shouldUseSplashed && genotype.C !== 'c/c') {
       hidden.push('Splashed');
     }
   }
