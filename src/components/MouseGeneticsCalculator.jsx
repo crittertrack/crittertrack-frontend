@@ -1015,12 +1015,18 @@ const MouseGeneticsCalculator = ({ API_BASE_URL, authToken }) => {
     const totalCount = Object.values(outcomes).reduce((sum, o) => sum + o.count, 0);
     const resultsArray = Object.entries(outcomes).map(([phenotype, data]) => {
       // Get the first genotype to display (they all produce the same phenotype)
-      const firstGenotype = data.genotypes[0];
-      const result = calculatePhenotype(firstGenotype, selectedGenotype);
+      const fullGenotype = data.genotypes[0];
+      const result = calculatePhenotype(fullGenotype, selectedGenotype);
+      
+      // Only show selected loci in the genotype display
+      const displayGenotype = {};
+      selectedLoci.forEach(locus => {
+        displayGenotype[locus] = fullGenotype[locus];
+      });
       
       return {
         phenotype: result.phenotype,
-        genotype: firstGenotype,
+        genotype: displayGenotype,
         carriers: result.carriers,
         hidden: result.hidden,
         percentage: ((data.count / totalCount) * 100).toFixed(2),
