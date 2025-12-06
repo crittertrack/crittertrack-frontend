@@ -1019,43 +1019,29 @@ const MouseGeneticsCalculator = ({ API_BASE_URL, authToken }) => {
       });
     });
     
-    // Calculate percentages and sort by frequency
-    const totalCount = allGenotypes.length;
-    
-    // Group by unique selected genotype combinations
-    const genotypeMap = {};
+    // Group by phenotype and collect all genotypes for each
+    const phenotypeMap = {};
     allGenotypes.forEach(fullGenotype => {
+      const result = calculatePhenotype(fullGenotype, selectedGenotype);
+      const phenotype = result.phenotype;
+      
+      if (!phenotypeMap[phenotype]) {
+        phenotypeMap[phenotype] = {
+          phenotype: phenotype,
+          genotypes: []
+        };
+      }
+      
       // Only show selected loci in the genotype display
       const displayGenotype = {};
       selectedLoci.forEach(locus => {
         displayGenotype[locus] = fullGenotype[locus];
       });
       
-      // Create a key from the display genotype
-      const genotypeKey = selectedLoci.map(locus => fullGenotype[locus]).join('|');
-      
-      if (!genotypeMap[genotypeKey]) {
-        const result = calculatePhenotype(fullGenotype, selectedGenotype);
-        genotypeMap[genotypeKey] = {
-          phenotype: result.phenotype,
-          genotype: displayGenotype,
-          carriers: result.carriers,
-          hidden: result.hidden,
-          count: 0
-        };
-      }
-      genotypeMap[genotypeKey].count++;
+      phenotypeMap[phenotype].genotypes.push(displayGenotype);
     });
     
-    const resultsArray = Object.values(genotypeMap).map(data => ({
-      phenotype: data.phenotype,
-      genotype: data.genotype,
-      carriers: data.carriers,
-      hidden: data.hidden,
-      percentage: ((data.count / totalCount) * 100).toFixed(2),
-      count: data.count,
-      total: totalCount
-    })).sort((a, b) => b.percentage - a.percentage);
+    const resultsArray = Object.values(phenotypeMap);
     
     setOffspringResults(resultsArray);
   };
@@ -1547,30 +1533,22 @@ const MouseGeneticsCalculator = ({ API_BASE_URL, authToken }) => {
               <div className="space-y-3">
                 {offspringResults.map((result, idx) => (
                   <div key={idx} className="bg-white p-4 rounded-lg border border-purple-200">
-                    <div className="flex justify-between items-start mb-2">
-                      <p className={`text-lg font-semibold ${result.phenotype.includes('LETHAL') ? 'text-red-600' : 'text-gray-800'}`}>
-                        <span className="text-sm font-medium text-gray-600">Phenotype: </span>
-                        {result.phenotype}
-                      </p>
-                      <span className="text-purple-700 font-semibold whitespace-nowrap ml-4">
-                        {result.percentage}%
-                        <span className="text-xs text-gray-500 ml-2">
-                          ({result.count}/{result.total})
-                        </span>
-                      </span>
-                    </div>
-                    <p className="text-sm text-gray-700">
-                      <span className="font-medium">Genotype: </span>
-                      {result.genotype ? Object.entries(result.genotype)
-                        .map(([_, alleles]) => alleles)
-                        .join(', ') : 'N/A'}
+                    <p className={`text-lg font-semibold mb-3 ${result.phenotype.includes('LETHAL') ? 'text-red-600' : 'text-gray-800'}`}>
+                      <span className="text-sm font-medium text-gray-600">Phenotype: </span>
+                      {result.phenotype}
                     </p>
-                    {result.carriers && result.carriers.length > 0 && (
-                      <p className="text-sm text-gray-700 mt-1">
-                        <span className="font-medium">Carried genes: </span>
-                        {result.carriers.join(', ')}
-                      </p>
-                    )}
+                    <div className="text-sm text-gray-700">
+                      <span className="font-medium">Genotypes:</span>
+                      <div className="mt-1 space-y-1">
+                        {result.genotypes.map((genotype, gIdx) => (
+                          <div key={gIdx} className="pl-4">
+                            {Object.entries(genotype)
+                              .map(([_, alleles]) => alleles)
+                              .join(', ')}
+                          </div>
+                        ))}
+                      </div>
+                    </div>
                   </div>
                 ))}
               </div>
