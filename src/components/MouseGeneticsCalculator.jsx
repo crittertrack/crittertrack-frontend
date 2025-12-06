@@ -1627,10 +1627,10 @@ const MouseGeneticsCalculator = ({ API_BASE_URL, authToken }) => {
                       >
                         {expandedPhenotypes[idx] ? '▲' : '▼'} {result.genotypes.length} genotype{result.genotypes.length !== 1 ? 's' : ''}
                       </button>
-                      {(result.phenotype.includes('Unknown') || result.phenotype.includes('LETHAL')) && (
+                      {result.phenotype.includes('Unknown') && (
                         <button
                           onClick={() => openFeedbackModal(result.phenotype, result.genotypes[0])}
-                          className="ml-2 px-3 py-1 text-sm bg-yellow-100 hover:bg-yellow-200 text-yellow-800 rounded-lg transition"
+                          className="ml-2 px-3 py-1 text-sm bg-red-100 hover:bg-red-200 text-red-800 rounded-lg transition"
                           title="Report incorrect phenotype"
                         >
                           Report Issue
