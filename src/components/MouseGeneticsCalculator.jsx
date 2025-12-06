@@ -1521,10 +1521,9 @@ const MouseGeneticsCalculator = ({ API_BASE_URL, authToken }) => {
                     </div>
                     <p className="text-sm text-gray-700">
                       <span className="font-medium">Genotype: </span>
-                      {Object.entries(result.genotype)
-                        .filter(([_, value]) => value && value !== '')
+                      {result.genotype ? Object.entries(result.genotype)
                         .map(([_, alleles]) => alleles)
-                        .join(', ')}
+                        .join(', ') : 'N/A'}
                     </p>
                     {result.carriers && result.carriers.length > 0 && (
                       <p className="text-sm text-gray-700 mt-1">
