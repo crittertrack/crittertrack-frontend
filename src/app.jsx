@@ -6,8 +6,8 @@ import html2canvas from 'html2canvas';
 import MouseGeneticsCalculator from './components/MouseGeneticsCalculator';
 
 // const API_BASE_URL = 'http://localhost:5000/api'; // Local development
-// const API_BASE_URL = 'https://crittertrack-pedigree-production.up.railway.app/api'; // Direct Railway
-const API_BASE_URL = '/api'; // Production via Vercel proxy
+const API_BASE_URL = 'https://crittertrack-pedigree-production.up.railway.app/api'; // Direct Railway (for testing)
+// const API_BASE_URL = '/api'; // Production via Vercel proxy
 
 const GENDER_OPTIONS = ['Male', 'Female'];
 const STATUS_OPTIONS = ['Pet', 'Breeder', 'Available', 'Retired', 'Deceased', 'Rehomed']; 
