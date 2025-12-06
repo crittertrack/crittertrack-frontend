@@ -1031,6 +1031,7 @@ const MouseGeneticsCalculator = ({ API_BASE_URL, authToken }) => {
         phenotypeMap[phenotype] = {
           phenotype: phenotype,
           genotypes: [],
+          genotypeKeys: new Set(),
           count: 0
         };
       }
@@ -1041,7 +1042,15 @@ const MouseGeneticsCalculator = ({ API_BASE_URL, authToken }) => {
         displayGenotype[locus] = fullGenotype[locus];
       });
       
-      phenotypeMap[phenotype].genotypes.push(displayGenotype);
+      // Create a unique key for this genotype to avoid duplicates
+      const genotypeKey = selectedLoci.map(locus => fullGenotype[locus]).join('|');
+      
+      // Only add if we haven't seen this exact genotype before for this phenotype
+      if (!phenotypeMap[phenotype].genotypeKeys.has(genotypeKey)) {
+        phenotypeMap[phenotype].genotypes.push(displayGenotype);
+        phenotypeMap[phenotype].genotypeKeys.add(genotypeKey);
+      }
+      
       phenotypeMap[phenotype].count++;
     });
     
