@@ -485,7 +485,7 @@ const calculatePhenotype = (genotype, originalGenotype = null) => {
     
     // Handle brown + dilute + pink-eye combination
     if (isBrown && isDilute && isPinkEye) {
-      color = 'Fawn Lilac';
+      color = isTanVariant ? 'Dominant Red Lavender Tan' : 'Dominant Red Lavender';
       return { phenotype: addMarkingsIfNeeded(color), carriers, hidden };
     }
     
@@ -576,6 +576,13 @@ const calculatePhenotype = (genotype, originalGenotype = null) => {
     const isDilute = genotype.D === 'd/d';
     const isAgouti = genotype.A === 'Avy/A';
     const isAvyAvy = genotype.A === 'Avy/Avy';
+    const isPinkEye = genotype.P === 'p/p';
+    
+    // Handle brown + dilute + pink-eye combination
+    if (isBrown && isDilute && isPinkEye) {
+      color = isTanVariant ? 'Lavender Brindle Tan' : isAgouti ? 'Lavender Agouti Brindle' : 'Lavender Brindle';
+      return { phenotype: addMarkingsIfNeeded(color), carriers, hidden };
+    }
     
     // Handle brown + dilute combination
     if (isBrown && isDilute) {
@@ -667,11 +674,19 @@ const calculatePhenotype = (genotype, originalGenotype = null) => {
     else if (color === 'Agouti') color = 'Blue Agouti';
     else if (color === 'Agouti Tan') color = 'Blue Agouti Tan';
     else if (color === 'Cinnamon') color = 'Cinnamon Argente';
-    else if (color === 'Cinnamon Tan') color = 'Argente Tan';
+    else if (color === 'Cinnamon Tan') color = 'Cinnamon Argente Tan';
     else if (color === 'Black Tan') color = 'Blue Tan';
     else if (color === 'Chocolate Tan') color = 'Lilac Tan';
   } else if (genotype.D === 'D/d') {
     carriers.push('Blue');
+  }
+
+  // Lavender (b/b + d/d + p/p combination)
+  if (genotype.B === 'b/b' && genotype.D === 'd/d' && genotype.P === 'p/p') {
+    if (color === 'Lilac') color = 'Lavender';
+    else if (color === 'Lilac Tan') color = 'Lavender Tan';
+    else if (color === 'Cinnamon Argente') color = 'Lavender Agouti';
+    else if (color === 'Cinnamon Argente Tan') color = 'Lavender Agouti Tan';
   }
 
   if (genotype.P === 'p/p') {
