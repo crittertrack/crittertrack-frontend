@@ -684,6 +684,11 @@ const calculatePhenotype = (genotype, originalGenotype = null) => {
     else if (recessive === 'cch') carriers.push('Chinchilla');
   }
 
+  // Umbrous modifier
+  if (genotype.U && genotype.U.includes('U/')) {
+    color = `Umbrous ${color}`;
+  }
+
   // E-locus carriers
   if (genotype.E === 'E/e') carriers.push('Recessive Red');
 
