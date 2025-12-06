@@ -1011,29 +1011,51 @@ const MouseGeneticsCalculator = ({ API_BASE_URL, authToken }) => {
     
     generateOffspring(0, {});
     
+    // Create results array with each unique genotype
+    const allGenotypes = [];
+    Object.values(outcomes).forEach(data => {
+      data.genotypes.forEach(fullGenotype => {
+        allGenotypes.push(fullGenotype);
+      });
+    });
+    
     // Calculate percentages and sort by frequency
-    const totalCount = Object.values(outcomes).reduce((sum, o) => sum + o.count, 0);
-    const resultsArray = Object.entries(outcomes).map(([phenotype, data]) => {
-      // Get the first genotype to display (they all produce the same phenotype)
-      const fullGenotype = data.genotypes[0];
-      const result = calculatePhenotype(fullGenotype, selectedGenotype);
-      
+    const totalCount = allGenotypes.length;
+    
+    // Group by unique selected genotype combinations
+    const genotypeMap = {};
+    allGenotypes.forEach(fullGenotype => {
       // Only show selected loci in the genotype display
       const displayGenotype = {};
       selectedLoci.forEach(locus => {
         displayGenotype[locus] = fullGenotype[locus];
       });
       
-      return {
-        phenotype: result.phenotype,
-        genotype: displayGenotype,
-        carriers: result.carriers,
-        hidden: result.hidden,
-        percentage: ((data.count / totalCount) * 100).toFixed(2),
-        count: data.count,
-        total: totalCount
-      };
-    }).sort((a, b) => b.percentage - a.percentage);
+      // Create a key from the display genotype
+      const genotypeKey = selectedLoci.map(locus => fullGenotype[locus]).join('|');
+      
+      if (!genotypeMap[genotypeKey]) {
+        const result = calculatePhenotype(fullGenotype, selectedGenotype);
+        genotypeMap[genotypeKey] = {
+          phenotype: result.phenotype,
+          genotype: displayGenotype,
+          carriers: result.carriers,
+          hidden: result.hidden,
+          count: 0
+        };
+      }
+      genotypeMap[genotypeKey].count++;
+    });
+    
+    const resultsArray = Object.values(genotypeMap).map(data => ({
+      phenotype: data.phenotype,
+      genotype: data.genotype,
+      carriers: data.carriers,
+      hidden: data.hidden,
+      percentage: ((data.count / totalCount) * 100).toFixed(2),
+      count: data.count,
+      total: totalCount
+    })).sort((a, b) => b.percentage - a.percentage);
     
     setOffspringResults(resultsArray);
   };
