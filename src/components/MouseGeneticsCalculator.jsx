@@ -223,9 +223,9 @@ const calculatePhenotype = (genotype, originalGenotype = null) => {
   const isBlack = genotype.A === 'a/a';
   const isSelfBlackVariant = isExtremeBlack || isBlackHetero || isBlack;
 
-  // Check if this is at/ae, at/a, or at/at (tan/fox variants)
-  const isExtremeTan = genotype.A === 'at/ae';
-  const isTanHetero = genotype.A === 'at/a';
+  // Check if this is at/ae, ae/at, at/a, or at/at (tan/fox variants)
+  const isExtremeTan = genotype.A === 'at/ae' || genotype.A === 'ae/at';
+  const isTanHetero = genotype.A === 'at/a' || genotype.A === 'a/at';
   const isTan = genotype.A === 'at/at';
   const isTanVariant = isExtremeTan || isTanHetero || isTan;
 
