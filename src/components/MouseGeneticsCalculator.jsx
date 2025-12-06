@@ -105,6 +105,13 @@ const GENE_LOCI = {
       'mobr/mobr'
     ]
   },
+  U: {
+    name: 'Umbrous',
+    combinations: [
+      'u/u',
+      'U/u', 'U/U'
+    ]
+  },
   Go: {
     name: 'Shorthair/Longhair',
     combinations: [
@@ -145,13 +152,6 @@ const GENE_LOCI = {
     combinations: [
       'nu/nu',
       'Nu/nu', 'Nu/Nu'
-    ]
-  },
-  U: {
-    name: 'Umbrous',
-    combinations: [
-      'u/u',
-      'U/u', 'U/U'
     ]
   }
 };
@@ -761,13 +761,15 @@ const calculatePhenotype = (genotype, originalGenotype = null) => {
     }
   }
 
-  if (genotype.Rn && genotype.Rn.includes('Rn/')) {
+  // Roan (Rn) - recessive trait
+  if (genotype.Rn === 'rn/rn') {
     markings.push('Roan');
   } else if (genotype.Rn === 'Rn/rn') {
     carriers.push('Roan');
   }
 
-  if (genotype.Si && genotype.Si.includes('Si/')) {
+  // Silvered (Si) - recessive trait
+  if (genotype.Si === 'si/si') {
     markings.push('Silvered');
   } else if (genotype.Si === 'Si/si') {
     carriers.push('Silvered');
@@ -791,7 +793,13 @@ const calculatePhenotype = (genotype, originalGenotype = null) => {
 
   // Texture - only show if coat genes were explicitly selected
   if (coatGenesSelected) {
-    if (genotype.Re === 'Re/re' || genotype.Re === 'Re/Re') {
+    const hasLonghair = genotype.Go === 'go/go';
+    const hasAstrex = genotype.Re === 'Re/re' || genotype.Re === 'Re/Re';
+    
+    // Check for Texel (longhair + astrex combination)
+    if (hasLonghair && hasAstrex) {
+      texture = 'Texel';
+    } else if (hasAstrex) {
       texture = 'Astrex';
     } else if (genotype.Re === 're/Re') {
       carriers.push('Astrex');
@@ -827,10 +835,10 @@ const calculatePhenotype = (genotype, originalGenotype = null) => {
     result += ' Umbrous';
   }
   if (markings.length > 0) {
-    result += ' ' + markings.join(', ');
+    result += ' ' + markings.join(' ');
   }
   if (texture) {
-    result += ` (${texture})`;
+    result += ' ' + texture;
   }
 
   return { phenotype: result || 'Unknown', carriers, hidden };
@@ -993,12 +1001,21 @@ const MouseGeneticsCalculator = ({ API_BASE_URL, authToken }) => {
     
     // Calculate percentages and sort by frequency
     const totalCount = Object.values(outcomes).reduce((sum, o) => sum + o.count, 0);
-    const resultsArray = Object.entries(outcomes).map(([phenotype, data]) => ({
-      phenotype,
-      percentage: ((data.count / totalCount) * 100).toFixed(2),
-      count: data.count,
-      total: totalCount
-    })).sort((a, b) => b.percentage - a.percentage);
+    const resultsArray = Object.entries(outcomes).map(([phenotype, data]) => {
+      // Get the first genotype to display (they all produce the same phenotype)
+      const firstGenotype = data.genotypes[0];
+      const result = calculatePhenotype(firstGenotype, selectedGenotype);
+      
+      return {
+        phenotype: result.phenotype,
+        genotype: firstGenotype,
+        carriers: result.carriers,
+        hidden: result.hidden,
+        percentage: ((data.count / totalCount) * 100).toFixed(2),
+        count: data.count,
+        total: totalCount
+      };
+    }).sort((a, b) => b.percentage - a.percentage);
     
     setOffspringResults(resultsArray);
   };
@@ -1393,18 +1410,27 @@ const MouseGeneticsCalculator = ({ API_BASE_URL, authToken }) => {
             })}
           </div>
           <div className="mt-4 p-3 bg-white rounded-lg border-2 border-blue-500">
-            <p className="text-sm font-medium text-gray-700 mb-1">Phenotype:</p>
-            <p className={`text-lg font-semibold ${parent1Result.phenotype.includes('LETHAL') ? 'text-red-600' : 'text-blue-800'}`}>
+            <p className={`text-lg font-semibold ${parent1Result.phenotype.includes('LETHAL') ? 'text-red-600' : 'text-blue-800'} mb-2`}>
+              <span className="text-sm font-medium text-gray-700">Phenotype: </span>
               {parent1Result.phenotype}
             </p>
+            <p className="text-sm text-gray-700">
+              <span className="font-medium">Genotype: </span>
+              {Object.entries(applyDefaults(parent1))
+                .filter(([_, value]) => value && value !== '')
+                .map(([locus, alleles]) => `${locus}: ${alleles}`)
+                .join(', ')}
+            </p>
             {parent1Result.carriers && parent1Result.carriers.length > 0 && (
-              <p className="text-xs text-gray-600 mt-2">
-                <span className="font-medium">Carried genes:</span> {parent1Result.carriers.join(', ')}
+              <p className="text-sm text-gray-700 mt-1">
+                <span className="font-medium">Carried genes: </span>
+                {parent1Result.carriers.join(', ')}
               </p>
             )}
             {parent1Result.hidden && parent1Result.hidden.length > 0 && (
-              <p className="text-xs text-gray-600 mt-1">
-                <span className="font-medium">Hidden:</span> {parent1Result.hidden.join(', ')}
+              <p className="text-sm text-gray-700 mt-1">
+                <span className="font-medium">Hidden: </span>
+                {parent1Result.hidden.join(', ')}
               </p>
             )}
           </div>
@@ -1432,18 +1458,27 @@ const MouseGeneticsCalculator = ({ API_BASE_URL, authToken }) => {
             ))}
           </div>
           <div className="mt-4 p-3 bg-white rounded-lg border-2 border-pink-500">
-            <p className="text-sm font-medium text-gray-700 mb-1">Phenotype:</p>
-            <p className={`text-lg font-semibold ${parent2Result.phenotype.includes('LETHAL') ? 'text-red-600' : 'text-pink-800'}`}>
+            <p className={`text-lg font-semibold ${parent2Result.phenotype.includes('LETHAL') ? 'text-red-600' : 'text-pink-800'} mb-2`}>
+              <span className="text-sm font-medium text-gray-700">Phenotype: </span>
               {parent2Result.phenotype}
             </p>
+            <p className="text-sm text-gray-700">
+              <span className="font-medium">Genotype: </span>
+              {Object.entries(applyDefaults(parent2))
+                .filter(([_, value]) => value && value !== '')
+                .map(([locus, alleles]) => `${locus}: ${alleles}`)
+                .join(', ')}
+            </p>
             {parent2Result.carriers && parent2Result.carriers.length > 0 && (
-              <p className="text-xs text-gray-600 mt-2">
-                <span className="font-medium">Carried genes:</span> {parent2Result.carriers.join(', ')}
+              <p className="text-sm text-gray-700 mt-1">
+                <span className="font-medium">Carried genes: </span>
+                {parent2Result.carriers.join(', ')}
               </p>
             )}
             {parent2Result.hidden && parent2Result.hidden.length > 0 && (
-              <p className="text-xs text-gray-600 mt-1">
-                <span className="font-medium">Hidden:</span> {parent2Result.hidden.join(', ')}
+              <p className="text-sm text-gray-700 mt-1">
+                <span className="font-medium">Hidden: </span>
+                {parent2Result.hidden.join(', ')}
               </p>
             )}
           </div>
@@ -1464,18 +1499,34 @@ const MouseGeneticsCalculator = ({ API_BASE_URL, authToken }) => {
           {offspringResults && (
             <div className="mt-6 bg-purple-50 rounded-lg p-6 border-2 border-purple-300">
               <h2 className="text-xl font-semibold text-purple-800 mb-4">Possible Offspring Outcomes</h2>
-              <div className="space-y-2">
+              <div className="space-y-3">
                 {offspringResults.map((result, idx) => (
-                  <div key={idx} className="bg-white p-3 rounded-lg border border-purple-200 flex justify-between items-center">
-                    <span className={`font-medium ${result.phenotype.includes('LETHAL') ? 'text-red-600' : 'text-gray-800'}`}>
-                      {result.phenotype}
-                    </span>
-                    <span className="text-purple-700 font-semibold">
-                      {result.percentage}%
-                      <span className="text-xs text-gray-500 ml-2">
-                        ({result.count}/{result.total})
+                  <div key={idx} className="bg-white p-4 rounded-lg border border-purple-200">
+                    <div className="flex justify-between items-start mb-2">
+                      <p className={`text-lg font-semibold ${result.phenotype.includes('LETHAL') ? 'text-red-600' : 'text-gray-800'}`}>
+                        <span className="text-sm font-medium text-gray-600">Phenotype: </span>
+                        {result.phenotype}
+                      </p>
+                      <span className="text-purple-700 font-semibold whitespace-nowrap ml-4">
+                        {result.percentage}%
+                        <span className="text-xs text-gray-500 ml-2">
+                          ({result.count}/{result.total})
+                        </span>
                       </span>
-                    </span>
+                    </div>
+                    <p className="text-sm text-gray-700">
+                      <span className="font-medium">Genotype: </span>
+                      {Object.entries(result.genotype)
+                        .filter(([_, value]) => value && value !== '')
+                        .map(([locus, alleles]) => `${locus}: ${alleles}`)
+                        .join(', ')}
+                    </p>
+                    {result.carriers && result.carriers.length > 0 && (
+                      <p className="text-sm text-gray-700 mt-1">
+                        <span className="font-medium">Carried genes: </span>
+                        {result.carriers.join(', ')}
+                      </p>
+                    )}
                   </div>
                 ))}
               </div>
