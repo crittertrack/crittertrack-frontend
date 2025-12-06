@@ -306,7 +306,7 @@ const calculatePhenotype = (genotype, originalGenotype = null) => {
     
     // If Spl is present with eligible C-dilutes, use Splashed
     if (hasSpl && !excludedCForSpl.includes(genotype.C)) {
-      return { phenotype: 'Tan Splashed Fox', carriers, hidden };
+      return { phenotype: 'Black Splashed Fox', carriers, hidden };
     }
     
     if (genotype.C === 'ch/c') {
