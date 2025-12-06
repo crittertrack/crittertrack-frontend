@@ -482,6 +482,18 @@ const calculatePhenotype = (genotype, originalGenotype = null) => {
     const isBrown = genotype.B === 'b/b';
     const isDilute = genotype.D === 'd/d';
     
+    // Handle brown + dilute combination
+    if (isBrown && isDilute) {
+      color = isTanVariant ? 'Dominant Red Lilac Tan' : 'Dominant Red Lilac';
+      return { phenotype: addMarkingsIfNeeded(color), carriers, hidden };
+    }
+    
+    // Handle brown + pink-eye combination
+    if (isBrown && genotype.P === 'p/p') {
+      color = isTanVariant ? 'Dominant Red Lilac Tan' : 'Dominant Red Lilac';
+      return { phenotype: addMarkingsIfNeeded(color), carriers, hidden };
+    }
+    
     // Handle brown modifier
     if (isBrown) {
       color = isTanVariant ? 'Dominant Red Chocolate Tan' : 'Dominant Red Chocolate';
@@ -549,6 +561,12 @@ const calculatePhenotype = (genotype, originalGenotype = null) => {
     const isDilute = genotype.D === 'd/d';
     const isAgouti = genotype.A === 'Avy/A';
     const isAvyAvy = genotype.A === 'Avy/Avy';
+    
+    // Handle brown + dilute combination
+    if (isBrown && isDilute) {
+      color = isTanVariant ? 'Lilac Brindle Tan' : isAgouti ? 'Cinnamon Argente Brindle' : 'Lilac Brindle';
+      return { phenotype: addMarkingsIfNeeded(color), carriers, hidden };
+    }
     
     // Handle brown modifier
     if (isBrown) {
@@ -633,7 +651,7 @@ const calculatePhenotype = (genotype, originalGenotype = null) => {
     else if (color === 'Chocolate') color = 'Lilac';
     else if (color === 'Agouti') color = 'Blue Agouti';
     else if (color === 'Agouti Tan') color = 'Blue Agouti Tan';
-    else if (color === 'Cinnamon') color = 'Argente';
+    else if (color === 'Cinnamon') color = 'Cinnamon Argente';
     else if (color === 'Cinnamon Tan') color = 'Argente Tan';
     else if (color === 'Black Tan') color = 'Blue Tan';
     else if (color === 'Chocolate Tan') color = 'Lilac Tan';
