@@ -6007,7 +6007,7 @@ const App = () => {
 
     if (!authToken) {
         // Allow unauthenticated users to access search and genetics calculator
-        const mainTitle = isRegister ? 'Create Account' : 'Welcome Back';
+        const mainTitle = isRegister ? 'Create Account' : 'Welcome';
         
         // Handle public profile viewing for non-logged-in users
         if (viewingPublicProfile) {
