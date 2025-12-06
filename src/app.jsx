@@ -5,6 +5,7 @@ import jsPDF from 'jspdf';
 import html2canvas from 'html2canvas';
 import MouseGeneticsCalculator from './components/MouseGeneticsCalculator';
 
+// const API_BASE_URL = 'http://localhost:5000/api';
 const API_BASE_URL = 'https://crittertrack-pedigree-production.up.railway.app/api';
 
 const GENDER_OPTIONS = ['Male', 'Female'];
