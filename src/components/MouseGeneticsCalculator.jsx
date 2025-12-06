@@ -175,6 +175,14 @@ const calculatePhenotype = (genotype, originalGenotype = null) => {
   const coatGenesSelected = originalGenotype && 
     ['Go', 'Re', 'Sa', 'Rst', 'Fz', 'Nu'].some(gene => originalGenotype[gene] && originalGenotype[gene] !== '');
 
+  // Helper function to add Pied to phenotype if s/s
+  const addPiedIfNeeded = (phenotype) => {
+    if (genotype.S === 's/s' && phenotype !== 'Albino' && !phenotype.includes('Pied')) {
+      return `${phenotype} Pied`;
+    }
+    return phenotype;
+  };
+
   // Check for lethal combinations
   if (genotype.A === 'Ay/Ay (lethal)') return { phenotype: 'LETHAL: Homozygous Dominant Red', carriers: [], hidden: [] };
   if (genotype.W && genotype.W.includes('lethal')) return { phenotype: 'LETHAL: Dominant Spotting Homozygous', carriers: [], hidden: [] };
@@ -220,35 +228,35 @@ const calculatePhenotype = (genotype, originalGenotype = null) => {
     
     // If Spl is present with eligible C-dilutes, use Splashed
     if (hasSpl && !excludedCForSpl.includes(genotype.C)) {
-      return { phenotype: 'Agouti Splashed Fox', carriers, hidden };
+      return { phenotype: addPiedIfNeeded('Agouti Splashed Fox'), carriers, hidden };
     }
     
     if (genotype.C === 'ch/c') {
-      return { phenotype: 'Agouti Himalayan Fox', carriers, hidden };
+      return { phenotype: addPiedIfNeeded('Agouti Himalayan Fox'), carriers, hidden };
     }
     if (genotype.C === 'ch/ch') {
-      return { phenotype: 'Agouti Siamese Fox', carriers, hidden };
+      return { phenotype: addPiedIfNeeded('Agouti Siamese Fox'), carriers, hidden };
     }
     if (genotype.C === 'ce/c') {
-      return { phenotype: 'Agouti Bone Fox', carriers, hidden };
+      return { phenotype: addPiedIfNeeded('Agouti Bone Fox'), carriers, hidden };
     }
     if (genotype.C === 'ce/ch') {
-      return { phenotype: 'Agouti Colorpoint Beige Fox', carriers, hidden };
+      return { phenotype: addPiedIfNeeded('Agouti Colorpoint Beige Fox'), carriers, hidden };
     }
     if (genotype.C === 'ce/ce') {
-      return { phenotype: 'Agouti Beige Fox', carriers, hidden };
+      return { phenotype: addPiedIfNeeded('Agouti Beige Fox'), carriers, hidden };
     }
     if (genotype.C === 'cch/c') {
-      return { phenotype: 'Agouti Stone Fox', carriers, hidden };
+      return { phenotype: addPiedIfNeeded('Agouti Stone Fox'), carriers, hidden };
     }
     if (genotype.C === 'cch/ch') {
-      return { phenotype: 'Agouti Burmese Fox', carriers, hidden };
+      return { phenotype: addPiedIfNeeded('Agouti Burmese Fox'), carriers, hidden };
     }
     if (genotype.C === 'cch/ce') {
-      return { phenotype: 'Agouti Mock Chocolate Fox', carriers, hidden };
+      return { phenotype: addPiedIfNeeded('Agouti Mock Chocolate Fox'), carriers, hidden };
     }
     if (genotype.C === 'cch/cch') {
-      return { phenotype: 'Chinchilla', carriers, hidden };
+      return { phenotype: addPiedIfNeeded('Chinchilla'), carriers, hidden };
     }
   }
 
@@ -263,35 +271,35 @@ const calculatePhenotype = (genotype, originalGenotype = null) => {
     
     // If Spl is present with eligible C-dilutes, use Splashed
     if (hasSpl && !excludedCForSpl.includes(genotype.C)) {
-      return { phenotype: 'Agouti Splashed', carriers, hidden };
+      return { phenotype: addPiedIfNeeded('Agouti Splashed'), carriers, hidden };
     }
     
     if (genotype.C === 'ch/c') {
-      return { phenotype: 'Agouti Himalayan', carriers, hidden };
+      return { phenotype: addPiedIfNeeded('Agouti Himalayan'), carriers, hidden };
     }
     if (genotype.C === 'ch/ch') {
-      return { phenotype: 'Agouti Siamese', carriers, hidden };
+      return { phenotype: addPiedIfNeeded('Agouti Siamese'), carriers, hidden };
     }
     if (genotype.C === 'ce/c') {
-      return { phenotype: 'Agouti Bone', carriers, hidden };
+      return { phenotype: addPiedIfNeeded('Agouti Bone'), carriers, hidden };
     }
     if (genotype.C === 'ce/ch') {
-      return { phenotype: 'Agouti Colorpoint Beige', carriers, hidden };
+      return { phenotype: addPiedIfNeeded('Agouti Colorpoint Beige'), carriers, hidden };
     }
     if (genotype.C === 'ce/ce') {
-      return { phenotype: 'Agouti Beige', carriers, hidden };
+      return { phenotype: addPiedIfNeeded('Agouti Beige'), carriers, hidden };
     }
     if (genotype.C === 'cch/c') {
-      return { phenotype: 'Agouti Stone', carriers, hidden };
+      return { phenotype: addPiedIfNeeded('Agouti Stone'), carriers, hidden };
     }
     if (genotype.C === 'cch/ch') {
-      return { phenotype: 'Agouti Burmese', carriers, hidden };
+      return { phenotype: addPiedIfNeeded('Agouti Burmese'), carriers, hidden };
     }
     if (genotype.C === 'cch/ce') {
-      return { phenotype: 'Agouti Mock Chocolate', carriers, hidden };
+      return { phenotype: addPiedIfNeeded('Agouti Mock Chocolate'), carriers, hidden };
     }
     if (genotype.C === 'cch/cch') {
-      return { phenotype: 'Silver Agouti', carriers, hidden };
+      return { phenotype: addPiedIfNeeded('Silver Agouti'), carriers, hidden };
     }
   }
 
@@ -306,35 +314,35 @@ const calculatePhenotype = (genotype, originalGenotype = null) => {
     
     // If Spl is present with eligible C-dilutes, use Splashed
     if (hasSpl && !excludedCForSpl.includes(genotype.C)) {
-      return { phenotype: 'Black Splashed Fox', carriers, hidden };
+      return { phenotype: addPiedIfNeeded('Black Splashed Fox'), carriers, hidden };
     }
     
     if (genotype.C === 'ch/c') {
-      return { phenotype: 'Himalayan Fox', carriers, hidden };
+      return { phenotype: addPiedIfNeeded('Himalayan Fox'), carriers, hidden };
     }
     if (genotype.C === 'ch/ch') {
-      return { phenotype: 'Siamese Fox', carriers, hidden };
+      return { phenotype: addPiedIfNeeded('Siamese Fox'), carriers, hidden };
     }
     if (genotype.C === 'ce/c') {
-      return { phenotype: 'Bone Fox', carriers, hidden };
+      return { phenotype: addPiedIfNeeded('Bone Fox'), carriers, hidden };
     }
     if (genotype.C === 'ce/ch') {
-      return { phenotype: 'Colorpoint Beige Fox', carriers, hidden };
+      return { phenotype: addPiedIfNeeded('Colorpoint Beige Fox'), carriers, hidden };
     }
     if (genotype.C === 'ce/ce') {
-      return { phenotype: 'Beige Fox', carriers, hidden };
+      return { phenotype: addPiedIfNeeded('Beige Fox'), carriers, hidden };
     }
     if (genotype.C === 'cch/c') {
-      return { phenotype: 'Stone Fox', carriers, hidden };
+      return { phenotype: addPiedIfNeeded('Stone Fox'), carriers, hidden };
     }
     if (genotype.C === 'cch/ch') {
-      return { phenotype: 'Burmese Fox', carriers, hidden };
+      return { phenotype: addPiedIfNeeded('Burmese Fox'), carriers, hidden };
     }
     if (genotype.C === 'cch/ce') {
-      return { phenotype: 'Mock Chocolate Fox', carriers, hidden };
+      return { phenotype: addPiedIfNeeded('Mock Chocolate Fox'), carriers, hidden };
     }
     if (genotype.C === 'cch/cch') {
-      return { phenotype: 'Sepia Fox', carriers, hidden };
+      return { phenotype: addPiedIfNeeded('Sepia Fox'), carriers, hidden };
     }
   }
 
@@ -349,35 +357,35 @@ const calculatePhenotype = (genotype, originalGenotype = null) => {
     
     // If Spl is present with eligible C-dilutes, use Splashed
     if (hasSpl && !excludedCForSpl.includes(genotype.C)) {
-      return { phenotype: 'Black Splashed', carriers, hidden };
+      return { phenotype: addPiedIfNeeded('Black Splashed'), carriers, hidden };
     }
     
     if (genotype.C === 'ch/c') {
-      return { phenotype: 'Himalayan', carriers, hidden };
+      return { phenotype: addPiedIfNeeded('Himalayan'), carriers, hidden };
     }
     if (genotype.C === 'ch/ch') {
-      return { phenotype: 'Siamese', carriers, hidden };
+      return { phenotype: addPiedIfNeeded('Siamese'), carriers, hidden };
     }
     if (genotype.C === 'ce/c') {
-      return { phenotype: 'Bone', carriers, hidden };
+      return { phenotype: addPiedIfNeeded('Bone'), carriers, hidden };
     }
     if (genotype.C === 'ce/ch') {
-      return { phenotype: 'Colorpoint Beige', carriers, hidden };
+      return { phenotype: addPiedIfNeeded('Colorpoint Beige'), carriers, hidden };
     }
     if (genotype.C === 'ce/ce') {
-      return { phenotype: 'Beige', carriers, hidden };
+      return { phenotype: addPiedIfNeeded('Beige'), carriers, hidden };
     }
     if (genotype.C === 'cch/c') {
-      return { phenotype: 'Stone', carriers, hidden };
+      return { phenotype: addPiedIfNeeded('Stone'), carriers, hidden };
     }
     if (genotype.C === 'cch/ch') {
-      return { phenotype: 'Burmese', carriers, hidden };
+      return { phenotype: addPiedIfNeeded('Burmese'), carriers, hidden };
     }
     if (genotype.C === 'cch/ce') {
-      return { phenotype: 'Mock Chocolate', carriers, hidden };
+      return { phenotype: addPiedIfNeeded('Mock Chocolate'), carriers, hidden };
     }
     if (genotype.C === 'cch/cch') {
-      return { phenotype: 'Sepia', carriers, hidden };
+      return { phenotype: addPiedIfNeeded('Sepia'), carriers, hidden };
     }
   }
 
@@ -386,14 +394,14 @@ const calculatePhenotype = (genotype, originalGenotype = null) => {
     return { phenotype: 'Albino', carriers, hidden };
   }
 
-  // Recessive red/yellow
+  // Recessive red/yellow (old section - should be removed, using e/e section below)
   if (genotype.E === 'e/e') {
     if (genotype.P === 'p/p') {
       color = 'Recessive Fawn';
     } else {
       color = 'Recessive Red';
     }
-    return { phenotype: color, carriers, hidden };
+    return { phenotype: addPiedIfNeeded(color), carriers, hidden };
   }
 
   // Dominant yellow/red (Ay)
@@ -407,38 +415,38 @@ const calculatePhenotype = (genotype, originalGenotype = null) => {
       
       // If Spl is present, use Splashed instead of C-dilute names
       if (hasSpl) {
-        return { phenotype: isTanVariant ? 'Dominant Red Splashed Fox' : 'Dominant Red Splashed', carriers, hidden };
+        return { phenotype: addPiedIfNeeded(isTanVariant ? 'Dominant Red Splashed Fox' : 'Dominant Red Splashed'), carriers, hidden };
       }
       
       const baseName = 'Dominant Red';
       const suffix = isTanVariant ? ' Fox' : '';
       
       if (genotype.C === 'ch/c') {
-        return { phenotype: `${baseName} Himalayan${suffix}`, carriers, hidden };
+        return { phenotype: addPiedIfNeeded(`${baseName} Himalayan${suffix}`), carriers, hidden };
       }
       if (genotype.C === 'ch/ch') {
-        return { phenotype: `${baseName} Siamese${suffix}`, carriers, hidden };
+        return { phenotype: addPiedIfNeeded(`${baseName} Siamese${suffix}`), carriers, hidden };
       }
       if (genotype.C === 'ce/c') {
-        return { phenotype: `${baseName} Bone${suffix}`, carriers, hidden };
+        return { phenotype: addPiedIfNeeded(`${baseName} Bone${suffix}`), carriers, hidden };
       }
       if (genotype.C === 'ce/ch') {
-        return { phenotype: `${baseName} Colorpoint Beige${suffix}`, carriers, hidden };
+        return { phenotype: addPiedIfNeeded(`${baseName} Colorpoint Beige${suffix}`), carriers, hidden };
       }
       if (genotype.C === 'ce/ce') {
-        return { phenotype: `${baseName} Beige${suffix}`, carriers, hidden };
+        return { phenotype: addPiedIfNeeded(`${baseName} Beige${suffix}`), carriers, hidden };
       }
       if (genotype.C === 'cch/c') {
-        return { phenotype: `${baseName} Stone${suffix}`, carriers, hidden };
+        return { phenotype: addPiedIfNeeded(`${baseName} Stone${suffix}`), carriers, hidden };
       }
       if (genotype.C === 'cch/ch') {
-        return { phenotype: `${baseName} Burmese${suffix}`, carriers, hidden };
+        return { phenotype: addPiedIfNeeded(`${baseName} Burmese${suffix}`), carriers, hidden };
       }
       if (genotype.C === 'cch/ce') {
-        return { phenotype: `${baseName} Mock Chocolate${suffix}`, carriers, hidden };
+        return { phenotype: addPiedIfNeeded(`${baseName} Mock Chocolate${suffix}`), carriers, hidden };
       }
       if (genotype.C === 'cch/cch') {
-        return { phenotype: isTanVariant ? 'Cream Fox' : 'Cream', carriers, hidden };
+        return { phenotype: addPiedIfNeeded(isTanVariant ? 'Cream Fox' : 'Cream'), carriers, hidden };
       }
     }
     
@@ -456,13 +464,13 @@ const calculatePhenotype = (genotype, originalGenotype = null) => {
     // Handle brown modifier
     if (isBrown) {
       color = isTanVariant ? 'Dominant Red Chocolate Tan' : 'Dominant Red Chocolate';
-      return { phenotype: color, carriers, hidden };
+      return { phenotype: addPiedIfNeeded(color), carriers, hidden };
     }
     
     // Handle dilute modifier
     if (isDilute) {
       color = isTanVariant ? 'Amber Tan' : 'Amber';
-      return { phenotype: color, carriers, hidden };
+      return { phenotype: addPiedIfNeeded(color), carriers, hidden };
     }
     
     if (genotype.P === 'p/p') {
@@ -470,16 +478,15 @@ const calculatePhenotype = (genotype, originalGenotype = null) => {
     } else {
       color = isTanVariant ? 'Dominant Red Tan' : 'Dominant Red';
     }
-    if (genotype.S === 's/s') color += ' Pied';
-    return { phenotype: color, carriers, hidden };
+    return { phenotype: addPiedIfNeeded(color), carriers, hidden };
   }
 
   // Recessive red (e/e)
   if (genotype.E === 'e/e') {
     if (genotype.A && genotype.A.includes('at')) {
-      return { phenotype: 'Recessive Red Tan', carriers, hidden };
+      return { phenotype: addPiedIfNeeded('Recessive Red Tan'), carriers, hidden };
     }
-    return { phenotype: 'Recessive Red', carriers, hidden };
+    return { phenotype: addPiedIfNeeded('Recessive Red'), carriers, hidden };
   }
 
   // Viable yellow (brindle - Avy)
@@ -504,10 +511,10 @@ const calculatePhenotype = (genotype, originalGenotype = null) => {
       
       // If Spl is present, use Splashed instead of Snowtiger
       if (hasSpl) {
-        return { phenotype: isTanVariant ? 'Brindle Splashed Fox' : 'Brindle Splashed', carriers, hidden };
+        return { phenotype: addPiedIfNeeded(isTanVariant ? 'Brindle Splashed Fox' : 'Brindle Splashed'), carriers, hidden };
       }
       
-      return { phenotype: isTanVariant ? 'Snowtiger Fox' : 'Snowtiger', carriers, hidden };
+      return { phenotype: addPiedIfNeeded(isTanVariant ? 'Snowtiger Fox' : 'Snowtiger'), carriers, hidden };
     }
     
     // Track what Avy is paired with
@@ -525,25 +532,23 @@ const calculatePhenotype = (genotype, originalGenotype = null) => {
     // Handle brown modifier
     if (isBrown) {
       color = isTanVariant ? 'Chocolate Brindle Tan' : isAgouti ? 'Cinnamon Brindle' : 'Chocolate Brindle';
-      return { phenotype: color, carriers, hidden };
+      return { phenotype: addPiedIfNeeded(color), carriers, hidden };
     }
     
     // Handle dilute modifier
     if (isDilute) {
       color = isTanVariant ? 'Blue Brindle Tan' : isAgouti ? 'Blue Agouti Brindle' : 'Blue Brindle';
-      return { phenotype: color, carriers, hidden };
+      return { phenotype: addPiedIfNeeded(color), carriers, hidden };
     }
     
     // Handle pink-eyed dilution
     if (genotype.P === 'p/p') {
       color = isTanVariant ? 'Dove Brindle Tan' : isAgouti ? 'Argente Brindle' : 'Dove Brindle';
-      if (genotype.S === 's/s') color += ' Pied';
-      return { phenotype: color, carriers, hidden };
+      return { phenotype: addPiedIfNeeded(color), carriers, hidden };
     }
     
     color = isTanVariant ? 'Brindle Tan' : 'Brindle';
-    if (genotype.S === 's/s') color += ' Pied';
-    return { phenotype: color, carriers, hidden };
+    return { phenotype: addPiedIfNeeded(color), carriers, hidden };
   }
 
   // Base color determination
