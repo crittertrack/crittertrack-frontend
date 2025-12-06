@@ -874,6 +874,9 @@ const MouseGeneticsCalculator = ({ API_BASE_URL, authToken }) => {
   const [activeTab, setActiveTab] = useState('self');
   const [offspringResults, setOffspringResults] = useState(null);
   const [expandedPhenotypes, setExpandedPhenotypes] = useState({});
+  const [feedbackGenotype, setFeedbackGenotype] = useState(null);
+  const [feedbackMessage, setFeedbackMessage] = useState('');
+  const [showFeedbackModal, setShowFeedbackModal] = useState(false);
 
   const updateParent1 = (locus, value) => {
     setParent1({ ...parent1, [locus]: value });
@@ -888,6 +891,54 @@ const MouseGeneticsCalculator = ({ API_BASE_URL, authToken }) => {
       ...prev,
       [index]: !prev[index]
     }));
+  };
+
+  const openFeedbackModal = (phenotype, genotype) => {
+    setFeedbackGenotype({ phenotype, genotype });
+    setFeedbackMessage('');
+    setShowFeedbackModal(true);
+  };
+
+  const closeFeedbackModal = () => {
+    setShowFeedbackModal(false);
+    setFeedbackGenotype(null);
+    setFeedbackMessage('');
+  };
+
+  const submitFeedback = async () => {
+    if (!feedbackGenotype || !feedbackMessage.trim()) {
+      alert('Please enter your feedback');
+      return;
+    }
+
+    try {
+      const genotypeString = Object.entries(feedbackGenotype.genotype)
+        .map(([locus, alleles]) => `${locus}: ${alleles}`)
+        .join(', ');
+
+      const response = await fetch(`${API_BASE_URL}/genetics-feedback`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${authToken}`
+        },
+        body: JSON.stringify({
+          phenotype: feedbackGenotype.phenotype,
+          genotype: genotypeString,
+          feedback: feedbackMessage
+        })
+      });
+
+      if (response.ok) {
+        alert('Thank you for your feedback! We will review it.');
+        closeFeedbackModal();
+      } else {
+        alert('Failed to submit feedback. Please try again.');
+      }
+    } catch (error) {
+      console.error('Error submitting feedback:', error);
+      alert('An error occurred. Please try again.');
+    }
   };
 
   // Function to get possible alleles from a genotype combination
@@ -1576,6 +1627,15 @@ const MouseGeneticsCalculator = ({ API_BASE_URL, authToken }) => {
                       >
                         {expandedPhenotypes[idx] ? '▲' : '▼'} {result.genotypes.length} genotype{result.genotypes.length !== 1 ? 's' : ''}
                       </button>
+                      {(result.phenotype.includes('Unknown') || result.phenotype.includes('LETHAL')) && (
+                        <button
+                          onClick={() => openFeedbackModal(result.phenotype, result.genotypes[0])}
+                          className="ml-2 px-3 py-1 text-sm bg-yellow-100 hover:bg-yellow-200 text-yellow-800 rounded-lg transition"
+                          title="Report incorrect phenotype"
+                        >
+                          Report Issue
+                        </button>
+                      )}
                     </div>
                     
                     {expandedPhenotypes[idx] && (
@@ -1593,6 +1653,63 @@ const MouseGeneticsCalculator = ({ API_BASE_URL, authToken }) => {
                     )}
                   </div>
                 ))}
+              </div>
+            </div>
+          )}
+
+          {/* Feedback Modal */}
+          {showFeedbackModal && (
+            <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
+              <div className="bg-white rounded-lg p-6 max-w-md w-full">
+                <div className="flex justify-between items-start mb-4">
+                  <h3 className="text-xl font-semibold text-gray-800">Report Phenotype Issue</h3>
+                  <button
+                    onClick={closeFeedbackModal}
+                    className="text-gray-500 hover:text-gray-700"
+                  >
+                    <X size={24} />
+                  </button>
+                </div>
+                
+                <div className="mb-4">
+                  <p className="text-sm text-gray-600 mb-2">
+                    <span className="font-medium">Phenotype:</span> {feedbackGenotype?.phenotype}
+                  </p>
+                  <p className="text-sm text-gray-600">
+                    <span className="font-medium">Genotype:</span>{' '}
+                    {feedbackGenotype && Object.entries(feedbackGenotype.genotype)
+                      .map(([_, alleles]) => alleles)
+                      .join(', ')}
+                  </p>
+                </div>
+
+                <div className="mb-4">
+                  <label className="block text-sm font-medium text-gray-700 mb-2">
+                    What is the issue or correct phenotype?
+                  </label>
+                  <textarea
+                    value={feedbackMessage}
+                    onChange={(e) => setFeedbackMessage(e.target.value)}
+                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-500"
+                    rows="4"
+                    placeholder="Please describe the issue or provide the correct phenotype..."
+                  />
+                </div>
+
+                <div className="flex gap-3">
+                  <button
+                    onClick={submitFeedback}
+                    className="flex-1 px-4 py-2 bg-purple-600 text-white rounded-lg hover:bg-purple-700 transition"
+                  >
+                    Submit Feedback
+                  </button>
+                  <button
+                    onClick={closeFeedbackModal}
+                    className="px-4 py-2 bg-gray-200 text-gray-800 rounded-lg hover:bg-gray-300 transition"
+                  >
+                    Cancel
+                  </button>
+                </div>
               </div>
             </div>
           )}
