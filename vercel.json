@@ -1,13 +1,8 @@
 {
   "rewrites": [
     {
-      "source": "/api/(.*)",
-      "destination": "https://crittertrack-pedigree-production.up.railway.app/api/$1"
+      "source": "/(.*)",
+      "destination": "/index.html"
     }
-  ],
-  "build": {
-    "env": {
-      "REACT_APP_API_BASE_URL": "/api"
-    }
-  }
+  ]
 }
