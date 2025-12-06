@@ -1418,7 +1418,7 @@ const MouseGeneticsCalculator = ({ API_BASE_URL, authToken }) => {
               <span className="font-medium">Genotype: </span>
               {Object.entries(parent1)
                 .filter(([_, value]) => value && value !== '')
-                .map(([locus, alleles]) => `${locus}: ${alleles}`)
+                .map(([_, alleles]) => alleles)
                 .join(', ') || ''}
             </p>
             {parent1Result.carriers && parent1Result.carriers.length > 0 && (
@@ -1466,7 +1466,7 @@ const MouseGeneticsCalculator = ({ API_BASE_URL, authToken }) => {
               <span className="font-medium">Genotype: </span>
               {Object.entries(parent2)
                 .filter(([_, value]) => value && value !== '')
-                .map(([locus, alleles]) => `${locus}: ${alleles}`)
+                .map(([_, alleles]) => alleles)
                 .join(', ') || ''}
             </p>
             {parent2Result.carriers && parent2Result.carriers.length > 0 && (
@@ -1523,7 +1523,7 @@ const MouseGeneticsCalculator = ({ API_BASE_URL, authToken }) => {
                       <span className="font-medium">Genotype: </span>
                       {Object.entries(result.genotype)
                         .filter(([_, value]) => value && value !== '')
-                        .map(([locus, alleles]) => `${locus}: ${alleles}`)
+                        .map(([_, alleles]) => alleles)
                         .join(', ')}
                     </p>
                     {result.carriers && result.carriers.length > 0 && (
