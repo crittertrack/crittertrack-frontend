@@ -908,8 +908,8 @@ const MouseGeneticsCalculator = ({ API_BASE_URL, authToken }) => {
       S: 'S/S',      // Non-pied (wild type)
       W: 'w/w',      // No white spotting
       Spl: 'spl/spl', // No splashed
-      Rn: 'rn/rn',   // No roan
-      Si: 'si/si',   // No silver
+      Rn: 'Rn/Rn',   // No roan
+      Si: 'Si/Si',   // No silver
       Mobr: 'mobr/mobr', // No xbrindle
       Go: 'Go/Go',   // Shorthair (default)
       Re: 're/re',   // No astrex
