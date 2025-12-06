@@ -1419,7 +1419,7 @@ const MouseGeneticsCalculator = ({ API_BASE_URL, authToken }) => {
               {Object.entries(applyDefaults(parent1))
                 .filter(([_, value]) => value && value !== '')
                 .map(([locus, alleles]) => `${locus}: ${alleles}`)
-                .join(', ')}
+                .join(', ') || ''}
             </p>
             {parent1Result.carriers && parent1Result.carriers.length > 0 && (
               <p className="text-sm text-gray-700 mt-1">
@@ -1467,7 +1467,7 @@ const MouseGeneticsCalculator = ({ API_BASE_URL, authToken }) => {
               {Object.entries(applyDefaults(parent2))
                 .filter(([_, value]) => value && value !== '')
                 .map(([locus, alleles]) => `${locus}: ${alleles}`)
-                .join(', ')}
+                .join(', ') || ''}
             </p>
             {parent2Result.carriers && parent2Result.carriers.length > 0 && (
               <p className="text-sm text-gray-700 mt-1">
