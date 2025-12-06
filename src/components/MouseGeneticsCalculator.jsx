@@ -1489,7 +1489,12 @@ const MouseGeneticsCalculator = ({ API_BASE_URL, authToken }) => {
           <div className="mt-6 flex justify-center">
             <button
               onClick={calculateOffspring}
-              className="px-8 py-3 bg-green-600 text-white text-lg font-semibold rounded-lg hover:bg-green-700 transition shadow-lg"
+              disabled={!hasAnySelection(parent1) || !hasAnySelection(parent2)}
+              className={`px-8 py-3 text-white text-lg font-semibold rounded-lg transition shadow-lg ${
+                hasAnySelection(parent1) && hasAnySelection(parent2)
+                  ? 'bg-pink-600 hover:bg-pink-700 cursor-pointer'
+                  : 'bg-gray-400 cursor-not-allowed opacity-50'
+              }`}
             >
               Calculate Offspring
             </button>
