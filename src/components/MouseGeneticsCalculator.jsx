@@ -1019,6 +1019,8 @@ const MouseGeneticsCalculator = ({ API_BASE_URL, authToken }) => {
       });
     });
     
+    const totalCount = allGenotypes.length;
+    
     // Group by phenotype and collect all genotypes for each
     const phenotypeMap = {};
     allGenotypes.forEach(fullGenotype => {
@@ -1028,7 +1030,8 @@ const MouseGeneticsCalculator = ({ API_BASE_URL, authToken }) => {
       if (!phenotypeMap[phenotype]) {
         phenotypeMap[phenotype] = {
           phenotype: phenotype,
-          genotypes: []
+          genotypes: [],
+          count: 0
         };
       }
       
@@ -1039,9 +1042,14 @@ const MouseGeneticsCalculator = ({ API_BASE_URL, authToken }) => {
       });
       
       phenotypeMap[phenotype].genotypes.push(displayGenotype);
+      phenotypeMap[phenotype].count++;
     });
     
-    const resultsArray = Object.values(phenotypeMap);
+    const resultsArray = Object.values(phenotypeMap).map(data => ({
+      phenotype: data.phenotype,
+      genotypes: data.genotypes,
+      percentage: ((data.count / totalCount) * 100).toFixed(2)
+    })).sort((a, b) => b.percentage - a.percentage);
     
     setOffspringResults(resultsArray);
   };
@@ -1533,10 +1541,15 @@ const MouseGeneticsCalculator = ({ API_BASE_URL, authToken }) => {
               <div className="space-y-3">
                 {offspringResults.map((result, idx) => (
                   <div key={idx} className="bg-white p-4 rounded-lg border border-purple-200">
-                    <p className={`text-lg font-semibold mb-3 ${result.phenotype.includes('LETHAL') ? 'text-red-600' : 'text-gray-800'}`}>
-                      <span className="text-sm font-medium text-gray-600">Phenotype: </span>
-                      {result.phenotype}
-                    </p>
+                    <div className="flex justify-between items-start mb-3">
+                      <p className={`text-lg font-semibold ${result.phenotype.includes('LETHAL') ? 'text-red-600' : 'text-gray-800'}`}>
+                        <span className="text-sm font-medium text-gray-600">Phenotype: </span>
+                        {result.phenotype}
+                      </p>
+                      <span className="text-purple-700 font-semibold whitespace-nowrap ml-4">
+                        {result.percentage}%
+                      </span>
+                    </div>
                     <div className="text-sm text-gray-700">
                       <span className="font-medium">Genotypes:</span>
                       <div className="mt-1 space-y-1">
