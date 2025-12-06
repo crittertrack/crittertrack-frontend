@@ -873,6 +873,7 @@ const MouseGeneticsCalculator = ({ API_BASE_URL, authToken }) => {
   const [showExamples, setShowExamples] = useState(false);
   const [activeTab, setActiveTab] = useState('self');
   const [offspringResults, setOffspringResults] = useState(null);
+  const [expandedPhenotypes, setExpandedPhenotypes] = useState({});
 
   const updateParent1 = (locus, value) => {
     setParent1({ ...parent1, [locus]: value });
@@ -880,6 +881,13 @@ const MouseGeneticsCalculator = ({ API_BASE_URL, authToken }) => {
 
   const updateParent2 = (locus, value) => {
     setParent2({ ...parent2, [locus]: value });
+  };
+
+  const togglePhenotype = (index) => {
+    setExpandedPhenotypes(prev => ({
+      ...prev,
+      [index]: !prev[index]
+    }));
   };
 
   // Function to get possible alleles from a genotype combination
@@ -1550,27 +1558,39 @@ const MouseGeneticsCalculator = ({ API_BASE_URL, authToken }) => {
               <div className="space-y-3">
                 {offspringResults.map((result, idx) => (
                   <div key={idx} className="bg-white p-4 rounded-lg border border-purple-200">
-                    <div className="flex justify-between items-start mb-3">
-                      <p className={`text-lg font-semibold ${result.phenotype.includes('LETHAL') ? 'text-red-600' : 'text-gray-800'}`}>
-                        <span className="text-sm font-medium text-gray-600">Phenotype: </span>
-                        {result.phenotype}
-                      </p>
-                      <span className="text-purple-700 font-semibold whitespace-nowrap ml-4">
-                        {result.percentage}%
-                      </span>
-                    </div>
-                    <div className="text-sm text-gray-700">
-                      <span className="font-medium">Genotypes:</span>
-                      <div className="mt-1 space-y-1">
-                        {result.genotypes.map((genotype, gIdx) => (
-                          <div key={gIdx} className="pl-4">
-                            {Object.entries(genotype)
-                              .map(([_, alleles]) => alleles)
-                              .join(', ')}
-                          </div>
-                        ))}
+                    <div className="flex justify-between items-center">
+                      <div className="flex-1">
+                        <div className="flex items-center gap-2">
+                          <p className={`text-lg font-semibold ${result.phenotype.includes('LETHAL') ? 'text-red-600' : 'text-gray-800'}`}>
+                            <span className="text-sm font-medium text-gray-600">Phenotype: </span>
+                            {result.phenotype}
+                          </p>
+                          <span className="text-purple-700 font-semibold">
+                            {result.percentage}%
+                          </span>
+                        </div>
                       </div>
+                      <button
+                        onClick={() => togglePhenotype(idx)}
+                        className="ml-4 px-3 py-1 text-sm bg-purple-100 hover:bg-purple-200 text-purple-800 rounded-lg transition flex items-center gap-1"
+                      >
+                        {expandedPhenotypes[idx] ? '▲' : '▼'} {result.genotypes.length} genotype{result.genotypes.length !== 1 ? 's' : ''}
+                      </button>
                     </div>
+                    
+                    {expandedPhenotypes[idx] && (
+                      <div className="mt-3 pt-3 border-t border-purple-100">
+                        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-2">
+                          {result.genotypes.map((genotype, gIdx) => (
+                            <div key={gIdx} className="text-sm text-gray-700 bg-purple-50 px-3 py-2 rounded">
+                              {Object.entries(genotype)
+                                .map(([_, alleles]) => alleles)
+                                .join(', ')}
+                            </div>
+                          ))}
+                        </div>
+                      </div>
+                    )}
                   </div>
                 ))}
               </div>
