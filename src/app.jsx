@@ -4728,66 +4728,173 @@ const AuthView = ({ onLoginSuccess, showModalMessage, isRegister, setIsRegister,
     const [password, setPassword] = useState('');
     const [personalName, setPersonalName] = useState('');
     const [loading, setLoading] = useState(false);
+    const [verificationStep, setVerificationStep] = useState(false);
+    const [verificationCode, setVerificationCode] = useState('');
 
     const handleSubmit = async (e) => {
         e.preventDefault();
         setLoading(true);
         
-        const endpoint = isRegister ? '/auth/register' : '/auth/login';
-        const payload = isRegister ? { email, password, personalName } : { email, password };
-        
-        try {
-            const response = await axios.post(`${API_BASE_URL}${endpoint}`, payload);
-            
-            if (isRegister) {
-                showModalMessage('Registration Success', 'Your account has been created. Please log in.');
-                setIsRegister(false); 
-            } else {
-                onLoginSuccess(response.data.token);
+        if (isRegister && !verificationStep) {
+            // Step 1: Request verification code
+            try {
+                await axios.post(`${API_BASE_URL}/auth/register-request`, {
+                    email,
+                    password,
+                    personalName
+                });
+                setVerificationStep(true);
+                showModalMessage('Verification Code Sent', 'Please check your email for a 6-digit verification code.');
+            } catch (error) {
+                console.error('Registration request error:', error.response?.data || error.message);
+                showModalMessage(
+                    'Registration Failed',
+                    error.response?.data?.message || 'Failed to send verification code. Please try again.'
+                );
+            } finally {
+                setLoading(false);
             }
+        } else if (isRegister && verificationStep) {
+            // Step 2: Verify code and complete registration
+            try {
+                const response = await axios.post(`${API_BASE_URL}/auth/verify-email`, {
+                    email,
+                    code: verificationCode
+                });
+                showModalMessage('Registration Success', 'Your account has been verified! You are now logged in.');
+                onLoginSuccess(response.data.token);
+                setVerificationStep(false);
+                setVerificationCode('');
+            } catch (error) {
+                console.error('Verification error:', error.response?.data || error.message);
+                showModalMessage(
+                    'Verification Failed',
+                    error.response?.data?.message || 'Invalid or expired verification code. Please try again.'
+                );
+            } finally {
+                setLoading(false);
+            }
+        } else {
+            // Login flow (unchanged)
+            try {
+                const response = await axios.post(`${API_BASE_URL}/auth/login`, { email, password });
+                onLoginSuccess(response.data.token);
+            } catch (error) {
+                console.error('Login error:', error.response?.data || error.message);
+                showModalMessage(
+                    'Login Failed',
+                    error.response?.data?.message || 'An unexpected error occurred. Please try again.'
+                );
+            } finally {
+                setLoading(false);
+            }
+        }
+    };
+
+    const handleResendCode = async () => {
+        setLoading(true);
+        try {
+            await axios.post(`${API_BASE_URL}/auth/resend-verification`, { email });
+            showModalMessage('Code Resent', 'A new verification code has been sent to your email.');
         } catch (error) {
-            console.error('Authentication Error:', error.response?.data || error.message);
-            showModalMessage(
-                isRegister ? 'Registration Failed' : 'Login Failed',
-                error.response?.data?.message || 'An unexpected error occurred. Please try again.'
-            );
+            console.error('Resend error:', error.response?.data || error.message);
+            showModalMessage('Resend Failed', error.response?.data?.message || 'Failed to resend code.');
         } finally {
             setLoading(false);
         }
     };
 
+    const handleBackToRegistration = () => {
+        setVerificationStep(false);
+        setVerificationCode('');
+    };
+
     return (
         <div className="max-w-md w-full bg-white p-8 rounded-xl shadow-2xl">
             <h2 className="text-3xl font-extrabold text-gray-900 mb-6 text-center">
-                {mainTitle}
+                {verificationStep ? 'Verify Your Email' : mainTitle}
             </h2>
-            <form onSubmit={handleSubmit} className="space-y-4">
-                
-                {isRegister && (
-                    <input type="text" placeholder="Your Personal Name *" value={personalName} onChange={(e) => setPersonalName(e.target.value)} required 
+
+            {verificationStep ? (
+                // Step 2: Verification Code Form
+                <form onSubmit={handleSubmit} className="space-y-4">
+                    <div className="text-center mb-4">
+                        <p className="text-sm text-gray-600">
+                            We sent a 6-digit code to <strong>{email}</strong>
+                        </p>
+                        <p className="text-xs text-gray-500 mt-2">
+                            Code expires in 10 minutes
+                        </p>
+                    </div>
+                    
+                    <input 
+                        type="text" 
+                        placeholder="Enter 6-digit code" 
+                        value={verificationCode} 
+                        onChange={(e) => setVerificationCode(e.target.value.replace(/\D/g, '').slice(0, 6))} 
+                        required 
+                        maxLength={6}
+                        pattern="[0-9]{6}"
+                        className="w-full p-3 border border-gray-300 rounded-lg focus:ring-primary focus:border-primary transition text-center text-2xl tracking-widest font-mono"
+                    />
+                    
+                    <button
+                        type="submit"
+                        disabled={loading || verificationCode.length !== 6}
+                        className="w-full bg-primary text-black font-bold py-3 rounded-lg shadow-md hover:bg-primary/90 transition duration-150 flex items-center justify-center disabled:opacity-50"
+                    >
+                        {loading ? <Loader2 className="animate-spin mr-2" size={20} /> : 'Verify & Create Account'}
+                    </button>
+
+                    <div className="flex flex-col space-y-2 mt-4">
+                        <button 
+                            type="button" 
+                            onClick={handleResendCode}
+                            disabled={loading}
+                            className="text-sm text-accent hover:text-accent/80 transition duration-150 font-medium"
+                        >
+                            Resend Code
+                        </button>
+                        <button 
+                            type="button" 
+                            onClick={handleBackToRegistration}
+                            className="text-sm text-gray-600 hover:text-gray-800 transition duration-150"
+                        >
+                            ← Back to Registration
+                        </button>
+                    </div>
+                </form>
+            ) : (
+                // Step 1: Registration/Login Form
+                <form onSubmit={handleSubmit} className="space-y-4">
+                    
+                    {isRegister && (
+                        <input type="text" placeholder="Your Personal Name *" value={personalName} onChange={(e) => setPersonalName(e.target.value)} required 
+                            className="w-full p-3 border border-gray-300 rounded-lg focus:ring-primary focus:border-primary transition" />
+                    )}
+                    
+                    <input type="email" placeholder="Email Address *" value={email} onChange={(e) => setEmail(e.target.value)} required 
                         className="w-full p-3 border border-gray-300 rounded-lg focus:ring-primary focus:border-primary transition" />
-                )}
-                
-                <input type="email" placeholder="Email Address *" value={email} onChange={(e) => setEmail(e.target.value)} required 
-                    className="w-full p-3 border border-gray-300 rounded-lg focus:ring-primary focus:border-primary transition" />
-                <input type="password" placeholder="Password *" value={password} onChange={(e) => setPassword(e.target.value)} required 
-                    className="w-full p-3 border border-gray-300 rounded-lg focus:ring-primary focus:border-primary transition" />
-                
-                 <button
-          type="submit"
-          disabled={loading}
-          className="w-full bg-primary text-black font-bold py-3 rounded-lg shadow-md hover:bg-primary/90 transition duration-150 flex items-center justify-center disabled:opacity-50"
-        >
-          {loading ? <Loader2 className="animate-spin mr-2" size={20} /> : (isRegister ? <><UserPlus size={20} className="mr-2" /> Register</> : <><LogIn size={20} className="mr-2" /> Log In</>)}
-        </button>
-            </form>
+                    <input type="password" placeholder="Password *" value={password} onChange={(e) => setPassword(e.target.value)} required 
+                        className="w-full p-3 border border-gray-300 rounded-lg focus:ring-primary focus:border-primary transition" />
+                    
+                    <button
+                        type="submit"
+                        disabled={loading}
+                        className="w-full bg-primary text-black font-bold py-3 rounded-lg shadow-md hover:bg-primary/90 transition duration-150 flex items-center justify-center disabled:opacity-50"
+                    >
+                        {loading ? <Loader2 className="animate-spin mr-2" size={20} /> : (isRegister ? <><UserPlus size={20} className="mr-2" /> Register</> : <><LogIn size={20} className="mr-2" /> Log In</>)}
+                    </button>
+                </form>
+            )}
             
-            <div className="mt-6 text-center">
-    <button type="button" onClick={() => setIsRegister(prev => !prev)}
-        className="text-sm text-accent hover:text-accent/80 transition duration-150 font-medium"
-    >
-        {isRegister ? 'Already have an account? Log In' : "Don't have an account? Register Here"}
-    </button>
+            {!verificationStep && (
+                <div className="mt-6 text-center">
+                    <button type="button" onClick={() => setIsRegister(prev => !prev)}
+                        className="text-sm text-accent hover:text-accent/80 transition duration-150 font-medium"
+                    >
+                        {isRegister ? 'Already have an account? Log In' : "Don't have an account? Register Here"}
+                    </button>
             </div>
         </div>
     );
