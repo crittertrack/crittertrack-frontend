@@ -209,7 +209,6 @@ const calculatePhenotype = (genotype, originalGenotype = null) => {
   if (genotype.A === 'Ay/Ay (lethal)') return { phenotype: 'LETHAL: Homozygous Dominant Red', carriers: [], hidden: [] };
   if (genotype.W && genotype.W.includes('lethal')) return { phenotype: 'LETHAL: Dominant Spotting Homozygous', carriers: [], hidden: [] };
   if (genotype.W && genotype.W.includes('Wsh/Wsh')) return { phenotype: 'LETHAL: Wsh Homozygous', carriers: [], hidden: [] };
-  if (genotype.W && genotype.W.includes('Rw/')) return { phenotype: 'LETHAL: Rw Combination', carriers: [], hidden: [] };
 
   let color = '';
   let pattern = '';
@@ -587,6 +586,7 @@ const calculatePhenotype = (genotype, originalGenotype = null) => {
     // A/at is agouti tan (tan shows visually)
   }
   else if (genotype.A === 'a/ae') carriers.push('Extreme Black');
+  else if (genotype.A === 'at/ae') carriers.push('Extreme Black');
 
   // Brown/Black base
   const isBrown = genotype.B === 'b/b';
