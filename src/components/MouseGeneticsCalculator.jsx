@@ -684,11 +684,6 @@ const calculatePhenotype = (genotype, originalGenotype = null) => {
     else if (recessive === 'cch') carriers.push('Chinchilla');
   }
 
-  // Umbrous modifier
-  if (genotype.U && genotype.U.includes('U/')) {
-    color = `Umbrous ${color}`;
-  }
-
   // E-locus carriers
   if (genotype.E === 'E/e') carriers.push('Recessive Red');
 
@@ -781,6 +776,10 @@ const calculatePhenotype = (genotype, originalGenotype = null) => {
   let result = color;
   if (markings.length > 0) {
     result += ' ' + markings.join(', ');
+  }
+  // Apply Umbrous after color and markings but before texture
+  if (genotype.U && genotype.U.includes('U/')) {
+    result = `Umbrous ${result}`;
   }
   if (texture) {
     result += ` (${texture})`;
