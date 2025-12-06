@@ -944,6 +944,16 @@ const MouseGeneticsCalculator = ({ API_BASE_URL, authToken }) => {
     const p1 = applyDefaults(parent1);
     const p2 = applyDefaults(parent2);
     
+    // Only calculate for loci where at least one parent has a selection
+    const selectedLoci = Object.keys(GENE_LOCI).filter(locus => 
+      (parent1[locus] && parent1[locus] !== '') || (parent2[locus] && parent2[locus] !== '')
+    );
+    
+    // If no loci selected, don't calculate
+    if (selectedLoci.length === 0) {
+      return;
+    }
+    
     // Check if any coat genes were selected by either parent
     const coatGenesSelected = ['Go', 'Re', 'Sa', 'Rst', 'Fz', 'Nu'].some(gene => 
       (parent1[gene] && parent1[gene] !== '') || (parent2[gene] && parent2[gene] !== '')
@@ -956,24 +966,26 @@ const MouseGeneticsCalculator = ({ API_BASE_URL, authToken }) => {
     }
     
     const outcomes = {};
-    const allLoci = Object.keys(GENE_LOCI);
     
     // Generate all possible offspring genotypes
     const generateOffspring = (locusIndex, currentGenotype) => {
-      if (locusIndex >= allLoci.length) {
+      if (locusIndex >= selectedLoci.length) {
+        // Fill in defaults for unselected loci
+        const completeGenotype = applyDefaults(currentGenotype);
+        
         // Calculate phenotype for this genotype, passing selected info
-        const result = calculatePhenotype(currentGenotype, selectedGenotype);
+        const result = calculatePhenotype(completeGenotype, selectedGenotype);
         const phenotype = result.phenotype;
         
         if (!outcomes[phenotype]) {
           outcomes[phenotype] = { count: 0, genotypes: [] };
         }
         outcomes[phenotype].count++;
-        outcomes[phenotype].genotypes.push(currentGenotype);
+        outcomes[phenotype].genotypes.push(completeGenotype);
         return;
       }
       
-      const locus = allLoci[locusIndex];
+      const locus = selectedLoci[locusIndex];
       const parent1Alleles = getAlleles(p1[locus]);
       const parent2Alleles = getAlleles(p2[locus]);
       
