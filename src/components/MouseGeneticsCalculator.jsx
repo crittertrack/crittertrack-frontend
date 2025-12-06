@@ -481,15 +481,28 @@ const calculatePhenotype = (genotype, originalGenotype = null) => {
     const isTanVariant = genotype.A === 'Ay/at';
     const isBrown = genotype.B === 'b/b';
     const isDilute = genotype.D === 'd/d';
+    const isPinkEye = genotype.P === 'p/p';
     
-    // Handle brown + dilute combination
-    if (isBrown && isDilute) {
-      color = isTanVariant ? 'Dominant Red Lilac Tan' : 'Dominant Red Lilac';
+    // Handle brown + dilute + pink-eye combination
+    if (isBrown && isDilute && isPinkEye) {
+      color = 'Fawn Lilac';
+      return { phenotype: addMarkingsIfNeeded(color), carriers, hidden };
+    }
+    
+    // Handle dilute + pink-eye combination
+    if (isDilute && isPinkEye) {
+      color = 'Fawn Amber';
       return { phenotype: addMarkingsIfNeeded(color), carriers, hidden };
     }
     
     // Handle brown + pink-eye combination
-    if (isBrown && genotype.P === 'p/p') {
+    if (isBrown && isPinkEye) {
+      color = 'Fawn Chocolate';
+      return { phenotype: addMarkingsIfNeeded(color), carriers, hidden };
+    }
+    
+    // Handle brown + dilute combination
+    if (isBrown && isDilute) {
       color = isTanVariant ? 'Dominant Red Lilac Tan' : 'Dominant Red Lilac';
       return { phenotype: addMarkingsIfNeeded(color), carriers, hidden };
     }
@@ -506,11 +519,13 @@ const calculatePhenotype = (genotype, originalGenotype = null) => {
       return { phenotype: addMarkingsIfNeeded(color), carriers, hidden };
     }
     
-    if (genotype.P === 'p/p') {
-      color = isTanVariant ? 'Dominant Fawn Tan' : 'Dominant Fawn';
-    } else {
-      color = isTanVariant ? 'Dominant Red Tan' : 'Dominant Red';
+    // Handle pink-eye modifier
+    if (isPinkEye) {
+      color = isTanVariant ? 'Fawn Tan' : 'Fawn';
+      return { phenotype: addMarkingsIfNeeded(color), carriers, hidden };
     }
+    
+    color = isTanVariant ? 'Dominant Red Tan' : 'Dominant Red';
     return { phenotype: addMarkingsIfNeeded(color), carriers, hidden };
   }
 
@@ -582,7 +597,7 @@ const calculatePhenotype = (genotype, originalGenotype = null) => {
     
     // Handle pink-eyed dilution
     if (genotype.P === 'p/p') {
-      color = isTanVariant ? 'Dove Brindle Tan' : isAgouti ? 'Argente Brindle' : 'Dove Brindle';
+      color = isTanVariant ? 'Champagne Brindle Tan' : isAgouti ? 'Cinnamon Argente Brindle' : 'Champagne Brindle';
       return { phenotype: addMarkingsIfNeeded(color), carriers, hidden };
     }
     
@@ -621,7 +636,7 @@ const calculatePhenotype = (genotype, originalGenotype = null) => {
       }
     } else {
       if (genotype.P === 'p/p') {
-        color = 'Argente';
+        color = isBrown ? 'Cinnamon Argente' : 'Argente';
       } else {
         color = isBrown ? 'Cinnamon' : 'Agouti';
       }
@@ -629,14 +644,14 @@ const calculatePhenotype = (genotype, originalGenotype = null) => {
   } else if (isTanPattern) {
     pattern = 'Tan';
     if (genotype.P === 'p/p') {
-      color = 'Dove Tan';
+      color = isBrown ? 'Champagne Tan' : 'Dove Tan';
     } else {
       color = isBrown ? 'Chocolate Tan' : 'Black Tan';
     }
   } else if (isBlackPattern) {
     pattern = 'Self';
     if (genotype.P === 'p/p') {
-      color = 'Dove';
+      color = isBrown ? 'Champagne' : 'Dove';
     } else if (isExtremeBlackPattern) {
       color = isBrown ? 'Chocolate' : 'Extreme Black';
     } else {
@@ -660,7 +675,7 @@ const calculatePhenotype = (genotype, originalGenotype = null) => {
   }
 
   if (genotype.P === 'p/p') {
-    if (!color.includes('Fawn') && !color.includes('Red')) {
+    if (!color.includes('Fawn') && !color.includes('Red') && !color.includes('Dove') && !color.includes('Argente') && !color.includes('Champagne')) {
       color = `Pink-Eyed ${color}`;
     }
   } else if (genotype.P === 'P/p') {
