@@ -774,12 +774,12 @@ const calculatePhenotype = (genotype, originalGenotype = null) => {
 
   // Combine results
   let result = color;
-  if (markings.length > 0) {
-    result += ' ' + markings.join(', ');
-  }
-  // Apply Umbrous after color and markings but before texture
+  // Apply Umbrous after color but before markings
   if (genotype.U && genotype.U.includes('U/')) {
     result = `Umbrous ${result}`;
+  }
+  if (markings.length > 0) {
+    result += ' ' + markings.join(', ');
   }
   if (texture) {
     result += ` (${texture})`;
