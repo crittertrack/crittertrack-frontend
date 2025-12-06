@@ -181,8 +181,15 @@ const calculatePhenotype = (genotype, originalGenotype = null) => {
     
     let result = phenotype;
     
-    // Add Pied
-    if (genotype.S === 's/s' && !result.includes('Pied')) {
+    // Check if Splashed is in phenotype and Pied should be added -> convert to Tricolor
+    const hasSplashed = result.includes('Splashed');
+    const shouldAddPied = genotype.S === 's/s' && !result.includes('Pied') && !result.includes('Tricolor');
+    
+    if (hasSplashed && shouldAddPied) {
+      // Replace "Splashed" with "Tricolor"
+      result = result.replace('Splashed', 'Tricolor');
+    } else if (shouldAddPied) {
+      // Add Pied if no Splashed
       result += ' Pied';
     }
     
