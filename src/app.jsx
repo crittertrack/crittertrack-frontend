@@ -4134,7 +4134,14 @@ const AnimalForm = ({
                     fd.append('file', animalImageFile);
                     fd.append('type', 'animal');
                     console.log('[IMAGE UPLOAD] Sending to:', `${API_BASE_URL}/upload`);
-                    const uploadResp = await axios.post(`${API_BASE_URL}/upload`, fd, { headers: { 'Content-Type': 'multipart/form-data', Authorization: `Bearer ${authToken}` } });
+                    alert(`[DEBUG] Sending request to: ${API_BASE_URL}/upload`);
+                    const uploadResp = await axios.post(`${API_BASE_URL}/upload`, fd, { 
+                        headers: { 
+                            'Content-Type': 'multipart/form-data', 
+                            Authorization: `Bearer ${authToken}` 
+                        },
+                        timeout: 60000 // 60 second timeout
+                    });
                     console.log('[IMAGE UPLOAD] Response received:', uploadResp?.status, uploadResp?.data);
                     alert(`[DEBUG] Upload success! URL: ${uploadResp?.data?.url}`);
                     // Build payload explicitly instead of mutating state directly
@@ -4151,7 +4158,7 @@ const AnimalForm = ({
                         response: uploadErr?.response?.data,
                         status: uploadErr?.response?.status
                     });
-                    alert(`[DEBUG] Upload failed: ${uploadErr.message}`);
+                    alert(`[DEBUG] Upload FAILED: ${uploadErr.message} | Status: ${uploadErr?.response?.status} | Error: ${JSON.stringify(uploadErr?.response?.data)}`);
                     showModalMessage('Image Upload', 'Failed to upload animal image. The record will be saved without the image.');
                 }
             } else {
