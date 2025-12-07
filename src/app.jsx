@@ -4123,23 +4123,36 @@ const AnimalForm = ({
             // Upload animal image first (if selected)
                 let uploadedFilename = null;
                 if (animalImageFile) {
+                console.log('[IMAGE UPLOAD] Starting upload:', {
+                    fileName: animalImageFile.name,
+                    fileSize: animalImageFile.size,
+                    fileType: animalImageFile.type
+                });
                 try {
                     const fd = new FormData();
                     fd.append('file', animalImageFile);
                     fd.append('type', 'animal');
+                    console.log('[IMAGE UPLOAD] Sending to:', `${API_BASE_URL}/upload`);
                     const uploadResp = await axios.post(`${API_BASE_URL}/upload`, fd, { headers: { 'Content-Type': 'multipart/form-data', Authorization: `Bearer ${authToken}` } });
-                    console.debug('Animal image upload response:', uploadResp?.status, uploadResp?.data);
+                    console.log('[IMAGE UPLOAD] Response received:', uploadResp?.status, uploadResp?.data);
                     // Build payload explicitly instead of mutating state directly
                     if (uploadResp?.data?.url) {
                         formData.imageUrl = uploadResp.data.url;
+                        console.log('[IMAGE UPLOAD] URL set:', uploadResp.data.url);
                     }
                     if (uploadResp?.data?.filename) {
                         uploadedFilename = uploadResp.data.filename;
                     }
                 } catch (uploadErr) {
-                    console.error('Animal image upload failed:', uploadErr?.response?.data || uploadErr.message);
+                    console.error('[IMAGE UPLOAD] Upload failed:', {
+                        message: uploadErr.message,
+                        response: uploadErr?.response?.data,
+                        status: uploadErr?.response?.status
+                    });
                     showModalMessage('Image Upload', 'Failed to upload animal image. The record will be saved without the image.');
                 }
+            } else {
+                console.log('[IMAGE UPLOAD] No image file to upload');
             }
 
             // Prepare explicit payload to send to the API and log it for debugging
