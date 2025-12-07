@@ -1542,15 +1542,13 @@ const ViewOnlyAnimalDetail = ({ animal, onClose, API_BASE_URL, onViewProfile }) 
                             <ArrowLeft size={18} className="mr-1" /> Back
                         </button>
                         <div className="flex items-center gap-2">
-                            {animal.showOnPublicProfile && (
-                                <button
-                                    onClick={handleShare}
-                                    className="px-3 py-1.5 bg-primary hover:bg-primary/90 text-black font-semibold rounded-lg transition flex items-center gap-2"
-                                >
-                                    <Link size={16} />
-                                    {copySuccess ? 'Link Copied!' : 'Share Link'}
-                                </button>
-                            )}
+                            <button
+                                onClick={handleShare}
+                                className="px-3 py-1.5 bg-primary hover:bg-primary/90 text-black font-semibold rounded-lg transition flex items-center gap-2"
+                            >
+                                <Link size={16} />
+                                {copySuccess ? 'Link Copied!' : 'Share Link'}
+                            </button>
                             <button onClick={onClose} className="text-gray-500 hover:text-gray-800">
                                 <X size={28} />
                             </button>
@@ -4639,6 +4637,15 @@ const ProfileEditForm = ({ userProfile, showModalMessage, onSaveSuccess, onCance
 
 const ProfileView = ({ userProfile, showModalMessage, fetchUserProfile, authToken, onProfileUpdated }) => {
     const [isEditing, setIsEditing] = useState(false);
+    const [copySuccess, setCopySuccess] = useState(false);
+
+    const handleShare = () => {
+        const url = `${window.location.origin}/user/${userProfile.id_public}`;
+        navigator.clipboard.writeText(url).then(() => {
+            setCopySuccess(true);
+            setTimeout(() => setCopySuccess(false), 2000);
+        });
+    };
 
     if (!userProfile) return <LoadingSpinner />;
 
@@ -4663,10 +4670,19 @@ const ProfileView = ({ userProfile, showModalMessage, fetchUserProfile, authToke
 
     return (
         <div className="w-full max-w-4xl bg-white p-6 rounded-xl shadow-lg">
-            <h2 className="text-3xl font-bold text-gray-800 mb-6 flex items-center">
-                <Settings size={24} className="mr-3 text-primary-dark" />
-                Profile Settings
-            </h2>
+            <div className="flex justify-between items-center mb-6">
+                <h2 className="text-3xl font-bold text-gray-800 flex items-center">
+                    <Settings size={24} className="mr-3 text-primary-dark" />
+                    Profile Settings
+                </h2>
+                <button
+                    onClick={handleShare}
+                    className="px-3 py-1.5 bg-primary hover:bg-primary/90 text-black font-semibold rounded-lg transition flex items-center gap-2"
+                >
+                    <Link size={16} />
+                    {copySuccess ? 'Link Copied!' : 'Share Profile'}
+                </button>
+            </div>
             <div className="space-y-4">
                 
                 <div className="p-4 bg-gray-50 rounded-lg border border-gray-200">
@@ -5626,6 +5642,7 @@ const App = () => {
     const [viewAnimalBreederInfo, setViewAnimalBreederInfo] = useState(null);
     const [animalToView, setAnimalToView] = useState(null);
     const [showPedigreeChart, setShowPedigreeChart] = useState(false);
+    const [copySuccessAnimal, setCopySuccessAnimal] = useState(false);
     
     const [showBugReportModal, setShowBugReportModal] = useState(false);
     const [bugReportCategory, setBugReportCategory] = useState('Bug');
@@ -5988,6 +6005,13 @@ const App = () => {
                 const formattedBirthDate = animalToView.birthDate
                     ? new Intl.DateTimeFormat('en-US', { year: 'numeric', month: 'long', day: 'numeric' }).format(new Date(animalToView.birthDate))
                     : '—';
+                const handleShareAnimal = () => {
+                    const url = `${window.location.origin}/animal/${animalToView.id_public}`;
+                    navigator.clipboard.writeText(url).then(() => {
+                        setCopySuccessAnimal(true);
+                        setTimeout(() => setCopySuccessAnimal(false), 2000);
+                    });
+                };
                 return (
                     <>
                     <div className="w-full max-w-4xl bg-white p-6 rounded-xl shadow-lg">
@@ -5996,10 +6020,19 @@ const App = () => {
                                 <ArrowLeft size={20} className="mr-2" />
                                 Back to Dashboard
                             </button>
-                            {/* Only show edit button if user owns this animal */}
-                            {userProfile && animalToView.ownerId_public === userProfile.id_public && (
-                                <button onClick={() => { setAnimalToEdit(animalToView); setSpeciesToAdd(animalToView.species); setCurrentView('edit-animal'); }} className="bg-primary hover:bg-primary/90 text-black font-semibold py-2 px-4 rounded-lg">Edit</button>
-                            )}
+                            <div className="flex items-center gap-2">
+                                <button
+                                    onClick={handleShareAnimal}
+                                    className="px-3 py-1.5 bg-primary hover:bg-primary/90 text-black font-semibold rounded-lg transition flex items-center gap-2"
+                                >
+                                    <Link size={16} />
+                                    {copySuccessAnimal ? 'Link Copied!' : 'Share Link'}
+                                </button>
+                                {/* Only show edit button if user owns this animal */}
+                                {userProfile && animalToView.ownerId_public === userProfile.id_public && (
+                                    <button onClick={() => { setAnimalToEdit(animalToView); setSpeciesToAdd(animalToView.species); setCurrentView('edit-animal'); }} className="bg-primary hover:bg-primary/90 text-black font-semibold py-2 px-4 rounded-lg">Edit</button>
+                                )}
+                            </div>
                         </div>
 
                         {/* Main Info Section */}
