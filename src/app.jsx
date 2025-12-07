@@ -7,6 +7,7 @@ import html2canvas from 'html2canvas';
 import MouseGeneticsCalculator from './components/MouseGeneticsCalculator';
 import TermsOfService from './components/TermsOfService';
 import PrivacyPolicy from './components/PrivacyPolicy';
+import InstallPWA from './components/InstallPWA';
 
 // const API_BASE_URL = 'http://localhost:5000/api'; // Local development
 const API_BASE_URL = 'https://crittertrack-pedigree-production.up.railway.app/api'; // Direct Railway (for testing)
@@ -7273,11 +7274,14 @@ const PublicProfilePage = () => {
 // Router Wrapper Component
 const AppRouter = () => {
     return (
-        <Routes>
-            <Route path="/" element={<App />} />
-            <Route path="/animal/:animalId" element={<PublicAnimalPage />} />
-            <Route path="/user/:userId" element={<PublicProfilePage />} />
-        </Routes>
+        <>
+            <InstallPWA />
+            <Routes>
+                <Route path="/" element={<App />} />
+                <Route path="/animal/:animalId" element={<PublicAnimalPage />} />
+                <Route path="/user/:userId" element={<PublicProfilePage />} />
+            </Routes>
+        </>
     );
 };
 
