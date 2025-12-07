@@ -3279,6 +3279,10 @@ const SpeciesManager = ({ speciesOptions, setSpeciesOptions, onCancel, showModal
     const [searchTerm, setSearchTerm] = useState('');
     const [categoryFilter, setCategoryFilter] = useState('All');
     const [loading, setLoading] = useState(false);
+    const [showFeedbackModal, setShowFeedbackModal] = useState(false);
+    const [feedbackSpecies, setFeedbackSpecies] = useState('');
+    const [feedbackText, setFeedbackText] = useState('');
+    const [feedbackSubmitting, setFeedbackSubmitting] = useState(false);
     
     const categories = ['Rodent', 'Mammal', 'Reptile', 'Bird', 'Amphibian', 'Fish', 'Invertebrate', 'Other'];
     
@@ -3318,6 +3322,34 @@ const SpeciesManager = ({ speciesOptions, setSpeciesOptions, onCancel, showModal
             }
         } finally {
             setLoading(false);
+        }
+    };
+
+    const handleSubmitFeedback = async (e) => {
+        e.preventDefault();
+        if (!feedbackSpecies || !feedbackText.trim()) return;
+        
+        setFeedbackSubmitting(true);
+        try {
+            await axios.post(
+                `${API_BASE_URL}/feedback/species`,
+                {
+                    species: feedbackSpecies,
+                    feedback: feedbackText.trim(),
+                    type: 'species-customization'
+                },
+                { headers: { Authorization: `Bearer ${authToken}` } }
+            );
+            
+            showModalMessage('Feedback Sent', 'Thank you! Your feedback will help us improve species customization.');
+            setShowFeedbackModal(false);
+            setFeedbackSpecies('');
+            setFeedbackText('');
+        } catch (error) {
+            console.error('Failed to submit feedback:', error);
+            showModalMessage('Error', 'Failed to submit feedback. Please try again.');
+        } finally {
+            setFeedbackSubmitting(false);
         }
     };
 
@@ -3404,7 +3436,13 @@ const SpeciesManager = ({ speciesOptions, setSpeciesOptions, onCancel, showModal
                 )}
             </div>
             
-            <div className="mt-6 border-t pt-4 flex justify-end">
+            <div className="mt-6 border-t pt-4 flex justify-between items-center">
+                <button
+                    onClick={() => setShowFeedbackModal(true)}
+                    className="flex items-center text-accent hover:text-accent/80 transition font-medium"
+                >
+                    <Mail size={18} className="mr-1" /> Request Species Customization
+                </button>
                 <button
                     onClick={onCancel}
                     className="flex items-center text-gray-600 hover:text-gray-800 transition"
@@ -3412,6 +3450,71 @@ const SpeciesManager = ({ speciesOptions, setSpeciesOptions, onCancel, showModal
                     <ArrowLeft size={18} className="mr-1" /> Back to Selector
                 </button>
             </div>
+
+            {/* Feedback Modal */}
+            {showFeedbackModal && (
+                <div className="fixed inset-0 bg-gray-600 bg-opacity-75 flex items-center justify-center p-4 z-50">
+                    <div className="bg-white rounded-xl shadow-2xl p-6 w-full max-w-lg">
+                        <h3 className="text-xl font-bold text-gray-800 mb-4">Request Species Customization</h3>
+                        <p className="text-sm text-gray-600 mb-4">
+                            Let us know if a species needs different field labels (e.g., "Morph" instead of "Color/Coat" for snakes)
+                        </p>
+                        
+                        <form onSubmit={handleSubmitFeedback} className="space-y-4">
+                            <div>
+                                <label className="block text-sm font-medium text-gray-700 mb-1">Species</label>
+                                <select
+                                    value={feedbackSpecies}
+                                    onChange={(e) => setFeedbackSpecies(e.target.value)}
+                                    required
+                                    className="w-full p-2 border border-gray-300 rounded-lg"
+                                >
+                                    <option value="">Select a species...</option>
+                                    {speciesOptions.map(s => (
+                                        <option key={s._id || s.name} value={s.name}>{s.name}</option>
+                                    ))}
+                                </select>
+                            </div>
+                            
+                            <div>
+                                <label className="block text-sm font-medium text-gray-700 mb-1">
+                                    What field labels should be different?
+                                </label>
+                                <textarea
+                                    value={feedbackText}
+                                    onChange={(e) => setFeedbackText(e.target.value)}
+                                    required
+                                    rows={4}
+                                    placeholder='Example: For snakes, "Color" and "Coat" should be replaced with "Morph"'
+                                    className="w-full p-2 border border-gray-300 rounded-lg"
+                                />
+                            </div>
+                            
+                            <div className="flex gap-3">
+                                <button
+                                    type="button"
+                                    onClick={() => {
+                                        setShowFeedbackModal(false);
+                                        setFeedbackSpecies('');
+                                        setFeedbackText('');
+                                    }}
+                                    className="flex-1 px-4 py-2 bg-gray-200 hover:bg-gray-300 text-gray-700 rounded-lg transition"
+                                >
+                                    Cancel
+                                </button>
+                                <button
+                                    type="submit"
+                                    disabled={feedbackSubmitting}
+                                    className="flex-1 px-4 py-2 bg-accent hover:bg-accent/80 text-white rounded-lg transition disabled:opacity-50 flex items-center justify-center"
+                                >
+                                    {feedbackSubmitting ? <Loader2 className="animate-spin mr-2" size={18} /> : <Mail size={18} className="mr-2" />}
+                                    {feedbackSubmitting ? 'Sending...' : 'Send Feedback'}
+                                </button>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            )}
         </div>
     );
 };
