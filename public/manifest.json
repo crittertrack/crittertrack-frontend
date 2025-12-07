@@ -6,7 +6,7 @@
   "display": "standalone",
   "background_color": "#ffffff",
   "theme_color": "#FFD700",
-  "orientation": "portrait-primary",
+  "orientation": "any",
   "icons": [
     {
       "src": "/logo192.png",
@@ -22,6 +22,16 @@
     }
   ],
   "categories": ["productivity", "utilities"],
+  "shortcuts": [
+    {
+      "name": "My Animals",
+      "short_name": "Animals",
+      "description": "View and manage your animals",
+      "url": "/?view=list",
+      "icons": [{ "src": "/logo192.png", "sizes": "192x192" }]
+    }
+  ],
+  "prefer_related_applications": false,
   "screenshots": [
     {
       "src": "/screenshot1.png",
