@@ -6609,7 +6609,7 @@ const PublicAnimalPage = () => {
     useEffect(() => {
         const fetchAnimal = async () => {
             try {
-                const response = await axios.get(`${API_BASE_URL}/public-animals/${animalId}`);
+                const response = await axios.get(`${API_BASE_URL}/public/animal/${animalId}`);
                 setAnimal(response.data);
                 setLoading(false);
             } catch (error) {
@@ -6689,7 +6689,7 @@ const PublicProfilePage = () => {
     useEffect(() => {
         const fetchProfile = async () => {
             try {
-                const response = await axios.get(`${API_BASE_URL}/users/public/${userId}`);
+                const response = await axios.get(`${API_BASE_URL}/public/profile/${userId}`);
                 setProfile(response.data);
                 setLoading(false);
             } catch (error) {
