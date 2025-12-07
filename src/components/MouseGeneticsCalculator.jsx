@@ -113,7 +113,7 @@ const GENE_LOCI = {
     ]
   },
   Go: {
-    name: 'Shorthair/Longhair',
+    name: 'Shorthair',
     combinations: [
       'go/go',
       'Go/go', 'Go/Go'
