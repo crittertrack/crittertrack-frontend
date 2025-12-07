@@ -6129,6 +6129,13 @@ const App = () => {
             motherId_public: animal.motherId_public || animal.damId_public
         };
         
+        // Set COI to 0 for animals with no parents if not already set
+        if (normalizedAnimal.inbreedingCoefficient == null && 
+            !normalizedAnimal.fatherId_public && 
+            !normalizedAnimal.motherId_public) {
+            normalizedAnimal.inbreedingCoefficient = 0;
+        }
+        
         console.log('[handleViewAnimal] Father ID:', normalizedAnimal.fatherId_public, 'Mother ID:', normalizedAnimal.motherId_public);
         setAnimalToView(normalizedAnimal);
         setCurrentView('view-animal');
