@@ -12,7 +12,7 @@ module.exports = {
         // User-defined colors
         'page-bg': '#F1D1DC',
         'primary': '#9ED4E0',
-        'primary-dark': '#79A7B3', // A slightly darker shade for hover state
+        'primary-dark': '#7fd4e0', // A slightly darker shade for hover state
         'accent': '#D27096',
       }
     },

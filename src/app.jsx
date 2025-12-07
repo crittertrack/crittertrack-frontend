@@ -837,7 +837,7 @@ const ParentSearchModal = ({
                 </div>
                 
                 {/* Badge */}
-                {isGlobal && <span className="text-xs text-blue-600 bg-blue-100 px-2 py-1 rounded-full flex-shrink-0">Global</span>}
+                {isGlobal && <span className="text-xs text-black bg-primary px-2 py-1 rounded-full flex-shrink-0">Global</span>}
             </div>
         );
     };
@@ -2665,8 +2665,8 @@ const LitterManagement = ({ authToken, API_BASE_URL, userProfile, showModalMessa
                         />
                     </div>
 
-                    <div className="bg-blue-50 border border-blue-200 rounded-lg p-4 mb-4">
-                        <p className="text-sm text-blue-800">
+                    <div className="bg-primary/20 border border-primary rounded-lg p-4 mb-4">
+                        <p className="text-sm text-gray-800">
                             <strong>Note:</strong> Offspring will be created with names M1, M2... for males and F1, F2... for females. 
                             All will have status "Pet" and be marked as owned by you. You can edit names and details after creation.
                         </p>
@@ -3919,7 +3919,7 @@ const AnimalForm = ({
                                 </label>
                                 <label className="flex items-center space-x-2 text-sm text-gray-700">
                                     <input type="checkbox" name="isNursing" checked={formData.isNursing} onChange={handleChange} 
-                                        className="h-4 w-4 bg-blue-600 text-white rounded border-gray-300 focus:ring-blue-600" />
+                                        className="h-4 w-4 bg-primary text-black rounded border-gray-300 focus:ring-primary" />
                                     <span>Female is Nursing 🥛</span>
                                 </label>
                             </>
@@ -5479,14 +5479,14 @@ const AnimalList = ({ authToken, showModalMessage, onEditAnimal, onViewAnimal, o
 
                     <button onClick={handleFilterPregnant}
                         className={`px-3 py-1.5 text-sm font-semibold rounded-lg transition duration-150 shadow-sm flex items-center space-x-1 ${ 
-                            statusFilterPregnant ? 'bg-accent text-black' : 'bg-gray-200 text-gray-700 hover:bg-gray-300'
+                            statusFilterPregnant ? 'bg-accent text-white' : 'bg-gray-200 text-gray-700 hover:bg-gray-300'
                         }`}
                     >
                         <Egg size={16} /> <span>Pregnant</span>
                     </button>
                     <button onClick={handleFilterNursing}
                         className={`px-3 py-1.5 text-sm font-semibold rounded-lg transition duration-150 shadow-sm flex items-center space-x-1 ${ 
-                            statusFilterNursing ? 'bg-accent text-black' : 'bg-gray-200 text-gray-700 hover:bg-gray-300'
+                            statusFilterNursing ? 'bg-accent text-white' : 'bg-gray-200 text-gray-700 hover:bg-gray-300'
                         }`}
                     >
                         <Milk size={16} /> <span>Nursing</span>
@@ -5610,7 +5610,7 @@ const NotificationPanel = ({ authToken, API_BASE_URL, onClose, showModalMessage,
                                 <div>
                                     <h4 className="font-bold text-gray-700 mb-2">Pending Requests</h4>
                                     {pendingNotifications.map(notification => (
-                                        <div key={notification._id} className={`border rounded-lg p-4 mb-2 ${!notification.read ? 'bg-blue-50 border-blue-300' : 'bg-white'}`}>
+                                        <div key={notification._id} className={`border rounded-lg p-4 mb-2 ${!notification.read ? 'bg-primary/20 border-primary' : 'bg-white'}`}>
                                             <div className="flex items-start space-x-3 mb-2">
                                                 {/* Animal Thumbnail */}
                                                 <div className="flex-shrink-0 w-16 h-16 bg-gray-200 rounded-md overflow-hidden">
