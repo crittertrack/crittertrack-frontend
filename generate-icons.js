@@ -19,19 +19,19 @@ async function generateIcons() {
       await sharp(inputFile)
         .resize(paddedSize, paddedSize, {
           fit: 'contain',
-          background: { r: 241, g: 209, b: 220, alpha: 1 } // #F1D1DC page-bg color
+          background: { r: 255, g: 255, b: 255, alpha: 1 } // White background
         })
         .extend({
           top: Math.round((size - paddedSize) / 2),
           bottom: Math.round((size - paddedSize) / 2),
           left: Math.round((size - paddedSize) / 2),
           right: Math.round((size - paddedSize) / 2),
-          background: { r: 241, g: 209, b: 220, alpha: 1 } // #F1D1DC
+          background: { r: 255, g: 255, b: 255, alpha: 1 } // White
         })
         .png()
         .toFile(outputFile);
       
-      console.log(`✓ Generated ${size}x${size} icon with pink background: logo${size}.png`);
+      console.log(`✓ Generated ${size}x${size} icon with white background: logo${size}.png`);
     } catch (error) {
       console.error(`Error generating ${size}x${size} icon:`, error.message);
     }
