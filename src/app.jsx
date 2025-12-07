@@ -1477,8 +1477,23 @@ const PublicProfileView = ({ profile, onBack, onViewAnimal, API_BASE_URL }) => {
             {/* Filters */}
             {animals.length > 0 && (
                 <div className="mb-6 p-4 border rounded-lg bg-gray-50 space-y-3">
-                    {/* Species filter and Status dropdown */}
-                    <div className="flex flex-col sm:flex-row gap-3">
+                    {/* Status dropdown */}
+                    <div className="flex gap-2 items-center">
+                        <span className='text-sm font-medium text-gray-700 whitespace-nowrap'>Status:</span>
+                        <select 
+                            value={statusFilter} 
+                            onChange={(e) => setStatusFilter(e.target.value)} 
+                            className="p-2 border border-gray-300 rounded-lg shadow-sm focus:ring-primary focus:border-primary transition w-full sm:w-auto sm:min-w-[150px]"
+                        >
+                            <option value="">All</option>
+                            {STATUS_OPTIONS.map(status => (
+                                <option key={status} value={status}>{status}</option>
+                            ))}
+                        </select>
+                    </div>
+                    
+                    {/* Species and Gender filters */}
+                    <div className="flex flex-col sm:flex-row gap-3 pt-2 border-t border-gray-200">
                         {/* Species filter */}
                         <div className="flex gap-2 items-center flex-wrap">
                             <span className='text-sm font-medium text-gray-700 whitespace-nowrap'>Species:</span>
@@ -1498,18 +1513,6 @@ const PublicProfileView = ({ profile, onBack, onViewAnimal, API_BASE_URL }) => {
                                 );
                             })}
                         </div>
-                        
-                        {/* Status dropdown */}
-                        <select 
-                            value={statusFilter} 
-                            onChange={(e) => setStatusFilter(e.target.value)} 
-                            className="p-2 border border-gray-300 rounded-lg shadow-sm focus:ring-primary focus:border-primary transition w-full sm:w-auto sm:min-w-[150px]"
-                        >
-                            <option value="">All Statuses</option>
-                            {STATUS_OPTIONS.map(status => (
-                                <option key={status} value={status}>{status}</option>
-                            ))}
-                        </select>
                     </div>
                     
                     {/* Gender filter */}
