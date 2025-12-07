@@ -1542,7 +1542,7 @@ const ViewOnlyAnimalDetail = ({ animal, onClose, API_BASE_URL, onViewProfile }) 
                             <ArrowLeft size={18} className="mr-1" /> Back
                         </button>
                         <div className="flex items-center gap-2">
-                            {animal.isDisplay && (
+                            {animal.showOnPublicProfile && (
                                 <button
                                     onClick={handleShare}
                                     className="px-3 py-1.5 bg-primary hover:bg-primary/90 text-black font-semibold rounded-lg transition flex items-center gap-2"
@@ -5038,7 +5038,7 @@ const AuthView = ({ onLoginSuccess, showModalMessage, isRegister, setIsRegister,
                     ) : (
                         <HeartOff size={12} className="text-black" />
                     )}
-                    {parentData.isDisplay ? (
+                    {parentData.showOnPublicProfile ? (
                         <Eye size={12} className="text-black" />
                     ) : (
                         <EyeOff size={12} className="text-black" />
@@ -5273,7 +5273,7 @@ const AnimalList = ({ authToken, showModalMessage, onEditAnimal, onViewAnimal, o
                         ) : (
                             <HeartOff size={14} className="text-black" />
                         )}
-                        {animal.isDisplay ? (
+                        {animal.showOnPublicProfile ? (
                             <Eye size={14} className="text-black" />
                         ) : (
                             <EyeOff size={14} className="text-black" />
@@ -6024,7 +6024,7 @@ const App = () => {
                                         ) : (
                                             <HeartOff size={18} className="text-black" />
                                         )}
-                                        {animalToView.isDisplay ? (
+                                        {animalToView.showOnPublicProfile ? (
                                             <Eye size={18} className="text-black" />
                                         ) : (
                                             <EyeOff size={18} className="text-black" />
