@@ -5608,7 +5608,8 @@ const AnimalList = ({ authToken, showModalMessage, onEditAnimal, onViewAnimal, o
             </h2>
 
             <div className="mb-6 p-4 border rounded-lg bg-gray-50 space-y-3">
-                <div className="flex space-x-3">
+                {/* Search and Add buttons - Stack on mobile */}
+                <div className="flex flex-col sm:flex-row gap-2 sm:gap-3">
                     <input
                         type="text"
                         placeholder="Search by Animal Name..."
@@ -5618,26 +5619,29 @@ const AnimalList = ({ authToken, showModalMessage, onEditAnimal, onViewAnimal, o
                         className="flex-grow p-2 border border-gray-300 rounded-lg shadow-sm focus:ring-primary focus:border-primary transition"
                         disabled={loading}
                     />
-                    <button
-                        onClick={triggerSearch}
-                        disabled={loading}
-                        className="bg-primary hover:bg-primary/90 text-black font-semibold py-2 px-4 rounded-lg transition duration-150 shadow-md flex items-center space-x-1"
-                        title="Search"
-                    >
-                        <Search size={18} />
-                        <span className="hidden sm:inline">Search</span>
-                    </button>
-                    <button 
-                        onClick={() => onSetCurrentView('select-species')} 
-                        className="bg-accent hover:bg-accent/90 text-white font-semibold py-2 px-4 rounded-lg transition duration-150 shadow-md flex items-center space-x-1 whitespace-nowrap"
-                    >
-                        <PlusCircle size={18} /> <span>Add Animal</span>
-                    </button>
+                    <div className="flex gap-2">
+                        <button
+                            onClick={triggerSearch}
+                            disabled={loading}
+                            className="flex-1 sm:flex-none bg-primary hover:bg-primary/90 text-black font-semibold py-2 px-4 rounded-lg transition duration-150 shadow-md flex items-center justify-center space-x-1"
+                            title="Search"
+                        >
+                            <Search size={18} />
+                            <span>Search</span>
+                        </button>
+                        <button 
+                            onClick={() => onSetCurrentView('select-species')} 
+                            className="flex-1 sm:flex-none bg-accent hover:bg-accent/90 text-white font-semibold py-2 px-4 rounded-lg transition duration-150 shadow-md flex items-center justify-center space-x-1 whitespace-nowrap"
+                        >
+                            <PlusCircle size={18} /> <span>Add Animal</span>
+                        </button>
+                    </div>
                 </div>
 
-                <div className="flex space-x-4 pt-2 border-t border-gray-200">
+                {/* Status filter and Gender buttons - Stack on mobile */}
+                <div className="flex flex-col sm:flex-row gap-3 pt-2 border-t border-gray-200">
                     <select value={statusFilter} onChange={handleStatusFilterChange} 
-                        className="p-2 border border-gray-300 rounded-lg shadow-sm focus:ring-primary focus:border-primary transition w-1/3 min-w-[150px]"
+                        className="p-2 border border-gray-300 rounded-lg shadow-sm focus:ring-primary focus:border-primary transition w-full sm:w-1/3 sm:min-w-[150px]"
                     >
                         <option value="">All</option>
                         {STATUS_OPTIONS.map(status => (
@@ -5645,8 +5649,8 @@ const AnimalList = ({ authToken, showModalMessage, onEditAnimal, onViewAnimal, o
                         ))}
                     </select>
                     
-                    <div className="flex space-x-2 flex-grow items-center">
-                        <span className='text-sm font-medium text-gray-700'>Gender:</span>
+                    <div className="flex gap-2 items-center">
+                        <span className='text-sm font-medium text-gray-700 whitespace-nowrap'>Gender:</span>
                         {['All', ...GENDER_OPTIONS].map(gender => {
                             const value = gender === 'All' ? '' : gender;
                             const isCurrentSelected = genderFilter === value;
@@ -5654,7 +5658,7 @@ const AnimalList = ({ authToken, showModalMessage, onEditAnimal, onViewAnimal, o
                             
                             return (
                                 <button key={gender} onClick={() => handleGenderFilterChange(value)}
-                                    className={`px-3 py-1.5 text-sm font-semibold rounded-lg transition duration-150 shadow-sm ${selectedClasses}`}
+                                    className={`flex-1 px-3 py-1.5 text-sm font-semibold rounded-lg transition duration-150 shadow-sm ${selectedClasses}`}
                                 >
                                     {gender}
                                 </button>
@@ -5663,8 +5667,9 @@ const AnimalList = ({ authToken, showModalMessage, onEditAnimal, onViewAnimal, o
                     </div>
                 </div>
                 
-                <div className="flex flex-wrap items-center space-x-4 pt-2 border-t border-gray-200">
-                    <span className='text-sm font-medium text-gray-700'>Filter By:</span>
+                {/* Additional filters - Already wrapping */}
+                <div className="flex flex-wrap items-center gap-2 pt-2 border-t border-gray-200">
+                    <span className='text-sm font-medium text-gray-700 whitespace-nowrap'>Filter By:</span>
                     
                     {['Owned', 'All'].map(option => {
                         const value = option.toLowerCase();
