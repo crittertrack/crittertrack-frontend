@@ -130,7 +130,7 @@ const PedigreeChart = ({ animalId, animalData, onClose, API_BASE_URL, authToken 
                     if (animalInfo.breederId_public) {
                         try {
                             const breederResponse = await axios.get(
-                                `${API_BASE_URL}/public/profiles/search?query=CT${animalInfo.breederId_public}&limit=1`
+                                `${API_BASE_URL}/public/profiles/search?query=${animalInfo.breederId_public}&limit=1`
                             );
                             if (breederResponse.data && breederResponse.data.length > 0) {
                                 const breeder = breederResponse.data[0];
@@ -138,7 +138,7 @@ const PedigreeChart = ({ animalId, animalData, onClose, API_BASE_URL, authToken 
                                     ? `${breeder.personalName} (${breeder.breederName})` 
                                     : (breeder.showBreederName && breeder.breederName 
                                         ? breeder.breederName 
-                                        : breeder.personalName || `CT${animalInfo.breederId_public}`);
+                                        : breeder.personalName || `${animalInfo.breederId_public}`);
                                 animalInfo.breederName = breederName;
                             }
                         } catch (error) {
@@ -168,7 +168,7 @@ const PedigreeChart = ({ animalId, animalData, onClose, API_BASE_URL, authToken 
                     try {
                         const ownerId = data.ownerId_public || data.breederId_public;
                         const ownerResponse = await axios.get(
-                            `${API_BASE_URL}/public/profiles/search?query=CT${ownerId}&limit=1`
+                            `${API_BASE_URL}/public/profiles/search?query=${ownerId}&limit=1`
                         );
                         if (ownerResponse.data && ownerResponse.data.length > 0) {
                             setOwnerProfile(ownerResponse.data[0]);
@@ -1468,7 +1468,7 @@ const ViewOnlyAnimalDetail = ({ animal, onClose, API_BASE_URL, onViewProfile }) 
             if (animal?.breederId_public) {
                 try {
                     const response = await axios.get(
-                        `${API_BASE_URL}/public/profiles/search?query=CT${animal.breederId_public}&limit=1`
+                        `${API_BASE_URL}/public/profiles/search?query=${animal.breederId_public}&limit=1`
                     );
                     if (response.data && response.data.length > 0) {
                         setBreederInfo(response.data[0]);
@@ -1490,7 +1490,7 @@ const ViewOnlyAnimalDetail = ({ animal, onClose, API_BASE_URL, onViewProfile }) 
             if (animal?.ownerId_public) {
                 try {
                     const response = await axios.get(
-                        `${API_BASE_URL}/public/profiles/search?query=CT${animal.ownerId_public}&limit=1`
+                        `${API_BASE_URL}/public/profiles/search?query=${animal.ownerId_public}&limit=1`
                     );
                     console.log('Owner privacy response:', response.data);
                     if (response.data && response.data.length > 0) {
@@ -2730,10 +2730,10 @@ const LitterManagement = ({ authToken, API_BASE_URL, userProfile, showModalMessa
                                             </p>
                                         </div>
                                         <div className="text-sm">
-                                            <span className="text-gray-600">Sire:</span> {sire ? `${sire.prefix ? sire.prefix + ' ' : ''}${sire.name}` : `CT${litter.sireId_public}`}
+                                            <span className="text-gray-600">Sire:</span> {sire ? `${sire.prefix ? sire.prefix + ' ' : ''}${sire.name}` : `${litter.sireId_public}`}
                                         </div>
                                         <div className="text-sm">
-                                            <span className="text-gray-600">Dam:</span> {dam ? `${dam.prefix ? dam.prefix + ' ' : ''}${dam.name}` : `CT${litter.damId_public}`}
+                                            <span className="text-gray-600">Dam:</span> {dam ? `${dam.prefix ? dam.prefix + ' ' : ''}${dam.name}` : `${litter.damId_public}`}
                                         </div>
                                         <div className="text-sm font-semibold text-gray-700">
                                             {litter.numberBorn} offspring
@@ -4069,7 +4069,7 @@ const AnimalForm = ({
                                         </span>
                                     ) : (
                                         <span className={formData.fatherId_public ? "text-gray-800 font-mono" : "text-gray-400"}>
-                                            {formData.fatherId_public ? `CT${formData.fatherId_public}` : 'Click to Select Sire'}
+                                            {formData.fatherId_public ? `${formData.fatherId_public}` : 'Click to Select Sire'}
                                         </span>
                                     )}
                                     {formData.fatherId_public && (
@@ -4098,7 +4098,7 @@ const AnimalForm = ({
                                         </span>
                                     ) : (
                                         <span className={formData.motherId_public ? "text-gray-800 font-mono" : "text-gray-400"}>
-                                            {formData.motherId_public ? `CT${formData.motherId_public}` : 'Click to Select Dam'}
+                                            {formData.motherId_public ? `${formData.motherId_public}` : 'Click to Select Dam'}
                                         </span>
                                     )}
                                     {formData.motherId_public && (
@@ -5741,7 +5741,7 @@ const App = () => {
             if (animalToView?.breederId_public && currentView === 'view-animal') {
                 try {
                     const response = await axios.get(
-                        `${API_BASE_URL}/public/profiles/search?query=CT${animalToView.breederId_public}&limit=1`
+                        `${API_BASE_URL}/public/profiles/search?query=${animalToView.breederId_public}&limit=1`
                     );
                     if (response.data && response.data.length > 0) {
                         setViewAnimalBreederInfo(response.data[0]);
