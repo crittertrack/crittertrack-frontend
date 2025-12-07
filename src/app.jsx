@@ -2246,9 +2246,11 @@ const LitterManagement = ({ authToken, API_BASE_URL, userProfile, showModalMessa
                 } else {
                     // Animals with no parents have 0% COI by definition
                     animal.inbreedingCoefficient = 0;
+                    console.log(`[fetchMyAnimals] Set COI to 0 for animal ${animal.id_public} (no parents)`);
                 }
             }
             
+            console.log('[fetchMyAnimals] Final animals data:', animalsData.map(a => ({ id: a.id_public, coi: a.inbreedingCoefficient })));
             setMyAnimals(animalsData);
         } catch (error) {
             console.error('Error fetching animals:', error);
