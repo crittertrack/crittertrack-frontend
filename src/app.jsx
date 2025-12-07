@@ -800,19 +800,7 @@ const PedigreeChart = ({ animalId, animalData, onClose, API_BASE_URL, authToken 
                     {/* Footer */}
                     <div className="absolute bottom-6 left-6 right-6 pt-3 border-t-2 border-gray-300 flex justify-between items-center text-sm text-gray-600">
                         <div>
-                            {(() => {
-                                const ownerInfo = getOwnerDisplayInfo();
-                                return (
-                                    <>
-                                        {ownerInfo.lines.map((line, idx) => (
-                                            <div key={idx}>{line}</div>
-                                        ))}
-                                        {ownerInfo.userId && (
-                                            <div className="text-xs text-gray-500">{ownerInfo.userId}</div>
-                                        )}
-                                    </>
-                                );
-                            })()}
+                            {getOwnerDisplayInfoBottomLeft()}
                         </div>
                         <div>{new Date().toLocaleDateString()}</div>
                     </div>
