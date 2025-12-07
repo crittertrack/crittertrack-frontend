@@ -4573,6 +4573,12 @@ const ProfileEditForm = ({ userProfile, showModalMessage, onSaveSuccess, onCance
             showGeneticCodePublic: showGeneticCodePublic,
             showRemarksPublic: showRemarksPublic,
         };
+        
+        console.log('[PROFILE UPDATE] Sending payload:', {
+            showBreederName: payload.showBreederName,
+            breederName: payload.breederName,
+            showBreederNameType: typeof payload.showBreederName
+        });
 
         try {
             let uploadSucceeded = false;
