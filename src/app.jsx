@@ -1,4 +1,5 @@
 import React, { useState, useEffect, useCallback, useRef, useMemo } from 'react';
+import { useParams, useNavigate, useLocation, Routes, Route } from 'react-router-dom';
 import axios from 'axios';
 import { LogOut, Cat, UserPlus, LogIn, ChevronLeft, Trash2, Edit, Save, PlusCircle, Plus, ArrowLeft, Loader2, RefreshCw, User, ClipboardList, BookOpen, Settings, Mail, Globe, Egg, Milk, Search, X, Mars, Venus, Eye, EyeOff, Home, Heart, HeartOff, Bell, XCircle, Download, FileText, Link, AlertCircle } from 'lucide-react';
 import jsPDF from 'jspdf';
@@ -1291,6 +1292,15 @@ const UserSearchModal = ({ onClose, showModalMessage, onSelectUser, API_BASE_URL
 const PublicProfileView = ({ profile, onBack, onViewAnimal, API_BASE_URL }) => {
     const [animals, setAnimals] = useState([]);
     const [loading, setLoading] = useState(true);
+    const [copySuccess, setCopySuccess] = useState(false);
+    
+    const handleShare = () => {
+        const url = `${window.location.origin}/user/${profile.id_public}`;
+        navigator.clipboard.writeText(url).then(() => {
+            setCopySuccess(true);
+            setTimeout(() => setCopySuccess(false), 2000);
+        });
+    };
 
     useEffect(() => {
         const fetchPublicAnimals = async () => {
@@ -1336,6 +1346,13 @@ const PublicProfileView = ({ profile, onBack, onViewAnimal, API_BASE_URL }) => {
                     className="flex items-center text-gray-600 hover:text-gray-800 transition"
                 >
                     <ArrowLeft size={18} className="mr-1" /> Back
+                </button>
+                <button
+                    onClick={handleShare}
+                    className="px-3 py-1.5 bg-primary hover:bg-primary/90 text-black font-semibold rounded-lg transition flex items-center gap-2"
+                >
+                    <Link size={16} />
+                    {copySuccess ? 'Link Copied!' : 'Share Profile'}
                 </button>
             </div>
 
@@ -1435,6 +1452,15 @@ const ViewOnlyAnimalDetail = ({ animal, onClose, API_BASE_URL, onViewProfile }) 
     const [breederInfo, setBreederInfo] = useState(null);
     const [ownerPrivacySettings, setOwnerPrivacySettings] = useState(null);
     const [showPedigree, setShowPedigree] = useState(false);
+    const [copySuccess, setCopySuccess] = useState(false);
+    
+    const handleShare = () => {
+        const url = `${window.location.origin}/animal/${animal.id_public}`;
+        navigator.clipboard.writeText(url).then(() => {
+            setCopySuccess(true);
+            setTimeout(() => setCopySuccess(false), 2000);
+        });
+    };
     
     // Fetch breeder info when component mounts or animal changes
     React.useEffect(() => {
@@ -1515,9 +1541,20 @@ const ViewOnlyAnimalDetail = ({ animal, onClose, API_BASE_URL, onViewProfile }) 
                         >
                             <ArrowLeft size={18} className="mr-1" /> Back
                         </button>
-                        <button onClick={onClose} className="text-gray-500 hover:text-gray-800">
-                            <X size={28} />
-                        </button>
+                        <div className="flex items-center gap-2">
+                            {animal.isDisplay && (
+                                <button
+                                    onClick={handleShare}
+                                    className="px-3 py-1.5 bg-primary hover:bg-primary/90 text-black font-semibold rounded-lg transition flex items-center gap-2"
+                                >
+                                    <Link size={16} />
+                                    {copySuccess ? 'Link Copied!' : 'Share Link'}
+                                </button>
+                            )}
+                            <button onClick={onClose} className="text-gray-500 hover:text-gray-800">
+                                <X size={28} />
+                            </button>
+                        </div>
                     </div>
                 </div>
 
@@ -6528,4 +6565,175 @@ const App = () => {
     );
 };
 
-export default App;
+// Public Animal Page Component
+const PublicAnimalPage = () => {
+    const { animalId } = useParams();
+    const navigate = useNavigate();
+    const [animal, setAnimal] = useState(null);
+    const [loading, setLoading] = useState(true);
+    const [notFound, setNotFound] = useState(false);
+
+    useEffect(() => {
+        const fetchAnimal = async () => {
+            try {
+                const response = await axios.get(`${API_BASE_URL}/public-animals/${animalId}`);
+                setAnimal(response.data);
+                setLoading(false);
+            } catch (error) {
+                console.error('Animal not found or not public:', error);
+                setNotFound(true);
+                setLoading(false);
+            }
+        };
+        fetchAnimal();
+    }, [animalId]);
+
+    if (loading) {
+        return (
+            <div className="min-h-screen bg-page-bg flex items-center justify-center p-6">
+                <Loader2 className="animate-spin text-primary" size={48} />
+            </div>
+        );
+    }
+
+    if (notFound) {
+        return (
+            <div className="min-h-screen bg-page-bg flex flex-col items-center justify-center p-6">
+                <div className="bg-white rounded-xl shadow-lg p-8 max-w-md text-center">
+                    <XCircle size={64} className="text-red-500 mx-auto mb-4" />
+                    <h1 className="text-2xl font-bold text-gray-800 mb-2">Animal Not Found</h1>
+                    <p className="text-gray-600 mb-6">
+                        This animal either doesn't exist or is not publicly visible.
+                    </p>
+                    <div className="space-y-3">
+                        <button
+                            onClick={() => navigate('/')}
+                            className="w-full px-4 py-2 bg-primary text-black font-semibold rounded-lg hover:bg-primary/90 transition"
+                        >
+                            Go to Home
+                        </button>
+                        <button
+                            onClick={() => navigate('/')}
+                            className="w-full px-4 py-2 bg-gray-200 text-gray-700 font-semibold rounded-lg hover:bg-gray-300 transition"
+                        >
+                            Login / Register
+                        </button>
+                    </div>
+                </div>
+            </div>
+        );
+    }
+
+    return (
+        <div className="min-h-screen bg-page-bg flex flex-col items-center p-6">
+            <header className="w-full max-w-4xl bg-white p-4 rounded-xl shadow-lg mb-6 flex justify-between items-center">
+                <CustomAppLogo size="w-10 h-10" />
+                <button
+                    onClick={() => navigate('/')}
+                    className="px-3 py-2 bg-gray-200 hover:bg-gray-300 text-gray-700 font-semibold rounded-lg transition"
+                >
+                    Home
+                </button>
+            </header>
+            <ViewOnlyAnimalDetail
+                animal={animal}
+                onClose={() => navigate('/')}
+                API_BASE_URL={API_BASE_URL}
+                onViewProfile={(user) => navigate(`/user/${user.id_public}`)}
+            />
+        </div>
+    );
+};
+
+// Public Profile Page Component
+const PublicProfilePage = () => {
+    const { userId } = useParams();
+    const navigate = useNavigate();
+    const [profile, setProfile] = useState(null);
+    const [loading, setLoading] = useState(true);
+    const [notFound, setNotFound] = useState(false);
+
+    useEffect(() => {
+        const fetchProfile = async () => {
+            try {
+                const response = await axios.get(`${API_BASE_URL}/users/public/${userId}`);
+                setProfile(response.data);
+                setLoading(false);
+            } catch (error) {
+                console.error('Profile not found or not public:', error);
+                setNotFound(true);
+                setLoading(false);
+            }
+        };
+        fetchProfile();
+    }, [userId]);
+
+    if (loading) {
+        return (
+            <div className="min-h-screen bg-page-bg flex items-center justify-center p-6">
+                <Loader2 className="animate-spin text-primary" size={48} />
+            </div>
+        );
+    }
+
+    if (notFound) {
+        return (
+            <div className="min-h-screen bg-page-bg flex flex-col items-center justify-center p-6">
+                <div className="bg-white rounded-xl shadow-lg p-8 max-w-md text-center">
+                    <XCircle size={64} className="text-red-500 mx-auto mb-4" />
+                    <h1 className="text-2xl font-bold text-gray-800 mb-2">Profile Not Found</h1>
+                    <p className="text-gray-600 mb-6">
+                        This profile either doesn't exist or is not publicly visible.
+                    </p>
+                    <div className="space-y-3">
+                        <button
+                            onClick={() => navigate('/')}
+                            className="w-full px-4 py-2 bg-primary text-black font-semibold rounded-lg hover:bg-primary/90 transition"
+                        >
+                            Go to Home
+                        </button>
+                        <button
+                            onClick={() => navigate('/')}
+                            className="w-full px-4 py-2 bg-gray-200 text-gray-700 font-semibold rounded-lg hover:bg-gray-300 transition"
+                        >
+                            Login / Register
+                        </button>
+                    </div>
+                </div>
+            </div>
+        );
+    }
+
+    return (
+        <div className="min-h-screen bg-page-bg flex flex-col items-center p-6">
+            <header className="w-full max-w-4xl bg-white p-4 rounded-xl shadow-lg mb-6 flex justify-between items-center">
+                <CustomAppLogo size="w-10 h-10" />
+                <button
+                    onClick={() => navigate('/')}
+                    className="px-3 py-2 bg-gray-200 hover:bg-gray-300 text-gray-700 font-semibold rounded-lg transition"
+                >
+                    Home
+                </button>
+            </header>
+            <PublicProfileView
+                profile={profile}
+                onBack={() => navigate('/')}
+                onViewAnimal={(animal) => navigate(`/animal/${animal.id_public}`)}
+                API_BASE_URL={API_BASE_URL}
+            />
+        </div>
+    );
+};
+
+// Router Wrapper Component
+const AppRouter = () => {
+    return (
+        <Routes>
+            <Route path="/" element={<App />} />
+            <Route path="/animal/:animalId" element={<PublicAnimalPage />} />
+            <Route path="/user/:userId" element={<PublicProfilePage />} />
+        </Routes>
+    );
+};
+
+export default AppRouter;
