@@ -3659,8 +3659,8 @@ async function compressImageFile(file, { maxWidth = 1200, maxHeight = 1200, qual
     ctx.fillRect(0, 0, targetWidth, targetHeight);
     ctx.drawImage(img, 0, 0, targetWidth, targetHeight);
 
-    // Use PNG output for original PNGs to preserve transparency, otherwise JPEG
-    const outputType = file.type === 'image/png' ? 'image/png' : 'image/jpeg';
+    // Always output JPEG for better compatibility (especially with mobile browsers)
+    const outputType = 'image/jpeg';
     const blob = await new Promise((resolve) => canvas.toBlob(resolve, outputType, quality));
     return blob || file;
 }
@@ -4373,10 +4373,9 @@ const AnimalForm = ({
                                 }
                             }
                             // If compressImageFile returned the original File/Blob, wrap if needed
-                            const mime = compressedBlob.type || original.type;
-                            const baseName = original.name.replace(/\.[^/.]+$/, '');
-                            const ext = mime === 'image/png' ? '.png' : '.jpg';
-                            const compressedFile = new File([compressedBlob], `${baseName}${ext}`, { type: mime });
+                            // Always use JPEG format for compatibility
+                            const baseName = original.name.replace(/\.[^/.]+$/, '') || 'image';
+                            const compressedFile = new File([compressedBlob], `${baseName}.jpg`, { type: 'image/jpeg' });
                             // Warn if we couldn't reach target size (best-effort)
                             if (compressedBlob.size > 200 * 1024) {
                                 showModalMessage('Image Compression', 'Image was compressed but is still larger than 200KB. It will be uploaded but consider using a smaller image.');
