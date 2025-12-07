@@ -289,6 +289,15 @@ const PedigreeChart = ({ animalId, animalData, onClose, API_BASE_URL, authToken 
         
         return (
             <div className={`border border-gray-700 rounded-lg p-2 ${bgColor} relative flex gap-3 items-center`} style={{height: '160px'}}>
+                {/* Image */}
+                <div className="w-32 h-32 bg-gray-100 rounded-lg overflow-hidden flex items-center justify-center flex-shrink-0 border-2 border-gray-900">
+                    {imgSrc ? (
+                        <AnimalImage src={imgSrc} alt={animal.name} className="w-full h-full object-cover" iconSize={48} />
+                    ) : (
+                        <Cat size={48} className="text-gray-400" />
+                    )}
+                </div>
+                
                 {/* Info */}
                 <div className="flex-1 min-w-0 flex flex-col justify-start gap-2 py-2">
                     {/* Name */}
@@ -353,6 +362,15 @@ const PedigreeChart = ({ animalId, animalData, onClose, API_BASE_URL, authToken 
         
         return (
             <div className={`border border-gray-700 rounded p-1.5 ${bgColor} relative flex gap-2 h-full items-center`}>
+                {/* Image - 1/3 width */}
+                <div className="w-1/3 aspect-square bg-gray-100 rounded-lg border-2 border-gray-900 overflow-hidden flex items-center justify-center flex-shrink-0">
+                    {imgSrc ? (
+                        <AnimalImage src={imgSrc} alt={animal.name} className="w-full h-full object-cover" iconSize={28} />
+                    ) : (
+                        <Cat size={28} className="text-gray-400" />
+                    )}
+                </div>
+                
                 {/* Info */}
                 <div className="flex-1 min-w-0 flex flex-col justify-start gap-1.5 py-1">
                     {/* Name */}
@@ -421,6 +439,15 @@ const PedigreeChart = ({ animalId, animalData, onClose, API_BASE_URL, authToken 
         
         return (
             <div className={`border border-gray-700 rounded p-1 ${bgColor} relative flex gap-1.5 h-full items-center`}>
+                {/* Image - 1/3 width */}
+                <div className="w-1/3 aspect-square bg-gray-100 rounded-lg border-2 border-gray-900 overflow-hidden flex items-center justify-center flex-shrink-0">
+                    {imgSrc ? (
+                        <AnimalImage src={imgSrc} alt={animal.name} className="w-full h-full object-cover" iconSize={20} />
+                    ) : (
+                        <Cat size={20} className="text-gray-400" />
+                    )}
+                </div>
+                
                 {/* Info */}
                 <div className="flex-1 min-w-0 flex flex-col justify-start gap-1 py-0.5">
                     {/* Name */}
