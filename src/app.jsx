@@ -3457,7 +3457,7 @@ const SpeciesManager = ({ speciesOptions, setSpeciesOptions, onCancel, showModal
                     <div className="bg-white rounded-xl shadow-2xl p-6 w-full max-w-lg">
                         <h3 className="text-xl font-bold text-gray-800 mb-4">Request Species Customization</h3>
                         <p className="text-sm text-gray-600 mb-4">
-                            Let us know if a species needs different field labels (e.g., "Morph" instead of "Color/Coat" for snakes)
+                            Let us know if a species needs different or additional fields (e.g., "Morph" instead of "Color/Coat" for snakes, or missing fields like "Pattern")
                         </p>
                         
                         <form onSubmit={handleSubmitFeedback} className="space-y-4">
@@ -3478,14 +3478,14 @@ const SpeciesManager = ({ speciesOptions, setSpeciesOptions, onCancel, showModal
                             
                             <div>
                                 <label className="block text-sm font-medium text-gray-700 mb-1">
-                                    What field labels should be different?
+                                    What fields need to be different or added?
                                 </label>
                                 <textarea
                                     value={feedbackText}
                                     onChange={(e) => setFeedbackText(e.target.value)}
                                     required
                                     rows={4}
-                                    placeholder='Example: For snakes, "Color" and "Coat" should be replaced with "Morph"'
+                                    placeholder='Example: For snakes, replace "Color" and "Coat" with "Morph", and add a "Pattern" field'
                                     className="w-full p-2 border border-gray-300 rounded-lg"
                                 />
                             </div>
