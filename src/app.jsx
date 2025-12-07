@@ -3083,7 +3083,7 @@ const LitterManagement = ({ authToken, API_BASE_URL, userProfile, showModalMessa
                                         ) : (
                                             <button
                                                 onClick={() => handleAddOffspringToLitter(litter)}
-                                                className="flex items-center gap-1 bg-green-500 hover:bg-green-600 text-white font-semibold px-3 py-2 rounded-lg text-sm"
+                                                className="flex items-center gap-1 bg-accent hover:bg-accent/90 text-white font-semibold px-3 py-2 rounded-lg text-sm"
                                             >
                                                 <Plus size={16} />
                                                 Add Offspring
