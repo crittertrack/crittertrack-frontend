@@ -318,10 +318,10 @@ const PedigreeChart = ({ animalId, animalData, onClose, API_BASE_URL, authToken 
                         {animal.birthDate ? new Date(animal.birthDate).toLocaleDateString() : 'N/A'}
                     </div>
                     
-                    {/* Owner Info */}
+                    {/* Breeder Info */}
                     <div className="text-xs text-gray-900 leading-tight" style={{lineHeight: '1.2'}}>
-                        <span className="font-semibold">Owner: </span>
-                        {getOwnerDisplayInfoBottomLeft()}
+                        <span className="font-semibold">Breeder: </span>
+                        {animal.breederName || 'N/A'}
                     </div>
                 </div>
                 
