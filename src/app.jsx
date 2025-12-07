@@ -659,16 +659,23 @@ const PedigreeChart = ({ animalId, animalData, onClose, API_BASE_URL, authToken 
     const getOwnerDisplayName = () => {
         if (!ownerProfile) return 'Unknown Owner';
         
+        const userId = ownerProfile.id_public || pedigreeData?.ownerId_public || pedigreeData?.breederId_public;
+        let displayName = '';
+        
         if (ownerProfile.showBreederName && ownerProfile.personalName && ownerProfile.breederName) {
-            return `${ownerProfile.personalName} (${ownerProfile.breederName})`;
+            displayName = `${ownerProfile.personalName} (${ownerProfile.breederName})`;
+        } else if (ownerProfile.showBreederName && ownerProfile.breederName) {
+            displayName = ownerProfile.breederName;
+        } else if (ownerProfile.personalName) {
+            displayName = ownerProfile.personalName;
         }
-        if (ownerProfile.showBreederName && ownerProfile.breederName) {
-            return ownerProfile.breederName;
+        
+        // Add user ID if we have both name and ID
+        if (displayName && userId) {
+            return `${displayName} - ${userId}`;
         }
-        if (ownerProfile.personalName) {
-            return ownerProfile.personalName;
-        }
-        return pedigreeData?.ownerId_public || pedigreeData?.breederId_public || 'Unknown';
+        
+        return displayName || userId || 'Unknown';
     };
 
     return (
