@@ -1419,7 +1419,7 @@ const MouseGeneticsCalculator = ({ API_BASE_URL, authToken }) => {
             </div>
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
               {EXAMPLE_TABS[activeTab].examples.map((example, idx) => (
-                <div key={idx} className="bg-white p-4 rounded-lg border border-gray-200 flex gap-3">
+                <div key={idx} className="bg-white p-4 rounded-lg border border-gray-200 flex flex-col">
                   <div className="flex-1">
                     <h3 className="font-semibold text-gray-800 mb-2">{example.name}</h3>
                     {example.note && (
@@ -1459,7 +1459,7 @@ const MouseGeneticsCalculator = ({ API_BASE_URL, authToken }) => {
                   )}
                   </div>
                   {example.image && (
-                    <div className="flex-shrink-0 -mr-2">
+                    <div className="mt-3 flex justify-center">
                       <img 
                         src={example.image} 
                         alt={example.name}
@@ -1609,9 +1609,9 @@ const MouseGeneticsCalculator = ({ API_BASE_URL, authToken }) => {
               <div className="space-y-3">
                 {offspringResults.map((result, idx) => (
                   <div key={idx} className="bg-white p-4 rounded-lg border border-purple-200">
-                    <div className="flex justify-between items-center">
+                    <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-3">
                       <div className="flex-1">
-                        <div className="flex items-center gap-2">
+                        <div className="flex items-center gap-2 flex-wrap">
                           <p className={`text-lg font-semibold ${result.phenotype.includes('LETHAL') ? 'text-red-600' : 'text-gray-800'}`}>
                             <span className="text-sm font-medium text-gray-600">Phenotype: </span>
                             {result.phenotype}
@@ -1621,21 +1621,23 @@ const MouseGeneticsCalculator = ({ API_BASE_URL, authToken }) => {
                           </span>
                         </div>
                       </div>
-                      <button
-                        onClick={() => togglePhenotype(idx)}
-                        className="ml-4 px-3 py-1 text-sm bg-purple-100 hover:bg-purple-200 text-purple-800 rounded-lg transition flex items-center gap-1"
-                      >
-                        {expandedPhenotypes[idx] ? '▲' : '▼'} {result.genotypes.length} genotype{result.genotypes.length !== 1 ? 's' : ''}
-                      </button>
-                      {authToken && (
+                      <div className="flex gap-2 flex-wrap">
                         <button
-                          onClick={() => openFeedbackModal(result.phenotype, result.genotypes[0])}
-                          className="ml-2 px-3 py-1 text-sm bg-red-100 hover:bg-red-200 text-red-800 rounded-lg transition"
-                          title="Report incorrect or unknown phenotype"
+                          onClick={() => togglePhenotype(idx)}
+                          className="px-3 py-1 text-sm bg-purple-100 hover:bg-purple-200 text-purple-800 rounded-lg transition flex items-center gap-1"
                         >
-                          Report Issue
+                          {expandedPhenotypes[idx] ? '▲' : '▼'} {result.genotypes.length} genotype{result.genotypes.length !== 1 ? 's' : ''}
                         </button>
-                      )}
+                        {authToken && (
+                          <button
+                            onClick={() => openFeedbackModal(result.phenotype, result.genotypes[0])}
+                            className="px-3 py-1 text-sm bg-red-100 hover:bg-red-200 text-red-800 rounded-lg transition whitespace-nowrap"
+                            title="Report incorrect or unknown phenotype"
+                          >
+                            Report Issue
+                          </button>
+                        )}
+                      </div>
                     </div>
                     
                     {expandedPhenotypes[idx] && (
