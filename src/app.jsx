@@ -4468,6 +4468,13 @@ const AnimalForm = ({
                             className="mt-1 block w-full p-2 border border-gray-300 rounded-md shadow-sm focus:ring-primary focus:border-primary" />
                     </div>
 					
+					{/* Deceased Date */}
+                    <div>
+                        <label className="block text-sm font-medium text-gray-700">Deceased Date</label>
+                        <input type="date" name="deceasedDate" value={formData.deceasedDate || ''} onChange={handleChange} 
+                            className="mt-1 block w-full p-2 border border-gray-300 rounded-md shadow-sm focus:ring-primary focus:border-primary" />
+                    </div>
+					
 					{/* Status */}
                     <div>
                         <label className="block text-sm font-medium text-gray-700">Status*</label>
