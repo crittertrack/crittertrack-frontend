@@ -35,11 +35,16 @@ const ModalMessage = ({ title, message, onClose }) => (
 );
 
 const CustomAppLogo = ({ size = "w-10 h-10" }) => (
-  <img 
-    src="/logo.png" 
-    alt="Crittertrack Logo" 
-    className={`${size} shadow-md`} 
-  />
+  <div className="relative inline-block">
+    <img 
+      src="/logo.png" 
+      alt="Crittertrack Logo" 
+      className={`${size} shadow-md`} 
+    />
+    <div className="absolute -top-1 -right-1 bg-orange-500 text-white text-[8px] font-bold px-1.5 py-0.5 rounded shadow-lg transform rotate-12">
+      BETA
+    </div>
+  </div>
 );
 
 const LoadingSpinner = () => (
