@@ -5212,31 +5212,31 @@ const AuthView = ({ onLoginSuccess, showModalMessage, isRegister, setIsRegister,
                 setLoading(true);
                 setNotFound(false);
                 try {
-                    console.log(`[ParentCard] Fetching parent CT${parentId} of type ${parentType}`);
+                    console.log(`[ParentCard] Fetching parent ${parentId} of type ${parentType}`);
                     // Try to fetch from authenticated endpoint (can access any animal globally)
                     try {
                         const response = await axios.get(`${API_BASE_URL}/animals/any/${parentId}`, {
                             headers: { Authorization: `Bearer ${authToken}` }
                         });
                         if (response.data) {
-                            console.log(`[ParentCard] Found parent CT${parentId} via /animals/any:`, response.data);
+                            console.log(`[ParentCard] Found parent ${parentId} via /animals/any:`, response.data);
                             setParentData(response.data);
                             setLoading(false);
                             return;
                         }
                     } catch (authError) {
                         // If authenticated endpoint fails, try public
-                        console.log(`[ParentCard] Parent CT${parentId} not found in /animals/any, trying public. Error:`, authError.response?.status, authError.response?.data);
+                        console.log(`[ParentCard] Parent ${parentId} not found in /animals/any, trying public. Error:`, authError.response?.status, authError.response?.data);
                     }
 
                     // Try fetching from global public animals database
                     const publicResponse = await axios.get(`${API_BASE_URL}/public/global/animals?id_public=${parentId}`);
                     if (publicResponse.data && publicResponse.data.length > 0) {
-                        console.log(`[ParentCard] Found parent CT${parentId} via public endpoint`);
+                        console.log(`[ParentCard] Found parent ${parentId} via public endpoint`);
                         setParentData(publicResponse.data[0]);
                     } else {
                         // Animal not found in either collection - treat as if no parent recorded
-                        console.warn(`[ParentCard] Parent CT${parentId} not found in local or public collections`);
+                        console.warn(`[ParentCard] Parent ${parentId} not found in local or public collections`);
                         setNotFound(true);
                         setParentData(null);
                     }
