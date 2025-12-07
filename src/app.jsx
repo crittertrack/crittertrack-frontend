@@ -3287,8 +3287,8 @@ const SpeciesManager = ({ speciesOptions, setSpeciesOptions, onCancel, showModal
     
     // Filter species by category and search
     const filteredSpecies = speciesOptions.filter(s => {
-        const matchesCategory = categoryFilter === 'All' || s.category === categoryFilter;
-        const matchesSearch = !searchTerm || s.name.toLowerCase().includes(searchTerm.toLowerCase());
+        const matchesCategory = categoryFilter === 'All' || (s.category && s.category === categoryFilter);
+        const matchesSearch = !searchTerm || (s.name && s.name.toLowerCase().includes(searchTerm.toLowerCase()));
         return matchesCategory && matchesSearch;
     });
     
