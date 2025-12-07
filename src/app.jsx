@@ -318,10 +318,10 @@ const PedigreeChart = ({ animalId, animalData, onClose, API_BASE_URL, authToken 
                         {animal.birthDate ? new Date(animal.birthDate).toLocaleDateString() : 'N/A'}
                     </div>
                     
-                    {/* Breeder */}
+                    {/* Owner Info */}
                     <div className="text-xs text-gray-900 leading-tight" style={{lineHeight: '1.2'}}>
-                        <span className="font-semibold">Breeder: </span>
-                        {animal.breederName || 'N/A'}
+                        <span className="font-semibold">Owner: </span>
+                        {getOwnerDisplayInfoBottomLeft()}
                     </div>
                 </div>
                 
@@ -667,7 +667,31 @@ const PedigreeChart = ({ animalId, animalData, onClose, API_BASE_URL, authToken 
         );
     }
 
-    const getOwnerDisplayInfo = () => {
+    // Top right - 3 lines (Personal Name, Breeder Name, CTID)
+    const getOwnerDisplayInfoTopRight = () => {
+        if (!ownerProfile) return { lines: ['Unknown Owner'], userId: null };
+        
+        const userId = ownerProfile.id_public || pedigreeData?.ownerId_public || pedigreeData?.breederId_public;
+        const lines = [];
+        
+        // Add personal name if available
+        if (ownerProfile.personalName) {
+            lines.push(ownerProfile.personalName);
+        }
+        
+        // Add breeder name if it's public and available
+        if (ownerProfile.showBreederName && ownerProfile.breederName) {
+            lines.push(ownerProfile.breederName);
+        }
+        
+        return { 
+            lines: lines.length > 0 ? lines : [userId || 'Unknown'], 
+            userId 
+        };
+    };
+    
+    // Bottom left - 1 line (CTID - Personal Name - Breeder Name)
+    const getOwnerDisplayInfoBottomLeft = () => {
         if (!ownerProfile) return 'Unknown Owner';
         
         const userId = ownerProfile.id_public || pedigreeData?.ownerId_public || pedigreeData?.breederId_public;
@@ -744,9 +768,19 @@ const PedigreeChart = ({ animalId, animalData, onClose, API_BASE_URL, authToken 
                         {/* Right: Owner Profile */}
                         <div className="w-1/3 flex items-center justify-end gap-3">
                             <div className="text-right">
-                                <div className="text-sm font-semibold text-gray-800">
-                                    {getOwnerDisplayInfo()}
-                                </div>
+                                {(() => {
+                                    const ownerInfo = getOwnerDisplayInfoTopRight();
+                                    return (
+                                        <>
+                                            {ownerInfo.lines.map((line, idx) => (
+                                                <div key={idx} className="text-base font-semibold text-gray-800 leading-tight">{line}</div>
+                                            ))}
+                                            {ownerInfo.userId && (
+                                                <div className="text-xs text-gray-600 mt-1">{ownerInfo.userId}</div>
+                                            )}
+                                        </>
+                                    );
+                                })()}
                             </div>
                             <div className="w-16 h-16 bg-gray-200 rounded-lg overflow-hidden flex items-center justify-center">
                                 {(ownerProfile?.profileImage || ownerProfile?.profileImageUrl) ? (
