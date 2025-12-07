@@ -2243,6 +2243,9 @@ const LitterManagement = ({ authToken, API_BASE_URL, userProfile, showModalMessa
                     } catch (error) {
                         console.log(`Could not update COI for animal ${animal.id_public}:`, error);
                     }
+                } else {
+                    // Animals with no parents have 0% COI by definition
+                    animal.inbreedingCoefficient = 0;
                 }
             }
             
