@@ -172,11 +172,22 @@ const PedigreeChart = ({ animalId, animalData, onClose, API_BASE_URL, authToken 
                 if (data?.ownerId_public || data?.breederId_public) {
                     try {
                         const ownerId = data.ownerId_public || data.breederId_public;
+                        console.log('[PEDIGREE] Fetching owner profile for ID:', ownerId);
                         const ownerResponse = await axios.get(
                             `${API_BASE_URL}/public/profiles/search?query=${ownerId}&limit=1`
                         );
+                        console.log('[PEDIGREE] Owner profile response:', ownerResponse.data);
                         if (ownerResponse.data && ownerResponse.data.length > 0) {
-                            setOwnerProfile(ownerResponse.data[0]);
+                            const profile = ownerResponse.data[0];
+                            console.log('[PEDIGREE] Owner profile data:', {
+                                personalName: profile.personalName,
+                                breederName: profile.breederName,
+                                showBreederName: profile.showBreederName,
+                                profileImage: profile.profileImage,
+                                profileImageUrl: profile.profileImageUrl,
+                                id_public: profile.id_public
+                            });
+                            setOwnerProfile(profile);
                         }
                     } catch (error) {
                         console.error('Failed to fetch owner profile:', error);
@@ -746,8 +757,8 @@ const PedigreeChart = ({ animalId, animalData, onClose, API_BASE_URL, authToken 
                                 })()}
                             </div>
                             <div className="w-16 h-16 bg-gray-200 rounded-lg overflow-hidden flex items-center justify-center">
-                                {ownerProfile?.profileImage ? (
-                                    <img src={ownerProfile.profileImage} alt="Owner" className="w-full h-full object-cover" />
+                                {(ownerProfile?.profileImage || ownerProfile?.profileImageUrl) ? (
+                                    <img src={ownerProfile.profileImage || ownerProfile.profileImageUrl} alt="Owner" className="w-full h-full object-cover" />
                                 ) : (
                                     <User size={32} className="text-gray-400" />
                                 )}
