@@ -6121,7 +6121,7 @@ const App = () => {
         setCurrentView('edit-animal');
     };
 
-    const handleViewAnimal = (animal) => {
+    const handleViewAnimal = async (animal) => {
         console.log('[handleViewAnimal] Viewing animal:', animal);
         
         // Normalize parent field names (backend uses sireId_public/damId_public, frontend uses fatherId_public/motherId_public)
@@ -6131,11 +6131,23 @@ const App = () => {
             motherId_public: animal.motherId_public || animal.damId_public
         };
         
-        // Set COI to 0 for animals with no parents if not already set
-        if (normalizedAnimal.inbreedingCoefficient == null && 
-            !normalizedAnimal.fatherId_public && 
-            !normalizedAnimal.motherId_public) {
-            normalizedAnimal.inbreedingCoefficient = 0;
+        // Calculate or set COI if not already set
+        if (normalizedAnimal.inbreedingCoefficient == null) {
+            if (!normalizedAnimal.fatherId_public && !normalizedAnimal.motherId_public) {
+                // Animals with no parents have 0% COI by definition
+                normalizedAnimal.inbreedingCoefficient = 0;
+            } else if (authToken) {
+                // Animals with parents - calculate COI
+                try {
+                    const coiResponse = await axios.get(`${API_BASE_URL}/animals/${normalizedAnimal.id_public}/inbreeding`, {
+                        params: { generations: 5 },
+                        headers: { Authorization: `Bearer ${authToken}` }
+                    });
+                    normalizedAnimal.inbreedingCoefficient = coiResponse.data.inbreedingCoefficient;
+                } catch (error) {
+                    console.log(`Could not calculate COI for animal ${normalizedAnimal.id_public}:`, error);
+                }
+            }
         }
         
         console.log('[handleViewAnimal] Father ID:', normalizedAnimal.fatherId_public, 'Mother ID:', normalizedAnimal.motherId_public);
