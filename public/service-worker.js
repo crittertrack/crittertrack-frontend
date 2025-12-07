@@ -1,5 +1,5 @@
 // Service Worker for CritterTrack PWA
-const CACHE_NAME = 'crittertrack-v1';
+const CACHE_NAME = 'crittertrack-v2'; // Increment version to force cache update
 const urlsToCache = [
   '/',
   '/index.html',
@@ -16,7 +16,7 @@ self.addEventListener('install', (event) => {
         return cache.addAll(urlsToCache);
       })
   );
-  self.skipWaiting();
+  self.skipWaiting(); // Force immediate activation
 });
 
 // Fetch event - serve from cache, fallback to network
