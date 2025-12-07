@@ -1366,6 +1366,9 @@ const PublicProfileView = ({ profile, onBack, onViewAnimal, API_BASE_URL }) => {
     const [animals, setAnimals] = useState([]);
     const [loading, setLoading] = useState(true);
     const [copySuccess, setCopySuccess] = useState(false);
+    const [speciesFilter, setSpeciesFilter] = useState('');
+    const [genderFilter, setGenderFilter] = useState('');
+    const [statusFilter, setStatusFilter] = useState('');
     
     const handleShare = () => {
         const url = `${window.location.origin}/user/${profile.id_public}`;
@@ -1404,7 +1407,15 @@ const PublicProfileView = ({ profile, onBack, onViewAnimal, API_BASE_URL }) => {
         ? `${profile.personalName} (${profile.breederName})`
         : (profile.showBreederName && profile.breederName ? profile.breederName : profile.personalName || 'Anonymous Breeder');
 
-    const groupedAnimals = animals.reduce((groups, animal) => {
+    // Apply filters
+    const filteredAnimals = animals.filter(animal => {
+        if (speciesFilter && animal.species !== speciesFilter) return false;
+        if (genderFilter && animal.gender !== genderFilter) return false;
+        if (statusFilter && animal.status !== statusFilter) return false;
+        return true;
+    });
+
+    const groupedAnimals = filteredAnimals.reduce((groups, animal) => {
         const species = animal.species || 'Unspecified';
         if (!groups[species]) groups[species] = [];
         groups[species].push(animal);
@@ -1461,9 +1472,80 @@ const PublicProfileView = ({ profile, onBack, onViewAnimal, API_BASE_URL }) => {
             </div>
 
             {/* Public Animals */}
-            <h3 className="text-2xl font-bold text-gray-800 mb-4">Public Animals ({animals.length})</h3>
+            <h3 className="text-2xl font-bold text-gray-800 mb-4">Public Animals ({filteredAnimals.length})</h3>
+            
+            {/* Filters */}
+            {animals.length > 0 && (
+                <div className="mb-6 p-4 border rounded-lg bg-gray-50 space-y-3">
+                    {/* Species and Gender filters - Stack on mobile */}
+                    <div className="flex flex-col sm:flex-row gap-3">
+                        {/* Species filter */}
+                        <div className="flex gap-2 items-center flex-wrap">
+                            <span className='text-sm font-medium text-gray-700 whitespace-nowrap'>Species:</span>
+                            {['All', ...DEFAULT_SPECIES_OPTIONS].map(species => {
+                                const value = species === 'All' ? '' : species;
+                                const isCurrentSelected = speciesFilter === value;
+                                const displayName = species === 'All' ? 'All' : getSpeciesDisplayName(species);
+                                
+                                return (
+                                    <button key={species} onClick={() => setSpeciesFilter(value)}
+                                        className={`px-3 py-1.5 text-sm font-semibold rounded-lg transition duration-150 shadow-sm ${ 
+                                            isCurrentSelected ? 'bg-primary text-black' : 'bg-gray-200 text-gray-700 hover:bg-gray-300'
+                                        }`}
+                                    >
+                                        {displayName}
+                                    </button>
+                                );
+                            })}
+                        </div>
+                        
+                        {/* Gender filter */}
+                        <div className="flex gap-2 items-center flex-wrap">
+                            <span className='text-sm font-medium text-gray-700 whitespace-nowrap'>Gender:</span>
+                            {['All', ...GENDER_OPTIONS].map(gender => {
+                                const value = gender === 'All' ? '' : gender;
+                                const isCurrentSelected = genderFilter === value;
+                                let selectedClasses = isCurrentSelected ? (gender === 'Male' ? 'bg-primary text-black' : gender === 'Female' ? 'bg-accent text-white' : 'bg-primary-dark text-black') : 'bg-gray-200 text-gray-700 hover:bg-gray-300';
+                                
+                                return (
+                                    <button key={gender} onClick={() => setGenderFilter(value)}
+                                        className={`px-3 py-1.5 text-sm font-semibold rounded-lg transition duration-150 shadow-sm ${selectedClasses}`}
+                                    >
+                                        {gender}
+                                    </button>
+                                );
+                            })}
+                        </div>
+                    </div>
+                    
+                    {/* Status filter */}
+                    <div className="flex gap-2 items-center flex-wrap pt-2 border-t border-gray-200">
+                        <span className='text-sm font-medium text-gray-700 whitespace-nowrap'>Status:</span>
+                        {['All', ...STATUS_OPTIONS].map(status => {
+                            const value = status === 'All' ? '' : status;
+                            const isCurrentSelected = statusFilter === value;
+                            
+                            return (
+                                <button key={status} onClick={() => setStatusFilter(value)}
+                                    className={`px-3 py-1.5 text-sm font-semibold rounded-lg transition duration-150 shadow-sm ${ 
+                                        isCurrentSelected ? 'bg-primary text-black' : 'bg-gray-200 text-gray-700 hover:bg-gray-300'
+                                    }`}
+                                >
+                                    {status}
+                                </button>
+                            );
+                        })}
+                    </div>
+                </div>
+            )}
+            
             {loading ? (
                 <LoadingSpinner />
+            ) : filteredAnimals.length === 0 && animals.length > 0 ? (
+                <div className="text-center py-12 text-gray-500">
+                    <Cat size={48} className="mx-auto mb-4 text-gray-300" />
+                    <p>No animals match the selected filters.</p>
+                </div>
             ) : animals.length === 0 ? (
                 <div className="text-center py-12 text-gray-500">
                     <Cat size={48} className="mx-auto mb-4 text-gray-300" />
