@@ -6717,7 +6717,7 @@ const App = () => {
                 />
             )}
             
-            <header className={`w-full bg-white p-4 rounded-xl shadow-lg mb-6 flex justify-between items-center ${currentView === 'genetics-calculator' ? 'max-w-6xl' : 'max-w-4xl'}`}>
+            <header className="w-full bg-white p-4 rounded-xl shadow-lg mb-6 flex justify-between items-center max-w-4xl">
                 <CustomAppLogo size="w-10 h-10" />
                 
                 <nav className="flex space-x-2 sm:space-x-4">
@@ -6860,11 +6860,11 @@ const App = () => {
 
             {currentView !== 'profile' && userProfile && <UserProfileCard userProfile={userProfile} />}
 
-            <main className={`w-full flex-grow ${currentView === 'genetics-calculator' ? 'max-w-6xl' : 'max-w-4xl'}`}>
+            <main className="w-full flex-grow max-w-4xl">
                 {renderView()}
             </main>
 
-            <footer className={`w-full mt-6 text-center text-sm pt-4 border-t border-gray-200 ${currentView === 'genetics-calculator' ? 'max-w-6xl' : 'max-w-4xl'}`}>
+            <footer className="w-full mt-6 text-center text-sm pt-4 border-t border-gray-200 max-w-4xl">
                 <div className="flex flex-col sm:flex-row items-center justify-center gap-2 sm:gap-4 mb-2">
                     <button
                         onClick={() => setShowBugReportModal(true)}
