@@ -2195,7 +2195,7 @@ const LitterManagement = ({ authToken, API_BASE_URL, userProfile, showModalMessa
                         params: {
                             sireId: litter.sireId_public,
                             damId: litter.damId_public,
-                            generations: 5
+                            generations: 50
                         },
                         headers: { Authorization: `Bearer ${authToken}` }
                     });
@@ -2234,7 +2234,7 @@ const LitterManagement = ({ authToken, API_BASE_URL, userProfile, showModalMessa
                 if ((animal.fatherId_public || animal.motherId_public || animal.sireId_public || animal.damId_public)) {
                     try {
                         const coiResponse = await axios.get(`${API_BASE_URL}/animals/${animal.id_public}/inbreeding`, {
-                            params: { generations: 5 },
+                            params: { generations: 50 },
                             headers: { Authorization: `Bearer ${authToken}` }
                         });
                         animal.inbreedingCoefficient = coiResponse.data.inbreedingCoefficient;
@@ -2312,7 +2312,7 @@ const LitterManagement = ({ authToken, API_BASE_URL, userProfile, showModalMessa
                     params: {
                         sireId: formData.sireId_public,
                         damId: formData.damId_public,
-                        generations: 5
+                        generations: 50
                     },
                     headers: { Authorization: `Bearer ${authToken}` }
                 });
@@ -2382,7 +2382,7 @@ const LitterManagement = ({ authToken, API_BASE_URL, userProfile, showModalMessa
             for (const animalId of offspringIds) {
                 try {
                     await axios.get(`${API_BASE_URL}/animals/${animalId}/inbreeding`, {
-                        params: { generations: 5 },
+                        params: { generations: 50 },
                         headers: { Authorization: `Bearer ${authToken}` }
                     });
                 } catch (coiError) {
@@ -2535,7 +2535,7 @@ const LitterManagement = ({ authToken, API_BASE_URL, userProfile, showModalMessa
             // Calculate inbreeding coefficient
             try {
                 await axios.get(`${API_BASE_URL}/animals/${newAnimalId}/inbreeding`, {
-                    params: { generations: 5 },
+                    params: { generations: 50 },
                     headers: { Authorization: `Bearer ${authToken}` }
                 });
             } catch (coiError) {
@@ -5486,7 +5486,7 @@ const AnimalList = ({ authToken, showModalMessage, onEditAnimal, onViewAnimal, o
                 if (animal.fatherId_public || animal.motherId_public || animal.sireId_public || animal.damId_public) {
                     try {
                         await axios.get(`${API_BASE_URL}/animals/${animal.id_public}/inbreeding`, {
-                            params: { generations: 5 },
+                            params: { generations: 50 },
                             headers: { Authorization: `Bearer ${authToken}` }
                         });
                     } catch (error) {
@@ -6137,7 +6137,7 @@ const App = () => {
             // Animals with parents - always recalculate COI from current pedigree
             try {
                 const coiResponse = await axios.get(`${API_BASE_URL}/animals/${normalizedAnimal.id_public}/inbreeding`, {
-                    params: { generations: 5 },
+                    params: { generations: 50 },
                     headers: { Authorization: `Bearer ${authToken}` }
                 });
                 normalizedAnimal.inbreedingCoefficient = coiResponse.data.inbreedingCoefficient;
