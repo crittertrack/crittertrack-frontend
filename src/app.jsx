@@ -2215,8 +2215,8 @@ const LitterManagement = ({ authToken, API_BASE_URL, userProfile, showModalMessa
 
         try {
             // Get parent details
-            const sire = myAnimals.find(a => a.id_public === parseInt(formData.sireId_public));
-            const dam = myAnimals.find(a => a.id_public === parseInt(formData.damId_public));
+            const sire = myAnimals.find(a => a.id_public === formData.sireId_public);
+            const dam = myAnimals.find(a => a.id_public === formData.damId_public);
 
             if (!sire || !dam) {
                 showModalMessage('Error', 'Selected parents not found');
@@ -2231,8 +2231,8 @@ const LitterManagement = ({ authToken, API_BASE_URL, userProfile, showModalMessa
             // Create litter
             const litterPayload = {
                 breedingPairCodeName: formData.breedingPairCodeName || null,
-                sireId_public: parseInt(formData.sireId_public),
-                damId_public: parseInt(formData.damId_public),
+                sireId_public: formData.sireId_public,
+                damId_public: formData.damId_public,
                 pairingDate: formData.pairingDate || null,
                 birthDate: formData.birthDate,
                 numberBorn: totalOffspring,
@@ -2278,8 +2278,8 @@ const LitterManagement = ({ authToken, API_BASE_URL, userProfile, showModalMessa
                     gender: 'Male',
                     birthDate: formData.birthDate,
                     status: 'Pet',
-                    fatherId_public: parseInt(formData.sireId_public),
-                    motherId_public: parseInt(formData.damId_public),
+                    fatherId_public: formData.sireId_public,
+                    motherId_public: formData.damId_public,
                     isOwned: true,
                     breederId_public: userProfile.id_public,
                     ownerId_public: userProfile.id_public
@@ -2299,8 +2299,8 @@ const LitterManagement = ({ authToken, API_BASE_URL, userProfile, showModalMessa
                     gender: 'Female',
                     birthDate: formData.birthDate,
                     status: 'Pet',
-                    fatherId_public: parseInt(formData.sireId_public),
-                    motherId_public: parseInt(formData.damId_public),
+                    fatherId_public: formData.sireId_public,
+                    motherId_public: formData.damId_public,
                     isOwned: true,
                     breederId_public: userProfile.id_public,
                     ownerId_public: userProfile.id_public
