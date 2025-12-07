@@ -4128,13 +4128,11 @@ const AnimalForm = ({
                     fileSize: animalImageFile.size,
                     fileType: animalImageFile.type
                 });
-                alert(`[DEBUG] Uploading image: ${animalImageFile.name}, size: ${animalImageFile.size} bytes`);
                 try {
                     const fd = new FormData();
                     fd.append('file', animalImageFile);
                     fd.append('type', 'animal');
                     console.log('[IMAGE UPLOAD] Sending to:', `${API_BASE_URL}/upload`);
-                    alert(`[DEBUG] Sending request to: ${API_BASE_URL}/upload`);
                     const uploadResp = await axios.post(`${API_BASE_URL}/upload`, fd, { 
                         headers: { 
                             'Content-Type': 'multipart/form-data', 
@@ -4143,7 +4141,6 @@ const AnimalForm = ({
                         timeout: 60000 // 60 second timeout
                     });
                     console.log('[IMAGE UPLOAD] Response received:', uploadResp?.status, uploadResp?.data);
-                    alert(`[DEBUG] Upload success! URL: ${uploadResp?.data?.url}`);
                     // Build payload explicitly instead of mutating state directly
                     if (uploadResp?.data?.url) {
                         formData.imageUrl = uploadResp.data.url;
@@ -4158,12 +4155,10 @@ const AnimalForm = ({
                         response: uploadErr?.response?.data,
                         status: uploadErr?.response?.status
                     });
-                    alert(`[DEBUG] Upload FAILED: ${uploadErr.message} | Status: ${uploadErr?.response?.status} | Error: ${JSON.stringify(uploadErr?.response?.data)}`);
                     showModalMessage('Image Upload', 'Failed to upload animal image. The record will be saved without the image.');
                 }
             } else {
                 console.log('[IMAGE UPLOAD] No image file to upload');
-                alert('[DEBUG] No image file selected');
             }
 
             // Prepare explicit payload to send to the API and log it for debugging
