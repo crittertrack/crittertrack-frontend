@@ -801,7 +801,8 @@ const ParentSearchModal = ({
     Loader2, 
     LoadingSpinner,
     requiredGender, // Filter: e.g., 'Male' or 'Female'
-    birthDate       // Filter: Date of the animal being bred
+    birthDate,      // Filter: Date of the animal being bred
+    species         // Filter: Species of the animal being bred
 }) => {
     const [searchTerm, setSearchTerm] = useState('');
         const [hasSearched, setHasSearched] = useState(false);
@@ -861,6 +862,7 @@ const ParentSearchModal = ({
         // --- CONSTRUCT FILTER QUERIES ---
         const genderQuery = requiredGender ? `&gender=${requiredGender}` : '';
         const birthdateQuery = birthDate ? `&birthdateBefore=${birthDate}` : '';
+        const speciesQuery = species ? `&species=${encodeURIComponent(species)}` : '';
 
         // Prepare promises depending on scope
         setLoadingLocal(scope === 'local' || scope === 'both');
@@ -871,7 +873,7 @@ const ParentSearchModal = ({
             try {
                 const localUrl = isIdSearch
                     ? `${API_BASE_URL}/animals?id_public=${encodeURIComponent(idValue)}`
-                    : `${API_BASE_URL}/animals?name=${encodeURIComponent(trimmedSearchTerm)}${genderQuery}${birthdateQuery}`;
+                    : `${API_BASE_URL}/animals?name=${encodeURIComponent(trimmedSearchTerm)}${genderQuery}${birthdateQuery}${speciesQuery}`;
 
                 const localResponse = await axios.get(localUrl, {
                     headers: { Authorization: `Bearer ${authToken}` }
@@ -895,7 +897,7 @@ const ParentSearchModal = ({
             try {
                 const globalUrl = isIdSearch
                     ? `${API_BASE_URL}/public/global/animals?id_public=${encodeURIComponent(idValue)}`
-                    : `${API_BASE_URL}/public/global/animals?name=${encodeURIComponent(trimmedSearchTerm)}${genderQuery}${birthdateQuery}`;
+                    : `${API_BASE_URL}/public/global/animals?name=${encodeURIComponent(trimmedSearchTerm)}${genderQuery}${birthdateQuery}${speciesQuery}`;
 
                 const globalResponse = await axios.get(globalUrl);
                 const filteredGlobal = globalResponse.data.filter(a => a.id_public !== currentId);
@@ -3091,77 +3093,132 @@ const LitterManagement = ({ authToken, API_BASE_URL, userProfile, showModalMessa
 };
 
 
-const SpeciesManager = ({ speciesOptions, setSpeciesOptions, onCancel, showModalMessage }) => {
+const SpeciesManager = ({ speciesOptions, setSpeciesOptions, onCancel, showModalMessage, authToken, API_BASE_URL }) => {
     const [newSpeciesName, setNewSpeciesName] = useState('');
+    const [selectedCategory, setSelectedCategory] = useState('Other');
+    const [searchTerm, setSearchTerm] = useState('');
+    const [categoryFilter, setCategoryFilter] = useState('All');
+    const [loading, setLoading] = useState(false);
     
-    const customSpecies = speciesOptions.filter(s => !DEFAULT_SPECIES_OPTIONS.includes(s));
+    const categories = ['Rodent', 'Mammal', 'Reptile', 'Bird', 'Amphibian', 'Fish', 'Invertebrate', 'Other'];
     
-    const handleAddSpecies = (e) => {
+    const customSpecies = speciesOptions.filter(s => !s.isDefault);
+    const defaultSpecies = speciesOptions.filter(s => s.isDefault);
+    
+    // Filter species by category and search
+    const filteredSpecies = speciesOptions.filter(s => {
+        const matchesCategory = categoryFilter === 'All' || s.category === categoryFilter;
+        const matchesSearch = !searchTerm || s.name.toLowerCase().includes(searchTerm.toLowerCase());
+        return matchesCategory && matchesSearch;
+    });
+    
+    const handleAddSpecies = async (e) => {
         e.preventDefault();
         const trimmedName = newSpeciesName.trim();
-        if (trimmedName && !speciesOptions.includes(trimmedName)) {
-            setSpeciesOptions(prev => [...prev, trimmedName]);
+        if (!trimmedName) return;
+        
+        setLoading(true);
+        try {
+            const response = await axios.post(
+                `${API_BASE_URL}/species`,
+                { name: trimmedName, category: selectedCategory },
+                { headers: { Authorization: `Bearer ${authToken}` } }
+            );
+            
+            // Add to local state
+            setSpeciesOptions(prev => [...prev, response.data.species]);
             setNewSpeciesName('');
-            showModalMessage('Success', `Custom species "${trimmedName}" added.`);
-        } else if (speciesOptions.includes(trimmedName)) {
-            showModalMessage('Warning', `Species "${trimmedName}" already exists.`);
-        }
-    };
-
-    const handleDeleteSpecies = (speciesToDelete) => {
-        if (window.confirm(`Are you sure you want to delete the custom species "${speciesToDelete}"? This action cannot be undone.`)) {
-            setSpeciesOptions(prev => prev.filter(s => s !== speciesToDelete));
-            showModalMessage('Deleted', `Species "${speciesToDelete}" has been removed.`);
+            showModalMessage('Success', `Species "${trimmedName}" added and is now available to all users!`);
+        } catch (error) {
+            if (error.response?.status === 409) {
+                showModalMessage('Already Exists', `Species "${error.response.data.existing?.name || trimmedName}" already exists.`);
+            } else {
+                console.error('Failed to add species:', error);
+                showModalMessage('Error', 'Failed to add species. Please try again.');
+            }
+        } finally {
+            setLoading(false);
         }
     };
 
     return (
-        <div className="w-full max-w-2xl bg-white p-6 rounded-xl shadow-lg">
+        <div className="w-full max-w-3xl bg-white p-6 rounded-xl shadow-lg">
             <h2 className="text-2xl font-bold text-gray-800 mb-6 flex items-center">
                 <Settings size={20} className="mr-2 text-primary-dark" />
-                Manage Custom Species
+                Manage Species (Global for All Users)
             </h2>
 
-            <form onSubmit={handleAddSpecies} className="flex space-x-3 mb-6 p-4 border rounded-lg bg-gray-50">
-                <input
-                    type="text"
-                    placeholder="Enter new species name..."
-                    value={newSpeciesName}
-                    onChange={(e) => setNewSpeciesName(e.target.value)}
-                    required
-                    className="flex-grow p-2 border border-gray-300 rounded-lg"
-                />
-                <button
-                    type="submit"
-                    className="bg-primary hover:bg-primary-dark text-black font-semibold py-2 px-4 rounded-lg transition duration-150 flex items-center"
-                >
-                    <PlusCircle size={18} className="mr-2" /> Add
-                </button>
+            <form onSubmit={handleAddSpecies} className="mb-6 p-4 border rounded-lg bg-gray-50 space-y-3">
+                <div className="flex space-x-3">
+                    <input
+                        type="text"
+                        placeholder="Enter new species name..."
+                        value={newSpeciesName}
+                        onChange={(e) => setNewSpeciesName(e.target.value)}
+                        required
+                        disabled={loading}
+                        className="flex-grow p-2 border border-gray-300 rounded-lg"
+                    />
+                    <select
+                        value={selectedCategory}
+                        onChange={(e) => setSelectedCategory(e.target.value)}
+                        disabled={loading}
+                        className="p-2 border border-gray-300 rounded-lg"
+                    >
+                        {categories.map(cat => (
+                            <option key={cat} value={cat}>{cat}</option>
+                        ))}
+                    </select>
+                    <button
+                        type="submit"
+                        disabled={loading}
+                        className="bg-primary hover:bg-primary-dark text-black font-semibold py-2 px-4 rounded-lg transition duration-150 flex items-center disabled:opacity-50"
+                    >
+                        {loading ? <Loader2 className="animate-spin" size={18} /> : <PlusCircle size={18} className="mr-2" />}
+                        {loading ? 'Adding...' : 'Add'}
+                    </button>
+                </div>
+                <p className="text-xs text-gray-500">💡 Species you add will be available to all users globally!</p>
             </form>
 
-            <div className="space-y-3">
-                <h3 className="text-lg font-semibold text-gray-700 border-b pb-2">Your Species List</h3>
-                
-                {DEFAULT_SPECIES_OPTIONS.map(species => (
-                    <div key={species} className="flex justify-between items-center p-3 bg-gray-100 rounded-lg">
-                        <span className="font-medium text-gray-600">{species} (Default)</span>
-                        <span className="text-sm text-gray-400">Locked</span>
-                    </div>
-                ))}
+            <div className="mb-4 flex space-x-3">
+                <input
+                    type="text"
+                    placeholder="Search species..."
+                    value={searchTerm}
+                    onChange={(e) => setSearchTerm(e.target.value)}
+                    className="flex-grow p-2 border border-gray-300 rounded-lg"
+                />
+                <select
+                    value={categoryFilter}
+                    onChange={(e) => setCategoryFilter(e.target.value)}
+                    className="p-2 border border-gray-300 rounded-lg"
+                >
+                    <option value="All">All Categories</option>
+                    {categories.map(cat => (
+                        <option key={cat} value={cat}>{cat}</option>
+                    ))}
+                </select>
+            </div>
 
-                {customSpecies.length === 0 ? (
-                    <p className="text-sm text-gray-500 p-2">No custom species added yet.</p>
+            <div className="space-y-3 max-h-96 overflow-y-auto">
+                <h3 className="text-lg font-semibold text-gray-700 border-b pb-2">Available Species ({filteredSpecies.length})</h3>
+                
+                {filteredSpecies.length === 0 ? (
+                    <p className="text-sm text-gray-500 p-2">No species found matching your filters.</p>
                 ) : (
-                    customSpecies.map(species => (
-                        <div key={species} className="flex justify-between items-center p-3 border rounded-lg bg-white shadow-sm">
-                            <span className="font-medium text-gray-800">{species}</span>
-                            <button
-                                onClick={() => handleDeleteSpecies(species)}
-                                className="text-red-500 hover:text-red-700 p-1 transition"
-                                title="Delete Custom Species"
-                            >
-                                <Trash2 size={18} />
-                            </button>
+                    filteredSpecies.map(species => (
+                        <div key={species._id || species.name} className="flex justify-between items-center p-3 border rounded-lg bg-white shadow-sm">
+                            <div>
+                                <span className="font-medium text-gray-800">{species.name}</span>
+                                <span className="ml-2 text-xs bg-gray-200 text-gray-600 px-2 py-1 rounded">{species.category}</span>
+                                {species.isDefault && <span className="ml-2 text-xs bg-primary text-black px-2 py-1 rounded">Default</span>}
+                            </div>
+                            {species.isDefault ? (
+                                <span className="text-sm text-gray-400">Locked</span>
+                            ) : (
+                                <span className="text-xs text-gray-500">Added by community</span>
+                            )}
                         </div>
                     ))
                 )}
@@ -3179,35 +3236,82 @@ const SpeciesManager = ({ speciesOptions, setSpeciesOptions, onCancel, showModal
     );
 };
 
-const SpeciesSelector = ({ speciesOptions, onSelectSpecies, onManageSpecies }) => (
-    <div className="w-full max-w-4xl bg-white p-6 rounded-xl shadow-lg">
-        <h2 className="text-3xl font-bold text-gray-800 mb-6 flex items-center">
-            <Cat size={24} className="mr-3 text-primary-dark" />
-            Select Species for New Animal
-        </h2>
-        
-        <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-4 mb-6">
-            {speciesOptions.map(species => (
-                <button
-                    key={species}
-                    onClick={() => onSelectSpecies(species)}
-                    className="p-6 border-2 border-primary-dark text-lg font-semibold text-gray-800 rounded-lg hover:bg-primary/50 transition duration-150 shadow-md bg-primary"
+const SpeciesSelector = ({ speciesOptions, onSelectSpecies, onManageSpecies, searchTerm, setSearchTerm, categoryFilter, setCategoryFilter }) => {
+    const categories = ['All', 'Rodent', 'Mammal', 'Reptile', 'Bird', 'Amphibian', 'Fish', 'Invertebrate', 'Other'];
+    
+    // Filter species by category and search
+    const filteredSpecies = speciesOptions.filter(s => {
+        const matchesCategory = categoryFilter === 'All' || s.category === categoryFilter;
+        const matchesSearch = !searchTerm || s.name.toLowerCase().includes(searchTerm.toLowerCase());
+        return matchesCategory && matchesSearch;
+    });
+    
+    // Sort: defaults first, then alphabetical
+    const sortedSpecies = [...filteredSpecies].sort((a, b) => {
+        if (a.isDefault && !b.isDefault) return -1;
+        if (!a.isDefault && b.isDefault) return 1;
+        return a.name.localeCompare(b.name);
+    });
+    
+    return (
+        <div className="w-full max-w-4xl bg-white p-6 rounded-xl shadow-lg">
+            <h2 className="text-3xl font-bold text-gray-800 mb-6 flex items-center">
+                <Cat size={24} className="mr-3 text-primary-dark" />
+                Select Species for New Animal
+            </h2>
+            
+            <div className="mb-4 flex space-x-3">
+                <input
+                    type="text"
+                    placeholder="Search species..."
+                    value={searchTerm}
+                    onChange={(e) => setSearchTerm(e.target.value)}
+                    className="flex-grow p-2 border border-gray-300 rounded-lg"
+                />
+                <select
+                    value={categoryFilter}
+                    onChange={(e) => setCategoryFilter(e.target.value)}
+                    className="p-2 border border-gray-300 rounded-lg"
                 >
-                    {species}
-                </button>
-            ))}
-        </div>
+                    {categories.map(cat => (
+                        <option key={cat} value={cat}>{cat}</option>
+                    ))}
+                </select>
+            </div>
+            
+            <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-4 mb-6 max-h-96 overflow-y-auto">
+                {sortedSpecies.length === 0 ? (
+                    <p className="col-span-full text-center text-gray-500 p-4">No species found matching your filters.</p>
+                ) : (
+                    sortedSpecies.map(species => (
+                        <button
+                            key={species._id || species.name}
+                            onClick={() => onSelectSpecies(species.name)}
+                            className="p-6 border-2 border-primary-dark text-lg font-semibold text-gray-800 rounded-lg hover:bg-primary/50 transition duration-150 shadow-md bg-primary relative"
+                        >
+                            {species.name}
+                            {species.isDefault && (
+                                <span className="absolute top-1 right-1 text-xs bg-white text-primary-dark px-1.5 py-0.5 rounded">★</span>
+                            )}
+                        </button>
+                    ))
+                )}
+            </div>
 
-        <div className="mt-8 border-t pt-4">
-            <button
-                onClick={onManageSpecies}
-                className="text-primary-dark hover:text-primary transition duration-150 font-medium flex items-center"
-            >
-                <Settings size={18} className="mr-2" /> Add/Delete Custom Species
-            </button>
+            <div className="mt-8 border-t pt-4 flex justify-between items-center">
+                <p className="text-sm text-gray-500">
+                    <span className="font-semibold">{sortedSpecies.length}</span> species available
+                </p>
+                <button
+                    onClick={onManageSpecies}
+                    className="text-primary-dark hover:text-primary transition duration-150 font-medium flex items-center"
+                >
+                    <Settings size={18} className="mr-2" /> Add New Species
+                </button>
+            </div>
         </div>
-    </div>
-);
+    );
+};
 
 
 // Small helper component for animal image selection/preview
@@ -3878,7 +3982,8 @@ const AnimalForm = ({
                     Loader2={Loader2}
                     LoadingSpinner={LoadingSpinner}
                     requiredGender={requiredGender}
-                    birthDate={formData.birthDate} 
+                    birthDate={formData.birthDate}
+                    species={formData.species}
                 /> 
             )}
 
@@ -5724,7 +5829,9 @@ const App = () => {
     const [currentView, setCurrentView] = useState('list'); 
     const [animalToEdit, setAnimalToEdit] = useState(null);
     const [speciesToAdd, setSpeciesToAdd] = useState(null); 
-    const [speciesOptions, setSpeciesOptions] = useState(DEFAULT_SPECIES_OPTIONS); 
+    const [speciesOptions, setSpeciesOptions] = useState([]); 
+    const [speciesSearchTerm, setSpeciesSearchTerm] = useState('');
+    const [speciesCategoryFilter, setSpeciesCategoryFilter] = useState('All');
     const [showModal, setShowModal] = useState(false);
     const [modalMessage, setModalMessage] = useState({ title: '', message: '' });
     const [isRegister, setIsRegister] = useState(false); 
@@ -5877,6 +5984,25 @@ const App = () => {
         }
     }, [authToken, fetchNotificationCount]);
 	
+    // Fetch global species list
+    useEffect(() => {
+        const fetchSpecies = async () => {
+            try {
+                const response = await axios.get(`${API_BASE_URL}/species`);
+                setSpeciesOptions(response.data);
+            } catch (error) {
+                console.error('Failed to fetch species:', error);
+                // Fallback to defaults if API fails
+                setSpeciesOptions([
+                    { name: 'Mouse', category: 'Rodent', isDefault: true },
+                    { name: 'Rat', category: 'Rodent', isDefault: true },
+                    { name: 'Hamster', category: 'Rodent', isDefault: true }
+                ]);
+            }
+        };
+        fetchSpecies();
+    }, [API_BASE_URL]);
+	
     const handleBugReportSubmit = async (e) => {
         e.preventDefault();
         if (!bugReportDescription.trim()) {
@@ -6018,6 +6144,10 @@ const App = () => {
                             setCurrentView('add-animal'); 
                         }} 
                         onManageSpecies={() => setCurrentView('manage-species')}
+                        searchTerm={speciesSearchTerm}
+                        setSearchTerm={setSpeciesSearchTerm}
+                        categoryFilter={speciesCategoryFilter}
+                        setCategoryFilter={setSpeciesCategoryFilter}
                     />
                 );
             case 'manage-species':
@@ -6027,6 +6157,8 @@ const App = () => {
                         setSpeciesOptions={setSpeciesOptions} 
                         onCancel={() => setCurrentView('select-species')}
                         showModalMessage={showModalMessage}
+                        authToken={authToken}
+                        API_BASE_URL={API_BASE_URL}
                     />
                 );
             case 'add-animal':
@@ -6040,6 +6172,10 @@ const App = () => {
                                 setCurrentView('add-animal');
                             }}
                             onManageSpecies={() => setCurrentView('manage-species')}
+                            searchTerm={speciesSearchTerm}
+                            setSearchTerm={setSpeciesSearchTerm}
+                            categoryFilter={speciesCategoryFilter}
+                            setCategoryFilter={setSpeciesCategoryFilter}
                         />
                     );
                 }
