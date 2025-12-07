@@ -2200,14 +2200,16 @@ const LitterManagement = ({ authToken, API_BASE_URL, userProfile, showModalMessa
                         headers: { Authorization: `Bearer ${authToken}` }
                     });
 
-                    if (coiResponse.data.inbreedingCoefficient != null && 
-                        coiResponse.data.inbreedingCoefficient !== litter.inbreedingCoefficient) {
+                    if (coiResponse.data.inbreedingCoefficient != null) {
+                        // Always set the COI value from the calculation
+                        litter.inbreedingCoefficient = coiResponse.data.inbreedingCoefficient;
+                        
+                        // Update database if needed
                         await axios.put(`${API_BASE_URL}/litters/${litter._id}`, {
                             inbreedingCoefficient: coiResponse.data.inbreedingCoefficient
                         }, {
                             headers: { Authorization: `Bearer ${authToken}` }
                         });
-                        litter.inbreedingCoefficient = coiResponse.data.inbreedingCoefficient;
                     }
                 } catch (error) {
                     console.log(`Could not update COI for litter ${litter._id}:`, error);
