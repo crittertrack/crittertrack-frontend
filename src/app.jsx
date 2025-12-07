@@ -6361,9 +6361,9 @@ const App = () => {
                         </div>
 
                         {/* Main Info Section */}
-                        <div className="border-2 border-gray-300 rounded-lg p-6 mb-6">
-                            <div className="flex items-start space-x-6">
-                                <div>
+                        <div className="border-2 border-gray-300 rounded-lg p-4 sm:p-6 mb-6">
+                            <div className="flex flex-col sm:flex-row items-start sm:space-x-6 space-y-4 sm:space-y-0">
+                                <div className="w-full sm:w-auto flex flex-col items-center sm:items-start">
                                     <div className="w-40 h-40 bg-gray-100 rounded-lg overflow-hidden flex items-center justify-center">
                                         { (animalToView.imageUrl || animalToView.photoUrl) ? (
                                             <img src={animalToView.imageUrl || animalToView.photoUrl} alt={animalToView.name} className="w-full h-full object-cover" />
@@ -6391,10 +6391,10 @@ const App = () => {
                                         {animalToView.isNursing && <Milk size={18} className="text-black" />}
                                     </div>
                                 </div>
-                                <div className="flex-1">
+                                <div className="flex-1 w-full">
                                     <h2 className="text-2xl font-bold text-gray-800 mb-2">{animalToView.prefix ? `${animalToView.prefix} ` : ''}{animalToView.name}</h2>
                                     <p className="text-sm text-gray-600 mb-4">{animalToView.species} &nbsp; • &nbsp; {animalToView.id_public}</p>
-                                    <div className="grid grid-cols-2 gap-x-6 gap-y-3 text-sm text-gray-700">
+                                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-x-6 gap-y-3 text-sm text-gray-700">
                                         <div><strong>Gender:</strong> {animalToView.gender}</div>
                                         <div><strong>Color:</strong> {animalToView.color || '—'}</div>
                                         <div><strong>Coat:</strong> {animalToView.coat || '—'}</div>
@@ -6467,7 +6467,7 @@ const App = () => {
                                     Pedigree
                                 </button>
                             </div>
-                            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                            <div className="flex flex-col sm:grid sm:grid-cols-2 gap-4">
                                 {/* Father Card */}
                                 <ParentCard 
                                     parentId={animalToView.fatherId_public} 
