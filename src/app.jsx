@@ -3439,7 +3439,7 @@ const SpeciesManager = ({ speciesOptions, setSpeciesOptions, onCancel, showModal
             <div className="mt-6 border-t pt-4 flex justify-between items-center">
                 <button
                     onClick={() => setShowFeedbackModal(true)}
-                    className="flex items-center text-accent hover:text-accent/80 transition font-medium"
+                    className="flex items-center text-purple-600 hover:text-purple-700 transition font-medium"
                 >
                     <Mail size={18} className="mr-1" /> Request Species Customization
                 </button>
