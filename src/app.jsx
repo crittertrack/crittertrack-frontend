@@ -5302,13 +5302,19 @@ const AuthView = ({ onLoginSuccess, showModalMessage, isRegister, setIsRegister,
             )}
             
             {!verificationStep && (
-                <div className="mt-6 text-center">
-                    <button type="button" onClick={() => setIsRegister(prev => !prev)}
-                        className="text-sm text-accent hover:text-accent/80 transition duration-150 font-medium"
-                    >
-                        {isRegister ? 'Already have an account? Log In' : "Don't have an account? Register Here"}
-                    </button>
-                </div>
+                <>
+                    <div className="mt-6 text-center">
+                        <button type="button" onClick={() => setIsRegister(prev => !prev)}
+                            className="text-sm text-accent hover:text-accent/80 transition duration-150 font-medium"
+                        >
+                            {isRegister ? 'Already have an account? Log In' : "Don't have an account? Register Here"}
+                        </button>
+                    </div>
+                    
+                    <div className="mt-4">
+                        <InstallPWA />
+                    </div>
+                </>
             )}
             
             <div className="mt-6 pt-6 border-t border-gray-200 text-center text-xs text-gray-500 space-x-4">
@@ -7274,14 +7280,11 @@ const PublicProfilePage = () => {
 // Router Wrapper Component
 const AppRouter = () => {
     return (
-        <>
-            <InstallPWA />
-            <Routes>
-                <Route path="/" element={<App />} />
-                <Route path="/animal/:animalId" element={<PublicAnimalPage />} />
-                <Route path="/user/:userId" element={<PublicProfilePage />} />
-            </Routes>
-        </>
+        <Routes>
+            <Route path="/" element={<App />} />
+            <Route path="/animal/:animalId" element={<PublicAnimalPage />} />
+            <Route path="/user/:userId" element={<PublicProfilePage />} />
+        </Routes>
     );
 };
 
