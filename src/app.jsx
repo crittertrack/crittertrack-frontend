@@ -656,26 +656,26 @@ const PedigreeChart = ({ animalId, animalData, onClose, API_BASE_URL, authToken 
         );
     }
 
-    const getOwnerDisplayName = () => {
-        if (!ownerProfile) return 'Unknown Owner';
+    const getOwnerDisplayInfo = () => {
+        if (!ownerProfile) return { lines: ['Unknown Owner'], userId: null };
         
         const userId = ownerProfile.id_public || pedigreeData?.ownerId_public || pedigreeData?.breederId_public;
-        let displayName = '';
+        const lines = [];
         
-        if (ownerProfile.showBreederName && ownerProfile.personalName && ownerProfile.breederName) {
-            displayName = `${ownerProfile.personalName} (${ownerProfile.breederName})`;
-        } else if (ownerProfile.showBreederName && ownerProfile.breederName) {
-            displayName = ownerProfile.breederName;
-        } else if (ownerProfile.personalName) {
-            displayName = ownerProfile.personalName;
+        // Add personal name if available
+        if (ownerProfile.personalName) {
+            lines.push(ownerProfile.personalName);
         }
         
-        // Add user ID if we have both name and ID
-        if (displayName && userId) {
-            return `${displayName} - ${userId}`;
+        // Add breeder name if it's public and available
+        if (ownerProfile.showBreederName && ownerProfile.breederName) {
+            lines.push(ownerProfile.breederName);
         }
         
-        return displayName || userId || 'Unknown';
+        return { 
+            lines: lines.length > 0 ? lines : [userId || 'Unknown'], 
+            userId 
+        };
     };
 
     return (
@@ -731,7 +731,19 @@ const PedigreeChart = ({ animalId, animalData, onClose, API_BASE_URL, authToken 
                         {/* Right: Owner Profile */}
                         <div className="w-1/3 flex items-center justify-end gap-3">
                             <div className="text-right">
-                                <div className="text-lg font-semibold text-gray-800">{getOwnerDisplayName()}</div>
+                                {(() => {
+                                    const ownerInfo = getOwnerDisplayInfo();
+                                    return (
+                                        <>
+                                            {ownerInfo.lines.map((line, idx) => (
+                                                <div key={idx} className="text-base font-semibold text-gray-800 leading-tight">{line}</div>
+                                            ))}
+                                            {ownerInfo.userId && (
+                                                <div className="text-xs text-gray-600 mt-1">{ownerInfo.userId}</div>
+                                            )}
+                                        </>
+                                    );
+                                })()}
                             </div>
                             <div className="w-16 h-16 bg-gray-200 rounded-lg overflow-hidden flex items-center justify-center">
                                 {ownerProfile?.profileImage ? (
@@ -750,7 +762,21 @@ const PedigreeChart = ({ animalId, animalData, onClose, API_BASE_URL, authToken 
 
                     {/* Footer */}
                     <div className="absolute bottom-6 left-6 right-6 pt-3 border-t-2 border-gray-300 flex justify-between items-center text-sm text-gray-600">
-                        <div>{getOwnerDisplayName()}</div>
+                        <div>
+                            {(() => {
+                                const ownerInfo = getOwnerDisplayInfo();
+                                return (
+                                    <>
+                                        {ownerInfo.lines.map((line, idx) => (
+                                            <div key={idx}>{line}</div>
+                                        ))}
+                                        {ownerInfo.userId && (
+                                            <div className="text-xs text-gray-500">{ownerInfo.userId}</div>
+                                        )}
+                                    </>
+                                );
+                            })()}
+                        </div>
                         <div>{new Date().toLocaleDateString()}</div>
                     </div>
                 </div>
