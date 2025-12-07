@@ -17,6 +17,16 @@ const STATUS_OPTIONS = ['Pet', 'Breeder', 'Available', 'Retired', 'Deceased', 'R
 
 const DEFAULT_SPECIES_OPTIONS = ['Mouse', 'Rat', 'Hamster'];
 
+// Helper function to get plural/display names for species
+const getSpeciesDisplayName = (species) => {
+    const displayNames = {
+        'Mouse': 'Fancy Mice',
+        'Rat': 'Rats',
+        'Hamster': 'Hamsters'
+    };
+    return displayNames[species] || species;
+};
+
 const IDLE_TIMEOUT_MS = 15 * 60 * 1000; // 15 minutes in milliseconds
 
 const ModalMessage = ({ title, message, onClose }) => (
@@ -2791,6 +2801,7 @@ const LitterManagement = ({ authToken, API_BASE_URL, userProfile, showModalMessa
                             {['All', ...DEFAULT_SPECIES_OPTIONS].map(species => {
                                 const value = species === 'All' ? '' : species;
                                 const isCurrentSelected = speciesFilter === value;
+                                const displayName = species === 'All' ? 'All' : getSpeciesDisplayName(species);
                                 
                                 return (
                                     <button key={species} onClick={() => setSpeciesFilter(value)}
@@ -2798,7 +2809,7 @@ const LitterManagement = ({ authToken, API_BASE_URL, userProfile, showModalMessa
                                             isCurrentSelected ? 'bg-primary text-black' : 'bg-gray-200 text-gray-700 hover:bg-gray-300'
                                         }`}
                                     >
-                                        {species}
+                                        {displayName}
                                     </button>
                                 );
                             })}
@@ -5707,6 +5718,7 @@ const AnimalList = ({ authToken, showModalMessage, onEditAnimal, onViewAnimal, o
                         {['All', ...DEFAULT_SPECIES_OPTIONS].map(species => {
                             const value = species === 'All' ? '' : species;
                             const isCurrentSelected = speciesFilter === value;
+                            const displayName = species === 'All' ? 'All' : getSpeciesDisplayName(species);
                             
                             return (
                                 <button key={species} onClick={() => setSpeciesFilter(value)}
@@ -5714,7 +5726,7 @@ const AnimalList = ({ authToken, showModalMessage, onEditAnimal, onViewAnimal, o
                                         isCurrentSelected ? 'bg-primary text-black' : 'bg-gray-200 text-gray-700 hover:bg-gray-300'
                                     }`}
                                 >
-                                    {species}
+                                    {displayName}
                                 </button>
                             );
                         })}
