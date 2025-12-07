@@ -13,17 +13,25 @@ async function generateIcons() {
 
   for (const size of sizes) {
     const outputFile = path.join(__dirname, 'public', `logo${size}.png`);
+    const paddedSize = Math.round(size * 0.8); // 20% padding (10% on each side)
     
     try {
       await sharp(inputFile)
-        .resize(size, size, {
+        .resize(paddedSize, paddedSize, {
           fit: 'contain',
-          background: { r: 255, g: 255, b: 255, alpha: 1 }
+          background: { r: 255, g: 255, b: 255, alpha: 0 }
+        })
+        .extend({
+          top: Math.round((size - paddedSize) / 2),
+          bottom: Math.round((size - paddedSize) / 2),
+          left: Math.round((size - paddedSize) / 2),
+          right: Math.round((size - paddedSize) / 2),
+          background: { r: 255, g: 255, b: 255, alpha: 0 }
         })
         .png()
         .toFile(outputFile);
       
-      console.log(`✓ Generated ${size}x${size} icon: logo${size}.png`);
+      console.log(`✓ Generated ${size}x${size} icon with padding: logo${size}.png`);
     } catch (error) {
       console.error(`Error generating ${size}x${size} icon:`, error.message);
     }
