@@ -1477,7 +1477,7 @@ const PublicProfileView = ({ profile, onBack, onViewAnimal, API_BASE_URL }) => {
             {/* Filters */}
             {animals.length > 0 && (
                 <div className="mb-6 p-4 border rounded-lg bg-gray-50 space-y-3">
-                    {/* Species and Gender filters - Stack on mobile */}
+                    {/* Species filter and Status dropdown */}
                     <div className="flex flex-col sm:flex-row gap-3">
                         {/* Species filter */}
                         <div className="flex gap-2 items-center flex-wrap">
@@ -1499,39 +1499,32 @@ const PublicProfileView = ({ profile, onBack, onViewAnimal, API_BASE_URL }) => {
                             })}
                         </div>
                         
-                        {/* Gender filter */}
-                        <div className="flex gap-2 items-center flex-wrap">
-                            <span className='text-sm font-medium text-gray-700 whitespace-nowrap'>Gender:</span>
-                            {['All', ...GENDER_OPTIONS].map(gender => {
-                                const value = gender === 'All' ? '' : gender;
-                                const isCurrentSelected = genderFilter === value;
-                                let selectedClasses = isCurrentSelected ? (gender === 'Male' ? 'bg-primary text-black' : gender === 'Female' ? 'bg-accent text-white' : 'bg-primary-dark text-black') : 'bg-gray-200 text-gray-700 hover:bg-gray-300';
-                                
-                                return (
-                                    <button key={gender} onClick={() => setGenderFilter(value)}
-                                        className={`px-3 py-1.5 text-sm font-semibold rounded-lg transition duration-150 shadow-sm ${selectedClasses}`}
-                                    >
-                                        {gender}
-                                    </button>
-                                );
-                            })}
-                        </div>
+                        {/* Status dropdown */}
+                        <select 
+                            value={statusFilter} 
+                            onChange={(e) => setStatusFilter(e.target.value)} 
+                            className="p-2 border border-gray-300 rounded-lg shadow-sm focus:ring-primary focus:border-primary transition w-full sm:w-auto sm:min-w-[150px]"
+                        >
+                            <option value="">All Statuses</option>
+                            {STATUS_OPTIONS.map(status => (
+                                <option key={status} value={status}>{status}</option>
+                            ))}
+                        </select>
                     </div>
                     
-                    {/* Status filter */}
+                    {/* Gender filter */}
                     <div className="flex gap-2 items-center flex-wrap pt-2 border-t border-gray-200">
-                        <span className='text-sm font-medium text-gray-700 whitespace-nowrap'>Status:</span>
-                        {['All', ...STATUS_OPTIONS].map(status => {
-                            const value = status === 'All' ? '' : status;
-                            const isCurrentSelected = statusFilter === value;
+                        <span className='text-sm font-medium text-gray-700 whitespace-nowrap'>Gender:</span>
+                        {['All', ...GENDER_OPTIONS].map(gender => {
+                            const value = gender === 'All' ? '' : gender;
+                            const isCurrentSelected = genderFilter === value;
+                            let selectedClasses = isCurrentSelected ? (gender === 'Male' ? 'bg-primary text-black' : gender === 'Female' ? 'bg-accent text-white' : 'bg-primary-dark text-black') : 'bg-gray-200 text-gray-700 hover:bg-gray-300';
                             
                             return (
-                                <button key={status} onClick={() => setStatusFilter(value)}
-                                    className={`px-3 py-1.5 text-sm font-semibold rounded-lg transition duration-150 shadow-sm ${ 
-                                        isCurrentSelected ? 'bg-primary text-black' : 'bg-gray-200 text-gray-700 hover:bg-gray-300'
-                                    }`}
+                                <button key={gender} onClick={() => setGenderFilter(value)}
+                                    className={`px-3 py-1.5 text-sm font-semibold rounded-lg transition duration-150 shadow-sm ${selectedClasses}`}
                                 >
-                                    {status}
+                                    {gender}
                                 </button>
                             );
                         })}
