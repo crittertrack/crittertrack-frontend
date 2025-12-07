@@ -6638,20 +6638,12 @@ const PublicAnimalPage = () => {
                     <p className="text-gray-600 mb-6">
                         This animal either doesn't exist or is not publicly visible.
                     </p>
-                    <div className="space-y-3">
-                        <button
-                            onClick={() => navigate('/')}
-                            className="w-full px-4 py-2 bg-primary text-black font-semibold rounded-lg hover:bg-primary/90 transition"
-                        >
-                            Go to Home
-                        </button>
-                        <button
-                            onClick={() => navigate('/')}
-                            className="w-full px-4 py-2 bg-gray-200 text-gray-700 font-semibold rounded-lg hover:bg-gray-300 transition"
-                        >
-                            Login / Register
-                        </button>
-                    </div>
+                    <button
+                        onClick={() => navigate('/')}
+                        className="w-full px-4 py-2 bg-primary text-black font-semibold rounded-lg hover:bg-primary/90 transition"
+                    >
+                        Login / Register
+                    </button>
                 </div>
             </div>
         );
@@ -6718,20 +6710,12 @@ const PublicProfilePage = () => {
                     <p className="text-gray-600 mb-6">
                         This profile either doesn't exist or is not publicly visible.
                     </p>
-                    <div className="space-y-3">
-                        <button
-                            onClick={() => navigate('/')}
-                            className="w-full px-4 py-2 bg-primary text-black font-semibold rounded-lg hover:bg-primary/90 transition"
-                        >
-                            Go to Home
-                        </button>
-                        <button
-                            onClick={() => navigate('/')}
-                            className="w-full px-4 py-2 bg-gray-200 text-gray-700 font-semibold rounded-lg hover:bg-gray-300 transition"
-                        >
-                            Login / Register
-                        </button>
-                    </div>
+                    <button
+                        onClick={() => navigate('/')}
+                        className="w-full px-4 py-2 bg-primary text-black font-semibold rounded-lg hover:bg-primary/90 transition"
+                    >
+                        Login / Register
+                    </button>
                 </div>
             </div>
         );
