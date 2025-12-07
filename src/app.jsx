@@ -1474,7 +1474,7 @@ const PublicProfileView = ({ profile, onBack, onViewAnimal, API_BASE_URL }) => {
                     {sortedSpecies.map(species => (
                         <div key={species} className="bg-gray-50 p-4 rounded-lg">
                             <h4 className="text-xl font-semibold text-gray-700 mb-3 flex items-center">
-                                <Cat size={20} className="mr-2" /> {species}
+                                <Cat size={20} className="mr-2" /> {getSpeciesDisplayName(species)}
                             </h4>
                             <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-4">
                                 {groupedAnimals[species].map(animal => {
@@ -5781,7 +5781,7 @@ const AnimalList = ({ authToken, showModalMessage, onEditAnimal, onViewAnimal, o
                     {speciesNames.map(species => (
                         <div key={species} className="border border-gray-200 rounded-xl overflow-hidden shadow-sm">
                             <h3 className="text-lg font-bold bg-gray-100 p-4 border-b text-gray-700">
-                                {species} ({groupedAnimals[species].length})
+                                {getSpeciesDisplayName(species)} ({groupedAnimals[species].length})
                             </h3>
                             <div className="p-4 grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-4">
                                 {groupedAnimals[species].map(animal => (
