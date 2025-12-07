@@ -1645,7 +1645,7 @@ const MouseGeneticsCalculator = ({ API_BASE_URL, authToken }) => {
                             <div key={gIdx} className="text-sm text-gray-700 bg-purple-50 px-3 py-2 rounded">
                               {Object.entries(genotype)
                                 .map(([_, alleles]) => alleles)
-                                .join(', ')}
+                                .join(' ')}
                             </div>
                           ))}
                         </div>
