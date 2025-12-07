@@ -668,25 +668,27 @@ const PedigreeChart = ({ animalId, animalData, onClose, API_BASE_URL, authToken 
     }
 
     const getOwnerDisplayInfo = () => {
-        if (!ownerProfile) return { lines: ['Unknown Owner'], userId: null };
+        if (!ownerProfile) return 'Unknown Owner';
         
         const userId = ownerProfile.id_public || pedigreeData?.ownerId_public || pedigreeData?.breederId_public;
-        const lines = [];
+        const parts = [];
+        
+        // Add CTID first
+        if (userId) {
+            parts.push(userId);
+        }
         
         // Add personal name if available
         if (ownerProfile.personalName) {
-            lines.push(ownerProfile.personalName);
+            parts.push(ownerProfile.personalName);
         }
         
         // Add breeder name if it's public and available
         if (ownerProfile.showBreederName && ownerProfile.breederName) {
-            lines.push(ownerProfile.breederName);
+            parts.push(ownerProfile.breederName);
         }
         
-        return { 
-            lines: lines.length > 0 ? lines : [userId || 'Unknown'], 
-            userId 
-        };
+        return parts.length > 0 ? parts.join(' - ') : 'Unknown';
     };
 
     return (
@@ -742,19 +744,9 @@ const PedigreeChart = ({ animalId, animalData, onClose, API_BASE_URL, authToken 
                         {/* Right: Owner Profile */}
                         <div className="w-1/3 flex items-center justify-end gap-3">
                             <div className="text-right">
-                                {(() => {
-                                    const ownerInfo = getOwnerDisplayInfo();
-                                    return (
-                                        <>
-                                            {ownerInfo.lines.map((line, idx) => (
-                                                <div key={idx} className="text-base font-semibold text-gray-800 leading-tight">{line}</div>
-                                            ))}
-                                            {ownerInfo.userId && (
-                                                <div className="text-xs text-gray-600 mt-1">{ownerInfo.userId}</div>
-                                            )}
-                                        </>
-                                    );
-                                })()}
+                                <div className="text-sm font-semibold text-gray-800">
+                                    {getOwnerDisplayInfo()}
+                                </div>
                             </div>
                             <div className="w-16 h-16 bg-gray-200 rounded-lg overflow-hidden flex items-center justify-center">
                                 {(ownerProfile?.profileImage || ownerProfile?.profileImageUrl) ? (
