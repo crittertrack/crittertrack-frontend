@@ -1627,13 +1627,17 @@ const MouseGeneticsCalculator = ({ API_BASE_URL, authToken }) => {
                       >
                         {expandedPhenotypes[idx] ? '▲' : '▼'} {result.genotypes.length} genotype{result.genotypes.length !== 1 ? 's' : ''}
                       </button>
-                      {result.phenotype.includes('Unknown') && (
+                      {authToken && (
                         <button
                           onClick={() => openFeedbackModal(result.phenotype, result.genotypes[0])}
-                          className="ml-2 px-3 py-1 text-sm bg-red-100 hover:bg-red-200 text-red-800 rounded-lg transition"
-                          title="Report incorrect phenotype"
+                          className={`ml-2 px-3 py-1 text-sm rounded-lg transition ${
+                            result.phenotype.includes('Unknown')
+                              ? 'bg-red-100 hover:bg-red-200 text-red-800'
+                              : 'bg-yellow-100 hover:bg-yellow-200 text-yellow-800'
+                          }`}
+                          title={result.phenotype.includes('Unknown') ? 'Report unknown phenotype' : 'Report incorrect phenotype'}
                         >
-                          Report Issue
+                          {result.phenotype.includes('Unknown') ? '⚠ Report Unknown' : '📝 Feedback'}
                         </button>
                       )}
                     </div>
@@ -1660,9 +1664,13 @@ const MouseGeneticsCalculator = ({ API_BASE_URL, authToken }) => {
           {/* Feedback Modal */}
           {showFeedbackModal && (
             <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
-              <div className="bg-white rounded-lg p-6 max-w-md w-full">
+              <div className="bg-white rounded-lg p-6 max-w-lg w-full">
                 <div className="flex justify-between items-start mb-4">
-                  <h3 className="text-xl font-semibold text-gray-800">Report Phenotype Issue</h3>
+                  <h3 className="text-xl font-semibold text-gray-800">
+                    {feedbackGenotype?.phenotype.includes('Unknown') 
+                      ? '⚠ Report Unknown Phenotype' 
+                      : '📝 Report Phenotype Feedback'}
+                  </h3>
                   <button
                     onClick={closeFeedbackModal}
                     className="text-gray-500 hover:text-gray-700"
@@ -1671,35 +1679,47 @@ const MouseGeneticsCalculator = ({ API_BASE_URL, authToken }) => {
                   </button>
                 </div>
                 
-                <div className="mb-4">
+                <div className="mb-4 p-3 bg-gray-50 rounded-lg border border-gray-200">
                   <p className="text-sm text-gray-600 mb-2">
-                    <span className="font-medium">Phenotype:</span> {feedbackGenotype?.phenotype}
+                    <span className="font-medium">Phenotype Result:</span> 
+                    <span className={feedbackGenotype?.phenotype.includes('Unknown') ? 'text-red-600 font-semibold ml-1' : 'ml-1'}>
+                      {feedbackGenotype?.phenotype}
+                    </span>
                   </p>
                   <p className="text-sm text-gray-600">
                     <span className="font-medium">Genotype:</span>{' '}
-                    {feedbackGenotype && Object.entries(feedbackGenotype.genotype)
-                      .map(([_, alleles]) => alleles)
-                      .join(', ')}
+                    <span className="font-mono text-xs">
+                      {feedbackGenotype && Object.entries(feedbackGenotype.genotype)
+                        .map(([_, alleles]) => alleles)
+                        .join(', ')}
+                    </span>
                   </p>
                 </div>
 
                 <div className="mb-4">
                   <label className="block text-sm font-medium text-gray-700 mb-2">
-                    What is the issue or correct phenotype?
+                    {feedbackGenotype?.phenotype.includes('Unknown')
+                      ? 'What should this phenotype be called?'
+                      : 'What is incorrect about this phenotype?'}
                   </label>
+                  <p className="text-xs text-gray-500 mb-2 italic">
+                    {feedbackGenotype?.phenotype.includes('Unknown')
+                      ? 'Example: "This should be Black Self" or "This genotype produces Agouti"'
+                      : 'Example: "Should be Champagne not Beige" or "Missing carrier notation"'}
+                  </p>
                   <textarea
                     value={feedbackMessage}
                     onChange={(e) => setFeedbackMessage(e.target.value)}
                     className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-500"
                     rows="4"
-                    placeholder="Please describe the issue or provide the correct phenotype..."
+                    placeholder="Please provide details about the correct phenotype or what is wrong..."
                   />
                 </div>
 
                 <div className="flex gap-3">
                   <button
                     onClick={submitFeedback}
-                    className="flex-1 px-4 py-2 bg-purple-600 text-white rounded-lg hover:bg-purple-700 transition"
+                    className="flex-1 px-4 py-2 bg-purple-600 text-white rounded-lg hover:bg-purple-700 transition font-semibold"
                   >
                     Submit Feedback
                   </button>
