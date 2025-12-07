@@ -3260,6 +3260,12 @@ const SpeciesSelector = ({ speciesOptions, onSelectSpecies, onManageSpecies, sea
                 Select Species for New Animal
             </h2>
             
+            <div className="mb-4 p-4 bg-yellow-50 border-l-4 border-yellow-400 rounded-lg">
+                <p className="text-sm text-yellow-800">
+                    <span className="font-semibold">⚠️ Work in Progress:</span> All species can be selected, but species-specific details (traits, colors, coat types, etc.) are not yet implemented. Currently optimized for Mouse, Rat, and Hamster.
+                </p>
+            </div>
+            
             <div className="mb-4 flex space-x-3">
                 <input
                     type="text"
