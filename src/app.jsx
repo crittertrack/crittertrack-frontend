@@ -237,17 +237,9 @@ const PedigreeChart = ({ animalId, animalData, onClose, API_BASE_URL, authToken 
         if (!pedigreeRef.current) return;
 
         try {
-            // Wait for all images to load
-            const images = pedigreeRef.current.querySelectorAll('img');
-            await Promise.all(
-                Array.from(images).map(img => {
-                    if (img.complete) return Promise.resolve();
-                    return new Promise((resolve, reject) => {
-                        img.onload = resolve;
-                        img.onerror = resolve; // Resolve even on error to continue
-                    });
-                })
-            );
+            // Hide all images before PDF generation
+            const imageContainers = pedigreeRef.current.querySelectorAll('.hide-for-pdf');
+            imageContainers.forEach(el => el.style.display = 'none');
 
             const canvas = await html2canvas(pedigreeRef.current, {
                 scale: 3,
@@ -259,6 +251,9 @@ const PedigreeChart = ({ animalId, animalData, onClose, API_BASE_URL, authToken 
                 windowWidth: 1123,
                 windowHeight: 794
             });
+
+            // Restore images after PDF generation
+            imageContainers.forEach(el => el.style.display = '');
 
             const imgData = canvas.toDataURL('image/png');
             const pdf = new jsPDF({
@@ -272,6 +267,9 @@ const PedigreeChart = ({ animalId, animalData, onClose, API_BASE_URL, authToken 
             pdf.save(`pedigree-${pedigreeData?.name || 'chart'}.pdf`);
         } catch (error) {
             console.error('Error generating PDF:', error);
+            // Restore images even if there's an error
+            const imageContainers = pedigreeRef.current?.querySelectorAll('.hide-for-pdf');
+            imageContainers?.forEach(el => el.style.display = '');
         }
     };
 
@@ -290,7 +288,7 @@ const PedigreeChart = ({ animalId, animalData, onClose, API_BASE_URL, authToken 
         return (
             <div className={`border border-gray-700 rounded-lg p-2 ${bgColor} relative flex gap-3 items-center`} style={{height: '160px'}}>
                 {/* Image */}
-                <div className="w-32 h-32 bg-gray-100 rounded-lg overflow-hidden flex items-center justify-center flex-shrink-0 border-2 border-gray-900">
+                <div className="hide-for-pdf w-32 h-32 bg-gray-100 rounded-lg overflow-hidden flex items-center justify-center flex-shrink-0 border-2 border-gray-900">
                     {imgSrc ? (
                         <AnimalImage src={imgSrc} alt={animal.name} className="w-full h-full object-cover" iconSize={48} />
                     ) : (
@@ -363,7 +361,7 @@ const PedigreeChart = ({ animalId, animalData, onClose, API_BASE_URL, authToken 
         return (
             <div className={`border border-gray-700 rounded p-1.5 ${bgColor} relative flex gap-2 h-full items-center`}>
                 {/* Image - 1/3 width */}
-                <div className="w-1/3 aspect-square bg-gray-100 rounded-lg border-2 border-gray-900 overflow-hidden flex items-center justify-center flex-shrink-0">
+                <div className="hide-for-pdf w-1/3 aspect-square bg-gray-100 rounded-lg border-2 border-gray-900 overflow-hidden flex items-center justify-center flex-shrink-0">
                     {imgSrc ? (
                         <AnimalImage src={imgSrc} alt={animal.name} className="w-full h-full object-cover" iconSize={28} />
                     ) : (
@@ -440,7 +438,7 @@ const PedigreeChart = ({ animalId, animalData, onClose, API_BASE_URL, authToken 
         return (
             <div className={`border border-gray-700 rounded p-1 ${bgColor} relative flex gap-1.5 h-full items-center`}>
                 {/* Image - 1/3 width */}
-                <div className="w-1/3 aspect-square bg-gray-100 rounded-lg border-2 border-gray-900 overflow-hidden flex items-center justify-center flex-shrink-0">
+                <div className="hide-for-pdf w-1/3 aspect-square bg-gray-100 rounded-lg border-2 border-gray-900 overflow-hidden flex items-center justify-center flex-shrink-0">
                     {imgSrc ? (
                         <AnimalImage src={imgSrc} alt={animal.name} className="w-full h-full object-cover" iconSize={20} />
                     ) : (
