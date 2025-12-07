@@ -40,7 +40,7 @@ const InstallPWA = () => {
   return (
     <button
       onClick={handleInstallClick}
-      className="w-full bg-purple-100 hover:bg-purple-200 text-purple-800 font-semibold py-3 px-4 rounded-lg transition duration-150 flex items-center justify-center gap-2 border border-purple-300"
+      className="w-full bg-purple-100 hover:bg-purple-200 text-purple-800 font-semibold py-3 px-4 rounded-lg transition duration-150 flex items-center justify-center gap-2 border-2 border-purple-300"
     >
       <Download size={20} />
       Install Desktop/Mobile App
