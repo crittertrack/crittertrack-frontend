@@ -3891,21 +3891,18 @@ const AnimalForm = ({
             payloadToSave.fatherId_public = finalFatherId;
             payloadToSave.motherId_public = finalMotherId;
 
-            // Also include common alias fields and numeric conversions to match backend expectations
-            const fVal = finalFatherId !== null && finalFatherId !== undefined ? Number(finalFatherId) : null;
-            const mVal = finalMotherId !== null && finalMotherId !== undefined ? Number(finalMotherId) : null;
-            
+            // Include common alias fields (keep as strings to support CTU/CTC format)
             // Always send father fields (even if null to clear)
-            payloadToSave.fatherId = fVal;
-            payloadToSave.father_id = fVal;
-            payloadToSave.father_public = fVal;
-            payloadToSave.sireId_public = fVal;
+            payloadToSave.fatherId = finalFatherId;
+            payloadToSave.father_id = finalFatherId;
+            payloadToSave.father_public = finalFatherId;
+            payloadToSave.sireId_public = finalFatherId;
             
             // Always send mother fields (even if null to clear)
-            payloadToSave.motherId = mVal;
-            payloadToSave.mother_id = mVal;
-            payloadToSave.mother_public = mVal;
-            payloadToSave.damId_public = mVal;
+            payloadToSave.motherId = finalMotherId;
+            payloadToSave.mother_id = finalMotherId;
+            payloadToSave.mother_public = finalMotherId;
+            payloadToSave.damId_public = finalMotherId;
             
             console.log('[DEBUG] Final payload parent fields:', {
                 fatherId_public: payloadToSave.fatherId_public,
