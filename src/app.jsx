@@ -6131,37 +6131,22 @@ const App = () => {
             motherId_public: animal.motherId_public || animal.damId_public
         };
         
-        // Calculate or set COI if not already set
-        let coiUpdated = false;
-        if (normalizedAnimal.inbreedingCoefficient == null) {
-            if (!normalizedAnimal.fatherId_public && !normalizedAnimal.motherId_public) {
-                // Animals with no parents have 0% COI by definition
-                normalizedAnimal.inbreedingCoefficient = 0;
-                coiUpdated = true;
-            } else if (authToken) {
-                // Animals with parents - calculate COI
-                try {
-                    const coiResponse = await axios.get(`${API_BASE_URL}/animals/${normalizedAnimal.id_public}/inbreeding`, {
-                        params: { generations: 5 },
-                        headers: { Authorization: `Bearer ${authToken}` }
-                    });
-                    normalizedAnimal.inbreedingCoefficient = coiResponse.data.inbreedingCoefficient;
-                    coiUpdated = true;
-                } catch (error) {
-                    console.log(`Could not calculate COI for animal ${normalizedAnimal.id_public}:`, error);
-                }
+        // Always recalculate COI to ensure it reflects current pedigree state
+        if (!normalizedAnimal.fatherId_public && !normalizedAnimal.motherId_public) {
+            // Animals with no parents have 0% COI by definition
+            normalizedAnimal.inbreedingCoefficient = 0;
+        } else if (authToken) {
+            // Animals with parents - always recalculate COI from current pedigree
+            try {
+                const coiResponse = await axios.get(`${API_BASE_URL}/animals/${normalizedAnimal.id_public}/inbreeding`, {
+                    params: { generations: 5 },
+                    headers: { Authorization: `Bearer ${authToken}` }
+                });
+                normalizedAnimal.inbreedingCoefficient = coiResponse.data.inbreedingCoefficient;
+            } catch (error) {
+                console.log(`Could not calculate COI for animal ${normalizedAnimal.id_public}:`, error);
+                normalizedAnimal.inbreedingCoefficient = null;
             }
-        }
-        
-        // Update the animal in myAnimals state if COI was calculated
-        if (coiUpdated) {
-            setMyAnimals(prevAnimals => 
-                prevAnimals.map(a => 
-                    a.id_public === normalizedAnimal.id_public 
-                        ? { ...a, inbreedingCoefficient: normalizedAnimal.inbreedingCoefficient }
-                        : a
-                )
-            );
         }
         
         console.log('[handleViewAnimal] Father ID:', normalizedAnimal.fatherId_public, 'Mother ID:', normalizedAnimal.motherId_public);
