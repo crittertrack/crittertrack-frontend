@@ -1343,6 +1343,21 @@ const PublicProfileView = ({ profile, onBack, onViewAnimal, API_BASE_URL }) => {
         return groups;
     }, {});
 
+    const sortedSpecies = Object.keys(groupedAnimals).sort((a, b) => {
+        const order = ['Mouse', 'Rat', 'Hamster'];
+        const aIndex = order.indexOf(a);
+        const bIndex = order.indexOf(b);
+        
+        // If both are in the base order, sort by their position
+        if (aIndex !== -1 && bIndex !== -1) return aIndex - bIndex;
+        // If only a is in base order, it comes first
+        if (aIndex !== -1) return -1;
+        // If only b is in base order, it comes first
+        if (bIndex !== -1) return 1;
+        // Otherwise, alphabetical sort
+        return a.localeCompare(b);
+    });
+
     return (
         <div className="w-full max-w-6xl bg-white p-6 rounded-xl shadow-lg">
             <div className="flex justify-between items-start mb-6">
@@ -1388,7 +1403,7 @@ const PublicProfileView = ({ profile, onBack, onViewAnimal, API_BASE_URL }) => {
                 </div>
             ) : (
                 <div className="space-y-6">
-                    {Object.keys(groupedAnimals).sort().map(species => (
+                    {sortedSpecies.map(species => (
                         <div key={species} className="bg-gray-50 p-4 rounded-lg">
                             <h4 className="text-xl font-semibold text-gray-700 mb-3 flex items-center">
                                 <Cat size={20} className="mr-2" /> {species}
@@ -5261,7 +5276,20 @@ const AnimalList = ({ authToken, showModalMessage, onEditAnimal, onViewAnimal, o
         }, {});
     }, [animals]);
     
-    const speciesNames = Object.keys(groupedAnimals).sort();
+    const speciesNames = Object.keys(groupedAnimals).sort((a, b) => {
+        const order = ['Mouse', 'Rat', 'Hamster'];
+        const aIndex = order.indexOf(a);
+        const bIndex = order.indexOf(b);
+        
+        // If both are in the base order, sort by their position
+        if (aIndex !== -1 && bIndex !== -1) return aIndex - bIndex;
+        // If only a is in base order, it comes first
+        if (aIndex !== -1) return -1;
+        // If only b is in base order, it comes first
+        if (bIndex !== -1) return 1;
+        // Otherwise, alphabetical sort
+        return a.localeCompare(b);
+    });
 
     const handleStatusFilterChange = (e) => setStatusFilter(e.target.value);
     const handleSearchInputChange = (e) => setSearchInput(e.target.value);
