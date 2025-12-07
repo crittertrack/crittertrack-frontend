@@ -3033,27 +3033,6 @@ const LitterManagement = ({ authToken, API_BASE_URL, userProfile, showModalMessa
     );
 };
 
-const GeneticsCalculatorPlaceholder = ({ onCancel }) => (
-    <div className="w-full max-w-4xl bg-white p-6 rounded-xl shadow-lg">
-        <h2 className="text-3xl font-bold text-gray-800 mb-6 flex items-center justify-between">
-            <div className='flex items-center'>
-                <Cat size={24} className="mr-3 text-primary-dark" />
-                Mouse Genetics Calculator 🧬
-            </div>
-            <button 
-                onClick={onCancel} 
-                className="flex items-center text-gray-600 hover:text-gray-800 transition"
-            >
-                <ArrowLeft size={18} className="mr-1" /> Back to Dashboard
-            </button>
-        </h2>
-        <div className="text-center p-8 border-2 border-dashed border-gray-300 rounded-lg bg-gray-50">
-            <BookOpen size={48} className="text-gray-400 mx-auto mb-4" />
-            <p className="text-xl font-semibold text-gray-700 mb-2">Genetics Calculator - Coming Soon!</p>
-            <p className="text-gray-600">This tool will allow you to predict the coat color and genetic outcomes of mating pairs for mice.</p>
-        </div>
-    </div>
-);
 
 const SpeciesManager = ({ speciesOptions, setSpeciesOptions, onCancel, showModalMessage }) => {
     const [newSpeciesName, setNewSpeciesName] = useState('');
