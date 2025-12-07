@@ -6738,64 +6738,123 @@ const App = () => {
                 />
             )}
             
-            <header className="w-full bg-white p-4 rounded-xl shadow-lg mb-6 flex justify-between items-center max-w-4xl">
-                <CustomAppLogo size="w-10 h-10" />
-                
-                <nav className="flex space-x-2 sm:space-x-4">
-                    <button onClick={() => setCurrentView('list')} className={`px-2 py-2 sm:px-4 text-sm font-medium rounded-lg transition duration-150 ${currentView === 'list' ? 'bg-primary text-black shadow-md' : 'text-gray-600 hover:bg-gray-100'}`}>
-                        <ClipboardList size={18} className="inline mr-1 hidden sm:inline" /> Animals
-                    </button>
-                    <button onClick={() => setCurrentView('litters')} className={`px-2 py-2 sm:px-4 text-sm font-medium rounded-lg transition duration-150 ${currentView === 'litters' ? 'bg-primary text-black shadow-md' : 'text-gray-600 hover:bg-gray-100'}`}>
-                        <BookOpen size={18} className="inline mr-1 hidden sm:inline" /> Litters
-                    </button>
-                    {/* NEW: Genetics Calculator Link */}
-                    <button onClick={() => setCurrentView('genetics-calculator')} className={`px-2 py-2 sm:px-4 text-sm font-medium rounded-lg transition duration-150 ${currentView === 'genetics-calculator' ? 'bg-primary text-black shadow-md' : 'text-gray-600 hover:bg-gray-100'}`}>
-                        <Cat size={18} className="inline mr-1 hidden sm:inline" /> Genetics
-                    </button>
-                    <button onClick={() => setCurrentView('profile')} className={`px-2 py-2 sm:px-4 text-sm font-medium rounded-lg transition duration-150 ${currentView === 'profile' ? 'bg-primary text-black shadow-md' : 'text-gray-600 hover:bg-gray-100'}`}>
-                        <User size={18} className="inline mr-1 hidden sm:inline" /> Profile
-                    </button>
-                </nav>
-
-                <div className="flex items-center space-x-3 sm:space-x-4">
-                    {/* NEW: Search Button to launch UserSearchModal */}
-                    <button 
-                        onClick={() => setShowUserSearchModal(true)} 
-                        className="flex items-center justify-center bg-gray-100 hover:bg-gray-200 text-gray-600 py-2 px-3 rounded-lg transition duration-150 shadow-sm"
-                        title="Search Users by Name or ID"
-                    >
-                        <Search size={20} className="mr-1 hidden sm:inline" />
-                        <span className="text-sm hidden sm:inline">Search</span>
-                        <Search size={20} className="sm:hidden" />
-                    </button>
-
-                    {/* Notification Bell */}
-                    <button
-                        onClick={() => {
-                            setShowNotifications(true);
-                            fetchNotificationCount();
-                        }}
-                        className="relative flex items-center justify-center bg-gray-100 hover:bg-gray-200 text-gray-600 py-2 px-3 rounded-lg transition duration-150 shadow-sm"
-                        title="Notifications"
-                    >
-                        <Bell size={20} />
-                        {notificationCount > 0 && (
-                            <span className="absolute -top-1 -right-1 bg-red-500 text-white text-xs rounded-full w-5 h-5 flex items-center justify-center font-bold">
-                                {notificationCount > 9 ? '9+' : notificationCount}
-                            </span>
-                        )}
-                    </button>
+            <header className="w-full bg-white p-4 rounded-xl shadow-lg mb-6 max-w-4xl">
+                {/* Desktop: Single row layout */}
+                <div className="hidden md:flex justify-between items-center">
+                    <CustomAppLogo size="w-10 h-10" />
                     
-                    <div className="flex items-center space-x-2">
+                    <nav className="flex space-x-4">
+                        <button onClick={() => setCurrentView('list')} className={`px-4 py-2 text-sm font-medium rounded-lg transition duration-150 ${currentView === 'list' ? 'bg-primary text-black shadow-md' : 'text-gray-600 hover:bg-gray-100'}`}>
+                            <ClipboardList size={18} className="inline mr-1" /> Animals
+                        </button>
+                        <button onClick={() => setCurrentView('litters')} className={`px-4 py-2 text-sm font-medium rounded-lg transition duration-150 ${currentView === 'litters' ? 'bg-primary text-black shadow-md' : 'text-gray-600 hover:bg-gray-100'}`}>
+                            <BookOpen size={18} className="inline mr-1" /> Litters
+                        </button>
+                        <button onClick={() => setCurrentView('genetics-calculator')} className={`px-4 py-2 text-sm font-medium rounded-lg transition duration-150 ${currentView === 'genetics-calculator' ? 'bg-primary text-black shadow-md' : 'text-gray-600 hover:bg-gray-100'}`}>
+                            <Cat size={18} className="inline mr-1" /> Genetics
+                        </button>
+                        <button onClick={() => setCurrentView('profile')} className={`px-4 py-2 text-sm font-medium rounded-lg transition duration-150 ${currentView === 'profile' ? 'bg-primary text-black shadow-md' : 'text-gray-600 hover:bg-gray-100'}`}>
+                            <User size={18} className="inline mr-1" /> Profile
+                        </button>
+                    </nav>
+
+                    <div className="flex items-center space-x-4">
+                        <button 
+                            onClick={() => setShowUserSearchModal(true)} 
+                            className="flex items-center justify-center bg-gray-100 hover:bg-gray-200 text-gray-600 py-2 px-3 rounded-lg transition duration-150 shadow-sm"
+                            title="Search Users by Name or ID"
+                        >
+                            <Search size={20} className="mr-1" />
+                            <span className="text-sm">Search</span>
+                        </button>
+
+                        <button
+                            onClick={() => {
+                                setShowNotifications(true);
+                                fetchNotificationCount();
+                            }}
+                            className="relative flex items-center justify-center bg-gray-100 hover:bg-gray-200 text-gray-600 py-2 px-3 rounded-lg transition duration-150 shadow-sm"
+                            title="Notifications"
+                        >
+                            <Bell size={20} />
+                            {notificationCount > 0 && (
+                                <span className="absolute -top-1 -right-1 bg-red-500 text-white text-xs rounded-full w-5 h-5 flex items-center justify-center font-bold">
+                                    {notificationCount > 9 ? '9+' : notificationCount}
+                                </span>
+                            )}
+                        </button>
+                        
                         <button 
                             onClick={() => handleLogout(false)} 
                             title="Log Out"
                             className="bg-accent hover:bg-accent/80 text-white font-semibold py-2 px-4 rounded-lg transition duration-150 shadow-md flex items-center space-x-1"
                         >
-                            <LogOut size={18} className="hidden sm:inline" />
+                            <LogOut size={18} />
                             <span className="text-sm">Logout</span>
                         </button>
                     </div>
+                </div>
+
+                {/* Mobile: Two row layout */}
+                <div className="md:hidden">
+                    {/* First row: Logo and action buttons */}
+                    <div className="flex justify-between items-center mb-3">
+                        <CustomAppLogo size="w-8 h-8" />
+                        
+                        <div className="flex items-center space-x-2">
+                            <button 
+                                onClick={() => setShowUserSearchModal(true)} 
+                                className="flex items-center justify-center bg-gray-100 hover:bg-gray-200 text-gray-600 p-2 rounded-lg transition duration-150 shadow-sm"
+                                title="Search"
+                            >
+                                <Search size={18} />
+                            </button>
+
+                            <button
+                                onClick={() => {
+                                    setShowNotifications(true);
+                                    fetchNotificationCount();
+                                }}
+                                className="relative flex items-center justify-center bg-gray-100 hover:bg-gray-200 text-gray-600 p-2 rounded-lg transition duration-150 shadow-sm"
+                                title="Notifications"
+                            >
+                                <Bell size={18} />
+                                {notificationCount > 0 && (
+                                    <span className="absolute -top-1 -right-1 bg-red-500 text-white text-xs rounded-full w-4 h-4 flex items-center justify-center font-bold text-[10px]">
+                                        {notificationCount > 9 ? '9+' : notificationCount}
+                                    </span>
+                                )}
+                            </button>
+                            
+                            <button 
+                                onClick={() => handleLogout(false)} 
+                                title="Log Out"
+                                className="bg-accent hover:bg-accent/80 text-white font-semibold p-2 rounded-lg transition duration-150 shadow-md"
+                            >
+                                <LogOut size={18} />
+                            </button>
+                        </div>
+                    </div>
+
+                    {/* Second row: Navigation */}
+                    <nav className="flex justify-between space-x-1">
+                        <button onClick={() => setCurrentView('list')} className={`flex-1 px-2 py-2 text-xs font-medium rounded-lg transition duration-150 ${currentView === 'list' ? 'bg-primary text-black shadow-md' : 'text-gray-600 hover:bg-gray-100'}`}>
+                            <ClipboardList size={16} className="inline mb-0.5" />
+                            <span className="block">Animals</span>
+                        </button>
+                        <button onClick={() => setCurrentView('litters')} className={`flex-1 px-2 py-2 text-xs font-medium rounded-lg transition duration-150 ${currentView === 'litters' ? 'bg-primary text-black shadow-md' : 'text-gray-600 hover:bg-gray-100'}`}>
+                            <BookOpen size={16} className="inline mb-0.5" />
+                            <span className="block">Litters</span>
+                        </button>
+                        <button onClick={() => setCurrentView('genetics-calculator')} className={`flex-1 px-2 py-2 text-xs font-medium rounded-lg transition duration-150 ${currentView === 'genetics-calculator' ? 'bg-primary text-black shadow-md' : 'text-gray-600 hover:bg-gray-100'}`}>
+                            <Cat size={16} className="inline mb-0.5" />
+                            <span className="block">Genetics</span>
+                        </button>
+                        <button onClick={() => setCurrentView('profile')} className={`flex-1 px-2 py-2 text-xs font-medium rounded-lg transition duration-150 ${currentView === 'profile' ? 'bg-primary text-black shadow-md' : 'text-gray-600 hover:bg-gray-100'}`}>
+                            <User size={16} className="inline mb-0.5" />
+                            <span className="block">Profile</span>
+                        </button>
+                    </nav>
                 </div>
             </header>
 
