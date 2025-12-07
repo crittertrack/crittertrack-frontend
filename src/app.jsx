@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useCallback, useRef, useMemo } from 'react';
 import axios from 'axios';
-import { LogOut, Cat, UserPlus, LogIn, ChevronLeft, Trash2, Edit, Save, PlusCircle, Plus, ArrowLeft, Loader2, RefreshCw, User, ClipboardList, BookOpen, Settings, Mail, Globe, Egg, Milk, Search, X, Mars, Venus, Eye, EyeOff, Home, Heart, HeartOff, Bell, XCircle, Download, FileText, Link } from 'lucide-react';
+import { LogOut, Cat, UserPlus, LogIn, ChevronLeft, Trash2, Edit, Save, PlusCircle, Plus, ArrowLeft, Loader2, RefreshCw, User, ClipboardList, BookOpen, Settings, Mail, Globe, Egg, Milk, Search, X, Mars, Venus, Eye, EyeOff, Home, Heart, HeartOff, Bell, XCircle, Download, FileText, Link, AlertCircle } from 'lucide-react';
 import jsPDF from 'jspdf';
 import html2canvas from 'html2canvas';
 import MouseGeneticsCalculator from './components/MouseGeneticsCalculator';
@@ -5577,6 +5577,11 @@ const App = () => {
     const [viewAnimalBreederInfo, setViewAnimalBreederInfo] = useState(null);
     const [animalToView, setAnimalToView] = useState(null);
     const [showPedigreeChart, setShowPedigreeChart] = useState(false);
+    
+    const [showBugReportModal, setShowBugReportModal] = useState(false);
+    const [bugReportCategory, setBugReportCategory] = useState('Bug');
+    const [bugReportDescription, setBugReportDescription] = useState('');
+    const [bugReportSubmitting, setBugReportSubmitting] = useState(false);
 
     const timeoutRef = useRef(null);
     const activeEvents = ['mousemove', 'keydown', 'scroll', 'click'];
@@ -5707,6 +5712,35 @@ const App = () => {
         }
     }, [authToken, fetchNotificationCount]);
 	
+    const handleBugReportSubmit = async (e) => {
+        e.preventDefault();
+        if (!bugReportDescription.trim()) {
+            showModalMessage('Error', 'Please enter a description for your report.');
+            return;
+        }
+        
+        setBugReportSubmitting(true);
+        try {
+            await axios.post(`${API_BASE_URL}/bug-reports`, {
+                category: bugReportCategory,
+                description: bugReportDescription,
+                page: currentView
+            }, {
+                headers: { Authorization: `Bearer ${authToken}` }
+            });
+            
+            showModalMessage('Success', 'Thank you for your report! We will review it soon.');
+            setShowBugReportModal(false);
+            setBugReportDescription('');
+            setBugReportCategory('Bug');
+        } catch (error) {
+            console.error('Failed to submit bug report:', error);
+            showModalMessage('Error', 'Failed to submit report. Please try again.');
+        } finally {
+            setBugReportSubmitting(false);
+        }
+    };
+    
     const handleLoginSuccess = (token) => {
         setAuthToken(token);
         try {
@@ -6367,6 +6401,73 @@ const App = () => {
                     showModalMessage={showModalMessage}
                 />
             )}
+            
+            {showBugReportModal && (
+                <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
+                    <div className="bg-white rounded-xl shadow-2xl max-w-lg w-full p-6">
+                        <div className="flex justify-between items-center mb-4">
+                            <h2 className="text-xl font-bold text-gray-800">Report Issue / Bug</h2>
+                            <button 
+                                onClick={() => setShowBugReportModal(false)}
+                                className="text-gray-500 hover:text-gray-700 transition"
+                            >
+                                <X size={24} />
+                            </button>
+                        </div>
+                        
+                        <form onSubmit={handleBugReportSubmit} className="space-y-4">
+                            <div>
+                                <label className="block text-sm font-medium text-gray-700 mb-2">Category</label>
+                                <select
+                                    value={bugReportCategory}
+                                    onChange={(e) => setBugReportCategory(e.target.value)}
+                                    className="w-full p-2 border border-gray-300 rounded-lg focus:ring-primary focus:border-primary"
+                                >
+                                    <option value="Bug">Bug</option>
+                                    <option value="Feature Request">Feature Request</option>
+                                    <option value="General Feedback">General Feedback</option>
+                                </select>
+                            </div>
+                            
+                            <div>
+                                <label className="block text-sm font-medium text-gray-700 mb-2">Description</label>
+                                <textarea
+                                    value={bugReportDescription}
+                                    onChange={(e) => setBugReportDescription(e.target.value)}
+                                    placeholder="Please describe the issue or feedback in detail..."
+                                    rows={6}
+                                    required
+                                    className="w-full p-3 border border-gray-300 rounded-lg focus:ring-primary focus:border-primary resize-none"
+                                />
+                            </div>
+                            
+                            <div className="flex gap-3 justify-end">
+                                <button
+                                    type="button"
+                                    onClick={() => setShowBugReportModal(false)}
+                                    className="px-4 py-2 bg-gray-200 text-gray-700 rounded-lg hover:bg-gray-300 transition"
+                                >
+                                    Cancel
+                                </button>
+                                <button
+                                    type="submit"
+                                    disabled={bugReportSubmitting}
+                                    className="px-4 py-2 bg-primary text-black font-semibold rounded-lg hover:bg-primary/90 transition disabled:opacity-50 flex items-center gap-2"
+                                >
+                                    {bugReportSubmitting ? (
+                                        <>
+                                            <Loader2 className="animate-spin" size={16} />
+                                            Submitting...
+                                        </>
+                                    ) : (
+                                        'Submit Report'
+                                    )}
+                                </button>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            )}
 
             {currentView !== 'profile' && userProfile && <UserProfileCard userProfile={userProfile} />}
 
@@ -6374,8 +6475,17 @@ const App = () => {
                 {renderView()}
             </main>
 
-            <footer className={`w-full mt-6 text-center text-sm text-gray-500 pt-4 border-t border-gray-200 ${currentView === 'genetics-calculator' ? 'max-w-6xl' : 'max-w-4xl'}`}>
-                &copy; {new Date().getFullYear()} CritterTrack Pedigree System.
+            <footer className={`w-full mt-6 text-center text-sm pt-4 border-t border-gray-200 ${currentView === 'genetics-calculator' ? 'max-w-6xl' : 'max-w-4xl'}`}>
+                <div className="flex flex-col sm:flex-row items-center justify-center gap-2 sm:gap-4 mb-2">
+                    <button
+                        onClick={() => setShowBugReportModal(true)}
+                        className="text-gray-600 hover:text-primary transition font-medium flex items-center gap-1"
+                    >
+                        <AlertCircle size={14} />
+                        Report Issue / Bug
+                    </button>
+                </div>
+                <p className="text-gray-500">&copy; {new Date().getFullYear()} CritterTrack Pedigree System.</p>
             </footer>
         </div>
     );
