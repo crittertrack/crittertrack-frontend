@@ -4,6 +4,8 @@ import { LogOut, Cat, UserPlus, LogIn, ChevronLeft, Trash2, Edit, Save, PlusCirc
 import jsPDF from 'jspdf';
 import html2canvas from 'html2canvas';
 import MouseGeneticsCalculator from './components/MouseGeneticsCalculator';
+import TermsOfService from './components/TermsOfService';
+import PrivacyPolicy from './components/PrivacyPolicy';
 
 // const API_BASE_URL = 'http://localhost:5000/api'; // Local development
 const API_BASE_URL = 'https://crittertrack-pedigree-production.up.railway.app/api'; // Direct Railway (for testing)
@@ -4704,7 +4706,7 @@ const ProfileView = ({ userProfile, showModalMessage, fetchUserProfile, authToke
     );
 };
 
-const AuthView = ({ onLoginSuccess, showModalMessage, isRegister, setIsRegister, mainTitle }) => {
+const AuthView = ({ onLoginSuccess, showModalMessage, isRegister, setIsRegister, mainTitle, onShowTerms, onShowPrivacy }) => {
     const [email, setEmail] = useState('');
     const [password, setPassword] = useState('');
     const [personalName, setPersonalName] = useState('');
@@ -4878,6 +4880,16 @@ const AuthView = ({ onLoginSuccess, showModalMessage, isRegister, setIsRegister,
                     </button>
                 </div>
             )}
+            
+            <div className="mt-6 pt-6 border-t border-gray-200 text-center text-xs text-gray-500 space-x-4">
+                <button onClick={onShowTerms} className="hover:text-primary transition">
+                    Terms of Service
+                </button>
+                <span>|</span>
+                <button onClick={onShowPrivacy} className="hover:text-primary transition">
+                    Privacy Policy
+                </button>
+            </div>
         </div>
     );
 };
@@ -5582,6 +5594,9 @@ const App = () => {
     const [bugReportCategory, setBugReportCategory] = useState('Bug');
     const [bugReportDescription, setBugReportDescription] = useState('');
     const [bugReportSubmitting, setBugReportSubmitting] = useState(false);
+    
+    const [showTermsModal, setShowTermsModal] = useState(false);
+    const [showPrivacyModal, setShowPrivacyModal] = useState(false);
 
     const timeoutRef = useRef(null);
     const activeEvents = ['mousemove', 'keydown', 'scroll', 'click'];
@@ -6298,8 +6313,13 @@ const App = () => {
                     showModalMessage={showModalMessage} 
                     isRegister={isRegister} 
                     setIsRegister={setIsRegister} 
-                    mainTitle={mainTitle} 
+                    mainTitle={mainTitle}
+                    onShowTerms={() => setShowTermsModal(true)}
+                    onShowPrivacy={() => setShowPrivacyModal(true)}
                 />
+                
+                {showTermsModal && <TermsOfService onClose={() => setShowTermsModal(false)} />}
+                {showPrivacyModal && <PrivacyPolicy onClose={() => setShowPrivacyModal(false)} />}
             </div>
         );
     }
@@ -6484,9 +6504,26 @@ const App = () => {
                         <AlertCircle size={14} />
                         Report Issue / Bug
                     </button>
+                    <span className="hidden sm:inline text-gray-300">|</span>
+                    <button
+                        onClick={() => setShowTermsModal(true)}
+                        className="text-gray-600 hover:text-primary transition"
+                    >
+                        Terms of Service
+                    </button>
+                    <span className="hidden sm:inline text-gray-300">|</span>
+                    <button
+                        onClick={() => setShowPrivacyModal(true)}
+                        className="text-gray-600 hover:text-primary transition"
+                    >
+                        Privacy Policy
+                    </button>
                 </div>
                 <p className="text-gray-500">&copy; {new Date().getFullYear()} CritterTrack Pedigree System.</p>
             </footer>
+            
+            {showTermsModal && <TermsOfService onClose={() => setShowTermsModal(false)} />}
+            {showPrivacyModal && <PrivacyPolicy onClose={() => setShowPrivacyModal(false)} />}
         </div>
     );
 };
