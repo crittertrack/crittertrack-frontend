@@ -1630,14 +1630,10 @@ const MouseGeneticsCalculator = ({ API_BASE_URL, authToken }) => {
                       {authToken && (
                         <button
                           onClick={() => openFeedbackModal(result.phenotype, result.genotypes[0])}
-                          className={`ml-2 px-3 py-1 text-sm rounded-lg transition ${
-                            result.phenotype.includes('Unknown')
-                              ? 'bg-red-100 hover:bg-red-200 text-red-800'
-                              : 'bg-yellow-100 hover:bg-yellow-200 text-yellow-800'
-                          }`}
-                          title={result.phenotype.includes('Unknown') ? 'Report unknown phenotype' : 'Report incorrect phenotype'}
+                          className="ml-2 px-3 py-1 text-sm bg-red-100 hover:bg-red-200 text-red-800 rounded-lg transition"
+                          title="Report incorrect or unknown phenotype"
                         >
-                          {result.phenotype.includes('Unknown') ? '⚠ Report Unknown' : '📝 Feedback'}
+                          Report Issue
                         </button>
                       )}
                     </div>
