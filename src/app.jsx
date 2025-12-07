@@ -2167,6 +2167,7 @@ const LitterManagement = ({ authToken, API_BASE_URL, userProfile, showModalMessa
     const [availableToLink, setAvailableToLink] = useState({ litter: null, animals: [] });
     const [expandedLitter, setExpandedLitter] = useState(null);
     const [searchQuery, setSearchQuery] = useState('');
+    const [speciesFilter, setSpeciesFilter] = useState('');
     const [addingOffspring, setAddingOffspring] = useState(null);
     const [newOffspringData, setNewOffspringData] = useState({
         name: '',
@@ -2566,13 +2567,20 @@ const LitterManagement = ({ authToken, API_BASE_URL, userProfile, showModalMessa
     const maleAnimals = myAnimals.filter(a => a.gender === 'Male');
     const femaleAnimals = myAnimals.filter(a => a.gender === 'Female');
 
-    // Filter litters based on search query
+    // Filter litters based on search query and species
     const filteredLitters = litters.filter(litter => {
+        const sire = myAnimals.find(a => a.id_public === litter.sireId_public);
+        const dam = myAnimals.find(a => a.id_public === litter.damId_public);
+        
+        // Species filter
+        if (speciesFilter) {
+            if (sire?.species !== speciesFilter) return false;
+        }
+        
+        // Search filter
         if (!searchQuery) return true;
         
         const query = searchQuery.toLowerCase();
-        const sire = myAnimals.find(a => a.id_public === litter.sireId_public);
-        const dam = myAnimals.find(a => a.id_public === litter.damId_public);
         
         // Search by litter name
         if (litter.breedingPairCodeName && litter.breedingPairCodeName.toLowerCase().includes(query)) return true;
@@ -2765,7 +2773,7 @@ const LitterManagement = ({ authToken, API_BASE_URL, userProfile, showModalMessa
             <div className="space-y-4">
                 {/* Search Bar */}
                 {litters.length > 0 && (
-                    <div className="bg-gray-50 p-4 rounded-lg border-2 border-gray-200">
+                    <div className="bg-gray-50 p-4 rounded-lg border-2 border-gray-200 space-y-3">
                         <div className="relative">
                             <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400" size={20} />
                             <input
@@ -2775,6 +2783,25 @@ const LitterManagement = ({ authToken, API_BASE_URL, userProfile, showModalMessa
                                 onChange={(e) => setSearchQuery(e.target.value)}
                                 className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent"
                             />
+                        </div>
+                        
+                        {/* Species filter */}
+                        <div className="flex gap-2 items-center flex-wrap pt-2 border-t border-gray-200">
+                            <span className='text-sm font-medium text-gray-700 whitespace-nowrap'>Species:</span>
+                            {['All', ...DEFAULT_SPECIES_OPTIONS].map(species => {
+                                const value = species === 'All' ? '' : species;
+                                const isCurrentSelected = speciesFilter === value;
+                                
+                                return (
+                                    <button key={species} onClick={() => setSpeciesFilter(value)}
+                                        className={`px-3 py-1.5 text-sm font-semibold rounded-lg transition duration-150 shadow-sm ${ 
+                                            isCurrentSelected ? 'bg-primary text-black' : 'bg-gray-200 text-gray-700 hover:bg-gray-300'
+                                        }`}
+                                    >
+                                        {species}
+                                    </button>
+                                );
+                            })}
                         </div>
                     </div>
                 )}
@@ -5352,6 +5379,7 @@ const AnimalList = ({ authToken, showModalMessage, onEditAnimal, onViewAnimal, o
     const [searchInput, setSearchInput] = useState('');
     const [appliedNameFilter, setAppliedNameFilter] = useState('');
     const [genderFilter, setGenderFilter] = useState('');
+    const [speciesFilter, setSpeciesFilter] = useState('');
     const [statusFilterPregnant, setStatusFilterPregnant] = useState(false);
     const [statusFilterNursing, setStatusFilterNursing] = useState(false);
     const [ownedFilter, setOwnedFilter] = useState('owned');
@@ -5365,6 +5393,9 @@ const AnimalList = ({ authToken, showModalMessage, onEditAnimal, onViewAnimal, o
             }
             if (genderFilter) {
                 params.push(`gender=${genderFilter}`);
+            }
+            if (speciesFilter) {
+                params.push(`species=${encodeURIComponent(speciesFilter)}`);
             }
             if (appliedNameFilter) {
                 params.push(`name=${encodeURIComponent(appliedNameFilter)}`);
@@ -5427,7 +5458,7 @@ const AnimalList = ({ authToken, showModalMessage, onEditAnimal, onViewAnimal, o
         } finally {
             setLoading(false);
         }
-    }, [authToken, statusFilter, genderFilter, appliedNameFilter, statusFilterPregnant, statusFilterNursing, ownedFilter, showModalMessage]);
+    }, [authToken, statusFilter, genderFilter, speciesFilter, appliedNameFilter, statusFilterPregnant, statusFilterNursing, ownedFilter, showModalMessage]);
 
     useEffect(() => {
         fetchAnimals();
@@ -5663,6 +5694,27 @@ const AnimalList = ({ authToken, showModalMessage, onEditAnimal, onViewAnimal, o
                                     className={`flex-1 px-3 py-1.5 text-sm font-semibold rounded-lg transition duration-150 shadow-sm ${selectedClasses}`}
                                 >
                                     {gender}
+                                </button>
+                            );
+                        })}
+                    </div>
+                </div>
+                
+                {/* Species filter */}
+                <div className="flex flex-col sm:flex-row gap-3 pt-2 border-t border-gray-200">
+                    <div className="flex gap-2 items-center flex-wrap">
+                        <span className='text-sm font-medium text-gray-700 whitespace-nowrap'>Species:</span>
+                        {['All', ...DEFAULT_SPECIES_OPTIONS].map(species => {
+                            const value = species === 'All' ? '' : species;
+                            const isCurrentSelected = speciesFilter === value;
+                            
+                            return (
+                                <button key={species} onClick={() => setSpeciesFilter(value)}
+                                    className={`px-3 py-1.5 text-sm font-semibold rounded-lg transition duration-150 shadow-sm ${ 
+                                        isCurrentSelected ? 'bg-primary text-black' : 'bg-gray-200 text-gray-700 hover:bg-gray-300'
+                                    }`}
+                                >
+                                    {species}
                                 </button>
                             );
                         })}
