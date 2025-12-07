@@ -316,7 +316,7 @@ const PedigreeChart = ({ animalId, animalData, onClose, API_BASE_URL, authToken 
                 
                 {/* CT ID - Bottom Right */}
                 <div className="absolute bottom-1 right-2 text-xs font-mono text-gray-700">
-                    CT{animal.id_public}
+                    {animal.id_public}
                 </div>
             </div>
         );
@@ -389,7 +389,7 @@ const PedigreeChart = ({ animalId, animalData, onClose, API_BASE_URL, authToken 
                 
                 {/* CT ID - Bottom Right */}
                 <div className="absolute bottom-1 right-2 text-xs font-mono text-gray-700">
-                    CT{animal.id_public}
+                    {animal.id_public}
                 </div>
             </div>
         );
@@ -466,7 +466,7 @@ const PedigreeChart = ({ animalId, animalData, onClose, API_BASE_URL, authToken 
                 
                 {/* CT ID - Bottom Right */}
                 <div className="absolute bottom-1 right-1 text-xs font-mono text-gray-700">
-                    CT{animal.id_public}
+                    {animal.id_public}
                 </div>
             </div>
         );
@@ -517,7 +517,7 @@ const PedigreeChart = ({ animalId, animalData, onClose, API_BASE_URL, authToken 
                 
                 {/* CT ID - Bottom Right */}
                 <div className="absolute bottom-0.5 right-0.5 text-xs font-mono text-gray-700">
-                    CT{animal.id_public}
+                    {animal.id_public}
                 </div>
             </div>
         );
@@ -825,7 +825,7 @@ const ParentSearchModal = ({
                     <p className="font-semibold text-gray-800">
                         {animal.prefix ? `${animal.prefix} ` : ''}{animal.name}
                     </p>
-                    <p className="text-xs text-gray-500">CT{animal.id_public}</p>
+                    <p className="text-xs text-gray-500">{animal.id_public}</p>
                     <p className="text-sm text-gray-600">
                         {animal.species} • {animal.gender} • {animal.status || 'Unknown'}
                     </p>
@@ -995,7 +995,7 @@ const LocalAnimalSearchModal = ({ title, currentId, onSelect, onClose, authToken
             onClick={() => onSelect(animal.id_public)}
         >
             <div>
-                <p className="font-semibold text-gray-800">{animal.prefix} {animal.name} (CT{animal.id_public})</p>
+                <p className="font-semibold text-gray-800">{animal.prefix} {animal.name} ({animal.id_public})</p>
                 <p className="text-sm text-gray-600">
                     {animal.species} | {animal.gender} | {animal.status}
                 </p>
@@ -1164,7 +1164,7 @@ const UserSearchModal = ({ onClose, showModalMessage, onSelectUser, API_BASE_URL
                             {displayName}
                         </p>
                         <p className="text-sm text-gray-600">
-                            Public ID: <span className="font-mono text-accent">CT{user.id_public}</span>
+                            Public ID: <span className="font-mono text-accent">{user.id_public}</span>
                         </p>
                         <p className="text-xs text-gray-500 mt-1">
                             Member since {memberSince}
@@ -1194,7 +1194,7 @@ const UserSearchModal = ({ onClose, showModalMessage, onSelectUser, API_BASE_URL
                         {animal.prefix && `${animal.prefix} `}{animal.name}
                     </p>
                     <p className="text-sm text-gray-600">
-                        {animal.species} • {animal.gender} • <span className="font-mono">CT{animal.id_public}</span>
+                        {animal.species} • {animal.gender} • <span className="font-mono">{animal.id_public}</span>
                     </p>
                     {animal.color && <p className="text-xs text-gray-500 mt-1">{animal.color}</p>}
                 </div>
@@ -1367,7 +1367,7 @@ const PublicProfileView = ({ profile, onBack, onViewAnimal, API_BASE_URL }) => {
                 )}
                 <div>
                     <h2 className="text-3xl font-bold text-gray-900">{displayName}</h2>
-                    <p className="text-gray-600">Public ID: <span className="font-mono text-accent">CT{profile.id_public}</span></p>
+                    <p className="text-gray-600">Public ID: <span className="font-mono text-accent">{profile.id_public}</span></p>
                     <p className="text-sm text-gray-500 mt-1">Member since {memberSince}</p>
                 </div>
             </div>
@@ -1427,7 +1427,7 @@ const PublicProfileView = ({ profile, onBack, onViewAnimal, API_BASE_URL }) => {
 
                                                 {/* ID bottom-right */}
                                                 <div className="w-full px-2 pb-2 flex justify-end">
-                                                    <div className="text-xs text-gray-500">CT{animal.id_public}</div>
+                                                    <div className="text-xs text-gray-500">{animal.id_public}</div>
                                                 </div>
                                                 
                                                 {/* Status bar at bottom */}
@@ -1574,7 +1574,7 @@ const ViewOnlyAnimalDetail = ({ animal, onClose, API_BASE_URL, onViewProfile }) 
                                 {animal.prefix && `${animal.prefix} `}{animal.name}
                             </h2>
                             <p className="text-center">
-                                <span className="text-base font-medium text-gray-700">CT{animal.id_public}</span>
+                                <span className="text-base font-medium text-gray-700">{animal.id_public}</span>
                                 <span className="mx-2 text-gray-400">•</span>
                                 <span className="text-base font-medium text-gray-700">{animal.species}</span>
                             </p>
@@ -1654,7 +1654,7 @@ const ViewOnlyAnimalDetail = ({ animal, onClose, API_BASE_URL, onViewProfile }) 
                                                 : breederInfo.personalName || 'Anonymous Breeder')}
                                     </button>
                                 ) : (
-                                    <span className="font-mono text-accent">CT{animal.breederId_public}</span>
+                                    <span className="font-mono text-accent">{animal.breederId_public}</span>
                                 )}
                             </p>
                         </div>
@@ -1805,7 +1805,7 @@ const ViewOnlyParentCard = ({ parentId, parentType, API_BASE_URL, onViewAnimal }
                         <p className="font-semibold text-gray-800">
                             {parentData.prefix && `${parentData.prefix} `}{parentData.name}
                         </p>
-                        <p className="text-xs text-gray-600 font-mono">CT{parentData.id_public}</p>
+                        <p className="text-xs text-gray-600 font-mono">{parentData.id_public}</p>
                         {parentData.status && (
                             <p className="text-xs text-gray-500 mt-1">{parentData.status}</p>
                         )}
@@ -1863,7 +1863,7 @@ const ParentMiniCard = ({ parent, label, onViewAnimal }) => {
                         {parent.name}
                     </p>
                     <p className="text-xs text-gray-600 font-mono">
-                        CT{parent.id_public}
+                        {parent.id_public}
                     </p>
                 </div>
             </div>
@@ -2050,7 +2050,7 @@ const OffspringSection = ({ animalId, API_BASE_URL, authToken = null, onViewAnim
 
                                         {/* ID bottom-right */}
                                         <div className="w-full px-2 pb-2 flex justify-end">
-                                            <div className="text-xs text-gray-500">CT{animal.id_public}</div>
+                                            <div className="text-xs text-gray-500">{animal.id_public}</div>
                                         </div>
                                         
                                         {/* Status bar */}
@@ -2579,7 +2579,7 @@ const LitterManagement = ({ authToken, API_BASE_URL, userProfile, showModalMessa
                                 <option value="">Select Sire</option>
                                 {maleAnimals.map(animal => (
                                     <option key={animal.id_public} value={animal.id_public}>
-                                        {animal.prefix ? `${animal.prefix} ` : ''}{animal.name} - CT{animal.id_public} ({animal.species})
+                                        {animal.prefix ? `${animal.prefix} ` : ''}{animal.name} - {animal.id_public} ({animal.species})
                                     </option>
                                 ))}
                             </select>
@@ -2599,7 +2599,7 @@ const LitterManagement = ({ authToken, API_BASE_URL, userProfile, showModalMessa
                                 <option value="">Select Dam</option>
                                 {femaleAnimals.map(animal => (
                                     <option key={animal.id_public} value={animal.id_public}>
-                                        {animal.prefix ? `${animal.prefix} ` : ''}{animal.name} - CT{animal.id_public} ({animal.species})
+                                        {animal.prefix ? `${animal.prefix} ` : ''}{animal.name} - {animal.id_public} ({animal.species})
                                     </option>
                                 ))}
                             </select>
@@ -2812,7 +2812,7 @@ const LitterManagement = ({ authToken, API_BASE_URL, userProfile, showModalMessa
                                                                     {sire.prefix ? `${sire.prefix} ` : ''}{sire.name}
                                                                 </p>
                                                             </div>
-                                                            <p className="text-xs text-gray-500">CT{sire.id_public}</p>
+                                                            <p className="text-xs text-gray-500">{sire.id_public}</p>
                                                             <p className="text-xs text-gray-600">{sire.species}</p>
                                                         </div>
                                                     </div>
@@ -2840,7 +2840,7 @@ const LitterManagement = ({ authToken, API_BASE_URL, userProfile, showModalMessa
                                                                     {dam.prefix ? `${dam.prefix} ` : ''}{dam.name}
                                                                 </p>
                                                             </div>
-                                                            <p className="text-xs text-gray-500">CT{dam.id_public}</p>
+                                                            <p className="text-xs text-gray-500">{dam.id_public}</p>
                                                             <p className="text-xs text-gray-600">{dam.species}</p>
                                                         </div>
                                                     </div>
@@ -2909,7 +2909,7 @@ const LitterManagement = ({ authToken, API_BASE_URL, userProfile, showModalMessa
 
                                                             {/* ID bottom-right */}
                                                             <div className="w-full px-2 pb-2 flex justify-end">
-                                                                <div className="text-xs text-gray-500">CT{animal.id_public}</div>
+                                                                <div className="text-xs text-gray-500">{animal.id_public}</div>
                                                             </div>
                                                             
                                                             {/* Status bar */}
@@ -2981,7 +2981,7 @@ const LitterManagement = ({ authToken, API_BASE_URL, userProfile, showModalMessa
                                                     </div>
                                                 </div>
                                                 <div className="text-xs text-gray-500 mb-3">
-                                                    Autofilled: Species ({sire?.species}), Birth Date ({new Date(litter.birthDate).toLocaleDateString()}), Parents (CT{litter.sireId_public} × CT{litter.damId_public})
+                                                    Autofilled: Species ({sire?.species}), Birth Date ({new Date(litter.birthDate).toLocaleDateString()}), Parents ({litter.sireId_public} × {litter.damId_public})
                                                 </div>
                                                 <div className="flex gap-2">
                                                     <button
@@ -3042,7 +3042,7 @@ const LitterManagement = ({ authToken, API_BASE_URL, userProfile, showModalMessa
                                                     {animal.prefix ? `${animal.prefix} ` : ''}{animal.name}
                                                 </p>
                                                 <p className="text-sm text-gray-600">
-                                                    CT{animal.id_public} • {animal.gender} • {animal.species}
+                                                    {animal.id_public} • {animal.gender} • {animal.species}
                                                 </p>
                                             </div>
                                             <button
@@ -4308,7 +4308,7 @@ const UserProfileCard = ({ userProfile }) => {
                 
                     <div className="mb-2"> 
                     <span className="text-2xl font-extrabold text-accent">
-                        CT{userProfile.id_public}
+                        {userProfile.id_public}
                     </span>
                 </div>
 
@@ -4729,7 +4729,7 @@ const ProfileView = ({ userProfile, showModalMessage, fetchUserProfile, authToke
 
                 <div className="p-4 bg-gray-50 rounded-lg border border-gray-200">
                     <p className="text-lg font-semibold text-gray-700">Personal ID:</p>
-                    <p className="text-3xl font-extrabold text-accent">CT{userProfile.id_public}</p>
+                    <p className="text-3xl font-extrabold text-accent">{userProfile.id_public}</p>
                 </div>
             </div>
             
@@ -5056,7 +5056,7 @@ const AuthView = ({ onLoginSuccess, showModalMessage, isRegister, setIsRegister,
 
                 {/* ID */}
                 <div className="text-center mb-2">
-                    <p className="text-xs text-gray-500">CT{parentData.id_public}</p>
+                    <p className="text-xs text-gray-500">{parentData.id_public}</p>
                 </div>
 
                 {/* Status bar */}
@@ -5291,7 +5291,7 @@ const AnimalList = ({ authToken, showModalMessage, onEditAnimal, onViewAnimal, o
 
                     {/* ID bottom-right */}
                     <div className="w-full px-2 pb-2 flex justify-end">
-                        <div className="text-xs text-gray-500">CT{animal.id_public}</div>
+                        <div className="text-xs text-gray-500">{animal.id_public}</div>
                     </div>
                     
                     {/* Status bar at bottom */}
@@ -6035,7 +6035,7 @@ const App = () => {
                                 </div>
                                 <div className="flex-1">
                                     <h2 className="text-2xl font-bold text-gray-800 mb-2">{animalToView.prefix ? `${animalToView.prefix} ` : ''}{animalToView.name}</h2>
-                                    <p className="text-sm text-gray-600 mb-4">{animalToView.species} &nbsp; • &nbsp; CT{animalToView.id_public}</p>
+                                    <p className="text-sm text-gray-600 mb-4">{animalToView.species} &nbsp; • &nbsp; {animalToView.id_public}</p>
                                     <div className="grid grid-cols-2 gap-x-6 gap-y-3 text-sm text-gray-700">
                                         <div><strong>Gender:</strong> {animalToView.gender}</div>
                                         <div><strong>Color:</strong> {animalToView.color || '—'}</div>
@@ -6073,7 +6073,7 @@ const App = () => {
                                                         : viewAnimalBreederInfo.personalName || 'Anonymous Breeder')}
                                             </span>
                                         ) : (
-                                            <span className="font-mono text-accent">CT{animalToView.breederId_public}</span>
+                                            <span className="font-mono text-accent">{animalToView.breederId_public}</span>
                                         )
                                     ) : (
                                         <span className="text-gray-500 italic">Not specified</span>
