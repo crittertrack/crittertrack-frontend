@@ -668,7 +668,7 @@ const PedigreeChart = ({ animalId, animalData, onClose, API_BASE_URL, authToken 
         if (ownerProfile.personalName) {
             return ownerProfile.personalName;
         }
-        return `CT${pedigreeData?.ownerId_public || pedigreeData?.breederId_public || ''}`;
+        return pedigreeData?.ownerId_public || pedigreeData?.breederId_public || 'Unknown';
     };
 
     return (
