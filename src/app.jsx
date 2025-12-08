@@ -2260,7 +2260,8 @@ const LitterManagement = ({ authToken, API_BASE_URL, userProfile, showModalMessa
         birthDate: '',
         maleCount: 0,
         femaleCount: 0,
-        notes: ''
+        notes: '',
+        linkedOffspringIds: []
     });
     const [linkingAnimals, setLinkingAnimals] = useState(false);
     const [availableToLink, setAvailableToLink] = useState({ litter: null, animals: [] });
@@ -2370,9 +2371,12 @@ const LitterManagement = ({ authToken, API_BASE_URL, userProfile, showModalMessa
             return;
         }
 
-        const totalOffspring = parseInt(formData.maleCount) + parseInt(formData.femaleCount);
+        const totalNewOffspring = parseInt(formData.maleCount) + parseInt(formData.femaleCount);
+        const totalLinkedOffspring = formData.linkedOffspringIds?.length || 0;
+        const totalOffspring = totalNewOffspring + totalLinkedOffspring;
+        
         if (totalOffspring === 0) {
-            showModalMessage('Error', 'Please specify at least one offspring');
+            showModalMessage('Error', 'Please specify at least one offspring (new or linked)');
             return;
         }
 
@@ -2399,7 +2403,8 @@ const LitterManagement = ({ authToken, API_BASE_URL, userProfile, showModalMessa
                 pairingDate: formData.pairingDate || null,
                 birthDate: formData.birthDate,
                 numberBorn: totalOffspring,
-                notes: formData.notes || ''
+                notes: formData.notes || '',
+                offspringIds_public: formData.linkedOffspringIds || []
             };
 
             const litterResponse = await axios.post(`${API_BASE_URL}/litters`, litterPayload, {
@@ -2477,11 +2482,14 @@ const LitterManagement = ({ authToken, API_BASE_URL, userProfile, showModalMessa
 
             const createdAnimals = await Promise.all(offspringPromises);
 
-            // Extract the IDs from created animals and update litter
-            const offspringIds = createdAnimals.map(response => response.data.id_public);
+            // Extract the IDs from created animals
+            const newOffspringIds = createdAnimals.map(response => response.data.id_public);
             
-            // Calculate inbreeding for each offspring
-            for (const animalId of offspringIds) {
+            // Combine created offspring IDs with linked offspring IDs
+            const allOffspringIds = [...newOffspringIds, ...(formData.linkedOffspringIds || [])];
+            
+            // Calculate inbreeding for each NEW offspring (linked ones already exist)
+            for (const animalId of newOffspringIds) {
                 try {
                     await axios.get(`${API_BASE_URL}/animals/${animalId}/inbreeding`, {
                         params: { generations: 50 },
@@ -2493,7 +2501,7 @@ const LitterManagement = ({ authToken, API_BASE_URL, userProfile, showModalMessa
             }
             
             await axios.put(`${API_BASE_URL}/litters/${litterId}`, {
-                offspringIds_public: offspringIds
+                offspringIds_public: allOffspringIds
             }, {
                 headers: { Authorization: `Bearer ${authToken}` }
             });
@@ -2508,7 +2516,8 @@ const LitterManagement = ({ authToken, API_BASE_URL, userProfile, showModalMessa
                 birthDate: '',
                 maleCount: 0,
                 femaleCount: 0,
-                notes: ''
+                notes: '',
+                linkedOffspringIds: []
             });
             fetchLitters();
             fetchMyAnimals();
@@ -2835,6 +2844,65 @@ const LitterManagement = ({ authToken, API_BASE_URL, userProfile, showModalMessa
                                 onChange={(e) => setFormData({...formData, femaleCount: e.target.value})}
                                 className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent"
                             />
+                        </div>
+                    </div>
+
+                    {/* Link Existing Offspring */}
+                    <div className="mb-4 border-t pt-4">
+                        <label className="block text-sm font-medium text-gray-700 mb-2">
+                            Link Existing Animals as Offspring (Optional)
+                        </label>
+                        <div className="bg-gray-50 p-3 rounded-lg">
+                            <p className="text-xs text-gray-600 mb-3">
+                                Select animals with matching parents and birth date to link them to this litter instead of creating new offspring.
+                            </p>
+                            {formData.sireId_public && formData.damId_public && formData.birthDate ? (
+                                <div className="space-y-2">
+                                    {myAnimals
+                                        .filter(animal => {
+                                            const matchesSire = animal.fatherId_public === formData.sireId_public || animal.sireId_public === formData.sireId_public;
+                                            const matchesDam = animal.motherId_public === formData.damId_public || animal.damId_public === formData.damId_public;
+                                            const matchesBirthDate = animal.birthDate && new Date(animal.birthDate).toDateString() === new Date(formData.birthDate).toDateString();
+                                            return matchesSire && matchesDam && matchesBirthDate;
+                                        })
+                                        .map(animal => (
+                                            <label key={animal.id_public} className="flex items-center space-x-2 p-2 hover:bg-gray-100 rounded cursor-pointer">
+                                                <input
+                                                    type="checkbox"
+                                                    checked={formData.linkedOffspringIds?.includes(animal.id_public)}
+                                                    onChange={(e) => {
+                                                        const newLinked = e.target.checked
+                                                            ? [...(formData.linkedOffspringIds || []), animal.id_public]
+                                                            : (formData.linkedOffspringIds || []).filter(id => id !== animal.id_public);
+                                                        setFormData({...formData, linkedOffspringIds: newLinked});
+                                                    }}
+                                                    className="h-4 w-4 text-primary rounded border-gray-300 focus:ring-primary"
+                                                />
+                                                <span className="text-sm text-gray-800">
+                                                    {animal.prefix && `${animal.prefix} `}{animal.name} - {animal.id_public} ({animal.gender})
+                                                </span>
+                                            </label>
+                                        ))
+                                    }
+                                    {myAnimals.filter(animal => {
+                                        const matchesSire = animal.fatherId_public === formData.sireId_public || animal.sireId_public === formData.sireId_public;
+                                        const matchesDam = animal.motherId_public === formData.damId_public || animal.damId_public === formData.damId_public;
+                                        const matchesBirthDate = animal.birthDate && new Date(animal.birthDate).toDateString() === new Date(formData.birthDate).toDateString();
+                                        return matchesSire && matchesDam && matchesBirthDate;
+                                    }).length === 0 && (
+                                        <p className="text-xs text-gray-500 italic">No matching animals found</p>
+                                    )}
+                                    {formData.linkedOffspringIds?.length > 0 && (
+                                        <p className="text-xs text-green-600 font-semibold mt-2">
+                                            {formData.linkedOffspringIds.length} animal(s) selected
+                                        </p>
+                                    )}
+                                </div>
+                            ) : (
+                                <p className="text-xs text-gray-500 italic">
+                                    Select parents and birth date first to see matching animals
+                                </p>
+                            )}
                         </div>
                     </div>
 
