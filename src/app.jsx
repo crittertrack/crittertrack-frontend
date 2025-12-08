@@ -6046,47 +6046,54 @@ const AnimalList = ({ authToken, showModalMessage, onEditAnimal, onViewAnimal, o
                     </div>
                 </div>
 
-                {/* Species filter on left */}
-                <div className="flex flex-col sm:flex-row gap-3 pt-2 border-t border-gray-200">
-                    <div className="flex gap-2 items-center flex-wrap">
-                        <span className='text-sm font-medium text-gray-700 whitespace-nowrap'>Species:</span>
-                        {DEFAULT_SPECIES_OPTIONS.map(species => {
-                            const isSelected = selectedSpecies.includes(species);
-                            const displayName = getSpeciesDisplayName(species);
-                            
-                            return (
-                                <button key={species} onClick={() => toggleSpecies(species)}
-                                    className={`px-3 py-1.5 text-sm font-semibold rounded-lg transition duration-150 shadow-sm flex items-center gap-1.5 ${ 
-                                        isSelected ? 'bg-primary text-black' : 'bg-gray-200 text-gray-700 hover:bg-gray-300'
-                                    }`}
-                                >
-                                    {isSelected && <Check size={16} className="flex-shrink-0" />}
-                                    <span>{displayName}</span>
-                                </button>
-                            );
-                        })}
-                    </div>
-                </div>
-                
-                {/* Gender filter on left, Status filter on right */}
+                {/* Gender icons, Species dropdown, and Status dropdown - all in one row */}
                 <div className="flex flex-col sm:flex-row gap-3 pt-2 border-t border-gray-200 justify-between">
-                    <div className="flex gap-2 items-center">
-                        <span className='text-sm font-medium text-gray-700 whitespace-nowrap'>Gender:</span>
-                        {GENDER_OPTIONS.map(gender => {
-                            const isSelected = selectedGenders.includes(gender);
-                            let selectedClasses = isSelected ? (gender === 'Male' ? 'bg-primary text-black' : gender === 'Female' ? 'bg-accent text-white' : 'bg-primary-dark text-black') : 'bg-gray-200 text-gray-700 hover:bg-gray-300';
-                            
-                            return (
-                                <button key={gender} onClick={() => toggleGender(gender)}
-                                    className={`flex-1 px-3 py-1.5 text-sm font-semibold rounded-lg transition duration-150 shadow-sm flex items-center justify-center gap-1.5 ${selectedClasses}`}
-                                >
-                                    {isSelected && <Check size={16} className="flex-shrink-0" />}
-                                    <span>{gender}</span>
-                                </button>
-                            );
-                        })}
+                    <div className="flex gap-3 items-center flex-wrap">
+                        {/* Gender filter with icons */}
+                        <div className="flex gap-2 items-center">
+                            <span className='text-sm font-medium text-gray-700 whitespace-nowrap'>Gender:</span>
+                            {GENDER_OPTIONS.map(gender => {
+                                const isSelected = selectedGenders.includes(gender);
+                                const Icon = gender === 'Male' ? Mars : Venus;
+                                let bgColor = isSelected 
+                                    ? (gender === 'Male' ? 'bg-blue-400' : 'bg-pink-400') 
+                                    : 'bg-gray-300 hover:bg-gray-400';
+                                
+                                return (
+                                    <button key={gender} onClick={() => toggleGender(gender)}
+                                        className={`p-2 rounded-lg transition duration-150 shadow-sm ${bgColor}`}
+                                        title={gender}
+                                    >
+                                        <Icon size={18} className="text-black" />
+                                    </button>
+                                );
+                            })}
+                        </div>
+                        
+                        {/* Species dropdown */}
+                        <div className="flex gap-2 items-center">
+                            <span className='text-sm font-medium text-gray-700 whitespace-nowrap'>Species:</span>
+                            <select 
+                                value={selectedSpecies.length === DEFAULT_SPECIES_OPTIONS.length ? '' : selectedSpecies[0] || ''}
+                                onChange={(e) => {
+                                    const value = e.target.value;
+                                    if (value === '') {
+                                        setSelectedSpecies([...DEFAULT_SPECIES_OPTIONS]);
+                                    } else {
+                                        setSelectedSpecies([value]);
+                                    }
+                                }}
+                                className="p-2 border border-gray-300 rounded-lg shadow-sm focus:ring-primary focus:border-primary transition min-w-[150px]"
+                            >
+                                <option value="">All Species</option>
+                                {DEFAULT_SPECIES_OPTIONS.map(species => (
+                                    <option key={species} value={species}>{getSpeciesDisplayName(species)}</option>
+                                ))}
+                            </select>
+                        </div>
                     </div>
                     
+                    {/* Status dropdown on right */}
                     <div className="flex gap-2 items-center">
                         <span className='text-sm font-medium text-gray-700 whitespace-nowrap'>Status:</span>
                         <select value={statusFilter} onChange={handleStatusFilterChange} 
