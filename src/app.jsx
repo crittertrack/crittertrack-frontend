@@ -5747,9 +5747,6 @@ const AnimalList = ({ authToken, showModalMessage, onEditAnimal, onViewAnimal, o
     const [animals, setAnimals] = useState([]);
     const [loading, setLoading] = useState(true);
     const [statusFilter, setStatusFilter] = useState('');
-    const [newestUsers, setNewestUsers] = useState([]);
-    const [activeUsers, setActiveUsers] = useState([]);
-    const scrollContainerRef = useRef(null);
     // Manual search: `searchInput` is the controlled input, `appliedNameFilter` is sent to the API
     const [searchInput, setSearchInput] = useState('');
     const [appliedNameFilter, setAppliedNameFilter] = useState('');
@@ -5837,59 +5834,7 @@ const AnimalList = ({ authToken, showModalMessage, onEditAnimal, onViewAnimal, o
 
     useEffect(() => {
         fetchAnimals();
-        fetchNewestUsers();
     }, [fetchAnimals]);
-
-    const fetchNewestUsers = async () => {
-        try {
-            const [newestResponse, activeResponse] = await Promise.all([
-                axios.get(`${API_BASE_URL}/public/users/newest?limit=5`),
-                axios.get(`${API_BASE_URL}/public/users/active?minutes=15`)
-            ]);
-            setNewestUsers(newestResponse.data || []);
-            setActiveUsers(activeResponse.data || []);
-        } catch (error) {
-            console.error('Error fetching users:', error);
-        }
-    };
-
-    // Auto-scroll effect for user cards
-    useEffect(() => {
-        const scrollContainer = scrollContainerRef.current;
-        if (!scrollContainer) return;
-        
-        let scrollInterval;
-        let isPaused = false;
-        
-        const startScroll = () => {
-            scrollInterval = setInterval(() => {
-                if (!isPaused && scrollContainer) {
-                    const maxScroll = scrollContainer.scrollWidth - scrollContainer.clientWidth;
-                    const currentScroll = scrollContainer.scrollLeft;
-                    
-                    if (currentScroll >= maxScroll) {
-                        scrollContainer.scrollLeft = 0;
-                    } else {
-                        scrollContainer.scrollLeft += 1;
-                    }
-                }
-            }, 30);
-        };
-        
-        const handleMouseEnter = () => { isPaused = true; };
-        const handleMouseLeave = () => { isPaused = false; };
-        
-        scrollContainer.addEventListener('mouseenter', handleMouseEnter);
-        scrollContainer.addEventListener('mouseleave', handleMouseLeave);
-        
-        startScroll();
-        
-        return () => {
-            clearInterval(scrollInterval);
-            scrollContainer?.removeEventListener('mouseenter', handleMouseEnter);
-            scrollContainer?.removeEventListener('mouseleave', handleMouseLeave);
-        };
-    }, [newestUsers, activeUsers]);
 
     // Refresh animals when other parts of the app signal a change (e.g., after upload/save)
     useEffect(() => {
@@ -6052,73 +5997,6 @@ const AnimalList = ({ authToken, showModalMessage, onEditAnimal, onViewAnimal, o
 
     return (
         <div className="w-full max-w-4xl bg-white p-6 rounded-xl shadow-lg">
-            {/* Community Activity Banner */}
-            {(newestUsers.length > 0 || activeUsers.length > 0) && (
-                <div className="mb-6 bg-gradient-to-r from-primary/20 to-accent/20 p-4 rounded-lg border border-primary/30">
-                    <h3 className="text-sm font-semibold text-gray-800 mb-3 flex items-center">
-                        <Users size={16} className="mr-2 text-primary-dark" />
-                        Community Activity
-                    </h3>
-                    <div 
-                        ref={scrollContainerRef}
-                        className="flex overflow-x-auto gap-3 pb-2 scroll-smooth"
-                        style={{ scrollbarWidth: 'thin' }}
-                    >
-                        {/* Newest Members */}
-                        {newestUsers.map(user => (
-                            <div 
-                                key={`new-${user.id_public}`}
-                                className="flex-shrink-0 bg-white rounded-lg p-3 shadow-sm border-2 border-primary/40 hover:shadow-md transition cursor-pointer min-w-[140px]"
-                                onClick={() => window.location.href = `/profile/${user.id_public}`}
-                            >
-                                <div className="w-12 h-12 bg-gray-100 rounded-full overflow-hidden mx-auto mb-2">
-                                    {user.profileImage ? (
-                                        <img src={user.profileImage} alt={user.breederName || user.personalName} className="w-full h-full object-cover" />
-                                    ) : (
-                                        <div className="w-full h-full flex items-center justify-center text-gray-400">
-                                            <User size={24} />
-                                        </div>
-                                    )}
-                                </div>
-                                <div className="text-xs bg-primary text-black px-2 py-0.5 rounded text-center mb-1 font-semibold">
-                                    NEW
-                                </div>
-                                <p className="text-xs font-semibold text-gray-800 text-center truncate">
-                                    {user.showBreederName && user.breederName ? user.breederName : user.personalName}
-                                </p>
-                                <p className="text-xs text-gray-500 text-center truncate">{user.id_public}</p>
-                            </div>
-                        ))}
-                        
-                        {/* Active Users */}
-                        {activeUsers.map(user => (
-                            <div 
-                                key={`active-${user.id_public}`}
-                                className="flex-shrink-0 bg-white rounded-lg p-3 shadow-sm border-2 border-accent/40 hover:shadow-md transition cursor-pointer min-w-[140px]"
-                                onClick={() => window.location.href = `/profile/${user.id_public}`}
-                            >
-                                <div className="w-12 h-12 bg-gray-100 rounded-full overflow-hidden mx-auto mb-2">
-                                    {user.profileImage ? (
-                                        <img src={user.profileImage} alt={user.breederName || user.personalName} className="w-full h-full object-cover" />
-                                    ) : (
-                                        <div className="w-full h-full flex items-center justify-center text-gray-400">
-                                            <User size={24} />
-                                        </div>
-                                    )}
-                                </div>
-                                <div className="text-xs bg-accent text-white px-2 py-0.5 rounded text-center mb-1 font-semibold">
-                                    ACTIVE
-                                </div>
-                                <p className="text-xs font-semibold text-gray-800 text-center truncate">
-                                    {user.showBreederName && user.breederName ? user.breederName : user.personalName}
-                                </p>
-                                <p className="text-xs text-gray-500 text-center truncate">{user.id_public}</p>
-                            </div>
-                        ))}
-                    </div>
-                </div>
-            )}
-
             <h2 className="text-3xl font-bold text-gray-800 mb-6 flex items-center justify-between">
                 <div className='flex items-center'>
                     <ClipboardList size={24} className="mr-3 text-primary-dark" />
@@ -6478,6 +6356,11 @@ const App = () => {
     
     const [showTermsModal, setShowTermsModal] = useState(false);
     const [showPrivacyModal, setShowPrivacyModal] = useState(false);
+    
+    // Community banner states
+    const [newestUsers, setNewestUsers] = useState([]);
+    const [activeUsers, setActiveUsers] = useState([]);
+    const scrollContainerRef = useRef(null);
 
     const timeoutRef = useRef(null);
     const activeEvents = ['mousemove', 'keydown', 'scroll', 'click'];
@@ -6626,6 +6509,67 @@ const App = () => {
         };
         fetchSpecies();
     }, [API_BASE_URL]);
+	
+    // Fetch community users (newest + active)
+    useEffect(() => {
+        const fetchCommunityUsers = async () => {
+            try {
+                const [newestResponse, activeResponse] = await Promise.all([
+                    axios.get(`${API_BASE_URL}/public/users/newest?limit=5`),
+                    axios.get(`${API_BASE_URL}/public/users/active?minutes=15`)
+                ]);
+                setNewestUsers(newestResponse.data || []);
+                setActiveUsers(activeResponse.data || []);
+            } catch (error) {
+                console.error('Error fetching community users:', error);
+            }
+        };
+        
+        if (authToken) {
+            fetchCommunityUsers();
+            // Refresh community users every 2 minutes
+            const interval = setInterval(fetchCommunityUsers, 120000);
+            return () => clearInterval(interval);
+        }
+    }, [authToken, API_BASE_URL]);
+    
+    // Auto-scroll effect for community banner
+    useEffect(() => {
+        const scrollContainer = scrollContainerRef.current;
+        if (!scrollContainer || (!newestUsers.length && !activeUsers.length)) return;
+        
+        let scrollInterval;
+        let isPaused = false;
+        
+        const startScroll = () => {
+            scrollInterval = setInterval(() => {
+                if (!isPaused && scrollContainer) {
+                    const maxScroll = scrollContainer.scrollWidth - scrollContainer.clientWidth;
+                    const currentScroll = scrollContainer.scrollLeft;
+                    
+                    if (currentScroll >= maxScroll) {
+                        scrollContainer.scrollLeft = 0;
+                    } else {
+                        scrollContainer.scrollLeft += 1;
+                    }
+                }
+            }, 30);
+        };
+        
+        const handleMouseEnter = () => { isPaused = true; };
+        const handleMouseLeave = () => { isPaused = false; };
+        
+        scrollContainer.addEventListener('mouseenter', handleMouseEnter);
+        scrollContainer.addEventListener('mouseleave', handleMouseLeave);
+        
+        startScroll();
+        
+        return () => {
+            clearInterval(scrollInterval);
+            scrollContainer?.removeEventListener('mouseenter', handleMouseEnter);
+            scrollContainer?.removeEventListener('mouseleave', handleMouseLeave);
+        };
+    }, [newestUsers, activeUsers]);
 	
     const handleBugReportSubmit = async (e) => {
         e.preventDefault();
@@ -7490,6 +7434,79 @@ const App = () => {
                                 </button>
                             </div>
                         </form>
+                    </div>
+                </div>
+            )}
+
+            {/* Community Activity Banner - shown only on list view */}
+            {currentView === 'list' && (newestUsers.length > 0 || activeUsers.length > 0) && (
+                <div className="w-full max-w-4xl mb-6 bg-gradient-to-r from-primary/20 to-accent/20 p-4 rounded-lg border border-primary/30">
+                    <h3 className="text-sm font-semibold text-gray-800 mb-3 flex items-center">
+                        <Users size={16} className="mr-2 text-primary-dark" />
+                        Community Activity
+                    </h3>
+                    <div 
+                        ref={scrollContainerRef}
+                        className="flex overflow-x-auto gap-3 pb-2 scroll-smooth"
+                        style={{ scrollbarWidth: 'thin' }}
+                    >
+                        {/* Newest Members */}
+                        {newestUsers.map(user => (
+                            <div 
+                                key={`new-${user.id_public}`}
+                                className="flex-shrink-0 bg-white rounded-lg p-3 shadow-sm border-2 border-primary/40 hover:shadow-md transition cursor-pointer min-w-[140px]"
+                                onClick={() => {
+                                    setViewingPublicProfile({ id_public: user.id_public });
+                                    setCurrentView('publicProfile');
+                                }}
+                            >
+                                <div className="w-12 h-12 bg-gray-100 rounded-full overflow-hidden mx-auto mb-2">
+                                    {user.profileImage ? (
+                                        <img src={user.profileImage} alt={user.breederName || user.personalName} className="w-full h-full object-cover" />
+                                    ) : (
+                                        <div className="w-full h-full flex items-center justify-center text-gray-400">
+                                            <User size={24} />
+                                        </div>
+                                    )}
+                                </div>
+                                <div className="text-xs bg-primary text-black px-2 py-0.5 rounded text-center mb-1 font-semibold">
+                                    NEW
+                                </div>
+                                <p className="text-xs font-semibold text-gray-800 text-center truncate">
+                                    {user.showBreederName && user.breederName ? user.breederName : user.personalName}
+                                </p>
+                                <p className="text-xs text-gray-500 text-center truncate">{user.id_public}</p>
+                            </div>
+                        ))}
+                        
+                        {/* Active Users */}
+                        {activeUsers.map(user => (
+                            <div 
+                                key={`active-${user.id_public}`}
+                                className="flex-shrink-0 bg-white rounded-lg p-3 shadow-sm border-2 border-accent/40 hover:shadow-md transition cursor-pointer min-w-[140px]"
+                                onClick={() => {
+                                    setViewingPublicProfile({ id_public: user.id_public });
+                                    setCurrentView('publicProfile');
+                                }}
+                            >
+                                <div className="w-12 h-12 bg-gray-100 rounded-full overflow-hidden mx-auto mb-2">
+                                    {user.profileImage ? (
+                                        <img src={user.profileImage} alt={user.breederName || user.personalName} className="w-full h-full object-cover" />
+                                    ) : (
+                                        <div className="w-full h-full flex items-center justify-center text-gray-400">
+                                            <User size={24} />
+                                        </div>
+                                    )}
+                                </div>
+                                <div className="text-xs bg-accent text-white px-2 py-0.5 rounded text-center mb-1 font-semibold">
+                                    ACTIVE
+                                </div>
+                                <p className="text-xs font-semibold text-gray-800 text-center truncate">
+                                    {user.showBreederName && user.breederName ? user.breederName : user.personalName}
+                                </p>
+                                <p className="text-xs text-gray-500 text-center truncate">{user.id_public}</p>
+                            </div>
+                        ))}
                     </div>
                 </div>
             )}
