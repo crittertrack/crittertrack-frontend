@@ -2870,22 +2870,21 @@ const LitterManagement = ({ authToken, API_BASE_URL, userProfile, showModalMessa
                     </div>
 
                     {/* Link Existing Offspring */}
-                    {formData.sireId_public && formData.damId_public && formData.birthDate && (
+                    {formData.sireId_public && formData.damId_public && (
                         <div className="mb-4 border-t pt-4">
                             <label className="block text-sm font-medium text-gray-700 mb-2">
                                 Link Existing Animals as Offspring
                             </label>
                             <div className="bg-gray-50 p-3 rounded-lg">
                                 <p className="text-xs text-gray-600 mb-3">
-                                    Select animals with matching parents and birth date to link them to this litter.
+                                    Select animals with matching parents to link them to this litter. Birth date will be filled automatically.
                                 </p>
                                 <div className="space-y-2">
                                     {myAnimals
                                         .filter(animal => {
                                             const matchesSire = animal.fatherId_public === formData.sireId_public || animal.sireId_public === formData.sireId_public;
                                             const matchesDam = animal.motherId_public === formData.damId_public || animal.damId_public === formData.damId_public;
-                                            const matchesBirthDate = animal.birthDate && new Date(animal.birthDate).toDateString() === new Date(formData.birthDate).toDateString();
-                                            return matchesSire && matchesDam && matchesBirthDate;
+                                            return matchesSire && matchesDam;
                                         })
                                         .map(animal => (
                                             <label key={animal.id_public} className="flex items-center space-x-2 p-2 hover:bg-gray-100 rounded cursor-pointer">
@@ -2896,7 +2895,11 @@ const LitterManagement = ({ authToken, API_BASE_URL, userProfile, showModalMessa
                                                         const newLinked = e.target.checked
                                                             ? [...(formData.linkedOffspringIds || []), animal.id_public]
                                                             : (formData.linkedOffspringIds || []).filter(id => id !== animal.id_public);
-                                                        setFormData({...formData, linkedOffspringIds: newLinked});
+                                                        // Auto-fill birthDate from first selected offspring
+                                                        const newBirthDate = e.target.checked && animal.birthDate && !formData.birthDate
+                                                            ? animal.birthDate
+                                                            : formData.birthDate;
+                                                        setFormData({...formData, linkedOffspringIds: newLinked, birthDate: newBirthDate});
                                                     }}
                                                     className="h-4 w-4 text-primary rounded border-gray-300 focus:ring-primary"
                                                 />
@@ -2909,8 +2912,7 @@ const LitterManagement = ({ authToken, API_BASE_URL, userProfile, showModalMessa
                                     {myAnimals.filter(animal => {
                                         const matchesSire = animal.fatherId_public === formData.sireId_public || animal.sireId_public === formData.sireId_public;
                                         const matchesDam = animal.motherId_public === formData.damId_public || animal.damId_public === formData.damId_public;
-                                        const matchesBirthDate = animal.birthDate && new Date(animal.birthDate).toDateString() === new Date(formData.birthDate).toDateString();
-                                        return matchesSire && matchesDam && matchesBirthDate;
+                                        return matchesSire && matchesDam;
                                     }).length === 0 && (
                                         <p className="text-xs text-gray-500 italic">No matching animals found</p>
                                     )}
