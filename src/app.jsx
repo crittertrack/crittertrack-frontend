@@ -2373,10 +2373,10 @@ const LitterManagement = ({ authToken, API_BASE_URL, userProfile, showModalMessa
 
         const totalNewOffspring = parseInt(formData.maleCount) + parseInt(formData.femaleCount);
         const totalLinkedOffspring = formData.linkedOffspringIds?.length || 0;
-        const totalOffspring = totalNewOffspring + totalLinkedOffspring;
         
-        if (totalOffspring === 0) {
-            showModalMessage('Error', 'Please specify at least one offspring (new or linked)');
+        // Allow litter creation with either counts for tracking OR linked animals
+        if (totalNewOffspring === 0 && totalLinkedOffspring === 0) {
+            showModalMessage('Error', 'Please specify offspring counts for tracking and/or link existing animals');
             return;
         }
 
@@ -2395,14 +2395,17 @@ const LitterManagement = ({ authToken, API_BASE_URL, userProfile, showModalMessa
                 return;
             }
 
-            // Create litter
+            // Create litter with offspring counts for tracking
+            const totalCount = parseInt(formData.maleCount) + parseInt(formData.femaleCount);
             const litterPayload = {
                 breedingPairCodeName: formData.breedingPairCodeName || null,
                 sireId_public: formData.sireId_public,
                 damId_public: formData.damId_public,
                 pairingDate: formData.pairingDate || null,
                 birthDate: formData.birthDate,
-                numberBorn: totalOffspring,
+                numberBorn: totalCount, // Track total count
+                maleCount: parseInt(formData.maleCount) || 0,
+                femaleCount: parseInt(formData.femaleCount) || 0,
                 notes: formData.notes || '',
                 offspringIds_public: formData.linkedOffspringIds || []
             };
@@ -2436,77 +2439,39 @@ const LitterManagement = ({ authToken, API_BASE_URL, userProfile, showModalMessa
             }
 
             // Create offspring animals
+            // NOTE: Animals are NO LONGER automatically created from male/female counts.
+            // Those counts are for tracking purposes only.
+            // Only linked existing animals will be associated with this litter.
             const offspringPromises = [];
             
-            // Create males
-            for (let i = 1; i <= parseInt(formData.maleCount); i++) {
-                const animalData = {
-                    name: `M${i}`,
-                    species: sire.species,
-                    gender: 'Male',
-                    birthDate: formData.birthDate,
-                    status: 'Pet',
-                    fatherId_public: formData.sireId_public,
-                    motherId_public: formData.damId_public,
-                    isOwned: true,
-                    breederId_public: userProfile.id_public,
-                    ownerId_public: userProfile.id_public
-                };
-                offspringPromises.push(
-                    axios.post(`${API_BASE_URL}/animals`, animalData, {
-                        headers: { Authorization: `Bearer ${authToken}` }
-                    })
-                );
-            }
-
-            // Create females
-            for (let i = 1; i <= parseInt(formData.femaleCount); i++) {
-                const animalData = {
-                    name: `F${i}`,
-                    species: sire.species,
-                    gender: 'Female',
-                    birthDate: formData.birthDate,
-                    status: 'Pet',
-                    fatherId_public: formData.sireId_public,
-                    motherId_public: formData.damId_public,
-                    isOwned: true,
-                    breederId_public: userProfile.id_public,
-                    ownerId_public: userProfile.id_public
-                };
-                offspringPromises.push(
-                    axios.post(`${API_BASE_URL}/animals`, animalData, {
-                        headers: { Authorization: `Bearer ${authToken}` }
-                    })
-                );
-            }
-
+            // If user wants to create placeholder animals, they can do so via the "Add Offspring" feature after creation
+            
             const createdAnimals = await Promise.all(offspringPromises);
 
             // Extract the IDs from created animals
             const newOffspringIds = createdAnimals.map(response => response.data.id_public);
             
-            // Combine created offspring IDs with linked offspring IDs
-            const allOffspringIds = [...newOffspringIds, ...(formData.linkedOffspringIds || [])];
+            // Use linked offspring IDs only
+            const allOffspringIds = [...(formData.linkedOffspringIds || [])];
             
-            // Calculate inbreeding for each NEW offspring (linked ones already exist)
-            for (const animalId of newOffspringIds) {
-                try {
-                    await axios.get(`${API_BASE_URL}/animals/${animalId}/inbreeding`, {
-                        params: { generations: 50 },
-                        headers: { Authorization: `Bearer ${authToken}` }
-                    });
-                } catch (coiError) {
-                    console.log(`Could not calculate COI for animal ${animalId}:`, coiError);
-                }
-            }
-            
+            // Update litter with linked offspring
             await axios.put(`${API_BASE_URL}/litters/${litterId}`, {
                 offspringIds_public: allOffspringIds
             }, {
                 headers: { Authorization: `Bearer ${authToken}` }
             });
 
-            showModalMessage('Success', `Litter created with ${totalOffspring} offspring!`);
+            const linkedCount = formData.linkedOffspringIds?.length || 0;
+            const trackingCount = parseInt(formData.maleCount) + parseInt(formData.femaleCount);
+            let successMsg = 'Litter created successfully!';
+            if (linkedCount > 0 && trackingCount > 0) {
+                successMsg = `Litter created with ${linkedCount} linked animal(s) and ${trackingCount} tracked offspring!`;
+            } else if (linkedCount > 0) {
+                successMsg = `Litter created with ${linkedCount} linked animal(s)!`;
+            } else if (trackingCount > 0) {
+                successMsg = `Litter created with ${trackingCount} tracked offspring (counts only)!`;
+            }
+            showModalMessage('Success', successMsg);
             setShowAddForm(false);
             setFormData({
                 breedingPairCodeName: '',
@@ -2821,7 +2786,7 @@ const LitterManagement = ({ authToken, API_BASE_URL, userProfile, showModalMessa
                         {/* Male Count */}
                         <div>
                             <label className="block text-sm font-medium text-gray-700 mb-1">
-                                Number of Males
+                                Number of Males (for tracking)
                             </label>
                             <input
                                 type="number"
@@ -2835,7 +2800,7 @@ const LitterManagement = ({ authToken, API_BASE_URL, userProfile, showModalMessa
                         {/* Female Count */}
                         <div>
                             <label className="block text-sm font-medium text-gray-700 mb-1">
-                                Number of Females
+                                Number of Females (for tracking)
                             </label>
                             <input
                                 type="number"
@@ -2922,8 +2887,8 @@ const LitterManagement = ({ authToken, API_BASE_URL, userProfile, showModalMessa
 
                     <div className="bg-primary/20 border border-primary rounded-lg p-4 mb-4">
                         <p className="text-sm text-gray-800">
-                            <strong>Note:</strong> Offspring will be created with names M1, M2... for males and F1, F2... for females. 
-                            All will have status "Pet" and be marked as owned by you. You can edit names and details after creation.
+                            <strong>Note:</strong> Male/female counts are for tracking purposes only and will NOT automatically create animal records. 
+                            Use "Link Existing Animals" above to associate already-created animals with this litter, or add offspring manually after creation.
                         </p>
                     </div>
 
@@ -2931,7 +2896,7 @@ const LitterManagement = ({ authToken, API_BASE_URL, userProfile, showModalMessa
                         type="submit"
                         className="w-full bg-primary hover:bg-primary/90 text-black font-bold py-3 px-4 rounded-lg"
                     >
-                        Create Litter & Offspring
+                        Create Litter
                     </button>
                 </form>
             )}
