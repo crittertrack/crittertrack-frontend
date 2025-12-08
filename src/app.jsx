@@ -150,11 +150,20 @@ const PedigreeChart = ({ animalId, animalData, onClose, API_BASE_URL, authToken 
                             );
                             if (breederResponse.data && breederResponse.data.length > 0) {
                                 const breeder = breederResponse.data[0];
-                                const breederName = breeder.showBreederName && breeder.personalName && breeder.breederName 
-                                    ? `${breeder.personalName} (${breeder.breederName})` 
-                                    : (breeder.showBreederName && breeder.breederName 
-                                        ? breeder.breederName 
-                                        : breeder.personalName || `${animalInfo.breederId_public}`);
+                                const showPersonalName = breeder.showPersonalName ?? false;
+                                const showBreederName = breeder.showBreederName ?? false;
+                                
+                                // Determine breeder display name based on privacy settings
+                                let breederName;
+                                if (showBreederName && showPersonalName && breeder.personalName && breeder.breederName) {
+                                    breederName = `${breeder.personalName} (${breeder.breederName})`;
+                                } else if (showBreederName && breeder.breederName) {
+                                    breederName = breeder.breederName;
+                                } else if (showPersonalName && breeder.personalName) {
+                                    breederName = breeder.personalName;
+                                } else {
+                                    breederName = 'Anonymous Breeder';
+                                }
                                 animalInfo.breederName = breederName;
                             }
                         } catch (error) {
@@ -691,18 +700,21 @@ const PedigreeChart = ({ animalId, animalData, onClose, API_BASE_URL, authToken 
         const userId = ownerProfile.id_public || pedigreeData?.ownerId_public || pedigreeData?.breederId_public;
         const lines = [];
         
-        // Add personal name if available
-        if (ownerProfile.personalName) {
+        const showPersonalName = ownerProfile.showPersonalName ?? false;
+        const showBreederName = ownerProfile.showBreederName ?? false;
+        
+        // Add personal name if privacy allows and available
+        if (showPersonalName && ownerProfile.personalName) {
             lines.push(ownerProfile.personalName);
         }
         
         // Add breeder name if it's public and available
-        if (ownerProfile.showBreederName && ownerProfile.breederName) {
+        if (showBreederName && ownerProfile.breederName) {
             lines.push(ownerProfile.breederName);
         }
         
         return { 
-            lines: lines.length > 0 ? lines : [userId || 'Unknown'], 
+            lines: lines.length > 0 ? lines : [userId || 'Anonymous Breeder'], 
             userId 
         };
     };
@@ -714,22 +726,25 @@ const PedigreeChart = ({ animalId, animalData, onClose, API_BASE_URL, authToken 
         const userId = ownerProfile.id_public || pedigreeData?.ownerId_public || pedigreeData?.breederId_public;
         const parts = [];
         
+        const showPersonalName = ownerProfile.showPersonalName ?? false;
+        const showBreederName = ownerProfile.showBreederName ?? false;
+        
         // Add CTID first
         if (userId) {
             parts.push(userId);
         }
         
-        // Add personal name if available
-        if (ownerProfile.personalName) {
+        // Add personal name if privacy allows and available
+        if (showPersonalName && ownerProfile.personalName) {
             parts.push(ownerProfile.personalName);
         }
         
         // Add breeder name if it's public and available
-        if (ownerProfile.showBreederName && ownerProfile.breederName) {
+        if (showBreederName && ownerProfile.breederName) {
             parts.push(ownerProfile.breederName);
         }
         
-        return parts.length > 0 ? parts.join(' - ') : 'Unknown';
+        return parts.length > 0 ? parts.join(' - ') : 'Anonymous Breeder';
     };
 
     return (
@@ -1220,11 +1235,20 @@ const UserSearchModal = ({ onClose, showModalMessage, onSelectUser, API_BASE_URL
             ? new Intl.DateTimeFormat('en-US', { year: 'numeric', month: 'long', day: 'numeric' }).format(new Date(user.createdAt))
             : (user.updatedAt ? new Intl.DateTimeFormat('en-US', { year: 'numeric', month: 'long', day: 'numeric' }).format(new Date(user.updatedAt)) : null);
         
-        // Determine display name(s)
-        const showBothNames = user.showBreederName && user.personalName && user.breederName;
-        const displayName = showBothNames 
-            ? `${user.personalName} (${user.breederName})`
-            : (user.showBreederName && user.breederName ? user.breederName : user.personalName || 'Anonymous Breeder');
+        // Determine display name(s) - respect privacy settings
+        const showPersonalName = user.showPersonalName ?? false;
+        const showBreederName = user.showBreederName ?? false;
+        
+        let displayName;
+        if (showBreederName && showPersonalName && user.personalName && user.breederName) {
+            displayName = `${user.personalName} (${user.breederName})`;
+        } else if (showBreederName && user.breederName) {
+            displayName = user.breederName;
+        } else if (showPersonalName && user.personalName) {
+            displayName = user.personalName;
+        } else {
+            displayName = 'Anonymous Breeder';
+        }
         
         return (
             <div 
@@ -6059,11 +6083,11 @@ const AnimalList = ({ authToken, showModalMessage, onEditAnimal, onViewAnimal, o
                         <div className="flex gap-2 items-center">
                             <span className='text-sm font-medium text-gray-700 whitespace-nowrap'>Species:</span>
                             <select 
-                                value={selectedSpecies.length === DEFAULT_SPECIES_OPTIONS.length ? '' : selectedSpecies[0] || ''}
+                                value={selectedSpecies.length === speciesNames.length ? '' : selectedSpecies[0] || ''}
                                 onChange={(e) => {
                                     const value = e.target.value;
                                     if (value === '') {
-                                        setSelectedSpecies([...DEFAULT_SPECIES_OPTIONS]);
+                                        setSelectedSpecies([...speciesNames]);
                                     } else {
                                         setSelectedSpecies([value]);
                                     }
@@ -6071,7 +6095,7 @@ const AnimalList = ({ authToken, showModalMessage, onEditAnimal, onViewAnimal, o
                                 className="p-2 border border-gray-300 rounded-lg shadow-sm focus:ring-primary focus:border-primary transition min-w-[150px]"
                             >
                                 <option value="">All Species</option>
-                                {DEFAULT_SPECIES_OPTIONS.map(species => (
+                                {speciesNames.map(species => (
                                     <option key={species} value={species}>{getSpeciesDisplayName(species)}</option>
                                 ))}
                             </select>
