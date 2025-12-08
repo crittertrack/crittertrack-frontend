@@ -631,8 +631,15 @@ const calculatePhenotype = (genotype, originalGenotype = null) => {
   const isExtremeBlackPattern = genotype.A === 'ae/ae';
   const isExtremeTanPattern = genotype.A === 'at/ae' || genotype.A === 'ae/at';
 
-  // Check if A locus was explicitly selected (not defaulted)
-  const aLocusSelected = originalGenotype && originalGenotype.A && originalGenotype.A !== '';
+  // Check if any color/pattern genes were explicitly selected (not defaulted)
+  const colorGenesSelected = originalGenotype && (
+    (originalGenotype.A && originalGenotype.A !== '') ||
+    (originalGenotype.B && originalGenotype.B !== '') ||
+    (originalGenotype.C && originalGenotype.C !== '') ||
+    (originalGenotype.D && originalGenotype.D !== '') ||
+    (originalGenotype.E && originalGenotype.E !== '') ||
+    (originalGenotype.P && originalGenotype.P !== '')
+  );
 
   // Track carriers for A-locus
   if (genotype.A === 'A/a') carriers.push('Black');
@@ -654,13 +661,13 @@ const calculatePhenotype = (genotype, originalGenotype = null) => {
       if (genotype.P === 'p/p') {
         color = 'Argente Tan';
       } else {
-        color = isBrown ? 'Cinnamon Tan' : (aLocusSelected ? 'Agouti Tan' : 'Tan');
+        color = isBrown ? 'Cinnamon Tan' : 'Agouti Tan';
       }
     } else {
       if (genotype.P === 'p/p') {
         color = isBrown ? 'Cinnamon Argente' : 'Argente';
       } else {
-        color = isBrown ? 'Cinnamon' : (aLocusSelected ? 'Agouti' : 'Wild Type');
+        color = isBrown ? 'Cinnamon' : 'Agouti';
       }
     }
   } else if (isTanPattern) {
@@ -862,16 +869,22 @@ const calculatePhenotype = (genotype, originalGenotype = null) => {
   }
 
   // Combine results
-  let result = color;
+  let result = '';
+  
+  // Only include color if color genes were selected
+  if (colorGenesSelected && color) {
+    result = color;
+  }
+  
   // Apply Umbrous after color but before markings
   if (genotype.U && genotype.U.includes('U/')) {
-    result += ' Umbrous';
+    result += (result ? ' ' : '') + 'Umbrous';
   }
   if (markings.length > 0) {
-    result += ' ' + markings.join(' ');
+    result += (result ? ' ' : '') + markings.join(' ');
   }
   if (texture) {
-    result += ' ' + texture;
+    result += (result ? ' ' : '') + texture;
   }
 
   return { phenotype: result || 'Unknown', carriers, hidden, notes };
