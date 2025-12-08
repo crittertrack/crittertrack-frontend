@@ -4908,7 +4908,7 @@ const UserProfileCard = ({ userProfile }) => {
 const ProfileEditForm = ({ userProfile, showModalMessage, onSaveSuccess, onCancel, authToken }) => {
     const [personalName, setPersonalName] = useState(userProfile.personalName);
     const [breederName, setBreederName] = useState(userProfile.breederName || '');
-    const [showPersonalName, setShowPersonalName] = useState(userProfile.showPersonalName ?? true); 
+    const [showPersonalName, setShowPersonalName] = useState(userProfile.showPersonalName ?? false); 
     const [showBreederName, setShowBreederName] = useState(userProfile.showBreederName ?? false); 
     const [websiteURL, setWebsiteURL] = useState(userProfile.websiteURL || '');
     const [showWebsiteURL, setShowWebsiteURL] = useState(userProfile.showWebsiteURL ?? false);
