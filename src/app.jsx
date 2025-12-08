@@ -7500,7 +7500,7 @@ const App = () => {
                                 {newestUsers.map(user => {
                                     const displayName = (user.showBreederName && user.breederName) 
                                         ? user.breederName 
-                                        : ((user.showPersonalName ?? true) ? user.personalName : 'Anonymous');
+                                        : ((user.showPersonalName ?? false) ? user.personalName : 'Anonymous');
                                     
                                     return (
                                         <div 
@@ -7532,7 +7532,7 @@ const App = () => {
                                 {activeUsers.map(user => {
                                     const displayName = (user.showBreederName && user.breederName) 
                                         ? user.breederName 
-                                        : ((user.showPersonalName ?? true) ? user.personalName : 'Anonymous');
+                                        : ((user.showPersonalName ?? false) ? user.personalName : 'Anonymous');
                                     
                                     return (
                                         <div 
