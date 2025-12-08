@@ -652,41 +652,51 @@ const calculatePhenotype = (genotype, originalGenotype = null) => {
     if (originalGenotype.P && originalGenotype.P !== '') selectedColorGenes.push('P');
   }
 
-  // If only one color gene is selected (excluding A-locus which can stand alone), show descriptive title with note
-  if (selectedColorGenes.length === 1 && selectedColorGenes[0] !== 'A' && !originalGenotype.W && !originalGenotype.Wsh && !originalGenotype.Rw && !originalGenotype.S && !originalGenotype.Mi && !originalGenotype.Rb) {
+  // If color genes selected without A-locus (excluding marking-only selections), show note
+  const hasMarkingGenes = originalGenotype && (
+    (originalGenotype.W && originalGenotype.W !== '') ||
+    (originalGenotype.Wsh && originalGenotype.Wsh !== '') ||
+    (originalGenotype.Rw && originalGenotype.Rw !== '') ||
+    (originalGenotype.S && originalGenotype.S !== '') ||
+    (originalGenotype.Mi && originalGenotype.Mi !== '') ||
+    (originalGenotype.Rb && originalGenotype.Rb !== '')
+  );
+  
+  if (selectedColorGenes.length >= 1 && !selectedColorGenes.includes('A') && !hasMarkingGenes) {
     const singleGene = selectedColorGenes[0];
     let title = '';
-    let note = '';
+    let note = 'Select A-locus (use a/a for self) for full phenotype calculation';
     
-    if (singleGene === 'B') {
-      title = genotype.B === 'b/b' ? 'Brown/Chocolate Base' : 'Black Base';
-      note = 'Select A-locus (use a/a for self) for full phenotype calculation';
-    } else if (singleGene === 'C') {
-      if (genotype.C === 'C/C' || genotype.C === 'C/c' || genotype.C === 'C/ce' || genotype.C === 'C/ch' || genotype.C === 'C/cch') {
-        title = 'Full Color';
-      } else if (genotype.C === 'cch/cch' || isCCombo(genotype.C, 'cch/ce') || isCCombo(genotype.C, 'cch/ch') || isCCombo(genotype.C, 'cch/c')) {
-        title = 'Chinchilla/Mock Dilution';
-      } else if (genotype.C === 'ch/ch' || isCCombo(genotype.C, 'ch/ce') || isCCombo(genotype.C, 'ch/c')) {
-        title = 'Himalayan/Sable';
-      } else if (genotype.C === 'ce/ce' || isCCombo(genotype.C, 'ce/c')) {
-        title = 'Extreme Dilution';
-      } else if (genotype.C === 'c/c') {
-        title = 'Albino';
+    // For single gene selection, show descriptive title
+    if (selectedColorGenes.length === 1) {
+      if (singleGene === 'B') {
+        title = genotype.B === 'b/b' ? 'Brown/Chocolate Base' : 'Black Base';
+      } else if (singleGene === 'C') {
+        if (genotype.C === 'C/C' || genotype.C === 'C/c' || genotype.C === 'C/ce' || genotype.C === 'C/ch' || genotype.C === 'C/cch') {
+          title = 'Full Color';
+        } else if (genotype.C === 'cch/cch' || isCCombo(genotype.C, 'cch/ce') || isCCombo(genotype.C, 'cch/ch') || isCCombo(genotype.C, 'cch/c')) {
+          title = 'Chinchilla/Mock Dilution';
+        } else if (genotype.C === 'ch/ch' || isCCombo(genotype.C, 'ch/ce') || isCCombo(genotype.C, 'ch/c')) {
+          title = 'Himalayan/Sable';
+        } else if (genotype.C === 'ce/ce' || isCCombo(genotype.C, 'ce/c')) {
+          title = 'Extreme Dilution';
+        } else if (genotype.C === 'c/c') {
+          title = 'Albino';
+        }
+      } else if (singleGene === 'D') {
+        title = genotype.D === 'd/d' ? 'Dilute' : 'Non-Dilute';
+      } else if (singleGene === 'E') {
+        if (genotype.E === 'E/E' || genotype.E === 'E/e') {
+          title = 'Normal Extension';
+        } else if (genotype.E === 'e/e') {
+          title = 'Recessive Red/Yellow';
+        }
+      } else if (singleGene === 'P') {
+        title = genotype.P === 'p/p' ? 'Pink-Eyed Dilution' : 'Normal Eye Color';
       }
-      note = 'Select A-locus (use a/a for self) for full phenotype calculation';
-    } else if (singleGene === 'D') {
-      title = genotype.D === 'd/d' ? 'Dilute' : 'Non-Dilute';
-      note = 'Select A-locus (use a/a for self) for full phenotype calculation';
-    } else if (singleGene === 'E') {
-      if (genotype.E === 'E/E' || genotype.E === 'E/e') {
-        title = 'Normal Extension';
-      } else if (genotype.E === 'e/e') {
-        title = 'Recessive Red/Yellow';
-      }
-      note = 'Select A-locus (use a/a for self) for full phenotype calculation';
-    } else if (singleGene === 'P') {
-      title = genotype.P === 'p/p' ? 'Pink-Eyed Dilution' : 'Normal Eye Color';
-      note = 'Select A-locus (use a/a for self) for full phenotype calculation';
+    } else {
+      // Multiple genes selected without A-locus
+      title = 'Incomplete Color Selection';
     }
     
     return { phenotype: title || 'Unknown', carriers, hidden, notes: [note] };
