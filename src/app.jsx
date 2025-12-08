@@ -5732,6 +5732,7 @@ const AnimalList = ({ authToken, showModalMessage, onEditAnimal, onViewAnimal, o
     const [statusFilterPregnant, setStatusFilterPregnant] = useState(false);
     const [statusFilterNursing, setStatusFilterNursing] = useState(false);
     const [ownedFilter, setOwnedFilter] = useState('owned');
+    const [publicFilter, setPublicFilter] = useState('');
     
     const fetchAnimals = useCallback(async () => {
         setLoading(true);
@@ -5790,6 +5791,13 @@ const AnimalList = ({ authToken, showModalMessage, onEditAnimal, onViewAnimal, o
                 data = data.filter(a => a.isNursing === true);
             }
 
+            // Filter by public/private status
+            if (publicFilter === 'public') {
+                data = data.filter(a => a.showOnPublicProfile === true);
+            } else if (publicFilter === 'private') {
+                data = data.filter(a => !a.showOnPublicProfile);
+            }
+
             // Cache-bust any image URLs so updated uploads appear immediately
             data = data.map(a => {
                 const img = a.imageUrl || a.photoUrl || null;
@@ -5807,7 +5815,7 @@ const AnimalList = ({ authToken, showModalMessage, onEditAnimal, onViewAnimal, o
         } finally {
             setLoading(false);
         }
-    }, [authToken, statusFilter, genderFilter, speciesFilter, appliedNameFilter, statusFilterPregnant, statusFilterNursing, ownedFilter, showModalMessage]);
+    }, [authToken, statusFilter, genderFilter, speciesFilter, appliedNameFilter, statusFilterPregnant, statusFilterNursing, ownedFilter, publicFilter, showModalMessage]);
 
     useEffect(() => {
         fetchAnimals();
@@ -6103,6 +6111,23 @@ const AnimalList = ({ authToken, showModalMessage, onEditAnimal, onViewAnimal, o
                     >
                         <Milk size={16} /> <span>Nursing</span>
                     </button>
+
+                    <div className="ml-auto flex gap-2 items-center">
+                        <span className='text-sm font-medium text-gray-700 whitespace-nowrap'>Visibility:</span>
+                        {['All', 'Public', 'Private'].map(option => {
+                            const value = option === 'All' ? '' : option.toLowerCase();
+                            const isSelected = publicFilter === value;
+                            return (
+                                <button key={option} onClick={() => setPublicFilter(value)}
+                                    className={`px-3 py-1.5 text-sm font-semibold rounded-lg transition duration-150 shadow-sm ${ 
+                                        isSelected ? 'bg-primary text-black' : 'bg-gray-200 text-gray-700 hover:bg-gray-300'
+                                    }`}
+                                >
+                                    {option}
+                                </button>
+                            );
+                        })}
+                    </div>
                 </div>
             </div>
 
