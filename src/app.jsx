@@ -1502,61 +1502,63 @@ const PublicProfileView = ({ profile, onBack, onViewAnimal, API_BASE_URL }) => {
             
             {/* Filters */}
             {animals.length > 0 && (
-                <div className="mb-6 p-4 border rounded-lg bg-gray-50 space-y-3">
-                    {/* Status dropdown */}
-                    <div className="flex gap-2 items-center">
-                        <span className='text-sm font-medium text-gray-700 whitespace-nowrap'>Status:</span>
-                        <select 
-                            value={statusFilter} 
-                            onChange={(e) => setStatusFilter(e.target.value)} 
-                            className="p-2 border border-gray-300 rounded-lg shadow-sm focus:ring-primary focus:border-primary transition w-full sm:w-auto sm:min-w-[150px]"
-                        >
-                            <option value="">All</option>
-                            {STATUS_OPTIONS.map(status => (
-                                <option key={status} value={status}>{status}</option>
-                            ))}
-                        </select>
-                    </div>
-                    
-                    {/* Species and Gender filters */}
-                    <div className="flex flex-col sm:flex-row gap-3 pt-2 border-t border-gray-200">
-                        {/* Species filter */}
-                        <div className="flex gap-2 items-center flex-wrap">
-                            <span className='text-sm font-medium text-gray-700 whitespace-nowrap'>Species:</span>
-                            {['All', ...sortedSpecies].map(species => {
-                                const value = species === 'All' ? '' : species;
-                                const isCurrentSelected = speciesFilter === value;
-                                const displayName = species === 'All' ? 'All' : getSpeciesDisplayName(species);
-                                
-                                return (
-                                    <button key={species} onClick={() => setSpeciesFilter(value)}
-                                        className={`px-3 py-1.5 text-sm font-semibold rounded-lg transition duration-150 shadow-sm ${ 
-                                            isCurrentSelected ? 'bg-primary text-black' : 'bg-gray-200 text-gray-700 hover:bg-gray-300'
-                                        }`}
-                                    >
-                                        {displayName}
-                                    </button>
-                                );
-                            })}
-                        </div>
-                    </div>
-                    
-                    {/* Gender filter */}
-                    <div className="flex gap-2 items-center flex-wrap pt-2 border-t border-gray-200">
-                        <span className='text-sm font-medium text-gray-700 whitespace-nowrap'>Gender:</span>
-                        {['All', ...GENDER_OPTIONS].map(gender => {
-                            const value = gender === 'All' ? '' : gender;
-                            const isCurrentSelected = genderFilter === value;
-                            let selectedClasses = isCurrentSelected ? (gender === 'Male' ? 'bg-primary text-black' : gender === 'Female' ? 'bg-accent text-white' : 'bg-primary-dark text-black') : 'bg-gray-200 text-gray-700 hover:bg-gray-300';
-                            
-                            return (
-                                <button key={gender} onClick={() => setGenderFilter(value)}
-                                    className={`px-3 py-1.5 text-sm font-semibold rounded-lg transition duration-150 shadow-sm ${selectedClasses}`}
+                <div className="mb-6 p-4 border rounded-lg bg-gray-50">
+                    {/* Species dropdown, Gender icons, and Status dropdown - all in one row */}
+                    <div className="flex flex-col sm:flex-row gap-3 justify-between">
+                        <div className="flex gap-3 items-center flex-wrap">
+                            {/* Species dropdown */}
+                            <div className="flex gap-2 items-center">
+                                <span className='text-sm font-medium text-gray-700 whitespace-nowrap'>Species:</span>
+                                <select 
+                                    value={speciesFilter}
+                                    onChange={(e) => setSpeciesFilter(e.target.value)}
+                                    className="p-2 border border-gray-300 rounded-lg shadow-sm focus:ring-primary focus:border-primary transition min-w-[150px]"
                                 >
-                                    {gender}
+                                    <option value="">All Species</option>
+                                    {sortedSpecies.map(species => (
+                                        <option key={species} value={species}>{getSpeciesDisplayName(species)}</option>
+                                    ))}
+                                </select>
+                            </div>
+                            
+                            {/* Gender filter with icons */}
+                            <div className="flex gap-2 items-center">
+                                <span className='text-sm font-medium text-gray-700 whitespace-nowrap'>Gender:</span>
+                                <button 
+                                    onClick={() => setGenderFilter(genderFilter === 'Male' ? '' : 'Male')}
+                                    className={`p-2 rounded-lg transition duration-150 shadow-sm ${
+                                        genderFilter === 'Male' ? 'bg-primary' : 'bg-gray-300 hover:bg-gray-400'
+                                    }`}
+                                    title="Male"
+                                >
+                                    <Mars size={18} className="text-black" />
                                 </button>
-                            );
-                        })}
+                                <button 
+                                    onClick={() => setGenderFilter(genderFilter === 'Female' ? '' : 'Female')}
+                                    className={`p-2 rounded-lg transition duration-150 shadow-sm ${
+                                        genderFilter === 'Female' ? 'bg-pink-400' : 'bg-gray-300 hover:bg-gray-400'
+                                    }`}
+                                    title="Female"
+                                >
+                                    <Venus size={18} className="text-black" />
+                                </button>
+                            </div>
+                        </div>
+                        
+                        {/* Status dropdown on right */}
+                        <div className="flex gap-2 items-center">
+                            <span className='text-sm font-medium text-gray-700 whitespace-nowrap'>Status:</span>
+                            <select 
+                                value={statusFilter} 
+                                onChange={(e) => setStatusFilter(e.target.value)} 
+                                className="p-2 border border-gray-300 rounded-lg shadow-sm focus:ring-primary focus:border-primary transition min-w-[150px]"
+                            >
+                                <option value="">All</option>
+                                {STATUS_OPTIONS.map(status => (
+                                    <option key={status} value={status}>{status}</option>
+                                ))}
+                            </select>
+                        </div>
                     </div>
                 </div>
             )}
