@@ -1421,7 +1421,7 @@ const PublicProfileView = ({ profile, onBack, onViewAnimal, API_BASE_URL }) => {
         : (profile.updatedAt ? new Intl.DateTimeFormat('en-US', { year: 'numeric', month: 'long', day: 'numeric' }).format(new Date(profile.updatedAt)) : 'Unknown');
 
     // Determine display name(s) - respect privacy settings
-    const showPersonalName = profile.showPersonalName ?? true;
+    const showPersonalName = profile.showPersonalName ?? false;
     const showBreederName = profile.showBreederName ?? false;
     
     const showBothNames = showPersonalName && showBreederName && profile.personalName && profile.breederName;
@@ -1523,7 +1523,7 @@ const PublicProfileView = ({ profile, onBack, onViewAnimal, API_BASE_URL }) => {
                         {/* Species filter */}
                         <div className="flex gap-2 items-center flex-wrap">
                             <span className='text-sm font-medium text-gray-700 whitespace-nowrap'>Species:</span>
-                            {['All', ...DEFAULT_SPECIES_OPTIONS].map(species => {
+                            {['All', ...sortedSpecies].map(species => {
                                 const value = species === 'All' ? '' : species;
                                 const isCurrentSelected = speciesFilter === value;
                                 const displayName = species === 'All' ? 'All' : getSpeciesDisplayName(species);
