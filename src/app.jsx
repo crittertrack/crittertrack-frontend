@@ -5775,8 +5775,12 @@ const AnimalList = ({ authToken, showModalMessage, onEditAnimal, onViewAnimal, o
                 data = data.filter(a => selectedSpecies.includes(a.species));
             }
 
-            // Filter by selected genders (if not all are selected)
-            if (selectedGenders.length > 0 && selectedGenders.length < GENDER_OPTIONS.length) {
+            // Filter by selected genders (if not all are selected, or if none are selected show nothing)
+            if (selectedGenders.length === 0) {
+                // No genders selected = show no animals
+                data = [];
+            } else if (selectedGenders.length < GENDER_OPTIONS.length) {
+                // Some genders selected = filter to those
                 data = data.filter(a => selectedGenders.includes(a.gender));
             }
 
