@@ -312,7 +312,9 @@ const PedigreeChart = ({ animalId, animalData, onClose, API_BASE_URL, authToken 
                     {/* Name */}
                     <div className="text-sm text-gray-900 leading-tight" style={{lineHeight: '1.2'}}>
                         <span className="font-bold">Name: </span>
-                        {animal.prefix && `${animal.prefix} `}{animal.name}{animal.suffix && ` ${animal.suffix}`}
+                        <span className="line-clamp-2">
+                            {animal.prefix && `${animal.prefix} `}{animal.name}{animal.suffix && ` ${animal.suffix}`}
+                        </span>
                     </div>
                     
                     {/* Variety */}
@@ -385,7 +387,9 @@ const PedigreeChart = ({ animalId, animalData, onClose, API_BASE_URL, authToken 
                     {/* Name */}
                     <div className="text-xs text-gray-900 leading-tight" style={{lineHeight: '1.2'}}>
                         <span className="font-semibold">Name: </span>
-                        {animal.prefix && `${animal.prefix} `}{animal.name}{animal.suffix && ` ${animal.suffix}`}
+                        <span className="line-clamp-2">
+                            {animal.prefix && `${animal.prefix} `}{animal.name}{animal.suffix && ` ${animal.suffix}`}
+                        </span>
                     </div>
                     
                     {/* Variety */}
@@ -462,7 +466,9 @@ const PedigreeChart = ({ animalId, animalData, onClose, API_BASE_URL, authToken 
                     {/* Name */}
                     <div className="text-gray-900 leading-tight" style={{fontSize: '0.65rem', lineHeight: '1.2'}}>
                         <span className="font-semibold">Name: </span>
-                        {animal.prefix && `${animal.prefix} `}{animal.name}{animal.suffix && ` ${animal.suffix}`}
+                        <span className="line-clamp-2">
+                            {animal.prefix && `${animal.prefix} `}{animal.name}{animal.suffix && ` ${animal.suffix}`}
+                        </span>
                     </div>
                     
                     {/* Variety */}
@@ -520,7 +526,9 @@ const PedigreeChart = ({ animalId, animalData, onClose, API_BASE_URL, authToken 
                 {/* Name */}
                 <div className="text-gray-900 leading-tight" style={{fontSize: '0.6rem', lineHeight: '1.2'}}>
                     <span className="font-semibold">Name: </span>
-                    {animal.prefix && `${animal.prefix} `}{animal.name}{animal.suffix && ` ${animal.suffix}`}
+                    <span className="line-clamp-2">
+                        {animal.prefix && `${animal.prefix} `}{animal.name}{animal.suffix && ` ${animal.suffix}`}
+                    </span>
                 </div>
                 
                 {/* Variety */}
@@ -563,7 +571,7 @@ const PedigreeChart = ({ animalId, animalData, onClose, API_BASE_URL, authToken 
         return (
             <div className="border border-gray-200 rounded px-1 py-0.5 bg-white h-full flex flex-col justify-center">
                 {/* Name */}
-                <div className="font-semibold text-xs text-gray-800 truncate leading-tight">
+                <div className="font-semibold text-xs text-gray-800 leading-tight line-clamp-2">
                     {animal.prefix && `${animal.prefix} `}{animal.name}{animal.suffix && ` ${animal.suffix}`}
                 </div>
                 
@@ -1599,7 +1607,7 @@ const PublicProfileView = ({ profile, onBack, onViewAnimal, API_BASE_URL }) => {
                                                 
                                                 {/* Prefix / Name under image */}
                                                 <div className="w-full text-center px-2 pb-1 mt-2">
-                                                    <div className="text-sm font-semibold text-gray-800 truncate">{animal.prefix ? `${animal.prefix} ` : ''}{animal.name}{animal.suffix ? ` ${animal.suffix}` : ''}</div>
+                                                    <div className="text-sm font-semibold text-gray-800 line-clamp-2">{animal.prefix ? `${animal.prefix} ` : ''}{animal.name}{animal.suffix ? ` ${animal.suffix}` : ''}</div>
                                                 </div>
 
                                                 {/* ID bottom-right */}
@@ -5960,7 +5968,7 @@ const AnimalList = ({ authToken, showModalMessage, onEditAnimal, onViewAnimal, o
                     
                     {/* Prefix / Name under image */}
                     <div className="w-full text-center px-2 pb-1">
-                        <div className="text-sm font-semibold text-gray-800 truncate">{animal.prefix ? `${animal.prefix} ` : ''}{animal.name}{animal.suffix ? ` ${animal.suffix}` : ''}</div>
+                        <div className="text-sm font-semibold text-gray-800 line-clamp-2">{animal.prefix ? `${animal.prefix} ` : ''}{animal.name}{animal.suffix ? ` ${animal.suffix}` : ''}</div>
                     </div>
 
                     {/* Edit is available when viewing full card; remove inline edit icon from dashboard cards */}
