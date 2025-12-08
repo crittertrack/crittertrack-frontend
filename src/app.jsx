@@ -6518,8 +6518,15 @@ const App = () => {
                     axios.get(`${API_BASE_URL}/public/users/newest?limit=5`),
                     axios.get(`${API_BASE_URL}/public/users/active?minutes=15`)
                 ]);
-                setNewestUsers(newestResponse.data || []);
-                setActiveUsers(activeResponse.data || []);
+                const newest = newestResponse.data || [];
+                const active = activeResponse.data || [];
+                
+                // Remove duplicates: filter out active users who are already in newest
+                const newestIds = new Set(newest.map(u => u.id_public));
+                const uniqueActive = active.filter(u => !newestIds.has(u.id_public));
+                
+                setNewestUsers(newest);
+                setActiveUsers(uniqueActive);
             } catch (error) {
                 console.error('Error fetching community users:', error);
             }
@@ -7456,7 +7463,7 @@ const App = () => {
                                 key={`new-${user.id_public}`}
                                 className="flex-shrink-0 bg-white rounded-lg p-3 shadow-sm border-2 border-primary/40 hover:shadow-md transition cursor-pointer min-w-[140px]"
                                 onClick={() => {
-                                    setViewingPublicProfile({ id_public: user.id_public });
+                                    setViewingPublicProfile(user);
                                     setCurrentView('publicProfile');
                                 }}
                             >
@@ -7482,7 +7489,7 @@ const App = () => {
                                 key={`active-${user.id_public}`}
                                 className="flex-shrink-0 bg-white rounded-lg p-3 shadow-sm border-2 border-accent/40 hover:shadow-md transition cursor-pointer min-w-[140px]"
                                 onClick={() => {
-                                    setViewingPublicProfile({ id_public: user.id_public });
+                                    setViewingPublicProfile(user);
                                     setCurrentView('publicProfile');
                                 }}
                             >
