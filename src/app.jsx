@@ -4814,56 +4814,44 @@ const UserProfileCard = ({ userProfile }) => {
     const formattedCreationDate = userProfile.creationDate
         ? new Intl.DateTimeFormat('en-US', { year: 'numeric', month: 'long', day: 'numeric' }).format(new Date(userProfile.creationDate))
         : 'N/A';
-    
-    const ProfileImage = () => {
-        const img = userProfile.profileImage || userProfile.profileImageUrl || userProfile.imageUrl || userProfile.avatarUrl || userProfile.avatar || userProfile.profile_image || null;
-        if (img) {
-            return (
-                <div className="w-20 h-20 bg-gray-200 rounded-lg flex items-center justify-center text-gray-500 overflow-hidden shadow-inner">
-                    <img src={img} alt={userProfile.personalName} className="w-full h-full object-cover" />
-                </div>
-            );
-        }
-
-        return (
-            <div className="w-20 h-20 bg-gray-200 rounded-lg flex items-center justify-center text-gray-500 overflow-hidden shadow-inner">
-                <User size={40} />
-            </div>
-        );
-    };
 
     const isPersonalNameVisible = userProfile.showPersonalName ?? true;
     const isBreederNameVisible = userProfile.showBreederName ?? false;
 
 
     return (
-        <div className="w-full max-w-4xl bg-white p-6 rounded-xl shadow-lg mb-6 flex flex-col sm:flex-row items-center sm:items-start space-y-4 sm:space-y-0 sm:space-x-6">
-            <ProfileImage />
+        <div className="w-full max-w-4xl bg-white p-4 rounded-xl shadow-lg mb-6 flex flex-col sm:flex-row items-center sm:items-start space-y-3 sm:space-y-0 sm:space-x-4">
+            <div className="w-16 h-16 bg-gray-200 rounded-lg flex items-center justify-center text-gray-500 overflow-hidden shadow-inner flex-shrink-0">
+                {(userProfile.profileImage || userProfile.profileImageUrl || userProfile.imageUrl || userProfile.avatarUrl || userProfile.avatar || userProfile.profile_image) ? (
+                    <img src={userProfile.profileImage || userProfile.profileImageUrl || userProfile.imageUrl || userProfile.avatarUrl || userProfile.avatar || userProfile.profile_image} alt={userProfile.personalName} className="w-full h-full object-cover" />
+                ) : (
+                    <User size={32} />
+                )}
+            </div>
 
             <div className="flex-grow text-center sm:text-left">
-                
                 {isPersonalNameVisible && (
-                    <h3 className="text-3xl font-bold text-gray-900 mb-1">
+                    <h3 className="text-xl font-bold text-gray-900">
                         {userProfile.personalName}
                     </h3>
                 )}
                 
                 {(isBreederNameVisible && userProfile.breederName) && (
-                    <div className="text-xl text-gray-700 font-semibold">
+                    <div className="text-sm text-gray-700 font-semibold">
                         {userProfile.breederName}
                     </div>
                 )}
 
                 {(!isPersonalNameVisible && !isBreederNameVisible) && (
-                    <h3 className="text-2xl font-bold text-gray-500 mb-2">
+                    <h3 className="text-lg font-bold text-gray-500">
                         (Name Hidden)
                     </h3>
                 )}
 
-                <div className="mt-4 space-y-1 text-sm text-gray-700">
+                <div className="mt-2 space-y-1 text-xs text-gray-700">
                     {((userProfile.showEmailPublic ?? false)) && (
                         <div className="flex items-center justify-center sm:justify-start space-x-2">
-                            <Mail size={16} className="text-gray-500" />
+                            <Mail size={14} className="text-gray-500" />
                             <a href={`mailto:${userProfile.email}`} className="text-gray-700 hover:text-primary transition duration-150">
                                 {userProfile.email}
                             </a>
@@ -4872,7 +4860,7 @@ const UserProfileCard = ({ userProfile }) => {
                     
                     {(userProfile.websiteURL && userProfile.showWebsiteURL) && (
                         <div className="flex items-center justify-center sm:justify-start space-x-2">
-                            <Globe size={16} className="text-gray-500" />
+                            <Globe size={14} className="text-gray-500" />
                             <a 
                                 href={userProfile.websiteURL} 
                                 target="_blank" 
@@ -4886,16 +4874,12 @@ const UserProfileCard = ({ userProfile }) => {
                 </div>
             </div>
 
-            <div className="w-full sm:w-auto sm:text-right space-y-2 pt-4 sm:pt-0 border-t sm:border-t-0 sm:border-l border-gray-200 sm:pl-6">
-                
-                    <div className="mb-2"> 
-                    <span className="text-2xl font-extrabold text-accent">
-                        {userProfile.id_public}
-                    </span>
-                </div>
-
-                <div className="text-sm text-gray-600">
-                    <span className="font-semibold">Member Since:</span> {formattedCreationDate}
+            <div className="flex items-center sm:items-end gap-4 sm:gap-0 sm:flex-col sm:text-right pt-3 sm:pt-0 border-t sm:border-t-0 sm:border-l border-gray-200 sm:pl-4">
+                <span className="text-lg font-extrabold text-accent">
+                    {userProfile.id_public}
+                </span>
+                <div className="text-xs text-gray-600">
+                    {formattedCreationDate}
                 </div>
             </div>
         </div>
