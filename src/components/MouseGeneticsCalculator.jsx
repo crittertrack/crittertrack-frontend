@@ -69,12 +69,12 @@ const GENE_LOCI = {
     name: 'Dominant Spotting',
     combinations: [
       'w/w',
-      'Rw/w', 'Rw/Rw',
-      'Wsh/w', 'Wsh/Wsh',
       'W/w', 'W/W',
-      'W/Rw',
       'W/Wsh',
-      'Rw/Wsh'
+      'W/Rw',
+      'Wsh/w', 'Wsh/Wsh',
+      'Wsh/Rw',
+      'Rw/w', 'Rw/Rw'
     ]
   },
   Spl: {
@@ -778,7 +778,7 @@ const calculatePhenotype = (genotype, originalGenotype = null) => {
   } else if (genotype.W === 'W/Wsh' || genotype.W === 'Wsh/W') {
     markings.push('Variegated Banded');
     notes.push('Possibly lethal depending on line');
-  } else if (genotype.W === 'Rw/Wsh' || genotype.W === 'Wsh/Rw') {
+  } else if (genotype.W === 'Wsh/Rw' || genotype.W === 'Rw/Wsh') {
     markings.push('Rumpwhite Banded');
     notes.push('Possibly lethal depending on line');
   }
