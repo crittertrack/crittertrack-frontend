@@ -3560,7 +3560,7 @@ const SpeciesSelector = ({ speciesOptions, onSelectSpecies, onManageSpecies, sea
                 <select
                     value={categoryFilter}
                     onChange={(e) => setCategoryFilter(e.target.value)}
-                    className="p-2 border border-gray-300 rounded-lg w-32 min-w-fit"
+                    className="p-2 border border-gray-300 rounded-lg w-auto min-w-[80px] max-w-[150px]"
                 >
                     {categories.map(cat => (
                         <option key={cat} value={cat}>{cat}</option>
