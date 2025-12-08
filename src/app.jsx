@@ -1420,11 +1420,18 @@ const PublicProfileView = ({ profile, onBack, onViewAnimal, API_BASE_URL }) => {
         ? new Intl.DateTimeFormat('en-US', { year: 'numeric', month: 'long', day: 'numeric' }).format(new Date(profile.createdAt))
         : (profile.updatedAt ? new Intl.DateTimeFormat('en-US', { year: 'numeric', month: 'long', day: 'numeric' }).format(new Date(profile.updatedAt)) : 'Unknown');
 
-    // Determine display name(s)
-    const showBothNames = profile.showBreederName && profile.personalName && profile.breederName;
+    // Determine display name(s) - respect privacy settings
+    const showPersonalName = profile.showPersonalName ?? true;
+    const showBreederName = profile.showBreederName ?? false;
+    
+    const showBothNames = showPersonalName && showBreederName && profile.personalName && profile.breederName;
     const displayName = showBothNames 
         ? `${profile.personalName} (${profile.breederName})`
-        : (profile.showBreederName && profile.breederName ? profile.breederName : profile.personalName || 'Anonymous Breeder');
+        : (showBreederName && profile.breederName 
+            ? profile.breederName 
+            : (showPersonalName && profile.personalName 
+                ? profile.personalName 
+                : 'Anonymous Breeder'));
 
     // Apply filters
     const filteredAnimals = animals.filter(animal => {
@@ -4826,69 +4833,70 @@ const UserProfileCard = ({ userProfile }) => {
     const isPersonalNameVisible = userProfile.showPersonalName ?? true;
     const isBreederNameVisible = userProfile.showBreederName ?? false;
 
-
     return (
-        <div className="w-full max-w-4xl bg-white p-4 rounded-xl shadow-lg mb-6 flex flex-col sm:flex-row items-center sm:items-start space-y-3 sm:space-y-0 sm:space-x-4">
-            <div className="w-16 h-16 bg-gray-200 rounded-lg flex items-center justify-center text-gray-500 overflow-hidden shadow-inner flex-shrink-0">
-                {(userProfile.profileImage || userProfile.profileImageUrl || userProfile.imageUrl || userProfile.avatarUrl || userProfile.avatar || userProfile.profile_image) ? (
-                    <img src={userProfile.profileImage || userProfile.profileImageUrl || userProfile.imageUrl || userProfile.avatarUrl || userProfile.avatar || userProfile.profile_image} alt={userProfile.personalName} className="w-full h-full object-cover" />
-                ) : (
-                    <User size={32} />
-                )}
-            </div>
-
-            <div className="flex-grow text-center sm:text-left">
+        <div className="bg-white p-4 rounded-xl shadow-lg flex flex-col items-center text-center" style={{minWidth: '200px', maxWidth: '220px'}}>
+            {/* Names at top */}
+            <div className="mb-3 w-full">
                 {isPersonalNameVisible && (
-                    <h3 className="text-xl font-bold text-gray-900">
+                    <h3 className="text-base font-bold text-gray-900 line-clamp-2">
                         {userProfile.personalName}
                     </h3>
                 )}
                 
                 {(isBreederNameVisible && userProfile.breederName) && (
-                    <div className="text-sm text-gray-700 font-semibold">
+                    <div className="text-sm text-gray-700 font-semibold line-clamp-1">
                         {userProfile.breederName}
                     </div>
                 )}
 
                 {(!isPersonalNameVisible && !isBreederNameVisible) && (
-                    <h3 className="text-lg font-bold text-gray-500">
+                    <h3 className="text-sm font-bold text-gray-500">
                         (Name Hidden)
                     </h3>
                 )}
-
-                <div className="mt-2 space-y-1 text-xs text-gray-700">
-                    {((userProfile.showEmailPublic ?? false)) && (
-                        <div className="flex items-center justify-center sm:justify-start space-x-2">
-                            <Mail size={14} className="text-gray-500" />
-                            <a href={`mailto:${userProfile.email}`} className="text-gray-700 hover:text-primary transition duration-150">
-                                {userProfile.email}
-                            </a>
-                        </div>
-                    )}
-                    
-                    {(userProfile.websiteURL && userProfile.showWebsiteURL) && (
-                        <div className="flex items-center justify-center sm:justify-start space-x-2">
-                            <Globe size={14} className="text-gray-500" />
-                            <a 
-                                href={userProfile.websiteURL} 
-                                target="_blank" 
-                                rel="noopener noreferrer" 
-                                className="text-primary-dark hover:underline transition duration-150 truncate max-w-full sm:max-w-xs"
-                            >
-                                {userProfile.websiteURL.replace(/https?:\/\/(www.)?/, '')}
-                            </a>
-                        </div>
-                    )}
-                </div>
             </div>
 
-            <div className="flex items-center sm:items-end gap-4 sm:gap-0 sm:flex-col sm:text-right pt-3 sm:pt-0 border-t sm:border-t-0 sm:border-l border-gray-200 sm:pl-4">
-                <span className="text-lg font-extrabold text-accent">
+            {/* Image centered */}
+            <div className="w-20 h-20 bg-gray-200 rounded-lg flex items-center justify-center text-gray-500 overflow-hidden shadow-inner mb-3">
+                {(userProfile.profileImage || userProfile.profileImageUrl || userProfile.imageUrl || userProfile.avatarUrl || userProfile.avatar || userProfile.profile_image) ? (
+                    <img src={userProfile.profileImage || userProfile.profileImageUrl || userProfile.imageUrl || userProfile.avatarUrl || userProfile.avatar || userProfile.profile_image} alt={userProfile.personalName} className="w-full h-full object-cover" />
+                ) : (
+                    <User size={40} />
+                )}
+            </div>
+
+            {/* Other info below image */}
+            <div className="w-full space-y-2">
+                <div className="text-lg font-extrabold text-accent">
                     {userProfile.id_public}
-                </span>
+                </div>
+                
                 <div className="text-xs text-gray-600">
                     {formattedCreationDate}
                 </div>
+
+                {((userProfile.showEmailPublic ?? false)) && (
+                    <div className="flex items-center justify-center space-x-1">
+                        <Mail size={12} className="text-gray-500" />
+                        <a href={`mailto:${userProfile.email}`} className="text-xs text-gray-700 hover:text-primary transition duration-150 truncate">
+                            {userProfile.email}
+                        </a>
+                    </div>
+                )}
+                
+                {(userProfile.websiteURL && userProfile.showWebsiteURL) && (
+                    <div className="flex items-center justify-center space-x-1">
+                        <Globe size={12} className="text-gray-500" />
+                        <a 
+                            href={userProfile.websiteURL} 
+                            target="_blank" 
+                            rel="noopener noreferrer" 
+                            className="text-xs text-primary-dark hover:underline transition duration-150 truncate"
+                        >
+                            {userProfile.websiteURL.replace(/https?:\/\/(www.)?/, '')}
+                        </a>
+                    </div>
+                )}
             </div>
         </div>
     );
@@ -7437,74 +7445,92 @@ const App = () => {
                 </div>
             )}
 
-            {/* Community Activity Banner - shown only on list view */}
-            {currentView === 'list' && (newestUsers.length > 0 || activeUsers.length > 0) && (
-                <div className="w-full max-w-4xl mb-6 bg-gradient-to-r from-primary/20 to-accent/20 p-4 rounded-lg border border-primary/30">
-                    <h3 className="text-sm font-semibold text-gray-800 mb-3 flex items-center">
-                        <Users size={16} className="mr-2 text-primary-dark" />
-                        Community Activity
-                    </h3>
-                    <div 
-                        ref={scrollContainerRef}
-                        className="flex overflow-x-auto gap-3 pb-2 scroll-smooth"
-                        style={{ scrollbarWidth: 'thin' }}
-                    >
-                        {/* Newest Members */}
-                        {newestUsers.map(user => (
+            {/* Profile Card and Community Activity - shown only on list view */}
+            {currentView === 'list' && (
+                <div className="w-full max-w-4xl mb-6 flex flex-col sm:flex-row gap-4">
+                    {/* Profile Card */}
+                    {currentView !== 'profile' && userProfile && <UserProfileCard userProfile={userProfile} />}
+                    
+                    {/* Community Activity Banner */}
+                    {(newestUsers.length > 0 || activeUsers.length > 0) && (
+                        <div className="flex-1 bg-gradient-to-r from-primary/20 to-accent/20 p-4 rounded-lg border border-primary/30">
+                            <h3 className="text-sm font-semibold text-gray-800 mb-3 flex items-center">
+                                <Users size={16} className="mr-2 text-primary-dark" />
+                                Community Activity
+                            </h3>
                             <div 
-                                key={`new-${user.id_public}`}
-                                className="flex-shrink-0 bg-white rounded-lg p-3 shadow-sm border-2 border-primary/40 hover:shadow-md transition cursor-pointer min-w-[140px]"
-                                onClick={() => {
-                                    setViewingPublicProfile(user);
-                                    setCurrentView('publicProfile');
-                                }}
+                                ref={scrollContainerRef}
+                                className="flex overflow-x-auto gap-3 pb-2 scroll-smooth"
+                                style={{ scrollbarWidth: 'thin' }}
                             >
-                                <div className="w-12 h-12 bg-gray-100 rounded-full overflow-hidden mx-auto mb-2">
-                                    {user.profileImage ? (
-                                        <img src={user.profileImage} alt={user.breederName || user.personalName} className="w-full h-full object-cover" />
-                                    ) : (
-                                        <div className="w-full h-full flex items-center justify-center text-gray-400">
-                                            <User size={24} />
+                                {/* Newest Members */}
+                                {newestUsers.map(user => {
+                                    const displayName = (user.showBreederName && user.breederName) 
+                                        ? user.breederName 
+                                        : ((user.showPersonalName ?? true) ? user.personalName : 'Anonymous');
+                                    
+                                    return (
+                                        <div 
+                                            key={`new-${user.id_public}`}
+                                            className="flex-shrink-0 bg-white rounded-lg p-3 shadow-sm border-2 border-primary/40 hover:shadow-md transition cursor-pointer min-w-[140px]"
+                                            onClick={() => {
+                                                setViewingPublicProfile(user);
+                                                setCurrentView('publicProfile');
+                                            }}
+                                        >
+                                            <div className="w-12 h-12 bg-gray-100 rounded-full overflow-hidden mx-auto mb-2">
+                                                {user.profileImage ? (
+                                                    <img src={user.profileImage} alt={displayName} className="w-full h-full object-cover" />
+                                                ) : (
+                                                    <div className="w-full h-full flex items-center justify-center text-gray-400">
+                                                        <User size={24} />
+                                                    </div>
+                                                )}
+                                            </div>
+                                            <p className="text-xs font-semibold text-gray-800 text-center truncate">
+                                                {displayName}
+                                            </p>
+                                            <p className="text-xs text-gray-500 text-center truncate">{user.id_public}</p>
                                         </div>
-                                    )}
-                                </div>
-                                <p className="text-xs font-semibold text-gray-800 text-center truncate">
-                                    {user.showBreederName && user.breederName ? user.breederName : user.personalName}
-                                </p>
-                                <p className="text-xs text-gray-500 text-center truncate">{user.id_public}</p>
-                            </div>
-                        ))}
-                        
-                        {/* Active Users */}
-                        {activeUsers.map(user => (
-                            <div 
-                                key={`active-${user.id_public}`}
-                                className="flex-shrink-0 bg-white rounded-lg p-3 shadow-sm border-2 border-accent/40 hover:shadow-md transition cursor-pointer min-w-[140px]"
-                                onClick={() => {
-                                    setViewingPublicProfile(user);
-                                    setCurrentView('publicProfile');
-                                }}
-                            >
-                                <div className="w-12 h-12 bg-gray-100 rounded-full overflow-hidden mx-auto mb-2">
-                                    {user.profileImage ? (
-                                        <img src={user.profileImage} alt={user.breederName || user.personalName} className="w-full h-full object-cover" />
-                                    ) : (
-                                        <div className="w-full h-full flex items-center justify-center text-gray-400">
-                                            <User size={24} />
+                                    );
+                                })}
+                                
+                                {/* Active Users */}
+                                {activeUsers.map(user => {
+                                    const displayName = (user.showBreederName && user.breederName) 
+                                        ? user.breederName 
+                                        : ((user.showPersonalName ?? true) ? user.personalName : 'Anonymous');
+                                    
+                                    return (
+                                        <div 
+                                            key={`active-${user.id_public}`}
+                                            className="flex-shrink-0 bg-white rounded-lg p-3 shadow-sm border-2 border-accent/40 hover:shadow-md transition cursor-pointer min-w-[140px]"
+                                            onClick={() => {
+                                                setViewingPublicProfile(user);
+                                                setCurrentView('publicProfile');
+                                            }}
+                                        >
+                                            <div className="w-12 h-12 bg-gray-100 rounded-full overflow-hidden mx-auto mb-2">
+                                                {user.profileImage ? (
+                                                    <img src={user.profileImage} alt={displayName} className="w-full h-full object-cover" />
+                                                ) : (
+                                                    <div className="w-full h-full flex items-center justify-center text-gray-400">
+                                                        <User size={24} />
+                                                    </div>
+                                                )}
+                                            </div>
+                                            <p className="text-xs font-semibold text-gray-800 text-center truncate">
+                                                {displayName}
+                                            </p>
+                                            <p className="text-xs text-gray-500 text-center truncate">{user.id_public}</p>
                                         </div>
-                                    )}
-                                </div>
-                                <p className="text-xs font-semibold text-gray-800 text-center truncate">
-                                    {user.showBreederName && user.breederName ? user.breederName : user.personalName}
-                                </p>
-                                <p className="text-xs text-gray-500 text-center truncate">{user.id_public}</p>
+                                    );
+                                })}
                             </div>
-                        ))}
-                    </div>
+                        </div>
+                    )}
                 </div>
             )}
-
-            {currentView !== 'profile' && userProfile && <UserProfileCard userProfile={userProfile} />}
 
             <main className="w-full flex-grow max-w-4xl">
                 {renderView()}
