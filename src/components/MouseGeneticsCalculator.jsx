@@ -641,6 +641,68 @@ const calculatePhenotype = (genotype, originalGenotype = null) => {
     (originalGenotype.P && originalGenotype.P !== '')
   );
 
+  // Check if ONLY one color gene is selected (incomplete for phenotype calculation)
+  const selectedColorGenes = [];
+  if (originalGenotype) {
+    if (originalGenotype.A && originalGenotype.A !== '') selectedColorGenes.push('A');
+    if (originalGenotype.B && originalGenotype.B !== '') selectedColorGenes.push('B');
+    if (originalGenotype.C && originalGenotype.C !== '') selectedColorGenes.push('C');
+    if (originalGenotype.D && originalGenotype.D !== '') selectedColorGenes.push('D');
+    if (originalGenotype.E && originalGenotype.E !== '') selectedColorGenes.push('E');
+    if (originalGenotype.P && originalGenotype.P !== '') selectedColorGenes.push('P');
+  }
+
+  // If only one color gene is selected, show descriptive title with note
+  if (selectedColorGenes.length === 1 && !originalGenotype.W && !originalGenotype.Wsh && !originalGenotype.Rw && !originalGenotype.S && !originalGenotype.Mi && !originalGenotype.Rb) {
+    const singleGene = selectedColorGenes[0];
+    let title = '';
+    let note = '';
+    
+    if (singleGene === 'A') {
+      if (genotype.A === 'A/A' || genotype.A === 'A/a' || genotype.A === 'A/at' || genotype.A === 'A/ae') {
+        title = 'Agouti Pattern';
+      } else if (genotype.A === 'at/at' || genotype.A === 'at/a' || genotype.A === 'at/ae') {
+        title = 'Tan Pattern';
+      } else if (genotype.A === 'a/a' || genotype.A === 'a/ae') {
+        title = 'Self Pattern';
+      } else if (genotype.A === 'ae/ae') {
+        title = 'Extreme Non-Agouti Pattern';
+      }
+      note = 'Additional color loci (B, C, D, E, P) are needed for full phenotype calculation';
+    } else if (singleGene === 'B') {
+      title = genotype.B === 'b/b' ? 'Brown/Chocolate Base' : 'Black Base';
+      note = 'A-locus selection is needed for full phenotype calculation';
+    } else if (singleGene === 'C') {
+      if (genotype.C === 'C/C' || genotype.C === 'C/c' || genotype.C === 'C/ce' || genotype.C === 'C/ch' || genotype.C === 'C/cch') {
+        title = 'Full Color';
+      } else if (genotype.C === 'cch/cch' || isCCombo(genotype.C, 'cch/ce') || isCCombo(genotype.C, 'cch/ch') || isCCombo(genotype.C, 'cch/c')) {
+        title = 'Chinchilla/Mock Dilution';
+      } else if (genotype.C === 'ch/ch' || isCCombo(genotype.C, 'ch/ce') || isCCombo(genotype.C, 'ch/c')) {
+        title = 'Himalayan/Sable';
+      } else if (genotype.C === 'ce/ce' || isCCombo(genotype.C, 'ce/c')) {
+        title = 'Extreme Dilution';
+      } else if (genotype.C === 'c/c') {
+        title = 'Albino';
+      }
+      note = 'A-locus selection is needed for full phenotype calculation';
+    } else if (singleGene === 'D') {
+      title = genotype.D === 'd/d' ? 'Dilute' : 'Non-Dilute';
+      note = 'A-locus selection is needed for full phenotype calculation';
+    } else if (singleGene === 'E') {
+      if (genotype.E === 'E/E' || genotype.E === 'E/e') {
+        title = 'Normal Extension';
+      } else if (genotype.E === 'e/e') {
+        title = 'Recessive Red/Yellow';
+      }
+      note = 'A-locus selection is needed for full phenotype calculation';
+    } else if (singleGene === 'P') {
+      title = genotype.P === 'p/p' ? 'Pink-Eyed Dilution' : 'Normal Eye Color';
+      note = 'A-locus selection is needed for full phenotype calculation';
+    }
+    
+    return { phenotype: title || 'Unknown', carriers, hidden, notes: [note] };
+  }
+
   // Track carriers for A-locus
   if (genotype.A === 'A/a') carriers.push('Black');
   else if (genotype.A === 'A/ae') carriers.push('Extreme Black');
@@ -1056,6 +1118,18 @@ const MouseGeneticsCalculator = ({ API_BASE_URL, authToken }) => {
     
     // If no loci selected, don't calculate
     if (selectedLoci.length === 0) {
+      return;
+    }
+
+    // Check if only incomplete color genes are selected (without full color gene set)
+    const colorGenes = ['A', 'B', 'C', 'D', 'E', 'P'];
+    const markingGenes = ['W', 'Wsh', 'Rw', 'S', 'Mi', 'Rb'];
+    const selectedColorGenes = selectedLoci.filter(locus => colorGenes.includes(locus));
+    const selectedMarkingGenes = selectedLoci.filter(locus => markingGenes.includes(locus));
+    
+    // If only one color gene selected and no marking genes, prevent calculation
+    if (selectedColorGenes.length === 1 && selectedMarkingGenes.length === 0) {
+      alert('Additional color loci are needed for full phenotype calculation. Please select A-locus along with other color genes (B, C, D, E, P) for complete results.');
       return;
     }
     
