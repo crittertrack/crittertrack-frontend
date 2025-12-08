@@ -1340,7 +1340,7 @@ const UserSearchModal = ({ onClose, showModalMessage, onSelectUser, API_BASE_URL
                     {modalTarget === 'breeder' && userProfile && (
                         <div className="border rounded-lg bg-white shadow-sm mb-4">
                             <h4 className="font-bold text-gray-700 p-3 bg-primary/20 border-b">
-                                Your Profile (Default)
+                                Your Profile
                             </h4>
                             <UserResultCard user={userProfile} />
                         </div>
