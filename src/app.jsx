@@ -1210,7 +1210,7 @@ const UserSearchModal = ({ onClose, showModalMessage, onSelectUser, API_BASE_URL
     const UserResultCard = ({ user }) => {
         const memberSince = user.createdAt 
             ? new Intl.DateTimeFormat('en-US', { year: 'numeric', month: 'long', day: 'numeric' }).format(new Date(user.createdAt))
-            : (user.updatedAt ? new Intl.DateTimeFormat('en-US', { year: 'numeric', month: 'long', day: 'numeric' }).format(new Date(user.updatedAt)) : 'Unknown');
+            : (user.updatedAt ? new Intl.DateTimeFormat('en-US', { year: 'numeric', month: 'long', day: 'numeric' }).format(new Date(user.updatedAt)) : null);
         
         // Determine display name(s)
         const showBothNames = user.showBreederName && user.personalName && user.breederName;
@@ -1240,9 +1240,11 @@ const UserSearchModal = ({ onClose, showModalMessage, onSelectUser, API_BASE_URL
                         <p className="text-sm text-gray-600">
                             Public ID: <span className="font-mono text-accent">{user.id_public}</span>
                         </p>
-                        <p className="text-xs text-gray-500 mt-1">
-                            Member since {memberSince}
-                        </p>
+                        {memberSince && (
+                            <p className="text-xs text-gray-500 mt-1">
+                                Member since {memberSince}
+                            </p>
+                        )}
                     </div>
                 </div>
             </div>
