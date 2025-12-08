@@ -7469,9 +7469,6 @@ const App = () => {
                                         </div>
                                     )}
                                 </div>
-                                <div className="text-xs bg-primary text-black px-2 py-0.5 rounded text-center mb-1 font-semibold">
-                                    NEW
-                                </div>
                                 <p className="text-xs font-semibold text-gray-800 text-center truncate">
                                     {user.showBreederName && user.breederName ? user.breederName : user.personalName}
                                 </p>
@@ -7497,9 +7494,6 @@ const App = () => {
                                             <User size={24} />
                                         </div>
                                     )}
-                                </div>
-                                <div className="text-xs bg-accent text-white px-2 py-0.5 rounded text-center mb-1 font-semibold">
-                                    ACTIVE
                                 </div>
                                 <p className="text-xs font-semibold text-gray-800 text-center truncate">
                                     {user.showBreederName && user.breederName ? user.breederName : user.personalName}
