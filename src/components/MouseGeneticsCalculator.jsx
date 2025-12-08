@@ -72,9 +72,9 @@ const GENE_LOCI = {
       'Rw/w', 'Rw/Rw',
       'Wsh/w', 'Wsh/Wsh',
       'W/w', 'W/W',
-      'W/Rw', 'Rw/W',
-      'W/Wsh', 'Wsh/W',
-      'Rw/Wsh', 'Wsh/Rw'
+      'W/Rw',
+      'W/Wsh',
+      'Rw/Wsh'
     ]
   },
   Spl: {
