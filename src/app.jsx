@@ -2258,10 +2258,14 @@ const LitterManagement = ({ authToken, API_BASE_URL, userProfile, showModalMessa
         damId_public: '',
         pairingDate: '',
         birthDate: '',
-        maleCount: 0,
-        femaleCount: 0,
+        maleCount: '',
+        femaleCount: '',
         notes: '',
         linkedOffspringIds: []
+    });
+    const [createOffspringCounts, setCreateOffspringCounts] = useState({
+        males: 0,
+        females: 0
     });
     const [linkingAnimals, setLinkingAnimals] = useState(false);
     const [availableToLink, setAvailableToLink] = useState({ litter: null, animals: [] });
@@ -2366,20 +2370,6 @@ const LitterManagement = ({ authToken, API_BASE_URL, userProfile, showModalMessa
             return;
         }
 
-        if (!formData.birthDate) {
-            showModalMessage('Error', 'Birth date is required');
-            return;
-        }
-
-        const totalNewOffspring = parseInt(formData.maleCount) + parseInt(formData.femaleCount);
-        const totalLinkedOffspring = formData.linkedOffspringIds?.length || 0;
-        
-        // Allow litter creation with either counts for tracking OR linked animals
-        if (totalNewOffspring === 0 && totalLinkedOffspring === 0) {
-            showModalMessage('Error', 'Please specify offspring counts for tracking and/or link existing animals');
-            return;
-        }
-
         try {
             // Get parent details
             const sire = myAnimals.find(a => a.id_public === formData.sireId_public);
@@ -2395,17 +2385,20 @@ const LitterManagement = ({ authToken, API_BASE_URL, userProfile, showModalMessa
                 return;
             }
 
-            // Create litter with offspring counts for tracking
-            const totalCount = parseInt(formData.maleCount) + parseInt(formData.femaleCount);
+            // Create litter with optional tracking counts
+            const maleCountNum = formData.maleCount ? parseInt(formData.maleCount) : 0;
+            const femaleCountNum = formData.femaleCount ? parseInt(formData.femaleCount) : 0;
+            const totalCount = maleCountNum + femaleCountNum;
+            
             const litterPayload = {
                 breedingPairCodeName: formData.breedingPairCodeName || null,
                 sireId_public: formData.sireId_public,
                 damId_public: formData.damId_public,
                 pairingDate: formData.pairingDate || null,
-                birthDate: formData.birthDate,
-                numberBorn: totalCount, // Track total count
-                maleCount: parseInt(formData.maleCount) || 0,
-                femaleCount: parseInt(formData.femaleCount) || 0,
+                birthDate: formData.birthDate || null,
+                numberBorn: totalCount > 0 ? totalCount : (formData.linkedOffspringIds?.length || 0),
+                maleCount: maleCountNum,
+                femaleCount: femaleCountNum,
                 notes: formData.notes || '',
                 offspringIds_public: formData.linkedOffspringIds || []
             };
@@ -2438,39 +2431,103 @@ const LitterManagement = ({ authToken, API_BASE_URL, userProfile, showModalMessa
                 console.log('Could not calculate COI for litter:', coiError);
             }
 
-            // Create offspring animals
-            // NOTE: Animals are NO LONGER automatically created from male/female counts.
-            // Those counts are for tracking purposes only.
-            // Only linked existing animals will be associated with this litter.
+            // Create offspring animals if requested
             const offspringPromises = [];
+            const totalToCreate = parseInt(createOffspringCounts.males) + parseInt(createOffspringCounts.females);
             
-            // If user wants to create placeholder animals, they can do so via the "Add Offspring" feature after creation
+            if (totalToCreate > 0) {
+                // Need birthdate to create animals
+                if (!formData.birthDate) {
+                    showModalMessage('Error', 'Birth date is required to create new offspring animals');
+                    return;
+                }
+                
+                // Create males
+                for (let i = 1; i <= parseInt(createOffspringCounts.males); i++) {
+                    const animalData = {
+                        name: `M${i}`,
+                        species: sire.species,
+                        gender: 'Male',
+                        birthDate: formData.birthDate,
+                        status: 'Pet',
+                        fatherId_public: formData.sireId_public,
+                        motherId_public: formData.damId_public,
+                        isOwned: true,
+                        breederId_public: userProfile.id_public,
+                        ownerId_public: userProfile.id_public
+                    };
+                    offspringPromises.push(
+                        axios.post(`${API_BASE_URL}/animals`, animalData, {
+                            headers: { Authorization: `Bearer ${authToken}` }
+                        })
+                    );
+                }
+                
+                // Create females
+                for (let i = 1; i <= parseInt(createOffspringCounts.females); i++) {
+                    const animalData = {
+                        name: `F${i}`,
+                        species: sire.species,
+                        gender: 'Female',
+                        birthDate: formData.birthDate,
+                        status: 'Pet',
+                        fatherId_public: formData.sireId_public,
+                        motherId_public: formData.damId_public,
+                        isOwned: true,
+                        breederId_public: userProfile.id_public,
+                        ownerId_public: userProfile.id_public
+                    };
+                    offspringPromises.push(
+                        axios.post(`${API_BASE_URL}/animals`, animalData, {
+                            headers: { Authorization: `Bearer ${authToken}` }
+                        })
+                    );
+                }
+            }
             
             const createdAnimals = await Promise.all(offspringPromises);
 
             // Extract the IDs from created animals
             const newOffspringIds = createdAnimals.map(response => response.data.id_public);
             
-            // Use linked offspring IDs only
-            const allOffspringIds = [...(formData.linkedOffspringIds || [])];
+            // Combine created and linked offspring IDs
+            const allOffspringIds = [...newOffspringIds, ...(formData.linkedOffspringIds || [])];
             
-            // Update litter with linked offspring
+            // Calculate inbreeding for each NEW offspring
+            for (const animalId of newOffspringIds) {
+                try {
+                    await axios.get(`${API_BASE_URL}/animals/${animalId}/inbreeding`, {
+                        params: { generations: 50 },
+                        headers: { Authorization: `Bearer ${authToken}` }
+                    });
+                } catch (coiError) {
+                    console.log(`Could not calculate COI for animal ${animalId}:`, coiError);
+                }
+            }
+            
+            // Update litter with all offspring
             await axios.put(`${API_BASE_URL}/litters/${litterId}`, {
                 offspringIds_public: allOffspringIds
             }, {
                 headers: { Authorization: `Bearer ${authToken}` }
             });
 
+            const createdCount = newOffspringIds.length;
             const linkedCount = formData.linkedOffspringIds?.length || 0;
-            const trackingCount = parseInt(formData.maleCount) + parseInt(formData.femaleCount);
+            const trackingMales = formData.maleCount ? parseInt(formData.maleCount) : 0;
+            const trackingFemales = formData.femaleCount ? parseInt(formData.femaleCount) : 0;
+            
             let successMsg = 'Litter created successfully!';
-            if (linkedCount > 0 && trackingCount > 0) {
-                successMsg = `Litter created with ${linkedCount} linked animal(s) and ${trackingCount} tracked offspring!`;
-            } else if (linkedCount > 0) {
-                successMsg = `Litter created with ${linkedCount} linked animal(s)!`;
-            } else if (trackingCount > 0) {
-                successMsg = `Litter created with ${trackingCount} tracked offspring (counts only)!`;
+            const parts = [];
+            if (createdCount > 0) parts.push(`${createdCount} new animal(s) created`);
+            if (linkedCount > 0) parts.push(`${linkedCount} animal(s) linked`);
+            if (trackingMales > 0 || trackingFemales > 0) {
+                parts.push(`tracking ${trackingMales}M/${trackingFemales}F`);
             }
+            if (parts.length > 0) {
+                successMsg = `Litter created with ${parts.join(', ')}!`;
+            }
+            
             showModalMessage('Success', successMsg);
             setShowAddForm(false);
             setFormData({
@@ -2479,11 +2536,12 @@ const LitterManagement = ({ authToken, API_BASE_URL, userProfile, showModalMessa
                 damId_public: '',
                 pairingDate: '',
                 birthDate: '',
-                maleCount: 0,
-                femaleCount: 0,
+                maleCount: '',
+                femaleCount: '',
                 notes: '',
                 linkedOffspringIds: []
             });
+            setCreateOffspringCounts({ males: 0, females: 0 });
             fetchLitters();
             fetchMyAnimals();
         } catch (error) {
@@ -2772,56 +2830,55 @@ const LitterManagement = ({ authToken, API_BASE_URL, userProfile, showModalMessa
                         {/* Birth Date */}
                         <div>
                             <label className="block text-sm font-medium text-gray-700 mb-1">
-                                Birth Date <span className="text-red-500">*</span>
+                                Birth Date (Optional)
                             </label>
                             <input
                                 type="date"
                                 value={formData.birthDate}
                                 onChange={(e) => setFormData({...formData, birthDate: e.target.value})}
                                 className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent"
-                                required
                             />
                         </div>
 
                         {/* Male Count */}
                         <div>
                             <label className="block text-sm font-medium text-gray-700 mb-1">
-                                Number of Males (for tracking)
+                                Number of Males (Optional)
                             </label>
                             <input
-                                type="number"
-                                min="0"
+                                type="text"
                                 value={formData.maleCount}
                                 onChange={(e) => setFormData({...formData, maleCount: e.target.value})}
                                 className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent"
+                                placeholder="e.g., 5 or just notes"
                             />
                         </div>
 
                         {/* Female Count */}
                         <div>
                             <label className="block text-sm font-medium text-gray-700 mb-1">
-                                Number of Females (for tracking)
+                                Number of Females (Optional)
                             </label>
                             <input
-                                type="number"
-                                min="0"
+                                type="text"
                                 value={formData.femaleCount}
                                 onChange={(e) => setFormData({...formData, femaleCount: e.target.value})}
                                 className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent"
+                                placeholder="e.g., 3 or just notes"
                             />
                         </div>
                     </div>
 
                     {/* Link Existing Offspring */}
-                    <div className="mb-4 border-t pt-4">
-                        <label className="block text-sm font-medium text-gray-700 mb-2">
-                            Link Existing Animals as Offspring (Optional)
-                        </label>
-                        <div className="bg-gray-50 p-3 rounded-lg">
-                            <p className="text-xs text-gray-600 mb-3">
-                                Select animals with matching parents and birth date to link them to this litter instead of creating new offspring.
-                            </p>
-                            {formData.sireId_public && formData.damId_public && formData.birthDate ? (
+                    {formData.sireId_public && formData.damId_public && formData.birthDate && (
+                        <div className="mb-4 border-t pt-4">
+                            <label className="block text-sm font-medium text-gray-700 mb-2">
+                                Link Existing Animals as Offspring
+                            </label>
+                            <div className="bg-gray-50 p-3 rounded-lg">
+                                <p className="text-xs text-gray-600 mb-3">
+                                    Select animals with matching parents and birth date to link them to this litter.
+                                </p>
                                 <div className="space-y-2">
                                     {myAnimals
                                         .filter(animal => {
@@ -2863,13 +2920,56 @@ const LitterManagement = ({ authToken, API_BASE_URL, userProfile, showModalMessa
                                         </p>
                                     )}
                                 </div>
-                            ) : (
-                                <p className="text-xs text-gray-500 italic">
-                                    Select parents and birth date first to see matching animals
-                                </p>
-                            )}
+                            </div>
                         </div>
-                    </div>
+                    )}
+
+                    {/* Create New Offspring */}
+                    {formData.sireId_public && formData.damId_public && formData.birthDate && (
+                        <div className="mb-4 border-t pt-4">
+                            <label className="block text-sm font-medium text-gray-700 mb-2">
+                                Create New Offspring Animals
+                            </label>
+                            <div className="bg-blue-50 p-4 rounded-lg border border-blue-200">
+                                <p className="text-xs text-blue-800 mb-3">
+                                    <strong>Create placeholder animals:</strong> These will be created with names M1, M2... for males and F1, F2... for females. You can edit names and details after creation.
+                                </p>
+                                <div className="grid grid-cols-2 gap-4">
+                                    <div>
+                                        <label className="block text-xs font-medium text-gray-700 mb-1">
+                                            Add # Males
+                                        </label>
+                                        <input
+                                            type="number"
+                                            min="0"
+                                            value={createOffspringCounts.males}
+                                            onChange={(e) => setCreateOffspringCounts({...createOffspringCounts, males: e.target.value})}
+                                            className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent"
+                                            placeholder="0"
+                                        />
+                                    </div>
+                                    <div>
+                                        <label className="block text-xs font-medium text-gray-700 mb-1">
+                                            Add # Females
+                                        </label>
+                                        <input
+                                            type="number"
+                                            min="0"
+                                            value={createOffspringCounts.females}
+                                            onChange={(e) => setCreateOffspringCounts({...createOffspringCounts, females: e.target.value})}
+                                            className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent"
+                                            placeholder="0"
+                                        />
+                                    </div>
+                                </div>
+                                {(parseInt(createOffspringCounts.males) > 0 || parseInt(createOffspringCounts.females) > 0) && (
+                                    <p className="text-xs text-green-600 font-semibold mt-2">
+                                        Will create {parseInt(createOffspringCounts.males) + parseInt(createOffspringCounts.females)} new animal(s)
+                                    </p>
+                                )}
+                            </div>
+                        </div>
+                    )}
 
                     {/* Notes */}
                     <div className="mb-4">
@@ -2883,13 +2983,6 @@ const LitterManagement = ({ authToken, API_BASE_URL, userProfile, showModalMessa
                             rows="3"
                             placeholder="Additional notes about this litter..."
                         />
-                    </div>
-
-                    <div className="bg-primary/20 border border-primary rounded-lg p-4 mb-4">
-                        <p className="text-sm text-gray-800">
-                            <strong>Note:</strong> Male/female counts are for tracking purposes only and will NOT automatically create animal records. 
-                            Use "Link Existing Animals" above to associate already-created animals with this litter, or add offspring manually after creation.
-                        </p>
                     </div>
 
                     <button
