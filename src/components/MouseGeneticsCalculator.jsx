@@ -652,24 +652,13 @@ const calculatePhenotype = (genotype, originalGenotype = null) => {
     if (originalGenotype.P && originalGenotype.P !== '') selectedColorGenes.push('P');
   }
 
-  // If only one color gene is selected, show descriptive title with note
-  if (selectedColorGenes.length === 1 && !originalGenotype.W && !originalGenotype.Wsh && !originalGenotype.Rw && !originalGenotype.S && !originalGenotype.Mi && !originalGenotype.Rb) {
+  // If only one color gene is selected (excluding A-locus which can stand alone), show descriptive title with note
+  if (selectedColorGenes.length === 1 && selectedColorGenes[0] !== 'A' && !originalGenotype.W && !originalGenotype.Wsh && !originalGenotype.Rw && !originalGenotype.S && !originalGenotype.Mi && !originalGenotype.Rb) {
     const singleGene = selectedColorGenes[0];
     let title = '';
     let note = '';
     
-    if (singleGene === 'A') {
-      if (genotype.A === 'A/A' || genotype.A === 'A/a' || genotype.A === 'A/at' || genotype.A === 'A/ae') {
-        title = 'Agouti Pattern';
-      } else if (genotype.A === 'at/at' || genotype.A === 'at/a' || genotype.A === 'at/ae') {
-        title = 'Tan Pattern';
-      } else if (genotype.A === 'a/a' || genotype.A === 'a/ae') {
-        title = 'Self Pattern';
-      } else if (genotype.A === 'ae/ae') {
-        title = 'Extreme Non-Agouti Pattern';
-      }
-      note = 'Additional color loci (B, C, D, E, P) are needed for full phenotype calculation';
-    } else if (singleGene === 'B') {
+    if (singleGene === 'B') {
       title = genotype.B === 'b/b' ? 'Brown/Chocolate Base' : 'Black Base';
       note = 'A-locus selection is needed for full phenotype calculation';
     } else if (singleGene === 'C') {
@@ -1127,8 +1116,8 @@ const MouseGeneticsCalculator = ({ API_BASE_URL, authToken }) => {
     const selectedColorGenes = selectedLoci.filter(locus => colorGenes.includes(locus));
     const selectedMarkingGenes = selectedLoci.filter(locus => markingGenes.includes(locus));
     
-    // If only one color gene selected and no marking genes, prevent calculation
-    if (selectedColorGenes.length === 1 && selectedMarkingGenes.length === 0) {
+    // If only one color gene selected (excluding A-locus which can stand alone) and no marking genes, prevent calculation
+    if (selectedColorGenes.length === 1 && !selectedColorGenes.includes('A') && selectedMarkingGenes.length === 0) {
       alert('Additional color loci are needed for full phenotype calculation. Please select A-locus along with other color genes (B, C, D, E, P) for complete results.');
       return;
     }
