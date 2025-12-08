@@ -4874,29 +4874,6 @@ const UserProfileCard = ({ userProfile }) => {
                 <div className="text-xs text-gray-600">
                     {formattedCreationDate}
                 </div>
-
-                {((userProfile.showEmailPublic ?? false)) && (
-                    <div className="flex items-center justify-center space-x-1">
-                        <Mail size={12} className="text-gray-500" />
-                        <a href={`mailto:${userProfile.email}`} className="text-xs text-gray-700 hover:text-primary transition duration-150 truncate">
-                            {userProfile.email}
-                        </a>
-                    </div>
-                )}
-                
-                {(userProfile.websiteURL && userProfile.showWebsiteURL) && (
-                    <div className="flex items-center justify-center space-x-1">
-                        <Globe size={12} className="text-gray-500" />
-                        <a 
-                            href={userProfile.websiteURL} 
-                            target="_blank" 
-                            rel="noopener noreferrer" 
-                            className="text-xs text-primary-dark hover:underline transition duration-150 truncate"
-                        >
-                            {userProfile.websiteURL.replace(/https?:\/\/(www.)?/, '')}
-                        </a>
-                    </div>
-                )}
             </div>
         </div>
     );
