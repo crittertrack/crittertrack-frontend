@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useCallback, useRef, useMemo } from 'react';
 import { useParams, useNavigate, useLocation, Routes, Route } from 'react-router-dom';
 import axios from 'axios';
-import { LogOut, Cat, UserPlus, LogIn, ChevronLeft, Trash2, Edit, Save, PlusCircle, Plus, ArrowLeft, Loader2, RefreshCw, User, Users, ClipboardList, BookOpen, Settings, Mail, Globe, Egg, Milk, Search, X, Mars, Venus, Eye, EyeOff, Home, Heart, HeartOff, Bell, XCircle, Download, FileText, Link, AlertCircle, Check } from 'lucide-react';
+import { LogOut, Cat, UserPlus, LogIn, ChevronLeft, Trash2, Edit, Save, PlusCircle, Plus, ArrowLeft, Loader2, RefreshCw, User, Users, ClipboardList, BookOpen, Settings, Mail, Globe, Egg, Milk, Search, X, Mars, Venus, Eye, EyeOff, Home, Heart, HeartOff, HeartHandshake, Bell, XCircle, Download, FileText, Link, AlertCircle, Check } from 'lucide-react';
 import jsPDF from 'jspdf';
 import html2canvas from 'html2canvas';
 import MouseGeneticsCalculator from './components/MouseGeneticsCalculator';
@@ -6117,7 +6117,7 @@ const AnimalList = ({ authToken, showModalMessage, onEditAnimal, onViewAnimal, o
                                 ownedFilterActive ? 'bg-primary text-black' : 'bg-gray-200 text-gray-700 hover:bg-gray-300'
                             }`}
                         >
-                            {ownedFilterActive ? <Heart size={16} /> : <HeartOff size={16} />}
+                            {ownedFilterActive ? <Heart size={16} /> : <HeartHandshake size={16} />}
                             <span>{ownedFilterActive ? 'My Animals' : 'All Animals'}</span>
                         </button>
 
