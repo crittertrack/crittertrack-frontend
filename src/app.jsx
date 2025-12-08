@@ -14,7 +14,7 @@ const API_BASE_URL = 'https://crittertrack-pedigree-production.up.railway.app/ap
 // const API_BASE_URL = '/api'; // Production via Vercel proxy
 
 const GENDER_OPTIONS = ['Male', 'Female'];
-const STATUS_OPTIONS = ['Pet', 'Breeder', 'Available', 'Retired', 'Deceased', 'Rehomed']; 
+const STATUS_OPTIONS = ['Pet', 'Breeder', 'Available', 'Retired', 'Deceased', 'Rehomed', 'Unknown']; 
 
 const DEFAULT_SPECIES_OPTIONS = ['Mouse', 'Rat', 'Hamster'];
 
