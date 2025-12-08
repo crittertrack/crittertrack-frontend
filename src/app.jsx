@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useCallback, useRef, useMemo } from 'react';
 import { useParams, useNavigate, useLocation, Routes, Route } from 'react-router-dom';
 import axios from 'axios';
-import { LogOut, Cat, UserPlus, LogIn, ChevronLeft, Trash2, Edit, Save, PlusCircle, Plus, ArrowLeft, Loader2, RefreshCw, User, ClipboardList, BookOpen, Settings, Mail, Globe, Egg, Milk, Search, X, Mars, Venus, Eye, EyeOff, Home, Heart, HeartOff, Bell, XCircle, Download, FileText, Link, AlertCircle } from 'lucide-react';
+import { LogOut, Cat, UserPlus, LogIn, ChevronLeft, Trash2, Edit, Save, PlusCircle, Plus, ArrowLeft, Loader2, RefreshCw, User, Users, ClipboardList, BookOpen, Settings, Mail, Globe, Egg, Milk, Search, X, Mars, Venus, Eye, EyeOff, Home, Heart, HeartOff, Bell, XCircle, Download, FileText, Link, AlertCircle } from 'lucide-react';
 import jsPDF from 'jspdf';
 import html2canvas from 'html2canvas';
 import MouseGeneticsCalculator from './components/MouseGeneticsCalculator';
@@ -5747,6 +5747,7 @@ const AnimalList = ({ authToken, showModalMessage, onEditAnimal, onViewAnimal, o
     const [animals, setAnimals] = useState([]);
     const [loading, setLoading] = useState(true);
     const [statusFilter, setStatusFilter] = useState('');
+    const [newestUsers, setNewestUsers] = useState([]);
     // Manual search: `searchInput` is the controlled input, `appliedNameFilter` is sent to the API
     const [searchInput, setSearchInput] = useState('');
     const [appliedNameFilter, setAppliedNameFilter] = useState('');
@@ -5834,7 +5835,17 @@ const AnimalList = ({ authToken, showModalMessage, onEditAnimal, onViewAnimal, o
 
     useEffect(() => {
         fetchAnimals();
+        fetchNewestUsers();
     }, [fetchAnimals]);
+
+    const fetchNewestUsers = async () => {
+        try {
+            const response = await axios.get(`${API_BASE_URL}/public/users/newest?limit=10`);
+            setNewestUsers(response.data || []);
+        } catch (error) {
+            console.error('Error fetching newest users:', error);
+        }
+    };
 
     // Refresh animals when other parts of the app signal a change (e.g., after upload/save)
     useEffect(() => {
@@ -5997,6 +6008,39 @@ const AnimalList = ({ authToken, showModalMessage, onEditAnimal, onViewAnimal, o
 
     return (
         <div className="w-full max-w-4xl bg-white p-6 rounded-xl shadow-lg">
+            {/* Newest Users Banner */}
+            {newestUsers.length > 0 && (
+                <div className="mb-6 bg-gradient-to-r from-primary/20 to-accent/20 p-4 rounded-lg border border-primary/30">
+                    <h3 className="text-sm font-semibold text-gray-800 mb-3 flex items-center">
+                        <Users size={16} className="mr-2 text-primary-dark" />
+                        Newest Members
+                    </h3>
+                    <div className="flex overflow-x-auto gap-3 pb-2">
+                        {newestUsers.map(user => (
+                            <div 
+                                key={user.id_public} 
+                                className="flex-shrink-0 bg-white rounded-lg p-3 shadow-sm border border-gray-200 hover:shadow-md transition cursor-pointer min-w-[140px]"
+                                onClick={() => window.location.href = `/profile/${user.id_public}`}
+                            >
+                                <div className="w-12 h-12 bg-gray-100 rounded-full overflow-hidden mx-auto mb-2">
+                                    {user.profileImage ? (
+                                        <img src={user.profileImage} alt={user.breederName || user.personalName} className="w-full h-full object-cover" />
+                                    ) : (
+                                        <div className="w-full h-full flex items-center justify-center text-gray-400">
+                                            <User size={24} />
+                                        </div>
+                                    )}
+                                </div>
+                                <p className="text-xs font-semibold text-gray-800 text-center truncate">
+                                    {user.showBreederName && user.breederName ? user.breederName : user.personalName}
+                                </p>
+                                <p className="text-xs text-gray-500 text-center truncate">{user.id_public}</p>
+                            </div>
+                        ))}
+                    </div>
+                </div>
+            )}
+
             <h2 className="text-3xl font-bold text-gray-800 mb-6 flex items-center justify-between">
                 <div className='flex items-center'>
                     <ClipboardList size={24} className="mr-3 text-primary-dark" />
