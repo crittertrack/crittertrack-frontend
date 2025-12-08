@@ -5727,11 +5727,11 @@ const AnimalList = ({ authToken, showModalMessage, onEditAnimal, onViewAnimal, o
     // Manual search: `searchInput` is the controlled input, `appliedNameFilter` is sent to the API
     const [searchInput, setSearchInput] = useState('');
     const [appliedNameFilter, setAppliedNameFilter] = useState('');
-    const [genderFilter, setGenderFilter] = useState('');
-    const [speciesFilter, setSpeciesFilter] = useState('');
+    const [selectedGenders, setSelectedGenders] = useState([...GENDER_OPTIONS]);
+    const [selectedSpecies, setSelectedSpecies] = useState([...DEFAULT_SPECIES_OPTIONS]);
     const [statusFilterPregnant, setStatusFilterPregnant] = useState(false);
     const [statusFilterNursing, setStatusFilterNursing] = useState(false);
-    const [ownedFilter, setOwnedFilter] = useState('owned');
+    const [ownedFilterActive, setOwnedFilterActive] = useState(true);
     const [publicFilter, setPublicFilter] = useState('');
     
     const fetchAnimals = useCallback(async () => {
@@ -5740,12 +5740,6 @@ const AnimalList = ({ authToken, showModalMessage, onEditAnimal, onViewAnimal, o
             let params = [];
             if (statusFilter) {
                 params.push(`status=${statusFilter}`);
-            }
-            if (genderFilter) {
-                params.push(`gender=${genderFilter}`);
-            }
-            if (speciesFilter) {
-                params.push(`species=${encodeURIComponent(speciesFilter)}`);
             }
             if (appliedNameFilter) {
                 params.push(`name=${encodeURIComponent(appliedNameFilter)}`);
@@ -5756,7 +5750,7 @@ const AnimalList = ({ authToken, showModalMessage, onEditAnimal, onViewAnimal, o
             if (statusFilterNursing) {
                 params.push(`isNursing=true`);
             }
-            if (ownedFilter === 'owned') {
+            if (ownedFilterActive) {
                 params.push(`isOwned=true`);
             }
             const queryString = params.length > 0 ? `?${params.join('&')}` : '';
@@ -5764,6 +5758,7 @@ const AnimalList = ({ authToken, showModalMessage, onEditAnimal, onViewAnimal, o
 
             const response = await axios.get(url, { headers: { Authorization: `Bearer ${authToken}` } });
             let data = response.data || [];
+            
             // Client-side fallback filtering in case the API doesn't apply the `name` filter reliably
             if (appliedNameFilter) {
                 const term = appliedNameFilter.toLowerCase();
@@ -5773,6 +5768,16 @@ const AnimalList = ({ authToken, showModalMessage, onEditAnimal, onViewAnimal, o
                     const idPublic = (a.id_public || '').toString().toLowerCase();
                     return name.includes(term) || registry.includes(term) || idPublic.includes(term.replace(/^ct-?/,'').toLowerCase());
                 });
+            }
+
+            // Filter by selected species (if not all are selected)
+            if (selectedSpecies.length > 0 && selectedSpecies.length < DEFAULT_SPECIES_OPTIONS.length) {
+                data = data.filter(a => selectedSpecies.includes(a.species));
+            }
+
+            // Filter by selected genders (if not all are selected)
+            if (selectedGenders.length > 0 && selectedGenders.length < GENDER_OPTIONS.length) {
+                data = data.filter(a => selectedGenders.includes(a.gender));
             }
 
             // Enforce that males are excluded when pregnant or nursing filters are active
@@ -5815,7 +5820,7 @@ const AnimalList = ({ authToken, showModalMessage, onEditAnimal, onViewAnimal, o
         } finally {
             setLoading(false);
         }
-    }, [authToken, statusFilter, genderFilter, speciesFilter, appliedNameFilter, statusFilterPregnant, statusFilterNursing, ownedFilter, publicFilter, showModalMessage]);
+    }, [authToken, statusFilter, selectedGenders, selectedSpecies, appliedNameFilter, statusFilterPregnant, statusFilterNursing, ownedFilterActive, publicFilter, showModalMessage]);
 
     useEffect(() => {
         fetchAnimals();
@@ -5858,7 +5863,20 @@ const AnimalList = ({ authToken, showModalMessage, onEditAnimal, onViewAnimal, o
 
     const handleStatusFilterChange = (e) => setStatusFilter(e.target.value);
     const handleSearchInputChange = (e) => setSearchInput(e.target.value);
-    const handleGenderFilterChange = (gender) => setGenderFilter(gender);
+    const toggleGender = (gender) => {
+        setSelectedGenders(prev => 
+            prev.includes(gender) 
+                ? prev.filter(g => g !== gender) 
+                : [...prev, gender]
+        );
+    };
+    const toggleSpecies = (species) => {
+        setSelectedSpecies(prev => 
+            prev.includes(species)
+                ? prev.filter(s => s !== species)
+                : [...prev, species]
+        );
+    };
     const handleFilterPregnant = () => { setStatusFilterPregnant(prev => !prev); setStatusFilterNursing(false); };
     const handleFilterNursing = () => { setStatusFilterNursing(prev => !prev); setStatusFilterPregnant(false); };
     
@@ -6032,15 +6050,14 @@ const AnimalList = ({ authToken, showModalMessage, onEditAnimal, onViewAnimal, o
                 <div className="flex flex-col sm:flex-row gap-3 pt-2 border-t border-gray-200">
                     <div className="flex gap-2 items-center flex-wrap">
                         <span className='text-sm font-medium text-gray-700 whitespace-nowrap'>Species:</span>
-                        {['All', ...DEFAULT_SPECIES_OPTIONS].map(species => {
-                            const value = species === 'All' ? '' : species;
-                            const isCurrentSelected = speciesFilter === value;
-                            const displayName = species === 'All' ? 'All' : getSpeciesDisplayName(species);
+                        {DEFAULT_SPECIES_OPTIONS.map(species => {
+                            const isSelected = selectedSpecies.includes(species);
+                            const displayName = getSpeciesDisplayName(species);
                             
                             return (
-                                <button key={species} onClick={() => setSpeciesFilter(value)}
+                                <button key={species} onClick={() => toggleSpecies(species)}
                                     className={`px-3 py-1.5 text-sm font-semibold rounded-lg transition duration-150 shadow-sm ${ 
-                                        isCurrentSelected ? 'bg-primary text-black' : 'bg-gray-200 text-gray-700 hover:bg-gray-300'
+                                        isSelected ? 'bg-primary text-black' : 'bg-gray-200 text-gray-700 hover:bg-gray-300'
                                     }`}
                                 >
                                     {displayName}
@@ -6054,13 +6071,12 @@ const AnimalList = ({ authToken, showModalMessage, onEditAnimal, onViewAnimal, o
                 <div className="flex flex-col sm:flex-row gap-3 pt-2 border-t border-gray-200 justify-between">
                     <div className="flex gap-2 items-center">
                         <span className='text-sm font-medium text-gray-700 whitespace-nowrap'>Gender:</span>
-                        {['All', ...GENDER_OPTIONS].map(gender => {
-                            const value = gender === 'All' ? '' : gender;
-                            const isCurrentSelected = genderFilter === value;
-                            let selectedClasses = isCurrentSelected ? (gender === 'Male' ? 'bg-primary text-black' : gender === 'Female' ? 'bg-accent text-white' : 'bg-primary-dark text-black') : 'bg-gray-200 text-gray-700 hover:bg-gray-300';
+                        {GENDER_OPTIONS.map(gender => {
+                            const isSelected = selectedGenders.includes(gender);
+                            let selectedClasses = isSelected ? (gender === 'Male' ? 'bg-primary text-black' : gender === 'Female' ? 'bg-accent text-white' : 'bg-primary-dark text-black') : 'bg-gray-200 text-gray-700 hover:bg-gray-300';
                             
                             return (
-                                <button key={gender} onClick={() => handleGenderFilterChange(value)}
+                                <button key={gender} onClick={() => toggleGender(gender)}
                                     className={`flex-1 px-3 py-1.5 text-sm font-semibold rounded-lg transition duration-150 shadow-sm ${selectedClasses}`}
                                 >
                                     {gender}
@@ -6087,19 +6103,13 @@ const AnimalList = ({ authToken, showModalMessage, onEditAnimal, onViewAnimal, o
                     <div className="flex flex-wrap items-center gap-2">
                         <span className='text-sm font-medium text-gray-700 whitespace-nowrap'>Show:</span>
                         
-                        {['Owned', 'All'].map(option => {
-                            const value = option.toLowerCase();
-                            const isSelected = ownedFilter === value;
-                            return (
-                                <button key={value} onClick={() => setOwnedFilter(value)}
-                                    className={`px-3 py-1.5 text-sm font-semibold rounded-lg transition duration-150 shadow-sm ${ 
-                                        isSelected ? 'bg-primary text-black' : 'bg-gray-200 text-gray-700 hover:bg-gray-300'
-                                    }`}
-                                >
-                                    {option}
-                                </button>
-                            );
-                        })}
+                        <button onClick={() => setOwnedFilterActive(prev => !prev)}
+                            className={`px-3 py-1.5 text-sm font-semibold rounded-lg transition duration-150 shadow-sm ${ 
+                                ownedFilterActive ? 'bg-primary text-black' : 'bg-gray-200 text-gray-700 hover:bg-gray-300'
+                            }`}
+                        >
+                            {ownedFilterActive ? 'My Animals' : 'All Animals'}
+                        </button>
 
                         <button onClick={handleFilterPregnant}
                             className={`px-3 py-1.5 text-sm font-semibold rounded-lg transition duration-150 shadow-sm flex items-center space-x-1 ${ 
