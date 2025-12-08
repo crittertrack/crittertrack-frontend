@@ -4834,40 +4834,40 @@ const UserProfileCard = ({ userProfile }) => {
     const isBreederNameVisible = userProfile.showBreederName ?? false;
 
     return (
-        <div className="bg-white p-4 rounded-xl shadow-lg flex flex-col items-center text-center" style={{minWidth: '200px', maxWidth: '220px'}}>
+        <div className="bg-white p-3 rounded-xl shadow-lg flex flex-col items-center text-center" style={{minWidth: '200px', maxWidth: '220px'}}>
             {/* Names at top */}
-            <div className="mb-3 w-full">
+            <div className="mb-2 w-full">
                 {isPersonalNameVisible && (
-                    <h3 className="text-base font-bold text-gray-900 line-clamp-2">
+                    <h3 className="text-sm font-bold text-gray-900 line-clamp-2">
                         {userProfile.personalName}
                     </h3>
                 )}
                 
                 {(isBreederNameVisible && userProfile.breederName) && (
-                    <div className="text-sm text-gray-700 font-semibold line-clamp-1">
+                    <div className="text-xs text-gray-700 font-semibold line-clamp-1">
                         {userProfile.breederName}
                     </div>
                 )}
 
                 {(!isPersonalNameVisible && !isBreederNameVisible) && (
-                    <h3 className="text-sm font-bold text-gray-500">
+                    <h3 className="text-xs font-bold text-gray-500">
                         (Name Hidden)
                     </h3>
                 )}
             </div>
 
             {/* Image centered */}
-            <div className="w-20 h-20 bg-gray-200 rounded-lg flex items-center justify-center text-gray-500 overflow-hidden shadow-inner mb-3">
+            <div className="w-16 h-16 bg-gray-200 rounded-lg flex items-center justify-center text-gray-500 overflow-hidden shadow-inner mb-2">
                 {(userProfile.profileImage || userProfile.profileImageUrl || userProfile.imageUrl || userProfile.avatarUrl || userProfile.avatar || userProfile.profile_image) ? (
                     <img src={userProfile.profileImage || userProfile.profileImageUrl || userProfile.imageUrl || userProfile.avatarUrl || userProfile.avatar || userProfile.profile_image} alt={userProfile.personalName} className="w-full h-full object-cover" />
                 ) : (
-                    <User size={40} />
+                    <User size={32} />
                 )}
             </div>
 
             {/* Other info below image */}
-            <div className="w-full space-y-2">
-                <div className="text-lg font-extrabold text-accent">
+            <div className="w-full space-y-1">
+                <div className="text-sm font-extrabold text-accent">
                     {userProfile.id_public}
                 </div>
                 
@@ -7430,9 +7430,9 @@ const App = () => {
                     
                     {/* Community Activity Banner */}
                     {(newestUsers.length > 0 || activeUsers.length > 0) && (
-                        <div className="flex-1 bg-gradient-to-r from-primary/20 to-accent/20 p-4 rounded-lg border border-primary/30">
-                            <h3 className="text-sm font-semibold text-gray-800 mb-3 flex items-center">
-                                <Users size={16} className="mr-2 text-primary-dark" />
+                        <div className="flex-1 bg-gradient-to-r from-primary/20 to-accent/20 p-3 rounded-lg border border-primary/30">
+                            <h3 className="text-xs font-semibold text-gray-800 mb-2 flex items-center">
+                                <Users size={14} className="mr-2 text-primary-dark" />
                                 Community Activity
                             </h3>
                             <div 
@@ -7449,18 +7449,18 @@ const App = () => {
                                     return (
                                         <div 
                                             key={`new-${user.id_public}`}
-                                            className="flex-shrink-0 bg-white rounded-lg p-3 shadow-sm border-2 border-primary/40 hover:shadow-md transition cursor-pointer min-w-[140px]"
+                                            className="flex-shrink-0 bg-white rounded-lg p-2 shadow-sm border-2 border-primary/40 hover:shadow-md transition cursor-pointer min-w-[120px]"
                                             onClick={() => {
                                                 setViewingPublicProfile(user);
                                                 setCurrentView('publicProfile');
                                             }}
                                         >
-                                            <div className="w-12 h-12 bg-gray-100 rounded-full overflow-hidden mx-auto mb-2">
+                                            <div className="w-10 h-10 bg-gray-100 rounded-full overflow-hidden mx-auto mb-1">
                                                 {user.profileImage ? (
                                                     <img src={user.profileImage} alt={displayName} className="w-full h-full object-cover" />
                                                 ) : (
                                                     <div className="w-full h-full flex items-center justify-center text-gray-400">
-                                                        <User size={24} />
+                                                        <User size={20} />
                                                     </div>
                                                 )}
                                             </div>
@@ -7481,18 +7481,18 @@ const App = () => {
                                     return (
                                         <div 
                                             key={`active-${user.id_public}`}
-                                            className="flex-shrink-0 bg-white rounded-lg p-3 shadow-sm border-2 border-accent/40 hover:shadow-md transition cursor-pointer min-w-[140px]"
+                                            className="flex-shrink-0 bg-white rounded-lg p-2 shadow-sm border-2 border-accent/40 hover:shadow-md transition cursor-pointer min-w-[120px]"
                                             onClick={() => {
                                                 setViewingPublicProfile(user);
                                                 setCurrentView('publicProfile');
                                             }}
                                         >
-                                            <div className="w-12 h-12 bg-gray-100 rounded-full overflow-hidden mx-auto mb-2">
+                                            <div className="w-10 h-10 bg-gray-100 rounded-full overflow-hidden mx-auto mb-1">
                                                 {user.profileImage ? (
                                                     <img src={user.profileImage} alt={displayName} className="w-full h-full object-cover" />
                                                 ) : (
                                                     <div className="w-full h-full flex items-center justify-center text-gray-400">
-                                                        <User size={24} />
+                                                        <User size={20} />
                                                     </div>
                                                 )}
                                             </div>
