@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useCallback, useRef, useMemo } from 'react';
 import { useParams, useNavigate, useLocation, Routes, Route } from 'react-router-dom';
 import axios from 'axios';
-import { LogOut, Cat, UserPlus, LogIn, ChevronLeft, Trash2, Edit, Save, PlusCircle, Plus, ArrowLeft, Loader2, RefreshCw, User, Users, ClipboardList, BookOpen, Settings, Mail, Globe, Egg, Milk, Search, X, Mars, Venus, Eye, EyeOff, Home, Heart, HeartOff, Bell, XCircle, Download, FileText, Link, AlertCircle } from 'lucide-react';
+import { LogOut, Cat, UserPlus, LogIn, ChevronLeft, Trash2, Edit, Save, PlusCircle, Plus, ArrowLeft, Loader2, RefreshCw, User, Users, ClipboardList, BookOpen, Settings, Mail, Globe, Egg, Milk, Search, X, Mars, Venus, Eye, EyeOff, Home, Heart, HeartOff, Bell, XCircle, Download, FileText, Link, AlertCircle, Check } from 'lucide-react';
 import jsPDF from 'jspdf';
 import html2canvas from 'html2canvas';
 import MouseGeneticsCalculator from './components/MouseGeneticsCalculator';
@@ -6056,11 +6056,12 @@ const AnimalList = ({ authToken, showModalMessage, onEditAnimal, onViewAnimal, o
                             
                             return (
                                 <button key={species} onClick={() => toggleSpecies(species)}
-                                    className={`px-3 py-1.5 text-sm font-semibold rounded-lg transition duration-150 shadow-sm ${ 
+                                    className={`px-3 py-1.5 text-sm font-semibold rounded-lg transition duration-150 shadow-sm flex items-center gap-1.5 ${ 
                                         isSelected ? 'bg-primary text-black' : 'bg-gray-200 text-gray-700 hover:bg-gray-300'
                                     }`}
                                 >
-                                    {displayName}
+                                    {isSelected && <Check size={16} className="flex-shrink-0" />}
+                                    <span>{displayName}</span>
                                 </button>
                             );
                         })}
@@ -6077,9 +6078,10 @@ const AnimalList = ({ authToken, showModalMessage, onEditAnimal, onViewAnimal, o
                             
                             return (
                                 <button key={gender} onClick={() => toggleGender(gender)}
-                                    className={`flex-1 px-3 py-1.5 text-sm font-semibold rounded-lg transition duration-150 shadow-sm ${selectedClasses}`}
+                                    className={`flex-1 px-3 py-1.5 text-sm font-semibold rounded-lg transition duration-150 shadow-sm flex items-center justify-center gap-1.5 ${selectedClasses}`}
                                 >
-                                    {gender}
+                                    {isSelected && <Check size={16} className="flex-shrink-0" />}
+                                    <span>{gender}</span>
                                 </button>
                             );
                         })}
@@ -6104,11 +6106,12 @@ const AnimalList = ({ authToken, showModalMessage, onEditAnimal, onViewAnimal, o
                         <span className='text-sm font-medium text-gray-700 whitespace-nowrap'>Show:</span>
                         
                         <button onClick={() => setOwnedFilterActive(prev => !prev)}
-                            className={`px-3 py-1.5 text-sm font-semibold rounded-lg transition duration-150 shadow-sm ${ 
+                            className={`px-3 py-1.5 text-sm font-semibold rounded-lg transition duration-150 shadow-sm flex items-center gap-1.5 ${ 
                                 ownedFilterActive ? 'bg-primary text-black' : 'bg-gray-200 text-gray-700 hover:bg-gray-300'
                             }`}
                         >
-                            {ownedFilterActive ? 'My Animals' : 'All Animals'}
+                            {ownedFilterActive ? <Eye size={16} /> : <EyeOff size={16} />}
+                            <span>{ownedFilterActive ? 'My Animals' : 'All Animals'}</span>
                         </button>
 
                         <button onClick={handleFilterPregnant}
