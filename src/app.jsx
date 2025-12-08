@@ -6028,36 +6028,7 @@ const AnimalList = ({ authToken, showModalMessage, onEditAnimal, onViewAnimal, o
                     </div>
                 </div>
 
-                {/* Status filter and Gender buttons - Stack on mobile */}
-                <div className="flex flex-col sm:flex-row gap-3 pt-2 border-t border-gray-200">
-                    <select value={statusFilter} onChange={handleStatusFilterChange} 
-                        className="p-2 border border-gray-300 rounded-lg shadow-sm focus:ring-primary focus:border-primary transition w-full sm:w-1/3 sm:min-w-[150px]"
-                    >
-                        <option value="">All</option>
-                        {STATUS_OPTIONS.map(status => (
-                            <option key={status} value={status}>{status}</option>
-                        ))}
-                    </select>
-                    
-                    <div className="flex gap-2 items-center">
-                        <span className='text-sm font-medium text-gray-700 whitespace-nowrap'>Gender:</span>
-                        {['All', ...GENDER_OPTIONS].map(gender => {
-                            const value = gender === 'All' ? '' : gender;
-                            const isCurrentSelected = genderFilter === value;
-                            let selectedClasses = isCurrentSelected ? (gender === 'Male' ? 'bg-primary text-black' : gender === 'Female' ? 'bg-accent text-white' : 'bg-primary-dark text-black') : 'bg-gray-200 text-gray-700 hover:bg-gray-300';
-                            
-                            return (
-                                <button key={gender} onClick={() => handleGenderFilterChange(value)}
-                                    className={`flex-1 px-3 py-1.5 text-sm font-semibold rounded-lg transition duration-150 shadow-sm ${selectedClasses}`}
-                                >
-                                    {gender}
-                                </button>
-                            );
-                        })}
-                    </div>
-                </div>
-                
-                {/* Species filter */}
+                {/* Species filter on left */}
                 <div className="flex flex-col sm:flex-row gap-3 pt-2 border-t border-gray-200">
                     <div className="flex gap-2 items-center flex-wrap">
                         <span className='text-sm font-medium text-gray-700 whitespace-nowrap'>Species:</span>
@@ -6079,40 +6050,74 @@ const AnimalList = ({ authToken, showModalMessage, onEditAnimal, onViewAnimal, o
                     </div>
                 </div>
                 
-                {/* Additional filters - Already wrapping */}
-                <div className="flex flex-wrap items-center gap-2 pt-2 border-t border-gray-200">
-                    <span className='text-sm font-medium text-gray-700 whitespace-nowrap'>Filter By:</span>
+                {/* Gender filter on left, Status filter on right */}
+                <div className="flex flex-col sm:flex-row gap-3 pt-2 border-t border-gray-200 justify-between">
+                    <div className="flex gap-2 items-center">
+                        <span className='text-sm font-medium text-gray-700 whitespace-nowrap'>Gender:</span>
+                        {['All', ...GENDER_OPTIONS].map(gender => {
+                            const value = gender === 'All' ? '' : gender;
+                            const isCurrentSelected = genderFilter === value;
+                            let selectedClasses = isCurrentSelected ? (gender === 'Male' ? 'bg-primary text-black' : gender === 'Female' ? 'bg-accent text-white' : 'bg-primary-dark text-black') : 'bg-gray-200 text-gray-700 hover:bg-gray-300';
+                            
+                            return (
+                                <button key={gender} onClick={() => handleGenderFilterChange(value)}
+                                    className={`flex-1 px-3 py-1.5 text-sm font-semibold rounded-lg transition duration-150 shadow-sm ${selectedClasses}`}
+                                >
+                                    {gender}
+                                </button>
+                            );
+                        })}
+                    </div>
                     
-                    {['Owned', 'All'].map(option => {
-                        const value = option.toLowerCase();
-                        const isSelected = ownedFilter === value;
-                        return (
-                            <button key={value} onClick={() => setOwnedFilter(value)}
-                                className={`px-3 py-1.5 text-sm font-semibold rounded-lg transition duration-150 shadow-sm ${ 
-                                    isSelected ? 'bg-primary text-black' : 'bg-gray-200 text-gray-700 hover:bg-gray-300'
-                                }`}
-                            >
-                                {option}
-                            </button>
-                        );
-                    })}
+                    <div className="flex gap-2 items-center">
+                        <span className='text-sm font-medium text-gray-700 whitespace-nowrap'>Status:</span>
+                        <select value={statusFilter} onChange={handleStatusFilterChange} 
+                            className="p-2 border border-gray-300 rounded-lg shadow-sm focus:ring-primary focus:border-primary transition min-w-[150px]"
+                        >
+                            <option value="">All</option>
+                            {STATUS_OPTIONS.map(status => (
+                                <option key={status} value={status}>{status}</option>
+                            ))}
+                        </select>
+                    </div>
+                </div>
+                
+                {/* Ownership/Special filters on left, Visibility filter on right */}
+                <div className="flex flex-col sm:flex-row gap-3 pt-2 border-t border-gray-200 justify-between">
+                    <div className="flex flex-wrap items-center gap-2">
+                        <span className='text-sm font-medium text-gray-700 whitespace-nowrap'>Show:</span>
+                        
+                        {['Owned', 'All'].map(option => {
+                            const value = option.toLowerCase();
+                            const isSelected = ownedFilter === value;
+                            return (
+                                <button key={value} onClick={() => setOwnedFilter(value)}
+                                    className={`px-3 py-1.5 text-sm font-semibold rounded-lg transition duration-150 shadow-sm ${ 
+                                        isSelected ? 'bg-primary text-black' : 'bg-gray-200 text-gray-700 hover:bg-gray-300'
+                                    }`}
+                                >
+                                    {option}
+                                </button>
+                            );
+                        })}
 
-                    <button onClick={handleFilterPregnant}
-                        className={`px-3 py-1.5 text-sm font-semibold rounded-lg transition duration-150 shadow-sm flex items-center space-x-1 ${ 
-                            statusFilterPregnant ? 'bg-accent text-white' : 'bg-gray-200 text-gray-700 hover:bg-gray-300'
-                        }`}
-                    >
-                        <Egg size={16} /> <span>Pregnant</span>
-                    </button>
-                    <button onClick={handleFilterNursing}
-                        className={`px-3 py-1.5 text-sm font-semibold rounded-lg transition duration-150 shadow-sm flex items-center space-x-1 ${ 
-                            statusFilterNursing ? 'bg-accent text-white' : 'bg-gray-200 text-gray-700 hover:bg-gray-300'
-                        }`}
-                    >
-                        <Milk size={16} /> <span>Nursing</span>
-                    </button>
+                        <button onClick={handleFilterPregnant}
+                            className={`px-3 py-1.5 text-sm font-semibold rounded-lg transition duration-150 shadow-sm flex items-center space-x-1 ${ 
+                                statusFilterPregnant ? 'bg-accent text-white' : 'bg-gray-200 text-gray-700 hover:bg-gray-300'
+                            }`}
+                        >
+                            <Egg size={16} /> <span>Pregnant</span>
+                        </button>
+                        <button onClick={handleFilterNursing}
+                            className={`px-3 py-1.5 text-sm font-semibold rounded-lg transition duration-150 shadow-sm flex items-center space-x-1 ${ 
+                                statusFilterNursing ? 'bg-accent text-white' : 'bg-gray-200 text-gray-700 hover:bg-gray-300'
+                            }`}
+                        >
+                            <Milk size={16} /> <span>Nursing</span>
+                        </button>
+                    </div>
 
-                    <div className="ml-auto flex gap-2 items-center">
+                    <div className="flex gap-2 items-center">
                         <span className='text-sm font-medium text-gray-700 whitespace-nowrap'>Visibility:</span>
                         {['All', 'Public', 'Private'].map(option => {
                             const value = option === 'All' ? '' : option.toLowerCase();
