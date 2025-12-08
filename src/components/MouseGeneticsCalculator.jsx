@@ -175,6 +175,16 @@ const calculatePhenotype = (genotype, originalGenotype = null) => {
   const coatGenesSelected = originalGenotype && 
     ['Go', 'Re', 'Sa', 'Rst', 'Fz', 'Nu'].some(gene => originalGenotype[gene] && originalGenotype[gene] !== '');
 
+  // Helper function to check C-locus combinations in both directions
+  const isCCombo = (combo1, combo2 = null) => {
+    if (!combo2) {
+      // Single check (e.g., 'c/c', 'ch/ch')
+      return genotype.C === combo1;
+    }
+    // Check both orders (e.g., 'cch/ce' or 'ce/cch')
+    return genotype.C === combo1 || genotype.C === combo2;
+  };
+
   // Helper function to add markings to phenotype
   const addMarkingsIfNeeded = (phenotype) => {
     if (phenotype === 'Albino') return phenotype;
@@ -241,7 +251,7 @@ const calculatePhenotype = (genotype, originalGenotype = null) => {
   // Special handling for agouti tan (A/at) with C-locus combinations
   if (isAgoutiTan && genotype.C !== 'C/C') {
     const hasSpl = genotype.Spl && genotype.Spl.includes('Spl/');
-    const excludedCForSpl = ['C/C', 'c/c', 'C/c', 'C/ce', 'C/ch', 'C/cch'];
+    const excludedCForSpl = ['C/C', 'c/c', 'C/c', 'c/C', 'C/ce', 'ce/C', 'C/ch', 'ch/C', 'C/cch', 'cch/C'];
     
     if (genotype.C === 'c/c') {
       return { phenotype: 'Albino', carriers, hidden };
@@ -252,28 +262,28 @@ const calculatePhenotype = (genotype, originalGenotype = null) => {
       return { phenotype: addMarkingsIfNeeded('Agouti Splashed Fox'), carriers, hidden };
     }
     
-    if (genotype.C === 'ch/c') {
+    if (isCCombo('ch/c', 'c/ch')) {
       return { phenotype: addMarkingsIfNeeded('Agouti Himalayan Fox'), carriers, hidden };
     }
-    if (genotype.C === 'ch/ch') {
+    if (isCCombo('ch/ch')) {
       return { phenotype: addMarkingsIfNeeded('Agouti Siamese Fox'), carriers, hidden };
     }
-    if (genotype.C === 'ce/c') {
+    if (isCCombo('ce/c', 'c/ce')) {
       return { phenotype: addMarkingsIfNeeded('Agouti Bone Fox'), carriers, hidden };
     }
-    if (genotype.C === 'ce/ch') {
+    if (isCCombo('ce/ch', 'ch/ce')) {
       return { phenotype: addMarkingsIfNeeded('Agouti Colorpoint Beige Fox'), carriers, hidden };
     }
-    if (genotype.C === 'ce/ce') {
+    if (isCCombo('ce/ce')) {
       return { phenotype: addMarkingsIfNeeded('Agouti Beige Fox'), carriers, hidden };
     }
-    if (genotype.C === 'cch/c') {
+    if (isCCombo('cch/c', 'c/cch')) {
       return { phenotype: addMarkingsIfNeeded('Agouti Stone Fox'), carriers, hidden };
     }
-    if (genotype.C === 'cch/ch') {
+    if (isCCombo('cch/ch', 'ch/cch')) {
       return { phenotype: addMarkingsIfNeeded('Agouti Burmese Fox'), carriers, hidden };
     }
-    if (genotype.C === 'cch/ce') {
+    if (isCCombo('cch/ce', 'ce/cch')) {
       return { phenotype: addMarkingsIfNeeded('Agouti Mock Chocolate Fox'), carriers, hidden };
     }
     if (genotype.C === 'cch/cch') {
@@ -284,7 +294,7 @@ const calculatePhenotype = (genotype, originalGenotype = null) => {
   // Special handling for agouti variants with C-locus combinations
   if (isAgoutiVariant && genotype.C !== 'C/C') {
     const hasSpl = genotype.Spl && genotype.Spl.includes('Spl/');
-    const excludedCForSpl = ['C/C', 'c/c', 'C/c', 'C/ce', 'C/ch', 'C/cch'];
+    const excludedCForSpl = ['C/C', 'c/c', 'C/c', 'c/C', 'C/ce', 'ce/C', 'C/ch', 'ch/C', 'C/cch', 'cch/C'];
     
     if (genotype.C === 'c/c') {
       return { phenotype: 'Albino', carriers, hidden };
@@ -295,28 +305,28 @@ const calculatePhenotype = (genotype, originalGenotype = null) => {
       return { phenotype: addMarkingsIfNeeded('Agouti Splashed'), carriers, hidden };
     }
     
-    if (genotype.C === 'ch/c') {
+    if (isCCombo('ch/c', 'c/ch')) {
       return { phenotype: addMarkingsIfNeeded('Agouti Himalayan'), carriers, hidden };
     }
-    if (genotype.C === 'ch/ch') {
+    if (isCCombo('ch/ch')) {
       return { phenotype: addMarkingsIfNeeded('Agouti Siamese'), carriers, hidden };
     }
-    if (genotype.C === 'ce/c') {
+    if (isCCombo('ce/c', 'c/ce')) {
       return { phenotype: addMarkingsIfNeeded('Agouti Bone'), carriers, hidden };
     }
-    if (genotype.C === 'ce/ch') {
+    if (isCCombo('ce/ch', 'ch/ce')) {
       return { phenotype: addMarkingsIfNeeded('Agouti Colorpoint Beige'), carriers, hidden };
     }
-    if (genotype.C === 'ce/ce') {
+    if (isCCombo('ce/ce')) {
       return { phenotype: addMarkingsIfNeeded('Agouti Beige'), carriers, hidden };
     }
-    if (genotype.C === 'cch/c') {
+    if (isCCombo('cch/c', 'c/cch')) {
       return { phenotype: addMarkingsIfNeeded('Agouti Stone'), carriers, hidden };
     }
-    if (genotype.C === 'cch/ch') {
+    if (isCCombo('cch/ch', 'ch/cch')) {
       return { phenotype: addMarkingsIfNeeded('Agouti Burmese'), carriers, hidden };
     }
-    if (genotype.C === 'cch/ce') {
+    if (isCCombo('cch/ce', 'ce/cch')) {
       return { phenotype: addMarkingsIfNeeded('Agouti Mock Chocolate'), carriers, hidden };
     }
     if (genotype.C === 'cch/cch') {
@@ -327,7 +337,7 @@ const calculatePhenotype = (genotype, originalGenotype = null) => {
   // Special handling for tan/fox variants with C-locus combinations
   if (isTanVariant && genotype.C !== 'C/C') {
     const hasSpl = genotype.Spl && genotype.Spl.includes('Spl/');
-    const excludedCForSpl = ['C/C', 'c/c', 'C/c', 'C/ce', 'C/ch', 'C/cch'];
+    const excludedCForSpl = ['C/C', 'c/c', 'C/c', 'c/C', 'C/ce', 'ce/C', 'C/ch', 'ch/C', 'C/cch', 'cch/C'];
     
     if (genotype.C === 'c/c') {
       return { phenotype: 'Albino', carriers, hidden };
@@ -338,28 +348,28 @@ const calculatePhenotype = (genotype, originalGenotype = null) => {
       return { phenotype: addMarkingsIfNeeded('Black Splashed Fox'), carriers, hidden };
     }
     
-    if (genotype.C === 'ch/c') {
+    if (isCCombo('ch/c', 'c/ch')) {
       return { phenotype: addMarkingsIfNeeded('Himalayan Fox'), carriers, hidden };
     }
-    if (genotype.C === 'ch/ch') {
+    if (isCCombo('ch/ch')) {
       return { phenotype: addMarkingsIfNeeded('Siamese Fox'), carriers, hidden };
     }
-    if (genotype.C === 'ce/c') {
+    if (isCCombo('ce/c', 'c/ce')) {
       return { phenotype: addMarkingsIfNeeded('Bone Fox'), carriers, hidden };
     }
-    if (genotype.C === 'ce/ch') {
+    if (isCCombo('ce/ch', 'ch/ce')) {
       return { phenotype: addMarkingsIfNeeded('Colorpoint Beige Fox'), carriers, hidden };
     }
-    if (genotype.C === 'ce/ce') {
+    if (isCCombo('ce/ce')) {
       return { phenotype: addMarkingsIfNeeded('Beige Fox'), carriers, hidden };
     }
-    if (genotype.C === 'cch/c') {
+    if (isCCombo('cch/c', 'c/cch')) {
       return { phenotype: addMarkingsIfNeeded('Stone Fox'), carriers, hidden };
     }
-    if (genotype.C === 'cch/ch') {
+    if (isCCombo('cch/ch', 'ch/cch')) {
       return { phenotype: addMarkingsIfNeeded('Burmese Fox'), carriers, hidden };
     }
-    if (genotype.C === 'cch/ce') {
+    if (isCCombo('cch/ce', 'ce/cch')) {
       return { phenotype: addMarkingsIfNeeded('Mock Chocolate Fox'), carriers, hidden };
     }
     if (genotype.C === 'cch/cch') {
@@ -370,7 +380,7 @@ const calculatePhenotype = (genotype, originalGenotype = null) => {
   // Special handling for self black variants with C-locus combinations
   if (isSelfBlackVariant && genotype.C !== 'C/C') {
     const hasSpl = genotype.Spl && genotype.Spl.includes('Spl/');
-    const excludedCForSpl = ['C/C', 'c/c', 'C/c', 'C/ce', 'C/ch', 'C/cch'];
+    const excludedCForSpl = ['C/C', 'c/c', 'C/c', 'c/C', 'C/ce', 'ce/C', 'C/ch', 'ch/C', 'C/cch', 'cch/C'];
     
     if (genotype.C === 'c/c') {
       return { phenotype: 'Albino', carriers, hidden };
@@ -381,28 +391,28 @@ const calculatePhenotype = (genotype, originalGenotype = null) => {
       return { phenotype: addMarkingsIfNeeded('Black Splashed'), carriers, hidden };
     }
     
-    if (genotype.C === 'ch/c') {
+    if (isCCombo('ch/c', 'c/ch')) {
       return { phenotype: addMarkingsIfNeeded('Himalayan'), carriers, hidden };
     }
-    if (genotype.C === 'ch/ch') {
+    if (isCCombo('ch/ch')) {
       return { phenotype: addMarkingsIfNeeded('Siamese'), carriers, hidden };
     }
-    if (genotype.C === 'ce/c') {
+    if (isCCombo('ce/c', 'c/ce')) {
       return { phenotype: addMarkingsIfNeeded('Bone'), carriers, hidden };
     }
-    if (genotype.C === 'ce/ch') {
+    if (isCCombo('ce/ch', 'ch/ce')) {
       return { phenotype: addMarkingsIfNeeded('Colorpoint Beige'), carriers, hidden };
     }
-    if (genotype.C === 'ce/ce') {
+    if (isCCombo('ce/ce')) {
       return { phenotype: addMarkingsIfNeeded('Beige'), carriers, hidden };
     }
-    if (genotype.C === 'cch/c') {
+    if (isCCombo('cch/c', 'c/cch')) {
       return { phenotype: addMarkingsIfNeeded('Stone'), carriers, hidden };
     }
-    if (genotype.C === 'cch/ch') {
+    if (isCCombo('cch/ch', 'ch/cch')) {
       return { phenotype: addMarkingsIfNeeded('Burmese'), carriers, hidden };
     }
-    if (genotype.C === 'cch/ce') {
+    if (isCCombo('cch/ce', 'ce/cch')) {
       return { phenotype: addMarkingsIfNeeded('Mock Chocolate'), carriers, hidden };
     }
     if (genotype.C === 'cch/cch') {
@@ -430,7 +440,7 @@ const calculatePhenotype = (genotype, originalGenotype = null) => {
     const hasSpl = genotype.Spl && genotype.Spl.includes('Spl/');
     
     // Check for C-locus dilutes (exclude C/C and c/c)
-    const excludedCLocus = ['C/C', 'c/c', 'C/ch', 'C/ce', 'C/c', 'C/cch'];
+    const excludedCLocus = ['C/C', 'c/c', 'C/ch', 'ch/C', 'C/ce', 'ce/C', 'C/c', 'c/C', 'C/cch', 'cch/C'];
     if (genotype.C && !excludedCLocus.includes(genotype.C)) {
       const isTanVariant = genotype.A === 'Ay/at';
       
@@ -442,28 +452,28 @@ const calculatePhenotype = (genotype, originalGenotype = null) => {
       const baseName = 'Dominant Red';
       const suffix = isTanVariant ? ' Fox' : '';
       
-      if (genotype.C === 'ch/c') {
+      if (isCCombo('ch/c', 'c/ch')) {
         return { phenotype: addMarkingsIfNeeded(`${baseName} Himalayan${suffix}`), carriers, hidden };
       }
-      if (genotype.C === 'ch/ch') {
+      if (isCCombo('ch/ch')) {
         return { phenotype: addMarkingsIfNeeded(`${baseName} Siamese${suffix}`), carriers, hidden };
       }
-      if (genotype.C === 'ce/c') {
+      if (isCCombo('ce/c', 'c/ce')) {
         return { phenotype: addMarkingsIfNeeded(`${baseName} Bone${suffix}`), carriers, hidden };
       }
-      if (genotype.C === 'ce/ch') {
+      if (isCCombo('ce/ch', 'ch/ce')) {
         return { phenotype: addMarkingsIfNeeded(`${baseName} Colorpoint Beige${suffix}`), carriers, hidden };
       }
-      if (genotype.C === 'ce/ce') {
+      if (isCCombo('ce/ce')) {
         return { phenotype: addMarkingsIfNeeded(`${baseName} Beige${suffix}`), carriers, hidden };
       }
-      if (genotype.C === 'cch/c') {
+      if (isCCombo('cch/c', 'c/cch')) {
         return { phenotype: addMarkingsIfNeeded(`${baseName} Stone${suffix}`), carriers, hidden };
       }
-      if (genotype.C === 'cch/ch') {
+      if (isCCombo('cch/ch', 'ch/cch')) {
         return { phenotype: addMarkingsIfNeeded(`${baseName} Burmese${suffix}`), carriers, hidden };
       }
-      if (genotype.C === 'cch/ce') {
+      if (isCCombo('cch/ce', 'ce/cch')) {
         return { phenotype: addMarkingsIfNeeded(`${baseName} Mock Chocolate${suffix}`), carriers, hidden };
       }
       if (genotype.C === 'cch/cch') {
@@ -711,21 +721,22 @@ const calculatePhenotype = (genotype, originalGenotype = null) => {
     color = `${baseName}Splashed`;
   } else if (genotype.C !== 'c/c') {
     // Normal C-locus modifications (skip if albino)
-    if (genotype.C === 'cch/cch' || genotype.C?.includes('cch/')) {
-      if (!genotype.C.includes('C/cch')) {
+    if (genotype.C === 'cch/cch' || genotype.C?.includes('cch/') || genotype.C?.includes('/cch')) {
+      if (!genotype.C.includes('C/cch') && !genotype.C.includes('cch/C')) {
         color = `Chinchilla ${color}`;
       }
     }
-    if (genotype.C === 'ch/ch' || (genotype.C?.includes('ch/') && !genotype.C.includes('C/ch') && !genotype.C.includes('cch/ch'))) {
+    if (genotype.C === 'ch/ch' || (genotype.C?.includes('ch/') || genotype.C?.includes('/ch')) && !genotype.C.includes('C/ch') && !genotype.C.includes('ch/C') && !genotype.C.includes('cch/ch') && !genotype.C.includes('ch/cch')) {
       color = `Himalayan ${color}`;
     }
-    if (genotype.C === 'ce/ce' || (genotype.C?.includes('ce/') && !genotype.C.includes('C/ce'))) {
+    if (genotype.C === 'ce/ce' || (genotype.C?.includes('ce/') || genotype.C?.includes('/ce')) && !genotype.C.includes('C/ce') && !genotype.C.includes('ce/C')) {
       color = `Beige ${color}`;
     }
   }
   // C-locus carriers
-  if (genotype.C && genotype.C.includes('C/')) {
-    const recessive = genotype.C.split('/')[1];
+  if (genotype.C && (genotype.C.includes('C/') || genotype.C.includes('/C'))) {
+    const alleles = genotype.C.split('/');
+    const recessive = alleles[0] === 'C' ? alleles[1] : (alleles[1] === 'C' ? alleles[0] : null);
     if (recessive === 'c') carriers.push('Albino');
     else if (recessive === 'ch') carriers.push('Himalayan');
     else if (recessive === 'ce') carriers.push('Beige');
