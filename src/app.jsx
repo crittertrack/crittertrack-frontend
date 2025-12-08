@@ -4333,7 +4333,7 @@ const AnimalForm = ({
                         <label className="flex items-center space-x-2 text-sm text-gray-700">
                             <input type="checkbox" name="isDisplay" checked={formData.isDisplay} onChange={handleChange} 
                                 className="h-4 w-4 text-primary rounded border-gray-300 focus:ring-primary" />
-                            <span>Share on public profile</span>
+                            <span>Public</span>
                         </label>
                         {formData.gender === 'Female' && (
                             <>
