@@ -660,7 +660,7 @@ const calculatePhenotype = (genotype, originalGenotype = null) => {
     
     if (singleGene === 'B') {
       title = genotype.B === 'b/b' ? 'Brown/Chocolate Base' : 'Black Base';
-      note = 'A-locus selection is needed for full phenotype calculation';
+      note = 'Select A-locus (use a/a for self) for full phenotype calculation';
     } else if (singleGene === 'C') {
       if (genotype.C === 'C/C' || genotype.C === 'C/c' || genotype.C === 'C/ce' || genotype.C === 'C/ch' || genotype.C === 'C/cch') {
         title = 'Full Color';
@@ -673,20 +673,20 @@ const calculatePhenotype = (genotype, originalGenotype = null) => {
       } else if (genotype.C === 'c/c') {
         title = 'Albino';
       }
-      note = 'A-locus selection is needed for full phenotype calculation';
+      note = 'Select A-locus (use a/a for self) for full phenotype calculation';
     } else if (singleGene === 'D') {
       title = genotype.D === 'd/d' ? 'Dilute' : 'Non-Dilute';
-      note = 'A-locus selection is needed for full phenotype calculation';
+      note = 'Select A-locus (use a/a for self) for full phenotype calculation';
     } else if (singleGene === 'E') {
       if (genotype.E === 'E/E' || genotype.E === 'E/e') {
         title = 'Normal Extension';
       } else if (genotype.E === 'e/e') {
         title = 'Recessive Red/Yellow';
       }
-      note = 'A-locus selection is needed for full phenotype calculation';
+      note = 'Select A-locus (use a/a for self) for full phenotype calculation';
     } else if (singleGene === 'P') {
       title = genotype.P === 'p/p' ? 'Pink-Eyed Dilution' : 'Normal Eye Color';
-      note = 'A-locus selection is needed for full phenotype calculation';
+      note = 'Select A-locus (use a/a for self) for full phenotype calculation';
     }
     
     return { phenotype: title || 'Unknown', carriers, hidden, notes: [note] };
