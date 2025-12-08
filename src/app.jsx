@@ -4556,17 +4556,17 @@ const AnimalForm = ({
                             className="mt-1 block w-full p-2 border border-gray-300 rounded-md shadow-sm focus:ring-primary focus:border-primary" />
                     </div>
 					
-					{/* Suffix */}
-                    <div>
-                        <label className="block text-sm font-medium text-gray-700">Suffix</label>
-                        <input type="text" name="suffix" value={formData.suffix} onChange={handleChange} 
-                            className="mt-1 block w-full p-2 border border-gray-300 rounded-md shadow-sm focus:ring-primary focus:border-primary" />
-                    </div>
-					
 					{/* Name */}
                     <div>
                         <label className="block text-sm font-medium text-gray-700">Name*</label>
                         <input type="text" name="name" value={formData.name} onChange={handleChange} required 
+                            className="mt-1 block w-full p-2 border border-gray-300 rounded-md shadow-sm focus:ring-primary focus:border-primary" />
+                    </div>
+					
+					{/* Suffix */}
+                    <div>
+                        <label className="block text-sm font-medium text-gray-700">Suffix</label>
+                        <input type="text" name="suffix" value={formData.suffix} onChange={handleChange} 
                             className="mt-1 block w-full p-2 border border-gray-300 rounded-md shadow-sm focus:ring-primary focus:border-primary" />
                     </div>
 					
