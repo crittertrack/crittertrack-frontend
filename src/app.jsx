@@ -6046,30 +6046,9 @@ const AnimalList = ({ authToken, showModalMessage, onEditAnimal, onViewAnimal, o
                     </div>
                 </div>
 
-                {/* Gender icons, Species dropdown, and Status dropdown - all in one row */}
+                {/* Species dropdown, Gender icons, and Status dropdown - all in one row */}
                 <div className="flex flex-col sm:flex-row gap-3 pt-2 border-t border-gray-200 justify-between">
                     <div className="flex gap-3 items-center flex-wrap">
-                        {/* Gender filter with icons */}
-                        <div className="flex gap-2 items-center">
-                            <span className='text-sm font-medium text-gray-700 whitespace-nowrap'>Gender:</span>
-                            {GENDER_OPTIONS.map(gender => {
-                                const isSelected = selectedGenders.includes(gender);
-                                const Icon = gender === 'Male' ? Mars : Venus;
-                                let bgColor = isSelected 
-                                    ? (gender === 'Male' ? 'bg-blue-400' : 'bg-pink-400') 
-                                    : 'bg-gray-300 hover:bg-gray-400';
-                                
-                                return (
-                                    <button key={gender} onClick={() => toggleGender(gender)}
-                                        className={`p-2 rounded-lg transition duration-150 shadow-sm ${bgColor}`}
-                                        title={gender}
-                                    >
-                                        <Icon size={18} className="text-black" />
-                                    </button>
-                                );
-                            })}
-                        </div>
-                        
                         {/* Species dropdown */}
                         <div className="flex gap-2 items-center">
                             <span className='text-sm font-medium text-gray-700 whitespace-nowrap'>Species:</span>
@@ -6090,6 +6069,27 @@ const AnimalList = ({ authToken, showModalMessage, onEditAnimal, onViewAnimal, o
                                     <option key={species} value={species}>{getSpeciesDisplayName(species)}</option>
                                 ))}
                             </select>
+                        </div>
+                        
+                        {/* Gender filter with icons */}
+                        <div className="flex gap-2 items-center">
+                            <span className='text-sm font-medium text-gray-700 whitespace-nowrap'>Gender:</span>
+                            {GENDER_OPTIONS.map(gender => {
+                                const isSelected = selectedGenders.includes(gender);
+                                const Icon = gender === 'Male' ? Mars : Venus;
+                                let bgColor = isSelected 
+                                    ? (gender === 'Male' ? 'bg-primary' : 'bg-pink-400') 
+                                    : 'bg-gray-300 hover:bg-gray-400';
+                                
+                                return (
+                                    <button key={gender} onClick={() => toggleGender(gender)}
+                                        className={`p-2 rounded-lg transition duration-150 shadow-sm ${bgColor}`}
+                                        title={gender}
+                                    >
+                                        <Icon size={18} className="text-black" />
+                                    </button>
+                                );
+                            })}
                         </div>
                     </div>
                     
@@ -6117,7 +6117,7 @@ const AnimalList = ({ authToken, showModalMessage, onEditAnimal, onViewAnimal, o
                                 ownedFilterActive ? 'bg-primary text-black' : 'bg-gray-200 text-gray-700 hover:bg-gray-300'
                             }`}
                         >
-                            {ownedFilterActive ? <Eye size={16} /> : <EyeOff size={16} />}
+                            {ownedFilterActive ? <Heart size={16} /> : <HeartOff size={16} />}
                             <span>{ownedFilterActive ? 'My Animals' : 'All Animals'}</span>
                         </button>
 
