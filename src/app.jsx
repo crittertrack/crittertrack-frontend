@@ -1160,7 +1160,7 @@ const LocalAnimalSearchModal = ({ title, currentId, onSelect, onClose, authToken
 
 
 
-const UserSearchModal = ({ onClose, showModalMessage, onSelectUser, API_BASE_URL, modalTarget }) => {
+const UserSearchModal = ({ onClose, showModalMessage, onSelectUser, API_BASE_URL, modalTarget, userProfile }) => {
     const [searchTerm, setSearchTerm] = useState('');
     const [searchType, setSearchType] = useState('users'); // 'users' or 'animals'
     const [userResults, setUserResults] = useState([]);
@@ -1337,6 +1337,14 @@ const UserSearchModal = ({ onClose, showModalMessage, onSelectUser, API_BASE_URL
                 </div>
                 
                 <div className="flex-grow overflow-y-auto space-y-4 divide-y divide-gray-100">
+                    {modalTarget === 'breeder' && userProfile && (
+                        <div className="border rounded-lg bg-white shadow-sm mb-4">
+                            <h4 className="font-bold text-gray-700 p-3 bg-primary/20 border-b">
+                                Your Profile (Default)
+                            </h4>
+                            <UserResultCard user={userProfile} />
+                        </div>
+                    )}
                     {loading ? <LoadingSpinner /> : results.length > 0 ? (
                         <div className="border rounded-lg bg-white shadow-sm">
                             <h4 className="font-bold text-gray-700 p-3 bg-gray-50 border-b">
@@ -3783,6 +3791,7 @@ const AnimalForm = ({
     authToken,
     showModalMessage, 
     API_BASE_URL,          // Ensure these are passed from the parent component (App)
+    userProfile,           // Current user profile for default breeder
     X, 
     Search, 
     Loader2, 
@@ -4021,7 +4030,6 @@ const AnimalForm = ({
 
     // Clear breeder selection
     const clearBreederSelection = () => {
-        console.log('[DEBUG] Clearing breeder selection');
         setFormData(prev => ({ ...prev, breederId_public: null }));
         setBreederInfo(null);
     };
@@ -4300,6 +4308,7 @@ const AnimalForm = ({
                     showModalMessage={showModalMessage}
                     API_BASE_URL={API_BASE_URL}
                     modalTarget={modalTarget}
+                    userProfile={userProfile}
                 />
             )}
 
@@ -4577,7 +4586,7 @@ const AnimalForm = ({
                                         </span>
                                     ) : (
                                         <span className="text-gray-400">
-                                            {formData.breederId_public ? 'Loading...' : 'Click to Select Breeder (defaults to you)'}
+                                            {formData.breederId_public ? 'Loading...' : 'Click to Select Breeder'}
                                         </span>
                                     )}
                                     {formData.breederId_public && (
@@ -6565,6 +6574,7 @@ const App = () => {
                         authToken={authToken}
                         showModalMessage={showModalMessage}
                         API_BASE_URL={API_BASE_URL}
+                        userProfile={userProfile}
                         X={X}
                         Search={Search}
                         Loader2={Loader2}
@@ -6591,6 +6601,7 @@ const App = () => {
                         authToken={authToken} 
                         showModalMessage={showModalMessage}
                         API_BASE_URL={API_BASE_URL}
+                        userProfile={userProfile}
                         X={X}
                         Search={Search}
                         Loader2={Loader2}
