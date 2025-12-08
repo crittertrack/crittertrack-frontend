@@ -312,7 +312,7 @@ const PedigreeChart = ({ animalId, animalData, onClose, API_BASE_URL, authToken 
                     {/* Name */}
                     <div className="text-sm text-gray-900 leading-tight" style={{lineHeight: '1.2'}}>
                         <span className="font-bold">Name: </span>
-                        {animal.prefix && `${animal.prefix} `}{animal.name}
+                        {animal.prefix && `${animal.prefix} `}{animal.name}{animal.suffix && ` ${animal.suffix}`}
                     </div>
                     
                     {/* Variety */}
@@ -385,7 +385,7 @@ const PedigreeChart = ({ animalId, animalData, onClose, API_BASE_URL, authToken 
                     {/* Name */}
                     <div className="text-xs text-gray-900 leading-tight" style={{lineHeight: '1.2'}}>
                         <span className="font-semibold">Name: </span>
-                        {animal.prefix && `${animal.prefix} `}{animal.name}
+                        {animal.prefix && `${animal.prefix} `}{animal.name}{animal.suffix && ` ${animal.suffix}`}
                     </div>
                     
                     {/* Variety */}
@@ -462,7 +462,7 @@ const PedigreeChart = ({ animalId, animalData, onClose, API_BASE_URL, authToken 
                     {/* Name */}
                     <div className="text-gray-900 leading-tight" style={{fontSize: '0.65rem', lineHeight: '1.2'}}>
                         <span className="font-semibold">Name: </span>
-                        {animal.prefix && `${animal.prefix} `}{animal.name}
+                        {animal.prefix && `${animal.prefix} `}{animal.name}{animal.suffix && ` ${animal.suffix}`}
                     </div>
                     
                     {/* Variety */}
@@ -520,7 +520,7 @@ const PedigreeChart = ({ animalId, animalData, onClose, API_BASE_URL, authToken 
                 {/* Name */}
                 <div className="text-gray-900 leading-tight" style={{fontSize: '0.6rem', lineHeight: '1.2'}}>
                     <span className="font-semibold">Name: </span>
-                    {animal.prefix && `${animal.prefix} `}{animal.name}
+                    {animal.prefix && `${animal.prefix} `}{animal.name}{animal.suffix && ` ${animal.suffix}`}
                 </div>
                 
                 {/* Variety */}
@@ -564,7 +564,7 @@ const PedigreeChart = ({ animalId, animalData, onClose, API_BASE_URL, authToken 
             <div className="border border-gray-200 rounded px-1 py-0.5 bg-white h-full flex flex-col justify-center">
                 {/* Name */}
                 <div className="font-semibold text-xs text-gray-800 truncate leading-tight">
-                    {animal.prefix && `${animal.prefix} `}{animal.name}
+                    {animal.prefix && `${animal.prefix} `}{animal.name}{animal.suffix && ` ${animal.suffix}`}
                 </div>
                 
                 {/* Color/Coat */}
@@ -896,7 +896,7 @@ const ParentSearchModal = ({
                 {/* Info */}
                 <div className="flex-grow">
                     <p className="font-semibold text-gray-800">
-                        {animal.prefix ? `${animal.prefix} ` : ''}{animal.name}
+                        {animal.prefix ? `${animal.prefix} ` : ''}{animal.name}{animal.suffix ? ` ${animal.suffix}` : ''}
                     </p>
                     <p className="text-xs text-gray-500">{animal.id_public}</p>
                     <p className="text-sm text-gray-600">
@@ -1069,7 +1069,7 @@ const LocalAnimalSearchModal = ({ title, currentId, onSelect, onClose, authToken
             onClick={() => onSelect(animal.id_public)}
         >
             <div>
-                <p className="font-semibold text-gray-800">{animal.prefix} {animal.name} ({animal.id_public})</p>
+                <p className="font-semibold text-gray-800">{animal.prefix} {animal.name}{animal.suffix && ` ${animal.suffix}`} ({animal.id_public})</p>
                 <p className="text-sm text-gray-600">
                     {animal.species} | {animal.gender} | {animal.status}
                 </p>
@@ -1267,7 +1267,7 @@ const UserSearchModal = ({ onClose, showModalMessage, onSelectUser, API_BASE_URL
                 </div>
                 <div className="flex-grow">
                     <p className="text-lg font-semibold text-gray-800">
-                        {animal.prefix && `${animal.prefix} `}{animal.name}
+                        {animal.prefix && `${animal.prefix} `}{animal.name}{animal.suffix && ` ${animal.suffix}`}
                     </p>
                     <p className="text-sm text-gray-600">
                         {animal.species} • {animal.gender} • <span className="font-mono">{animal.id_public}</span>
@@ -1599,7 +1599,7 @@ const PublicProfileView = ({ profile, onBack, onViewAnimal, API_BASE_URL }) => {
                                                 
                                                 {/* Prefix / Name under image */}
                                                 <div className="w-full text-center px-2 pb-1 mt-2">
-                                                    <div className="text-sm font-semibold text-gray-800 truncate">{animal.prefix ? `${animal.prefix} ` : ''}{animal.name}</div>
+                                                    <div className="text-sm font-semibold text-gray-800 truncate">{animal.prefix ? `${animal.prefix} ` : ''}{animal.name}{animal.suffix ? ` ${animal.suffix}` : ''}</div>
                                                 </div>
 
                                                 {/* ID bottom-right */}
@@ -1746,7 +1746,7 @@ const ViewOnlyAnimalDetail = ({ animal, onClose, API_BASE_URL, onViewProfile }) 
                         </div>
                         <div className="mt-4 space-y-2">
                             <h2 className="text-3xl font-bold text-gray-900 text-center">
-                                {animal.prefix && `${animal.prefix} `}{animal.name}
+                                {animal.prefix && `${animal.prefix} `}{animal.name}{animal.suffix && ` ${animal.suffix}`}
                             </h2>
                             <p className="text-center">
                                 <span className="text-base font-medium text-gray-700">{animal.id_public}</span>
@@ -2219,7 +2219,7 @@ const OffspringSection = ({ animalId, API_BASE_URL, authToken = null, onViewAnim
                                         {/* Name */}
                                         <div className="w-full text-center px-2 pb-1">
                                             <div className="text-sm font-semibold text-gray-800 truncate">
-                                                {animal.prefix ? `${animal.prefix} ` : ''}{animal.name}
+                                                {animal.prefix ? `${animal.prefix} ` : ''}{animal.name}{animal.suffix ? ` ${animal.suffix}` : ''}
                                             </div>
                                         </div>
 
@@ -2801,7 +2801,7 @@ const LitterManagement = ({ authToken, API_BASE_URL, userProfile, showModalMessa
                                 <option value="">Select Sire</option>
                                 {maleAnimals.map(animal => (
                                     <option key={animal.id_public} value={animal.id_public}>
-                                        {animal.prefix ? `${animal.prefix} ` : ''}{animal.name} - {animal.id_public} ({animal.species})
+                                        {animal.prefix ? `${animal.prefix} ` : ''}{animal.name}{animal.suffix ? ` ${animal.suffix}` : ''} - {animal.id_public} ({animal.species})
                                     </option>
                                 ))}
                             </select>
@@ -2821,7 +2821,7 @@ const LitterManagement = ({ authToken, API_BASE_URL, userProfile, showModalMessa
                                 <option value="">Select Dam</option>
                                 {femaleAnimals.map(animal => (
                                     <option key={animal.id_public} value={animal.id_public}>
-                                        {animal.prefix ? `${animal.prefix} ` : ''}{animal.name} - {animal.id_public} ({animal.species})
+                                        {animal.prefix ? `${animal.prefix} ` : ''}{animal.name}{animal.suffix ? ` ${animal.suffix}` : ''} - {animal.id_public} ({animal.species})
                                     </option>
                                 ))}
                             </select>
@@ -2904,7 +2904,7 @@ const LitterManagement = ({ authToken, API_BASE_URL, userProfile, showModalMessa
                                                     className="h-4 w-4 text-primary rounded border-gray-300 focus:ring-primary"
                                                 />
                                                 <span className="text-sm text-gray-800">
-                                                    {animal.prefix && `${animal.prefix} `}{animal.name} - {animal.id_public} ({animal.gender})
+                                                    {animal.prefix && `${animal.prefix} `}{animal.name}{animal.suffix && ` ${animal.suffix}`} - {animal.id_public} ({animal.gender})
                                                 </span>
                                             </label>
                                         ))
@@ -3070,10 +3070,10 @@ const LitterManagement = ({ authToken, API_BASE_URL, userProfile, showModalMessa
                                             </p>
                                         </div>
                                         <div className="text-sm">
-                                            <span className="text-gray-600">Sire:</span> {sire ? `${sire.prefix ? sire.prefix + ' ' : ''}${sire.name}` : `${litter.sireId_public}`}
+                                            <span className="text-gray-600">Sire:</span> {sire ? `${sire.prefix ? sire.prefix + ' ' : ''}${sire.name}${sire.suffix ? ' ' + sire.suffix : ''}` : `${litter.sireId_public}`}
                                         </div>
                                         <div className="text-sm">
-                                            <span className="text-gray-600">Dam:</span> {dam ? `${dam.prefix ? dam.prefix + ' ' : ''}${dam.name}` : `${litter.damId_public}`}
+                                            <span className="text-gray-600">Dam:</span> {dam ? `${dam.prefix ? dam.prefix + ' ' : ''}${dam.name}${dam.suffix ? ' ' + dam.suffix : ''}` : `${litter.damId_public}`}
                                         </div>
                                         <div className="text-sm font-semibold text-gray-700">
                                             {litter.numberBorn} offspring
@@ -3147,7 +3147,7 @@ const LitterManagement = ({ authToken, API_BASE_URL, userProfile, showModalMessa
                                                             <div className="flex items-center gap-1 mb-1">
                                                                 <Mars size={14} className="text-primary flex-shrink-0" />
                                                                 <p className="font-bold text-gray-800 truncate">
-                                                                    {sire.prefix ? `${sire.prefix} ` : ''}{sire.name}
+                                                                    {sire.prefix ? `${sire.prefix} ` : ''}{sire.name}{sire.suffix ? ` ${sire.suffix}` : ''}
                                                                 </p>
                                                             </div>
                                                             <p className="text-xs text-gray-500">{sire.id_public}</p>
@@ -3175,7 +3175,7 @@ const LitterManagement = ({ authToken, API_BASE_URL, userProfile, showModalMessa
                                                             <div className="flex items-center gap-1 mb-1">
                                                                 <Venus size={14} className="text-accent flex-shrink-0" />
                                                                 <p className="font-bold text-gray-800 truncate">
-                                                                    {dam.prefix ? `${dam.prefix} ` : ''}{dam.name}
+                                                                    {dam.prefix ? `${dam.prefix} ` : ''}{dam.name}{dam.suffix ? ` ${dam.suffix}` : ''}
                                                                 </p>
                                                             </div>
                                                             <p className="text-xs text-gray-500">{dam.id_public}</p>
@@ -3241,7 +3241,7 @@ const LitterManagement = ({ authToken, API_BASE_URL, userProfile, showModalMessa
                                                             {/* Name */}
                                                             <div className="w-full text-center px-2 pb-1">
                                                                 <div className="text-sm font-semibold text-gray-800 truncate">
-                                                                    {animal.prefix ? `${animal.prefix} ` : ''}{animal.name}
+                                                                    {animal.prefix ? `${animal.prefix} ` : ''}{animal.name}{animal.suffix ? ` ${animal.suffix}` : ''}
                                                                 </div>
                                                             </div>
 
@@ -3377,7 +3377,7 @@ const LitterManagement = ({ authToken, API_BASE_URL, userProfile, showModalMessa
                                         <div key={animal.id_public} className="border rounded-lg p-3 flex justify-between items-center">
                                             <div>
                                                 <p className="font-semibold">
-                                                    {animal.prefix ? `${animal.prefix} ` : ''}{animal.name}
+                                                    {animal.prefix ? `${animal.prefix} ` : ''}{animal.name}{animal.suffix ? ` ${animal.suffix}` : ''}
                                                 </p>
                                                 <p className="text-sm text-gray-600">
                                                     {animal.id_public} • {animal.gender} • {animal.species}
@@ -3937,6 +3937,7 @@ const AnimalForm = ({
             species: animalToEdit.species,
             breederyId: animalToEdit.breederyId || animalToEdit.registryCode || '',
             prefix: animalToEdit.prefix || '',
+            suffix: animalToEdit.suffix || '',
             name: animalToEdit.name || '',
             gender: animalToEdit.gender || GENDER_OPTIONS[0],
             birthDate: animalToEdit.birthDate ? new Date(animalToEdit.birthDate).toISOString().substring(0, 10) : '',
@@ -3958,6 +3959,7 @@ const AnimalForm = ({
             species: species, 
             breederyId: '',
             prefix: '',
+            suffix: '',
             name: '',
             gender: GENDER_OPTIONS[0],
             birthDate: '', 
@@ -3993,7 +3995,7 @@ const AnimalForm = ({
             const localResp = await axios.get(`${API_BASE_URL}/animals?id_public=${encodeURIComponent(idPublic)}`, { headers: { Authorization: `Bearer ${authToken}` } });
             if (Array.isArray(localResp.data) && localResp.data.length > 0) {
                 const a = localResp.data[0];
-                return { id_public: a.id_public, prefix: a.prefix || '', name: a.name || '', backendId: a._id || a.id_backend || null };
+                return { id_public: a.id_public, prefix: a.prefix || '', suffix: a.suffix || '', name: a.name || '', backendId: a._id || a.id_backend || null };
             }
         } catch (err) {
             // ignore and try global
@@ -4003,7 +4005,7 @@ const AnimalForm = ({
             const globalResp = await axios.get(`${API_BASE_URL}/public/global/animals?id_public=${encodeURIComponent(idPublic)}`);
             if (Array.isArray(globalResp.data) && globalResp.data.length > 0) {
                 const a = globalResp.data[0];
-                return { id_public: a.id_public, prefix: a.prefix || '', name: a.name || '', backendId: a._id || a.id_backend || null };
+                return { id_public: a.id_public, prefix: a.prefix || '', suffix: a.suffix || '', name: a.name || '', backendId: a._id || a.id_backend || null };
             }
         } catch (err) {
             // ignore
@@ -4087,7 +4089,7 @@ const AnimalForm = ({
         // If caller passed the whole animal object, use it directly to avoid refetch
         if (idOrAnimal && typeof idOrAnimal === 'object') {
             const a = idOrAnimal;
-            const info = { id_public: a.id_public, prefix: a.prefix || '', name: a.name || '', backendId: a._id || a.id_backend || null };
+            const info = { id_public: a.id_public, prefix: a.prefix || '', suffix: a.suffix || '', name: a.name || '', backendId: a._id || a.id_backend || null };
             if (modalTarget === 'father') {
                 setFatherInfo(info);
                 pedigreeRef.current.fatherBackendId = info.backendId;
@@ -4551,6 +4553,13 @@ const AnimalForm = ({
                     <div>
                         <label className="block text-sm font-medium text-gray-700">Prefix</label>
                         <input type="text" name="prefix" value={formData.prefix} onChange={handleChange} 
+                            className="mt-1 block w-full p-2 border border-gray-300 rounded-md shadow-sm focus:ring-primary focus:border-primary" />
+                    </div>
+					
+					{/* Suffix */}
+                    <div>
+                        <label className="block text-sm font-medium text-gray-700">Suffix</label>
+                        <input type="text" name="suffix" value={formData.suffix} onChange={handleChange} 
                             className="mt-1 block w-full p-2 border border-gray-300 rounded-md shadow-sm focus:ring-primary focus:border-primary" />
                     </div>
 					
@@ -5716,7 +5725,7 @@ const AuthView = ({ onLoginSuccess, showModalMessage, isRegister, setIsRegister,
                 {/* Name */}
                 <div className="text-center mb-1">
                     <p className="text-sm font-semibold text-gray-800 truncate">
-                        {parentData.prefix ? `${parentData.prefix} ` : ''}{parentData.name}
+                        {parentData.prefix ? `${parentData.prefix} ` : ''}{parentData.name}{parentData.suffix ? ` ${parentData.suffix}` : ''}
                     </p>
                 </div>
 
@@ -5967,7 +5976,7 @@ const AnimalList = ({ authToken, showModalMessage, onEditAnimal, onViewAnimal, o
                     
                     {/* Prefix / Name under image */}
                     <div className="w-full text-center px-2 pb-1">
-                        <div className="text-sm font-semibold text-gray-800 truncate">{animal.prefix ? `${animal.prefix} ` : ''}{animal.name}</div>
+                        <div className="text-sm font-semibold text-gray-800 truncate">{animal.prefix ? `${animal.prefix} ` : ''}{animal.name}{animal.suffix ? ` ${animal.suffix}` : ''}</div>
                     </div>
 
                     {/* Edit is available when viewing full card; remove inline edit icon from dashboard cards */}
@@ -6812,7 +6821,7 @@ const App = () => {
                                     </div>
                                 </div>
                                 <div className="flex-1 w-full">
-                                    <h2 className="text-2xl font-bold text-gray-800 mb-2">{animalToView.prefix ? `${animalToView.prefix} ` : ''}{animalToView.name}</h2>
+                                    <h2 className="text-2xl font-bold text-gray-800 mb-2">{animalToView.prefix ? `${animalToView.prefix} ` : ''}{animalToView.name}{animalToView.suffix ? ` ${animalToView.suffix}` : ''}</h2>
                                     <p className="text-sm text-gray-600 mb-4">{animalToView.species} &nbsp; • &nbsp; {animalToView.id_public}</p>
                                     <div className="grid grid-cols-1 sm:grid-cols-2 gap-x-6 gap-y-3 text-sm text-gray-700">
                                         <div><strong>Gender:</strong> {animalToView.gender}</div>
