@@ -631,6 +631,9 @@ const calculatePhenotype = (genotype, originalGenotype = null) => {
   const isExtremeBlackPattern = genotype.A === 'ae/ae';
   const isExtremeTanPattern = genotype.A === 'at/ae' || genotype.A === 'ae/at';
 
+  // Check if A locus was explicitly selected (not defaulted)
+  const aLocusSelected = originalGenotype && originalGenotype.A && originalGenotype.A !== '';
+
   // Track carriers for A-locus
   if (genotype.A === 'A/a') carriers.push('Black');
   else if (genotype.A === 'A/ae') carriers.push('Extreme Black');
@@ -651,13 +654,13 @@ const calculatePhenotype = (genotype, originalGenotype = null) => {
       if (genotype.P === 'p/p') {
         color = 'Argente Tan';
       } else {
-        color = isBrown ? 'Cinnamon Tan' : 'Agouti Tan';
+        color = isBrown ? 'Cinnamon Tan' : (aLocusSelected ? 'Agouti Tan' : 'Tan');
       }
     } else {
       if (genotype.P === 'p/p') {
         color = isBrown ? 'Cinnamon Argente' : 'Argente';
       } else {
-        color = isBrown ? 'Cinnamon' : 'Agouti';
+        color = isBrown ? 'Cinnamon' : (aLocusSelected ? 'Agouti' : 'Wild Type');
       }
     }
   } else if (isTanPattern) {
