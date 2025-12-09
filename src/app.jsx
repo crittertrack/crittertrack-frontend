@@ -5911,6 +5911,10 @@ const AnimalList = ({ authToken, showModalMessage, onEditAnimal, onViewAnimal, o
     const [statusFilterNursing, setStatusFilterNursing] = useState(false);
     const [ownedFilterActive, setOwnedFilterActive] = useState(true);
     const [publicFilter, setPublicFilter] = useState('');
+    const [bulkDeleteMode, setBulkDeleteMode] = useState({}); // { species: true/false }
+    const [selectedAnimals, setSelectedAnimals] = useState({}); // { species: [id1, id2, ...] }
+    const [bulkDeleteMode, setBulkDeleteMode] = useState({}); // { species: true/false }
+    const [selectedAnimals, setSelectedAnimals] = useState({}); // { species: [id1, id2, ...] }
     
     const fetchAnimals = useCallback(async () => {
         setLoading(true);
@@ -6108,18 +6112,83 @@ const AnimalList = ({ authToken, showModalMessage, onEditAnimal, onViewAnimal, o
         setAppliedNameFilter(term);
     };
 
-    const AnimalCard = ({ animal, onEditAnimal }) => {
+    const toggleBulkDeleteMode = (species) => {
+        setBulkDeleteMode(prev => ({ ...prev, [species]: !prev[species] }));
+        setSelectedAnimals(prev => ({ ...prev, [species]: [] }));
+    };
+
+    const toggleAnimalSelection = (species, animalId) => {
+        setSelectedAnimals(prev => {
+            const current = prev[species] || [];
+            const updated = current.includes(animalId)
+                ? current.filter(id => id !== animalId)
+                : [...current, animalId];
+            return { ...prev, [species]: updated };
+        });
+    };
+
+    const handleBulkDelete = async (species) => {
+        const selectedIds = selectedAnimals[species] || [];
+        if (selectedIds.length === 0) {
+            showModalMessage('No Selection', 'Please select at least one animal to delete.');
+            return;
+        }
+
+        const confirmDelete = window.confirm(`Are you sure you want to delete ${selectedIds.length} animal(s)? This action cannot be undone.`);
+        if (!confirmDelete) return;
+
+        try {
+            setLoading(true);
+            for (const id of selectedIds) {
+                await axios.delete(`${API_BASE_URL}/animals/${id}`, {
+                    headers: { Authorization: `Bearer ${authToken}` }
+                });
+            }
+            showModalMessage('Success', `Successfully deleted ${selectedIds.length} animal(s).`);
+            setBulkDeleteMode(prev => ({ ...prev, [species]: false }));
+            setSelectedAnimals(prev => ({ ...prev, [species]: [] }));
+            await fetchAnimals();
+        } catch (error) {
+            console.error('Error deleting animals:', error);
+            showModalMessage('Error', 'Failed to delete some animals. Please try again.');
+        } finally {
+            setLoading(false);
+        }
+    };
+
+    const AnimalCard = ({ animal, onEditAnimal, species, isSelectable, isSelected, onToggleSelect }) => {
         const birth = animal.birthDate ? new Date(animal.birthDate).toLocaleDateString() : '';
         const imgSrc = animal.imageUrl || animal.photoUrl || null;
+
+        const handleClick = () => {
+            if (isSelectable) {
+                onToggleSelect(species, animal.id_public);
+            } else {
+                onViewAnimal(animal);
+            }
+        };
 
         return (
             <div className="w-full flex justify-center">
                 <div
-                    onClick={() => onViewAnimal(animal)}
-                    className="relative bg-white rounded-xl shadow-sm w-44 h-56 flex flex-col items-center overflow-hidden cursor-pointer hover:shadow-md transition border border-gray-300 pt-3"
+                    onClick={handleClick}
+                    className={`relative bg-white rounded-xl shadow-sm w-44 h-56 flex flex-col items-center overflow-hidden cursor-pointer hover:shadow-md transition border-2 pt-3 ${
+                        isSelected ? 'border-red-500' : 'border-gray-300'
+                    }`}
                 >
-                    {/* Birthdate top-left */}
-                    {birth && (
+                    {isSelectable && (
+                        <div className="absolute top-2 left-2 z-10">
+                            <input
+                                type="checkbox"
+                                checked={isSelected}
+                                onChange={() => {}} // Handled by parent click
+                                className="w-5 h-5 cursor-pointer"
+                                onClick={(e) => e.stopPropagation()}
+                            />
+                        </div>
+                    )}
+                    {/* Birthdate top-left - only show if not in selection mode */}
+                    {birth && !isSelectable && (
                         <div className="absolute top-2 left-2 text-xs text-gray-600 bg-white/80 px-2 py-0.5 rounded">
                             {birth}
                         </div>
@@ -6348,18 +6417,64 @@ const AnimalList = ({ authToken, showModalMessage, onEditAnimal, onViewAnimal, o
                 </div>
             ) : (
                 <div className="space-y-4">
-                    {speciesNames.map(species => (
+                    {speciesNames.map(species => {
+                        const isBulkMode = bulkDeleteMode[species] || false;
+                        const selected = selectedAnimals[species] || [];
+                        
+                        return (
                         <div key={species} className="border border-gray-200 rounded-xl overflow-hidden shadow-sm">
-                            <h3 className="text-lg font-bold bg-gray-100 p-4 border-b text-gray-700">
-                                {getSpeciesDisplayName(species)} ({groupedAnimals[species].length})
-                            </h3>
+                            <div className="flex items-center justify-between bg-gray-100 p-4 border-b">
+                                <h3 className="text-lg font-bold text-gray-700">
+                                    {getSpeciesDisplayName(species)} ({groupedAnimals[species].length})
+                                </h3>
+                                <div className="flex items-center gap-2">
+                                    {isBulkMode && (
+                                        <>
+                                            <span className="text-sm text-gray-600">
+                                                {selected.length} selected
+                                            </span>
+                                            <button
+                                                onClick={() => handleBulkDelete(species)}
+                                                disabled={selected.length === 0}
+                                                className="px-3 py-1 bg-red-500 hover:bg-red-600 text-white text-sm font-semibold rounded-lg transition disabled:opacity-50 disabled:cursor-not-allowed"
+                                            >
+                                                Delete Selected
+                                            </button>
+                                            <button
+                                                onClick={() => toggleBulkDeleteMode(species)}
+                                                className="px-3 py-1 bg-gray-300 hover:bg-gray-400 text-gray-800 text-sm font-semibold rounded-lg transition"
+                                            >
+                                                Cancel
+                                            </button>
+                                        </>
+                                    )}
+                                    {!isBulkMode && (
+                                        <button
+                                            onClick={() => toggleBulkDeleteMode(species)}
+                                            className="p-2 hover:bg-gray-200 rounded-lg transition"
+                                            title="Delete Multiple"
+                                        >
+                                            <Trash2 size={18} className="text-red-500" />
+                                        </button>
+                                    )}
+                                </div>
+                            </div>
                             <div className="p-4 grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-4">
                                 {groupedAnimals[species].map(animal => (
-                                    <AnimalCard key={animal.id_public} animal={animal} onEditAnimal={onEditAnimal} />
+                                    <AnimalCard 
+                                        key={animal.id_public} 
+                                        animal={animal} 
+                                        onEditAnimal={onEditAnimal}
+                                        species={species}
+                                        isSelectable={isBulkMode}
+                                        isSelected={selected.includes(animal.id_public)}
+                                        onToggleSelect={toggleAnimalSelection}
+                                    />
                                 ))}
                             </div>
                         </div>
-                    ))}
+                        );
+                    })}
                 </div>
             )}
         </div>
