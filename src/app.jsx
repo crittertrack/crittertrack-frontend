@@ -5913,8 +5913,6 @@ const AnimalList = ({ authToken, showModalMessage, onEditAnimal, onViewAnimal, o
     const [publicFilter, setPublicFilter] = useState('');
     const [bulkDeleteMode, setBulkDeleteMode] = useState({}); // { species: true/false }
     const [selectedAnimals, setSelectedAnimals] = useState({}); // { species: [id1, id2, ...] }
-    const [bulkDeleteMode, setBulkDeleteMode] = useState({}); // { species: true/false }
-    const [selectedAnimals, setSelectedAnimals] = useState({}); // { species: [id1, id2, ...] }
     
     const fetchAnimals = useCallback(async () => {
         setLoading(true);
