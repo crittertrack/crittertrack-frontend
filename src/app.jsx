@@ -4380,6 +4380,16 @@ const AnimalForm = ({
             // Merge in any immediate pedigree selections stored in `pedigreeRef` to avoid race conditions
             const payloadToSave = { ...formData };
             
+            // Validate deceased date: remove if it's before birth date
+            if (payloadToSave.deceasedDate && payloadToSave.birthDate) {
+                const birthDate = new Date(payloadToSave.birthDate);
+                const deceasedDate = new Date(payloadToSave.deceasedDate);
+                if (deceasedDate < birthDate) {
+                    console.log('[VALIDATION] Deceased date is before birth date, removing it');
+                    payloadToSave.deceasedDate = '';
+                }
+            }
+            
             // Determine final parent values (pedigreeRef takes precedence if set, otherwise use formData)
             const finalFatherId = pedigreeRef.current.father !== undefined ? pedigreeRef.current.father : formData.fatherId_public;
             const finalMotherId = pedigreeRef.current.mother !== undefined ? pedigreeRef.current.mother : formData.motherId_public;
@@ -6998,8 +7008,12 @@ const App = () => {
                                     <p className="text-sm text-gray-600 mb-4">{animalToView.species} &nbsp; • &nbsp; {animalToView.id_public}</p>
                                     <div className="grid grid-cols-1 sm:grid-cols-2 gap-x-6 gap-y-3 text-sm text-gray-700">
                                         <div><strong>Gender:</strong> {animalToView.gender}</div>
+                                        <div><strong>Birth Date:</strong> {formattedBirthDate}</div>
                                         <div><strong>Color:</strong> {animalToView.color || '—'}</div>
                                         <div><strong>Coat:</strong> {animalToView.coat || '—'}</div>
+                                        {animalToView.deceasedDate && (
+                                            <div><strong>Deceased Date:</strong> {new Intl.DateTimeFormat('en-US', { year: 'numeric', month: 'long', day: 'numeric' }).format(new Date(animalToView.deceasedDate))}</div>
+                                        )}
                                         <div><strong>Breedery ID:</strong> {animalToView.breederyId || animalToView.registryCode || '—'}</div>
                                         <div><strong>Inbreeding COI:</strong> {animalToView.inbreedingCoefficient != null ? `${animalToView.inbreedingCoefficient.toFixed(2)}%` : 'N/A'}</div>
                                     </div>
