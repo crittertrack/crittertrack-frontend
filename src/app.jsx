@@ -4155,10 +4155,21 @@ const AnimalForm = ({
 
     const handleChange = (e) => {
         const { name, value, type, checked } = e.target;
-        setFormData(prev => ({
-            ...prev,
-            [name]: type === 'checkbox' ? checked : value
-        }));
+        setFormData(prev => {
+            const updated = {
+                ...prev,
+                [name]: type === 'checkbox' ? checked : value
+            };
+            
+            // If deceased date is being set, automatically set status to Deceased
+            if (name === 'deceasedDate' && value) {
+                updated.status = 'Deceased';
+            }
+            // If deceased date is being cleared, don't automatically change status
+            // (user might want to keep it as is)
+            
+            return updated;
+        });
     };
     
         const handleSelectPedigree = async (idOrAnimal) => {
