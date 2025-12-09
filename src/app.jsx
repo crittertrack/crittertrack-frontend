@@ -7675,7 +7675,7 @@ const App = () => {
                     
                     {/* Community Activity Banner */}
                     {(newestUsers.length > 0 || activeUsers.length > 0) && (
-                        <div className="flex-1 bg-gradient-to-r from-primary/20 to-accent/20 p-3 rounded-lg border border-primary/30">
+                        <div className="flex-1 min-w-0 bg-gradient-to-r from-primary/20 to-accent/20 p-3 rounded-lg border border-primary/30">
                             <h3 className="text-xs font-semibold text-gray-800 mb-2 flex items-center">
                                 <Users size={14} className="mr-2 text-primary-dark" />
                                 Community Activity
