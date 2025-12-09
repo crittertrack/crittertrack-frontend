@@ -969,7 +969,17 @@ const ParentSearchModal = ({
                 const localResponse = await axios.get(localUrl, {
                     headers: { Authorization: `Bearer ${authToken}` }
                 });
-                const filteredLocal = localResponse.data.filter(a => a.id_public !== currentId);
+                // Filter out current animal and animals deceased before offspring birth date
+                const filteredLocal = localResponse.data.filter(a => {
+                    if (a.id_public === currentId) return false;
+                    // If animal has deceased date and we have offspring birth date, check if alive at that time
+                    if (birthDate && a.deceasedDate) {
+                        const offspringBirth = new Date(birthDate);
+                        const parentDeceased = new Date(a.deceasedDate);
+                        if (parentDeceased < offspringBirth) return false; // Parent died before offspring born
+                    }
+                    return true;
+                });
                 setLocalAnimals(filteredLocal);
             } catch (error) {
                 console.error('Local Search Error:', error);
@@ -991,7 +1001,17 @@ const ParentSearchModal = ({
                     : `${API_BASE_URL}/public/global/animals?name=${encodeURIComponent(trimmedSearchTerm)}${genderQuery}${birthdateQuery}${speciesQuery}`;
 
                 const globalResponse = await axios.get(globalUrl);
-                const filteredGlobal = globalResponse.data.filter(a => a.id_public !== currentId);
+                // Filter out current animal and animals deceased before offspring birth date
+                const filteredGlobal = globalResponse.data.filter(a => {
+                    if (a.id_public === currentId) return false;
+                    // If animal has deceased date and we have offspring birth date, check if alive at that time
+                    if (birthDate && a.deceasedDate) {
+                        const offspringBirth = new Date(birthDate);
+                        const parentDeceased = new Date(a.deceasedDate);
+                        if (parentDeceased < offspringBirth) return false; // Parent died before offspring born
+                    }
+                    return true;
+                });
                 setGlobalAnimals(filteredGlobal);
             } catch (error) {
                 console.error('Global Search Error:', error);
@@ -2454,6 +2474,27 @@ const LitterManagement = ({ authToken, API_BASE_URL, userProfile, showModalMessa
             if (sire.species !== dam.species) {
                 showModalMessage('Error', 'Parents must be the same species');
                 return;
+            }
+
+            // Validate parents were alive at litter birth date
+            if (formData.birthDate) {
+                const litterBirthDate = new Date(formData.birthDate);
+                
+                if (sire.deceasedDate) {
+                    const sireDeceasedDate = new Date(sire.deceasedDate);
+                    if (sireDeceasedDate < litterBirthDate) {
+                        showModalMessage('Error', `Sire (${sire.name}) was deceased before the litter birth date`);
+                        return;
+                    }
+                }
+                
+                if (dam.deceasedDate) {
+                    const damDeceasedDate = new Date(dam.deceasedDate);
+                    if (damDeceasedDate < litterBirthDate) {
+                        showModalMessage('Error', `Dam (${dam.name}) was deceased before the litter birth date`);
+                        return;
+                    }
+                }
             }
 
             // Create litter with optional tracking counts
@@ -4374,6 +4415,53 @@ const AnimalForm = ({
                 }
             } else {
                 console.log('[IMAGE UPLOAD] No image file to upload');
+            }
+
+            // Validate parents were alive at animal's birth date
+            if (formData.birthDate && (formData.fatherId_public || formData.motherId_public)) {
+                const animalBirthDate = new Date(formData.birthDate);
+                
+                // Check father
+                if (formData.fatherId_public && fatherInfo) {
+                    try {
+                        // Fetch full father details to get deceased date
+                        const fatherResp = await axios.get(`${API_BASE_URL}/animals?id_public=${encodeURIComponent(formData.fatherId_public)}`, {
+                            headers: { Authorization: `Bearer ${authToken}` }
+                        });
+                        const father = fatherResp.data?.[0];
+                        if (father?.deceasedDate) {
+                            const fatherDeceasedDate = new Date(father.deceasedDate);
+                            if (fatherDeceasedDate < animalBirthDate) {
+                                setLoading(false);
+                                showModalMessage('Error', `Father (${father.name}) was deceased before this animal's birth date`);
+                                return;
+                            }
+                        }
+                    } catch (err) {
+                        console.warn('Could not validate father deceased date:', err);
+                    }
+                }
+                
+                // Check mother
+                if (formData.motherId_public && motherInfo) {
+                    try {
+                        // Fetch full mother details to get deceased date
+                        const motherResp = await axios.get(`${API_BASE_URL}/animals?id_public=${encodeURIComponent(formData.motherId_public)}`, {
+                            headers: { Authorization: `Bearer ${authToken}` }
+                        });
+                        const mother = motherResp.data?.[0];
+                        if (mother?.deceasedDate) {
+                            const motherDeceasedDate = new Date(mother.deceasedDate);
+                            if (motherDeceasedDate < animalBirthDate) {
+                                setLoading(false);
+                                showModalMessage('Error', `Mother (${mother.name}) was deceased before this animal's birth date`);
+                                return;
+                            }
+                        }
+                    } catch (err) {
+                        console.warn('Could not validate mother deceased date:', err);
+                    }
+                }
             }
 
             // Prepare explicit payload to send to the API and log it for debugging
