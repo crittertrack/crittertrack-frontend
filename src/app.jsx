@@ -6175,14 +6175,11 @@ const AnimalList = ({ authToken, showModalMessage, onEditAnimal, onViewAnimal, o
                     }`}
                 >
                     {isSelectable && (
-                        <div className="absolute top-2 left-2 z-10">
+                        <div className="absolute top-2 left-2 z-10" onClick={(e) => e.stopPropagation()}>
                             <input
                                 type="checkbox"
                                 checked={isSelected}
-                                onChange={(e) => {
-                                    e.stopPropagation();
-                                    onToggleSelect(species, animal.id_public);
-                                }}
+                                onChange={() => onToggleSelect(species, animal.id_public)}
                                 className="w-5 h-5 cursor-pointer"
                             />
                         </div>
