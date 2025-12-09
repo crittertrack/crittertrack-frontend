@@ -2371,11 +2371,58 @@ const LitterManagement = ({ authToken, API_BASE_URL, userProfile, showModalMessa
         coat: '',
         remarks: ''
     });
+    const [bulkDeleteMode, setBulkDeleteMode] = useState({});
+    const [selectedOffspring, setSelectedOffspring] = useState({});
 
     useEffect(() => {
         fetchLitters();
         fetchMyAnimals();
     }, []);
+
+    const toggleBulkDeleteMode = (litterId) => {
+        setBulkDeleteMode(prev => ({ ...prev, [litterId]: !prev[litterId] }));
+        setSelectedOffspring(prev => ({ ...prev, [litterId]: [] }));
+    };
+
+    const toggleOffspringSelection = (litterId, animalId) => {
+        setSelectedOffspring(prev => {
+            const current = prev[litterId] || [];
+            const updated = current.includes(animalId)
+                ? current.filter(id => id !== animalId)
+                : [...current, animalId];
+            return { ...prev, [litterId]: updated };
+        });
+    };
+
+    const handleBulkDeleteOffspring = async (litterId) => {
+        const selectedIds = selectedOffspring[litterId] || [];
+        if (selectedIds.length === 0) {
+            showModalMessage('No Selection', 'Please select at least one offspring to delete.');
+            return;
+        }
+
+        const confirmDelete = window.confirm(`Are you sure you want to delete ${selectedIds.length} offspring animal(s)? This action cannot be undone.`);
+        if (!confirmDelete) return;
+
+        try {
+            setLoading(true);
+            for (const id of selectedIds) {
+                await axios.delete(`${API_BASE_URL}/animals/${id}`, {
+                    headers: { Authorization: `Bearer ${authToken}` }
+                });
+            }
+            showModalMessage('Success', `Successfully deleted ${selectedIds.length} offspring animal(s).`);
+            setBulkDeleteMode(prev => ({ ...prev, [litterId]: false }));
+            setSelectedOffspring(prev => ({ ...prev, [litterId]: [] }));
+            await fetchLitters();
+            await fetchMyAnimals();
+        } catch (error) {
+            console.error('Error deleting offspring:', error);
+            showModalMessage('Error', 'Failed to delete some offspring. Please try again.');
+        } finally {
+            setLoading(false);
+        }
+    };
 
     const fetchLitters = async () => {
         try {
@@ -3303,14 +3350,69 @@ const LitterManagement = ({ authToken, API_BASE_URL, userProfile, showModalMessa
                                         {/* Offspring Cards */}
                                         {offspringList.length > 0 && (
                                             <div className="mb-4">
-                                                <h4 className="text-sm font-bold text-gray-700 mb-2">Offspring ({offspringList.length})</h4>
+                                                <div className="flex items-center justify-between mb-2">
+                                                    <h4 className="text-sm font-bold text-gray-700">Offspring ({offspringList.length})</h4>
+                                                    <div className="flex items-center gap-2">
+                                                        {bulkDeleteMode[litter._id] && (
+                                                            <>
+                                                                <span className="text-sm text-gray-600">
+                                                                    {(selectedOffspring[litter._id] || []).length} selected
+                                                                </span>
+                                                                <button
+                                                                    onClick={() => handleBulkDeleteOffspring(litter._id)}
+                                                                    disabled={(selectedOffspring[litter._id] || []).length === 0}
+                                                                    className="px-3 py-1 bg-red-500 hover:bg-red-600 text-white text-sm font-semibold rounded-lg transition disabled:opacity-50 disabled:cursor-not-allowed"
+                                                                >
+                                                                    Delete Selected
+                                                                </button>
+                                                                <button
+                                                                    onClick={() => toggleBulkDeleteMode(litter._id)}
+                                                                    className="px-3 py-1 bg-gray-300 hover:bg-gray-400 text-gray-800 text-sm font-semibold rounded-lg transition"
+                                                                >
+                                                                    Cancel
+                                                                </button>
+                                                            </>
+                                                        )}
+                                                        {!bulkDeleteMode[litter._id] && (
+                                                            <button
+                                                                onClick={() => toggleBulkDeleteMode(litter._id)}
+                                                                className="p-2 hover:bg-gray-200 rounded-lg transition"
+                                                                title="Delete Multiple"
+                                                            >
+                                                                <Trash2 size={18} className="text-red-500" />
+                                                            </button>
+                                                        )}
+                                                    </div>
+                                                </div>
                                                 <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-3">
-                                                    {offspringList.map(animal => (
+                                                    {offspringList.map(animal => {
+                                                        const isBulkMode = bulkDeleteMode[litter._id] || false;
+                                                        const isSelected = (selectedOffspring[litter._id] || []).includes(animal.id_public);
+                                                        
+                                                        return (
                                                         <div
                                                             key={animal.id_public}
-                                                            onClick={() => onViewAnimal(animal)}
-                                                            className="relative bg-white rounded-lg shadow-sm h-52 flex flex-col items-center overflow-hidden cursor-pointer hover:shadow-md transition border border-gray-300 pt-2"
+                                                            onClick={() => {
+                                                                if (isBulkMode) {
+                                                                    toggleOffspringSelection(litter._id, animal.id_public);
+                                                                } else {
+                                                                    onViewAnimal(animal);
+                                                                }
+                                                            }}
+                                                            className={`relative bg-white rounded-lg shadow-sm h-52 flex flex-col items-center overflow-hidden cursor-pointer hover:shadow-md transition border-2 pt-2 ${
+                                                                isSelected ? 'border-red-500' : 'border-gray-300'
+                                                            }`}
                                                         >
+                                                            {isBulkMode && (
+                                                                <div className="absolute top-2 left-2 z-10" onClick={(e) => e.stopPropagation()}>
+                                                                    <input
+                                                                        type="checkbox"
+                                                                        checked={isSelected}
+                                                                        onChange={() => toggleOffspringSelection(litter._id, animal.id_public)}
+                                                                        className="w-5 h-5 cursor-pointer"
+                                                                    />
+                                                                </div>
+                                                            )}
                                                             {/* Gender badge top-right */}
                                                             {animal.gender && (
                                                                 <div className="absolute top-1.5 right-1.5">
@@ -3369,7 +3471,8 @@ const LitterManagement = ({ authToken, API_BASE_URL, userProfile, showModalMessa
                                                                 <div className="text-xs font-medium text-gray-700">{animal.status || 'Unknown'}</div>
                                                             </div>
                                                         </div>
-                                                    ))}
+                                                        );
+                                                    })}
                                                 </div>
                                             </div>
                                         )}
