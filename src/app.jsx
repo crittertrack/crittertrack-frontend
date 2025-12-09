@@ -6179,9 +6179,11 @@ const AnimalList = ({ authToken, showModalMessage, onEditAnimal, onViewAnimal, o
                             <input
                                 type="checkbox"
                                 checked={isSelected}
-                                onChange={() => {}} // Handled by parent click
+                                onChange={(e) => {
+                                    e.stopPropagation();
+                                    onToggleSelect(species, animal.id_public);
+                                }}
                                 className="w-5 h-5 cursor-pointer"
-                                onClick={(e) => e.stopPropagation()}
                             />
                         </div>
                     )}
