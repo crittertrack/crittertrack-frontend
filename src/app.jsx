@@ -5677,6 +5677,7 @@ const AuthView = ({ onLoginSuccess, showModalMessage, isRegister, setIsRegister,
     const [loading, setLoading] = useState(false);
     const [verificationStep, setVerificationStep] = useState(false);
     const [verificationCode, setVerificationCode] = useState('');
+    const [agreedToTerms, setAgreedToTerms] = useState(false);
 
     const handleSubmit = async (e) => {
         e.preventDefault();
@@ -5684,6 +5685,11 @@ const AuthView = ({ onLoginSuccess, showModalMessage, isRegister, setIsRegister,
         
         if (isRegister && !verificationStep) {
             // Step 1: Request verification code
+            if (!agreedToTerms) {
+                showModalMessage('Terms Required', 'You must agree to the Terms of Service and Privacy Policy to register.');
+                setLoading(false);
+                return;
+            }
             try {
                 await axios.post(`${API_BASE_URL}/auth/register-request`, {
                     email,
@@ -5824,6 +5830,36 @@ const AuthView = ({ onLoginSuccess, showModalMessage, isRegister, setIsRegister,
                         className="w-full p-3 border border-gray-300 rounded-lg focus:ring-primary focus:border-primary transition" />
                     <input type="password" placeholder="Password *" value={password} onChange={(e) => setPassword(e.target.value)} required 
                         className="w-full p-3 border border-gray-300 rounded-lg focus:ring-primary focus:border-primary transition" />
+                    
+                    {isRegister && (
+                        <label className="flex items-start space-x-2 p-3 border border-gray-300 rounded-lg hover:bg-gray-50 cursor-pointer">
+                            <input
+                                type="checkbox"
+                                checked={agreedToTerms}
+                                onChange={(e) => setAgreedToTerms(e.target.checked)}
+                                required
+                                className="mt-1 h-4 w-4 text-primary rounded border-gray-300 focus:ring-primary cursor-pointer"
+                            />
+                            <span className="text-sm text-gray-700">
+                                I agree to the{' '}
+                                <button
+                                    type="button"
+                                    onClick={onShowTerms}
+                                    className="text-accent hover:text-accent/80 underline font-medium"
+                                >
+                                    Terms of Service
+                                </button>
+                                {' '}and{' '}
+                                <button
+                                    type="button"
+                                    onClick={onShowPrivacy}
+                                    className="text-accent hover:text-accent/80 underline font-medium"
+                                >
+                                    Privacy Policy
+                                </button>
+                            </span>
+                        </label>
+                    )}
                     
                     <button
                         type="submit"
