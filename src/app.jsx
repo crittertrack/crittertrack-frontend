@@ -1519,6 +1519,26 @@ const PublicProfileView = ({ profile, onBack, onViewAnimal, API_BASE_URL }) => {
                     <h2 className="text-3xl font-bold text-gray-900">{displayName}</h2>
                     <p className="text-gray-600">Public ID: <span className="font-mono text-accent">{profile.id_public}</span></p>
                     <p className="text-sm text-gray-500 mt-1">Member since {memberSince}</p>
+                    
+                    {/* Email - Show if public */}
+                    {profile.showEmailPublic && profile.email && (
+                        <p className="text-sm text-gray-700 mt-2 flex items-center gap-2">
+                            <Mail size={16} className="text-accent" />
+                            <a href={`mailto:${profile.email}`} className="hover:text-accent transition underline">
+                                {profile.email}
+                            </a>
+                        </p>
+                    )}
+                    
+                    {/* Website - Show if public */}
+                    {profile.showWebsiteURL && profile.websiteURL && (
+                        <p className="text-sm text-gray-700 mt-2 flex items-center gap-2">
+                            <Globe size={16} className="text-accent" />
+                            <a href={profile.websiteURL} target="_blank" rel="noopener noreferrer" className="hover:text-accent transition underline">
+                                {profile.websiteURL}
+                            </a>
+                        </p>
+                    )}
                 </div>
             </div>
 
