@@ -947,7 +947,8 @@ const ParentSearchModal = ({
         // Detect ID searches (CT1234 or 1234)
         const idMatch = trimmedSearchTerm.match(/^\s*(?:CT[- ]?)?(\d+)\s*$/i);
         const isIdSearch = !!idMatch;
-        const idValue = isIdSearch ? idMatch[1] : null;
+        // Send full CTC format (CTC1234) instead of just numeric portion (1234)
+        const idValue = isIdSearch ? `CTC${idMatch[1]}` : null;
 
         // --- CONSTRUCT FILTER QUERIES ---
         const genderQuery = requiredGender ? `&gender=${requiredGender}` : '';
