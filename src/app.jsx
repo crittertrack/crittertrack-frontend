@@ -1884,11 +1884,20 @@ const ViewOnlyAnimalDetail = ({ animal, onClose, API_BASE_URL, onViewProfile }) 
                                         onClick={() => onViewProfile && onViewProfile(breederInfo)}
                                         className="text-primary hover:text-primary-dark underline font-medium transition"
                                     >
-                                        {breederInfo.showBreederName && breederInfo.personalName && breederInfo.breederName 
-                                            ? `${breederInfo.personalName} (${breederInfo.breederName})` 
-                                            : (breederInfo.showBreederName && breederInfo.breederName 
-                                                ? breederInfo.breederName 
-                                                : breederInfo.personalName || 'Anonymous Breeder')}
+                                        {(() => {
+                                            const showPersonal = breederInfo.showPersonalName ?? false;
+                                            const showBreeder = breederInfo.showBreederName ?? false;
+                                            
+                                            if (showPersonal && showBreeder && breederInfo.personalName && breederInfo.breederName) {
+                                                return `${breederInfo.personalName} (${breederInfo.breederName})`;
+                                            } else if (showBreeder && breederInfo.breederName) {
+                                                return breederInfo.breederName;
+                                            } else if (showPersonal && breederInfo.personalName) {
+                                                return breederInfo.personalName;
+                                            } else {
+                                                return 'Unknown Breeder';
+                                            }
+                                        })()}
                                     </button>
                                 ) : (
                                     <span className="font-mono text-accent">{animal.breederId_public}</span>
@@ -4783,11 +4792,20 @@ const AnimalForm = ({
                                 <div className="flex items-center space-x-2 w-full">
                                     {formData.breederId_public && breederInfo ? (
                                         <span className="text-gray-800">
-                                            {breederInfo.showBreederName && breederInfo.personalName && breederInfo.breederName 
-                                                ? `${breederInfo.personalName} (${breederInfo.breederName})` 
-                                                : (breederInfo.showBreederName && breederInfo.breederName 
-                                                    ? breederInfo.breederName 
-                                                    : breederInfo.personalName || 'Anonymous Breeder')}
+                                            {(() => {
+                                                const showPersonal = breederInfo.showPersonalName ?? false;
+                                                const showBreeder = breederInfo.showBreederName ?? false;
+                                                
+                                                if (showPersonal && showBreeder && breederInfo.personalName && breederInfo.breederName) {
+                                                    return `${breederInfo.personalName} (${breederInfo.breederName})`;
+                                                } else if (showBreeder && breederInfo.breederName) {
+                                                    return breederInfo.breederName;
+                                                } else if (showPersonal && breederInfo.personalName) {
+                                                    return breederInfo.personalName;
+                                                } else {
+                                                    return 'Unknown Breeder';
+                                                }
+                                            })()}
                                         </span>
                                     ) : (
                                         <span className="text-gray-400">
@@ -7008,11 +7026,20 @@ const App = () => {
                                     {animalToView.breederId_public ? (
                                         viewAnimalBreederInfo ? (
                                             <span>
-                                                {viewAnimalBreederInfo.showBreederName && viewAnimalBreederInfo.personalName && viewAnimalBreederInfo.breederName 
-                                                    ? `${viewAnimalBreederInfo.personalName} (${viewAnimalBreederInfo.breederName})` 
-                                                    : (viewAnimalBreederInfo.showBreederName && viewAnimalBreederInfo.breederName 
-                                                        ? viewAnimalBreederInfo.breederName 
-                                                        : viewAnimalBreederInfo.personalName || 'Anonymous Breeder')}
+                                                {(() => {
+                                                    const showPersonal = viewAnimalBreederInfo.showPersonalName ?? false;
+                                                    const showBreeder = viewAnimalBreederInfo.showBreederName ?? false;
+                                                    
+                                                    if (showPersonal && showBreeder && viewAnimalBreederInfo.personalName && viewAnimalBreederInfo.breederName) {
+                                                        return `${viewAnimalBreederInfo.personalName} (${viewAnimalBreederInfo.breederName})`;
+                                                    } else if (showBreeder && viewAnimalBreederInfo.breederName) {
+                                                        return viewAnimalBreederInfo.breederName;
+                                                    } else if (showPersonal && viewAnimalBreederInfo.personalName) {
+                                                        return viewAnimalBreederInfo.personalName;
+                                                    } else {
+                                                        return 'Unknown Breeder';
+                                                    }
+                                                })()}
                                             </span>
                                         ) : (
                                             <span className="font-mono text-accent">{animalToView.breederId_public}</span>
