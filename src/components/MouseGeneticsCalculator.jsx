@@ -702,6 +702,58 @@ const calculatePhenotype = (genotype, originalGenotype = null) => {
     return { phenotype: title || 'Unknown', carriers, hidden, notes: [note] };
   }
 
+  // Check for solo marking/modifier genes that need special handling
+  const onlyGeneSelected = originalGenotype && 
+    Object.keys(originalGenotype).filter(key => originalGenotype[key] && originalGenotype[key] !== '').length === 1;
+
+  if (onlyGeneSelected) {
+    // S locus alone
+    if (originalGenotype.S) {
+      if (genotype.S === 'S/s') {
+        // Add to carriers so it shows in "Carried genes" for parents
+        carriers.push('Pied');
+        return { phenotype: '', carriers, hidden, notes: [] };
+      } else if (genotype.S === 'S/S') {
+        return { phenotype: '', carriers, hidden, notes: ['This gene combination does not affect phenotype'] };
+      }
+    }
+
+    // Rn locus alone
+    if (originalGenotype.Rn) {
+      if (genotype.Rn === 'Rn/rn') {
+        carriers.push('Roan');
+        return { phenotype: '', carriers, hidden, notes: [] };
+      } else if (genotype.Rn === 'Rn/Rn') {
+        return { phenotype: '', carriers, hidden, notes: ['This gene combination does not affect phenotype'] };
+      }
+    }
+
+    // Si locus alone
+    if (originalGenotype.Si) {
+      if (genotype.Si === 'Si/si') {
+        carriers.push('Silvered');
+        return { phenotype: '', carriers, hidden, notes: [] };
+      } else if (genotype.Si === 'Si/Si') {
+        return { phenotype: '', carriers, hidden, notes: ['This gene combination does not affect phenotype'] };
+      }
+    }
+
+    // Mobr locus alone
+    if (originalGenotype.Mobr && genotype.Mobr === 'mobr/mobr') {
+      return { phenotype: '', carriers, hidden, notes: ['This gene combination does not affect phenotype'] };
+    }
+
+    // w locus alone (non-white)
+    if (originalGenotype.W && genotype.W === 'w/w') {
+      return { phenotype: '', carriers, hidden, notes: ['This gene combination does not affect phenotype'] };
+    }
+
+    // u locus alone (non-umbrous)
+    if (originalGenotype.U && genotype.U === 'u/u') {
+      return { phenotype: '', carriers, hidden, notes: ['This gene combination does not affect phenotype'] };
+    }
+  }
+
   // Track carriers for A-locus
   if (genotype.A === 'A/a') carriers.push('Black');
   else if (genotype.A === 'A/ae') carriers.push('Extreme Black');
@@ -1208,6 +1260,8 @@ const MouseGeneticsCalculator = ({ API_BASE_URL, authToken }) => {
       if (!phenotypeMap[phenotype]) {
         phenotypeMap[phenotype] = {
           phenotype: phenotype,
+          carriers: result.carriers || [],
+          notes: result.notes || [],
           genotypes: [],
           genotypeKeys: new Set(),
           count: 0
@@ -1234,6 +1288,8 @@ const MouseGeneticsCalculator = ({ API_BASE_URL, authToken }) => {
     
     const resultsArray = Object.values(phenotypeMap).map(data => ({
       phenotype: data.phenotype,
+      carriers: data.carriers,
+      notes: data.notes,
       genotypes: data.genotypes,
       percentage: ((data.count / totalCount) * 100).toFixed(2)
     })).sort((a, b) => b.percentage - a.percentage);
@@ -1736,14 +1792,21 @@ const MouseGeneticsCalculator = ({ API_BASE_URL, authToken }) => {
             <div className="mt-6 bg-purple-50 rounded-lg p-6 border-2 border-purple-300">
               <h2 className="text-xl font-semibold text-purple-800 mb-4">Possible Offspring Outcomes</h2>
               <div className="space-y-3">
-                {offspringResults.map((result, idx) => (
+                {offspringResults.map((result, idx) => {
+                  // For offspring display: if phenotype is empty but has carriers, show carrier status
+                  const displayPhenotype = result.phenotype || 
+                    (result.carriers && result.carriers.length > 0 
+                      ? result.carriers.map(c => `${c} Carrier`).join(', ') 
+                      : '');
+                  
+                  return (
                   <div key={idx} className="bg-white p-4 rounded-lg border border-purple-200">
                     <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-3">
                       <div className="flex-1">
                         <div className="flex items-center gap-2 flex-wrap">
-                          <p className={`text-lg font-semibold ${result.phenotype.includes('LETHAL') ? 'text-red-600' : 'text-gray-800'}`}>
+                          <p className={`text-lg font-semibold ${displayPhenotype.includes('LETHAL') ? 'text-red-600' : 'text-gray-800'}`}>
                             <span className="text-sm font-medium text-gray-600">Phenotype: </span>
-                            {result.phenotype}
+                            {displayPhenotype}
                           </p>
                           <span className="text-purple-700 font-semibold">
                             {result.percentage}%
@@ -1788,7 +1851,8 @@ const MouseGeneticsCalculator = ({ API_BASE_URL, authToken }) => {
                       </div>
                     )}
                   </div>
-                ))}
+                );
+                })}
               </div>
             </div>
           )}
