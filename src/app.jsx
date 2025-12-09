@@ -2877,6 +2877,7 @@ const LitterManagement = ({ authToken, API_BASE_URL, userProfile, showModalMessa
                                 type="date"
                                 value={formData.birthDate}
                                 onChange={(e) => setFormData({...formData, birthDate: e.target.value})}
+                                max={new Date().toISOString().split('T')[0]}
                                 className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent"
                             />
                         </div>
@@ -3982,6 +3983,7 @@ const AnimalForm = ({
             name: animalToEdit.name || '',
             gender: animalToEdit.gender || GENDER_OPTIONS[0],
             birthDate: animalToEdit.birthDate ? new Date(animalToEdit.birthDate).toISOString().substring(0, 10) : '',
+            deceasedDate: animalToEdit.deceasedDate ? new Date(animalToEdit.deceasedDate).toISOString().substring(0, 10) : '',
             status: animalToEdit.status || 'Pet',
             color: animalToEdit.color || '',
             coat: animalToEdit.coat || '',
@@ -4004,6 +4006,7 @@ const AnimalForm = ({
             name: '',
             gender: GENDER_OPTIONS[0],
             birthDate: '', 
+            deceasedDate: '',
             status: 'Pet',
             color: '',
             coat: '',
@@ -4653,14 +4656,14 @@ const AnimalForm = ({
 					 {/* Birthdate */}
                     <div>
                         <label className="block text-sm font-medium text-gray-700">Birthdate*</label>
-                        <input type="date" name="birthDate" value={formData.birthDate} onChange={handleChange} required 
+                        <input type="date" name="birthDate" value={formData.birthDate} onChange={handleChange} max={new Date().toISOString().split('T')[0]} required 
                             className="mt-1 block w-full p-2 border border-gray-300 rounded-md shadow-sm focus:ring-primary focus:border-primary" />
                     </div>
 					
 					{/* Deceased Date */}
                     <div>
                         <label className="block text-sm font-medium text-gray-700">Deceased Date</label>
-                        <input type="date" name="deceasedDate" value={formData.deceasedDate || ''} onChange={handleChange} 
+                        <input type="date" name="deceasedDate" value={formData.deceasedDate || ''} onChange={handleChange} max={new Date().toISOString().split('T')[0]} 
                             className="mt-1 block w-full p-2 border border-gray-300 rounded-md shadow-sm focus:ring-primary focus:border-primary" />
                     </div>
 					
