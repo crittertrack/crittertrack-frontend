@@ -231,7 +231,7 @@ const calculatePhenotype = (genotype, originalGenotype = null) => {
 
   // Check if this is ae/ae, a/ae, or a/a (non-agouti self colors)
   const isExtremeBlack = genotype.A === 'ae/ae';
-  const isBlackHetero = genotype.A === 'a/ae';
+  const isBlackHetero = genotype.A === 'a/ae' || genotype.A === 'ae/a';
   const isBlack = genotype.A === 'a/a';
   const isSelfBlackVariant = isExtremeBlack || isBlackHetero || isBlack;
 
@@ -242,13 +242,13 @@ const calculatePhenotype = (genotype, originalGenotype = null) => {
   const isTanVariant = isExtremeTan || isTanHetero || isTan;
 
   // Check if this is A/ae, A/a, or A/A (agouti variants)
-  const isAgoutiExtremeHetero = genotype.A === 'A/ae';
-  const isAgoutiHetero = genotype.A === 'A/a';
+  const isAgoutiExtremeHetero = genotype.A === 'A/ae' || genotype.A === 'ae/A';
+  const isAgoutiHetero = genotype.A === 'A/a' || genotype.A === 'a/A';
   const isAgouti = genotype.A === 'A/A';
   const isAgoutiVariant = isAgoutiExtremeHetero || isAgoutiHetero || isAgouti;
 
   // Check if this is A/at (agouti tan)
-  const isAgoutiTan = genotype.A === 'A/at';
+  const isAgoutiTan = genotype.A === 'A/at' || genotype.A === 'at/A';
 
   // Special handling for agouti tan (A/at) with C-locus combinations
   if (isAgoutiTan && genotype.C !== 'C/C') {
@@ -444,7 +444,7 @@ const calculatePhenotype = (genotype, originalGenotype = null) => {
     // Check for C-locus dilutes (exclude C/C and c/c)
     const excludedCLocus = ['C/C', 'c/c', 'C/ch', 'ch/C', 'C/ce', 'ce/C', 'C/c', 'c/C', 'C/cch', 'cch/C'];
     if (genotype.C && !excludedCLocus.includes(genotype.C)) {
-      const isTanVariant = genotype.A === 'Ay/at';
+      const isTanVariant = genotype.A === 'Ay/at' || genotype.A === 'at/Ay';
       
       // If Spl is present, use Splashed instead of C-dilute names
       if (hasSpl) {
@@ -484,13 +484,13 @@ const calculatePhenotype = (genotype, originalGenotype = null) => {
     }
     
     // Track what Ay is paired with
-    if (genotype.A === 'Ay/ae') carriers.push('Extreme Black');
-    else if (genotype.A === 'Ay/a') carriers.push('Black');
-    else if (genotype.A === 'Ay/A') carriers.push('Agouti');
-    else if (genotype.A === 'Ay/Avy') carriers.push('Brindle');
+    if (genotype.A === 'Ay/ae' || genotype.A === 'ae/Ay') carriers.push('Extreme Black');
+    else if (genotype.A === 'Ay/a' || genotype.A === 'a/Ay') carriers.push('Black');
+    else if (genotype.A === 'Ay/A' || genotype.A === 'A/Ay') carriers.push('Agouti');
+    else if (genotype.A === 'Ay/Avy' || genotype.A === 'Avy/Ay') carriers.push('Brindle');
     
     // Determine if it's tan variant
-    const isTanVariant = genotype.A === 'Ay/at';
+    const isTanVariant = genotype.A === 'Ay/at' || genotype.A === 'at/Ay';
     const isBrown = genotype.B === 'b/b';
     const isDilute = genotype.D === 'd/d';
     const isPinkEye = genotype.P === 'p/p';
@@ -567,7 +567,7 @@ const calculatePhenotype = (genotype, originalGenotype = null) => {
     // Check for C-locus dilutes (exclude C/C, c/c, and C/- carriers)
     const excludedCLocus = ['C/C', 'c/c', 'C/ch', 'C/ce', 'C/c', 'C/cch'];
     if (genotype.C && !excludedCLocus.includes(genotype.C)) {
-      const isTanVariant = genotype.A === 'Avy/at';
+      const isTanVariant = genotype.A === 'Avy/at' || genotype.A === 'at/Avy';
       
       // If Spl is present, use Splashed instead of Snowtiger
       if (hasSpl) {
@@ -578,15 +578,15 @@ const calculatePhenotype = (genotype, originalGenotype = null) => {
     }
     
     // Track what Avy is paired with
-    if (genotype.A === 'Avy/ae') carriers.push('Extreme Black');
-    else if (genotype.A === 'Avy/a') carriers.push('Black');
-    else if (genotype.A === 'Avy/A') carriers.push('Agouti');
+    if (genotype.A === 'Avy/ae' || genotype.A === 'ae/Avy') carriers.push('Extreme Black');
+    else if (genotype.A === 'Avy/a' || genotype.A === 'a/Avy') carriers.push('Black');
+    else if (genotype.A === 'Avy/A' || genotype.A === 'A/Avy') carriers.push('Agouti');
     
     // Determine if it's tan variant and modifiers
-    const isTanVariant = genotype.A === 'Avy/at';
+    const isTanVariant = genotype.A === 'Avy/at' || genotype.A === 'at/Avy';
     const isBrown = genotype.B === 'b/b';
     const isDilute = genotype.D === 'd/d';
-    const isAgouti = genotype.A === 'Avy/A';
+    const isAgouti = genotype.A === 'Avy/A' || genotype.A === 'A/Avy';
     const isAvyAvy = genotype.A === 'Avy/Avy';
     const isPinkEye = genotype.P === 'p/p';
     
@@ -755,13 +755,13 @@ const calculatePhenotype = (genotype, originalGenotype = null) => {
   }
 
   // Track carriers for A-locus
-  if (genotype.A === 'A/a') carriers.push('Black');
-  else if (genotype.A === 'A/ae') carriers.push('Extreme Black');
-  else if (genotype.A === 'A/at') {
+  if (genotype.A === 'A/a' || genotype.A === 'a/A') carriers.push('Black');
+  else if (genotype.A === 'A/ae' || genotype.A === 'ae/A') carriers.push('Extreme Black');
+  else if (genotype.A === 'A/at' || genotype.A === 'at/A') {
     // A/at is agouti tan (tan shows visually)
   }
-  else if (genotype.A === 'a/ae') carriers.push('Extreme Black');
-  else if (genotype.A === 'at/ae') carriers.push('Extreme Black');
+  else if (genotype.A === 'a/ae' || genotype.A === 'ae/a') carriers.push('Extreme Black');
+  else if (genotype.A === 'at/ae' || genotype.A === 'ae/at') carriers.push('Extreme Black');
 
   // Brown/Black base
   const isBrown = genotype.B === 'b/b';
