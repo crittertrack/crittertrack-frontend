@@ -671,12 +671,27 @@ const BudgetingTab = ({ authToken, API_BASE_URL, showModalMessage }) => {
                                                 return hasVisibleBreederName || hasVisiblePersonalName;
                                             })
                                             .map(user => {
-                                                // Prioritize breeder name if visible, otherwise use personal name
-                                                const displayName = (user.breederName && user.showBreederName) 
-                                                    ? user.breederName 
-                                                    : user.personalName;
+                                                // Build display name based on what's visible
+                                                const hasVisibleBreederName = user.breederName && user.showBreederName;
+                                                const hasVisiblePersonalName = user.personalName && user.showPersonalName;
+                                                
+                                                let displayName;
+                                                if (hasVisibleBreederName && hasVisiblePersonalName) {
+                                                    // Both visible: show both
+                                                    displayName = `${user.breederName} (${user.personalName})`;
+                                                } else if (hasVisibleBreederName) {
+                                                    // Only breeder name visible
+                                                    displayName = user.breederName;
+                                                } else {
+                                                    // Only personal name visible
+                                                    displayName = user.personalName;
+                                                }
+                                                
+                                                // Use breeder name as value if available, otherwise personal name
+                                                const value = hasVisibleBreederName ? user.breederName : user.personalName;
+                                                
                                                 return (
-                                                    <option key={user.id_public} value={displayName}>
+                                                    <option key={user.id_public} value={value}>
                                                         {user.id_public} - {displayName}
                                                     </option>
                                                 );
