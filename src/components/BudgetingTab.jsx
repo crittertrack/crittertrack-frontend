@@ -677,8 +677,8 @@ const BudgetingTab = ({ authToken, API_BASE_URL, showModalMessage }) => {
                                                 
                                                 let displayName;
                                                 if (hasVisibleBreederName && hasVisiblePersonalName) {
-                                                    // Both visible: show both
-                                                    displayName = `${user.breederName} (${user.personalName})`;
+                                                    // Both visible: show personal name first, breeder name in parentheses
+                                                    displayName = `${user.personalName} (${user.breederName})`;
                                                 } else if (hasVisibleBreederName) {
                                                     // Only breeder name visible
                                                     displayName = user.breederName;
