@@ -663,11 +663,25 @@ const BudgetingTab = ({ authToken, API_BASE_URL, showModalMessage }) => {
                                         className="w-full p-2 border border-gray-300 rounded-lg focus:ring-primary focus:border-primary"
                                     >
                                         <option value="">-- Select a user --</option>
-                                        {users.map(user => (
-                                            <option key={user.id_public} value={user.breederName || user.personalName}>
-                                                {user.id_public} - {user.breederName || user.personalName}
-                                            </option>
-                                        ))}
+                                        {users
+                                            .filter(user => {
+                                                // Only show users who have at least one name visible
+                                                const hasVisibleBreederName = user.breederName && user.showBreederName;
+                                                const hasVisiblePersonalName = user.personalName && user.showPersonalName;
+                                                return hasVisibleBreederName || hasVisiblePersonalName;
+                                            })
+                                            .map(user => {
+                                                // Prioritize breeder name if visible, otherwise use personal name
+                                                const displayName = (user.breederName && user.showBreederName) 
+                                                    ? user.breederName 
+                                                    : user.personalName;
+                                                return (
+                                                    <option key={user.id_public} value={displayName}>
+                                                        {user.id_public} - {displayName}
+                                                    </option>
+                                                );
+                                            })
+                                        }
                                     </select>
                                 )}
                                 <p className="text-xs text-gray-500 mt-1">
