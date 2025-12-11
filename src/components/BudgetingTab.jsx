@@ -99,8 +99,8 @@ const BudgetingTab = ({ authToken, API_BASE_URL, showModalMessage }) => {
 
     const fetchUsers = async () => {
         try {
-            // Try the public profiles search endpoint
-            const response = await axios.get(`${API_BASE_URL}/public/search?query=`, {
+            // Use the profiles search endpoint with empty query to get all users
+            const response = await axios.get(`${API_BASE_URL}/public/profiles/search?query=`, {
                 headers: { Authorization: `Bearer ${authToken}` }
             });
             console.log('Fetched users:', response.data);
