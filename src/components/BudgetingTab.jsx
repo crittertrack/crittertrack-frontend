@@ -530,6 +530,8 @@ const BudgetingTab = ({ authToken, API_BASE_URL, showModalMessage }) => {
                                         value={formData.date}
                                         onChange={(e) => setFormData({ ...formData, date: e.target.value })}
                                         className="w-full p-2 border border-gray-300 rounded-lg focus:ring-primary focus:border-primary"
+                                        min="1900-01-01"
+                                        max={new Date().toISOString().split('T')[0]}
                                         required
                                     />
                                 </div>
