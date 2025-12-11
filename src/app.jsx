@@ -1,10 +1,11 @@
 import React, { useState, useEffect, useCallback, useRef, useMemo } from 'react';
 import { useParams, useNavigate, useLocation, Routes, Route } from 'react-router-dom';
 import axios from 'axios';
-import { LogOut, Cat, UserPlus, LogIn, ChevronLeft, Trash2, Edit, Save, PlusCircle, Plus, ArrowLeft, Loader2, RefreshCw, User, Users, ClipboardList, BookOpen, Settings, Mail, Globe, Egg, Milk, Search, X, Mars, Venus, Eye, EyeOff, Home, Heart, HeartOff, HeartHandshake, Bell, XCircle, Download, FileText, Link, AlertCircle, Check } from 'lucide-react';
+import { LogOut, Cat, UserPlus, LogIn, ChevronLeft, Trash2, Edit, Save, PlusCircle, Plus, ArrowLeft, Loader2, RefreshCw, User, Users, ClipboardList, BookOpen, Settings, Mail, Globe, Egg, Milk, Search, X, Mars, Venus, Eye, EyeOff, Home, Heart, HeartOff, HeartHandshake, Bell, XCircle, Download, FileText, Link, AlertCircle, Check, DollarSign } from 'lucide-react';
 import jsPDF from 'jspdf';
 import html2canvas from 'html2canvas';
 import MouseGeneticsCalculator from './components/MouseGeneticsCalculator';
+import BudgetingTab from './components/BudgetingTab';
 import TermsOfService from './components/TermsOfService';
 import PrivacyPolicy from './components/PrivacyPolicy';
 import InstallPWA from './components/InstallPWA';
@@ -7506,6 +7507,14 @@ const App = () => {
                         authToken={authToken}
                     />
                 );
+            case 'budget':
+                return (
+                    <BudgetingTab
+                        authToken={authToken}
+                        API_BASE_URL={API_BASE_URL}
+                        showModalMessage={showModalMessage}
+                    />
+                );
             case 'litters':
                 return (
                     <LitterManagement
@@ -7747,6 +7756,9 @@ const App = () => {
                         <button onClick={() => setCurrentView('litters')} className={`px-4 py-2 text-sm font-medium rounded-lg transition duration-150 ${currentView === 'litters' ? 'bg-primary text-black shadow-md' : 'text-gray-600 hover:bg-gray-100'}`}>
                             <BookOpen size={18} className="inline mr-1" /> Litters
                         </button>
+                        <button onClick={() => setCurrentView('budget')} className={`px-4 py-2 text-sm font-medium rounded-lg transition duration-150 ${currentView === 'budget' ? 'bg-primary text-black shadow-md' : 'text-gray-600 hover:bg-gray-100'}`}>
+                            <DollarSign size={18} className="inline mr-1" /> Budget
+                        </button>
                         <button onClick={() => setCurrentView('genetics-calculator')} className={`px-4 py-2 text-sm font-medium rounded-lg transition duration-150 ${currentView === 'genetics-calculator' ? 'bg-primary text-black shadow-md' : 'text-gray-600 hover:bg-gray-100'}`}>
                             <Cat size={18} className="inline mr-1" /> Genetics
                         </button>
@@ -7842,6 +7854,10 @@ const App = () => {
                         <button onClick={() => setCurrentView('litters')} className={`flex-1 px-2 py-2 text-xs font-medium rounded-lg transition duration-150 ${currentView === 'litters' ? 'bg-primary text-black shadow-md' : 'text-gray-600 hover:bg-gray-100'}`}>
                             <BookOpen size={16} className="inline mb-0.5" />
                             <span className="block">Litters</span>
+                        </button>
+                        <button onClick={() => setCurrentView('budget')} className={`flex-1 px-2 py-2 text-xs font-medium rounded-lg transition duration-150 ${currentView === 'budget' ? 'bg-primary text-black shadow-md' : 'text-gray-600 hover:bg-gray-100'}`}>
+                            <DollarSign size={16} className="inline mb-0.5" />
+                            <span className="block">Budget</span>
                         </button>
                         <button onClick={() => setCurrentView('genetics-calculator')} className={`flex-1 px-2 py-2 text-xs font-medium rounded-lg transition duration-150 ${currentView === 'genetics-calculator' ? 'bg-primary text-black shadow-md' : 'text-gray-600 hover:bg-gray-100'}`}>
                             <Cat size={16} className="inline mb-0.5" />
