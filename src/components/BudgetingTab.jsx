@@ -11,6 +11,42 @@ const BudgetingTab = ({ authToken, API_BASE_URL, showModalMessage }) => {
     const [searchTerm, setSearchTerm] = useState('');
     const [filterType, setFilterType] = useState('all'); // all, sale, purchase
     const [filterYear, setFilterYear] = useState('all');
+    const [currency, setCurrency] = useState(() => {
+        return localStorage.getItem('budgetCurrency') || 'USD';
+    });
+
+    // Currency options with symbols
+    const currencyOptions = [
+        { code: 'USD', symbol: '$', name: 'US Dollar' },
+        { code: 'EUR', symbol: '€', name: 'Euro' },
+        { code: 'GBP', symbol: '£', name: 'British Pound' },
+        { code: 'JPY', symbol: '¥', name: 'Japanese Yen' },
+        { code: 'AUD', symbol: 'A$', name: 'Australian Dollar' },
+        { code: 'CAD', symbol: 'C$', name: 'Canadian Dollar' },
+        { code: 'CHF', symbol: 'CHF', name: 'Swiss Franc' },
+        { code: 'CNY', symbol: '¥', name: 'Chinese Yuan' },
+        { code: 'SEK', symbol: 'kr', name: 'Swedish Krona' },
+        { code: 'NZD', symbol: 'NZ$', name: 'New Zealand Dollar' },
+        { code: 'MXN', symbol: 'Mex$', name: 'Mexican Peso' },
+        { code: 'SGD', symbol: 'S$', name: 'Singapore Dollar' },
+        { code: 'HKD', symbol: 'HK$', name: 'Hong Kong Dollar' },
+        { code: 'NOK', symbol: 'kr', name: 'Norwegian Krone' },
+        { code: 'KRW', symbol: '₩', name: 'South Korean Won' },
+        { code: 'TRY', symbol: '₺', name: 'Turkish Lira' },
+        { code: 'RUB', symbol: '₽', name: 'Russian Ruble' },
+        { code: 'INR', symbol: '₹', name: 'Indian Rupee' },
+        { code: 'BRL', symbol: 'R$', name: 'Brazilian Real' },
+        { code: 'ZAR', symbol: 'R', name: 'South African Rand' }
+    ];
+
+    const getCurrencySymbol = () => {
+        return currencyOptions.find(c => c.code === currency)?.symbol || '$';
+    };
+
+    const handleCurrencyChange = (newCurrency) => {
+        setCurrency(newCurrency);
+        localStorage.setItem('budgetCurrency', newCurrency);
+    };
     
     // Form state
     const [formData, setFormData] = useState({
@@ -266,7 +302,7 @@ const BudgetingTab = ({ authToken, API_BASE_URL, showModalMessage }) => {
                             Total Sales
                         </div>
                         <div className="text-2xl font-bold text-green-700">
-                            ${stats.totalSales.toFixed(2)}
+                            {getCurrencySymbol()}{stats.totalSales.toFixed(2)}
                         </div>
                         <div className="text-xs text-green-600 mt-1">
                             {stats.salesCount} transaction{stats.salesCount !== 1 ? 's' : ''}
@@ -279,7 +315,7 @@ const BudgetingTab = ({ authToken, API_BASE_URL, showModalMessage }) => {
                             Total Purchases
                         </div>
                         <div className="text-2xl font-bold text-red-700">
-                            ${stats.totalPurchases.toFixed(2)}
+                            {getCurrencySymbol()}{stats.totalPurchases.toFixed(2)}
                         </div>
                         <div className="text-xs text-red-600 mt-1">
                             {stats.purchasesCount} transaction{stats.purchasesCount !== 1 ? 's' : ''}
@@ -291,7 +327,7 @@ const BudgetingTab = ({ authToken, API_BASE_URL, showModalMessage }) => {
                             Net Profit/Loss
                         </div>
                         <div className={`text-2xl font-bold ${netProfit >= 0 ? 'text-blue-700' : 'text-orange-700'}`}>
-                            {netProfit >= 0 ? '+' : ''}{netProfit.toFixed(2)}
+                            {netProfit >= 0 ? '+' : ''}{getCurrencySymbol()}{Math.abs(netProfit).toFixed(2)}
                         </div>
                         <div className={`text-xs ${netProfit >= 0 ? 'text-blue-600' : 'text-orange-600'} mt-1`}>
                             {filteredTransactions.length} total transaction{filteredTransactions.length !== 1 ? 's' : ''}
@@ -303,7 +339,7 @@ const BudgetingTab = ({ authToken, API_BASE_URL, showModalMessage }) => {
                             Average Sale
                         </div>
                         <div className="text-2xl font-bold text-purple-700">
-                            ${stats.salesCount > 0 ? (stats.totalSales / stats.salesCount).toFixed(2) : '0.00'}
+                            {getCurrencySymbol()}{stats.salesCount > 0 ? (stats.totalSales / stats.salesCount).toFixed(2) : '0.00'}
                         </div>
                         <div className="text-xs text-purple-600 mt-1">
                             Per animal sold
@@ -314,7 +350,7 @@ const BudgetingTab = ({ authToken, API_BASE_URL, showModalMessage }) => {
 
             {/* Filters */}
             <div className="bg-white rounded-xl shadow-lg p-4 mb-6">
-                <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
                     <div className="relative">
                         <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400" size={18} />
                         <input
@@ -349,6 +385,22 @@ const BudgetingTab = ({ authToken, API_BASE_URL, showModalMessage }) => {
                             <option value="all">All Years</option>
                             {availableYears.map(year => (
                                 <option key={year} value={year}>{year}</option>
+                            ))}
+                        </select>
+                    </div>
+
+                    <div className="relative">
+                        <DollarSign className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400" size={18} />
+                        <select
+                            value={currency}
+                            onChange={(e) => handleCurrencyChange(e.target.value)}
+                            className="w-full pl-10 pr-3 py-2 border border-gray-300 rounded-lg focus:ring-primary focus:border-primary"
+                            title="Select Currency"
+                        >
+                            {currencyOptions.map(curr => (
+                                <option key={curr.code} value={curr.code}>
+                                    {curr.symbol} {curr.code} - {curr.name}
+                                </option>
                             ))}
                         </select>
                     </div>
@@ -399,7 +451,7 @@ const BudgetingTab = ({ authToken, API_BASE_URL, showModalMessage }) => {
                                             )}
                                         </td>
                                         <td className="px-4 py-3 text-sm font-semibold text-gray-900">
-                                            ${transaction.price.toFixed(2)}
+                                            {getCurrencySymbol()}{transaction.price.toFixed(2)}
                                         </td>
                                         <td className="px-4 py-3 text-sm text-gray-700">
                                             {transaction.type === 'sale' ? transaction.buyer : transaction.seller}
@@ -517,7 +569,7 @@ const BudgetingTab = ({ authToken, API_BASE_URL, showModalMessage }) => {
 
                             <div>
                                 <label className="block text-sm font-medium text-gray-700 mb-2">
-                                    Price * ($)
+                                    Price * ({getCurrencySymbol()})
                                 </label>
                                 <input
                                     type="number"
