@@ -99,12 +99,16 @@ const BudgetingTab = ({ authToken, API_BASE_URL, showModalMessage }) => {
 
     const fetchUsers = async () => {
         try {
-            const response = await axios.get(`${API_BASE_URL}/public/profiles`, {
+            // Try the public profiles search endpoint
+            const response = await axios.get(`${API_BASE_URL}/public/search?query=`, {
                 headers: { Authorization: `Bearer ${authToken}` }
             });
+            console.log('Fetched users:', response.data);
             setUsers(response.data || []);
         } catch (error) {
             console.error('Error fetching users:', error);
+            // If the endpoint doesn't exist, set empty array
+            setUsers([]);
         }
     };
 
