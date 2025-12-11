@@ -5,12 +5,14 @@ import axios from 'axios';
 const BudgetingTab = ({ authToken, API_BASE_URL, showModalMessage }) => {
     const [transactions, setTransactions] = useState([]);
     const [animals, setAnimals] = useState([]);
+    const [users, setUsers] = useState([]);
     const [loading, setLoading] = useState(true);
     const [showAddModal, setShowAddModal] = useState(false);
     const [editingTransaction, setEditingTransaction] = useState(null);
     const [searchTerm, setSearchTerm] = useState('');
     const [filterType, setFilterType] = useState('all'); // all, sale, purchase
     const [filterYear, setFilterYear] = useState('all');
+    const [buyerInputMode, setBuyerInputMode] = useState('manual'); // 'manual' or 'user'
     const [currency, setCurrency] = useState(() => {
         return localStorage.getItem('budgetCurrency') || 'USD';
     });
@@ -64,6 +66,7 @@ const BudgetingTab = ({ authToken, API_BASE_URL, showModalMessage }) => {
     useEffect(() => {
         fetchTransactions();
         fetchAnimals();
+        fetchUsers();
     }, []);
 
     const fetchTransactions = async () => {
@@ -94,6 +97,17 @@ const BudgetingTab = ({ authToken, API_BASE_URL, showModalMessage }) => {
         }
     };
 
+    const fetchUsers = async () => {
+        try {
+            const response = await axios.get(`${API_BASE_URL}/public/profiles`, {
+                headers: { Authorization: `Bearer ${authToken}` }
+            });
+            setUsers(response.data || []);
+        } catch (error) {
+            console.error('Error fetching users:', error);
+        }
+    };
+
     const resetForm = () => {
         setFormData({
             type: 'sale',
@@ -106,6 +120,7 @@ const BudgetingTab = ({ authToken, API_BASE_URL, showModalMessage }) => {
             notes: ''
         });
         setSelectedSpecies('');
+        setBuyerInputMode('manual');
         setEditingTransaction(null);
     };
 
@@ -600,19 +615,66 @@ const BudgetingTab = ({ authToken, API_BASE_URL, showModalMessage }) => {
                             </div>
 
                             <div>
-                                <label className="block text-sm font-medium text-gray-700 mb-2">
-                                    {formData.type === 'sale' ? 'Buyer' : 'Seller'}
-                                </label>
-                                <input
-                                    type="text"
-                                    value={formData.type === 'sale' ? formData.buyer : formData.seller}
-                                    onChange={(e) => setFormData({ 
-                                        ...formData, 
-                                        [formData.type === 'sale' ? 'buyer' : 'seller']: e.target.value 
-                                    })}
-                                    placeholder={`Enter ${formData.type === 'sale' ? 'buyer' : 'seller'} name`}
-                                    className="w-full p-2 border border-gray-300 rounded-lg focus:ring-primary focus:border-primary"
-                                />
+                                <div className="flex items-center justify-between mb-2">
+                                    <label className="block text-sm font-medium text-gray-700">
+                                        {formData.type === 'sale' ? 'Buyer' : 'Seller'}
+                                    </label>
+                                    <div className="flex gap-2">
+                                        <button
+                                            type="button"
+                                            onClick={() => {
+                                                setBuyerInputMode('manual');
+                                                setFormData({ ...formData, buyer: '', seller: '' });
+                                            }}
+                                            className={`text-xs px-2 py-1 rounded ${buyerInputMode === 'manual' ? 'bg-primary text-black' : 'bg-gray-200 text-gray-600'}`}
+                                        >
+                                            Manual
+                                        </button>
+                                        <button
+                                            type="button"
+                                            onClick={() => {
+                                                setBuyerInputMode('user');
+                                                setFormData({ ...formData, buyer: '', seller: '' });
+                                            }}
+                                            className={`text-xs px-2 py-1 rounded ${buyerInputMode === 'user' ? 'bg-primary text-black' : 'bg-gray-200 text-gray-600'}`}
+                                        >
+                                            Select User
+                                        </button>
+                                    </div>
+                                </div>
+                                {buyerInputMode === 'manual' ? (
+                                    <input
+                                        type="text"
+                                        value={formData.type === 'sale' ? formData.buyer : formData.seller}
+                                        onChange={(e) => setFormData({ 
+                                            ...formData, 
+                                            [formData.type === 'sale' ? 'buyer' : 'seller']: e.target.value 
+                                        })}
+                                        placeholder={`Enter ${formData.type === 'sale' ? 'buyer' : 'seller'} name`}
+                                        className="w-full p-2 border border-gray-300 rounded-lg focus:ring-primary focus:border-primary"
+                                    />
+                                ) : (
+                                    <select
+                                        value={formData.type === 'sale' ? formData.buyer : formData.seller}
+                                        onChange={(e) => setFormData({ 
+                                            ...formData, 
+                                            [formData.type === 'sale' ? 'buyer' : 'seller']: e.target.value 
+                                        })}
+                                        className="w-full p-2 border border-gray-300 rounded-lg focus:ring-primary focus:border-primary"
+                                    >
+                                        <option value="">-- Select a user --</option>
+                                        {users.map(user => (
+                                            <option key={user.id_public} value={user.breederName || user.personalName}>
+                                                {user.id_public} - {user.breederName || user.personalName}
+                                            </option>
+                                        ))}
+                                    </select>
+                                )}
+                                <p className="text-xs text-gray-500 mt-1">
+                                    {buyerInputMode === 'manual' 
+                                        ? 'Enter name manually' 
+                                        : 'Select from registered users'}
+                                </p>
                             </div>
 
                             <div>
