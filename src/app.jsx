@@ -5673,6 +5673,7 @@ const ProfileView = ({ userProfile, showModalMessage, fetchUserProfile, authToke
 const AuthView = ({ onLoginSuccess, showModalMessage, isRegister, setIsRegister, mainTitle, onShowTerms, onShowPrivacy }) => {
     const [email, setEmail] = useState('');
     const [password, setPassword] = useState('');
+    const [confirmPassword, setConfirmPassword] = useState('');
     const [personalName, setPersonalName] = useState('');
     const [loading, setLoading] = useState(false);
     const [verificationStep, setVerificationStep] = useState(false);
@@ -5687,6 +5688,11 @@ const AuthView = ({ onLoginSuccess, showModalMessage, isRegister, setIsRegister,
             // Step 1: Request verification code
             if (!agreedToTerms) {
                 showModalMessage('Terms Required', 'You must agree to the Terms of Service and Privacy Policy to register.');
+                setLoading(false);
+                return;
+            }
+            if (password !== confirmPassword) {
+                showModalMessage('Password Mismatch', 'Passwords do not match. Please try again.');
                 setLoading(false);
                 return;
             }
@@ -5830,6 +5836,17 @@ const AuthView = ({ onLoginSuccess, showModalMessage, isRegister, setIsRegister,
                         className="w-full p-3 border border-gray-300 rounded-lg focus:ring-primary focus:border-primary transition" />
                     <input type="password" placeholder="Password *" value={password} onChange={(e) => setPassword(e.target.value)} required 
                         className="w-full p-3 border border-gray-300 rounded-lg focus:ring-primary focus:border-primary transition" />
+                    
+                    {isRegister && (
+                        <input 
+                            type="password" 
+                            placeholder="Confirm Password *" 
+                            value={confirmPassword} 
+                            onChange={(e) => setConfirmPassword(e.target.value)} 
+                            required 
+                            className="w-full p-3 border border-gray-300 rounded-lg focus:ring-primary focus:border-primary transition" 
+                        />
+                    )}
                     
                     {isRegister && (
                         <label className="flex items-start space-x-2 p-3 border border-gray-300 rounded-lg hover:bg-gray-50 cursor-pointer">
