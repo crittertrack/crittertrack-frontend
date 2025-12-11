@@ -549,21 +549,8 @@ const BudgetingTab = ({ authToken, API_BASE_URL, showModalMessage }) => {
                                         </option>
                                     ))}
                                 </select>
-                            </div>
-
-                            <div>
-                                <label className="block text-sm font-medium text-gray-700 mb-2">
-                                    Animal Name
-                                </label>
-                                <input
-                                    type="text"
-                                    value={formData.animalName}
-                                    onChange={(e) => setFormData({ ...formData, animalName: e.target.value })}
-                                    placeholder="Enter animal name manually"
-                                    className="w-full p-2 border border-gray-300 rounded-lg focus:ring-primary focus:border-primary"
-                                />
                                 <p className="text-xs text-gray-500 mt-1">
-                                    Auto-filled when selecting an animal above
+                                    Animal name will be automatically linked from your animals list
                                 </p>
                             </div>
 

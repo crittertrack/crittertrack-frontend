@@ -7749,32 +7749,37 @@ const App = () => {
                 <div className="hidden md:flex justify-between items-center">
                     <CustomAppLogo size="w-10 h-10" />
                     
-                    <nav className="flex space-x-4">
-                        <button onClick={() => setCurrentView('list')} className={`px-4 py-2 text-sm font-medium rounded-lg transition duration-150 ${currentView === 'list' ? 'bg-primary text-black shadow-md' : 'text-gray-600 hover:bg-gray-100'}`}>
-                            <ClipboardList size={18} className="inline mr-1" /> Animals
+                    <nav className="flex space-x-2">
+                        <button onClick={() => setCurrentView('list')} className={`px-3 py-2 text-xs font-medium rounded-lg transition duration-150 flex flex-col items-center ${currentView === 'list' ? 'bg-primary text-black shadow-md' : 'text-gray-600 hover:bg-gray-100'}`}>
+                            <ClipboardList size={18} className="mb-1" />
+                            <span>Animals</span>
                         </button>
-                        <button onClick={() => setCurrentView('litters')} className={`px-4 py-2 text-sm font-medium rounded-lg transition duration-150 ${currentView === 'litters' ? 'bg-primary text-black shadow-md' : 'text-gray-600 hover:bg-gray-100'}`}>
-                            <BookOpen size={18} className="inline mr-1" /> Litters
+                        <button onClick={() => setCurrentView('litters')} className={`px-3 py-2 text-xs font-medium rounded-lg transition duration-150 flex flex-col items-center ${currentView === 'litters' ? 'bg-primary text-black shadow-md' : 'text-gray-600 hover:bg-gray-100'}`}>
+                            <BookOpen size={18} className="mb-1" />
+                            <span>Litters</span>
                         </button>
-                        <button onClick={() => setCurrentView('budget')} className={`px-4 py-2 text-sm font-medium rounded-lg transition duration-150 ${currentView === 'budget' ? 'bg-primary text-black shadow-md' : 'text-gray-600 hover:bg-gray-100'}`}>
-                            <DollarSign size={18} className="inline mr-1" /> Budget
+                        <button onClick={() => setCurrentView('budget')} className={`px-3 py-2 text-xs font-medium rounded-lg transition duration-150 flex flex-col items-center ${currentView === 'budget' ? 'bg-primary text-black shadow-md' : 'text-gray-600 hover:bg-gray-100'}`}>
+                            <DollarSign size={18} className="mb-1" />
+                            <span>Budget</span>
                         </button>
-                        <button onClick={() => setCurrentView('genetics-calculator')} className={`px-4 py-2 text-sm font-medium rounded-lg transition duration-150 ${currentView === 'genetics-calculator' ? 'bg-primary text-black shadow-md' : 'text-gray-600 hover:bg-gray-100'}`}>
-                            <Cat size={18} className="inline mr-1" /> Genetics
+                        <button onClick={() => setCurrentView('genetics-calculator')} className={`px-3 py-2 text-xs font-medium rounded-lg transition duration-150 flex flex-col items-center ${currentView === 'genetics-calculator' ? 'bg-primary text-black shadow-md' : 'text-gray-600 hover:bg-gray-100'}`}>
+                            <Cat size={18} className="mb-1" />
+                            <span>Genetics</span>
                         </button>
-                        <button onClick={() => setCurrentView('profile')} className={`px-4 py-2 text-sm font-medium rounded-lg transition duration-150 ${currentView === 'profile' ? 'bg-primary text-black shadow-md' : 'text-gray-600 hover:bg-gray-100'}`}>
-                            <User size={18} className="inline mr-1" /> Profile
+                        <button onClick={() => setCurrentView('profile')} className={`px-3 py-2 text-xs font-medium rounded-lg transition duration-150 flex flex-col items-center ${currentView === 'profile' ? 'bg-primary text-black shadow-md' : 'text-gray-600 hover:bg-gray-100'}`}>
+                            <User size={18} className="mb-1" />
+                            <span>Profile</span>
                         </button>
                     </nav>
 
-                    <div className="flex items-center space-x-4">
+                    <div className="flex items-center space-x-2">
                         <button 
                             onClick={() => setShowUserSearchModal(true)} 
-                            className="flex items-center justify-center bg-gray-100 hover:bg-gray-200 text-gray-600 py-2 px-3 rounded-lg transition duration-150 shadow-sm"
+                            className="flex flex-col items-center justify-center bg-gray-100 hover:bg-gray-200 text-gray-600 py-2 px-3 rounded-lg transition duration-150 shadow-sm"
                             title="Search Users by Name or ID"
                         >
-                            <Search size={20} className="mr-1" />
-                            <span className="text-sm">Search</span>
+                            <Search size={18} className="mb-1" />
+                            <span className="text-xs">Search</span>
                         </button>
 
                         <button
@@ -7782,10 +7787,10 @@ const App = () => {
                                 setShowNotifications(true);
                                 fetchNotificationCount();
                             }}
-                            className="relative flex items-center justify-center bg-gray-100 hover:bg-gray-200 text-gray-600 py-2 px-3 rounded-lg transition duration-150 shadow-sm"
+                            className="relative flex flex-col items-center justify-center bg-gray-100 hover:bg-gray-200 text-gray-600 py-2 px-3 rounded-lg transition duration-150 shadow-sm"
                             title="Notifications"
                         >
-                            <Bell size={20} />
+                            <Bell size={18} />
                             {notificationCount > 0 && (
                                 <span className="absolute -top-1 -right-1 bg-red-500 text-white text-xs rounded-full w-5 h-5 flex items-center justify-center font-bold">
                                     {notificationCount > 9 ? '9+' : notificationCount}
@@ -7796,10 +7801,10 @@ const App = () => {
                         <button 
                             onClick={() => handleLogout(false)} 
                             title="Log Out"
-                            className="bg-accent hover:bg-accent/80 text-white font-semibold py-2 px-4 rounded-lg transition duration-150 shadow-md flex items-center space-x-1"
+                            className="bg-accent hover:bg-accent/80 text-white font-semibold py-2 px-3 rounded-lg transition duration-150 shadow-md flex flex-col items-center"
                         >
-                            <LogOut size={18} />
-                            <span className="text-sm">Logout</span>
+                            <LogOut size={18} className="mb-1" />
+                            <span className="text-xs">Logout</span>
                         </button>
                     </div>
                 </div>
