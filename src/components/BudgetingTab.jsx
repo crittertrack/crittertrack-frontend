@@ -59,6 +59,7 @@ const BudgetingTab = ({ authToken, API_BASE_URL, showModalMessage }) => {
         seller: '',
         notes: ''
     });
+    const [selectedSpecies, setSelectedSpecies] = useState('');
 
     useEffect(() => {
         fetchTransactions();
@@ -104,6 +105,7 @@ const BudgetingTab = ({ authToken, API_BASE_URL, showModalMessage }) => {
             seller: '',
             notes: ''
         });
+        setSelectedSpecies('');
         setEditingTransaction(null);
     };
 
@@ -537,20 +539,45 @@ const BudgetingTab = ({ authToken, API_BASE_URL, showModalMessage }) => {
                                 <label className="block text-sm font-medium text-gray-700 mb-2">
                                     Select Animal (optional)
                                 </label>
-                                <select
-                                    value={formData.animalId}
-                                    onChange={(e) => handleAnimalSelect(e.target.value)}
-                                    className="w-full p-2 border border-gray-300 rounded-lg focus:ring-primary focus:border-primary"
-                                >
-                                    <option value="">-- Select an animal --</option>
-                                    {animals.map(animal => (
-                                        <option key={animal.id_public} value={animal.id_public}>
-                                            {animal.id_public} - {animal.name} ({animal.species})
-                                        </option>
-                                    ))}
-                                </select>
+                                <div className="space-y-3">
+                                    {/* Species filter */}
+                                    <select
+                                        value={selectedSpecies}
+                                        onChange={(e) => {
+                                            setSelectedSpecies(e.target.value);
+                                            setFormData({ ...formData, animalId: '', animalName: '' });
+                                        }}
+                                        className="w-full p-2 border border-gray-300 rounded-lg focus:ring-primary focus:border-primary"
+                                    >
+                                        <option value="">-- All Species --</option>
+                                        {[...new Set(animals.map(a => a.species))].sort().map(species => (
+                                            <option key={species} value={species}>
+                                                {species}
+                                            </option>
+                                        ))}
+                                    </select>
+                                    
+                                    {/* Animal selection */}
+                                    <select
+                                        value={formData.animalId}
+                                        onChange={(e) => handleAnimalSelect(e.target.value)}
+                                        className="w-full p-2 border border-gray-300 rounded-lg focus:ring-primary focus:border-primary"
+                                        disabled={selectedSpecies && animals.filter(a => a.species === selectedSpecies).length === 0}
+                                    >
+                                        <option value="">-- Select an animal --</option>
+                                        {animals
+                                            .filter(animal => !selectedSpecies || animal.species === selectedSpecies)
+                                            .map(animal => (
+                                                <option key={animal.id_public} value={animal.id_public}>
+                                                    {animal.id_public} - {animal.name}
+                                                </option>
+                                            ))}
+                                    </select>
+                                </div>
                                 <p className="text-xs text-gray-500 mt-1">
-                                    Animal name will be automatically linked from your animals list
+                                    {selectedSpecies 
+                                        ? `Showing ${animals.filter(a => a.species === selectedSpecies).length} ${selectedSpecies}` 
+                                        : 'Filter by species first for easier selection'}
                                 </p>
                             </div>
 
