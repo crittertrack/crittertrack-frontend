@@ -6467,14 +6467,6 @@ const AnimalList = ({ authToken, showModalMessage, onEditAnimal, onViewAnimal, o
                     {/* Prefix / Name under image */}
                     <div className="w-full text-center px-2 pb-1">
                         <div className="text-sm font-semibold text-gray-800 line-clamp-2">{animal.prefix ? `${animal.prefix} ` : ''}{animal.name}{animal.suffix ? ` ${animal.suffix}` : ''}</div>
-                        {animal.species && (
-                            <div className="text-xs text-gray-600">
-                                {animal.species}
-                                {getSpeciesLatinName(animal.species) && (
-                                    <div className="italic text-gray-500">{getSpeciesLatinName(animal.species)}</div>
-                                )}
-                            </div>
-                        )}
                     </div>
 
                     {/* Edit is available when viewing full card; remove inline edit icon from dashboard cards */}
