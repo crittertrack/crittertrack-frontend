@@ -6380,9 +6380,9 @@ const AnimalList = ({ authToken, showModalMessage, onEditAnimal, onViewAnimal, o
                     )}
 
                     {/* Centered profile image */}
-                    <div className="flex-1 flex items-center justify-center w-full px-2 mt-1">
+                    <div className="flex items-center justify-center w-full px-2 mt-1 h-28">
                         {imgSrc ? (
-                            <img src={imgSrc} alt={animal.name} className="w-24 h-24 object-cover rounded-md" />
+                            <img src={imgSrc} alt={animal.name} className="max-w-24 max-h-24 w-auto h-auto object-contain rounded-md" />
                         ) : (
                             <div className="w-24 h-24 bg-gray-100 rounded-md flex items-center justify-center text-gray-400">
                                 <Cat size={36} />
