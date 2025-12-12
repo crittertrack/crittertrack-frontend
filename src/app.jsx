@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useCallback, useRef, useMemo } from 'react';
 import { useParams, useNavigate, useLocation, Routes, Route } from 'react-router-dom';
 import axios from 'axios';
-import { LogOut, Cat, UserPlus, LogIn, ChevronLeft, Trash2, Edit, Save, PlusCircle, Plus, ArrowLeft, Loader2, RefreshCw, User, Users, ClipboardList, BookOpen, Settings, Mail, Globe, Egg, Milk, Search, X, Mars, Venus, Eye, EyeOff, Home, Heart, HeartOff, HeartHandshake, Bell, XCircle, CheckCircle, Download, FileText, Link, AlertCircle, Check, DollarSign, Archive } from 'lucide-react';
+import { LogOut, Cat, UserPlus, LogIn, ChevronLeft, Trash2, Edit, Save, PlusCircle, Plus, ArrowLeft, Loader2, RefreshCw, User, Users, ClipboardList, BookOpen, Settings, Mail, Globe, Egg, Milk, Search, X, Mars, Venus, Eye, EyeOff, Home, Heart, HeartOff, HeartHandshake, Bell, XCircle, CheckCircle, Download, FileText, Link, AlertCircle, Check, DollarSign, Archive, ArrowLeftRight } from 'lucide-react';
 import jsPDF from 'jspdf';
 import html2canvas from 'html2canvas';
 import MouseGeneticsCalculator from './components/MouseGeneticsCalculator';
@@ -6348,16 +6348,10 @@ const AnimalList = ({ authToken, showModalMessage, onEditAnimal, onViewAnimal, o
                         </div>
                     )}
 
-                    {/* Sold/View-Only badge top-center */}
+                    {/* Transfer badge top-center */}
                     {(animal.soldStatus || animal.isViewOnly) && (
-                        <div className={`absolute top-2 left-1/2 transform -translate-x-1/2 text-xs px-2 py-0.5 rounded font-semibold ${
-                            animal.isViewOnly 
-                                ? 'bg-gray-500 text-white' 
-                                : animal.soldStatus === 'sold' 
-                                    ? 'bg-blue-500 text-white' 
-                                    : 'bg-green-500 text-white'
-                        }`}>
-                            {animal.isViewOnly ? 'View Only' : animal.soldStatus === 'sold' ? 'Sold' : 'Purchased'}
+                        <div className="absolute top-2 left-1/2 transform -translate-x-1/2 bg-blue-500 text-white p-1 rounded-full" title="Transferred Animal">
+                            <ArrowLeftRight size={14} strokeWidth={2.5} />
                         </div>
                     )}
 
@@ -6408,8 +6402,12 @@ const AnimalList = ({ authToken, showModalMessage, onEditAnimal, onViewAnimal, o
                     </div>
                     
                     {/* Status bar at bottom */}
-                    <div className="w-full bg-gray-100 py-1 text-center border-t border-gray-300 mt-auto">
-                        <div className="text-xs font-medium text-gray-700">{animal.status || 'Unknown'}</div>
+                    <div className={`w-full py-1 text-center border-t border-gray-300 mt-auto ${
+                        animal.isViewOnly ? 'bg-orange-100' : 'bg-gray-100'
+                    }`}>
+                        <div className={`text-xs font-medium ${
+                            animal.isViewOnly ? 'text-orange-800' : 'text-gray-700'
+                        }`}>{animal.isViewOnly ? 'Sold' : (animal.status || 'Unknown')}</div>
                     </div>
                 </div>
             </div>
