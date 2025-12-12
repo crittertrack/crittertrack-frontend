@@ -5,7 +5,7 @@ import axios from 'axios';
 const BudgetingTab = ({ authToken, API_BASE_URL, showModalMessage }) => {
     const [transactions, setTransactions] = useState([]);
     const [animals, setAnimals] = useState([]);
-    const [users, setUsers] = useState([]);
+    const [searchResults, setSearchResults] = useState([]);
     const [loading, setLoading] = useState(true);
     const [showAddModal, setShowAddModal] = useState(false);
     const [editingTransaction, setEditingTransaction] = useState(null);
@@ -13,6 +13,8 @@ const BudgetingTab = ({ authToken, API_BASE_URL, showModalMessage }) => {
     const [filterType, setFilterType] = useState('all'); // all, sale, purchase
     const [filterYear, setFilterYear] = useState('all');
     const [buyerInputMode, setBuyerInputMode] = useState('manual'); // 'manual' or 'user'
+    const [userSearchQuery, setUserSearchQuery] = useState('');
+    const [isSearching, setIsSearching] = useState(false);
     const [currency, setCurrency] = useState(() => {
         return localStorage.getItem('budgetCurrency') || 'USD';
     });
@@ -66,7 +68,6 @@ const BudgetingTab = ({ authToken, API_BASE_URL, showModalMessage }) => {
     useEffect(() => {
         fetchTransactions();
         fetchAnimals();
-        fetchUsers();
     }, []);
 
     const fetchTransactions = async () => {
@@ -97,20 +98,46 @@ const BudgetingTab = ({ authToken, API_BASE_URL, showModalMessage }) => {
         }
     };
 
-    const fetchUsers = async () => {
+    const searchUsers = async (query) => {
+        if (!query || query.trim().length < 2) {
+            setSearchResults([]);
+            return;
+        }
+        
+        setIsSearching(true);
         try {
-            // Use the profiles search endpoint with empty query to get all users
-            const response = await axios.get(`${API_BASE_URL}/public/profiles/search?query=`, {
+            const response = await axios.get(`${API_BASE_URL}/public/profiles/search?query=${encodeURIComponent(query)}`, {
                 headers: { Authorization: `Bearer ${authToken}` }
             });
-            console.log('Fetched users:', response.data);
-            setUsers(response.data || []);
+            
+            // Filter to only show users with at least one visible name
+            const filteredUsers = (response.data || []).filter(user => {
+                const hasVisibleBreederName = user.breederName && user.showBreederName;
+                const hasVisiblePersonalName = user.personalName && user.showPersonalName;
+                return hasVisibleBreederName || hasVisiblePersonalName;
+            });
+            
+            setSearchResults(filteredUsers);
         } catch (error) {
-            console.error('Error fetching users:', error);
-            // If the endpoint doesn't exist, set empty array
-            setUsers([]);
+            console.error('Error searching users:', error);
+            setSearchResults([]);
+        } finally {
+            setIsSearching(false);
         }
     };
+
+    // Debounce user search
+    useEffect(() => {
+        const timer = setTimeout(() => {
+            if (buyerInputMode === 'user' && userSearchQuery) {
+                searchUsers(userSearchQuery);
+            } else {
+                setSearchResults([]);
+            }
+        }, 300);
+
+        return () => clearTimeout(timer);
+    }, [userSearchQuery, buyerInputMode]);
 
     const resetForm = () => {
         setFormData({
@@ -125,6 +152,8 @@ const BudgetingTab = ({ authToken, API_BASE_URL, showModalMessage }) => {
         });
         setSelectedSpecies('');
         setBuyerInputMode('manual');
+        setUserSearchQuery('');
+        setSearchResults([]);
         setEditingTransaction(null);
     };
 
@@ -629,6 +658,8 @@ const BudgetingTab = ({ authToken, API_BASE_URL, showModalMessage }) => {
                                             onClick={() => {
                                                 setBuyerInputMode('manual');
                                                 setFormData({ ...formData, buyer: '', seller: '' });
+                                                setUserSearchQuery('');
+                                                setSearchResults([]);
                                             }}
                                             className={`text-xs px-2 py-1 rounded ${buyerInputMode === 'manual' ? 'bg-primary text-black' : 'bg-gray-200 text-gray-600'}`}
                                         >
@@ -642,7 +673,7 @@ const BudgetingTab = ({ authToken, API_BASE_URL, showModalMessage }) => {
                                             }}
                                             className={`text-xs px-2 py-1 rounded ${buyerInputMode === 'user' ? 'bg-primary text-black' : 'bg-gray-200 text-gray-600'}`}
                                         >
-                                            Select User
+                                            Search User
                                         </button>
                                     </div>
                                 </div>
@@ -658,55 +689,68 @@ const BudgetingTab = ({ authToken, API_BASE_URL, showModalMessage }) => {
                                         className="w-full p-2 border border-gray-300 rounded-lg focus:ring-primary focus:border-primary"
                                     />
                                 ) : (
-                                    <select
-                                        value={formData.type === 'sale' ? formData.buyer : formData.seller}
-                                        onChange={(e) => setFormData({ 
-                                            ...formData, 
-                                            [formData.type === 'sale' ? 'buyer' : 'seller']: e.target.value 
-                                        })}
-                                        className="w-full p-2 border border-gray-300 rounded-lg focus:ring-primary focus:border-primary"
-                                    >
-                                        <option value="">-- Select a user --</option>
-                                        {users
-                                            .filter(user => {
-                                                // Only show users who have at least one name visible
-                                                const hasVisibleBreederName = user.breederName && user.showBreederName;
-                                                const hasVisiblePersonalName = user.personalName && user.showPersonalName;
-                                                return hasVisibleBreederName || hasVisiblePersonalName;
-                                            })
-                                            .map(user => {
-                                                // Build display name based on what's visible
-                                                const hasVisibleBreederName = user.breederName && user.showBreederName;
-                                                const hasVisiblePersonalName = user.personalName && user.showPersonalName;
-                                                
-                                                let displayName;
-                                                if (hasVisibleBreederName && hasVisiblePersonalName) {
-                                                    // Both visible: show personal name first, breeder name in parentheses
-                                                    displayName = `${user.personalName} (${user.breederName})`;
-                                                } else if (hasVisibleBreederName) {
-                                                    // Only breeder name visible
-                                                    displayName = user.breederName;
-                                                } else {
-                                                    // Only personal name visible
-                                                    displayName = user.personalName;
-                                                }
-                                                
-                                                // Use breeder name as value if available, otherwise personal name
-                                                const value = hasVisibleBreederName ? user.breederName : user.personalName;
-                                                
-                                                return (
-                                                    <option key={user.id_public} value={value}>
-                                                        {user.id_public} - {displayName}
-                                                    </option>
-                                                );
-                                            })
-                                        }
-                                    </select>
+                                    <div className="relative">
+                                        <input
+                                            type="text"
+                                            value={userSearchQuery}
+                                            onChange={(e) => setUserSearchQuery(e.target.value)}
+                                            placeholder="Search by name or ID (min 2 chars)..."
+                                            className="w-full p-2 border border-gray-300 rounded-lg focus:ring-primary focus:border-primary"
+                                        />
+                                        {isSearching && (
+                                            <div className="absolute right-2 top-2 text-gray-400">
+                                                <Search className="w-5 h-5 animate-pulse" />
+                                            </div>
+                                        )}
+                                        {userSearchQuery.length >= 2 && searchResults.length > 0 && (
+                                            <div className="absolute z-10 w-full mt-1 bg-white border border-gray-300 rounded-lg shadow-lg max-h-60 overflow-y-auto">
+                                                {searchResults.map(user => {
+                                                    const hasVisibleBreederName = user.breederName && user.showBreederName;
+                                                    const hasVisiblePersonalName = user.personalName && user.showPersonalName;
+                                                    
+                                                    let displayName;
+                                                    if (hasVisibleBreederName && hasVisiblePersonalName) {
+                                                        displayName = `${user.personalName} (${user.breederName})`;
+                                                    } else if (hasVisibleBreederName) {
+                                                        displayName = user.breederName;
+                                                    } else {
+                                                        displayName = user.personalName;
+                                                    }
+                                                    
+                                                    const value = hasVisibleBreederName ? user.breederName : user.personalName;
+                                                    
+                                                    return (
+                                                        <button
+                                                            key={user.id_public}
+                                                            type="button"
+                                                            onClick={() => {
+                                                                setFormData({ 
+                                                                    ...formData, 
+                                                                    [formData.type === 'sale' ? 'buyer' : 'seller']: value 
+                                                                });
+                                                                setUserSearchQuery('');
+                                                                setSearchResults([]);
+                                                            }}
+                                                            className="w-full text-left px-4 py-2 hover:bg-gray-100 border-b border-gray-100 last:border-b-0"
+                                                        >
+                                                            <div className="font-medium">{user.id_public}</div>
+                                                            <div className="text-sm text-gray-600">{displayName}</div>
+                                                        </button>
+                                                    );
+                                                })}
+                                            </div>
+                                        )}
+                                        {userSearchQuery.length >= 2 && searchResults.length === 0 && !isSearching && (
+                                            <div className="absolute z-10 w-full mt-1 bg-white border border-gray-300 rounded-lg shadow-lg p-4 text-center text-gray-500">
+                                                No users found
+                                            </div>
+                                        )}
+                                    </div>
                                 )}
                                 <p className="text-xs text-gray-500 mt-1">
                                     {buyerInputMode === 'manual' 
                                         ? 'Enter name manually' 
-                                        : 'Select from registered users'}
+                                        : 'Search by name or ID (minimum 2 characters)'}
                                 </p>
                             </div>
 
