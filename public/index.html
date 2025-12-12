@@ -15,53 +15,69 @@
     <div id="root"></div>
     
     <script>
-      // Register service worker with aggressive update detection
+      // Version identifier - increment this when deploying breaking changes
+      const APP_VERSION = '2025-12-12-v5';
+      
+      // Store version in session storage on load
+      const savedVersion = sessionStorage.getItem('appVersion');
+      if (!savedVersion) {
+        sessionStorage.setItem('appVersion', APP_VERSION);
+      } else if (savedVersion !== APP_VERSION) {
+        console.log('[App] Version changed from', savedVersion, 'to', APP_VERSION, '- performing hard refresh');
+        // Version mismatch - do a hard refresh to clear everything
+        sessionStorage.setItem('appVersion', APP_VERSION);
+        window.location.reload(true); // Force refresh from server
+      }
+
+      // Register service worker with aggressive auto-update
       if ('serviceWorker' in navigator) {
         window.addEventListener('load', () => {
           navigator.serviceWorker.register('/service-worker.js')
             .then((registration) => {
               console.log('[App] SW registered:', registration);
               
-              // Check for updates every 10 seconds (very aggressive)
-              setInterval(() => {
-                console.log('[App] Checking for service worker updates...');
+              // AGGRESSIVE: Check for updates every 5 seconds
+              const updateInterval = setInterval(() => {
+                console.log('[App] Checking for service worker updates (interval)...');
                 registration.update();
-              }, 10000);
+              }, 5000);
               
-              // Also check immediately on startup
+              // Check immediately on startup
               registration.update();
               
-              // Listen for updates
+              // Listen for new service worker installation
               registration.addEventListener('updatefound', () => {
                 const newWorker = registration.installing;
                 console.log('[App] New service worker found, installing...');
                 
                 newWorker.addEventListener('statechange', () => {
                   if (newWorker.state === 'installed' && navigator.serviceWorker.controller) {
-                    console.log('[App] New version available, notifying user...');
-                    // Store flag so app knows to show update prompt
+                    // New version is ready - store flag and notify user
+                    console.log('[App] New version available! Preparing to reload...');
                     window.SW_UPDATE_AVAILABLE = true;
-                    // Dispatch custom event that app can listen to
+                    
+                    // Dispatch event for React component to catch
                     window.dispatchEvent(new Event('sw-update-available'));
+                    
+                    // Auto-reload after 5 seconds if user doesn't interact
+                    // This ensures old users get updates without being prompted
+                    setTimeout(() => {
+                      console.log('[App] Auto-reloading to apply new version...');
+                      window.location.reload();
+                    }, 5000);
                   }
                 });
               });
+              
+              // When service worker takes control, reload immediately
+              navigator.serviceWorker.addEventListener('controllerchange', () => {
+                console.log('[App] Service worker controller changed, reloading...');
+                window.location.reload();
+              });
             })
             .catch((error) => {
-              console.log('[App] SW registration failed:', error);
+              console.error('[App] SW registration failed:', error);
             });
-          
-          // Reload when new service worker takes control
-          navigator.serviceWorker.addEventListener('controllerchange', () => {
-            console.log('[App] Service worker controller changed');
-            window.location.reload();
-          });
-        });
-      }
-    </script>
-            console.log('[App] New service worker activated, reloading...');
-            window.location.reload();
-          });
         });
       }
     </script>

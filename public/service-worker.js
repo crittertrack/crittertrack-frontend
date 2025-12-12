@@ -117,9 +117,9 @@ self.addEventListener('fetch', (event) => {
   );
 });
 
-// Activate event - cleanup old caches
+// Activate event - cleanup old caches and claim clients immediately
 self.addEventListener('activate', (event) => {
-  console.log('[SW] Activating new service worker...');
+  console.log('[SW] Activating new service worker version:', CACHE_NAME);
   const cacheWhitelist = [CACHE_NAME];
   event.waitUntil(
     caches.keys().then((cacheNames) => {
@@ -131,10 +131,12 @@ self.addEventListener('activate', (event) => {
           }
         })
       );
+    }).then(() => {
+      // Take control of all clients immediately - this forces page reload
+      console.log('[SW] Taking control of all clients');
+      return self.clients.claim();
     })
   );
-  // Take control of all clients immediately
-  return self.clients.claim();
 });
 
 // Listen for messages from the app
