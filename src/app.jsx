@@ -5097,8 +5097,9 @@ const AnimalForm = ({
                         <button 
                             type="button" 
                             onClick={() => { 
-                                const isTransferred = animalToEdit.originalOwnerId;
-                                const confirmMessage = isTransferred 
+                                // Check if this animal was transferred TO the current user (not back to original owner)
+                                const isTransferredToMe = animalToEdit.originalOwnerId && userProfile && animalToEdit.originalOwnerId !== userProfile.userId_backend;
+                                const confirmMessage = isTransferredToMe 
                                     ? `Return ${animalToEdit.name} to the original owner? This will remove the animal from your account.`
                                     : `Are you sure you want to delete ${animalToEdit.name}? This action cannot be undone.`;
                                 if(window.confirm(confirmMessage)) { 
@@ -5107,8 +5108,8 @@ const AnimalForm = ({
                             }} 
                             className="bg-red-500 hover:bg-red-600 text-white font-semibold py-2 px-4 rounded-lg transition duration-150 shadow-md flex items-center space-x-2"
                         > 
-                            {animalToEdit.originalOwnerId ? <RotateCcw size={18} /> : <Trash2 size={18} />}
-                            <span>{animalToEdit.originalOwnerId ? 'Return Animal' : 'Delete'}</span> 
+                            {animalToEdit.originalOwnerId && userProfile && animalToEdit.originalOwnerId !== userProfile.userId_backend ? <RotateCcw size={18} /> : <Trash2 size={18} />}
+                            <span>{animalToEdit.originalOwnerId && userProfile && animalToEdit.originalOwnerId !== userProfile.userId_backend ? 'Return Animal' : 'Delete'}</span> 
                         </button>
                     )}
                 </div>
@@ -6979,6 +6980,16 @@ const App = () => {
     const [showTermsModal, setShowTermsModal] = useState(false);
     const [showPrivacyModal, setShowPrivacyModal] = useState(false);
     
+    // Transfer modal states
+    const [showTransferModal, setShowTransferModal] = useState(false);
+    const [transferAnimal, setTransferAnimal] = useState(null);
+    const [transferUserQuery, setTransferUserQuery] = useState('');
+    const [transferUserResults, setTransferUserResults] = useState([]);
+    const [transferSelectedUser, setTransferSelectedUser] = useState(null);
+    const [transferSearching, setTransferSearching] = useState(false);
+    const [transferPrice, setTransferPrice] = useState('');
+    const [transferNotes, setTransferNotes] = useState('');
+    
     // Community banner states
     const [newestUsers, setNewestUsers] = useState([]);
     const [activeUsers, setActiveUsers] = useState([]);
@@ -7385,6 +7396,61 @@ const App = () => {
         }
     };
 
+    const handleSearchTransferUser = async () => {
+        if (transferUserQuery.length < 2) return;
+        
+        setTransferSearching(true);
+        try {
+            const response = await axios.get(`${API_BASE_URL}/public-profiles/search`, {
+                params: { query: transferUserQuery },
+                headers: { Authorization: `Bearer ${authToken}` }
+            });
+            setTransferUserResults(response.data || []);
+        } catch (error) {
+            console.error('Error searching users:', error);
+            setTransferUserResults([]);
+        } finally {
+            setTransferSearching(false);
+        }
+    };
+
+    const handleSubmitTransfer = async () => {
+        if (!transferSelectedUser || !transferPrice) {
+            showModalMessage('Error', 'Please select a buyer and enter a price');
+            return;
+        }
+
+        try {
+            const transactionData = {
+                type: 'sale',
+                animalId: transferAnimal.id_public,
+                animalName: transferAnimal.name,
+                price: parseFloat(transferPrice),
+                buyer: transferSelectedUser.breederName || transferSelectedUser.personalName,
+                buyerUserId: transferSelectedUser.userId_backend,
+                date: new Date().toISOString().split('T')[0],
+                notes: transferNotes
+            };
+
+            await axios.post(`${API_BASE_URL}/budget/transactions`, transactionData, {
+                headers: { Authorization: `Bearer ${authToken}` }
+            });
+
+            showModalMessage('Success', `Transfer request sent to ${transferSelectedUser.breederName || transferSelectedUser.personalName}!`);
+            setShowTransferModal(false);
+            setTransferAnimal(null);
+            setTransferUserQuery('');
+            setTransferUserResults([]);
+            setTransferSelectedUser(null);
+            setTransferPrice('');
+            setTransferNotes('');
+            setCurrentView('list');
+        } catch (error) {
+            console.error('Error creating transfer:', error);
+            showModalMessage('Error', error.response?.data?.message || 'Failed to create transfer');
+        }
+    };
+
     const renderView = () => {
         switch (currentView) {
             case 'publicProfile':
@@ -7529,9 +7595,21 @@ const App = () => {
                                     <Link size={16} />
                                     {copySuccessAnimal ? 'Link Copied!' : 'Share Link'}
                                 </button>
-                                {/* Only show edit button if user owns this animal and it's not view-only */}
+                                {/* Only show edit and transfer buttons if user owns this animal and it's not view-only */}
                                 {userProfile && animalToView.ownerId_public === userProfile.id_public && !animalToView.isViewOnly && (
-                                    <button onClick={() => { setAnimalToEdit(animalToView); setSpeciesToAdd(animalToView.species); setCurrentView('edit-animal'); }} className="bg-primary hover:bg-primary/90 text-black font-semibold py-2 px-4 rounded-lg">Edit</button>
+                                    <>
+                                        <button onClick={() => { setAnimalToEdit(animalToView); setSpeciesToAdd(animalToView.species); setCurrentView('edit-animal'); }} className="bg-primary hover:bg-primary/90 text-black font-semibold py-2 px-4 rounded-lg">Edit</button>
+                                        <button 
+                                            onClick={() => { 
+                                                setTransferAnimal(animalToView); 
+                                                setShowTransferModal(true); 
+                                            }} 
+                                            className="bg-blue-500 hover:bg-blue-600 text-white font-semibold py-2 px-4 rounded-lg transition flex items-center gap-2"
+                                        >
+                                            <ArrowLeftRight size={16} />
+                                            Transfer
+                                        </button>
+                                    </>
                                 )}
                                 {/* Show hide button for view-only animals */}
                                 {animalToView.isViewOnly && (
@@ -8349,6 +8427,195 @@ const App = () => {
             
             {showTermsModal && <TermsOfService onClose={() => setShowTermsModal(false)} />}
             {showPrivacyModal && <PrivacyPolicy onClose={() => setShowPrivacyModal(false)} />}
+            
+            {/* Transfer Animal Modal */}
+            {showTransferModal && transferAnimal && (
+                <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
+                    <div className="bg-white rounded-xl shadow-2xl max-w-md w-full p-6">
+                        <div className="flex justify-between items-center mb-6">
+                            <h2 className="text-xl font-bold text-gray-800 flex items-center gap-2">
+                                <ArrowLeftRight size={24} className="text-blue-600" />
+                                Transfer Animal
+                            </h2>
+                            <button
+                                onClick={() => {
+                                    setShowTransferModal(false);
+                                    setTransferAnimal(null);
+                                    setTransferUserQuery('');
+                                    setTransferUserResults([]);
+                                    setTransferSelectedUser(null);
+                                    setTransferPrice('');
+                                    setTransferNotes('');
+                                }}
+                                className="text-gray-500 hover:text-gray-700"
+                            >
+                                <X size={24} />
+                            </button>
+                        </div>
+
+                        <div className="space-y-4">
+                            {/* Animal Info */}
+                            <div className="p-3 bg-gray-50 rounded-lg">
+                                <p className="text-sm text-gray-600">Transferring:</p>
+                                <p className="font-semibold text-gray-800">{transferAnimal.id_public} - {transferAnimal.name}</p>
+                            </div>
+
+                            {/* Buyer Search */}
+                            <div>
+                                <label className="block text-sm font-medium text-gray-700 mb-2">
+                                    Search for Buyer *
+                                </label>
+                                {transferSelectedUser ? (
+                                    <div className="flex items-center justify-between p-2 border border-gray-300 rounded-lg bg-gray-50">
+                                        <span className="text-gray-700">
+                                            {transferSelectedUser.breederName || transferSelectedUser.personalName}
+                                        </span>
+                                        <button
+                                            onClick={() => {
+                                                setTransferSelectedUser(null);
+                                                setTransferUserResults([]);
+                                            }}
+                                            className="text-gray-500 hover:text-red-500"
+                                        >
+                                            <X className="w-4 h-4" />
+                                        </button>
+                                    </div>
+                                ) : (
+                                    <>
+                                        <div className="flex gap-2">
+                                            <input
+                                                type="text"
+                                                value={transferUserQuery}
+                                                onChange={(e) => setTransferUserQuery(e.target.value)}
+                                                onKeyDown={(e) => {
+                                                    if (e.key === 'Enter') {
+                                                        e.preventDefault();
+                                                        handleSearchTransferUser();
+                                                    }
+                                                }}
+                                                placeholder="Search by name or ID (min 2 chars)..."
+                                                className="flex-1 p-2 border border-gray-300 rounded-lg focus:ring-primary focus:border-primary"
+                                            />
+                                            <button
+                                                onClick={handleSearchTransferUser}
+                                                disabled={transferSearching}
+                                                className="px-4 py-2 bg-primary text-black rounded-lg hover:bg-primary/90 disabled:opacity-50 flex items-center gap-2"
+                                            >
+                                                <Search className="w-4 h-4" />
+                                                {transferSearching ? 'Searching...' : 'Search'}
+                                            </button>
+                                        </div>
+                                        {transferUserQuery.length >= 2 && transferUserResults.length > 0 && (
+                                            <div className="mt-1 bg-white border border-gray-300 rounded-lg shadow-lg max-h-60 overflow-y-auto">
+                                                {transferUserResults.map(user => {
+                                                    const hasVisibleBreederName = user.breederName && user.showBreederName;
+                                                    const hasVisiblePersonalName = user.personalName && user.showPersonalName;
+                                                    
+                                                    let displayName;
+                                                    if (hasVisibleBreederName && hasVisiblePersonalName) {
+                                                        displayName = `${user.personalName} (${user.breederName})`;
+                                                    } else if (hasVisibleBreederName) {
+                                                        displayName = user.breederName;
+                                                    } else {
+                                                        displayName = user.personalName;
+                                                    }
+                                                    
+                                                    return (
+                                                        <button
+                                                            key={user.id_public}
+                                                            onClick={() => {
+                                                                setTransferSelectedUser(user);
+                                                                setTransferUserQuery('');
+                                                                setTransferUserResults([]);
+                                                            }}
+                                                            className="w-full text-left px-4 py-2 hover:bg-gray-100 border-b border-gray-100 last:border-b-0"
+                                                        >
+                                                            <div className="font-medium">{user.id_public}</div>
+                                                            <div className="text-sm text-gray-600">{displayName}</div>
+                                                        </button>
+                                                    );
+                                                })}
+                                            </div>
+                                        )}
+                                        {transferUserQuery.length >= 2 && transferUserResults.length === 0 && !transferSearching && (
+                                            <div className="mt-1 p-4 bg-white border border-gray-300 rounded-lg text-center text-gray-500 text-sm">
+                                                No users found
+                                            </div>
+                                        )}
+                                    </>
+                                )}
+                            </div>
+
+                            {/* Price */}
+                            <div>
+                                <label className="block text-sm font-medium text-gray-700 mb-2">
+                                    Sale Price * ($)
+                                </label>
+                                <input
+                                    type="number"
+                                    step="0.01"
+                                    min="0"
+                                    value={transferPrice}
+                                    onChange={(e) => setTransferPrice(e.target.value)}
+                                    placeholder="0.00"
+                                    className="w-full p-2 border border-gray-300 rounded-lg focus:ring-primary focus:border-primary"
+                                    required
+                                />
+                            </div>
+
+                            {/* Notes */}
+                            <div>
+                                <label className="block text-sm font-medium text-gray-700 mb-2">
+                                    Notes (Optional)
+                                </label>
+                                <textarea
+                                    value={transferNotes}
+                                    onChange={(e) => setTransferNotes(e.target.value)}
+                                    placeholder="Add any additional notes..."
+                                    rows={3}
+                                    className="w-full p-2 border border-gray-300 rounded-lg focus:ring-primary focus:border-primary"
+                                />
+                            </div>
+
+                            {/* Info Box */}
+                            <div className="p-3 bg-blue-50 border border-blue-200 rounded-lg">
+                                <div className="flex items-start gap-2">
+                                    <Info className="w-4 h-4 text-blue-600 mt-0.5 flex-shrink-0" />
+                                    <div className="text-xs text-blue-800">
+                                        <p className="font-semibold mb-1">🎉 How Transfer Works</p>
+                                        <p>The buyer will receive a notification to accept the transfer. Once accepted, the animal will be transferred to their account and you'll keep view-only access to track lineage.</p>
+                                    </div>
+                                </div>
+                            </div>
+
+                            {/* Buttons */}
+                            <div className="flex gap-3 pt-4">
+                                <button
+                                    onClick={handleSubmitTransfer}
+                                    disabled={!transferSelectedUser || !transferPrice}
+                                    className="flex-1 bg-blue-500 hover:bg-blue-600 disabled:bg-gray-400 text-white font-semibold py-2 px-4 rounded-lg transition disabled:cursor-not-allowed"
+                                >
+                                    Send Transfer Request
+                                </button>
+                                <button
+                                    onClick={() => {
+                                        setShowTransferModal(false);
+                                        setTransferAnimal(null);
+                                        setTransferUserQuery('');
+                                        setTransferUserResults([]);
+                                        setTransferSelectedUser(null);
+                                        setTransferPrice('');
+                                        setTransferNotes('');
+                                    }}
+                                    className="flex-1 bg-gray-200 hover:bg-gray-300 text-gray-700 font-semibold py-2 px-4 rounded-lg transition"
+                                >
+                                    Cancel
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            )}
         </div>
     );
 };
