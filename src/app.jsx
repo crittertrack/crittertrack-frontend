@@ -6207,6 +6207,11 @@ const AnimalList = ({ authToken, showModalMessage, onEditAnimal, onViewAnimal, o
                 data = data.filter(a => selectedGenders.includes(a.gender));
             }
 
+            // Filter out view-only animals when "My Animals" filter is active
+            if (ownedFilterActive) {
+                data = data.filter(a => !a.isViewOnly);
+            }
+
             // Enforce that males are excluded when pregnant or nursing filters are active
             if (statusFilterPregnant || statusFilterNursing) {
                 data = data.filter(a => {
