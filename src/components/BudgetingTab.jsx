@@ -671,58 +671,44 @@ const BudgetingTab = ({ authToken, API_BASE_URL, showModalMessage }) => {
                                     </div>
                                     {animalInputMode === 'select' ? (
                                         <div className="space-y-3">
-                                            {/* Species/Category search */}
-                                            <div>
-                                                <input
-                                                    type="text"
-                                                    value={selectedSpecies}
-                                                    onChange={(e) => {
-                                                        setSelectedSpecies(e.target.value);
-                                                        setFormData({ ...formData, animalId: '', animalName: '' });
-                                                    }}
-                                                    placeholder="Search by species/category..."
-                                                    className="w-full p-2 border border-gray-300 rounded-lg focus:ring-primary focus:border-primary"
-                                                />
-                                                {selectedSpecies && (
-                                                    <div className="mt-2 flex flex-wrap gap-2">
-                                                        {[...new Set(animals.map(a => a.species))]
-                                                            .filter(species => species.toLowerCase().includes(selectedSpecies.toLowerCase()))
-                                                            .sort()
-                                                            .slice(0, 10)
-                                                            .map(species => (
-                                                                <button
-                                                                    key={species}
-                                                                    type="button"
-                                                                    onClick={() => setSelectedSpecies(species)}
-                                                                    className="text-xs px-3 py-1 bg-gray-100 hover:bg-primary hover:text-black rounded-full transition"
-                                                                >
-                                                                    {species}
-                                                                </button>
-                                                            ))}
-                                                    </div>
-                                                )}
-                                            </div>
+                                            {/* Species filter dropdown */}
+                                            <select
+                                                value={selectedSpecies}
+                                                onChange={(e) => {
+                                                    setSelectedSpecies(e.target.value);
+                                                    setFormData({ ...formData, animalId: '', animalName: '' });
+                                                }}
+                                                className="w-full p-2 border border-gray-300 rounded-lg focus:ring-primary focus:border-primary"
+                                            >
+                                                <option value="">-- All Species --</option>
+                                                {[...new Set(animals.map(a => a.species))].sort().map(species => (
+                                                    <option key={species} value={species}>
+                                                        {species}
+                                                    </option>
+                                                ))}
+                                            </select>
                                             
                                             {/* Animal selection dropdown */}
                                             <select
                                                 value={formData.animalId}
                                                 onChange={(e) => handleAnimalSelect(e.target.value)}
                                                 className="w-full p-2 border border-gray-300 rounded-lg focus:ring-primary focus:border-primary"
+                                                disabled={selectedSpecies && animals.filter(a => a.species === selectedSpecies).length === 0}
                                                 required
                                             >
                                                 <option value="">-- Select an animal --</option>
                                                 {animals
-                                                    .filter(animal => !selectedSpecies || animal.species.toLowerCase().includes(selectedSpecies.toLowerCase()))
+                                                    .filter(animal => !selectedSpecies || animal.species === selectedSpecies)
                                                     .map(animal => (
                                                         <option key={animal.id_public} value={animal.id_public}>
-                                                            {animal.id_public} - {animal.name} ({animal.species})
+                                                            {animal.id_public} - {animal.name}
                                                         </option>
                                                     ))}
                                             </select>
                                             <p className="text-xs text-gray-500 mt-1">
                                                 {selectedSpecies 
-                                                    ? `Showing ${animals.filter(a => a.species.toLowerCase().includes(selectedSpecies.toLowerCase())).length} animals matching "${selectedSpecies}"` 
-                                                    : `Select from ${animals.length} existing animals`}
+                                                    ? `Showing ${animals.filter(a => a.species === selectedSpecies).length} ${selectedSpecies}` 
+                                                    : 'Filter by species first for easier selection'}
                                             </p>
                                         </div>
                                     ) : (
