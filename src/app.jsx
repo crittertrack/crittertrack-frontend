@@ -7587,13 +7587,13 @@ const App = () => {
                                 <ArrowLeft size={20} className="mr-2" />
                                 Back to Dashboard
                             </button>
-                            <div className="flex items-center gap-2">
+                            <div className="flex flex-wrap items-center gap-2">
                                 <button
                                     onClick={handleShareAnimal}
-                                    className="px-3 py-1.5 bg-primary hover:bg-primary/90 text-black font-semibold rounded-lg transition flex items-center gap-2"
+                                    className="p-2 bg-primary hover:bg-primary/90 text-black font-semibold rounded-lg transition flex items-center justify-center"
+                                    title={copySuccessAnimal ? 'Link Copied!' : 'Share Link'}
                                 >
-                                    <Link size={16} />
-                                    {copySuccessAnimal ? 'Link Copied!' : 'Share Link'}
+                                    <Link size={18} />
                                 </button>
                                 {/* Only show edit and transfer buttons if user owns this animal and it's not view-only */}
                                 {userProfile && animalToView.ownerId_public === userProfile.id_public && !animalToView.isViewOnly && (
