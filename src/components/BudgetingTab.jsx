@@ -173,17 +173,22 @@ const BudgetingTab = ({ authToken, API_BASE_URL, showModalMessage }) => {
         e.preventDefault();
         
         console.log('Form submitted with data:', formData);
+        console.log('Price validation:', formData.price, parseFloat(formData.price), parseFloat(formData.price) <= 0);
         
         if (!formData.price || parseFloat(formData.price) <= 0) {
-            showModalMessage('Error', 'Please enter a valid price');
+            console.log('Price validation failed');
+            showModalMessage('Error', 'Please enter a valid price greater than 0');
             return;
         }
 
+        console.log('Starting API call...');
         try {
             const transactionData = {
                 ...formData,
                 price: parseFloat(formData.price)
             };
+
+            console.log('Transaction data to send:', transactionData);
 
             if (editingTransaction) {
                 await axios.put(
@@ -201,11 +206,13 @@ const BudgetingTab = ({ authToken, API_BASE_URL, showModalMessage }) => {
                 showModalMessage('Success', 'Transaction added successfully');
             }
 
+            console.log('API call successful');
             setShowAddModal(false);
             resetForm();
             fetchTransactions();
         } catch (error) {
             console.error('Error saving transaction:', error);
+            console.error('Error response:', error.response?.data);
             showModalMessage('Error', error.response?.data?.message || 'Failed to save transaction');
         }
     };
