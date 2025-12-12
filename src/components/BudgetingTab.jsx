@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { DollarSign, Plus, Edit, Trash2, Search, X, Calendar, Filter, Download, TrendingUp, TrendingDown } from 'lucide-react';
+import { DollarSign, Plus, Edit, Trash2, Search, X, Calendar, Filter, Download, TrendingUp, TrendingDown, Info, ArrowLeftRight } from 'lucide-react';
 import axios from 'axios';
 
 const BudgetingTab = ({ authToken, API_BASE_URL, showModalMessage }) => {
@@ -597,6 +597,10 @@ const BudgetingTab = ({ authToken, API_BASE_URL, showModalMessage }) => {
                                         <TrendingUp className="w-16 h-16 text-green-600 mb-4" />
                                         <h3 className="text-xl font-bold text-gray-800 mb-2">Sale</h3>
                                         <p className="text-sm text-gray-600 text-center">Record an animal you sold</p>
+                                        <div className="mt-3 flex items-center gap-1 text-xs text-blue-600 bg-blue-50 px-3 py-1 rounded-full">
+                                            <ArrowLeftRight className="w-3 h-3" />
+                                            <span>Can transfer ownership</span>
+                                        </div>
                                     </button>
                                     <button
                                         type="button"
@@ -783,8 +787,14 @@ const BudgetingTab = ({ authToken, API_BASE_URL, showModalMessage }) => {
 
                             <div>
                                 <div className="flex items-center justify-between mb-2">
-                                    <label className="block text-sm font-medium text-gray-700">
+                                    <label className="block text-sm font-medium text-gray-700 flex items-center gap-2">
                                         {formData.type === 'sale' ? 'Buyer' : 'Seller'}
+                                        {formData.type === 'sale' && buyerInputMode === 'user' && (
+                                            <span className="flex items-center gap-1 text-xs font-normal text-blue-600 bg-blue-50 px-2 py-0.5 rounded-full">
+                                                <ArrowLeftRight className="w-3 h-3" />
+                                                Transfer enabled
+                                            </span>
+                                        )}
                                     </label>
                                     <div className="flex gap-2">
                                         <button
@@ -805,8 +815,9 @@ const BudgetingTab = ({ authToken, API_BASE_URL, showModalMessage }) => {
                                                 setBuyerInputMode('user');
                                                 setFormData({ ...formData, buyer: '', seller: '' });
                                             }}
-                                            className={`text-xs px-2 py-1 rounded ${buyerInputMode === 'user' ? 'bg-primary text-black' : 'bg-gray-200 text-gray-600'}`}
+                                            className={`text-xs px-2 py-1 rounded flex items-center gap-1 ${buyerInputMode === 'user' ? 'bg-primary text-black' : 'bg-gray-200 text-gray-600'}`}
                                         >
+                                            {formData.type === 'sale' && <ArrowLeftRight className="w-3 h-3" />}
                                             Search User
                                         </button>
                                     </div>
@@ -914,11 +925,25 @@ const BudgetingTab = ({ authToken, API_BASE_URL, showModalMessage }) => {
                                         )}
                                     </div>
                                 )}
-                                <p className="text-xs text-gray-500 mt-1">
-                                    {buyerInputMode === 'manual' 
-                                        ? 'Enter name manually' 
-                                        : 'Search by name or ID (minimum 2 characters)'}
-                                </p>
+                                {formData.type === 'sale' && buyerInputMode === 'user' && formData.animalId ? (
+                                    <div className="mt-2 p-3 bg-blue-50 border border-blue-200 rounded-lg">
+                                        <div className="flex items-start gap-2">
+                                            <Info className="w-4 h-4 text-blue-600 mt-0.5 flex-shrink-0" />
+                                            <div className="text-xs text-blue-800">
+                                                <p className="font-semibold mb-1">🎉 Animal Transfer</p>
+                                                <p>When you select a CritterTrack user as the buyer, the animal will be transferred to their account! They'll receive a notification to accept the transfer. You'll keep view-only access to track the animal's lineage.</p>
+                                            </div>
+                                        </div>
+                                    </div>
+                                ) : (
+                                    <p className="text-xs text-gray-500 mt-1">
+                                        {buyerInputMode === 'manual' 
+                                            ? 'Enter name manually' 
+                                            : formData.type === 'sale' 
+                                                ? 'Search for a CritterTrack user to transfer animal ownership' 
+                                                : 'Search by name or ID (minimum 2 characters)'}
+                                    </p>
+                                )}
                             </div>
 
                             <div>
