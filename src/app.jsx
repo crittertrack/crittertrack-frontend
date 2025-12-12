@@ -6348,13 +6348,6 @@ const AnimalList = ({ authToken, showModalMessage, onEditAnimal, onViewAnimal, o
                         </div>
                     )}
 
-                    {/* Transfer badge top-center */}
-                    {(animal.soldStatus || animal.isViewOnly) && (
-                        <div className="absolute top-2 left-1/2 transform -translate-x-1/2 bg-blue-500 text-white p-1 rounded-full" title="Transferred Animal">
-                            <ArrowLeftRight size={14} strokeWidth={2.5} />
-                        </div>
-                    )}
-
                     {/* Gender badge top-right */}
                     {animal.gender && (
                         <div className={`absolute top-2 right-2`} title={animal.gender}>
@@ -6397,7 +6390,15 @@ const AnimalList = ({ authToken, showModalMessage, onEditAnimal, onViewAnimal, o
                     {/* Edit is available when viewing full card; remove inline edit icon from dashboard cards */}
 
                     {/* ID bottom-right */}
-                    <div className="w-full px-2 pb-2 flex justify-end">
+                    <div className="w-full px-2 pb-2 flex justify-between items-center">
+                        {/* Transfer icon bottom-left */}
+                        {(animal.soldStatus || animal.isViewOnly) && (
+                            <div className="text-black" title="Transferred Animal">
+                                <ArrowLeftRight size={14} strokeWidth={2.5} />
+                            </div>
+                        )}
+                        {/* Spacer if no transfer icon */}
+                        {!(animal.soldStatus || animal.isViewOnly) && <div></div>}
                         <div className="text-xs text-gray-500">{animal.id_public}</div>
                     </div>
                     
