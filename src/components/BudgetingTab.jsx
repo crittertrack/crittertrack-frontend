@@ -587,8 +587,10 @@ const BudgetingTab = ({ authToken, API_BASE_URL, showModalMessage }) => {
                                     <button
                                         type="button"
                                         onClick={() => {
+                                            console.log('[BudgetTab] Sale button clicked');
                                             setFormData({ ...formData, type: 'sale' });
                                             setShowTypeSelection(false);
+                                            console.log('[BudgetTab] State updated - type: sale, showTypeSelection: false');
                                         }}
                                         className="flex flex-col items-center justify-center p-8 border-2 border-gray-300 rounded-xl hover:border-green-500 hover:bg-green-50 transition-all group"
                                     >
@@ -599,8 +601,10 @@ const BudgetingTab = ({ authToken, API_BASE_URL, showModalMessage }) => {
                                     <button
                                         type="button"
                                         onClick={() => {
+                                            console.log('[BudgetTab] Purchase button clicked');
                                             setFormData({ ...formData, type: 'purchase' });
                                             setShowTypeSelection(false);
+                                            console.log('[BudgetTab] State updated - type: purchase, showTypeSelection: false');
                                         }}
                                         className="flex flex-col items-center justify-center p-8 border-2 border-gray-300 rounded-xl hover:border-red-500 hover:bg-red-50 transition-all group"
                                     >
@@ -611,6 +615,8 @@ const BudgetingTab = ({ authToken, API_BASE_URL, showModalMessage }) => {
                                 </div>
                             </div>
                         ) : (
+                        <>
+                        {console.log('[BudgetTab] Rendering form - type:', formData.type, 'showTypeSelection:', showTypeSelection)}
                         <form onSubmit={handleSaveTransaction} className="space-y-4">
                             <div>
                                 <label className="block text-sm font-medium text-gray-700 mb-2">
@@ -947,6 +953,7 @@ const BudgetingTab = ({ authToken, API_BASE_URL, showModalMessage }) => {
                                 </button>
                             </div>
                         </form>
+                        </>
                         )}
                     </div>
                 </div>
