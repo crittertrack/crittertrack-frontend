@@ -531,7 +531,14 @@ const BudgetingTab = ({ authToken, API_BASE_URL, showModalMessage }) => {
                     <div className="bg-white rounded-xl shadow-2xl max-w-2xl w-full p-6 max-h-[90vh] overflow-y-auto">
                         <div className="flex justify-between items-center mb-6">
                             <h2 className="text-xl font-bold text-gray-800">
-                                {editingTransaction ? 'Edit Transaction' : 'Add Transaction'}
+                                {editingTransaction 
+                                    ? 'Edit Transaction' 
+                                    : showTypeSelection 
+                                        ? 'Add Transaction'
+                                        : formData.type === 'sale' 
+                                            ? 'Add Sale' 
+                                            : 'Add Purchase'
+                                }
                             </h2>
                             <button
                                 onClick={() => {
