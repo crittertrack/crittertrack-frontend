@@ -7312,6 +7312,56 @@ const App = () => {
         }
     };
 
+    const handleHideViewOnlyAnimal = async (id_public) => {
+        if (!window.confirm('Hide this view-only animal? You can restore it later from the hidden animals list.')) {
+            return;
+        }
+        try {
+            await axios.post(`${API_BASE_URL}/animals/${id_public}/hide`, {}, {
+                headers: { Authorization: `Bearer ${authToken}` }
+            });
+            setCurrentView('list');
+            showModalMessage('Success', 'View-only animal hidden. You can restore it anytime from the hidden animals section.');
+        } catch (error) {
+            console.error('Failed to hide animal:', error);
+            showModalMessage('Error', error.response?.data?.message || 'Failed to hide animal');
+        }
+    };
+
+    const handleRestoreViewOnlyAnimal = async (id_public) => {
+        try {
+            await axios.post(`${API_BASE_URL}/animals/${id_public}/restore`, {}, {
+                headers: { Authorization: `Bearer ${authToken}` }
+            });
+            showModalMessage('Success', 'View-only animal restored to your list!');
+            // Refresh the view
+            if (currentView === 'hidden-animals') {
+                fetchHiddenAnimals();
+            }
+        } catch (error) {
+            console.error('Failed to restore animal:', error);
+            showModalMessage('Error', error.response?.data?.message || 'Failed to restore animal');
+        }
+    };
+
+    const [hiddenAnimals, setHiddenAnimals] = useState([]);
+    const [loadingHidden, setLoadingHidden] = useState(false);
+
+    const fetchHiddenAnimals = async () => {
+        setLoadingHidden(true);
+        try {
+            const response = await axios.get(`${API_BASE_URL}/animals/hidden/list`, {
+                headers: { Authorization: `Bearer ${authToken}` }
+            });
+            setHiddenAnimals(response.data || []);
+        } catch (error) {
+            console.error('Failed to fetch hidden animals:', error);
+            showModalMessage('Error', 'Failed to load hidden animals');
+        } finally {
+            setLoadingHidden(false);
+        }
+    };
+
     const renderView = () => {
         switch (currentView) {
             case 'publicProfile':
@@ -7458,11 +7508,20 @@ const App = () => {
                                 {userProfile && animalToView.ownerId_public === userProfile.id_public && !animalToView.isViewOnly && (
                                     <button onClick={() => { setAnimalToEdit(animalToView); setSpeciesToAdd(animalToView.species); setCurrentView('edit-animal'); }} className="bg-primary hover:bg-primary/90 text-black font-semibold py-2 px-4 rounded-lg">Edit</button>
                                 )}
-                                {/* Show view-only message for view-only animals */}
+                                {/* Show view-only message and hide button for view-only animals */}
                                 {animalToView.isViewOnly && (
-                                    <div className="px-3 py-1.5 bg-gray-200 text-gray-700 font-medium rounded-lg border border-gray-400">
-                                        View Only
-                                    </div>
+                                    <>
+                                        <div className="px-3 py-1.5 bg-gray-200 text-gray-700 font-medium rounded-lg border border-gray-400">
+                                            View Only
+                                        </div>
+                                        <button
+                                            onClick={() => handleHideViewOnlyAnimal(animalToView.id_public)}
+                                            className="px-3 py-1.5 bg-red-500 hover:bg-red-600 text-white font-semibold rounded-lg transition flex items-center gap-2"
+                                        >
+                                            <EyeOff size={16} />
+                                            Hide
+                                        </button>
+                                    </>
                                 )}
                             </div>
                         </div>
@@ -7641,6 +7700,68 @@ const App = () => {
                         API_BASE_URL={API_BASE_URL}
                         showModalMessage={showModalMessage}
                     />
+                );
+            case 'hidden-animals':
+                return (
+                    <div className="w-full max-w-4xl bg-white p-6 rounded-xl shadow-lg">
+                        <div className="flex items-start justify-between mb-6">
+                            <button onClick={() => setCurrentView('list')} className="flex items-center text-gray-600 hover:text-gray-800 font-medium">
+                                <ArrowLeft size={20} className="mr-2" />
+                                Back to Dashboard
+                            </button>
+                        </div>
+                        <h2 className="text-3xl font-bold text-gray-800 mb-6 flex items-center">
+                            <EyeOff size={24} className="mr-3 text-gray-600" />
+                            Hidden View-Only Animals
+                        </h2>
+                        {loadingHidden ? (
+                            <div className="flex justify-center py-8">
+                                <Loader2 className="animate-spin" size={32} />
+                            </div>
+                        ) : hiddenAnimals.length === 0 ? (
+                            <p className="text-center text-gray-500 py-8">No hidden animals</p>
+                        ) : (
+                            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                                {hiddenAnimals.map(animal => (
+                                    <div key={animal.id_public} className="border border-gray-300 rounded-lg p-4 bg-gray-50">
+                                        <div className="flex items-center space-x-3 mb-3">
+                                            <div className="w-16 h-16 bg-gray-200 rounded-md overflow-hidden flex-shrink-0">
+                                                {animal.imageUrl || animal.photoUrl ? (
+                                                    <img src={animal.imageUrl || animal.photoUrl} alt={animal.name} className="w-full h-full object-cover" />
+                                                ) : (
+                                                    <div className="w-full h-full flex items-center justify-center text-gray-400">
+                                                        <Cat size={32} />
+                                                    </div>
+                                                )}
+                                            </div>
+                                            <div className="flex-1">
+                                                <h3 className="font-semibold text-gray-800">
+                                                    {animal.prefix ? `${animal.prefix} ` : ''}{animal.name}{animal.suffix ? ` ${animal.suffix}` : ''}
+                                                </h3>
+                                                <p className="text-sm text-gray-600">{animal.id_public}</p>
+                                                <p className="text-xs text-gray-500">{animal.species} • {animal.gender}</p>
+                                            </div>
+                                        </div>
+                                        <div className="flex gap-2">
+                                            <button
+                                                onClick={() => handleRestoreViewOnlyAnimal(animal.id_public)}
+                                                className="flex-1 px-3 py-2 bg-green-500 hover:bg-green-600 text-white font-semibold rounded-lg transition flex items-center justify-center gap-2"
+                                            >
+                                                <Eye size={16} />
+                                                Restore
+                                            </button>
+                                            <button
+                                                onClick={() => handleViewAnimal(animal)}
+                                                className="flex-1 px-3 py-2 bg-gray-600 hover:bg-gray-700 text-white font-semibold rounded-lg transition"
+                                            >
+                                                View
+                                            </button>
+                                        </div>
+                                    </div>
+                                ))}
+                            </div>
+                        )}
+                    </div>
                 );
             case 'litters':
                 return (
@@ -7881,6 +8002,10 @@ const App = () => {
                             <ClipboardList size={18} className="mb-1" />
                             <span>Animals</span>
                         </button>
+                        <button onClick={() => { setCurrentView('hidden-animals'); fetchHiddenAnimals(); }} className={`px-4 py-2 text-xs font-medium rounded-lg transition duration-150 flex flex-col items-center ${currentView === 'hidden-animals' ? 'bg-primary text-black shadow-md' : 'text-gray-600 hover:bg-gray-100'}`}>
+                            <EyeOff size={18} className="mb-1" />
+                            <span>Hidden</span>
+                        </button>
                         <button onClick={() => setCurrentView('litters')} className={`px-4 py-2 text-xs font-medium rounded-lg transition duration-150 flex flex-col items-center ${currentView === 'litters' ? 'bg-primary text-black shadow-md' : 'text-gray-600 hover:bg-gray-100'}`}>
                             <BookOpen size={18} className="mb-1" />
                             <span>Litters</span>
@@ -7982,6 +8107,10 @@ const App = () => {
                         <button onClick={() => setCurrentView('list')} className={`flex-1 px-2 py-2 text-xs font-medium rounded-lg transition duration-150 ${currentView === 'list' ? 'bg-primary text-black shadow-md' : 'text-gray-600 hover:bg-gray-100'}`}>
                             <ClipboardList size={16} className="inline mb-0.5" />
                             <span className="block">Animals</span>
+                        </button>
+                        <button onClick={() => { setCurrentView('hidden-animals'); fetchHiddenAnimals(); }} className={`flex-1 px-2 py-2 text-xs font-medium rounded-lg transition duration-150 ${currentView === 'hidden-animals' ? 'bg-primary text-black shadow-md' : 'text-gray-600 hover:bg-gray-100'}`}>
+                            <EyeOff size={16} className="inline mb-0.5" />
+                            <span className="block">Hidden</span>
                         </button>
                         <button onClick={() => setCurrentView('litters')} className={`flex-1 px-2 py-2 text-xs font-medium rounded-lg transition duration-150 ${currentView === 'litters' ? 'bg-primary text-black shadow-md' : 'text-gray-600 hover:bg-gray-100'}`}>
                             <BookOpen size={16} className="inline mb-0.5" />
