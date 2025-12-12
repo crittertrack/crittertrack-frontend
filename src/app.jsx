@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useCallback, useRef, useMemo } from 'react';
 import { useParams, useNavigate, useLocation, Routes, Route } from 'react-router-dom';
 import axios from 'axios';
-import { LogOut, Cat, UserPlus, LogIn, ChevronLeft, Trash2, Edit, Save, PlusCircle, Plus, ArrowLeft, Loader2, RefreshCw, User, Users, ClipboardList, BookOpen, Settings, Mail, Globe, Egg, Milk, Search, X, Mars, Venus, Eye, EyeOff, Home, Heart, HeartOff, HeartHandshake, Bell, XCircle, CheckCircle, Download, FileText, Link, AlertCircle, Check, DollarSign } from 'lucide-react';
+import { LogOut, Cat, UserPlus, LogIn, ChevronLeft, Trash2, Edit, Save, PlusCircle, Plus, ArrowLeft, Loader2, RefreshCw, User, Users, ClipboardList, BookOpen, Settings, Mail, Globe, Egg, Milk, Search, X, Mars, Venus, Eye, EyeOff, Home, Heart, HeartOff, HeartHandshake, Bell, XCircle, CheckCircle, Download, FileText, Link, AlertCircle, Check, DollarSign, Archive } from 'lucide-react';
 import jsPDF from 'jspdf';
 import html2canvas from 'html2canvas';
 import MouseGeneticsCalculator from './components/MouseGeneticsCalculator';
@@ -6429,7 +6429,7 @@ const AnimalList = ({ authToken, showModalMessage, onEditAnimal, onViewAnimal, o
                         className="text-gray-600 hover:text-gray-800 transition flex items-center gap-1 px-3 py-1.5 rounded-lg hover:bg-gray-100"
                         title="View Hidden Animals"
                     >
-                        <EyeOff size={18} />
+                        <Archive size={18} />
                         <span className="text-sm font-medium">Hidden</span>
                     </button>
                     <button 
@@ -7528,7 +7528,7 @@ const App = () => {
                                             onClick={() => handleHideViewOnlyAnimal(animalToView.id_public)}
                                             className="px-3 py-1.5 bg-red-500 hover:bg-red-600 text-white font-semibold rounded-lg transition flex items-center gap-2"
                                         >
-                                            <EyeOff size={16} />
+                                            <Archive size={16} />
                                             Hide
                                         </button>
                                     </>
@@ -7721,7 +7721,7 @@ const App = () => {
                             </button>
                         </div>
                         <h2 className="text-3xl font-bold text-gray-800 mb-6 flex items-center">
-                            <EyeOff size={24} className="mr-3 text-gray-600" />
+                            <Archive size={24} className="mr-3 text-gray-600" />
                             Hidden View-Only Animals
                         </h2>
                         {loadingHidden ? (
