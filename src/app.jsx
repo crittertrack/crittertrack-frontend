@@ -17,16 +17,39 @@ const API_BASE_URL = 'https://crittertrack-pedigree-production.up.railway.app/ap
 const GENDER_OPTIONS = ['Male', 'Female'];
 const STATUS_OPTIONS = ['Pet', 'Breeder', 'Available', 'Sold', 'Retired', 'Deceased', 'Rehomed', 'Unknown']; 
 
-const DEFAULT_SPECIES_OPTIONS = ['Mouse', 'Rat', 'Hamster'];
+const DEFAULT_SPECIES_OPTIONS = ['Fancy Mouse', 'Fancy Rat', 'Russian Dwarf Hamster', 'Campbells Dwarf Hamster', 'Chinese Dwarf Hamster', 'Syrian Hamster', 'Guinea Pig'];
 
 // Helper function to get plural/display names for species
 const getSpeciesDisplayName = (species) => {
     const displayNames = {
-        'Mouse': 'Fancy Mice',
-        'Rat': 'Rats',
-        'Hamster': 'Hamsters'
+        'Fancy Mouse': 'Fancy Mice',
+        'Mouse': 'Fancy Mice', // Backwards compatibility
+        'Fancy Rat': 'Fancy Rats',
+        'Rat': 'Fancy Rats', // Backwards compatibility
+        'Russian Dwarf Hamster': 'Russian Dwarf Hamsters',
+        'Campbells Dwarf Hamster': 'Campbells Dwarf Hamsters',
+        'Chinese Dwarf Hamster': 'Chinese Dwarf Hamsters',
+        'Syrian Hamster': 'Syrian Hamsters',
+        'Hamster': 'Hamsters', // Backwards compatibility
+        'Guinea Pig': 'Guinea Pigs'
     };
     return displayNames[species] || species;
+};
+
+// Map species to their latin names for display
+const getSpeciesLatinName = (species) => {
+    const latinNames = {
+        'Fancy Mouse': 'Mus musculus',
+        'Mouse': 'Mus musculus',
+        'Fancy Rat': 'Rattus norvegicus',
+        'Rat': 'Rattus norvegicus',
+        'Russian Dwarf Hamster': 'Phodopus sungorus',
+        'Campbells Dwarf Hamster': 'Phodopus campbelli',
+        'Chinese Dwarf Hamster': 'Cricetulus barabensis',
+        'Syrian Hamster': 'Mesocricetus auratus',
+        'Guinea Pig': 'Cavia porcellus'
+    };
+    return latinNames[species] || null;
 };
 
 const IDLE_TIMEOUT_MS = 15 * 60 * 1000; // 15 minutes in milliseconds
@@ -795,7 +818,12 @@ const PedigreeChart = ({ animalId, animalData, onClose, API_BASE_URL, authToken 
                         
                         {/* Middle: Species */}
                         <div className="w-1/3 flex items-center justify-center">
-                            <h3 className="text-lg font-bold text-gray-800">{pedigreeData?.species || 'Unknown Species'}</h3>
+                            <div className="text-center">
+                                <h3 className="text-lg font-bold text-gray-800">{pedigreeData?.species || 'Unknown Species'}</h3>
+                                {pedigreeData?.species && getSpeciesLatinName(pedigreeData.species) && (
+                                    <p className="text-sm italic text-gray-600">{getSpeciesLatinName(pedigreeData.species)}</p>
+                                )}
+                            </div>
                         </div>
                         
                         {/* Right: Owner Profile */}
@@ -926,6 +954,9 @@ const ParentSearchModal = ({
                     <p className="text-sm text-gray-600">
                         {animal.species} • {animal.gender} • {animal.status || 'Unknown'}
                     </p>
+                    {getSpeciesLatinName(animal.species) && (
+                        <p className="text-xs italic text-gray-500">{getSpeciesLatinName(animal.species)}</p>
+                    )}
                 </div>
                 
                 {/* Badge */}
@@ -1118,6 +1149,9 @@ const LocalAnimalSearchModal = ({ title, currentId, onSelect, onClose, authToken
                 <p className="text-sm text-gray-600">
                     {animal.species} | {animal.gender} | {animal.status}
                 </p>
+                {getSpeciesLatinName(animal.species) && (
+                    <p className="text-xs italic text-gray-500">{getSpeciesLatinName(animal.species)}</p>
+                )}
             </div>
         </div>
     );
