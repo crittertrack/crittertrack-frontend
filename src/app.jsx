@@ -6055,7 +6055,7 @@ const AuthView = ({ onLoginSuccess, showModalMessage, isRegister, setIsRegister,
     );
 };
 
-const AnimalList = ({ authToken, showModalMessage, onEditAnimal, onViewAnimal, onSetCurrentView }) => {
+const AnimalList = ({ authToken, showModalMessage, onEditAnimal, onViewAnimal, onSetCurrentView, fetchHiddenAnimals }) => {
     const [animals, setAnimals] = useState([]);
     const [loading, setLoading] = useState(true);
     const [statusFilter, setStatusFilter] = useState('');
@@ -6423,14 +6423,24 @@ const AnimalList = ({ authToken, showModalMessage, onEditAnimal, onViewAnimal, o
                     <ClipboardList size={24} className="mr-3 text-primary-dark" />
                     My Animals ({animals.length})
                 </div>
-                <button 
-                    onClick={handleRefresh} 
-                    disabled={loading}
-                    className="text-gray-600 hover:text-primary transition disabled:opacity-50 flex items-center"
-                    title="Refresh List"
-                >
-                    {loading ? <Loader2 size={18} className="animate-spin" /> : <RefreshCw size={18} />}
-                </button>
+                <div className="flex items-center gap-2">
+                    <button 
+                        onClick={() => { onSetCurrentView('hidden-animals'); fetchHiddenAnimals(); }}
+                        className="text-gray-600 hover:text-gray-800 transition flex items-center gap-1 px-3 py-1.5 rounded-lg hover:bg-gray-100"
+                        title="View Hidden Animals"
+                    >
+                        <EyeOff size={18} />
+                        <span className="text-sm font-medium">Hidden</span>
+                    </button>
+                    <button 
+                        onClick={handleRefresh} 
+                        disabled={loading}
+                        className="text-gray-600 hover:text-primary transition disabled:opacity-50 flex items-center"
+                        title="Refresh List"
+                    >
+                        {loading ? <Loader2 size={18} className="animate-spin" /> : <RefreshCw size={18} />}
+                    </button>
+                </div>
             </h2>
 
             <div className="mb-6 p-4 border rounded-lg bg-gray-50 space-y-3">
@@ -7782,6 +7792,7 @@ const App = () => {
                         onEditAnimal={handleEditAnimal} 
                         onViewAnimal={handleViewAnimal}
                         onSetCurrentView={setCurrentView}
+                        fetchHiddenAnimals={fetchHiddenAnimals}
                     />
                 );
         }
@@ -8002,10 +8013,6 @@ const App = () => {
                             <ClipboardList size={18} className="mb-1" />
                             <span>Animals</span>
                         </button>
-                        <button onClick={() => { setCurrentView('hidden-animals'); fetchHiddenAnimals(); }} className={`px-4 py-2 text-xs font-medium rounded-lg transition duration-150 flex flex-col items-center ${currentView === 'hidden-animals' ? 'bg-primary text-black shadow-md' : 'text-gray-600 hover:bg-gray-100'}`}>
-                            <EyeOff size={18} className="mb-1" />
-                            <span>Hidden</span>
-                        </button>
                         <button onClick={() => setCurrentView('litters')} className={`px-4 py-2 text-xs font-medium rounded-lg transition duration-150 flex flex-col items-center ${currentView === 'litters' ? 'bg-primary text-black shadow-md' : 'text-gray-600 hover:bg-gray-100'}`}>
                             <BookOpen size={18} className="mb-1" />
                             <span>Litters</span>
@@ -8107,10 +8114,6 @@ const App = () => {
                         <button onClick={() => setCurrentView('list')} className={`flex-1 px-2 py-2 text-xs font-medium rounded-lg transition duration-150 ${currentView === 'list' ? 'bg-primary text-black shadow-md' : 'text-gray-600 hover:bg-gray-100'}`}>
                             <ClipboardList size={16} className="inline mb-0.5" />
                             <span className="block">Animals</span>
-                        </button>
-                        <button onClick={() => { setCurrentView('hidden-animals'); fetchHiddenAnimals(); }} className={`flex-1 px-2 py-2 text-xs font-medium rounded-lg transition duration-150 ${currentView === 'hidden-animals' ? 'bg-primary text-black shadow-md' : 'text-gray-600 hover:bg-gray-100'}`}>
-                            <EyeOff size={16} className="inline mb-0.5" />
-                            <span className="block">Hidden</span>
                         </button>
                         <button onClick={() => setCurrentView('litters')} className={`flex-1 px-2 py-2 text-xs font-medium rounded-lg transition duration-150 ${currentView === 'litters' ? 'bg-primary text-black shadow-md' : 'text-gray-600 hover:bg-gray-100'}`}>
                             <BookOpen size={16} className="inline mb-0.5" />
