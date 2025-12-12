@@ -5625,6 +5625,8 @@ const ProfileEditForm = ({ userProfile, showModalMessage, onSaveSuccess, onCance
 const ProfileView = ({ userProfile, showModalMessage, fetchUserProfile, authToken, onProfileUpdated }) => {
     const [isEditing, setIsEditing] = useState(false);
     const [copySuccess, setCopySuccess] = useState(false);
+    const [checkingForUpdates, setCheckingForUpdates] = useState(false);
+    const [updateAvailable, setUpdateAvailable] = useState(false);
 
     const handleShare = () => {
         const url = `${window.location.origin}/user/${userProfile.id_public}`;
@@ -5632,6 +5634,47 @@ const ProfileView = ({ userProfile, showModalMessage, fetchUserProfile, authToke
             setCopySuccess(true);
             setTimeout(() => setCopySuccess(false), 2000);
         });
+    };
+
+    const handleCheckForUpdates = async () => {
+        setCheckingForUpdates(true);
+        setUpdateAvailable(false);
+        
+        try {
+            if ('serviceWorker' in navigator) {
+                const registration = await navigator.serviceWorker.getRegistration();
+                if (registration) {
+                    console.log('[ProfileView] Manually checking for service worker updates...');
+                    await registration.update();
+                    console.log('[ProfileView] Update check complete');
+                    
+                    // Set up listener for update found event
+                    const handleUpdateAvailable = () => {
+                        console.log('[ProfileView] Update is available!');
+                        setUpdateAvailable(true);
+                        showModalMessage('Update Available', 'A new version of CritterTrack is available. Please refresh the page to update.');
+                        // Remove listener after it fires
+                        window.removeEventListener('sw-update-available', handleUpdateAvailable);
+                    };
+                    
+                    window.addEventListener('sw-update-available', handleUpdateAvailable);
+                    
+                    // Check if update was already found (SW_UPDATE_AVAILABLE flag)
+                    if (window.SW_UPDATE_AVAILABLE) {
+                        handleUpdateAvailable();
+                    }
+                    
+                    showModalMessage('Check Complete', 'CritterTrack is up to date. You\'re running the latest version!');
+                } else {
+                    showModalMessage('Error', 'Service worker is not installed. Please refresh the page.');
+                }
+            }
+        } catch (error) {
+            console.error('[ProfileView] Error checking for updates:', error);
+            showModalMessage('Error', 'Failed to check for updates. Please try again later.');
+        } finally {
+            setCheckingForUpdates(false);
+        }
     };
 
     if (!userProfile) return <LoadingSpinner />;
@@ -5741,6 +5784,26 @@ const ProfileView = ({ userProfile, showModalMessage, fetchUserProfile, authToke
                 className="mt-6 bg-accent hover:bg-accent/90 text-white font-semibold py-3 px-6 rounded-lg transition duration-150 shadow-md flex items-center"
             >
                 <Edit size={20} className="mr-2" /> Edit Profile
+            </button>
+            
+            <button 
+                onClick={handleCheckForUpdates}
+                disabled={checkingForUpdates}
+                className="mt-3 bg-primary hover:bg-primary/90 text-black font-semibold py-3 px-6 rounded-lg transition duration-150 shadow-md flex items-center disabled:opacity-50"
+            >
+                {checkingForUpdates ? (
+                    <>
+                        <Loader2 size={20} className="mr-2 animate-spin" /> Checking for Updates...
+                    </>
+                ) : updateAvailable ? (
+                    <>
+                        <CheckCircle size={20} className="mr-2 text-green-600" /> Update Available!
+                    </>
+                ) : (
+                    <>
+                        <RefreshCw size={20} className="mr-2" /> Check for Updates
+                    </>
+                )}
             </button>
         </div>
     );

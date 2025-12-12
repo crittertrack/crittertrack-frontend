@@ -15,17 +15,21 @@
     <div id="root"></div>
     
     <script>
-      // Register service worker with update detection
+      // Register service worker with aggressive update detection
       if ('serviceWorker' in navigator) {
         window.addEventListener('load', () => {
           navigator.serviceWorker.register('/service-worker.js')
             .then((registration) => {
               console.log('[App] SW registered:', registration);
               
-              // Check for updates every 60 seconds
+              // Check for updates every 10 seconds (very aggressive)
               setInterval(() => {
+                console.log('[App] Checking for service worker updates...');
                 registration.update();
-              }, 60000);
+              }, 10000);
+              
+              // Also check immediately on startup
+              registration.update();
               
               // Listen for updates
               registration.addEventListener('updatefound', () => {
@@ -34,10 +38,11 @@
                 
                 newWorker.addEventListener('statechange', () => {
                   if (newWorker.state === 'installed' && navigator.serviceWorker.controller) {
-                    console.log('[App] New version available, reloading...');
-                    // New service worker installed, reload to activate
-                    newWorker.postMessage({ type: 'SKIP_WAITING' });
-                    window.location.reload();
+                    console.log('[App] New version available, notifying user...');
+                    // Store flag so app knows to show update prompt
+                    window.SW_UPDATE_AVAILABLE = true;
+                    // Dispatch custom event that app can listen to
+                    window.dispatchEvent(new Event('sw-update-available'));
                   }
                 });
               });
@@ -48,6 +53,12 @@
           
           // Reload when new service worker takes control
           navigator.serviceWorker.addEventListener('controllerchange', () => {
+            console.log('[App] Service worker controller changed');
+            window.location.reload();
+          });
+        });
+      }
+    </script>
             console.log('[App] New service worker activated, reloading...');
             window.location.reload();
           });
