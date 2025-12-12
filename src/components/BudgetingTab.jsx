@@ -935,13 +935,23 @@ const BudgetingTab = ({ authToken, API_BASE_URL, showModalMessage }) => {
                                             </div>
                                         </div>
                                     </div>
+                                ) : formData.type === 'purchase' && buyerInputMode === 'user' ? (
+                                    <div className="mt-2 p-3 bg-green-50 border border-green-200 rounded-lg">
+                                        <div className="flex items-start gap-2">
+                                            <Info className="w-4 h-4 text-green-600 mt-0.5 flex-shrink-0" />
+                                            <div className="text-xs text-green-800">
+                                                <p className="font-semibold mb-1">📢 Notify the Breeder</p>
+                                                <p>Selecting a CritterTrack user as the seller will send them a notification about your purchase. This helps breeders keep track of where their animals go and maintain accurate records!</p>
+                                            </div>
+                                        </div>
+                                    </div>
                                 ) : (
                                     <p className="text-xs text-gray-500 mt-1">
                                         {buyerInputMode === 'manual' 
                                             ? 'Enter name manually' 
                                             : formData.type === 'sale' 
                                                 ? 'Search for a CritterTrack user to transfer animal ownership' 
-                                                : 'Search by name or ID (minimum 2 characters)'}
+                                                : 'Search for a CritterTrack user to notify them of your purchase'}
                                     </p>
                                 )}
                             </div>
