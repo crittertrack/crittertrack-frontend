@@ -7730,13 +7730,13 @@ const App = () => {
                                 </div>
                                 <div className="flex-1 w-full">
                                     <h2 className="text-2xl font-bold text-gray-800 mb-2">{animalToView.prefix ? `${animalToView.prefix} ` : ''}{animalToView.name}{animalToView.suffix ? ` ${animalToView.suffix}` : ''}</h2>
-                                    <div className="text-sm text-gray-600 mb-4">
+                                    <p className="text-sm text-gray-600 mb-4">
                                         {animalToView.species}
                                         {getSpeciesLatinName(animalToView.species) && (
-                                            <div className="italic text-gray-500">{getSpeciesLatinName(animalToView.species)}</div>
+                                            <span className="italic text-gray-500"> ({getSpeciesLatinName(animalToView.species)})</span>
                                         )}
-                                        <div>&nbsp; • &nbsp; {animalToView.id_public}</div>
-                                    </div>
+                                        &nbsp; • &nbsp; {animalToView.id_public}
+                                    </p>
                                     <div className="grid grid-cols-1 sm:grid-cols-2 gap-x-6 gap-y-3 text-sm text-gray-700">
                                         <div><strong>Gender:</strong> {animalToView.gender}</div>
                                         <div><strong>Birth Date:</strong> {formattedBirthDate}</div>
