@@ -3987,11 +3987,15 @@ const SpeciesSelector = ({ speciesOptions, onSelectSpecies, onManageSpecies, sea
                         <button
                             key={species._id || species.name}
                             onClick={() => onSelectSpecies(species.name)}
-                            className="p-6 border-2 border-primary-dark text-lg font-semibold text-gray-800 rounded-lg hover:bg-primary/50 transition duration-150 shadow-md bg-primary relative text-center"
+                            className={`p-6 border-2 text-lg font-semibold rounded-lg transition duration-150 shadow-md relative text-center ${
+                                species.isDefault 
+                                    ? 'border-primary-dark bg-primary text-gray-800 hover:bg-primary/80' 
+                                    : 'border-accent bg-accent text-white hover:bg-accent/80'
+                            }`}
                         >
                             {species.name}
                             {species.latinName && (
-                                <p className="text-xs italic text-gray-600 mt-1">{species.latinName}</p>
+                                <p className={`text-xs italic mt-1 ${species.isDefault ? 'text-gray-600' : 'text-white/80'}`}>{species.latinName}</p>
                             )}
                             {species.isDefault && (
                                 <span className="absolute top-1 right-1 text-xs bg-white text-primary-dark px-1.5 py-0.5 rounded">★</span>
