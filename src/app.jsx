@@ -7604,7 +7604,7 @@ const App = () => {
                                                 setTransferAnimal(animalToView); 
                                                 setShowTransferModal(true); 
                                             }} 
-                                            className="bg-blue-500 hover:bg-blue-600 text-white font-semibold py-2 px-4 rounded-lg transition flex items-center gap-2"
+                                            className="bg-accent hover:bg-accent/90 text-white font-semibold py-2 px-4 rounded-lg transition flex items-center gap-2"
                                         >
                                             <ArrowLeftRight size={16} />
                                             Transfer
