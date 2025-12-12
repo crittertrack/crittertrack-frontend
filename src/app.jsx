@@ -3966,9 +3966,12 @@ const SpeciesSelector = ({ speciesOptions, onSelectSpecies, onManageSpecies, sea
                         <button
                             key={species._id || species.name}
                             onClick={() => onSelectSpecies(species.name)}
-                            className="p-6 border-2 border-primary-dark text-lg font-semibold text-gray-800 rounded-lg hover:bg-primary/50 transition duration-150 shadow-md bg-primary relative"
+                            className="p-6 border-2 border-primary-dark text-lg font-semibold text-gray-800 rounded-lg hover:bg-primary/50 transition duration-150 shadow-md bg-primary relative text-center"
                         >
                             {species.name}
+                            {species.latinName && (
+                                <p className="text-xs italic text-gray-600 mt-1">{species.latinName}</p>
+                            )}
                             {species.isDefault && (
                                 <span className="absolute top-1 right-1 text-xs bg-white text-primary-dark px-1.5 py-0.5 rounded">★</span>
                             )}
@@ -6443,6 +6446,14 @@ const AnimalList = ({ authToken, showModalMessage, onEditAnimal, onViewAnimal, o
                     {/* Prefix / Name under image */}
                     <div className="w-full text-center px-2 pb-1">
                         <div className="text-sm font-semibold text-gray-800 line-clamp-2">{animal.prefix ? `${animal.prefix} ` : ''}{animal.name}{animal.suffix ? ` ${animal.suffix}` : ''}</div>
+                        {animal.species && (
+                            <div className="text-xs text-gray-600">
+                                {animal.species}
+                                {getSpeciesLatinName(animal.species) && (
+                                    <div className="italic text-gray-500">{getSpeciesLatinName(animal.species)}</div>
+                                )}
+                            </div>
+                        )}
                     </div>
 
                     {/* Edit is available when viewing full card; remove inline edit icon from dashboard cards */}
