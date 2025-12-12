@@ -172,6 +172,8 @@ const BudgetingTab = ({ authToken, API_BASE_URL, showModalMessage }) => {
     const handleSaveTransaction = async (e) => {
         e.preventDefault();
         
+        console.log('Form submitted with data:', formData);
+        
         if (!formData.price || parseFloat(formData.price) <= 0) {
             showModalMessage('Error', 'Please enter a valid price');
             return;
