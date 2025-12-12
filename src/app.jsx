@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useCallback, useRef, useMemo } from 'react';
 import { useParams, useNavigate, useLocation, Routes, Route } from 'react-router-dom';
 import axios from 'axios';
-import { LogOut, Cat, UserPlus, LogIn, ChevronLeft, Trash2, Edit, Save, PlusCircle, Plus, ArrowLeft, Loader2, RefreshCw, User, Users, ClipboardList, BookOpen, Settings, Mail, Globe, Egg, Milk, Search, X, Mars, Venus, Eye, EyeOff, Home, Heart, HeartOff, HeartHandshake, Bell, XCircle, CheckCircle, Download, FileText, Link, AlertCircle, Check, DollarSign, Archive, ArrowLeftRight } from 'lucide-react';
+import { LogOut, Cat, UserPlus, LogIn, ChevronLeft, Trash2, Edit, Save, PlusCircle, Plus, ArrowLeft, Loader2, RefreshCw, User, Users, ClipboardList, BookOpen, Settings, Mail, Globe, Egg, Milk, Search, X, Mars, Venus, Eye, EyeOff, Home, Heart, HeartOff, HeartHandshake, Bell, XCircle, CheckCircle, Download, FileText, Link, AlertCircle, Check, DollarSign, Archive, ArrowLeftRight, RotateCcw } from 'lucide-react';
 import jsPDF from 'jspdf';
 import html2canvas from 'html2canvas';
 import MouseGeneticsCalculator from './components/MouseGeneticsCalculator';
@@ -4144,7 +4144,7 @@ const AnimalForm = ({
     Search, 
     Loader2, 
     LoadingSpinner,
-    PlusCircle, ArrowLeft, Save, Trash2,
+    PlusCircle, ArrowLeft, Save, Trash2, RotateCcw,
     GENDER_OPTIONS, STATUS_OPTIONS,
     AnimalImageUpload // Assuming this component is defined elsewhere
 }) => {
@@ -5094,9 +5094,21 @@ const AnimalForm = ({
                             </button>
                     </div>
                     {animalToEdit && onDelete && (
-                        <button type="button" onClick={() => { if(window.confirm(`Are you sure you want to delete ${animalToEdit.name}? This action cannot be undone.`)) { onDelete(animalToEdit.id_public); } }} className="bg-red-500 hover:bg-red-600 text-white font-semibold py-2 px-4 rounded-lg transition duration-150 shadow-md flex items-center space-x-2" > 
-                            <Trash2 size={18} /> 
-                            <span>Delete</span> 
+                        <button 
+                            type="button" 
+                            onClick={() => { 
+                                const isTransferred = animalToEdit.originalOwnerId;
+                                const confirmMessage = isTransferred 
+                                    ? `Return ${animalToEdit.name} to the original owner? This will remove the animal from your account.`
+                                    : `Are you sure you want to delete ${animalToEdit.name}? This action cannot be undone.`;
+                                if(window.confirm(confirmMessage)) { 
+                                    onDelete(animalToEdit.id_public); 
+                                } 
+                            }} 
+                            className="bg-red-500 hover:bg-red-600 text-white font-semibold py-2 px-4 rounded-lg transition duration-150 shadow-md flex items-center space-x-2"
+                        > 
+                            {animalToEdit.originalOwnerId ? <RotateCcw size={18} /> : <Trash2 size={18} />}
+                            <span>{animalToEdit.originalOwnerId ? 'Return Animal' : 'Delete'}</span> 
                         </button>
                     )}
                 </div>
@@ -7455,6 +7467,7 @@ const App = () => {
                         ArrowLeft={ArrowLeft}
                         Save={Save}
                         Trash2={Trash2}
+                        RotateCcw={RotateCcw}
                         GENDER_OPTIONS={GENDER_OPTIONS}
                         STATUS_OPTIONS={STATUS_OPTIONS}
                         AnimalImageUpload={AnimalImageUpload}
@@ -7482,6 +7495,7 @@ const App = () => {
                         ArrowLeft={ArrowLeft}
                         Save={Save}
                         Trash2={Trash2}
+                        RotateCcw={RotateCcw}
                         GENDER_OPTIONS={GENDER_OPTIONS}
                         STATUS_OPTIONS={STATUS_OPTIONS}
                         AnimalImageUpload={AnimalImageUpload}
