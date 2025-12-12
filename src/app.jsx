@@ -6106,8 +6106,19 @@ const AnimalList = ({ authToken, showModalMessage, onEditAnimal, onViewAnimal, o
             const queryString = params.length > 0 ? `?${params.join('&')}` : '';
             const url = `${API_BASE_URL}/animals${queryString}`;
 
+            console.log('[fetchAnimals] Fetching with ownedFilterActive:', ownedFilterActive, 'URL:', url);
             const response = await axios.get(url, { headers: { Authorization: `Bearer ${authToken}` } });
             let data = response.data || [];
+            console.log('[fetchAnimals] Received', data.length, 'animals from backend');
+            
+            // Log a sample of animals to see their ownership status
+            if (data.length > 0) {
+                console.log('[fetchAnimals] Sample animals:', data.slice(0, 3).map(a => ({
+                    id: a.id_public,
+                    isViewOnly: a.isViewOnly,
+                    ownerId: a.ownerId_public
+                })));
+            }
             
             // Client-side fallback filtering in case the API doesn't apply the `name` filter reliably
             if (appliedNameFilter) {
