@@ -17,6 +17,7 @@ const BudgetingTab = ({ authToken, API_BASE_URL, showModalMessage }) => {
     const [animalInputMode, setAnimalInputMode] = useState('manual'); // 'select' or 'manual'
     const [userSearchQuery, setUserSearchQuery] = useState('');
     const [isSearching, setIsSearching] = useState(false);
+    const [selectedUser, setSelectedUser] = useState(null); // Store selected user with ID
     const [currency, setCurrency] = useState(() => {
         return localStorage.getItem('budgetCurrency') || 'USD';
     });
@@ -145,6 +146,7 @@ const BudgetingTab = ({ authToken, API_BASE_URL, showModalMessage }) => {
         setAnimalInputMode('manual');
         setUserSearchQuery('');
         setSearchResults([]);
+        setSelectedUser(null); // Clear selected user
         setShowTypeSelection(true);
         setEditingTransaction(null);
     };
@@ -173,6 +175,7 @@ const BudgetingTab = ({ authToken, API_BASE_URL, showModalMessage }) => {
         e.preventDefault();
         
         console.log('Form submitted with data:', formData);
+        console.log('Selected user:', selectedUser);
         console.log('Price validation:', formData.price, parseFloat(formData.price));
         
         if (formData.price === '' || formData.price === null || formData.price === undefined) {
@@ -194,6 +197,15 @@ const BudgetingTab = ({ authToken, API_BASE_URL, showModalMessage }) => {
                 ...formData,
                 price: parseFloat(formData.price)
             };
+
+            // Add user ID if a user was selected from search
+            if (selectedUser) {
+                if (formData.type === 'sale') {
+                    transactionData.buyerUserId = selectedUser._id;
+                } else {
+                    transactionData.sellerUserId = selectedUser._id;
+                }
+            }
 
             console.log('Transaction data to send:', transactionData);
 
@@ -814,6 +826,7 @@ const BudgetingTab = ({ authToken, API_BASE_URL, showModalMessage }) => {
                                                     type="button"
                                                     onClick={() => {
                                                         setFormData({ ...formData, buyer: '', seller: '' });
+                                                        setSelectedUser(null); // Clear selected user
                                                         setSearchResults([]);
                                                     }}
                                                     className="text-gray-500 hover:text-red-500"
@@ -873,6 +886,7 @@ const BudgetingTab = ({ authToken, API_BASE_URL, showModalMessage }) => {
                                                                     ...formData, 
                                                                     [formData.type === 'sale' ? 'buyer' : 'seller']: value 
                                                                 });
+                                                                setSelectedUser(user); // Store full user object with _id
                                                                 setUserSearchQuery('');
                                                                 setSearchResults([]);
                                                             }}

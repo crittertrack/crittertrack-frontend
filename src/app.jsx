@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useCallback, useRef, useMemo } from 'react';
 import { useParams, useNavigate, useLocation, Routes, Route } from 'react-router-dom';
 import axios from 'axios';
-import { LogOut, Cat, UserPlus, LogIn, ChevronLeft, Trash2, Edit, Save, PlusCircle, Plus, ArrowLeft, Loader2, RefreshCw, User, Users, ClipboardList, BookOpen, Settings, Mail, Globe, Egg, Milk, Search, X, Mars, Venus, Eye, EyeOff, Home, Heart, HeartOff, HeartHandshake, Bell, XCircle, Download, FileText, Link, AlertCircle, Check, DollarSign } from 'lucide-react';
+import { LogOut, Cat, UserPlus, LogIn, ChevronLeft, Trash2, Edit, Save, PlusCircle, Plus, ArrowLeft, Loader2, RefreshCw, User, Users, ClipboardList, BookOpen, Settings, Mail, Globe, Egg, Milk, Search, X, Mars, Venus, Eye, EyeOff, Home, Heart, HeartOff, HeartHandshake, Bell, XCircle, CheckCircle, Download, FileText, Link, AlertCircle, Check, DollarSign } from 'lucide-react';
 import jsPDF from 'jspdf';
 import html2canvas from 'html2canvas';
 import MouseGeneticsCalculator from './components/MouseGeneticsCalculator';
@@ -6328,7 +6328,7 @@ const AnimalList = ({ authToken, showModalMessage, onEditAnimal, onViewAnimal, o
                 <div
                     onClick={handleClick}
                     className={`relative bg-white rounded-xl shadow-sm w-44 h-56 flex flex-col items-center overflow-hidden cursor-pointer hover:shadow-md transition border-2 pt-3 ${
-                        isSelected ? 'border-red-500' : 'border-gray-300'
+                        isSelected ? 'border-red-500' : animal.isViewOnly ? 'border-gray-400 bg-gray-50' : 'border-gray-300'
                     }`}
                 >
                     {isSelectable && (
@@ -6345,6 +6345,19 @@ const AnimalList = ({ authToken, showModalMessage, onEditAnimal, onViewAnimal, o
                     {birth && !isSelectable && (
                         <div className="absolute top-2 left-2 text-xs text-gray-600 bg-white/80 px-2 py-0.5 rounded">
                             {birth}
+                        </div>
+                    )}
+
+                    {/* Sold/View-Only badge top-center */}
+                    {(animal.soldStatus || animal.isViewOnly) && (
+                        <div className={`absolute top-2 left-1/2 transform -translate-x-1/2 text-xs px-2 py-0.5 rounded font-semibold ${
+                            animal.isViewOnly 
+                                ? 'bg-gray-500 text-white' 
+                                : animal.soldStatus === 'sold' 
+                                    ? 'bg-blue-500 text-white' 
+                                    : 'bg-green-500 text-white'
+                        }`}>
+                            {animal.isViewOnly ? 'View Only' : animal.soldStatus === 'sold' ? 'Sold' : 'Purchased'}
                         </div>
                     )}
 
@@ -6677,6 +6690,57 @@ const NotificationPanel = ({ authToken, API_BASE_URL, onClose, showModalMessage,
         }
     };
 
+    const handleAcceptTransfer = async (transferId) => {
+        setProcessing(transferId);
+        try {
+            await axios.post(`${API_BASE_URL}/transfers/${transferId}/accept`, {}, {
+                headers: { Authorization: `Bearer ${authToken}` }
+            });
+            showModalMessage('Success', 'Transfer accepted! Animal has been added to your account.');
+            fetchNotifications();
+            if (onNotificationChange) onNotificationChange();
+        } catch (error) {
+            console.error('Error accepting transfer:', error);
+            showModalMessage('Error', error.response?.data?.message || 'Failed to accept transfer');
+        } finally {
+            setProcessing(null);
+        }
+    };
+
+    const handleDeclineTransfer = async (transferId) => {
+        setProcessing(transferId);
+        try {
+            await axios.post(`${API_BASE_URL}/transfers/${transferId}/decline`, {}, {
+                headers: { Authorization: `Bearer ${authToken}` }
+            });
+            showModalMessage('Declined', 'Transfer declined');
+            fetchNotifications();
+            if (onNotificationChange) onNotificationChange();
+        } catch (error) {
+            console.error('Error declining transfer:', error);
+            showModalMessage('Error', 'Failed to decline transfer');
+        } finally {
+            setProcessing(null);
+        }
+    };
+
+    const handleAcceptViewOnly = async (transferId) => {
+        setProcessing(transferId);
+        try {
+            await axios.post(`${API_BASE_URL}/transfers/${transferId}/accept-view-only`, {}, {
+                headers: { Authorization: `Bearer ${authToken}` }
+            });
+            showModalMessage('Success', 'View-only access accepted');
+            fetchNotifications();
+            if (onNotificationChange) onNotificationChange();
+        } catch (error) {
+            console.error('Error accepting view-only:', error);
+            showModalMessage('Error', 'Failed to accept view-only access');
+        } finally {
+            setProcessing(null);
+        }
+    };
+
     const handleDelete = async (notificationId) => {
         try {
             console.log('[handleDelete] Deleting notification:', notificationId);
@@ -6748,21 +6812,78 @@ const NotificationPanel = ({ authToken, API_BASE_URL, onClose, showModalMessage,
                                                 </div>
                                             </div>
                                             <div className="flex space-x-2">
-                                                <button
-                                                    onClick={() => handleReject(notification._id)}
-                                                    disabled={processing === notification._id}
-                                                    className="flex items-center space-x-1 bg-primary border-2 border-black text-black hover:bg-primary/90 px-3 py-1 rounded text-sm disabled:opacity-50"
-                                                >
-                                                    <XCircle size={14} />
-                                                    <span>Reject</span>
-                                                </button>
-                                                <button
-                                                    onClick={() => handleDelete(notification._id)}
-                                                    className="flex items-center space-x-1 bg-red-500 hover:bg-red-600 text-white px-3 py-1 rounded text-sm"
-                                                >
-                                                    <X size={14} />
-                                                    <span>Delete</span>
-                                                </button>
+                                                {/* Transfer Request */}
+                                                {notification.type === 'transfer_request' && notification.transferId && (
+                                                    <>
+                                                        <button
+                                                            onClick={() => handleAcceptTransfer(notification.transferId)}
+                                                            disabled={processing === notification.transferId}
+                                                            className="flex items-center space-x-1 bg-green-500 hover:bg-green-600 text-white px-3 py-1 rounded text-sm disabled:opacity-50"
+                                                        >
+                                                            <CheckCircle size={14} />
+                                                            <span>Accept</span>
+                                                        </button>
+                                                        <button
+                                                            onClick={() => handleDeclineTransfer(notification.transferId)}
+                                                            disabled={processing === notification.transferId}
+                                                            className="flex items-center space-x-1 bg-red-500 hover:bg-red-600 text-white px-3 py-1 rounded text-sm disabled:opacity-50"
+                                                        >
+                                                            <XCircle size={14} />
+                                                            <span>Decline</span>
+                                                        </button>
+                                                    </>
+                                                )}
+                                                {/* View-Only Offer */}
+                                                {notification.type === 'view_only_offer' && notification.transferId && (
+                                                    <>
+                                                        <button
+                                                            onClick={() => handleAcceptViewOnly(notification.transferId)}
+                                                            disabled={processing === notification.transferId}
+                                                            className="flex items-center space-x-1 bg-blue-500 hover:bg-blue-600 text-white px-3 py-1 rounded text-sm disabled:opacity-50"
+                                                        >
+                                                            <CheckCircle size={14} />
+                                                            <span>Accept</span>
+                                                        </button>
+                                                        <button
+                                                            onClick={() => handleDeclineTransfer(notification.transferId)}
+                                                            disabled={processing === notification.transferId}
+                                                            className="flex items-center space-x-1 bg-gray-500 hover:bg-gray-600 text-white px-3 py-1 rounded text-sm disabled:opacity-50"
+                                                        >
+                                                            <XCircle size={14} />
+                                                            <span>Decline</span>
+                                                        </button>
+                                                    </>
+                                                )}
+                                                {/* Link Request (old functionality) */}
+                                                {notification.type === 'link_request' && (
+                                                    <>
+                                                        <button
+                                                            onClick={() => handleReject(notification._id)}
+                                                            disabled={processing === notification._id}
+                                                            className="flex items-center space-x-1 bg-primary border-2 border-black text-black hover:bg-primary/90 px-3 py-1 rounded text-sm disabled:opacity-50"
+                                                        >
+                                                            <XCircle size={14} />
+                                                            <span>Reject</span>
+                                                        </button>
+                                                        <button
+                                                            onClick={() => handleDelete(notification._id)}
+                                                            className="flex items-center space-x-1 bg-red-500 hover:bg-red-600 text-white px-3 py-1 rounded text-sm"
+                                                        >
+                                                            <X size={14} />
+                                                            <span>Delete</span>
+                                                        </button>
+                                                    </>
+                                                )}
+                                                {/* Delete button for all notifications */}
+                                                {notification.type !== 'link_request' && (
+                                                    <button
+                                                        onClick={() => handleDelete(notification._id)}
+                                                        className="flex items-center space-x-1 bg-gray-500 hover:bg-gray-600 text-white px-3 py-1 rounded text-sm"
+                                                    >
+                                                        <X size={14} />
+                                                        <span>Delete</span>
+                                                    </button>
+                                                )}
                                             </div>
                                         </div>
                                     ))}
@@ -7333,9 +7454,15 @@ const App = () => {
                                     <Link size={16} />
                                     {copySuccessAnimal ? 'Link Copied!' : 'Share Link'}
                                 </button>
-                                {/* Only show edit button if user owns this animal */}
-                                {userProfile && animalToView.ownerId_public === userProfile.id_public && (
+                                {/* Only show edit button if user owns this animal and it's not view-only */}
+                                {userProfile && animalToView.ownerId_public === userProfile.id_public && !animalToView.isViewOnly && (
                                     <button onClick={() => { setAnimalToEdit(animalToView); setSpeciesToAdd(animalToView.species); setCurrentView('edit-animal'); }} className="bg-primary hover:bg-primary/90 text-black font-semibold py-2 px-4 rounded-lg">Edit</button>
+                                )}
+                                {/* Show view-only message for view-only animals */}
+                                {animalToView.isViewOnly && (
+                                    <div className="px-3 py-1.5 bg-gray-200 text-gray-700 font-medium rounded-lg border border-gray-400">
+                                        View Only
+                                    </div>
                                 )}
                             </div>
                         </div>
