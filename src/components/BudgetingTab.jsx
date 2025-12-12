@@ -173,11 +173,18 @@ const BudgetingTab = ({ authToken, API_BASE_URL, showModalMessage }) => {
         e.preventDefault();
         
         console.log('Form submitted with data:', formData);
-        console.log('Price validation:', formData.price, parseFloat(formData.price), parseFloat(formData.price) <= 0);
+        console.log('Price validation:', formData.price, parseFloat(formData.price));
         
-        if (!formData.price || parseFloat(formData.price) <= 0) {
-            console.log('Price validation failed');
-            showModalMessage('Error', 'Please enter a valid price greater than 0');
+        if (formData.price === '' || formData.price === null || formData.price === undefined) {
+            console.log('Price validation failed - empty');
+            showModalMessage('Error', 'Please enter a price');
+            return;
+        }
+
+        const priceValue = parseFloat(formData.price);
+        if (isNaN(priceValue) || priceValue < 0) {
+            console.log('Price validation failed - invalid or negative');
+            showModalMessage('Error', 'Please enter a valid price (0 or greater)');
             return;
         }
 
