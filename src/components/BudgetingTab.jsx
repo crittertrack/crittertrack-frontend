@@ -678,30 +678,47 @@ const BudgetingTab = ({ authToken, API_BASE_URL, showModalMessage }) => {
                                     />
                                 ) : (
                                     <div className="relative">
-                                        <div className="flex gap-2">
-                                            <input
-                                                type="text"
-                                                value={userSearchQuery}
-                                                onChange={(e) => setUserSearchQuery(e.target.value)}
-                                                onKeyDown={(e) => {
-                                                    if (e.key === 'Enter') {
-                                                        e.preventDefault();
-                                                        searchUsers();
-                                                    }
-                                                }}
-                                                placeholder="Search by name or ID (min 2 chars)..."
-                                                className="flex-1 p-2 border border-gray-300 rounded-lg focus:ring-primary focus:border-primary"
-                                            />
-                                            <button
-                                                type="button"
-                                                onClick={searchUsers}
-                                                disabled={isSearching}
-                                                className="px-4 py-2 bg-primary text-black rounded-lg hover:bg-primary/90 disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2"
-                                            >
-                                                <Search className="w-4 h-4" />
-                                                {isSearching ? 'Searching...' : 'Search'}
-                                            </button>
-                                        </div>
+                                        {/* Show selected user or search input */}
+                                        {(formData.type === 'sale' ? formData.buyer : formData.seller) ? (
+                                            <div className="flex items-center justify-between w-full p-2 border border-gray-300 rounded-lg bg-gray-50">
+                                                <span className="text-gray-700">{formData.type === 'sale' ? formData.buyer : formData.seller}</span>
+                                                <button
+                                                    type="button"
+                                                    onClick={() => {
+                                                        setFormData({ ...formData, buyer: '', seller: '' });
+                                                        setSearchResults([]);
+                                                    }}
+                                                    className="text-gray-500 hover:text-red-500"
+                                                >
+                                                    <X className="w-4 h-4" />
+                                                </button>
+                                            </div>
+                                        ) : (
+                                            <>
+                                                <div className="flex gap-2">
+                                                    <input
+                                                        type="text"
+                                                        value={userSearchQuery}
+                                                        onChange={(e) => setUserSearchQuery(e.target.value)}
+                                                        onKeyDown={(e) => {
+                                                            if (e.key === 'Enter') {
+                                                                e.preventDefault();
+                                                                searchUsers();
+                                                            }
+                                                        }}
+                                                        placeholder="Search by name or ID (min 2 chars)..."
+                                                        className="flex-1 p-2 border border-gray-300 rounded-lg focus:ring-primary focus:border-primary"
+                                                    />
+                                                    <button
+                                                        type="button"
+                                                        onClick={searchUsers}
+                                                        disabled={isSearching}
+                                                        className="px-4 py-2 bg-primary text-black rounded-lg hover:bg-primary/90 disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2"
+                                                    >
+                                                        <Search className="w-4 h-4" />
+                                                        {isSearching ? 'Searching...' : 'Search'}
+                                                    </button>
+                                                </div>
                                         {userSearchQuery.length >= 2 && searchResults.length > 0 && (
                                             <div className="absolute z-10 w-full mt-1 bg-white border border-gray-300 rounded-lg shadow-lg max-h-60 overflow-y-auto">
                                                 {searchResults.map(user => {
@@ -744,6 +761,8 @@ const BudgetingTab = ({ authToken, API_BASE_URL, showModalMessage }) => {
                                             <div className="absolute z-10 w-full mt-1 bg-white border border-gray-300 rounded-lg shadow-lg p-4 text-center text-gray-500">
                                                 No users found
                                             </div>
+                                        )}
+                                            </>
                                         )}
                                     </div>
                                 )}
