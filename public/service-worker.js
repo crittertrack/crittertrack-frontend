@@ -1,10 +1,8 @@
 // Service Worker for CritterTrack PWA
-const CACHE_NAME = 'crittertrack-v3'; // Increment version to force cache update
+const CACHE_NAME = 'crittertrack-v4'; // Increment version to force cache update
 const urlsToCache = [
   '/',
-  '/index.html',
-  '/static/js/main.js',
-  '/static/css/main.css'
+  '/index.html'
 ];
 
 // Install event - cache resources
@@ -14,8 +12,12 @@ self.addEventListener('install', (event) => {
     caches.open(CACHE_NAME)
       .then((cache) => {
         console.log('[SW] Opened cache');
-        return cache.addAll(urlsToCache);
+        // Don't cache all URLs upfront - let them be cached on demand
+        return cache.addAll(urlsToCache).catch(err => {
+          console.log('[SW] Initial cache failed (ok for offline):', err);
+        });
       })
+      .catch(err => console.error('[SW] Cache open failed:', err))
   );
   self.skipWaiting(); // Force immediate activation of new SW
 });
@@ -30,11 +32,35 @@ self.addEventListener('fetch', (event) => {
   const { request } = event;
   const url = new URL(request.url);
   
+  // Skip API requests - always go to network
+  if (url.pathname.includes('/api/')) {
+    event.respondWith(
+      fetch(request)
+        .then(response => {
+          console.log('[SW] API request success:', url.pathname);
+          return response;
+        })
+        .catch(err => {
+          console.error('[SW] API request failed:', url.pathname, err);
+          return new Response(JSON.stringify({ error: 'Network error' }), {
+            status: 503,
+            statusText: 'Service Unavailable',
+            headers: new Headers({ 'Content-Type': 'application/json' })
+          });
+        })
+    );
+    return;
+  }
+  
   // Network-first strategy for HTML files (ensures updates are fetched)
-  if (request.headers.get('accept').includes('text/html') || url.pathname === '/' || url.pathname.endsWith('.html')) {
+  if (request.headers.get('accept')?.includes('text/html') || url.pathname === '/' || url.pathname.endsWith('.html')) {
     event.respondWith(
       fetch(request)
         .then((response) => {
+          console.log('[SW] HTML network fetch:', url.pathname);
+          if (!response || response.status !== 200) {
+            return response;
+          }
           // Clone and cache the response
           const responseToCache = response.clone();
           caches.open(CACHE_NAME).then((cache) => {
@@ -42,9 +68,11 @@ self.addEventListener('fetch', (event) => {
           });
           return response;
         })
-        .catch(() => {
+        .catch((err) => {
+          console.log('[SW] HTML fetch failed, trying cache:', url.pathname, err);
           // If network fails, try cache
-          return caches.match(request);
+          return caches.match(request)
+            .then(response => response || new Response('Offline - page not cached', { status: 503 }));
         })
     );
     return;
@@ -56,12 +84,14 @@ self.addEventListener('fetch', (event) => {
       .then((response) => {
         // Cache hit - return response
         if (response) {
+          console.log('[SW] Cache hit:', url.pathname);
           return response;
         }
+        console.log('[SW] Cache miss, fetching:', url.pathname);
         return fetch(request).then(
           (response) => {
             // Check if valid response
-            if (!response || response.status !== 200 || response.type !== 'basic') {
+            if (!response || response.status !== 200 || response.type === 'error') {
               return response;
             }
 
@@ -75,7 +105,14 @@ self.addEventListener('fetch', (event) => {
 
             return response;
           }
-        );
+        ).catch(err => {
+          console.error('[SW] Fetch failed:', url.pathname, err);
+          return new Response('Network error', { status: 503 });
+        });
+      })
+      .catch(err => {
+        console.error('[SW] Cache match failed:', err);
+        return fetch(request);
       })
   );
 });
@@ -103,6 +140,7 @@ self.addEventListener('activate', (event) => {
 // Listen for messages from the app
 self.addEventListener('message', (event) => {
   if (event.data && event.data.type === 'SKIP_WAITING') {
+    console.log('[SW] SKIP_WAITING message received');
     self.skipWaiting();
   }
 });
