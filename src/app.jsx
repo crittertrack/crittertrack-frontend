@@ -3665,6 +3665,7 @@ const LitterManagement = ({ authToken, API_BASE_URL, userProfile, showModalMessa
 
 const SpeciesManager = ({ speciesOptions, setSpeciesOptions, onCancel, showModalMessage, authToken, API_BASE_URL }) => {
     const [newSpeciesName, setNewSpeciesName] = useState('');
+    const [newSpeciesLatinName, setNewSpeciesLatinName] = useState('');
     const [selectedCategory, setSelectedCategory] = useState('Other');
     const [searchTerm, setSearchTerm] = useState('');
     const [categoryFilter, setCategoryFilter] = useState('All');
@@ -3695,13 +3696,18 @@ const SpeciesManager = ({ speciesOptions, setSpeciesOptions, onCancel, showModal
         try {
             const response = await axios.post(
                 `${API_BASE_URL}/species`,
-                { name: trimmedName, category: selectedCategory },
+                { 
+                    name: trimmedName, 
+                    latinName: newSpeciesLatinName.trim() || null,
+                    category: selectedCategory 
+                },
                 { headers: { Authorization: `Bearer ${authToken}` } }
             );
             
             // Add to local state
             setSpeciesOptions(prev => [...prev, response.data.species]);
             setNewSpeciesName('');
+            setNewSpeciesLatinName('');
             showModalMessage('Success', `Species "${trimmedName}" added and is now available to all users!`);
         } catch (error) {
             if (error.response?.status === 409) {
@@ -3751,26 +3757,38 @@ const SpeciesManager = ({ speciesOptions, setSpeciesOptions, onCancel, showModal
             </h2>
 
             <form onSubmit={handleAddSpecies} className="mb-6 p-4 border rounded-lg bg-gray-50 space-y-3">
-                <div className="flex space-x-3">
+                <div className="flex flex-col space-y-2">
+                    <div className="flex space-x-3">
+                        <input
+                            type="text"
+                            placeholder="Enter species name..."
+                            value={newSpeciesName}
+                            onChange={(e) => setNewSpeciesName(e.target.value)}
+                            required
+                            disabled={loading}
+                            className="flex-grow p-2 border border-gray-300 rounded-lg"
+                        />
+                        <select
+                            value={selectedCategory}
+                            onChange={(e) => setSelectedCategory(e.target.value)}
+                            disabled={loading}
+                            className="p-2 border border-gray-300 rounded-lg"
+                        >
+                            {categories.map(cat => (
+                                <option key={cat} value={cat}>{cat}</option>
+                            ))}
+                        </select>
+                    </div>
                     <input
                         type="text"
-                        placeholder="Enter new species name..."
-                        value={newSpeciesName}
-                        onChange={(e) => setNewSpeciesName(e.target.value)}
-                        required
+                        placeholder="Enter latin/scientific name... (optional, e.g., Mus musculus)"
+                        value={newSpeciesLatinName}
+                        onChange={(e) => setNewSpeciesLatinName(e.target.value)}
                         disabled={loading}
-                        className="flex-grow p-2 border border-gray-300 rounded-lg"
+                        className="w-full p-2 border border-gray-300 rounded-lg"
                     />
-                    <select
-                        value={selectedCategory}
-                        onChange={(e) => setSelectedCategory(e.target.value)}
-                        disabled={loading}
-                        className="p-2 border border-gray-300 rounded-lg"
-                    >
-                        {categories.map(cat => (
-                            <option key={cat} value={cat}>{cat}</option>
-                        ))}
-                    </select>
+                </div>
+                <div className="flex gap-3">
                     <button
                         type="submit"
                         disabled={loading}
@@ -3780,7 +3798,7 @@ const SpeciesManager = ({ speciesOptions, setSpeciesOptions, onCancel, showModal
                         {loading ? 'Adding...' : 'Add'}
                     </button>
                 </div>
-                <p className="text-xs text-gray-500">💡 Species you add will be available to all users globally!</p>
+                <p className="text-xs text-gray-500">💡 Species you add will be available to all users globally! Include the scientific name if known.</p>
             </form>
 
             <div className="mb-4 flex space-x-3">
@@ -3813,6 +3831,9 @@ const SpeciesManager = ({ speciesOptions, setSpeciesOptions, onCancel, showModal
                         <div key={species._id || species.name} className="flex justify-between items-center p-3 border rounded-lg bg-white shadow-sm">
                             <div>
                                 <span className="font-medium text-gray-800">{species.name}</span>
+                                {species.latinName && (
+                                    <div className="text-xs italic text-gray-600">{species.latinName}</div>
+                                )}
                                 <span className="ml-2 text-xs bg-gray-200 text-gray-600 px-2 py-1 rounded">{species.category}</span>
                                 {species.isDefault && <span className="ml-2 text-xs bg-primary text-black px-2 py-1 rounded">Default</span>}
                             </div>
