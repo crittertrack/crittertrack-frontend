@@ -15,7 +15,7 @@ const API_BASE_URL = 'https://crittertrack-pedigree-production.up.railway.app/ap
 // const API_BASE_URL = '/api'; // Production via Vercel proxy
 
 const GENDER_OPTIONS = ['Male', 'Female'];
-const STATUS_OPTIONS = ['Pet', 'Breeder', 'Available', 'Retired', 'Deceased', 'Rehomed', 'Unknown']; 
+const STATUS_OPTIONS = ['Pet', 'Breeder', 'Available', 'Sold', 'Retired', 'Deceased', 'Rehomed', 'Unknown']; 
 
 const DEFAULT_SPECIES_OPTIONS = ['Mouse', 'Rat', 'Hamster'];
 
@@ -6884,8 +6884,10 @@ const NotificationPanel = ({ authToken, API_BASE_URL, onClose, showModalMessage,
                                                         </button>
                                                     </>
                                                 )}
-                                                {/* Delete button for all notifications */}
-                                                {notification.type !== 'link_request' && (
+                                                {/* Delete button for non-pending transfer notifications */}
+                                                {notification.type !== 'link_request' && 
+                                                 notification.type !== 'transfer_request' && 
+                                                 notification.type !== 'view_only_offer' && (
                                                     <button
                                                         onClick={() => handleDelete(notification._id)}
                                                         className="flex items-center space-x-1 bg-gray-500 hover:bg-gray-600 text-white px-3 py-1 rounded text-sm"
@@ -7518,20 +7520,15 @@ const App = () => {
                                 {userProfile && animalToView.ownerId_public === userProfile.id_public && !animalToView.isViewOnly && (
                                     <button onClick={() => { setAnimalToEdit(animalToView); setSpeciesToAdd(animalToView.species); setCurrentView('edit-animal'); }} className="bg-primary hover:bg-primary/90 text-black font-semibold py-2 px-4 rounded-lg">Edit</button>
                                 )}
-                                {/* Show view-only message and hide button for view-only animals */}
+                                {/* Show hide button for view-only animals */}
                                 {animalToView.isViewOnly && (
-                                    <>
-                                        <div className="px-3 py-1.5 bg-gray-200 text-gray-700 font-medium rounded-lg border border-gray-400">
-                                            View Only
-                                        </div>
-                                        <button
-                                            onClick={() => handleHideViewOnlyAnimal(animalToView.id_public)}
-                                            className="px-3 py-1.5 bg-red-500 hover:bg-red-600 text-white font-semibold rounded-lg transition flex items-center gap-2"
-                                        >
-                                            <Archive size={16} />
-                                            Hide
-                                        </button>
-                                    </>
+                                    <button
+                                        onClick={() => handleHideViewOnlyAnimal(animalToView.id_public)}
+                                        className="px-3 py-1.5 bg-red-500 hover:bg-red-600 text-white font-semibold rounded-lg transition flex items-center gap-2"
+                                    >
+                                        <Archive size={16} />
+                                        Hide
+                                    </button>
                                 )}
                             </div>
                         </div>
@@ -7548,8 +7545,12 @@ const App = () => {
                                         ) }
                                     </div>
                                     {/* Status bar */}
-                                    <div className="w-40 bg-gray-200 py-2 text-center mt-2 rounded border-2 border-gray-400">
-                                        <div className="text-sm font-semibold text-gray-800">{animalToView.status || 'Unknown'}</div>
+                                    <div className={`w-40 py-2 text-center mt-2 rounded border-2 ${
+                                        animalToView.isViewOnly 
+                                            ? 'bg-orange-100 border-orange-400 text-orange-800' 
+                                            : 'bg-gray-200 border-gray-400 text-gray-800'
+                                    }`}>
+                                        <div className="text-sm font-semibold">{animalToView.isViewOnly ? 'Sold' : (animalToView.status || 'Unknown')}</div>
                                     </div>
                                     {/* Icon row */}
                                     <div className="w-40 flex justify-center items-center space-x-3 py-2">
