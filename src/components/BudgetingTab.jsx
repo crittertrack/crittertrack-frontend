@@ -340,12 +340,12 @@ const BudgetingTab = ({ authToken, API_BASE_URL, showModalMessage }) => {
         <div className="w-full max-w-6xl mx-auto p-4">
             {/* Header */}
             <div className="bg-white rounded-xl shadow-lg p-6 mb-6">
-                <div className="flex justify-between items-center mb-4">
+                <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-4 mb-4">
                     <h1 className="text-2xl font-bold text-gray-800 flex items-center gap-2">
                         <DollarSign size={28} className="text-green-600" />
                         Budget Tracker
                     </h1>
-                    <div className="flex gap-2">
+                    <div className="flex flex-wrap gap-2">
                         <button
                             onClick={exportToCSV}
                             className="flex items-center gap-2 px-4 py-2 bg-gray-600 hover:bg-gray-700 text-white rounded-lg transition"
