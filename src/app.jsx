@@ -5474,7 +5474,7 @@ const ProfileEditForm = ({ userProfile, showModalMessage, onSaveSuccess, onCance
                 </button>
             </div>
             
-            <form onSubmit={handleProfileUpdate} className="space-y-6 mb-8 p-6 border rounded-lg bg-gray-50">
+            <form onSubmit={handleProfileUpdate} className="space-y-6 mb-8 p-4 sm:p-6 border rounded-lg bg-gray-50 overflow-x-hidden">
                 <h3 className="text-xl font-semibold text-gray-800 border-b pb-2">Public Profile Information</h3>
                 
                 <ProfileImagePlaceholder 
@@ -5483,13 +5483,13 @@ const ProfileEditForm = ({ userProfile, showModalMessage, onSaveSuccess, onCance
                     disabled={profileLoading} 
                 />
 
-                <div className="space-y-4">
+                <div className="space-y-4 min-w-0">
                     <input type="text" name="personalName" placeholder="Personal Name *" value={personalName} onChange={(e) => setPersonalName(e.target.value)} required 
-                        className="w-full p-3 border border-gray-300 rounded-lg focus:ring-primary focus:border-primary transition" disabled={profileLoading} />
+                        className="w-full p-3 border border-gray-300 rounded-lg focus:ring-primary focus:border-primary transition box-border" disabled={profileLoading} />
                     <input type="text" name="breederName" placeholder="Breeder Name (Optional)" value={breederName} onChange={(e) => setBreederName(e.target.value)}
-                        className="w-full p-3 border border-gray-300 rounded-lg focus:ring-primary focus:border-primary transition" disabled={profileLoading} />
+                        className="w-full p-3 border border-gray-300 rounded-lg focus:ring-primary focus:border-primary transition box-border" disabled={profileLoading} />
                     <input type="url" name="websiteURL" placeholder="Website URL (Optional) e.g., https://example.com" value={websiteURL} onChange={(e) => setWebsiteURL(e.target.value)}
-                        className="w-full p-3 border border-gray-300 rounded-lg focus:ring-primary focus:border-primary transition" disabled={profileLoading} />
+                        className="w-full p-3 border border-gray-300 rounded-lg focus:ring-primary focus:border-primary transition box-border" disabled={profileLoading} />
 
                     <div className="pt-2 space-y-2">
                         <h4 className="text-base font-medium text-gray-800 pt-2 border-t border-gray-200">Public Profile Visibility:</h4>
@@ -5550,10 +5550,10 @@ const ProfileEditForm = ({ userProfile, showModalMessage, onSaveSuccess, onCance
                 </div>
             </form>
             
-            <form onSubmit={handleEmailUpdate} className="space-y-4 mb-8 p-6 border rounded-lg bg-gray-50">
+            <form onSubmit={handleEmailUpdate} className="space-y-4 mb-8 p-4 sm:p-6 border rounded-lg bg-gray-50 overflow-x-hidden">
                 <h3 className="text-xl font-semibold text-gray-800 border-b pb-2">Change Email Address</h3>
                 <input type="email" placeholder="New Email Address *" value={email} onChange={(e) => setEmail(e.target.value)} required 
-                    className="w-full p-3 border border-gray-300 rounded-lg focus:ring-primary focus:border-primary transition" disabled={securityLoading} />
+                    className="w-full p-3 border border-gray-300 rounded-lg focus:ring-primary focus:border-primary transition box-border" disabled={securityLoading} />
                 <div className="flex justify-end pt-2">
                     <button type="submit" disabled={securityLoading} 
                         className="bg-primary hover:bg-primary-dark text-black font-bold py-2 px-4 rounded-lg shadow-md transition duration-150 flex items-center justify-center disabled:opacity-50"
@@ -5564,14 +5564,14 @@ const ProfileEditForm = ({ userProfile, showModalMessage, onSaveSuccess, onCance
                 </div>
             </form>
 
-            <form onSubmit={handlePasswordUpdate} className="space-y-4 p-6 border rounded-lg bg-gray-50">
+            <form onSubmit={handlePasswordUpdate} className="space-y-4 p-4 sm:p-6 border rounded-lg bg-gray-50 overflow-x-hidden">
                 <h3 className="text-xl font-semibold text-gray-800 border-b pb-2">Change Password</h3>
                 <input type="password" placeholder="Current Password *" value={currentPassword} onChange={(e) => setCurrentPassword(e.target.value)} required 
-                    className="w-full p-3 border border-gray-300 rounded-lg focus:ring-primary focus:border-primary transition" disabled={passwordLoading} />
+                    className="w-full p-3 border border-gray-300 rounded-lg focus:ring-primary focus:border-primary transition box-border" disabled={passwordLoading} />
                 <input type="password" placeholder="New Password *" value={newPassword} onChange={(e) => setNewPassword(e.target.value)} required 
-                    className="w-full p-3 border border-gray-300 rounded-lg focus:ring-primary focus:border-primary transition" disabled={passwordLoading} />
+                    className="w-full p-3 border border-gray-300 rounded-lg focus:ring-primary focus:border-primary transition box-border" disabled={passwordLoading} />
                 <input type="password" placeholder="Confirm New Password *" value={confirmNewPassword} onChange={(e) => setConfirmNewPassword(e.target.value)} required 
-                    className="w-full p-3 border border-gray-300 rounded-lg focus:ring-primary focus:border-primary transition" disabled={passwordLoading} />
+                    className="w-full p-3 border border-gray-300 rounded-lg focus:ring-primary focus:border-primary transition box-border" disabled={passwordLoading} />
                 <div className="flex justify-end pt-2">
                     <button type="submit" disabled={passwordLoading}
                         className="bg-primary-dark hover:bg-primary text-black font-bold py-2 px-4 rounded-lg shadow-md transition duration-150 flex items-center justify-center disabled:opacity-50"
@@ -5582,7 +5582,7 @@ const ProfileEditForm = ({ userProfile, showModalMessage, onSaveSuccess, onCance
                 </div>
             </form>
             
-            <div className="mt-8 p-6 border-2 border-red-300 rounded-lg bg-red-50">
+            <div className="mt-8 p-4 sm:p-6 border-2 border-red-300 rounded-lg bg-red-50 overflow-x-hidden">
                 <h3 className="text-xl font-semibold text-red-800 border-b border-red-200 pb-2 mb-4">Danger Zone</h3>
                 <p className="text-sm text-gray-700 mb-4">
                     Deleting your account is permanent and cannot be undone. All your animals, litters, and profile data will be permanently deleted.
@@ -5713,59 +5713,59 @@ const ProfileView = ({ userProfile, showModalMessage, fetchUserProfile, authToke
                     {copySuccess ? 'Link Copied!' : 'Share Profile'}
                 </button>
             </div>
-            <div className="space-y-4">
+            <div className="space-y-4 overflow-x-hidden">
                 
-                <div className="p-4 bg-gray-50 rounded-lg border border-gray-200">
-                    <p className="text-lg font-semibold text-gray-700 mb-2">Public Visibility Status</p>
+                <div className="p-4 bg-gray-50 rounded-lg border border-gray-200 overflow-x-hidden">
+                    <p className="text-lg font-semibold text-gray-700 mb-3">Public Visibility Status</p>
                     
-                    <div className="flex justify-between items-center py-1">
-                        <span className="text-base text-gray-800">Personal Name ({userProfile.personalName})</span>
-                        <span className={`px-3 py-1 text-xs font-semibold rounded-full ${ 
+                    <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-2 py-2">
+                        <span className="text-sm sm:text-base text-gray-800 truncate">Personal Name ({userProfile.personalName})</span>
+                        <span className={`px-3 py-1 text-xs font-semibold rounded-full whitespace-nowrap ${ 
                             (userProfile.showPersonalName ?? true) ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800'
                         }`}>
                             {(userProfile.showPersonalName ?? true) ? 'Public' : 'Private'}
                         </span>
                     </div>
 
-                    <div className="flex justify-between items-center py-1">
-                        <span className="text-base text-gray-800">Breeder Name ({userProfile.breederName || 'N/A'})</span>
-                        <span className={`px-3 py-1 text-xs font-semibold rounded-full ${ 
+                    <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-2 py-2">
+                        <span className="text-sm sm:text-base text-gray-800 truncate">Breeder Name ({userProfile.breederName || 'N/A'})</span>
+                        <span className={`px-3 py-1 text-xs font-semibold rounded-full whitespace-nowrap ${ 
                             (userProfile.showBreederName ?? false) ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800'
                         }`}>
                             {(userProfile.showBreederName ?? false) ? 'Public' : 'Private'}
                         </span>
                     </div>
 
-                    <div className="flex justify-between items-center py-1">
-                        <span className="text-base text-gray-800">Website URL ({userProfile.websiteURL || 'N/A'})</span>
-                        <span className={`px-3 py-1 text-xs font-semibold rounded-full ${ 
+                    <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-2 py-2">
+                        <span className="text-sm sm:text-base text-gray-800 truncate">Website URL ({userProfile.websiteURL || 'N/A'})</span>
+                        <span className={`px-3 py-1 text-xs font-semibold rounded-full whitespace-nowrap ${ 
                             (userProfile.showWebsiteURL ?? false) ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800'
                         }`}>
                             {(userProfile.showWebsiteURL ?? false) ? 'Public' : 'Private'}
                         </span>
                     </div>
                     
-                    <div className="flex justify-between items-center py-1">
-                        <span className="text-base text-gray-800">Email Address ({userProfile.email})</span>
-                        <span className={`px-3 py-1 text-xs font-semibold rounded-full ${ 
+                    <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-2 py-2">
+                        <span className="text-sm sm:text-base text-gray-800 truncate">Email Address ({userProfile.email})</span>
+                        <span className={`px-3 py-1 text-xs font-semibold rounded-full whitespace-nowrap ${ 
                             (userProfile.showEmailPublic ?? false) ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800'
                         }`}>
                             {(userProfile.showEmailPublic ?? false) ? 'Public' : 'Private'}
                         </span>
                     </div>
                     
-                    <div className="flex justify-between items-center py-1">
-                        <span className="text-base text-gray-800">Genetic Code on Public Animals</span>
-                        <span className={`px-3 py-1 text-xs font-semibold rounded-full ${ 
+                    <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-2 py-2">
+                        <span className="text-sm sm:text-base text-gray-800 truncate">Genetic Code on Public Animals</span>
+                        <span className={`px-3 py-1 text-xs font-semibold rounded-full whitespace-nowrap ${ 
                             (userProfile.showGeneticCodePublic ?? false) ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800'
                         }`}>
                             {(userProfile.showGeneticCodePublic ?? false) ? 'Public' : 'Private'}
                         </span>
                     </div>
                     
-                    <div className="flex justify-between items-center py-1">
-                        <span className="text-base text-gray-800">Remarks/Notes on Public Animals</span>
-                        <span className={`px-3 py-1 text-xs font-semibold rounded-full ${ 
+                    <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-2 py-2">
+                        <span className="text-sm sm:text-base text-gray-800 truncate">Remarks/Notes on Public Animals</span>
+                        <span className={`px-3 py-1 text-xs font-semibold rounded-full whitespace-nowrap ${ 
                             (userProfile.showRemarksPublic ?? false) ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800'
                         }`}>
                             {(userProfile.showRemarksPublic ?? false) ? 'Public' : 'Private'}
@@ -5773,9 +5773,9 @@ const ProfileView = ({ userProfile, showModalMessage, fetchUserProfile, authToke
                     </div>
                 </div>
 
-                <div className="p-4 bg-gray-50 rounded-lg border border-gray-200">
+                <div className="p-4 bg-gray-50 rounded-lg border border-gray-200 overflow-x-hidden">
                     <p className="text-lg font-semibold text-gray-700">Personal ID:</p>
-                    <p className="text-3xl font-extrabold text-accent">{userProfile.id_public}</p>
+                    <p className="text-2xl sm:text-3xl font-extrabold text-accent truncate">{userProfile.id_public}</p>
                 </div>
             </div>
             
