@@ -98,15 +98,15 @@ const BudgetingTab = ({ authToken, API_BASE_URL, showModalMessage }) => {
         }
     };
 
-    const searchUsers = async (query) => {
-        if (!query || query.trim().length < 2) {
-            setSearchResults([]);
+    const searchUsers = async () => {
+        if (!userSearchQuery || userSearchQuery.trim().length < 2) {
+            showModalMessage('Error', 'Please enter at least 2 characters to search');
             return;
         }
         
         setIsSearching(true);
         try {
-            const response = await axios.get(`${API_BASE_URL}/public/profiles/search?query=${encodeURIComponent(query)}`, {
+            const response = await axios.get(`${API_BASE_URL}/public/profiles/search?query=${encodeURIComponent(userSearchQuery)}`, {
                 headers: { Authorization: `Bearer ${authToken}` }
             });
             
@@ -121,23 +121,11 @@ const BudgetingTab = ({ authToken, API_BASE_URL, showModalMessage }) => {
         } catch (error) {
             console.error('Error searching users:', error);
             setSearchResults([]);
+            showModalMessage('Error', 'Failed to search users');
         } finally {
             setIsSearching(false);
         }
     };
-
-    // Debounce user search
-    useEffect(() => {
-        const timer = setTimeout(() => {
-            if (buyerInputMode === 'user' && userSearchQuery) {
-                searchUsers(userSearchQuery);
-            } else {
-                setSearchResults([]);
-            }
-        }, 300);
-
-        return () => clearTimeout(timer);
-    }, [userSearchQuery, buyerInputMode]);
 
     const resetForm = () => {
         setFormData({
@@ -690,18 +678,30 @@ const BudgetingTab = ({ authToken, API_BASE_URL, showModalMessage }) => {
                                     />
                                 ) : (
                                     <div className="relative">
-                                        <input
-                                            type="text"
-                                            value={userSearchQuery}
-                                            onChange={(e) => setUserSearchQuery(e.target.value)}
-                                            placeholder="Search by name or ID (min 2 chars)..."
-                                            className="w-full p-2 border border-gray-300 rounded-lg focus:ring-primary focus:border-primary"
-                                        />
-                                        {isSearching && (
-                                            <div className="absolute right-2 top-2 text-gray-400">
-                                                <Search className="w-5 h-5 animate-pulse" />
-                                            </div>
-                                        )}
+                                        <div className="flex gap-2">
+                                            <input
+                                                type="text"
+                                                value={userSearchQuery}
+                                                onChange={(e) => setUserSearchQuery(e.target.value)}
+                                                onKeyDown={(e) => {
+                                                    if (e.key === 'Enter') {
+                                                        e.preventDefault();
+                                                        searchUsers();
+                                                    }
+                                                }}
+                                                placeholder="Search by name or ID (min 2 chars)..."
+                                                className="flex-1 p-2 border border-gray-300 rounded-lg focus:ring-primary focus:border-primary"
+                                            />
+                                            <button
+                                                type="button"
+                                                onClick={searchUsers}
+                                                disabled={isSearching}
+                                                className="px-4 py-2 bg-primary text-black rounded-lg hover:bg-primary/90 disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2"
+                                            >
+                                                <Search className="w-4 h-4" />
+                                                {isSearching ? 'Searching...' : 'Search'}
+                                            </button>
+                                        </div>
                                         {userSearchQuery.length >= 2 && searchResults.length > 0 && (
                                             <div className="absolute z-10 w-full mt-1 bg-white border border-gray-300 rounded-lg shadow-lg max-h-60 overflow-y-auto">
                                                 {searchResults.map(user => {
