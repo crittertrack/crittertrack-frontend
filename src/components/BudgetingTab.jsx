@@ -14,7 +14,7 @@ const BudgetingTab = ({ authToken, API_BASE_URL, showModalMessage }) => {
     const [filterType, setFilterType] = useState('all'); // all, sale, purchase
     const [filterYear, setFilterYear] = useState('all');
     const [buyerInputMode, setBuyerInputMode] = useState('manual'); // 'manual' or 'user'
-    const [animalInputMode, setAnimalInputMode] = useState('select'); // 'select' or 'manual'
+    const [animalInputMode, setAnimalInputMode] = useState('manual'); // 'select' or 'manual'
     const [userSearchQuery, setUserSearchQuery] = useState('');
     const [isSearching, setIsSearching] = useState(false);
     const [currency, setCurrency] = useState(() => {
@@ -142,7 +142,7 @@ const BudgetingTab = ({ authToken, API_BASE_URL, showModalMessage }) => {
         });
         setSelectedSpecies('');
         setBuyerInputMode('manual');
-        setAnimalInputMode('select');
+        setAnimalInputMode('manual');
         setUserSearchQuery('');
         setSearchResults([]);
         setShowTypeSelection(true);
@@ -649,16 +649,6 @@ const BudgetingTab = ({ authToken, API_BASE_URL, showModalMessage }) => {
                                             <button
                                                 type="button"
                                                 onClick={() => {
-                                                    setAnimalInputMode('select');
-                                                    setFormData({ ...formData, animalName: '' });
-                                                }}
-                                                className={`text-xs px-2 py-1 rounded ${animalInputMode === 'select' ? 'bg-primary text-black' : 'bg-gray-200 text-gray-600'}`}
-                                            >
-                                                Select Existing
-                                            </button>
-                                            <button
-                                                type="button"
-                                                onClick={() => {
                                                     setAnimalInputMode('manual');
                                                     setFormData({ ...formData, animalId: '', animalName: '' });
                                                     setSelectedSpecies('');
@@ -666,6 +656,16 @@ const BudgetingTab = ({ authToken, API_BASE_URL, showModalMessage }) => {
                                                 className={`text-xs px-2 py-1 rounded ${animalInputMode === 'manual' ? 'bg-primary text-black' : 'bg-gray-200 text-gray-600'}`}
                                             >
                                                 Manual Entry
+                                            </button>
+                                            <button
+                                                type="button"
+                                                onClick={() => {
+                                                    setAnimalInputMode('select');
+                                                    setFormData({ ...formData, animalName: '' });
+                                                }}
+                                                className={`text-xs px-2 py-1 rounded ${animalInputMode === 'select' ? 'bg-primary text-black' : 'bg-gray-200 text-gray-600'}`}
+                                            >
+                                                Select Existing
                                             </button>
                                         </div>
                                     </div>
