@@ -201,9 +201,9 @@ const BudgetingTab = ({ authToken, API_BASE_URL, showModalMessage }) => {
             // Add user ID if a user was selected from search
             if (selectedUser) {
                 if (formData.type === 'sale') {
-                    transactionData.buyerUserId = selectedUser._id;
+                    transactionData.buyerUserId = selectedUser.userId_backend;
                 } else {
-                    transactionData.sellerUserId = selectedUser._id;
+                    transactionData.sellerUserId = selectedUser.userId_backend;
                 }
             }
 
