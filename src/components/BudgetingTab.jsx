@@ -8,6 +8,7 @@ const BudgetingTab = ({ authToken, API_BASE_URL, showModalMessage }) => {
     const [searchResults, setSearchResults] = useState([]);
     const [loading, setLoading] = useState(true);
     const [showAddModal, setShowAddModal] = useState(false);
+    const [showTypeSelection, setShowTypeSelection] = useState(true);
     const [editingTransaction, setEditingTransaction] = useState(null);
     const [searchTerm, setSearchTerm] = useState('');
     const [filterType, setFilterType] = useState('all'); // all, sale, purchase
@@ -142,6 +143,7 @@ const BudgetingTab = ({ authToken, API_BASE_URL, showModalMessage }) => {
         setBuyerInputMode('manual');
         setUserSearchQuery('');
         setSearchResults([]);
+        setShowTypeSelection(true);
         setEditingTransaction(null);
     };
 
@@ -540,6 +542,38 @@ const BudgetingTab = ({ authToken, API_BASE_URL, showModalMessage }) => {
                             </button>
                         </div>
 
+                        {/* Transaction Type Selection Screen */}
+                        {!editingTransaction && showTypeSelection ? (
+                            <div className="space-y-6">
+                                <p className="text-center text-gray-600 mb-8">What type of transaction would you like to add?</p>
+                                <div className="grid grid-cols-2 gap-6">
+                                    <button
+                                        type="button"
+                                        onClick={() => {
+                                            setFormData({ ...formData, type: 'sale' });
+                                            setShowTypeSelection(false);
+                                        }}
+                                        className="flex flex-col items-center justify-center p-8 border-2 border-gray-300 rounded-xl hover:border-green-500 hover:bg-green-50 transition-all group"
+                                    >
+                                        <TrendingUp className="w-16 h-16 text-green-600 mb-4" />
+                                        <h3 className="text-xl font-bold text-gray-800 mb-2">Sale</h3>
+                                        <p className="text-sm text-gray-600 text-center">Record an animal you sold</p>
+                                    </button>
+                                    <button
+                                        type="button"
+                                        onClick={() => {
+                                            setFormData({ ...formData, type: 'purchase' });
+                                            setShowTypeSelection(false);
+                                        }}
+                                        className="flex flex-col items-center justify-center p-8 border-2 border-gray-300 rounded-xl hover:border-red-500 hover:bg-red-50 transition-all group"
+                                    >
+                                        <TrendingDown className="w-16 h-16 text-red-600 mb-4" />
+                                        <h3 className="text-xl font-bold text-gray-800 mb-2">Purchase</h3>
+                                        <p className="text-sm text-gray-600 text-center">Record an animal you bought</p>
+                                    </button>
+                                </div>
+                            </div>
+                        ) : (
                         <form onSubmit={handleSaveTransaction} className="space-y-4">
                             <div className="grid grid-cols-2 gap-4">
                                 <div>
@@ -805,6 +839,7 @@ const BudgetingTab = ({ authToken, API_BASE_URL, showModalMessage }) => {
                                 </button>
                             </div>
                         </form>
+                        )}
                     </div>
                 </div>
             )}
