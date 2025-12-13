@@ -4229,6 +4229,7 @@ const AnimalForm = ({
             coat: animalToEdit.coat || '',
 			earset: animalToEdit.earset || '', 
             remarks: animalToEdit.remarks || '',
+            tags: animalToEdit.tags || [],
             geneticCode: animalToEdit.geneticCode || '',
             fatherId_public: animalToEdit.fatherId_public || null,
             motherId_public: animalToEdit.motherId_public || null,
@@ -4253,6 +4254,7 @@ const AnimalForm = ({
             coat: '',
 			earset: '', 
             remarks: '',
+            tags: [],
             geneticCode: '',
             fatherId_public: null,
             motherId_public: null,
@@ -5130,6 +5132,41 @@ const AnimalForm = ({
                     <label className="block text-sm font-medium text-gray-700">Remarks / Notes</label>
                     <textarea name="remarks" value={formData.remarks} onChange={handleChange} rows="3"
                         className="mt-1 block w-full p-2 border border-gray-300 rounded-md shadow-sm focus:ring-primary focus:border-primary" />
+                </div>
+
+                {/* Tags */}
+                <div className='mt-4'>
+                    <label className="block text-sm font-medium text-gray-700">Tags (Lines, Enclosures, etc)</label>
+                    <input 
+                        type="text" 
+                        placeholder="Enter tags separated by commas (e.g., Line A, Enclosure 1)" 
+                        value={formData.tags.join(', ')} 
+                        onChange={(e) => {
+                            const tagString = e.target.value;
+                            const newTags = tagString.split(',').map(tag => tag.trim()).filter(tag => tag.length > 0);
+                            setFormData({ ...formData, tags: newTags });
+                        }}
+                        className="mt-1 block w-full p-2 border border-gray-300 rounded-md shadow-sm focus:ring-primary focus:border-primary" 
+                    />
+                    {formData.tags.length > 0 && (
+                        <div className="mt-2 flex flex-wrap gap-2">
+                            {formData.tags.map((tag, idx) => (
+                                <span key={idx} className="inline-flex items-center bg-primary text-white text-xs font-semibold px-3 py-1 rounded-full">
+                                    {tag}
+                                    <button
+                                        type="button"
+                                        onClick={() => {
+                                            const newTags = formData.tags.filter((_, i) => i !== idx);
+                                            setFormData({ ...formData, tags: newTags });
+                                        }}
+                                        className="ml-2 text-white hover:text-gray-200"
+                                    >
+                                        ×
+                                    </button>
+                                </span>
+                            ))}
+                        </div>
+                    )}
                 </div>
                 
                 {/* Submit/Delete Buttons */}
@@ -7909,6 +7946,20 @@ const App = () => {
                                 <p className="text-gray-500 text-sm italic">No remarks recorded.</p>
                             )}
                         </div>
+
+                        {/* Tags Section */}
+                        {animalToView.tags && animalToView.tags.length > 0 && (
+                            <div className="border-2 border-gray-300 rounded-lg p-6 mb-6">
+                                <h3 className="text-lg font-semibold text-gray-800 mb-3">Tags</h3>
+                                <div className="flex flex-wrap gap-2">
+                                    {animalToView.tags.map((tag, idx) => (
+                                        <span key={idx} className="inline-flex items-center bg-primary text-white text-sm font-semibold px-3 py-1 rounded-full">
+                                            {tag}
+                                        </span>
+                                    ))}
+                                </div>
+                            </div>
+                        )}
 
                         {/* Parents Section */}
                         <div className="border-2 border-gray-300 rounded-lg p-6 mb-6">
