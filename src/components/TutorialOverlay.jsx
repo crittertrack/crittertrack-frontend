@@ -64,7 +64,7 @@ export const TutorialOverlay = ({ lessonId, onClose, onComplete }) => {
       <div className="fixed inset-0 bg-black/30 pointer-events-none z-[9998]" />
       
       {/* Tutorial Panel - floating on the side */}
-      <div className="fixed bottom-6 right-6 w-96 bg-white rounded-2xl shadow-2xl flex flex-col max-h-[85vh] overflow-hidden z-[9999]">
+      <div className="fixed top-6 left-6 w-96 bg-white rounded-2xl shadow-2xl flex flex-col max-h-[85vh] overflow-hidden z-[9999]">
         {/* Header */}
         <div className="bg-gradient-to-r from-primary to-primary/80 text-black p-4 flex justify-between items-start flex-shrink-0">
           <div className="flex-1 pr-3">
