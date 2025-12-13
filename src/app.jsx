@@ -2337,7 +2337,7 @@ const OffspringSection = ({ animalId, API_BASE_URL, authToken = null, onViewAnim
                                                 ) : (
                                                     <EyeOff size={12} className="text-black" />
                                                 )}
-                                                {animal.isInMating && <Hourglass size={12} className="text-purple-600" />}
+                                                {animal.isInMating && <Hourglass size={12} className="text-black" />}
                                                 {animal.isPregnant && <Bean size={12} className="text-black" />}
                                                 {animal.isNursing && <Milk size={12} className="text-black" />}
                                             </div>
@@ -3486,7 +3486,7 @@ const LitterManagement = ({ authToken, API_BASE_URL, userProfile, showModalMessa
                                                                 ) : (
                                                                     <EyeOff size={12} className="text-black" />
                                                                 )}
-                                                                {animal.isInMating && <Hourglass size={12} className="text-purple-600" />}
+                                                                {animal.isInMating && <Hourglass size={12} className="text-black" />}
                                                                 {animal.isPregnant && <Bean size={12} className="text-black" />}
                                                                 {animal.isNursing && <Milk size={12} className="text-black" />}
                                                             </div>
@@ -6177,7 +6177,7 @@ const AuthView = ({ onLoginSuccess, showModalMessage, isRegister, setIsRegister,
                     ) : (
                         <EyeOff size={12} className="text-black" />
                     )}
-                    {parentData.isInMating && <Hourglass size={12} className="text-purple-600" />}
+                    {parentData.isInMating && <Hourglass size={12} className="text-black" />}
                     {parentData.isPregnant && <Bean size={12} className="text-black" />}
                     {parentData.isNursing && <Milk size={12} className="text-black" />}
                 </div>
@@ -6550,7 +6550,7 @@ const AnimalList = ({ authToken, showModalMessage, onEditAnimal, onViewAnimal, o
                         ) : (
                             <EyeOff size={14} className="text-black" />
                         )}
-                        {animal.isInMating && <Hourglass size={14} className="text-purple-600" />}
+                        {animal.isInMating && <Hourglass size={14} className="text-black" />}
                         {animal.isPregnant && <Bean size={14} className="text-black" />}
                         {animal.isNursing && <Milk size={14} className="text-black" />}
                     </div>
@@ -7822,7 +7822,7 @@ const App = () => {
                                         ) : (
                                             <EyeOff size={18} className="text-black" />
                                         )}
-                                        {animalToView.isInMating && <Hourglass size={18} className="text-purple-600" />}
+                                        {animalToView.isInMating && <Hourglass size={18} className="text-black" />}
                                         {animalToView.isPregnant && <Bean size={18} className="text-black" />}
                                         {animalToView.isNursing && <Milk size={18} className="text-black" />}
                                     </div>
