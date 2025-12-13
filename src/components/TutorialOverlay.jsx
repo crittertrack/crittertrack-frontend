@@ -34,9 +34,12 @@ export const TutorialOverlay = ({ lessonId, onClose, onComplete }) => {
   }, [lesson, markTutorialCompleted, onComplete, onClose]);
 
   const handleNext = useCallback(() => {
+    console.log('handleNext clicked, isLastStep:', isLastStep);
     if (!isLastStep) {
+      console.log('Moving to next step');
       setCurrentStepIndex(prev => prev + 1);
     } else {
+      console.log('Calling handleComplete');
       handleComplete();
     }
   }, [isLastStep, handleComplete]);
