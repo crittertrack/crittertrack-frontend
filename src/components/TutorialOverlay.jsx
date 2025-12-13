@@ -27,11 +27,9 @@ export const TutorialOverlay = ({ lessonId, onClose, onComplete }) => {
       console.log('Calling onComplete with lessonId:', lesson?.id);
       onComplete(lesson?.id);
     }
-    if (onClose) {
-      console.log('Calling onClose');
-      onClose();
-    }
-  }, [lesson, markTutorialCompleted, onComplete, onClose]);
+    // Don't call onClose here - let the parent component handle closing
+    // onClose will be called by parent when all lessons are done
+  }, [lesson, markTutorialCompleted, onComplete]);
 
   const handleNext = useCallback(() => {
     console.log('handleNext clicked, isLastStep:', isLastStep);
