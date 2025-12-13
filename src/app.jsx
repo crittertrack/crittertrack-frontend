@@ -6721,6 +6721,13 @@ const AnimalList = ({ authToken, showModalMessage, onEditAnimal, onViewAnimal, o
                             <span>{ownedFilterActive ? 'My Animals' : 'All Animals'}</span>
                         </button>
 
+                        <button onClick={handleFilterMating}
+                            className={`px-3 py-1.5 text-sm font-semibold rounded-lg transition duration-150 shadow-sm flex items-center space-x-1 ${ 
+                                statusFilterMating ? 'bg-accent text-white' : 'bg-gray-200 text-gray-700 hover:bg-gray-300'
+                            }`}
+                        >
+                            <Hourglass size={16} /> <span>Mating</span>
+                        </button>
                         <button onClick={handleFilterPregnant}
                             className={`px-3 py-1.5 text-sm font-semibold rounded-lg transition duration-150 shadow-sm flex items-center space-x-1 ${ 
                                 statusFilterPregnant ? 'bg-accent text-white' : 'bg-gray-200 text-gray-700 hover:bg-gray-300'
@@ -6734,13 +6741,6 @@ const AnimalList = ({ authToken, showModalMessage, onEditAnimal, onViewAnimal, o
                             }`}
                         >
                             <Milk size={16} /> <span>Nursing</span>
-                        </button>
-                        <button onClick={handleFilterMating}
-                            className={`px-3 py-1.5 text-sm font-semibold rounded-lg transition duration-150 shadow-sm flex items-center space-x-1 ${ 
-                                statusFilterMating ? 'bg-accent text-white' : 'bg-gray-200 text-gray-700 hover:bg-gray-300'
-                            }`}
-                        >
-                            <Hourglass size={16} /> <span>Mating</span>
                         </button>
                     </div>
 
