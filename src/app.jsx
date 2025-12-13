@@ -3756,9 +3756,9 @@ const SpeciesManager = ({ speciesOptions, setSpeciesOptions, onCancel, showModal
                 Manage Species (Global for All Users)
             </h2>
 
-            <form onSubmit={handleAddSpecies} className="mb-6 p-4 border rounded-lg bg-gray-50 space-y-3">
-                <div className="flex flex-col space-y-2">
-                    <div className="flex space-x-3">
+            <form onSubmit={handleAddSpecies} className="mb-6 p-3 sm:p-4 border rounded-lg bg-gray-50 space-y-3 overflow-x-hidden">
+                <div className="flex flex-col space-y-2 min-w-0">
+                    <div className="flex flex-col sm:flex-row gap-2 sm:space-x-3">
                         <input
                             type="text"
                             placeholder="Enter species name..."
@@ -3766,13 +3766,13 @@ const SpeciesManager = ({ speciesOptions, setSpeciesOptions, onCancel, showModal
                             onChange={(e) => setNewSpeciesName(e.target.value)}
                             required
                             disabled={loading}
-                            className="flex-grow p-2 border border-gray-300 rounded-lg"
+                            className="flex-grow p-2 border border-gray-300 rounded-lg box-border min-w-0"
                         />
                         <select
                             value={selectedCategory}
                             onChange={(e) => setSelectedCategory(e.target.value)}
                             disabled={loading}
-                            className="p-2 border border-gray-300 rounded-lg"
+                            className="p-2 border border-gray-300 rounded-lg box-border sm:flex-shrink-0 sm:w-auto w-full"
                         >
                             {categories.map(cat => (
                                 <option key={cat} value={cat}>{cat}</option>
@@ -3801,18 +3801,18 @@ const SpeciesManager = ({ speciesOptions, setSpeciesOptions, onCancel, showModal
                 <p className="text-xs text-gray-500">💡 Species you add will be available to all users globally! Include the scientific name if known.</p>
             </form>
 
-            <div className="mb-4 flex space-x-3">
+            <div className="mb-4 flex flex-col sm:flex-row gap-2 sm:space-x-3 overflow-x-hidden">
                 <input
                     type="text"
                     placeholder="Search species..."
                     value={searchTerm}
                     onChange={(e) => setSearchTerm(e.target.value)}
-                    className="flex-grow p-2 border border-gray-300 rounded-lg"
+                    className="flex-grow p-2 border border-gray-300 rounded-lg box-border min-w-0"
                 />
                 <select
                     value={categoryFilter}
                     onChange={(e) => setCategoryFilter(e.target.value)}
-                    className="p-2 border border-gray-300 rounded-lg"
+                    className="p-2 border border-gray-300 rounded-lg box-border sm:flex-shrink-0 sm:w-auto w-full"
                 >
                     <option value="All">All Categories</option>
                     {categories.map(cat => (
