@@ -11,6 +11,7 @@ import PrivacyPolicy from './components/PrivacyPolicy';
 import InstallPWA from './components/InstallPWA';
 import { TutorialProvider, useTutorial } from './contexts/TutorialContext';
 import { InitialTutorialModal, TutorialOverlay } from './components/TutorialOverlay';
+import { TUTORIAL_LESSONS } from './data/tutorialLessons';
 import InfoTab from './components/InfoTab';
 
 // const API_BASE_URL = 'http://localhost:5000/api'; // Local development
@@ -7223,6 +7224,7 @@ const App = () => {
     const [showInfoTab, setShowInfoTab] = useState(false);
     const [currentTutorialId, setCurrentTutorialId] = useState(null);
     const [showTutorialOverlay, setShowTutorialOverlay] = useState(false);
+    const [currentTutorialIndex, setCurrentTutorialIndex] = useState(0);
 
     const timeoutRef = useRef(null);
     const activeEvents = ['mousemove', 'keydown', 'scroll', 'click'];
@@ -8604,10 +8606,21 @@ const App = () => {
                     onClose={() => {
                         setShowTutorialOverlay(false);
                         setCurrentTutorialId(null);
+                        setCurrentTutorialIndex(0);
                     }}
                     onComplete={() => {
-                        setShowTutorialOverlay(false);
-                        setCurrentTutorialId(null);
+                        // Move to next lesson in the sequence
+                        const nextIndex = currentTutorialIndex + 1;
+                        if (nextIndex < TUTORIAL_LESSONS.onboarding.length) {
+                            // Show next lesson
+                            setCurrentTutorialIndex(nextIndex);
+                            setCurrentTutorialId(TUTORIAL_LESSONS.onboarding[nextIndex].id);
+                        } else {
+                            // All lessons completed
+                            setShowTutorialOverlay(false);
+                            setCurrentTutorialId(null);
+                            setCurrentTutorialIndex(0);
+                        }
                     }}
                 />
             )}
