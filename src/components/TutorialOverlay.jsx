@@ -62,9 +62,6 @@ export const TutorialOverlay = ({ lessonId, onClose, onComplete, onStepChange })
 
   return (
     <>
-      {/* Overlay backdrop - semi-transparent, only blocks clicks on itself */}
-      <div className="fixed inset-0 bg-black/30 pointer-events-none z-[9998]" />
-      
       {/* Tutorial Panel - floating on the side */}
       <div className="fixed top-6 left-6 w-96 bg-white rounded-2xl shadow-2xl flex flex-col max-h-[85vh] overflow-hidden z-[9999]">
         {/* Header */}
