@@ -8610,20 +8610,15 @@ const App = () => {
                         setCurrentTutorialIndex(0);
                     }}
                     onComplete={() => {
-                        console.log('Tutorial onComplete fired, currentTutorialIndex:', currentTutorialIndex);
                         // Move to next lesson in the sequence
                         setCurrentTutorialIndex(prevIndex => {
-                            console.log('setCurrentTutorialIndex callback, prevIndex:', prevIndex);
                             const nextIndex = prevIndex + 1;
-                            console.log('nextIndex:', nextIndex, 'total lessons:', TUTORIAL_LESSONS.onboarding.length);
                             if (nextIndex < TUTORIAL_LESSONS.onboarding.length) {
                                 // Show next lesson
-                                console.log('Moving to next lesson:', TUTORIAL_LESSONS.onboarding[nextIndex].id);
                                 setCurrentTutorialId(TUTORIAL_LESSONS.onboarding[nextIndex].id);
                                 return nextIndex;
                             } else {
                                 // All lessons completed
-                                console.log('All lessons completed');
                                 setShowTutorialOverlay(false);
                                 setCurrentTutorialId(null);
                                 return 0;

@@ -59,24 +59,27 @@ export const TutorialOverlay = ({ lessonId, onClose, onComplete }) => {
   const progress = ((currentStepIndex + 1) / lesson.steps.length) * 100;
 
   return (
-    <div className="fixed inset-0 bg-black/50 flex items-center justify-center p-4 z-[9999]">
-      <div className="bg-white rounded-2xl shadow-2xl max-w-2xl w-full max-h-[90vh] flex flex-col overflow-hidden">
+    <>
+      {/* Overlay backdrop - semi-transparent, only blocks clicks on itself */}
+      <div className="fixed inset-0 bg-black/30 pointer-events-none z-[9998]" />
+      
+      {/* Tutorial Panel - floating on the side */}
+      <div className="fixed bottom-6 right-6 w-96 bg-white rounded-2xl shadow-2xl flex flex-col max-h-[85vh] overflow-hidden z-[9999]">
         {/* Header */}
-        <div className="bg-gradient-to-r from-primary to-primary/80 text-black p-6 flex justify-between items-start">
-          <div className="flex-1">
-            <div className="flex items-center gap-2 mb-2">
-              <BookOpen size={20} />
-              <span className="text-sm font-semibold opacity-80">Tutorial: Lesson {TUTORIAL_LESSONS.onboarding.findIndex(l => l.id === lessonId) + 1} of {TUTORIAL_LESSONS.onboarding.length}</span>
+        <div className="bg-gradient-to-r from-primary to-primary/80 text-black p-4 flex justify-between items-start flex-shrink-0">
+          <div className="flex-1 pr-3">
+            <div className="flex items-center gap-2 mb-1">
+              <BookOpen size={16} />
+              <span className="text-xs font-semibold opacity-80">Lesson {TUTORIAL_LESSONS.onboarding.findIndex(l => l.id === lessonId) + 1} of {TUTORIAL_LESSONS.onboarding.length}</span>
             </div>
-            <h2 className="text-2xl font-bold">{lesson.title}</h2>
-            <p className="text-sm opacity-80 mt-1">{lesson.description}</p>
+            <h2 className="text-lg font-bold">{lesson.title}</h2>
           </div>
           <button
             onClick={handleSkip}
-            className="text-black/50 hover:text-black transition p-2 rounded-lg hover:bg-white/20"
+            className="text-black/50 hover:text-black transition p-1 rounded-lg hover:bg-white/20 flex-shrink-0"
             title="Close tutorial"
           >
-            <X size={24} />
+            <X size={20} />
           </button>
         </div>
 
@@ -89,18 +92,18 @@ export const TutorialOverlay = ({ lessonId, onClose, onComplete }) => {
         </div>
 
         {/* Content */}
-        <div className="flex-1 overflow-y-auto p-8 space-y-6">
+        <div className="flex-1 overflow-y-auto p-4 space-y-4">
           {/* Step Counter */}
           <div className="flex items-center justify-between">
-            <span className="text-sm font-semibold text-gray-600">
+            <span className="text-xs font-semibold text-gray-600">
               Step {currentStepIndex + 1} of {lesson.steps.length}
             </span>
             <div className="flex gap-1">
               {lesson.steps.map((_, index) => (
                 <div
                   key={index}
-                  className={`h-2 w-2 rounded-full transition-all ${
-                    index === currentStepIndex ? 'bg-primary w-6' : 
+                  className={`h-1.5 w-1.5 rounded-full transition-all ${
+                    index === currentStepIndex ? 'bg-primary w-4' : 
                     index < currentStepIndex ? 'bg-accent' :
                     'bg-gray-300'
                   }`}
@@ -111,21 +114,21 @@ export const TutorialOverlay = ({ lessonId, onClose, onComplete }) => {
 
           {/* Step Title */}
           <div>
-            <h3 className="text-3xl font-bold text-gray-800 mb-4">
+            <h3 className="text-lg font-bold text-gray-800 mb-2">
               {currentStep.title}
             </h3>
-            <p className="text-lg text-gray-700 leading-relaxed">
+            <p className="text-sm text-gray-700 leading-relaxed">
               {currentStep.content}
             </p>
           </div>
 
           {/* Tips */}
           {currentStep.tips && currentStep.tips.length > 0 && (
-            <div className="bg-blue-50 border-l-4 border-blue-400 rounded-lg p-4">
-              <h4 className="text-sm font-bold text-blue-900 mb-2">💡 Tips:</h4>
-              <ul className="space-y-2">
+            <div className="bg-blue-50 border-l-3 border-blue-400 rounded p-3">
+              <h4 className="text-xs font-bold text-blue-900 mb-1">💡 Tips:</h4>
+              <ul className="space-y-1">
                 {currentStep.tips.map((tip, index) => (
-                  <li key={index} className="text-sm text-blue-800 flex gap-2">
+                  <li key={index} className="text-xs text-blue-800 flex gap-2">
                     <span className="text-blue-400 flex-shrink-0">•</span>
                     <span>{tip}</span>
                   </li>
@@ -136,8 +139,8 @@ export const TutorialOverlay = ({ lessonId, onClose, onComplete }) => {
 
           {/* Highlighted element indicator */}
           {currentStep.highlightElement && (
-            <div className="bg-amber-50 border-l-4 border-amber-400 rounded-lg p-4">
-              <p className="text-sm text-amber-800">
+            <div className="bg-amber-50 border-l-3 border-amber-400 rounded p-3">
+              <p className="text-xs text-amber-800">
                 ✨ <strong>Look for the highlighted element on the screen →</strong>
               </p>
             </div>
@@ -145,27 +148,27 @@ export const TutorialOverlay = ({ lessonId, onClose, onComplete }) => {
         </div>
 
         {/* Footer with Navigation */}
-        <div className="border-t border-gray-200 bg-gray-50 p-6 flex items-center justify-between">
+        <div className="border-t border-gray-200 bg-gray-50 p-3 flex items-center justify-between gap-2 flex-shrink-0">
           <button
             onClick={handlePrevious}
             disabled={isFirstStep}
-            className="flex items-center gap-2 px-4 py-2 rounded-lg transition disabled:opacity-30 disabled:cursor-not-allowed hover:bg-white"
+            className="flex items-center gap-1 px-3 py-1.5 rounded text-xs transition disabled:opacity-30 disabled:cursor-not-allowed hover:bg-white"
           >
-            <ChevronLeft size={20} />
-            <span className="font-semibold">Previous</span>
+            <ChevronLeft size={14} />
+            <span className="font-semibold hidden sm:inline">Prev</span>
           </button>
 
-          <div className="flex items-center gap-3">
+          <div className="flex items-center gap-2 flex-1 justify-end">
             <button
               onClick={handleSkip}
-              className="px-4 py-2 text-gray-700 hover:text-gray-900 font-semibold transition hover:bg-white rounded-lg"
+              className="px-3 py-1.5 text-xs text-gray-700 hover:text-gray-900 font-semibold transition hover:bg-white rounded"
             >
-              Skip Tutorial
+              Skip
             </button>
 
             <button
               onClick={handleNext}
-              className={`flex items-center gap-2 px-6 py-2 rounded-lg font-semibold transition ${
+              className={`flex items-center gap-1 px-4 py-1.5 rounded text-xs font-semibold transition ${
                 isLastStep
                   ? 'bg-accent hover:bg-accent/90 text-white'
                   : 'bg-primary hover:bg-primary/90 text-black'
@@ -173,20 +176,20 @@ export const TutorialOverlay = ({ lessonId, onClose, onComplete }) => {
             >
               {isLastStep ? (
                 <>
-                  <Check size={20} />
-                  Complete
+                  <Check size={14} />
+                  Done
                 </>
               ) : (
                 <>
                   Next
-                  <ChevronRight size={20} />
+                  <ChevronRight size={14} />
                 </>
               )}
             </button>
           </div>
         </div>
       </div>
-    </div>
+    </>
   );
 };
 
