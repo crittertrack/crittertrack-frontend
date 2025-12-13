@@ -9,6 +9,9 @@ import BudgetingTab from './components/BudgetingTab';
 import TermsOfService from './components/TermsOfService';
 import PrivacyPolicy from './components/PrivacyPolicy';
 import InstallPWA from './components/InstallPWA';
+import { TutorialProvider, useTutorial } from './contexts/TutorialContext';
+import { InitialTutorialModal, TutorialOverlay } from './components/TutorialOverlay';
+import InfoTab from './components/InfoTab';
 
 // const API_BASE_URL = 'http://localhost:5000/api'; // Local development
 const API_BASE_URL = 'https://crittertrack-pedigree-production.up.railway.app/api'; // Direct Railway (for testing)
@@ -1694,7 +1697,7 @@ const PublicProfileView = ({ profile, onBack, onViewAnimal, API_BASE_URL }) => {
                                         <div key={animal.id_public} className="w-full flex justify-center">
                                             <div
                                                 onClick={() => onViewAnimal(animal)}
-                                                className="relative bg-white rounded-xl shadow-sm w-44 h-72 flex flex-col items-center overflow-hidden cursor-pointer hover:shadow-md transition border border-gray-300 pt-3 box-border"
+                                                className="relative bg-white rounded-xl shadow-sm w-44 h-56 flex flex-col items-center overflow-hidden cursor-pointer hover:shadow-md transition border-2 border-gray-300 pt-3"
                                             >
                                                 {/* Birthdate top-left */}
                                                 {birth && (
@@ -1711,14 +1714,23 @@ const PublicProfileView = ({ profile, onBack, onViewAnimal, API_BASE_URL }) => {
                                                 )}
 
                                                 {/* Centered profile image */}
-                                                <div className="w-full px-2 mt-1">
-                                                    <div className="w-24 h-24 bg-gray-100 rounded-md overflow-hidden flex items-center justify-center flex-shrink-0 mx-auto">
-                                                        <AnimalImage src={imgSrc} alt={animal.name} className="w-full h-full object-cover" iconSize={36} />
-                                                    </div>
+                                                <div className="flex items-center justify-center w-full px-2 mt-1 h-28">
+                                                    {imgSrc ? (
+                                                        <img src={imgSrc} alt={animal.name} className="max-w-24 max-h-24 w-auto h-auto object-contain rounded-md" />
+                                                    ) : (
+                                                        <div className="w-24 h-24 bg-gray-100 rounded-md flex items-center justify-center text-gray-400">
+                                                            <Cat size={36} />
+                                                        </div>
+                                                    )}
                                                 </div>
                                                 
-                                                {/* Prefix / Name under image - fixed height for 2 lines */}
-                                                <div className="w-full text-center px-2 mt-2 h-10 flex items-center justify-center">
+                                                {/* Icon row */}
+                                                <div className="w-full flex justify-center items-center space-x-2 py-1">
+                                                    {/* No icons for public profile - they don't apply */}
+                                                </div>
+                                                
+                                                {/* Prefix / Name under image */}
+                                                <div className="w-full text-center px-2 pb-1">
                                                     <div className="text-sm font-semibold text-gray-800 line-clamp-2">{animal.prefix ? `${animal.prefix} ` : ''}{animal.name}{animal.suffix ? ` ${animal.suffix}` : ''}</div>
                                                 </div>
 
@@ -7161,6 +7173,9 @@ const App = () => {
     const [authToken, setAuthToken] = useState(localStorage.getItem('authToken') || null);
     const [userProfile, setUserProfile] = useState(null);
     const [currentView, setCurrentView] = useState('list'); 
+    
+    // Tutorial context hook
+    const { hasSeenInitialTutorial, markInitialTutorialSeen } = useTutorial(); 
     const [animalToEdit, setAnimalToEdit] = useState(null);
     const [speciesToAdd, setSpeciesToAdd] = useState(null); 
     const [speciesOptions, setSpeciesOptions] = useState([]); 
@@ -7203,6 +7218,11 @@ const App = () => {
     const [newestUsers, setNewestUsers] = useState([]);
     const [activeUsers, setActiveUsers] = useState([]);
     const scrollContainerRef = useRef(null);
+
+    // Tutorial modal states
+    const [showInfoTab, setShowInfoTab] = useState(false);
+    const [currentTutorialId, setCurrentTutorialId] = useState(null);
+    const [showTutorialOverlay, setShowTutorialOverlay] = useState(false);
 
     const timeoutRef = useRef(null);
     const activeEvents = ['mousemove', 'keydown', 'scroll', 'click'];
@@ -7254,8 +7274,15 @@ const App = () => {
         };
     }, [authToken, resetIdleTimer]);
 
+    // Show initial tutorial on first login
+    useEffect(() => {
+        if (authToken && !hasSeenInitialTutorial && userProfile) {
+            // Show the initial welcome tutorial
+            // This will automatically trigger the InitialTutorialModal through the tutorial context
+        }
+    }, [authToken, hasSeenInitialTutorial, userProfile]);
 
-        useEffect(() => {
+    useEffect(() => {
         if (authToken) {
             axios.defaults.headers.common['Authorization'] = `Bearer ${authToken}`;
             fetchUserProfile(authToken);
@@ -8303,6 +8330,20 @@ const App = () => {
 
      return (
         <div className="min-h-screen bg-page-bg flex flex-col items-center p-6 font-sans">
+            {/* Initial Tutorial Modal - Shows once to new users */}
+            {authToken && !hasSeenInitialTutorial && userProfile && (
+                <InitialTutorialModal 
+                    onStart={(lessonId) => {
+                        markInitialTutorialSeen();
+                        setCurrentTutorialId(lessonId);
+                        setShowTutorialOverlay(true);
+                    }}
+                    onSkip={() => {
+                        markInitialTutorialSeen();
+                    }}
+                />
+            )}
+            
             {showModal && <ModalMessage title={modalMessage.title} message={modalMessage.message} onClose={() => setShowModal(false)} />}
             {showUserSearchModal && (
                 <UserSearchModal 
@@ -8350,6 +8391,10 @@ const App = () => {
                         <button onClick={() => setCurrentView('profile')} className={`px-4 py-2 text-xs font-medium rounded-lg transition duration-150 flex flex-col items-center ${currentView === 'profile' ? 'bg-primary text-black shadow-md' : 'text-gray-600 hover:bg-gray-100'}`}>
                             <User size={18} className="mb-1" />
                             <span>Profile</span>
+                        </button>
+                        <button onClick={() => setShowInfoTab(true)} className={`px-4 py-2 text-xs font-medium rounded-lg transition duration-150 flex flex-col items-center text-gray-600 hover:bg-gray-100`}>
+                            <BookOpen size={18} className="mb-1" />
+                            <span>Info</span>
                         </button>
                     </nav>
 
@@ -8453,6 +8498,10 @@ const App = () => {
                             <User size={16} className="inline mb-0.5" />
                             <span className="block">Profile</span>
                         </button>
+                        <button onClick={() => setShowInfoTab(true)} className={`flex-1 px-2 py-2 text-xs font-medium rounded-lg transition duration-150 text-gray-600 hover:bg-gray-100`}>
+                            <BookOpen size={16} className="inline mb-0.5" />
+                            <span className="block">Info</span>
+                        </button>
                     </nav>
                 </div>
             </header>
@@ -8535,6 +8584,32 @@ const App = () => {
                         </form>
                     </div>
                 </div>
+            )}
+
+            {/* Tutorial Info Tab Modal */}
+            {showInfoTab && (
+                <InfoTab 
+                    onClose={() => setShowInfoTab(false)}
+                    onStartTutorial={(lessonId) => {
+                        setCurrentTutorialId(lessonId);
+                        setShowTutorialOverlay(true);
+                    }}
+                />
+            )}
+
+            {/* Tutorial Overlay Modal */}
+            {showTutorialOverlay && currentTutorialId && (
+                <TutorialOverlay
+                    lessonId={currentTutorialId}
+                    onClose={() => {
+                        setShowTutorialOverlay(false);
+                        setCurrentTutorialId(null);
+                    }}
+                    onComplete={() => {
+                        setShowTutorialOverlay(false);
+                        setCurrentTutorialId(null);
+                    }}
+                />
             )}
 
             {/* Profile Card and Community Activity - shown only on list view */}
@@ -8998,7 +9073,11 @@ const PublicProfilePage = () => {
 const AppRouter = () => {
     return (
         <Routes>
-            <Route path="/" element={<App />} />
+            <Route path="/" element={
+                <TutorialProvider userId={localStorage.getItem('userId')}>
+                    <App />
+                </TutorialProvider>
+            } />
             <Route path="/animal/:animalId" element={<PublicAnimalPage />} />
             <Route path="/user/:userId" element={<PublicProfilePage />} />
         </Routes>
