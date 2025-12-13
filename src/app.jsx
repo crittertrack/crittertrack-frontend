@@ -1466,7 +1466,7 @@ const PublicProfileView = ({ profile, onBack, onViewAnimal, API_BASE_URL }) => {
     const [loading, setLoading] = useState(true);
     const [copySuccess, setCopySuccess] = useState(false);
     const [speciesFilter, setSpeciesFilter] = useState('');
-    const [genderFilter, setGenderFilter] = useState('');
+    const [genderFilters, setGenderFilters] = useState({ Male: true, Female: true });
     const [statusFilter, setStatusFilter] = useState('');
     
     const handleShare = () => {
@@ -1516,7 +1516,10 @@ const PublicProfileView = ({ profile, onBack, onViewAnimal, API_BASE_URL }) => {
     // Apply filters
     const filteredAnimals = animals.filter(animal => {
         if (speciesFilter && animal.species !== speciesFilter) return false;
-        if (genderFilter && animal.gender !== genderFilter) return false;
+        // Show nothing if both genders are unchecked
+        if (!genderFilters.Male && !genderFilters.Female) return false;
+        // Filter by selected genders
+        if (!genderFilters[animal.gender]) return false;
         if (statusFilter && animal.status !== statusFilter) return false;
         return true;
     });
@@ -1625,18 +1628,18 @@ const PublicProfileView = ({ profile, onBack, onViewAnimal, API_BASE_URL }) => {
                             <div className="flex gap-2 items-center">
                                 <span className='text-sm font-medium text-gray-700 whitespace-nowrap'>Gender:</span>
                                 <button 
-                                    onClick={() => setGenderFilter(genderFilter === 'Male' ? '' : 'Male')}
+                                    onClick={() => setGenderFilters(prev => ({ ...prev, Male: !prev.Male }))}
                                     className={`p-2 rounded-lg transition duration-150 shadow-sm ${
-                                        genderFilter === 'Male' ? 'bg-primary' : 'bg-gray-300 hover:bg-gray-400'
+                                        genderFilters.Male ? 'bg-primary' : 'bg-gray-300 hover:bg-gray-400'
                                     }`}
                                     title="Male"
                                 >
                                     <Mars size={18} className="text-black" />
                                 </button>
                                 <button 
-                                    onClick={() => setGenderFilter(genderFilter === 'Female' ? '' : 'Female')}
+                                    onClick={() => setGenderFilters(prev => ({ ...prev, Female: !prev.Female }))}
                                     className={`p-2 rounded-lg transition duration-150 shadow-sm ${
-                                        genderFilter === 'Female' ? 'bg-pink-400' : 'bg-gray-300 hover:bg-gray-400'
+                                        genderFilters.Female ? 'bg-pink-400' : 'bg-gray-300 hover:bg-gray-400'
                                     }`}
                                     title="Female"
                                 >
