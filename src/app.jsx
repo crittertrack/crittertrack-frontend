@@ -6695,6 +6695,7 @@ const AnimalList = ({ authToken, showModalMessage, onEditAnimal, onViewAnimal, o
                         <button 
                             onClick={() => onSetCurrentView('select-species')} 
                             className="flex-1 sm:flex-none bg-accent hover:bg-accent/90 text-white font-semibold py-2 px-4 rounded-lg transition duration-150 shadow-md flex items-center justify-center space-x-1 whitespace-nowrap"
+                            data-tutorial-target="add-animal-btn"
                         >
                             <PlusCircle size={18} /> <span>Add Animal</span>
                         </button>
