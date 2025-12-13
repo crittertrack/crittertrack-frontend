@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useState, useEffect, useRef, useCallback } from 'react';
 import { X, ChevronLeft, ChevronRight, Check, BookOpen } from 'lucide-react';
 import { TUTORIAL_LESSONS } from '../data/tutorialLessons';
 import { useTutorial } from '../contexts/TutorialContext';
@@ -8,41 +8,49 @@ import { useTutorial } from '../contexts/TutorialContext';
  * Main modal component that shows tutorial lessons with navigation
  */
 export const TutorialOverlay = ({ lessonId, onClose, onComplete }) => {
+  const [currentStepIndex, setCurrentStepIndex] = useState(0);
+  const { markTutorialCompleted } = useTutorial();
+
   const lesson = TUTORIAL_LESSONS.onboarding.find(l => l.id === lessonId) || 
                  TUTORIAL_LESSONS.features.find(l => l.id === lessonId);
-  
-  const [currentStepIndex, setCurrentStepIndex] = useState(0);
-  const { markTutorialCompleted, isTutorialCompleted } = useTutorial();
 
-  if (!lesson) return null;
-
-  const currentStep = lesson.steps[currentStepIndex];
+  const currentStep = lesson?.steps[currentStepIndex];
   const isFirstStep = currentStepIndex === 0;
-  const isLastStep = currentStepIndex === lesson.steps.length - 1;
+  const isLastStep = lesson ? currentStepIndex === lesson.steps.length - 1 : false;
 
-  const handleNext = () => {
+  const handleComplete = useCallback(() => {
+    if (lesson) {
+      markTutorialCompleted(lesson.id);
+    }
+    if (onComplete) {
+      onComplete(lesson?.id);
+    }
+    if (onClose) {
+      onClose();
+    }
+  }, [lesson, markTutorialCompleted, onComplete, onClose]);
+
+  const handleNext = useCallback(() => {
     if (!isLastStep) {
       setCurrentStepIndex(prev => prev + 1);
     } else {
       handleComplete();
     }
-  };
+  }, [isLastStep, handleComplete]);
 
-  const handlePrevious = () => {
+  const handlePrevious = useCallback(() => {
     if (!isFirstStep) {
       setCurrentStepIndex(prev => prev - 1);
     }
-  };
+  }, [isFirstStep]);
 
-  const handleComplete = () => {
-    markTutorialCompleted(lesson.id);
-    onComplete && onComplete(lesson.id);
-    onClose();
-  };
+  const handleSkip = useCallback(() => {
+    if (onClose) {
+      onClose();
+    }
+  }, [onClose]);
 
-  const handleSkip = () => {
-    onClose();
-  };
+  if (!lesson || !currentStep) return null;
 
   const progress = ((currentStepIndex + 1) / lesson.steps.length) * 100;
 

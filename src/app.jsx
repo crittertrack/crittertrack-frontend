@@ -8337,6 +8337,7 @@ const App = () => {
                 <InitialTutorialModal 
                     onStart={() => {
                         markInitialTutorialSeen();
+                        setCurrentTutorialIndex(0);
                         setCurrentTutorialId('welcome');
                         setShowTutorialOverlay(true);
                     }}
