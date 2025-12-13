@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useCallback, useRef, useMemo } from 'react';
 import { useParams, useNavigate, useLocation, Routes, Route } from 'react-router-dom';
 import axios from 'axios';
-import { LogOut, Cat, UserPlus, LogIn, ChevronLeft, Trash2, Edit, Save, PlusCircle, Plus, ArrowLeft, Loader2, RefreshCw, User, Users, ClipboardList, BookOpen, Settings, Mail, Globe, Egg, Milk, Search, X, Mars, Venus, Eye, EyeOff, Home, Heart, HeartOff, HeartHandshake, Bell, XCircle, CheckCircle, Download, FileText, Link, AlertCircle, Check, DollarSign, Archive, ArrowLeftRight, RotateCcw, Info, Hourglass } from 'lucide-react';
+import { LogOut, Cat, UserPlus, LogIn, ChevronLeft, Trash2, Edit, Save, PlusCircle, Plus, ArrowLeft, Loader2, RefreshCw, User, Users, ClipboardList, BookOpen, Settings, Mail, Globe, Bean, Milk, Search, X, Mars, Venus, Eye, EyeOff, Home, Heart, HeartOff, HeartHandshake, Bell, XCircle, CheckCircle, Download, FileText, Link, AlertCircle, Check, DollarSign, Archive, ArrowLeftRight, RotateCcw, Info, Hourglass } from 'lucide-react';
 import jsPDF from 'jspdf';
 import html2canvas from 'html2canvas';
 import MouseGeneticsCalculator from './components/MouseGeneticsCalculator';
@@ -2337,7 +2337,7 @@ const OffspringSection = ({ animalId, API_BASE_URL, authToken = null, onViewAnim
                                                 ) : (
                                                     <EyeOff size={12} className="text-black" />
                                                 )}
-                                                {animal.isPregnant && <Egg size={12} className="text-black" />}
+                                                {animal.isPregnant && <Bean size={12} className="text-black" />}
                                                 {animal.isNursing && <Milk size={12} className="text-black" />}
                                                 {animal.isInMating && <Hourglass size={12} className="text-purple-600" />}
                                             </div>
@@ -3486,7 +3486,7 @@ const LitterManagement = ({ authToken, API_BASE_URL, userProfile, showModalMessa
                                                                 ) : (
                                                                     <EyeOff size={12} className="text-black" />
                                                                 )}
-                                                                {animal.isPregnant && <Egg size={12} className="text-black" />}
+                                                                {animal.isPregnant && <Bean size={12} className="text-black" />}
                                                                 {animal.isNursing && <Milk size={12} className="text-black" />}
                                                                 {animal.isInMating && <Hourglass size={12} className="text-purple-600" />}
                                                             </div>
@@ -4835,7 +4835,7 @@ const AnimalForm = ({
                                 <label className="flex items-center space-x-2 text-sm text-gray-700">
                                     <input type="checkbox" name="isPregnant" checked={formData.isPregnant} onChange={handleChange} 
                                         className="h-4 w-4 text-primary rounded border-gray-300 focus:ring-primary" />
-                                    <span>Female is Pregnant 🥚</span>
+                                    <span>Female is Pregnant 🫘</span>
                                 </label>
                                 <label className="flex items-center space-x-2 text-sm text-gray-700">
                                     <input type="checkbox" name="isNursing" checked={formData.isNursing} onChange={handleChange} 
@@ -6177,7 +6177,7 @@ const AuthView = ({ onLoginSuccess, showModalMessage, isRegister, setIsRegister,
                     ) : (
                         <EyeOff size={12} className="text-black" />
                     )}
-                    {parentData.isPregnant && <Egg size={12} className="text-black" />}
+                    {parentData.isPregnant && <Bean size={12} className="text-black" />}
                     {parentData.isNursing && <Milk size={12} className="text-black" />}
                     {parentData.isInMating && <Hourglass size={12} className="text-purple-600" />}
                 </div>
@@ -6550,7 +6550,7 @@ const AnimalList = ({ authToken, showModalMessage, onEditAnimal, onViewAnimal, o
                         ) : (
                             <EyeOff size={14} className="text-black" />
                         )}
-                        {animal.isPregnant && <Egg size={14} className="text-black" />}
+                        {animal.isPregnant && <Bean size={14} className="text-black" />}
                         {animal.isNursing && <Milk size={14} className="text-black" />}
                     </div>
                     
@@ -6725,7 +6725,7 @@ const AnimalList = ({ authToken, showModalMessage, onEditAnimal, onViewAnimal, o
                                 statusFilterPregnant ? 'bg-accent text-white' : 'bg-gray-200 text-gray-700 hover:bg-gray-300'
                             }`}
                         >
-                            <Egg size={16} /> <span>Pregnant</span>
+                            <Bean size={16} /> <span>Pregnant</span>
                         </button>
                         <button onClick={handleFilterNursing}
                             className={`px-3 py-1.5 text-sm font-semibold rounded-lg transition duration-150 shadow-sm flex items-center space-x-1 ${ 
@@ -7821,7 +7821,7 @@ const App = () => {
                                         ) : (
                                             <EyeOff size={18} className="text-black" />
                                         )}
-                                        {animalToView.isPregnant && <Egg size={18} className="text-black" />}
+                                        {animalToView.isPregnant && <Bean size={18} className="text-black" />}
                                         {animalToView.isNursing && <Milk size={18} className="text-black" />}
                                     </div>
                                 </div>
