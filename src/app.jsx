@@ -6303,7 +6303,9 @@ const AnimalList = ({ authToken, showModalMessage, onEditAnimal, onViewAnimal, o
                     const name = (a.name || '').toString().toLowerCase();
                     const registry = (a.breederyId || a.registryCode || '').toString().toLowerCase();
                     const idPublic = (a.id_public || '').toString().toLowerCase();
-                    return name.includes(term) || registry.includes(term) || idPublic.includes(term.replace(/^ct-?/,'').toLowerCase());
+                    const tags = (a.tags || []).map(t => t.toLowerCase());
+                    const tagsMatch = tags.some(tag => tag.includes(term));
+                    return name.includes(term) || registry.includes(term) || idPublic.includes(term.replace(/^ct-?/,'').toLowerCase()) || tagsMatch;
                 });
             }
 
