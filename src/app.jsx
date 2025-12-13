@@ -4847,7 +4847,7 @@ const AnimalForm = ({
                         <label className="flex items-center space-x-2 text-sm text-gray-700">
                             <input type="checkbox" name="isInMating" checked={formData.isInMating} onChange={handleChange} 
                                 className="h-4 w-4 text-primary rounded border-gray-300 focus:ring-primary" />
-                            <span>In Mating ❤️</span>
+                            <span>In Mating ⏳</span>
                         </label>
                     </div>
                 </div>
