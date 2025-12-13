@@ -1694,7 +1694,7 @@ const PublicProfileView = ({ profile, onBack, onViewAnimal, API_BASE_URL }) => {
                                         <div key={animal.id_public} className="w-full flex justify-center">
                                             <div
                                                 onClick={() => onViewAnimal(animal)}
-                                                className="relative bg-white rounded-xl shadow-sm w-44 h-56 flex flex-col items-center overflow-hidden cursor-pointer hover:shadow-md transition border border-gray-300 pt-3 box-border"
+                                                className="relative bg-white rounded-xl shadow-sm w-44 h-72 flex flex-col items-center overflow-hidden cursor-pointer hover:shadow-md transition border border-gray-300 pt-3 box-border"
                                             >
                                                 {/* Birthdate top-left */}
                                                 {birth && (
@@ -1711,19 +1711,19 @@ const PublicProfileView = ({ profile, onBack, onViewAnimal, API_BASE_URL }) => {
                                                 )}
 
                                                 {/* Centered profile image */}
-                                                <div className="flex-1 flex items-center justify-center w-full px-2 mt-1 min-h-0">
-                                                    <div className="w-24 h-24 bg-gray-100 rounded-md overflow-hidden flex items-center justify-center flex-shrink-0">
+                                                <div className="w-full px-2 mt-1">
+                                                    <div className="w-24 h-24 bg-gray-100 rounded-md overflow-hidden flex items-center justify-center flex-shrink-0 mx-auto">
                                                         <AnimalImage src={imgSrc} alt={animal.name} className="w-full h-full object-cover" iconSize={36} />
                                                     </div>
                                                 </div>
                                                 
-                                                {/* Prefix / Name under image */}
-                                                <div className="w-full text-center px-2 pb-1 mt-2 min-w-0 overflow-hidden">
+                                                {/* Prefix / Name under image - fixed height for 2 lines */}
+                                                <div className="w-full text-center px-2 mt-2 h-10 flex items-center justify-center">
                                                     <div className="text-sm font-semibold text-gray-800 line-clamp-2">{animal.prefix ? `${animal.prefix} ` : ''}{animal.name}{animal.suffix ? ` ${animal.suffix}` : ''}</div>
                                                 </div>
 
                                                 {/* ID bottom-right */}
-                                                <div className="w-full px-2 pb-2 flex justify-end min-w-0">
+                                                <div className="w-full px-2 pb-2 flex justify-end">
                                                     <div className="text-xs text-gray-500">{animal.id_public}</div>
                                                 </div>
                                                 
