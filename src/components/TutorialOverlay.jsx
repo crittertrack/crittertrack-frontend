@@ -314,9 +314,9 @@ export const TutorialHighlight = ({ elementSelector, onHighlightClose }) => {
 
   return (
     <>
-      {/* Overlay background */}
+      {/* Overlay background - pointer-events-none so clicks pass through to highlighted element */}
       <div 
-        className="fixed inset-0 bg-black/40 z-[9998]"
+        className="fixed inset-0 bg-black/40 z-[9998] pointer-events-none"
         style={{
           boxShadow: `inset 0 0 0 9999px rgba(0, 0, 0, 0.4)`,
           clipPath: `polygon(
@@ -332,7 +332,6 @@ export const TutorialHighlight = ({ elementSelector, onHighlightClose }) => {
             ${position.left - padding}px ${position.top - padding}px
           )`
         }}
-        onClick={onHighlightClose}
       />
 
       {/* Highlight border */}
