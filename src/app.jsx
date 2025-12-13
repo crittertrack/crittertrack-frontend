@@ -1716,12 +1716,12 @@ const PublicProfileView = ({ profile, onBack, onViewAnimal, API_BASE_URL }) => {
                                                 
                                                 {/* Prefix / Name under image */}
                                                 <div className="w-full text-center px-2 pb-1 mt-2 min-w-0 overflow-hidden">
-                                                    <div className="text-sm font-semibold text-gray-800 line-clamp-2 truncate">{animal.prefix ? `${animal.prefix} ` : ''}{animal.name}{animal.suffix ? ` ${animal.suffix}` : ''}</div>
+                                                    <div className="text-sm font-semibold text-gray-800 line-clamp-2">{animal.prefix ? `${animal.prefix} ` : ''}{animal.name}{animal.suffix ? ` ${animal.suffix}` : ''}</div>
                                                 </div>
 
                                                 {/* ID bottom-right */}
                                                 <div className="w-full px-2 pb-2 flex justify-end min-w-0">
-                                                    <div className="text-xs text-gray-500 truncate">{animal.id_public}</div>
+                                                    <div className="text-xs text-gray-500">{animal.id_public}</div>
                                                 </div>
                                                 
                                                 {/* Status bar at bottom */}
