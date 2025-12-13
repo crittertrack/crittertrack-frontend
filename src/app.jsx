@@ -8333,9 +8333,9 @@ const App = () => {
             {/* Initial Tutorial Modal - Shows once to new users */}
             {authToken && !hasSeenInitialTutorial && userProfile && (
                 <InitialTutorialModal 
-                    onStart={(lessonId) => {
+                    onStart={() => {
                         markInitialTutorialSeen();
-                        setCurrentTutorialId(lessonId);
+                        setCurrentTutorialId('welcome');
                         setShowTutorialOverlay(true);
                     }}
                     onSkip={() => {
