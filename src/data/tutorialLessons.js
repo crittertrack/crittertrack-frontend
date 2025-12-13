@@ -38,7 +38,7 @@ export const TUTORIAL_LESSONS = {
         {
           stepNumber: 1,
           title: 'Start Adding Animals',
-          content: 'Click the "+" button in the Animals section to create a new animal.',
+          content: 'Click the "+ Add Animal" button in the My Animals section to create a new animal.',
           highlightElement: '[data-tutorial-target="add-animal-btn"]',
           tips: [
             'Every animal needs a name and species',
