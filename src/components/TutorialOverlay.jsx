@@ -284,10 +284,17 @@ export const TutorialHighlight = ({ elementSelector, onHighlightClose }) => {
 
   useEffect(() => {
     const updatePosition = () => {
-      if (!elementSelector) return;
+      if (!elementSelector) {
+        setPosition(null);
+        return;
+      }
 
       const element = document.querySelector(elementSelector);
-      if (!element) return;
+      if (!element) {
+        // Element not found - hide the highlight
+        setPosition(null);
+        return;
+      }
 
       const rect = element.getBoundingClientRect();
       setPosition({
@@ -299,12 +306,15 @@ export const TutorialHighlight = ({ elementSelector, onHighlightClose }) => {
     };
 
     updatePosition();
-    window.addEventListener('resize', updatePosition);
-    window.addEventListener('scroll', updatePosition);
+    const resizeListener = () => updatePosition();
+    const scrollListener = () => updatePosition();
+    
+    window.addEventListener('resize', resizeListener);
+    window.addEventListener('scroll', scrollListener);
 
     return () => {
-      window.removeEventListener('resize', updatePosition);
-      window.removeEventListener('scroll', updatePosition);
+      window.removeEventListener('resize', resizeListener);
+      window.removeEventListener('scroll', scrollListener);
     };
   }, [elementSelector]);
 
