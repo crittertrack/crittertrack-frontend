@@ -184,70 +184,70 @@ export const TutorialOverlay = ({ lessonId, onClose, onComplete }) => {
  */
 export const InitialTutorialModal = ({ onStart, onSkip }) => {
   return (
-    <div className="fixed inset-0 bg-black/50 flex items-center justify-center p-4 z-[9999]">
-      <div className="bg-white rounded-2xl shadow-2xl max-w-2xl w-full overflow-hidden">
+    <div className="fixed inset-0 bg-black/50 flex items-center justify-center p-4 z-[9999] overflow-y-auto">
+      <div className="bg-white rounded-2xl shadow-2xl max-w-2xl w-full my-auto flex flex-col max-h-[90vh] overflow-hidden">
         {/* Header with background */}
-        <div className="bg-gradient-to-br from-primary via-primary/90 to-accent text-black p-12 text-center">
-          <BookOpen size={64} className="mx-auto mb-4 opacity-80" />
-          <h2 className="text-4xl font-bold mb-4">Welcome to CritterTrack! 🎉</h2>
-          <p className="text-lg opacity-90">
+        <div className="bg-gradient-to-br from-primary via-primary/90 to-accent text-black p-8 text-center flex-shrink-0">
+          <BookOpen size={48} className="mx-auto mb-3 opacity-80" />
+          <h2 className="text-3xl font-bold mb-2">Welcome to CritterTrack! 🎉</h2>
+          <p className="text-base opacity-90">
             Your personal breeding database and genetics tracker
           </p>
         </div>
 
         {/* Content */}
-        <div className="p-8 space-y-6">
-          <p className="text-lg text-gray-700 leading-relaxed">
+        <div className="p-6 space-y-4 overflow-y-auto flex-1">
+          <p className="text-base text-gray-700 leading-relaxed">
             Whether you're just getting started or a seasoned breeder, CritterTrack helps you manage your animals, track genetics, and organize your breeding program.
           </p>
 
-          <div className="bg-blue-50 rounded-lg p-6 border-l-4 border-blue-400">
-            <h3 className="text-lg font-bold text-blue-900 mb-3">Quick Start Guide Available</h3>
-            <p className="text-blue-800 mb-4">
+          <div className="bg-blue-50 rounded-lg p-4 border-l-4 border-blue-400">
+            <h3 className="text-base font-bold text-blue-900 mb-2">Quick Start Guide Available</h3>
+            <p className="text-sm text-blue-800 mb-3">
               We've created a guided tour covering the essentials:
             </p>
-            <ul className="space-y-2 text-blue-800">
+            <ul className="space-y-1 text-sm text-blue-800">
               <li className="flex items-center gap-2">
-                <Check size={18} className="text-blue-600" />
+                <Check size={16} className="text-blue-600 flex-shrink-0" />
                 <span>Creating your first animals</span>
               </li>
               <li className="flex items-center gap-2">
-                <Check size={18} className="text-blue-600" />
+                <Check size={16} className="text-blue-600 flex-shrink-0" />
                 <span>Assigning parents to build pedigrees</span>
               </li>
               <li className="flex items-center gap-2">
-                <Check size={18} className="text-blue-600" />
+                <Check size={16} className="text-blue-600 flex-shrink-0" />
                 <span>Managing litters and breeding records</span>
               </li>
               <li className="flex items-center gap-2">
-                <Check size={18} className="text-blue-600" />
+                <Check size={16} className="text-blue-600 flex-shrink-0" />
                 <span>Tracking breeding costs and income</span>
               </li>
               <li className="flex items-center gap-2">
-                <Check size={18} className="text-blue-600" />
+                <Check size={16} className="text-blue-600 flex-shrink-0" />
                 <span>And more!</span>
               </li>
             </ul>
           </div>
 
-          <p className="text-gray-600 text-sm">
+          <p className="text-gray-600 text-xs">
             💡 <strong>Tip:</strong> You can always access tutorials later from the Info tab at any time.
           </p>
         </div>
 
         {/* Footer */}
-        <div className="border-t border-gray-200 bg-gray-50 p-6 flex items-center justify-end gap-3">
+        <div className="border-t border-gray-200 bg-gray-50 p-4 flex items-center justify-end gap-3 flex-shrink-0">
           <button
             onClick={onSkip}
-            className="px-6 py-3 text-gray-700 hover:text-gray-900 font-semibold transition hover:bg-white rounded-lg border border-gray-300"
+            className="px-4 py-2 text-sm text-gray-700 hover:text-gray-900 font-semibold transition hover:bg-white rounded-lg border border-gray-300"
           >
             Skip for Now
           </button>
           <button
             onClick={onStart}
-            className="flex items-center gap-2 px-8 py-3 bg-gradient-to-r from-primary to-primary/80 hover:from-primary/90 hover:to-primary/70 text-black font-bold rounded-lg transition shadow-md"
+            className="flex items-center gap-2 px-6 py-2 bg-gradient-to-r from-primary to-primary/80 hover:from-primary/90 hover:to-primary/70 text-black font-bold rounded-lg transition shadow-md text-sm"
           >
-            <BookOpen size={20} />
+            <BookOpen size={18} />
             Start Tutorial
           </button>
         </div>
