@@ -324,19 +324,19 @@ export const TutorialHighlight = ({ elementSelector, onHighlightClose }) => {
       {/* Highlight border only - no dark overlay */}
       <div
         ref={highlightRef}
-        className="fixed border-4 border-accent rounded-lg pointer-events-none z-[9998] animate-pulse"
+        className="fixed border-4 border-amber-400 rounded-lg pointer-events-none z-[9998] animate-pulse"
         style={{
           top: position.top - padding,
           left: position.left - padding,
           width: position.width + padding * 2,
           height: position.height + padding * 2,
-          boxShadow: '0 0 30px rgba(249, 115, 22, 0.8)',
+          boxShadow: '0 0 30px rgba(180, 83, 9, 0.8)',
         }}
       />
 
       {/* Pointer arrow */}
       <div
-        className="fixed bg-accent text-white px-3 py-1 rounded-full text-sm font-bold z-[9998] animate-bounce"
+        className="fixed bg-amber-400 text-amber-900 px-3 py-1 rounded-full text-sm font-bold z-[9998] animate-bounce"
         style={{
           top: position.top - 40,
           left: position.left + position.width / 2 - 15,
