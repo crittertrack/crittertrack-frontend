@@ -8611,17 +8611,19 @@ const App = () => {
                     }}
                     onComplete={() => {
                         // Move to next lesson in the sequence
-                        const nextIndex = currentTutorialIndex + 1;
-                        if (nextIndex < TUTORIAL_LESSONS.onboarding.length) {
-                            // Show next lesson
-                            setCurrentTutorialIndex(nextIndex);
-                            setCurrentTutorialId(TUTORIAL_LESSONS.onboarding[nextIndex].id);
-                        } else {
-                            // All lessons completed
-                            setShowTutorialOverlay(false);
-                            setCurrentTutorialId(null);
-                            setCurrentTutorialIndex(0);
-                        }
+                        setCurrentTutorialIndex(prevIndex => {
+                            const nextIndex = prevIndex + 1;
+                            if (nextIndex < TUTORIAL_LESSONS.onboarding.length) {
+                                // Show next lesson
+                                setCurrentTutorialId(TUTORIAL_LESSONS.onboarding[nextIndex].id);
+                                return nextIndex;
+                            } else {
+                                // All lessons completed
+                                setShowTutorialOverlay(false);
+                                setCurrentTutorialId(null);
+                                return 0;
+                            }
+                        });
                     }}
                 />
             )}
