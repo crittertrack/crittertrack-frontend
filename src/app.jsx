@@ -5151,7 +5151,7 @@ const AnimalForm = ({
                     {formData.tags.length > 0 && (
                         <div className="mt-2 flex flex-wrap gap-2">
                             {formData.tags.map((tag, idx) => (
-                                <span key={idx} className="inline-flex items-center bg-primary text-white text-xs font-semibold px-3 py-1 rounded-full">
+                                <span key={idx} className="inline-flex items-center bg-primary text-black text-xs font-semibold px-3 py-1 rounded-full">
                                     {tag}
                                     <button
                                         type="button"
@@ -5159,7 +5159,7 @@ const AnimalForm = ({
                                             const newTags = formData.tags.filter((_, i) => i !== idx);
                                             setFormData({ ...formData, tags: newTags });
                                         }}
-                                        className="ml-2 text-white hover:text-gray-200"
+                                        className="ml-2 text-black hover:text-gray-600"
                                     >
                                         ×
                                     </button>
@@ -7953,7 +7953,7 @@ const App = () => {
                                 <h3 className="text-lg font-semibold text-gray-800 mb-3">Tags</h3>
                                 <div className="flex flex-wrap gap-2">
                                     {animalToView.tags.map((tag, idx) => (
-                                        <span key={idx} className="inline-flex items-center bg-primary text-white text-sm font-semibold px-3 py-1 rounded-full">
+                                        <span key={idx} className="inline-flex items-center bg-primary text-black text-sm font-semibold px-3 py-1 rounded-full">
                                             {tag}
                                         </span>
                                     ))}
