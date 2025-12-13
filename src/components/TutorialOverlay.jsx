@@ -7,7 +7,7 @@ import { useTutorial } from '../contexts/TutorialContext';
  * TutorialOverlay
  * Main modal component that shows tutorial lessons with navigation
  */
-export const TutorialOverlay = ({ lessonId, onClose, onComplete }) => {
+export const TutorialOverlay = ({ lessonId, onClose, onComplete, onStepChange }) => {
   const [currentStepIndex, setCurrentStepIndex] = useState(0);
   const { markTutorialCompleted } = useTutorial();
 
@@ -18,13 +18,18 @@ export const TutorialOverlay = ({ lessonId, onClose, onComplete }) => {
   const isFirstStep = currentStepIndex === 0;
   const isLastStep = lesson ? currentStepIndex === lesson.steps.length - 1 : false;
 
+  // Notify parent when step changes
+  useEffect(() => {
+    if (onStepChange) {
+      onStepChange(currentStepIndex, currentStep);
+    }
+  }, [currentStepIndex, currentStep, onStepChange]);
+
   const handleComplete = useCallback(() => {
-    console.log('handleComplete called for lesson:', lesson?.id);
     if (lesson) {
       markTutorialCompleted(lesson.id);
     }
     if (onComplete) {
-      console.log('Calling onComplete with lessonId:', lesson?.id);
       onComplete(lesson?.id);
     }
     // Don't call onClose here - let the parent component handle closing
@@ -32,12 +37,9 @@ export const TutorialOverlay = ({ lessonId, onClose, onComplete }) => {
   }, [lesson, markTutorialCompleted, onComplete]);
 
   const handleNext = useCallback(() => {
-    console.log('handleNext clicked, isLastStep:', isLastStep);
     if (!isLastStep) {
-      console.log('Moving to next step');
       setCurrentStepIndex(prev => prev + 1);
     } else {
-      console.log('Calling handleComplete');
       handleComplete();
     }
   }, [isLastStep, handleComplete]);

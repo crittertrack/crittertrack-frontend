@@ -10,7 +10,7 @@ import TermsOfService from './components/TermsOfService';
 import PrivacyPolicy from './components/PrivacyPolicy';
 import InstallPWA from './components/InstallPWA';
 import { TutorialProvider, useTutorial } from './contexts/TutorialContext';
-import { InitialTutorialModal, TutorialOverlay } from './components/TutorialOverlay';
+import { InitialTutorialModal, TutorialOverlay, TutorialHighlight } from './components/TutorialOverlay';
 import { TUTORIAL_LESSONS } from './data/tutorialLessons';
 import InfoTab from './components/InfoTab';
 
@@ -7225,6 +7225,7 @@ const App = () => {
     const [currentTutorialId, setCurrentTutorialId] = useState(null);
     const [showTutorialOverlay, setShowTutorialOverlay] = useState(false);
     const [currentTutorialIndex, setCurrentTutorialIndex] = useState(0);
+    const [currentTutorialStep, setCurrentTutorialStep] = useState(null);
 
     const timeoutRef = useRef(null);
     const activeEvents = ['mousemove', 'keydown', 'scroll', 'click'];
@@ -8604,10 +8605,14 @@ const App = () => {
             {showTutorialOverlay && currentTutorialId && (
                 <TutorialOverlay
                     lessonId={currentTutorialId}
+                    onStepChange={(stepIndex, step) => {
+                        setCurrentTutorialStep(step);
+                    }}
                     onClose={() => {
                         setShowTutorialOverlay(false);
                         setCurrentTutorialId(null);
                         setCurrentTutorialIndex(0);
+                        setCurrentTutorialStep(null);
                     }}
                     onComplete={() => {
                         // Move to next lesson in the sequence
@@ -8621,10 +8626,19 @@ const App = () => {
                                 // All lessons completed
                                 setShowTutorialOverlay(false);
                                 setCurrentTutorialId(null);
+                                setCurrentTutorialStep(null);
                                 return 0;
                             }
                         });
                     }}
+                />
+            )}
+
+            {/* Tutorial Highlight - highlights elements during tutorial */}
+            {showTutorialOverlay && currentTutorialStep && currentTutorialStep.highlightElement && (
+                <TutorialHighlight 
+                    elementSelector={currentTutorialStep.highlightElement}
+                    onHighlightClose={() => {}}
                 />
             )}
 
