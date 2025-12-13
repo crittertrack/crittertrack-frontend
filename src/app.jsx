@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useCallback, useRef, useMemo } from 'react';
 import { useParams, useNavigate, useLocation, Routes, Route } from 'react-router-dom';
 import axios from 'axios';
-import { LogOut, Cat, UserPlus, LogIn, ChevronLeft, Trash2, Edit, Save, PlusCircle, Plus, ArrowLeft, Loader2, RefreshCw, User, Users, ClipboardList, BookOpen, Settings, Mail, Globe, Egg, Milk, Search, X, Mars, Venus, Eye, EyeOff, Home, Heart, HeartOff, HeartHandshake, Bell, XCircle, CheckCircle, Download, FileText, Link, AlertCircle, Check, DollarSign, Archive, ArrowLeftRight, RotateCcw, Info } from 'lucide-react';
+import { LogOut, Cat, UserPlus, LogIn, ChevronLeft, Trash2, Edit, Save, PlusCircle, Plus, ArrowLeft, Loader2, RefreshCw, User, Users, ClipboardList, BookOpen, Settings, Mail, Globe, Egg, Milk, Search, X, Mars, Venus, Eye, EyeOff, Home, Heart, HeartOff, HeartHandshake, Bell, XCircle, CheckCircle, Download, FileText, Link, AlertCircle, Check, DollarSign, Archive, ArrowLeftRight, RotateCcw, Info, Hourglass } from 'lucide-react';
 import jsPDF from 'jspdf';
 import html2canvas from 'html2canvas';
 import MouseGeneticsCalculator from './components/MouseGeneticsCalculator';
@@ -2339,6 +2339,7 @@ const OffspringSection = ({ animalId, API_BASE_URL, authToken = null, onViewAnim
                                                 )}
                                                 {animal.isPregnant && <Egg size={12} className="text-black" />}
                                                 {animal.isNursing && <Milk size={12} className="text-black" />}
+                                                {animal.isInMating && <Hourglass size={12} className="text-purple-600" />}
                                             </div>
                                         )}
                                         
@@ -3487,6 +3488,7 @@ const LitterManagement = ({ authToken, API_BASE_URL, userProfile, showModalMessa
                                                                 )}
                                                                 {animal.isPregnant && <Egg size={12} className="text-black" />}
                                                                 {animal.isNursing && <Milk size={12} className="text-black" />}
+                                                                {animal.isInMating && <Hourglass size={12} className="text-purple-600" />}
                                                             </div>
                                                             
                                                             {/* Name */}
@@ -4234,6 +4236,7 @@ const AnimalForm = ({
             ownerName: animalToEdit.ownerName || '',
             isPregnant: animalToEdit.isPregnant || false,
             isNursing: animalToEdit.isNursing || false,
+            isInMating: animalToEdit.isInMating || false,
             isOwned: animalToEdit.isOwned ?? true,
             isDisplay: animalToEdit.isDisplay ?? false,
         } : {
@@ -4257,6 +4260,7 @@ const AnimalForm = ({
             ownerName: '',
             isPregnant: false,
             isNursing: false,
+            isInMating: false,
             isOwned: true,
             isDisplay: false,
         }
@@ -4840,6 +4844,11 @@ const AnimalForm = ({
                                 </label>
                             </>
                         )}
+                        <label className="flex items-center space-x-2 text-sm text-gray-700">
+                            <input type="checkbox" name="isInMating" checked={formData.isInMating} onChange={handleChange} 
+                                className="h-4 w-4 text-primary rounded border-gray-300 focus:ring-primary" />
+                            <span>In Mating ❤️</span>
+                        </label>
                     </div>
                 </div>
                 {/* ------------------------------------------- */}
@@ -6170,6 +6179,7 @@ const AuthView = ({ onLoginSuccess, showModalMessage, isRegister, setIsRegister,
                     )}
                     {parentData.isPregnant && <Egg size={12} className="text-black" />}
                     {parentData.isNursing && <Milk size={12} className="text-black" />}
+                    {parentData.isInMating && <Hourglass size={12} className="text-purple-600" />}
                 </div>
 
                 {/* Name */}
@@ -6204,6 +6214,7 @@ const AnimalList = ({ authToken, showModalMessage, onEditAnimal, onViewAnimal, o
     const [selectedSpecies, setSelectedSpecies] = useState([...DEFAULT_SPECIES_OPTIONS]);
     const [statusFilterPregnant, setStatusFilterPregnant] = useState(false);
     const [statusFilterNursing, setStatusFilterNursing] = useState(false);
+    const [statusFilterMating, setStatusFilterMating] = useState(false);
     const [ownedFilterActive, setOwnedFilterActive] = useState(true);
     const [publicFilter, setPublicFilter] = useState('');
     const [bulkDeleteMode, setBulkDeleteMode] = useState({}); // { species: true/false }
@@ -6224,6 +6235,9 @@ const AnimalList = ({ authToken, showModalMessage, onEditAnimal, onViewAnimal, o
             }
             if (statusFilterNursing) {
                 params.push(`isNursing=true`);
+            }
+            if (statusFilterMating) {
+                params.push(`isInMating=true`);
             }
             if (ownedFilterActive) {
                 params.push(`isOwned=true`);
@@ -6290,6 +6304,9 @@ const AnimalList = ({ authToken, showModalMessage, onEditAnimal, onViewAnimal, o
             if (statusFilterNursing) {
                 data = data.filter(a => a.isNursing === true);
             }
+            if (statusFilterMating) {
+                data = data.filter(a => a.isInMating === true);
+            }
 
             // Filter by public/private status
             if (publicFilter === 'public') {
@@ -6315,7 +6332,7 @@ const AnimalList = ({ authToken, showModalMessage, onEditAnimal, onViewAnimal, o
         } finally {
             setLoading(false);
         }
-    }, [authToken, statusFilter, selectedGenders, selectedSpecies, appliedNameFilter, statusFilterPregnant, statusFilterNursing, ownedFilterActive, publicFilter, showModalMessage]);
+    }, [authToken, statusFilter, selectedGenders, selectedSpecies, appliedNameFilter, statusFilterPregnant, statusFilterNursing, statusFilterMating, ownedFilterActive, publicFilter, showModalMessage]);
 
     useEffect(() => {
         fetchAnimals();
@@ -6372,8 +6389,9 @@ const AnimalList = ({ authToken, showModalMessage, onEditAnimal, onViewAnimal, o
                 : [...prev, species]
         );
     };
-    const handleFilterPregnant = () => { setStatusFilterPregnant(prev => !prev); setStatusFilterNursing(false); };
-    const handleFilterNursing = () => { setStatusFilterNursing(prev => !prev); setStatusFilterPregnant(false); };
+    const handleFilterPregnant = () => { setStatusFilterPregnant(prev => !prev); setStatusFilterNursing(false); setStatusFilterMating(false); };
+    const handleFilterNursing = () => { setStatusFilterNursing(prev => !prev); setStatusFilterPregnant(false); setStatusFilterMating(false); };
+    const handleFilterMating = () => { setStatusFilterMating(prev => !prev); setStatusFilterPregnant(false); setStatusFilterNursing(false); };
     
     const handleRefresh = async () => {
         try {
@@ -6715,6 +6733,13 @@ const AnimalList = ({ authToken, showModalMessage, onEditAnimal, onViewAnimal, o
                             }`}
                         >
                             <Milk size={16} /> <span>Nursing</span>
+                        </button>
+                        <button onClick={handleFilterMating}
+                            className={`px-3 py-1.5 text-sm font-semibold rounded-lg transition duration-150 shadow-sm flex items-center space-x-1 ${ 
+                                statusFilterMating ? 'bg-accent text-white' : 'bg-gray-200 text-gray-700 hover:bg-gray-300'
+                            }`}
+                        >
+                            <Hourglass size={16} /> <span>Mating</span>
                         </button>
                     </div>
 
