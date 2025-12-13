@@ -19,13 +19,16 @@ export const TutorialOverlay = ({ lessonId, onClose, onComplete }) => {
   const isLastStep = lesson ? currentStepIndex === lesson.steps.length - 1 : false;
 
   const handleComplete = useCallback(() => {
+    console.log('handleComplete called for lesson:', lesson?.id);
     if (lesson) {
       markTutorialCompleted(lesson.id);
     }
     if (onComplete) {
+      console.log('Calling onComplete with lessonId:', lesson?.id);
       onComplete(lesson?.id);
     }
     if (onClose) {
+      console.log('Calling onClose');
       onClose();
     }
   }, [lesson, markTutorialCompleted, onComplete, onClose]);
