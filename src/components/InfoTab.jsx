@@ -153,65 +153,79 @@ export const InfoTab = ({ onClose }) => {
   const completedFeatures = featureLessons.filter(l => isTutorialCompleted(l.id)).length;
 
   return (
-    <div className="w-full max-w-6xl bg-white p-6 rounded-xl shadow-lg">
-      {/* Header */}
-      <div className="flex items-center justify-between mb-6">
-        <div className="flex items-center gap-3">
-          <BookOpen size={32} className="text-primary" />
-          <div>
-            <h2 className="text-3xl font-bold text-gray-800">CritterTrack Tutorials & Help</h2>
-            <p className="text-gray-600 text-sm mt-1">Learn all about managing your breeding program</p>
+    <>
+      {/* Full-screen backdrop */}
+      <div 
+        className="fixed inset-0 bg-black/50 z-[9998]"
+        onClick={onClose}
+      />
+      
+      {/* Full-screen modal container */}
+      <div className="fixed inset-0 z-[9999] flex items-center justify-center p-4 overflow-hidden">
+        <div className="w-full max-w-6xl h-full max-h-[90vh] bg-white rounded-xl shadow-2xl flex flex-col">
+          {/* Header - Fixed */}
+          <div className="flex items-center justify-between p-6 border-b border-gray-200 flex-shrink-0">
+            <div className="flex items-center gap-3">
+              <BookOpen size={32} className="text-primary" />
+              <div>
+                <h2 className="text-3xl font-bold text-gray-800">CritterTrack Tutorials & Help</h2>
+                <p className="text-gray-600 text-sm mt-1">Learn all about managing your breeding program</p>
+              </div>
+            </div>
+            <button
+              onClick={onClose}
+              className="p-2 hover:bg-gray-100 rounded-lg transition"
+            >
+              <X size={24} className="text-gray-500" />
+            </button>
+          </div>
+
+          {/* Scrollable Content Area */}
+          <div className="flex-1 overflow-y-auto p-6">
+            {/* Stats */}
+            <div className="grid grid-cols-2 gap-4 mb-6">
+              <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
+                <p className="text-sm text-blue-600 font-semibold">Getting Started</p>
+                <p className="text-3xl font-bold text-blue-900">{completedOnboarding}/{onboardingLessons.length}</p>
+              </div>
+              <div className="bg-purple-50 border border-purple-200 rounded-lg p-4">
+                <p className="text-sm text-purple-600 font-semibold">Advanced Features</p>
+                <p className="text-3xl font-bold text-purple-900">{completedFeatures}/{featureLessons.length}</p>
+              </div>
+            </div>
+
+            {/* Tabs */}
+            <div className="flex gap-4 mb-6 border-b border-gray-200">
+              <button
+                onClick={() => setActiveTab('getting-started')}
+                className={`px-4 py-3 font-semibold transition border-b-4 ${
+                  activeTab === 'getting-started'
+                    ? 'border-primary text-primary'
+                    : 'border-transparent text-gray-600 hover:text-gray-800'
+                }`}
+              >
+                🚀 Getting Started ({completedOnboarding}/{onboardingLessons.length})
+              </button>
+              <button
+                onClick={() => setActiveTab('advanced')}
+                className={`px-4 py-3 font-semibold transition border-b-4 ${
+                  activeTab === 'advanced'
+                    ? 'border-primary text-primary'
+                    : 'border-transparent text-gray-600 hover:text-gray-800'
+                }`}
+              >
+                ✨ Advanced Features ({completedFeatures}/{featureLessons.length})
+              </button>
+            </div>
+
+            {/* Lesson Cards */}
+            <div className="space-y-4">
+              {currentLessons.map(lesson => (
+                <LessonCard key={lesson.id} lesson={lesson} />
+              ))}
+            </div>
           </div>
         </div>
-        <button
-          onClick={onClose}
-          className="p-2 hover:bg-gray-100 rounded-lg transition"
-        >
-          <X size={24} className="text-gray-500" />
-        </button>
-      </div>
-
-      {/* Stats */}
-      <div className="grid grid-cols-2 gap-4 mb-6">
-        <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
-          <p className="text-sm text-blue-600 font-semibold">Getting Started</p>
-          <p className="text-3xl font-bold text-blue-900">{completedOnboarding}/{onboardingLessons.length}</p>
-        </div>
-        <div className="bg-purple-50 border border-purple-200 rounded-lg p-4">
-          <p className="text-sm text-purple-600 font-semibold">Advanced Features</p>
-          <p className="text-3xl font-bold text-purple-900">{completedFeatures}/{featureLessons.length}</p>
-        </div>
-      </div>
-
-      {/* Tabs */}
-      <div className="flex gap-4 mb-6 border-b border-gray-200">
-        <button
-          onClick={() => setActiveTab('getting-started')}
-          className={`px-4 py-3 font-semibold transition border-b-4 ${
-            activeTab === 'getting-started'
-              ? 'border-primary text-primary'
-              : 'border-transparent text-gray-600 hover:text-gray-800'
-          }`}
-        >
-          🚀 Getting Started ({completedOnboarding}/{onboardingLessons.length})
-        </button>
-        <button
-          onClick={() => setActiveTab('advanced')}
-          className={`px-4 py-3 font-semibold transition border-b-4 ${
-            activeTab === 'advanced'
-              ? 'border-primary text-primary'
-              : 'border-transparent text-gray-600 hover:text-gray-800'
-          }`}
-        >
-          ✨ Advanced Features ({completedFeatures}/{featureLessons.length})
-        </button>
-      </div>
-
-      {/* Content */}
-      <div className="space-y-4">
-        {currentLessons.map(lesson => (
-          <LessonCard key={lesson.id} lesson={lesson} />
-        ))}
       </div>
 
       {/* Tutorial Running */}
@@ -222,7 +236,7 @@ export const InfoTab = ({ onClose }) => {
           onComplete={handleTutorialComplete}
         />
       )}
-    </div>
+    </>
   );
 };
 
