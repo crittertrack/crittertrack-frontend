@@ -170,16 +170,30 @@ export const TUTORIAL_LESSONS = {
         },
         {
           stepNumber: 3,
-          title: 'Link Animals to the Litter',
-          content: 'Add animals to the litter by creating new ones or linking existing animals with matching parents and birthdate.',
+          title: 'Select Parents & Birth Date',
+          content: 'Select both the Sire (Father) and Dam (Mother) - this is required. The parents\' species determines the offspring species. You can optionally set the Number of Males and Females fields. Once you\'ve set the parents and birth date, offspring sections will appear below where you can link existing animals or create new ones.',
+          highlightElement: '[data-tutorial-target="litter-parents-section"]',
           tips: [
-            'CritterTrack can auto-find matching animals',
-            'You can manually add new animals',
-            'Track how many males and females were born'
+            'Parents must be the same species - offspring will inherit this species',
+            'Birth Date is required to create new offspring in this form',
+            'Number of Males/Females are optional fields for tracking purposes',
+            'Once birth date is set, the offspring sections will appear'
           ]
         },
         {
           stepNumber: 4,
+          title: 'Link Animals to the Litter',
+          content: 'Link existing animals as offspring or create new offspring directly. The "Link Existing Animals" section shows animals matching these parents. The "Create New Offspring" section lets you quickly add new animals to this litter.',
+          highlightElement: '[data-tutorial-target="litter-offspring-sections"]',
+          tips: [
+            'CritterTrack auto-finds animals with matching parents',
+            'You can link existing animals to the litter',
+            'Track how many males and females were born',
+            'Create new offspring directly with parents and species pre-filled'
+          ]
+        },
+        {
+          stepNumber: 5,
           title: 'Litter Information',
           content: 'Each litter shows the COI, number of offspring, and breeding pair info. Use this to track your breeding program!',
           tips: [

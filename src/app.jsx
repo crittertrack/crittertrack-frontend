@@ -2390,7 +2390,7 @@ const OffspringSection = ({ animalId, API_BASE_URL, authToken = null, onViewAnim
 };
 
 // Litter Management Component
-const LitterManagement = ({ authToken, API_BASE_URL, userProfile, showModalMessage, onViewAnimal }) => {
+const LitterManagement = ({ authToken, API_BASE_URL, userProfile, showModalMessage, onViewAnimal, formDataRef }) => {
     const [litters, setLitters] = useState([]);
     const [myAnimals, setMyAnimals] = useState([]);
     const [loading, setLoading] = useState(true);
@@ -2430,6 +2430,13 @@ const LitterManagement = ({ authToken, API_BASE_URL, userProfile, showModalMessa
         fetchLitters();
         fetchMyAnimals();
     }, []);
+
+    // Update parent ref with current form data for tutorial tracking
+    useEffect(() => {
+        if (formDataRef) {
+            formDataRef.current = formData;
+        }
+    }, [formData, formDataRef]);
 
     const toggleBulkDeleteMode = (litterId) => {
         setBulkDeleteMode(prev => ({ ...prev, [litterId]: !prev[litterId] }));
@@ -3000,7 +3007,7 @@ const LitterManagement = ({ authToken, API_BASE_URL, userProfile, showModalMessa
                         </div>
 
                         {/* Sire Selection */}
-                        <div>
+                        <div data-tutorial-target="litter-parents-section">
                             <label className="block text-sm font-medium text-gray-700 mb-1">
                                 Sire (Father) <span className="text-red-500">*</span>
                             </label>
@@ -3085,7 +3092,7 @@ const LitterManagement = ({ authToken, API_BASE_URL, userProfile, showModalMessa
 
                     {/* Link Existing Offspring */}
                     {formData.sireId_public && formData.damId_public && (
-                        <div className="mb-4 border-t pt-4">
+                        <div className="mb-4 border-t pt-4" data-tutorial-target="litter-offspring-sections">
                             <label className="block text-sm font-medium text-gray-700 mb-2">
                                 Link Existing Animals as Offspring
                             </label>
@@ -3142,7 +3149,7 @@ const LitterManagement = ({ authToken, API_BASE_URL, userProfile, showModalMessa
 
                     {/* Create New Offspring */}
                     {formData.sireId_public && formData.damId_public && formData.birthDate && (
-                        <div className="mb-4 border-t pt-4">
+                        <div className="mb-4 border-t pt-4" data-tutorial-target="litter-offspring-sections">
                             <label className="block text-sm font-medium text-gray-700 mb-2">
                                 Create New Offspring Animals
                             </label>
@@ -7226,6 +7233,7 @@ const App = () => {
     const [activeUsers, setActiveUsers] = useState([]);
     const scrollContainerRef = useRef(null);
     const tutorialOverlayRef = useRef(null);
+    const litterFormDataRef = useRef(null);
 
     // Tutorial modal states
     const [showInfoTab, setShowInfoTab] = useState(false);
@@ -7340,6 +7348,21 @@ const App = () => {
             tutorialOverlayRef.current.advanceStep();
         }
     }, [currentView, showTutorialOverlay, currentTutorialId, currentTutorialStep]);
+
+    // Auto-advance tutorial for lesson 4 step 3 when parents and birthdate are filled
+    useEffect(() => {
+        if (!showTutorialOverlay || currentTutorialId !== 'create-litters' || !tutorialOverlayRef.current) {
+            return;
+        }
+
+        // When parents and birthdate are set, advance from step 3 to step 4 (offspring sections)
+        if (currentTutorialStep?.stepNumber === 3 && litterFormDataRef.current) {
+            const { sireId_public, damId_public, birthDate } = litterFormDataRef.current;
+            if (sireId_public && damId_public && birthDate) {
+                tutorialOverlayRef.current.advanceStep();
+            }
+        }
+    }, [showTutorialOverlay, currentTutorialId, currentTutorialStep, litterFormDataRef.current?.sireId_public, litterFormDataRef.current?.damId_public, litterFormDataRef.current?.birthDate]);
 
     useEffect(() => {
         if (authToken) {
@@ -8195,6 +8218,7 @@ const App = () => {
                         userProfile={userProfile}
                         showModalMessage={showModalMessage}
                         onViewAnimal={handleViewAnimal}
+                        formDataRef={litterFormDataRef}
                     />
                 );
             case 'list':
