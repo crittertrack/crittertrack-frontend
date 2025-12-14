@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { DollarSign, Plus, Edit, Trash2, Search, X, Calendar, Filter, Download, TrendingUp, TrendingDown, Info } from 'lucide-react';
 import axios from 'axios';
 
-const BudgetingTab = ({ authToken, API_BASE_URL, showModalMessage }) => {
+const BudgetingTab = ({ authToken, API_BASE_URL, showModalMessage, preSelectedAnimal = null, preSelectedType = null }) => {
     const [transactions, setTransactions] = useState([]);
     const [animals, setAnimals] = useState([]);
     const [searchResults, setSearchResults] = useState([]);
@@ -76,6 +76,26 @@ const BudgetingTab = ({ authToken, API_BASE_URL, showModalMessage }) => {
         fetchAnimals();
         fetchUserProfile();
     }, []);
+
+    // Handle pre-selected animal and type (from Transfer button)
+    useEffect(() => {
+        if (preSelectedAnimal && preSelectedType) {
+            setFormData(prev => ({
+                ...prev,
+                type: preSelectedType,
+                animalId: preSelectedAnimal.id_public,
+                animalName: preSelectedAnimal.name,
+                buyer: userProfile?.breederName || userProfile?.personalName || ''
+            }));
+            setSelectedSpecies(preSelectedAnimal.species);
+            setShowAddModal(true);
+            setShowTypeSelection(false);
+            // For animal-sale, show mode selection
+            if (preSelectedType === 'animal-sale') {
+                setShowModeSelection(true);
+            }
+        }
+    }, [preSelectedAnimal, preSelectedType, userProfile]);
 
     const fetchUserProfile = async () => {
         try {

@@ -7232,6 +7232,8 @@ const App = () => {
     // Transfer modal states
     const [showTransferModal, setShowTransferModal] = useState(false);
     const [transferAnimal, setTransferAnimal] = useState(null);
+    const [preSelectedTransferAnimal, setPreSelectedTransferAnimal] = useState(null);
+    const [preSelectedTransactionType, setPreSelectedTransactionType] = useState(null);
     const [transferUserQuery, setTransferUserQuery] = useState('');
     const [transferUserResults, setTransferUserResults] = useState([]);
     const [transferSelectedUser, setTransferSelectedUser] = useState(null);
@@ -7398,6 +7400,14 @@ const App = () => {
             tutorialOverlayRef.current.advanceStep();
         }
     }, [currentView, showTutorialOverlay, currentTutorialId, currentTutorialStep]);
+
+    // Clear pre-selected transfer data when leaving budget view
+    useEffect(() => {
+        if (currentView !== 'budget') {
+            setPreSelectedTransferAnimal(null);
+            setPreSelectedTransactionType(null);
+        }
+    }, [currentView]);
 
     // Auto-advance tutorial for lesson 4 step 2 when form opens
     useEffect(() => {
@@ -7987,8 +7997,10 @@ const App = () => {
                                         </button>
                                         <button 
                                             onClick={() => { 
-                                                setTransferAnimal(animalToView); 
-                                                setShowTransferModal(true); 
+                                                // Use new budget-based transfer system
+                                                setPreSelectedTransferAnimal(animalToView);
+                                                setPreSelectedTransactionType('animal-sale');
+                                                setCurrentView('budget');
                                             }} 
                                             className="bg-accent hover:bg-accent/90 text-white font-semibold py-2 px-4 rounded-lg transition flex items-center gap-2"
                                         >
@@ -8208,6 +8220,8 @@ const App = () => {
                         authToken={authToken}
                         API_BASE_URL={API_BASE_URL}
                         showModalMessage={showModalMessage}
+                        preSelectedAnimal={preSelectedTransferAnimal}
+                        preSelectedType={preSelectedTransactionType}
                     />
                 );
             case 'hidden-animals':
