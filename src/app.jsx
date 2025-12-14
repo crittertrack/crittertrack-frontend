@@ -790,6 +790,7 @@ const PedigreeChart = ({ animalId, animalData, onClose, API_BASE_URL, authToken 
                             <button
                                 onClick={downloadPDF}
                                 disabled={!imagesLoaded}
+                                data-tutorial-target="download-pdf-btn"
                                 className={`flex items-center gap-2 px-4 py-2 font-semibold rounded-lg transition ${
                                     imagesLoaded 
                                         ? 'bg-primary hover:bg-primary/90 text-black cursor-pointer' 
@@ -1609,8 +1610,7 @@ const PublicProfileView = ({ profile, onBack, onViewAnimal, API_BASE_URL }) => {
             <h3 className="text-2xl font-bold text-gray-800 mb-4">Public Animals ({filteredAnimals.length})</h3>
             
             {/* Filters */}
-            {animals.length > 0 && (
-                <div className="mb-6 p-4 border rounded-lg bg-gray-50">
+            <div className="mb-6 p-4 border rounded-lg bg-gray-50">
                     {/* Species dropdown, Gender icons, and Status dropdown - all in one row */}
                     <div className="flex flex-col sm:flex-row gap-3 justify-between">
                         <div className="flex gap-3 items-center flex-wrap">
@@ -1669,7 +1669,6 @@ const PublicProfileView = ({ profile, onBack, onViewAnimal, API_BASE_URL }) => {
                         </div>
                     </div>
                 </div>
-            )}
             
             {loading ? (
                 <LoadingSpinner />
@@ -3251,6 +3250,7 @@ const LitterManagement = ({ authToken, API_BASE_URL, userProfile, showModalMessa
 
                     <button
                         type="submit"
+                        data-tutorial-target="create-litter-btn"
                         className="w-full bg-primary hover:bg-primary/90 text-black font-bold py-3 px-4 rounded-lg"
                     >
                         Create Litter
@@ -4091,7 +4091,7 @@ const SpeciesSelector = ({ speciesOptions, onSelectSpecies, onManageSpecies, sea
 
 // Small helper component for animal image selection/preview
 const AnimalImageUpload = ({ imageUrl, onFileChange, disabled = false }) => (
-    <div className="flex items-center space-x-4">
+    <div data-tutorial-target="photo-upload-section" className="flex items-center space-x-4">
         <div className="w-28 h-28 bg-gray-100 rounded-lg overflow-hidden flex items-center justify-center border">
             <AnimalImage src={imageUrl} alt="Animal" className="w-full h-full object-cover" iconSize={36} />
         </div>
@@ -4885,7 +4885,7 @@ const AnimalForm = ({
                 {/* ------------------------------------------- */}
                 {/* STATUS & PRIVACY FLAGS */}
                 {/* ------------------------------------------- */}
-                <div className="bg-primary/10 p-4 rounded-lg border-2 border-primary space-y-2">
+                <div data-tutorial-target="status-flags-container" className="bg-primary/10 p-4 rounded-lg border-2 border-primary space-y-2">
                     <h3 className="text-lg font-semibold text-gray-800">Status & Privacy Flags</h3>
                     <div className="grid grid-cols-2 gap-4">
                         <label className="flex items-center space-x-2 text-sm text-gray-700">
@@ -4967,7 +4967,7 @@ const AnimalForm = ({
                 {/* ------------------------------------------- */}
                 {/* PRIMARY INPUT FIELDS (THE MISSING SECTION) */}
                 {/* ------------------------------------------- */}
-                <div className="grid grid-cols-1 md:grid-cols-3 gap-4 border p-4 rounded-lg">
+                <div data-tutorial-target="general-info-container" className="grid grid-cols-1 md:grid-cols-3 gap-4 border p-4 rounded-lg">
                     					
 					{/* Breedery ID */}
                     <div>
@@ -5054,6 +5054,7 @@ const AnimalForm = ({
                     <div>
                         <label className="block text-sm font-medium text-gray-700">Status*</label>
                         <select name="status" value={formData.status} onChange={handleChange} required 
+                            data-tutorial-target="status-dropdown"
                             className="mt-1 block w-full p-2 border border-gray-300 rounded-md shadow-sm focus:ring-primary focus:border-primary" >
                             {STATUS_OPTIONS.map(s => <option key={s} value={s}>{s}</option>)}
                         </select>
@@ -5204,7 +5205,7 @@ const AnimalForm = ({
                 </div>
 
                 {/* Tags */}
-                <div className='mt-4'>
+                <div className='mt-4' data-tutorial-target="tags-edit-section">
                     <label className="block text-sm font-medium text-gray-700">Tags (Lines, Enclosures, etc)</label>
                     <input 
                         type="text" 
@@ -5248,6 +5249,7 @@ const AnimalForm = ({
                             <button
                                 type="submit"
                                 disabled={loading}
+                                data-tutorial-target="save-animal-btn"
                                 onClick={(e) => {
                                     try {
                                         console.log('Save button clicked (frontend debug)');
@@ -5272,7 +5274,8 @@ const AnimalForm = ({
                     </div>
                     {animalToEdit && onDelete && (
                         <button 
-                            type="button" 
+                            type="button"
+                            data-tutorial-target="delete-animal-btn"
                             onClick={() => { 
                                 // Check if this animal was transferred TO the current user (not back to original owner)
                                 const isTransferredToMe = animalToEdit.originalOwnerId && userProfile && animalToEdit.originalOwnerId !== userProfile.userId_backend;
@@ -6710,6 +6713,7 @@ const AnimalList = ({ authToken, showModalMessage, onEditAnimal, onViewAnimal, o
                 <div className="flex items-center gap-2">
                     <button 
                         onClick={() => { onSetCurrentView('hidden-animals'); fetchHiddenAnimals(); }}
+                        data-tutorial-target="hidden-animals-btn"
                         className="text-gray-600 hover:text-gray-800 transition flex items-center gap-1 px-3 py-1.5 rounded-lg hover:bg-gray-100"
                         title="View Hidden Animals"
                     >
@@ -6764,7 +6768,7 @@ const AnimalList = ({ authToken, showModalMessage, onEditAnimal, onViewAnimal, o
                 <div className="flex flex-col sm:flex-row gap-3 pt-2 border-t border-gray-200 justify-between">
                     <div className="flex gap-3 items-center flex-wrap">
                         {/* Species dropdown */}
-                        <div className="flex gap-2 items-center">
+                        <div className="flex gap-2 items-center" data-tutorial-target="species-filter">
                             <span className='text-sm font-medium text-gray-700 whitespace-nowrap'>Species:</span>
                             <select 
                                 value={selectedSpecies.length === speciesNames.length ? '' : selectedSpecies[0] || ''}
@@ -6786,7 +6790,7 @@ const AnimalList = ({ authToken, showModalMessage, onEditAnimal, onViewAnimal, o
                         </div>
                         
                         {/* Gender filter with icons */}
-                        <div className="flex gap-2 items-center">
+                        <div className="flex gap-2 items-center" data-tutorial-target="gender-filter">
                             <span className='text-sm font-medium text-gray-700 whitespace-nowrap'>Gender:</span>
                             {GENDER_OPTIONS.map(gender => {
                                 const isSelected = selectedGenders.includes(gender);
@@ -6808,7 +6812,7 @@ const AnimalList = ({ authToken, showModalMessage, onEditAnimal, onViewAnimal, o
                     </div>
                     
                     {/* Status dropdown on right */}
-                    <div className="flex gap-2 items-center">
+                    <div className="flex gap-2 items-center" data-tutorial-target="status-filter">
                         <span className='text-sm font-medium text-gray-700 whitespace-nowrap'>Status:</span>
                         <select value={statusFilter} onChange={handleStatusFilterChange} 
                             className="p-2 border border-gray-300 rounded-lg shadow-sm focus:ring-primary focus:border-primary transition min-w-[150px]"
@@ -6921,6 +6925,7 @@ const AnimalList = ({ authToken, showModalMessage, onEditAnimal, onViewAnimal, o
                                     {!isBulkMode && (
                                         <button
                                             onClick={() => toggleBulkDeleteMode(species)}
+                                            data-tutorial-target="bulk-delete-btn"
                                             className="p-2 hover:bg-gray-200 rounded-lg transition"
                                             title="Delete Multiple"
                                         >
@@ -8051,7 +8056,8 @@ const App = () => {
                                                 setPreSelectedTransferAnimal(animalToView);
                                                 setPreSelectedTransactionType('animal-sale');
                                                 setCurrentView('budget');
-                                            }} 
+                                            }}
+                                            data-tutorial-target="transfer-animal-btn"
                                             className="bg-accent hover:bg-accent/90 text-white font-semibold py-2 px-4 rounded-lg transition flex items-center gap-2"
                                         >
                                             <ArrowLeftRight size={16} />
@@ -8193,7 +8199,7 @@ const App = () => {
 
                         {/* Tags Section */}
                         {animalToView.tags && animalToView.tags.length > 0 && (
-                            <div className="border-2 border-gray-300 rounded-lg p-6 mb-6">
+                            <div data-tutorial-target="tags-section" className="border-2 border-gray-300 rounded-lg p-6 mb-6">
                                 <h3 className="text-lg font-semibold text-gray-800 mb-3">Tags</h3>
                                 <div className="flex flex-wrap gap-2">
                                     {animalToView.tags.map((tag, idx) => (
@@ -8211,6 +8217,7 @@ const App = () => {
                                 <h3 className="text-lg font-semibold text-gray-800">Parents</h3>
                                 <button
                                     onClick={() => setShowPedigreeChart(true)}
+                                    data-tutorial-target="pedigree-btn"
                                     className="flex items-center gap-2 px-3 py-1.5 bg-primary hover:bg-primary/90 text-black text-sm font-semibold rounded-lg transition"
                                 >
                                     <FileText size={16} />
@@ -8618,7 +8625,7 @@ const App = () => {
                             <DollarSign size={18} className="mb-1" />
                             <span>Budget</span>
                         </button>
-                        <button onClick={() => setCurrentView('genetics-calculator')} className={`px-4 py-2 text-xs font-medium rounded-lg transition duration-150 flex flex-col items-center ${currentView === 'genetics-calculator' ? 'bg-primary text-black shadow-md' : 'text-gray-600 hover:bg-gray-100'}`}>
+                        <button onClick={() => setCurrentView('genetics-calculator')} data-tutorial-target="genetics-btn" className={`px-4 py-2 text-xs font-medium rounded-lg transition duration-150 flex flex-col items-center ${currentView === 'genetics-calculator' ? 'bg-primary text-black shadow-md' : 'text-gray-600 hover:bg-gray-100'}`}>
                             <Cat size={18} className="mb-1" />
                             <span>Genetics</span>
                         </button>
@@ -8637,6 +8644,7 @@ const App = () => {
                             onClick={() => setShowUserSearchModal(true)} 
                             className="flex flex-col items-center justify-center bg-gray-100 hover:bg-gray-200 text-gray-600 py-2 px-3 rounded-lg transition duration-150 shadow-sm"
                             title="Search Users by Name or ID"
+                            data-tutorial-target="global-search-btn"
                         >
                             <Search size={18} className="mb-1" />
                             <span className="text-xs">Search</span>
@@ -8647,6 +8655,7 @@ const App = () => {
                                 setShowNotifications(true);
                                 fetchNotificationCount();
                             }}
+                            data-tutorial-target="notification-bell"
                             className="relative flex flex-col items-center justify-center bg-gray-100 hover:bg-gray-200 text-gray-600 py-2 px-3 rounded-lg transition duration-150 shadow-sm"
                             title="Notifications"
                         >
@@ -8680,6 +8689,7 @@ const App = () => {
                                 onClick={() => setShowUserSearchModal(true)} 
                                 className="flex items-center justify-center bg-gray-100 hover:bg-gray-200 text-gray-600 p-2 rounded-lg transition duration-150 shadow-sm"
                                 title="Search"
+                                data-tutorial-target="global-search-btn"
                             >
                                 <Search size={18} />
                             </button>
@@ -8689,6 +8699,7 @@ const App = () => {
                                     setShowNotifications(true);
                                     fetchNotificationCount();
                                 }}
+                                data-tutorial-target="notification-bell"
                                 className="relative flex items-center justify-center bg-gray-100 hover:bg-gray-200 text-gray-600 p-2 rounded-lg transition duration-150 shadow-sm"
                                 title="Notifications"
                             >
@@ -8724,7 +8735,7 @@ const App = () => {
                             <DollarSign size={16} className="inline mb-0.5" />
                             <span className="block">Budget</span>
                         </button>
-                        <button onClick={() => setCurrentView('genetics-calculator')} className={`flex-1 px-2 py-2 text-xs font-medium rounded-lg transition duration-150 ${currentView === 'genetics-calculator' ? 'bg-primary text-black shadow-md' : 'text-gray-600 hover:bg-gray-100'}`}>
+                        <button onClick={() => setCurrentView('genetics-calculator')} data-tutorial-target="genetics-btn" className={`flex-1 px-2 py-2 text-xs font-medium rounded-lg transition duration-150 ${currentView === 'genetics-calculator' ? 'bg-primary text-black shadow-md' : 'text-gray-600 hover:bg-gray-100'}`}>
                             <Cat size={16} className="inline mb-0.5" />
                             <span className="block">Genetics</span>
                         </button>
@@ -8922,7 +8933,7 @@ const App = () => {
                     
                     {/* Community Activity Banner */}
                     {(newestUsers.length > 0 || activeUsers.length > 0) && (
-                        <div className="flex-1 min-w-0 bg-gradient-to-r from-primary/20 to-accent/20 p-3 rounded-lg border border-primary/30">
+                        <div className="flex-1 min-w-0 bg-gradient-to-r from-primary/20 to-accent/20 p-3 rounded-lg border border-primary/30" data-tutorial-target="community-activity">
                             <h3 className="text-xs font-semibold text-gray-800 mb-2 flex items-center">
                                 <Users size={14} className="mr-2 text-primary-dark" />
                                 Community Activity

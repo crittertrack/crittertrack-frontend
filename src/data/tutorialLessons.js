@@ -49,26 +49,29 @@ export const TUTORIAL_LESSONS = {
         {
           stepNumber: 2,
           title: 'Select a Species',
-          content: 'Choose a species from the available options. If your species isn\'t listed, you can add a custom species by selecting "add new species" (bottom right, highlight) where you can create a new species.',
+          content: 'Choose a species from the available options. For the sake of this tutorial, please select "Fancy Mouse". If your species isn\'t listed, you can add a custom species by selecting "add new species" (bottom right, highlight) where you can create a new species.',
           highlightElement: '[data-tutorial-target="add-new-species-btn"]',
           tips: [
-            'Common species like Fancy Mouse, Fancy Rat and Various Hamsters are pre-loaded'
+            'Common species like Fancy Mouse, Fancy Rat and Various Hamsters are pre-loaded',
+            'For this tutorial: select Fancy Mouse'
           ]
         },
         {
           stepNumber: 3,
           title: 'Fill in Basic Information',
-          content: 'Enter your animal\'s name, gender, and birthdate.',
+          content: 'Enter your animal\'s name, gender, and birthdate in the General Information section. You\'ll also see fields for Breeder ID, prefix, suffix, and other details.',
+          highlightElement: '[data-tutorial-target="general-info-container"]',
           tips: [
             'The name should be unique for easy identification',
             'Select the correct gender for genetics tracking',
-            'Birthdate helps track age and breeding timeline'
+            'Birthdate helps track age and breeding timeline',
+            'Breeder ID, prefix, and suffix are optional'
           ]
         },
         {
           stepNumber: 4,
           title: 'Add Animal Details',
-          content: 'You can optionally add color, coat type, genetic code, and other details. Upload a photo so you can easily find your animal later!',
+          content: 'You can optionally add color, coat type, genetic code, and other details.',
           tips: [
             'Photos help identify animals at a glance',
             'Color and coat information is useful for genetics',
@@ -79,10 +82,93 @@ export const TUTORIAL_LESSONS = {
           stepNumber: 5,
           title: 'Save Your Animal',
           content: 'Click "Save Animal" to add it to your collection. Your animal will be assigned a unique CritterTrack ID.',
+          highlightElement: '[data-tutorial-target="save-animal-btn"]',
           tips: [
             'Your animal is now in your collection',
             'You can edit or delete it anytime',
             'Share it publicly to show other breeders'
+          ]
+        }
+      ]
+    },
+    {
+      id: 'view-edit-animals',
+      title: '1.5. Viewing & Editing Animals 📝',
+      description: 'Learn how to view animal details and edit your animals.',
+      category: 'core-features',
+      steps: [
+        {
+          stepNumber: 1,
+          title: 'View Animal Details',
+          content: 'Click on any animal card in your My Animals section to view its full details, including photos, pedigree, offspring, and more.',
+          waitForNavigation: true,
+          tips: [
+            'Click anywhere on an animal card to open details',
+            'Scroll through to see all information',
+            'View pedigree chart, offspring list, and breeding history',
+            'See all tags and genetic information'
+          ]
+        },
+        {
+          stepNumber: 2,
+          title: 'Edit Animal Information',
+          content: 'In the animal detail view, click the "Edit" button in the top right corner to modify any information about your animal.',
+          highlightElement: '[data-tutorial-target="edit-animal-btn"]',
+          waitForAction: true,
+          tips: [
+            'Update photos, name, colors, or genetic codes',
+            'Change status (Breeder, Pet, Sold, etc.)',
+            'Set breeding flags (Mating, Pregnant, Nursing)',
+            'Add or remove tags',
+            'Toggle public/private visibility'
+          ]
+        },
+        {
+          stepNumber: 3,
+          title: 'Animal Photos',
+          content: 'Upload multiple photos to help identify your animals. Photos appear on cards and in the detail view. You can set a primary photo that shows on the card.',
+          highlightElement: '[data-tutorial-target="photo-upload-section"]',
+          tips: [
+            'Drag and drop photos or click to upload',
+            'Good photos help with identification',
+            'Update photos as animals mature',
+            'Primary photo shows on animal cards'
+          ]
+        },
+        {
+          stepNumber: 4,
+          title: 'Status & Breeding Flags',
+          content: 'Set your animal\'s status (Breeder, Pet, Sold, Retired, Deceased) in the status dropdown. Below that, you\'ll find breeding flags (Mating, Pregnant, Nursing) and privacy settings to organize your collection and track breeding activities.',
+          highlightElement: '[data-tutorial-target="status-dropdown"],[data-tutorial-target="status-flags-container"]',
+          tips: [
+            'Status helps filter and organize animals',
+            'Breeding flags show on animal cards with icons',
+            'Pregnant/Nursing flags only available for females',
+            'Update status as situations change'
+          ]
+        },
+        {
+          stepNumber: 5,
+          title: 'Public vs Private',
+          content: 'Toggle the "Public" setting to control whether other breeders can see this animal. Public animals appear in global search and on your public profile.',
+          highlightElement: '[data-tutorial-target="status-flags-container"]',
+          tips: [
+            'Private animals are only visible to you',
+            'Public animals help other breeders find genetics',
+            'You can change visibility anytime',
+            'Public animals can be used in other breeders\' pedigrees'
+          ]
+        },
+        {
+          stepNumber: 6,
+          title: 'Deleting Animals',
+          content: 'If you need to remove an animal, use the "Delete" button. Note: You cannot delete animals with offspring - you must delete offspring first. Sold animals cannot be deleted.',
+          highlightElement: '[data-tutorial-target="delete-animal-btn"]',
+          tips: [
+            'Deletion is permanent - cannot be undone',
+            'Cannot delete animals with offspring',
+            'Sold/transferred animals show "Return" instead',
+            'Consider marking as Deceased instead of deleting'
           ]
         }
       ]
@@ -109,6 +195,7 @@ export const TUTORIAL_LESSONS = {
           title: 'Assign a Sire (Father)',
           content: 'In the "Pedigree: Sire and Dam 🌳" section, click on the Sire field to select the father. You can search your own animals or the global database. The global database shows all animals marked as public by other breeders. Note: other breeders can reject the use of their animals in your pedigree.',
           highlightElement: '[data-tutorial-target="pedigree-section"]',
+          hideOnModal: true,
           tips: [
             'The sire must be male',
             'Global search shows animals marked public by other users',
@@ -121,6 +208,7 @@ export const TUTORIAL_LESSONS = {
           title: 'Assign a Dam (Mother)',
           content: 'Use the Dam field to select a female parent. Similar to the sire, you can search your own animals or the global database. The global database shows all animals marked as public by other breeders. Other breeders can reject the use of their animals in your pedigree.',
           highlightElement: '[data-tutorial-target="pedigree-section"]',
+          hideOnModal: true,
           tips: [
             'The dam must be female',
             'Global search shows animals marked public by other users',
@@ -194,10 +282,23 @@ export const TUTORIAL_LESSONS = {
         },
         {
           stepNumber: 5,
-          title: 'Litter Information',
-          content: 'Each litter shows the COI, number of offspring, and breeding pair info. Use this to track your breeding program!',
+          title: 'Save the Litter',
+          content: 'Once you\'ve set the parents and linked or created offspring, click the "Create Litter" button to save it.',
+          highlightElement: '[data-tutorial-target="create-litter-btn"]',
           tips: [
-            'Lower COI is generally better for health',
+            'You can add more offspring later',
+            'Edit litters anytime',
+            'COI is calculated automatically'
+          ]
+        },
+        {
+          stepNumber: 6,
+          title: 'Litter Information',
+          content: 'Each litter card shows the litter name, birth date, sire and dam names, offspring count, and COI. Click on a litter card to expand it and view detailed information including all offspring, the "Link Animals" button, and the "Delete Litter" button. Note: deleting a litter does NOT delete the offspring - it only unlinks them from the litter.',
+          tips: [
+            'Litter cards are expand-on-click',
+            'View offspring list when expanded',
+            'Delete litter only unlinks offspring, doesn\'t delete them',
             'Keep detailed notes about the litter',
             'Review litters to plan future breedings'
           ]
@@ -375,12 +476,14 @@ export const TUTORIAL_LESSONS = {
         {
           stepNumber: 1,
           title: 'Search Your Animals',
-          content: 'Use the search bar in the My Animals section to quickly find your own animals by name.',
+          content: 'Use the search bar in the My Animals section to quickly find your own animals by name or ID.',
           highlightElement: '[data-tutorial-target="my-animals-search"]',
           tips: [
             'Search by partial name (e.g., "min" finds Minnie)',
+            'Search by animal ID (e.g., CT123)',
+            'Search by tags to find grouped animals',
             'Minimum 3 characters to search',
-            'Only searches your owned animals'
+            'Only searches your OWN animals'
           ]
         },
         {
@@ -389,9 +492,10 @@ export const TUTORIAL_LESSONS = {
           content: 'Click the Search button in the top navigation to search across all public animals and find other breeders in the CritterTrack community.',
           highlightElement: '[data-tutorial-target="global-search-btn"]',
           tips: [
-            'Search by animal ID format: CT123 or just 123',
-            'Find other breeders by name or ID',
-            'View public profiles and animals'
+            'Search breeders by name or breeder ID',
+            'Search animals by name or animal ID (CT123 or just 123)',
+            'Only shows public animals and profiles',
+            'View profiles and browse their animals'
           ]
         },
         {
@@ -435,7 +539,8 @@ export const TUTORIAL_LESSONS = {
           tips: [
             'My Animals shows only your owned animals',
             'All Animals includes view-only animals',
-            'Breeding filters help track active pairs and expecting mothers'
+            'Mating filter applies to both males and females',
+            'Pregnant/Nursing can only be set on female animals in their details'
           ]
         },
         {
@@ -452,49 +557,116 @@ export const TUTORIAL_LESSONS = {
       ]
     },
     {
-      id: 'genetics-calculator',
-      title: 'Genetics Calculator 🧬',
-      description: 'Calculate genetic outcomes for mouse breeding pairs.',
-      category: 'advanced',
+      id: 'tags-management',
+      title: 'Tags & Mass Management 🏷️',
+      description: 'Organize animals with tags and manage multiple animals at once.',
+      category: 'organization',
       steps: [
         {
           stepNumber: 1,
-          title: 'What is the Genetics Calculator?',
-          content: 'Predict offspring phenotypes (appearance) based on parental genetics. Currently optimized for mice.',
+          title: 'What are Tags?',
+          content: 'Tags are custom labels you can add to animals to organize them into groups. Examples: "For Sale", "Show Quality", "Breeding Stock", "My Favorites".',
           tips: [
-            'Works best with known genetic codes',
-            'Shows probability of each phenotype',
-            'Helps plan for desired traits'
+            'Create unlimited custom tags',
+            'Add multiple tags to one animal',
+            'Search by tags to quickly find groups',
+            'Use tags for sales, projects, or breeding lines'
           ]
         },
         {
           stepNumber: 2,
-          title: 'Enter Parent Genetics',
-          content: 'Select or enter the genetic codes for sire and dam. Use standard mouse genetics notation.',
+          title: 'Adding Tags to Animals',
+          content: 'Click on an animal card to view details, then click the "Edit" button in the top right corner. The tag feature is located in the EDIT screen, not the regular detail view. Scroll down to find the Tags section where you can add or remove tags.',
+          highlightElement: '[data-tutorial-target="tags-edit-section"]',
           tips: [
-            'Format: e.g., +/+ for wildtype, a/a for homozygous recessive',
-            'Multiple genes can be entered',
-            'See examples in the calculator'
+            'Tags are only editable in Edit mode',
+            'Tags are searchable in the My Animals search',
+            'Use consistent naming for better organization',
+            'Great for tracking animals over time',
+            'Share common tag systems with other breeders'
           ]
         },
         {
           stepNumber: 3,
-          title: 'View Predictions',
-          content: 'The calculator shows all possible offspring combinations and their probabilities.',
+          title: 'Mass Delete Animals',
+          content: 'Go back to your main My Animals list. Need to remove multiple animals at once? Use the species filter to view a specific species, then click the trash can icon to enable bulk delete mode where you can select and delete multiple animals.',
+          highlightElement: '[data-tutorial-target="bulk-delete-btn"]',
           tips: [
-            'Percentages add up to 100%',
-            'Plan for recessive traits',
-            'Understand genetic inheritance'
+            'First return to the main animal list',
+            'Filter by species first to target specific animals',
+            'Click the trash can icon to enter bulk delete mode',
+            'Select animals you want to delete',
+            'Confirm deletion - this cannot be undone',
+            'Useful when retiring a breeding line or species'
+          ]
+        }
+      ]
+    },
+    {
+      id: 'notifications',
+      title: 'Notifications System 🔔',
+      description: 'Manage transfer requests, view-only offers, and breeder communications.',
+      category: 'communication',
+      steps: [
+        {
+          stepNumber: 1,
+          title: 'What Are Notifications?',
+          content: 'The bell icon in the header shows your pending notifications. You\'ll receive notifications for transfer requests, view-only offers, and pedigree requests from other breeders.',
+          highlightElement: '[data-tutorial-target="notification-bell"]',
+          tips: [
+            'Red badge shows number of unread notifications',
+            'Click the bell to view all notifications',
+            'Notifications include: transfer requests, view-only offers, pedigree usage',
+            'Accept or reject requests directly from notifications'
+          ]
+        },
+        {
+          stepNumber: 2,
+          title: 'Transfer Requests',
+          content: 'When someone wants to transfer an animal to you (sale), you\'ll receive a notification. Review the animal details and accept or reject the transfer.',
+          tips: [
+            'Review animal info before accepting',
+            'Accepting transfers ownership to you',
+            'Original owner keeps view-only access',
+            'You cannot delete transferred animals (only Return)',
+            'Rejecting removes the transfer request'
+          ]
+        },
+        {
+          stepNumber: 3,
+          title: 'View-Only Offers',
+          content: 'When you record a Purchase, the original breeder receives a view-only offer. They can accept to track their animal in your collection (read-only).',
+          tips: [
+            'View-only access lets breeders track their bloodlines',
+            'No editing allowed - just viewing',
+            'Great for tracking genetic diversity',
+            'Accept offers from trusted breeders',
+            'You can hide view-only animals from your list'
           ]
         },
         {
           stepNumber: 4,
-          title: 'Save Your Genes',
-          content: 'Save frequently-used genetic combinations for quick reference.',
+          title: 'Managing Hidden Animals',
+          content: 'Animals you\'ve sold or animals linked to you as the breeder after purchase by another user can be hidden from your general My/All Animals list. Click the "Hidden" button to view and manage these animals. They\'ll be shown in a separate section instead of cluttering your main list.',
+          highlightElement: '[data-tutorial-target="hidden-animals-btn"]',
           tips: [
-            'Build a library of your lines',
-            'Share with other breeders',
-            'Reference for future breedings'
+            'Hide sold animals to keep your active list clean',
+            'View-only animals can also be hidden',
+            'Access hidden animals anytime via the Hidden button',
+            'Unhide anytime to restore visibility',
+            'Useful for managing large sold/view-only collections'
+          ]
+        },
+        {
+          stepNumber: 5,
+          title: 'Pedigree Usage Requests',
+          content: 'When another breeder uses your public animal as a parent in their pedigree, you\'ll receive a notification. You can accept or reject this usage.',
+          tips: [
+            'Public animals can be used in pedigrees',
+            'You control who can use your animals',
+            'Rejecting removes the animal from their pedigree',
+            'Good practice: accept legitimate uses, reject misuse',
+            'Helps maintain accurate genetics records'
           ]
         }
       ]
@@ -508,20 +680,23 @@ export const TUTORIAL_LESSONS = {
         {
           stepNumber: 1,
           title: 'Quick Review: Transfer System',
-          content: 'The Budget tab\'s Transfer/Notify system lets you sell animals with automatic ownership transfer and buyer notifications. This lesson covers advanced features and tips.',
+          content: 'Click on any animal card to view its details. The Transfer button on an animal detail screen is a quick shortcut to the Budget tab\'s Transfer/Notify system, which lets you sell animals with automatic ownership transfer and buyer notifications. This lesson covers advanced features and tips.',
+          highlightElement: '[data-tutorial-target="transfer-animal-btn"]',
           tips: [
-            'Review: Use Budget tab → Add Transaction → Animal Sale → Transfer mode',
-            'Quick shortcut: Click Transfer button on any animal card',
+            'Transfer button is a shortcut to Budget → Animal Sale → Transfer',
+            'Opens the transaction form with this animal pre-selected',
             'This lesson focuses on advanced features not covered in basics'
           ]
         },
         {
           stepNumber: 2,
           title: 'Managing View-Only Access',
-          content: 'After selling an animal, you keep view-only access to track your breeding lines. You can\'t edit sold animals, but you can see their pedigree, offspring, and updates.',
+          content: 'Go back to your My Animals list. After selling an animal, you keep view-only access to track your breeding lines. You can\'t edit sold animals, but you can see their pedigree, offspring, and updates. Use the status dropdown filter to view your sold animals.',
+          highlightElement: '[data-tutorial-target="status-filter"]',
           tips: [
+            'Return to your main animal list',
             'View-only animals appear with an orange "Sold" badge',
-            'Use filters to show/hide sold animals from your main list',
+            'Use the Sold status filter to see all sold animals',
             'Buyers can\'t delete animals - they can only Return them',
             'Great for tracking your breeding program\'s success'
           ]
@@ -540,18 +715,18 @@ export const TUTORIAL_LESSONS = {
         {
           stepNumber: 4,
           title: 'Returning Animals',
-          content: 'Buyers can return animals to the original owner using the Delete/Return button. This removes their ownership and notifies the seller, automatically removing view-only access.',
+          content: 'For animals you\'ve purchased via transfer, the Delete button changes to a Return button. Buyers can return animals to the original owner using this Return button. This removes their ownership and notifies the seller, automatically removing view-only access.',
           tips: [
+            'Transferred animals show "Return" instead of "Delete"',
             'Returns are permanent - can\'t be undone',
             'Seller gets notification of the return',
-            'Transaction stays in budget history for records',
-            'Use notes field to explain return reason'
+            'Transaction stays in budget history for records'
           ]
         },
         {
           stepNumber: 5,
           title: 'Tutorial Complete! 🎉',
-          content: 'You\'ve learned the advanced transfer features! Check the box below to mark this tutorial as complete.',
+          content: 'You\'ve learned the advanced transfer features! Click the Done button to move on.',
           isCompletionStep: true,
           tips: [
             'Practice transfers with other users to master the system',
@@ -571,8 +746,12 @@ export const TUTORIAL_LESSONS = {
         {
           stepNumber: 1,
           title: 'View Pedigree Chart',
-          content: 'Click "View Pedigree" on any animal to see its family tree spanning 4 generations.',
+          content: 'First, click on any animal card to open its detail view. Then click the "Pedigree" button to see its family tree spanning 4 generations.',
+          highlightElement: '[data-tutorial-target="pedigree-btn"]',
+          waitForAction: true,
+          hideOnModal: true,
           tips: [
+            'Open an animal detail view first',
             'Shows all ancestors back to great-grandparents',
             'Visual layout for easy understanding',
             'Click ancestors to see their details'
@@ -602,6 +781,7 @@ export const TUTORIAL_LESSONS = {
           stepNumber: 4,
           title: 'Export as PDF',
           content: 'Download your pedigree chart as a high-quality PDF for printing or sharing.',
+          highlightElement: '[data-tutorial-target="download-pdf-btn"]',
           tips: [
             'Professional format for records',
             'Share with buyers',
@@ -619,15 +799,28 @@ export const TUTORIAL_LESSONS = {
         {
           stepNumber: 1,
           title: 'What are Public Profiles?',
-          content: 'Make your animals visible to other breeders to showcase your breeding program.',
+          content: 'Make your animals visible to other breeders to showcase your breeding program. The Community Activity section shows the newest members and most active breeders in the CritterTrack community. Click on any profile to view their public animals.',
+          highlightElement: '[data-tutorial-target="community-activity"]',
           tips: [
             'Help other breeders find genes',
             'Build your reputation',
-            'Connect with the community'
+            'Connect with the community',
+            'Browse Community Activity to discover new breeders'
           ]
         },
         {
           stepNumber: 2,
+          title: 'Community Activity',
+          content: 'The Community Activity section displays two types of users: Newest Members (users who recently joined CritterTrack) and Active Breeders (users who have been actively updating their animals). Click on any breeder card to view their public profile and animals.',
+          highlightElement: '[data-tutorial-target="community-activity"]',
+          tips: [
+            'Active breeders show recent activity',
+            'Scroll horizontally to see more profiles',
+            'Great way to discover new breeding programs'
+          ]
+        },
+        {
+          stepNumber: 3,
           title: 'Make Animals Public',
           content: 'Toggle "Public" on individual animals to display them on your profile.',
           tips: [
@@ -637,7 +830,7 @@ export const TUTORIAL_LESSONS = {
           ]
         },
         {
-          stepNumber: 3,
+          stepNumber: 4,
           title: 'Your Breeder Profile',
           content: 'Other breeders can find your profile and see all your public animals, organized by species.',
           tips: [
@@ -647,7 +840,7 @@ export const TUTORIAL_LESSONS = {
           ]
         },
         {
-          stepNumber: 4,
+          stepNumber: 5,
           title: 'Global Search',
           content: 'Use Global Search to find other breeders and their animals. View pedigrees of public animals.',
           tips: [
@@ -667,11 +860,12 @@ export const TUTORIAL_LESSONS = {
         {
           stepNumber: 1,
           title: 'What is COI?',
-          content: 'COI measures genetic relatedness. Higher COI means less genetic diversity and higher risk of genetic problems.',
+          content: 'COI measures genetic relatedness. Higher COI means less genetic diversity and higher risk of inheritance of genetic traits. However, COI has both pros and cons: Lower COI increases genetic diversity and reduces genetic health risks, but may lose desired traits. Higher COI can fix desirable traits but increases risk of inherited health issues. Use COI as a tool, not an absolute rule.',
           tips: [
             'Calculated from pedigree depth',
             'Expressed as a percentage',
-            'Lower is better (aim for < 10%)'
+            'Consider breeding goals when evaluating COI',
+            'Balance genetic diversity with trait consistency'
           ]
         },
         {
@@ -687,21 +881,76 @@ export const TUTORIAL_LESSONS = {
         {
           stepNumber: 3,
           title: 'Interpreting COI Results',
-          content: 'COI < 5% = Low (excellent), 5-10% = Moderate (acceptable), > 10% = High (concerning)',
+          content: 'COI is typically expressed as a percentage. Lower percentages (< 5%) indicate less inbreeding, moderate percentages (5-10%) show some common ancestry, and higher percentages (> 10%) indicate closer genetic relationships. Each breeding program may have different goals and acceptable ranges.',
           tips: [
-            'Plan breedings to minimize COI',
             'Track COI trends over generations',
-            'Use genetic diversity wisely'
+            'Use genetic diversity wisely',
+            'Consider your specific breeding goals'
           ]
         },
         {
           stepNumber: 4,
           title: 'Using COI to Plan Breedings',
-          content: 'Check COI before deciding on a breeding pair. Avoid high-COI pairings that could cause health problems.',
+          content: 'Check COI before deciding on a breeding pair. Use COI data alongside other factors like health, temperament, and desired traits to make informed breeding decisions.',
           tips: [
             'Use COI as one factor in breeding decisions',
             'Document your reasoning',
             'Share with community for feedback'
+          ]
+        }
+      ]
+    },
+    {
+      id: 'genetics-calculator',
+      title: 'Genetics Calculator 🧬',
+      description: 'Calculate genetic outcomes for mouse breeding pairs.',
+      category: 'advanced',
+      steps: [
+        {
+          stepNumber: 1,
+          title: 'What is the Genetics Calculator?',
+          content: 'Predict offspring phenotypes (appearance) based on parental genetics. Currently optimized for mice. Click the Genetics button in the header to access the calculator.',
+          highlightElement: '[data-tutorial-target="genetics-btn"]',
+          tips: [
+            'Works best with known genetic codes',
+            'Shows probability of each phenotype',
+            'Helps plan for desired traits',
+            'Access from the top navigation bar'
+          ]
+        },
+        {
+          stepNumber: 2,
+          title: 'Enter Parent Genetics',
+          content: 'Select or enter the genetic codes for sire and dam. Use standard mouse genetics notation. You must select at least one gene for each parent to calculate outcomes.',
+          tips: [
+            'Format: e.g., +/+ for wildtype, a/a for homozygous recessive',
+            'Multiple genes can be entered',
+            'At least 1 gene per parent is required',
+            'See examples in the calculator'
+          ]
+        },
+        {
+          stepNumber: 3,
+          title: 'Calculate Offspring',
+          content: 'Once you\'ve selected at least one gene for each parent, click the "Calculate Offspring" button to see all possible genetic outcomes.',
+          highlightElement: '[data-tutorial-target="calculate-offspring-btn"]',
+          tips: [
+            'Button only works when genes are selected',
+            'Need at least 1 gene per parent',
+            'Results show immediately after clicking',
+            'You can modify genes and recalculate anytime'
+          ]
+        },
+        {
+          stepNumber: 4,
+          title: 'View Predictions',
+          content: 'The calculator shows all possible offspring combinations and their probabilities in the Possible Offspring Outcomes section below.',
+          highlightElement: '[data-tutorial-target="offspring-results"]',
+          tips: [
+            'Percentages add up to 100%',
+            'Plan for recessive traits',
+            'Understand genetic inheritance',
+            'Use results to plan breeding pairs'
           ]
         }
       ]

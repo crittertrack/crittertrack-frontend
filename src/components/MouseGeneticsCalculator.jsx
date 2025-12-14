@@ -1782,6 +1782,7 @@ const MouseGeneticsCalculator = ({ API_BASE_URL, authToken }) => {
                   ? 'bg-pink-600 hover:bg-pink-700 cursor-pointer'
                   : 'bg-gray-400 cursor-not-allowed opacity-50'
               }`}
+              data-tutorial-target="calculate-offspring-btn"
             >
               Calculate Offspring
             </button>
@@ -1789,7 +1790,7 @@ const MouseGeneticsCalculator = ({ API_BASE_URL, authToken }) => {
 
           {/* Offspring Results */}
           {offspringResults && (
-            <div className="mt-6 bg-purple-50 rounded-lg p-6 border-2 border-purple-300">
+            <div className="mt-6 bg-purple-50 rounded-lg p-6 border-2 border-purple-300" data-tutorial-target="offspring-results">
               <h2 className="text-xl font-semibold text-purple-800 mb-4">Possible Offspring Outcomes</h2>
               <div className="space-y-3">
                 {offspringResults.map((result, idx) => {

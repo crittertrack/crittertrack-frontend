@@ -46,6 +46,32 @@ export const TutorialOverlay = React.forwardRef(({ lessonId, onClose, onComplete
     setShowAdvancedFeaturesPrompt(false);
   }, [lessonId]);
 
+  // Handle waitForAction - automatically advance when highlighted element is clicked
+  useEffect(() => {
+    if (!currentStep?.waitForAction || !currentStep?.highlightElement) {
+      return;
+    }
+
+    const handleElementClick = (e) => {
+      // Check if the clicked element or any parent matches the selector
+      const target = e.target.closest(currentStep.highlightElement);
+      if (target) {
+        // Small delay to let the click action complete before advancing
+        setTimeout(() => {
+          if (!isLastStep) {
+            setCurrentStepIndex(prev => prev + 1);
+          }
+        }, 300);
+      }
+    };
+
+    document.addEventListener('click', handleElementClick, true);
+
+    return () => {
+      document.removeEventListener('click', handleElementClick, true);
+    };
+  }, [currentStep, isLastStep]);
+
   const handleComplete = useCallback(() => {
     if (lesson) {
       // Determine if this is the final onboarding lesson (budget-basics)
@@ -407,42 +433,15 @@ export const TutorialHighlight = ({ elementSelector, onHighlightClose, isModalOp
       }
 
       const elements = document.querySelectorAll(elementSelector);
+      
       if (elements.length === 0) {
         // Element not found - hide the highlight
         setPosition(null);
         return;
       }
 
-      // Check for visible modal overlays (but not the tutorial panel)
-      // Look for elements with fixed positioning and inset-0 (which covers full screen)
-      const potentialModals = document.querySelectorAll('[class*="inset-0"][class*="fixed"]');
-      let hasVisibleModal = false;
-      
-      for (const modal of potentialModals) {
-        const styles = window.getComputedStyle(modal);
-        const display = styles.display;
-        const visibility = styles.visibility;
-        const classes = modal.className;
-        
-        // Check if it's actually visible and not the tutorial overlay
-        if (display !== 'none' && visibility !== 'hidden') {
-          // Skip if it's our highlight overlay (has z-[9998])
-          if (classes.includes('z-[9998]') || classes.includes('pointer-events-none')) {
-            continue;
-          }
-          // Skip if it's the tutorial panel background (has gradient)
-          if (classes.includes('bg-gradient')) {
-            continue;
-          }
-          hasVisibleModal = true;
-          break;
-        }
-      }
-
-      if (hasVisibleModal) {
-        setPosition(null);
-        return;
-      }
+      // Don't check for modals at all - let the highlight show regardless
+      // The tutorial overlay has a lower z-index than actual blocking modals anyway
 
       // Calculate bounding box that encompasses all visible matching elements
       let minTop = Infinity;
