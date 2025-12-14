@@ -24,12 +24,14 @@ export const InfoTab = ({ onClose }) => {
 
   const handleStartTutorial = (lessonId) => {
     setRunningTutorialId(lessonId);
+    onClose(); // Close the Help modal when starting tutorial
   };
 
   const handleRestartTutorial = (lessonId, e) => {
     e.stopPropagation();
     restartTutorial(lessonId);
     setRunningTutorialId(lessonId);
+    onClose(); // Close the Help modal when restarting tutorial
   };
 
   const handleTutorialClose = () => {
@@ -148,10 +150,6 @@ export const InfoTab = ({ onClose }) => {
     );
   };
 
-  // Stats Row
-  const completedOnboarding = onboardingLessons.filter(l => isTutorialCompleted(l.id)).length;
-  const completedFeatures = featureLessons.filter(l => isTutorialCompleted(l.id)).length;
-
   return (
     <>
       {/* Full-screen backdrop */}
@@ -182,18 +180,6 @@ export const InfoTab = ({ onClose }) => {
 
           {/* Scrollable Content Area */}
           <div className="flex-1 overflow-y-auto p-6">
-            {/* Stats */}
-            <div className="grid grid-cols-2 gap-4 mb-6">
-              <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
-                <p className="text-sm text-blue-600 font-semibold">Getting Started</p>
-                <p className="text-3xl font-bold text-blue-900">{completedOnboarding}/{onboardingLessons.length}</p>
-              </div>
-              <div className="bg-purple-50 border border-purple-200 rounded-lg p-4">
-                <p className="text-sm text-purple-600 font-semibold">Advanced Features</p>
-                <p className="text-3xl font-bold text-purple-900">{completedFeatures}/{featureLessons.length}</p>
-              </div>
-            </div>
-
             {/* Tabs */}
             <div className="flex gap-4 mb-6 border-b border-gray-200">
               <button
@@ -204,7 +190,7 @@ export const InfoTab = ({ onClose }) => {
                     : 'border-transparent text-gray-600 hover:text-gray-800'
                 }`}
               >
-                🚀 Getting Started ({completedOnboarding}/{onboardingLessons.length})
+                🚀 Getting Started
               </button>
               <button
                 onClick={() => setActiveTab('advanced')}
@@ -214,7 +200,7 @@ export const InfoTab = ({ onClose }) => {
                     : 'border-transparent text-gray-600 hover:text-gray-800'
                 }`}
               >
-                ✨ Advanced Features ({completedFeatures}/{featureLessons.length})
+                ✨ Advanced Features
               </button>
             </div>
 

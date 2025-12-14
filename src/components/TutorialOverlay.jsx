@@ -313,7 +313,7 @@ export const TutorialOverlay = React.forwardRef(({ lessonId, onClose, onComplete
             </div>
 
             <p className="text-xs text-gray-500 text-center mt-4">
-              You can access all tutorials anytime from the Info tab (ℹ️)
+              You can access all tutorials anytime from the Help tab
             </p>
           </div>
         </div>

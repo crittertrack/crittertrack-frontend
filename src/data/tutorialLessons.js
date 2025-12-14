@@ -336,10 +336,9 @@ export const TUTORIAL_LESSONS = {
           content: 'Congratulations! You\'ve completed the Getting Started tutorial and learned the core features of CritterTrack. Check the box below to mark this tutorial as complete.',
           isCompletionStep: true,
           tips: [
-            'You can always restart tutorials from the Info tab',
+            'You can always restart tutorials from the Help tab',
             'Access advanced feature tutorials anytime',
-            'Your progress is saved automatically',
-            'Clear your browser cache? Your tutorial progress persists in our database'
+            'Explore all features at your own pace'
           ]
         }
       ]
@@ -362,7 +361,6 @@ export const TUTORIAL_LESSONS = {
           content: 'You\'ve mastered the basics! Now explore advanced tools: genetics calculators for predicting offspring, COI analysis for breeding decisions, advanced transfers & purchases, powerful search & filtering, and more. Each tutorial builds on previous knowledge - skip what you know and revisit anytime from the Help tab.',
           tips: [
             'These features help serious breeders take their program to the next level',
-            'You can pause and resume anytime - your progress is always saved',
             'Learn at your own pace - skip tutorials you already understand',
             'Access all tutorials anytime from the Help tab'
           ]
@@ -685,8 +683,7 @@ export const TUTORIAL_LESSONS = {
           isCompletionStep: true,
           tips: [
             'You\'ve mastered all major CritterTrack features!',
-            'Revisit any tutorial anytime from the Info tab (ℹ️)',
-            'Your progress is saved in our database',
+            'Revisit any tutorial anytime from the Help tab',
             'Share your knowledge with the breeder community',
             'Keep breeding responsibly and ethically!'
           ]

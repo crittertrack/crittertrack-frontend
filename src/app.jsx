@@ -8808,9 +8808,11 @@ const App = () => {
                     onComplete={(signal) => {
                         // Handle "start-advanced" signal from onboarding completion
                         if (signal === 'start-advanced') {
+                            // Start the first advanced features tutorial
                             setCurrentTutorialIndex(0);
                             setCurrentTutorialId(TUTORIAL_LESSONS.features[0].id);
                             setCurrentTutorialStep(null);
+                            setShowTutorialOverlay(true); // Ensure overlay stays visible
                             return;
                         }
 
