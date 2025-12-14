@@ -7234,6 +7234,7 @@ const App = () => {
     const [transferAnimal, setTransferAnimal] = useState(null);
     const [preSelectedTransferAnimal, setPreSelectedTransferAnimal] = useState(null);
     const [preSelectedTransactionType, setPreSelectedTransactionType] = useState(null);
+    const [budgetModalOpen, setBudgetModalOpen] = useState(false);
     const [transferUserQuery, setTransferUserQuery] = useState('');
     const [transferUserResults, setTransferUserResults] = useState([]);
     const [transferSelectedUser, setTransferSelectedUser] = useState(null);
@@ -7395,11 +7396,24 @@ const App = () => {
             return;
         }
 
-        // When viewing budget, advance to step 2 (where add expenses is explained)
+        // When viewing budget, advance to step 2 (where add transaction button is explained)
         if (currentView === 'budget' && currentTutorialStep?.stepNumber === 1) {
             tutorialOverlayRef.current.advanceStep();
         }
     }, [currentView, showTutorialOverlay, currentTutorialId, currentTutorialStep]);
+
+    // Auto-advance tutorial for lesson 6 (budget-basics) step 2 when Add Transaction clicked
+    useEffect(() => {
+        if (!showTutorialOverlay || currentTutorialId !== 'budget-basics' || !tutorialOverlayRef.current) {
+            return;
+        }
+
+        // When Add Transaction is clicked, advance from step 2 to step 3 (manual vs transfer)
+        if (budgetModalOpen && currentTutorialStep?.stepNumber === 2) {
+            tutorialOverlayRef.current.advanceStep();
+            setBudgetModalOpen(false); // Reset for next time
+        }
+    }, [budgetModalOpen, showTutorialOverlay, currentTutorialId, currentTutorialStep]);
 
     // Clear pre-selected transfer data when leaving budget view
     useEffect(() => {
@@ -8222,6 +8236,7 @@ const App = () => {
                         showModalMessage={showModalMessage}
                         preSelectedAnimal={preSelectedTransferAnimal}
                         preSelectedType={preSelectedTransactionType}
+                        onAddModalOpen={() => setBudgetModalOpen(true)}
                     />
                 );
             case 'hidden-animals':

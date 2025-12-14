@@ -277,7 +277,7 @@ export const TUTORIAL_LESSONS = {
         {
           stepNumber: 3,
           title: 'Animal Transactions: Manual vs Transfer',
-          content: 'For Animal Sales and Purchases, you\'ll choose a mode: Manual Entry (just record the transaction) or Transfer/Notify (actually transfer ownership and notify the other user).',
+          content: 'For Animal Sales and Purchases, you\'ll choose a mode: Manual Entry (just record the transaction) or Transfer/Notify (actually transfer ownership and/or notify the other user).',
           tips: [
             'Manual: Quick record-keeping, no ownership change',
             'Transfer/Notify: Real ownership transfer + notification system',
@@ -288,11 +288,11 @@ export const TUTORIAL_LESSONS = {
         {
           stepNumber: 4,
           title: 'Sale Workflow',
-          content: 'When selling an animal in Transfer mode: You select your animal → Choose the buyer (CritterTrack user) → Buyer receives notification → Buyer accepts → Ownership transfers and they get full access. Quick tip: You can also click the "Transfer" button on any animal\'s detail page to start a sale with that animal pre-selected!',
+          content: 'When selling an animal in Transfer mode: You select your animal → Choose the buyer (CritterTrack user) → Buyer receives notification → Buyer accepts → Ownership transfers to buyer, and you keep view-only access to track lineage. Quick tip: You can also click the "Transfer" button on any animal\'s detail page to start a sale with that animal pre-selected!',
           tips: [
             'Shortcut: Use the "Transfer" button on animal detail cards',
-            'Only your unsold animals appear in the dropdown',
-            'Buyer name is auto-filled from your profile',
+            'Seller keeps view-only access after sale (can\'t edit)',
+            'Buyer owns the animal but CANNOT delete it (can only Return)',
             'Transaction is recorded in both users\' budgets',
             'Sold animals are protected from being sold again'
           ]
