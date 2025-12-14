@@ -340,10 +340,11 @@ const BudgetingTab = ({ authToken, API_BASE_URL, showModalMessage }) => {
 
     // Calculate statistics
     const stats = filteredTransactions.reduce((acc, transaction) => {
-        if (transaction.type === 'animal-sale') {
+        // Handle both 'animal-sale'/'sale' formats
+        if (transaction.type === 'animal-sale' || transaction.type === 'sale') {
             acc.totalSales += transaction.price;
             acc.salesCount++;
-        } else if (transaction.type === 'animal-purchase') {
+        } else if (transaction.type === 'animal-purchase' || transaction.type === 'purchase') {
             acc.totalPurchases += transaction.price;
             acc.purchasesCount++;
         } else if (transaction.type === 'income') {
@@ -572,17 +573,17 @@ const BudgetingTab = ({ authToken, API_BASE_URL, showModalMessage }) => {
                                         </td>
                                         <td className="px-4 py-3 text-sm">
                                             <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${
-                                                transaction.type === 'animal-sale' 
+                                                (transaction.type === 'animal-sale' || transaction.type === 'sale')
                                                     ? 'bg-green-100 text-green-800' 
-                                                    : transaction.type === 'animal-purchase'
+                                                    : (transaction.type === 'animal-purchase' || transaction.type === 'purchase')
                                                     ? 'bg-red-100 text-red-800'
                                                     : transaction.type === 'expense'
                                                     ? 'bg-orange-100 text-orange-800'
                                                     : 'bg-blue-100 text-blue-800'
                                             }`}>
-                                                {transaction.type === 'animal-sale' 
+                                                {(transaction.type === 'animal-sale' || transaction.type === 'sale')
                                                     ? 'Animal Sale' 
-                                                    : transaction.type === 'animal-purchase'
+                                                    : (transaction.type === 'animal-purchase' || transaction.type === 'purchase')
                                                     ? 'Animal Purchase'
                                                     : transaction.type === 'expense'
                                                     ? 'Expense'
@@ -590,7 +591,7 @@ const BudgetingTab = ({ authToken, API_BASE_URL, showModalMessage }) => {
                                             </span>
                                         </td>
                                         <td className="px-4 py-3 text-sm text-gray-700">
-                                            {transaction.type === 'animal-sale' || transaction.type === 'animal-purchase' ? (
+                                            {(transaction.type === 'animal-sale' || transaction.type === 'sale' || transaction.type === 'animal-purchase' || transaction.type === 'purchase') ? (
                                                 <>
                                                     <div className="font-medium">{transaction.animalName || 'N/A'}</div>
                                                     {transaction.animalId && (
@@ -610,7 +611,7 @@ const BudgetingTab = ({ authToken, API_BASE_URL, showModalMessage }) => {
                                             {getCurrencySymbol()}{transaction.price.toFixed(2)}
                                         </td>
                                         <td className="px-4 py-3 text-sm text-gray-700">
-                                            {transaction.type === 'animal-sale' ? transaction.buyer : transaction.type === 'animal-purchase' ? transaction.seller : '-'}
+                                            {(transaction.type === 'animal-sale' || transaction.type === 'sale') ? transaction.buyer : (transaction.type === 'animal-purchase' || transaction.type === 'purchase') ? transaction.seller : '-'}
                                         </td>
                                         <td className="px-4 py-3 text-sm text-gray-500 max-w-xs truncate">
                                             {transaction.notes || '-'}
