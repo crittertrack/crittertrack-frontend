@@ -309,8 +309,8 @@ export const TutorialHighlight = ({ elementSelector, onHighlightClose, isModalOp
         return;
       }
 
-      const element = document.querySelector(elementSelector);
-      if (!element) {
+      const elements = document.querySelectorAll(elementSelector);
+      if (elements.length === 0) {
         // Element not found - hide the highlight
         setPosition(null);
         return;
@@ -347,13 +347,28 @@ export const TutorialHighlight = ({ elementSelector, onHighlightClose, isModalOp
         return;
       }
 
-      // Get the element's position
-      const rect = element.getBoundingClientRect();
+      // Calculate bounding box that encompasses all matching elements
+      let minTop = Infinity;
+      let minLeft = Infinity;
+      let maxBottom = -Infinity;
+      let maxRight = -Infinity;
+
+      elements.forEach(element => {
+        const rect = element.getBoundingClientRect();
+        minTop = Math.min(minTop, rect.top);
+        minLeft = Math.min(minLeft, rect.left);
+        maxBottom = Math.max(maxBottom, rect.bottom);
+        maxRight = Math.max(maxRight, rect.right);
+      });
+
+      const width = maxRight - minLeft;
+      const height = maxBottom - minTop;
+
       setPosition({
-        top: rect.top,
-        left: rect.left,
-        width: rect.width,
-        height: rect.height,
+        top: minTop,
+        left: minLeft,
+        width: width,
+        height: height,
       });
     };
 
