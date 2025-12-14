@@ -199,6 +199,7 @@ const BudgetingTab = ({ authToken, API_BASE_URL, showModalMessage }) => {
         }
 
         console.log('Starting API call...');
+        console.log('DEBUG - Before checks: selectedUser:', !!selectedUser, 'animalSaleMode:', animalSaleMode, 'type:', formData.type);
         try {
             const transactionData = {
                 ...formData,
@@ -216,6 +217,7 @@ const BudgetingTab = ({ authToken, API_BASE_URL, showModalMessage }) => {
 
             // Add user ID if a user was selected from search (for animal sales/purchases only)
             // Only add user IDs in transfer mode (not in manual mode)
+            console.log('DEBUG - Checking condition: selectedUser=', !!selectedUser, 'animalSaleMode===transfer=', animalSaleMode === 'transfer', 'type check=', (formData.type === 'animal-sale' || formData.type === 'animal-purchase'));
             if (selectedUser && animalSaleMode === 'transfer' && (formData.type === 'animal-sale' || formData.type === 'animal-purchase')) {
                 console.log('Adding user IDs for transfer mode');
                 if (formData.type === 'animal-sale') {
