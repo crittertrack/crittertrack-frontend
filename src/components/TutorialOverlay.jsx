@@ -98,6 +98,21 @@ export const TutorialOverlay = React.forwardRef(({ lessonId, onClose, onComplete
 
   const progress = ((currentStepIndex + 1) / lesson.steps.length) * 100;
 
+  // Determine which tutorial array we're in and calculate lesson number
+  const isInOnboarding = TUTORIAL_LESSONS.onboarding.some(l => l.id === lessonId);
+  const isInFeatures = TUTORIAL_LESSONS.features.some(l => l.id === lessonId);
+  
+  let lessonNumber = 1;
+  let totalLessons = 1;
+  
+  if (isInOnboarding) {
+    lessonNumber = TUTORIAL_LESSONS.onboarding.findIndex(l => l.id === lessonId) + 1;
+    totalLessons = TUTORIAL_LESSONS.onboarding.length;
+  } else if (isInFeatures) {
+    lessonNumber = TUTORIAL_LESSONS.features.findIndex(l => l.id === lessonId) + 1;
+    totalLessons = TUTORIAL_LESSONS.features.length;
+  }
+
   return (
     <>
       {/* Tutorial Panel - floating on the side */}
@@ -107,7 +122,7 @@ export const TutorialOverlay = React.forwardRef(({ lessonId, onClose, onComplete
           <div className="flex-1 pr-3">
             <div className="flex items-center gap-2 mb-1">
               <BookOpen size={16} />
-              <span className="text-xs font-semibold opacity-80">Lesson {TUTORIAL_LESSONS.onboarding.findIndex(l => l.id === lessonId) + 1} of {TUTORIAL_LESSONS.onboarding.length}</span>
+              <span className="text-xs font-semibold opacity-80">Lesson {lessonNumber} of {totalLessons}</span>
             </div>
             <h2 className="text-lg font-bold">{lesson.title}</h2>
           </div>

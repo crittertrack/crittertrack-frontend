@@ -8855,22 +8855,50 @@ const App = () => {
                             return;
                         }
 
-                        // Move to next lesson in the sequence
-                        setCurrentTutorialIndex(prevIndex => {
-                            const nextIndex = prevIndex + 1;
-                            if (nextIndex < TUTORIAL_LESSONS.onboarding.length) {
-                                // Show next lesson
-                                setCurrentTutorialId(TUTORIAL_LESSONS.onboarding[nextIndex].id);
-                                setCurrentTutorialStep(null);
-                                return nextIndex;
-                            } else {
-                                // All lessons completed
-                                setShowTutorialOverlay(false);
-                                setCurrentTutorialId(null);
-                                setCurrentTutorialStep(null);
-                                return 0;
-                            }
-                        });
+                        // Determine which tutorial array we're in
+                        const isInOnboarding = TUTORIAL_LESSONS.onboarding.some(lesson => lesson.id === currentTutorialId);
+                        const isInFeatures = TUTORIAL_LESSONS.features.some(lesson => lesson.id === currentTutorialId);
+
+                        if (isInOnboarding) {
+                            // Move to next lesson in onboarding sequence
+                            setCurrentTutorialIndex(prevIndex => {
+                                const nextIndex = prevIndex + 1;
+                                if (nextIndex < TUTORIAL_LESSONS.onboarding.length) {
+                                    // Show next lesson
+                                    setCurrentTutorialId(TUTORIAL_LESSONS.onboarding[nextIndex].id);
+                                    setCurrentTutorialStep(null);
+                                    return nextIndex;
+                                } else {
+                                    // All onboarding lessons completed
+                                    setShowTutorialOverlay(false);
+                                    setCurrentTutorialId(null);
+                                    setCurrentTutorialStep(null);
+                                    return 0;
+                                }
+                            });
+                        } else if (isInFeatures) {
+                            // Move to next lesson in features sequence
+                            setCurrentTutorialIndex(prevIndex => {
+                                const nextIndex = prevIndex + 1;
+                                if (nextIndex < TUTORIAL_LESSONS.features.length) {
+                                    // Show next lesson
+                                    setCurrentTutorialId(TUTORIAL_LESSONS.features[nextIndex].id);
+                                    setCurrentTutorialStep(null);
+                                    return nextIndex;
+                                } else {
+                                    // All feature lessons completed
+                                    setShowTutorialOverlay(false);
+                                    setCurrentTutorialId(null);
+                                    setCurrentTutorialStep(null);
+                                    return 0;
+                                }
+                            });
+                        } else {
+                            // Fallback: just close the tutorial
+                            setShowTutorialOverlay(false);
+                            setCurrentTutorialId(null);
+                            setCurrentTutorialStep(null);
+                        }
                     }}
                 />
             )}
