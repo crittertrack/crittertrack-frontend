@@ -7387,6 +7387,18 @@ const App = () => {
         }
     }, [profileEditButtonClicked, showTutorialOverlay, currentTutorialId, currentTutorialStep]);
 
+    // Auto-advance tutorial for lesson 6 (budget-basics) when entering budget view
+    useEffect(() => {
+        if (!showTutorialOverlay || currentTutorialId !== 'budget-basics' || !tutorialOverlayRef.current) {
+            return;
+        }
+
+        // When viewing budget, advance to step 2 (where add expenses is explained)
+        if (currentView === 'budget' && currentTutorialStep?.stepNumber === 1) {
+            tutorialOverlayRef.current.advanceStep();
+        }
+    }, [currentView, showTutorialOverlay, currentTutorialId, currentTutorialStep]);
+
     // Auto-advance tutorial for lesson 4 step 2 when form opens
     useEffect(() => {
         if (!showTutorialOverlay || currentTutorialId !== 'create-litters' || !tutorialOverlayRef.current) {
