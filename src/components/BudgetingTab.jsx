@@ -214,7 +214,8 @@ const BudgetingTab = ({ authToken, API_BASE_URL, showModalMessage }) => {
             }
 
             // Add user ID if a user was selected from search (for animal sales/purchases only)
-            if (selectedUser && (formData.type === 'animal-sale' || formData.type === 'animal-purchase')) {
+            // Only add user IDs in transfer mode (not in manual mode)
+            if (selectedUser && animalSaleMode === 'transfer' && (formData.type === 'animal-sale' || formData.type === 'animal-purchase')) {
                 if (formData.type === 'animal-sale') {
                     transactionData.buyerUserId = selectedUser._id;
                 } else {
