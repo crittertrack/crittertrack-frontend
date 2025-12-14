@@ -79,7 +79,7 @@ const BudgetingTab = ({ authToken, API_BASE_URL, showModalMessage }) => {
 
     const fetchUserProfile = async () => {
         try {
-            const response = await axios.get(`${API_BASE_URL}/profile`, {
+            const response = await axios.get(`${API_BASE_URL}/users/profile`, {
                 headers: { Authorization: `Bearer ${authToken}` }
             });
             setUserProfile(response.data);
