@@ -309,16 +309,6 @@ export const TutorialHighlight = ({ elementSelector, onHighlightClose, isModalOp
         return;
       }
 
-      // Check if any modals are open (search modals, transfer modals, etc.)
-      const hasOpenModal = document.querySelector('[role="dialog"]') || 
-                          document.querySelector('.modal') ||
-                          document.querySelector('[class*="modal"]');
-
-      if (hasOpenModal) {
-        setPosition(null);
-        return;
-      }
-
       const element = document.querySelector(elementSelector);
       if (!element) {
         // Element not found - hide the highlight
@@ -326,7 +316,30 @@ export const TutorialHighlight = ({ elementSelector, onHighlightClose, isModalOp
         return;
       }
 
+      // Get the element's position
       const rect = element.getBoundingClientRect();
+      
+      // Check if element is covered by a modal overlay
+      // Get the highest z-index overlay/modal that exists
+      const allFixed = document.querySelectorAll('[class*="fixed"]');
+      let maxModalZIndex = 0;
+      let maxElementZIndex = 9998; // Our highlight z-index
+      
+      for (const el of allFixed) {
+        const zIndex = window.getComputedStyle(el).zIndex;
+        const classes = el.className;
+        // Check if this looks like a modal (has bg-black, bg-white, or similar overlay classes)
+        if ((classes.includes('bg-black') || classes.includes('bg-white')) && !isNaN(zIndex) && zIndex !== 'auto') {
+          maxModalZIndex = Math.max(maxModalZIndex, parseInt(zIndex));
+        }
+      }
+
+      // If there's a modal with higher z-index than our highlight, don't show highlight
+      if (maxModalZIndex > maxElementZIndex) {
+        setPosition(null);
+        return;
+      }
+
       setPosition({
         top: rect.top,
         left: rect.left,
@@ -350,7 +363,7 @@ export const TutorialHighlight = ({ elementSelector, onHighlightClose, isModalOp
       subtree: true,
       childList: true,
       attributes: true,
-      attributeFilter: ['class', 'style']
+      attributeFilter: ['class', 'style', 'zindex']
     });
 
     return () => {
