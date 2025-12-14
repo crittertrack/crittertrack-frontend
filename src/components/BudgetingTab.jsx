@@ -220,12 +220,15 @@ const BudgetingTab = ({ authToken, API_BASE_URL, showModalMessage }) => {
             console.log('DEBUG - Checking condition: selectedUser=', !!selectedUser, 'animalSaleMode===transfer=', animalSaleMode === 'transfer', 'type check=', (formData.type === 'animal-sale' || formData.type === 'animal-purchase'));
             if (selectedUser && animalSaleMode === 'transfer' && (formData.type === 'animal-sale' || formData.type === 'animal-purchase')) {
                 console.log('Adding user IDs for transfer mode');
+                // Use userId_backend which is what the backend expects
+                const userIdToUse = selectedUser.userId_backend || selectedUser._id;
+                console.log('Using user ID:', userIdToUse, '(userId_backend:', selectedUser.userId_backend, ', _id:', selectedUser._id, ')');
                 if (formData.type === 'animal-sale') {
-                    transactionData.buyerUserId = selectedUser._id;
-                    console.log('Set buyerUserId:', selectedUser._id);
+                    transactionData.buyerUserId = userIdToUse;
+                    console.log('Set buyerUserId:', userIdToUse);
                 } else {
-                    transactionData.sellerUserId = selectedUser._id;
-                    console.log('Set sellerUserId:', selectedUser._id);
+                    transactionData.sellerUserId = userIdToUse;
+                    console.log('Set sellerUserId:', userIdToUse);
                 }
                 // Mark this as a transfer mode transaction (not just logging)
                 transactionData.mode = 'transfer';
