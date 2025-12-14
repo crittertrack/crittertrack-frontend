@@ -1615,7 +1615,7 @@ const PublicProfileView = ({ profile, onBack, onViewAnimal, API_BASE_URL }) => {
                     <div className="flex flex-col sm:flex-row gap-3 justify-between">
                         <div className="flex gap-3 items-center flex-wrap">
                             {/* Species dropdown */}
-                            <div className="flex gap-2 items-center">
+                            <div className="flex gap-2 items-center" data-tutorial-target="species-filter">
                                 <span className='text-sm font-medium text-gray-700 whitespace-nowrap'>Species:</span>
                                 <select 
                                     value={speciesFilter}
@@ -1630,7 +1630,7 @@ const PublicProfileView = ({ profile, onBack, onViewAnimal, API_BASE_URL }) => {
                             </div>
                             
                             {/* Gender filter with icons */}
-                            <div className="flex gap-2 items-center">
+                            <div className="flex gap-2 items-center" data-tutorial-target="gender-filter">
                                 <span className='text-sm font-medium text-gray-700 whitespace-nowrap'>Gender:</span>
                                 <button 
                                     onClick={() => setGenderFilters(prev => ({ ...prev, Male: !prev.Male }))}
@@ -1654,7 +1654,7 @@ const PublicProfileView = ({ profile, onBack, onViewAnimal, API_BASE_URL }) => {
                         </div>
                         
                         {/* Status dropdown on right */}
-                        <div className="flex gap-2 items-center">
+                        <div className="flex gap-2 items-center" data-tutorial-target="status-filter">
                             <span className='text-sm font-medium text-gray-700 whitespace-nowrap'>Status:</span>
                             <select 
                                 value={statusFilter} 
@@ -6738,6 +6738,7 @@ const AnimalList = ({ authToken, showModalMessage, onEditAnimal, onViewAnimal, o
                         onKeyPress={(e) => { if (e.key === 'Enter') triggerSearch(); }}
                         className="flex-grow p-2 border border-gray-300 rounded-lg shadow-sm focus:ring-primary focus:border-primary transition"
                         disabled={loading}
+                        data-tutorial-target="my-animals-search"
                     />
                     <div className="flex gap-2">
                         <button
@@ -6822,7 +6823,7 @@ const AnimalList = ({ authToken, showModalMessage, onEditAnimal, onViewAnimal, o
                 
                 {/* Ownership/Special filters on left, Visibility filter on right */}
                 <div className="flex flex-col sm:flex-row gap-3 pt-2 border-t border-gray-200 justify-between">
-                    <div className="flex flex-wrap items-center gap-2">
+                    <div className="flex flex-wrap items-center gap-2" data-tutorial-target="collection-filters">
                         <span className='text-sm font-medium text-gray-700 whitespace-nowrap'>Show:</span>
                         
                         <button onClick={() => setOwnedFilterActive(prev => !prev)}
@@ -6857,7 +6858,7 @@ const AnimalList = ({ authToken, showModalMessage, onEditAnimal, onViewAnimal, o
                         </button>
                     </div>
 
-                    <div className="flex gap-2 items-center">
+                    <div className="flex gap-2 items-center" data-tutorial-target="visibility-filter">
                         <span className='text-sm font-medium text-gray-700 whitespace-nowrap'>Visibility:</span>
                         {['All', 'Public', 'Private'].map(option => {
                             const value = option === 'All' ? '' : option.toLowerCase();
@@ -8387,6 +8388,7 @@ const App = () => {
                             <button 
                                 onClick={() => setShowUserSearchModal(true)}
                                 className="px-3 py-2 bg-primary hover:bg-primary-dark text-black font-semibold rounded-lg transition flex items-center"
+                                data-tutorial-target="global-search-btn"
                             >
                                 <Search size={18} className="mr-1" /> Search
                             </button>
@@ -8492,6 +8494,7 @@ const App = () => {
                         <button 
                             onClick={() => setShowUserSearchModal(true)}
                             className="px-3 py-2 bg-primary hover:bg-primary-dark text-black font-semibold rounded-lg transition flex items-center"
+                            data-tutorial-target="global-search-btn"
                         >
                             <Search size={18} className="mr-1" /> Search
                         </button>

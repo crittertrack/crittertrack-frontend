@@ -374,28 +374,42 @@ export const TUTORIAL_LESSONS = {
       steps: [
         {
           stepNumber: 1,
-          title: 'Quick Search',
-          content: 'Use the search bar to find animals by name or CritterTrack ID. Works across your own animals and the global database.',
+          title: 'Search Your Animals',
+          content: 'Use the search bar in the My Animals section to quickly find your own animals by name.',
+          highlightElement: '[data-tutorial-target="my-animals-search"]',
           tips: [
             'Search by partial name (e.g., "min" finds Minnie)',
-            'Search by ID format: CT123 or just 123',
-            'Results include both local and global animals'
+            'Minimum 3 characters to search',
+            'Only searches your owned animals'
           ]
         },
         {
           stepNumber: 2,
-          title: 'Filter by Species',
-          content: 'Filter your collection by species type (Mice, Rats, Hamsters, etc.).',
+          title: 'Global User & Animal Search',
+          content: 'Click the Search button in the top navigation to search across all public animals and find other breeders in the CritterTrack community.',
+          highlightElement: '[data-tutorial-target="global-search-btn"]',
           tips: [
-            'Helpful for multi-species breeders',
-            'See how many animals per species',
-            'Filter in multiple locations'
+            'Search by animal ID format: CT123 or just 123',
+            'Find other breeders by name or ID',
+            'View public profiles and animals'
           ]
         },
         {
           stepNumber: 3,
+          title: 'Filter by Species',
+          content: 'Use the species dropdown to show only animals of a specific type (Mice, Rats, Hamsters, etc.).',
+          highlightElement: '[data-tutorial-target="species-filter"]',
+          tips: [
+            'Helpful for multi-species breeders',
+            'See how many animals per species',
+            'Combine with other filters'
+          ]
+        },
+        {
+          stepNumber: 4,
           title: 'Filter by Gender',
-          content: 'Show only males or females to plan breeding pairs or sales.',
+          content: 'Use the gender buttons to show only males or females. Click the Mars (♂) icon for males and Venus (♀) icon for females.',
+          highlightElement: '[data-tutorial-target="gender-filter"]',
           tips: [
             'Quick way to count breeding stock',
             'Plan gender-specific sales',
@@ -403,13 +417,36 @@ export const TUTORIAL_LESSONS = {
           ]
         },
         {
-          stepNumber: 4,
+          stepNumber: 5,
           title: 'Filter by Status',
-          content: 'Filter by status: Breeder, Pet, Sold, Retired, Deceased, etc.',
+          content: 'Filter by status: Breeder, Pet, Sold, Retired, Deceased, etc. to organize your collection.',
+          highlightElement: '[data-tutorial-target="status-filter"]',
           tips: [
             'Track which animals are actively breeding',
             'See sold or rehomed animals',
             'Keep records organized'
+          ]
+        },
+        {
+          stepNumber: 6,
+          title: 'Collection & Breeding Filters',
+          content: 'Use the "Show" filters to toggle between My Animals/All Animals, and filter by breeding status: Mating, Pregnant, or Nursing.',
+          highlightElement: '[data-tutorial-target="collection-filters"]',
+          tips: [
+            'My Animals shows only your owned animals',
+            'All Animals includes view-only animals',
+            'Breeding filters help track active pairs and expecting mothers'
+          ]
+        },
+        {
+          stepNumber: 7,
+          title: 'Visibility Filters',
+          content: 'Filter animals by their visibility status: All, Public (visible to everyone), or Private (only you can see).',
+          highlightElement: '[data-tutorial-target="visibility-filter"]',
+          tips: [
+            'Quickly see which animals are public',
+            'Manage your privacy settings',
+            'Private animals won\'t appear in global search'
           ]
         }
       ]
