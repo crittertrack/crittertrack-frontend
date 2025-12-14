@@ -7198,6 +7198,7 @@ const App = () => {
     const [authToken, setAuthToken] = useState(localStorage.getItem('authToken') || null);
     const [userProfile, setUserProfile] = useState(null);
     const [currentView, setCurrentView] = useState('list'); 
+    const [hasSkippedTutorialThisSession, setHasSkippedTutorialThisSession] = useState(false);
     
     // Tutorial context hook
     const { hasSeenInitialTutorial, markInitialTutorialSeen, hasCompletedOnboarding, isLoading: tutorialLoading, markTutorialCompleted } = useTutorial(); 
@@ -8512,18 +8513,17 @@ const App = () => {
      return (
         <div className="min-h-screen bg-page-bg flex flex-col items-center p-6 font-sans">
             {/* Initial Tutorial Modal - Shows once to new users */}
-            {authToken && !hasCompletedOnboarding && !tutorialLoading && userProfile && (
+            {authToken && !hasCompletedOnboarding && !tutorialLoading && !hasSkippedTutorialThisSession && userProfile && (
                 <InitialTutorialModal 
                     onStart={() => {
-                        markInitialTutorialSeen();
                         setCurrentTutorialIndex(0);
                         setCurrentTutorialId('welcome');
                         setShowTutorialOverlay(true);
+                        setHasSkippedTutorialThisSession(true);
                     }}
                     onSkip={() => {
-                        markInitialTutorialSeen();
-                        // Mark onboarding as complete so the modal doesn't show again
-                        markTutorialCompleted('budget-basics', true);
+                        // Only skip for this session - will appear again on next login
+                        setHasSkippedTutorialThisSession(true);
                     }}
                 />
             )}
