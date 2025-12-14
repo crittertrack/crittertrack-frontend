@@ -298,13 +298,23 @@ InitialTutorialModal.displayName = 'InitialTutorialModal';
  * Highlights a specific element on the screen and shows a pointer
  * Should be rendered as an overlay to the main content
  */
-export const TutorialHighlight = ({ elementSelector, onHighlightClose }) => {
+export const TutorialHighlight = ({ elementSelector, onHighlightClose, isModalOpen }) => {
   const [position, setPosition] = useState(null);
   const highlightRef = useRef(null);
 
   useEffect(() => {
     const updatePosition = () => {
       if (!elementSelector) {
+        setPosition(null);
+        return;
+      }
+
+      // Check if any modals are open (search modals, transfer modals, etc.)
+      const hasOpenModal = document.querySelector('[role="dialog"]') || 
+                          document.querySelector('.modal') ||
+                          document.querySelector('[class*="modal"]');
+
+      if (hasOpenModal) {
         setPosition(null);
         return;
       }
@@ -348,7 +358,7 @@ export const TutorialHighlight = ({ elementSelector, onHighlightClose }) => {
       window.removeEventListener('scroll', scrollListener);
       mutationObserver.disconnect();
     };
-  }, [elementSelector]);
+  }, [elementSelector, isModalOpen]);
 
   if (!position) return null;
 
