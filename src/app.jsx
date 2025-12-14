@@ -7201,7 +7201,7 @@ const App = () => {
     const [hasSkippedTutorialThisSession, setHasSkippedTutorialThisSession] = useState(false);
     
     // Tutorial context hook
-    const { hasSeenInitialTutorial, markInitialTutorialSeen, hasCompletedOnboarding, isLoading: tutorialLoading, markTutorialCompleted } = useTutorial(); 
+    const { hasSeenInitialTutorial, markInitialTutorialSeen, hasCompletedOnboarding, isLoading: tutorialLoading, markTutorialCompleted, completedTutorials, isTutorialCompleted } = useTutorial(); 
     const [animalToEdit, setAnimalToEdit] = useState(null);
     const [speciesToAdd, setSpeciesToAdd] = useState(null); 
     const [speciesOptions, setSpeciesOptions] = useState([]); 
@@ -8516,8 +8516,17 @@ const App = () => {
             {authToken && !hasCompletedOnboarding && !tutorialLoading && !hasSkippedTutorialThisSession && userProfile && (
                 <InitialTutorialModal 
                     onStart={() => {
-                        setCurrentTutorialIndex(0);
-                        setCurrentTutorialId('welcome');
+                        // Find the first incomplete lesson to resume from
+                        let startIndex = 0;
+                        for (let i = 0; i < TUTORIAL_LESSONS.onboarding.length; i++) {
+                            if (!isTutorialCompleted(TUTORIAL_LESSONS.onboarding[i].id)) {
+                                startIndex = i;
+                                break;
+                            }
+                        }
+                        
+                        setCurrentTutorialIndex(startIndex);
+                        setCurrentTutorialId(TUTORIAL_LESSONS.onboarding[startIndex].id);
                         setShowTutorialOverlay(true);
                         setHasSkippedTutorialThisSession(true);
                     }}
