@@ -148,8 +148,9 @@ export const TUTORIAL_LESSONS = {
       steps: [
         {
           stepNumber: 1,
-          title: 'What is a Litter?',
-          content: 'A litter is a record of offspring born from a specific breeding pair. It helps track which animals are siblings.',
+          title: 'Access the Litters Tab',
+          content: 'Click on the Litters button in the header to manage your litters.',
+          highlightElement: '[data-tutorial-target="litters-btn"]',
           tips: [
             'Litters contain COI (Coefficient of Inbreeding)',
             'Link animals to see siblings',
