@@ -223,8 +223,9 @@ export const TUTORIAL_LESSONS = {
         },
         {
           stepNumber: 2,
-          title: 'Personal Information',
-          content: 'Add your personal name and breeder name. Choose whether to display them publicly.',
+          title: 'Edit Your Profile',
+          content: 'Click the "Edit Profile" button to customize your personal information, breeder name, and privacy settings.',
+          highlightElement: '[data-tutorial-target="profile-edit-btn"]',
           tips: [
             'Your breeder name helps other breeders find you',
             'You can hide your personal name for privacy',
@@ -239,16 +240,6 @@ export const TUTORIAL_LESSONS = {
             'Default: only your breeder name is public',
             'You control every piece of information',
             'Change settings anytime'
-          ]
-        },
-        {
-          stepNumber: 4,
-          title: 'Display Animals',
-          content: 'Choose which animals appear on your public profile. Mark animals as "public" in their settings.',
-          tips: [
-            'Only marked animals show on your profile',
-            'Share your best animals with the community',
-            'Showcase your breeding program'
           ]
         }
       ]

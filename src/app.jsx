@@ -5861,7 +5861,8 @@ const ProfileView = ({ userProfile, showModalMessage, fetchUserProfile, authToke
             </div>
             
             <button 
-                onClick={() => setIsEditing(true)} 
+                onClick={() => setIsEditing(true)}
+                data-tutorial-target="profile-edit-btn"
                 className="mt-6 bg-accent hover:bg-accent/90 text-white font-semibold py-3 px-6 rounded-lg transition duration-150 shadow-md flex items-center"
             >
                 <Edit size={20} className="mr-2" /> Edit Profile
@@ -7353,6 +7354,18 @@ const App = () => {
 
         // When viewing litters, advance to step 2 (where new litter button is highlighted)
         if (currentView === 'litters' && currentTutorialStep?.stepNumber === 1) {
+            tutorialOverlayRef.current.advanceStep();
+        }
+    }, [currentView, showTutorialOverlay, currentTutorialId, currentTutorialStep]);
+
+    // Auto-advance tutorial for lesson 4 (profile-settings) when entering profile view
+    useEffect(() => {
+        if (!showTutorialOverlay || currentTutorialId !== 'profile-settings' || !tutorialOverlayRef.current) {
+            return;
+        }
+
+        // When viewing profile, advance to step 2 (where edit button is highlighted)
+        if (currentView === 'profile' && currentTutorialStep?.stepNumber === 1) {
             tutorialOverlayRef.current.advanceStep();
         }
     }, [currentView, showTutorialOverlay, currentTutorialId, currentTutorialStep]);
