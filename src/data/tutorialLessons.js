@@ -48,6 +48,16 @@ export const TUTORIAL_LESSONS = {
         },
         {
           stepNumber: 2,
+          title: 'Select a Species',
+          content: 'Choose a species from the available options. If your species isn\'t listed, you can add a custom species by entering it in the search field and clicking "Add Custom Species".',
+          tips: [
+            'Common species like Mouse, Rat, and Hamster are pre-loaded',
+            'You can create custom species for your unique breeds',
+            'Custom species will be saved for future use'
+          ]
+        },
+        {
+          stepNumber: 3,
           title: 'Fill in Basic Information',
           content: 'Enter your animal\'s name, species, gender, and birthdate.',
           tips: [
@@ -57,7 +67,7 @@ export const TUTORIAL_LESSONS = {
           ]
         },
         {
-          stepNumber: 3,
+          stepNumber: 4,
           title: 'Add Animal Details',
           content: 'You can optionally add color, coat type, genetic code, and other details. Upload a photo so you can easily find your animal later!',
           tips: [
@@ -67,7 +77,7 @@ export const TUTORIAL_LESSONS = {
           ]
         },
         {
-          stepNumber: 4,
+          stepNumber: 5,
           title: 'Save Your Animal',
           content: 'Click "Save Animal" to add it to your collection. Your animal will be assigned a unique CritterTrack ID.',
           tips: [
