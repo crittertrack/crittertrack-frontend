@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useRef, useCallback } from 'react';
 import { X, ChevronLeft, ChevronRight, Check, BookOpen } from 'lucide-react';
-import { TUTORIAL_LESSONS, hasStartedAdvancedFeatures } from '../data/tutorialLessons';
+import { TUTORIAL_LESSONS } from '../data/tutorialLessons';
 import { useTutorial } from '../contexts/TutorialContext';
 
 /**
@@ -9,7 +9,6 @@ import { useTutorial } from '../contexts/TutorialContext';
  */
 export const TutorialOverlay = React.forwardRef(({ lessonId, onClose, onComplete, onStepChange }, ref) => {
   const [currentStepIndex, setCurrentStepIndex] = useState(0);
-  const [completionChecked, setCompletionChecked] = useState(false);
   const [showAdvancedFeaturesPrompt, setShowAdvancedFeaturesPrompt] = useState(false);
   const { markTutorialCompleted, completedTutorials } = useTutorial();
 
@@ -44,18 +43,11 @@ export const TutorialOverlay = React.forwardRef(({ lessonId, onClose, onComplete
   // Reset step index and completion state when lesson changes
   useEffect(() => {
     setCurrentStepIndex(0);
-    setCompletionChecked(false);
     setShowAdvancedFeaturesPrompt(false);
   }, [lessonId]);
 
   const handleComplete = useCallback(() => {
     if (lesson) {
-      // Check if this is a completion step and checkbox is required
-      if (currentStep?.isCompletionStep && !completionChecked) {
-        // Don't complete unless checkbox is checked
-        return;
-      }
-
       // Determine if this is the final onboarding lesson (budget-basics)
       const isOnboardingComplete = lesson.id === 'budget-basics';
       
@@ -64,8 +56,8 @@ export const TutorialOverlay = React.forwardRef(({ lessonId, onClose, onComplete
       
       markTutorialCompleted(lesson.id, isOnboardingComplete, isAdvancedFeaturesComplete);
 
-      // Show advanced features prompt after completing onboarding if user hasn't started advanced features
-      if (isOnboardingComplete && !hasStartedAdvancedFeatures(completedTutorials)) {
+      // Always show advanced features prompt after completing onboarding
+      if (isOnboardingComplete) {
         setShowAdvancedFeaturesPrompt(true);
         return; // Don't close yet, show the prompt
       }
@@ -74,9 +66,7 @@ export const TutorialOverlay = React.forwardRef(({ lessonId, onClose, onComplete
     if (onComplete) {
       onComplete(lesson?.id);
     }
-    // Don't call onClose here - let the parent component handle closing
-    // onClose will be called by parent when all lessons are done
-  }, [lesson, currentStep, completionChecked, completedTutorials, markTutorialCompleted, onComplete]);
+  }, [lesson, markTutorialCompleted, onComplete]);
 
   const handleNext = useCallback(() => {
     if (!isLastStep) {
@@ -184,39 +174,6 @@ export const TutorialOverlay = React.forwardRef(({ lessonId, onClose, onComplete
             </div>
           )}
 
-          {/* Completion Checkbox for final steps */}
-          {currentStep.isCompletionStep && (
-            <div className="bg-gradient-to-r from-green-50 to-blue-50 border-2 border-green-300 rounded-lg p-4 space-y-3">
-              <div className="flex items-start gap-3">
-                <input
-                  type="checkbox"
-                  id="tutorial-complete-checkbox"
-                  checked={completionChecked}
-                  onChange={(e) => setCompletionChecked(e.target.checked)}
-                  className="mt-1 w-5 h-5 text-green-600 border-gray-300 rounded focus:ring-green-500 cursor-pointer"
-                />
-                <label htmlFor="tutorial-complete-checkbox" className="flex-1 cursor-pointer">
-                  <span className="text-sm font-bold text-gray-800 block mb-1">
-                    ✓ Mark this tutorial as complete
-                  </span>
-                  <span className="text-xs text-gray-600">
-                    Your progress will be saved and synced across all your devices
-                  </span>
-                </label>
-              </div>
-              
-              <div className="bg-white/60 rounded p-3 border border-green-200">
-                <p className="text-xs text-gray-700 font-medium mb-1">
-                  📚 <strong>Need to review?</strong>
-                </p>
-                <p className="text-xs text-gray-600">
-                  Access any tutorial anytime from the <strong>Info tab</strong> (ℹ️ button in the header). 
-                  You can restart lessons or explore advanced features whenever you're ready!
-                </p>
-              </div>
-            </div>
-          )}
-
           {/* Highlighted element indicator */}
           {currentStep.highlightElement && (
             <div className="bg-amber-50 border-l-3 border-amber-400 rounded p-3">
@@ -248,17 +205,16 @@ export const TutorialOverlay = React.forwardRef(({ lessonId, onClose, onComplete
 
             <button
               onClick={handleNext}
-              disabled={isLastStep && currentStep?.isCompletionStep && !completionChecked}
               className={`flex items-center gap-1 px-4 py-1.5 rounded text-xs font-semibold transition ${
                 isLastStep
-                  ? 'bg-accent hover:bg-accent/90 text-white disabled:opacity-50 disabled:cursor-not-allowed'
+                  ? 'bg-accent hover:bg-accent/90 text-white'
                   : 'bg-primary hover:bg-primary/90 text-black'
               }`}
             >
               {isLastStep ? (
                 <>
                   <Check size={14} />
-                  {currentStep?.isCompletionStep && !completionChecked ? 'Check box above' : 'Done'}
+                  Done
                 </>
               ) : (
                 <>

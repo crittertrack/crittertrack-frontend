@@ -333,8 +333,7 @@ export const TUTORIAL_LESSONS = {
         {
           stepNumber: 8,
           title: 'Tutorial Complete! 🎉',
-          content: 'Congratulations! You\'ve completed the Getting Started tutorial and learned the core features of CritterTrack. Check the box below to mark this tutorial as complete.',
-          isCompletionStep: true,
+          content: 'Congratulations! You\'ve completed the Getting Started tutorial and learned the core features of CritterTrack.',
           tips: [
             'You can always restart tutorials from the Help tab',
             'Access advanced feature tutorials anytime',
