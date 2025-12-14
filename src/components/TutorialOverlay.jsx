@@ -303,15 +303,27 @@ export const TutorialHighlight = ({ elementSelector, onHighlightClose }) => {
     };
 
     updatePosition();
+    
+    // Listen to resize and scroll events
     const resizeListener = () => updatePosition();
     const scrollListener = () => updatePosition();
     
     window.addEventListener('resize', resizeListener);
     window.addEventListener('scroll', scrollListener);
 
+    // Also listen for DOM changes in case the view changes
+    const mutationObserver = new MutationObserver(() => updatePosition());
+    mutationObserver.observe(document.body, {
+      subtree: true,
+      childList: true,
+      attributes: true,
+      attributeFilter: ['class', 'style']
+    });
+
     return () => {
       window.removeEventListener('resize', resizeListener);
       window.removeEventListener('scroll', scrollListener);
+      mutationObserver.disconnect();
     };
   }, [elementSelector]);
 
