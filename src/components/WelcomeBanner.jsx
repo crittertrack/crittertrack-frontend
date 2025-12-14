@@ -3,7 +3,7 @@ import { X, GraduationCap } from 'lucide-react';
 
 const WelcomeBanner = ({ onStartTutorial, onDismiss }) => {
     return (
-        <div className="w-full bg-gradient-to-r from-primary/10 to-blue-50 border-b-2 border-primary/20 shadow-sm">
+        <div className="w-full bg-white border-b-2 border-primary/20 shadow-sm">
             <div className="max-w-7xl mx-auto px-4 py-3">
                 <div className="flex items-center justify-between gap-4">
                     <div className="flex items-center gap-3 flex-1">

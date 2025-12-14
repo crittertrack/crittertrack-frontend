@@ -5740,11 +5740,146 @@ const ProfileEditForm = ({ userProfile, showModalMessage, onSaveSuccess, onCance
     );
 };
 
+const DonationView = ({ onBack }) => {
+    return (
+        <div className="w-full max-w-2xl bg-white p-8 rounded-xl shadow-lg">
+            {/* Back Button */}
+            <button 
+                onClick={onBack}
+                className="flex items-center text-gray-600 hover:text-gray-800 font-medium mb-6 transition"
+            >
+                <ArrowLeft size={20} className="mr-2" />
+                Back
+            </button>
+
+            {/* Header */}
+            <div className="flex items-center gap-3 mb-6">
+                <div className="bg-gradient-to-r from-pink-500 to-red-500 p-3 rounded-full">
+                    <Heart size={32} className="text-white fill-current" />
+                </div>
+                <div>
+                    <h1 className="text-3xl font-bold text-gray-800">Support CritterTrack</h1>
+                    <p className="text-gray-500 text-sm">Help keep this platform running</p>
+                </div>
+            </div>
+
+            {/* Description */}
+            <div className="bg-gradient-to-r from-primary/10 to-accent/10 border-2 border-primary/20 rounded-lg p-6 mb-6">
+                <p className="text-gray-700 leading-relaxed mb-4">
+                    CritterTrack is provided <strong>completely free of charge</strong> to all users. There are no premium tiers, 
+                    paywalls, or required subscriptions. However, hosting, maintaining, and improving this platform requires resources.
+                </p>
+                <p className="text-gray-700 leading-relaxed">
+                    If you find CritterTrack valuable for managing your breeding program, please consider supporting its 
+                    continued development with a voluntary donation. Every contribution, no matter the size, helps keep this 
+                    platform running and improving.
+                </p>
+            </div>
+
+            {/* Personal Note */}
+            <div className="bg-accent/10 border-2 border-accent/30 rounded-lg p-5 mb-6">
+                <p className="text-sm text-gray-700 font-semibold mb-2 flex items-center gap-2">
+                    <Heart size={18} className="text-accent fill-current" />
+                    A note from the developer
+                </p>
+                <p className="text-sm text-gray-600 leading-relaxed">
+                    CritterTrack is developed and maintained by a single developer who is passionate about helping breeders 
+                    manage their programs effectively. Your support directly contributes to server costs, new features, 
+                    and ongoing maintenance. Thank you for being part of this community!
+                </p>
+            </div>
+
+            {/* Donation Options */}
+            <h2 className="text-xl font-bold text-gray-800 mb-4">Choose Your Support Method</h2>
+            <div className="space-y-4">
+                {/* One-Time Donation */}
+                <div className="border-2 border-primary/30 rounded-lg p-6 bg-gradient-to-r from-primary/5 to-accent/5 hover:shadow-md transition">
+                    <div className="flex items-start gap-4">
+                        <div className="bg-primary/20 p-3 rounded-lg">
+                            <DollarSign size={24} className="text-primary-dark" />
+                        </div>
+                        <div className="flex-1">
+                            <h3 className="font-bold text-lg text-gray-800 mb-2">One-Time Donation</h3>
+                            <p className="text-sm text-gray-600 mb-4">
+                                Make a one-time contribution of any amount you choose. Perfect for showing your appreciation 
+                                or celebrating a milestone in your breeding program.
+                            </p>
+                            <form action="https://www.paypal.com/donate" method="post" target="_blank">
+                                <input type="hidden" name="business" value="mouserymorningstar@gmail.com" />
+                                <input type="hidden" name="no_recurring" value="0" />
+                                <input type="hidden" name="item_name" value="Support CritterTrack Development" />
+                                <input type="hidden" name="currency_code" value="USD" />
+                                <button
+                                    type="submit"
+                                    className="w-full bg-gradient-to-r from-blue-500 to-blue-600 hover:from-blue-600 hover:to-blue-700 text-white font-semibold py-3 px-6 rounded-lg transition shadow-md flex items-center justify-center gap-2"
+                                >
+                                    <Heart size={18} />
+                                    Donate via PayPal
+                                </button>
+                            </form>
+                        </div>
+                    </div>
+                </div>
+
+                {/* Monthly Subscription */}
+                <div className="border-2 border-accent/30 rounded-lg p-6 bg-gradient-to-r from-accent/5 to-primary/5 hover:shadow-md transition">
+                    <div className="flex items-start gap-4">
+                        <div className="bg-accent/20 p-3 rounded-lg">
+                            <RefreshCw size={24} className="text-accent-dark" />
+                        </div>
+                        <div className="flex-1">
+                            <h3 className="font-bold text-lg text-gray-800 mb-2">Monthly Support</h3>
+                            <p className="text-sm text-gray-600 mb-4">
+                                Become a recurring supporter with a monthly contribution. Your ongoing support helps ensure 
+                                CritterTrack's long-term sustainability. Cancel anytime through your PayPal account.
+                            </p>
+                            <form action="https://www.paypal.com/cgi-bin/webscr" method="post" target="_blank">
+                                <input type="hidden" name="cmd" value="_xclick-subscriptions" />
+                                <input type="hidden" name="business" value="mouserymorningstar@gmail.com" />
+                                <input type="hidden" name="item_name" value="CritterTrack Monthly Support" />
+                                <input type="hidden" name="currency_code" value="USD" />
+                                <input type="hidden" name="a3" value="5.00" />
+                                <input type="hidden" name="p3" value="1" />
+                                <input type="hidden" name="t3" value="M" />
+                                <input type="hidden" name="src" value="1" />
+                                <input type="hidden" name="sra" value="1" />
+                                <button
+                                    type="submit"
+                                    className="w-full bg-gradient-to-r from-accent to-accent/80 hover:from-accent-dark hover:to-accent text-white font-semibold py-3 px-6 rounded-lg transition shadow-md flex items-center justify-center gap-2"
+                                >
+                                    <Heart size={18} className="fill-current" />
+                                    Support for $5/month
+                                </button>
+                            </form>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            {/* Footer Note */}
+            <div className="mt-6 p-4 bg-gray-50 rounded-lg border border-gray-200">
+                <p className="text-xs text-gray-600 text-center leading-relaxed">
+                    All donations are processed securely through PayPal. You are not required to have a PayPal account to donate. 
+                    Monthly subscriptions can be cancelled at any time through your PayPal account settings.
+                </p>
+            </div>
+
+            {/* Thank You */}
+            <div className="mt-6 text-center">
+                <p className="text-sm text-gray-500 italic">
+                    Thank you for considering supporting CritterTrack. Your generosity is deeply appreciated! ❤️
+                </p>
+            </div>
+        </div>
+    );
+};
+
 const ProfileView = ({ userProfile, showModalMessage, fetchUserProfile, authToken, onProfileUpdated, onProfileEditButtonClicked }) => {
     const [isEditing, setIsEditing] = useState(false);
     const [copySuccess, setCopySuccess] = useState(false);
     const [checkingForUpdates, setCheckingForUpdates] = useState(false);
     const [updateAvailable, setUpdateAvailable] = useState(false);
+    // Note: Donation button is now globally available via fixed button in top-left corner
 
     const handleShare = () => {
         const url = `${window.location.origin}/user/${userProfile.id_public}`;
@@ -7261,11 +7396,17 @@ const App = () => {
     const [animalToView, setAnimalToView] = useState(null);
     const [showPedigreeChart, setShowPedigreeChart] = useState(false);
     const [copySuccessAnimal, setCopySuccessAnimal] = useState(false);
+    const [showImageModal, setShowImageModal] = useState(false);
+    const [enlargedImageUrl, setEnlargedImageUrl] = useState(null);
     
     const [showBugReportModal, setShowBugReportModal] = useState(false);
     const [bugReportCategory, setBugReportCategory] = useState('Bug');
     const [bugReportDescription, setBugReportDescription] = useState('');
     const [bugReportSubmitting, setBugReportSubmitting] = useState(false);
+    
+    const [hasSeenDonationHighlight, setHasSeenDonationHighlight] = useState(() => {
+        return localStorage.getItem('hasSeenDonationHighlight') === 'true';
+    });
     
     const [showTermsModal, setShowTermsModal] = useState(false);
     const [showPrivacyModal, setShowPrivacyModal] = useState(false);
@@ -7568,6 +7709,17 @@ const App = () => {
             return () => clearInterval(interval);
         }
     }, [authToken, fetchNotificationCount]);
+
+    // Mark donation highlight as seen after 8 seconds
+    useEffect(() => {
+        if (authToken && !hasSeenDonationHighlight) {
+            const timer = setTimeout(() => {
+                setHasSeenDonationHighlight(true);
+                localStorage.setItem('hasSeenDonationHighlight', 'true');
+            }, 8000);
+            return () => clearTimeout(timer);
+        }
+    }, [authToken, hasSeenDonationHighlight]);
 	
     // Fetch global species list
     useEffect(() => {
@@ -7898,6 +8050,8 @@ const App = () => {
 
     const renderView = () => {
         switch (currentView) {
+            case 'donation':
+                return <DonationView onBack={() => setCurrentView('list')} />;
             case 'publicProfile':
                 return (
                     <PublicProfileView 
@@ -8082,7 +8236,16 @@ const App = () => {
                         <div className="border-2 border-gray-300 rounded-lg p-4 sm:p-6 mb-6">
                             <div className="flex flex-col sm:flex-row items-start sm:space-x-6 space-y-4 sm:space-y-0">
                                 <div className="w-full sm:w-auto flex flex-col items-center sm:items-start">
-                                    <div className="w-40 h-40 bg-gray-100 rounded-lg overflow-hidden flex items-center justify-center">
+                                    <div 
+                                        className="w-40 h-40 bg-gray-100 rounded-lg overflow-hidden flex items-center justify-center cursor-pointer hover:opacity-80 transition"
+                                        onClick={() => {
+                                            if (animalToView.imageUrl || animalToView.photoUrl) {
+                                                setEnlargedImageUrl(animalToView.imageUrl || animalToView.photoUrl);
+                                                setShowImageModal(true);
+                                            }
+                                        }}
+                                        title="Click to enlarge"
+                                    >
                                         { (animalToView.imageUrl || animalToView.photoUrl) ? (
                                             <img src={animalToView.imageUrl || animalToView.photoUrl} alt={animalToView.name} className="w-full h-full object-cover" />
                                         ) : (
@@ -8261,6 +8424,63 @@ const App = () => {
                             API_BASE_URL={API_BASE_URL}
                             authToken={authToken}
                         />
+                    )}
+
+                    {/* Image Enlargement Modal */}
+                    {showImageModal && enlargedImageUrl && (
+                        <div 
+                            className="fixed inset-0 bg-black/90 flex items-center justify-center p-4 z-[10000]"
+                            onClick={() => setShowImageModal(false)}
+                        >
+                            <div className="relative max-w-5xl max-h-[90vh] w-full flex flex-col">
+                                {/* Header */}
+                                <div className="flex justify-between items-center mb-4">
+                                    <h3 className="text-white text-lg font-semibold">
+                                        {animalToView?.name || 'Animal Image'}
+                                    </h3>
+                                    <div className="flex gap-2">
+                                        <button
+                                            onClick={async (e) => {
+                                                e.stopPropagation();
+                                                try {
+                                                    const response = await fetch(enlargedImageUrl);
+                                                    const blob = await response.blob();
+                                                    const url = window.URL.createObjectURL(blob);
+                                                    const link = document.createElement('a');
+                                                    link.href = url;
+                                                    link.download = `crittertrack_${animalToView?.id_public || 'image'}.jpg`;
+                                                    document.body.appendChild(link);
+                                                    link.click();
+                                                    document.body.removeChild(link);
+                                                    window.URL.revokeObjectURL(url);
+                                                } catch (error) {
+                                                    console.error('Download failed:', error);
+                                                }
+                                            }}
+                                            className="flex items-center gap-2 px-4 py-2 bg-primary hover:bg-primary/90 text-black font-semibold rounded-lg transition"
+                                        >
+                                            <Download size={18} />
+                                            Download
+                                        </button>
+                                        <button
+                                            onClick={() => setShowImageModal(false)}
+                                            className="p-2 hover:bg-white/10 rounded-lg transition text-white"
+                                        >
+                                            <X size={24} />
+                                        </button>
+                                    </div>
+                                </div>
+                                {/* Image */}
+                                <div className="flex-1 flex items-center justify-center">
+                                    <img 
+                                        src={enlargedImageUrl} 
+                                        alt={animalToView?.name || 'Animal'} 
+                                        className="max-w-full max-h-[80vh] object-contain rounded-lg"
+                                        onClick={(e) => e.stopPropagation()}
+                                    />
+                                </div>
+                            </div>
+                        </div>
                     )}
                     </>
                 );
@@ -8556,6 +8776,34 @@ const App = () => {
 
      return (
         <div className="min-h-screen bg-page-bg flex flex-col font-sans">
+            {/* Fixed Donation Button - Top Left */}
+            <div className="fixed top-4 left-4 z-[60]">
+                <button
+                    onClick={() => {
+                        setCurrentView('donation');
+                        if (!hasSeenDonationHighlight) {
+                            setHasSeenDonationHighlight(true);
+                            localStorage.setItem('hasSeenDonationHighlight', 'true');
+                        }
+                    }}
+                    className={`bg-gradient-to-r from-pink-500 to-red-500 hover:from-pink-600 hover:to-red-600 text-white p-2.5 rounded-full shadow-lg transition-all hover:scale-110 flex items-center justify-center ${
+                        !hasSeenDonationHighlight ? 'animate-pulse ring-4 ring-pink-300 ring-opacity-50' : ''
+                    }`}
+                    title="Support CritterTrack"
+                    aria-label="Support CritterTrack"
+                >
+                    <Heart size={20} className="fill-current" />
+                </button>
+                
+                {/* First-time tooltip */}
+                {!hasSeenDonationHighlight && (
+                    <div className="absolute top-full mt-2 left-0 bg-gray-900 text-white text-xs px-3 py-2 rounded-lg shadow-xl whitespace-nowrap animate-bounce">
+                        <div className="absolute bottom-full left-4 w-0 h-0 border-l-4 border-l-transparent border-r-4 border-r-transparent border-b-4 border-b-gray-900"></div>
+                        💝 Support CritterTrack
+                    </div>
+                )}
+            </div>
+            
             {/* Welcome Banner - Shows once to new users within first month */}
             {authToken && !hasSeenWelcomeBanner && !tutorialLoading && userProfile && (() => {
                 // Check if account is less than 30 days old
