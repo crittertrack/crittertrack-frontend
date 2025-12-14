@@ -7877,7 +7877,13 @@ const App = () => {
                                 {/* Only show edit and transfer buttons if user owns this animal and it's not view-only */}
                                 {userProfile && animalToView.ownerId_public === userProfile.id_public && !animalToView.isViewOnly && (
                                     <>
-                                        <button onClick={() => { setAnimalToEdit(animalToView); setSpeciesToAdd(animalToView.species); setCurrentView('edit-animal'); }} className="bg-primary hover:bg-primary/90 text-black font-semibold py-2 px-4 rounded-lg">Edit</button>
+                                        <button 
+                                            data-tutorial-target="edit-animal-btn"
+                                            onClick={() => { setAnimalToEdit(animalToView); setSpeciesToAdd(animalToView.species); setCurrentView('edit-animal'); }} 
+                                            className="bg-primary hover:bg-primary/90 text-black font-semibold py-2 px-4 rounded-lg"
+                                        >
+                                            Edit
+                                        </button>
                                         <button 
                                             onClick={() => { 
                                                 setTransferAnimal(animalToView); 
