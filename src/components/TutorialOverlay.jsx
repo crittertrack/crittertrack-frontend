@@ -347,19 +347,33 @@ export const TutorialHighlight = ({ elementSelector, onHighlightClose, isModalOp
         return;
       }
 
-      // Calculate bounding box that encompasses all matching elements
+      // Calculate bounding box that encompasses all visible matching elements
       let minTop = Infinity;
       let minLeft = Infinity;
       let maxBottom = -Infinity;
       let maxRight = -Infinity;
+      let hasVisibleElement = false;
 
       elements.forEach(element => {
-        const rect = element.getBoundingClientRect();
-        minTop = Math.min(minTop, rect.top);
-        minLeft = Math.min(minLeft, rect.left);
-        maxBottom = Math.max(maxBottom, rect.bottom);
-        maxRight = Math.max(maxRight, rect.right);
+        const styles = window.getComputedStyle(element);
+        // Only consider visible elements
+        if (styles.display !== 'none' && styles.visibility !== 'hidden') {
+          const rect = element.getBoundingClientRect();
+          // Only include elements that are actually in the viewport
+          if (rect.width > 0 && rect.height > 0) {
+            minTop = Math.min(minTop, rect.top);
+            minLeft = Math.min(minLeft, rect.left);
+            maxBottom = Math.max(maxBottom, rect.bottom);
+            maxRight = Math.max(maxRight, rect.right);
+            hasVisibleElement = true;
+          }
+        }
       });
+
+      if (!hasVisibleElement) {
+        setPosition(null);
+        return;
+      }
 
       const width = maxRight - minLeft;
       const height = maxBottom - minTop;
