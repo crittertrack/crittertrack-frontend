@@ -7,7 +7,7 @@ import { useTutorial } from '../contexts/TutorialContext';
  * TutorialOverlay
  * Main modal component that shows tutorial lessons with navigation
  */
-export const TutorialOverlay = ({ lessonId, onClose, onComplete, onStepChange }) => {
+export const TutorialOverlay = React.forwardRef(({ lessonId, onClose, onComplete, onStepChange }, ref) => {
   const [currentStepIndex, setCurrentStepIndex] = useState(0);
   const { markTutorialCompleted } = useTutorial();
 
@@ -17,6 +17,20 @@ export const TutorialOverlay = ({ lessonId, onClose, onComplete, onStepChange })
   const currentStep = lesson?.steps[currentStepIndex];
   const isFirstStep = currentStepIndex === 0;
   const isLastStep = lesson ? currentStepIndex === lesson.steps.length - 1 : false;
+
+  // Expose advance method to parent component
+  React.useImperativeHandle(ref, () => ({
+    advanceStep: () => {
+      if (!isLastStep) {
+        setCurrentStepIndex(prev => prev + 1);
+      }
+    },
+    goToStep: (stepIndex) => {
+      if (stepIndex >= 0 && stepIndex < lesson?.steps.length) {
+        setCurrentStepIndex(stepIndex);
+      }
+    }
+  }), [isLastStep, lesson]);
 
   // Notify parent when step changes
   useEffect(() => {
@@ -190,7 +204,9 @@ export const TutorialOverlay = ({ lessonId, onClose, onComplete, onStepChange })
       </div>
     </>
   );
-};
+});
+
+TutorialOverlay.displayName = 'TutorialOverlay';
 
 /**
  * InitialTutorialModal
@@ -269,6 +285,8 @@ export const InitialTutorialModal = ({ onStart, onSkip }) => {
     </div>
   );
 };
+
+InitialTutorialModal.displayName = 'InitialTutorialModal';
 
 /**
  * TutorialHighlight

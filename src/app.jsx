@@ -7220,6 +7220,7 @@ const App = () => {
     const [newestUsers, setNewestUsers] = useState([]);
     const [activeUsers, setActiveUsers] = useState([]);
     const scrollContainerRef = useRef(null);
+    const tutorialOverlayRef = useRef(null);
 
     // Tutorial modal states
     const [showInfoTab, setShowInfoTab] = useState(false);
@@ -7285,6 +7286,27 @@ const App = () => {
             // This will automatically trigger the InitialTutorialModal through the tutorial context
         }
     }, [authToken, hasSeenInitialTutorial, userProfile]);
+
+    // Auto-advance tutorial when view changes (indicating step completion)
+    useEffect(() => {
+        if (!showTutorialOverlay || currentTutorialId !== 'create-animals' || !tutorialOverlayRef.current) {
+            return;
+        }
+
+        // Map views to expected tutorial step numbers
+        const viewToStep = {
+            'list': 0,           // Start Adding Animals
+            'select-species': 1, // Select a Species
+            'select-animal': 2,  // Fill in Basic Information
+            'form': 2            // Fill in Basic Information
+        };
+
+        const expectedStep = viewToStep[currentView];
+        if (expectedStep !== undefined && currentTutorialStep && expectedStep > currentTutorialStep.stepNumber - 1) {
+            // Auto-advance to the next step
+            tutorialOverlayRef.current.advanceStep();
+        }
+    }, [currentView, showTutorialOverlay, currentTutorialId, currentTutorialStep]);
 
     useEffect(() => {
         if (authToken) {
@@ -8605,6 +8627,7 @@ const App = () => {
             {/* Tutorial Overlay Modal */}
             {showTutorialOverlay && currentTutorialId && (
                 <TutorialOverlay
+                    ref={tutorialOverlayRef}
                     lessonId={currentTutorialId}
                     onStepChange={(stepIndex, step) => {
                         setCurrentTutorialStep(step);
