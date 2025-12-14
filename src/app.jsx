@@ -8521,7 +8521,7 @@ const App = () => {
                             <BookOpen size={18} className="mb-1" />
                             <span>Litters</span>
                         </button>
-                        <button onClick={() => setCurrentView('budget')} className={`px-4 py-2 text-xs font-medium rounded-lg transition duration-150 flex flex-col items-center ${currentView === 'budget' ? 'bg-primary text-black shadow-md' : 'text-gray-600 hover:bg-gray-100'}`}>
+                        <button onClick={() => setCurrentView('budget')} data-tutorial-target="budget-btn" className={`px-4 py-2 text-xs font-medium rounded-lg transition duration-150 flex flex-col items-center ${currentView === 'budget' ? 'bg-primary text-black shadow-md' : 'text-gray-600 hover:bg-gray-100'}`}>
                             <DollarSign size={18} className="mb-1" />
                             <span>Budget</span>
                         </button>
@@ -8627,7 +8627,7 @@ const App = () => {
                             <BookOpen size={16} className="inline mb-0.5" />
                             <span className="block">Litters</span>
                         </button>
-                        <button onClick={() => setCurrentView('budget')} className={`flex-1 px-2 py-2 text-xs font-medium rounded-lg transition duration-150 ${currentView === 'budget' ? 'bg-primary text-black shadow-md' : 'text-gray-600 hover:bg-gray-100'}`}>
+                        <button onClick={() => setCurrentView('budget')} data-tutorial-target="budget-btn" className={`flex-1 px-2 py-2 text-xs font-medium rounded-lg transition duration-150 ${currentView === 'budget' ? 'bg-primary text-black shadow-md' : 'text-gray-600 hover:bg-gray-100'}`}>
                             <DollarSign size={16} className="inline mb-0.5" />
                             <span className="block">Budget</span>
                         </button>

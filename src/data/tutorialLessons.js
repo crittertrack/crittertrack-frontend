@@ -253,7 +253,8 @@ export const TUTORIAL_LESSONS = {
         {
           stepNumber: 1,
           title: 'Why Track a Budget?',
-          content: 'The Budget tab helps you manage expenses (food, housing, medical) and income (animal sales).',
+          content: 'The Budget tab helps you manage expenses (food, housing, medical) and income (animal sales). Click the Budget button in the header to get started.',
+          highlightElement: '[data-tutorial-target="budget-btn"]',
           tips: [
             'See the true cost of your breeding program',
             'Plan for future expenses',
