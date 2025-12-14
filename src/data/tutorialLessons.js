@@ -358,33 +358,13 @@ export const TUTORIAL_LESSONS = {
       steps: [
         {
           stepNumber: 1,
-          title: 'Ready for More?',
-          content: 'You\'ve mastered the basics! Now let\'s explore advanced features like genetics calculators, COI analysis, advanced transfers, and powerful search tools.',
+          title: 'Ready for Advanced Features?',
+          content: 'You\'ve mastered the basics! Now explore advanced tools: genetics calculators for predicting offspring, COI analysis for breeding decisions, advanced transfers & purchases, powerful search & filtering, and more. Each tutorial builds on previous knowledge - skip what you know and revisit anytime from the Help tab.',
           tips: [
-            'These features help serious breeders',
-            'Take your breeding program to the next level',
-            'Learn at your own pace'
-          ]
-        },
-        {
-          stepNumber: 2,
-          title: 'What You\'ll Learn',
-          content: 'Advanced search & filtering, genetics calculator for predicting offspring, managing transfers & purchases, COI (Coefficient of Inbreeding) analysis, and more!',
-          tips: [
-            'Each tutorial builds on previous knowledge',
-            'You can skip tutorials you already know',
-            'Revisit anytime from the Info tab'
-          ]
-        },
-        {
-          stepNumber: 3,
-          title: 'Let\'s Get Started!',
-          content: 'Complete all advanced feature tutorials to become a CritterTrack expert. Ready to begin your journey!',
-          tips: [
-            'This is just the beginning',
-            'You can pause and resume anytime',
-            'Your progress is always saved',
-            'Access all tutorials from the Help tab'
+            'These features help serious breeders take their program to the next level',
+            'You can pause and resume anytime - your progress is always saved',
+            'Learn at your own pace - skip tutorials you already understand',
+            'Access all tutorials anytime from the Help tab'
           ]
         }
       ]
