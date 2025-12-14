@@ -4028,6 +4028,7 @@ const SpeciesSelector = ({ speciesOptions, onSelectSpecies, onManageSpecies, sea
                     <span className="font-semibold">{sortedSpecies.length}</span> species available
                 </p>
                 <button
+                    data-tutorial-target="add-new-species-btn"
                     onClick={onManageSpecies}
                     className="text-primary-dark hover:text-primary transition duration-150 font-medium flex items-center"
                 >

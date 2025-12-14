@@ -49,11 +49,10 @@ export const TUTORIAL_LESSONS = {
         {
           stepNumber: 2,
           title: 'Select a Species',
-          content: 'Choose a species from the available options. If your species isn\'t listed, you can add a custom species by entering it in the search field and clicking "Add Custom Species".',
+          content: 'Choose a species from the available options. If your species isn\'t listed, you can add a custom species by selecting "add new species" (bottom right, highlight) where you can create a new species.',
+          highlightElement: '[data-tutorial-target="add-new-species-btn"]',
           tips: [
-            'Common species like Mouse, Rat, and Hamster are pre-loaded',
-            'You can create custom species for your unique breeds',
-            'Custom species will be saved for future use'
+            'Common species like Fancy Mouse, Fancy Rat and Various Hamsters are pre-loaded'
           ]
         },
         {
