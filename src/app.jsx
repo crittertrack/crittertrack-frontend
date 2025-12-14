@@ -8649,6 +8649,7 @@ const App = () => {
                             if (nextIndex < TUTORIAL_LESSONS.onboarding.length) {
                                 // Show next lesson
                                 setCurrentTutorialId(TUTORIAL_LESSONS.onboarding[nextIndex].id);
+                                setCurrentTutorialStep(null);
                                 return nextIndex;
                             } else {
                                 // All lessons completed

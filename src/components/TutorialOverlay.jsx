@@ -39,6 +39,11 @@ export const TutorialOverlay = React.forwardRef(({ lessonId, onClose, onComplete
     }
   }, [currentStepIndex, currentStep, onStepChange]);
 
+  // Reset step index when lesson changes
+  useEffect(() => {
+    setCurrentStepIndex(0);
+  }, [lessonId]);
+
   const handleComplete = useCallback(() => {
     if (lesson) {
       markTutorialCompleted(lesson.id);
