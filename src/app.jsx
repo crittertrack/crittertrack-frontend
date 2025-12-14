@@ -7312,6 +7312,18 @@ const App = () => {
         }
     }, [currentView, speciesToAdd, showTutorialOverlay, currentTutorialId, currentTutorialStep]);
 
+    // Auto-advance tutorial for lesson 3 (assign-parents) when entering edit view
+    useEffect(() => {
+        if (!showTutorialOverlay || currentTutorialId !== 'assign-parents' || !tutorialOverlayRef.current) {
+            return;
+        }
+
+        // When editing an animal, advance to step 2 (where pedigree section is highlighted)
+        if (currentView === 'edit-animal' && currentTutorialStep?.stepNumber === 1) {
+            tutorialOverlayRef.current.advanceStep();
+        }
+    }, [currentView, showTutorialOverlay, currentTutorialId, currentTutorialStep]);
+
     useEffect(() => {
         if (authToken) {
             axios.defaults.headers.common['Authorization'] = `Bearer ${authToken}`;

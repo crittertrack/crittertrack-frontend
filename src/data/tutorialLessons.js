@@ -96,28 +96,31 @@ export const TUTORIAL_LESSONS = {
       steps: [
         {
           stepNumber: 1,
-          title: 'Why Assign Parents?',
-          content: 'Assigning parents creates a family tree and enables genetic calculations like Coefficient of Inbreeding (COI).',
+          title: 'Edit Your Animal',
+          content: 'Go back to the My Animals section and click on the animal you just created. Then click the Edit button in the top right corner.',
+          highlightElement: '[data-tutorial-target="edit-animal-btn"]',
           tips: [
-            'COI helps prevent genetic problems',
-            'You can see entire family lines',
-            'Track lineage across generations'
+            'Click on an animal card to view its details',
+            'The Edit button is in the top right corner',
+            'You can edit any animal anytime'
           ]
         },
         {
           stepNumber: 2,
           title: 'Assign a Sire (Father)',
-          content: 'When creating or editing an animal, use the "Sire" field to select a male parent. You can search by name or ID.',
+          content: 'In the "Pedigree: Sire and Dam 🌳" section, click on the Sire field to select the father. You can search your own animals or the global database.',
+          highlightElement: '[data-tutorial-target="pedigree-section"]',
           tips: [
             'The sire must be male',
-            'Search your own animals or global database',
-            'You can search by name or CritterTrack ID'
+            'Search by name or CritterTrack ID',
+            'Parents must be the same species'
           ]
         },
         {
           stepNumber: 3,
           title: 'Assign a Dam (Mother)',
-          content: 'Use the "Dam" field to select a female parent. Similar to the sire, you can search your own animals or the global database.',
+          content: 'Use the Dam field to select a female parent. Similar to the sire, you can search your own animals or the global database.',
+          highlightElement: '[data-tutorial-target="pedigree-section"]',
           tips: [
             'The dam must be female',
             'Both parents should be the same species',
