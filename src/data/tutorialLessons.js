@@ -247,49 +247,86 @@ export const TUTORIAL_LESSONS = {
     {
       id: 'budget-basics',
       title: '5. Budget Tracking 💰',
-      description: 'Track your breeding expenses and income.',
+      description: 'Track your breeding expenses, income, and animal transactions.',
       category: 'core-features',
       steps: [
         {
           stepNumber: 1,
           title: 'Why Track a Budget?',
-          content: 'The Budget tab helps you manage expenses (food, housing, medical) and income (animal sales). Click the Budget button in the header to get started.',
+          content: 'The Budget tab helps you manage expenses (food, housing, medical), income (stud fees, donations), and animal transactions (sales & purchases). Click the Budget button in the header to get started.',
           highlightElement: '[data-tutorial-target="budget-btn"]',
           tips: [
             'See the true cost of your breeding program',
+            'Track animal sales and purchases separately',
             'Plan for future expenses',
-            'Track profitability'
+            'Calculate net profit/loss'
           ]
         },
         {
           stepNumber: 2,
-          title: 'Add Expenses',
-          content: 'Go to the Budget tab and add expenses for feed, housing, medical care, equipment, etc.',
+          title: 'Understanding Transaction Types',
+          content: 'When you click "Add Transaction", you\'ll choose from 4 types: Animal Sale (selling an animal), Animal Purchase (buying an animal), Expense (general costs), or Income (other income like stud fees).',
           highlightElement: '[data-tutorial-target="budget-tab"]',
           tips: [
-            'Be specific about expense types',
-            'Include all costs (setup, recurring, etc.)',
-            'Dates help track spending patterns'
+            'Animal Sale: Records selling YOUR animal to someone else',
+            'Animal Purchase: Records buying an animal from someone else',
+            'Expense: Food, housing, medical, equipment, etc.',
+            'Income: Stud fees, donations, or other income'
           ]
         },
         {
           stepNumber: 3,
-          title: 'Track Income',
-          content: 'Record income from animal sales. Link sales to specific animals or buyers.',
+          title: 'Animal Transactions: Manual vs Transfer',
+          content: 'For Animal Sales and Purchases, you\'ll choose a mode: Manual Entry (just record the transaction) or Transfer/Notify (actually transfer ownership and notify the other user).',
           tips: [
-            'Track which animals generate income',
-            'Identify your most profitable animals',
-            'Calculate ROI for each breeding'
+            'Manual: Quick record-keeping, no ownership change',
+            'Transfer/Notify: Real ownership transfer + notification system',
+            'Transfer mode requires selecting a CritterTrack user',
+            'The other user must accept the transfer'
           ]
         },
         {
           stepNumber: 4,
-          title: 'View Reports',
-          content: 'See breakdowns of expenses by category and compare income vs. expenses over time.',
+          title: 'Sale Workflow',
+          content: 'When selling an animal in Transfer mode: You select your animal → Choose the buyer (CritterTrack user) → Buyer receives notification → Buyer accepts → Ownership transfers and they get full access.',
           tips: [
-            'Monthly and yearly overviews',
-            'Export data for records',
-            'Plan your breeding budget'
+            'Only your unsold animals appear in the dropdown',
+            'Buyer name is auto-filled from your profile',
+            'Transaction is recorded in both users\' budgets',
+            'Sold animals are protected from being sold again'
+          ]
+        },
+        {
+          stepNumber: 5,
+          title: 'Purchase Workflow',
+          content: 'When recording a purchase in Transfer mode: You select your animal (that you bought) → Choose the seller/breeder → Seller receives view-only offer → Seller accepts → You keep ownership, seller gets view-only access.',
+          tips: [
+            'You must already own the animal you\'re recording',
+            'Original breeder gets view-only access to track their lines',
+            'Transaction shows as expense (reduces net profit)',
+            'Seller can see pedigree but cannot edit'
+          ]
+        },
+        {
+          stepNumber: 6,
+          title: 'Expenses & Income',
+          content: 'For general Expenses and Income, just fill in description, price, and date. No transfer system needed - these are simple records for tracking costs and other income sources.',
+          tips: [
+            'Be specific with descriptions (e.g., "50lb bag feed" vs "food")',
+            'Dates help identify spending patterns',
+            'Regular expenses: food, bedding, vet visits, equipment',
+            'Regular income: stud fees, rehoming fees, donations'
+          ]
+        },
+        {
+          stepNumber: 7,
+          title: 'View Your Financial Summary',
+          content: 'The Budget tab shows total sales, purchases, expenses, income, and net profit. Transactions are color-coded: Sales (green), Purchases (red), Expenses (orange), Income (blue).',
+          tips: [
+            'Net Profit = (Sales + Income) - (Purchases + Expenses)',
+            'Filter by date range to see monthly/yearly trends',
+            'Export data for tax records',
+            'Track which animals are most profitable'
           ]
         }
       ]
