@@ -11,7 +11,7 @@ const BudgetingTab = ({ authToken, API_BASE_URL, showModalMessage }) => {
     const [showTypeSelection, setShowTypeSelection] = useState(true);
     const [editingTransaction, setEditingTransaction] = useState(null);
     const [searchTerm, setSearchTerm] = useState('');
-    const [filterType, setFilterType] = useState('all'); // all, sale, purchase
+    const [filterType, setFilterType] = useState('all'); // all, animal-sale, animal-purchase, expense, income
     const [filterYear, setFilterYear] = useState('all');
     const [buyerInputMode, setBuyerInputMode] = useState('manual'); // 'manual' or 'user'
     const [animalInputMode, setAnimalInputMode] = useState('manual'); // 'select' or 'manual'
@@ -57,13 +57,15 @@ const BudgetingTab = ({ authToken, API_BASE_URL, showModalMessage }) => {
     
     // Form state
     const [formData, setFormData] = useState({
-        type: 'sale', // sale or purchase
+        transactionType: 'animal-sale', // animal-sale, animal-purchase, expense, income
         animalId: '',
         animalName: '',
         price: '',
         date: new Date().toISOString().split('T')[0],
         buyer: '',
         seller: '',
+        category: 'food', // for expense/income: food, housing, medical, equipment, other
+        description: '', // for expense/income
         notes: ''
     });
     const [selectedSpecies, setSelectedSpecies] = useState('');
@@ -132,13 +134,15 @@ const BudgetingTab = ({ authToken, API_BASE_URL, showModalMessage }) => {
 
     const resetForm = () => {
         setFormData({
-            type: 'sale',
+            transactionType: 'animal-sale',
             animalId: '',
             animalName: '',
             price: '',
             date: new Date().toISOString().split('T')[0],
             buyer: '',
             seller: '',
+            category: 'food',
+            description: '',
             notes: ''
         });
         setSelectedSpecies('');
@@ -158,13 +162,15 @@ const BudgetingTab = ({ authToken, API_BASE_URL, showModalMessage }) => {
 
     const handleEditTransaction = (transaction) => {
         setFormData({
-            type: transaction.type,
+            type: transaction.type || transaction.transactionType || 'animal-sale',
             animalId: transaction.animalId || '',
             animalName: transaction.animalName || '',
             price: transaction.price.toString(),
             date: transaction.date.split('T')[0],
             buyer: transaction.buyer || '',
             seller: transaction.seller || '',
+            category: transaction.category || 'food',
+            description: transaction.description || '',
             notes: transaction.notes || ''
         });
         setEditingTransaction(transaction);
@@ -195,12 +201,13 @@ const BudgetingTab = ({ authToken, API_BASE_URL, showModalMessage }) => {
         try {
             const transactionData = {
                 ...formData,
+                type: formData.type, // send as 'type' to API, but use 'transactionType' internally
                 price: parseFloat(formData.price)
             };
 
-            // Add user ID if a user was selected from search
-            if (selectedUser) {
-                if (formData.type === 'sale') {
+            // Add user ID if a user was selected from search (for animal sales/purchases only)
+            if (selectedUser && (formData.type === 'animal-sale' || formData.type === 'animal-purchase')) {
+                if (formData.type === 'animal-sale') {
                     transactionData.buyerUserId = selectedUser.userId_backend;
                 } else {
                     transactionData.sellerUserId = selectedUser.userId_backend;
@@ -271,6 +278,8 @@ const BudgetingTab = ({ authToken, API_BASE_URL, showModalMessage }) => {
             transaction.animalId?.toLowerCase().includes(searchTerm.toLowerCase()) ||
             transaction.buyer?.toLowerCase().includes(searchTerm.toLowerCase()) ||
             transaction.seller?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+            transaction.description?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+            transaction.category?.toLowerCase().includes(searchTerm.toLowerCase()) ||
             transaction.notes?.toLowerCase().includes(searchTerm.toLowerCase());
         
         const matchesType = filterType === 'all' || transaction.type === filterType;
@@ -283,17 +292,23 @@ const BudgetingTab = ({ authToken, API_BASE_URL, showModalMessage }) => {
 
     // Calculate statistics
     const stats = filteredTransactions.reduce((acc, transaction) => {
-        if (transaction.type === 'sale') {
+        if (transaction.type === 'animal-sale') {
             acc.totalSales += transaction.price;
             acc.salesCount++;
-        } else {
+        } else if (transaction.type === 'animal-purchase') {
             acc.totalPurchases += transaction.price;
             acc.purchasesCount++;
+        } else if (transaction.type === 'income') {
+            acc.totalIncome += transaction.price;
+            acc.incomeCount++;
+        } else if (transaction.type === 'expense') {
+            acc.totalExpenses += transaction.price;
+            acc.expenseCount++;
         }
         return acc;
-    }, { totalSales: 0, totalPurchases: 0, salesCount: 0, purchasesCount: 0 });
+    }, { totalSales: 0, totalPurchases: 0, totalIncome: 0, totalExpenses: 0, salesCount: 0, purchasesCount: 0, incomeCount: 0, expenseCount: 0 });
 
-    const netProfit = stats.totalSales - stats.totalPurchases;
+    const netProfit = (stats.totalSales + stats.totalIncome) - (stats.totalPurchases + stats.totalExpenses);
 
     // Get unique years from transactions
     const availableYears = [...new Set(transactions.map(t => 
@@ -440,8 +455,10 @@ const BudgetingTab = ({ authToken, API_BASE_URL, showModalMessage }) => {
                             className="w-full pl-10 pr-3 py-2 border border-gray-300 rounded-lg focus:ring-primary focus:border-primary"
                         >
                             <option value="all">All Types</option>
-                            <option value="sale">Sales Only</option>
-                            <option value="purchase">Purchases Only</option>
+                            <option value="animal-sale">Animal Sales</option>
+                            <option value="animal-purchase">Animal Purchases</option>
+                            <option value="expense">Expenses</option>
+                            <option value="income">Income</option>
                         </select>
                     </div>
 
@@ -507,24 +524,45 @@ const BudgetingTab = ({ authToken, API_BASE_URL, showModalMessage }) => {
                                         </td>
                                         <td className="px-4 py-3 text-sm">
                                             <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${
-                                                transaction.type === 'sale' 
+                                                transaction.type === 'animal-sale' 
                                                     ? 'bg-green-100 text-green-800' 
-                                                    : 'bg-red-100 text-red-800'
+                                                    : transaction.type === 'animal-purchase'
+                                                    ? 'bg-red-100 text-red-800'
+                                                    : transaction.type === 'expense'
+                                                    ? 'bg-orange-100 text-orange-800'
+                                                    : 'bg-blue-100 text-blue-800'
                                             }`}>
-                                                {transaction.type === 'sale' ? 'Sale' : 'Purchase'}
+                                                {transaction.type === 'animal-sale' 
+                                                    ? 'Animal Sale' 
+                                                    : transaction.type === 'animal-purchase'
+                                                    ? 'Animal Purchase'
+                                                    : transaction.type === 'expense'
+                                                    ? 'Expense'
+                                                    : 'Income'}
                                             </span>
                                         </td>
                                         <td className="px-4 py-3 text-sm text-gray-700">
-                                            <div className="font-medium">{transaction.animalName || 'N/A'}</div>
-                                            {transaction.animalId && (
-                                                <div className="text-xs text-gray-500">{transaction.animalId}</div>
+                                            {transaction.type === 'animal-sale' || transaction.type === 'animal-purchase' ? (
+                                                <>
+                                                    <div className="font-medium">{transaction.animalName || 'N/A'}</div>
+                                                    {transaction.animalId && (
+                                                        <div className="text-xs text-gray-500">{transaction.animalId}</div>
+                                                    )}
+                                                </>
+                                            ) : (
+                                                <>
+                                                    <div className="font-medium">{transaction.description || 'N/A'}</div>
+                                                    {transaction.category && (
+                                                        <div className="text-xs text-gray-500">{transaction.category}</div>
+                                                    )}
+                                                </>
                                             )}
                                         </td>
                                         <td className="px-4 py-3 text-sm font-semibold text-gray-900">
                                             {getCurrencySymbol()}{transaction.price.toFixed(2)}
                                         </td>
                                         <td className="px-4 py-3 text-sm text-gray-700">
-                                            {transaction.type === 'sale' ? transaction.buyer : transaction.seller}
+                                            {transaction.type === 'animal-sale' ? transaction.buyer : transaction.type === 'animal-purchase' ? transaction.seller : '-'}
                                         </td>
                                         <td className="px-4 py-3 text-sm text-gray-500 max-w-xs truncate">
                                             {transaction.notes || '-'}
@@ -563,9 +601,13 @@ const BudgetingTab = ({ authToken, API_BASE_URL, showModalMessage }) => {
                                     ? 'Edit Transaction' 
                                     : showTypeSelection 
                                         ? 'Add Transaction'
-                                        : formData.type === 'sale' 
-                                            ? 'Add Sale' 
-                                            : 'Add Purchase'
+                                        : formData.type === 'animal-sale' 
+                                            ? 'Add Animal Sale' 
+                                            : formData.type === 'animal-purchase'
+                                            ? 'Add Animal Purchase'
+                                            : formData.type === 'expense'
+                                            ? 'Add Expense'
+                                            : 'Add Income'
                                 }
                             </h2>
                             <button
@@ -583,38 +625,58 @@ const BudgetingTab = ({ authToken, API_BASE_URL, showModalMessage }) => {
                         {!editingTransaction && showTypeSelection ? (
                             <div className="space-y-6">
                                 <p className="text-center text-gray-600 mb-8">What type of transaction would you like to add?</p>
-                                <div className="grid grid-cols-2 gap-6">
+                                <div className="grid grid-cols-2 gap-4">
                                     <button
                                         type="button"
                                         onClick={() => {
-                                            console.log('[BudgetTab] Sale button clicked');
-                                            setFormData({ ...formData, type: 'sale' });
+                                            console.log('[BudgetTab] Animal Sale button clicked');
+                                            setFormData({ ...formData, type: 'animal-sale' });
                                             setShowTypeSelection(false);
-                                            console.log('[BudgetTab] State updated - type: sale, showTypeSelection: false');
                                         }}
-                                        className="flex flex-col items-center justify-center p-8 border-2 border-gray-300 rounded-xl hover:border-green-500 hover:bg-green-50 transition-all group"
+                                        className="flex flex-col items-center justify-center p-6 border-2 border-gray-300 rounded-xl hover:border-green-500 hover:bg-green-50 transition-all"
                                     >
-                                        <TrendingUp className="w-16 h-16 text-green-600 mb-4" />
-                                        <h3 className="text-xl font-bold text-gray-800 mb-2">Sale</h3>
-                                        <p className="text-sm text-gray-600 text-center">Record an animal you sold</p>
-                                        <div className="mt-3 flex items-center gap-1 text-xs text-blue-600 bg-blue-50 px-3 py-1 rounded-full">
-                                            <ArrowLeftRight className="w-3 h-3" />
-                                            <span>Can transfer ownership</span>
-                                        </div>
+                                        <TrendingUp className="w-12 h-12 text-green-600 mb-3" />
+                                        <h3 className="text-lg font-bold text-gray-800 mb-1">Animal Sale</h3>
+                                        <p className="text-xs text-gray-600 text-center">Sell an animal</p>
                                     </button>
                                     <button
                                         type="button"
                                         onClick={() => {
-                                            console.log('[BudgetTab] Purchase button clicked');
-                                            setFormData({ ...formData, type: 'purchase' });
+                                            console.log('[BudgetTab] Animal Purchase button clicked');
+                                            setFormData({ ...formData, type: 'animal-purchase' });
                                             setShowTypeSelection(false);
-                                            console.log('[BudgetTab] State updated - type: purchase, showTypeSelection: false');
                                         }}
-                                        className="flex flex-col items-center justify-center p-8 border-2 border-gray-300 rounded-xl hover:border-red-500 hover:bg-red-50 transition-all group"
+                                        className="flex flex-col items-center justify-center p-6 border-2 border-gray-300 rounded-xl hover:border-red-500 hover:bg-red-50 transition-all"
                                     >
-                                        <TrendingDown className="w-16 h-16 text-red-600 mb-4" />
-                                        <h3 className="text-xl font-bold text-gray-800 mb-2">Purchase</h3>
-                                        <p className="text-sm text-gray-600 text-center">Record an animal you bought</p>
+                                        <TrendingDown className="w-12 h-12 text-red-600 mb-3" />
+                                        <h3 className="text-lg font-bold text-gray-800 mb-1">Animal Purchase</h3>
+                                        <p className="text-xs text-gray-600 text-center">Buy an animal</p>
+                                    </button>
+                                    <button
+                                        type="button"
+                                        onClick={() => {
+                                            console.log('[BudgetTab] Expense button clicked');
+                                            setFormData({ ...formData, type: 'expense' });
+                                            setShowTypeSelection(false);
+                                        }}
+                                        className="flex flex-col items-center justify-center p-6 border-2 border-gray-300 rounded-xl hover:border-orange-500 hover:bg-orange-50 transition-all"
+                                    >
+                                        <TrendingDown className="w-12 h-12 text-orange-600 mb-3" />
+                                        <h3 className="text-lg font-bold text-gray-800 mb-1">Expense</h3>
+                                        <p className="text-xs text-gray-600 text-center">Food, housing, medical...</p>
+                                    </button>
+                                    <button
+                                        type="button"
+                                        onClick={() => {
+                                            console.log('[BudgetTab] Income button clicked');
+                                            setFormData({ ...formData, type: 'income' });
+                                            setShowTypeSelection(false);
+                                        }}
+                                        className="flex flex-col items-center justify-center p-6 border-2 border-gray-300 rounded-xl hover:border-blue-500 hover:bg-blue-50 transition-all"
+                                    >
+                                        <TrendingUp className="w-12 h-12 text-blue-600 mb-3" />
+                                        <h3 className="text-lg font-bold text-gray-800 mb-1">Income</h3>
+                                        <p className="text-xs text-gray-600 text-center">Other income</p>
                                     </button>
                                 </div>
                             </div>
@@ -637,8 +699,8 @@ const BudgetingTab = ({ authToken, API_BASE_URL, showModalMessage }) => {
                                 />
                             </div>
 
-                            {/* Animal selection - different for sale vs purchase */}
-                            {formData.type === 'sale' ? (
+                            {/* Animal selection - for animal sales and purchases only */}
+                            {(formData.type === 'animal-sale' || formData.type === 'animal-purchase') && (
                                 <div>
                                     <label className="block text-sm font-medium text-gray-700 mb-2">
                                         Select Animal (optional)
@@ -684,7 +746,10 @@ const BudgetingTab = ({ authToken, API_BASE_URL, showModalMessage }) => {
                                             : 'Filter by species first for easier selection'}
                                     </p>
                                 </div>
-                            ) : (
+                            )}
+
+                            {/* Buyer/Seller or Category/Description fields */}
+                            {(formData.transactionType === 'animal-sale' || formData.transactionType === 'animal-purchase') && (
                                 <div>
                                     <div className="flex items-center justify-between mb-2">
                                         <label className="block text-sm font-medium text-gray-700">
@@ -785,16 +850,50 @@ const BudgetingTab = ({ authToken, API_BASE_URL, showModalMessage }) => {
                                 />
                             </div>
 
+                            {/* Category field for expense/income */}
+                            {(formData.type === 'expense' || formData.type === 'income') && (
+                                <div>
+                                    <label className="block text-sm font-medium text-gray-700 mb-2">
+                                        Category *
+                                    </label>
+                                    <select
+                                        value={formData.category}
+                                        onChange={(e) => setFormData({ ...formData, category: e.target.value })}
+                                        className="w-full p-2 border border-gray-300 rounded-lg focus:ring-primary focus:border-primary"
+                                        required
+                                    >
+                                        <option value="food">Food & Supplies</option>
+                                        <option value="housing">Housing & Bedding</option>
+                                        <option value="medical">Medical & Veterinary</option>
+                                        <option value="equipment">Equipment & Setup</option>
+                                        <option value="other">Other</option>
+                                    </select>
+                                </div>
+                            )}
+
+                            {/* Description field for expense/income */}
+                            {(formData.type === 'expense' || formData.type === 'income') && (
+                                <div>
+                                    <label className="block text-sm font-medium text-gray-700 mb-2">
+                                        Description *
+                                    </label>
+                                    <input
+                                        type="text"
+                                        value={formData.description}
+                                        onChange={(e) => setFormData({ ...formData, description: e.target.value })}
+                                        placeholder="e.g., Monthly food supply, Vet checkup, Cage upgrade"
+                                        className="w-full p-2 border border-gray-300 rounded-lg focus:ring-primary focus:border-primary"
+                                        required
+                                    />
+                                </div>
+                            )}
+
+                            {/* Buyer/Seller section for animal sales and purchases */}
+                            {(formData.type === 'animal-sale' || formData.type === 'animal-purchase') && (
                             <div>
                                 <div className="flex items-center justify-between mb-2">
                                     <label className="block text-sm font-medium text-gray-700 flex items-center gap-2">
-                                        {formData.type === 'sale' ? 'Buyer' : 'Seller'}
-                                        {formData.type === 'sale' && buyerInputMode === 'user' && (
-                                            <span className="flex items-center gap-1 text-xs font-normal text-blue-600 bg-blue-50 px-2 py-0.5 rounded-full">
-                                                <ArrowLeftRight className="w-3 h-3" />
-                                                Transfer enabled
-                                            </span>
-                                        )}
+                                        {formData.type === 'animal-sale' ? 'Buyer' : 'Seller'}
                                     </label>
                                     <div className="flex gap-2">
                                         <button
@@ -817,7 +916,7 @@ const BudgetingTab = ({ authToken, API_BASE_URL, showModalMessage }) => {
                                             }}
                                             className={`text-xs px-2 py-1 rounded flex items-center gap-1 ${buyerInputMode === 'user' ? 'bg-primary text-black' : 'bg-gray-200 text-gray-600'}`}
                                         >
-                                            {formData.type === 'sale' && <ArrowLeftRight className="w-3 h-3" />}
+                                            {formData.type === 'animal-sale' && <ArrowLeftRight className="w-3 h-3" />}
                                             Search User
                                         </button>
                                     </div>
@@ -825,20 +924,20 @@ const BudgetingTab = ({ authToken, API_BASE_URL, showModalMessage }) => {
                                 {buyerInputMode === 'manual' ? (
                                     <input
                                         type="text"
-                                        value={formData.type === 'sale' ? formData.buyer : formData.seller}
+                                        value={formData.type === 'animal-sale' ? formData.buyer : formData.seller}
                                         onChange={(e) => setFormData({ 
                                             ...formData, 
-                                            [formData.type === 'sale' ? 'buyer' : 'seller']: e.target.value 
+                                            [formData.type === 'animal-sale' ? 'buyer' : 'seller']: e.target.value 
                                         })}
-                                        placeholder={`Enter ${formData.type === 'sale' ? 'buyer' : 'seller'} name`}
+                                        placeholder={`Enter ${formData.type === 'animal-sale' ? 'buyer' : 'seller'} name`}
                                         className="w-full p-2 border border-gray-300 rounded-lg focus:ring-primary focus:border-primary"
                                     />
                                 ) : (
                                     <div className="relative">
                                         {/* Show selected user or search input */}
-                                        {(formData.type === 'sale' ? formData.buyer : formData.seller) ? (
+                                        {(formData.type === 'animal-sale' ? formData.buyer : formData.seller) ? (
                                             <div className="flex items-center justify-between w-full p-2 border border-gray-300 rounded-lg bg-gray-50">
-                                                <span className="text-gray-700">{formData.type === 'sale' ? formData.buyer : formData.seller}</span>
+                                                <span className="text-gray-700">{formData.type === 'animal-sale' ? formData.buyer : formData.seller}</span>
                                                 <button
                                                     type="button"
                                                     onClick={() => {
@@ -901,7 +1000,7 @@ const BudgetingTab = ({ authToken, API_BASE_URL, showModalMessage }) => {
                                                             onClick={() => {
                                                                 setFormData({ 
                                                                     ...formData, 
-                                                                    [formData.type === 'sale' ? 'buyer' : 'seller']: value 
+                                                                    [formData.type === 'animal-sale' ? 'buyer' : 'seller']: value 
                                                                 });
                                                                 setSelectedUser(user); // Store full user object with _id
                                                                 setUserSearchQuery('');
@@ -925,13 +1024,13 @@ const BudgetingTab = ({ authToken, API_BASE_URL, showModalMessage }) => {
                                         )}
                                     </div>
                                 )}
-                                {formData.type === 'sale' && buyerInputMode === 'user' && formData.animalId ? (
+                                {formData.type === 'animal-sale' && buyerInputMode === 'user' && formData.animalId ? (
                                     <div className="mt-2 p-3 bg-blue-50 border border-blue-200 rounded-lg">
                                         <div className="flex items-start gap-2">
                                             <Info className="w-4 h-4 text-blue-600 mt-0.5 flex-shrink-0" />
                                             <div className="text-xs text-blue-800">
-                                                <p className="font-semibold mb-1">🎉 Animal Transfer</p>
-                                                <p>When you select a CritterTrack user as the buyer, the animal will be transferred to their account! They'll receive a notification to accept the transfer. You'll keep view-only access to track the animal's lineage.</p>
+                                                <p className="font-semibold mb-1">📝 Buyer Information</p>
+                                                <p>You can track who bought this animal, but no transfer or notification will be sent to the buyer.</p>
                                             </div>
                                         </div>
                                     </div>
@@ -949,12 +1048,13 @@ const BudgetingTab = ({ authToken, API_BASE_URL, showModalMessage }) => {
                                     <p className="text-xs text-gray-500 mt-1">
                                         {buyerInputMode === 'manual' 
                                             ? 'Enter name manually' 
-                                            : formData.type === 'sale' 
-                                                ? 'Search for a CritterTrack user to transfer animal ownership' 
-                                                : 'Search for a CritterTrack user to notify them of your purchase'}
+                                            : formData.type === 'animal-sale' 
+                                                ? 'Search for a CritterTrack user' 
+                                                : 'Search for a CritterTrack user'}
                                     </p>
                                 )}
                             </div>
+                            )}
 
                             <div>
                                 <label className="block text-sm font-medium text-gray-700 mb-2">
