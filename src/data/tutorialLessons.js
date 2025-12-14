@@ -160,8 +160,8 @@ export const TUTORIAL_LESSONS = {
         {
           stepNumber: 2,
           title: 'Create a New Litter',
-          content: 'Go to the Litters tab and click "New Litter". Select the sire and dam.',
-          highlightElement: '[data-tutorial-target="litter-management-tab"]',
+          content: 'Click the "New Litter" button to start creating a new litter. You\'ll select the sire (father) and dam (mother).',
+          highlightElement: '[data-tutorial-target="new-litter-btn"]',
           tips: [
             'Both parents are required',
             'Parents must be the same species',

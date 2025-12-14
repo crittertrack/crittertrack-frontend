@@ -2959,6 +2959,7 @@ const LitterManagement = ({ authToken, API_BASE_URL, userProfile, showModalMessa
                 </h2>
                 <button
                     onClick={() => setShowAddForm(!showAddForm)}
+                    data-tutorial-target="new-litter-btn"
                     className="bg-primary hover:bg-primary/90 text-black font-semibold py-2 px-4 rounded-lg flex items-center gap-2"
                 >
                     {showAddForm ? <X size={20} /> : <Plus size={20} />}
@@ -7324,6 +7325,18 @@ const App = () => {
 
         // When editing an animal, advance to step 2 (where pedigree section is highlighted)
         if (currentView === 'edit-animal' && currentTutorialStep?.stepNumber === 1) {
+            tutorialOverlayRef.current.advanceStep();
+        }
+    }, [currentView, showTutorialOverlay, currentTutorialId, currentTutorialStep]);
+
+    // Auto-advance tutorial for lesson 4 (create-litters) when entering litters view
+    useEffect(() => {
+        if (!showTutorialOverlay || currentTutorialId !== 'create-litters' || !tutorialOverlayRef.current) {
+            return;
+        }
+
+        // When viewing litters, advance to step 2 (where new litter button is highlighted)
+        if (currentView === 'litters' && currentTutorialStep?.stepNumber === 1) {
             tutorialOverlayRef.current.advanceStep();
         }
     }, [currentView, showTutorialOverlay, currentTutorialId, currentTutorialStep]);
