@@ -41,6 +41,8 @@ export const TutorialProvider = ({ children, userId, authToken, API_BASE_URL }) 
           headers: { Authorization: `Bearer ${authToken}` }
         });
         
+        console.log('Tutorial progress loaded from backend:', response.data);
+        
         setCompletedTutorials(response.data.completedTutorials || []);
         setHasCompletedOnboarding(response.data.hasCompletedOnboarding || false);
         setHasCompletedAdvancedFeatures(response.data.hasCompletedAdvancedFeatures || false);
@@ -48,29 +50,31 @@ export const TutorialProvider = ({ children, userId, authToken, API_BASE_URL }) 
         // Also sync with localStorage for offline support
         const userStoragePrefix = `${userId}_`;
         localStorage.setItem(userStoragePrefix + STORAGE_KEYS.COMPLETED_TUTORIALS, JSON.stringify(response.data.completedTutorials || []));
+        localStorage.setItem(userStoragePrefix + STORAGE_KEYS.HAS_SEEN_TUTORIAL, JSON.stringify(response.data.hasCompletedOnboarding || false));
         
-        // If user has completed onboarding, mark initial tutorial as seen
-        if (response.data.hasCompletedOnboarding) {
-          setHasSeenInitialTutorial(true);
-          localStorage.setItem(userStoragePrefix + STORAGE_KEYS.HAS_SEEN_TUTORIAL, JSON.stringify(true));
-        }
+        console.log('Tutorial state synced to localStorage for user:', userId);
       } catch (error) {
-        console.warn('Failed to load tutorial progress from backend, using localStorage:', error);
+        console.error('Failed to load tutorial progress from backend:', error);
         
         // Fallback to localStorage
         const userStoragePrefix = `${userId}_`;
         try {
-          const savedHasSeenTutorial = localStorage.getItem(userStoragePrefix + STORAGE_KEYS.HAS_SEEN_TUTORIAL);
-          if (savedHasSeenTutorial !== null) {
-            setHasSeenInitialTutorial(JSON.parse(savedHasSeenTutorial));
-          }
-
           const savedCompletedTutorials = localStorage.getItem(userStoragePrefix + STORAGE_KEYS.COMPLETED_TUTORIALS);
+          const savedHasSeenTutorial = localStorage.getItem(userStoragePrefix + STORAGE_KEYS.HAS_SEEN_TUTORIAL);
+          
           if (savedCompletedTutorials) {
-            setCompletedTutorials(JSON.parse(savedCompletedTutorials));
+            const tutorials = JSON.parse(savedCompletedTutorials);
+            setCompletedTutorials(tutorials);
+            console.log('Tutorial progress loaded from localStorage:', tutorials);
+          }
+          
+          if (savedHasSeenTutorial !== null) {
+            const hasCompleted = JSON.parse(savedHasSeenTutorial);
+            setHasSeenInitialTutorial(hasCompleted);
+            setHasCompletedOnboarding(hasCompleted);
           }
         } catch (err) {
-          console.warn('Failed to load tutorial state from localStorage:', err);
+          console.error('Failed to load tutorial state from localStorage:', err);
         }
       }
       
