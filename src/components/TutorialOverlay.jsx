@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useRef, useCallback } from 'react';
 import { X, ChevronLeft, ChevronRight, Check, BookOpen } from 'lucide-react';
-import { TUTORIAL_LESSONS } from '../data/tutorialLessons';
+import { TUTORIAL_LESSONS, hasStartedAdvancedFeatures } from '../data/tutorialLessons';
 import { useTutorial } from '../contexts/TutorialContext';
 
 /**
@@ -59,13 +59,13 @@ export const TutorialOverlay = React.forwardRef(({ lessonId, onClose, onComplete
       // Determine if this is the final onboarding lesson (budget-basics)
       const isOnboardingComplete = lesson.id === 'budget-basics';
       
-      // Determine if this is the final advanced features lesson (coi-explained)
-      const isAdvancedComplete = lesson.id === 'coi-explained';
+      // Determine if this is the final advanced features lesson
+      const isAdvancedFeaturesComplete = lesson.id === 'advanced-features-complete';
       
-      markTutorialCompleted(lesson.id, isOnboardingComplete);
+      markTutorialCompleted(lesson.id, isOnboardingComplete, isAdvancedFeaturesComplete);
 
-      // Show advanced features prompt after completing onboarding
-      if (isOnboardingComplete && !completedTutorials.includes('coi-explained')) {
+      // Show advanced features prompt after completing onboarding if user hasn't started advanced features
+      if (isOnboardingComplete && !hasStartedAdvancedFeatures(completedTutorials)) {
         setShowAdvancedFeaturesPrompt(true);
         return; // Don't close yet, show the prompt
       }

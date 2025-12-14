@@ -23,6 +23,7 @@ export const TutorialProvider = ({ children, userId, authToken, API_BASE_URL }) 
   const [currentTutorialId, setCurrentTutorialId] = useState(null);
   const [isLoading, setIsLoading] = useState(true);
   const [hasCompletedOnboarding, setHasCompletedOnboarding] = useState(false);
+  const [hasCompletedAdvancedFeatures, setHasCompletedAdvancedFeatures] = useState(false);
 
   // Load tutorial state from backend when user logs in
   useEffect(() => {
@@ -42,6 +43,7 @@ export const TutorialProvider = ({ children, userId, authToken, API_BASE_URL }) 
         
         setCompletedTutorials(response.data.completedTutorials || []);
         setHasCompletedOnboarding(response.data.hasCompletedOnboarding || false);
+        setHasCompletedAdvancedFeatures(response.data.hasCompletedAdvancedFeatures || false);
         
         // Also sync with localStorage for offline support
         const userStoragePrefix = `${userId}_`;
@@ -97,7 +99,7 @@ export const TutorialProvider = ({ children, userId, authToken, API_BASE_URL }) 
   }, [saveTutorialState]);
 
   // Mark a tutorial as completed
-  const markTutorialCompleted = useCallback(async (tutorialId, isOnboardingComplete = false) => {
+  const markTutorialCompleted = useCallback(async (tutorialId, isOnboardingComplete = false, isAdvancedFeaturesComplete = false) => {
     setCompletedTutorials(prev => {
       if (prev.includes(tutorialId)) return prev;
       const updated = [...prev, tutorialId];
@@ -116,7 +118,8 @@ export const TutorialProvider = ({ children, userId, authToken, API_BASE_URL }) 
       try {
         await axios.post(`${API_BASE_URL}/users/tutorial-complete`, {
           tutorialId,
-          isOnboardingComplete
+          isOnboardingComplete,
+          isAdvancedFeaturesComplete
         }, {
           headers: { Authorization: `Bearer ${authToken}` }
         });
@@ -176,6 +179,7 @@ export const TutorialProvider = ({ children, userId, authToken, API_BASE_URL }) 
     currentTutorialId,
     isLoading,
     hasCompletedOnboarding,
+    hasCompletedAdvancedFeatures,
 
     // Actions
     markInitialTutorialSeen,

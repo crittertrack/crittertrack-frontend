@@ -351,6 +351,46 @@ export const TUTORIAL_LESSONS = {
   // ====================================
   features: [
     {
+      id: 'advanced-welcome',
+      title: 'Welcome to Advanced Features! 🚀',
+      description: 'Unlock the full power of CritterTrack with advanced tools and features.',
+      category: 'welcome',
+      steps: [
+        {
+          stepNumber: 1,
+          title: 'Ready for More?',
+          content: 'You\'ve mastered the basics! Now let\'s explore advanced features like genetics calculators, COI analysis, advanced transfers, and powerful search tools.',
+          tips: [
+            'These features help serious breeders',
+            'Take your breeding program to the next level',
+            'Learn at your own pace'
+          ]
+        },
+        {
+          stepNumber: 2,
+          title: 'What You\'ll Learn',
+          content: 'Advanced search & filtering, genetics calculator for predicting offspring, managing transfers & purchases, COI (Coefficient of Inbreeding) analysis, and more!',
+          tips: [
+            'Each tutorial builds on previous knowledge',
+            'You can skip tutorials you already know',
+            'Revisit anytime from the Info tab'
+          ]
+        },
+        {
+          stepNumber: 3,
+          title: 'Let\'s Get Started!',
+          content: 'Complete all advanced feature tutorials to become a CritterTrack expert. Check the box below to begin your journey!',
+          isCompletionStep: true,
+          tips: [
+            'This is just the beginning',
+            'You can pause and resume anytime',
+            'Your progress is always saved',
+            'Access all tutorials from the Info tab (ℹ️)'
+          ]
+        }
+      ]
+    },
+    {
       id: 'search-filter',
       title: 'Searching & Filtering 🔍',
       description: 'Find your animals quickly using search and advanced filters.',
@@ -650,17 +690,26 @@ export const TUTORIAL_LESSONS = {
             'Document your reasoning',
             'Share with community for feedback'
           ]
-        },
+        }
+      ]
+    },
+    {
+      id: 'advanced-features-complete',
+      title: 'Advanced Features Complete! 🎉',
+      description: 'Congratulations on mastering all advanced CritterTrack features!',
+      category: 'completion',
+      steps: [
         {
-          stepNumber: 5,
-          title: 'Advanced Features Complete! 🎉',
-          content: 'Congratulations! You\'ve completed all Advanced Features tutorials. Check the box below to mark your progress.',
+          stepNumber: 1,
+          title: 'You\'re a CritterTrack Expert!',
+          content: 'Congratulations! You\'ve completed all Advanced Features tutorials and mastered the full power of CritterTrack. Check the box below to mark your achievement.',
           isCompletionStep: true,
           tips: [
             'You\'ve mastered all major CritterTrack features!',
-            'Revisit any tutorial anytime from the Info tab',
+            'Revisit any tutorial anytime from the Info tab (ℹ️)',
             'Your progress is saved in our database',
-            'Share your knowledge with the breeder community'
+            'Share your knowledge with the breeder community',
+            'Keep breeding responsibly and ethically!'
           ]
         }
       ]
@@ -710,8 +759,16 @@ export const isOnboardingComplete = (completedTutorials) => {
 };
 
 /**
+ * Check if user has started advanced features
+ */
+export const hasStartedAdvancedFeatures = (completedTutorials) => {
+  const advancedLessonIds = TUTORIAL_LESSONS.features.map(l => l.id);
+  return advancedLessonIds.some(id => completedTutorials.includes(id));
+};
+
+/**
  * Check if all advanced features tutorials are complete
  */
 export const areAdvancedFeaturesComplete = (completedTutorials) => {
-  return completedTutorials.includes('coi-explained'); // Last feature tutorial
+  return completedTutorials.includes('advanced-features-complete'); // Final completion lesson
 };
