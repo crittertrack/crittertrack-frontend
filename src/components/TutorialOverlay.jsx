@@ -316,34 +316,39 @@ export const TutorialHighlight = ({ elementSelector, onHighlightClose, isModalOp
         return;
       }
 
-      // Get the element's position
-      const rect = element.getBoundingClientRect();
+      // Check for visible modal overlays (but not the tutorial panel)
+      // Look for elements with fixed positioning and inset-0 (which covers full screen)
+      const potentialModals = document.querySelectorAll('[class*="inset-0"][class*="fixed"]');
+      let hasVisibleModal = false;
       
-      // Check if element is covered by a modal overlay (but exclude the tutorial panel itself)
-      const allFixed = document.querySelectorAll('[class*="fixed"]');
-      let maxModalZIndex = 0;
-      let maxElementZIndex = 9998; // Our highlight z-index
-      
-      for (const el of allFixed) {
-        // Skip the tutorial panel itself
-        if (el.classList.contains('bg-gradient-to-r') && el.classList.contains('shadow-2xl')) {
-          continue; // This is the tutorial panel, skip it
-        }
+      for (const modal of potentialModals) {
+        const styles = window.getComputedStyle(modal);
+        const display = styles.display;
+        const visibility = styles.visibility;
+        const classes = modal.className;
         
-        const zIndex = window.getComputedStyle(el).zIndex;
-        const classes = el.className;
-        // Check if this looks like a modal (has bg-black, bg-white, or similar overlay classes)
-        if ((classes.includes('bg-black') || classes.includes('bg-white')) && !isNaN(zIndex) && zIndex !== 'auto') {
-          maxModalZIndex = Math.max(maxModalZIndex, parseInt(zIndex));
+        // Check if it's actually visible and not the tutorial overlay
+        if (display !== 'none' && visibility !== 'hidden') {
+          // Skip if it's our highlight overlay (has z-[9998])
+          if (classes.includes('z-[9998]') || classes.includes('pointer-events-none')) {
+            continue;
+          }
+          // Skip if it's the tutorial panel background (has gradient)
+          if (classes.includes('bg-gradient')) {
+            continue;
+          }
+          hasVisibleModal = true;
+          break;
         }
       }
 
-      // If there's a modal with higher z-index than our highlight, don't show highlight
-      if (maxModalZIndex > maxElementZIndex) {
+      if (hasVisibleModal) {
         setPosition(null);
         return;
       }
 
+      // Get the element's position
+      const rect = element.getBoundingClientRect();
       setPosition({
         top: rect.top,
         left: rect.left,
@@ -367,7 +372,7 @@ export const TutorialHighlight = ({ elementSelector, onHighlightClose, isModalOp
       subtree: true,
       childList: true,
       attributes: true,
-      attributeFilter: ['class', 'style', 'zindex']
+      attributeFilter: ['class', 'style', 'display', 'visibility']
     });
 
     return () => {
