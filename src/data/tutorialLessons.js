@@ -107,22 +107,24 @@ export const TUTORIAL_LESSONS = {
         {
           stepNumber: 2,
           title: 'Assign a Sire (Father)',
-          content: 'In the "Pedigree: Sire and Dam 🌳" section, click on the Sire field to select the father. You can search your own animals or the global database.',
+          content: 'In the "Pedigree: Sire and Dam 🌳" section, click on the Sire field to select the father. You can search your own animals or the global database. The global database shows all animals marked as public by other breeders. Note: other breeders can reject the use of their animals in your pedigree.',
           highlightElement: '[data-tutorial-target="pedigree-section"]',
           tips: [
             'The sire must be male',
-            'Search by name or CritterTrack ID',
-            'Parents must be the same species'
+            'Global search shows animals marked public by other users',
+            'Breeders can reject use of their animals in your pedigree',
+            'Search by name or CritterTrack ID'
           ]
         },
         {
           stepNumber: 3,
           title: 'Assign a Dam (Mother)',
-          content: 'Use the Dam field to select a female parent. Similar to the sire, you can search your own animals or the global database.',
+          content: 'Use the Dam field to select a female parent. Similar to the sire, you can search your own animals or the global database. The global database shows all animals marked as public by other breeders. Other breeders can reject the use of their animals in your pedigree.',
           highlightElement: '[data-tutorial-target="pedigree-section"]',
           tips: [
             'The dam must be female',
-            'Both parents should be the same species',
+            'Global search shows animals marked public by other users',
+            'Breeders can reject use of their animals in your pedigree',
             'Parents must be alive before the offspring\'s birth date'
           ]
         },
