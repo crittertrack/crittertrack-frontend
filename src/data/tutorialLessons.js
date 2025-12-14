@@ -213,8 +213,8 @@ export const TUTORIAL_LESSONS = {
         {
           stepNumber: 1,
           title: 'Access Your Profile',
-          content: 'Click on your profile icon in the top-right corner to access profile settings.',
-          highlightElement: '[data-tutorial-target="profile-menu"]',
+          content: 'Click on the Profile button in the header to access your profile settings.',
+          highlightElement: '[data-tutorial-target="profile-btn"]',
           tips: [
             'Your profile is visible to other breeders',
             'You can customize what information is public',
