@@ -5015,7 +5015,10 @@ const AnimalForm = ({
                 {/* ------------------------------------------- */}
                 {/* Pedigree Section */}
                 {/* ------------------------------------------- */}
-                <div className="bg-gray-50 p-4 rounded-lg border border-gray-200 space-y-4">
+                <div 
+                    data-tutorial-target="pedigree-section"
+                    className="bg-gray-50 p-4 rounded-lg border border-gray-200 space-y-4"
+                >
                     <h3 className="text-lg font-semibold text-gray-700 border-b pb-2">Pedigree: Sire and Dam 🌳</h3>
                     <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                         <div className='flex flex-col'>
