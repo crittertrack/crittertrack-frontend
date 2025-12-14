@@ -9283,14 +9283,26 @@ const PublicProfilePage = () => {
 const AppRouter = () => {
     return (
         <Routes>
-            <Route path="/" element={
-                <TutorialProvider userId={localStorage.getItem('userId')}>
-                    <App />
-                </TutorialProvider>
-            } />
+            <Route path="/" element={<AppWithTutorial />} />
             <Route path="/animal/:animalId" element={<PublicAnimalPage />} />
             <Route path="/user/:userId" element={<PublicProfilePage />} />
         </Routes>
+    );
+};
+
+// Wrapper to provide tutorial context with auth
+const AppWithTutorial = () => {
+    const [authToken] = useState(localStorage.getItem('authToken') || null);
+    const [userId] = useState(localStorage.getItem('userId') || null);
+    
+    return (
+        <TutorialProvider 
+            userId={userId}
+            authToken={authToken}
+            API_BASE_URL={API_BASE_URL}
+        >
+            <App />
+        </TutorialProvider>
     );
 };
 

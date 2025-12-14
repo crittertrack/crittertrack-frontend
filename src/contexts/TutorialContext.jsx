@@ -1,10 +1,11 @@
 import React, { createContext, useState, useCallback, useEffect } from 'react';
+import axios from 'axios';
 
 /**
  * TutorialContext
  * Manages tutorial state including:
  * - Current tutorial being shown
- * - Completed tutorials
+ * - Completed tutorials (synced with backend)
  * - Whether new user has seen initial tutorial
  * - Tutorial preferences
  */
@@ -16,40 +17,66 @@ const STORAGE_KEYS = {
   TUTORIAL_PREFERENCES: 'crittertrack_tutorial_preferences',
 };
 
-export const TutorialProvider = ({ children, userId }) => {
+export const TutorialProvider = ({ children, userId, authToken, API_BASE_URL }) => {
   const [hasSeenInitialTutorial, setHasSeenInitialTutorial] = useState(false);
   const [completedTutorials, setCompletedTutorials] = useState([]);
   const [currentTutorialId, setCurrentTutorialId] = useState(null);
   const [isLoading, setIsLoading] = useState(true);
+  const [hasCompletedOnboarding, setHasCompletedOnboarding] = useState(false);
 
-  // Load tutorial state from localStorage on mount and when userId changes
+  // Load tutorial state from backend when user logs in
   useEffect(() => {
-    setIsLoading(true);
-    
-    if (!userId) {
+    const loadTutorialProgress = async () => {
+      setIsLoading(true);
+      
+      if (!userId || !authToken) {
+        setIsLoading(false);
+        return;
+      }
+
+      try {
+        // Fetch tutorial progress from backend
+        const response = await axios.get(`${API_BASE_URL}/users/tutorial-progress`, {
+          headers: { Authorization: `Bearer ${authToken}` }
+        });
+        
+        setCompletedTutorials(response.data.completedTutorials || []);
+        setHasCompletedOnboarding(response.data.hasCompletedOnboarding || false);
+        
+        // Also sync with localStorage for offline support
+        const userStoragePrefix = `${userId}_`;
+        localStorage.setItem(userStoragePrefix + STORAGE_KEYS.COMPLETED_TUTORIALS, JSON.stringify(response.data.completedTutorials || []));
+        
+        // If user has completed onboarding, mark initial tutorial as seen
+        if (response.data.hasCompletedOnboarding) {
+          setHasSeenInitialTutorial(true);
+          localStorage.setItem(userStoragePrefix + STORAGE_KEYS.HAS_SEEN_TUTORIAL, JSON.stringify(true));
+        }
+      } catch (error) {
+        console.warn('Failed to load tutorial progress from backend, using localStorage:', error);
+        
+        // Fallback to localStorage
+        const userStoragePrefix = `${userId}_`;
+        try {
+          const savedHasSeenTutorial = localStorage.getItem(userStoragePrefix + STORAGE_KEYS.HAS_SEEN_TUTORIAL);
+          if (savedHasSeenTutorial !== null) {
+            setHasSeenInitialTutorial(JSON.parse(savedHasSeenTutorial));
+          }
+
+          const savedCompletedTutorials = localStorage.getItem(userStoragePrefix + STORAGE_KEYS.COMPLETED_TUTORIALS);
+          if (savedCompletedTutorials) {
+            setCompletedTutorials(JSON.parse(savedCompletedTutorials));
+          }
+        } catch (err) {
+          console.warn('Failed to load tutorial state from localStorage:', err);
+        }
+      }
+      
       setIsLoading(false);
-      return;
-    }
+    };
 
-    // Use userId as part of storage key to keep tutorials per-user
-    const userStoragePrefix = `${userId}_`;
-    
-    try {
-      const savedHasSeenTutorial = localStorage.getItem(userStoragePrefix + STORAGE_KEYS.HAS_SEEN_TUTORIAL);
-      if (savedHasSeenTutorial !== null) {
-        setHasSeenInitialTutorial(JSON.parse(savedHasSeenTutorial));
-      }
-
-      const savedCompletedTutorials = localStorage.getItem(userStoragePrefix + STORAGE_KEYS.COMPLETED_TUTORIALS);
-      if (savedCompletedTutorials) {
-        setCompletedTutorials(JSON.parse(savedCompletedTutorials));
-      }
-    } catch (err) {
-      console.warn('Failed to load tutorial state from localStorage:', err);
-    }
-    
-    setIsLoading(false);
-  }, [userId]);
+    loadTutorialProgress();
+  }, [userId, authToken, API_BASE_URL]);
 
   // Save tutorial state to localStorage
   const saveTutorialState = useCallback((key, value) => {
@@ -70,14 +97,35 @@ export const TutorialProvider = ({ children, userId }) => {
   }, [saveTutorialState]);
 
   // Mark a tutorial as completed
-  const markTutorialCompleted = useCallback((tutorialId) => {
+  const markTutorialCompleted = useCallback(async (tutorialId, isOnboardingComplete = false) => {
     setCompletedTutorials(prev => {
       if (prev.includes(tutorialId)) return prev;
       const updated = [...prev, tutorialId];
       saveTutorialState(STORAGE_KEYS.COMPLETED_TUTORIALS, updated);
       return updated;
     });
-  }, [saveTutorialState]);
+
+    if (isOnboardingComplete) {
+      setHasCompletedOnboarding(true);
+      setHasSeenInitialTutorial(true);
+      saveTutorialState(STORAGE_KEYS.HAS_SEEN_TUTORIAL, true);
+    }
+
+    // Save to backend
+    if (authToken && API_BASE_URL) {
+      try {
+        await axios.post(`${API_BASE_URL}/users/tutorial-complete`, {
+          tutorialId,
+          isOnboardingComplete
+        }, {
+          headers: { Authorization: `Bearer ${authToken}` }
+        });
+      } catch (error) {
+        console.warn('Failed to save tutorial completion to backend:', error);
+        // Continue anyway - localStorage backup is in place
+      }
+    }
+  }, [saveTutorialState, authToken, API_BASE_URL]);
 
   // Check if a tutorial has been completed
   const isTutorialCompleted = useCallback((tutorialId) => {
@@ -127,6 +175,7 @@ export const TutorialProvider = ({ children, userId }) => {
     completedTutorials,
     currentTutorialId,
     isLoading,
+    hasCompletedOnboarding,
 
     // Actions
     markInitialTutorialSeen,

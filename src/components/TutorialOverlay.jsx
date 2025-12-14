@@ -9,7 +9,9 @@ import { useTutorial } from '../contexts/TutorialContext';
  */
 export const TutorialOverlay = React.forwardRef(({ lessonId, onClose, onComplete, onStepChange }, ref) => {
   const [currentStepIndex, setCurrentStepIndex] = useState(0);
-  const { markTutorialCompleted } = useTutorial();
+  const [completionChecked, setCompletionChecked] = useState(false);
+  const [showAdvancedFeaturesPrompt, setShowAdvancedFeaturesPrompt] = useState(false);
+  const { markTutorialCompleted, completedTutorials } = useTutorial();
 
   const lesson = TUTORIAL_LESSONS.onboarding.find(l => l.id === lessonId) || 
                  TUTORIAL_LESSONS.features.find(l => l.id === lessonId);

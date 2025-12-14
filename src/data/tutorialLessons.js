@@ -329,6 +329,18 @@ export const TUTORIAL_LESSONS = {
             'Export data for tax records',
             'Track which animals are most profitable'
           ]
+        },
+        {
+          stepNumber: 8,
+          title: 'Tutorial Complete! 🎉',
+          content: 'Congratulations! You\'ve completed the Getting Started tutorial and learned the core features of CritterTrack. Check the box below to mark this tutorial as complete.',
+          isCompletionStep: true,
+          tips: [
+            'You can always restart tutorials from the Info tab',
+            'Access advanced feature tutorials anytime',
+            'Your progress is saved automatically',
+            'Clear your browser cache? Your tutorial progress persists in our database'
+          ]
         }
       ]
     }
@@ -436,48 +448,63 @@ export const TUTORIAL_LESSONS = {
     },
     {
       id: 'transfer-animals',
-      title: 'Transferring Animals 🚚',
-      description: 'Transfer ownership of animals to other breeders.',
+      title: 'Advanced Transfer Features 🚚',
+      description: 'Learn advanced animal transfer features and best practices.',
       category: 'sharing',
       steps: [
         {
           stepNumber: 1,
-          title: 'Why Transfer Animals?',
-          content: 'Mark animals as sold or rehomed, and update ownership records.',
+          title: 'Quick Review: Transfer System',
+          content: 'The Budget tab\'s Transfer/Notify system lets you sell animals with automatic ownership transfer and buyer notifications. This lesson covers advanced features and tips.',
           tips: [
-            'Keep accurate records of your breeding program',
-            'Track where animals went',
-            'Maintain contact with new owners'
+            'Review: Use Budget tab → Add Transaction → Animal Sale → Transfer mode',
+            'Quick shortcut: Click Transfer button on any animal card',
+            'This lesson focuses on advanced features not covered in basics'
           ]
         },
         {
           stepNumber: 2,
-          title: 'Mark as Sold',
-          content: 'In animal details, you can track sale price and buyer information.',
+          title: 'Managing View-Only Access',
+          content: 'After selling an animal, you keep view-only access to track your breeding lines. You can\'t edit sold animals, but you can see their pedigree, offspring, and updates.',
           tips: [
-            'Record sale price for budget tracking',
-            'Add buyer contact information',
-            'Keep records for breeding follow-up'
+            'View-only animals appear with an orange "Sold" badge',
+            'Use filters to show/hide sold animals from your main list',
+            'Buyers can\'t delete animals - they can only Return them',
+            'Great for tracking your breeding program\'s success'
           ]
         },
         {
           stepNumber: 3,
-          title: 'Update Status',
-          content: 'Change the animal\'s status from "Breeder" to "Sold", "Rehomed", or other status.',
+          title: 'Purchase Workflow: Offering View-Only',
+          content: 'When you buy an animal and record it as a Purchase in Transfer mode, the original breeder/seller receives a view-only offer. They can accept to track their bloodlines.',
           tips: [
-            'Helps track current breeding stock',
-            'Maintain complete colony history',
-            'See statistics on your breeding success'
+            'Helps breeders track where their genetics go',
+            'Original owner sees animal in their collection (view-only)',
+            'Builds community and breeder relationships',
+            'Useful for tracking genetic diversity across programs'
           ]
         },
         {
           stepNumber: 4,
-          title: 'Share Pedigree Info',
-          content: 'Consider sharing pedigree information with the new owner for their records.',
+          title: 'Returning Animals',
+          content: 'Buyers can return animals to the original owner using the Delete/Return button. This removes their ownership and notifies the seller, automatically removing view-only access.',
           tips: [
-            'Export pedigree charts as PDF',
-            'Help new owners understand genetics',
-            'Build breeder community'
+            'Returns are permanent - can\'t be undone',
+            'Seller gets notification of the return',
+            'Transaction stays in budget history for records',
+            'Use notes field to explain return reason'
+          ]
+        },
+        {
+          stepNumber: 5,
+          title: 'Tutorial Complete! 🎉',
+          content: 'You\'ve learned the advanced transfer features! Check the box below to mark this tutorial as complete.',
+          isCompletionStep: true,
+          tips: [
+            'Practice transfers with other users to master the system',
+            'Check notifications regularly for transfer requests',
+            'Use Budget tab to track all your transactions',
+            'Explore other advanced tutorials in the Info tab'
           ]
         }
       ]
@@ -623,6 +650,18 @@ export const TUTORIAL_LESSONS = {
             'Document your reasoning',
             'Share with community for feedback'
           ]
+        },
+        {
+          stepNumber: 5,
+          title: 'Advanced Features Complete! 🎉',
+          content: 'Congratulations! You\'ve completed all Advanced Features tutorials. Check the box below to mark your progress.',
+          isCompletionStep: true,
+          tips: [
+            'You\'ve mastered all major CritterTrack features!',
+            'Revisit any tutorial anytime from the Info tab',
+            'Your progress is saved in our database',
+            'Share your knowledge with the breeder community'
+          ]
         }
       ]
     }
@@ -653,4 +692,26 @@ export const getFeatureLessons = () => TUTORIAL_LESSONS.features;
 export const getLessonsByCategory = (category) => {
   const allLessons = [...TUTORIAL_LESSONS.onboarding, ...TUTORIAL_LESSONS.features];
   return allLessons.filter(lesson => lesson.category === category);
+};
+
+/**
+ * Check if all lessons in a tutorial type are completed
+ */
+export const areAllLessonsCompleted = (lessons, completedTutorials) => {
+  if (!lessons || lessons.length === 0) return false;
+  return lessons.every(lesson => completedTutorials.includes(lesson.id));
+};
+
+/**
+ * Check if the budget-basics tutorial is complete
+ */
+export const isOnboardingComplete = (completedTutorials) => {
+  return completedTutorials.includes('budget-basics'); // Last onboarding tutorial
+};
+
+/**
+ * Check if all advanced features tutorials are complete
+ */
+export const areAdvancedFeaturesComplete = (completedTutorials) => {
+  return completedTutorials.includes('coi-explained'); // Last feature tutorial
 };
