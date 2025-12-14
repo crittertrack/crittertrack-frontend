@@ -319,13 +319,17 @@ export const TutorialHighlight = ({ elementSelector, onHighlightClose, isModalOp
       // Get the element's position
       const rect = element.getBoundingClientRect();
       
-      // Check if element is covered by a modal overlay
-      // Get the highest z-index overlay/modal that exists
+      // Check if element is covered by a modal overlay (but exclude the tutorial panel itself)
       const allFixed = document.querySelectorAll('[class*="fixed"]');
       let maxModalZIndex = 0;
       let maxElementZIndex = 9998; // Our highlight z-index
       
       for (const el of allFixed) {
+        // Skip the tutorial panel itself
+        if (el.classList.contains('bg-gradient-to-r') && el.classList.contains('shadow-2xl')) {
+          continue; // This is the tutorial panel, skip it
+        }
+        
         const zIndex = window.getComputedStyle(el).zIndex;
         const classes = el.className;
         // Check if this looks like a modal (has bg-black, bg-white, or similar overlay classes)
