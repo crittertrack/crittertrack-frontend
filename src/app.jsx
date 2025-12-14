@@ -8793,7 +8793,15 @@ const App = () => {
                         setCurrentTutorialIndex(0);
                         setCurrentTutorialStep(null);
                     }}
-                    onComplete={() => {
+                    onComplete={(signal) => {
+                        // Handle "start-advanced" signal from onboarding completion
+                        if (signal === 'start-advanced') {
+                            setCurrentTutorialIndex(0);
+                            setCurrentTutorialId(TUTORIAL_LESSONS.features[0].id);
+                            setCurrentTutorialStep(null);
+                            return;
+                        }
+
                         // Move to next lesson in the sequence
                         setCurrentTutorialIndex(prevIndex => {
                             const nextIndex = prevIndex + 1;

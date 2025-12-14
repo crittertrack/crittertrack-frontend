@@ -41,21 +41,42 @@ export const TutorialOverlay = React.forwardRef(({ lessonId, onClose, onComplete
     }
   }, [currentStepIndex, currentStep, onStepChange]);
 
-  // Reset step index when lesson changes
+  // Reset step index and completion state when lesson changes
   useEffect(() => {
     setCurrentStepIndex(0);
+    setCompletionChecked(false);
+    setShowAdvancedFeaturesPrompt(false);
   }, [lessonId]);
 
   const handleComplete = useCallback(() => {
     if (lesson) {
-      markTutorialCompleted(lesson.id);
+      // Check if this is a completion step and checkbox is required
+      if (currentStep?.isCompletionStep && !completionChecked) {
+        // Don't complete unless checkbox is checked
+        return;
+      }
+
+      // Determine if this is the final onboarding lesson (budget-basics)
+      const isOnboardingComplete = lesson.id === 'budget-basics';
+      
+      // Determine if this is the final advanced features lesson (coi-explained)
+      const isAdvancedComplete = lesson.id === 'coi-explained';
+      
+      markTutorialCompleted(lesson.id, isOnboardingComplete);
+
+      // Show advanced features prompt after completing onboarding
+      if (isOnboardingComplete && !completedTutorials.includes('coi-explained')) {
+        setShowAdvancedFeaturesPrompt(true);
+        return; // Don't close yet, show the prompt
+      }
     }
+    
     if (onComplete) {
       onComplete(lesson?.id);
     }
     // Don't call onClose here - let the parent component handle closing
     // onClose will be called by parent when all lessons are done
-  }, [lesson, markTutorialCompleted, onComplete]);
+  }, [lesson, currentStep, completionChecked, completedTutorials, markTutorialCompleted, onComplete]);
 
   const handleNext = useCallback(() => {
     if (!isLastStep) {
@@ -157,6 +178,39 @@ export const TutorialOverlay = React.forwardRef(({ lessonId, onClose, onComplete
             </div>
           )}
 
+          {/* Completion Checkbox for final steps */}
+          {currentStep.isCompletionStep && (
+            <div className="bg-gradient-to-r from-green-50 to-blue-50 border-2 border-green-300 rounded-lg p-4 space-y-3">
+              <div className="flex items-start gap-3">
+                <input
+                  type="checkbox"
+                  id="tutorial-complete-checkbox"
+                  checked={completionChecked}
+                  onChange={(e) => setCompletionChecked(e.target.checked)}
+                  className="mt-1 w-5 h-5 text-green-600 border-gray-300 rounded focus:ring-green-500 cursor-pointer"
+                />
+                <label htmlFor="tutorial-complete-checkbox" className="flex-1 cursor-pointer">
+                  <span className="text-sm font-bold text-gray-800 block mb-1">
+                    ✓ Mark this tutorial as complete
+                  </span>
+                  <span className="text-xs text-gray-600">
+                    Your progress will be saved and synced across all your devices
+                  </span>
+                </label>
+              </div>
+              
+              <div className="bg-white/60 rounded p-3 border border-green-200">
+                <p className="text-xs text-gray-700 font-medium mb-1">
+                  📚 <strong>Need to review?</strong>
+                </p>
+                <p className="text-xs text-gray-600">
+                  Access any tutorial anytime from the <strong>Info tab</strong> (ℹ️ button in the header). 
+                  You can restart lessons or explore advanced features whenever you're ready!
+                </p>
+              </div>
+            </div>
+          )}
+
           {/* Highlighted element indicator */}
           {currentStep.highlightElement && (
             <div className="bg-amber-50 border-l-3 border-amber-400 rounded p-3">
@@ -188,16 +242,17 @@ export const TutorialOverlay = React.forwardRef(({ lessonId, onClose, onComplete
 
             <button
               onClick={handleNext}
+              disabled={isLastStep && currentStep?.isCompletionStep && !completionChecked}
               className={`flex items-center gap-1 px-4 py-1.5 rounded text-xs font-semibold transition ${
                 isLastStep
-                  ? 'bg-accent hover:bg-accent/90 text-white'
+                  ? 'bg-accent hover:bg-accent/90 text-white disabled:opacity-50 disabled:cursor-not-allowed'
                   : 'bg-primary hover:bg-primary/90 text-black'
               }`}
             >
               {isLastStep ? (
                 <>
                   <Check size={14} />
-                  Done
+                  {currentStep?.isCompletionStep && !completionChecked ? 'Check box above' : 'Done'}
                 </>
               ) : (
                 <>
@@ -209,6 +264,54 @@ export const TutorialOverlay = React.forwardRef(({ lessonId, onClose, onComplete
           </div>
         </div>
       </div>
+
+      {/* Advanced Features Prompt - shown after completing onboarding */}
+      {showAdvancedFeaturesPrompt && (
+        <div className="fixed inset-0 bg-black/70 flex items-center justify-center p-4 z-[10000]">
+          <div className="bg-white rounded-2xl shadow-2xl max-w-md w-full p-6">
+            <div className="text-center mb-6">
+              <div className="text-4xl mb-3">🎓</div>
+              <h2 className="text-2xl font-bold text-gray-800 mb-2">
+                Great job completing the basics!
+              </h2>
+              <p className="text-gray-600">
+                Ready to explore advanced features like genetics calculators, COI tracking, and more?
+              </p>
+            </div>
+
+            <div className="space-y-3">
+              <button
+                onClick={() => {
+                  setShowAdvancedFeaturesPrompt(false);
+                  if (onComplete) {
+                    onComplete('start-advanced');
+                  }
+                }}
+                className="w-full bg-accent hover:bg-accent/90 text-white font-semibold py-3 px-4 rounded-lg transition flex items-center justify-center gap-2"
+              >
+                <BookOpen size={18} />
+                Start Advanced Features Tutorial
+              </button>
+              
+              <button
+                onClick={() => {
+                  setShowAdvancedFeaturesPrompt(false);
+                  if (onComplete) {
+                    onComplete(lesson?.id);
+                  }
+                }}
+                className="w-full bg-gray-200 hover:bg-gray-300 text-gray-700 font-semibold py-3 px-4 rounded-lg transition"
+              >
+                Skip for now
+              </button>
+            </div>
+
+            <p className="text-xs text-gray-500 text-center mt-4">
+              You can access all tutorials anytime from the Info tab (ℹ️)
+            </p>
+          </div>
+        </div>
+      )}
     </>
   );
 });
