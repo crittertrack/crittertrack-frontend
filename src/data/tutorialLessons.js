@@ -288,8 +288,9 @@ export const TUTORIAL_LESSONS = {
         {
           stepNumber: 4,
           title: 'Sale Workflow',
-          content: 'When selling an animal in Transfer mode: You select your animal → Choose the buyer (CritterTrack user) → Buyer receives notification → Buyer accepts → Ownership transfers and they get full access.',
+          content: 'When selling an animal in Transfer mode: You select your animal → Choose the buyer (CritterTrack user) → Buyer receives notification → Buyer accepts → Ownership transfers and they get full access. Quick tip: You can also click the "Transfer" button on any animal\'s detail page to start a sale with that animal pre-selected!',
           tips: [
+            'Shortcut: Use the "Transfer" button on animal detail cards',
             'Only your unsold animals appear in the dropdown',
             'Buyer name is auto-filled from your profile',
             'Transaction is recorded in both users\' budgets',
