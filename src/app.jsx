@@ -7293,21 +7293,24 @@ const App = () => {
             return;
         }
 
-        // Map views to expected tutorial step numbers
-        const viewToStep = {
-            'list': 0,           // Start Adding Animals
-            'select-species': 1, // Select a Species
-            'manage-species': 2, // Add Custom Species (advances to step 3)
-            'select-animal': 2,  // Fill in Basic Information
-            'form': 2            // Fill in Basic Information
-        };
+        // Determine expected step based on current view and state
+        let expectedStep = undefined;
 
-        const expectedStep = viewToStep[currentView];
+        if (currentView === 'list') {
+            expectedStep = 0; // Start Adding Animals
+        } else if (currentView === 'select-species') {
+            expectedStep = 1; // Select a Species
+        } else if (currentView === 'add-animal' && speciesToAdd) {
+            expectedStep = 2; // Species selected - advances to step 3 (Fill in Basic Information)
+        } else if (currentView === 'form') {
+            expectedStep = 3;
+        }
+
         if (expectedStep !== undefined && currentTutorialStep && expectedStep > currentTutorialStep.stepNumber - 1) {
             // Auto-advance to the next step
             tutorialOverlayRef.current.advanceStep();
         }
-    }, [currentView, showTutorialOverlay, currentTutorialId, currentTutorialStep]);
+    }, [currentView, speciesToAdd, showTutorialOverlay, currentTutorialId, currentTutorialStep]);
 
     useEffect(() => {
         if (authToken) {
