@@ -8797,10 +8797,12 @@ const App = () => {
                         setCurrentTutorialStep(step);
                     }}
                     onClose={() => {
+                        // Close tutorial and don't show again this session (like "Skip for Now")
                         setShowTutorialOverlay(false);
                         setCurrentTutorialId(null);
                         setCurrentTutorialIndex(0);
                         setCurrentTutorialStep(null);
+                        setHasSkippedTutorialThisSession(true);
                     }}
                     onComplete={(signal) => {
                         // Handle "start-advanced" signal from onboarding completion

@@ -98,6 +98,12 @@ export const TutorialOverlay = React.forwardRef(({ lessonId, onClose, onComplete
     }
   }, [onComplete]);
 
+  const handleClose = useCallback(() => {
+    if (onClose) {
+      onClose();
+    }
+  }, [onClose]);
+
   if (!lesson || !currentStep) return null;
 
   const progress = ((currentStepIndex + 1) / lesson.steps.length) * 100;
@@ -116,7 +122,7 @@ export const TutorialOverlay = React.forwardRef(({ lessonId, onClose, onComplete
             <h2 className="text-lg font-bold">{lesson.title}</h2>
           </div>
           <button
-            onClick={handleSkip}
+            onClick={handleClose}
             className="text-black/50 hover:text-black transition p-1 rounded-lg hover:bg-white/20 flex-shrink-0"
             title="Close tutorial"
           >
