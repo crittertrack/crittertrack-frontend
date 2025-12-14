@@ -7,6 +7,7 @@ const BudgetingTab = ({ authToken, API_BASE_URL, showModalMessage }) => {
     const [animals, setAnimals] = useState([]);
     const [searchResults, setSearchResults] = useState([]);
     const [loading, setLoading] = useState(true);
+    const [userProfile, setUserProfile] = useState(null);
     const [showAddModal, setShowAddModal] = useState(false);
     const [showModeSelection, setShowModeSelection] = useState(false); // Show modal to choose manual vs transfer
     const [animalSaleMode, setAnimalSaleMode] = useState(null); // 'manual' or 'transfer' 
@@ -73,7 +74,19 @@ const BudgetingTab = ({ authToken, API_BASE_URL, showModalMessage }) => {
     useEffect(() => {
         fetchTransactions();
         fetchAnimals();
+        fetchUserProfile();
     }, []);
+
+    const fetchUserProfile = async () => {
+        try {
+            const response = await axios.get(`${API_BASE_URL}/profile`, {
+                headers: { Authorization: `Bearer ${authToken}` }
+            });
+            setUserProfile(response.data);
+        } catch (error) {
+            console.error('Error fetching user profile:', error);
+        }
+    };
 
     const fetchTransactions = async () => {
         try {
@@ -226,9 +239,21 @@ const BudgetingTab = ({ authToken, API_BASE_URL, showModalMessage }) => {
                 if (formData.type === 'animal-sale') {
                     transactionData.buyerUserId = userIdToUse;
                     console.log('Set buyerUserId:', userIdToUse);
+                    // For sales, set the seller to current user's name
+                    if (userProfile && !transactionData.seller) {
+                        const sellerName = userProfile.breederName || userProfile.personalName || 'Unknown';
+                        transactionData.seller = sellerName;
+                        console.log('Set seller to current user:', sellerName);
+                    }
                 } else {
                     transactionData.sellerUserId = userIdToUse;
                     console.log('Set sellerUserId:', userIdToUse);
+                    // For purchases, set the buyer to current user's name
+                    if (userProfile && !transactionData.buyer) {
+                        const buyerName = userProfile.breederName || userProfile.personalName || 'Unknown';
+                        transactionData.buyer = buyerName;
+                        console.log('Set buyer to current user:', buyerName);
+                    }
                 }
                 // Mark this as a transfer mode transaction (not just logging)
                 transactionData.mode = 'transfer';
