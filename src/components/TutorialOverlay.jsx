@@ -83,10 +83,17 @@ export const TutorialOverlay = React.forwardRef(({ lessonId, onClose, onComplete
   }, [isFirstStep]);
 
   const handleSkip = useCallback(() => {
+    // Check if this is the final onboarding lesson (budget-basics)
+    if (lesson && lesson.id === 'budget-basics') {
+      markTutorialCompleted(lesson.id, true, false);
+      setShowAdvancedFeaturesPrompt(true);
+      return; // Don't close yet, show the prompt
+    }
+    
     if (onComplete) {
       onComplete();
     }
-  }, [onComplete]);
+  }, [lesson, markTutorialCompleted, onComplete]);
 
   const handleClose = useCallback(() => {
     if (onClose) {
