@@ -7200,7 +7200,7 @@ const App = () => {
     const [currentView, setCurrentView] = useState('list'); 
     
     // Tutorial context hook
-    const { hasSeenInitialTutorial, markInitialTutorialSeen, hasCompletedOnboarding, isLoading: tutorialLoading } = useTutorial(); 
+    const { hasSeenInitialTutorial, markInitialTutorialSeen, hasCompletedOnboarding, isLoading: tutorialLoading, markTutorialCompleted } = useTutorial(); 
     const [animalToEdit, setAnimalToEdit] = useState(null);
     const [speciesToAdd, setSpeciesToAdd] = useState(null); 
     const [speciesOptions, setSpeciesOptions] = useState([]); 
@@ -8522,6 +8522,8 @@ const App = () => {
                     }}
                     onSkip={() => {
                         markInitialTutorialSeen();
+                        // Mark onboarding as complete so the modal doesn't show again
+                        markTutorialCompleted('budget-basics', true);
                     }}
                 />
             )}
