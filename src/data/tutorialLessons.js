@@ -59,7 +59,7 @@ export const TUTORIAL_LESSONS = {
         {
           stepNumber: 3,
           title: 'Fill in Basic Information',
-          content: 'Enter your animal\'s name, species, gender, and birthdate.',
+          content: 'Enter your animal\'s name, gender, and birthdate.',
           tips: [
             'The name should be unique for easy identification',
             'Select the correct gender for genetics tracking',
