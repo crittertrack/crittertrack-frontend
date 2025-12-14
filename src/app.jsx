@@ -6784,7 +6784,7 @@ const AnimalList = ({ authToken, showModalMessage, onEditAnimal, onViewAnimal, o
                                 src={imgSrc} 
                                 alt={animal.name} 
                                 className="rounded-md" 
-                                style={{ maxWidth: '96px', maxHeight: '96px', width: 'auto', height: 'auto', objectFit: 'contain' }}
+                                style={{ maxWidth: '96px', maxHeight: '96px', objectFit: 'contain' }}
                             />
                         ) : (
                             <div className="w-24 h-24 bg-gray-100 rounded-md flex items-center justify-center text-gray-400">
