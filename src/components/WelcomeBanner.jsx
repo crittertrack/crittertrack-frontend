@@ -30,7 +30,7 @@ const WelcomeBanner = ({ onStartTutorial, onDismiss }) => {
                         <button
                             onClick={onDismiss}
                             className="p-2 text-gray-500 hover:text-gray-700 hover:bg-gray-100 rounded-lg transition"
-                            title="Dismiss (you can always access tutorials from the Info tab)"
+                            title="Dismiss (you can always access tutorials from the Help tab)"
                         >
                             <X size={20} />
                         </button>

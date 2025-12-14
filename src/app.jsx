@@ -2541,6 +2541,15 @@ const LitterManagement = ({ authToken, API_BASE_URL, userProfile, showModalMessa
             });
             const animalsData = response.data || [];
             
+            console.log('[fetchMyAnimals] Raw response:', animalsData.length, 'animals');
+            console.log('[fetchMyAnimals] First few animals:', animalsData.slice(0, 3).map(a => ({
+                id: a.id_public,
+                name: a.name,
+                gender: a.gender,
+                genderType: typeof a.gender,
+                species: a.species
+            })));
+            
             // Recalculate COI for animals with parents
             for (const animal of animalsData) {
                 if ((animal.fatherId_public || animal.motherId_public || animal.sireId_public || animal.damId_public)) {
@@ -2921,8 +2930,20 @@ const LitterManagement = ({ authToken, API_BASE_URL, userProfile, showModalMessa
         }
     };
 
+    // Debug logging for animal filtering
+    console.log('[LitterManagement] Total myAnimals:', myAnimals.length);
+    console.log('[LitterManagement] Animals data:', myAnimals.map(a => ({ 
+        id: a.id_public, 
+        name: a.name, 
+        gender: a.gender,
+        species: a.species 
+    })));
+    
     const maleAnimals = myAnimals.filter(a => a.gender === 'Male');
     const femaleAnimals = myAnimals.filter(a => a.gender === 'Female');
+    
+    console.log('[LitterManagement] Male animals:', maleAnimals.length);
+    console.log('[LitterManagement] Female animals:', femaleAnimals.length);
 
     // Filter litters based on search query and species
     const filteredLitters = litters.filter(litter => {
@@ -3026,6 +3047,12 @@ const LitterManagement = ({ authToken, API_BASE_URL, userProfile, showModalMessa
                                 required
                             >
                                 <option value="">Select Sire</option>
+                                {maleAnimals.length === 0 && myAnimals.length > 0 && (
+                                    <option value="" disabled>No male animals found</option>
+                                )}
+                                {maleAnimals.length === 0 && myAnimals.length === 0 && (
+                                    <option value="" disabled>Loading animals...</option>
+                                )}
                                 {maleAnimals.map(animal => (
                                     <option key={animal.id_public} value={animal.id_public}>
                                         {animal.prefix ? `${animal.prefix} ` : ''}{animal.name}{animal.suffix ? ` ${animal.suffix}` : ''} - {animal.id_public} ({animal.species})
@@ -3046,6 +3073,12 @@ const LitterManagement = ({ authToken, API_BASE_URL, userProfile, showModalMessa
                                 required
                             >
                                 <option value="">Select Dam</option>
+                                {femaleAnimals.length === 0 && myAnimals.length > 0 && (
+                                    <option value="" disabled>No female animals found</option>
+                                )}
+                                {femaleAnimals.length === 0 && myAnimals.length === 0 && (
+                                    <option value="" disabled>Loading animals...</option>
+                                )}
                                 {femaleAnimals.map(animal => (
                                     <option key={animal.id_public} value={animal.id_public}>
                                         {animal.prefix ? `${animal.prefix} ` : ''}{animal.name}{animal.suffix ? ` ${animal.suffix}` : ''} - {animal.id_public} ({animal.species})
@@ -8513,8 +8546,14 @@ const App = () => {
 
      return (
         <div className="min-h-screen bg-page-bg flex flex-col font-sans">
-            {/* Welcome Banner - Shows once to new users */}
-            {authToken && !hasSeenWelcomeBanner && !tutorialLoading && userProfile && (
+            {/* Welcome Banner - Shows once to new users within first month */}
+            {authToken && !hasSeenWelcomeBanner && !tutorialLoading && userProfile && (() => {
+                // Check if account is less than 30 days old
+                const accountCreationDate = new Date(userProfile.creationDate);
+                const now = new Date();
+                const daysSinceCreation = Math.floor((now - accountCreationDate) / (1000 * 60 * 60 * 24));
+                return daysSinceCreation <= 30;
+            })() && (
                 <WelcomeBanner 
                     onStartTutorial={() => {
                         // Find the first incomplete lesson to resume from
