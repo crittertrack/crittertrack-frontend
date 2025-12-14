@@ -266,7 +266,7 @@ export const TUTORIAL_LESSONS = {
           stepNumber: 2,
           title: 'Understanding Transaction Types',
           content: 'When you click "Add Transaction", you\'ll choose from 4 types: Animal Sale (selling an animal), Animal Purchase (buying an animal), Expense (general costs), or Income (other income like stud fees).',
-          highlightElement: '[data-tutorial-target="budget-tab"]',
+          highlightElement: '[data-tutorial-target="add-transaction-btn"]',
           tips: [
             'Animal Sale: Records selling YOUR animal to someone else',
             'Animal Purchase: Records buying an animal from someone else',

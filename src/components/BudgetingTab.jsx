@@ -440,6 +440,7 @@ const BudgetingTab = ({ authToken, API_BASE_URL, showModalMessage, preSelectedAn
                         </button>
                         <button
                             onClick={handleAddTransaction}
+                            data-tutorial-target="add-transaction-btn"
                             className="flex items-center gap-2 px-4 py-2 bg-primary hover:bg-primary/90 text-black font-semibold rounded-lg transition"
                         >
                             <Plus size={18} />
