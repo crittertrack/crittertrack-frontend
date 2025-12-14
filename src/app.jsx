@@ -2390,7 +2390,7 @@ const OffspringSection = ({ animalId, API_BASE_URL, authToken = null, onViewAnim
 };
 
 // Litter Management Component
-const LitterManagement = ({ authToken, API_BASE_URL, userProfile, showModalMessage, onViewAnimal, formDataRef, formOpenRef }) => {
+const LitterManagement = ({ authToken, API_BASE_URL, userProfile, showModalMessage, onViewAnimal, formDataRef, onFormOpenChange }) => {
     const [litters, setLitters] = useState([]);
     const [myAnimals, setMyAnimals] = useState([]);
     const [loading, setLoading] = useState(true);
@@ -2438,12 +2438,12 @@ const LitterManagement = ({ authToken, API_BASE_URL, userProfile, showModalMessa
         }
     }, [formData, formDataRef]);
 
-    // Update parent ref with form open state for tutorial tracking
+    // Notify parent when form open state changes
     useEffect(() => {
-        if (formOpenRef) {
-            formOpenRef.current = showAddForm;
+        if (onFormOpenChange) {
+            onFormOpenChange(showAddForm);
         }
-    }, [showAddForm, formOpenRef]);
+    }, [showAddForm, onFormOpenChange]);
 
     const toggleBulkDeleteMode = (litterId) => {
         setBulkDeleteMode(prev => ({ ...prev, [litterId]: !prev[litterId] }));
@@ -7241,7 +7241,6 @@ const App = () => {
     const scrollContainerRef = useRef(null);
     const tutorialOverlayRef = useRef(null);
     const litterFormDataRef = useRef(null);
-    const litterFormOpenRef = useRef(null);
 
     // Tutorial modal states
     const [showInfoTab, setShowInfoTab] = useState(false);
@@ -7249,6 +7248,7 @@ const App = () => {
     const [showTutorialOverlay, setShowTutorialOverlay] = useState(false);
     const [currentTutorialIndex, setCurrentTutorialIndex] = useState(0);
     const [currentTutorialStep, setCurrentTutorialStep] = useState(null);
+    const [litterFormOpen, setLitterFormOpen] = useState(false);
 
     const timeoutRef = useRef(null);
     const activeEvents = ['mousemove', 'keydown', 'scroll', 'click'];
@@ -7364,10 +7364,10 @@ const App = () => {
         }
 
         // When new litter form opens, advance to step 3 (where parents section is highlighted)
-        if (litterFormOpenRef.current && currentTutorialStep?.stepNumber === 2) {
+        if (litterFormOpen && currentTutorialStep?.stepNumber === 2) {
             tutorialOverlayRef.current.advanceStep();
         }
-    }, [showTutorialOverlay, currentTutorialId, currentTutorialStep, litterFormOpenRef.current]);
+    }, [showTutorialOverlay, currentTutorialId, currentTutorialStep, litterFormOpen]);
 
     // Auto-advance tutorial for lesson 4 step 3 when parents and birthdate are filled
     useEffect(() => {
@@ -8239,7 +8239,7 @@ const App = () => {
                         showModalMessage={showModalMessage}
                         onViewAnimal={handleViewAnimal}
                         formDataRef={litterFormDataRef}
-                        formOpenRef={litterFormOpenRef}
+                        onFormOpenChange={setLitterFormOpen}
                     />
                 );
             case 'list':
