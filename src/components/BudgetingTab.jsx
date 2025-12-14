@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { DollarSign, Plus, Edit, Trash2, Search, X, Calendar, Filter, Download, TrendingUp, TrendingDown, Info, ArrowLeftRight } from 'lucide-react';
+import { DollarSign, Plus, Edit, Trash2, Search, X, Calendar, Filter, Download, TrendingUp, TrendingDown, Info } from 'lucide-react';
 import axios from 'axios';
 
 const BudgetingTab = ({ authToken, API_BASE_URL, showModalMessage }) => {
@@ -8,12 +8,13 @@ const BudgetingTab = ({ authToken, API_BASE_URL, showModalMessage }) => {
     const [searchResults, setSearchResults] = useState([]);
     const [loading, setLoading] = useState(true);
     const [showAddModal, setShowAddModal] = useState(false);
+    const [showModeSelection, setShowModeSelection] = useState(false); // Show modal to choose manual vs transfer
+    const [animalSaleMode, setAnimalSaleMode] = useState(null); // 'manual' or 'transfer' 
     const [showTypeSelection, setShowTypeSelection] = useState(true);
     const [editingTransaction, setEditingTransaction] = useState(null);
     const [searchTerm, setSearchTerm] = useState('');
     const [filterType, setFilterType] = useState('all'); // all, animal-sale, animal-purchase, expense, income
     const [filterYear, setFilterYear] = useState('all');
-    const [buyerInputMode, setBuyerInputMode] = useState('manual'); // 'manual' or 'user'
     const [animalInputMode, setAnimalInputMode] = useState('manual'); // 'select' or 'manual'
     const [userSearchQuery, setUserSearchQuery] = useState('');
     const [isSearching, setIsSearching] = useState(false);
@@ -146,12 +147,13 @@ const BudgetingTab = ({ authToken, API_BASE_URL, showModalMessage }) => {
             notes: ''
         });
         setSelectedSpecies('');
-        setBuyerInputMode('manual');
         setAnimalInputMode('manual');
         setUserSearchQuery('');
         setSearchResults([]);
         setSelectedUser(null); // Clear selected user
         setShowTypeSelection(true);
+        setShowModeSelection(false);
+        setAnimalSaleMode(null);
         setEditingTransaction(null);
     };
 
@@ -632,6 +634,7 @@ const BudgetingTab = ({ authToken, API_BASE_URL, showModalMessage }) => {
                                             console.log('[BudgetTab] Animal Sale button clicked');
                                             setFormData({ ...formData, type: 'animal-sale' });
                                             setShowTypeSelection(false);
+                                            setShowModeSelection(true);
                                         }}
                                         className="flex flex-col items-center justify-center p-6 border-2 border-gray-300 rounded-xl hover:border-green-500 hover:bg-green-50 transition-all"
                                     >
@@ -645,6 +648,7 @@ const BudgetingTab = ({ authToken, API_BASE_URL, showModalMessage }) => {
                                             console.log('[BudgetTab] Animal Purchase button clicked');
                                             setFormData({ ...formData, type: 'animal-purchase' });
                                             setShowTypeSelection(false);
+                                            setShowModeSelection(true);
                                         }}
                                         className="flex flex-col items-center justify-center p-6 border-2 border-gray-300 rounded-xl hover:border-red-500 hover:bg-red-50 transition-all"
                                     >
@@ -680,9 +684,54 @@ const BudgetingTab = ({ authToken, API_BASE_URL, showModalMessage }) => {
                                     </button>
                                 </div>
                             </div>
+                        ) : showModeSelection && (formData.type === 'animal-sale' || formData.type === 'animal-purchase') ? (
+                            // Mode Selection Screen for Animal Transactions
+                            <div className="space-y-6">
+                                <p className="text-center text-gray-600 mb-8">
+                                    {formData.type === 'animal-sale' 
+                                        ? 'How would you like to record this animal sale?' 
+                                        : 'How would you like to record this animal purchase?'}
+                                </p>
+                                <div className="grid grid-cols-1 gap-4">
+                                    <button
+                                        type="button"
+                                        onClick={() => {
+                                            console.log('[BudgetTab] Manual mode selected for', formData.type);
+                                            setAnimalSaleMode('manual');
+                                            setShowModeSelection(false);
+                                        }}
+                                        className="flex flex-col items-start justify-start p-6 border-2 border-gray-300 rounded-xl hover:border-blue-500 hover:bg-blue-50 transition-all text-left"
+                                    >
+                                        <h3 className="text-lg font-bold text-gray-800 mb-2">Manual Entry</h3>
+                                        <p className="text-sm text-gray-600">
+                                            {formData.type === 'animal-sale'
+                                                ? 'Simply record the sale details. Animal selection is optional.'
+                                                : 'Simply record the purchase details. Animal selection is optional.'}
+                                        </p>
+                                    </button>
+                                    <button
+                                        type="button"
+                                        onClick={() => {
+                                            console.log('[BudgetTab] Transfer mode selected for', formData.type);
+                                            setAnimalSaleMode('transfer');
+                                            setShowModeSelection(false);
+                                        }}
+                                        className="flex flex-col items-start justify-start p-6 border-2 border-gray-300 rounded-xl hover:border-purple-500 hover:bg-purple-50 transition-all text-left"
+                                    >
+                                        <h3 className="text-lg font-bold text-gray-800 mb-2">
+                                            {formData.type === 'animal-sale' ? 'Transfer Ownership' : 'Notify Seller'}
+                                        </h3>
+                                        <p className="text-sm text-gray-600">
+                                            {formData.type === 'animal-sale'
+                                                ? 'Transfer ownership to a buyer and notify them.'
+                                                : 'Request an animal from a seller and notify them.'}
+                                        </p>
+                                    </button>
+                                </div>
+                            </div>
                         ) : (
                         <>
-                        {console.log('[BudgetTab] Rendering form - type:', formData.type, 'showTypeSelection:', showTypeSelection)}
+                        {console.log('[BudgetTab] Rendering form - type:', formData.type, 'animalSaleMode:', animalSaleMode)}
                         <form onSubmit={handleSaveTransaction} className="space-y-4">
                             <div>
                                 <label className="block text-sm font-medium text-gray-700 mb-2">
@@ -699,11 +748,11 @@ const BudgetingTab = ({ authToken, API_BASE_URL, showModalMessage }) => {
                                 />
                             </div>
 
-                            {/* Animal selection - for animal sales and purchases only */}
+                            {/* Animal selection - MANUAL MODE: optional, TRANSFER MODE: required */}
                             {(formData.type === 'animal-sale' || formData.type === 'animal-purchase') && (
                                 <div>
                                     <label className="block text-sm font-medium text-gray-700 mb-2">
-                                        Select Animal (optional)
+                                        Select Animal {animalSaleMode === 'transfer' ? '*' : '(optional)'}
                                     </label>
                                     <div className="space-y-3">
                                         {/* Species filter */}
@@ -729,6 +778,7 @@ const BudgetingTab = ({ authToken, API_BASE_URL, showModalMessage }) => {
                                             onChange={(e) => handleAnimalSelect(e.target.value)}
                                             className="w-full p-2 border border-gray-300 rounded-lg focus:ring-primary focus:border-primary"
                                             disabled={selectedSpecies && animals.filter(a => a.species === selectedSpecies).length === 0}
+                                            required={animalSaleMode === 'transfer'}
                                         >
                                             <option value="">-- Select an animal --</option>
                                             {animals
@@ -889,39 +939,11 @@ const BudgetingTab = ({ authToken, API_BASE_URL, showModalMessage }) => {
                             )}
 
                             {/* Buyer/Seller section for animal sales and purchases */}
-                            {(formData.type === 'animal-sale' || formData.type === 'animal-purchase') && (
-                            <div>
-                                <div className="flex items-center justify-between mb-2">
-                                    <label className="block text-sm font-medium text-gray-700 flex items-center gap-2">
-                                        {formData.type === 'animal-sale' ? 'Buyer' : 'Seller'}
+                            {(formData.type === 'animal-sale' || formData.type === 'animal-purchase') && animalSaleMode === 'manual' && (
+                                <div>
+                                    <label className="block text-sm font-medium text-gray-700 mb-2">
+                                        {formData.type === 'animal-sale' ? 'Buyer Name' : 'Seller Name'}
                                     </label>
-                                    <div className="flex gap-2">
-                                        <button
-                                            type="button"
-                                            onClick={() => {
-                                                setBuyerInputMode('manual');
-                                                setFormData({ ...formData, buyer: '', seller: '' });
-                                                setUserSearchQuery('');
-                                                setSearchResults([]);
-                                            }}
-                                            className={`text-xs px-2 py-1 rounded ${buyerInputMode === 'manual' ? 'bg-primary text-black' : 'bg-gray-200 text-gray-600'}`}
-                                        >
-                                            Manual
-                                        </button>
-                                        <button
-                                            type="button"
-                                            onClick={() => {
-                                                setBuyerInputMode('user');
-                                                setFormData({ ...formData, buyer: '', seller: '' });
-                                            }}
-                                            className={`text-xs px-2 py-1 rounded flex items-center gap-1 ${buyerInputMode === 'user' ? 'bg-primary text-black' : 'bg-gray-200 text-gray-600'}`}
-                                        >
-                                            {formData.type === 'animal-sale' && <ArrowLeftRight className="w-3 h-3" />}
-                                            Search User
-                                        </button>
-                                    </div>
-                                </div>
-                                {buyerInputMode === 'manual' ? (
                                     <input
                                         type="text"
                                         value={formData.type === 'animal-sale' ? formData.buyer : formData.seller}
@@ -929,10 +951,18 @@ const BudgetingTab = ({ authToken, API_BASE_URL, showModalMessage }) => {
                                             ...formData, 
                                             [formData.type === 'animal-sale' ? 'buyer' : 'seller']: e.target.value 
                                         })}
-                                        placeholder={`Enter ${formData.type === 'animal-sale' ? 'buyer' : 'seller'} name`}
+                                        placeholder={`Enter ${formData.type === 'animal-sale' ? 'buyer' : 'seller'} name (optional)`}
                                         className="w-full p-2 border border-gray-300 rounded-lg focus:ring-primary focus:border-primary"
                                     />
-                                ) : (
+                                </div>
+                            )}
+
+                            {/* Transfer/Notify mode: Required user search */}
+                            {(formData.type === 'animal-sale' || formData.type === 'animal-purchase') && animalSaleMode === 'transfer' && (
+                                <div>
+                                    <label className="block text-sm font-medium text-gray-700 mb-2">
+                                        {formData.type === 'animal-sale' ? 'Buyer (CritterTrack User) *' : 'Seller (CritterTrack User) *'}
+                                    </label>
                                     <div className="relative">
                                         {/* Show selected user or search input */}
                                         {(formData.type === 'animal-sale' ? formData.buyer : formData.seller) ? (
@@ -942,7 +972,7 @@ const BudgetingTab = ({ authToken, API_BASE_URL, showModalMessage }) => {
                                                     type="button"
                                                     onClick={() => {
                                                         setFormData({ ...formData, buyer: '', seller: '' });
-                                                        setSelectedUser(null); // Clear selected user
+                                                        setSelectedUser(null);
                                                         setSearchResults([]);
                                                     }}
                                                     className="text-gray-500 hover:text-red-500"
@@ -976,84 +1006,76 @@ const BudgetingTab = ({ authToken, API_BASE_URL, showModalMessage }) => {
                                                         {isSearching ? 'Searching...' : 'Search'}
                                                     </button>
                                                 </div>
-                                        {userSearchQuery.length >= 2 && searchResults.length > 0 && (
-                                            <div className="absolute z-10 w-full mt-1 bg-white border border-gray-300 rounded-lg shadow-lg max-h-60 overflow-y-auto">
-                                                {searchResults.map(user => {
-                                                    const hasVisibleBreederName = user.breederName && user.showBreederName;
-                                                    const hasVisiblePersonalName = user.personalName && user.showPersonalName;
-                                                    
-                                                    let displayName;
-                                                    if (hasVisibleBreederName && hasVisiblePersonalName) {
-                                                        displayName = `${user.personalName} (${user.breederName})`;
-                                                    } else if (hasVisibleBreederName) {
-                                                        displayName = user.breederName;
-                                                    } else {
-                                                        displayName = user.personalName;
-                                                    }
-                                                    
-                                                    const value = hasVisibleBreederName ? user.breederName : user.personalName;
-                                                    
-                                                    return (
-                                                        <button
-                                                            key={user.id_public}
-                                                            type="button"
-                                                            onClick={() => {
-                                                                setFormData({ 
-                                                                    ...formData, 
-                                                                    [formData.type === 'animal-sale' ? 'buyer' : 'seller']: value 
-                                                                });
-                                                                setSelectedUser(user); // Store full user object with _id
-                                                                setUserSearchQuery('');
-                                                                setSearchResults([]);
-                                                            }}
-                                                            className="w-full text-left px-4 py-2 hover:bg-gray-100 border-b border-gray-100 last:border-b-0"
-                                                        >
-                                                            <div className="font-medium">{user.id_public}</div>
-                                                            <div className="text-sm text-gray-600">{displayName}</div>
-                                                        </button>
-                                                    );
-                                                })}
-                                            </div>
-                                        )}
-                                        {userSearchQuery.length >= 2 && searchResults.length === 0 && !isSearching && (
-                                            <div className="absolute z-10 w-full mt-1 bg-white border border-gray-300 rounded-lg shadow-lg p-4 text-center text-gray-500">
-                                                No users found
-                                            </div>
-                                        )}
+                                                {userSearchQuery.length >= 2 && searchResults.length > 0 && (
+                                                    <div className="absolute z-10 w-full mt-1 bg-white border border-gray-300 rounded-lg shadow-lg max-h-60 overflow-y-auto">
+                                                        {searchResults.map(user => {
+                                                            const hasVisibleBreederName = user.breederName && user.showBreederName;
+                                                            const hasVisiblePersonalName = user.personalName && user.showPersonalName;
+                                                            
+                                                            let displayName;
+                                                            if (hasVisibleBreederName && hasVisiblePersonalName) {
+                                                                displayName = `${user.personalName} (${user.breederName})`;
+                                                            } else if (hasVisibleBreederName) {
+                                                                displayName = user.breederName;
+                                                            } else {
+                                                                displayName = user.personalName;
+                                                            }
+                                                            
+                                                            const value = hasVisibleBreederName ? user.breederName : user.personalName;
+                                                            
+                                                            return (
+                                                                <button
+                                                                    key={user.id_public}
+                                                                    type="button"
+                                                                    onClick={() => {
+                                                                        setFormData({ 
+                                                                            ...formData, 
+                                                                            [formData.type === 'animal-sale' ? 'buyer' : 'seller']: value 
+                                                                        });
+                                                                        setSelectedUser(user);
+                                                                        setUserSearchQuery('');
+                                                                        setSearchResults([]);
+                                                                    }}
+                                                                    className="w-full text-left px-4 py-2 hover:bg-gray-100 border-b border-gray-100 last:border-b-0"
+                                                                >
+                                                                    <div className="font-medium">{user.id_public}</div>
+                                                                    <div className="text-sm text-gray-600">{displayName}</div>
+                                                                </button>
+                                                            );
+                                                        })}
+                                                    </div>
+                                                )}
+                                                {userSearchQuery.length >= 2 && searchResults.length === 0 && !isSearching && (
+                                                    <div className="absolute z-10 w-full mt-1 bg-white border border-gray-300 rounded-lg shadow-lg p-4 text-center text-gray-500">
+                                                        No users found
+                                                    </div>
+                                                )}
                                             </>
                                         )}
                                     </div>
-                                )}
-                                {formData.type === 'animal-sale' && buyerInputMode === 'user' && formData.animalId ? (
-                                    <div className="mt-2 p-3 bg-blue-50 border border-blue-200 rounded-lg">
-                                        <div className="flex items-start gap-2">
-                                            <Info className="w-4 h-4 text-blue-600 mt-0.5 flex-shrink-0" />
-                                            <div className="text-xs text-blue-800">
-                                                <p className="font-semibold mb-1">📝 Buyer Information</p>
-                                                <p>You can track who bought this animal, but no transfer or notification will be sent to the buyer.</p>
+                                    {formData.type === 'animal-sale' && (
+                                        <div className="mt-2 p-3 bg-green-50 border border-green-200 rounded-lg">
+                                            <div className="flex items-start gap-2">
+                                                <Info className="w-4 h-4 text-green-600 mt-0.5 flex-shrink-0" />
+                                                <div className="text-xs text-green-800">
+                                                    <p className="font-semibold mb-1">🔄 Transfer Ownership</p>
+                                                    <p>The buyer will be notified and the animal ownership will be transferred to them in the system.</p>
+                                                </div>
                                             </div>
                                         </div>
-                                    </div>
-                                ) : formData.type === 'purchase' && buyerInputMode === 'user' ? (
-                                    <div className="mt-2 p-3 bg-green-50 border border-green-200 rounded-lg">
-                                        <div className="flex items-start gap-2">
-                                            <Info className="w-4 h-4 text-green-600 mt-0.5 flex-shrink-0" />
-                                            <div className="text-xs text-green-800">
-                                                <p className="font-semibold mb-1">📢 Notify the Breeder</p>
-                                                <p>Selecting a CritterTrack user as the seller will send them a notification about your purchase. This helps breeders keep track of where their animals go and maintain accurate records!</p>
+                                    )}
+                                    {formData.type === 'animal-purchase' && (
+                                        <div className="mt-2 p-3 bg-blue-50 border border-blue-200 rounded-lg">
+                                            <div className="flex items-start gap-2">
+                                                <Info className="w-4 h-4 text-blue-600 mt-0.5 flex-shrink-0" />
+                                                <div className="text-xs text-blue-800">
+                                                    <p className="font-semibold mb-1">📢 Notify Seller</p>
+                                                    <p>The seller will be notified of your purchase. This helps breeders keep track of where their animals go.</p>
+                                                </div>
                                             </div>
                                         </div>
-                                    </div>
-                                ) : (
-                                    <p className="text-xs text-gray-500 mt-1">
-                                        {buyerInputMode === 'manual' 
-                                            ? 'Enter name manually' 
-                                            : formData.type === 'animal-sale' 
-                                                ? 'Search for a CritterTrack user' 
-                                                : 'Search for a CritterTrack user'}
-                                    </p>
-                                )}
-                            </div>
+                                    )}
+                                </div>
                             )}
 
                             <div>
