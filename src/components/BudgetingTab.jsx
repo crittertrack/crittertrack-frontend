@@ -57,7 +57,7 @@ const BudgetingTab = ({ authToken, API_BASE_URL, showModalMessage }) => {
     
     // Form state
     const [formData, setFormData] = useState({
-        transactionType: 'animal-sale', // animal-sale, animal-purchase, expense, income
+        type: 'animal-sale', // animal-sale, animal-purchase, expense, income
         animalId: '',
         animalName: '',
         price: '',
@@ -134,7 +134,7 @@ const BudgetingTab = ({ authToken, API_BASE_URL, showModalMessage }) => {
 
     const resetForm = () => {
         setFormData({
-            transactionType: 'animal-sale',
+            type: 'animal-sale',
             animalId: '',
             animalName: '',
             price: '',
@@ -201,9 +201,17 @@ const BudgetingTab = ({ authToken, API_BASE_URL, showModalMessage }) => {
         try {
             const transactionData = {
                 ...formData,
-                type: formData.type, // send as 'type' to API, but use 'transactionType' internally
                 price: parseFloat(formData.price)
             };
+
+            // Transform transaction type for API (remove 'animal-' prefix)
+            if (formData.type === 'animal-sale') {
+                transactionData.type = 'sale';
+            } else if (formData.type === 'animal-purchase') {
+                transactionData.type = 'purchase';
+            } else {
+                transactionData.type = formData.type;
+            }
 
             // Add user ID if a user was selected from search (for animal sales/purchases only)
             if (selectedUser && (formData.type === 'animal-sale' || formData.type === 'animal-purchase')) {
