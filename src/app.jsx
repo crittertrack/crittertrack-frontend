@@ -5703,7 +5703,7 @@ const ProfileEditForm = ({ userProfile, showModalMessage, onSaveSuccess, onCance
     );
 };
 
-const ProfileView = ({ userProfile, showModalMessage, fetchUserProfile, authToken, onProfileUpdated }) => {
+const ProfileView = ({ userProfile, showModalMessage, fetchUserProfile, authToken, onProfileUpdated, onProfileEditButtonClicked }) => {
     const [isEditing, setIsEditing] = useState(false);
     const [copySuccess, setCopySuccess] = useState(false);
     const [checkingForUpdates, setCheckingForUpdates] = useState(false);
@@ -5861,7 +5861,10 @@ const ProfileView = ({ userProfile, showModalMessage, fetchUserProfile, authToke
             </div>
             
             <button 
-                onClick={() => setIsEditing(true)}
+                onClick={() => {
+                    setIsEditing(true);
+                    onProfileEditButtonClicked(true);
+                }}
                 data-tutorial-target="profile-edit-btn"
                 className="mt-6 bg-accent hover:bg-accent/90 text-white font-semibold py-3 px-6 rounded-lg transition duration-150 shadow-md flex items-center"
             >
@@ -7250,6 +7253,7 @@ const App = () => {
     const [currentTutorialIndex, setCurrentTutorialIndex] = useState(0);
     const [currentTutorialStep, setCurrentTutorialStep] = useState(null);
     const [litterFormOpen, setLitterFormOpen] = useState(false);
+    const [profileEditButtonClicked, setProfileEditButtonClicked] = useState(false);
 
     const timeoutRef = useRef(null);
     const activeEvents = ['mousemove', 'keydown', 'scroll', 'click'];
@@ -7369,6 +7373,19 @@ const App = () => {
             tutorialOverlayRef.current.advanceStep();
         }
     }, [currentView, showTutorialOverlay, currentTutorialId, currentTutorialStep]);
+
+    // Auto-advance tutorial for lesson 4 step 3 when edit profile button is clicked
+    useEffect(() => {
+        if (!showTutorialOverlay || currentTutorialId !== 'profile-settings' || !tutorialOverlayRef.current) {
+            return;
+        }
+
+        // When edit profile button is clicked, advance to step 3 (privacy settings)
+        if (profileEditButtonClicked && currentTutorialStep?.stepNumber === 2) {
+            tutorialOverlayRef.current.advanceStep();
+            setProfileEditButtonClicked(false);
+        }
+    }, [profileEditButtonClicked, showTutorialOverlay, currentTutorialId, currentTutorialStep]);
 
     // Auto-advance tutorial for lesson 4 step 2 when form opens
     useEffect(() => {
@@ -7814,7 +7831,7 @@ const App = () => {
                     />
                 );
             case 'profile':
-                return <ProfileView userProfile={userProfile} showModalMessage={showModalMessage} fetchUserProfile={fetchUserProfile} authToken={authToken} onProfileUpdated={setUserProfile} />;
+                return <ProfileView userProfile={userProfile} showModalMessage={showModalMessage} fetchUserProfile={fetchUserProfile} authToken={authToken} onProfileUpdated={setUserProfile} onProfileEditButtonClicked={setProfileEditButtonClicked} />;
             case 'select-species':
                 const speciesList = speciesOptions.join('/');
                 const selectorTitle = `Add New ${speciesList}/Custom`;
