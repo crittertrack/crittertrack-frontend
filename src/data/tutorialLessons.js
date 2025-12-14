@@ -379,13 +379,12 @@ export const TUTORIAL_LESSONS = {
         {
           stepNumber: 3,
           title: 'Let\'s Get Started!',
-          content: 'Complete all advanced feature tutorials to become a CritterTrack expert. Check the box below to begin your journey!',
-          isCompletionStep: true,
+          content: 'Complete all advanced feature tutorials to become a CritterTrack expert. Ready to begin your journey!',
           tips: [
             'This is just the beginning',
             'You can pause and resume anytime',
             'Your progress is always saved',
-            'Access all tutorials from the Info tab (ℹ️)'
+            'Access all tutorials from the Help tab'
           ]
         }
       ]
