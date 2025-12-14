@@ -182,6 +182,7 @@ const BudgetingTab = ({ authToken, API_BASE_URL, showModalMessage }) => {
         
         console.log('Form submitted with data:', formData);
         console.log('Selected user:', selectedUser);
+        console.log('Animal sale mode:', animalSaleMode);
         console.log('Price validation:', formData.price, parseFloat(formData.price));
         
         if (formData.price === '' || formData.price === null || formData.price === undefined) {
@@ -216,13 +217,19 @@ const BudgetingTab = ({ authToken, API_BASE_URL, showModalMessage }) => {
             // Add user ID if a user was selected from search (for animal sales/purchases only)
             // Only add user IDs in transfer mode (not in manual mode)
             if (selectedUser && animalSaleMode === 'transfer' && (formData.type === 'animal-sale' || formData.type === 'animal-purchase')) {
+                console.log('Adding user IDs for transfer mode');
                 if (formData.type === 'animal-sale') {
                     transactionData.buyerUserId = selectedUser._id;
+                    console.log('Set buyerUserId:', selectedUser._id);
                 } else {
                     transactionData.sellerUserId = selectedUser._id;
+                    console.log('Set sellerUserId:', selectedUser._id);
                 }
                 // Mark this as a transfer mode transaction (not just logging)
                 transactionData.mode = 'transfer';
+                console.log('Set mode to transfer');
+            } else {
+                console.log('NOT adding user IDs - selectedUser:', !!selectedUser, 'animalSaleMode:', animalSaleMode, 'type:', formData.type);
             }
 
             console.log('Transaction data to send:', transactionData);
