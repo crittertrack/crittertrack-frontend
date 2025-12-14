@@ -70,10 +70,10 @@ export const TutorialOverlay = React.forwardRef(({ lessonId, onClose, onComplete
   }, [isFirstStep]);
 
   const handleSkip = useCallback(() => {
-    if (onClose) {
-      onClose();
+    if (onComplete) {
+      onComplete();
     }
-  }, [onClose]);
+  }, [onComplete]);
 
   if (!lesson || !currentStep) return null;
 
