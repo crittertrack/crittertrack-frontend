@@ -829,6 +829,13 @@ const BudgetingTab = ({ authToken, API_BASE_URL, showModalMessage }) => {
                                             <option value="">-- Select an animal --</option>
                                             {animals
                                                 .filter(animal => !selectedSpecies || animal.species === selectedSpecies)
+                                                .filter(animal => {
+                                                    // For sales, exclude already sold animals
+                                                    if (formData.type === 'animal-sale' && animal.soldStatus === 'sold') {
+                                                        return false;
+                                                    }
+                                                    return true;
+                                                })
                                                 .map(animal => (
                                                     <option key={animal.id_public} value={animal.id_public}>
                                                         {animal.id_public} - {animal.name}
@@ -837,9 +844,10 @@ const BudgetingTab = ({ authToken, API_BASE_URL, showModalMessage }) => {
                                         </select>
                                     </div>
                                     <p className="text-xs text-gray-500 mt-1">
-                                        {selectedSpecies 
+                                        {formData.type === 'animal-sale' && 'Only unsold animals are shown. Sold animals cannot be sold again.'}
+                                        {formData.type !== 'animal-sale' && (selectedSpecies 
                                             ? `Showing ${animals.filter(a => a.species === selectedSpecies).length} ${selectedSpecies}` 
-                                            : 'Filter by species first for easier selection'}
+                                            : 'Filter by species first for easier selection')}
                                     </p>
                                 </div>
                             )}
