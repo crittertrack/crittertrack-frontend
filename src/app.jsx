@@ -8525,6 +8525,13 @@ const App = () => {
                         // Only skip for this session - will appear again on next login
                         setHasSkippedTutorialThisSession(true);
                     }}
+                    onPermanentSkip={() => {
+                        // Mark both onboarding and advanced features as complete
+                        // This prevents all tutorial prompts from appearing
+                        markTutorialCompleted('budget-basics', true);
+                        markTutorialCompleted('advanced-features-complete', false, true);
+                        setHasSkippedTutorialThisSession(true);
+                    }}
                 />
             )}
             

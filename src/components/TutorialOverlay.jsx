@@ -322,7 +322,7 @@ TutorialOverlay.displayName = 'TutorialOverlay';
  * InitialTutorialModal
  * Welcome screen for new users - lets them choose to start tutorial or skip
  */
-export const InitialTutorialModal = ({ onStart, onSkip }) => {
+export const InitialTutorialModal = ({ onStart, onSkip, onPermanentSkip }) => {
   return (
     <div className="fixed inset-0 bg-black/50 flex items-center justify-center p-4 z-[9999] overflow-y-auto">
       <div className="bg-white rounded-2xl shadow-2xl max-w-2xl w-full my-auto flex flex-col max-h-[90vh] overflow-hidden">
@@ -376,20 +376,28 @@ export const InitialTutorialModal = ({ onStart, onSkip }) => {
         </div>
 
         {/* Footer */}
-        <div className="border-t border-gray-200 bg-gray-50 p-4 flex items-center justify-end gap-3 flex-shrink-0">
+        <div className="border-t border-gray-200 bg-gray-50 p-4 flex items-center justify-between flex-shrink-0">
           <button
-            onClick={onSkip}
-            className="px-4 py-2 text-sm text-gray-700 hover:text-gray-900 font-semibold transition hover:bg-white rounded-lg border border-gray-300"
+            onClick={onPermanentSkip}
+            className="px-3 py-2 text-xs text-gray-500 hover:text-gray-700 hover:underline transition"
           >
-            Skip for Now
+            Don't show this again
           </button>
-          <button
-            onClick={onStart}
-            className="flex items-center gap-2 px-6 py-2 bg-gradient-to-r from-primary to-primary/80 hover:from-primary/90 hover:to-primary/70 text-black font-bold rounded-lg transition shadow-md text-sm"
-          >
-            <BookOpen size={18} />
-            Start Tutorial
-          </button>
+          <div className="flex items-center gap-3">
+            <button
+              onClick={onSkip}
+              className="px-4 py-2 text-sm text-gray-700 hover:text-gray-900 font-semibold transition hover:bg-white rounded-lg border border-gray-300"
+            >
+              Skip for Now
+            </button>
+            <button
+              onClick={onStart}
+              className="flex items-center gap-2 px-6 py-2 bg-gradient-to-r from-primary to-primary/80 hover:from-primary/90 hover:to-primary/70 text-black font-bold rounded-lg transition shadow-md text-sm"
+            >
+              <BookOpen size={18} />
+              Start Tutorial
+            </button>
+          </div>
         </div>
       </div>
     </div>
