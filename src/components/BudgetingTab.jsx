@@ -875,6 +875,12 @@ const BudgetingTab = ({ authToken, API_BASE_URL, showModalMessage }) => {
                                     <label className="block text-sm font-medium text-gray-700 mb-2">
                                         {formData.type === 'animal-sale' ? 'Buyer (CritterTrack User) *' : 'Seller (CritterTrack User) *'}
                                     </label>
+                                    {/* Hidden input for form validation */}
+                                    <input
+                                        type="hidden"
+                                        value={formData.type === 'animal-sale' ? formData.buyer : formData.seller}
+                                        required
+                                    />
                                     <div className="relative">
                                         {/* Show selected user or search input */}
                                         {(formData.type === 'animal-sale' ? formData.buyer : formData.seller) ? (
