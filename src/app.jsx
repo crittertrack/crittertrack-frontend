@@ -7200,7 +7200,7 @@ const App = () => {
     const [currentView, setCurrentView] = useState('list'); 
     
     // Tutorial context hook
-    const { hasSeenInitialTutorial, markInitialTutorialSeen } = useTutorial(); 
+    const { hasSeenInitialTutorial, markInitialTutorialSeen, hasCompletedOnboarding, isLoading: tutorialLoading } = useTutorial(); 
     const [animalToEdit, setAnimalToEdit] = useState(null);
     const [speciesToAdd, setSpeciesToAdd] = useState(null); 
     const [speciesOptions, setSpeciesOptions] = useState([]); 
@@ -7310,11 +7310,11 @@ const App = () => {
 
     // Show initial tutorial on first login
     useEffect(() => {
-        if (authToken && !hasSeenInitialTutorial && userProfile) {
+        if (authToken && !hasCompletedOnboarding && !tutorialLoading && userProfile) {
             // Show the initial welcome tutorial
             // This will automatically trigger the InitialTutorialModal through the tutorial context
         }
-    }, [authToken, hasSeenInitialTutorial, userProfile]);
+    }, [authToken, hasCompletedOnboarding, tutorialLoading, userProfile]);
 
     // Auto-advance tutorial when view changes (indicating step completion)
     useEffect(() => {
@@ -8512,7 +8512,7 @@ const App = () => {
      return (
         <div className="min-h-screen bg-page-bg flex flex-col items-center p-6 font-sans">
             {/* Initial Tutorial Modal - Shows once to new users */}
-            {authToken && !hasSeenInitialTutorial && userProfile && (
+            {authToken && !hasCompletedOnboarding && !tutorialLoading && userProfile && (
                 <InitialTutorialModal 
                     onStart={() => {
                         markInitialTutorialSeen();

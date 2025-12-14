@@ -187,6 +187,18 @@ export const TutorialProvider = ({ children, userId, authToken, API_BASE_URL }) 
     clearCurrentTutorial,
   };
 
+  // Don't render children until we've loaded tutorial state
+  // This prevents the tutorial from incorrectly showing while we're still fetching data
+  if (isLoading) {
+    return (
+      <TutorialContext.Provider value={value}>
+        <div className="min-h-screen flex items-center justify-center">
+          <div className="text-gray-600">Loading...</div>
+        </div>
+      </TutorialContext.Provider>
+    );
+  }
+
   return (
     <TutorialContext.Provider value={value}>
       {children}
