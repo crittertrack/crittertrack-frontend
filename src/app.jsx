@@ -8511,11 +8511,6 @@ const App = () => {
     }
 
      return (
-        <TutorialProvider 
-            userId={userProfile?.id_public || null}
-            authToken={authToken}
-            API_BASE_URL={API_BASE_URL}
-        >
         <div className="min-h-screen bg-page-bg flex flex-col items-center p-6 font-sans">
             {/* Initial Tutorial Modal - Shows once to new users */}
             {authToken && !hasCompletedOnboarding && !tutorialLoading && !hasSkippedTutorialThisSession && userProfile && (
@@ -9165,7 +9160,6 @@ const App = () => {
                 </div>
             )}
         </div>
-        </TutorialProvider>
     );
 };
 
@@ -9326,7 +9320,15 @@ const AppRouter = () => {
 
 // Wrapper component - TutorialProvider is now inside App to access auth state
 const AppWithTutorial = () => {
-    return <App />;
+    return (
+        <TutorialProvider 
+            userId={localStorage.getItem('userId')}
+            authToken={localStorage.getItem('authToken')}
+            API_BASE_URL={API_BASE_URL}
+        >
+            <App />
+        </TutorialProvider>
+    );
 };
 
 export default AppRouter;
