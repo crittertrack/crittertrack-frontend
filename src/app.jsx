@@ -13,6 +13,7 @@ import { TutorialProvider, useTutorial } from './contexts/TutorialContext';
 import { InitialTutorialModal, TutorialOverlay, TutorialHighlight } from './components/TutorialOverlay';
 import { TUTORIAL_LESSONS } from './data/tutorialLessons';
 import InfoTab from './components/InfoTab';
+import WelcomeBanner from './components/WelcomeBanner';
 
 // const API_BASE_URL = 'http://localhost:5000/api'; // Local development
 const API_BASE_URL = 'https://crittertrack-pedigree-production.up.railway.app/api'; // Direct Railway (for testing)
@@ -7201,7 +7202,7 @@ const App = () => {
     const [hasSkippedTutorialThisSession, setHasSkippedTutorialThisSession] = useState(false);
     
     // Tutorial context hook
-    const { hasSeenInitialTutorial, markInitialTutorialSeen, hasCompletedOnboarding, isLoading: tutorialLoading, markTutorialCompleted, completedTutorials, isTutorialCompleted } = useTutorial(); 
+    const { hasSeenInitialTutorial, markInitialTutorialSeen, hasCompletedOnboarding, isLoading: tutorialLoading, markTutorialCompleted, completedTutorials, isTutorialCompleted, hasSeenWelcomeBanner, dismissWelcomeBanner } = useTutorial(); 
     const [animalToEdit, setAnimalToEdit] = useState(null);
     const [speciesToAdd, setSpeciesToAdd] = useState(null); 
     const [speciesOptions, setSpeciesOptions] = useState([]); 
@@ -8511,11 +8512,11 @@ const App = () => {
     }
 
      return (
-        <div className="min-h-screen bg-page-bg flex flex-col items-center p-6 font-sans">
-            {/* Initial Tutorial Modal - Shows once to new users */}
-            {authToken && !hasCompletedOnboarding && !tutorialLoading && !hasSkippedTutorialThisSession && userProfile && (
-                <InitialTutorialModal 
-                    onStart={() => {
+        <div className="min-h-screen bg-page-bg flex flex-col font-sans">
+            {/* Welcome Banner - Shows once to new users */}
+            {authToken && !hasSeenWelcomeBanner && !tutorialLoading && userProfile && (
+                <WelcomeBanner 
+                    onStartTutorial={() => {
                         // Find the first incomplete lesson to resume from
                         let startIndex = 0;
                         for (let i = 0; i < TUTORIAL_LESSONS.onboarding.length; i++) {
@@ -8528,22 +8529,13 @@ const App = () => {
                         setCurrentTutorialIndex(startIndex);
                         setCurrentTutorialId(TUTORIAL_LESSONS.onboarding[startIndex].id);
                         setShowTutorialOverlay(true);
-                        setHasSkippedTutorialThisSession(true);
+                        dismissWelcomeBanner();
                     }}
-                    onSkip={() => {
-                        // Only skip for this session - will appear again on next login
-                        setHasSkippedTutorialThisSession(true);
-                    }}
-                    onPermanentSkip={() => {
-                        // Mark both onboarding and advanced features as complete
-                        // This prevents all tutorial prompts from appearing
-                        markTutorialCompleted('budget-basics', true);
-                        markTutorialCompleted('advanced-features-complete', false, true);
-                        setHasSkippedTutorialThisSession(true);
-                    }}
+                    onDismiss={dismissWelcomeBanner}
                 />
             )}
             
+            <div className="flex flex-col items-center p-6 flex-1">
             {showModal && <ModalMessage title={modalMessage.title} message={modalMessage.message} onClose={() => setShowModal(false)} />}
             {showUserSearchModal && (
                 <UserSearchModal 
@@ -8592,9 +8584,9 @@ const App = () => {
                             <User size={18} className="mb-1" />
                             <span>Profile</span>
                         </button>
-                        <button onClick={() => setShowInfoTab(true)} className={`px-4 py-2 text-xs font-medium rounded-lg transition duration-150 flex flex-col items-center text-gray-600 hover:bg-gray-100`}>
+                        <button onClick={() => setShowInfoTab(true)} className={`px-4 py-2 text-xs font-medium rounded-lg transition duration-150 flex flex-col items-center text-gray-600 hover:bg-gray-100`} title="Tutorials & Help">
                             <BookOpen size={18} className="mb-1" />
-                            <span>Info</span>
+                            <span>Help</span>
                         </button>
                     </nav>
 
@@ -8700,7 +8692,7 @@ const App = () => {
                         </button>
                         <button onClick={() => setShowInfoTab(true)} className={`flex-1 px-2 py-2 text-xs font-medium rounded-lg transition duration-150 text-gray-600 hover:bg-gray-100`}>
                             <BookOpen size={16} className="inline mb-0.5" />
-                            <span className="block">Info</span>
+                            <span className="block">Help</span>
                         </button>
                     </nav>
                 </div>
@@ -9159,6 +9151,7 @@ const App = () => {
                     </div>
                 </div>
             )}
+            </div>
         </div>
     );
 };
