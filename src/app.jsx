@@ -3014,7 +3014,7 @@ const LitterManagement = ({ authToken, API_BASE_URL, userProfile, showModalMessa
                         </div>
 
                         {/* Sire Selection */}
-                        <div data-tutorial-target="litter-parents-section">
+                        <div data-tutorial-target="litter-sire-dam">
                             <label className="block text-sm font-medium text-gray-700 mb-1">
                                 Sire (Father) <span className="text-red-500">*</span>
                             </label>
@@ -3034,7 +3034,7 @@ const LitterManagement = ({ authToken, API_BASE_URL, userProfile, showModalMessa
                         </div>
 
                         {/* Dam Selection */}
-                        <div>
+                        <div data-tutorial-target="litter-sire-dam">
                             <label className="block text-sm font-medium text-gray-700 mb-1">
                                 Dam (Mother) <span className="text-red-500">*</span>
                             </label>

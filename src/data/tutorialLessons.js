@@ -172,7 +172,7 @@ export const TUTORIAL_LESSONS = {
           stepNumber: 3,
           title: 'Select Parents & Birth Date',
           content: 'Select both the Sire (Father) and Dam (Mother) - this is required. The parents\' species determines the offspring species. You can optionally set the Number of Males and Females fields. Once you\'ve set the parents and birth date, offspring sections will appear below where you can link existing animals or create new ones.',
-          highlightElement: '[data-tutorial-target="litter-parents-section"]',
+          highlightElement: '[data-tutorial-target="litter-sire-dam"]',
           tips: [
             'Parents must be the same species - offspring will inherit this species',
             'Birth Date is required to create new offspring in this form',
