@@ -220,6 +220,8 @@ const BudgetingTab = ({ authToken, API_BASE_URL, showModalMessage }) => {
                 } else {
                     transactionData.sellerUserId = selectedUser._id;
                 }
+                // Mark this as a transfer mode transaction (not just logging)
+                transactionData.mode = 'transfer';
             }
 
             console.log('Transaction data to send:', transactionData);
