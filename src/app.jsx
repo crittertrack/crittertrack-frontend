@@ -7297,6 +7297,7 @@ const App = () => {
         const viewToStep = {
             'list': 0,           // Start Adding Animals
             'select-species': 1, // Select a Species
+            'manage-species': 2, // Add Custom Species (advances to step 3)
             'select-animal': 2,  // Fill in Basic Information
             'form': 2            // Fill in Basic Information
         };
