@@ -2390,7 +2390,7 @@ const OffspringSection = ({ animalId, API_BASE_URL, authToken = null, onViewAnim
 };
 
 // Litter Management Component
-const LitterManagement = ({ authToken, API_BASE_URL, userProfile, showModalMessage, onViewAnimal, formDataRef }) => {
+const LitterManagement = ({ authToken, API_BASE_URL, userProfile, showModalMessage, onViewAnimal, formDataRef, formOpenRef }) => {
     const [litters, setLitters] = useState([]);
     const [myAnimals, setMyAnimals] = useState([]);
     const [loading, setLoading] = useState(true);
@@ -2437,6 +2437,13 @@ const LitterManagement = ({ authToken, API_BASE_URL, userProfile, showModalMessa
             formDataRef.current = formData;
         }
     }, [formData, formDataRef]);
+
+    // Update parent ref with form open state for tutorial tracking
+    useEffect(() => {
+        if (formOpenRef) {
+            formOpenRef.current = showAddForm;
+        }
+    }, [showAddForm, formOpenRef]);
 
     const toggleBulkDeleteMode = (litterId) => {
         setBulkDeleteMode(prev => ({ ...prev, [litterId]: !prev[litterId] }));
@@ -7234,6 +7241,7 @@ const App = () => {
     const scrollContainerRef = useRef(null);
     const tutorialOverlayRef = useRef(null);
     const litterFormDataRef = useRef(null);
+    const litterFormOpenRef = useRef(null);
 
     // Tutorial modal states
     const [showInfoTab, setShowInfoTab] = useState(false);
@@ -7348,6 +7356,18 @@ const App = () => {
             tutorialOverlayRef.current.advanceStep();
         }
     }, [currentView, showTutorialOverlay, currentTutorialId, currentTutorialStep]);
+
+    // Auto-advance tutorial for lesson 4 step 2 when form opens
+    useEffect(() => {
+        if (!showTutorialOverlay || currentTutorialId !== 'create-litters' || !tutorialOverlayRef.current) {
+            return;
+        }
+
+        // When new litter form opens, advance to step 3 (where parents section is highlighted)
+        if (litterFormOpenRef.current && currentTutorialStep?.stepNumber === 2) {
+            tutorialOverlayRef.current.advanceStep();
+        }
+    }, [showTutorialOverlay, currentTutorialId, currentTutorialStep, litterFormOpenRef.current]);
 
     // Auto-advance tutorial for lesson 4 step 3 when parents and birthdate are filled
     useEffect(() => {
@@ -8219,6 +8239,7 @@ const App = () => {
                         showModalMessage={showModalMessage}
                         onViewAnimal={handleViewAnimal}
                         formDataRef={litterFormDataRef}
+                        formOpenRef={litterFormOpenRef}
                     />
                 );
             case 'list':
