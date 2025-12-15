@@ -2508,7 +2508,10 @@ const LitterManagement = ({ authToken, API_BASE_URL, userProfile, showModalMessa
             });
             const littersData = response.data || [];
             
-            // Recalculate COI for each litter
+            // Set litters immediately so UI can render
+            setLitters(littersData);
+            
+            // Recalculate COI for each litter in the background
             for (const litter of littersData) {
                 try {
                     const coiResponse = await axios.get(`${API_BASE_URL}/inbreeding/pairing`, {
@@ -2536,9 +2539,11 @@ const LitterManagement = ({ authToken, API_BASE_URL, userProfile, showModalMessa
                 }
             }
             
-            setLitters(littersData);
+            // Update litters again after COI calculations
+            setLitters([...littersData]);
         } catch (error) {
             console.error('Error fetching litters:', error);
+            setLitters([]); // Set empty array on error so page can still render
         }
     };
 
@@ -2558,7 +2563,10 @@ const LitterManagement = ({ authToken, API_BASE_URL, userProfile, showModalMessa
                 species: a.species
             })));
             
-            // Recalculate COI for animals with parents
+            // Set animals immediately so UI can render
+            setMyAnimals(animalsData);
+            
+            // Recalculate COI for animals with parents in the background
             for (const animal of animalsData) {
                 if ((animal.fatherId_public || animal.motherId_public || animal.sireId_public || animal.damId_public)) {
                     try {
@@ -2578,9 +2586,11 @@ const LitterManagement = ({ authToken, API_BASE_URL, userProfile, showModalMessa
             }
             
             console.log('[fetchMyAnimals] Final animals data:', animalsData.map(a => ({ id: a.id_public, coi: a.inbreedingCoefficient })));
-            setMyAnimals(animalsData);
+            // Update animals again after COI calculations
+            setMyAnimals([...animalsData]);
         } catch (error) {
             console.error('Error fetching animals:', error);
+            setMyAnimals([]); // Set empty array on error so page can still render
         }
     };
 
