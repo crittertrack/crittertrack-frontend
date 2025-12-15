@@ -7458,6 +7458,14 @@ const App = () => {
     const [userProfile, setUserProfile] = useState(null);
     const [currentView, setCurrentView] = useState('list'); 
     const [hasSkippedTutorialThisSession, setHasSkippedTutorialThisSession] = useState(false);
+    const [isMobile, setIsMobile] = useState(window.innerWidth < 768);
+    
+    // Detect mobile/app environment
+    React.useEffect(() => {
+        const handleResize = () => setIsMobile(window.innerWidth < 768);
+        window.addEventListener('resize', handleResize);
+        return () => window.removeEventListener('resize', handleResize);
+    }, []);
     
     // Tutorial context hook
     const { hasSeenInitialTutorial, markInitialTutorialSeen, hasCompletedOnboarding, isLoading: tutorialLoading, markTutorialCompleted, completedTutorials, isTutorialCompleted, hasSeenWelcomeBanner, dismissWelcomeBanner } = useTutorial(); 
@@ -8897,6 +8905,7 @@ const App = () => {
                 return daysSinceCreation <= 30;
             })() && (
                 <WelcomeBanner 
+                    isMobile={isMobile}
                     onStartTutorial={() => {
                         // Find the first incomplete lesson to resume from
                         let startIndex = 0;
@@ -8965,10 +8974,12 @@ const App = () => {
                             <User size={18} className="mb-1" />
                             <span>Profile</span>
                         </button>
-                        <button onClick={() => setShowInfoTab(true)} className={`px-4 py-2 text-xs font-medium rounded-lg transition duration-150 flex flex-col items-center text-gray-600 hover:bg-gray-100`} title="Tutorials & Help">
-                            <BookOpen size={18} className="mb-1" />
-                            <span>Help</span>
-                        </button>
+                        {!isMobile && (
+                            <button onClick={() => setShowInfoTab(true)} className={`px-4 py-2 text-xs font-medium rounded-lg transition duration-150 flex flex-col items-center text-gray-600 hover:bg-gray-100`} title="Tutorials & Help">
+                                <BookOpen size={18} className="mb-1" />
+                                <span>Help</span>
+                            </button>
+                        )}
                     </nav>
 
                     <div className="flex items-center space-x-3">
