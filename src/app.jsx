@@ -2417,6 +2417,7 @@ const LitterManagement = ({ authToken, API_BASE_URL, userProfile, showModalMessa
     const [linkingAnimals, setLinkingAnimals] = useState(false);
     const [availableToLink, setAvailableToLink] = useState({ litter: null, animals: [] });
     const [expandedLitter, setExpandedLitter] = useState(null);
+    const [editingLitter, setEditingLitter] = useState(null);
     const [searchQuery, setSearchQuery] = useState('');
     const [speciesFilter, setSpeciesFilter] = useState('');
     const [addingOffspring, setAddingOffspring] = useState(null);
@@ -2867,7 +2868,75 @@ const LitterManagement = ({ authToken, API_BASE_URL, userProfile, showModalMessa
             fetchLitters();
         } catch (error) {
             console.error('Error deleting litter:', error);
-            showModalMessage('Error', error.response?.data?.message || 'Failed to delete litter');
+            showModalMessage('Error', 'Failed to delete litter');
+        }
+    };
+
+    const handleEditLitter = (litter) => {
+        setEditingLitter(litter._id);
+        setFormData({
+            breedingPairCodeName: litter.breedingPairCodeName || '',
+            sireId_public: litter.sireId_public,
+            damId_public: litter.damId_public,
+            pairingDate: litter.pairingDate || '',
+            birthDate: litter.birthDate || '',
+            maleCount: litter.maleCount || '',
+            femaleCount: litter.femaleCount || '',
+            notes: litter.notes || '',
+            linkedOffspringIds: litter.offspringIds_public || []
+        });
+        setShowAddForm(true);
+        setExpandedLitter(null);
+    };
+
+    const handleUpdateLitter = async (e) => {
+        e.preventDefault();
+        
+        if (!formData.sireId_public || !formData.damId_public) {
+            showModalMessage('Error', 'Please select both parents');
+            return;
+        }
+
+        try {
+            await axios.put(`${API_BASE_URL}/litters/${editingLitter}`, {
+                breedingPairCodeName: formData.breedingPairCodeName,
+                sireId_public: formData.sireId_public,
+                damId_public: formData.damId_public,
+                pairingDate: formData.pairingDate,
+                birthDate: formData.birthDate,
+                maleCount: formData.maleCount,
+                femaleCount: formData.femaleCount,
+                notes: formData.notes,
+                offspringIds_public: formData.linkedOffspringIds,
+                numberBorn: formData.linkedOffspringIds?.length || 0
+            }, {
+                headers: { Authorization: `Bearer ${authToken}` }
+            });
+
+            showModalMessage('Success', 'Litter updated successfully!');
+            setShowAddForm(false);
+            setEditingLitter(null);
+            setFormData({
+                breedingPairCodeName: '',
+                sireId_public: '',
+                damId_public: '',
+                pairingDate: '',
+                birthDate: '',
+                maleCount: '',
+                femaleCount: '',
+                notes: '',
+                linkedOffspringIds: []
+            });
+            setCreateOffspringCounts({ males: 0, females: 0 });
+            setSireSearch('');
+            setDamSearch('');
+            setSireSpeciesFilter('');
+            setDamSpeciesFilter('');
+            fetchLitters();
+            fetchMyAnimals();
+        } catch (error) {
+            console.error('Error updating litter:', error);
+            showModalMessage('Error', error.response?.data?.message || 'Failed to update litter');
         }
     };
 
@@ -3034,11 +3103,23 @@ const LitterManagement = ({ authToken, API_BASE_URL, userProfile, showModalMessa
                 <button
                     onClick={() => {
                         if (showAddForm) {
-                            // Clear search filters when closing form
+                            // Clear search filters and editing state when closing form
                             setSireSearch('');
                             setDamSearch('');
                             setSireSpeciesFilter('');
                             setDamSpeciesFilter('');
+                            setEditingLitter(null);
+                            setFormData({
+                                breedingPairCodeName: '',
+                                sireId_public: '',
+                                damId_public: '',
+                                pairingDate: '',
+                                birthDate: '',
+                                maleCount: '',
+                                femaleCount: '',
+                                notes: '',
+                                linkedOffspringIds: []
+                            });
                         }
                         setShowAddForm(!showAddForm);
                     }}
@@ -3051,8 +3132,8 @@ const LitterManagement = ({ authToken, API_BASE_URL, userProfile, showModalMessa
             </div>
 
             {showAddForm && (
-                <form onSubmit={handleSubmit} className="bg-gray-50 p-6 rounded-lg mb-6 border-2 border-gray-200">
-                    <h3 className="text-xl font-bold text-gray-800 mb-4">Create New Litter</h3>
+                <form onSubmit={editingLitter ? handleUpdateLitter : handleSubmit} className="bg-gray-50 p-6 rounded-lg mb-6 border-2 border-gray-200">
+                    <h3 className="text-xl font-bold text-gray-800 mb-4">{editingLitter ? 'Edit Litter' : 'Create New Litter'}</h3>
                     
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
                         {/* Litter Name */}
@@ -3351,7 +3432,7 @@ const LitterManagement = ({ authToken, API_BASE_URL, userProfile, showModalMessa
                         data-tutorial-target="create-litter-btn"
                         className="w-full bg-primary hover:bg-primary/90 text-black font-bold py-3 px-4 rounded-lg"
                     >
-                        Create Litter
+                        {editingLitter ? 'Update Litter' : 'Create Litter'}
                     </button>
                 </form>
             )}
@@ -3450,6 +3531,16 @@ const LitterManagement = ({ authToken, API_BASE_URL, userProfile, showModalMessa
                                 {isExpanded && (
                                     <div className="border-t-2 border-gray-200 p-4 bg-gray-50">
                                         <div className="flex justify-end gap-2 mb-4">
+                                            <button
+                                                onClick={(e) => {
+                                                    e.stopPropagation();
+                                                    handleEditLitter(litter);
+                                                }}
+                                                className="flex items-center gap-1 bg-blue-500 hover:bg-blue-600 text-white font-semibold px-3 py-2 rounded-lg text-sm"
+                                            >
+                                                <Edit size={16} />
+                                                Edit
+                                            </button>
                                             <button
                                                 onClick={() => handleLinkAnimals(litter)}
                                                 className="flex items-center gap-1 bg-primary hover:bg-primary/90 text-black font-semibold px-3 py-2 rounded-lg text-sm"
