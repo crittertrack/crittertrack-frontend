@@ -13,13 +13,27 @@ self.onmessage = async (e) => {
     console.log('[WORKER] Original dimensions:', imageBitmap.width, 'x', imageBitmap.height);
 
     let { maxWidth = 1200, maxHeight = 1200, startQuality = 0.85, minQuality = 0.35, qualityStep = 0.05, minDimension = 200 } = opts;
-    let targetW = Math.min(imageBitmap.width, maxWidth);
-    let targetH = Math.min(imageBitmap.height, maxHeight);
+    
+    // Calculate target dimensions while preserving aspect ratio
+    const aspectRatio = imageBitmap.width / imageBitmap.height;
+    let targetW, targetH;
+    
+    if (imageBitmap.width <= maxWidth && imageBitmap.height <= maxHeight) {
+      // Image already fits within bounds
+      targetW = imageBitmap.width;
+      targetH = imageBitmap.height;
+    } else {
+      // Scale down proportionally to fit within maxWidth x maxHeight
+      const widthRatio = maxWidth / imageBitmap.width;
+      const heightRatio = maxHeight / imageBitmap.height;
+      const ratio = Math.min(widthRatio, heightRatio);
+      targetW = Math.round(imageBitmap.width * ratio);
+      targetH = Math.round(imageBitmap.height * ratio);
+    }
 
     console.log('[WORKER] Initial target:', targetW, 'x', targetH);
 
     const outputType = (file.type === 'image/png') ? 'image/png' : 'image/jpeg';
-    const aspectRatio = imageBitmap.width / imageBitmap.height;
     console.log('[WORKER] Aspect ratio:', aspectRatio.toFixed(3));
 
     const tryCompress = async (w, h, quality) => {
