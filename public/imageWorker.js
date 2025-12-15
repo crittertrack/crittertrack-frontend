@@ -38,10 +38,25 @@ self.onmessage = async (e) => {
       quality -= qualityStep;
     }
 
-    // Second pass: scale down and retry
+    // Second pass: scale down proportionally while preserving aspect ratio
+    const aspectRatio = imageBitmap.width / imageBitmap.height;
     while (Math.max(targetW, targetH) > minDimension) {
-      targetW = Math.max(Math.round(targetW * 0.8), minDimension);
-      targetH = Math.max(Math.round(targetH * 0.8), minDimension);
+      // Scale both dimensions proportionally
+      const scale = 0.8;
+      targetW = Math.round(targetW * scale);
+      targetH = Math.round(targetH * scale);
+      
+      // Ensure neither dimension goes below minDimension while preserving aspect ratio
+      if (Math.max(targetW, targetH) < minDimension) {
+        if (aspectRatio >= 1) {
+          targetW = minDimension;
+          targetH = Math.round(minDimension / aspectRatio);
+        } else {
+          targetH = minDimension;
+          targetW = Math.round(minDimension * aspectRatio);
+        }
+      }
+      
       quality = startQuality;
       while (quality >= minQuality) {
         const blob = await tryCompress(targetW, targetH, quality);
@@ -53,8 +68,10 @@ self.onmessage = async (e) => {
       }
     }
 
-    // Final small attempt
-    const finalBlob = await tryCompress(minDimension, minDimension, minQuality);
+    // Final attempt with aspect ratio preserved
+    const finalW = aspectRatio >= 1 ? minDimension : Math.round(minDimension * aspectRatio);
+    const finalH = aspectRatio <= 1 ? minDimension : Math.round(minDimension / aspectRatio);
+    const finalBlob = await tryCompress(finalW, finalH, minQuality);
     self.postMessage({ id, blob: finalBlob });
   } catch (err) {
     self.postMessage({ id, error: err && err.message ? err.message : String(err) });
