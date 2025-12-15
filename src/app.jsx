@@ -3076,7 +3076,7 @@ const LitterManagement = ({ authToken, API_BASE_URL, userProfile, showModalMessa
                             </label>
                             
                             {/* Search and Filter for Sire */}
-                            <div className="flex gap-2 mb-2">
+                            <div className="flex flex-col sm:flex-row gap-2 mb-2">
                                 <input
                                     type="text"
                                     placeholder="Search sires..."
@@ -3087,7 +3087,7 @@ const LitterManagement = ({ authToken, API_BASE_URL, userProfile, showModalMessa
                                 <select
                                     value={sireSpeciesFilter}
                                     onChange={(e) => setSireSpeciesFilter(e.target.value)}
-                                    className="px-3 py-1.5 text-sm border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent"
+                                    className="w-full sm:w-auto px-3 py-1.5 text-sm border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent"
                                 >
                                     <option value="">All Species</option>
                                     {allSpecies.map(species => (
@@ -3127,7 +3127,7 @@ const LitterManagement = ({ authToken, API_BASE_URL, userProfile, showModalMessa
                             </label>
                             
                             {/* Search and Filter for Dam */}
-                            <div className="flex gap-2 mb-2">
+                            <div className="flex flex-col sm:flex-row gap-2 mb-2">
                                 <input
                                     type="text"
                                     placeholder="Search dams..."
@@ -3138,7 +3138,7 @@ const LitterManagement = ({ authToken, API_BASE_URL, userProfile, showModalMessa
                                 <select
                                     value={damSpeciesFilter}
                                     onChange={(e) => setDamSpeciesFilter(e.target.value)}
-                                    className="px-3 py-1.5 text-sm border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent"
+                                    className="w-full sm:w-auto px-3 py-1.5 text-sm border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent"
                                 >
                                     <option value="">All Species</option>
                                     {allSpecies.map(species => (
