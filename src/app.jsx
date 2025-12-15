@@ -4090,16 +4090,29 @@ const SpeciesSelector = ({ speciesOptions, onSelectSpecies, onManageSpecies, sea
 
 
 // Small helper component for animal image selection/preview
-const AnimalImageUpload = ({ imageUrl, onFileChange, disabled = false }) => (
+const AnimalImageUpload = ({ imageUrl, onFileChange, onDeleteImage, disabled = false, Trash2 }) => (
     <div data-tutorial-target="photo-upload-section" className="flex items-center space-x-4">
         <div className="w-28 h-28 bg-gray-100 rounded-lg overflow-hidden flex items-center justify-center border">
             <AnimalImage src={imageUrl} alt="Animal" className="w-full h-full object-cover" iconSize={36} />
         </div>
         <div className="flex-1">
-            <label className={`inline-flex items-center px-4 py-2 bg-primary text-black rounded-md cursor-pointer ${disabled ? 'opacity-50 cursor-not-allowed' : 'hover:bg-primary/90'}`}>
-                Change Photo
-                <input type="file" accept="image/*" onChange={onFileChange} disabled={disabled} className="hidden" />
-            </label>
+            <div className="flex items-center space-x-2">
+                <label className={`inline-flex items-center px-4 py-2 bg-primary text-black rounded-md cursor-pointer ${disabled ? 'opacity-50 cursor-not-allowed' : 'hover:bg-primary/90'}`}>
+                    Change Photo
+                    <input type="file" accept="image/*" onChange={onFileChange} disabled={disabled} className="hidden" />
+                </label>
+                {imageUrl && onDeleteImage && Trash2 && (
+                    <button
+                        type="button"
+                        onClick={onDeleteImage}
+                        disabled={disabled}
+                        className={`inline-flex items-center px-4 py-2 bg-red-500 text-white rounded-md ${disabled ? 'opacity-50 cursor-not-allowed' : 'hover:bg-red-600'}`}
+                        title="Delete Image"
+                    >
+                        <Trash2 size={18} />
+                    </button>
+                )}
+            </div>
             <p className="text-sm text-gray-500 mt-2">Images are automatically compressed for upload.</p>
         </div>
     </div>
@@ -4939,47 +4952,56 @@ const AnimalForm = ({
                 {/* ------------------------------------------- */}
 
                 {/* Image Upload Placeholder */}
-                <AnimalImageUpload imageUrl={animalImagePreview} onFileChange={async (e) => {
-                    if (e.target.files && e.target.files[0]) {
-                        const original = e.target.files[0];
-                        try {
-                            // Compress to target <=200KB if possible. Prefer a Web Worker-based compressor
-                            // (non-blocking) and fall back to the existing main-thread functions when unavailable.
-                            let compressedBlob = null;
-
+                <AnimalImageUpload 
+                    imageUrl={animalImagePreview} 
+                    onFileChange={async (e) => {
+                        if (e.target.files && e.target.files[0]) {
+                            const original = e.target.files[0];
                             try {
-                                compressedBlob = await compressImageWithWorker(original, 200 * 1024, { maxWidth: 1200, maxHeight: 1200, startQuality: 0.85 });
-                            } catch (werr) {
-                                console.warn('Worker compression failed unexpectedly:', werr);
-                                compressedBlob = null;
-                            }
+                                // Compress to target <=200KB if possible. Prefer a Web Worker-based compressor
+                                // (non-blocking) and fall back to the existing main-thread functions when unavailable.
+                                let compressedBlob = null;
 
-                            if (!compressedBlob) {
-                                // Worker not available or failed — fallback to main-thread compression
                                 try {
-                                    compressedBlob = await compressImageToMaxSize(original, 200 * 1024, { maxWidth: 1200, maxHeight: 1200, startQuality: 0.85 });
-                                } catch (err) {
-                                    console.warn('Compression-to-size failed, falling back to single-pass compress:', err);
-                                    compressedBlob = await compressImageFile(original, { maxWidth: 1200, maxHeight: 1200, quality: 0.8 });
+                                    compressedBlob = await compressImageWithWorker(original, 200 * 1024, { maxWidth: 1200, maxHeight: 1200, startQuality: 0.85 });
+                                } catch (werr) {
+                                    console.warn('Worker compression failed unexpectedly:', werr);
+                                    compressedBlob = null;
                                 }
+
+                                if (!compressedBlob) {
+                                    // Worker not available or failed — fallback to main-thread compression
+                                    try {
+                                        compressedBlob = await compressImageToMaxSize(original, 200 * 1024, { maxWidth: 1200, maxHeight: 1200, startQuality: 0.85 });
+                                    } catch (err) {
+                                        console.warn('Compression-to-size failed, falling back to single-pass compress:', err);
+                                        compressedBlob = await compressImageFile(original, { maxWidth: 1200, maxHeight: 1200, quality: 0.8 });
+                                    }
+                                }
+                                // If compressImageFile returned the original File/Blob, wrap if needed
+                                // Always use JPEG format for compatibility
+                                const baseName = original.name.replace(/\.[^/.]+$/, '') || 'image';
+                                const compressedFile = new File([compressedBlob], `${baseName}.jpg`, { type: 'image/jpeg' });
+                                // Warn if we couldn't reach target size (best-effort)
+                                if (compressedBlob.size > 200 * 1024) {
+                                    showModalMessage('Image Compression', 'Image was compressed but is still larger than 200KB. It will be uploaded but consider using a smaller image.');
+                                }
+                                setAnimalImageFile(compressedFile);
+                                setAnimalImagePreview(URL.createObjectURL(compressedFile));
+                            } catch (err) {
+                                console.warn('Image compression failed, using original file', err);
+                                setAnimalImageFile(original);
+                                setAnimalImagePreview(URL.createObjectURL(original));
                             }
-                            // If compressImageFile returned the original File/Blob, wrap if needed
-                            // Always use JPEG format for compatibility
-                            const baseName = original.name.replace(/\.[^/.]+$/, '') || 'image';
-                            const compressedFile = new File([compressedBlob], `${baseName}.jpg`, { type: 'image/jpeg' });
-                            // Warn if we couldn't reach target size (best-effort)
-                            if (compressedBlob.size > 200 * 1024) {
-                                showModalMessage('Image Compression', 'Image was compressed but is still larger than 200KB. It will be uploaded but consider using a smaller image.');
-                            }
-                            setAnimalImageFile(compressedFile);
-                            setAnimalImagePreview(URL.createObjectURL(compressedFile));
-                        } catch (err) {
-                            console.warn('Image compression failed, using original file', err);
-                            setAnimalImageFile(original);
-                            setAnimalImagePreview(URL.createObjectURL(original));
                         }
-                    }
-                }} disabled={loading} />
+                    }}
+                    onDeleteImage={() => {
+                        setAnimalImageFile(null);
+                        setAnimalImagePreview(null);
+                    }}
+                    disabled={loading}
+                    Trash2={Trash2}
+                />
 
                 {/* ------------------------------------------- */}
                 {/* PRIMARY INPUT FIELDS (THE MISSING SECTION) */}
