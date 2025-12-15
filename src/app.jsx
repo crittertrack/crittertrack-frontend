@@ -2427,17 +2427,19 @@ const LitterManagement = ({ authToken, API_BASE_URL, userProfile, showModalMessa
     const [selectedOffspring, setSelectedOffspring] = useState({});
 
     useEffect(() => {
-        const loadInitialData = async () => {
+        const loadData = async () => {
             setLoading(true);
             try {
-                await Promise.all([fetchLitters(), fetchMyAnimals()]);
+                // Fetch animals first, then litters
+                await fetchMyAnimals();
+                await fetchLitters();
             } catch (error) {
-                console.error('Error loading initial data:', error);
+                console.error('Error loading data:', error);
             } finally {
                 setLoading(false);
             }
         };
-        loadInitialData();
+        loadData();
     }, []);
 
     // Update parent ref with current form data for tutorial tracking
