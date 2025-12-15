@@ -2427,8 +2427,17 @@ const LitterManagement = ({ authToken, API_BASE_URL, userProfile, showModalMessa
     const [selectedOffspring, setSelectedOffspring] = useState({});
 
     useEffect(() => {
-        fetchLitters();
-        fetchMyAnimals();
+        const loadInitialData = async () => {
+            setLoading(true);
+            try {
+                await Promise.all([fetchLitters(), fetchMyAnimals()]);
+            } catch (error) {
+                console.error('Error loading initial data:', error);
+            } finally {
+                setLoading(false);
+            }
+        };
+        loadInitialData();
     }, []);
 
     // Update parent ref with current form data for tutorial tracking
@@ -2528,8 +2537,6 @@ const LitterManagement = ({ authToken, API_BASE_URL, userProfile, showModalMessa
             setLitters(littersData);
         } catch (error) {
             console.error('Error fetching litters:', error);
-        } finally {
-            setLoading(false);
         }
     };
 
@@ -9178,6 +9185,7 @@ const App = () => {
             {showInfoTab && (
                 <InfoTab 
                     onClose={() => setShowInfoTab(false)}
+                    isMobile={isMobile}
                     onStartTutorial={(lessonId) => {
                         setCurrentTutorialId(lessonId);
                         setShowTutorialOverlay(true);

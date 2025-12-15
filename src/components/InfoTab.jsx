@@ -9,7 +9,7 @@ import { TutorialOverlay } from './TutorialOverlay';
  * Displays all tutorial lessons and features
  * Users can view lessons, restart tutorials, and explore features
  */
-export const InfoTab = ({ onClose }) => {
+export const InfoTab = ({ onClose, isMobile }) => {
   const [activeTab, setActiveTab] = useState('getting-started'); // 'getting-started' or 'advanced'
   const [selectedLesson, setSelectedLesson] = useState(null);
   const [expandedLesson, setExpandedLesson] = useState(null);
@@ -127,21 +127,31 @@ export const InfoTab = ({ onClose }) => {
 
             {/* Action Buttons */}
             <div className="flex gap-2 flex-wrap">
-              <button
-                onClick={() => handleStartTutorial(lesson.id)}
-                className="flex items-center gap-2 px-4 py-2 bg-primary hover:bg-primary/90 text-black font-semibold rounded-lg transition"
-              >
-                <Play size={16} />
-                {isCompleted ? 'Replay' : 'Start'} Tutorial
-              </button>
-              {isCompleted && (
-                <button
-                  onClick={(e) => handleRestartTutorial(lesson.id, e)}
-                  className="flex items-center gap-2 px-4 py-2 bg-gray-200 hover:bg-gray-300 text-gray-800 font-semibold rounded-lg transition"
-                >
-                  <RotateCcw size={16} />
-                  Restart
-                </button>
+              {isMobile ? (
+                <div className="w-full p-3 bg-blue-50 border border-blue-200 rounded-lg">
+                  <p className="text-sm text-blue-800">
+                    <span className="font-semibold">Desktop Only:</span> Interactive tutorials are available on the desktop version. Visit crittertrack.net on your computer to try them.
+                  </p>
+                </div>
+              ) : (
+                <>
+                  <button
+                    onClick={() => handleStartTutorial(lesson.id)}
+                    className="flex items-center gap-2 px-4 py-2 bg-primary hover:bg-primary/90 text-black font-semibold rounded-lg transition"
+                  >
+                    <Play size={16} />
+                    {isCompleted ? 'Replay' : 'Start'} Tutorial
+                  </button>
+                  {isCompleted && (
+                    <button
+                      onClick={(e) => handleRestartTutorial(lesson.id, e)}
+                      className="flex items-center gap-2 px-4 py-2 bg-gray-200 hover:bg-gray-300 text-gray-800 font-semibold rounded-lg transition"
+                    >
+                      <RotateCcw size={16} />
+                      Restart
+                    </button>
+                  )}
+                </>
               )}
             </div>
           </div>
