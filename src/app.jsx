@@ -4210,8 +4210,11 @@ async function compressImageToMaxSize(file, maxBytes = 200 * 1024, opts = {}) {
         }
     }
 
-    // As a last resort, return the smallest we could create (use minQuality and minDimension)
-    const finalBlob = await tryCompress(minDimension, minDimension, minQuality);
+    // As a last resort, return the smallest we could create (use minQuality and minimum dimensions while preserving aspect ratio)
+    const aspectRatio = image.width / image.height;
+    const finalW = aspectRatio >= 1 ? minDimension : Math.round(minDimension * aspectRatio);
+    const finalH = aspectRatio <= 1 ? minDimension : Math.round(minDimension / aspectRatio);
+    const finalBlob = await tryCompress(finalW, finalH, minQuality);
     return finalBlob || file;
 }
 
