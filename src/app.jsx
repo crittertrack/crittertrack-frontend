@@ -4197,10 +4197,25 @@ async function compressImageToMaxSize(file, maxBytes = 200 * 1024, opts = {}) {
         quality -= qualityStep;
     }
 
-    // Second pass: gradually reduce dimensions and retry quality sweep
+    // Second pass: gradually reduce dimensions while preserving aspect ratio
+    const aspectRatio = image.width / image.height;
     while (Math.max(targetW, targetH) > minDimension) {
-        targetW = Math.max(Math.round(targetW * 0.8), minDimension);
-        targetH = Math.max(Math.round(targetH * 0.8), minDimension);
+        // Reduce dimensions proportionally to maintain aspect ratio
+        const scale = 0.8;
+        targetW = Math.round(targetW * scale);
+        targetH = Math.round(targetH * scale);
+        
+        // Ensure neither dimension goes below minDimension while preserving aspect ratio
+        if (Math.max(targetW, targetH) < minDimension) {
+            if (aspectRatio >= 1) {
+                targetW = minDimension;
+                targetH = Math.round(minDimension / aspectRatio);
+            } else {
+                targetH = minDimension;
+                targetW = Math.round(minDimension * aspectRatio);
+            }
+        }
+        
         quality = startQuality;
         while (quality >= minQuality) {
             const blob = await tryCompress(targetW, targetH, quality);
