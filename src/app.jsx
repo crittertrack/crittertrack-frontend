@@ -2430,9 +2430,8 @@ const LitterManagement = ({ authToken, API_BASE_URL, userProfile, showModalMessa
         const loadData = async () => {
             setLoading(true);
             try {
-                // Fetch animals first, then litters
-                await fetchMyAnimals();
-                await fetchLitters();
+                // Fetch animals and litters - they return immediately after setting data
+                await Promise.all([fetchMyAnimals(), fetchLitters()]);
             } catch (error) {
                 console.error('Error loading data:', error);
             } finally {
@@ -2511,39 +2510,37 @@ const LitterManagement = ({ authToken, API_BASE_URL, userProfile, showModalMessa
             // Set litters immediately so UI can render
             setLitters(littersData);
             
-            // Recalculate COI for each litter in the background
-            for (const litter of littersData) {
-                try {
-                    const coiResponse = await axios.get(`${API_BASE_URL}/inbreeding/pairing`, {
-                        params: {
-                            sireId: litter.sireId_public,
-                            damId: litter.damId_public,
-                            generations: 50
-                        },
-                        headers: { Authorization: `Bearer ${authToken}` }
-                    });
-
-                    if (coiResponse.data.inbreedingCoefficient != null) {
-                        // Always set the COI value from the calculation
-                        litter.inbreedingCoefficient = coiResponse.data.inbreedingCoefficient;
-                        
-                        // Update database if needed
-                        await axios.put(`${API_BASE_URL}/litters/${litter._id}`, {
-                            inbreedingCoefficient: coiResponse.data.inbreedingCoefficient
-                        }, {
+            // Start COI calculations in background without blocking
+            Promise.resolve().then(async () => {
+                for (const litter of littersData) {
+                    try {
+                        const coiResponse = await axios.get(`${API_BASE_URL}/inbreeding/pairing`, {
+                            params: {
+                                sireId: litter.sireId_public,
+                                damId: litter.damId_public,
+                                generations: 50
+                            },
                             headers: { Authorization: `Bearer ${authToken}` }
                         });
+
+                        if (coiResponse.data.inbreedingCoefficient != null) {
+                            litter.inbreedingCoefficient = coiResponse.data.inbreedingCoefficient;
+                            
+                            await axios.put(`${API_BASE_URL}/litters/${litter._id}`, {
+                                inbreedingCoefficient: coiResponse.data.inbreedingCoefficient
+                            }, {
+                                headers: { Authorization: `Bearer ${authToken}` }
+                            });
+                        }
+                    } catch (error) {
+                        console.log(`Could not update COI for litter ${litter._id}:`, error);
                     }
-                } catch (error) {
-                    console.log(`Could not update COI for litter ${litter._id}:`, error);
                 }
-            }
-            
-            // Update litters again after COI calculations
-            setLitters([...littersData]);
+                setLitters([...littersData]);
+            });
         } catch (error) {
             console.error('Error fetching litters:', error);
-            setLitters([]); // Set empty array on error so page can still render
+            setLitters([]);
         }
     };
 
@@ -2555,42 +2552,32 @@ const LitterManagement = ({ authToken, API_BASE_URL, userProfile, showModalMessa
             const animalsData = response.data || [];
             
             console.log('[fetchMyAnimals] Raw response:', animalsData.length, 'animals');
-            console.log('[fetchMyAnimals] First few animals:', animalsData.slice(0, 3).map(a => ({
-                id: a.id_public,
-                name: a.name,
-                gender: a.gender,
-                genderType: typeof a.gender,
-                species: a.species
-            })));
             
             // Set animals immediately so UI can render
             setMyAnimals(animalsData);
             
-            // Recalculate COI for animals with parents in the background
-            for (const animal of animalsData) {
-                if ((animal.fatherId_public || animal.motherId_public || animal.sireId_public || animal.damId_public)) {
-                    try {
-                        const coiResponse = await axios.get(`${API_BASE_URL}/animals/${animal.id_public}/inbreeding`, {
-                            params: { generations: 50 },
-                            headers: { Authorization: `Bearer ${authToken}` }
-                        });
-                        animal.inbreedingCoefficient = coiResponse.data.inbreedingCoefficient;
-                    } catch (error) {
-                        console.log(`Could not update COI for animal ${animal.id_public}:`, error);
+            // Start COI calculations in background without blocking
+            Promise.resolve().then(async () => {
+                for (const animal of animalsData) {
+                    if ((animal.fatherId_public || animal.motherId_public || animal.sireId_public || animal.damId_public)) {
+                        try {
+                            const coiResponse = await axios.get(`${API_BASE_URL}/animals/${animal.id_public}/inbreeding`, {
+                                params: { generations: 50 },
+                                headers: { Authorization: `Bearer ${authToken}` }
+                            });
+                            animal.inbreedingCoefficient = coiResponse.data.inbreedingCoefficient;
+                        } catch (error) {
+                            console.log(`Could not update COI for animal ${animal.id_public}:`, error);
+                        }
+                    } else {
+                        animal.inbreedingCoefficient = 0;
                     }
-                } else {
-                    // Animals with no parents have 0% COI by definition
-                    animal.inbreedingCoefficient = 0;
-                    console.log(`[fetchMyAnimals] Set COI to 0 for animal ${animal.id_public} (no parents)`);
                 }
-            }
-            
-            console.log('[fetchMyAnimals] Final animals data:', animalsData.map(a => ({ id: a.id_public, coi: a.inbreedingCoefficient })));
-            // Update animals again after COI calculations
-            setMyAnimals([...animalsData]);
+                setMyAnimals([...animalsData]);
+            });
         } catch (error) {
             console.error('Error fetching animals:', error);
-            setMyAnimals([]); // Set empty array on error so page can still render
+            setMyAnimals([]);
         }
     };
 
