@@ -4993,13 +4993,16 @@ const AnimalForm = ({
                     onFileChange={async (e) => {
                         if (e.target.files && e.target.files[0]) {
                             const original = e.target.files[0];
+                            console.log('[FILE CHANGE] Original file:', { name: original.name, size: original.size, type: original.type });
                             try {
                                 // Compress to target <=200KB if possible. Prefer a Web Worker-based compressor
                                 // (non-blocking) and fall back to the existing main-thread functions when unavailable.
                                 let compressedBlob = null;
 
                                 try {
+                                    console.log('[FILE CHANGE] Attempting worker compression...');
                                     compressedBlob = await compressImageWithWorker(original, 200 * 1024, { maxWidth: 1200, maxHeight: 1200, startQuality: 0.85 });
+                                    console.log('[FILE CHANGE] Worker compression result:', compressedBlob ? { size: compressedBlob.size } : 'null');
                                 } catch (werr) {
                                     console.warn('Worker compression failed unexpectedly:', werr);
                                     compressedBlob = null;
@@ -5007,23 +5010,28 @@ const AnimalForm = ({
 
                                 if (!compressedBlob) {
                                     // Worker not available or failed — fallback to main-thread compression
+                                    console.log('[FILE CHANGE] Falling back to main-thread compression...');
                                     try {
                                         compressedBlob = await compressImageToMaxSize(original, 200 * 1024, { maxWidth: 1200, maxHeight: 1200, startQuality: 0.85 });
+                                        console.log('[FILE CHANGE] Main-thread compression result:', compressedBlob ? { size: compressedBlob.size } : 'null');
                                     } catch (err) {
                                         console.warn('Compression-to-size failed, falling back to single-pass compress:', err);
                                         compressedBlob = await compressImageFile(original, { maxWidth: 1200, maxHeight: 1200, quality: 0.8 });
+                                        console.log('[FILE CHANGE] Single-pass compression result:', compressedBlob ? { size: compressedBlob.size } : 'null');
                                     }
                                 }
                                 // If compressImageFile returned the original File/Blob, wrap if needed
                                 // Always use JPEG format for compatibility
                                 const baseName = original.name.replace(/\.[^/.]+$/, '') || 'image';
                                 const compressedFile = new File([compressedBlob], `${baseName}.jpg`, { type: 'image/jpeg' });
+                                console.log('[FILE CHANGE] Final compressed file:', { name: compressedFile.name, size: compressedFile.size, type: compressedFile.type });
                                 // Warn if we couldn't reach target size (best-effort)
                                 if (compressedBlob.size > 200 * 1024) {
                                     showModalMessage('Image Compression', 'Image was compressed but is still larger than 200KB. It will be uploaded but consider using a smaller image.');
                                 }
                                 setAnimalImageFile(compressedFile);
                                 setAnimalImagePreview(URL.createObjectURL(compressedFile));
+                                console.log('[FILE CHANGE] Set animalImageFile and preview');
                             } catch (err) {
                                 console.warn('Image compression failed, using original file', err);
                                 setAnimalImageFile(original);
