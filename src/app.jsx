@@ -2786,6 +2786,10 @@ const LitterManagement = ({ authToken, API_BASE_URL, userProfile, showModalMessa
                 linkedOffspringIds: []
             });
             setCreateOffspringCounts({ males: 0, females: 0 });
+            setSireSearch('');
+            setDamSearch('');
+            setSireSpeciesFilter('');
+            setDamSpeciesFilter('');
             fetchLitters();
             fetchMyAnimals();
         } catch (error) {
@@ -3028,7 +3032,16 @@ const LitterManagement = ({ authToken, API_BASE_URL, userProfile, showModalMessa
                     Litter Management
                 </h2>
                 <button
-                    onClick={() => setShowAddForm(!showAddForm)}
+                    onClick={() => {
+                        if (showAddForm) {
+                            // Clear search filters when closing form
+                            setSireSearch('');
+                            setDamSearch('');
+                            setSireSpeciesFilter('');
+                            setDamSpeciesFilter('');
+                        }
+                        setShowAddForm(!showAddForm);
+                    }}
                     data-tutorial-target="new-litter-btn"
                     className="bg-primary hover:bg-primary/90 text-black font-semibold py-2 px-4 rounded-lg flex items-center gap-2"
                 >
