@@ -2410,6 +2410,10 @@ const LitterManagement = ({ authToken, API_BASE_URL, userProfile, showModalMessa
         males: 0,
         females: 0
     });
+    const [sireSearch, setSireSearch] = useState('');
+    const [damSearch, setDamSearch] = useState('');
+    const [sireSpeciesFilter, setSireSpeciesFilter] = useState('');
+    const [damSpeciesFilter, setDamSpeciesFilter] = useState('');
     const [linkingAnimals, setLinkingAnimals] = useState(false);
     const [availableToLink, setAvailableToLink] = useState({ litter: null, animals: [] });
     const [expandedLitter, setExpandedLitter] = useState(null);
@@ -2947,6 +2951,31 @@ const LitterManagement = ({ authToken, API_BASE_URL, userProfile, showModalMessa
     const maleAnimals = myAnimals.filter(a => a.gender === 'Male');
     const femaleAnimals = myAnimals.filter(a => a.gender === 'Female');
     
+    // Filter male animals by search and species
+    const filteredMaleAnimals = maleAnimals.filter(animal => {
+        const matchesSearch = !sireSearch || 
+            animal.name.toLowerCase().includes(sireSearch.toLowerCase()) ||
+            animal.id_public.toString().includes(sireSearch) ||
+            (animal.prefix && animal.prefix.toLowerCase().includes(sireSearch.toLowerCase())) ||
+            (animal.suffix && animal.suffix.toLowerCase().includes(sireSearch.toLowerCase()));
+        const matchesSpecies = !sireSpeciesFilter || animal.species === sireSpeciesFilter;
+        return matchesSearch && matchesSpecies;
+    });
+    
+    // Filter female animals by search and species
+    const filteredFemaleAnimals = femaleAnimals.filter(animal => {
+        const matchesSearch = !damSearch || 
+            animal.name.toLowerCase().includes(damSearch.toLowerCase()) ||
+            animal.id_public.toString().includes(damSearch) ||
+            (animal.prefix && animal.prefix.toLowerCase().includes(damSearch.toLowerCase())) ||
+            (animal.suffix && animal.suffix.toLowerCase().includes(damSearch.toLowerCase()));
+        const matchesSpecies = !damSpeciesFilter || animal.species === damSpeciesFilter;
+        return matchesSearch && matchesSpecies;
+    });
+    
+    // Get unique species from all animals
+    const allSpecies = [...new Set(myAnimals.map(a => a.species).filter(Boolean))].sort();
+    
     console.log('[LitterManagement] Male animals:', maleAnimals.length);
     console.log('[LitterManagement] Female animals:', femaleAnimals.length);
 
@@ -3045,6 +3074,28 @@ const LitterManagement = ({ authToken, API_BASE_URL, userProfile, showModalMessa
                             <label className="block text-sm font-medium text-gray-700 mb-1">
                                 Sire (Father) <span className="text-red-500">*</span>
                             </label>
+                            
+                            {/* Search and Filter for Sire */}
+                            <div className="flex gap-2 mb-2">
+                                <input
+                                    type="text"
+                                    placeholder="Search sires..."
+                                    value={sireSearch}
+                                    onChange={(e) => setSireSearch(e.target.value)}
+                                    className="flex-1 px-3 py-1.5 text-sm border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent"
+                                />
+                                <select
+                                    value={sireSpeciesFilter}
+                                    onChange={(e) => setSireSpeciesFilter(e.target.value)}
+                                    className="px-3 py-1.5 text-sm border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent"
+                                >
+                                    <option value="">All Species</option>
+                                    {allSpecies.map(species => (
+                                        <option key={species} value={species}>{species}</option>
+                                    ))}
+                                </select>
+                            </div>
+                            
                             <select
                                 value={formData.sireId_public}
                                 onChange={(e) => setFormData({...formData, sireId_public: e.target.value})}
@@ -3052,13 +3103,16 @@ const LitterManagement = ({ authToken, API_BASE_URL, userProfile, showModalMessa
                                 required
                             >
                                 <option value="">Select Sire</option>
+                                {filteredMaleAnimals.length === 0 && maleAnimals.length > 0 && (
+                                    <option value="" disabled>No males match your filters</option>
+                                )}
                                 {maleAnimals.length === 0 && myAnimals.length > 0 && (
                                     <option value="" disabled>No male animals found</option>
                                 )}
                                 {maleAnimals.length === 0 && myAnimals.length === 0 && (
                                     <option value="" disabled>Loading animals...</option>
                                 )}
-                                {maleAnimals.map(animal => (
+                                {filteredMaleAnimals.map(animal => (
                                     <option key={animal.id_public} value={animal.id_public}>
                                         {animal.prefix ? `${animal.prefix} ` : ''}{animal.name}{animal.suffix ? ` ${animal.suffix}` : ''} - {animal.id_public} ({animal.species})
                                     </option>
@@ -3071,6 +3125,28 @@ const LitterManagement = ({ authToken, API_BASE_URL, userProfile, showModalMessa
                             <label className="block text-sm font-medium text-gray-700 mb-1">
                                 Dam (Mother) <span className="text-red-500">*</span>
                             </label>
+                            
+                            {/* Search and Filter for Dam */}
+                            <div className="flex gap-2 mb-2">
+                                <input
+                                    type="text"
+                                    placeholder="Search dams..."
+                                    value={damSearch}
+                                    onChange={(e) => setDamSearch(e.target.value)}
+                                    className="flex-1 px-3 py-1.5 text-sm border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent"
+                                />
+                                <select
+                                    value={damSpeciesFilter}
+                                    onChange={(e) => setDamSpeciesFilter(e.target.value)}
+                                    className="px-3 py-1.5 text-sm border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent"
+                                >
+                                    <option value="">All Species</option>
+                                    {allSpecies.map(species => (
+                                        <option key={species} value={species}>{species}</option>
+                                    ))}
+                                </select>
+                            </div>
+                            
                             <select
                                 value={formData.damId_public}
                                 onChange={(e) => setFormData({...formData, damId_public: e.target.value})}
@@ -3078,13 +3154,16 @@ const LitterManagement = ({ authToken, API_BASE_URL, userProfile, showModalMessa
                                 required
                             >
                                 <option value="">Select Dam</option>
+                                {filteredFemaleAnimals.length === 0 && femaleAnimals.length > 0 && (
+                                    <option value="" disabled>No females match your filters</option>
+                                )}
                                 {femaleAnimals.length === 0 && myAnimals.length > 0 && (
                                     <option value="" disabled>No female animals found</option>
                                 )}
                                 {femaleAnimals.length === 0 && myAnimals.length === 0 && (
                                     <option value="" disabled>Loading animals...</option>
                                 )}
-                                {femaleAnimals.map(animal => (
+                                {filteredFemaleAnimals.map(animal => (
                                     <option key={animal.id_public} value={animal.id_public}>
                                         {animal.prefix ? `${animal.prefix} ` : ''}{animal.name}{animal.suffix ? ` ${animal.suffix}` : ''} - {animal.id_public} ({animal.species})
                                     </option>
