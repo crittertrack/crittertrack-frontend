@@ -3360,23 +3360,21 @@ const LitterManagement = ({ authToken, API_BASE_URL, userProfile, showModalMessa
                         </div>
                         
                         {/* Species filter */}
-                        <div className="flex gap-2 items-center flex-wrap pt-2 border-t border-gray-200">
-                            <span className='text-sm font-medium text-gray-700 whitespace-nowrap'>Species:</span>
-                            {['All', ...DEFAULT_SPECIES_OPTIONS].map(species => {
-                                const value = species === 'All' ? '' : species;
-                                const isCurrentSelected = speciesFilter === value;
-                                const displayName = species === 'All' ? 'All' : getSpeciesDisplayName(species);
-                                
-                                return (
-                                    <button key={species} onClick={() => setSpeciesFilter(value)}
-                                        className={`px-3 py-1.5 text-sm font-semibold rounded-lg transition duration-150 shadow-sm ${ 
-                                            isCurrentSelected ? 'bg-primary text-black' : 'bg-gray-200 text-gray-700 hover:bg-gray-300'
-                                        }`}
-                                    >
-                                        {displayName}
-                                    </button>
-                                );
-                            })}
+                        <div className="flex gap-2 items-center pt-2 border-t border-gray-200">
+                            <label htmlFor="litter-species-filter" className='text-sm font-medium text-gray-700 whitespace-nowrap'>Species:</label>
+                            <select
+                                id="litter-species-filter"
+                                value={speciesFilter}
+                                onChange={(e) => setSpeciesFilter(e.target.value)}
+                                className="px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent text-sm"
+                            >
+                                <option value="">All Species</option>
+                                {DEFAULT_SPECIES_OPTIONS.map(species => (
+                                    <option key={species} value={species}>
+                                        {getSpeciesDisplayName(species)}
+                                    </option>
+                                ))}
+                            </select>
                         </div>
                     </div>
                 )}
