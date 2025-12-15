@@ -4420,6 +4420,7 @@ const AnimalForm = ({
     const [modalTarget, setModalTarget] = useState(null); 
     const [animalImageFile, setAnimalImageFile] = useState(null);
     const [animalImagePreview, setAnimalImagePreview] = useState(animalToEdit?.imageUrl || animalToEdit?.photoUrl || null);
+    const [deleteImage, setDeleteImage] = useState(false);
 
     const handleChange = (e) => {
         const { name, value, type, checked } = e.target;
@@ -4747,6 +4748,15 @@ const AnimalForm = ({
             // Merge in any immediate pedigree selections stored in `pedigreeRef` to avoid race conditions
             const payloadToSave = { ...formData };
             
+            // Handle image deletion
+            if (deleteImage && animalToEdit) {
+                payloadToSave.imageUrl = null;
+                payloadToSave.photoUrl = null;
+                payloadToSave.profileImage = null;
+                payloadToSave.image_path = null;
+                console.log('[IMAGE DELETE] Image deletion requested');
+            }
+            
             // Validate deceased date: remove if it's before birth date
             if (payloadToSave.deceasedDate && payloadToSave.birthDate) {
                 const birthDate = new Date(payloadToSave.birthDate);
@@ -4998,6 +5008,7 @@ const AnimalForm = ({
                     onDeleteImage={() => {
                         setAnimalImageFile(null);
                         setAnimalImagePreview(null);
+                        setDeleteImage(true);
                     }}
                     disabled={loading}
                     Trash2={Trash2}
