@@ -93,60 +93,60 @@ const GENE_LOCI = {
       'Si/si', 'Si/Si'
     ]
   },
-  Um: {
+  Mobr: {
+    name: 'xbrindle',
+    combinations: [
+      'mobr/mobr',
+      'Mobr/mobr'
+    ]
+  },
+  U: {
     name: 'Umbrous',
     combinations: [
-      'um/um',
-      'Um/um', 'Um/Um'
+      'u/u',
+      'U/u', 'U/U'
     ]
   },
-  Mo: {
-    name: 'Mottled/Merle',
+  Go: {
+    name: 'Shorthair',
     combinations: [
-      'mo/mo',
-      'Mo/mo', 'Mo/Mo'
-    ]
-  },
-  Bl: {
-    name: 'Belted',
-    combinations: [
-      'bl/bl',
-      'Bl/bl', 'Bl/Bl'
-    ]
-  },
-  Ln: {
-    name: 'Long Hair',
-    combinations: [
-      'ln/ln',
-      'Ln/ln', 'Ln/Ln'
+      'go/go',
+      'Go/go', 'Go/Go'
     ]
   },
   Re: {
-    name: 'Rex',
+    name: 'Astrex',
     combinations: [
       're/re',
       'Re/re', 'Re/Re'
     ]
   },
+  Sa: {
+    name: 'Satin',
+    combinations: [
+      'sa/sa',
+      'Sa/sa', 'Sa/Sa'
+    ]
+  },
+  Rst: {
+    name: 'Rosette',
+    combinations: [
+      'rst/rst',
+      'Rst/rst', 'Rst/Rst'
+    ]
+  },
   Fz: {
-    name: 'Fuzzy',
+    name: 'Fuzz',
     combinations: [
       'fz/fz',
       'Fz/fz', 'Fz/Fz'
     ]
   },
-  R: {
-    name: 'Caracul/Waved',
+  Nu: {
+    name: 'Nude/Hairless',
     combinations: [
-      'r/r',
-      'R/r', 'R/R'
-    ]
-  },
-  Hr: {
-    name: 'Hairless',
-    combinations: [
-      'hr/hr',
-      'Hr/hr', 'Hr/Hr'
+      'nu/nu',
+      'Nu/nu', 'Nu/Nu'
     ]
   }
 };
@@ -244,9 +244,9 @@ const GeneticCodeBuilder = ({ species, value, onChange, onOpenCommunityForm }) =
             <button
               type="button"
               onClick={() => setShowBuilderModal(true)}
-              className="px-4 py-2 bg-pink-500 hover:bg-pink-600 text-white rounded font-medium transition whitespace-nowrap"
+              className="px-4 py-2 bg-accent hover:bg-accent/90 text-white rounded font-medium transition whitespace-nowrap"
             >
-              {value ? 'Edit Genes' : 'Build Genes'}
+              {value ? 'Edit Genes' : 'Add'}
             </button>
           </div>
           
@@ -282,7 +282,7 @@ const GeneticCodeBuilder = ({ species, value, onChange, onOpenCommunityForm }) =
                   <button
                     type="button"
                     onClick={handleSave}
-                    className="px-4 py-2 bg-pink-500 hover:bg-pink-600 text-white rounded-lg font-semibold transition"
+                    className="px-4 py-2 bg-accent hover:bg-accent/90 text-white rounded-lg font-semibold transition"
                   >
                     Save Genetics
                   </button>
@@ -332,12 +332,12 @@ const GeneticCodeBuilder = ({ species, value, onChange, onOpenCommunityForm }) =
                       className="flex items-center gap-2 text-lg font-semibold text-gray-800 hover:text-gray-600 mb-3"
                     >
                       {showAdvanced ? <ChevronUp size={20} /> : <ChevronDown size={20} />}
-                      Advanced Genes (Marking & Coat)
+                      Advanced Genes (Markings, Patterns & Coat)
                     </button>
                     
                     {showAdvanced && (
                       <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
-                        {['S', 'W', 'Spl', 'Rn', 'Si', 'Um', 'Mo', 'Bl', 'Ln', 'Re', 'Fz', 'R', 'Hr'].map(locus => (
+                        {['S', 'W', 'Spl', 'Rn', 'Si', 'Mobr', 'U', 'Go', 'Re', 'Sa', 'Rst', 'Fz', 'Nu'].map(locus => (
                           <div key={locus} className="bg-white p-3 rounded border border-gray-200">
                             <label className="block text-sm font-semibold text-gray-700 mb-2">
                               {GENE_LOCI[locus].name} ({locus})
@@ -345,7 +345,7 @@ const GeneticCodeBuilder = ({ species, value, onChange, onOpenCommunityForm }) =
                             <select
                               value={genotype[locus] || ''}
                               onChange={(e) => handleGeneChange(locus, e.target.value)}
-                              className="w-full p-2 border border-gray-300 rounded focus:ring-pink-500 focus:border-pink-500"
+                              className="w-full p-2 border border-gray-300 rounded focus:ring-accent focus:border-accent"
                             >
                               <option value="">-</option>
                               {GENE_LOCI[locus].combinations.map(combo => (
@@ -378,7 +378,7 @@ const GeneticCodeBuilder = ({ species, value, onChange, onOpenCommunityForm }) =
                       value={buildGeneticCode(genotype)}
                       onChange={handleManualChange}
                       placeholder="e.g., A/A B/b C/C D/D E/E P/P"
-                      className="w-full p-3 border border-gray-300 rounded focus:ring-pink-500 focus:border-pink-500 font-mono text-sm"
+                      className="w-full p-3 border border-gray-300 rounded focus:ring-accent focus:border-accent font-mono text-sm"
                       rows="4"
                     />
                   </div>
