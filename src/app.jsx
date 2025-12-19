@@ -2940,6 +2940,39 @@ const LitterManagement = ({ authToken, API_BASE_URL, userProfile, showModalMessa
         }
     };
 
+    const handleRecalculateOffspringCounts = async () => {
+        if (!window.confirm('This will recalculate offspring counts for all litters based on linked animals. Continue?')) {
+            return;
+        }
+
+        try {
+            setLoading(true);
+            let updatedCount = 0;
+
+            for (const litter of litters) {
+                const correctCount = litter.offspringIds_public?.length || 0;
+                
+                // Only update if count is different
+                if (litter.numberBorn !== correctCount) {
+                    await axios.put(`${API_BASE_URL}/litters/${litter._id}`, {
+                        numberBorn: correctCount
+                    }, {
+                        headers: { Authorization: `Bearer ${authToken}` }
+                    });
+                    updatedCount++;
+                }
+            }
+
+            showModalMessage('Success', `Recalculated offspring counts for ${updatedCount} litter(s)!`);
+            fetchLitters();
+        } catch (error) {
+            console.error('Error recalculating offspring counts:', error);
+            showModalMessage('Error', 'Failed to recalculate offspring counts');
+        } finally {
+            setLoading(false);
+        }
+    };
+
     const handleEditLitter = (litter) => {
         setEditingLitter(litter._id);
         setFormData({
@@ -3169,32 +3202,41 @@ const LitterManagement = ({ authToken, API_BASE_URL, userProfile, showModalMessa
                     <BookOpen size={24} className="mr-3 text-primary-dark" />
                     Litter Management
                 </h2>
-                <button
-                    onClick={() => {
-                        if (showAddForm) {
-                            // Clear search filters and editing state when closing form
-                            setSireSearch('');
-                            setDamSearch('');
-                            setSireSpeciesFilter('');
-                            setDamSpeciesFilter('');
-                            setEditingLitter(null);
-                            setPredictedCOI(null);
-                            setFormData({
-                                breedingPairCodeName: '',
-                                sireId_public: '',
-                                damId_public: '',
-                                pairingDate: '',
-                                birthDate: '',
-                                maleCount: '',
-                                femaleCount: '',
-                                notes: '',
-                                linkedOffspringIds: []
-                            });
-                        }
-                        setShowAddForm(!showAddForm);
-                    }}
-                    data-tutorial-target="new-litter-btn"
-                    className="bg-primary hover:bg-primary/90 text-black font-semibold py-2 px-4 rounded-lg flex items-center gap-2"
+                <div className="flex gap-2">
+                    <button
+                        onClick={handleRecalculateOffspringCounts}
+                        className="bg-blue-600 hover:bg-blue-700 text-white font-semibold py-2 px-4 rounded-lg flex items-center gap-2"
+                        title="Recalculate offspring counts for all litters"
+                    >
+                        <RefreshCw size={18} />
+                        Recalculate Counts
+                    </button>
+                    <button
+                        onClick={() => {
+                            if (showAddForm) {
+                                // Clear search filters and editing state when closing form
+                                setSireSearch('');
+                                setDamSearch('');
+                                setSireSpeciesFilter('');
+                                setDamSpeciesFilter('');
+                                setEditingLitter(null);
+                                setPredictedCOI(null);
+                                setFormData({
+                                    breedingPairCodeName: '',
+                                    sireId_public: '',
+                                    damId_public: '',
+                                    pairingDate: '',
+                                    birthDate: '',
+                                    maleCount: '',
+                                    femaleCount: '',
+                                    notes: '',
+                                    linkedOffspringIds: []
+                                });
+                            }
+                            setShowAddForm(!showAddForm);
+                        }}
+                        data-tutorial-target="new-litter-btn"
+                        className="bg-primary hover:bg-primary/90 text-black font-semibold py-2 px-4 rounded-lg flex items-center gap-2"
                 >
                     {showAddForm ? <X size={20} /> : <Plus size={20} />}
                     {showAddForm ? 'Cancel' : 'New Litter'}
