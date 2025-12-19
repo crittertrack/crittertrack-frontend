@@ -8009,6 +8009,9 @@ const App = () => {
     const [showTermsModal, setShowTermsModal] = useState(false);
     const [showPrivacyModal, setShowPrivacyModal] = useState(false);
     
+    // Animals for genetics calculator
+    const [myAnimalsForCalculator, setMyAnimalsForCalculator] = useState([]);
+    
     // Transfer modal states
     const [showTransferModal, setShowTransferModal] = useState(false);
     const [transferAnimal, setTransferAnimal] = useState(null);
@@ -8261,6 +8264,24 @@ const App = () => {
             setAuthToken(null);
         }
     }, [showModalMessage]);
+
+    // Fetch animals for genetics calculator when needed
+    useEffect(() => {
+        const fetchAnimalsForCalculator = async () => {
+            if (currentView === 'genetics-calculator' && authToken) {
+                try {
+                    const response = await axios.get(`${API_BASE_URL}/animals?isOwned=true`, {
+                        headers: { Authorization: `Bearer ${authToken}` }
+                    });
+                    setMyAnimalsForCalculator(response.data || []);
+                } catch (error) {
+                    console.error('Failed to fetch animals for calculator:', error);
+                    setMyAnimalsForCalculator([]);
+                }
+            }
+        };
+        fetchAnimalsForCalculator();
+    }, [currentView, authToken, API_BASE_URL]);
 
     // Fetch breeder info when viewing an animal
     useEffect(() => {
@@ -9087,7 +9108,7 @@ const App = () => {
                     <MouseGeneticsCalculator
                         API_BASE_URL={API_BASE_URL}
                         authToken={authToken}
-                        myAnimals={animals}
+                        myAnimals={myAnimalsForCalculator}
                     />
                 );
             case 'budget':
