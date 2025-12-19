@@ -1,5 +1,5 @@
-import React, { useState } from 'react';
-import { X, Book } from 'lucide-react';
+import React, { useState, useEffect } from 'react';
+import { X, Book, User, Search } from 'lucide-react';
 
 // Define all gene loci with their possible allele combinations
 const GENE_LOCI = {
@@ -1003,7 +1003,54 @@ const calculatePhenotype = (genotype, originalGenotype = null) => {
   return { phenotype: result || 'Unknown', carriers, hidden, notes };
 };
 
-const MouseGeneticsCalculator = ({ API_BASE_URL, authToken }) => {
+const MouseGeneticsCalculator = ({ API_BASE_URL, authToken, myAnimals = [] }) => {
+  // Parse genetic code string to genotype object
+  const parseGeneticCode = (codeString) => {
+    if (!codeString) return {};
+    
+    const genotype = {};
+    // Remove commas and split by whitespace
+    const parts = codeString.replace(/,/g, ' ').trim().split(/\s+/);
+    
+    parts.forEach(part => {
+      // Try to match format with slash: A/A or a/a
+      let match = part.match(/^([A-Za-z]+)\/([A-Za-z]+)$/);
+      let allele1, allele2;
+      
+      if (match) {
+        allele1 = match[1];
+        allele2 = match[2];
+      } else {
+        // Try to match format without slash: AA, Aa, aa
+        match = part.match(/^([A-Za-z])([A-Za-z])$/);
+        if (match) {
+          allele1 = match[1];
+          allele2 = match[2];
+        }
+      }
+      
+      if (allele1 && allele2) {
+        // Normalize to lowercase for matching
+        const normalized = `${allele1.toLowerCase()}/${allele2.toLowerCase()}`;
+        
+        // Try to find matching locus in GENE_LOCI
+        for (const [locus, data] of Object.entries(GENE_LOCI)) {
+          // Check if any combination matches (case-insensitive)
+          const matchingCombo = data.combinations.find(combo => 
+            combo.toLowerCase() === normalized
+          );
+          
+          if (matchingCombo) {
+            genotype[locus] = matchingCombo; // Use the properly formatted version
+            break;
+          }
+        }
+      }
+    });
+    
+    return genotype;
+  };
+
   // Initialize with empty/default genotypes
   const defaultGenotype = {
     A: '',
@@ -1036,6 +1083,11 @@ const MouseGeneticsCalculator = ({ API_BASE_URL, authToken }) => {
   const [feedbackGenotype, setFeedbackGenotype] = useState(null);
   const [feedbackMessage, setFeedbackMessage] = useState('');
   const [showFeedbackModal, setShowFeedbackModal] = useState(false);
+  
+  // Animal selector states
+  const [showAnimalSelector, setShowAnimalSelector] = useState(false);
+  const [selectingForParent, setSelectingForParent] = useState(null); // 'parent1' or 'parent2'
+  const [animalSearch, setAnimalSearch] = useState('');
 
   const updateParent1 = (locus, value) => {
     setParent1({ ...parent1, [locus]: value });
@@ -1098,6 +1150,41 @@ const MouseGeneticsCalculator = ({ API_BASE_URL, authToken }) => {
       console.error('Error submitting feedback:', error);
       alert('An error occurred. Please try again.');
     }
+  };
+
+  // Animal selection functions
+  const openAnimalSelector = (parentNumber) => {
+    setSelectingForParent(parentNumber);
+    setAnimalSearch('');
+    setShowAnimalSelector(true);
+  };
+
+  const closeAnimalSelector = () => {
+    setShowAnimalSelector(false);
+    setSelectingForParent(null);
+    setAnimalSearch('');
+  };
+
+  const selectAnimal = (animal) => {
+    if (!animal.geneticCode) {
+      alert('This animal does not have a genetic code set.');
+      return;
+    }
+
+    const parsedGenotype = parseGeneticCode(animal.geneticCode);
+    
+    if (Object.keys(parsedGenotype).length === 0) {
+      alert('Could not parse genetic code for this animal.');
+      return;
+    }
+
+    if (selectingForParent === 'parent1') {
+      setParent1({ ...defaultGenotype, ...parsedGenotype });
+    } else if (selectingForParent === 'parent2') {
+      setParent2({ ...defaultGenotype, ...parsedGenotype });
+    }
+
+    closeAnimalSelector();
   };
 
   // Function to get possible alleles from a genotype combination
@@ -1663,7 +1750,19 @@ const MouseGeneticsCalculator = ({ API_BASE_URL, authToken }) => {
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
         {/* Sire/Father */}
         <div className="bg-blue-50 rounded-lg p-4 border-2 border-blue-300">
-          <h2 className="text-xl font-semibold text-blue-800 mb-4">Sire/Father</h2>
+          <div className="flex justify-between items-center mb-4">
+            <h2 className="text-xl font-semibold text-blue-800">Sire/Father</h2>
+            {authToken && myAnimals.length > 0 && (
+              <button
+                onClick={() => openAnimalSelector('parent1')}
+                className="flex items-center gap-1 px-3 py-1 bg-blue-600 hover:bg-blue-700 text-white text-sm rounded-lg transition"
+                title="Select from your animals"
+              >
+                <User size={14} />
+                Select Animal
+              </button>
+            )}
+          </div>
           <div className="grid grid-cols-2 gap-3">
             {Object.entries(GENE_LOCI).map(([locus, data]) => {
               // For Sire/Father, filter out Mobr combinations (males can't carry Mobr)
@@ -1720,7 +1819,19 @@ const MouseGeneticsCalculator = ({ API_BASE_URL, authToken }) => {
 
         {/* Dam/Mother */}
         <div className="bg-pink-50 rounded-lg p-4 border-2 border-pink-300">
-          <h2 className="text-xl font-semibold text-pink-800 mb-4">Dam/Mother</h2>
+          <div className="flex justify-between items-center mb-4">
+            <h2 className="text-xl font-semibold text-pink-800">Dam/Mother</h2>
+            {authToken && myAnimals.length > 0 && (
+              <button
+                onClick={() => openAnimalSelector('parent2')}
+                className="flex items-center gap-1 px-3 py-1 bg-pink-600 hover:bg-pink-700 text-white text-sm rounded-lg transition"
+                title="Select from your animals"
+              >
+                <User size={14} />
+                Select Animal
+              </button>
+            )}
+          </div>
           <div className="grid grid-cols-2 gap-3">
             {Object.entries(GENE_LOCI).map(([locus, data]) => (
               <div key={locus}>
@@ -1926,6 +2037,125 @@ const MouseGeneticsCalculator = ({ API_BASE_URL, authToken }) => {
                   >
                     Cancel
                   </button>
+                </div>
+              </div>
+            </div>
+          )}
+
+          {/* Animal Selector Modal */}
+          {showAnimalSelector && (
+            <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
+              <div className="bg-white rounded-lg p-6 max-w-3xl w-full max-h-[80vh] overflow-y-auto">
+                <div className="flex justify-between items-center mb-4">
+                  <h3 className="text-xl font-semibold text-gray-800">
+                    Select Animal for {selectingForParent === 'parent1' ? 'Sire' : 'Dam'}
+                  </h3>
+                  <button
+                    onClick={closeAnimalSelector}
+                    className="text-gray-500 hover:text-gray-700"
+                  >
+                    <X size={24} />
+                  </button>
+                </div>
+
+                {/* Search */}
+                <div className="mb-4">
+                  <div className="relative">
+                    <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400" size={18} />
+                    <input
+                      type="text"
+                      placeholder="Search animals by name or ID..."
+                      value={animalSearch}
+                      onChange={(e) => setAnimalSearch(e.target.value)}
+                      className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                    />
+                  </div>
+                </div>
+
+                {/* Animal List */}
+                <div className="space-y-2">
+                  {myAnimals
+                    .filter(animal => {
+                      // Filter by gender
+                      if (selectingForParent === 'parent1' && animal.gender !== 'Male') return false;
+                      if (selectingForParent === 'parent2' && animal.gender !== 'Female') return false;
+                      
+                      // Filter by species (Fancy Mouse only)
+                      if (animal.species !== 'Fancy Mouse') return false;
+                      
+                      // Filter by search
+                      if (animalSearch) {
+                        const searchLower = animalSearch.toLowerCase();
+                        const nameMatch = animal.name.toLowerCase().includes(searchLower);
+                        const idMatch = animal.id_public.toString().includes(searchLower);
+                        if (!nameMatch && !idMatch) return false;
+                      }
+                      
+                      return true;
+                    })
+                    .map(animal => (
+                      <div
+                        key={animal.id_public}
+                        className={`flex items-center gap-3 p-3 rounded-lg border-2 transition cursor-pointer ${
+                          animal.geneticCode
+                            ? 'border-gray-200 hover:border-blue-400 hover:bg-blue-50'
+                            : 'border-gray-100 bg-gray-50 opacity-60 cursor-not-allowed'
+                        }`}
+                        onClick={() => animal.geneticCode && selectAnimal(animal)}
+                      >
+                        {/* Animal Image */}
+                        <div className="w-16 h-16 bg-gray-200 rounded-lg flex-shrink-0 overflow-hidden">
+                          {animal.imageUrl || animal.photoUrl ? (
+                            <img 
+                              src={animal.imageUrl || animal.photoUrl} 
+                              alt={animal.name}
+                              className="w-full h-full object-cover"
+                            />
+                          ) : (
+                            <div className="w-full h-full flex items-center justify-center text-gray-400">
+                              <User size={32} />
+                            </div>
+                          )}
+                        </div>
+
+                        {/* Animal Info */}
+                        <div className="flex-1 min-w-0">
+                          <p className="font-semibold text-gray-800 truncate">
+                            {animal.prefix && `${animal.prefix} `}
+                            {animal.name}
+                            {animal.suffix && ` ${animal.suffix}`}
+                          </p>
+                          <p className="text-sm text-gray-600">{animal.id_public} • {animal.species}</p>
+                          {animal.geneticCode ? (
+                            <p className="text-xs text-gray-500 font-mono mt-1 truncate">
+                              {animal.geneticCode}
+                            </p>
+                          ) : (
+                            <p className="text-xs text-red-600 italic mt-1">
+                              No genetic code set
+                            </p>
+                          )}
+                        </div>
+
+                        {/* Select Button */}
+                        {animal.geneticCode && (
+                          <button
+                            className="px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg transition flex-shrink-0"
+                          >
+                            Select
+                          </button>
+                        )}
+                      </div>
+                    ))}
+                  
+                  {myAnimals.filter(a => 
+                    (selectingForParent === 'parent1' ? a.gender === 'Male' : a.gender === 'Female') &&
+                    a.species === 'Fancy Mouse'
+                  ).length === 0 && (
+                    <div className="text-center py-8 text-gray-500">
+                      <p>No {selectingForParent === 'parent1' ? 'male' : 'female'} Fancy Mice found in your collection.</p>
+                    </div>
+                  )}
                 </div>
               </div>
             </div>
