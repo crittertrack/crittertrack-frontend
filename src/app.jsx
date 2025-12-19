@@ -2469,7 +2469,7 @@ const LitterManagement = ({ authToken, API_BASE_URL, userProfile, showModalMessa
                 setCalculatingCOI(true);
                 try {
                     console.log('[Predicted COI] Calculating for sire:', formData.sireId_public, 'dam:', formData.damId_public);
-                    const coiResponse = await axios.get(`${API_BASE_URL}/inbreeding/pairing`, {
+                    const coiResponse = await axios.get(`${API_BASE_URL}/animals/inbreeding/pairing`, {
                         params: {
                             sireId: formData.sireId_public,
                             damId: formData.damId_public,
@@ -2557,8 +2557,7 @@ const LitterManagement = ({ authToken, API_BASE_URL, userProfile, showModalMessa
                     // Only calculate if COI is missing or null
                     if (litter.inbreedingCoefficient == null) {
                         try {
-                            const coiResponse = await axios.get(`${API_BASE_URL}/inbreeding/pairing`, {
-                                params: {
+                        const coiResponse = await axios.get(`${API_BASE_URL}/animals/inbreeding/pairing`, {
                                     sireId: litter.sireId_public,
                                     damId: litter.damId_public,
                                     generations: 50
