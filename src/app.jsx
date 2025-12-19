@@ -5635,6 +5635,7 @@ const AnimalForm = ({
                     <div className="md:col-span-3">
                         <GeneticCodeBuilder
                             species={formData.species}
+                            gender={formData.gender}
                             value={formData.geneticCode}
                             onChange={(value) => setFormData(prev => ({ ...prev, geneticCode: value }))}
                             onOpenCommunityForm={() => setShowCommunityGeneticsModal(true)}

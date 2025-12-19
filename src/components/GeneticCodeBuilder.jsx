@@ -151,7 +151,7 @@ const GENE_LOCI = {
   }
 };
 
-const GeneticCodeBuilder = ({ species, value, onChange, onOpenCommunityForm }) => {
+const GeneticCodeBuilder = ({ species, gender, value, onChange, onOpenCommunityForm }) => {
   const [showBuilderModal, setShowBuilderModal] = useState(false);
   const [mode, setMode] = useState('visual'); // 'visual' or 'manual'
   const [showAdvanced, setShowAdvanced] = useState(false);
@@ -219,6 +219,19 @@ const GeneticCodeBuilder = ({ species, value, onChange, onOpenCommunityForm }) =
   };
   
   const [genotype, setGenotype] = useState(() => parseGeneticCode(value));
+  
+  // Get valid combinations for a locus based on gender
+  const getValidCombinations = (locus) => {
+    const geneData = GENE_LOCI[locus];
+    if (!geneData) return [];
+    
+    // For Mobr (xbrindle), males can only be mobr/mobr
+    if (locus === 'Mobr' && gender === 'Male' && geneData.maleCombinations) {
+      return geneData.maleCombinations;
+    }
+    
+    return geneData.combinations;
+  };
   
   // Handle dropdown change
   const handleGeneChange = (locus, combination) => {
@@ -328,7 +341,7 @@ const GeneticCodeBuilder = ({ species, value, onChange, onOpenCommunityForm }) =
                             className="w-full p-2 border border-gray-300 rounded focus:ring-blue-500 focus:border-blue-500"
                           >
                             <option value="">-</option>
-                            {GENE_LOCI[locus].combinations.map(combo => (
+                            {getValidCombinations(locus).map(combo => (
                               <option key={combo} value={combo}>{combo}</option>
                             ))}
                           </select>
@@ -361,7 +374,7 @@ const GeneticCodeBuilder = ({ species, value, onChange, onOpenCommunityForm }) =
                               className="w-full p-2 border border-gray-300 rounded focus:ring-accent focus:border-accent"
                             >
                               <option value="">-</option>
-                              {GENE_LOCI[locus].combinations.map(combo => (
+                              {getValidCombinations(locus).map(combo => (
                                 <option key={combo} value={combo}>{combo}</option>
                               ))}
                             </select>
