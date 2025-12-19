@@ -933,29 +933,30 @@ const calculatePhenotype = (genotype, originalGenotype = null) => {
     markings.push('xbrindle');
   }
 
-  // Only show hair length if coat genes were explicitly selected
-  if (coatGenesSelected) {
-    if (genotype.Go === 'Go/Go') {
-      markings.push('Shorthair');
-    } else if (genotype.Go === 'go/go') {
-      markings.push('Longhair');
-    } else if (genotype.Go === 'Go/go') {
-      carriers.push('Longhair');
-    }
-  }
-
   // Texture - only show if coat genes were explicitly selected
   if (coatGenesSelected) {
     const hasLonghair = genotype.Go === 'go/go';
     const hasAstrex = genotype.Re === 'Re/re' || genotype.Re === 'Re/Re';
     
     // Check for Texel (longhair + astrex combination)
-    if (hasLonghair && hasAstrex) {
+    const isTexel = hasLonghair && hasAstrex;
+    
+    if (isTexel) {
       texture = 'Texel';
     } else if (hasAstrex) {
       texture = 'Astrex';
     } else if (genotype.Re === 're/Re') {
       carriers.push('Astrex');
+    }
+
+    // Only show hair length if coat genes were explicitly selected AND not Texel
+    if (genotype.Go === 'Go/Go') {
+      markings.push('Shorthair');
+    } else if (genotype.Go === 'go/go' && !isTexel) {
+      // Don't add Longhair if it's Texel (Longhair + Astrex)
+      markings.push('Longhair');
+    } else if (genotype.Go === 'Go/go') {
+      carriers.push('Longhair');
     }
     
     if (genotype.Sa === 'sa/sa') {
