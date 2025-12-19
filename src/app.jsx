@@ -2752,10 +2752,33 @@ const LitterManagement = ({ authToken, API_BASE_URL, userProfile, showModalMessa
             
             // Update litter with all offspring
             await axios.put(`${API_BASE_URL}/litters/${litterId}`, {
-                offspringIds_public: allOffspringIds
+                offspringIds_public: allOffspringIds,
+                numberBorn: allOffspringIds.length
             }, {
                 headers: { Authorization: `Bearer ${authToken}` }
             });
+
+            // Recalculate litter COI after adding offspring
+            try {
+                const coiResponse = await axios.get(`${API_BASE_URL}/inbreeding/pairing`, {
+                    params: {
+                        sireId: formData.sireId_public,
+                        damId: formData.damId_public,
+                        generations: 50
+                    },
+                    headers: { Authorization: `Bearer ${authToken}` }
+                });
+
+                if (coiResponse.data.inbreedingCoefficient != null) {
+                    await axios.put(`${API_BASE_URL}/litters/${litterId}`, {
+                        inbreedingCoefficient: coiResponse.data.inbreedingCoefficient
+                    }, {
+                        headers: { Authorization: `Bearer ${authToken}` }
+                    });
+                }
+            } catch (coiError) {
+                console.log('Could not calculate COI for litter:', coiError);
+            }
 
             const createdCount = newOffspringIds.length;
             const linkedCount = formData.linkedOffspringIds?.length || 0;
