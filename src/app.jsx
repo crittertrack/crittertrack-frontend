@@ -3205,11 +3205,10 @@ const LitterManagement = ({ authToken, API_BASE_URL, userProfile, showModalMessa
                 <div className="flex gap-2">
                     <button
                         onClick={handleRecalculateOffspringCounts}
-                        className="bg-blue-600 hover:bg-blue-700 text-white font-semibold py-2 px-4 rounded-lg flex items-center gap-2"
+                        className="bg-primary hover:bg-primary/90 text-black font-semibold py-2 px-3 rounded-lg flex items-center"
                         title="Recalculate offspring counts for all litters"
                     >
-                        <RefreshCw size={18} />
-                        Recalculate Counts
+                        <RefreshCw size={20} />
                     </button>
                     <button
                         onClick={() => {
