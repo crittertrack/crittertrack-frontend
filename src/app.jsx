@@ -2420,6 +2420,8 @@ const LitterManagement = ({ authToken, API_BASE_URL, userProfile, showModalMessa
     const [editingLitter, setEditingLitter] = useState(null);
     const [searchQuery, setSearchQuery] = useState('');
     const [speciesFilter, setSpeciesFilter] = useState('');
+    const [predictedCOI, setPredictedCOI] = useState(null);
+    const [calculatingCOI, setCalculatingCOI] = useState(false);
     const [addingOffspring, setAddingOffspring] = useState(null);
     const [newOffspringData, setNewOffspringData] = useState({
         name: '',
@@ -2459,6 +2461,35 @@ const LitterManagement = ({ authToken, API_BASE_URL, userProfile, showModalMessa
             onFormOpenChange(showAddForm);
         }
     }, [showAddForm, onFormOpenChange]);
+
+    // Calculate predicted COI when both parents are selected
+    useEffect(() => {
+        const calculatePredictedCOI = async () => {
+            if (formData.sireId_public && formData.damId_public && showAddForm) {
+                setCalculatingCOI(true);
+                try {
+                    const coiResponse = await axios.get(`${API_BASE_URL}/inbreeding/pairing`, {
+                        params: {
+                            sireId: formData.sireId_public,
+                            damId: formData.damId_public,
+                            generations: 50
+                        },
+                        headers: { Authorization: `Bearer ${authToken}` }
+                    });
+                    setPredictedCOI(coiResponse.data.inbreedingCoefficient);
+                } catch (error) {
+                    console.log('Could not calculate predicted COI:', error);
+                    setPredictedCOI(null);
+                } finally {
+                    setCalculatingCOI(false);
+                }
+            } else {
+                setPredictedCOI(null);
+            }
+        };
+        
+        calculatePredictedCOI();
+    }, [formData.sireId_public, formData.damId_public, showAddForm, authToken, API_BASE_URL]);
 
     const toggleBulkDeleteMode = (litterId) => {
         setBulkDeleteMode(prev => ({ ...prev, [litterId]: !prev[litterId] }));
@@ -2814,6 +2845,7 @@ const LitterManagement = ({ authToken, API_BASE_URL, userProfile, showModalMessa
             setDamSearch('');
             setSireSpeciesFilter('');
             setDamSpeciesFilter('');
+            setPredictedCOI(null);
             fetchLitters();
             fetchMyAnimals();
         } catch (error) {
@@ -2955,6 +2987,7 @@ const LitterManagement = ({ authToken, API_BASE_URL, userProfile, showModalMessa
             setDamSearch('');
             setSireSpeciesFilter('');
             setDamSpeciesFilter('');
+            setPredictedCOI(null);
             fetchLitters();
             fetchMyAnimals();
         } catch (error) {
@@ -3132,6 +3165,7 @@ const LitterManagement = ({ authToken, API_BASE_URL, userProfile, showModalMessa
                             setSireSpeciesFilter('');
                             setDamSpeciesFilter('');
                             setEditingLitter(null);
+                            setPredictedCOI(null);
                             setFormData({
                                 breedingPairCodeName: '',
                                 sireId_public: '',
@@ -3287,7 +3321,45 @@ const LitterManagement = ({ authToken, API_BASE_URL, userProfile, showModalMessa
                                 ))}
                             </select>
                         </div>
+                    </div>
 
+                    {/* Predicted COI Display */}
+                    {(formData.sireId_public && formData.damId_public) && (
+                        <div className="mb-4 p-4 bg-blue-50 border-2 border-blue-200 rounded-lg">
+                            <div className="flex items-center justify-between">
+                                <div>
+                                    <p className="text-sm font-semibold text-gray-700">Predicted Offspring COI:</p>
+                                    <p className="text-xs text-gray-600 mt-1">
+                                        Coefficient of Inbreeding for offspring from this pairing
+                                    </p>
+                                </div>
+                                <div className="text-right">
+                                    {calculatingCOI ? (
+                                        <div className="flex items-center gap-2">
+                                            <Loader2 className="animate-spin" size={20} />
+                                            <span className="text-sm text-gray-600">Calculating...</span>
+                                        </div>
+                                    ) : predictedCOI != null ? (
+                                        <div>
+                                            <p className="text-2xl font-bold text-blue-600">
+                                                {predictedCOI.toFixed(2)}%
+                                            </p>
+                                            <p className="text-xs text-gray-500">
+                                                {predictedCOI === 0 ? 'No inbreeding' : 
+                                                 predictedCOI < 5 ? 'Low inbreeding' : 
+                                                 predictedCOI < 10 ? 'Moderate inbreeding' : 
+                                                 'High inbreeding'}
+                                            </p>
+                                        </div>
+                                    ) : (
+                                        <p className="text-sm text-gray-500">N/A</p>
+                                    )}
+                                </div>
+                            </div>
+                        </div>
+                    )}
+
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
                         {/* Birth Date */}
                         <div>
                             <label className="block text-sm font-medium text-gray-700 mb-1">
