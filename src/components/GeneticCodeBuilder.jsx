@@ -244,9 +244,9 @@ const GeneticCodeBuilder = ({ species, value, onChange, onOpenCommunityForm }) =
             <button
               type="button"
               onClick={() => setShowBuilderModal(true)}
-              className="px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded font-medium transition whitespace-nowrap"
+              className="px-4 py-2 bg-pink-500 hover:bg-pink-600 text-white rounded font-medium transition whitespace-nowrap"
             >
-              {value ? 'Edit Genes' : 'Build Genetics'}
+              {value ? 'Edit Genes' : 'Build Genes'}
             </button>
           </div>
           
@@ -257,10 +257,10 @@ const GeneticCodeBuilder = ({ species, value, onChange, onOpenCommunityForm }) =
         
         {/* Full-Screen Builder Modal */}
         {showBuilderModal && (
-          <div className="fixed inset-0 bg-white z-50 overflow-y-auto">
-            <div className="max-w-6xl mx-auto p-6">
+          <div className="fixed inset-0 bg-gray-600 bg-opacity-75 flex items-center justify-center p-4 z-50">
+            <div className="bg-white rounded-xl shadow-2xl w-full max-w-6xl max-h-[90vh] flex flex-col">
               {/* Header */}
-              <div className="flex justify-between items-center mb-6 pb-4 border-b">
+              <div className="flex justify-between items-center border-b p-6">
                 <h2 className="text-2xl font-bold text-gray-800">
                   Genetic Code Builder - {species}
                 </h2>
@@ -268,28 +268,29 @@ const GeneticCodeBuilder = ({ species, value, onChange, onOpenCommunityForm }) =
                   <button
                     type="button"
                     onClick={() => setMode(mode === 'visual' ? 'manual' : 'visual')}
-                    className="px-4 py-2 bg-gray-100 hover:bg-gray-200 rounded transition"
+                    className="px-4 py-2 bg-gray-100 hover:bg-gray-200 text-gray-800 rounded-lg transition"
                   >
                     {mode === 'visual' ? 'Switch to Manual' : 'Switch to Visual'}
                   </button>
                   <button
                     type="button"
                     onClick={() => setShowBuilderModal(false)}
-                    className="px-4 py-2 bg-gray-200 hover:bg-gray-300 rounded transition"
+                    className="px-4 py-2 bg-gray-200 hover:bg-gray-300 text-gray-800 rounded-lg transition"
                   >
                     Cancel
                   </button>
                   <button
                     type="button"
                     onClick={handleSave}
-                    className="px-4 py-2 bg-green-600 hover:bg-green-700 text-white rounded font-medium transition"
+                    className="px-4 py-2 bg-pink-500 hover:bg-pink-600 text-white rounded-lg font-semibold transition"
                   >
                     Save Genetics
                   </button>
                 </div>
               </div>
               
-              {mode === 'visual' ? (
+              {/* Content */}
+              <div className="flex-1 overflow-y-auto p-6">{mode === 'visual' ? (
                 <div className="space-y-4">
                   {/* Preview of generated code */}
                   <div className="bg-blue-50 p-4 rounded-lg border border-blue-200">
@@ -344,7 +345,7 @@ const GeneticCodeBuilder = ({ species, value, onChange, onOpenCommunityForm }) =
                             <select
                               value={genotype[locus] || ''}
                               onChange={(e) => handleGeneChange(locus, e.target.value)}
-                              className="w-full p-2 border border-gray-300 rounded focus:ring-blue-500 focus:border-blue-500"
+                              className="w-full p-2 border border-gray-300 rounded focus:ring-pink-500 focus:border-pink-500"
                             >
                               <option value="">-</option>
                               {GENE_LOCI[locus].combinations.map(combo => (
@@ -377,7 +378,7 @@ const GeneticCodeBuilder = ({ species, value, onChange, onOpenCommunityForm }) =
                       value={buildGeneticCode(genotype)}
                       onChange={handleManualChange}
                       placeholder="e.g., A/A B/b C/C D/D E/E P/P"
-                      className="w-full p-3 border border-gray-300 rounded focus:ring-blue-500 focus:border-blue-500 font-mono text-sm"
+                      className="w-full p-3 border border-gray-300 rounded focus:ring-pink-500 focus:border-pink-500 font-mono text-sm"
                       rows="4"
                     />
                   </div>
@@ -392,6 +393,7 @@ const GeneticCodeBuilder = ({ species, value, onChange, onOpenCommunityForm }) =
                   </div>
                 </div>
               )}
+              </div>
             </div>
           </div>
         )}

@@ -5597,14 +5597,6 @@ const AnimalForm = ({
                                 className="mt-1 block w-full p-2 border border-gray-300 rounded-md shadow-sm focus:ring-primary focus:border-primary" />
                         </div>
                     )}
-                    
-                    {/* Genetic Code */}
-                    <GeneticCodeBuilder
-                        species={formData.species}
-                        value={formData.geneticCode}
-                        onChange={(value) => setFormData(prev => ({ ...prev, geneticCode: value }))}
-                        onOpenCommunityForm={() => setShowCommunityGeneticsModal(true)}
-                    />
 					
 					{/* Gender */}
                     <div>
@@ -5637,6 +5629,16 @@ const AnimalForm = ({
                             className="mt-1 block w-full p-2 border border-gray-300 rounded-md shadow-sm focus:ring-primary focus:border-primary" >
                             {STATUS_OPTIONS.map(s => <option key={s} value={s}>{s}</option>)}
                         </select>
+                    </div>
+                    
+                    {/* Genetic Code */}
+                    <div className="md:col-span-3">
+                        <GeneticCodeBuilder
+                            species={formData.species}
+                            value={formData.geneticCode}
+                            onChange={(value) => setFormData(prev => ({ ...prev, geneticCode: value }))}
+                            onOpenCommunityForm={() => setShowCommunityGeneticsModal(true)}
+                        />
                     </div>
                 </div>
                 {/* ------------------------------------------- */}
