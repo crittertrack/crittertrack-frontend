@@ -1287,11 +1287,13 @@ const MouseGeneticsCalculator = ({ API_BASE_URL, authToken, myAnimals = [] }) =>
       (parent1[gene] && parent1[gene] !== '') || (parent2[gene] && parent2[gene] !== '')
     );
     
-    // Create a dummy "selected" genotype to pass to calculatePhenotype
+    // Create selectedGenotype that includes ALL genes selected by either parent
     const selectedGenotype = {};
-    if (coatGenesSelected) {
-      selectedGenotype.Go = 'selected'; // Mark as selected
-    }
+    Object.keys(GENE_LOCI).forEach(locus => {
+      if ((parent1[locus] && parent1[locus] !== '') || (parent2[locus] && parent2[locus] !== '')) {
+        selectedGenotype[locus] = 'selected';
+      }
+    });
     
     const outcomes = {};
     
