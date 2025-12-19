@@ -179,6 +179,19 @@ const GeneticCodeBuilder = ({ species, value, onChange, onOpenCommunityForm }) =
       }
       
       if (allele1 && allele2) {
+        // First, try to find an exact match (preserving case)
+        const exactMatch = `${allele1}/${allele2}`;
+        
+        for (const [locus, data] of Object.entries(GENE_LOCI)) {
+          const found = data.combinations.find(combo => combo === exactMatch);
+          
+          if (found) {
+            genotype[locus] = found;
+            return; // Exit early if exact match found
+          }
+        }
+        
+        // If no exact match, try case-insensitive matching
         const normalized = `${allele1.toLowerCase()}/${allele2.toLowerCase()}`;
         
         for (const [locus, data] of Object.entries(GENE_LOCI)) {
@@ -187,7 +200,7 @@ const GeneticCodeBuilder = ({ species, value, onChange, onOpenCommunityForm }) =
           );
           
           if (matchingCombo) {
-            genotype[locus] = matchingCombo;
+            genotype[locus] = matchingCombo; // Use the properly formatted version from GENE_LOCI
             break;
           }
         }

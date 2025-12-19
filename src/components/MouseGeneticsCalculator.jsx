@@ -1030,18 +1030,28 @@ const MouseGeneticsCalculator = ({ API_BASE_URL, authToken, myAnimals = [] }) =>
       }
       
       if (allele1 && allele2) {
-        // Normalize to lowercase for matching
+        // First, try to find an exact match (preserving case)
+        const exactMatch = `${allele1}/${allele2}`;
+        
+        for (const [locus, data] of Object.entries(GENE_LOCI)) {
+          const found = data.combinations.find(combo => combo === exactMatch);
+          
+          if (found) {
+            genotype[locus] = found;
+            return; // Exit early if exact match found
+          }
+        }
+        
+        // If no exact match, try case-insensitive matching
         const normalized = `${allele1.toLowerCase()}/${allele2.toLowerCase()}`;
         
-        // Try to find matching locus in GENE_LOCI
         for (const [locus, data] of Object.entries(GENE_LOCI)) {
-          // Check if any combination matches (case-insensitive)
           const matchingCombo = data.combinations.find(combo => 
             combo.toLowerCase() === normalized
           );
           
           if (matchingCombo) {
-            genotype[locus] = matchingCombo; // Use the properly formatted version
+            genotype[locus] = matchingCombo; // Use the properly formatted version from GENE_LOCI
             break;
           }
         }
