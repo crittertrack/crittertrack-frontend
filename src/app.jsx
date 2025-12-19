@@ -3237,10 +3237,11 @@ const LitterManagement = ({ authToken, API_BASE_URL, userProfile, showModalMessa
                         }}
                         data-tutorial-target="new-litter-btn"
                         className="bg-primary hover:bg-primary/90 text-black font-semibold py-2 px-4 rounded-lg flex items-center gap-2"
-                >
-                    {showAddForm ? <X size={20} /> : <Plus size={20} />}
-                    {showAddForm ? 'Cancel' : 'New Litter'}
-                </button>
+                    >
+                        {showAddForm ? <X size={20} /> : <Plus size={20} />}
+                        {showAddForm ? 'Cancel' : 'New Litter'}
+                    </button>
+                </div>
             </div>
 
             {showAddForm && (
