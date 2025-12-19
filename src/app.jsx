@@ -2468,6 +2468,7 @@ const LitterManagement = ({ authToken, API_BASE_URL, userProfile, showModalMessa
             if (formData.sireId_public && formData.damId_public && showAddForm) {
                 setCalculatingCOI(true);
                 try {
+                    console.log('[Predicted COI] Calculating for sire:', formData.sireId_public, 'dam:', formData.damId_public);
                     const coiResponse = await axios.get(`${API_BASE_URL}/inbreeding/pairing`, {
                         params: {
                             sireId: formData.sireId_public,
@@ -2476,10 +2477,13 @@ const LitterManagement = ({ authToken, API_BASE_URL, userProfile, showModalMessa
                         },
                         headers: { Authorization: `Bearer ${authToken}` }
                     });
-                    setPredictedCOI(coiResponse.data.inbreedingCoefficient);
+                    console.log('[Predicted COI] Response:', coiResponse.data);
+                    const coiValue = coiResponse.data.inbreedingCoefficient;
+                    setPredictedCOI(coiValue != null ? coiValue : 0);
                 } catch (error) {
-                    console.log('Could not calculate predicted COI:', error);
-                    setPredictedCOI(null);
+                    console.error('[Predicted COI] Error calculating:', error);
+                    console.error('[Predicted COI] Error response:', error.response?.data);
+                    setPredictedCOI(0); // Default to 0 if calculation fails
                 } finally {
                     setCalculatingCOI(false);
                 }
