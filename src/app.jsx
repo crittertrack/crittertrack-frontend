@@ -2546,33 +2546,42 @@ const LitterManagement = ({ authToken, API_BASE_URL, userProfile, showModalMessa
             // Set litters immediately so UI can render
             setLitters(littersData);
             
-            // Start COI calculations in background without blocking
+            // Calculate COI for each litter in background
             Promise.resolve().then(async () => {
+                let needsUpdate = false;
                 for (const litter of littersData) {
-                    try {
-                        const coiResponse = await axios.get(`${API_BASE_URL}/inbreeding/pairing`, {
-                            params: {
-                                sireId: litter.sireId_public,
-                                damId: litter.damId_public,
-                                generations: 50
-                            },
-                            headers: { Authorization: `Bearer ${authToken}` }
-                        });
-
-                        if (coiResponse.data.inbreedingCoefficient != null) {
-                            litter.inbreedingCoefficient = coiResponse.data.inbreedingCoefficient;
-                            
-                            await axios.put(`${API_BASE_URL}/litters/${litter._id}`, {
-                                inbreedingCoefficient: coiResponse.data.inbreedingCoefficient
-                            }, {
+                    // Only calculate if COI is missing or null
+                    if (litter.inbreedingCoefficient == null) {
+                        try {
+                            const coiResponse = await axios.get(`${API_BASE_URL}/inbreeding/pairing`, {
+                                params: {
+                                    sireId: litter.sireId_public,
+                                    damId: litter.damId_public,
+                                    generations: 50
+                                },
                                 headers: { Authorization: `Bearer ${authToken}` }
                             });
+
+                            if (coiResponse.data.inbreedingCoefficient != null) {
+                                litter.inbreedingCoefficient = coiResponse.data.inbreedingCoefficient;
+                                needsUpdate = true;
+                                
+                                // Update database
+                                await axios.put(`${API_BASE_URL}/litters/${litter._id}`, {
+                                    inbreedingCoefficient: coiResponse.data.inbreedingCoefficient
+                                }, {
+                                    headers: { Authorization: `Bearer ${authToken}` }
+                                });
+                            }
+                        } catch (error) {
+                            console.log(`Could not update COI for litter ${litter._id}:`, error);
                         }
-                    } catch (error) {
-                        console.log(`Could not update COI for litter ${litter._id}:`, error);
                     }
                 }
-                setLitters([...littersData]);
+                // Update state if any COI values were calculated
+                if (needsUpdate) {
+                    setLitters([...littersData]);
+                }
             });
         } catch (error) {
             console.error('Error fetching litters:', error);
