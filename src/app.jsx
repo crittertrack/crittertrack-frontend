@@ -7755,12 +7755,30 @@ const MessagesView = ({ authToken, API_BASE_URL, onClose, showModalMessage, sele
 
     useEffect(() => {
         fetchConversations();
+        
+        // Poll for new conversations every 5 seconds
+        const interval = setInterval(() => {
+            fetchConversations();
+        }, 5000);
+
+        return () => clearInterval(interval);
     }, []);
 
     useEffect(() => {
         if (selectedConversation) {
             fetchMessages(selectedConversation.otherUserId);
         }
+    }, [selectedConversation]);
+
+    useEffect(() => {
+        // Poll for new messages every 3 seconds when a conversation is open
+        if (!selectedConversation) return;
+        
+        const interval = setInterval(() => {
+            fetchMessages(selectedConversation.otherUserId);
+        }, 3000);
+
+        return () => clearInterval(interval);
     }, [selectedConversation]);
 
     useEffect(() => {
