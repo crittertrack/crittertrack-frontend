@@ -8939,7 +8939,7 @@ const App = () => {
         }
     }, [authToken, API_BASE_URL]);
     
-    // Auto-scroll effect for community banner
+    // Auto-scroll effect for community banner - back and forth on desktop
     useEffect(() => {
         const scrollContainer = scrollContainerRef.current;
         if (!scrollContainer || (!newestUsers.length && !activeUsers.length)) return;
@@ -8950,30 +8950,32 @@ const App = () => {
         
         let scrollInterval;
         let isPaused = false;
+        let isScrollingRight = true;
+        const scrollSpeed = 0.5; // pixels per interval
         
         const startScroll = () => {
             scrollInterval = setInterval(() => {
                 if (!isPaused && scrollContainer) {
                     const maxScroll = scrollContainer.scrollWidth - scrollContainer.clientWidth;
-                    const currentScroll = scrollContainer.scrollLeft;
+                    let currentScroll = scrollContainer.scrollLeft;
 
-                    // Seamless loop: when at end, move first child to end and adjust scrollLeft
-                    if (currentScroll >= maxScroll - 1) {
-                        const firstChild = scrollContainer.firstElementChild;
-                        if (firstChild) {
-                            const childWidth = firstChild.offsetWidth || 0;
-                            scrollContainer.appendChild(firstChild);
-                            // Compensate scroll position by the moved width to avoid visual jump
-                            scrollContainer.scrollLeft = currentScroll - childWidth;
-                        } else {
-                            // Fallback to simple reset if no children found
-                            scrollContainer.scrollLeft = 0;
+                    if (isScrollingRight) {
+                        currentScroll += scrollSpeed;
+                        if (currentScroll >= maxScroll) {
+                            currentScroll = maxScroll;
+                            isScrollingRight = false;
                         }
                     } else {
-                        scrollContainer.scrollLeft = currentScroll + 1;
+                        currentScroll -= scrollSpeed;
+                        if (currentScroll <= 0) {
+                            currentScroll = 0;
+                            isScrollingRight = true;
+                        }
                     }
+                    
+                    scrollContainer.scrollLeft = currentScroll;
                 }
-            }, 30);
+            }, 50);
         };
         
         const handleMouseEnter = () => { isPaused = true; };
