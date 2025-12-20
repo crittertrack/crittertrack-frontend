@@ -58,7 +58,57 @@ const getSpeciesLatinName = (species) => {
     return latinNames[species] || null;
 };
 
+// Helper function to get flag emoji from country code
+const getCountryFlag = (countryCode) => {
+    if (!countryCode || countryCode.length !== 2) return '';
+    const codePoints = countryCode
+        .toUpperCase()
+        .split('')
+        .map(char => 127397 + char.charCodeAt());
+    return String.fromCodePoint(...codePoints);
+};
+
+// Get country name from code
+const getCountryName = (countryCode) => {
+    const countryNames = {
+        'US': 'United States', 'CA': 'Canada', 'GB': 'United Kingdom', 'AU': 'Australia',
+        'NZ': 'New Zealand', 'DE': 'Germany', 'FR': 'France', 'IT': 'Italy',
+        'ES': 'Spain', 'NL': 'Netherlands', 'SE': 'Sweden', 'NO': 'Norway',
+        'DK': 'Denmark', 'CH': 'Switzerland', 'BE': 'Belgium', 'AT': 'Austria',
+        'PL': 'Poland', 'CZ': 'Czech Republic', 'IE': 'Ireland', 'PT': 'Portugal',
+        'GR': 'Greece', 'RU': 'Russia', 'JP': 'Japan', 'KR': 'South Korea',
+        'CN': 'China', 'IN': 'India', 'BR': 'Brazil', 'MX': 'Mexico',
+        'ZA': 'South Africa', 'SG': 'Singapore', 'HK': 'Hong Kong', 'MY': 'Malaysia', 'TH': 'Thailand'
+    };
+    return countryNames[countryCode] || countryCode;
+};
+
 const IDLE_TIMEOUT_MS = 15 * 60 * 1000; // 15 minutes in milliseconds
+
+// Helper function to get flag emoji from country code
+const getCountryFlag = (countryCode) => {
+    if (!countryCode || countryCode.length !== 2) return '';
+    const codePoints = countryCode
+        .toUpperCase()
+        .split('')
+        .map(char => 127397 + char.charCodeAt());
+    return String.fromCodePoint(...codePoints);
+};
+
+// Get country name from code
+const getCountryName = (countryCode) => {
+    const countryNames = {
+        'US': 'United States', 'CA': 'Canada', 'GB': 'United Kingdom', 'AU': 'Australia',
+        'NZ': 'New Zealand', 'DE': 'Germany', 'FR': 'France', 'IT': 'Italy',
+        'ES': 'Spain', 'NL': 'Netherlands', 'SE': 'Sweden', 'NO': 'Norway',
+        'DK': 'Denmark', 'CH': 'Switzerland', 'BE': 'Belgium', 'AT': 'Austria',
+        'PL': 'Poland', 'CZ': 'Czech Republic', 'IE': 'Ireland', 'PT': 'Portugal',
+        'GR': 'Greece', 'RU': 'Russia', 'JP': 'Japan', 'KR': 'South Korea',
+        'CN': 'China', 'IN': 'India', 'BR': 'Brazil', 'MX': 'Mexico',
+        'ZA': 'South Africa', 'SG': 'Singapore', 'HK': 'Hong Kong', 'MY': 'Malaysia', 'TH': 'Thailand'
+    };
+    return countryNames[countryCode] || countryCode;
+};
 
 const ModalMessage = ({ title, message, onClose }) => (
   <div className="fixed inset-0 bg-gray-600 bg-opacity-75 flex items-center justify-center p-4 z-50">
@@ -1612,6 +1662,14 @@ const PublicProfileView = ({ profile, onBack, onViewAnimal, API_BASE_URL, onStar
                     <p className="text-gray-600">Public ID: <span className="font-mono text-accent">{freshProfile?.id_public || profile.id_public}</span></p>
                     <p className="text-sm text-gray-500 mt-1">Member since {memberSince}</p>
                     
+                    {/* Country - Show if available */}
+                    {(freshProfile?.country || profile.country) && (
+                        <p className="text-sm text-gray-600 mt-1 flex items-center gap-2">
+                            <span className="text-lg">{getCountryFlag(freshProfile?.country || profile.country)}</span>
+                            <span>{getCountryName(freshProfile?.country || profile.country)}</span>
+                        </p>
+                    )}
+                    
                     {/* Email - Show if public */}
                     {(freshProfile?.showEmailPublic ?? profile.showEmailPublic) && (freshProfile?.email || profile.email) && (
                         <p className="text-sm text-gray-700 mt-2 flex items-center gap-2 break-all">
@@ -1728,9 +1786,16 @@ const PublicProfileView = ({ profile, onBack, onViewAnimal, API_BASE_URL, onStar
                                                 onClick={() => onViewAnimal(animal)}
                                                 className="relative bg-white rounded-xl shadow-sm w-44 h-56 flex flex-col items-center overflow-hidden cursor-pointer hover:shadow-md transition border-2 border-gray-300 pt-3"
                                             >
-                                                {/* Birthdate top-left */}
+                                                {/* Country flag top-left */}
+                                                {(freshProfile?.country || profile.country) && (
+                                                    <div className="absolute top-2 left-2 text-xl" title={getCountryName(freshProfile?.country || profile.country)}>
+                                                        {getCountryFlag(freshProfile?.country || profile.country)}
+                                                    </div>
+                                                )}
+
+                                                {/* Birthdate top-left/center (adjusted if country flag present) */}
                                                 {birth && (
-                                                    <div className="absolute top-2 left-2 text-xs text-gray-600 bg-white/80 px-2 py-0.5 rounded">
+                                                    <div className="absolute top-2 left-10 text-xs text-gray-600 bg-white/80 px-2 py-0.5 rounded">
                                                         {birth}
                                                     </div>
                                                 )}
@@ -5988,14 +6053,16 @@ const ProfileEditForm = ({ userProfile, showModalMessage, onSaveSuccess, onCance
     const [showRemarksPublic, setShowRemarksPublic] = useState(userProfile.showRemarksPublic ?? false);
     const [allowMessages, setAllowMessages] = useState(userProfile.allowMessages === undefined ? true : !!userProfile.allowMessages);
     const [emailNotificationPreference, setEmailNotificationPreference] = useState(userProfile.emailNotificationPreference || 'none');
+    const [country, setCountry] = useState(userProfile.country || '');
 
     // Keep allowMessages in sync if userProfile updates (e.g., after save or refetch)
     useEffect(() => {
         const next = userProfile.allowMessages === undefined ? true : !!userProfile.allowMessages;
         setAllowMessages(next);
-        // Also sync email notification preference
+        // Also sync email notification preference and country
         setEmailNotificationPreference(userProfile.emailNotificationPreference || 'none');
-    }, [userProfile.allowMessages, userProfile.emailNotificationPreference]);
+        setCountry(userProfile.country || '');
+    }, [userProfile.allowMessages, userProfile.emailNotificationPreference, userProfile.country]);
     
     console.log('[ProfileEditForm] Initial allowMessages state:', allowMessages);
 
@@ -6058,6 +6125,7 @@ const ProfileEditForm = ({ userProfile, showModalMessage, onSaveSuccess, onCance
             showRemarksPublic: showRemarksPublic,
             allowMessages: allowMessages,
             emailNotificationPreference: emailNotificationPreference,
+            country: country || null,
         };
         
         console.log('[PROFILE UPDATE] allowMessages being sent:', allowMessages, 'Type:', typeof allowMessages);
@@ -6246,6 +6314,45 @@ const ProfileEditForm = ({ userProfile, showModalMessage, onSaveSuccess, onCance
                         className="w-full p-3 border border-gray-300 rounded-lg focus:ring-primary focus:border-primary transition box-border" disabled={profileLoading} />
                     <input type="url" name="websiteURL" placeholder="Website URL (Optional) e.g., https://example.com" value={websiteURL} onChange={(e) => setWebsiteURL(e.target.value)}
                         className="w-full p-3 border border-gray-300 rounded-lg focus:ring-primary focus:border-primary transition box-border" disabled={profileLoading} />
+                    
+                    <select value={country} onChange={(e) => setCountry(e.target.value)}
+                        className="w-full p-3 border border-gray-300 rounded-lg focus:ring-primary focus:border-primary transition box-border" disabled={profileLoading}>
+                        <option value="">Select Country (Optional)</option>
+                        <option value="US">🇺🇸 United States</option>
+                        <option value="CA">🇨🇦 Canada</option>
+                        <option value="GB">🇬🇧 United Kingdom</option>
+                        <option value="AU">🇦🇺 Australia</option>
+                        <option value="NZ">🇳🇿 New Zealand</option>
+                        <option value="DE">🇩🇪 Germany</option>
+                        <option value="FR">🇫🇷 France</option>
+                        <option value="IT">🇮🇹 Italy</option>
+                        <option value="ES">🇪🇸 Spain</option>
+                        <option value="NL">🇳🇱 Netherlands</option>
+                        <option value="SE">🇸🇪 Sweden</option>
+                        <option value="NO">🇳🇴 Norway</option>
+                        <option value="DK">🇩🇰 Denmark</option>
+                        <option value="CH">🇨🇭 Switzerland</option>
+                        <option value="BE">🇧🇪 Belgium</option>
+                        <option value="AT">🇦🇹 Austria</option>
+                        <option value="PL">🇵🇱 Poland</option>
+                        <option value="CZ">🇨🇿 Czech Republic</option>
+                        <option value="IE">🇮🇪 Ireland</option>
+                        <option value="PT">🇵🇹 Portugal</option>
+                        <option value="GR">🇬🇷 Greece</option>
+                        <option value="RU">🇷🇺 Russia</option>
+                        <option value="JP">🇯🇵 Japan</option>
+                        <option value="KR">🇰🇷 South Korea</option>
+                        <option value="CN">🇨🇳 China</option>
+                        <option value="IN">🇮🇳 India</option>
+                        <option value="BR">🇧🇷 Brazil</option>
+                        <option value="MX">🇲🇽 Mexico</option>
+                        <option value="ZA">🇿🇦 South Africa</option>
+                        <option value="NZ">🇳🇿 New Zealand</option>
+                        <option value="SG">🇸🇬 Singapore</option>
+                        <option value="HK">🇭🇰 Hong Kong</option>
+                        <option value="MY">🇲🇾 Malaysia</option>
+                        <option value="TH">🇹🇭 Thailand</option>
+                    </select>
 
                     <div className="pt-2 space-y-2">
                         <h4 className="text-base font-medium text-gray-800 pt-2 border-t border-gray-200">Public Profile Visibility:</h4>
