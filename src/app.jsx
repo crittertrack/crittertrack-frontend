@@ -8032,30 +8032,36 @@ const MessagesView = ({ authToken, API_BASE_URL, onClose, showModalMessage, sele
 
                                 {/* Send Message Form */}
                                 <form onSubmit={handleSendMessage} className="p-4 border-t bg-gray-50">
-                                    <div className="flex gap-2">
-                                        <input
-                                            type="text"
-                                            value={newMessage}
-                                            onChange={(e) => setNewMessage(e.target.value)}
-                                            placeholder="Type a message..."
-                                            className="flex-1 px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                                            disabled={sending}
-                                        />
-                                        <button
-                                            type="submit"
-                                            disabled={sending || !newMessage.trim()}
-                                            className="bg-blue-500 text-white px-6 py-2 rounded-lg hover:bg-blue-600 transition disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2"
-                                        >
-                                            {sending ? (
-                                                <>
-                                                    <Loader2 className="animate-spin" size={16} />
-                                                    Sending...
-                                                </>
-                                            ) : (
-                                                'Send'
-                                            )}
-                                        </button>
-                                    </div>
+                                    {selectedConversation.otherUser?.allowMessages === false ? (
+                                        <div className="text-center py-2 text-sm text-gray-500">
+                                            This user has disabled messages
+                                        </div>
+                                    ) : (
+                                        <div className="flex gap-2">
+                                            <input
+                                                type="text"
+                                                value={newMessage}
+                                                onChange={(e) => setNewMessage(e.target.value)}
+                                                placeholder="Type a message..."
+                                                className="flex-1 px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                                                disabled={sending}
+                                            />
+                                            <button
+                                                type="submit"
+                                                disabled={sending || !newMessage.trim()}
+                                                className="bg-blue-500 text-white px-6 py-2 rounded-lg hover:bg-blue-600 transition disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2"
+                                            >
+                                                {sending ? (
+                                                    <>
+                                                        <Loader2 className="animate-spin" size={16} />
+                                                        Sending...
+                                                    </>
+                                                ) : (
+                                                    'Send'
+                                                )}
+                                            </button>
+                                        </div>
+                                    )}
                                 </form>
                             </>
                         )}
