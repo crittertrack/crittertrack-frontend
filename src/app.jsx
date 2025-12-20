@@ -8296,8 +8296,8 @@ const App = () => {
             if (authToken) {
                 try {
                     console.log('[Available Animals] Fetching available animals...');
-                    // Get all public animals, filter client-side since backend query params don't work
-                    const response = await axios.get(`${API_BASE_URL}/public/global/animals?limit=50`);
+                    // Get all public animals without limit to find all Available ones
+                    const response = await axios.get(`${API_BASE_URL}/public/global/animals`);
                     console.log('[Available Animals] API Response:', response.data);
                     if (response.data && response.data.length > 0) {
                         // Log all unique status values to see what's actually in the data
