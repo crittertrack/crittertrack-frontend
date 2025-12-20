@@ -8305,16 +8305,22 @@ const App = () => {
                         const shuffled = filtered.sort(() => Math.random() - 0.5);
                         setAvailableAnimals(shuffled);
                         setCurrentAvailableIndex(0);
+                    } else {
+                        // Clear if no available animals found
+                        setAvailableAnimals([]);
                     }
                 } catch (error) {
                     console.error('Failed to fetch available animals:', error);
+                    setAvailableAnimals([]);
                 }
             }
         };
         
+        // Initial fetch
         fetchAvailableAnimals();
-        // Refresh every 5 minutes
-        const refreshInterval = setInterval(fetchAvailableAnimals, 300000);
+        
+        // Continuous refresh every 2 minutes to check for new available animals
+        const refreshInterval = setInterval(fetchAvailableAnimals, 120000);
         
         return () => clearInterval(refreshInterval);
     }, [authToken, API_BASE_URL]);
