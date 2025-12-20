@@ -8295,24 +8295,30 @@ const App = () => {
         const fetchAvailableAnimals = async () => {
             if (authToken) {
                 try {
+                    console.log('[Available Animals] Fetching available animals...');
                     const response = await axios.get(`${API_BASE_URL}/public/global/animals?status=Available&isPublic=true&limit=20`);
+                    console.log('[Available Animals] API Response:', response.data);
                     if (response.data && response.data.length > 0) {
                         // Additional client-side filter to ensure only Available status animals
                         const filtered = response.data.filter(animal => 
                             animal.status === 'Available' && animal.isPublic === true
                         );
+                        console.log('[Available Animals] Filtered count:', filtered.length, 'animals');
                         // Shuffle to show random animals
                         const shuffled = filtered.sort(() => Math.random() - 0.5);
                         setAvailableAnimals(shuffled);
                         setCurrentAvailableIndex(0);
                     } else {
+                        console.log('[Available Animals] No animals found in response');
                         // Clear if no available animals found
                         setAvailableAnimals([]);
                     }
                 } catch (error) {
-                    console.error('Failed to fetch available animals:', error);
+                    console.error('[Available Animals] Failed to fetch:', error);
                     setAvailableAnimals([]);
                 }
+            } else {
+                console.log('[Available Animals] No authToken, skipping fetch');
             }
         };
         
@@ -9582,7 +9588,10 @@ const App = () => {
             </div>
             
             {/* Available Animal Showcase - Top Right */}
-            {availableAnimals.length > 0 && availableAnimals[currentAvailableIndex] && (
+            {(() => {
+                console.log('[Available Animals Showcase] availableAnimals.length:', availableAnimals.length, 'currentIndex:', currentAvailableIndex);
+                return availableAnimals.length > 0 && availableAnimals[currentAvailableIndex];
+            })() && (
                 <div className="hidden lg:block fixed top-20 right-4 z-[60] w-48">
                     <div 
                         key={currentAvailableIndex}
