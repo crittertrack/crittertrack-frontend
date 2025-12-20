@@ -5959,6 +5959,8 @@ const UserProfileCard = ({ userProfile }) => {
 };
 
 const ProfileEditForm = ({ userProfile, showModalMessage, onSaveSuccess, onCancel, authToken }) => {
+    console.log('[ProfileEditForm] userProfile.allowMessages:', userProfile.allowMessages);
+    
     const [personalName, setPersonalName] = useState(userProfile.personalName);
     const [breederName, setBreederName] = useState(userProfile.breederName || '');
     const [showPersonalName, setShowPersonalName] = useState(userProfile.showPersonalName ?? false); 
@@ -5968,7 +5970,9 @@ const ProfileEditForm = ({ userProfile, showModalMessage, onSaveSuccess, onCance
     const [showEmailPublic, setShowEmailPublic] = useState(userProfile.showEmailPublic ?? false); 
     const [showGeneticCodePublic, setShowGeneticCodePublic] = useState(userProfile.showGeneticCodePublic ?? false);
     const [showRemarksPublic, setShowRemarksPublic] = useState(userProfile.showRemarksPublic ?? false);
-    const [allowMessages, setAllowMessages] = useState(userProfile.allowMessages ?? true); 
+    const [allowMessages, setAllowMessages] = useState(userProfile.allowMessages ?? true);
+    
+    console.log('[ProfileEditForm] Initial allowMessages state:', allowMessages); 
 
     const [profileImageFile, setProfileImageFile] = useState(null); 
     const [profileImageURL, setProfileImageURL] = useState(
@@ -6029,6 +6033,8 @@ const ProfileEditForm = ({ userProfile, showModalMessage, onSaveSuccess, onCance
             showRemarksPublic: showRemarksPublic,
             allowMessages: allowMessages,
         };
+        
+        console.log('[PROFILE UPDATE] allowMessages being sent:', allowMessages, 'Type:', typeof allowMessages);
         
         console.log('[PROFILE UPDATE] Sending payload:', {
             showBreederName: payload.showBreederName,
