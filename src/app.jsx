@@ -17,8 +17,8 @@ import InfoTab from './components/InfoTab';
 import WelcomeBanner from './components/WelcomeBanner';
 
 // const API_BASE_URL = 'http://localhost:5000/api'; // Local development
-const API_BASE_URL = 'https://crittertrack-pedigree-production.up.railway.app/api'; // Direct Railway (for testing)
-// const API_BASE_URL = '/api'; // Production via Vercel proxy
+// const API_BASE_URL = 'https://crittertrack-pedigree-production.up.railway.app/api'; // Direct Railway (for testing)
+const API_BASE_URL = '/api'; // Production via Vercel proxy
 
 const GENDER_OPTIONS = ['Male', 'Female'];
 const STATUS_OPTIONS = ['Pet', 'Breeder', 'Available', 'Sold', 'Retired', 'Deceased', 'Rehomed', 'Unknown']; 
