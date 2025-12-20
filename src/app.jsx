@@ -8305,6 +8305,13 @@ const App = () => {
                         console.log('[Available Animals] All unique status values:', uniqueStatuses);
                         console.log('[Available Animals] First animal status:', response.data[0].status);
                         
+                        // Check if specific Available animals are in the response
+                        const testIds = ['CTC432', 'CTC24', 'CTC20', 'CTC17', 'CTC18'];
+                        testIds.forEach(id => {
+                            const found = response.data.find(a => a.id_public === id);
+                            console.log(`[Available Animals] Looking for ${id}:`, found ? `FOUND - status: ${found.status}` : 'NOT FOUND');
+                        });
+                        
                         // The /public/global/animals endpoint already returns only public animals
                         // We just need to filter by status='Available' client-side
                         const filtered = response.data.filter(animal => 
