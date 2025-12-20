@@ -85,31 +85,6 @@ const getCountryName = (countryCode) => {
 
 const IDLE_TIMEOUT_MS = 15 * 60 * 1000; // 15 minutes in milliseconds
 
-// Helper function to get flag emoji from country code
-const getCountryFlag = (countryCode) => {
-    if (!countryCode || countryCode.length !== 2) return '';
-    const codePoints = countryCode
-        .toUpperCase()
-        .split('')
-        .map(char => 127397 + char.charCodeAt());
-    return String.fromCodePoint(...codePoints);
-};
-
-// Get country name from code
-const getCountryName = (countryCode) => {
-    const countryNames = {
-        'US': 'United States', 'CA': 'Canada', 'GB': 'United Kingdom', 'AU': 'Australia',
-        'NZ': 'New Zealand', 'DE': 'Germany', 'FR': 'France', 'IT': 'Italy',
-        'ES': 'Spain', 'NL': 'Netherlands', 'SE': 'Sweden', 'NO': 'Norway',
-        'DK': 'Denmark', 'CH': 'Switzerland', 'BE': 'Belgium', 'AT': 'Austria',
-        'PL': 'Poland', 'CZ': 'Czech Republic', 'IE': 'Ireland', 'PT': 'Portugal',
-        'GR': 'Greece', 'RU': 'Russia', 'JP': 'Japan', 'KR': 'South Korea',
-        'CN': 'China', 'IN': 'India', 'BR': 'Brazil', 'MX': 'Mexico',
-        'ZA': 'South Africa', 'SG': 'Singapore', 'HK': 'Hong Kong', 'MY': 'Malaysia', 'TH': 'Thailand'
-    };
-    return countryNames[countryCode] || countryCode;
-};
-
 const ModalMessage = ({ title, message, onClose }) => (
   <div className="fixed inset-0 bg-gray-600 bg-opacity-75 flex items-center justify-center p-4 z-50">
     <div className="bg-white rounded-xl shadow-2xl p-6 w-full max-w-sm">
