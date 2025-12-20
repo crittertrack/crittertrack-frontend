@@ -7994,7 +7994,7 @@ const MessagesView = ({ authToken, API_BASE_URL, onClose, showModalMessage, sele
                     {/* Messages Thread */}
                     <div className="flex-1 flex flex-col">
                         {!selectedConversation ? (
-                            <div className="flex items-center justify-center h-full text-gray-400">
+                            <div className="flex items-center justify-center h-full text-gray-400 px-4">
                                 <div className="text-center">
                                     <MessageSquare size={64} className="mx-auto mb-4 text-gray-200" />
                                     <p>Select a conversation to view messages</p>
