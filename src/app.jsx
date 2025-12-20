@@ -10320,6 +10320,7 @@ const App = () => {
                         <button
                             onClick={() => {
                                 setShowNotifications(true);
+                                setNotificationCount(0);
                                 fetchNotificationCount();
                             }}
                             data-tutorial-target="notification-bell"
@@ -10377,6 +10378,7 @@ const App = () => {
                             <button
                                 onClick={() => {
                                     setShowNotifications(true);
+                                    setNotificationCount(0);
                                     fetchNotificationCount();
                                 }}
                                 data-tutorial-target="notification-bell"
