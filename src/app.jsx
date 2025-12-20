@@ -9389,6 +9389,11 @@ const App = () => {
                     />
                 )}
                 
+                {/* Logo above all content */}
+                <div className="flex flex-col items-center mb-6">
+                    <CustomAppLogo size="w-32 h-32" />
+                </div>
+                
                 {/* 3-Column Layout: Donation | Auth Form | Features */}
                 <div className="w-full max-w-7xl grid grid-cols-1 lg:grid-cols-3 gap-6 items-start">
                     {/* LEFT: Donation Section */}
@@ -9420,10 +9425,7 @@ const App = () => {
                     </div>
                     
                     {/* MIDDLE: Auth Form */}
-                    <div className="flex flex-col items-center">
-                        <div className="mb-4">
-                            <CustomAppLogo size="w-32 h-32" />
-                        </div>
+                    <div>
                         <AuthView 
                             onLoginSuccess={handleLoginSuccess} 
                             showModalMessage={showModalMessage} 
