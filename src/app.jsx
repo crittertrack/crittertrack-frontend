@@ -8379,13 +8379,35 @@ const NotificationPanel = ({ authToken, API_BASE_URL, onClose, showModalMessage,
                                                             onClick={() => handleDelete(notification._id)}
                                                             className="flex items-center space-x-1 bg-red-500 hover:bg-red-600 text-white px-3 py-1 rounded text-sm"
                                                         >
-                                                            <X size={14} />
+                                                            <Trash2 size={14} />
                                                             <span>Delete</span>
                                                         </button>
                                                     </>
                                                 )}
-                                                {/* Delete button for non-pending transfer notifications */}
+                                                {/* Breeder and Parent Requests */}
+                                                {(notification.type === 'breeder_request' || notification.type === 'parent_request') && (
+                                                    <>
+                                                        <button
+                                                            onClick={() => handleReject(notification._id)}
+                                                            disabled={processing === notification._id}
+                                                            className="flex items-center space-x-1 bg-accent hover:bg-accent/80 text-white px-3 py-1 rounded text-sm disabled:opacity-50"
+                                                        >
+                                                            <XCircle size={14} />
+                                                            <span>Reject</span>
+                                                        </button>
+                                                        <button
+                                                            onClick={() => handleDelete(notification._id)}
+                                                            className="flex items-center space-x-1 bg-gray-500 hover:bg-gray-600 text-white px-3 py-1 rounded text-sm"
+                                                        >
+                                                            <Trash2 size={14} />
+                                                            <span>Delete</span>
+                                                        </button>
+                                                    </>
+                                                )}
+                                                {/* Delete button for other notifications */}
                                                 {notification.type !== 'link_request' && 
+                                                 notification.type !== 'breeder_request' &&
+                                                 notification.type !== 'parent_request' &&
                                                  notification.type !== 'transfer_request' && 
                                                  notification.type !== 'view_only_offer' && (
                                                     <button
