@@ -1563,7 +1563,7 @@ const PublicProfileView = ({ profile, onBack, onViewAnimal, API_BASE_URL, onStar
                     <ArrowLeft size={18} className="mr-1" /> Back
                 </button>
                 <div className="flex gap-2">
-                    {onStartMessage && profile.allowMessages !== false && (
+                    {onStartMessage && (profile.allowMessages === undefined || profile.allowMessages === true) && (
                         <button
                             onClick={onStartMessage}
                             className="px-3 py-1.5 bg-blue-500 hover:bg-blue-600 text-white font-semibold rounded-lg transition flex items-center gap-2"
