@@ -8297,8 +8297,12 @@ const App = () => {
                 try {
                     const response = await axios.get(`${API_BASE_URL}/public/global/animals?status=Available&isPublic=true&limit=20`);
                     if (response.data && response.data.length > 0) {
+                        // Additional client-side filter to ensure only Available status animals
+                        const filtered = response.data.filter(animal => 
+                            animal.status === 'Available' && animal.isPublic === true
+                        );
                         // Shuffle to show random animals
-                        const shuffled = response.data.sort(() => Math.random() - 0.5);
+                        const shuffled = filtered.sort(() => Math.random() - 0.5);
                         setAvailableAnimals(shuffled);
                         setCurrentAvailableIndex(0);
                     }
@@ -8315,12 +8319,12 @@ const App = () => {
         return () => clearInterval(refreshInterval);
     }, [authToken, API_BASE_URL]);
 
-    // Auto-cycle through available animals every 8 seconds
+    // Auto-cycle through available animals every 30 seconds
     useEffect(() => {
         if (availableAnimals.length > 1 && authToken) {
             const cycleInterval = setInterval(() => {
                 setCurrentAvailableIndex(prev => (prev + 1) % availableAnimals.length);
-            }, 8000);
+            }, 30000);
             
             return () => clearInterval(cycleInterval);
         }
@@ -9573,7 +9577,7 @@ const App = () => {
             
             {/* Available Animal Showcase - Top Right */}
             {availableAnimals.length > 0 && availableAnimals[currentAvailableIndex] && (
-                <div className="hidden lg:block fixed top-4 right-4 z-[60] w-48">
+                <div className="hidden lg:block fixed top-20 right-4 z-[60] w-48">
                     <div 
                         key={currentAvailableIndex}
                         onClick={() => setViewingPublicAnimal(availableAnimals[currentAvailableIndex])}
