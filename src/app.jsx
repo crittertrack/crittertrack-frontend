@@ -8964,8 +8964,26 @@ const App = () => {
                             animal.status === 'Available'
                         );
                         console.log('[Available Animals] Filtered count:', filtered.length, 'animals');
+
+                        // Enrich animals with owner country so we can render flag on the showcase card
+                        const ownerIds = [...new Set(filtered.map(animal => animal.ownerId_public).filter(Boolean))];
+                        const ownerProfiles = await Promise.all(ownerIds.map(async (id_public) => {
+                            try {
+                                const profileResp = await axios.get(`${API_BASE_URL}/public/profile/${id_public}`);
+                                return { id_public, country: profileResp.data?.country || null };
+                            } catch (err) {
+                                console.warn('[Available Animals] Failed to fetch profile for', id_public, err?.message);
+                                return { id_public, country: null };
+                            }
+                        }));
+                        const ownerCountryMap = new Map(ownerProfiles.map(p => [p.id_public, p.country]));
+                        const enriched = filtered.map(animal => ({
+                            ...animal,
+                            ownerCountry: ownerCountryMap.get(animal.ownerId_public) || null,
+                        }));
+
                         // Shuffle to show random animals
-                        const shuffled = filtered.sort(() => Math.random() - 0.5);
+                        const shuffled = enriched.sort(() => Math.random() - 0.5);
                         setAvailableAnimals(shuffled);
                         setCurrentAvailableIndex(0);
                     } else {
@@ -10349,6 +10367,14 @@ const App = () => {
                                 {availableAnimals[currentAvailableIndex].species}
                                 {availableAnimals[currentAvailableIndex].variety && ` • ${availableAnimals[currentAvailableIndex].variety}`}
                             </p>
+                            {availableAnimals[currentAvailableIndex].ownerCountry && (
+                                <div className="mt-2 flex justify-end">
+                                    <span
+                                        className={`${getCountryFlag(availableAnimals[currentAvailableIndex].ownerCountry)} h-4 w-6 block`}
+                                        title={getCountryName(availableAnimals[currentAvailableIndex].ownerCountry)}
+                                    ></span>
+                                </div>
+                            )}
                             <div className="mt-2 flex items-center justify-between">
                                 <span className="text-xs text-gray-500">
                                     {availableAnimals[currentAvailableIndex].gender}
