@@ -9606,7 +9606,7 @@ const App = () => {
                 console.log('[Available Animals Showcase] availableAnimals.length:', availableAnimals.length, 'currentIndex:', currentAvailableIndex);
                 return availableAnimals.length > 0 && availableAnimals[currentAvailableIndex];
             })() && (
-                <div className="hidden lg:block fixed top-20 right-4 z-[60] w-48">
+                <div className="hidden lg:block absolute top-20 right-4 z-[60] w-48">
                     <div 
                         key={currentAvailableIndex}
                         onClick={() => setViewingPublicAnimal(availableAnimals[currentAvailableIndex])}
@@ -9647,19 +9647,6 @@ const App = () => {
                             </div>
                         </div>
                     </div>
-                    {/* Indicator dots */}
-                    {availableAnimals.length > 1 && (
-                        <div className="flex justify-center gap-1 mt-2">
-                            {availableAnimals.slice(0, 5).map((_, idx) => (
-                                <div 
-                                    key={idx}
-                                    className={`w-1.5 h-1.5 rounded-full transition-all ${
-                                        idx === currentAvailableIndex % 5 ? 'bg-accent w-3' : 'bg-gray-300'
-                                    }`}
-                                />
-                            ))}
-                        </div>
-                    )}
                 </div>
             )}
             
