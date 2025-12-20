@@ -8944,6 +8944,10 @@ const App = () => {
         const scrollContainer = scrollContainerRef.current;
         if (!scrollContainer || (!newestUsers.length && !activeUsers.length)) return;
         
+        // Disable auto-scroll on mobile to prevent jittery behavior
+        const isMobile = window.innerWidth < 768;
+        if (isMobile) return;
+        
         let scrollInterval;
         let isPaused = false;
         
