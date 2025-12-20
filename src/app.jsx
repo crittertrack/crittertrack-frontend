@@ -8392,7 +8392,7 @@ const NotificationPanel = ({ authToken, API_BASE_URL, onClose, showModalMessage,
                                                         onClick={() => handleDelete(notification._id)}
                                                         className="flex items-center space-x-1 bg-gray-500 hover:bg-gray-600 text-white px-3 py-1 rounded text-sm"
                                                     >
-                                                        <X size={14} />
+                                                        <Trash2 size={14} />
                                                         <span>Delete</span>
                                                     </button>
                                                 )}
