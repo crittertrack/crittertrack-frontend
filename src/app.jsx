@@ -1614,9 +1614,9 @@ const PublicProfileView = ({ profile, onBack, onViewAnimal, API_BASE_URL, onStar
                     
                     {/* Email - Show if public */}
                     {(freshProfile?.showEmailPublic ?? profile.showEmailPublic) && (freshProfile?.email || profile.email) && (
-                        <p className="text-sm text-gray-700 mt-2 flex items-center gap-2">
-                            <Mail size={16} className="text-accent" />
-                            <a href={`mailto:${freshProfile?.email || profile.email}`} className="hover:text-accent transition underline">
+                        <p className="text-sm text-gray-700 mt-2 flex items-center gap-2 break-all">
+                            <Mail size={16} className="text-accent flex-shrink-0" />
+                            <a href={`mailto:${freshProfile?.email || profile.email}`} className="hover:text-accent transition underline break-all">
                                 {freshProfile?.email || profile.email}
                             </a>
                         </p>
