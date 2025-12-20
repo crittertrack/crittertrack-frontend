@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useCallback, useRef, useMemo } from 'react';
 import { useParams, useNavigate, useLocation, Routes, Route } from 'react-router-dom';
 import axios from 'axios';
-import { LogOut, Cat, UserPlus, LogIn, ChevronLeft, Trash2, Edit, Save, PlusCircle, Plus, ArrowLeft, Loader2, RefreshCw, User, Users, ClipboardList, BookOpen, Settings, Mail, Globe, Bean, Milk, Search, X, Mars, Venus, Eye, EyeOff, Home, Heart, HeartOff, HeartHandshake, Bell, XCircle, CheckCircle, Download, FileText, Link, AlertCircle, Check, DollarSign, Archive, ArrowLeftRight, RotateCcw, Info, Hourglass, MessageSquare } from 'lucide-react';
+import { LogOut, Cat, UserPlus, LogIn, ChevronLeft, Trash2, Edit, Save, PlusCircle, Plus, ArrowLeft, Loader2, RefreshCw, User, Users, ClipboardList, BookOpen, Settings, Mail, Globe, Bean, Milk, Search, X, Mars, Venus, Eye, EyeOff, Home, Heart, HeartOff, HeartHandshake, Bell, XCircle, CheckCircle, Download, FileText, Link, AlertCircle, Check, DollarSign, Archive, ArrowLeftRight, RotateCcw, Info, Hourglass, MessageSquare, Block, Flag } from 'lucide-react';
 import jsPDF from 'jspdf';
 import html2canvas from 'html2canvas';
 import MouseGeneticsCalculator from './components/MouseGeneticsCalculator';
@@ -5967,7 +5967,8 @@ const ProfileEditForm = ({ userProfile, showModalMessage, onSaveSuccess, onCance
     const [showWebsiteURL, setShowWebsiteURL] = useState(userProfile.showWebsiteURL ?? false);
     const [showEmailPublic, setShowEmailPublic] = useState(userProfile.showEmailPublic ?? false); 
     const [showGeneticCodePublic, setShowGeneticCodePublic] = useState(userProfile.showGeneticCodePublic ?? false);
-    const [showRemarksPublic, setShowRemarksPublic] = useState(userProfile.showRemarksPublic ?? false); 
+    const [showRemarksPublic, setShowRemarksPublic] = useState(userProfile.showRemarksPublic ?? false);
+    const [allowMessages, setAllowMessages] = useState(userProfile.allowMessages ?? true); 
 
     const [profileImageFile, setProfileImageFile] = useState(null); 
     const [profileImageURL, setProfileImageURL] = useState(
@@ -6026,6 +6027,7 @@ const ProfileEditForm = ({ userProfile, showModalMessage, onSaveSuccess, onCance
             showEmailPublic: showEmailPublic,
             showGeneticCodePublic: showGeneticCodePublic,
             showRemarksPublic: showRemarksPublic,
+            allowMessages: allowMessages,
         };
         
         console.log('[PROFILE UPDATE] Sending payload:', {
@@ -6258,6 +6260,16 @@ const ProfileEditForm = ({ userProfile, showModalMessage, onSaveSuccess, onCance
                             <input type="checkbox" checked={showRemarksPublic} onChange={(e) => setShowRemarksPublic(e.target.checked)} 
                                 className="rounded text-primary-dark focus:ring-primary-dark" disabled={profileLoading} />
                             <span>Show **Remarks/Notes** on public animal views</span>
+                        </label>
+                    </div>
+
+                    <div className="pt-4 space-y-2 border-t border-gray-200">
+                        <h4 className="text-base font-medium text-gray-800">Messaging Preferences:</h4>
+                        
+                        <label className="flex items-center space-x-2 text-sm text-gray-700">
+                            <input type="checkbox" checked={allowMessages} onChange={(e) => setAllowMessages(e.target.checked)} 
+                                className="rounded text-primary-dark focus:ring-primary-dark" disabled={profileLoading} />
+                            <span>Allow other breeders to message me</span>
                         </label>
                     </div>
                 </div>
@@ -7781,6 +7793,72 @@ const MessagesView = ({ authToken, API_BASE_URL, onClose, showModalMessage, sele
             : (user.showPersonalName ? user.personalName : `User ${user.id_public}`);
     };
 
+    const handleDeleteMessage = async (messageId) => {
+        if (!window.confirm('Delete this message?')) return;
+        try {
+            await axios.delete(`${API_BASE_URL}/messages/${messageId}`, {
+                headers: { Authorization: `Bearer ${authToken}` }
+            });
+            await fetchMessages(selectedConversation.otherUserId);
+        } catch (error) {
+            showModalMessage && showModalMessage('Error', 'Failed to delete message');
+        }
+    };
+
+    const handleDeleteConversation = async () => {
+        if (!window.confirm('Delete entire conversation? This cannot be undone.')) return;
+        try {
+            await axios.delete(`${API_BASE_URL}/messages/conversation/${selectedConversation.otherUserId}`, {
+                headers: { Authorization: `Bearer ${authToken}` }
+            });
+            setSelectedConversation(null);
+            await fetchConversations();
+            showModalMessage && showModalMessage('Success', 'Conversation deleted');
+        } catch (error) {
+            showModalMessage && showModalMessage('Error', 'Failed to delete conversation');
+        }
+    };
+
+    const handleBlockUser = async () => {
+        if (!window.confirm(`Block ${getDisplayName(selectedConversation.otherUser)}?`)) return;
+        try {
+            await axios.post(`${API_BASE_URL}/messages/block/${selectedConversation.otherUserId}`, {}, {
+                headers: { Authorization: `Bearer ${authToken}` }
+            });
+            setSelectedConversation(null);
+            await fetchConversations();
+            showModalMessage && showModalMessage('Success', 'User blocked');
+        } catch (error) {
+            showModalMessage && showModalMessage('Error', 'Failed to block user');
+        }
+    };
+
+    const handleReportUser = async () => {
+        const reason = window.prompt('Why are you reporting this user? (max 1000 characters)');
+        if (!reason) return;
+        if (reason.length > 1000) {
+            showModalMessage && showModalMessage('Error', 'Report reason too long');
+            return;
+        }
+        try {
+            const lastMsg = messages[messages.length - 1];
+            if (!lastMsg) {
+                showModalMessage && showModalMessage('Error', 'No message to report');
+                return;
+            }
+            await axios.post(`${API_BASE_URL}/messages/report`, {
+                messageId: lastMsg._id,
+                reportedUserId: selectedConversation.otherUserId,
+                reason: reason.trim()
+            }, {
+                headers: { Authorization: `Bearer ${authToken}` }
+            });
+            showModalMessage && showModalMessage('Success', 'Report submitted to support team');
+        } catch (error) {
+            showModalMessage && showModalMessage('Error', 'Failed to submit report');
+        }
+    };
+
     const formatTime = (timestamp) => {
         const date = new Date(timestamp);
         const now = new Date();
@@ -7871,19 +7949,44 @@ const MessagesView = ({ authToken, API_BASE_URL, onClose, showModalMessage, sele
                             <>
                                 {/* Conversation Header */}
                                 <div className="p-4 border-b bg-gray-50">
-                                    <div className="flex items-center gap-3">
-                                        <div className="w-10 h-10 bg-gray-200 rounded-full overflow-hidden">
-                                            {selectedConversation.otherUser?.profileImage ? (
-                                                <img src={selectedConversation.otherUser.profileImage} alt="" className="w-full h-full object-cover" />
-                                            ) : (
-                                                <div className="w-full h-full flex items-center justify-center text-gray-400">
-                                                    <User size={20} />
-                                                </div>
-                                            )}
+                                    <div className="flex items-center justify-between">
+                                        <div className="flex items-center gap-3">
+                                            <div className="w-10 h-10 bg-gray-200 rounded-full overflow-hidden">
+                                                {selectedConversation.otherUser?.profileImage ? (
+                                                    <img src={selectedConversation.otherUser.profileImage} alt="" className="w-full h-full object-cover" />
+                                                ) : (
+                                                    <div className="w-full h-full flex items-center justify-center text-gray-400">
+                                                        <User size={20} />
+                                                    </div>
+                                                )}
+                                            </div>
+                                            <div>
+                                                <p className="font-semibold">{getDisplayName(selectedConversation.otherUser)}</p>
+                                                <p className="text-xs text-gray-500">{selectedConversation.otherUser?.id_public}</p>
+                                            </div>
                                         </div>
-                                        <div>
-                                            <p className="font-semibold">{getDisplayName(selectedConversation.otherUser)}</p>
-                                            <p className="text-xs text-gray-500">{selectedConversation.otherUser?.id_public}</p>
+                                        <div className="flex gap-2">
+                                            <button
+                                                onClick={handleBlockUser}
+                                                className="p-2 text-gray-600 hover:bg-red-100 hover:text-red-600 rounded-lg transition"
+                                                title="Block user"
+                                            >
+                                                <Block size={18} />
+                                            </button>
+                                            <button
+                                                onClick={handleReportUser}
+                                                className="p-2 text-gray-600 hover:bg-orange-100 hover:text-orange-600 rounded-lg transition"
+                                                title="Report user"
+                                            >
+                                                <Flag size={18} />
+                                            </button>
+                                            <button
+                                                onClick={handleDeleteConversation}
+                                                className="p-2 text-gray-600 hover:bg-red-100 hover:text-red-600 rounded-lg transition"
+                                                title="Delete conversation"
+                                            >
+                                                <Trash2 size={18} />
+                                            </button>
                                         </div>
                                     </div>
                                 </div>
@@ -7898,16 +8001,27 @@ const MessagesView = ({ authToken, API_BASE_URL, onClose, showModalMessage, sele
                                         messages.map(msg => {
                                             const isSentByMe = msg.senderId.toString() === selectedConversation.otherUserId ? false : true;
                                             return (
-                                                <div key={msg._id} className={`flex ${isSentByMe ? 'justify-end' : 'justify-start'}`}>
+                                                <div key={msg._id} className={`flex ${isSentByMe ? 'justify-end' : 'justify-start'} group`}>
                                                     <div className={`max-w-[70%] rounded-lg px-4 py-2 ${
                                                         isSentByMe 
                                                             ? 'bg-blue-500 text-white' 
                                                             : 'bg-gray-200 text-gray-800'
                                                     }`}>
                                                         <p className="text-sm whitespace-pre-wrap break-words">{msg.message}</p>
-                                                        <p className={`text-xs mt-1 ${isSentByMe ? 'text-blue-100' : 'text-gray-500'}`}>
-                                                            {formatTime(msg.createdAt)}
-                                                        </p>
+                                                        <div className="flex items-center justify-between gap-2 mt-1">
+                                                            <p className={`text-xs ${isSentByMe ? 'text-blue-100' : 'text-gray-500'}`}>
+                                                                {formatTime(msg.createdAt)}
+                                                            </p>
+                                                            {isSentByMe && (
+                                                                <button
+                                                                    onClick={() => handleDeleteMessage(msg._id)}
+                                                                    className="opacity-0 group-hover:opacity-100 transition p-1 hover:bg-white hover:bg-opacity-20 rounded"
+                                                                    title="Delete message"
+                                                                >
+                                                                    <Trash2 size={14} />
+                                                                </button>
+                                                            )}
+                                                        </div>
                                                     </div>
                                                 </div>
                                             );
