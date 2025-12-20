@@ -4,6 +4,7 @@ import axios from 'axios';
 import { LogOut, Cat, UserPlus, LogIn, ChevronLeft, Trash2, Edit, Save, PlusCircle, Plus, ArrowLeft, Loader2, RefreshCw, User, Users, ClipboardList, BookOpen, Settings, Mail, Globe, Bean, Milk, Search, X, Mars, Venus, Eye, EyeOff, Home, Heart, HeartOff, HeartHandshake, Bell, XCircle, CheckCircle, Download, FileText, Link, AlertCircle, Check, DollarSign, Archive, ArrowLeftRight, RotateCcw, Info, Hourglass, MessageSquare, Ban, Flag } from 'lucide-react';
 import jsPDF from 'jspdf';
 import html2canvas from 'html2canvas';
+import 'flag-icons/css/flag-icons.min.css';
 import MouseGeneticsCalculator from './components/MouseGeneticsCalculator';
 import GeneticCodeBuilder from './components/GeneticCodeBuilder';
 import BudgetingTab from './components/BudgetingTab';
@@ -58,14 +59,10 @@ const getSpeciesLatinName = (species) => {
     return latinNames[species] || null;
 };
 
-// Helper function to get flag emoji from country code
+// Helper function to get flag class from country code (for flag-icons library)
 const getCountryFlag = (countryCode) => {
     if (!countryCode || countryCode.length !== 2) return '';
-    const codePoints = countryCode
-        .toUpperCase()
-        .split('')
-        .map(char => 127397 + char.charCodeAt());
-    return String.fromCodePoint(...codePoints);
+    return `flag-icons fi fi-${countryCode.toLowerCase()}`;
 };
 
 // Get country name from code
@@ -1640,7 +1637,7 @@ const PublicProfileView = ({ profile, onBack, onViewAnimal, API_BASE_URL, onStar
                     {/* Country - Show if available */}
                     {(freshProfile?.country || profile.country) && (
                         <p className="text-sm text-gray-600 mt-1 flex items-center gap-2">
-                            <span className="text-lg">{getCountryFlag(freshProfile?.country || profile.country)}</span>
+                            <span className={`${getCountryFlag(freshProfile?.country || profile.country)} h-5 w-7`}></span>
                             <span>{getCountryName(freshProfile?.country || profile.country)}</span>
                         </p>
                     )}
@@ -1763,8 +1760,8 @@ const PublicProfileView = ({ profile, onBack, onViewAnimal, API_BASE_URL, onStar
                                             >
                                                 {/* Country flag top-left */}
                                                 {(freshProfile?.country || profile.country) && (
-                                                    <div className="absolute top-2 left-2 text-xl" title={getCountryName(freshProfile?.country || profile.country)}>
-                                                        {getCountryFlag(freshProfile?.country || profile.country)}
+                                                    <div className="absolute top-2 left-2" title={getCountryName(freshProfile?.country || profile.country)}>
+                                                        <span className={`${getCountryFlag(freshProfile?.country || profile.country)} h-6 w-8 block`}></span>
                                                     </div>
                                                 )}
 
