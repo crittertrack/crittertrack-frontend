@@ -8299,13 +8299,16 @@ const App = () => {
                     const response = await axios.get(`${API_BASE_URL}/public/global/animals?status=Available&isPublic=true&limit=20`);
                     console.log('[Available Animals] API Response:', response.data);
                     if (response.data && response.data.length > 0) {
-                        // Log first animal to see actual field values
-                        console.log('[Available Animals] First animal status:', response.data[0].status, 'isPublic:', response.data[0].isPublic);
+                        // Log first animal to see actual field values and all keys
+                        console.log('[Available Animals] First animal:', response.data[0]);
+                        console.log('[Available Animals] First animal keys:', Object.keys(response.data[0]));
                         
-                        // Additional client-side filter to ensure only Available status animals
-                        const filtered = response.data.filter(animal => 
-                            animal.status === 'Available' && animal.isPublic === true
-                        );
+                        // The API should filter by status=Available, so we just need to ensure visibility
+                        // Check for both isPublic and is_public field names
+                        const filtered = response.data.filter(animal => {
+                            const publicField = animal.isPublic !== undefined ? animal.isPublic : animal.is_public;
+                            return animal.status === 'Available' && publicField === true;
+                        });
                         console.log('[Available Animals] Filtered count:', filtered.length, 'animals');
                         // Shuffle to show random animals
                         const shuffled = filtered.sort(() => Math.random() - 0.5);
