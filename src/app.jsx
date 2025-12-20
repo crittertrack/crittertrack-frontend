@@ -7745,7 +7745,7 @@ const AnimalList = ({ authToken, showModalMessage, onEditAnimal, onViewAnimal, o
 };
 
 // Messages View Component
-const MessagesView = ({ authToken, API_BASE_URL, onClose, showModalMessage, selectedConversation, setSelectedConversation }) => {
+const MessagesView = ({ authToken, API_BASE_URL, onClose, showModalMessage, selectedConversation, setSelectedConversation, userProfile }) => {
     const [conversations, setConversations] = useState([]);
     const [messages, setMessages] = useState([]);
     const [newMessage, setNewMessage] = useState('');
@@ -8069,7 +8069,11 @@ const MessagesView = ({ authToken, API_BASE_URL, onClose, showModalMessage, sele
 
                                 {/* Send Message Form */}
                                 <form onSubmit={handleSendMessage} className="p-4 border-t bg-gray-50">
-                                    {selectedConversation.otherUser?.allowMessages === false ? (
+                                    {userProfile?.allowMessages === false ? (
+                                        <div className="text-center py-2 text-sm text-gray-500">
+                                            You have disabled messages. Enable them in your profile settings to send messages.
+                                        </div>
+                                    ) : selectedConversation.otherUser?.allowMessages === false ? (
                                         <div className="text-center py-2 text-sm text-gray-500">
                                             This user has disabled messages
                                         </div>
@@ -10392,6 +10396,7 @@ const App = () => {
                     showModalMessage={showModalMessage}
                     selectedConversation={selectedConversation}
                     setSelectedConversation={setSelectedConversation}
+                    userProfile={userProfile}
                 />
             )}
             
