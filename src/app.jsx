@@ -7696,9 +7696,8 @@ const AnimalList = ({ authToken, showModalMessage, onEditAnimal, onViewAnimal, o
 };
 
 // Messages View Component
-const MessagesView = ({ authToken, API_BASE_URL, onClose, showModalMessage }) => {
+const MessagesView = ({ authToken, API_BASE_URL, onClose, showModalMessage, selectedConversation, setSelectedConversation }) => {
     const [conversations, setConversations] = useState([]);
-    const [selectedConversation, setSelectedConversation] = useState(null);
     const [messages, setMessages] = useState([]);
     const [newMessage, setNewMessage] = useState('');
     const [loading, setLoading] = useState(true);
@@ -7735,19 +7734,26 @@ const MessagesView = ({ authToken, API_BASE_URL, onClose, showModalMessage }) =>
 
     const fetchMessages = async (otherUserId) => {
         try {
+            console.log('[MessagesView] Fetching messages for:', otherUserId);
             const response = await axios.get(`${API_BASE_URL}/messages/conversation/${otherUserId}`, {
                 headers: { Authorization: `Bearer ${authToken}` }
             });
+            console.log('[MessagesView] Got messages:', response.data?.messages?.length || 0, 'messages');
             setMessages(response.data.messages || []);
         } catch (error) {
-            console.error('Error fetching messages:', error);
+            console.error('[MessagesView] Error fetching messages:', error.response?.data || error.message);
+            showModalMessage && showModalMessage('Error', 'Failed to load messages');
         }
     };
 
     const handleSendMessage = async (e) => {
         e.preventDefault();
-        if (!newMessage.trim() || !selectedConversation) return;
+        if (!newMessage.trim() || !selectedConversation) {
+            console.log('[MessagesView] Cannot send: newMessage or selectedConversation missing');
+            return;
+        }
 
+        console.log('[MessagesView] Sending message to:', selectedConversation.otherUserId);
         setSending(true);
         try {
             await axios.post(`${API_BASE_URL}/messages/send`, {
@@ -7756,12 +7762,13 @@ const MessagesView = ({ authToken, API_BASE_URL, onClose, showModalMessage }) =>
             }, {
                 headers: { Authorization: `Bearer ${authToken}` }
             });
+            console.log('[MessagesView] Message sent successfully');
             setNewMessage('');
             await fetchMessages(selectedConversation.otherUserId);
             await fetchConversations(); // Refresh conversation list
         } catch (error) {
-            console.error('Error sending message:', error);
-            showModalMessage('Error', error.response?.data?.error || 'Failed to send message');
+            console.error('[MessagesView] Error sending message:', error.response?.data || error.message);
+            showModalMessage && showModalMessage('Error', error.response?.data?.error || 'Failed to send message');
         } finally {
             setSending(false);
         }
@@ -7883,23 +7890,29 @@ const MessagesView = ({ authToken, API_BASE_URL, onClose, showModalMessage }) =>
 
                                 {/* Messages */}
                                 <div className="flex-1 overflow-y-auto p-4 space-y-3">
-                                    {messages.map(msg => {
-                                        const isSentByMe = msg.senderId === selectedConversation.otherUserId ? false : true;
-                                        return (
-                                            <div key={msg._id} className={`flex ${isSentByMe ? 'justify-end' : 'justify-start'}`}>
-                                                <div className={`max-w-[70%] rounded-lg px-4 py-2 ${
-                                                    isSentByMe 
-                                                        ? 'bg-blue-500 text-white' 
-                                                        : 'bg-gray-200 text-gray-800'
-                                                }`}>
-                                                    <p className="text-sm whitespace-pre-wrap break-words">{msg.message}</p>
-                                                    <p className={`text-xs mt-1 ${isSentByMe ? 'text-blue-100' : 'text-gray-500'}`}>
-                                                        {formatTime(msg.createdAt)}
-                                                    </p>
+                                    {messages.length === 0 ? (
+                                        <div className="flex items-center justify-center h-full text-gray-400">
+                                            <p>No messages yet. Start the conversation!</p>
+                                        </div>
+                                    ) : (
+                                        messages.map(msg => {
+                                            const isSentByMe = msg.senderId.toString() === selectedConversation.otherUserId ? false : true;
+                                            return (
+                                                <div key={msg._id} className={`flex ${isSentByMe ? 'justify-end' : 'justify-start'}`}>
+                                                    <div className={`max-w-[70%] rounded-lg px-4 py-2 ${
+                                                        isSentByMe 
+                                                            ? 'bg-blue-500 text-white' 
+                                                            : 'bg-gray-200 text-gray-800'
+                                                    }`}>
+                                                        <p className="text-sm whitespace-pre-wrap break-words">{msg.message}</p>
+                                                        <p className={`text-xs mt-1 ${isSentByMe ? 'text-blue-100' : 'text-gray-500'}`}>
+                                                            {formatTime(msg.createdAt)}
+                                                        </p>
+                                                    </div>
                                                 </div>
-                                            </div>
-                                        );
-                                    })}
+                                            );
+                                        })
+                                    )}
                                     <div ref={messagesEndRef} />
                                 </div>
 
@@ -10206,9 +10219,12 @@ const App = () => {
                     API_BASE_URL={API_BASE_URL}
                     onClose={() => {
                         setShowMessages(false);
+                        setSelectedConversation(null);
                         fetchUnreadMessageCount();
                     }}
                     showModalMessage={showModalMessage}
+                    selectedConversation={selectedConversation}
+                    setSelectedConversation={setSelectedConversation}
                 />
             )}
             
