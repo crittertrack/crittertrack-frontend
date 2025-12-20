@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useCallback, useRef, useMemo } from 'react';
 import { useParams, useNavigate, useLocation, Routes, Route } from 'react-router-dom';
 import axios from 'axios';
-import { LogOut, Cat, UserPlus, LogIn, ChevronLeft, Trash2, Edit, Save, PlusCircle, Plus, ArrowLeft, Loader2, RefreshCw, User, Users, ClipboardList, BookOpen, Settings, Mail, Globe, Bean, Milk, Search, X, Mars, Venus, Eye, EyeOff, Home, Heart, HeartOff, HeartHandshake, Bell, XCircle, CheckCircle, Download, FileText, Link, AlertCircle, Check, DollarSign, Archive, ArrowLeftRight, RotateCcw, Info, Hourglass } from 'lucide-react';
+import { LogOut, Cat, UserPlus, LogIn, ChevronLeft, Trash2, Edit, Save, PlusCircle, Plus, ArrowLeft, Loader2, RefreshCw, User, Users, ClipboardList, BookOpen, Settings, Mail, Globe, Bean, Milk, Search, X, Mars, Venus, Eye, EyeOff, Home, Heart, HeartOff, HeartHandshake, Bell, XCircle, CheckCircle, Download, FileText, Link, AlertCircle, Check, DollarSign, Archive, ArrowLeftRight, RotateCcw, Info, Hourglass, MessageSquare } from 'lucide-react';
 import jsPDF from 'jspdf';
 import html2canvas from 'html2canvas';
 import MouseGeneticsCalculator from './components/MouseGeneticsCalculator';
@@ -1468,7 +1468,7 @@ const UserSearchModal = ({ onClose, showModalMessage, onSelectUser, API_BASE_URL
 };
 
 // Public Profile View Component - Shows a breeder's public animals
-const PublicProfileView = ({ profile, onBack, onViewAnimal, API_BASE_URL }) => {
+const PublicProfileView = ({ profile, onBack, onViewAnimal, API_BASE_URL, onStartMessage }) => {
     const [animals, setAnimals] = useState([]);
     const [loading, setLoading] = useState(true);
     const [copySuccess, setCopySuccess] = useState(false);
@@ -1562,13 +1562,24 @@ const PublicProfileView = ({ profile, onBack, onViewAnimal, API_BASE_URL }) => {
                 >
                     <ArrowLeft size={18} className="mr-1" /> Back
                 </button>
-                <button
-                    onClick={handleShare}
-                    className="px-3 py-1.5 bg-primary hover:bg-primary/90 text-black font-semibold rounded-lg transition flex items-center gap-2"
-                >
-                    <Link size={16} />
-                    {copySuccess ? 'Link Copied!' : 'Share Profile'}
-                </button>
+                <div className="flex gap-2">
+                    {onStartMessage && (
+                        <button
+                            onClick={onStartMessage}
+                            className="px-3 py-1.5 bg-blue-500 hover:bg-blue-600 text-white font-semibold rounded-lg transition flex items-center gap-2"
+                        >
+                            <MessageSquare size={16} />
+                            Message
+                        </button>
+                    )}
+                    <button
+                        onClick={handleShare}
+                        className="px-3 py-1.5 bg-primary hover:bg-primary/90 text-black font-semibold rounded-lg transition flex items-center gap-2"
+                    >
+                        <Link size={16} />
+                        {copySuccess ? 'Link Copied!' : 'Share Profile'}
+                    </button>
+                </div>
             </div>
 
             {/* Profile Header */}
@@ -7684,6 +7695,250 @@ const AnimalList = ({ authToken, showModalMessage, onEditAnimal, onViewAnimal, o
     );
 };
 
+// Messages View Component
+const MessagesView = ({ authToken, API_BASE_URL, onClose, showModalMessage }) => {
+    const [conversations, setConversations] = useState([]);
+    const [selectedConversation, setSelectedConversation] = useState(null);
+    const [messages, setMessages] = useState([]);
+    const [newMessage, setNewMessage] = useState('');
+    const [loading, setLoading] = useState(true);
+    const [sending, setSending] = useState(false);
+    const messagesEndRef = useRef(null);
+
+    useEffect(() => {
+        fetchConversations();
+    }, []);
+
+    useEffect(() => {
+        if (selectedConversation) {
+            fetchMessages(selectedConversation.otherUserId);
+        }
+    }, [selectedConversation]);
+
+    useEffect(() => {
+        // Scroll to bottom when messages change
+        messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
+    }, [messages]);
+
+    const fetchConversations = async () => {
+        try {
+            const response = await axios.get(`${API_BASE_URL}/messages/conversations`, {
+                headers: { Authorization: `Bearer ${authToken}` }
+            });
+            setConversations(response.data || []);
+        } catch (error) {
+            console.error('Error fetching conversations:', error);
+        } finally {
+            setLoading(false);
+        }
+    };
+
+    const fetchMessages = async (otherUserId) => {
+        try {
+            const response = await axios.get(`${API_BASE_URL}/messages/conversation/${otherUserId}`, {
+                headers: { Authorization: `Bearer ${authToken}` }
+            });
+            setMessages(response.data.messages || []);
+        } catch (error) {
+            console.error('Error fetching messages:', error);
+        }
+    };
+
+    const handleSendMessage = async (e) => {
+        e.preventDefault();
+        if (!newMessage.trim() || !selectedConversation) return;
+
+        setSending(true);
+        try {
+            await axios.post(`${API_BASE_URL}/messages/send`, {
+                receiverId: selectedConversation.otherUserId,
+                message: newMessage.trim()
+            }, {
+                headers: { Authorization: `Bearer ${authToken}` }
+            });
+            setNewMessage('');
+            await fetchMessages(selectedConversation.otherUserId);
+            await fetchConversations(); // Refresh conversation list
+        } catch (error) {
+            console.error('Error sending message:', error);
+            showModalMessage('Error', error.response?.data?.error || 'Failed to send message');
+        } finally {
+            setSending(false);
+        }
+    };
+
+    const getDisplayName = (user) => {
+        if (!user) return 'Unknown User';
+        return (user.showBreederName && user.breederName) 
+            ? user.breederName 
+            : (user.showPersonalName ? user.personalName : `User ${user.id_public}`);
+    };
+
+    const formatTime = (timestamp) => {
+        const date = new Date(timestamp);
+        const now = new Date();
+        const diffInHours = (now - date) / (1000 * 60 * 60);
+        
+        if (diffInHours < 24) {
+            return date.toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit' });
+        } else if (diffInHours < 168) { // Less than a week
+            return date.toLocaleDateString('en-US', { weekday: 'short', hour: 'numeric', minute: '2-digit' });
+        } else {
+            return date.toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
+        }
+    };
+
+    return (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
+            <div className="bg-white rounded-xl shadow-2xl w-full max-w-4xl h-[600px] flex flex-col">
+                {/* Header */}
+                <div className="flex justify-between items-center p-4 border-b">
+                    <h2 className="text-xl font-bold text-gray-800 flex items-center gap-2">
+                        <MessageSquare size={24} className="text-blue-500" />
+                        Messages
+                    </h2>
+                    <button onClick={onClose} className="text-gray-500 hover:text-gray-700 transition">
+                        <X size={24} />
+                    </button>
+                </div>
+
+                <div className="flex flex-1 overflow-hidden">
+                    {/* Conversations List */}
+                    <div className="w-1/3 border-r overflow-y-auto">
+                        {loading ? (
+                            <div className="flex items-center justify-center h-full">
+                                <Loader2 className="animate-spin text-gray-400" size={32} />
+                            </div>
+                        ) : conversations.length === 0 ? (
+                            <div className="p-4 text-center text-gray-500">
+                                <MessageSquare size={48} className="mx-auto mb-2 text-gray-300" />
+                                <p>No conversations yet</p>
+                            </div>
+                        ) : (
+                            conversations.map(conv => (
+                                <div
+                                    key={conv.conversationId}
+                                    onClick={() => setSelectedConversation(conv)}
+                                    className={`p-4 border-b cursor-pointer hover:bg-gray-50 transition ${
+                                        selectedConversation?.conversationId === conv.conversationId ? 'bg-blue-50' : ''
+                                    }`}
+                                >
+                                    <div className="flex items-center gap-3">
+                                        <div className="w-10 h-10 bg-gray-200 rounded-full overflow-hidden flex-shrink-0">
+                                            {conv.otherUser?.profileImage ? (
+                                                <img src={conv.otherUser.profileImage} alt="" className="w-full h-full object-cover" />
+                                            ) : (
+                                                <div className="w-full h-full flex items-center justify-center text-gray-400">
+                                                    <User size={20} />
+                                                </div>
+                                            )}
+                                        </div>
+                                        <div className="flex-1 min-w-0">
+                                            <div className="flex justify-between items-baseline">
+                                                <p className="font-semibold text-sm truncate">{getDisplayName(conv.otherUser)}</p>
+                                                {conv.unreadCount > 0 && (
+                                                    <span className="bg-blue-500 text-white text-xs rounded-full px-2 py-0.5 ml-2">
+                                                        {conv.unreadCount}
+                                                    </span>
+                                                )}
+                                            </div>
+                                            <p className="text-xs text-gray-500 truncate">{conv.lastMessage}</p>
+                                            <p className="text-xs text-gray-400">{formatTime(conv.lastMessageDate)}</p>
+                                        </div>
+                                    </div>
+                                </div>
+                            ))
+                        )}
+                    </div>
+
+                    {/* Messages Thread */}
+                    <div className="flex-1 flex flex-col">
+                        {!selectedConversation ? (
+                            <div className="flex items-center justify-center h-full text-gray-400">
+                                <div className="text-center">
+                                    <MessageSquare size={64} className="mx-auto mb-4 text-gray-200" />
+                                    <p>Select a conversation to view messages</p>
+                                </div>
+                            </div>
+                        ) : (
+                            <>
+                                {/* Conversation Header */}
+                                <div className="p-4 border-b bg-gray-50">
+                                    <div className="flex items-center gap-3">
+                                        <div className="w-10 h-10 bg-gray-200 rounded-full overflow-hidden">
+                                            {selectedConversation.otherUser?.profileImage ? (
+                                                <img src={selectedConversation.otherUser.profileImage} alt="" className="w-full h-full object-cover" />
+                                            ) : (
+                                                <div className="w-full h-full flex items-center justify-center text-gray-400">
+                                                    <User size={20} />
+                                                </div>
+                                            )}
+                                        </div>
+                                        <div>
+                                            <p className="font-semibold">{getDisplayName(selectedConversation.otherUser)}</p>
+                                            <p className="text-xs text-gray-500">{selectedConversation.otherUser?.id_public}</p>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                {/* Messages */}
+                                <div className="flex-1 overflow-y-auto p-4 space-y-3">
+                                    {messages.map(msg => {
+                                        const isSentByMe = msg.senderId === selectedConversation.otherUserId ? false : true;
+                                        return (
+                                            <div key={msg._id} className={`flex ${isSentByMe ? 'justify-end' : 'justify-start'}`}>
+                                                <div className={`max-w-[70%] rounded-lg px-4 py-2 ${
+                                                    isSentByMe 
+                                                        ? 'bg-blue-500 text-white' 
+                                                        : 'bg-gray-200 text-gray-800'
+                                                }`}>
+                                                    <p className="text-sm whitespace-pre-wrap break-words">{msg.message}</p>
+                                                    <p className={`text-xs mt-1 ${isSentByMe ? 'text-blue-100' : 'text-gray-500'}`}>
+                                                        {formatTime(msg.createdAt)}
+                                                    </p>
+                                                </div>
+                                            </div>
+                                        );
+                                    })}
+                                    <div ref={messagesEndRef} />
+                                </div>
+
+                                {/* Send Message Form */}
+                                <form onSubmit={handleSendMessage} className="p-4 border-t bg-gray-50">
+                                    <div className="flex gap-2">
+                                        <input
+                                            type="text"
+                                            value={newMessage}
+                                            onChange={(e) => setNewMessage(e.target.value)}
+                                            placeholder="Type a message..."
+                                            className="flex-1 px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                                            disabled={sending}
+                                        />
+                                        <button
+                                            type="submit"
+                                            disabled={sending || !newMessage.trim()}
+                                            className="bg-blue-500 text-white px-6 py-2 rounded-lg hover:bg-blue-600 transition disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2"
+                                        >
+                                            {sending ? (
+                                                <>
+                                                    <Loader2 className="animate-spin" size={16} />
+                                                    Sending...
+                                                </>
+                                            ) : (
+                                                'Send'
+                                            )}
+                                        </button>
+                                    </div>
+                                </form>
+                            </>
+                        )}
+                    </div>
+                </div>
+            </div>
+        </div>
+    );
+};
+
 // Notification Panel Component
 const NotificationPanel = ({ authToken, API_BASE_URL, onClose, showModalMessage, onNotificationChange }) => {
     const [notifications, setNotifications] = useState([]);
@@ -7989,6 +8244,14 @@ const App = () => {
     
     const [showNotifications, setShowNotifications] = useState(false);
     const [notificationCount, setNotificationCount] = useState(0);
+    
+    const [showMessages, setShowMessages] = useState(false);
+    const [unreadMessageCount, setUnreadMessageCount] = useState(0);
+    const [conversations, setConversations] = useState([]);
+    const [selectedConversation, setSelectedConversation] = useState(null);
+    const [messages, setMessages] = useState([]);
+    const [newMessage, setNewMessage] = useState('');
+    const [sendingMessage, setSendingMessage] = useState(false);
 
     const [showUserSearchModal, setShowUserSearchModal] = useState(false);
     const [viewingPublicProfile, setViewingPublicProfile] = useState(null);
@@ -8393,14 +8656,30 @@ const App = () => {
         }
     }, [authToken, API_BASE_URL]);
 
+    const fetchUnreadMessageCount = useCallback(async () => {
+        if (!authToken) return;
+        try {
+            const response = await axios.get(`${API_BASE_URL}/messages/unread-count`, {
+                headers: { Authorization: `Bearer ${authToken}` }
+            });
+            setUnreadMessageCount(response.data?.count || 0);
+        } catch (error) {
+            console.error('Failed to fetch message count:', error);
+        }
+    }, [authToken, API_BASE_URL]);
+
     useEffect(() => {
         if (authToken) {
             fetchNotificationCount();
-            // Poll for new notifications every 30 seconds
-            const interval = setInterval(fetchNotificationCount, 30000);
+            fetchUnreadMessageCount();
+            // Poll for new notifications and messages every 30 seconds
+            const interval = setInterval(() => {
+                fetchNotificationCount();
+                fetchUnreadMessageCount();
+            }, 30000);
             return () => clearInterval(interval);
         }
-    }, [authToken, fetchNotificationCount]);
+    }, [authToken, fetchNotificationCount, fetchUnreadMessageCount]);
 
     // Mark donation highlight as seen after 8 seconds
     useEffect(() => {
@@ -8751,6 +9030,40 @@ const App = () => {
                         onBack={() => { setViewingPublicProfile(null); setCurrentView('list'); }}
                         onViewAnimal={(animal) => setViewingPublicAnimal(animal)}
                         API_BASE_URL={API_BASE_URL}
+                        onStartMessage={async () => {
+                            try {
+                                if (!viewingPublicProfile?.id_public) return;
+                                // Resolve backend user ID from public ID
+                                const resp = await axios.get(`${API_BASE_URL}/messages/resolve/${viewingPublicProfile.id_public}`, {
+                                    headers: { Authorization: `Bearer ${authToken}` }
+                                });
+                                const otherUserId = resp.data?.userId;
+                                if (!otherUserId) return;
+
+                                // Open messages and preselect conversation
+                                setShowMessages(true);
+                                // Fetch conversations and select matching one
+                                try {
+                                    const convResp = await axios.get(`${API_BASE_URL}/messages/conversations`, {
+                                        headers: { Authorization: `Bearer ${authToken}` }
+                                    });
+                                    const list = convResp.data || [];
+                                    const match = list.find(c => c.otherUserId === otherUserId);
+                                    if (match) {
+                                        setSelectedConversation(match);
+                                    } else {
+                                        // If no conversation yet, create a stub and fetch messages
+                                        const stub = { conversationId: `stub_${otherUserId}`, otherUserId, otherUser: viewingPublicProfile };
+                                        setSelectedConversation(stub);
+                                    }
+                                } catch (e) {
+                                    console.warn('Failed to preselect conversation, opening MessagesView anyway:', e);
+                                }
+                            } catch (err) {
+                                console.error('Failed to start message:', err);
+                                showModalMessage && showModalMessage('Error', 'Unable to start a message with this user');
+                            }
+                        }}
                     />
                 );
             case 'profile':
@@ -9764,6 +10077,19 @@ const App = () => {
                             )}
                         </button>
                         
+                        <button
+                            onClick={() => setShowMessages(true)}
+                            className="relative flex flex-col items-center justify-center bg-gray-100 hover:bg-gray-200 text-gray-600 py-2 px-3 rounded-lg transition duration-150 shadow-sm"
+                            title="Messages"
+                        >
+                            <MessageSquare size={18} />
+                            {unreadMessageCount > 0 && (
+                                <span className="absolute -top-1 -right-1 bg-blue-500 text-white text-xs rounded-full w-5 h-5 flex items-center justify-center font-bold">
+                                    {unreadMessageCount > 9 ? '9+' : unreadMessageCount}
+                                </span>
+                            )}
+                        </button>
+                        
                         <button 
                             onClick={() => handleLogout(false)} 
                             title="Log Out"
@@ -9804,6 +10130,19 @@ const App = () => {
                                 {notificationCount > 0 && (
                                     <span className="absolute -top-1 -right-1 bg-red-500 text-white text-xs rounded-full w-4 h-4 flex items-center justify-center font-bold text-[10px]">
                                         {notificationCount > 9 ? '9+' : notificationCount}
+                                    </span>
+                                )}
+                            </button>
+                            
+                            <button
+                                onClick={() => setShowMessages(true)}
+                                className="relative flex items-center justify-center bg-gray-100 hover:bg-gray-200 text-gray-600 p-2 rounded-lg transition duration-150 shadow-sm"
+                                title="Messages"
+                            >
+                                <MessageSquare size={18} />
+                                {unreadMessageCount > 0 && (
+                                    <span className="absolute -top-1 -right-1 bg-blue-500 text-white text-xs rounded-full w-4 h-4 flex items-center justify-center font-bold text-[10px]">
+                                        {unreadMessageCount > 9 ? '9+' : unreadMessageCount}
                                     </span>
                                 )}
                             </button>
@@ -9857,6 +10196,18 @@ const App = () => {
                         fetchNotificationCount();
                     }}
                     onNotificationChange={fetchNotificationCount}
+                    showModalMessage={showModalMessage}
+                />
+            )}
+            
+            {showMessages && (
+                <MessagesView
+                    authToken={authToken}
+                    API_BASE_URL={API_BASE_URL}
+                    onClose={() => {
+                        setShowMessages(false);
+                        fetchUnreadMessageCount();
+                    }}
                     showModalMessage={showModalMessage}
                 />
             )}
