@@ -5987,12 +5987,15 @@ const ProfileEditForm = ({ userProfile, showModalMessage, onSaveSuccess, onCance
     const [showGeneticCodePublic, setShowGeneticCodePublic] = useState(userProfile.showGeneticCodePublic ?? false);
     const [showRemarksPublic, setShowRemarksPublic] = useState(userProfile.showRemarksPublic ?? false);
     const [allowMessages, setAllowMessages] = useState(userProfile.allowMessages === undefined ? true : !!userProfile.allowMessages);
+    const [emailNotificationPreference, setEmailNotificationPreference] = useState(userProfile.emailNotificationPreference || 'none');
 
     // Keep allowMessages in sync if userProfile updates (e.g., after save or refetch)
     useEffect(() => {
         const next = userProfile.allowMessages === undefined ? true : !!userProfile.allowMessages;
         setAllowMessages(next);
-    }, [userProfile.allowMessages]);
+        // Also sync email notification preference
+        setEmailNotificationPreference(userProfile.emailNotificationPreference || 'none');
+    }, [userProfile.allowMessages, userProfile.emailNotificationPreference]);
     
     console.log('[ProfileEditForm] Initial allowMessages state:', allowMessages);
 
@@ -6054,6 +6057,7 @@ const ProfileEditForm = ({ userProfile, showModalMessage, onSaveSuccess, onCance
             showGeneticCodePublic: showGeneticCodePublic,
             showRemarksPublic: showRemarksPublic,
             allowMessages: allowMessages,
+            emailNotificationPreference: emailNotificationPreference,
         };
         
         console.log('[PROFILE UPDATE] allowMessages being sent:', allowMessages, 'Type:', typeof allowMessages);
@@ -6299,6 +6303,65 @@ const ProfileEditForm = ({ userProfile, showModalMessage, onSaveSuccess, onCance
                                 className="rounded text-primary-dark focus:ring-primary-dark" disabled={profileLoading} />
                             <span>Allow other breeders to message me</span>
                         </label>
+                    </div>
+
+                    <div className="pt-4 space-y-3 border-t border-gray-200">
+                        <h4 className="text-base font-medium text-gray-800">Email Notifications:</h4>
+                        <p className="text-sm text-gray-600">Choose what types of notifications to receive via email:</p>
+                        
+                        <div className="space-y-2 pl-2">
+                            <label className="flex items-center space-x-2 text-sm text-gray-700">
+                                <input 
+                                    type="radio" 
+                                    name="emailNotificationPreference" 
+                                    value="none"
+                                    checked={emailNotificationPreference === 'none'}
+                                    onChange={(e) => setEmailNotificationPreference(e.target.value)}
+                                    className="text-primary-dark focus:ring-primary-dark" 
+                                    disabled={profileLoading} 
+                                />
+                                <span><strong>None</strong> - Don't send me email notifications</span>
+                            </label>
+                            
+                            <label className="flex items-center space-x-2 text-sm text-gray-700">
+                                <input 
+                                    type="radio" 
+                                    name="emailNotificationPreference" 
+                                    value="requestsOnly"
+                                    checked={emailNotificationPreference === 'requestsOnly'}
+                                    onChange={(e) => setEmailNotificationPreference(e.target.value)}
+                                    className="text-primary-dark focus:ring-primary-dark" 
+                                    disabled={profileLoading} 
+                                />
+                                <span><strong>Requests Only</strong> - Send breeder requests, transfers, and breeding requests</span>
+                            </label>
+                            
+                            <label className="flex items-center space-x-2 text-sm text-gray-700">
+                                <input 
+                                    type="radio" 
+                                    name="emailNotificationPreference" 
+                                    value="messagesOnly"
+                                    checked={emailNotificationPreference === 'messagesOnly'}
+                                    onChange={(e) => setEmailNotificationPreference(e.target.value)}
+                                    className="text-primary-dark focus:ring-primary-dark" 
+                                    disabled={profileLoading} 
+                                />
+                                <span><strong>Messages Only</strong> - Send new messages from other breeders</span>
+                            </label>
+                            
+                            <label className="flex items-center space-x-2 text-sm text-gray-700">
+                                <input 
+                                    type="radio" 
+                                    name="emailNotificationPreference" 
+                                    value="all"
+                                    checked={emailNotificationPreference === 'all'}
+                                    onChange={(e) => setEmailNotificationPreference(e.target.value)}
+                                    className="text-primary-dark focus:ring-primary-dark" 
+                                    disabled={profileLoading} 
+                                />
+                                <span><strong>All</strong> - Send all notifications by email</span>
+                            </label>
+                        </div>
                     </div>
                 </div>
 
