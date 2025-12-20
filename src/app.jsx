@@ -7977,7 +7977,7 @@ const MessagesView = ({ authToken, API_BASE_URL, onClose, showModalMessage, sele
                                             <div className="flex justify-between items-baseline">
                                                 <p className="font-semibold text-sm truncate">{getDisplayName(conv.otherUser)}</p>
                                                 {conv.unreadCount > 0 && (
-                                                    <span className="bg-blue-500 text-white text-xs rounded-full px-2 py-0.5 ml-2">
+                                                    <span className="bg-red-500 text-white text-xs rounded-full px-2 py-0.5 ml-2">
                                                         {conv.unreadCount}
                                                     </span>
                                                 )}
@@ -10298,7 +10298,7 @@ const App = () => {
                         >
                             <MessageSquare size={18} />
                             {unreadMessageCount > 0 && (
-                                <span className="absolute -top-1 -right-1 bg-blue-500 text-white text-xs rounded-full w-5 h-5 flex items-center justify-center font-bold">
+                                <span className="absolute -top-1 -right-1 bg-red-500 text-white text-xs rounded-full w-5 h-5 flex items-center justify-center font-bold">
                                     {unreadMessageCount > 9 ? '9+' : unreadMessageCount}
                                 </span>
                             )}
@@ -10355,7 +10355,7 @@ const App = () => {
                             >
                                 <MessageSquare size={18} />
                                 {unreadMessageCount > 0 && (
-                                    <span className="absolute -top-1 -right-1 bg-blue-500 text-white text-xs rounded-full w-4 h-4 flex items-center justify-center font-bold text-[10px]">
+                                    <span className="absolute -top-1 -right-1 bg-red-500 text-white text-xs rounded-full w-4 h-4 flex items-center justify-center font-bold text-[10px]">
                                         {unreadMessageCount > 9 ? '9+' : unreadMessageCount}
                                     </span>
                                 )}
