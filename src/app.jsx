@@ -10285,7 +10285,7 @@ const App = () => {
                         >
                             <Bell size={18} />
                             {notificationCount > 0 && (
-                                <span className="absolute -top-1 -right-1 bg-red-500 text-white text-xs rounded-full w-5 h-5 flex items-center justify-center font-bold">
+                                <span className="absolute -top-1 -right-1 bg-purple-600 text-white text-xs rounded-full w-5 h-5 flex items-center justify-center font-bold">
                                     {notificationCount > 9 ? '9+' : notificationCount}
                                 </span>
                             )}
@@ -10342,7 +10342,7 @@ const App = () => {
                             >
                                 <Bell size={18} />
                                 {notificationCount > 0 && (
-                                    <span className="absolute -top-1 -right-1 bg-red-500 text-white text-xs rounded-full w-4 h-4 flex items-center justify-center font-bold text-[10px]">
+                                    <span className="absolute -top-1 -right-1 bg-purple-600 text-white text-xs rounded-full w-4 h-4 flex items-center justify-center font-bold text-[10px]">
                                         {notificationCount > 9 ? '9+' : notificationCount}
                                     </span>
                                 )}
