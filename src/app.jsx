@@ -8300,7 +8300,9 @@ const App = () => {
                     const response = await axios.get(`${API_BASE_URL}/public/global/animals?limit=50`);
                     console.log('[Available Animals] API Response:', response.data);
                     if (response.data && response.data.length > 0) {
-                        // Log first animal to see actual field values
+                        // Log all unique status values to see what's actually in the data
+                        const uniqueStatuses = [...new Set(response.data.map(a => a.status))];
+                        console.log('[Available Animals] All unique status values:', uniqueStatuses);
                         console.log('[Available Animals] First animal status:', response.data[0].status);
                         
                         // The /public/global/animals endpoint already returns only public animals
