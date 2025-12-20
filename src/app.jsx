@@ -8299,6 +8299,9 @@ const App = () => {
                     const response = await axios.get(`${API_BASE_URL}/public/global/animals?status=Available&isPublic=true&limit=20`);
                     console.log('[Available Animals] API Response:', response.data);
                     if (response.data && response.data.length > 0) {
+                        // Log first animal to see actual field values
+                        console.log('[Available Animals] First animal status:', response.data[0].status, 'isPublic:', response.data[0].isPublic);
+                        
                         // Additional client-side filter to ensure only Available status animals
                         const filtered = response.data.filter(animal => 
                             animal.status === 'Available' && animal.isPublic === true
