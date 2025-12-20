@@ -6641,6 +6641,15 @@ const ProfileView = ({ userProfile, showModalMessage, fetchUserProfile, authToke
                             {(userProfile.showWebsiteURL ?? false) ? 'Public' : 'Private'}
                         </span>
                     </div>
+
+                    <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-2 py-2">
+                        <span className="text-sm sm:text-base text-gray-800 truncate">Messages</span>
+                        <span className={`px-3 py-1 text-xs font-semibold rounded-full whitespace-nowrap ${
+                            (userProfile.allowMessages === true) ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800'
+                        }`}>
+                            {(userProfile.allowMessages === true) ? 'Allowed' : 'Disabled'}
+                        </span>
+                    </div>
                     
                     <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-2 py-2">
                         <span className="text-sm sm:text-base text-gray-800 truncate">Email Address ({userProfile.email})</span>
