@@ -8015,6 +8015,10 @@ const App = () => {
     // Animals for genetics calculator
     const [myAnimalsForCalculator, setMyAnimalsForCalculator] = useState([]);
     
+    // Available animals showcase
+    const [availableAnimals, setAvailableAnimals] = useState([]);
+    const [currentAvailableIndex, setCurrentAvailableIndex] = useState(0);
+    
     // Transfer modal states
     const [showTransferModal, setShowTransferModal] = useState(false);
     const [transferAnimal, setTransferAnimal] = useState(null);
@@ -8285,6 +8289,42 @@ const App = () => {
         };
         fetchAnimalsForCalculator();
     }, [currentView, authToken, API_BASE_URL]);
+
+    // Fetch and cycle through available animals
+    useEffect(() => {
+        const fetchAvailableAnimals = async () => {
+            if (authToken) {
+                try {
+                    const response = await axios.get(`${API_BASE_URL}/public/global/animals?status=Available&isPublic=true&limit=20`);
+                    if (response.data && response.data.length > 0) {
+                        // Shuffle to show random animals
+                        const shuffled = response.data.sort(() => Math.random() - 0.5);
+                        setAvailableAnimals(shuffled);
+                        setCurrentAvailableIndex(0);
+                    }
+                } catch (error) {
+                    console.error('Failed to fetch available animals:', error);
+                }
+            }
+        };
+        
+        fetchAvailableAnimals();
+        // Refresh every 5 minutes
+        const refreshInterval = setInterval(fetchAvailableAnimals, 300000);
+        
+        return () => clearInterval(refreshInterval);
+    }, [authToken, API_BASE_URL]);
+
+    // Auto-cycle through available animals every 8 seconds
+    useEffect(() => {
+        if (availableAnimals.length > 1 && authToken) {
+            const cycleInterval = setInterval(() => {
+                setCurrentAvailableIndex(prev => (prev + 1) % availableAnimals.length);
+            }, 8000);
+            
+            return () => clearInterval(cycleInterval);
+        }
+    }, [availableAnimals.length, authToken]);
 
     // Fetch breeder info when viewing an animal
     useEffect(() => {
@@ -9530,6 +9570,63 @@ const App = () => {
                     </div>
                 )}
             </div>
+            
+            {/* Available Animal Showcase - Top Right */}
+            {availableAnimals.length > 0 && availableAnimals[currentAvailableIndex] && (
+                <div className="hidden lg:block fixed top-4 right-4 z-[60] w-48">
+                    <div 
+                        key={currentAvailableIndex}
+                        onClick={() => setViewingPublicAnimal(availableAnimals[currentAvailableIndex])}
+                        className="bg-white rounded-xl shadow-lg overflow-hidden cursor-pointer hover:shadow-xl transition-all hover:scale-[1.02] animate-fadeInScale"
+                        style={{
+                            animation: 'fadeInScale 0.5s ease-in-out'
+                        }}
+                    >
+                        <div className="bg-gradient-to-r from-primary to-accent p-2">
+                            <p className="text-xs font-semibold text-black text-center flex items-center justify-center gap-1">
+                                <span>🏷️</span> Available Now
+                            </p>
+                        </div>
+                        {availableAnimals[currentAvailableIndex].imageUrl && (
+                            <img 
+                                src={availableAnimals[currentAvailableIndex].imageUrl} 
+                                alt={availableAnimals[currentAvailableIndex].name}
+                                className="w-full h-32 object-cover"
+                            />
+                        )}
+                        <div className="p-2">
+                            <p className="font-semibold text-sm text-gray-800 truncate">
+                                {availableAnimals[currentAvailableIndex].name}
+                            </p>
+                            <p className="text-xs text-gray-600 truncate">
+                                {availableAnimals[currentAvailableIndex].species}
+                                {availableAnimals[currentAvailableIndex].variety && ` • ${availableAnimals[currentAvailableIndex].variety}`}
+                            </p>
+                            <div className="mt-2 flex items-center justify-between">
+                                <span className="text-xs text-gray-500">
+                                    {availableAnimals[currentAvailableIndex].gender}
+                                </span>
+                                <span className="text-xs text-accent font-medium">
+                                    Click to view →
+                                </span>
+                            </div>
+                        </div>
+                    </div>
+                    {/* Indicator dots */}
+                    {availableAnimals.length > 1 && (
+                        <div className="flex justify-center gap-1 mt-2">
+                            {availableAnimals.slice(0, 5).map((_, idx) => (
+                                <div 
+                                    key={idx}
+                                    className={`w-1.5 h-1.5 rounded-full transition-all ${
+                                        idx === currentAvailableIndex % 5 ? 'bg-accent w-3' : 'bg-gray-300'
+                                    }`}
+                                />
+                            ))}
+                        </div>
+                    )}
+                </div>
+            )}
             
             {/* Welcome Banner - Shows once to new users within first month */}
             {authToken && !hasSeenWelcomeBanner && !tutorialLoading && userProfile && (() => {
