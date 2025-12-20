@@ -5970,9 +5970,15 @@ const ProfileEditForm = ({ userProfile, showModalMessage, onSaveSuccess, onCance
     const [showEmailPublic, setShowEmailPublic] = useState(userProfile.showEmailPublic ?? false); 
     const [showGeneticCodePublic, setShowGeneticCodePublic] = useState(userProfile.showGeneticCodePublic ?? false);
     const [showRemarksPublic, setShowRemarksPublic] = useState(userProfile.showRemarksPublic ?? false);
-    const [allowMessages, setAllowMessages] = useState(userProfile.allowMessages ?? true);
+    const [allowMessages, setAllowMessages] = useState(userProfile.allowMessages === undefined ? true : !!userProfile.allowMessages);
+
+    // Keep allowMessages in sync if userProfile updates (e.g., after save or refetch)
+    useEffect(() => {
+        const next = userProfile.allowMessages === undefined ? true : !!userProfile.allowMessages;
+        setAllowMessages(next);
+    }, [userProfile.allowMessages]);
     
-    console.log('[ProfileEditForm] Initial allowMessages state:', allowMessages); 
+    console.log('[ProfileEditForm] Initial allowMessages state:', allowMessages);
 
     const [profileImageFile, setProfileImageFile] = useState(null); 
     const [profileImageURL, setProfileImageURL] = useState(
