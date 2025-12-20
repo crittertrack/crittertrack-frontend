@@ -9600,7 +9600,9 @@ const App = () => {
                         )}
                         <div className="p-2">
                             <p className="font-semibold text-sm text-gray-800 truncate">
+                                {availableAnimals[currentAvailableIndex].prefix && `${availableAnimals[currentAvailableIndex].prefix} `}
                                 {availableAnimals[currentAvailableIndex].name}
+                                {availableAnimals[currentAvailableIndex].suffix && ` ${availableAnimals[currentAvailableIndex].suffix}`}
                             </p>
                             <p className="text-xs text-gray-600 truncate">
                                 {availableAnimals[currentAvailableIndex].species}
