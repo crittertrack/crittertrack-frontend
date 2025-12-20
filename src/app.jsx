@@ -7943,8 +7943,8 @@ const MessagesView = ({ authToken, API_BASE_URL, onClose, showModalMessage, sele
                 </div>
 
                 <div className="flex flex-1 overflow-hidden">
-                    {/* Conversations List */}
-                    <div className="w-1/3 border-r overflow-y-auto">
+                    {/* Conversations List - Hidden on mobile when conversation selected */}
+                    <div className={`${selectedConversation ? 'hidden sm:flex' : 'flex'} sm:w-1/3 w-full border-r overflow-y-auto flex-col`}>
                         {loading ? (
                             <div className="flex items-center justify-center h-full">
                                 <Loader2 className="animate-spin text-gray-400" size={32} />
@@ -8006,6 +8006,12 @@ const MessagesView = ({ authToken, API_BASE_URL, onClose, showModalMessage, sele
                                 <div className="p-4 border-b bg-gray-50">
                                     <div className="flex items-center justify-between">
                                         <div className="flex items-center gap-3">
+                                            <button
+                                                onClick={() => setSelectedConversation(null)}
+                                                className="sm:hidden text-gray-600 hover:text-gray-800 transition"
+                                            >
+                                                <ArrowLeft size={20} />
+                                            </button>
                                             <div className="w-10 h-10 bg-gray-200 rounded-full overflow-hidden">
                                                 {selectedConversation.otherUser?.profileImage ? (
                                                     <img src={selectedConversation.otherUser.profileImage} alt="" className="w-full h-full object-cover" />
