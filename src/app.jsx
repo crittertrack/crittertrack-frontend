@@ -8154,7 +8154,28 @@ const NotificationPanel = ({ authToken, API_BASE_URL, onClose, showModalMessage,
                 headers: { Authorization: `Bearer ${authToken}` }
             });
             console.log('[Notifications] Received:', response.data);
-            setNotifications(response.data || []);
+            
+            // Fetch missing animal images for notifications that don't have them
+            const notificationsWithImages = await Promise.all(
+                (response.data || []).map(async (notification) => {
+                    // If animalImageUrl is missing, try to fetch the animal details
+                    if (!notification.animalImageUrl && notification.animalId_public) {
+                        try {
+                            const animalRes = await axios.get(`${API_BASE_URL}/public/global/animals?id_public=${notification.animalId_public}`, {
+                                headers: { Authorization: `Bearer ${authToken}` }
+                            });
+                            if (animalRes.data?.length > 0) {
+                                notification.animalImageUrl = animalRes.data[0].imageUrl || '';
+                            }
+                        } catch (err) {
+                            console.warn('Failed to fetch image for animal:', notification.animalId_public, err);
+                        }
+                    }
+                    return notification;
+                })
+            );
+            
+            setNotifications(notificationsWithImages || []);
         } catch (error) {
             console.error('Error fetching notifications:', error);
         } finally {
