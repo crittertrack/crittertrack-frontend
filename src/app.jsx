@@ -1582,7 +1582,7 @@ const PublicProfileView = ({ profile, onBack, onViewAnimal, API_BASE_URL, onStar
                     {onStartMessage && freshProfile?.allowMessages === true && (
                         <button
                             onClick={onStartMessage}
-                            className="px-3 py-1.5 bg-blue-500 hover:bg-blue-600 text-white font-semibold rounded-lg transition flex items-center gap-2"
+                            className="px-3 py-1.5 bg-accent hover:bg-accent/80 text-white font-semibold rounded-lg transition flex items-center gap-2"
                         >
                             <MessageSquare size={16} />
                             Message
