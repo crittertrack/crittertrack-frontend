@@ -1475,9 +1475,25 @@ const PublicProfileView = ({ profile, onBack, onViewAnimal, API_BASE_URL, onStar
     const [speciesFilter, setSpeciesFilter] = useState('');
     const [genderFilters, setGenderFilters] = useState({ Male: true, Female: true });
     const [statusFilter, setStatusFilter] = useState('');
+    const [freshProfile, setFreshProfile] = useState(profile);
+    
+    // Force-refetch latest public profile to ensure flags like allowMessages are current
+    useEffect(() => {
+        const fetchProfile = async () => {
+            if (!profile?.id_public) return;
+            try {
+                const resp = await axios.get(`${API_BASE_URL}/public/profile/${profile.id_public}`);
+                setFreshProfile(resp.data || profile);
+            } catch (err) {
+                console.warn('Failed to refresh public profile, using provided profile', err);
+                setFreshProfile(profile);
+            }
+        };
+        fetchProfile();
+    }, [profile?.id_public, API_BASE_URL]);
     
     const handleShare = () => {
-        const url = `${window.location.origin}/user/${profile.id_public}`;
+        const url = `${window.location.origin}/user/${(freshProfile?.id_public || profile.id_public)}`;
         navigator.clipboard.writeText(url).then(() => {
             setCopySuccess(true);
             setTimeout(() => setCopySuccess(false), 2000);
@@ -1503,21 +1519,21 @@ const PublicProfileView = ({ profile, onBack, onViewAnimal, API_BASE_URL, onStar
         }
     }, [profile, API_BASE_URL]);
 
-    const memberSince = profile.createdAt 
-        ? new Intl.DateTimeFormat('en-US', { year: 'numeric', month: 'long', day: 'numeric' }).format(new Date(profile.createdAt))
-        : (profile.updatedAt ? new Intl.DateTimeFormat('en-US', { year: 'numeric', month: 'long', day: 'numeric' }).format(new Date(profile.updatedAt)) : 'Unknown');
+    const memberSince = (freshProfile?.createdAt || profile.createdAt)
+        ? new Intl.DateTimeFormat('en-US', { year: 'numeric', month: 'long', day: 'numeric' }).format(new Date(freshProfile?.createdAt || profile.createdAt))
+        : ((freshProfile?.updatedAt || profile.updatedAt) ? new Intl.DateTimeFormat('en-US', { year: 'numeric', month: 'long', day: 'numeric' }).format(new Date(freshProfile?.updatedAt || profile.updatedAt)) : 'Unknown');
 
     // Determine display name(s) - respect privacy settings
-    const showPersonalName = profile.showPersonalName ?? false;
-    const showBreederName = profile.showBreederName ?? false;
+    const showPersonalName = (freshProfile?.showPersonalName ?? profile.showPersonalName ?? false);
+    const showBreederName = (freshProfile?.showBreederName ?? profile.showBreederName ?? false);
     
     const showBothNames = showPersonalName && showBreederName && profile.personalName && profile.breederName;
     const displayName = showBothNames 
-        ? `${profile.personalName} (${profile.breederName})`
-        : (showBreederName && profile.breederName 
-            ? profile.breederName 
-            : (showPersonalName && profile.personalName 
-                ? profile.personalName 
+        ? `${(freshProfile?.personalName || profile.personalName)} (${(freshProfile?.breederName || profile.breederName)})`
+        : (showBreederName && (freshProfile?.breederName || profile.breederName) 
+            ? (freshProfile?.breederName || profile.breederName)
+            : (showPersonalName && (freshProfile?.personalName || profile.personalName) 
+                ? (freshProfile?.personalName || profile.personalName)
                 : 'Anonymous Breeder'));
 
     // Apply filters
@@ -1563,7 +1579,7 @@ const PublicProfileView = ({ profile, onBack, onViewAnimal, API_BASE_URL, onStar
                     <ArrowLeft size={18} className="mr-1" /> Back
                 </button>
                 <div className="flex gap-2">
-                    {onStartMessage && profile.allowMessages === true && (
+                    {onStartMessage && freshProfile?.allowMessages === true && (
                         <button
                             onClick={onStartMessage}
                             className="px-3 py-1.5 bg-blue-500 hover:bg-blue-600 text-white font-semibold rounded-lg transition flex items-center gap-2"
@@ -1593,25 +1609,25 @@ const PublicProfileView = ({ profile, onBack, onViewAnimal, API_BASE_URL, onStar
                 )}
                 <div>
                     <h2 className="text-3xl font-bold text-gray-900">{displayName}</h2>
-                    <p className="text-gray-600">Public ID: <span className="font-mono text-accent">{profile.id_public}</span></p>
+                    <p className="text-gray-600">Public ID: <span className="font-mono text-accent">{freshProfile?.id_public || profile.id_public}</span></p>
                     <p className="text-sm text-gray-500 mt-1">Member since {memberSince}</p>
                     
                     {/* Email - Show if public */}
-                    {profile.showEmailPublic && profile.email && (
+                    {(freshProfile?.showEmailPublic ?? profile.showEmailPublic) && (freshProfile?.email || profile.email) && (
                         <p className="text-sm text-gray-700 mt-2 flex items-center gap-2">
                             <Mail size={16} className="text-accent" />
-                            <a href={`mailto:${profile.email}`} className="hover:text-accent transition underline">
-                                {profile.email}
+                            <a href={`mailto:${freshProfile?.email || profile.email}`} className="hover:text-accent transition underline">
+                                {freshProfile?.email || profile.email}
                             </a>
                         </p>
                     )}
                     
                     {/* Website - Show if public */}
-                    {profile.showWebsiteURL && profile.websiteURL && (
+                    {(freshProfile?.showWebsiteURL ?? profile.showWebsiteURL) && (freshProfile?.websiteURL || profile.websiteURL) && (
                         <p className="text-sm text-gray-700 mt-2 flex items-center gap-2">
                             <Globe size={16} className="text-accent" />
-                            <a href={profile.websiteURL} target="_blank" rel="noopener noreferrer" className="hover:text-accent transition underline">
-                                {profile.websiteURL}
+                            <a href={freshProfile?.websiteURL || profile.websiteURL} target="_blank" rel="noopener noreferrer" className="hover:text-accent transition underline">
+                                {freshProfile?.websiteURL || profile.websiteURL}
                             </a>
                         </p>
                     )}
