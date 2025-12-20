@@ -4729,7 +4729,7 @@ const CommunityGeneticsModal = ({ species, onClose, authToken, API_BASE_URL, sho
                 <div className="bg-blue-50 p-4 rounded-lg mb-6">
                     <p className="text-sm text-blue-900">
                         Help us build a comprehensive genetics database! Share your knowledge about {species} genetics.
-                        Your submission will be reviewed by our team and may be used to create a visual builder for this species.
+                        Your submission may be used to create a visual builder for this species.
                     </p>
                 </div>
                 
