@@ -10358,23 +10358,25 @@ const App = () => {
                             />
                         )}
                         <div className="p-2">
-                            {availableAnimals[currentAvailableIndex].ownerCountry && (
-                                <div className="mt-1 flex justify-end -mb-1">
+                            <div className="flex items-start gap-2">
+                                <div className="flex-1 min-w-0">
+                                    <p className="font-semibold text-sm text-gray-800 truncate">
+                                        {availableAnimals[currentAvailableIndex].prefix && `${availableAnimals[currentAvailableIndex].prefix} `}
+                                        {availableAnimals[currentAvailableIndex].name}
+                                        {availableAnimals[currentAvailableIndex].suffix && ` ${availableAnimals[currentAvailableIndex].suffix}`}
+                                    </p>
+                                    <p className="text-xs text-gray-600 truncate">
+                                        {availableAnimals[currentAvailableIndex].species}
+                                        {availableAnimals[currentAvailableIndex].variety && ` • ${availableAnimals[currentAvailableIndex].variety}`}
+                                    </p>
+                                </div>
+                                {availableAnimals[currentAvailableIndex].ownerCountry && (
                                     <span
-                                        className={`${getCountryFlag(availableAnimals[currentAvailableIndex].ownerCountry)} h-4 w-6 block`}
+                                        className={`${getCountryFlag(availableAnimals[currentAvailableIndex].ownerCountry)} h-4 w-6 block flex-shrink-0 mt-1`}
                                         title={getCountryName(availableAnimals[currentAvailableIndex].ownerCountry)}
                                     ></span>
-                                </div>
-                            )}
-                            <p className="font-semibold text-sm text-gray-800 truncate">
-                                {availableAnimals[currentAvailableIndex].prefix && `${availableAnimals[currentAvailableIndex].prefix} `}
-                                {availableAnimals[currentAvailableIndex].name}
-                                {availableAnimals[currentAvailableIndex].suffix && ` ${availableAnimals[currentAvailableIndex].suffix}`}
-                            </p>
-                            <p className="text-xs text-gray-600 truncate">
-                                {availableAnimals[currentAvailableIndex].species}
-                                {availableAnimals[currentAvailableIndex].variety && ` • ${availableAnimals[currentAvailableIndex].variety}`}
-                            </p>
+                                )}
+                            </div>
                             <div className="mt-2 flex items-center justify-between">
                                 <span className="text-xs text-gray-500">
                                     {availableAnimals[currentAvailableIndex].gender}
