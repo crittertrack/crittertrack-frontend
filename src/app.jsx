@@ -62,7 +62,7 @@ const getSpeciesLatinName = (species) => {
 // Helper function to get flag class from country code (for flag-icons library)
 const getCountryFlag = (countryCode) => {
     if (!countryCode || countryCode.length !== 2) return '';
-    return `flag-icons fi fi-${countryCode.toLowerCase()}`;
+    return `fi fi-${countryCode.toLowerCase()}`;
 };
 
 // Get country name from code
@@ -1637,7 +1637,7 @@ const PublicProfileView = ({ profile, onBack, onViewAnimal, API_BASE_URL, onStar
                     {/* Country - Show if available */}
                     {(freshProfile?.country || profile.country) && (
                         <p className="text-sm text-gray-600 mt-1 flex items-center gap-2">
-                            <span className={`${getCountryFlag(freshProfile?.country || profile.country)} h-5 w-7`}></span>
+                            <span className={`${getCountryFlag(freshProfile?.country || profile.country)} inline-block h-5 w-7`}></span>
                             <span>{getCountryName(freshProfile?.country || profile.country)}</span>
                         </p>
                     )}
@@ -1761,7 +1761,7 @@ const PublicProfileView = ({ profile, onBack, onViewAnimal, API_BASE_URL, onStar
                                                 {/* Country flag top-left */}
                                                 {(freshProfile?.country || profile.country) && (
                                                     <div className="absolute top-2 left-2" title={getCountryName(freshProfile?.country || profile.country)}>
-                                                        <span className={`${getCountryFlag(freshProfile?.country || profile.country)} h-6 w-8 block`}></span>
+                                                        <span className={`${getCountryFlag(freshProfile?.country || profile.country)} inline-block h-6 w-8`}></span>
                                                     </div>
                                                 )}
 
@@ -10372,7 +10372,7 @@ const App = () => {
                                 </div>
                                 {availableAnimals[currentAvailableIndex].ownerCountry && (
                                     <span
-                                        className={`${getCountryFlag(availableAnimals[currentAvailableIndex].ownerCountry)} h-4 w-6 block flex-shrink-0 mt-1`}
+                                        className={`${getCountryFlag(availableAnimals[currentAvailableIndex].ownerCountry)} inline-block h-4 w-6 flex-shrink-0 mt-1`}
                                         title={getCountryName(availableAnimals[currentAvailableIndex].ownerCountry)}
                                     ></span>
                                 )}
