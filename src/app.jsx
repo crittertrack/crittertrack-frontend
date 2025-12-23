@@ -9319,7 +9319,7 @@ const App = () => {
     const handleEditAnimal = (animal) => {
         setAnimalToEdit(animal);
         setSpeciesToAdd(animal.species); 
-        navigate('/');
+        navigate('/edit-animal');
     };
 
     const handleViewAnimal = async (animal) => {
@@ -9352,7 +9352,7 @@ const App = () => {
         
         console.log('[handleViewAnimal] Father ID:', normalizedAnimal.fatherId_public, 'Mother ID:', normalizedAnimal.motherId_public);
         setAnimalToView(normalizedAnimal);
-        navigate('/');
+        navigate('/view-animal');
     };
 
     // Set up global handler for viewing public animals from search modal
