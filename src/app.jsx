@@ -10627,56 +10627,194 @@ const App = () => {
                                                 )}
                                             </div>
                                         </div>
-                                        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-                                            <div className="bg-gray-100 rounded-xl overflow-hidden">
-                                                {animalToView.imageUrl || animalToView.photoUrl ? (
-                                                    <img src={animalToView.imageUrl || animalToView.photoUrl} alt={animalToView.name} className="w-full h-auto" />
-                                                ) : (
-                                                    <div className="w-full h-64 flex items-center justify-center text-gray-400">
-                                                        <Cat size={64} />
+
+                                        {/* Main Info Section */}
+                                        <div className="border-2 border-gray-300 rounded-lg p-4 sm:p-6 mb-6">
+                                            <div className="flex flex-col sm:flex-row items-start sm:space-x-6 space-y-4 sm:space-y-0">
+                                                <div className="w-full sm:w-auto flex flex-col items-center sm:items-start">
+                                                    <div className="w-40 h-40 bg-gray-100 rounded-lg overflow-hidden flex items-center justify-center">
+                                                        { (animalToView.imageUrl || animalToView.photoUrl) ? (
+                                                            <img src={animalToView.imageUrl || animalToView.photoUrl} alt={animalToView.name} className="w-full h-full object-cover" />
+                                                        ) : (
+                                                            <Cat size={72} className="text-gray-400" />
+                                                        ) }
                                                     </div>
-                                                )}
-                                            </div>
-                                            <div className="space-y-4">
-                                                <div>
-                                                    <h1 className="text-4xl font-bold text-gray-800">
-                                                        {animalToView.prefix ? `${animalToView.prefix} ` : ''}{animalToView.name}{animalToView.suffix ? ` ${animalToView.suffix}` : ''}
-                                                    </h1>
-                                                    <p className="text-lg text-gray-600">{animalToView.species} • {animalToView.gender}</p>
-                                                    <p className="text-sm text-gray-500 mt-1">ID: {animalToView.id_public}</p>
+                                                    {/* Status bar */}
+                                                    <div className={`w-40 py-2 text-center mt-2 rounded border-2 ${
+                                                        animalToView.isViewOnly 
+                                                            ? 'bg-orange-100 border-orange-400 text-orange-800' 
+                                                            : 'bg-gray-200 border-gray-400 text-gray-800'
+                                                    }`}>
+                                                        <div className="text-sm font-semibold">{animalToView.isViewOnly ? 'Sold' : (animalToView.status || 'Unknown')}</div>
+                                                    </div>
+                                                    {/* Icon row */}
+                                                    <div className="w-40 flex justify-center items-center space-x-3 py-2">
+                                                        {animalToView.isOwned ? (
+                                                            <Heart size={18} className="text-black" />
+                                                        ) : (
+                                                            <HeartOff size={18} className="text-black" />
+                                                        )}
+                                                        {animalToView.showOnPublicProfile ? (
+                                                            <Eye size={18} className="text-black" />
+                                                        ) : (
+                                                            <EyeOff size={18} className="text-black" />
+                                                        )}
+                                                        {animalToView.isInMating && <Hourglass size={18} className="text-black" />}
+                                                        {animalToView.isPregnant && <Bean size={18} className="text-black" />}
+                                                        {animalToView.isNursing && <Milk size={18} className="text-black" />}
+                                                    </div>
                                                 </div>
-                                                <div className="flex gap-2">
-                                                    <span className={`px-3 py-1 rounded-full text-sm font-semibold ${animalToView.status === 'Available' ? 'bg-green-100 text-green-800' : animalToView.status === 'Sold' ? 'bg-red-100 text-red-800' : 'bg-gray-100 text-gray-800'}`}>
-                                                        {animalToView.status || '—'}
-                                                    </span>
-                                                    {animalToView.isViewOnly && (
-                                                        <span className="px-3 py-1 rounded-full text-sm font-semibold bg-blue-100 text-blue-800 flex items-center gap-1">
-                                                            <Eye size={14} />
-                                                            View-Only
-                                                        </span>
-                                                    )}
-                                                </div>
-                                                <div className="space-y-2">
-                                                    <p><span className="font-semibold">Birth Date:</span> {formattedBirthDate}</p>
-                                                    <p><span className="font-semibold">Birth Weight:</span> {animalToView.birthWeight ? `${animalToView.birthWeight}g` : '—'}</p>
-                                                    <p><span className="font-semibold">Status:</span> {animalToView.status || '—'}</p>
-                                                    <p><span className="font-semibold">Genetics:</span> {animalToView.genetics || '—'}</p>
-                                                    <p><span className="font-semibold">Genotype:</span> {animalToView.genotype || '—'}</p>
-                                                    <p><span className="font-semibold">Coat:</span> {animalToView.coat || '—'}</p>
-                                                    <p><span className="font-semibold">Eyes:</span> {animalToView.eyes || '—'}</p>
-                                                    <p><span className="font-semibold">Ears:</span> {animalToView.ears || '—'}</p>
-                                                    <p><span className="font-semibold">Dad:</span> {animalToView.dad || '—'}</p>
-                                                    <p><span className="font-semibold">Mom:</span> {animalToView.mom || '—'}</p>
+                                                <div className="flex-1 w-full">
+                                                    <h2 className="text-2xl font-bold text-gray-800 mb-2">{animalToView.prefix ? `${animalToView.prefix} ` : ''}{animalToView.name}{animalToView.suffix ? ` ${animalToView.suffix}` : ''}</h2>
+                                                    <p className="text-sm text-gray-600 mb-4">
+                                                        {animalToView.species}
+                                                        {getSpeciesLatinName(animalToView.species) && (
+                                                            <span className="italic text-gray-500"> ({getSpeciesLatinName(animalToView.species)})</span>
+                                                        )}
+                                                        &nbsp; • &nbsp; {animalToView.id_public}
+                                                    </p>
+                                                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-x-6 gap-y-3 text-sm text-gray-700">
+                                                        <div><strong>Gender:</strong> {animalToView.gender}</div>
+                                                        <div><strong>Birth Date:</strong> {formattedBirthDate}</div>
+                                                        <div><strong>Color:</strong> {animalToView.color || '—'}</div>
+                                                        <div><strong>Coat:</strong> {animalToView.coat || '—'}</div>
+                                                        {animalToView.species === 'Fancy Rat' && (
+                                                            <div><strong>Ears:</strong> {animalToView.ears || '—'}</div>
+                                                        )}
+                                                        {animalToView.deceasedDate && (
+                                                            <div><strong>Deceased Date:</strong> {new Intl.DateTimeFormat('en-US', { year: 'numeric', month: 'long', day: 'numeric' }).format(new Date(animalToView.deceasedDate))}</div>
+                                                        )}
+                                                        <div><strong>Breedery ID:</strong> {animalToView.breederyId || animalToView.registryCode || '—'}</div>
+                                                        <div><strong>Inbreeding COI:</strong> {animalToView.inbreedingCoefficient != null ? `${animalToView.inbreedingCoefficient.toFixed(2)}%` : 'N/A'}</div>
+                                                    </div>
                                                 </div>
                                             </div>
                                         </div>
-                                        {animalToView.notes && (
-                                            <div className="mt-6 bg-gray-50 p-4 rounded-lg">
-                                                <h2 className="font-semibold mb-2 text-gray-800">Notes</h2>
-                                                <p className="text-gray-700 whitespace-pre-wrap">{animalToView.notes}</p>
+
+                                        {/* Genetic Code Section */}
+                                        <div className="border-2 border-gray-300 rounded-lg p-6 mb-6">
+                                            <h3 className="text-lg font-semibold text-gray-800 mb-3">Genetic Code</h3>
+                                            {animalToView.geneticCode ? (
+                                                <p className="text-gray-700 text-sm font-mono">{animalToView.geneticCode}</p>
+                                            ) : (
+                                                <p className="text-gray-500 text-sm italic">No genetic code recorded.</p>
+                                            )}
+                                        </div>
+
+                                        {/* Breeder & Owner Section */}
+                                        <div className="border-2 border-gray-300 rounded-lg p-6 mb-6">
+                                            <h3 className="text-lg font-semibold text-gray-800 mb-3">Breeder & Owner</h3>
+                                            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 text-sm text-gray-700">
+                                                <div>
+                                                    <strong>Breeder:</strong>{' '}
+                                                    {animalToView.breederId_public ? (
+                                                        viewAnimalBreederInfo ? (
+                                                            <span>
+                                                                {(() => {
+                                                                    const showPersonal = viewAnimalBreederInfo.showPersonalName ?? false;
+                                                                    const showBreeder = viewAnimalBreederInfo.showBreederName ?? false;
+                                                                    
+                                                                    if (showPersonal && showBreeder && viewAnimalBreederInfo.personalName && viewAnimalBreederInfo.breederName) {
+                                                                        return `${viewAnimalBreederInfo.personalName} (${viewAnimalBreederInfo.breederName})`;
+                                                                    } else if (showBreeder && viewAnimalBreederInfo.breederName) {
+                                                                        return viewAnimalBreederInfo.breederName;
+                                                                    } else if (showPersonal && viewAnimalBreederInfo.personalName) {
+                                                                        return viewAnimalBreederInfo.personalName;
+                                                                    } else {
+                                                                        return 'Unknown Breeder';
+                                                                    }
+                                                                })()}
+                                                            </span>
+                                                        ) : (
+                                                            <span className="font-mono text-accent">{animalToView.breederId_public}</span>
+                                                        )
+                                                    ) : (
+                                                        <span className="text-gray-500 italic">Not specified</span>
+                                                    )}
+                                                </div>
+                                                {animalToView.ownerName && (
+                                                    <div>
+                                                        <strong>Owner:</strong> {animalToView.ownerName}
+                                                    </div>
+                                                )}
+                                            </div>
+                                        </div>
+
+                                        {/* Remarks / Notes Section */}
+                                        <div className="border-2 border-gray-300 rounded-lg p-6 mb-6">
+                                            <h3 className="text-lg font-semibold text-gray-800 mb-3">Remarks / Notes</h3>
+                                            {animalToView.remarks ? (
+                                                <p className="text-gray-700 text-sm">{animalToView.remarks}</p>
+                                            ) : (
+                                                <p className="text-gray-500 text-sm italic">No remarks recorded.</p>
+                                            )}
+                                        </div>
+
+                                        {/* Tags Section */}
+                                        {animalToView.tags && animalToView.tags.length > 0 && (
+                                            <div data-tutorial-target="tags-section" className="border-2 border-gray-300 rounded-lg p-6 mb-6">
+                                                <h3 className="text-lg font-semibold text-gray-800 mb-3">Tags</h3>
+                                                <div className="flex flex-wrap gap-2">
+                                                    {animalToView.tags.map((tag, idx) => (
+                                                        <span key={idx} className="inline-flex items-center bg-primary text-black text-sm font-semibold px-3 py-1 rounded-full">
+                                                            {tag}
+                                                        </span>
+                                                    ))}
+                                                </div>
                                             </div>
                                         )}
+
+                                        {/* Parents Section */}
+                                        <div className="border-2 border-gray-300 rounded-lg p-6 mb-6">
+                                            <div className="flex justify-between items-center mb-4">
+                                                <h3 className="text-lg font-semibold text-gray-800">Parents</h3>
+                                                <button
+                                                    onClick={() => setShowPedigreeChart(true)}
+                                                    data-tutorial-target="pedigree-btn"
+                                                    className="flex items-center gap-2 px-3 py-1.5 bg-primary hover:bg-primary/90 text-black text-sm font-semibold rounded-lg transition"
+                                                >
+                                                    <FileText size={16} />
+                                                    Pedigree
+                                                </button>
+                                            </div>
+                                            <div className="flex flex-col sm:grid sm:grid-cols-2 gap-4">
+                                                {/* Father Card */}
+                                                <ParentCard 
+                                                    parentId={animalToView.fatherId_public} 
+                                                    parentType="Father"
+                                                    authToken={authToken}
+                                                    API_BASE_URL={API_BASE_URL}
+                                                    onViewAnimal={handleViewAnimal}
+                                                />
+                                                {/* Mother Card */}
+                                                <ParentCard 
+                                                    parentId={animalToView.motherId_public} 
+                                                    parentType="Mother"
+                                                    authToken={authToken}
+                                                    API_BASE_URL={API_BASE_URL}
+                                                    onViewAnimal={handleViewAnimal}
+                                                />
+                                            </div>
+                                        </div>
+
+                                        {/* Offspring Section */}
+                                        <OffspringSection
+                                            animalId={animalToView.id_public}
+                                            API_BASE_URL={API_BASE_URL}
+                                            authToken={authToken}
+                                            onViewAnimal={handleViewAnimal}
+                                        />
                                     </div>
+
+                                    {/* Pedigree Chart Modal */}
+                                    {showPedigreeChart && animalToView && (
+                                        <PedigreeChart
+                                            animalData={animalToView}
+                                            onClose={() => setShowPedigreeChart(false)}
+                                            API_BASE_URL={API_BASE_URL}
+                                            authToken={authToken}
+                                        />
+                                    )}
                                     </>
                                 );
                             })()
