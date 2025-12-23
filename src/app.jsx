@@ -7308,7 +7308,7 @@ const AuthView = ({ onLoginSuccess, showModalMessage, isRegister, setIsRegister,
     );
 };
 
-const AnimalList = ({ authToken, showModalMessage, onEditAnimal, onViewAnimal, onSetCurrentView, fetchHiddenAnimals }) => {
+const AnimalList = ({ authToken, showModalMessage, onEditAnimal, onViewAnimal, onSetCurrentView, fetchHiddenAnimals, navigate }) => {
     const [animals, setAnimals] = useState([]);
     const [loading, setLoading] = useState(true);
     const [statusFilter, setStatusFilter] = useState('');
@@ -7704,7 +7704,7 @@ const AnimalList = ({ authToken, showModalMessage, onEditAnimal, onViewAnimal, o
                 </div>
                 <div className="flex items-center gap-2">
                     <button 
-                        onClick={() => { onSetCurrentView('hidden-animals'); fetchHiddenAnimals(); }}
+                        onClick={() => { navigate('/'); fetchHiddenAnimals(); }}
                         data-tutorial-target="hidden-animals-btn"
                         className="text-gray-600 hover:text-gray-800 transition flex items-center gap-1 px-3 py-1.5 rounded-lg hover:bg-gray-100"
                         title="View Hidden Animals"
@@ -7747,7 +7747,7 @@ const AnimalList = ({ authToken, showModalMessage, onEditAnimal, onViewAnimal, o
                             <span>Search</span>
                         </button>
                         <button 
-                            onClick={() => onSetCurrentView('select-species')} 
+                            onClick={() => navigate('/')} 
                             className="flex-1 sm:flex-none bg-accent hover:bg-accent/90 text-white font-semibold py-2 px-4 rounded-lg transition duration-150 shadow-md flex items-center justify-center space-x-1 whitespace-nowrap"
                             data-tutorial-target="add-animal-btn"
                         >
@@ -8671,11 +8671,15 @@ const NotificationPanel = ({ authToken, API_BASE_URL, onClose, showModalMessage,
 };
 
 const App = () => {
+    const navigate = useNavigate();
+    const location = useLocation();
     const [authToken, setAuthToken] = useState(localStorage.getItem('authToken') || null);
     const [userProfile, setUserProfile] = useState(null);
-    const [currentView, setCurrentView] = useState('list'); 
     const [hasSkippedTutorialThisSession, setHasSkippedTutorialThisSession] = useState(false);
     const [isMobile, setIsMobile] = useState(window.innerWidth < 768);
+    
+    // Derive currentView from URL path
+    const currentView = location.pathname.split('/')[1] || 'list';
     
     // Detect mobile/app environment
     React.useEffect(() => {
@@ -8775,7 +8779,7 @@ const App = () => {
     const handleLogout = useCallback((expired = false) => {
         setAuthToken(null);
         setUserProfile(null);
-        setCurrentView('auth');
+        navigate('/');
         localStorage.removeItem('authToken');
         if (expired) {
             showModalMessage('Session Expired', 'You were logged out due to 15 minutes of inactivity.');
@@ -8964,7 +8968,7 @@ const App = () => {
             delete axios.defaults.headers.common['Authorization'];
             localStorage.removeItem('authToken');
             setUserProfile(null);
-            setCurrentView('list');
+            navigate('/');
         }
     }, [authToken]);
 
@@ -9308,14 +9312,14 @@ const App = () => {
         } catch (e) {
             console.warn('Could not persist authToken to localStorage', e);
         }
-        setCurrentView('list');
+        navigate('/');
         setIsRegister(false);
     };
 
     const handleEditAnimal = (animal) => {
         setAnimalToEdit(animal);
         setSpeciesToAdd(animal.species); 
-        setCurrentView('edit-animal');
+        navigate('/');
     };
 
     const handleViewAnimal = async (animal) => {
@@ -9348,7 +9352,7 @@ const App = () => {
         
         console.log('[handleViewAnimal] Father ID:', normalizedAnimal.fatherId_public, 'Mother ID:', normalizedAnimal.motherId_public);
         setAnimalToView(normalizedAnimal);
-        setCurrentView('view-animal');
+        navigate('/');
     };
 
     // Set up global handler for viewing public animals from search modal
@@ -9399,7 +9403,7 @@ const App = () => {
         const handleDeleteAnimal = async (id_public) => {
         try {
             await axios.delete(`${API_BASE_URL}/animals/${id_public}`);
-            setCurrentView('list');
+            navigate('/');
             showModalMessage('Success', `Animal with ID ${id_public} has been successfully deleted.`);
         } catch (error) {
             console.error('Failed to delete animal:', error);
@@ -9415,7 +9419,7 @@ const App = () => {
             await axios.post(`${API_BASE_URL}/animals/${id_public}/hide`, {}, {
                 headers: { Authorization: `Bearer ${authToken}` }
             });
-            setCurrentView('list');
+            navigate('/');
             showModalMessage('Success', 'View-only animal hidden. You can restore it anytime from the hidden animals section.');
         } catch (error) {
             console.error('Failed to hide animal:', error);
@@ -9505,7 +9509,7 @@ const App = () => {
             setTransferSelectedUser(null);
             setTransferPrice('');
             setTransferNotes('');
-            setCurrentView('list');
+            navigate('/');
         } catch (error) {
             console.error('Error creating transfer:', error);
             showModalMessage('Error', error.response?.data?.message || 'Failed to create transfer');
@@ -9515,12 +9519,12 @@ const App = () => {
     const renderView = () => {
         switch (currentView) {
             case 'donation':
-                return <DonationView onBack={() => setCurrentView('list')} />;
+                return <DonationView onBack={() => navigate('/')} />;
             case 'publicProfile':
                 return (
                     <PublicProfileView 
                         profile={viewingPublicProfile}
-                        onBack={() => { setViewingPublicProfile(null); setCurrentView('list'); }}
+                        onBack={() => { setViewingPublicProfile(null); navigate('/'); }}
                         onViewAnimal={(animal) => setViewingPublicAnimal(animal)}
                         API_BASE_URL={API_BASE_URL}
                         onStartMessage={async () => {
@@ -9569,9 +9573,9 @@ const App = () => {
                         speciesOptions={speciesOptions} 
                         onSelectSpecies={(species) => { 
                             setSpeciesToAdd(species); 
-                            setCurrentView('add-animal'); 
+                            navigate('/'); 
                         }} 
-                        onManageSpecies={() => setCurrentView('manage-species')}
+                        onManageSpecies={() => navigate('/')}
                         searchTerm={speciesSearchTerm}
                         setSearchTerm={setSpeciesSearchTerm}
                         categoryFilter={speciesCategoryFilter}
@@ -9583,7 +9587,7 @@ const App = () => {
                     <SpeciesManager 
                         speciesOptions={speciesOptions} 
                         setSpeciesOptions={setSpeciesOptions} 
-                        onCancel={() => setCurrentView('select-species')}
+                        onCancel={() => navigate('/')}
                         showModalMessage={showModalMessage}
                         authToken={authToken}
                         API_BASE_URL={API_BASE_URL}
@@ -9597,9 +9601,9 @@ const App = () => {
                             speciesOptions={speciesOptions}
                             onSelectSpecies={(species) => {
                                 setSpeciesToAdd(species);
-                                setCurrentView('add-animal');
+                                navigate('/');
                             }}
-                            onManageSpecies={() => setCurrentView('manage-species')}
+                            onManageSpecies={() => navigate('/')}
                             searchTerm={speciesSearchTerm}
                             setSearchTerm={setSpeciesSearchTerm}
                             categoryFilter={speciesCategoryFilter}
@@ -9616,7 +9620,7 @@ const App = () => {
                         animalToEdit={null}
                         species={speciesToAdd}
                         onSave={handleSaveAnimal}
-                        onCancel={() => { setCurrentView('list'); setSpeciesToAdd(null); }}
+                        onCancel={() => { navigate('/'); setSpeciesToAdd(null); }}
                         onDelete={null}
                         authToken={authToken}
                         showModalMessage={showModalMessage}
@@ -9644,7 +9648,7 @@ const App = () => {
                         animalToEdit={animalToEdit} 
                         species={animalToEdit.species} 
                         onSave={handleSaveAnimal} 
-                        onCancel={() => setCurrentView('list')} 
+                        onCancel={() => navigate('/')} 
                         onDelete={handleDeleteAnimal}
                         authToken={authToken} 
                         showModalMessage={showModalMessage}
@@ -9680,7 +9684,7 @@ const App = () => {
                     <>
                     <div className="w-full max-w-4xl bg-white p-6 rounded-xl shadow-lg">
                         <div className="flex items-start justify-between mb-6">
-                            <button onClick={() => setCurrentView('list')} className="flex items-center text-gray-600 hover:text-gray-800 font-medium">
+                            <button onClick={() => navigate('/')} className="flex items-center text-gray-600 hover:text-gray-800 font-medium">
                                 <ArrowLeft size={20} className="mr-2" />
                                 Back to Dashboard
                             </button>
@@ -9697,7 +9701,7 @@ const App = () => {
                                     <>
                                         <button 
                                             data-tutorial-target="edit-animal-btn"
-                                            onClick={() => { setAnimalToEdit(animalToView); setSpeciesToAdd(animalToView.species); setCurrentView('edit-animal'); }} 
+                                            onClick={() => { setAnimalToEdit(animalToView); setSpeciesToAdd(animalToView.species); navigate('/'); }} 
                                             className="bg-primary hover:bg-primary/90 text-black font-semibold py-2 px-4 rounded-lg"
                                         >
                                             Edit
@@ -9707,7 +9711,7 @@ const App = () => {
                                                 // Use new budget-based transfer system
                                                 setPreSelectedTransferAnimal(animalToView);
                                                 setPreSelectedTransactionType('animal-sale');
-                                                setCurrentView('budget');
+                                                navigate('/');
                                             }}
                                             data-tutorial-target="transfer-animal-btn"
                                             className="bg-accent hover:bg-accent/90 text-white font-semibold py-2 px-4 rounded-lg transition flex items-center gap-2"
@@ -10005,7 +10009,7 @@ const App = () => {
                 return (
                     <div className="w-full max-w-4xl bg-white p-6 rounded-xl shadow-lg">
                         <div className="flex items-start justify-between mb-6">
-                            <button onClick={() => setCurrentView('list')} className="flex items-center text-gray-600 hover:text-gray-800 font-medium">
+                            <button onClick={() => navigate('/')} className="flex items-center text-gray-600 hover:text-gray-800 font-medium">
                                 <ArrowLeft size={20} className="mr-2" />
                                 Back to Dashboard
                             </button>
@@ -10083,8 +10087,9 @@ const App = () => {
                         showModalMessage={showModalMessage} 
                         onEditAnimal={handleEditAnimal} 
                         onViewAnimal={handleViewAnimal}
-                        onSetCurrentView={setCurrentView}
+                        onSetCurrentView={(view) => navigate(`/${view}`)}
                         fetchHiddenAnimals={fetchHiddenAnimals}
+                        navigate={navigate}
                     />
                 );
         }
@@ -10119,7 +10124,7 @@ const App = () => {
                                 <Search size={18} className="mr-1" /> Search
                             </button>
                             <button 
-                                onClick={() => { setViewingPublicProfile(null); setCurrentView('auth'); }}
+                                onClick={() => { setViewingPublicProfile(null); navigate('/'); }}
                                 className="px-3 py-2 bg-gray-200 hover:bg-gray-300 text-gray-700 font-semibold rounded-lg transition flex items-center"
                             >
                                 <LogIn size={18} className="mr-1" /> Login
@@ -10141,7 +10146,7 @@ const App = () => {
                     
                     <PublicProfileView 
                         profile={viewingPublicProfile}
-                        onBack={() => { setViewingPublicProfile(null); setCurrentView('auth'); }}
+                        onBack={() => { setViewingPublicProfile(null); navigate('/'); }}
                         onViewAnimal={(animal) => setViewingPublicAnimal(animal)}
                         API_BASE_URL={API_BASE_URL}
                     />
@@ -10165,13 +10170,13 @@ const App = () => {
                                 <Search size={18} className="mr-1" /> Search
                             </button>
                             <button 
-                                onClick={() => setCurrentView('genetics-calculator')}
+                                onClick={() => navigate('/')}
                                 className="px-3 py-2 bg-primary text-black font-semibold rounded-lg transition flex items-center"
                             >
                                 <Cat size={18} className="mr-1" /> Genetics
                             </button>
                             <button 
-                                onClick={() => setCurrentView('auth')}
+                                onClick={() => navigate('/')}
                                 className="px-3 py-2 bg-gray-200 hover:bg-gray-300 text-gray-700 font-semibold rounded-lg transition flex items-center"
                             >
                                 <LogIn size={18} className="mr-1" /> Login
@@ -10214,7 +10219,7 @@ const App = () => {
                 <div className="min-h-screen bg-page-bg flex flex-col items-center justify-center p-6 font-sans">
                     {showModal && <ModalMessage title={modalMessage.title} message={modalMessage.message} onClose={() => setShowModal(false)} />}
                     
-                    <DonationView onBack={() => setCurrentView('auth')} />
+                    <DonationView onBack={() => navigate('/')} />
                 </div>
             );
         }
@@ -10236,7 +10241,7 @@ const App = () => {
                             <Search size={18} className="mr-1" /> Search
                         </button>
                         <button 
-                            onClick={() => setCurrentView('genetics-calculator')}
+                            onClick={() => navigate('/')}
                             className="px-3 py-2 bg-primary hover:bg-primary-dark text-black font-semibold rounded-lg transition flex items-center"
                         >
                             <Cat size={18} className="mr-1" /> Genetics
@@ -10292,7 +10297,7 @@ const App = () => {
                         </p>
                         
                         <button
-                            onClick={() => setCurrentView('donation')}
+                            onClick={() => navigate('/')}
                             className="w-full bg-gradient-to-r from-pink-500 to-red-500 hover:from-pink-600 hover:to-red-600 text-white font-semibold py-3 px-4 rounded-lg shadow-md transition flex items-center justify-center gap-2"
                         >
                             <Heart size={18} className="fill-current" />
@@ -10383,7 +10388,7 @@ const App = () => {
             <div className="fixed top-4 left-4 z-[60]">
                 <button
                     onClick={() => {
-                        setCurrentView('donation');
+                        navigate('/');
                         if (!hasSeenDonationHighlight) {
                             setHasSeenDonationHighlight(true);
                             localStorage.setItem('hasSeenDonationHighlight', 'true');
@@ -10515,7 +10520,7 @@ const App = () => {
                     onSelectUser={(user) => {
                         setShowUserSearchModal(false);
                         setViewingPublicProfile(user);
-                        setCurrentView('publicProfile');
+                        navigate('/');
                     }}
                 />
             )}
@@ -10534,23 +10539,23 @@ const App = () => {
                     <CustomAppLogo size="w-10 h-10" />
                     
                     <nav className="flex space-x-3">
-                        <button onClick={() => setCurrentView('list')} className={`px-4 py-2 text-xs font-medium rounded-lg transition duration-150 flex flex-col items-center ${currentView === 'list' ? 'bg-primary text-black shadow-md' : 'text-gray-600 hover:bg-gray-100'}`}>
+                        <button onClick={() => navigate('/')} className={`px-4 py-2 text-xs font-medium rounded-lg transition duration-150 flex flex-col items-center ${currentView === 'list' ? 'bg-primary text-black shadow-md' : 'text-gray-600 hover:bg-gray-100'}`}>
                             <ClipboardList size={18} className="mb-1" />
                             <span>Animals</span>
                         </button>
-                        <button onClick={() => setCurrentView('litters')} data-tutorial-target="litters-btn" className={`px-4 py-2 text-xs font-medium rounded-lg transition duration-150 flex flex-col items-center ${currentView === 'litters' ? 'bg-primary text-black shadow-md' : 'text-gray-600 hover:bg-gray-100'}`}>
+                        <button onClick={() => navigate('/')} data-tutorial-target="litters-btn" className={`px-4 py-2 text-xs font-medium rounded-lg transition duration-150 flex flex-col items-center ${currentView === 'litters' ? 'bg-primary text-black shadow-md' : 'text-gray-600 hover:bg-gray-100'}`}>
                             <BookOpen size={18} className="mb-1" />
                             <span>Litters</span>
                         </button>
-                        <button onClick={() => setCurrentView('budget')} data-tutorial-target="budget-btn" className={`px-4 py-2 text-xs font-medium rounded-lg transition duration-150 flex flex-col items-center ${currentView === 'budget' ? 'bg-primary text-black shadow-md' : 'text-gray-600 hover:bg-gray-100'}`}>
+                        <button onClick={() => navigate('/')} data-tutorial-target="budget-btn" className={`px-4 py-2 text-xs font-medium rounded-lg transition duration-150 flex flex-col items-center ${currentView === 'budget' ? 'bg-primary text-black shadow-md' : 'text-gray-600 hover:bg-gray-100'}`}>
                             <DollarSign size={18} className="mb-1" />
                             <span>Budget</span>
                         </button>
-                        <button onClick={() => setCurrentView('genetics-calculator')} data-tutorial-target="genetics-btn" className={`px-4 py-2 text-xs font-medium rounded-lg transition duration-150 flex flex-col items-center ${currentView === 'genetics-calculator' ? 'bg-primary text-black shadow-md' : 'text-gray-600 hover:bg-gray-100'}`}>
+                        <button onClick={() => navigate('/')} data-tutorial-target="genetics-btn" className={`px-4 py-2 text-xs font-medium rounded-lg transition duration-150 flex flex-col items-center ${currentView === 'genetics-calculator' ? 'bg-primary text-black shadow-md' : 'text-gray-600 hover:bg-gray-100'}`}>
                             <Cat size={18} className="mb-1" />
                             <span>Genetics</span>
                         </button>
-                        <button onClick={() => setCurrentView('profile')} data-tutorial-target="profile-btn" className={`px-4 py-2 text-xs font-medium rounded-lg transition duration-150 flex flex-col items-center ${currentView === 'profile' ? 'bg-primary text-black shadow-md' : 'text-gray-600 hover:bg-gray-100'}`}>
+                        <button onClick={() => navigate('/')} data-tutorial-target="profile-btn" className={`px-4 py-2 text-xs font-medium rounded-lg transition duration-150 flex flex-col items-center ${currentView === 'profile' ? 'bg-primary text-black shadow-md' : 'text-gray-600 hover:bg-gray-100'}`}>
                             <User size={18} className="mb-1" />
                             <span>Profile</span>
                         </button>
@@ -10674,23 +10679,23 @@ const App = () => {
 
                     {/* Second row: Navigation */}
                     <nav className="flex justify-between space-x-1">
-                        <button onClick={() => setCurrentView('list')} className={`flex-1 px-2 py-2 text-xs font-medium rounded-lg transition duration-150 ${currentView === 'list' ? 'bg-primary text-black shadow-md' : 'text-gray-600 hover:bg-gray-100'}`}>
+                        <button onClick={() => navigate('/')} className={`flex-1 px-2 py-2 text-xs font-medium rounded-lg transition duration-150 ${currentView === 'list' ? 'bg-primary text-black shadow-md' : 'text-gray-600 hover:bg-gray-100'}`}>
                             <ClipboardList size={16} className="inline mb-0.5" />
                             <span className="block">Animals</span>
                         </button>
-                        <button onClick={() => setCurrentView('litters')} data-tutorial-target="litters-btn" className={`flex-1 px-2 py-2 text-xs font-medium rounded-lg transition duration-150 ${currentView === 'litters' ? 'bg-primary text-black shadow-md' : 'text-gray-600 hover:bg-gray-100'}`}>
+                        <button onClick={() => navigate('/')} data-tutorial-target="litters-btn" className={`flex-1 px-2 py-2 text-xs font-medium rounded-lg transition duration-150 ${currentView === 'litters' ? 'bg-primary text-black shadow-md' : 'text-gray-600 hover:bg-gray-100'}`}>
                             <BookOpen size={16} className="inline mb-0.5" />
                             <span className="block">Litters</span>
                         </button>
-                        <button onClick={() => setCurrentView('budget')} data-tutorial-target="budget-btn" className={`flex-1 px-2 py-2 text-xs font-medium rounded-lg transition duration-150 ${currentView === 'budget' ? 'bg-primary text-black shadow-md' : 'text-gray-600 hover:bg-gray-100'}`}>
+                        <button onClick={() => navigate('/')} data-tutorial-target="budget-btn" className={`flex-1 px-2 py-2 text-xs font-medium rounded-lg transition duration-150 ${currentView === 'budget' ? 'bg-primary text-black shadow-md' : 'text-gray-600 hover:bg-gray-100'}`}>
                             <DollarSign size={16} className="inline mb-0.5" />
                             <span className="block">Budget</span>
                         </button>
-                        <button onClick={() => setCurrentView('genetics-calculator')} data-tutorial-target="genetics-btn" className={`flex-1 px-2 py-2 text-xs font-medium rounded-lg transition duration-150 ${currentView === 'genetics-calculator' ? 'bg-primary text-black shadow-md' : 'text-gray-600 hover:bg-gray-100'}`}>
+                        <button onClick={() => navigate('/')} data-tutorial-target="genetics-btn" className={`flex-1 px-2 py-2 text-xs font-medium rounded-lg transition duration-150 ${currentView === 'genetics-calculator' ? 'bg-primary text-black shadow-md' : 'text-gray-600 hover:bg-gray-100'}`}>
                             <Cat size={16} className="inline mb-0.5" />
                             <span className="block">Genetics</span>
                         </button>
-                        <button onClick={() => setCurrentView('profile')} data-tutorial-target="profile-btn" className={`flex-1 px-2 py-2 text-xs font-medium rounded-lg transition duration-150 ${currentView === 'profile' ? 'bg-primary text-black shadow-md' : 'text-gray-600 hover:bg-gray-100'}`}>
+                        <button onClick={() => navigate('/')} data-tutorial-target="profile-btn" className={`flex-1 px-2 py-2 text-xs font-medium rounded-lg transition duration-150 ${currentView === 'profile' ? 'bg-primary text-black shadow-md' : 'text-gray-600 hover:bg-gray-100'}`}>
                             <User size={16} className="inline mb-0.5" />
                             <span className="block">Profile</span>
                         </button>
@@ -10719,7 +10724,7 @@ const App = () => {
                         })
                             .then(res => {
                                 setAnimalToView(res.data);
-                                setCurrentView('view-animal');
+                                navigate('/');
                                 setShowNotifications(false);
                             })
                             .catch(err => {
@@ -10938,7 +10943,7 @@ const App = () => {
                                             className="flex-shrink-0 bg-white rounded-lg p-2 shadow-sm border-2 border-primary/40 hover:shadow-md transition cursor-pointer min-w-[120px]"
                                             onClick={() => {
                                                 setViewingPublicProfile(user);
-                                                setCurrentView('publicProfile');
+                                                navigate('/');
                                             }}
                                         >
                                             <div className="w-10 h-10 bg-gray-100 rounded-full overflow-hidden mx-auto mb-1">
@@ -10970,7 +10975,7 @@ const App = () => {
                                             className="flex-shrink-0 bg-white rounded-lg p-2 shadow-sm border-2 border-accent/40 hover:shadow-md transition cursor-pointer min-w-[120px]"
                                             onClick={() => {
                                                 setViewingPublicProfile(user);
-                                                setCurrentView('publicProfile');
+                                                navigate('/');
                                             }}
                                         >
                                             <div className="w-10 h-10 bg-gray-100 rounded-full overflow-hidden mx-auto mb-1">
