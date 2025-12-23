@@ -9516,585 +9516,6 @@ const App = () => {
         }
     };
 
-    const renderView = () => {
-        switch (currentView) {
-            case 'donation':
-                return <DonationView onBack={() => navigate('/')} />;
-            case 'publicProfile':
-                return (
-                    <PublicProfileView 
-                        profile={viewingPublicProfile}
-                        onBack={() => { setViewingPublicProfile(null); navigate('/'); }}
-                        onViewAnimal={(animal) => setViewingPublicAnimal(animal)}
-                        API_BASE_URL={API_BASE_URL}
-                        onStartMessage={async () => {
-                            try {
-                                if (!viewingPublicProfile?.id_public) return;
-                                // Resolve backend user ID from public ID
-                                const resp = await axios.get(`${API_BASE_URL}/messages/resolve/${viewingPublicProfile.id_public}`, {
-                                    headers: { Authorization: `Bearer ${authToken}` }
-                                });
-                                const otherUserId = resp.data?.userId;
-                                if (!otherUserId) return;
-
-                                // Open messages and preselect conversation
-                                setShowMessages(true);
-                                // Fetch conversations and select matching one
-                                try {
-                                    const convResp = await axios.get(`${API_BASE_URL}/messages/conversations`, {
-                                        headers: { Authorization: `Bearer ${authToken}` }
-                                    });
-                                    const list = convResp.data || [];
-                                    const match = list.find(c => c.otherUserId === otherUserId);
-                                    if (match) {
-                                        setSelectedConversation(match);
-                                    } else {
-                                        // If no conversation yet, create a stub and fetch messages
-                                        const stub = { conversationId: `stub_${otherUserId}`, otherUserId, otherUser: viewingPublicProfile };
-                                        setSelectedConversation(stub);
-                                    }
-                                } catch (e) {
-                                    console.warn('Failed to preselect conversation, opening MessagesView anyway:', e);
-                                }
-                            } catch (err) {
-                                console.error('Failed to start message:', err);
-                                showModalMessage && showModalMessage('Error', 'Unable to start a message with this user');
-                            }
-                        }}
-                    />
-                );
-            case 'profile':
-                return <ProfileView userProfile={userProfile} showModalMessage={showModalMessage} fetchUserProfile={fetchUserProfile} authToken={authToken} onProfileUpdated={setUserProfile} onProfileEditButtonClicked={setProfileEditButtonClicked} />;
-            case 'select-species':
-                const speciesList = speciesOptions.join('/');
-                const selectorTitle = `Add New ${speciesList}/Custom`;
-                return (
-                    <SpeciesSelector 
-                        speciesOptions={speciesOptions} 
-                        onSelectSpecies={(species) => { 
-                            setSpeciesToAdd(species); 
-                            navigate('/'); 
-                        }} 
-                        onManageSpecies={() => navigate('/')}
-                        searchTerm={speciesSearchTerm}
-                        setSearchTerm={setSpeciesSearchTerm}
-                        categoryFilter={speciesCategoryFilter}
-                        setCategoryFilter={setSpeciesCategoryFilter}
-                    />
-                );
-            case 'manage-species':
-                return (
-                    <SpeciesManager 
-                        speciesOptions={speciesOptions} 
-                        setSpeciesOptions={setSpeciesOptions} 
-                        onCancel={() => navigate('/')}
-                        showModalMessage={showModalMessage}
-                        authToken={authToken}
-                        API_BASE_URL={API_BASE_URL}
-                    />
-                );
-            case 'add-animal':
-                // If no species has been selected yet, show the selector first
-                if (!speciesToAdd) {
-                    return (
-                        <SpeciesSelector
-                            speciesOptions={speciesOptions}
-                            onSelectSpecies={(species) => {
-                                setSpeciesToAdd(species);
-                                navigate('/');
-                            }}
-                            onManageSpecies={() => navigate('/')}
-                            searchTerm={speciesSearchTerm}
-                            setSearchTerm={setSpeciesSearchTerm}
-                            categoryFilter={speciesCategoryFilter}
-                            setCategoryFilter={setSpeciesCategoryFilter}
-                        />
-                    );
-                }
-
-                // speciesToAdd is set — render the AnimalForm
-                const addFormTitle = `Add New ${speciesToAdd}`;
-                return (
-                    <AnimalForm
-                        formTitle={addFormTitle}
-                        animalToEdit={null}
-                        species={speciesToAdd}
-                        onSave={handleSaveAnimal}
-                        onCancel={() => { navigate('/'); setSpeciesToAdd(null); }}
-                        onDelete={null}
-                        authToken={authToken}
-                        showModalMessage={showModalMessage}
-                        API_BASE_URL={API_BASE_URL}
-                        userProfile={userProfile}
-                        X={X}
-                        Search={Search}
-                        Loader2={Loader2}
-                        LoadingSpinner={LoadingSpinner}
-                        PlusCircle={PlusCircle}
-                        ArrowLeft={ArrowLeft}
-                        Save={Save}
-                        Trash2={Trash2}
-                        RotateCcw={RotateCcw}
-                        GENDER_OPTIONS={GENDER_OPTIONS}
-                        STATUS_OPTIONS={STATUS_OPTIONS}
-                        AnimalImageUpload={AnimalImageUpload}
-                    />
-                );
-            case 'edit-animal':
-                const editFormTitle = `Edit ${animalToEdit.name}`;
-                return (
-                    <AnimalForm 
-                        formTitle={editFormTitle} 
-                        animalToEdit={animalToEdit} 
-                        species={animalToEdit.species} 
-                        onSave={handleSaveAnimal} 
-                        onCancel={() => navigate('/')} 
-                        onDelete={handleDeleteAnimal}
-                        authToken={authToken} 
-                        showModalMessage={showModalMessage}
-                        API_BASE_URL={API_BASE_URL}
-                        userProfile={userProfile}
-                        X={X}
-                        Search={Search}
-                        Loader2={Loader2}
-                        LoadingSpinner={LoadingSpinner}
-                        PlusCircle={PlusCircle}
-                        ArrowLeft={ArrowLeft}
-                        Save={Save}
-                        Trash2={Trash2}
-                        RotateCcw={RotateCcw}
-                        GENDER_OPTIONS={GENDER_OPTIONS}
-                        STATUS_OPTIONS={STATUS_OPTIONS}
-                        AnimalImageUpload={AnimalImageUpload}
-                    />
-                );
-            case 'view-animal':
-                if (!animalToView) return null;
-                const formattedBirthDate = animalToView.birthDate
-                    ? new Intl.DateTimeFormat('en-US', { year: 'numeric', month: 'long', day: 'numeric' }).format(new Date(animalToView.birthDate))
-                    : '—';
-                const handleShareAnimal = () => {
-                    const url = `${window.location.origin}/animal/${animalToView.id_public}`;
-                    navigator.clipboard.writeText(url).then(() => {
-                        setCopySuccessAnimal(true);
-                        setTimeout(() => setCopySuccessAnimal(false), 2000);
-                    });
-                };
-                return (
-                    <>
-                    <div className="w-full max-w-4xl bg-white p-6 rounded-xl shadow-lg">
-                        <div className="flex items-start justify-between mb-6">
-                            <button onClick={() => navigate('/')} className="flex items-center text-gray-600 hover:text-gray-800 font-medium">
-                                <ArrowLeft size={20} className="mr-2" />
-                                Back to Dashboard
-                            </button>
-                            <div className="flex flex-wrap items-center gap-2">
-                                <button
-                                    onClick={handleShareAnimal}
-                                    className="p-2 bg-primary hover:bg-primary/90 text-black font-semibold rounded-lg transition flex items-center justify-center"
-                                    title={copySuccessAnimal ? 'Link Copied!' : 'Share Link'}
-                                >
-                                    <Link size={18} />
-                                </button>
-                                {/* Only show edit and transfer buttons if user owns this animal and it's not view-only */}
-                                {userProfile && animalToView.ownerId_public === userProfile.id_public && !animalToView.isViewOnly && (
-                                    <>
-                                        <button 
-                                            data-tutorial-target="edit-animal-btn"
-                                            onClick={() => { setAnimalToEdit(animalToView); setSpeciesToAdd(animalToView.species); navigate('/'); }} 
-                                            className="bg-primary hover:bg-primary/90 text-black font-semibold py-2 px-4 rounded-lg"
-                                        >
-                                            Edit
-                                        </button>
-                                        <button 
-                                            onClick={() => { 
-                                                // Use new budget-based transfer system
-                                                setPreSelectedTransferAnimal(animalToView);
-                                                setPreSelectedTransactionType('animal-sale');
-                                                navigate('/');
-                                            }}
-                                            data-tutorial-target="transfer-animal-btn"
-                                            className="bg-accent hover:bg-accent/90 text-white font-semibold py-2 px-4 rounded-lg transition flex items-center gap-2"
-                                        >
-                                            <ArrowLeftRight size={16} />
-                                            Transfer
-                                        </button>
-                                    </>
-                                )}
-                                {/* Show hide button for view-only animals */}
-                                {animalToView.isViewOnly && (
-                                    <button
-                                        onClick={() => handleHideViewOnlyAnimal(animalToView.id_public)}
-                                        className="px-3 py-1.5 bg-red-500 hover:bg-red-600 text-white font-semibold rounded-lg transition flex items-center gap-2"
-                                    >
-                                        <Archive size={16} />
-                                        Hide
-                                    </button>
-                                )}
-                            </div>
-                        </div>
-
-                        {/* Main Info Section */}
-                        <div className="border-2 border-gray-300 rounded-lg p-4 sm:p-6 mb-6">
-                            <div className="flex flex-col sm:flex-row items-start sm:space-x-6 space-y-4 sm:space-y-0">
-                                <div className="w-full sm:w-auto flex flex-col items-center sm:items-start">
-                                    <div 
-                                        className="w-40 h-40 bg-gray-100 rounded-lg overflow-hidden flex items-center justify-center cursor-pointer hover:opacity-80 transition"
-                                        onClick={() => {
-                                            if (animalToView.imageUrl || animalToView.photoUrl) {
-                                                setEnlargedImageUrl(animalToView.imageUrl || animalToView.photoUrl);
-                                                setShowImageModal(true);
-                                            }
-                                        }}
-                                        title="Click to enlarge"
-                                    >
-                                        { (animalToView.imageUrl || animalToView.photoUrl) ? (
-                                            <img src={animalToView.imageUrl || animalToView.photoUrl} alt={animalToView.name} className="w-full h-full object-cover" />
-                                        ) : (
-                                            <Cat size={72} className="text-gray-400" />
-                                        ) }
-                                    </div>
-                                    {/* Status bar */}
-                                    <div className={`w-40 py-2 text-center mt-2 rounded border-2 ${
-                                        animalToView.isViewOnly 
-                                            ? 'bg-orange-100 border-orange-400 text-orange-800' 
-                                            : 'bg-gray-200 border-gray-400 text-gray-800'
-                                    }`}>
-                                        <div className="text-sm font-semibold">{animalToView.isViewOnly ? 'Sold' : (animalToView.status || 'Unknown')}</div>
-                                    </div>
-                                    {/* Icon row */}
-                                    <div className="w-40 flex justify-center items-center space-x-3 py-2">
-                                        {animalToView.isOwned ? (
-                                            <Heart size={18} className="text-black" />
-                                        ) : (
-                                            <HeartOff size={18} className="text-black" />
-                                        )}
-                                        {animalToView.showOnPublicProfile ? (
-                                            <Eye size={18} className="text-black" />
-                                        ) : (
-                                            <EyeOff size={18} className="text-black" />
-                                        )}
-                                        {animalToView.isInMating && <Hourglass size={18} className="text-black" />}
-                                        {animalToView.isPregnant && <Bean size={18} className="text-black" />}
-                                        {animalToView.isNursing && <Milk size={18} className="text-black" />}
-                                    </div>
-                                </div>
-                                <div className="flex-1 w-full">
-                                    <h2 className="text-2xl font-bold text-gray-800 mb-2">{animalToView.prefix ? `${animalToView.prefix} ` : ''}{animalToView.name}{animalToView.suffix ? ` ${animalToView.suffix}` : ''}</h2>
-                                    <p className="text-sm text-gray-600 mb-4">
-                                        {animalToView.species}
-                                        {getSpeciesLatinName(animalToView.species) && (
-                                            <span className="italic text-gray-500"> ({getSpeciesLatinName(animalToView.species)})</span>
-                                        )}
-                                        &nbsp; • &nbsp; {animalToView.id_public}
-                                    </p>
-                                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-x-6 gap-y-3 text-sm text-gray-700">
-                                        <div><strong>Gender:</strong> {animalToView.gender}</div>
-                                        <div><strong>Birth Date:</strong> {formattedBirthDate}</div>
-                                        <div><strong>Color:</strong> {animalToView.color || '—'}</div>
-                                        <div><strong>Coat:</strong> {animalToView.coat || '—'}</div>
-                                        {animalToView.deceasedDate && (
-                                            <div><strong>Deceased Date:</strong> {new Intl.DateTimeFormat('en-US', { year: 'numeric', month: 'long', day: 'numeric' }).format(new Date(animalToView.deceasedDate))}</div>
-                                        )}
-                                        <div><strong>Breedery ID:</strong> {animalToView.breederyId || animalToView.registryCode || '—'}</div>
-                                        <div><strong>Inbreeding COI:</strong> {animalToView.inbreedingCoefficient != null ? `${animalToView.inbreedingCoefficient.toFixed(2)}%` : 'N/A'}</div>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-
-                        {/* Genetic Code Section */}
-                        <div className="border-2 border-gray-300 rounded-lg p-6 mb-6">
-                            <h3 className="text-lg font-semibold text-gray-800 mb-3">Genetic Code</h3>
-                            {animalToView.geneticCode ? (
-                                <p className="text-gray-700 text-sm font-mono">{animalToView.geneticCode}</p>
-                            ) : (
-                                <p className="text-gray-500 text-sm italic">No genetic code recorded.</p>
-                            )}
-                        </div>
-
-                        {/* Breeder & Owner Section */}
-                        <div className="border-2 border-gray-300 rounded-lg p-6 mb-6">
-                            <h3 className="text-lg font-semibold text-gray-800 mb-3">Breeder & Owner</h3>
-                            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 text-sm text-gray-700">
-                                <div>
-                                    <strong>Breeder:</strong>{' '}
-                                    {animalToView.breederId_public ? (
-                                        viewAnimalBreederInfo ? (
-                                            <span>
-                                                {(() => {
-                                                    const showPersonal = viewAnimalBreederInfo.showPersonalName ?? false;
-                                                    const showBreeder = viewAnimalBreederInfo.showBreederName ?? false;
-                                                    
-                                                    if (showPersonal && showBreeder && viewAnimalBreederInfo.personalName && viewAnimalBreederInfo.breederName) {
-                                                        return `${viewAnimalBreederInfo.personalName} (${viewAnimalBreederInfo.breederName})`;
-                                                    } else if (showBreeder && viewAnimalBreederInfo.breederName) {
-                                                        return viewAnimalBreederInfo.breederName;
-                                                    } else if (showPersonal && viewAnimalBreederInfo.personalName) {
-                                                        return viewAnimalBreederInfo.personalName;
-                                                    } else {
-                                                        return 'Unknown Breeder';
-                                                    }
-                                                })()}
-                                            </span>
-                                        ) : (
-                                            <span className="font-mono text-accent">{animalToView.breederId_public}</span>
-                                        )
-                                    ) : (
-                                        <span className="text-gray-500 italic">Not specified</span>
-                                    )}
-                                </div>
-                                {animalToView.ownerName && (
-                                    <div>
-                                        <strong>Owner:</strong> {animalToView.ownerName}
-                                    </div>
-                                )}
-                            </div>
-                        </div>
-
-                        {/* Remarks / Notes Section */}
-                        <div className="border-2 border-gray-300 rounded-lg p-6 mb-6">
-                            <h3 className="text-lg font-semibold text-gray-800 mb-3">Remarks / Notes</h3>
-                            {animalToView.remarks ? (
-                                <p className="text-gray-700 text-sm">{animalToView.remarks}</p>
-                            ) : (
-                                <p className="text-gray-500 text-sm italic">No remarks recorded.</p>
-                            )}
-                        </div>
-
-                        {/* Tags Section */}
-                        {animalToView.tags && animalToView.tags.length > 0 && (
-                            <div data-tutorial-target="tags-section" className="border-2 border-gray-300 rounded-lg p-6 mb-6">
-                                <h3 className="text-lg font-semibold text-gray-800 mb-3">Tags</h3>
-                                <div className="flex flex-wrap gap-2">
-                                    {animalToView.tags.map((tag, idx) => (
-                                        <span key={idx} className="inline-flex items-center bg-primary text-black text-sm font-semibold px-3 py-1 rounded-full">
-                                            {tag}
-                                        </span>
-                                    ))}
-                                </div>
-                            </div>
-                        )}
-
-                        {/* Parents Section */}
-                        <div className="border-2 border-gray-300 rounded-lg p-6 mb-6">
-                            <div className="flex justify-between items-center mb-4">
-                                <h3 className="text-lg font-semibold text-gray-800">Parents</h3>
-                                <button
-                                    onClick={() => setShowPedigreeChart(true)}
-                                    data-tutorial-target="pedigree-btn"
-                                    className="flex items-center gap-2 px-3 py-1.5 bg-primary hover:bg-primary/90 text-black text-sm font-semibold rounded-lg transition"
-                                >
-                                    <FileText size={16} />
-                                    Pedigree
-                                </button>
-                            </div>
-                            <div className="flex flex-col sm:grid sm:grid-cols-2 gap-4">
-                                {/* Father Card */}
-                                <ParentCard 
-                                    parentId={animalToView.fatherId_public} 
-                                    parentType="Father"
-                                    authToken={authToken}
-                                    API_BASE_URL={API_BASE_URL}
-                                    onViewAnimal={handleViewAnimal}
-                                />
-                                {/* Mother Card */}
-                                <ParentCard 
-                                    parentId={animalToView.motherId_public} 
-                                    parentType="Mother"
-                                    authToken={authToken}
-                                    API_BASE_URL={API_BASE_URL}
-                                    onViewAnimal={handleViewAnimal}
-                                />
-                            </div>
-                        </div>
-
-                        {/* Offspring Section */}
-                        <OffspringSection
-                            animalId={animalToView.id_public}
-                            API_BASE_URL={API_BASE_URL}
-                            authToken={authToken}
-                            onViewAnimal={handleViewAnimal}
-                        />
-                    </div>
-
-                    {/* Pedigree Chart Modal */}
-                    {showPedigreeChart && animalToView && (
-                        <PedigreeChart
-                            animalData={animalToView}
-                            onClose={() => setShowPedigreeChart(false)}
-                            API_BASE_URL={API_BASE_URL}
-                            authToken={authToken}
-                        />
-                    )}
-
-                    {/* Image Enlargement Modal */}
-                    {showImageModal && enlargedImageUrl && (
-                        <div 
-                            className="fixed inset-0 bg-black/90 flex items-center justify-center p-4 z-[10000]"
-                            onClick={() => setShowImageModal(false)}
-                        >
-                            <div className="relative max-w-5xl max-h-[90vh] w-full flex flex-col">
-                                {/* Header */}
-                                <div className="flex justify-between items-center mb-4">
-                                    <h3 className="text-white text-lg font-semibold">
-                                        {animalToView?.name || 'Animal Image'}
-                                    </h3>
-                                    <div className="flex gap-2">
-                                        <button
-                                            onClick={async (e) => {
-                                                e.stopPropagation();
-                                                try {
-                                                    const response = await fetch(enlargedImageUrl);
-                                                    const blob = await response.blob();
-                                                    const url = window.URL.createObjectURL(blob);
-                                                    const link = document.createElement('a');
-                                                    link.href = url;
-                                                    link.download = `crittertrack_${animalToView?.id_public || 'image'}.jpg`;
-                                                    document.body.appendChild(link);
-                                                    link.click();
-                                                    document.body.removeChild(link);
-                                                    window.URL.revokeObjectURL(url);
-                                                } catch (error) {
-                                                    console.error('Download failed:', error);
-                                                }
-                                            }}
-                                            className="flex items-center gap-2 px-4 py-2 bg-primary hover:bg-primary/90 text-black font-semibold rounded-lg transition"
-                                        >
-                                            <Download size={18} />
-                                            Download
-                                        </button>
-                                        <button
-                                            onClick={() => setShowImageModal(false)}
-                                            className="p-2 hover:bg-white/10 rounded-lg transition text-white"
-                                        >
-                                            <X size={24} />
-                                        </button>
-                                    </div>
-                                </div>
-                                {/* Image */}
-                                <div className="flex-1 flex items-center justify-center">
-                                    <img 
-                                        src={enlargedImageUrl} 
-                                        alt={animalToView?.name || 'Animal'} 
-                                        className="max-w-full max-h-[80vh] object-contain rounded-lg"
-                                        onClick={(e) => e.stopPropagation()}
-                                    />
-                                </div>
-                            </div>
-                        </div>
-                    )}
-                    </>
-                );
-            case 'genetics-calculator':
-                return (
-                    <MouseGeneticsCalculator
-                        API_BASE_URL={API_BASE_URL}
-                        authToken={authToken}
-                        myAnimals={myAnimalsForCalculator}
-                    />
-                );
-            case 'budget':
-                return (
-                    <BudgetingTab
-                        authToken={authToken}
-                        API_BASE_URL={API_BASE_URL}
-                        showModalMessage={showModalMessage}
-                        preSelectedAnimal={preSelectedTransferAnimal}
-                        preSelectedType={preSelectedTransactionType}
-                        onAddModalOpen={() => setBudgetModalOpen(true)}
-                    />
-                );
-            case 'hidden-animals':
-                return (
-                    <div className="w-full max-w-4xl bg-white p-6 rounded-xl shadow-lg">
-                        <div className="flex items-start justify-between mb-6">
-                            <button onClick={() => navigate('/')} className="flex items-center text-gray-600 hover:text-gray-800 font-medium">
-                                <ArrowLeft size={20} className="mr-2" />
-                                Back to Dashboard
-                            </button>
-                        </div>
-                        <h2 className="text-3xl font-bold text-gray-800 mb-6 flex items-center">
-                            <Archive size={24} className="mr-3 text-gray-600" />
-                            Hidden View-Only Animals
-                        </h2>
-                        {loadingHidden ? (
-                            <div className="flex justify-center py-8">
-                                <Loader2 className="animate-spin" size={32} />
-                            </div>
-                        ) : hiddenAnimals.length === 0 ? (
-                            <p className="text-center text-gray-500 py-8">No hidden animals</p>
-                        ) : (
-                            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-                                {hiddenAnimals.map(animal => (
-                                    <div key={animal.id_public} className="border border-gray-300 rounded-lg p-4 bg-gray-50">
-                                        <div className="flex items-center space-x-3 mb-3">
-                                            <div className="w-16 h-16 bg-gray-200 rounded-md overflow-hidden flex-shrink-0">
-                                                {animal.imageUrl || animal.photoUrl ? (
-                                                    <img src={animal.imageUrl || animal.photoUrl} alt={animal.name} className="w-full h-full object-cover" />
-                                                ) : (
-                                                    <div className="w-full h-full flex items-center justify-center text-gray-400">
-                                                        <Cat size={32} />
-                                                    </div>
-                                                )}
-                                            </div>
-                                            <div className="flex-1">
-                                                <h3 className="font-semibold text-gray-800">
-                                                    {animal.prefix ? `${animal.prefix} ` : ''}{animal.name}{animal.suffix ? ` ${animal.suffix}` : ''}
-                                                </h3>
-                                                <p className="text-sm text-gray-600">{animal.id_public}</p>
-                                                <p className="text-xs text-gray-500">{animal.species} • {animal.gender}</p>
-                                            </div>
-                                        </div>
-                                        <div className="flex gap-2">
-                                            <button
-                                                onClick={() => handleRestoreViewOnlyAnimal(animal.id_public)}
-                                                className="flex-1 px-3 py-2 bg-green-500 hover:bg-green-600 text-white font-semibold rounded-lg transition flex items-center justify-center gap-2"
-                                            >
-                                                <Eye size={16} />
-                                                Restore
-                                            </button>
-                                            <button
-                                                onClick={() => handleViewAnimal(animal)}
-                                                className="flex-1 px-3 py-2 bg-gray-600 hover:bg-gray-700 text-white font-semibold rounded-lg transition"
-                                            >
-                                                View
-                                            </button>
-                                        </div>
-                                    </div>
-                                ))}
-                            </div>
-                        )}
-                    </div>
-                );
-            case 'litters':
-                return (
-                    <LitterManagement
-                        authToken={authToken}
-                        API_BASE_URL={API_BASE_URL}
-                        userProfile={userProfile}
-                        showModalMessage={showModalMessage}
-                        onViewAnimal={handleViewAnimal}
-                        formDataRef={litterFormDataRef}
-                        onFormOpenChange={setLitterFormOpen}
-                    />
-                );
-            case 'list':
-            default:
-                return (
-                    <AnimalList 
-                        authToken={authToken} 
-                        showModalMessage={showModalMessage} 
-                        onEditAnimal={handleEditAnimal} 
-                        onViewAnimal={handleViewAnimal}
-                        onSetCurrentView={(view) => navigate(`/${view}`)}
-                        fetchHiddenAnimals={fetchHiddenAnimals}
-                        navigate={navigate}
-                    />
-                );
-        }
-    };
-
     if (!authToken) {
         // Allow unauthenticated users to access search and genetics calculator
         const mainTitle = isRegister ? 'Create Account' : 'Welcome';
@@ -11001,7 +10422,332 @@ const App = () => {
             )}
 
             <main className="w-full flex-grow max-w-4xl">
-                {renderView()}
+                <Routes>
+                    <Route path="/" element={
+                        <AnimalList 
+                            authToken={authToken} 
+                            showModalMessage={showModalMessage} 
+                            onEditAnimal={handleEditAnimal} 
+                            onViewAnimal={handleViewAnimal}
+                            onSetCurrentView={(view) => navigate(`/${view}`)}
+                            fetchHiddenAnimals={fetchHiddenAnimals}
+                            navigate={navigate}
+                        />
+                    } />
+                    <Route path="/list" element={
+                        <AnimalList 
+                            authToken={authToken} 
+                            showModalMessage={showModalMessage} 
+                            onEditAnimal={handleEditAnimal} 
+                            onViewAnimal={handleViewAnimal}
+                            onSetCurrentView={(view) => navigate(`/${view}`)}
+                            fetchHiddenAnimals={fetchHiddenAnimals}
+                            navigate={navigate}
+                        />
+                    } />
+                    <Route path="/donation" element={<DonationView onBack={() => navigate('/')} />} />
+                    <Route path="/profile" element={<ProfileView userProfile={userProfile} showModalMessage={showModalMessage} fetchUserProfile={fetchUserProfile} authToken={authToken} onProfileUpdated={setUserProfile} onProfileEditButtonClicked={setProfileEditButtonClicked} />} />
+                    <Route path="/litters" element={
+                        <LitterManagement
+                            authToken={authToken}
+                            API_BASE_URL={API_BASE_URL}
+                            userProfile={userProfile}
+                            showModalMessage={showModalMessage}
+                            onViewAnimal={handleViewAnimal}
+                            formDataRef={litterFormDataRef}
+                            onFormOpenChange={setLitterFormOpen}
+                        />
+                    } />
+                    <Route path="/budget" element={
+                        <BudgetingTab
+                            authToken={authToken}
+                            API_BASE_URL={API_BASE_URL}
+                            showModalMessage={showModalMessage}
+                            preSelectedAnimal={preSelectedTransferAnimal}
+                            preSelectedType={preSelectedTransactionType}
+                            onAddModalOpen={() => setBudgetModalOpen(true)}
+                        />
+                    } />
+                    <Route path="/genetics-calculator" element={
+                        <MouseGeneticsCalculator
+                            API_BASE_URL={API_BASE_URL}
+                            authToken={authToken}
+                            myAnimals={myAnimalsForCalculator}
+                        />
+                    } />
+                    <Route path="/select-species" element={
+                        <SpeciesSelector 
+                            speciesOptions={speciesOptions} 
+                            onSelectSpecies={(species) => { 
+                                setSpeciesToAdd(species); 
+                                navigate('/add-animal'); 
+                            }} 
+                            onManageSpecies={() => navigate('/manage-species')}
+                            searchTerm={speciesSearchTerm}
+                            setSearchTerm={setSpeciesSearchTerm}
+                            categoryFilter={speciesCategoryFilter}
+                            setCategoryFilter={setSpeciesCategoryFilter}
+                        />
+                    } />
+                    <Route path="/manage-species" element={
+                        <SpeciesManager 
+                            speciesOptions={speciesOptions} 
+                            setSpeciesOptions={setSpeciesOptions} 
+                            onCancel={() => navigate('/select-species')}
+                            showModalMessage={showModalMessage}
+                            authToken={authToken}
+                            API_BASE_URL={API_BASE_URL}
+                        />
+                    } />
+                    <Route path="/add-animal" element={
+                        !speciesToAdd ? (
+                            <SpeciesSelector
+                                speciesOptions={speciesOptions}
+                                onSelectSpecies={(species) => {
+                                    setSpeciesToAdd(species);
+                                    navigate('/add-animal');
+                                }}
+                                onManageSpecies={() => navigate('/manage-species')}
+                                searchTerm={speciesSearchTerm}
+                                setSearchTerm={setSpeciesSearchTerm}
+                                categoryFilter={speciesCategoryFilter}
+                                setCategoryFilter={setSpeciesCategoryFilter}
+                            />
+                        ) : (
+                            <AnimalForm
+                                formTitle={`Add New ${speciesToAdd}`}
+                                animalToEdit={null}
+                                species={speciesToAdd}
+                                onSave={handleSaveAnimal}
+                                onCancel={() => { navigate('/'); setSpeciesToAdd(null); }}
+                                onDelete={null}
+                                authToken={authToken}
+                                showModalMessage={showModalMessage}
+                                API_BASE_URL={API_BASE_URL}
+                                userProfile={userProfile}
+                                X={X}
+                                Search={Search}
+                                Loader2={Loader2}
+                                LoadingSpinner={LoadingSpinner}
+                                PlusCircle={PlusCircle}
+                                ArrowLeft={ArrowLeft}
+                                Save={Save}
+                                Trash2={Trash2}
+                                RotateCcw={RotateCcw}
+                                GENDER_OPTIONS={GENDER_OPTIONS}
+                                STATUS_OPTIONS={STATUS_OPTIONS}
+                                AnimalImageUpload={AnimalImageUpload}
+                            />
+                        )
+                    } />
+                    <Route path="/edit-animal" element={
+                        animalToEdit && (
+                            <AnimalForm 
+                                formTitle={`Edit ${animalToEdit.name}`}
+                                animalToEdit={animalToEdit} 
+                                species={animalToEdit.species} 
+                                onSave={handleSaveAnimal} 
+                                onCancel={() => navigate('/')} 
+                                onDelete={handleDeleteAnimal}
+                                authToken={authToken} 
+                                showModalMessage={showModalMessage}
+                                API_BASE_URL={API_BASE_URL}
+                                userProfile={userProfile}
+                                X={X}
+                                Search={Search}
+                                Loader2={Loader2}
+                                LoadingSpinner={LoadingSpinner}
+                                PlusCircle={PlusCircle}
+                                ArrowLeft={ArrowLeft}
+                                Save={Save}
+                                Trash2={Trash2}
+                                RotateCcw={RotateCcw}
+                                GENDER_OPTIONS={GENDER_OPTIONS}
+                                STATUS_OPTIONS={STATUS_OPTIONS}
+                                AnimalImageUpload={AnimalImageUpload}
+                            />
+                        )
+                    } />
+                    <Route path="/view-animal" element={
+                        animalToView && (
+                            (() => {
+                                const formattedBirthDate = animalToView.birthDate
+                                    ? new Intl.DateTimeFormat('en-US', { year: 'numeric', month: 'long', day: 'numeric' }).format(new Date(animalToView.birthDate))
+                                    : '—';
+                                const handleShareAnimal = () => {
+                                    const url = `${window.location.origin}/animal/${animalToView.id_public}`;
+                                    navigator.clipboard.writeText(url).then(() => {
+                                        setCopySuccessAnimal(true);
+                                        setTimeout(() => setCopySuccessAnimal(false), 2000);
+                                    });
+                                };
+                                return (
+                                    <>
+                                    <div className="w-full max-w-4xl bg-white p-6 rounded-xl shadow-lg">
+                                        <div className="flex items-start justify-between mb-6">
+                                            <button onClick={() => navigate('/')} className="flex items-center text-gray-600 hover:text-gray-800 font-medium">
+                                                <ArrowLeft size={20} className="mr-2" />
+                                                Back to Dashboard
+                                            </button>
+                                            <div className="flex flex-wrap items-center gap-2">
+                                                <button
+                                                    onClick={handleShareAnimal}
+                                                    className="p-2 bg-primary hover:bg-primary/90 text-black font-semibold rounded-lg transition flex items-center justify-center"
+                                                    title={copySuccessAnimal ? 'Link Copied!' : 'Share Link'}
+                                                >
+                                                    <Link size={18} />
+                                                </button>
+                                                {userProfile && animalToView.ownerId_public === userProfile.id_public && !animalToView.isViewOnly && (
+                                                    <>
+                                                        <button 
+                                                            data-tutorial-target="edit-animal-btn"
+                                                            onClick={() => { setAnimalToEdit(animalToView); setSpeciesToAdd(animalToView.species); navigate('/'); }} 
+                                                            className="bg-primary hover:bg-primary/90 text-black font-semibold py-2 px-4 rounded-lg"
+                                                        >
+                                                            Edit
+                                                        </button>
+                                                        <button 
+                                                            onClick={() => { 
+                                                                setPreSelectedTransferAnimal(animalToView);
+                                                                setPreSelectedTransactionType('animal-sale');
+                                                                navigate('/');
+                                                            }}
+                                                            data-tutorial-target="transfer-animal-btn"
+                                                            className="bg-accent hover:bg-accent/90 text-white font-semibold py-2 px-4 rounded-lg transition flex items-center gap-2"
+                                                        >
+                                                            <ArrowLeftRight size={16} />
+                                                            Transfer
+                                                        </button>
+                                                    </>
+                                                )}
+                                                {animalToView.isViewOnly && (
+                                                    <button
+                                                        onClick={() => handleHideViewOnlyAnimal(animalToView.id_public)}
+                                                        className="px-3 py-1.5 bg-red-500 hover:bg-red-600 text-white font-semibold rounded-lg transition flex items-center gap-2"
+                                                    >
+                                                        <Archive size={16} />
+                                                        Hide
+                                                    </button>
+                                                )}
+                                            </div>
+                                        </div>
+                                        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                                            <div className="bg-gray-100 rounded-xl overflow-hidden">
+                                                {animalToView.imageUrl || animalToView.photoUrl ? (
+                                                    <img src={animalToView.imageUrl || animalToView.photoUrl} alt={animalToView.name} className="w-full h-auto" />
+                                                ) : (
+                                                    <div className="w-full h-64 flex items-center justify-center text-gray-400">
+                                                        <Cat size={64} />
+                                                    </div>
+                                                )}
+                                            </div>
+                                            <div className="space-y-4">
+                                                <div>
+                                                    <h1 className="text-4xl font-bold text-gray-800">
+                                                        {animalToView.prefix ? `${animalToView.prefix} ` : ''}{animalToView.name}{animalToView.suffix ? ` ${animalToView.suffix}` : ''}
+                                                    </h1>
+                                                    <p className="text-lg text-gray-600">{animalToView.species} • {animalToView.gender}</p>
+                                                    <p className="text-sm text-gray-500 mt-1">ID: {animalToView.id_public}</p>
+                                                </div>
+                                                <div className="flex gap-2">
+                                                    <span className={`px-3 py-1 rounded-full text-sm font-semibold ${animalToView.status === 'Available' ? 'bg-green-100 text-green-800' : animalToView.status === 'Sold' ? 'bg-red-100 text-red-800' : 'bg-gray-100 text-gray-800'}`}>
+                                                        {animalToView.status || '—'}
+                                                    </span>
+                                                    {animalToView.isViewOnly && (
+                                                        <span className="px-3 py-1 rounded-full text-sm font-semibold bg-blue-100 text-blue-800 flex items-center gap-1">
+                                                            <Eye size={14} />
+                                                            View-Only
+                                                        </span>
+                                                    )}
+                                                </div>
+                                                <div className="space-y-2">
+                                                    <p><span className="font-semibold">Birth Date:</span> {formattedBirthDate}</p>
+                                                    <p><span className="font-semibold">Birth Weight:</span> {animalToView.birthWeight ? `${animalToView.birthWeight}g` : '—'}</p>
+                                                    <p><span className="font-semibold">Status:</span> {animalToView.status || '—'}</p>
+                                                    <p><span className="font-semibold">Genetics:</span> {animalToView.genetics || '—'}</p>
+                                                    <p><span className="font-semibold">Genotype:</span> {animalToView.genotype || '—'}</p>
+                                                    <p><span className="font-semibold">Coat:</span> {animalToView.coat || '—'}</p>
+                                                    <p><span className="font-semibold">Eyes:</span> {animalToView.eyes || '—'}</p>
+                                                    <p><span className="font-semibold">Ears:</span> {animalToView.ears || '—'}</p>
+                                                    <p><span className="font-semibold">Dad:</span> {animalToView.dad || '—'}</p>
+                                                    <p><span className="font-semibold">Mom:</span> {animalToView.mom || '—'}</p>
+                                                </div>
+                                            </div>
+                                        </div>
+                                        {animalToView.notes && (
+                                            <div className="mt-6 bg-gray-50 p-4 rounded-lg">
+                                                <h2 className="font-semibold mb-2 text-gray-800">Notes</h2>
+                                                <p className="text-gray-700 whitespace-pre-wrap">{animalToView.notes}</p>
+                                            </div>
+                                        )}
+                                    </div>
+                                    </>
+                                );
+                            })()
+                        )
+                    } />
+                    <Route path="/hidden-animals" element={
+                        <div className="w-full max-w-4xl bg-white p-6 rounded-xl shadow-lg">
+                            <div className="flex items-start justify-between mb-6">
+                                <button onClick={() => navigate('/')} className="flex items-center text-gray-600 hover:text-gray-800 font-medium">
+                                    <ArrowLeft size={20} className="mr-2" />
+                                    Back to Dashboard
+                                </button>
+                            </div>
+                            <h2 className="text-3xl font-bold text-gray-800 mb-6 flex items-center">
+                                <Archive size={24} className="mr-3 text-gray-600" />
+                                Hidden View-Only Animals
+                            </h2>
+                            {loadingHidden ? (
+                                <div className="flex justify-center py-8">
+                                    <Loader2 className="animate-spin" size={32} />
+                                </div>
+                            ) : hiddenAnimals.length === 0 ? (
+                                <p className="text-center text-gray-500 py-8">No hidden animals</p>
+                            ) : (
+                                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                                    {hiddenAnimals.map(animal => (
+                                        <div key={animal.id_public} className="border border-gray-300 rounded-lg p-4 bg-gray-50">
+                                            <div className="flex items-center space-x-3 mb-3">
+                                                <div className="w-16 h-16 bg-gray-200 rounded-md overflow-hidden flex-shrink-0">
+                                                    {animal.imageUrl || animal.photoUrl ? (
+                                                        <img src={animal.imageUrl || animal.photoUrl} alt={animal.name} className="w-full h-full object-cover" />
+                                                    ) : (
+                                                        <div className="w-full h-full flex items-center justify-center text-gray-400">
+                                                            <Cat size={32} />
+                                                        </div>
+                                                    )}
+                                                </div>
+                                                <div className="flex-1">
+                                                    <h3 className="font-semibold text-gray-800">
+                                                        {animal.prefix ? `${animal.prefix} ` : ''}{animal.name}{animal.suffix ? ` ${animal.suffix}` : ''}
+                                                    </h3>
+                                                    <p className="text-sm text-gray-600">{animal.id_public}</p>
+                                                    <p className="text-xs text-gray-500">{animal.species} • {animal.gender}</p>
+                                                </div>
+                                            </div>
+                                            <div className="flex gap-2">
+                                                <button
+                                                    onClick={() => handleRestoreViewOnlyAnimal(animal.id_public)}
+                                                    className="flex-1 px-3 py-2 bg-green-500 hover:bg-green-600 text-white font-semibold rounded-lg transition flex items-center justify-center gap-2"
+                                                >
+                                                    <Eye size={16} />
+                                                    Restore
+                                                </button>
+                                                <button
+                                                    onClick={() => handleViewAnimal(animal)}
+                                                    className="flex-1 px-3 py-2 bg-gray-600 hover:bg-gray-700 text-white font-semibold rounded-lg transition"
+                                                >
+                                                    View
+                                                </button>
+                                            </div>
+                                        </div>
+                                    ))}
+                                </div>
+                            )}
+                        </div>
+                    } />
+                </Routes>
             </main>
 
             <footer className="w-full mt-6 text-center text-sm pt-4 border-t border-gray-200 max-w-4xl">
