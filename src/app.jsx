@@ -7308,7 +7308,7 @@ const AuthView = ({ onLoginSuccess, showModalMessage, isRegister, setIsRegister,
     );
 };
 
-const AnimalList = ({ authToken, showModalMessage, onEditAnimal, onViewAnimal, onSetCurrentView, fetchHiddenAnimals, navigate }) => {
+const AnimalList = ({ authToken, showModalMessage, onEditAnimal, onViewAnimal, fetchHiddenAnimals, navigate }) => {
     const [animals, setAnimals] = useState([]);
     const [loading, setLoading] = useState(true);
     const [statusFilter, setStatusFilter] = useState('');
@@ -9940,8 +9940,7 @@ const App = () => {
                     API_BASE_URL={API_BASE_URL}
                     onSelectUser={(user) => {
                         setShowUserSearchModal(false);
-                        setViewingPublicProfile(user);
-                        navigate('/');
+                        navigate(`/user/${user.id_public}`);
                     }}
                 />
             )}
@@ -9950,7 +9949,7 @@ const App = () => {
                     animal={viewingPublicAnimal}
                     onClose={() => setViewingPublicAnimal(null)}
                     API_BASE_URL={API_BASE_URL}
-                    onViewProfile={(user) => setViewingPublicProfile(user)}
+                    onViewProfile={(user) => navigate(`/user/${user.id_public}`)}
                 />
             )}
             
@@ -10145,7 +10144,7 @@ const App = () => {
                         })
                             .then(res => {
                                 setAnimalToView(res.data);
-                                navigate('/');
+                                navigate('/view-animal');
                                 setShowNotifications(false);
                             })
                             .catch(err => {
@@ -10363,8 +10362,7 @@ const App = () => {
                                             key={`new-${user.id_public}`}
                                             className="flex-shrink-0 bg-white rounded-lg p-2 shadow-sm border-2 border-primary/40 hover:shadow-md transition cursor-pointer min-w-[120px]"
                                             onClick={() => {
-                                                setViewingPublicProfile(user);
-                                                navigate('/');
+                                                navigate(`/user/${user.id_public}`);
                                             }}
                                         >
                                             <div className="w-10 h-10 bg-gray-100 rounded-full overflow-hidden mx-auto mb-1">
@@ -10395,8 +10393,7 @@ const App = () => {
                                             key={`active-${user.id_public}`}
                                             className="flex-shrink-0 bg-white rounded-lg p-2 shadow-sm border-2 border-accent/40 hover:shadow-md transition cursor-pointer min-w-[120px]"
                                             onClick={() => {
-                                                setViewingPublicProfile(user);
-                                                navigate('/');
+                                                navigate(`/user/${user.id_public}`);
                                             }}
                                         >
                                             <div className="w-10 h-10 bg-gray-100 rounded-full overflow-hidden mx-auto mb-1">
@@ -10429,7 +10426,6 @@ const App = () => {
                             showModalMessage={showModalMessage} 
                             onEditAnimal={handleEditAnimal} 
                             onViewAnimal={handleViewAnimal}
-                            onSetCurrentView={(view) => navigate(`/${view}`)}
                             fetchHiddenAnimals={fetchHiddenAnimals}
                             navigate={navigate}
                         />
@@ -10440,7 +10436,6 @@ const App = () => {
                             showModalMessage={showModalMessage} 
                             onEditAnimal={handleEditAnimal} 
                             onViewAnimal={handleViewAnimal}
-                            onSetCurrentView={(view) => navigate(`/${view}`)}
                             fetchHiddenAnimals={fetchHiddenAnimals}
                             navigate={navigate}
                         />
