@@ -7704,7 +7704,7 @@ const AnimalList = ({ authToken, showModalMessage, onEditAnimal, onViewAnimal, o
                 </div>
                 <div className="flex items-center gap-2">
                     <button 
-                        onClick={() => { navigate('/'); fetchHiddenAnimals(); }}
+                        onClick={() => { navigate('/hidden-animals'); fetchHiddenAnimals(); }}
                         data-tutorial-target="hidden-animals-btn"
                         className="text-gray-600 hover:text-gray-800 transition flex items-center gap-1 px-3 py-1.5 rounded-lg hover:bg-gray-100"
                         title="View Hidden Animals"
@@ -7747,7 +7747,7 @@ const AnimalList = ({ authToken, showModalMessage, onEditAnimal, onViewAnimal, o
                             <span>Search</span>
                         </button>
                         <button 
-                            onClick={() => navigate('/')} 
+                            onClick={() => navigate('/select-species')} 
                             className="flex-1 sm:flex-none bg-accent hover:bg-accent/90 text-white font-semibold py-2 px-4 rounded-lg transition duration-150 shadow-md flex items-center justify-center space-x-1 whitespace-nowrap"
                             data-tutorial-target="add-animal-btn"
                         >
@@ -10601,7 +10601,7 @@ const App = () => {
                                                     <>
                                                         <button 
                                                             data-tutorial-target="edit-animal-btn"
-                                                            onClick={() => { setAnimalToEdit(animalToView); setSpeciesToAdd(animalToView.species); navigate('/'); }} 
+                                                            onClick={() => { setAnimalToEdit(animalToView); setSpeciesToAdd(animalToView.species); navigate('/edit-animal'); }} 
                                                             className="bg-primary hover:bg-primary/90 text-black font-semibold py-2 px-4 rounded-lg"
                                                         >
                                                             Edit
@@ -10610,7 +10610,7 @@ const App = () => {
                                                             onClick={() => { 
                                                                 setPreSelectedTransferAnimal(animalToView);
                                                                 setPreSelectedTransactionType('animal-sale');
-                                                                navigate('/');
+                                                                navigate('/budget');
                                                             }}
                                                             data-tutorial-target="transfer-animal-btn"
                                                             className="bg-accent hover:bg-accent/90 text-white font-semibold py-2 px-4 rounded-lg transition flex items-center gap-2"
