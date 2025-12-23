@@ -11121,9 +11121,9 @@ const PublicProfilePage = () => {
 const AppRouter = () => {
     return (
         <Routes>
-            <Route path="/" element={<AppWithTutorial />} />
             <Route path="/animal/:animalId" element={<PublicAnimalPage />} />
             <Route path="/user/:userId" element={<PublicProfilePage />} />
+            <Route path="/*" element={<AppWithTutorial />} />
         </Routes>
     );
 };
