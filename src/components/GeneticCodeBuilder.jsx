@@ -26,9 +26,9 @@ const GENE_LOCI = {
     name: 'Albino',
     combinations: [
       'c/c',
-      'ch/c', 'ch/ch',
-      'ce/c', 'ce/ch', 'ce/ce',
-      'cch/c', 'cch/ch', 'cch/ce', 'cch/cch',
+      'c/ch', 'ch/ch',
+      'c/ce', 'ce/ch', 'ce/ce',
+      'c/cch', 'ch/cch', 'ce/cch', 'cch/cch',
       'C/c', 'C/ch', 'C/ce', 'C/cch', 'C/C'
     ]
   },
