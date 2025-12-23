@@ -8342,7 +8342,7 @@ const MessagesView = ({ authToken, API_BASE_URL, onClose, showModalMessage, sele
 };
 
 // Notification Panel Component
-const NotificationPanel = ({ authToken, API_BASE_URL, onClose, showModalMessage, onNotificationChange }) => {
+const NotificationPanel = ({ authToken, API_BASE_URL, onClose, showModalMessage, onNotificationChange, onViewAnimal }) => {
     const [notifications, setNotifications] = useState([]);
     const [loading, setLoading] = useState(true);
     const [processing, setProcessing] = useState(null);
@@ -8504,7 +8504,15 @@ const NotificationPanel = ({ authToken, API_BASE_URL, onClose, showModalMessage,
                                         <div key={notification._id} className={`border rounded-lg p-4 mb-2 ${!notification.read ? 'bg-primary/20 border-primary' : 'bg-white'}`}>
                                             <div className="flex items-start space-x-3 mb-2">
                                                 {/* Animal Thumbnail */}
-                                                <div className="flex-shrink-0 w-16 h-16 bg-gray-200 rounded-md overflow-hidden">
+                                                <div 
+                                                    className="flex-shrink-0 w-16 h-16 bg-gray-200 rounded-md overflow-hidden cursor-pointer hover:opacity-80 transition-opacity"
+                                                    onClick={() => {
+                                                        if (notification.animalId_public && onViewAnimal) {
+                                                            onViewAnimal(notification.animalId_public, true);
+                                                        }
+                                                    }}
+                                                    title="Click to view animal"
+                                                >
                                                     {notification.animalImageUrl ? (
                                                         <img 
                                                             src={notification.animalImageUrl} 
@@ -10704,6 +10712,21 @@ const App = () => {
                     }}
                     onNotificationChange={fetchNotificationCount}
                     showModalMessage={showModalMessage}
+                    onViewAnimal={(animalId_public, viewFromNotification) => {
+                        // Fetch animal with notification flag to override private animal access
+                        axios.get(`${API_BASE_URL}/animals/any/${animalId_public}?viewFromNotification=${viewFromNotification}`, {
+                            headers: { Authorization: `Bearer ${authToken}` }
+                        })
+                            .then(res => {
+                                setAnimalToView(res.data);
+                                setCurrentView('view-animal');
+                                setShowNotifications(false);
+                            })
+                            .catch(err => {
+                                console.error('Failed to load animal:', err);
+                                showModalMessage('Error', 'Could not load animal details.');
+                            });
+                    }}
                 />
             )}
             
