@@ -2267,37 +2267,37 @@ const OffspringSection = ({ animalId, API_BASE_URL, authToken = null, onViewAnim
             try {
                 const headers = authToken ? { Authorization: `Bearer ${authToken}` } : {};
                 
-                // Fetch offspring - use different endpoints based on authentication
-                const offspringEndpoint = authToken 
-                    ? `${API_BASE_URL}/animals/${animalId}/offspring`  // Authenticated: private endpoint
-                    : `${API_BASE_URL}/public/animals/${animalId}/offspring`;  // Unauthenticated: public endpoint
-                
-                const offspringResponse = await axios.get(offspringEndpoint, { headers });
-                
-                // Fetch current animal to know which parent we are
-                let animal = null;
-                try {
-                    if (authToken) {
-                        // Authenticated: use /animals/any to access owned or related animals
+                // Fetch offspring - only available for authenticated users
+                if (authToken) {
+                    const offspringEndpoint = `${API_BASE_URL}/animals/${animalId}/offspring`;
+                    const offspringResponse = await axios.get(offspringEndpoint, { headers });
+                    setOffspring(offspringResponse.data || []);
+                    
+                    // Fetch current animal to know which parent we are
+                    try {
                         const animalResponse = await axios.get(
                             `${API_BASE_URL}/animals/any/${animalId}`,
                             { headers }
                         );
-                        animal = animalResponse.data;
-                    } else {
-                        // Unauthenticated: fetch from public endpoint
+                        setCurrentAnimal(animalResponse.data);
+                    } catch (err) {
+                        console.error('Error fetching current animal:', err);
+                    }
+                } else {
+                    // For unauthenticated users, offspring data is not available via API
+                    // The backend doesn't expose a public offspring endpoint for privacy reasons
+                    setOffspring([]);
+                    
+                    // Still fetch the current animal for display
+                    try {
                         const publicResponse = await axios.get(
                             `${API_BASE_URL}/public/global/animals?id_public=${animalId}`
                         );
-                        animal = publicResponse.data?.[0] || null;
+                        setCurrentAnimal(publicResponse.data?.[0] || null);
+                    } catch (err) {
+                        console.error('Error fetching current animal:', err);
                     }
-                } catch (err) {
-                    console.error('Error fetching current animal:', err);
-                    // If public endpoint fails, animal will be null and we'll skip parent display
                 }
-                
-                setCurrentAnimal(animal);
-                setOffspring(offspringResponse.data || []);
             } catch (error) {
                 console.error('Error fetching offspring:', error);
                 setOffspring([]);
