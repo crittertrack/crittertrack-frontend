@@ -9322,7 +9322,7 @@ const App = () => {
         navigate('/edit-animal');
     };
 
-    const handleViewAnimal = async (animal) => {
+    const handleViewAnimal = (animal) => {
         console.log('[handleViewAnimal] Viewing animal:', animal);
         
         // Normalize parent field names (backend uses sireId_public/damId_public, frontend uses fatherId_public/motherId_public)
@@ -9332,27 +9332,34 @@ const App = () => {
             motherId_public: animal.motherId_public || animal.damId_public
         };
         
-        // Always recalculate COI to ensure it reflects current pedigree state
+        // Set initial inbreeding coefficient for immediate display
         if (!normalizedAnimal.fatherId_public && !normalizedAnimal.motherId_public) {
             // Animals with no parents have 0% COI by definition
             normalizedAnimal.inbreedingCoefficient = 0;
-        } else if (authToken) {
-            // Animals with parents - always recalculate COI from current pedigree
-            try {
-                const coiResponse = await axios.get(`${API_BASE_URL}/animals/${normalizedAnimal.id_public}/inbreeding`, {
-                    params: { generations: 50 },
-                    headers: { Authorization: `Bearer ${authToken}` }
-                });
-                normalizedAnimal.inbreedingCoefficient = coiResponse.data.inbreedingCoefficient;
-            } catch (error) {
-                console.log(`Could not calculate COI for animal ${normalizedAnimal.id_public}:`, error);
-                normalizedAnimal.inbreedingCoefficient = null;
-            }
         }
+        // Use existing COI if available, will be updated in background
         
         console.log('[handleViewAnimal] Father ID:', normalizedAnimal.fatherId_public, 'Mother ID:', normalizedAnimal.motherId_public);
         setAnimalToView(normalizedAnimal);
         navigate('/view-animal');
+        
+        // Recalculate COI in background (non-blocking) for animals with parents
+        if ((normalizedAnimal.fatherId_public || normalizedAnimal.motherId_public) && authToken) {
+            axios.get(`${API_BASE_URL}/animals/${normalizedAnimal.id_public}/inbreeding`, {
+                params: { generations: 50 },
+                headers: { Authorization: `Bearer ${authToken}` }
+            })
+            .then(coiResponse => {
+                // Update the animal with fresh COI
+                setAnimalToView(prev => ({
+                    ...prev,
+                    inbreedingCoefficient: coiResponse.data.inbreedingCoefficient
+                }));
+            })
+            .catch(error => {
+                console.log(`Could not calculate COI for animal ${normalizedAnimal.id_public}:`, error);
+            });
+        }
     };
 
     // Set up global handler for viewing public animals from search modal
