@@ -9062,13 +9062,19 @@ const App = () => {
             }
         };
         
+        // Store the function for manual refresh
+        window.refreshAvailableAnimals = fetchAvailableAnimals;
+        
         // Initial fetch
         fetchAvailableAnimals();
         
         // Continuous refresh every 2 minutes to check for new available animals
         const refreshInterval = setInterval(fetchAvailableAnimals, 120000);
         
-        return () => clearInterval(refreshInterval);
+        return () => {
+            clearInterval(refreshInterval);
+            delete window.refreshAvailableAnimals;
+        };
     }, [authToken, API_BASE_URL]);
 
     // Auto-cycle through available animals every 30 seconds
@@ -10407,10 +10413,20 @@ const App = () => {
                             animation: 'fadeInScale 0.5s ease-in-out'
                         }}
                     >
-                        <div className="bg-gradient-to-r from-primary to-accent p-2">
+                        <div className="bg-gradient-to-r from-primary to-accent p-2 relative">
                             <p className="text-xs font-semibold text-black text-center flex items-center justify-center gap-1">
                                 <span>🏷️</span> Available Now
                             </p>
+                            <button
+                                onClick={(e) => {
+                                    e.stopPropagation();
+                                    window.refreshAvailableAnimals && window.refreshAvailableAnimals();
+                                }}
+                                className="absolute right-1 top-1/2 -translate-y-1/2 p-1 hover:bg-black/10 rounded transition-colors"
+                                title="Refresh available animals"
+                            >
+                                <RefreshCw size={14} className="text-black" />
+                            </button>
                         </div>
                         {availableAnimals[currentAvailableIndex].imageUrl && (
                             <img 
