@@ -3064,6 +3064,68 @@ const LitterManagement = ({ authToken, API_BASE_URL, userProfile, showModalMessa
         }
 
         try {
+            // Get parent details for offspring creation
+            const sire = myAnimals.find(a => a.id_public === formData.sireId_public);
+            const dam = myAnimals.find(a => a.id_public === formData.damId_public);
+
+            // Create offspring animals if requested
+            const offspringPromises = [];
+            const totalToCreate = parseInt(createOffspringCounts.males) + parseInt(createOffspringCounts.females);
+            
+            if (totalToCreate > 0) {
+                // Need birthdate to create animals
+                if (!formData.birthDate) {
+                    showModalMessage('Error', 'Birth date is required to create new offspring animals');
+                    return;
+                }
+                
+                // Create males
+                for (let i = 1; i <= parseInt(createOffspringCounts.males); i++) {
+                    const animalData = {
+                        name: `M${i}`,
+                        species: sire.species,
+                        gender: 'Male',
+                        birthDate: formData.birthDate,
+                        status: 'Pet',
+                        fatherId_public: formData.sireId_public,
+                        motherId_public: formData.damId_public,
+                        isOwned: true,
+                        breederId_public: userProfile.id_public,
+                        ownerId_public: userProfile.id_public
+                    };
+                    offspringPromises.push(
+                        axios.post(`${API_BASE_URL}/animals`, animalData, {
+                            headers: { Authorization: `Bearer ${authToken}` }
+                        })
+                    );
+                }
+                
+                // Create females
+                for (let i = 1; i <= parseInt(createOffspringCounts.females); i++) {
+                    const animalData = {
+                        name: `F${i}`,
+                        species: sire.species,
+                        gender: 'Female',
+                        birthDate: formData.birthDate,
+                        status: 'Pet',
+                        fatherId_public: formData.sireId_public,
+                        motherId_public: formData.damId_public,
+                        isOwned: true,
+                        breederId_public: userProfile.id_public,
+                        ownerId_public: userProfile.id_public
+                    };
+                    offspringPromises.push(
+                        axios.post(`${API_BASE_URL}/animals`, animalData, {
+                            headers: { Authorization: `Bearer ${authToken}` }
+                        })
+                    );
+                }
+            }
+            
+            const createdAnimals = await Promise.all(offspringPromises);
+            const newOffspringIds = createdAnimals.map(response => response.data.id_public);
+            const allOffspringIds = [...newOffspringIds, ...(formData.linkedOffspringIds || [])];
+
             await axios.put(`${API_BASE_URL}/litters/${editingLitter}`, {
                 breedingPairCodeName: formData.breedingPairCodeName,
                 sireId_public: formData.sireId_public,
@@ -3073,8 +3135,8 @@ const LitterManagement = ({ authToken, API_BASE_URL, userProfile, showModalMessa
                 maleCount: formData.maleCount,
                 femaleCount: formData.femaleCount,
                 notes: formData.notes,
-                offspringIds_public: formData.linkedOffspringIds,
-                numberBorn: formData.linkedOffspringIds?.length || 0
+                offspringIds_public: allOffspringIds,
+                numberBorn: allOffspringIds.length
             }, {
                 headers: { Authorization: `Bearer ${authToken}` }
             });
