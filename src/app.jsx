@@ -9592,12 +9592,6 @@ const App = () => {
                             </button>
                             <button 
                                 onClick={() => navigate('/')}
-                                className="px-3 py-2 bg-primary text-black font-semibold rounded-lg transition flex items-center"
-                            >
-                                <Cat size={18} className="mr-1" /> Genetics
-                            </button>
-                            <button 
-                                onClick={() => navigate('/')}
                                 className="px-3 py-2 bg-gray-200 hover:bg-gray-300 text-gray-700 font-semibold rounded-lg transition flex items-center"
                             >
                                 <LogIn size={18} className="mr-1" /> Login
@@ -9662,7 +9656,7 @@ const App = () => {
                             <Search size={18} className="mr-1" /> Search
                         </button>
                         <button 
-                            onClick={() => navigate('/')}
+                            onClick={() => navigate('/genetics-calculator')}
                             className="px-3 py-2 bg-primary hover:bg-primary-dark text-black font-semibold rounded-lg transition flex items-center"
                         >
                             <Cat size={18} className="mr-1" /> Genetics
@@ -9718,7 +9712,7 @@ const App = () => {
                         </p>
                         
                         <button
-                            onClick={() => navigate('/')}
+                            onClick={() => navigate('/donation')}
                             className="w-full bg-gradient-to-r from-pink-500 to-red-500 hover:from-pink-600 hover:to-red-600 text-white font-semibold py-3 px-4 rounded-lg shadow-md transition flex items-center justify-center gap-2"
                         >
                             <Heart size={18} className="fill-current" />
