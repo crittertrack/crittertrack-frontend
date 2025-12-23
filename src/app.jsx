@@ -9964,19 +9964,19 @@ const App = () => {
                             <ClipboardList size={18} className="mb-1" />
                             <span>Animals</span>
                         </button>
-                        <button onClick={() => navigate('/')} data-tutorial-target="litters-btn" className={`px-4 py-2 text-xs font-medium rounded-lg transition duration-150 flex flex-col items-center ${currentView === 'litters' ? 'bg-primary text-black shadow-md' : 'text-gray-600 hover:bg-gray-100'}`}>
+                        <button onClick={() => navigate('/litters')} data-tutorial-target="litters-btn" className={`px-4 py-2 text-xs font-medium rounded-lg transition duration-150 flex flex-col items-center ${currentView === 'litters' ? 'bg-primary text-black shadow-md' : 'text-gray-600 hover:bg-gray-100'}`}>
                             <BookOpen size={18} className="mb-1" />
                             <span>Litters</span>
                         </button>
-                        <button onClick={() => navigate('/')} data-tutorial-target="budget-btn" className={`px-4 py-2 text-xs font-medium rounded-lg transition duration-150 flex flex-col items-center ${currentView === 'budget' ? 'bg-primary text-black shadow-md' : 'text-gray-600 hover:bg-gray-100'}`}>
+                        <button onClick={() => navigate('/budget')} data-tutorial-target="budget-btn" className={`px-4 py-2 text-xs font-medium rounded-lg transition duration-150 flex flex-col items-center ${currentView === 'budget' ? 'bg-primary text-black shadow-md' : 'text-gray-600 hover:bg-gray-100'}`}>
                             <DollarSign size={18} className="mb-1" />
                             <span>Budget</span>
                         </button>
-                        <button onClick={() => navigate('/')} data-tutorial-target="genetics-btn" className={`px-4 py-2 text-xs font-medium rounded-lg transition duration-150 flex flex-col items-center ${currentView === 'genetics-calculator' ? 'bg-primary text-black shadow-md' : 'text-gray-600 hover:bg-gray-100'}`}>
+                        <button onClick={() => navigate('/genetics-calculator')} data-tutorial-target="genetics-btn" className={`px-4 py-2 text-xs font-medium rounded-lg transition duration-150 flex flex-col items-center ${currentView === 'genetics-calculator' ? 'bg-primary text-black shadow-md' : 'text-gray-600 hover:bg-gray-100'}`}>
                             <Cat size={18} className="mb-1" />
                             <span>Genetics</span>
                         </button>
-                        <button onClick={() => navigate('/')} data-tutorial-target="profile-btn" className={`px-4 py-2 text-xs font-medium rounded-lg transition duration-150 flex flex-col items-center ${currentView === 'profile' ? 'bg-primary text-black shadow-md' : 'text-gray-600 hover:bg-gray-100'}`}>
+                        <button onClick={() => navigate('/profile')} data-tutorial-target="profile-btn" className={`px-4 py-2 text-xs font-medium rounded-lg transition duration-150 flex flex-col items-center ${currentView === 'profile' ? 'bg-primary text-black shadow-md' : 'text-gray-600 hover:bg-gray-100'}`}>
                             <User size={18} className="mb-1" />
                             <span>Profile</span>
                         </button>
@@ -10104,19 +10104,19 @@ const App = () => {
                             <ClipboardList size={16} className="inline mb-0.5" />
                             <span className="block">Animals</span>
                         </button>
-                        <button onClick={() => navigate('/')} data-tutorial-target="litters-btn" className={`flex-1 px-2 py-2 text-xs font-medium rounded-lg transition duration-150 ${currentView === 'litters' ? 'bg-primary text-black shadow-md' : 'text-gray-600 hover:bg-gray-100'}`}>
+                        <button onClick={() => navigate('/litters')} data-tutorial-target="litters-btn" className={`flex-1 px-2 py-2 text-xs font-medium rounded-lg transition duration-150 ${currentView === 'litters' ? 'bg-primary text-black shadow-md' : 'text-gray-600 hover:bg-gray-100'}`}>
                             <BookOpen size={16} className="inline mb-0.5" />
                             <span className="block">Litters</span>
                         </button>
-                        <button onClick={() => navigate('/')} data-tutorial-target="budget-btn" className={`flex-1 px-2 py-2 text-xs font-medium rounded-lg transition duration-150 ${currentView === 'budget' ? 'bg-primary text-black shadow-md' : 'text-gray-600 hover:bg-gray-100'}`}>
+                        <button onClick={() => navigate('/budget')} data-tutorial-target="budget-btn" className={`flex-1 px-2 py-2 text-xs font-medium rounded-lg transition duration-150 ${currentView === 'budget' ? 'bg-primary text-black shadow-md' : 'text-gray-600 hover:bg-gray-100'}`}>
                             <DollarSign size={16} className="inline mb-0.5" />
                             <span className="block">Budget</span>
                         </button>
-                        <button onClick={() => navigate('/')} data-tutorial-target="genetics-btn" className={`flex-1 px-2 py-2 text-xs font-medium rounded-lg transition duration-150 ${currentView === 'genetics-calculator' ? 'bg-primary text-black shadow-md' : 'text-gray-600 hover:bg-gray-100'}`}>
+                        <button onClick={() => navigate('/genetics-calculator')} data-tutorial-target="genetics-btn" className={`flex-1 px-2 py-2 text-xs font-medium rounded-lg transition duration-150 ${currentView === 'genetics-calculator' ? 'bg-primary text-black shadow-md' : 'text-gray-600 hover:bg-gray-100'}`}>
                             <Cat size={16} className="inline mb-0.5" />
                             <span className="block">Genetics</span>
                         </button>
-                        <button onClick={() => navigate('/')} data-tutorial-target="profile-btn" className={`flex-1 px-2 py-2 text-xs font-medium rounded-lg transition duration-150 ${currentView === 'profile' ? 'bg-primary text-black shadow-md' : 'text-gray-600 hover:bg-gray-100'}`}>
+                        <button onClick={() => navigate('/profile')} data-tutorial-target="profile-btn" className={`flex-1 px-2 py-2 text-xs font-medium rounded-lg transition duration-150 ${currentView === 'profile' ? 'bg-primary text-black shadow-md' : 'text-gray-600 hover:bg-gray-100'}`}>
                             <User size={16} className="inline mb-0.5" />
                             <span className="block">Profile</span>
                         </button>
