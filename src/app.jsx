@@ -2270,7 +2270,7 @@ const OffspringSection = ({ animalId, API_BASE_URL, authToken = null, onViewAnim
                 // Fetch offspring - use different endpoints based on authentication
                 const offspringEndpoint = authToken 
                     ? `${API_BASE_URL}/animals/${animalId}/offspring`  // Authenticated: private endpoint
-                    : `${API_BASE_URL}/public/animal/${animalId}/offspring`;  // Unauthenticated: public endpoint
+                    : `${API_BASE_URL}/public/animals/${animalId}/offspring`;  // Unauthenticated: public endpoint
                 
                 const offspringResponse = await axios.get(offspringEndpoint, { headers });
                 
@@ -2287,9 +2287,9 @@ const OffspringSection = ({ animalId, API_BASE_URL, authToken = null, onViewAnim
                     } else {
                         // Unauthenticated: fetch from public endpoint
                         const publicResponse = await axios.get(
-                            `${API_BASE_URL}/public/animal/${animalId}`
+                            `${API_BASE_URL}/public/global/animals?id_public=${animalId}`
                         );
-                        animal = publicResponse.data;
+                        animal = publicResponse.data?.[0] || null;
                     }
                 } catch (err) {
                     console.error('Error fetching current animal:', err);
@@ -10973,8 +10973,11 @@ const PublicAnimalPage = () => {
     useEffect(() => {
         const fetchAnimal = async () => {
             try {
-                const response = await axios.get(`${API_BASE_URL}/public/animal/${animalId}`);
-                setAnimal(response.data);
+                const response = await axios.get(`${API_BASE_URL}/public/global/animals?id_public=${animalId}`);
+                setAnimal(response.data?.[0] || null);
+                if (!response.data?.[0]) {
+                    setNotFound(true);
+                }
                 setLoading(false);
             } catch (error) {
                 console.error('Animal not found or not public:', error);
