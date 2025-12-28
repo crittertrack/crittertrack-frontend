@@ -12033,10 +12033,10 @@ const App = () => {
                                                 {(animalToView.currentWeight || animalToView.bcs || animalToView.growthRecords?.length > 0 || animalToView.medicalConditions || animalToView.medications) && (
                                                     <div className="bg-white border-2 border-gray-300 rounded-lg p-4">
                                                         <h4 className="font-semibold text-gray-700 mb-2">Health</h4>
-                                                        <div className="grid grid-cols-2 gap-2 text-sm">
-                                                            {/* Current Measurements - no title */}
+                                                        <div className="space-y-3 text-sm">
+                                                            {/* Current Measurements Summary */}
                                                             {(animalToView.currentWeight || animalToView.bcs || animalToView.growthRecords?.length > 0) && (
-                                                                <>
+                                                                <div className="grid grid-cols-2 gap-2">
                                                                     {animalToView.currentWeight && (
                                                                         <div>
                                                                             <strong>Weight:</strong> {animalToView.currentWeight}g
@@ -12049,15 +12049,35 @@ const App = () => {
                                                                     )}
                                                                     {animalToView.bcs && <div><strong>BCS:</strong> {animalToView.bcs}</div>}
                                                                     {animalToView.growthRecords && animalToView.growthRecords.length > 0 && animalToView.growthRecords[animalToView.growthRecords.length - 1].length && (
-                                                                        <div><strong>Length:</strong> {animalToView.growthRecords[animalToView.growthRecords.length - 1].length}cm</div>
+                                                                        <div><strong>Length:</strong> {animalToView.growthRecords[animalToView.growthRecords.length - 1].length} {animalToView.measurementUnits?.length || 'cm'}</div>
                                                                     )}
-                                                                    {(animalToView.medicalConditions || animalToView.medications) && (
-                                                                        <div className="col-span-2 mt-2 pt-2 border-t border-gray-200"></div>
-                                                                    )}
-                                                                </>
+                                                                </div>
                                                             )}
-                                                            {animalToView.medicalConditions && <div className="col-span-2"><strong>Conditions:</strong> {animalToView.medicalConditions}</div>}
-                                                            {animalToView.medications && <div className="col-span-2"><strong>Medications:</strong> {animalToView.medications}</div>}
+                                                            
+                                                            {/* Recent Growth Records */}
+                                                            {animalToView.growthRecords && animalToView.growthRecords.length > 0 && (
+                                                                <div className="border-t border-gray-200 pt-2">
+                                                                    <p className="text-xs font-semibold text-gray-600 mb-2">Recent Measurements:</p>
+                                                                    <div className="space-y-1 max-h-32 overflow-y-auto">
+                                                                        {animalToView.growthRecords.slice(-5).reverse().map((record, idx) => (
+                                                                            <div key={idx} className="text-xs text-gray-600 border-l-2 border-blue-300 pl-2">
+                                                                                <strong>{record.date || 'No date'}:</strong> {record.weight} {animalToView.measurementUnits?.weight || 'g'}
+                                                                                {record.length && <span> • {record.length} {animalToView.measurementUnits?.length || 'cm'}</span>}
+                                                                                {record.bcs && <span> • BCS: {record.bcs}</span>}
+                                                                                {record.notes && <span className="text-gray-500"> ({record.notes})</span>}
+                                                                            </div>
+                                                                        ))}
+                                                                    </div>
+                                                                </div>
+                                                            )}
+                                                            
+                                                            {/* Conditions and Medications */}
+                                                            {(animalToView.medicalConditions || animalToView.medications) && (
+                                                                <div className="border-t border-gray-200 pt-2">
+                                                                    {animalToView.medicalConditions && <div><strong>Conditions:</strong> {animalToView.medicalConditions}</div>}
+                                                                    {animalToView.medications && <div><strong>Medications:</strong> {animalToView.medications}</div>}
+                                                                </div>
+                                                            )}
                                                         </div>
                                                     </div>
                                                 )}
