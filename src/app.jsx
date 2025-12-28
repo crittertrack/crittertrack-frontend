@@ -6153,8 +6153,27 @@ const AnimalForm = ({
                                                     p.notes ? `Notes: ${p.notes}` : null
                                                 ].filter(Boolean).join('\n');
                                                 
+                                                // Color gradient from green (earliest) to red (latest)
+                                                const colorRatio = points.length > 1 ? i / (points.length - 1) : 0;
+                                                let dotColor;
+                                                if (colorRatio < 0.5) {
+                                                    // Green to Yellow
+                                                    const t = colorRatio * 2;
+                                                    const r = Math.round(144 + (255 - 144) * t);
+                                                    const g = 191;
+                                                    const b = Math.round(71 + (0 - 71) * t);
+                                                    dotColor = `rgb(${r}, ${g}, ${b})`;
+                                                } else {
+                                                    // Yellow to Red
+                                                    const t = (colorRatio - 0.5) * 2;
+                                                    const r = 255;
+                                                    const g = Math.round(191 - (191) * t);
+                                                    const b = 0;
+                                                    dotColor = `rgb(${r}, ${g}, ${b})`;
+                                                }
+                                                
                                                 return (
-                                                    <circle key={`point-${i}`} cx={p.x} cy={p.y} r="4" fill="#3b82f6" stroke="#fff" strokeWidth="2">
+                                                    <circle key={`point-${i}`} cx={p.x} cy={p.y} r="5" fill={dotColor} stroke="#fff" strokeWidth="2">
                                                         <title>{tooltipText}</title>
                                                     </circle>
                                                 );
