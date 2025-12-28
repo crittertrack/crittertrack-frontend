@@ -4974,6 +4974,52 @@ const AnimalForm = ({
             isInMating: animalToEdit.isInMating || false,
             isOwned: animalToEdit.isOwned ?? true,
             isDisplay: animalToEdit.isDisplay ?? false,
+            // New fields for comprehensive mammal profile
+            microchipNumber: animalToEdit.microchipNumber || '',
+            pedigreeRegistrationId: animalToEdit.pedigreeRegistrationId || '',
+            breed: animalToEdit.breed || '',
+            strain: animalToEdit.strain || '',
+            coatPattern: animalToEdit.coatPattern || '',
+            bodyWeight: animalToEdit.bodyWeight || '',
+            bodyLength: animalToEdit.bodyLength || '',
+            heightAtWithers: animalToEdit.heightAtWithers || '',
+            bodyConditionScore: animalToEdit.bodyConditionScore || '',
+            origin: animalToEdit.origin || 'Captive-bred',
+            isNeutered: animalToEdit.isNeutered || false,
+            heatStatus: animalToEdit.heatStatus || '',
+            lastHeatDate: animalToEdit.lastHeatDate ? new Date(animalToEdit.lastHeatDate).toISOString().substring(0, 10) : '',
+            ovulationDate: animalToEdit.ovulationDate ? new Date(animalToEdit.ovulationDate).toISOString().substring(0, 10) : '',
+            matingDates: animalToEdit.matingDates || '',
+            expectedDueDate: animalToEdit.expectedDueDate ? new Date(animalToEdit.expectedDueDate).toISOString().substring(0, 10) : '',
+            litterCount: animalToEdit.litterCount || '',
+            nursingStartDate: animalToEdit.nursingStartDate ? new Date(animalToEdit.nursingStartDate).toISOString().substring(0, 10) : '',
+            weaningDate: animalToEdit.weaningDate ? new Date(animalToEdit.weaningDate).toISOString().substring(0, 10) : '',
+            vaccinations: animalToEdit.vaccinations || '',
+            dewormingRecords: animalToEdit.dewormingRecords || '',
+            parasiteControl: animalToEdit.parasiteControl || '',
+            medicalConditions: animalToEdit.medicalConditions || '',
+            allergies: animalToEdit.allergies || '',
+            medications: animalToEdit.medications || '',
+            medicalProcedures: animalToEdit.medicalProcedures || '',
+            labResults: animalToEdit.labResults || '',
+            vetVisits: animalToEdit.vetVisits || '',
+            primaryVet: animalToEdit.primaryVet || '',
+            dietType: animalToEdit.dietType || '',
+            feedingSchedule: animalToEdit.feedingSchedule || '',
+            supplements: animalToEdit.supplements || '',
+            housingType: animalToEdit.housingType || '',
+            bedding: animalToEdit.bedding || '',
+            temperatureRange: animalToEdit.temperatureRange || '',
+            enrichment: animalToEdit.enrichment || '',
+            temperament: animalToEdit.temperament || '',
+            handlingTolerance: animalToEdit.handlingTolerance || '',
+            socialStructure: animalToEdit.socialStructure || '',
+            activityCycle: animalToEdit.activityCycle || '',
+            lifeStage: animalToEdit.lifeStage || '',
+            causeOfDeath: animalToEdit.causeOfDeath || '',
+            necropsyResults: animalToEdit.necropsyResults || '',
+            insurance: animalToEdit.insurance || '',
+            legalStatus: animalToEdit.legalStatus || '',
         } : {
             species: species, 
             breederyId: '',
@@ -4999,6 +5045,52 @@ const AnimalForm = ({
             isInMating: false,
             isOwned: true,
             isDisplay: false,
+            // New fields defaults
+            microchipNumber: '',
+            pedigreeRegistrationId: '',
+            breed: '',
+            strain: '',
+            coatPattern: '',
+            bodyWeight: '',
+            bodyLength: '',
+            heightAtWithers: '',
+            bodyConditionScore: '',
+            origin: 'Captive-bred',
+            isNeutered: false,
+            heatStatus: '',
+            lastHeatDate: '',
+            ovulationDate: '',
+            matingDates: '',
+            expectedDueDate: '',
+            litterCount: '',
+            nursingStartDate: '',
+            weaningDate: '',
+            vaccinations: '',
+            dewormingRecords: '',
+            parasiteControl: '',
+            medicalConditions: '',
+            allergies: '',
+            medications: '',
+            medicalProcedures: '',
+            labResults: '',
+            vetVisits: '',
+            primaryVet: '',
+            dietType: '',
+            feedingSchedule: '',
+            supplements: '',
+            housingType: '',
+            bedding: '',
+            temperatureRange: '',
+            enrichment: '',
+            temperament: '',
+            handlingTolerance: '',
+            socialStructure: '',
+            activityCycle: '',
+            lifeStage: '',
+            causeOfDeath: '',
+            necropsyResults: '',
+            insurance: '',
+            legalStatus: '',
         }
     );
     // Keep a ref for immediate pedigree selection (avoids lost state if user selects then immediately saves)
@@ -5060,6 +5152,7 @@ const AnimalForm = ({
     const [animalImagePreview, setAnimalImagePreview] = useState(animalToEdit?.imageUrl || animalToEdit?.photoUrl || null);
     const [deleteImage, setDeleteImage] = useState(false);
     const [showCommunityGeneticsModal, setShowCommunityGeneticsModal] = useState(false);
+    const [activeTab, setActiveTab] = useState(1); // Tab navigation state
 
     const handleChange = (e) => {
         const { name, value, type, checked } = e.target;
@@ -5561,386 +5654,1004 @@ const AnimalForm = ({
 
             <form onSubmit={handleSubmit} className="space-y-6">
                 
-                {/* ------------------------------------------- */}
-                {/* STATUS & PRIVACY FLAGS */}
-                {/* ------------------------------------------- */}
-                <div data-tutorial-target="status-flags-container" className="bg-primary/10 p-4 rounded-lg border-2 border-primary space-y-2">
-                    <h3 className="text-lg font-semibold text-gray-800">Status & Privacy Flags</h3>
-                    <div className="grid grid-cols-2 gap-4">
-                        <label className="flex items-center space-x-2 text-sm text-gray-700">
-                            <input type="checkbox" name="isOwned" checked={formData.isOwned} onChange={handleChange} 
-                                className="h-4 w-4 text-primary rounded border-gray-300 focus:ring-primary" />
-                            <span>Currently Owned by me</span>
-                        </label>
-                        <label className="flex items-center space-x-2 text-sm text-gray-700">
-                            <input type="checkbox" name="isDisplay" checked={formData.isDisplay} onChange={handleChange} 
-                                className="h-4 w-4 text-primary rounded border-gray-300 focus:ring-primary" />
-                            <span>Public</span>
-                        </label>
-                        {formData.gender === 'Female' && (
-                            <>
-                                <label className="flex items-center space-x-2 text-sm text-gray-700">
-                                    <input type="checkbox" name="isPregnant" checked={formData.isPregnant} onChange={handleChange} 
-                                        className="h-4 w-4 text-primary rounded border-gray-300 focus:ring-primary" />
-                                    <span>Female is Pregnant 🫘</span>
-                                </label>
-                                <label className="flex items-center space-x-2 text-sm text-gray-700">
-                                    <input type="checkbox" name="isNursing" checked={formData.isNursing} onChange={handleChange} 
-                                        className="h-4 w-4 bg-primary text-black rounded border-gray-300 focus:ring-primary" />
-                                    <span>Female is Nursing 🥛</span>
-                                </label>
-                            </>
-                        )}
-                        <label className="flex items-center space-x-2 text-sm text-gray-700">
-                            <input type="checkbox" name="isInMating" checked={formData.isInMating} onChange={handleChange} 
-                                className="h-4 w-4 text-primary rounded border-gray-300 focus:ring-primary" />
-                            <span>In Mating ⏳</span>
-                        </label>
+                {/* Tab Navigation */}
+                <div className="border-b border-gray-200 -mx-6 px-6">
+                    <div className="flex overflow-x-auto space-x-1 pb-px">
+                        {[
+                            { id: 1, label: 'Overview', icon: '📋' },
+                            { id: 2, label: 'Status & Privacy', icon: '🔒' },
+                            { id: 3, label: 'Identification', icon: '🏷️' },
+                            { id: 4, label: 'Physical Profile', icon: '🎨' },
+                            { id: 5, label: 'Lineage & Origin', icon: '🌳' },
+                            { id: 6, label: 'Reproduction & Breeding', icon: '🫘' },
+                            { id: 7, label: 'Health & Veterinary', icon: '🏥' },
+                            { id: 8, label: 'Nutrition & Husbandry', icon: '🏠' },
+                            { id: 9, label: 'Behavior & Welfare', icon: '🧠' },
+                            { id: 10, label: 'Records & Notes', icon: '📝' },
+                            { id: 11, label: 'End of Life & Legal', icon: '🕊️' }
+                        ].map(tab => (
+                            <button
+                                key={tab.id}
+                                type="button"
+                                onClick={() => setActiveTab(tab.id)}
+                                className={`whitespace-nowrap px-4 py-2 text-sm font-medium rounded-t-lg transition-colors ${
+                                    activeTab === tab.id 
+                                        ? 'bg-primary text-black border-b-2 border-primary' 
+                                        : 'text-gray-600 hover:text-gray-800 hover:bg-gray-100'
+                                }`}
+                            >
+                                <span className="mr-1">{tab.icon}</span>
+                                <span className="hidden sm:inline">{tab.label}</span>
+                            </button>
+                        ))}
                     </div>
                 </div>
-                {/* ------------------------------------------- */}
-
-                {/* Image Upload Placeholder */}
-                <AnimalImageUpload 
-                    imageUrl={animalImagePreview} 
-                    onFileChange={async (e) => {
-                        if (e.target.files && e.target.files[0]) {
-                            const original = e.target.files[0];
-                            console.log('[FILE CHANGE] Original file:', { name: original.name, size: original.size, type: original.type });
-                            try {
-                                // Compress to target <=200KB if possible. Prefer a Web Worker-based compressor
-                                // (non-blocking) and fall back to the existing main-thread functions when unavailable.
-                                let compressedBlob = null;
-
-                                try {
-                                    console.log('[FILE CHANGE] Attempting worker compression...');
-                                    compressedBlob = await compressImageWithWorker(original, 200 * 1024, { maxWidth: 1200, maxHeight: 1200, startQuality: 0.85 });
-                                    console.log('[FILE CHANGE] Worker compression result:', compressedBlob ? { size: compressedBlob.size } : 'null');
-                                } catch (werr) {
-                                    console.warn('Worker compression failed unexpectedly:', werr);
-                                    compressedBlob = null;
-                                }
-
-                                if (!compressedBlob) {
-                                    // Worker not available or failed — fallback to main-thread compression
-                                    console.log('[FILE CHANGE] Falling back to main-thread compression...');
-                                    try {
-                                        compressedBlob = await compressImageToMaxSize(original, 200 * 1024, { maxWidth: 1200, maxHeight: 1200, startQuality: 0.85 });
-                                        console.log('[FILE CHANGE] Main-thread compression result:', compressedBlob ? { size: compressedBlob.size } : 'null');
-                                    } catch (err) {
-                                        console.warn('Compression-to-size failed, falling back to single-pass compress:', err);
-                                        compressedBlob = await compressImageFile(original, { maxWidth: 1200, maxHeight: 1200, quality: 0.8 });
-                                        console.log('[FILE CHANGE] Single-pass compression result:', compressedBlob ? { size: compressedBlob.size } : 'null');
-                                    }
-                                }
-                                // If compressImageFile returned the original File/Blob, wrap if needed
-                                // Always use JPEG format for compatibility
-                                const baseName = original.name.replace(/\.[^/.]+$/, '') || 'image';
-                                const compressedFile = new File([compressedBlob], `${baseName}.jpg`, { type: 'image/jpeg' });
-                                console.log('[FILE CHANGE] Final compressed file:', { name: compressedFile.name, size: compressedFile.size, type: compressedFile.type });
-                                // Warn if we couldn't reach target size (best-effort)
-                                if (compressedBlob.size > 200 * 1024) {
-                                    showModalMessage('Image Compression', 'Image was compressed but is still larger than 200KB. It will be uploaded but consider using a smaller image.');
-                                }
-                                setAnimalImageFile(compressedFile);
-                                setAnimalImagePreview(URL.createObjectURL(compressedFile));
-                                console.log('[FILE CHANGE] Set animalImageFile and preview');
-                            } catch (err) {
-                                console.warn('Image compression failed, using original file', err);
-                                setAnimalImageFile(original);
-                                setAnimalImagePreview(URL.createObjectURL(original));
-                            }
-                        }
-                    }}
-                    onDeleteImage={() => {
-                        setAnimalImageFile(null);
-                        setAnimalImagePreview(null);
-                        setDeleteImage(true);
-                    }}
-                    disabled={loading}
-                    Trash2={Trash2}
-                />
-
-                {/* ------------------------------------------- */}
-                {/* PRIMARY INPUT FIELDS (THE MISSING SECTION) */}
-                {/* ------------------------------------------- */}
-                <div data-tutorial-target="general-info-container" className="grid grid-cols-1 md:grid-cols-3 gap-4 border p-4 rounded-lg">
-                    					
-					{/* Breedery ID */}
-                    <div>
-                        <label className="block text-sm font-medium text-gray-700">Breedery ID</label>
-                        <input type="text" name="breederyId" value={formData.breederyId} onChange={handleChange} 
-                            className="mt-1 block w-full p-2 border border-gray-300 rounded-md shadow-sm focus:ring-primary focus:border-primary" />
-                    </div>
-					
-					{/* Prefix */}
-                    <div>
-                        <label className="block text-sm font-medium text-gray-700">Prefix</label>
-                        <input type="text" name="prefix" value={formData.prefix} onChange={handleChange} 
-                            className="mt-1 block w-full p-2 border border-gray-300 rounded-md shadow-sm focus:ring-primary focus:border-primary" />
-                    </div>
-					
-					{/* Name */}
-                    <div>
-                        <label className="block text-sm font-medium text-gray-700">Name*</label>
-                        <input type="text" name="name" value={formData.name} onChange={handleChange} required 
-                            className="mt-1 block w-full p-2 border border-gray-300 rounded-md shadow-sm focus:ring-primary focus:border-primary" />
-                    </div>
-					
-					{/* Suffix */}
-                    <div>
-                        <label className="block text-sm font-medium text-gray-700">Suffix</label>
-                        <input type="text" name="suffix" value={formData.suffix} onChange={handleChange} 
-                            className="mt-1 block w-full p-2 border border-gray-300 rounded-md shadow-sm focus:ring-primary focus:border-primary" />
-                    </div>
-					
-					{/* Color */}
-                    <div>
-                        <label className="block text-sm font-medium text-gray-700">Color</label>
-                        <input type="text" name="color" value={formData.color} onChange={handleChange} 
-                            className="mt-1 block w-full p-2 border border-gray-300 rounded-md shadow-sm focus:ring-primary focus:border-primary" />
-                    </div>
-					
-					{/* Coat */}
-                    <div>
-                        <label className="block text-sm font-medium text-gray-700">Coat</label>
-                        <input type="text" name="coat" value={formData.coat} onChange={handleChange} 
-                            className="mt-1 block w-full p-2 border border-gray-300 rounded-md shadow-sm focus:ring-primary focus:border-primary" />
-                    </div>
-					
-                    {/* --- NEW: EARSET ENTRY (CONDITIONAL ON SPECIES === 'Rat') --- */}
-                    {formData.species === 'Rat' && (
+                
+                {/* Tab 1: Overview - Core Identity */}
+                {activeTab === 1 && (
+                    <div className="space-y-6">
+                        {/* Image Upload */}
                         <div>
-                            <label className="block text-sm font-medium text-gray-700">Earset</label>
-                            <input type="text" name="earset" value={formData.earset} onChange={handleChange} 
-                                className="mt-1 block w-full p-2 border border-gray-300 rounded-md shadow-sm focus:ring-primary focus:border-primary" />
+                            <AnimalImageUpload 
+                                imageUrl={animalImagePreview} 
+                                onFileChange={async (e) => {
+                                    if (e.target.files && e.target.files[0]) {
+                                        const original = e.target.files[0];
+                                        try {
+                                            let compressedBlob = null;
+                                            try {
+                                                compressedBlob = await compressImageWithWorker(original, 200 * 1024, { maxWidth: 1200, maxHeight: 1200, startQuality: 0.85 });
+                                            } catch (werr) {
+                                                compressedBlob = null;
+                                            }
+                                            if (!compressedBlob) {
+                                                try {
+                                                    compressedBlob = await compressImageToMaxSize(original, 200 * 1024, { maxWidth: 1200, maxHeight: 1200, startQuality: 0.85 });
+                                                } catch (err) {
+                                                    compressedBlob = await compressImageFile(original, { maxWidth: 1200, maxHeight: 1200, quality: 0.8 });
+                                                }
+                                            }
+                                            const baseName = original.name.replace(/\.[^/.]+$/, '') || 'image';
+                                            const compressedFile = new File([compressedBlob], `${baseName}.jpg`, { type: 'image/jpeg' });
+                                            if (compressedBlob.size > 200 * 1024) {
+                                                showModalMessage('Image Compression', 'Image was compressed but is still larger than 200KB.');
+                                            }
+                                            setAnimalImageFile(compressedFile);
+                                            setAnimalImagePreview(URL.createObjectURL(compressedFile));
+                                        } catch (err) {
+                                            setAnimalImageFile(original);
+                                            setAnimalImagePreview(URL.createObjectURL(original));
+                                        }
+                                    }
+                                }}
+                                onDeleteImage={() => {
+                                    setAnimalImageFile(null);
+                                    setAnimalImagePreview(null);
+                                    setDeleteImage(true);
+                                }}
+                                disabled={loading}
+                                Trash2={Trash2}
+                            />
                         </div>
-                    )}
-					
-					{/* Gender */}
-                    <div>
-                        <label className="block text-sm font-medium text-gray-700">Gender*</label>
-                        <select name="gender" value={formData.gender} onChange={handleChange} required 
-                            className="mt-1 block w-full p-2 border border-gray-300 rounded-md shadow-sm focus:ring-primary focus:border-primary" >
-                            {GENDER_OPTIONS.map(g => <option key={g} value={g}>{g}</option>)}
-                        </select>
+                        
+                        {/* Identity Fields */}
+                        <div data-tutorial-target="general-info-container" className="bg-gray-50 p-4 rounded-lg border border-gray-200 space-y-4">
+                            <h3 className="text-lg font-semibold text-gray-700 border-b pb-2">Identity</h3>
+                            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                                <div>
+                                    <label className="block text-sm font-medium text-gray-700">Prefix</label>
+                                    <input type="text" name="prefix" value={formData.prefix} onChange={handleChange} 
+                                        className="mt-1 block w-full p-2 border border-gray-300 rounded-md shadow-sm focus:ring-primary focus:border-primary" />
+                                </div>
+                                
+                                <div>
+                                    <label className="block text-sm font-medium text-gray-700">Name*</label>
+                                    <input type="text" name="name" value={formData.name} onChange={handleChange} required 
+                                        className="mt-1 block w-full p-2 border border-gray-300 rounded-md shadow-sm focus:ring-primary focus:border-primary" />
+                                </div>
+                                
+                                <div>
+                                    <label className="block text-sm font-medium text-gray-700">Suffix</label>
+                                    <input type="text" name="suffix" value={formData.suffix} onChange={handleChange} 
+                                        className="mt-1 block w-full p-2 border border-gray-300 rounded-md shadow-sm focus:ring-primary focus:border-primary" />
+                                </div>
+                            </div>
+                            
+                            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                <div>
+                                    <label className="block text-sm font-medium text-gray-700">Gender*</label>
+                                    <select name="gender" value={formData.gender} onChange={handleChange} required 
+                                        className="mt-1 block w-full p-2 border border-gray-300 rounded-md shadow-sm focus:ring-primary focus:border-primary">
+                                        {GENDER_OPTIONS.map(g => <option key={g} value={g}>{g}</option>)}
+                                    </select>
+                                </div>
+                                
+                                <div>
+                                    <label className="block text-sm font-medium text-gray-700">Date of Birth*</label>
+                                    <input type="date" name="birthDate" value={formData.birthDate} onChange={handleChange} min="1800-01-01" max={new Date().toISOString().split('T')[0]} required 
+                                        className="mt-1 block w-full p-2 border border-gray-300 rounded-md shadow-sm focus:ring-primary focus:border-primary" />
+                                </div>
+                                
+                                <div className="md:col-span-2">
+                                    <label className="block text-sm font-medium text-gray-700">Status*</label>
+                                    <select name="status" value={formData.status} onChange={handleChange} required 
+                                        data-tutorial-target="status-dropdown"
+                                        className="mt-1 block w-full p-2 border border-gray-300 rounded-md shadow-sm focus:ring-primary focus:border-primary">
+                                        {STATUS_OPTIONS.map(s => <option key={s} value={s}>{s}</option>)}
+                                    </select>
+                                </div>
+                            </div>
+                        </div>
                     </div>
-					
-					 {/* Birthdate */}
-                    <div>
-                        <label className="block text-sm font-medium text-gray-700">Birthdate*</label>
-                        <input type="date" name="birthDate" value={formData.birthDate} onChange={handleChange} min="1800-01-01" max={new Date().toISOString().split('T')[0]} required 
-                            className="mt-1 block w-full p-2 border border-gray-300 rounded-md shadow-sm focus:ring-primary focus:border-primary" />
-                    </div>
-					
-					{/* Deceased Date */}
-                    <div>
-                        <label className="block text-sm font-medium text-gray-700">Deceased Date</label>
-                        <input type="date" name="deceasedDate" value={formData.deceasedDate || ''} onChange={handleChange} min="1800-01-01" max={new Date().toISOString().split('T')[0]} 
-                            className="mt-1 block w-full p-2 border border-gray-300 rounded-md shadow-sm focus:ring-primary focus:border-primary" />
-                    </div>
-					
-					{/* Status */}
-                    <div>
-                        <label className="block text-sm font-medium text-gray-700">Status*</label>
-                        <select name="status" value={formData.status} onChange={handleChange} required 
-                            data-tutorial-target="status-dropdown"
-                            className="mt-1 block w-full p-2 border border-gray-300 rounded-md shadow-sm focus:ring-primary focus:border-primary" >
-                            {STATUS_OPTIONS.map(s => <option key={s} value={s}>{s}</option>)}
-                        </select>
-                    </div>
-                    
-                    {/* Genetic Code */}
-                    <div className="md:col-span-3">
-                        <GeneticCodeBuilder
-                            species={formData.species}
-                            gender={formData.gender}
-                            value={formData.geneticCode}
-                            onChange={(value) => setFormData(prev => ({ ...prev, geneticCode: value }))}
-                            onOpenCommunityForm={() => setShowCommunityGeneticsModal(true)}
-                        />
-                    </div>
-                </div>
-                {/* ------------------------------------------- */}
-
-                {/* ------------------------------------------- */}
-                {/* Pedigree Section */}
-                {/* ------------------------------------------- */}
-                <div 
-                    data-tutorial-target="pedigree-section"
-                    className="bg-gray-50 p-4 rounded-lg border border-gray-200 space-y-4"
-                >
-                    <h3 className="text-lg font-semibold text-gray-700 border-b pb-2">Pedigree: Sire and Dam 🌳</h3>
-                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                        <div className='flex flex-col'>
-                            <label className='text-sm font-medium text-gray-600 mb-1'>Sire (Father)</label>
+                )}
+                
+                {/* Tab 2: Status & Privacy */}
+                {activeTab === 2 && (
+                    <div className="space-y-6">
+                        {/* Ownership */}
+                        <div className="bg-gray-50 p-4 rounded-lg border border-gray-200 space-y-4">
+                            <h3 className="text-lg font-semibold text-gray-700 border-b pb-2">Ownership</h3>
+                            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                <label className="flex items-center space-x-2 cursor-pointer p-3 border rounded-lg bg-white hover:bg-gray-50 transition">
+                                    <input type="checkbox" name="isOwned" checked={formData.isOwned} onChange={handleChange} 
+                                        className="form-checkbox h-5 w-5 text-primary rounded focus:ring-primary" />
+                                    <span className="text-sm font-medium text-gray-700">Currently Owned by Me</span>
+                                </label>
+                            </div>
+                            
+                            <div>
+                                <label className='block text-sm font-medium text-gray-700 mb-2'>Breeder</label>
                                 <div 
-                                    onClick={() => !loading && setModalTarget('father')}
+                                    onClick={() => !loading && setModalTarget('breeder')}
+                                    className="flex flex-col items-start p-3 border border-gray-300 rounded-lg bg-white cursor-pointer hover:border-primary transition"
+                                >
+                                    <div className="flex items-center space-x-2 w-full">
+                                        {formData.breederId_public && breederInfo ? (
+                                            <span className="text-gray-800">
+                                                {(() => {
+                                                    const showPersonal = breederInfo.showPersonalName ?? false;
+                                                    const showBreeder = breederInfo.showBreederName ?? false;
+                                                    if (showPersonal && showBreeder && breederInfo.personalName && breederInfo.breederName) {
+                                                        return `${breederInfo.personalName} (${breederInfo.breederName})`;
+                                                    } else if (showBreeder && breederInfo.breederName) {
+                                                        return breederInfo.breederName;
+                                                    } else if (showPersonal && breederInfo.personalName) {
+                                                        return breederInfo.personalName;
+                                                    } else {
+                                                        return 'Unknown Breeder';
+                                                    }
+                                                })()}
+                                            </span>
+                                        ) : (
+                                            <span className="text-gray-400">
+                                                {formData.breederId_public ? 'Loading...' : 'Click to Select Breeder'}
+                                            </span>
+                                        )}
+                                        {formData.breederId_public && (
+                                            <button
+                                                type="button"
+                                                onClick={(e) => { e.stopPropagation(); clearBreederSelection(); }}
+                                                title="Clear breeder selection"
+                                                className="text-sm text-red-500 hover:text-red-700 p-1 rounded"
+                                            >
+                                                <X size={14} />
+                                            </button>
+                                        )}
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        {/* Visibility */}
+                        <div className="bg-gray-50 p-4 rounded-lg border border-gray-200 space-y-4">
+                            <h3 className="text-lg font-semibold text-gray-700 border-b pb-2">Visibility</h3>
+                            <label className="flex items-center space-x-2 cursor-pointer p-3 border rounded-lg bg-white hover:bg-gray-50 transition">
+                                <input type="checkbox" name="isDisplay" checked={formData.isDisplay} onChange={handleChange} 
+                                    className="form-checkbox h-5 w-5 text-primary rounded focus:ring-primary" />
+                                <span className="text-sm font-medium text-gray-700">Public Profile</span>
+                            </label>
+                        </div>
+                        
+                        {/* Lifecycle Status */}
+                        <div className="bg-gray-50 p-4 rounded-lg border border-gray-200 space-y-4">
+                            <h3 className="text-lg font-semibold text-gray-700 border-b pb-2">Lifecycle Status</h3>
+                            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                <div>
+                                    <label className="block text-sm font-medium text-gray-700 mb-2">Status</label>
+                                    <select name="status" value={formData.status} onChange={handleChange} 
+                                        className="block w-full p-2 border border-gray-300 rounded-md shadow-sm focus:ring-primary focus:border-primary">
+                                        <option value="Alive">Alive</option>
+                                        <option value="Missing">Missing</option>
+                                        <option value="Retired">Retired</option>
+                                        <option value="Deceased">Deceased</option>
+                                    </select>
+                                </div>
+                                
+                                {formData.status === 'Deceased' && (
+                                    <div>
+                                        <label className="block text-sm font-medium text-gray-700 mb-2">Date of Death</label>
+                                        <input type="date" name="deceasedDate" value={formData.deceasedDate || ''} onChange={handleChange} 
+                                            min="1800-01-01" max={new Date().toISOString().split('T')[0]} 
+                                            className="block w-full p-2 border border-gray-300 rounded-md shadow-sm focus:ring-primary focus:border-primary" />
+                                    </div>
+                                )}
+                            </div>
+                        </div>
+                    </div>
+                )}
+                
+                {/* Tab 3: Identification */}
+                {activeTab === 3 && (
+                    <div className="space-y-6">
+                        {/* Identification Numbers */}
+                        <div className="bg-gray-50 p-4 rounded-lg border border-gray-200 space-y-4">
+                            <h3 className="text-lg font-semibold text-gray-700 border-b pb-2">Identification Numbers</h3>
+                            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                <div>
+                                    <label className="block text-sm font-medium text-gray-700">Identification</label>
+                                    <input type="text" name="breederyId" value={formData.breederyId} onChange={handleChange} 
+                                        className="mt-1 block w-full p-2 border border-gray-300 rounded-md shadow-sm focus:ring-primary focus:border-primary" 
+                                        placeholder="Breeder ID or Registry Code" />
+                                </div>
+                                
+                                <div>
+                                    <label className="block text-sm font-medium text-gray-700">Microchip Number</label>
+                                    <input type="text" name="microchipNumber" value={formData.microchipNumber} onChange={handleChange} 
+                                        className="mt-1 block w-full p-2 border border-gray-300 rounded-md shadow-sm focus:ring-primary focus:border-primary" />
+                                </div>
+                                
+                                <div className="md:col-span-2">
+                                    <label className="block text-sm font-medium text-gray-700">Pedigree Registration ID</label>
+                                    <input type="text" name="pedigreeRegistrationId" value={formData.pedigreeRegistrationId} onChange={handleChange} 
+                                        className="mt-1 block w-full p-2 border border-gray-300 rounded-md shadow-sm focus:ring-primary focus:border-primary" />
+                                </div>
+                            </div>
+                        </div>
+                        
+                        {/* Genetic Code */}
+                        <div className="bg-gray-50 p-4 rounded-lg border border-gray-200">
+                            <GeneticCodeBuilder
+                                species={formData.species}
+                                gender={formData.gender}
+                                value={formData.geneticCode}
+                                onChange={(value) => setFormData(prev => ({ ...prev, geneticCode: value }))}
+                                onOpenCommunityForm={() => setShowCommunityGeneticsModal(true)}
+                            />
+                        </div>
+                        
+                        {/* Classification */}
+                        <div className="bg-gray-50 p-4 rounded-lg border border-gray-200 space-y-4">
+                            <h3 className="text-lg font-semibold text-gray-700 border-b pb-2">Classification</h3>
+                            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                <div>
+                                    <label className="block text-sm font-medium text-gray-700">Species</label>
+                                    <input type="text" value={formData.species} disabled 
+                                        className="mt-1 block w-full p-2 border border-gray-300 rounded-md shadow-sm bg-gray-100 text-gray-600" />
+                                    <p className="text-xs text-gray-500 mt-1">Cannot be changed after creation</p>
+                                </div>
+                                
+                                <div>
+                                    <label className="block text-sm font-medium text-gray-700">Breed</label>
+                                    <input type="text" name="breed" value={formData.breed} onChange={handleChange} 
+                                        className="mt-1 block w-full p-2 border border-gray-300 rounded-md shadow-sm focus:ring-primary focus:border-primary" />
+                                </div>
+                                
+                                <div className="md:col-span-2">
+                                    <label className="block text-sm font-medium text-gray-700">Strain <span className="text-xs text-gray-500">(rodents)</span></label>
+                                    <input type="text" name="strain" value={formData.strain} onChange={handleChange} 
+                                        className="mt-1 block w-full p-2 border border-gray-300 rounded-md shadow-sm focus:ring-primary focus:border-primary" 
+                                        placeholder="e.g., C57BL/6, Wistar, Syrian" />
+                                </div>
+                            </div>
+                        </div>
+                        
+                        {/* Tags */}
+                        <div className="bg-gray-50 p-4 rounded-lg border border-gray-200" data-tutorial-target="tags-edit-section">
+                            <label className="block text-sm font-medium text-gray-700 mb-2">Tags (Lines, Enclosures, etc)</label>
+                            <input 
+                                type="text" 
+                                placeholder="Enter tags separated by commas (e.g., Line A, Enclosure 1)" 
+                                value={formData.tags.join(', ')} 
+                                onChange={(e) => {
+                                    const tagString = e.target.value;
+                                    const newTags = tagString.split(',').map(tag => tag.trim()).filter(tag => tag.length > 0);
+                                    setFormData({ ...formData, tags: newTags });
+                                }}
+                                className="block w-full p-2 border border-gray-300 rounded-md shadow-sm focus:ring-primary focus:border-primary" 
+                            />
+                            {formData.tags.length > 0 && (
+                                <div className="mt-2 flex flex-wrap gap-2">
+                                    {formData.tags.map((tag, idx) => (
+                                        <span key={idx} className="inline-flex items-center bg-primary text-black text-xs font-semibold px-3 py-1 rounded-full">
+                                            {tag}
+                                            <button
+                                                type="button"
+                                                onClick={() => {
+                                                    const newTags = formData.tags.filter((_, i) => i !== idx);
+                                                    setFormData({ ...formData, tags: newTags });
+                                                }}
+                                                className="ml-2 text-black hover:text-gray-600"
+                                            >
+                                                ×
+                                            </button>
+                                        </span>
+                                    ))}
+                                </div>
+                            )}
+                        </div>
+                    </div>
+                )}
+                
+                {/* Tab 4: Physical Profile */}
+                {activeTab === 4 && (
+                    <div className="space-y-6">
+                        {/* Appearance */}
+                        <div className="bg-gray-50 p-4 rounded-lg border border-gray-200 space-y-4">
+                            <h3 className="text-lg font-semibold text-gray-700 border-b pb-2">Appearance</h3>
+                            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                                <div>
+                                    <label className="block text-sm font-medium text-gray-700">Color</label>
+                                    <input type="text" name="color" value={formData.color} onChange={handleChange} 
+                                        className="mt-1 block w-full p-2 border border-gray-300 rounded-md shadow-sm focus:ring-primary focus:border-primary" />
+                                </div>
+                                
+                                <div>
+                                    <label className="block text-sm font-medium text-gray-700">Coat Type</label>
+                                    <input type="text" name="coat" value={formData.coat} onChange={handleChange} 
+                                        className="mt-1 block w-full p-2 border border-gray-300 rounded-md shadow-sm focus:ring-primary focus:border-primary" 
+                                        placeholder="e.g., Short, Long, Rex" />
+                                </div>
+                                
+                                <div>
+                                    <label className="block text-sm font-medium text-gray-700">Coat Pattern</label>
+                                    <input type="text" name="coatPattern" value={formData.coatPattern} onChange={handleChange} 
+                                        className="mt-1 block w-full p-2 border border-gray-300 rounded-md shadow-sm focus:ring-primary focus:border-primary" 
+                                        placeholder="e.g., Solid, Hooded, Brindle" />
+                                </div>
+                                
+                                {formData.species === 'Rat' && (
+                                    <div>
+                                        <label className="block text-sm font-medium text-gray-700">Earset</label>
+                                        <input type="text" name="earset" value={formData.earset} onChange={handleChange} 
+                                            className="mt-1 block w-full p-2 border border-gray-300 rounded-md shadow-sm focus:ring-primary focus:border-primary" 
+                                            placeholder="e.g., Standard, Dumbo" />
+                                    </div>
+                                )}
+                            </div>
+                        </div>
+                        
+                        {/* Measurements */}
+                        <div className="bg-gray-50 p-4 rounded-lg border border-gray-200 space-y-4">
+                            <h3 className="text-lg font-semibold text-gray-700 border-b pb-2">Measurements</h3>
+                            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                                <div>
+                                    <label className="block text-sm font-medium text-gray-700">Body Weight <span className="text-xs text-gray-500">(grams or lbs)</span></label>
+                                    <input type="text" name="bodyWeight" value={formData.bodyWeight} onChange={handleChange} 
+                                        className="mt-1 block w-full p-2 border border-gray-300 rounded-md shadow-sm focus:ring-primary focus:border-primary" 
+                                        placeholder="e.g., 450g or 15 lbs" />
+                                </div>
+                                
+                                <div>
+                                    <label className="block text-sm font-medium text-gray-700">Body Length <span className="text-xs text-gray-500">(cm or in)</span></label>
+                                    <input type="text" name="bodyLength" value={formData.bodyLength} onChange={handleChange} 
+                                        className="mt-1 block w-full p-2 border border-gray-300 rounded-md shadow-sm focus:ring-primary focus:border-primary" 
+                                        placeholder="e.g., 20cm" />
+                                </div>
+                                
+                                {['Dog', 'Cat', 'Rabbit'].includes(formData.species) && (
+                                    <div>
+                                        <label className="block text-sm font-medium text-gray-700">Height at Withers <span className="text-xs text-gray-500">(cm or in)</span></label>
+                                        <input type="text" name="heightAtWithers" value={formData.heightAtWithers} onChange={handleChange} 
+                                            className="mt-1 block w-full p-2 border border-gray-300 rounded-md shadow-sm focus:ring-primary focus:border-primary" />
+                                    </div>
+                                )}
+                                
+                                <div>
+                                    <label className="block text-sm font-medium text-gray-700">Body Condition Score</label>
+                                    <select name="bodyConditionScore" value={formData.bodyConditionScore} onChange={handleChange} 
+                                        className="mt-1 block w-full p-2 border border-gray-300 rounded-md shadow-sm focus:ring-primary focus:border-primary">
+                                        <option value="">Select BCS</option>
+                                        <option value="1">1 - Emaciated</option>
+                                        <option value="2">2 - Thin</option>
+                                        <option value="3">3 - Ideal</option>
+                                        <option value="4">4 - Overweight</option>
+                                        <option value="5">5 - Obese</option>
+                                    </select>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                )}
+                
+                {/* Tab 5: Lineage & Origin */}
+                {activeTab === 5 && (
+                    <div className="space-y-6">
+                        {/* Pedigree Section */}
+                        <div 
+                            data-tutorial-target="pedigree-section"
+                            className="bg-gray-50 p-4 rounded-lg border border-gray-200 space-y-4"
+                        >
+                            <h3 className="text-lg font-semibold text-gray-700 border-b pb-2">Pedigree: Sire and Dam 🌳</h3>
+                            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                                <div className='flex flex-col'>
+                                    <label className='text-sm font-medium text-gray-600 mb-1'>Sire (Father)</label>
+                                    <div 
+                                        onClick={() => !loading && setModalTarget('father')}
+                                        className="flex flex-col items-start p-3 border border-gray-300 rounded-lg bg-white cursor-pointer hover:border-primary transition disabled:opacity-50"
+                                    >
+                                        <div className="flex items-center space-x-2 w-full">
+                                        {formData.fatherId_public && fatherInfo ? (
+                                            <span className="text-gray-800">
+                                                {fatherInfo.prefix && `${fatherInfo.prefix} `}{fatherInfo.name}
+                                            </span>
+                                        ) : (
+                                            <span className={formData.fatherId_public ? "text-gray-800 font-mono" : "text-gray-400"}>
+                                                {formData.fatherId_public ? `${formData.fatherId_public}` : 'Click to Select Sire'}
+                                            </span>
+                                        )}
+                                        {formData.fatherId_public && (
+                                            <button
+                                                type="button"
+                                                onClick={(e) => { e.stopPropagation(); clearParentSelection('father'); }}
+                                                title="Clear sire selection"
+                                                className="text-sm text-red-500 hover:text-red-700 p-1 rounded"
+                                            >
+                                                <X size={14} />
+                                            </button>
+                                        )}
+                                        </div>
+                                    </div>
+                                </div>
+                                <div className='flex flex-col'>
+                                    <label className='text-sm font-medium text-gray-600 mb-1'>Dam (Mother)</label>
+                                    <div 
+                                        onClick={() => !loading && setModalTarget('mother')}
+                                        className="flex flex-col items-start p-3 border border-gray-300 rounded-lg bg-white cursor-pointer hover:border-primary transition disabled:opacity-50"
+                                    >
+                                        <div className="flex items-center space-x-2 w-full">
+                                            {formData.motherId_public && motherInfo ? (
+                                                <span className="text-gray-800">
+                                                    {motherInfo.prefix && `${motherInfo.prefix} `}{motherInfo.name}
+                                                </span>
+                                            ) : (
+                                                <span className={formData.motherId_public ? "text-gray-800 font-mono" : "text-gray-400"}>
+                                                    {formData.motherId_public ? `${formData.motherId_public}` : 'Click to Select Dam'}
+                                                </span>
+                                            )}
+                                            {formData.motherId_public && (
+                                                <button
+                                                    type="button"
+                                                    onClick={(e) => { e.stopPropagation(); clearParentSelection('mother'); }}
+                                                    title="Clear dam selection"
+                                                    className="text-sm text-red-500 hover:text-red-700 p-1 rounded"
+                                                >
+                                                    <X size={14} />
+                                                </button>
+                                            )}
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        {/* Breeder Section */}
+                        <div className="bg-gray-50 p-4 rounded-lg border border-gray-200 space-y-4">
+                            <h3 className="text-lg font-semibold text-gray-700 border-b pb-2">Breeder</h3>
+                            <div className='flex flex-col'>
+                                <label className='text-sm font-medium text-gray-600 mb-1'>Breeder</label>
+                                <div 
+                                    onClick={() => !loading && setModalTarget('breeder')}
                                     className="flex flex-col items-start p-3 border border-gray-300 rounded-lg bg-white cursor-pointer hover:border-primary transition disabled:opacity-50"
                                 >
                                     <div className="flex items-center space-x-2 w-full">
-                                    {formData.fatherId_public && fatherInfo ? (
-                                        <span className="text-gray-800">
-                                            {fatherInfo.prefix && `${fatherInfo.prefix} `}{fatherInfo.name}
-                                        </span>
-                                    ) : (
-                                        <span className={formData.fatherId_public ? "text-gray-800 font-mono" : "text-gray-400"}>
-                                            {formData.fatherId_public ? `${formData.fatherId_public}` : 'Click to Select Sire'}
-                                        </span>
-                                    )}
-                                    {formData.fatherId_public && (
-                                        <button
-                                            type="button"
-                                            onClick={(e) => { e.stopPropagation(); clearParentSelection('father'); }}
-                                            title="Clear sire selection"
-                                            className="text-sm text-red-500 hover:text-red-700 p-1 rounded"
-                                        >
-                                            <X size={14} />
-                                        </button>
-                                    )}
+                                        {formData.breederId_public && breederInfo ? (
+                                            <span className="text-gray-800">
+                                                {(() => {
+                                                    const showPersonal = breederInfo.showPersonalName ?? false;
+                                                    const showBreeder = breederInfo.showBreederName ?? false;
+                                                    
+                                                    if (showPersonal && showBreeder && breederInfo.personalName && breederInfo.breederName) {
+                                                        return `${breederInfo.personalName} (${breederInfo.breederName})`;
+                                                    } else if (showBreeder && breederInfo.breederName) {
+                                                        return breederInfo.breederName;
+                                                    } else if (showPersonal && breederInfo.personalName) {
+                                                        return breederInfo.personalName;
+                                                    } else {
+                                                        return 'Unknown Breeder';
+                                                    }
+                                                })()}
+                                            </span>
+                                        ) : (
+                                            <span className="text-gray-400">
+                                                {formData.breederId_public ? 'Loading...' : 'Click to Select Breeder'}
+                                            </span>
+                                        )}
+                                        {formData.breederId_public && (
+                                            <button
+                                                type="button"
+                                                onClick={(e) => { e.stopPropagation(); clearBreederSelection(); }}
+                                                title="Clear breeder selection"
+                                                className="text-sm text-red-500 hover:text-red-700 p-1 rounded"
+                                            >
+                                                <X size={14} />
+                                            </button>
+                                        )}
                                     </div>
                                 </div>
+                            </div>
                         </div>
-                        <div className='flex flex-col'>
-                            <label className='text-sm font-medium text-gray-600 mb-1'>Dam (Mother)</label>
-                            <div 
-                                onClick={() => !loading && setModalTarget('mother')}
-                                className="flex flex-col items-start p-3 border border-gray-300 rounded-lg bg-white cursor-pointer hover:border-primary transition disabled:opacity-50"
-                            >
-                                <div className="flex items-center space-x-2 w-full">
-                                    {formData.motherId_public && motherInfo ? (
-                                        <span className="text-gray-800">
-                                            {motherInfo.prefix && `${motherInfo.prefix} `}{motherInfo.name}
-                                        </span>
-                                    ) : (
-                                        <span className={formData.motherId_public ? "text-gray-800 font-mono" : "text-gray-400"}>
-                                            {formData.motherId_public ? `${formData.motherId_public}` : 'Click to Select Dam'}
-                                        </span>
+
+                        {/* Origin Section */}
+                        <div className="bg-gray-50 p-4 rounded-lg border border-gray-200 space-y-4">
+                            <h3 className="text-lg font-semibold text-gray-700 border-b pb-2">Origin</h3>
+                            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                <div>
+                                    <label className='block text-sm font-medium text-gray-700 mb-2'>Origin</label>
+                                    <select name="origin" value={formData.origin} onChange={handleChange} 
+                                        className="block w-full p-2 border border-gray-300 rounded-md shadow-sm focus:ring-primary focus:border-primary">
+                                        <option value="Captive-bred">Captive-bred</option>
+                                        <option value="Wild-caught">Wild-caught</option>
+                                        <option value="Rescue">Rescue</option>
+                                    </select>
+                                </div>
+                            </div>
+                        </div>
+
+                        {/* Ownership History */}
+                        <div className="bg-gray-50 p-4 rounded-lg border border-gray-200 space-y-4">
+                            <h3 className="text-lg font-semibold text-gray-700 border-b pb-2">Ownership History</h3>
+                            <div>
+                                <label className='block text-sm font-medium text-gray-700 mb-2'>Owner Name (Private)</label>
+                                <input 
+                                    type="text" 
+                                    name="ownerName" 
+                                    value={formData.ownerName} 
+                                    onChange={handleChange}
+                                    placeholder="Current owner name (only visible to you)"
+                                    className="block w-full p-2 border border-gray-300 rounded-md shadow-sm focus:ring-primary focus:border-primary" 
+                                />
+                                <p className="text-xs text-gray-500 mt-1">This field is only shown in your private view, not on public profiles.</p>
+                            </div>
+                        </div>
+                    </div>
+                )}
+
+                {/* Tab 6: Reproduction & Breeding */}
+                {activeTab === 6 && (
+                    <div className="space-y-6">
+                        {/* Reproductive Status */}
+                        <div className="bg-gray-50 p-4 rounded-lg border border-gray-200 space-y-4">
+                            <h3 className="text-lg font-semibold text-gray-700 border-b pb-2">Reproductive Status</h3>
+                            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                <label className="flex items-center space-x-2 cursor-pointer p-3 border rounded-lg bg-white hover:bg-gray-50 transition">
+                                    <input
+                                        type="checkbox"
+                                        name="isNeutered"
+                                        checked={formData.isNeutered}
+                                        onChange={handleChange}
+                                        className="form-checkbox h-5 w-5 text-primary rounded focus:ring-primary"
+                                    />
+                                    <span className="text-sm font-medium text-gray-700">Neutered / Spayed</span>
+                                </label>
+                                
+                                {!formData.isNeutered && (
+                                    <label className="flex items-center space-x-2 cursor-pointer p-3 border rounded-lg bg-white hover:bg-gray-50 transition">
+                                        <input
+                                            type="checkbox"
+                                            name="isInMating"
+                                            checked={formData.isInMating}
+                                            onChange={handleChange}
+                                            className="form-checkbox h-5 w-5 text-primary rounded focus:ring-primary"
+                                        />
+                                        <span className="text-sm font-medium text-gray-700">In Mating</span>
+                                    </label>
+                                )}
+                            </div>
+                        </div>
+
+                        {/* Estrus & Cycle (Females only) */}
+                        {formData.gender === 'Female' && !formData.isNeutered && (
+                            <div className="bg-gray-50 p-4 rounded-lg border border-gray-200 space-y-4">
+                                <h3 className="text-lg font-semibold text-gray-700 border-b pb-2">Estrus & Cycle</h3>
+                                <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                                    <div>
+                                        <label className="block text-sm font-medium text-gray-700 mb-2">Heat (Estrus) Status</label>
+                                        <input type="text" name="heatStatus" value={formData.heatStatus} onChange={handleChange} 
+                                            className="block w-full p-2 border border-gray-300 rounded-md shadow-sm focus:ring-primary focus:border-primary" 
+                                            placeholder="e.g., In Heat, Between Cycles" />
+                                    </div>
+                                    
+                                    <div>
+                                        <label className="block text-sm font-medium text-gray-700 mb-2">Last Heat Date</label>
+                                        <input type="date" name="lastHeatDate" value={formData.lastHeatDate} onChange={handleChange} 
+                                            className="block w-full p-2 border border-gray-300 rounded-md shadow-sm focus:ring-primary focus:border-primary" />
+                                    </div>
+                                    
+                                    <div>
+                                        <label className="block text-sm font-medium text-gray-700 mb-2">Ovulation Date</label>
+                                        <input type="date" name="ovulationDate" value={formData.ovulationDate} onChange={handleChange} 
+                                            className="block w-full p-2 border border-gray-300 rounded-md shadow-sm focus:ring-primary focus:border-primary" />
+                                    </div>
+                                </div>
+                            </div>
+                        )}
+
+                        {/* Mating & Pregnancy */}
+                        {!formData.isNeutered && (
+                            <div className="bg-gray-50 p-4 rounded-lg border border-gray-200 space-y-4">
+                                <h3 className="text-lg font-semibold text-gray-700 border-b pb-2">Mating & Pregnancy</h3>
+                                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                    <div className="md:col-span-2">
+                                        <label className="block text-sm font-medium text-gray-700 mb-2">Mating Date(s)</label>
+                                        <input type="text" name="matingDates" value={formData.matingDates} onChange={handleChange} 
+                                            className="block w-full p-2 border border-gray-300 rounded-md shadow-sm focus:ring-primary focus:border-primary" 
+                                            placeholder="e.g., 2025-01-15, 2025-01-16" />
+                                    </div>
+                                    
+                                    {formData.gender === 'Female' && (
+                                        <>
+                                            <label className="flex items-center space-x-2 cursor-pointer p-3 border rounded-lg bg-white hover:bg-gray-50 transition">
+                                                <input
+                                                    type="checkbox"
+                                                    name="isPregnant"
+                                                    checked={formData.isPregnant}
+                                                    onChange={handleChange}
+                                                    className="form-checkbox h-5 w-5 text-primary rounded focus:ring-primary"
+                                                />
+                                                <span className="text-sm font-medium text-gray-700">Pregnant</span>
+                                            </label>
+                                            
+                                            {formData.isPregnant && (
+                                                <div>
+                                                    <label className="block text-sm font-medium text-gray-700 mb-2">Expected Due Date</label>
+                                                    <input type="date" name="expectedDueDate" value={formData.expectedDueDate} onChange={handleChange} 
+                                                        className="block w-full p-2 border border-gray-300 rounded-md shadow-sm focus:ring-primary focus:border-primary" />
+                                                </div>
+                                            )}
+                                            
+                                            <div className="md:col-span-2">
+                                                <label className="block text-sm font-medium text-gray-700 mb-2">Litter Count (History)</label>
+                                                <input type="number" name="litterCount" value={formData.litterCount} onChange={handleChange} 
+                                                    className="block w-full p-2 border border-gray-300 rounded-md shadow-sm focus:ring-primary focus:border-primary" 
+                                                    placeholder="Total number of previous litters" />
+                                            </div>
+                                        </>
                                     )}
-                                    {formData.motherId_public && (
-                                        <button
-                                            type="button"
-                                            onClick={(e) => { e.stopPropagation(); clearParentSelection('mother'); }}
-                                            title="Clear dam selection"
-                                            className="text-sm text-red-500 hover:text-red-700 p-1 rounded"
-                                        >
-                                            <X size={14} />
-                                        </button>
+                                </div>
+                            </div>
+                        )}
+
+                        {/* Nursing */}
+                        {formData.gender === 'Female' && !formData.isNeutered && (
+                            <div className="bg-gray-50 p-4 rounded-lg border border-gray-200 space-y-4">
+                                <h3 className="text-lg font-semibold text-gray-700 border-b pb-2">Nursing</h3>
+                                <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                                    <label className="flex items-center space-x-2 cursor-pointer p-3 border rounded-lg bg-white hover:bg-gray-50 transition">
+                                        <input
+                                            type="checkbox"
+                                            name="isNursing"
+                                            checked={formData.isNursing}
+                                            onChange={handleChange}
+                                            className="form-checkbox h-5 w-5 text-primary rounded focus:ring-primary"
+                                        />
+                                        <span className="text-sm font-medium text-gray-700">Currently Nursing</span>
+                                    </label>
+                                    
+                                    {formData.isNursing && (
+                                        <>
+                                            <div>
+                                                <label className="block text-sm font-medium text-gray-700 mb-2">Nursing Start Date</label>
+                                                <input type="date" name="nursingStartDate" value={formData.nursingStartDate} onChange={handleChange} 
+                                                    className="block w-full p-2 border border-gray-300 rounded-md shadow-sm focus:ring-primary focus:border-primary" />
+                                            </div>
+                                            
+                                            <div>
+                                                <label className="block text-sm font-medium text-gray-700 mb-2">Weaning Date</label>
+                                                <input type="date" name="weaningDate" value={formData.weaningDate} onChange={handleChange} 
+                                                    className="block w-full p-2 border border-gray-300 rounded-md shadow-sm focus:ring-primary focus:border-primary" />
+                                            </div>
+                                        </>
                                     )}
+                                </div>
+                            </div>
+                        )}
+                    </div>
+                )}
+
+                {/* Tab 7: Health & Veterinary */}
+                {activeTab === 7 && (
+                    <div className="space-y-6">
+                        {/* Preventive Care */}
+                        <div className="bg-gray-50 p-4 rounded-lg border border-gray-200 space-y-4">
+                            <h3 className="text-lg font-semibold text-gray-700 border-b pb-2">Preventive Care</h3>
+                            <div className="space-y-4">
+                                <div>
+                                    <label className="block text-sm font-medium text-gray-700 mb-2">Vaccinations</label>
+                                    <textarea name="vaccinations" value={formData.vaccinations} onChange={handleChange} rows="2"
+                                        className="block w-full p-2 border border-gray-300 rounded-md shadow-sm focus:ring-primary focus:border-primary" 
+                                        placeholder="e.g., Rabies (2024-05-15), Distemper (2024-05-15)" />
+                                </div>
+                                
+                                <div>
+                                    <label className="block text-sm font-medium text-gray-700 mb-2">Deworming Records</label>
+                                    <textarea name="dewormingRecords" value={formData.dewormingRecords} onChange={handleChange} rows="2"
+                                        className="block w-full p-2 border border-gray-300 rounded-md shadow-sm focus:ring-primary focus:border-primary" 
+                                        placeholder="e.g., Fenbendazole (2024-12-01)" />
+                                </div>
+                                
+                                <div>
+                                    <label className="block text-sm font-medium text-gray-700 mb-2">Parasite Control</label>
+                                    <textarea name="parasiteControl" value={formData.parasiteControl} onChange={handleChange} rows="2"
+                                        className="block w-full p-2 border border-gray-300 rounded-md shadow-sm focus:ring-primary focus:border-primary" 
+                                        placeholder="e.g., Flea/tick prevention, mite treatment" />
+                                </div>
+                            </div>
+                        </div>
+
+                        {/* Medical History */}
+                        <div className="bg-gray-50 p-4 rounded-lg border border-gray-200 space-y-4">
+                            <h3 className="text-lg font-semibold text-gray-700 border-b pb-2">Medical History</h3>
+                            <div className="space-y-4">
+                                <div>
+                                    <label className="block text-sm font-medium text-gray-700 mb-2">Medical Conditions</label>
+                                    <textarea name="medicalConditions" value={formData.medicalConditions} onChange={handleChange} rows="2"
+                                        className="block w-full p-2 border border-gray-300 rounded-md shadow-sm focus:ring-primary focus:border-primary" 
+                                        placeholder="e.g., Respiratory issues, dental disease" />
+                                </div>
+                                
+                                <div>
+                                    <label className="block text-sm font-medium text-gray-700 mb-2">Allergies</label>
+                                    <textarea name="allergies" value={formData.allergies} onChange={handleChange} rows="2"
+                                        className="block w-full p-2 border border-gray-300 rounded-md shadow-sm focus:ring-primary focus:border-primary" 
+                                        placeholder="e.g., Food allergies, medication allergies" />
+                                </div>
+                                
+                                <div>
+                                    <label className="block text-sm font-medium text-gray-700 mb-2">Medications</label>
+                                    <textarea name="medications" value={formData.medications} onChange={handleChange} rows="2"
+                                        className="block w-full p-2 border border-gray-300 rounded-md shadow-sm focus:ring-primary focus:border-primary" 
+                                        placeholder="e.g., Daily medications, dosages" />
+                                </div>
+                            </div>
+                        </div>
+
+                        {/* Procedures & Diagnostics */}
+                        <div className="bg-gray-50 p-4 rounded-lg border border-gray-200 space-y-4">
+                            <h3 className="text-lg font-semibold text-gray-700 border-b pb-2">Procedures & Diagnostics</h3>
+                            <div className="space-y-4">
+                                <div>
+                                    <label className="block text-sm font-medium text-gray-700 mb-2">Medical Procedures</label>
+                                    <textarea name="medicalProcedures" value={formData.medicalProcedures} onChange={handleChange} rows="2"
+                                        className="block w-full p-2 border border-gray-300 rounded-md shadow-sm focus:ring-primary focus:border-primary" 
+                                        placeholder="e.g., Neutering (2024-06-01), Tumor removal" />
+                                </div>
+                                
+                                <div>
+                                    <label className="block text-sm font-medium text-gray-700 mb-2">Laboratory Results</label>
+                                    <textarea name="labResults" value={formData.labResults} onChange={handleChange} rows="2"
+                                        className="block w-full p-2 border border-gray-300 rounded-md shadow-sm focus:ring-primary focus:border-primary" 
+                                        placeholder="e.g., Blood work results, test findings" />
+                                </div>
+                            </div>
+                        </div>
+
+                        {/* Veterinary Care */}
+                        <div className="bg-gray-50 p-4 rounded-lg border border-gray-200 space-y-4">
+                            <h3 className="text-lg font-semibold text-gray-700 border-b pb-2">Veterinary Care</h3>
+                            <div className="space-y-4">
+                                <div>
+                                    <label className="block text-sm font-medium text-gray-700 mb-2">Veterinary Visits</label>
+                                    <textarea name="vetVisits" value={formData.vetVisits} onChange={handleChange} rows="2"
+                                        className="block w-full p-2 border border-gray-300 rounded-md shadow-sm focus:ring-primary focus:border-primary" 
+                                        placeholder="e.g., Annual checkup (2024-11-20), Emergency visit (2024-12-05)" />
+                                </div>
+                                
+                                <div>
+                                    <label className="block text-sm font-medium text-gray-700 mb-2">Primary Veterinarian</label>
+                                    <input type="text" name="primaryVet" value={formData.primaryVet} onChange={handleChange} 
+                                        className="block w-full p-2 border border-gray-300 rounded-md shadow-sm focus:ring-primary focus:border-primary" 
+                                        placeholder="e.g., Dr. Smith, ABC Veterinary Clinic" />
                                 </div>
                             </div>
                         </div>
                     </div>
-                </div>
-                {/* ------------------------------------------- */}
+                )}
 
-                {/* ------------------------------------------- */}
-                {/* Breeder & Owner Section */}
-                {/* ------------------------------------------- */}
-                <div className="bg-gray-50 p-4 rounded-lg border border-gray-200 space-y-4">
-                    <h3 className="text-lg font-semibold text-gray-700 border-b pb-2">Breeder & Owner</h3>
-                    <div className="space-y-4">
-                        <div className='flex flex-col'>
-                            <label className='text-sm font-medium text-gray-600 mb-1'>Breeder</label>
-                            <div 
-                                onClick={() => !loading && setModalTarget('breeder')}
-                                className="flex flex-col items-start p-3 border border-gray-300 rounded-lg bg-white cursor-pointer hover:border-primary transition disabled:opacity-50"
-                            >
-                                <div className="flex items-center space-x-2 w-full">
-                                    {formData.breederId_public && breederInfo ? (
-                                        <span className="text-gray-800">
-                                            {(() => {
-                                                const showPersonal = breederInfo.showPersonalName ?? false;
-                                                const showBreeder = breederInfo.showBreederName ?? false;
-                                                
-                                                if (showPersonal && showBreeder && breederInfo.personalName && breederInfo.breederName) {
-                                                    return `${breederInfo.personalName} (${breederInfo.breederName})`;
-                                                } else if (showBreeder && breederInfo.breederName) {
-                                                    return breederInfo.breederName;
-                                                } else if (showPersonal && breederInfo.personalName) {
-                                                    return breederInfo.personalName;
-                                                } else {
-                                                    return 'Unknown Breeder';
-                                                }
-                                            })()}
-                                        </span>
-                                    ) : (
-                                        <span className="text-gray-400">
-                                            {formData.breederId_public ? 'Loading...' : 'Click to Select Breeder'}
-                                        </span>
-                                    )}
-                                    {formData.breederId_public && (
-                                        <button
-                                            type="button"
-                                            onClick={(e) => { e.stopPropagation(); clearBreederSelection(); }}
-                                            title="Clear breeder selection"
-                                            className="text-sm text-red-500 hover:text-red-700 p-1 rounded"
-                                        >
-                                            <X size={14} />
-                                        </button>
-                                    )}
+                {/* Tab 8: Nutrition & Husbandry */}
+                {activeTab === 8 && (
+                    <div className="space-y-6">
+                        {/* Diet */}
+                        <div className="bg-gray-50 p-4 rounded-lg border border-gray-200 space-y-4">
+                            <h3 className="text-lg font-semibold text-gray-700 border-b pb-2">Diet</h3>
+                            <div className="space-y-4">
+                                <div>
+                                    <label className="block text-sm font-medium text-gray-700 mb-2">Diet Type</label>
+                                    <input type="text" name="dietType" value={formData.dietType} onChange={handleChange} 
+                                        className="block w-full p-2 border border-gray-300 rounded-md shadow-sm focus:ring-primary focus:border-primary" 
+                                        placeholder="e.g., Pellets, fresh vegetables, lab blocks" />
+                                </div>
+                                
+                                <div>
+                                    <label className="block text-sm font-medium text-gray-700 mb-2">Feeding Schedule</label>
+                                    <textarea name="feedingSchedule" value={formData.feedingSchedule} onChange={handleChange} rows="2"
+                                        className="block w-full p-2 border border-gray-300 rounded-md shadow-sm focus:ring-primary focus:border-primary" 
+                                        placeholder="e.g., Morning and evening, free feeding" />
+                                </div>
+                                
+                                <div>
+                                    <label className="block text-sm font-medium text-gray-700 mb-2">Supplements</label>
+                                    <textarea name="supplements" value={formData.supplements} onChange={handleChange} rows="2"
+                                        className="block w-full p-2 border border-gray-300 rounded-md shadow-sm focus:ring-primary focus:border-primary" 
+                                        placeholder="e.g., Vitamin D, calcium powder" />
                                 </div>
                             </div>
                         </div>
-                        <div className='flex flex-col'>
-                            <label className='text-sm font-medium text-gray-600 mb-1'>Owner Name</label>
-                            <input 
-                                type="text" 
-                                name="ownerName" 
-                                value={formData.ownerName} 
-                                onChange={handleChange}
-                                placeholder="Leave empty to not display"
-                                className="mt-1 block w-full p-2 border border-gray-300 rounded-md shadow-sm focus:ring-primary focus:border-primary" 
-                            />
-                            <p className="text-xs text-gray-500 mt-1">This field is only shown in your private view, not on public profiles.</p>
+
+                        {/* Environment */}
+                        <div className="bg-gray-50 p-4 rounded-lg border border-gray-200 space-y-4">
+                            <h3 className="text-lg font-semibold text-gray-700 border-b pb-2">Environment</h3>
+                            <div className="space-y-4">
+                                <div>
+                                    <label className="block text-sm font-medium text-gray-700 mb-2">Housing Type</label>
+                                    <input type="text" name="housingType" value={formData.housingType} onChange={handleChange} 
+                                        className="block w-full p-2 border border-gray-300 rounded-md shadow-sm focus:ring-primary focus:border-primary" 
+                                        placeholder="e.g., Wire cage, glass aquarium, multi-level enclosure" />
+                                </div>
+                                
+                                <div>
+                                    <label className="block text-sm font-medium text-gray-700 mb-2">Bedding / Substrate</label>
+                                    <input type="text" name="bedding" value={formData.bedding} onChange={handleChange} 
+                                        className="block w-full p-2 border border-gray-300 rounded-md shadow-sm focus:ring-primary focus:border-primary" 
+                                        placeholder="e.g., Aspen shavings, paper bedding, fleece liners" />
+                                </div>
+                                
+                                <div>
+                                    <label className="block text-sm font-medium text-gray-700 mb-2">Temperature Range</label>
+                                    <input type="text" name="temperatureRange" value={formData.temperatureRange} onChange={handleChange} 
+                                        className="block w-full p-2 border border-gray-300 rounded-md shadow-sm focus:ring-primary focus:border-primary" 
+                                        placeholder="e.g., 68-72°F, 20-22°C" />
+                                </div>
+                                
+                                <div>
+                                    <label className="block text-sm font-medium text-gray-700 mb-2">Enrichment Items</label>
+                                    <textarea name="enrichment" value={formData.enrichment} onChange={handleChange} rows="2"
+                                        className="block w-full p-2 border border-gray-300 rounded-md shadow-sm focus:ring-primary focus:border-primary" 
+                                        placeholder="e.g., Exercise wheel, tunnels, chew toys, hammocks" />
+                                </div>
+                            </div>
                         </div>
                     </div>
-                </div>
-                {/* ------------------------------------------- */}
-                
-                {/* Remarks */}
-                <div className='mt-4'>
-                    <label className="block text-sm font-medium text-gray-700">Remarks / Notes</label>
-                    <textarea name="remarks" value={formData.remarks} onChange={handleChange} rows="3"
-                        className="mt-1 block w-full p-2 border border-gray-300 rounded-md shadow-sm focus:ring-primary focus:border-primary" />
-                </div>
+                )}
 
-                {/* Tags */}
-                <div className='mt-4' data-tutorial-target="tags-edit-section">
-                    <label className="block text-sm font-medium text-gray-700">Tags (Lines, Enclosures, etc)</label>
-                    <input 
-                        type="text" 
-                        placeholder="Enter tags separated by commas (e.g., Line A, Enclosure 1)" 
-                        value={formData.tags.join(', ')} 
-                        onChange={(e) => {
-                            const tagString = e.target.value;
-                            const newTags = tagString.split(',').map(tag => tag.trim()).filter(tag => tag.length > 0);
-                            setFormData({ ...formData, tags: newTags });
-                        }}
-                        className="mt-1 block w-full p-2 border border-gray-300 rounded-md shadow-sm focus:ring-primary focus:border-primary" 
-                    />
-                    {formData.tags.length > 0 && (
-                        <div className="mt-2 flex flex-wrap gap-2">
-                            {formData.tags.map((tag, idx) => (
-                                <span key={idx} className="inline-flex items-center bg-primary text-black text-xs font-semibold px-3 py-1 rounded-full">
-                                    {tag}
-                                    <button
-                                        type="button"
-                                        onClick={() => {
-                                            const newTags = formData.tags.filter((_, i) => i !== idx);
-                                            setFormData({ ...formData, tags: newTags });
-                                        }}
-                                        className="ml-2 text-black hover:text-gray-600"
-                                    >
-                                        ×
-                                    </button>
-                                </span>
-                            ))}
+                {/* Tab 9: Behavior & Welfare */}
+                {activeTab === 9 && (
+                    <div className="space-y-6">
+                        {/* Behavior */}
+                        <div className="bg-gray-50 p-4 rounded-lg border border-gray-200 space-y-4">
+                            <h3 className="text-lg font-semibold text-gray-700 border-b pb-2">Behavior</h3>
+                            <div className="space-y-4">
+                                <div>
+                                    <label className="block text-sm font-medium text-gray-700 mb-2">Temperament</label>
+                                    <input type="text" name="temperament" value={formData.temperament} onChange={handleChange} 
+                                        className="block w-full p-2 border border-gray-300 rounded-md shadow-sm focus:ring-primary focus:border-primary" 
+                                        placeholder="e.g., Friendly, skittish, aggressive, calm" />
+                                </div>
+                                
+                                <div>
+                                    <label className="block text-sm font-medium text-gray-700 mb-2">Handling Tolerance</label>
+                                    <input type="text" name="handlingTolerance" value={formData.handlingTolerance} onChange={handleChange} 
+                                        className="block w-full p-2 border border-gray-300 rounded-md shadow-sm focus:ring-primary focus:border-primary" 
+                                        placeholder="e.g., Enjoys handling, tolerates briefly, avoids contact" />
+                                </div>
+                                
+                                <div>
+                                    <label className="block text-sm font-medium text-gray-700 mb-2">Social Structure</label>
+                                    <textarea name="socialStructure" value={formData.socialStructure} onChange={handleChange} rows="2"
+                                        className="block w-full p-2 border border-gray-300 rounded-md shadow-sm focus:ring-primary focus:border-primary" 
+                                        placeholder="e.g., Lives with 2 cage mates, solitary, dominant in group" />
+                                </div>
+                            </div>
                         </div>
-                    )}
-                </div>
+
+                        {/* Activity */}
+                        <div className="bg-gray-50 p-4 rounded-lg border border-gray-200 space-y-4">
+                            <h3 className="text-lg font-semibold text-gray-700 border-b pb-2">Activity</h3>
+                            <div>
+                                <label className="block text-sm font-medium text-gray-700 mb-2">Activity Cycle</label>
+                                <select name="activityCycle" value={formData.activityCycle} onChange={handleChange} 
+                                    className="block w-full p-2 border border-gray-300 rounded-md shadow-sm focus:ring-primary focus:border-primary">
+                                    <option value="">Select Activity Pattern</option>
+                                    <option value="Diurnal">Diurnal (Active during day)</option>
+                                    <option value="Nocturnal">Nocturnal (Active at night)</option>
+                                    <option value="Crepuscular">Crepuscular (Active dawn/dusk)</option>
+                                </select>
+                            </div>
+                        </div>
+
+                        {/* Life Stage */}
+                        <div className="bg-gray-50 p-4 rounded-lg border border-gray-200 space-y-4">
+                            <h3 className="text-lg font-semibold text-gray-700 border-b pb-2">Life Stage</h3>
+                            <div>
+                                <label className="block text-sm font-medium text-gray-700 mb-2">Life Stage</label>
+                                <select name="lifeStage" value={formData.lifeStage} onChange={handleChange} 
+                                    className="block w-full p-2 border border-gray-300 rounded-md shadow-sm focus:ring-primary focus:border-primary">
+                                    <option value="">Select Life Stage</option>
+                                    <option value="Neonate">Neonate (Newborn)</option>
+                                    <option value="Juvenile">Juvenile</option>
+                                    <option value="Adult">Adult</option>
+                                    <option value="Senior">Senior</option>
+                                </select>
+                            </div>
+                        </div>
+                    </div>
+                )}
+
+                {/* Tab 10: Records & Notes */}
+                {activeTab === 10 && (
+                    <div className="space-y-6">
+                        <div className="bg-gray-50 p-4 rounded-lg border border-gray-200">
+                            <label className="block text-sm font-medium text-gray-700 mb-2">Remarks / Notes</label>
+                            <textarea name="remarks" value={formData.remarks} onChange={handleChange} rows="5"
+                                className="block w-full p-2 border border-gray-300 rounded-md shadow-sm focus:ring-primary focus:border-primary" 
+                                placeholder="General notes, observations, and records..." />
+                            <p className="text-xs text-gray-500 mt-2">Future features: File attachments, change timeline, and detailed record keeping will be added here.</p>
+                        </div>
+                    </div>
+                )}
+
+                {/* Tab 11: End of Life & Legal */}
+                {activeTab === 11 && (
+                    <div className="space-y-6">
+                        {/* End of Life */}
+                        <div className="bg-gray-50 p-4 rounded-lg border border-gray-200 space-y-4">
+                            <h3 className="text-lg font-semibold text-gray-700 border-b pb-2">End of Life</h3>
+                            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                <div>
+                                    <label className="block text-sm font-medium text-gray-700 mb-2">Date of Death</label>
+                                    <input type="date" name="deceasedDate" value={formData.deceasedDate || ''} onChange={handleChange} 
+                                        min="1800-01-01" max={new Date().toISOString().split('T')[0]} 
+                                        className="block w-full p-2 border border-gray-300 rounded-md shadow-sm focus:ring-primary focus:border-primary" />
+                                </div>
+                                
+                                <div>
+                                    <label className="block text-sm font-medium text-gray-700 mb-2">Cause of Death</label>
+                                    <input type="text" name="causeOfDeath" value={formData.causeOfDeath} onChange={handleChange} 
+                                        className="block w-full p-2 border border-gray-300 rounded-md shadow-sm focus:ring-primary focus:border-primary" 
+                                        placeholder="e.g., Natural causes, illness, injury" />
+                                </div>
+                                
+                                <div className="md:col-span-2">
+                                    <label className="block text-sm font-medium text-gray-700 mb-2">Necropsy Results</label>
+                                    <textarea name="necropsyResults" value={formData.necropsyResults} onChange={handleChange} rows="3"
+                                        className="block w-full p-2 border border-gray-300 rounded-md shadow-sm focus:ring-primary focus:border-primary" 
+                                        placeholder="Post-mortem examination findings..." />
+                                </div>
+                            </div>
+                        </div>
+
+                        {/* Legal / Administrative */}
+                        <div className="bg-gray-50 p-4 rounded-lg border border-gray-200 space-y-4">
+                            <h3 className="text-lg font-semibold text-gray-700 border-b pb-2">Legal / Administrative</h3>
+                            <div className="space-y-4">
+                                <div>
+                                    <label className="block text-sm font-medium text-gray-700 mb-2">Insurance</label>
+                                    <textarea name="insurance" value={formData.insurance} onChange={handleChange} rows="2"
+                                        className="block w-full p-2 border border-gray-300 rounded-md shadow-sm focus:ring-primary focus:border-primary" 
+                                        placeholder="e.g., Pet insurance policy details, provider, coverage" />
+                                </div>
+                                
+                                <div>
+                                    <label className="block text-sm font-medium text-gray-700 mb-2">Legal Status</label>
+                                    <textarea name="legalStatus" value={formData.legalStatus} onChange={handleChange} rows="2"
+                                        className="block w-full p-2 border border-gray-300 rounded-md shadow-sm focus:ring-primary focus:border-primary" 
+                                        placeholder="e.g., Ownership documents, permits, registration" />
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                )}
                 
-                {/* Submit/Delete Buttons */}
+                {/* Submit/Delete Buttons (always visible outside tabs) */}
                 <div className="mt-8 flex justify-between items-center border-t pt-4">
                     <div className="flex space-x-4">
                         <button type="button" onClick={onCancel} className="bg-gray-300 hover:bg-gray-400 text-gray-800 font-semibold py-2 px-4 rounded-lg transition duration-150 shadow-md flex items-center space-x-2">
