@@ -11980,21 +11980,35 @@ const App = () => {
                                                             </div>
 
                                                             {/* Health */}
-                                                            {(animalToView.currentWeight || animalToView.bcs || animalToView.medicalConditions || animalToView.medications) && (
+                                                            {(animalToView.currentWeight || animalToView.bcs || animalToView.growthRecords?.length > 0 || animalToView.medicalConditions || animalToView.medications) && (
                                                                 <div className="mb-4 pb-4 border-b border-gray-200">
                                                                     <h4 className="font-semibold text-gray-700 mb-2">Health</h4>
                                                                     <div className="grid grid-cols-2 gap-2 text-sm">
-                                                                        {animalToView.currentWeight && (
-                                                                            <div>
-                                                                                <strong>Weight:</strong> {animalToView.currentWeight}g
-                                                                                {animalToView.weightTrend && (
-                                                                                    <span className={animalToView.weightTrend === 'up' ? 'text-red-600' : animalToView.weightTrend === 'down' ? 'text-green-600' : 'text-gray-600'}>
-                                                                                        {animalToView.weightTrend === 'up' ? ' ↑' : animalToView.weightTrend === 'down' ? ' ↓' : ' →'}
-                                                                                    </span>
+                                                                        {/* Current Measurements */}
+                                                                        {(animalToView.currentWeight || animalToView.bcs || animalToView.growthRecords?.length > 0) && (
+                                                                            <>
+                                                                                <div className="col-span-2 mb-2 pb-2 border-b border-gray-200">
+                                                                                    <div className="font-semibold text-gray-600 mb-1">Current Measurements</div>
+                                                                                </div>
+                                                                                {animalToView.currentWeight && (
+                                                                                    <div>
+                                                                                        <strong>Weight:</strong> {animalToView.currentWeight}g
+                                                                                        {animalToView.weightTrend && (
+                                                                                            <span className={animalToView.weightTrend === 'up' ? 'text-red-600' : animalToView.weightTrend === 'down' ? 'text-green-600' : 'text-gray-600'}>
+                                                                                                {animalToView.weightTrend === 'up' ? ' ↑' : animalToView.weightTrend === 'down' ? ' ↓' : ' →'}
+                                                                                            </span>
+                                                                                        )}
+                                                                                    </div>
                                                                                 )}
-                                                                            </div>
+                                                                                {animalToView.bcs && <div><strong>BCS:</strong> {animalToView.bcs}</div>}
+                                                                                {animalToView.growthRecords && animalToView.growthRecords.length > 0 && animalToView.growthRecords[animalToView.growthRecords.length - 1].length && (
+                                                                                    <div><strong>Length:</strong> {animalToView.growthRecords[animalToView.growthRecords.length - 1].length}cm</div>
+                                                                                )}
+                                                                                {(animalToView.medicalConditions || animalToView.medications) && (
+                                                                                    <div className="col-span-2 mt-2 pt-2 border-t border-gray-200"></div>
+                                                                                )}
+                                                                            </>
                                                                         )}
-                                                                        {animalToView.bcs && <div><strong>BCS:</strong> {animalToView.bcs}</div>}
                                                                         {animalToView.medicalConditions && <div className="col-span-2"><strong>Conditions:</strong> {animalToView.medicalConditions}</div>}
                                                                         {animalToView.medications && <div className="col-span-2"><strong>Medications:</strong> {animalToView.medications}</div>}
                                                                     </div>
