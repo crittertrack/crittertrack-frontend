@@ -10151,6 +10151,38 @@ const App = () => {
         return () => window.removeEventListener('resize', handleResize);
     }, []);
     
+    // Tutorial context hook
+    const { hasSeenInitialTutorial, markInitialTutorialSeen, hasCompletedOnboarding, isLoading: tutorialLoading, markTutorialCompleted, completedTutorials, isTutorialCompleted, hasSeenWelcomeBanner, dismissWelcomeBanner } = useTutorial(); 
+    const [animalToEdit, setAnimalToEdit] = useState(null);
+    const [speciesToAdd, setSpeciesToAdd] = useState(null); 
+    const [speciesOptions, setSpeciesOptions] = useState([]); 
+    const [speciesSearchTerm, setSpeciesSearchTerm] = useState('');
+    const [speciesCategoryFilter, setSpeciesCategoryFilter] = useState('All');
+    const [showModal, setShowModal] = useState(false);
+    const [modalMessage, setModalMessage] = useState({ title: '', message: '' });
+    const [isRegister, setIsRegister] = useState(false); 
+    
+    const [showNotifications, setShowNotifications] = useState(false);
+    const [notificationCount, setNotificationCount] = useState(0);
+    
+    const [showMessages, setShowMessages] = useState(false);
+    const [unreadMessageCount, setUnreadMessageCount] = useState(0);
+    const [conversations, setConversations] = useState([]);
+    const [selectedConversation, setSelectedConversation] = useState(null);
+    const [messages, setMessages] = useState([]);
+    const [newMessage, setNewMessage] = useState('');
+    const [sendingMessage, setSendingMessage] = useState(false);
+
+    const [showUserSearchModal, setShowUserSearchModal] = useState(false);
+    const [viewingPublicProfile, setViewingPublicProfile] = useState(null);
+    const [viewingPublicAnimal, setViewingPublicAnimal] = useState(null);
+    const [viewAnimalBreederInfo, setViewAnimalBreederInfo] = useState(null);
+    const [animalToView, setAnimalToView] = useState(null);
+    const [detailViewTab, setDetailViewTab] = useState(1); // Tab for detail view
+    const [showTabs, setShowTabs] = useState(false); // Toggle for collapsible tabs panel
+    const [sireData, setSireData] = useState(null);
+    const [damData, setDamData] = useState(null);
+    
     // Fetch parent animals when viewing an animal
     React.useEffect(() => {
         if (!animalToView) {
@@ -10185,37 +10217,6 @@ const App = () => {
         fetchParents();
     }, [animalToView, authToken]);
     
-    // Tutorial context hook
-    const { hasSeenInitialTutorial, markInitialTutorialSeen, hasCompletedOnboarding, isLoading: tutorialLoading, markTutorialCompleted, completedTutorials, isTutorialCompleted, hasSeenWelcomeBanner, dismissWelcomeBanner } = useTutorial(); 
-    const [animalToEdit, setAnimalToEdit] = useState(null);
-    const [speciesToAdd, setSpeciesToAdd] = useState(null); 
-    const [speciesOptions, setSpeciesOptions] = useState([]); 
-    const [speciesSearchTerm, setSpeciesSearchTerm] = useState('');
-    const [speciesCategoryFilter, setSpeciesCategoryFilter] = useState('All');
-    const [showModal, setShowModal] = useState(false);
-    const [modalMessage, setModalMessage] = useState({ title: '', message: '' });
-    const [isRegister, setIsRegister] = useState(false); 
-    
-    const [showNotifications, setShowNotifications] = useState(false);
-    const [notificationCount, setNotificationCount] = useState(0);
-    
-    const [showMessages, setShowMessages] = useState(false);
-    const [unreadMessageCount, setUnreadMessageCount] = useState(0);
-    const [conversations, setConversations] = useState([]);
-    const [selectedConversation, setSelectedConversation] = useState(null);
-    const [messages, setMessages] = useState([]);
-    const [newMessage, setNewMessage] = useState('');
-    const [sendingMessage, setSendingMessage] = useState(false);
-
-    const [showUserSearchModal, setShowUserSearchModal] = useState(false);
-    const [viewingPublicProfile, setViewingPublicProfile] = useState(null);
-    const [viewingPublicAnimal, setViewingPublicAnimal] = useState(null);
-    const [viewAnimalBreederInfo, setViewAnimalBreederInfo] = useState(null);
-    const [animalToView, setAnimalToView] = useState(null);
-    const [detailViewTab, setDetailViewTab] = useState(1); // Tab for detail view
-    const [showTabs, setShowTabs] = useState(false); // Toggle for collapsible tabs panel
-    const [sireData, setSireData] = useState(null);
-    const [damData, setDamData] = useState(null);
     const [showPedigreeChart, setShowPedigreeChart] = useState(false);
     const [copySuccessAnimal, setCopySuccessAnimal] = useState(false);
     const [showImageModal, setShowImageModal] = useState(false);
