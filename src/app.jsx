@@ -6327,17 +6327,6 @@ const AnimalForm = ({
                             </div>
                         </div>
                         
-                        {/* Genetic Code */}
-                        <div className="bg-gray-50 p-4 rounded-lg border border-gray-200">
-                            <GeneticCodeBuilder
-                                species={formData.species}
-                                gender={formData.gender}
-                                value={formData.geneticCode}
-                                onChange={(value) => setFormData(prev => ({ ...prev, geneticCode: value }))}
-                                onOpenCommunityForm={() => setShowCommunityGeneticsModal(true)}
-                            />
-                        </div>
-                        
                         {/* Classification */}
                         <div className="bg-gray-50 p-4 rounded-lg border border-gray-200 space-y-4">
                             <h3 className="text-lg font-semibold text-gray-700 border-b pb-2">Classification</h3>
@@ -6869,22 +6858,6 @@ const AnimalForm = ({
                                     <option value="Diurnal">Diurnal (Active during day)</option>
                                     <option value="Nocturnal">Nocturnal (Active at night)</option>
                                     <option value="Crepuscular">Crepuscular (Active dawn/dusk)</option>
-                                </select>
-                            </div>
-                        </div>
-
-                        {/* Life Stage */}
-                        <div className="bg-gray-50 p-4 rounded-lg border border-gray-200 space-y-4">
-                            <h3 className="text-lg font-semibold text-gray-700 border-b pb-2">Life Stage</h3>
-                            <div>
-                                <label className="block text-sm font-medium text-gray-700 mb-2">Life Stage</label>
-                                <select name="lifeStage" value={formData.lifeStage} onChange={handleChange} 
-                                    className="block w-full p-2 border border-gray-300 rounded-md shadow-sm focus:ring-primary focus:border-primary">
-                                    <option value="">Select Life Stage</option>
-                                    <option value="Neonate">Neonate (Newborn)</option>
-                                    <option value="Juvenile">Juvenile</option>
-                                    <option value="Adult">Adult</option>
-                                    <option value="Senior">Senior</option>
                                 </select>
                             </div>
                         </div>
