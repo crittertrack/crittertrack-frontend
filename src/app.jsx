@@ -11824,7 +11824,7 @@ const App = () => {
                                         {/* Tab 1: Overview */}
                                         {detailViewTab === 1 && (
                                             <div className="space-y-6 bg-white p-6">
-                                                <div className="border-2 border-gray-300 rounded-lg p-4 sm:p-6">
+                                                <div className="bg-white border-2 border-gray-300 rounded-lg p-4 sm:p-6">
                                                     <div className="flex flex-col sm:flex-row items-start sm:space-x-6 space-y-4 sm:space-y-0">
                                                         <div className="w-full sm:w-auto flex flex-col items-center sm:items-start">
                                                             <div className="w-40 h-40 bg-gray-100 rounded-lg overflow-hidden flex items-center justify-center">
@@ -11884,7 +11884,7 @@ const App = () => {
                                                     </div>
                                                 </div>
                                                 {animalToView.tags && animalToView.tags.length > 0 && (
-                                                    <div data-tutorial-target="tags-section" className="border-2 border-gray-300 rounded-lg p-6">
+                                                    <div data-tutorial-target="tags-section" className="bg-white border-2 border-gray-300 rounded-lg p-6">
                                                         <h3 className="text-lg font-semibold text-gray-800 mb-3">Tags</h3>
                                                         <div className="flex flex-wrap gap-2">
                                                             {animalToView.tags.map((tag, idx) => (
