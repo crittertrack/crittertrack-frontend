@@ -12350,6 +12350,54 @@ const App = () => {
                                                     </div>
                                                 )}
 
+                                                {/* Health Card */}
+                                                {(animalToView.currentWeight || animalToView.bcs || animalToView.growthRecords?.length > 0 || animalToView.medicalConditions || animalToView.medications) && (
+                                                    <div className="bg-white border-2 border-gray-300 rounded-lg p-4">
+                                                        <h4 className="font-semibold text-gray-700 mb-2">Health</h4>
+                                                        <div className="space-y-3 text-sm">
+                                                            {/* Current Measurements Summary */}
+                                                            {(animalToView.currentWeight || animalToView.bcs || animalToView.growthRecords?.length > 0) && (
+                                                                <div className="grid grid-cols-2 gap-2">
+                                                                    {animalToView.currentWeight && (
+                                                                        <div>
+                                                                            <strong>Weight:</strong> {animalToView.currentWeight}g
+                                                                            {animalToView.weightTrend && (
+                                                                                <span className={animalToView.weightTrend === 'up' ? 'text-red-600' : animalToView.weightTrend === 'down' ? 'text-green-600' : 'text-gray-600'}>
+                                                                                    {animalToView.weightTrend === 'up' ? ' ↑' : animalToView.weightTrend === 'down' ? ' ↓' : ' →'}
+                                                                                </span>
+                                                                            )}
+                                                                        </div>
+                                                                    )}
+                                                                    {animalToView.bcs && <div><strong>BCS:</strong> {animalToView.bcs}</div>}
+                                                                    {animalToView.growthRecords && animalToView.growthRecords.length > 0 && animalToView.growthRecords[animalToView.growthRecords.length - 1].length && (
+                                                                        <div><strong>Length:</strong> {animalToView.growthRecords[animalToView.growthRecords.length - 1].length} {animalToView.measurementUnits?.length || 'cm'}</div>
+                                                                    )}
+                                                                </div>
+                                                            )}
+                                                            
+                                                            {/* Conditions and Medications */}
+                                                            {(animalToView.medicalConditions || animalToView.medications) && (
+                                                                <div className="border-t border-gray-200 pt-2">
+                                                                    {animalToView.medicalConditions && <div><strong>Conditions:</strong> {animalToView.medicalConditions}</div>}
+                                                                    {animalToView.medications && <div><strong>Medications:</strong> {animalToView.medications}</div>}
+                                                                </div>
+                                                            )}
+                                                        </div>
+                                                    </div>
+                                                )}
+
+                                                {/* Reproductive Status Card */}
+                                                {!animalToView.isNeutered && (animalToView.heatStatus || animalToView.lastHeatDate || animalToView.matingDates) && (
+                                                    <div className="bg-white border-2 border-gray-300 rounded-lg p-4">
+                                                        <h4 className="font-semibold text-gray-700 mb-2">Reproductive Status</h4>
+                                                        <div className="text-sm space-y-1">
+                                                            {animalToView.heatStatus && <div><strong>Heat Status:</strong> {animalToView.heatStatus}</div>}
+                                                            {animalToView.lastHeatDate && <div><strong>Last Heat:</strong> {new Date(animalToView.lastHeatDate).toLocaleDateString()}</div>}
+                                                            {animalToView.matingDates && <div><strong>Last Mating:</strong> {animalToView.matingDates}</div>}
+                                                        </div>
+                                                    </div>
+                                                )}
+
                                                 {/* Parents Card */}
                                                 {(sireData || damData) && (
                                                     <div className="bg-white border-2 border-gray-300 rounded-lg p-4">
@@ -12418,85 +12466,43 @@ const App = () => {
                                                 {animalToView.offspring && animalToView.offspring.length > 0 && (
                                                     <div className="bg-white border-2 border-gray-300 rounded-lg p-4">
                                                         <h4 className="font-semibold text-gray-700 mb-4">Offspring ({animalToView.offspring.length})</h4>
-                                                        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-                                                            {offspringData.map(offspring => (
-                                                                <div 
-                                                                    key={offspring.id}
-                                                                    onClick={() => {
-                                                                        setAnimalToView(offspring);
-                                                                        setDetailViewTab(1);
-                                                                    }}
-                                                                    className="bg-gray-50 rounded-lg border border-gray-200 p-3 cursor-pointer hover:shadow-md transition"
-                                                                >
-                                                                    <div className="w-full h-48 bg-gray-200 rounded-lg overflow-hidden flex items-center justify-center mb-3">
-                                                                        <AnimalImage src={offspring.imageUrl || offspring.photoUrl} alt={offspring.name} className="w-full h-full object-cover" iconSize={32} />
-                                                                    </div>
-                                                                    <div className="text-center">
-                                                                        <p className="font-semibold text-gray-800 text-sm">
-                                                                            {offspring.prefix ? `${offspring.prefix} ` : ''}{offspring.name}{offspring.suffix ? ` ${offspring.suffix}` : ''}
-                                                                        </p>
-                                                                        <p className="text-xs text-gray-600 mt-1">
-                                                                            {offspring.species} • {offspring.gender}
-                                                                        </p>
-                                                                        {offspring.birthDate && (
-                                                                            <p className="text-xs text-gray-500 mt-2">
-                                                                                Born: {new Date(offspring.birthDate).toLocaleDateString()}
+                                                        {offspringData.length > 0 ? (
+                                                            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                                                                {offspringData.map(offspring => (
+                                                                    <div 
+                                                                        key={offspring.id}
+                                                                        onClick={() => {
+                                                                            setAnimalToView(offspring);
+                                                                            setDetailViewTab(1);
+                                                                        }}
+                                                                        className="bg-gray-50 rounded-lg border border-gray-200 p-3 cursor-pointer hover:shadow-md transition"
+                                                                    >
+                                                                        <div className="w-full h-48 bg-gray-200 rounded-lg overflow-hidden flex items-center justify-center mb-3">
+                                                                            <AnimalImage src={offspring.imageUrl || offspring.photoUrl} alt={offspring.name} className="w-full h-full object-cover" iconSize={32} />
+                                                                        </div>
+                                                                        <div className="text-center">
+                                                                            <p className="font-semibold text-gray-800 text-sm">
+                                                                                {offspring.prefix ? `${offspring.prefix} ` : ''}{offspring.name}{offspring.suffix ? ` ${offspring.suffix}` : ''}
                                                                             </p>
-                                                                        )}
-                                                                    </div>
-                                                                </div>
-                                                            ))}
-                                                        </div>
-                                                    </div>
-                                                )}
-
-                                                {/* Health Card */}
-                                                {(animalToView.currentWeight || animalToView.bcs || animalToView.growthRecords?.length > 0 || animalToView.medicalConditions || animalToView.medications) && (
-                                                    <div className="bg-white border-2 border-gray-300 rounded-lg p-4">
-                                                        <h4 className="font-semibold text-gray-700 mb-2">Health</h4>
-                                                        <div className="space-y-3 text-sm">
-                                                            {/* Current Measurements Summary */}
-                                                            {(animalToView.currentWeight || animalToView.bcs || animalToView.growthRecords?.length > 0) && (
-                                                                <div className="grid grid-cols-2 gap-2">
-                                                                    {animalToView.currentWeight && (
-                                                                        <div>
-                                                                            <strong>Weight:</strong> {animalToView.currentWeight}g
-                                                                            {animalToView.weightTrend && (
-                                                                                <span className={animalToView.weightTrend === 'up' ? 'text-red-600' : animalToView.weightTrend === 'down' ? 'text-green-600' : 'text-gray-600'}>
-                                                                                    {animalToView.weightTrend === 'up' ? ' ↑' : animalToView.weightTrend === 'down' ? ' ↓' : ' →'}
-                                                                                </span>
+                                                                            <p className="text-xs text-gray-600 mt-1">
+                                                                                {offspring.species} • {offspring.gender}
+                                                                            </p>
+                                                                            {offspring.birthDate && (
+                                                                                <p className="text-xs text-gray-500 mt-2">
+                                                                                    Born: {new Date(offspring.birthDate).toLocaleDateString()}
+                                                                                </p>
                                                                             )}
                                                                         </div>
-                                                                    )}
-                                                                    {animalToView.bcs && <div><strong>BCS:</strong> {animalToView.bcs}</div>}
-                                                                    {animalToView.growthRecords && animalToView.growthRecords.length > 0 && animalToView.growthRecords[animalToView.growthRecords.length - 1].length && (
-                                                                        <div><strong>Length:</strong> {animalToView.growthRecords[animalToView.growthRecords.length - 1].length} {animalToView.measurementUnits?.length || 'cm'}</div>
-                                                                    )}
-                                                                </div>
-                                                            )}
-                                                            
-                                                            {/* Conditions and Medications */}
-                                                            {(animalToView.medicalConditions || animalToView.medications) && (
-                                                                <div className="border-t border-gray-200 pt-2">
-                                                                    {animalToView.medicalConditions && <div><strong>Conditions:</strong> {animalToView.medicalConditions}</div>}
-                                                                    {animalToView.medications && <div><strong>Medications:</strong> {animalToView.medications}</div>}
-                                                                </div>
-                                                            )}
-                                                        </div>
+                                                                    </div>
+                                                                ))}
+                                                            </div>
+                                                        ) : (
+                                                            <div className="text-center text-sm text-gray-500 py-4">
+                                                                <p>Offspring found but loading details...</p>
+                                                            </div>
+                                                        )}
                                                     </div>
                                                 )}
-
-                                                            {/* Reproductive Status Card */}
-                                                            {!animalToView.isNeutered && (animalToView.heatStatus || animalToView.lastHeatDate || animalToView.matingDates) && (
-                                                                <div className="bg-white border-2 border-gray-300 rounded-lg p-4">
-                                                                    <h4 className="font-semibold text-gray-700 mb-2">Reproductive Status</h4>
-                                                                    <div className="text-sm space-y-1">
-                                                                        {animalToView.heatStatus && <div><strong>Heat Status:</strong> {animalToView.heatStatus}</div>}
-                                                                        {animalToView.lastHeatDate && <div><strong>Last Heat:</strong> {new Date(animalToView.lastHeatDate).toLocaleDateString()}</div>}
-                                                                        {animalToView.matingDates && <div><strong>Last Mating:</strong> {animalToView.matingDates}</div>}
-                                                                    </div>
-                                                                </div>
-                                                            )}
 
 
                                             </div>
