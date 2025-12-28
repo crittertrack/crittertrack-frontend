@@ -11887,183 +11887,154 @@ const App = () => {
                                                                 {animalToView.isPregnant && <Bean size={14} className="text-black" />}
                                                                 {animalToView.isNursing && <Milk size={14} className="text-black" />}
                                                             </div>
+
+                                                            {/* Status text */}
+                                                            <div className="text-sm font-medium text-gray-700 mt-2">
+                                                                {animalToView.isViewOnly ? 'Sold' : (animalToView.status || 'Unknown')}
+                                                            </div>
                                                         </div>
 
                                                         {/* Right Column - Info */}
-                                                        <div className="w-2/3 p-4 sm:p-6 flex flex-col justify-between border-l border-gray-300">
-                                                            {/* Top Section */}
-                                                            <div className="flex-grow">
-                                                                {/* Name */}
-                                                                <h2 className="text-2xl font-bold text-gray-800 mb-2">
-                                                                    {animalToView.prefix ? `${animalToView.prefix} ` : ''}
-                                                                    {animalToView.name}
-                                                                    {animalToView.suffix ? ` ${animalToView.suffix}` : ''}
-                                                                </h2>
+                                                        <div className="w-2/3 p-4 sm:p-6 flex flex-col justify-start border-l border-gray-300 space-y-3">
+                                                            {/* Species/Breed/Strain/CTC - At Top */}
+                                                            <p className="text-sm text-gray-600">
+                                                                {animalToView.species}
+                                                                {animalToView.breed && ` • ${animalToView.breed}`}
+                                                                {animalToView.strain && ` • ${animalToView.strain}`}
+                                                                {animalToView.id_public && ` • ${animalToView.id_public}`}
+                                                            </p>
 
-                                                                {/* Species/Breed/Strain/CTC */}
-                                                                <p className="text-sm text-gray-600 mb-4">
-                                                                    {animalToView.species}
-                                                                    {animalToView.breed && ` • ${animalToView.breed}`}
-                                                                    {animalToView.strain && ` • ${animalToView.strain}`}
-                                                                    {animalToView.id_public && ` • ${animalToView.id_public}`}
+                                                            {/* Name */}
+                                                            <h2 className="text-2xl font-bold text-gray-800">
+                                                                {animalToView.prefix ? `${animalToView.prefix} ` : ''}
+                                                                {animalToView.name}
+                                                                {animalToView.suffix ? ` ${animalToView.suffix}` : ''}
+                                                            </h2>
+
+                                                            {/* Appearance */}
+                                                            {(animalToView.color || animalToView.coat || animalToView.coatPattern || animalToView.earset) && (
+                                                                <p className="text-sm text-gray-700">
+                                                                    {[
+                                                                        animalToView.color,
+                                                                        animalToView.coatPattern,
+                                                                        animalToView.coat,
+                                                                        animalToView.earset
+                                                                    ].filter(Boolean).join(' ')}
                                                                 </p>
-                                                            </div>
+                                                            )}
 
-                                                            {/* Bottom Section - ID and Status */}
-                                                            <div className="flex justify-between items-center pt-2 border-t border-gray-300">
-                                                                <div className="text-sm font-medium text-gray-700">
-                                                                    {animalToView.isViewOnly ? 'Sold' : (animalToView.status || 'Unknown')}
+                                                            {/* Age */}
+                                                            {animalToView.birthDate && (
+                                                                <p className="text-sm text-gray-700">
+                                                                    Age: {(() => {
+                                                                        const birth = new Date(animalToView.birthDate);
+                                                                        const today = new Date();
+                                                                        let age = today.getFullYear() - birth.getFullYear();
+                                                                        const monthDiff = today.getMonth() - birth.getMonth();
+                                                                        if (monthDiff < 0 || (monthDiff === 0 && today.getDate() < birth.getDate())) age--;
+                                                                        const months = (today.getMonth() - birth.getMonth() + 12) % 12;
+                                                                        let days = today.getDate() - birth.getDate();
+                                                                        if (days < 0) {
+                                                                            days += new Date(today.getFullYear(), today.getMonth(), 0).getDate();
+                                                                        }
+                                                                        if (age > 0) {
+                                                                            return `${age}y ${months}m ${days}d`;
+                                                                        } else if (months > 0) {
+                                                                            return `${months}m ${days}d`;
+                                                                        } else {
+                                                                            return `${days}d`;
+                                                                        }
+                                                                    })()}
+                                                                </p>
+                                                            )}
+
+                                                            {/* Active Tags/Status Badges */}
+                                                            <div className="flex gap-2 flex-wrap pt-2">
+                                                                {animalToView.isPregnant && (
+                                                                    <div className="flex items-center gap-1 bg-purple-100 px-2 py-1 rounded text-sm">
+                                                                        <Bean size={14} className="text-purple-600" />
+                                                                        <span>Pregnant</span>
+                                                                    </div>
+                                                                )}
+                                                                {animalToView.isNursing && (
+                                                                    <div className="flex items-center gap-1 bg-purple-100 px-2 py-1 rounded text-sm">
+                                                                        <Milk size={14} className="text-purple-600" />
+                                                                        <span>Nursing</span>
+                                                                    </div>
+                                                                )}
+                                                                {animalToView.isInMating && (
+                                                                    <div className="flex items-center gap-1 bg-purple-100 px-2 py-1 rounded text-sm">
+                                                                        <Hourglass size={14} className="text-purple-600" />
+                                                                        <span>In Mating</span>
+                                                                    </div>
+                                                                )}
+                                                                {animalToView.isNeutered && (
+                                                                    <div className="flex items-center gap-1 bg-gray-100 px-2 py-1 rounded text-sm">
+                                                                        <Scissors size={14} className="text-gray-600" />
+                                                                        <span>Neutered</span>
+                                                                    </div>
+                                                                )}
+                                                                <div className={`flex items-center gap-1 px-2 py-1 rounded text-sm ${
+                                                                    animalToView.isOwned
+                                                                        ? 'bg-red-100'
+                                                                        : 'bg-gray-100'
+                                                                }`}>
+                                                                    {animalToView.isOwned ? (
+                                                                        <Heart size={14} className="text-red-600" />
+                                                                    ) : (
+                                                                        <HeartOff size={14} className="text-gray-600" />
+                                                                    )}
+                                                                    <span>{animalToView.isOwned ? 'Owned by Me' : 'Owned by Other'}</span>
                                                                 </div>
-                                                                <div className="text-xs text-gray-500">{animalToView.id_public}</div>
+                                                                <div className={`flex items-center gap-1 px-2 py-1 rounded text-sm ${
+                                                                    animalToView.showOnPublicProfile
+                                                                        ? 'bg-green-100'
+                                                                        : 'bg-gray-100'
+                                                                }`}>
+                                                                    {animalToView.showOnPublicProfile ? (
+                                                                        <Eye size={14} className="text-green-600" />
+                                                                    ) : (
+                                                                        <EyeOff size={14} className="text-gray-600" />
+                                                                    )}
+                                                                    <span>{animalToView.showOnPublicProfile ? 'Public' : 'Private'}</span>
+                                                                </div>
                                                             </div>
                                                         </div>
                                                     </div>
                                                 </div>
 
-                                                {/* Age and Appearance Card */}
-                                                <div className="bg-white border-2 border-gray-300 rounded-lg p-4">
-                                                    <div className="text-center space-y-2">
-                                                        {animalToView.birthDate && (
-                                                            <p className="text-sm text-gray-700">
-                                                                {(() => {
-                                                                    const birth = new Date(animalToView.birthDate);
-                                                                    const today = new Date();
-                                                                    let age = today.getFullYear() - birth.getFullYear();
-                                                                    const monthDiff = today.getMonth() - birth.getMonth();
-                                                                    if (monthDiff < 0 || (monthDiff === 0 && today.getDate() < birth.getDate())) age--;
-                                                                    const months = (today.getMonth() - birth.getMonth() + 12) % 12;
-                                                                    let days = today.getDate() - birth.getDate();
-                                                                    if (days < 0) {
-                                                                        days += new Date(today.getFullYear(), today.getMonth(), 0).getDate();
-                                                                    }
-                                                                    if (age > 0) {
-                                                                        return `${age}y ${months}m ${days}d`;
-                                                                    } else if (months > 0) {
-                                                                        return `${months}m ${days}d`;
-                                                                    } else {
-                                                                        return `${days}d`;
-                                                                    }
-                                                                })()}
-                                                            </p>
-                                                        )}
-
-                                                        {/* Appearance */}
-                                                        {(animalToView.color || animalToView.coat || animalToView.coatPattern || animalToView.earset) && (
-                                                            <p className="text-sm text-gray-700">
-                                                                {[
-                                                                    animalToView.color,
-                                                                    animalToView.coatPattern,
-                                                                    animalToView.coat,
-                                                                    animalToView.earset
-                                                                ].filter(Boolean).join(' ')}
-                                                            </p>
-                                                        )}
-                                                    </div>
-                                                </div>
-
-                                                {/* Status Badges Card */}
-                                                <div className="bg-white border-2 border-gray-300 rounded-lg p-4">
-                                                    <div className="flex gap-3 flex-wrap">
-                                                                    {animalToView.isPregnant && (
-                                                                        <div className="flex items-center gap-1 bg-purple-100 px-2 py-1 rounded text-sm">
-                                                                            <Bean size={16} className="text-purple-600" />
-                                                                            <span>Pregnant</span>
+                                                {/* Health Card */}
+                                                {(animalToView.currentWeight || animalToView.bcs || animalToView.growthRecords?.length > 0 || animalToView.medicalConditions || animalToView.medications) && (
+                                                    <div className="bg-white border-2 border-gray-300 rounded-lg p-4">
+                                                        <h4 className="font-semibold text-gray-700 mb-2">Health</h4>
+                                                        <div className="grid grid-cols-2 gap-2 text-sm">
+                                                            {/* Current Measurements - no title */}
+                                                            {(animalToView.currentWeight || animalToView.bcs || animalToView.growthRecords?.length > 0) && (
+                                                                <>
+                                                                    {animalToView.currentWeight && (
+                                                                        <div>
+                                                                            <strong>Weight:</strong> {animalToView.currentWeight}g
+                                                                            {animalToView.weightTrend && (
+                                                                                <span className={animalToView.weightTrend === 'up' ? 'text-red-600' : animalToView.weightTrend === 'down' ? 'text-green-600' : 'text-gray-600'}>
+                                                                                    {animalToView.weightTrend === 'up' ? ' ↑' : animalToView.weightTrend === 'down' ? ' ↓' : ' →'}
+                                                                                </span>
+                                                                            )}
                                                                         </div>
                                                                     )}
-                                                                    {animalToView.isNursing && (
-                                                                        <div className="flex items-center gap-1 bg-purple-100 px-2 py-1 rounded text-sm">
-                                                                            <Milk size={16} className="text-purple-600" />
-                                                                            <span>Nursing</span>
-                                                                        </div>
+                                                                    {animalToView.bcs && <div><strong>BCS:</strong> {animalToView.bcs}</div>}
+                                                                    {animalToView.growthRecords && animalToView.growthRecords.length > 0 && animalToView.growthRecords[animalToView.growthRecords.length - 1].length && (
+                                                                        <div><strong>Length:</strong> {animalToView.growthRecords[animalToView.growthRecords.length - 1].length}cm</div>
                                                                     )}
-                                                                    {animalToView.isInMating && (
-                                                                        <div className="flex items-center gap-1 bg-purple-100 px-2 py-1 rounded text-sm">
-                                                                            <Hourglass size={16} className="text-purple-600" />
-                                                                            <span>In Mating</span>
-                                                                        </div>
+                                                                    {(animalToView.medicalConditions || animalToView.medications) && (
+                                                                        <div className="col-span-2 mt-2 pt-2 border-t border-gray-200"></div>
                                                                     )}
-                                                                    {animalToView.isNeutered && (
-                                                                        <div className="flex items-center gap-1 bg-gray-100 px-2 py-1 rounded text-sm">
-                                                                            <Scissors size={16} className="text-gray-600" />
-                                                                            <span>Neutered</span>
-                                                                        </div>
-                                                                    )}
-                                                                    <div className={`flex items-center gap-1 px-2 py-1 rounded text-sm ${
-                                                                        animalToView.isOwned
-                                                                            ? 'bg-red-100'
-                                                                            : 'bg-gray-100'
-                                                                    }`}>
-                                                                        {animalToView.isOwned ? (
-                                                                            <Heart size={16} className="text-red-600" />
-                                                                        ) : (
-                                                                            <HeartOff size={16} className="text-gray-600" />
-                                                                        )}
-                                                                        <span>{animalToView.isOwned ? 'Owned by Me' : 'Owned by Other'}</span>
-                                                                    </div>
-                                                                    <div className={`flex items-center gap-1 px-2 py-1 rounded text-sm ${
-                                                                        animalToView.showOnPublicProfile
-                                                                            ? 'bg-green-100'
-                                                                            : 'bg-gray-100'
-                                                                    }`}>
-                                                                        {animalToView.showOnPublicProfile ? (
-                                                                            <Eye size={16} className="text-green-600" />
-                                                                        ) : (
-                                                                            <EyeOff size={16} className="text-gray-600" />
-                                                                        )}
-                                                                        <span>{animalToView.showOnPublicProfile ? 'Public' : 'Private'}</span>
-                                                                    </div>
-                                                                </div>
-                                                            </div>
-
-                                                            {/* Timeline Card */}
-                                                            <div className="bg-white border-2 border-gray-300 rounded-lg p-4">
-                                                                <h4 className="font-semibold text-gray-700 mb-2">Timeline</h4>
-                                                                <div className="space-y-1 text-sm">
-                                                                    <div><strong>Born:</strong> {formattedBirthDate}</div>
-                                                                    {animalToView.isPregnant && animalToView.expectedDueDate && (
-                                                                        <div><strong>Expected Due:</strong> {new Date(animalToView.expectedDueDate).toLocaleDateString()}</div>
-                                                                    )}
-                                                                    {animalToView.deceasedDate && (
-                                                                        <div><strong>Passed:</strong> {new Date(animalToView.deceasedDate).toLocaleDateString()}</div>
-                                                                    )}
-                                                                </div>
-                                                            </div>
-
-                                                            {/* Health Card */}
-                                                            {(animalToView.currentWeight || animalToView.bcs || animalToView.growthRecords?.length > 0 || animalToView.medicalConditions || animalToView.medications) && (
-                                                                <div className="bg-white border-2 border-gray-300 rounded-lg p-4">
-                                                                    <h4 className="font-semibold text-gray-700 mb-2">Health</h4>
-                                                                    <div className="grid grid-cols-2 gap-2 text-sm">
-                                                                        {/* Current Measurements */}
-                                                                        {(animalToView.currentWeight || animalToView.bcs || animalToView.growthRecords?.length > 0) && (
-                                                                            <>
-                                                                                <div className="col-span-2 mb-2 pb-2 border-b border-gray-200">
-                                                                                    <div className="font-semibold text-gray-600 mb-1">Current Measurements</div>
-                                                                                </div>
-                                                                                {animalToView.currentWeight && (
-                                                                                    <div>
-                                                                                        <strong>Weight:</strong> {animalToView.currentWeight}g
-                                                                                        {animalToView.weightTrend && (
-                                                                                            <span className={animalToView.weightTrend === 'up' ? 'text-red-600' : animalToView.weightTrend === 'down' ? 'text-green-600' : 'text-gray-600'}>
-                                                                                                {animalToView.weightTrend === 'up' ? ' ↑' : animalToView.weightTrend === 'down' ? ' ↓' : ' →'}
-                                                                                            </span>
-                                                                                        )}
-                                                                                    </div>
-                                                                                )}
-                                                                                {animalToView.bcs && <div><strong>BCS:</strong> {animalToView.bcs}</div>}
-                                                                                {animalToView.growthRecords && animalToView.growthRecords.length > 0 && animalToView.growthRecords[animalToView.growthRecords.length - 1].length && (
-                                                                                    <div><strong>Length:</strong> {animalToView.growthRecords[animalToView.growthRecords.length - 1].length}cm</div>
-                                                                                )}
-                                                                                {(animalToView.medicalConditions || animalToView.medications) && (
-                                                                                    <div className="col-span-2 mt-2 pt-2 border-t border-gray-200"></div>
-                                                                                )}
-                                                                            </>
-                                                                        )}
-                                                                        {animalToView.medicalConditions && <div className="col-span-2"><strong>Conditions:</strong> {animalToView.medicalConditions}</div>}
-                                                                        {animalToView.medications && <div className="col-span-2"><strong>Medications:</strong> {animalToView.medications}</div>}
-                                                                    </div>
-                                                                </div>
+                                                                </>
                                                             )}
+                                                            {animalToView.medicalConditions && <div className="col-span-2"><strong>Conditions:</strong> {animalToView.medicalConditions}</div>}
+                                                            {animalToView.medications && <div className="col-span-2"><strong>Medications:</strong> {animalToView.medications}</div>}
+                                                        </div>
+                                                    </div>
+                                                )}
 
                                                             {/* Reproductive Status Card */}
                                                             {!animalToView.isNeutered && (animalToView.heatStatus || animalToView.lastHeatDate || animalToView.matingDates) && (
