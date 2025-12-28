@@ -6148,7 +6148,9 @@ const AnimalForm = ({
                                 {/* Add New Measurement */}
                                 <div className="bg-white p-3 rounded-lg border border-gray-300 space-y-3">
                                     <p className="text-xs font-medium text-gray-600">Add New Measurement</p>
-                                    <div className="grid grid-cols-1 md:grid-cols-5 gap-3">
+                                    
+                                    {/* Row 1: Date, Weight, Length */}
+                                    <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
                                         <div>
                                             <label className="block text-xs font-medium text-gray-700">Date</label>
                                             <input 
@@ -6180,8 +6182,12 @@ const AnimalForm = ({
                                                 className="mt-1 block w-full p-2 text-sm border border-gray-300 rounded-md shadow-sm focus:ring-primary focus:border-primary" 
                                             />
                                         </div>
+                                    </div>
+                                    
+                                    {/* Row 2: BCS, Notes */}
+                                    <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
                                         <div>
-                                            <label className="block text-xs font-medium text-gray-700">BCS - optional</label>
+                                            <label className="block text-xs font-medium text-gray-700">Body Condition Score - optional</label>
                                             <select 
                                                 value={newMeasurement.bcs}
                                                 onChange={(e) => setNewMeasurement({...newMeasurement, bcs: e.target.value})}
@@ -6205,6 +6211,7 @@ const AnimalForm = ({
                                             />
                                         </div>
                                     </div>
+                                    
                                     <button
                                         type="button"
                                         onClick={() => {
