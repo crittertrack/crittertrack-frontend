@@ -5143,6 +5143,10 @@ const AnimalForm = ({
     const [growthRecords, setGrowthRecords] = useState(
         animalToEdit?.growthRecords || []
     );
+    const [measurementUnits, setMeasurementUnits] = useState({
+        weight: animalToEdit?.measurementUnits?.weight || 'g',
+        length: animalToEdit?.measurementUnits?.length || 'cm'
+    });
     const [newMeasurement, setNewMeasurement] = useState({
         date: new Date().toISOString().substring(0, 10),
         weight: '',
@@ -5539,6 +5543,7 @@ const AnimalForm = ({
             
             // Include growth records
             payloadToSave.growthRecords = growthRecords;
+            payloadToSave.measurementUnits = measurementUnits;
             
             // Handle image deletion
             if (deleteImage && animalToEdit) {
@@ -6115,6 +6120,39 @@ const AnimalForm = ({
                             <div className="space-y-3 mt-6">
                                 <h4 className="text-sm font-semibold text-gray-600">Growth History</h4>
                                 
+                                {/* Unit Selection */}
+                                <div className="bg-blue-50 p-3 rounded-lg border border-blue-200">
+                                    <p className="text-xs font-medium text-gray-700 mb-2">Measurement Units</p>
+                                    <div className="grid grid-cols-2 gap-3">
+                                        <div>
+                                            <label className="block text-xs font-medium text-gray-600">Weight Unit</label>
+                                            <select 
+                                                value={measurementUnits.weight}
+                                                onChange={(e) => setMeasurementUnits({...measurementUnits, weight: e.target.value})}
+                                                className="mt-1 block w-full p-2 text-sm border border-gray-300 rounded-md shadow-sm focus:ring-primary focus:border-primary bg-white"
+                                            >
+                                                <option value="g">Grams (g)</option>
+                                                <option value="kg">Kilograms (kg)</option>
+                                                <option value="lb">Pounds (lb)</option>
+                                                <option value="oz">Ounces (oz)</option>
+                                            </select>
+                                        </div>
+                                        <div>
+                                            <label className="block text-xs font-medium text-gray-600">Length Unit</label>
+                                            <select 
+                                                value={measurementUnits.length}
+                                                onChange={(e) => setMeasurementUnits({...measurementUnits, length: e.target.value})}
+                                                className="mt-1 block w-full p-2 text-sm border border-gray-300 rounded-md shadow-sm focus:ring-primary focus:border-primary bg-white"
+                                            >
+                                                <option value="cm">Centimeters (cm)</option>
+                                                <option value="m">Meters (m)</option>
+                                                <option value="in">Inches (in)</option>
+                                                <option value="ft">Feet (ft)</option>
+                                            </select>
+                                        </div>
+                                    </div>
+                                </div>
+                                
                                 {/* Add New Measurement */}
                                 <div className="bg-white p-3 rounded-lg border border-gray-300 space-y-3">
                                     <p className="text-xs font-medium text-gray-600">Add New Measurement</p>
@@ -6129,22 +6167,24 @@ const AnimalForm = ({
                                             />
                                         </div>
                                         <div>
-                                            <label className="block text-xs font-medium text-gray-700">Weight</label>
+                                            <label className="block text-xs font-medium text-gray-700">Weight ({measurementUnits.weight})</label>
                                             <input 
-                                                type="text" 
+                                                type="number" 
+                                                step="0.1"
                                                 value={newMeasurement.weight}
                                                 onChange={(e) => setNewMeasurement({...newMeasurement, weight: e.target.value})}
-                                                placeholder="e.g., 450g"
+                                                placeholder={`e.g., ${measurementUnits.weight === 'g' ? '450' : measurementUnits.weight === 'kg' ? '0.45' : measurementUnits.weight === 'lb' ? '1' : '16'}`}
                                                 className="mt-1 block w-full p-2 text-sm border border-gray-300 rounded-md shadow-sm focus:ring-primary focus:border-primary" 
                                             />
                                         </div>
                                         <div>
-                                            <label className="block text-xs font-medium text-gray-700">Length (optional)</label>
+                                            <label className="block text-xs font-medium text-gray-700">Length ({measurementUnits.length}) - optional</label>
                                             <input 
-                                                type="text" 
+                                                type="number" 
+                                                step="0.1"
                                                 value={newMeasurement.length}
                                                 onChange={(e) => setNewMeasurement({...newMeasurement, length: e.target.value})}
-                                                placeholder="e.g., 20cm"
+                                                placeholder={`e.g., ${measurementUnits.length === 'cm' ? '20' : measurementUnits.length === 'm' ? '0.2' : measurementUnits.length === 'in' ? '8' : '0.66'}`}
                                                 className="mt-1 block w-full p-2 text-sm border border-gray-300 rounded-md shadow-sm focus:ring-primary focus:border-primary" 
                                             />
                                         </div>
@@ -6182,61 +6222,80 @@ const AnimalForm = ({
                                 {growthRecords.length > 0 && (
                                     <div className="bg-white p-4 rounded-lg border border-gray-300">
                                         <h5 className="text-xs font-semibold text-gray-600 mb-3">Growth Curve</h5>
-                                        <div className="relative h-48 border border-gray-200 rounded">
-                                            {/* Simple SVG chart */}
-                                            {(() => {
-                                                const sorted = [...growthRecords].sort((a, b) => new Date(a.date) - new Date(b.date));
-                                                if (sorted.length === 0) return null;
-                                                
-                                                // Extract numeric weight values
-                                                const weights = sorted.map(r => {
-                                                    const match = r.weight.match(/[\d.]+/);
-                                                    return match ? parseFloat(match[0]) : 0;
-                                                });
-                                                
-                                                const maxWeight = Math.max(...weights);
-                                                const minWeight = Math.min(...weights);
-                                                const weightRange = maxWeight - minWeight || 1;
-                                                
-                                                const width = 100;
-                                                const height = 100;
-                                                const padding = 10;
-                                                
-                                                const points = sorted.map((record, i) => {
-                                                    const x = padding + ((i / (sorted.length - 1 || 1)) * (width - 2 * padding));
-                                                    const y = height - padding - (((weights[i] - minWeight) / weightRange) * (height - 2 * padding));
-                                                    return { x, y, record };
-                                                });
-                                                
-                                                const pathData = points.map((p, i) => 
-                                                    `${i === 0 ? 'M' : 'L'} ${p.x} ${p.y}`
-                                                ).join(' ');
-                                                
-                                                return (
-                                                    <svg viewBox={`0 0 ${width} ${height}`} className="w-full h-full">
-                                                        {/* Grid lines */}
-                                                        {[0, 25, 50, 75, 100].map(y => (
-                                                            <line key={y} x1={padding} y1={y} x2={width - padding} y2={y} 
-                                                                stroke="#e5e7eb" strokeWidth="0.5" />
-                                                        ))}
-                                                        
-                                                        {/* Growth line */}
-                                                        <path d={pathData} fill="none" stroke="#3b82f6" strokeWidth="2" />
-                                                        
-                                                        {/* Data points with larger hover areas */}
-                                                        {points.map((p, i) => (
-                                                            <g key={i}>
-                                                                {/* Invisible larger circle for easier hovering */}
-                                                                <circle cx={p.x} cy={p.y} r="5" fill="transparent" stroke="transparent" style={{cursor: 'pointer'}}>
-                                                                    <title>{`${p.record.date}: ${p.record.weight}${p.record.notes ? ' (' + p.record.notes + ')' : ''}`}</title>
-                                                                </circle>
-                                                                {/* Visible point */}
-                                                                <circle cx={p.x} cy={p.y} r="2.5" fill="#3b82f6" stroke="white" strokeWidth="1" style={{pointerEvents: 'none'}} />
-                                                            </g>
-                                                        ))}
-                                                    </svg>
-                                                );
-                                            })()}
+                                        <div className="relative h-48">
+                                            {/* Y-axis label */}
+                                            <div className="absolute left-0 top-1/2 -translate-y-1/2 -rotate-90 text-xs text-gray-500 font-medium">
+                                                Weight ({measurementUnits.weight})
+                                            </div>
+                                            {/* Chart container */}
+                                            <div className="ml-8 mr-2 h-full border border-gray-200 rounded relative">
+                                                {/* Simple SVG chart */}
+                                                {(() => {
+                                                    const sorted = [...growthRecords].sort((a, b) => new Date(a.date) - new Date(b.date));
+                                                    if (sorted.length === 0) return null;
+                                                    
+                                                    // Extract numeric weight values
+                                                    const weights = sorted.map(r => {
+                                                        const val = typeof r.weight === 'string' ? r.weight.match(/[\d.]+/) : r.weight;
+                                                        return val ? parseFloat(Array.isArray(val) ? val[0] : val) : 0;
+                                                    });
+                                                    
+                                                    const maxWeight = Math.max(...weights);
+                                                    const minWeight = Math.min(...weights);
+                                                    const weightRange = maxWeight - minWeight || 1;
+                                                    
+                                                    const width = 100;
+                                                    const height = 100;
+                                                    const padding = 12;
+                                                    
+                                                    const points = sorted.map((record, i) => {
+                                                        const x = padding + ((i / (sorted.length - 1 || 1)) * (width - 2 * padding));
+                                                        const y = height - padding - (((weights[i] - minWeight) / weightRange) * (height - 2 * padding));
+                                                        return { x, y, record, weight: weights[i] };
+                                                    });
+                                                    
+                                                    const pathData = points.map((p, i) => 
+                                                        `${i === 0 ? 'M' : 'L'} ${p.x} ${p.y}`
+                                                    ).join(' ');
+                                                    
+                                                    return (
+                                                        <svg viewBox={`0 0 ${width} ${height}`} className="w-full h-full">
+                                                            {/* Grid lines */}
+                                                            {[0, 25, 50, 75, 100].map(y => (
+                                                                <line key={y} x1={padding} y1={y} x2={width - padding} y2={y} 
+                                                                    stroke="#e5e7eb" strokeWidth="0.5" />
+                                                            ))}
+                                                            
+                                                            {/* Y-axis labels */}
+                                                            <text x={padding - 2} y={padding} fontSize="3" fill="#6b7280" textAnchor="end" alignmentBaseline="middle">
+                                                                {maxWeight.toFixed(1)}
+                                                            </text>
+                                                            <text x={padding - 2} y={height - padding} fontSize="3" fill="#6b7280" textAnchor="end" alignmentBaseline="middle">
+                                                                {minWeight.toFixed(1)}
+                                                            </text>
+                                                            
+                                                            {/* Growth line */}
+                                                            <path d={pathData} fill="none" stroke="#3b82f6" strokeWidth="2" />
+                                                            
+                                                            {/* Data points with larger hover areas */}
+                                                            {points.map((p, i) => (
+                                                                <g key={i}>
+                                                                    {/* Invisible larger circle for easier hovering */}
+                                                                    <circle cx={p.x} cy={p.y} r="5" fill="transparent" stroke="transparent" style={{cursor: 'pointer'}}>
+                                                                        <title>{`${p.record.date}: ${p.weight} ${measurementUnits.weight}${p.record.notes ? ' (' + p.record.notes + ')' : ''}`}</title>
+                                                                    </circle>
+                                                                    {/* Visible point */}
+                                                                    <circle cx={p.x} cy={p.y} r="2.5" fill="#3b82f6" stroke="white" strokeWidth="1" style={{pointerEvents: 'none'}} />
+                                                                </g>
+                                                            ))}
+                                                        </svg>
+                                                    );
+                                                })()}
+                                            </div>
+                                            {/* X-axis label */}
+                                            <div className="text-center mt-1 ml-8 mr-2 text-xs text-gray-500 font-medium">
+                                                Date
+                                            </div>
                                         </div>
                                         <p className="text-xs text-gray-500 mt-2">Hover over points to see details</p>
                                     </div>
@@ -6252,11 +6311,11 @@ const AnimalForm = ({
                                                     <div className="flex-1">
                                                         <span className="font-medium">{record.date}</span>
                                                         <span className="mx-2">•</span>
-                                                        <span className="text-gray-700">{record.weight}</span>
+                                                        <span className="text-gray-700">{record.weight} {measurementUnits.weight}</span>
                                                         {record.length && (
                                                             <>
                                                                 <span className="mx-2">•</span>
-                                                                <span className="text-gray-700">{record.length}</span>
+                                                                <span className="text-gray-700">{record.length} {measurementUnits.length}</span>
                                                             </>
                                                         )}
                                                         {record.notes && (
