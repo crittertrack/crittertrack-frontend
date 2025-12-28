@@ -11901,14 +11901,14 @@ const App = () => {
                                                                 {/* Status Icons */}
                                                                 <div className="flex gap-3 flex-wrap">
                                                                     {animalToView.isPregnant && (
-                                                                        <div className="flex items-center gap-1 bg-pink-100 px-2 py-1 rounded text-sm">
-                                                                            <Bean size={16} className="text-pink-600" />
+                                                                        <div className="flex items-center gap-1 bg-purple-100 px-2 py-1 rounded text-sm">
+                                                                            <Bean size={16} className="text-purple-600" />
                                                                             <span>Pregnant</span>
                                                                         </div>
                                                                     )}
                                                                     {animalToView.isNursing && (
-                                                                        <div className="flex items-center gap-1 bg-blue-100 px-2 py-1 rounded text-sm">
-                                                                            <Milk size={16} className="text-blue-600" />
+                                                                        <div className="flex items-center gap-1 bg-purple-100 px-2 py-1 rounded text-sm">
+                                                                            <Milk size={16} className="text-purple-600" />
                                                                             <span>Nursing</span>
                                                                         </div>
                                                                     )}
@@ -11924,18 +11924,30 @@ const App = () => {
                                                                             <span>Neutered</span>
                                                                         </div>
                                                                     )}
-                                                                    {animalToView.isOwned && (
-                                                                        <div className="flex items-center gap-1 bg-red-100 px-2 py-1 rounded text-sm">
+                                                                    <div className={`flex items-center gap-1 px-2 py-1 rounded text-sm ${
+                                                                        animalToView.isOwned
+                                                                            ? 'bg-red-100'
+                                                                            : 'bg-gray-100'
+                                                                    }`}>
+                                                                        {animalToView.isOwned ? (
                                                                             <Heart size={16} className="text-red-600" />
-                                                                            <span>Owned by Me</span>
-                                                                        </div>
-                                                                    )}
-                                                                    {animalToView.showOnPublicProfile && (
-                                                                        <div className="flex items-center gap-1 bg-green-100 px-2 py-1 rounded text-sm">
+                                                                        ) : (
+                                                                            <HeartOff size={16} className="text-gray-600" />
+                                                                        )}
+                                                                        <span>{animalToView.isOwned ? 'Owned by Me' : 'Owned by Other'}</span>
+                                                                    </div>
+                                                                    <div className={`flex items-center gap-1 px-2 py-1 rounded text-sm ${
+                                                                        animalToView.showOnPublicProfile
+                                                                            ? 'bg-green-100'
+                                                                            : 'bg-gray-100'
+                                                                    }`}>
+                                                                        {animalToView.showOnPublicProfile ? (
                                                                             <Eye size={16} className="text-green-600" />
-                                                                            <span>Public Profile</span>
-                                                                        </div>
-                                                                    )}
+                                                                        ) : (
+                                                                            <EyeOff size={16} className="text-gray-600" />
+                                                                        )}
+                                                                        <span>{animalToView.showOnPublicProfile ? 'Public' : 'Private'}</span>
+                                                                    </div>
                                                                 </div>
                                                             </div>
 
