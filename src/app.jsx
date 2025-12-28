@@ -5703,9 +5703,9 @@ const AnimalForm = ({
                     <div className="flex flex-wrap gap-1 pb-px">
                         {[
                             { id: 1, label: 'Overview', icon: '📋' },
-                            { id: 2, label: 'Status & Privacy', icon: '🔒' },
-                            { id: 3, label: 'Identification', icon: '🏷️' },
-                            { id: 4, label: 'Physical Profile', icon: '🎨' },
+                            { id: 2, label: 'Physical Profile', icon: '🎨' },
+                            { id: 3, label: 'Status & Privacy', icon: '🔒' },
+                            { id: 4, label: 'Identification', icon: '🏷️' },
                             { id: 5, label: 'Lineage & Origin', icon: '🌳' },
                             { id: 6, label: 'Reproduction & Breeding', icon: '🫘' },
                             { id: 7, label: 'Health & Veterinary', icon: '🏥' },
@@ -5840,7 +5840,7 @@ const AnimalForm = ({
                     </div>
                 )}
                 
-                {/* Tab 2: Status & Privacy */}
+                {/* Tab 2: Physical Profile */}
                 {activeTab === 2 && (
                     <div className="space-y-6">
                         {/* Ownership */}
@@ -5910,7 +5910,7 @@ const AnimalForm = ({
                     </div>
                 )}
                 
-                {/* Tab 3: Identification */}
+                {/* Tab 3: Status & Privacy */}
                 {activeTab === 3 && (
                     <div className="space-y-6">
                         {/* Identification Numbers */}
@@ -6012,7 +6012,7 @@ const AnimalForm = ({
                     </div>
                 )}
                 
-                {/* Tab 4: Physical Profile */}
+                {/* Tab 4: Identification */}
                 {activeTab === 4 && (
                     <div className="space-y-6">
                         {/* Appearance */}
