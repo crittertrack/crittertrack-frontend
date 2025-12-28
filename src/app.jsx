@@ -6068,6 +6068,84 @@ const AnimalForm = ({
                                     </div>
                                 );
                             })()}
+
+                            {/* Growth Curve Chart */}
+                            {growthRecords.length > 1 && (() => {
+                                const sorted = [...growthRecords].sort((a, b) => new Date(a.date) - new Date(b.date));
+                                const weights = sorted.map(r => parseFloat(r.weight) || 0).filter(w => w > 0);
+                                const dates = sorted.map(r => r.date);
+                                
+                                if (weights.length < 2) return null;
+                                
+                                const minWeight = Math.min(...weights);
+                                const maxWeight = Math.max(...weights);
+                                const padding = (maxWeight - minWeight) * 0.1 || 5;
+                                const chartMin = Math.max(0, minWeight - padding);
+                                const chartMax = maxWeight + padding;
+                                const range = chartMax - chartMin;
+                                
+                                const width = 400;
+                                const height = 250;
+                                const margin = { top: 20, right: 20, bottom: 40, left: 40 };
+                                const graphWidth = width - margin.left - margin.right;
+                                const graphHeight = height - margin.top - margin.bottom;
+                                
+                                const points = sorted.map((record, idx) => ({
+                                    x: margin.left + (idx / (sorted.length - 1)) * graphWidth,
+                                    y: margin.top + graphHeight - ((parseFloat(record.weight) - chartMin) / range) * graphHeight,
+                                    weight: record.weight,
+                                    date: record.date
+                                }));
+                                
+                                const pathData = points.map((p, i) => `${i === 0 ? 'M' : 'L'} ${p.x} ${p.y}`).join(' ');
+                                
+                                return (
+                                    <div className="bg-white p-4 rounded-lg border border-gray-200">
+                                        <h4 className="text-sm font-semibold text-gray-700 mb-3">Growth Curve</h4>
+                                        <svg width="100%" height="300" viewBox={`0 0 ${width} ${height}`} style={{ maxWidth: '100%' }}>
+                                            {/* Grid lines */}
+                                            {[0, 0.25, 0.5, 0.75, 1].map((ratio, i) => {
+                                                const y = margin.top + graphHeight * (1 - ratio);
+                                                const weightLabel = (chartMin + range * ratio).toFixed(1);
+                                                return (
+                                                    <g key={`grid-${i}`}>
+                                                        <line x1={margin.left} y1={y} x2={width - margin.right} y2={y} stroke="#e5e7eb" strokeWidth="1" strokeDasharray="4" />
+                                                        <text x={margin.left - 8} y={y} textAnchor="end" dy="0.3em" fontSize="11" fill="#666">{weightLabel}</text>
+                                                    </g>
+                                                );
+                                            })}
+                                            
+                                            {/* Axes */}
+                                            <line x1={margin.left} y1={margin.top} x2={margin.left} y2={height - margin.bottom} stroke="#333" strokeWidth="2" />
+                                            <line x1={margin.left} y1={height - margin.bottom} x2={width - margin.right} y2={height - margin.bottom} stroke="#333" strokeWidth="2" />
+                                            
+                                            {/* Y-axis label */}
+                                            <text x={15} y={margin.top + graphHeight / 2} textAnchor="middle" fontSize="12" fill="#666" transform={`rotate(-90 15 ${margin.top + graphHeight / 2})`}>
+                                                Weight ({measurementUnits.weight})
+                                            </text>
+                                            
+                                            {/* X-axis labels */}
+                                            {points.map((p, i) => (
+                                                i % Math.max(1, Math.floor(points.length / 6)) === 0 && (
+                                                    <text key={`date-${i}`} x={p.x} y={height - margin.bottom + 20} textAnchor="middle" fontSize="10" fill="#666">
+                                                        {new Date(p.date).toLocaleDateString('en-US', { month: 'short', day: 'numeric' })}
+                                                    </text>
+                                                )
+                                            ))}
+                                            
+                                            {/* Curve */}
+                                            <path d={pathData} fill="none" stroke="#3b82f6" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
+                                            
+                                            {/* Points */}
+                                            {points.map((p, i) => (
+                                                <circle key={`point-${i}`} cx={p.x} cy={p.y} r="4" fill="#3b82f6" stroke="#fff" strokeWidth="2">
+                                                    <title>{`${p.date}: ${p.weight} ${measurementUnits.weight}`}</title>
+                                                </circle>
+                                            ))}
+                                        </svg>
+                                    </div>
+                                );
+                            })()}
                             
                             {/* Growth Records */}
                             <div className="space-y-3 mt-6">
