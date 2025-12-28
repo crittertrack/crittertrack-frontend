@@ -7776,22 +7776,6 @@ const ProfileEditForm = ({ userProfile, showModalMessage, onSaveSuccess, onCance
                             </label>
                         )}
                     </div>
-                    
-                    <div className="pt-4 space-y-2 border-t border-gray-200">
-                        <h4 className="text-base font-medium text-gray-800">Animal Privacy Settings:</h4>
-                        
-                        <label className="flex items-center space-x-2 text-sm text-gray-700">
-                            <input type="checkbox" checked={showGeneticCodePublic} onChange={(e) => setShowGeneticCodePublic(e.target.checked)} 
-                                className="rounded text-primary-dark focus:ring-primary-dark" disabled={profileLoading} />
-                            <span>Show **Genetic Code** on public animal views</span>
-                        </label>
-                        
-                        <label className="flex items-center space-x-2 text-sm text-gray-700">
-                            <input type="checkbox" checked={showRemarksPublic} onChange={(e) => setShowRemarksPublic(e.target.checked)} 
-                                className="rounded text-primary-dark focus:ring-primary-dark" disabled={profileLoading} />
-                            <span>Show **Remarks/Notes** on public animal views</span>
-                        </label>
-                    </div>
 
                     <div className="pt-4 space-y-2 border-t border-gray-200">
                         <h4 className="text-base font-medium text-gray-800">Messaging Preferences:</h4>
@@ -10183,6 +10167,7 @@ const App = () => {
     const [sireData, setSireData] = useState(null);
     const [damData, setDamData] = useState(null);
     const [offspringData, setOffspringData] = useState([]);
+    const [sectionPrivacy, setSectionPrivacy] = useState({}); // Track which sections are public per animal
     
     // Fetch parent animals when viewing an animal
     React.useEffect(() => {
@@ -10190,8 +10175,27 @@ const App = () => {
             setSireData(null);
             setDamData(null);
             setOffspringData([]);
+            setSectionPrivacy({});
             return;
         }
+        
+        // Initialize section privacy settings from animal data
+        const animalId = animalToView.id_public;
+        setSectionPrivacy(prev => ({
+            ...prev,
+            [animalId]: animalToView.sectionPrivacy || {
+                appearance: true,
+                identification: true, // Always public
+                health: false,
+                reproductive: false,
+                genetics: false,
+                husbandry: false,
+                behavior: false,
+                records: false,
+                endOfLife: false,
+                remarks: false
+            }
+        }));
         
         const fetchPedigreeData = async () => {
             try {
@@ -10297,6 +10301,41 @@ const App = () => {
 
     const timeoutRef = useRef(null);
     const activeEvents = ['mousemove', 'keydown', 'scroll', 'click'];
+
+    // Toggle section privacy and save to animal
+    const toggleSectionPrivacy = useCallback(async (sectionName) => {
+        if (!animalToView) return;
+        
+        const animalId = animalToView.id_public;
+        const currentPrivacy = sectionPrivacy[animalId] || {};
+        const newPrivacy = {
+            ...currentPrivacy,
+            [sectionName]: !currentPrivacy[sectionName]
+        };
+        
+        // Update local state immediately for responsiveness
+        setSectionPrivacy(prev => ({
+            ...prev,
+            [animalId]: newPrivacy
+        }));
+        
+        // Save to backend
+        try {
+            await axios.put(`${API_BASE_URL}/animals/${animalId}`, {
+                sectionPrivacy: newPrivacy
+            }, {
+                headers: { Authorization: `Bearer ${authToken}` }
+            });
+        } catch (error) {
+            console.error('Error saving section privacy:', error);
+            // Revert on error
+            setSectionPrivacy(prev => ({
+                ...prev,
+                [animalId]: currentPrivacy
+            }));
+            showModalMessage('Error', 'Failed to save privacy settings');
+        }
+    }, [animalToView, sectionPrivacy, authToken, API_BASE_URL, showModalMessage]);
 
     const showModalMessage = useCallback((title, message) => {
         setModalMessage({ title, message });
@@ -12354,7 +12393,18 @@ const App = () => {
                                                 {/* Genetic Code Card */}
                                                 {animalToView.geneticCode && (
                                                     <div className="bg-white border-2 border-gray-300 rounded-lg p-4">
-                                                        <h4 className="font-semibold text-gray-700 mb-2">Genetic Code</h4>
+                                                        <div className="flex items-center justify-between mb-2">
+                                                            <h4 className="font-semibold text-gray-700">Genetic Code</h4>
+                                                            <button
+                                                                onClick={() => toggleSectionPrivacy('genetics')}
+                                                                className={`px-3 py-1 rounded text-xs font-medium transition ${
+                                                                    sectionPrivacy[animalToView.id_public]?.genetics ? 'bg-blue-100 text-blue-800' : 'bg-gray-100 text-gray-800'
+                                                                }`}
+                                                                title={sectionPrivacy[animalToView.id_public]?.genetics ? 'Public' : 'Private'}
+                                                            >
+                                                                {sectionPrivacy[animalToView.id_public]?.genetics ? '🌍 Public' : '🔒 Private'}
+                                                            </button>
+                                                        </div>
                                                         <div className="text-sm font-mono bg-gray-50 p-2 rounded border border-gray-200">
                                                             {animalToView.geneticCode}
                                                         </div>
@@ -12364,7 +12414,18 @@ const App = () => {
                                                 {/* Health Card */}
                                                 {(animalToView.currentWeight || animalToView.bcs || animalToView.growthRecords?.length > 0 || animalToView.medicalConditions || animalToView.medications) && (
                                                     <div className="bg-white border-2 border-gray-300 rounded-lg p-4">
-                                                        <h4 className="font-semibold text-gray-700 mb-2">Health</h4>
+                                                        <div className="flex items-center justify-between mb-2">
+                                                            <h4 className="font-semibold text-gray-700">Health</h4>
+                                                            <button
+                                                                onClick={() => toggleSectionPrivacy('health')}
+                                                                className={`px-3 py-1 rounded text-xs font-medium transition ${
+                                                                    sectionPrivacy[animalToView.id_public]?.health ? 'bg-blue-100 text-blue-800' : 'bg-gray-100 text-gray-800'
+                                                                }`}
+                                                                title={sectionPrivacy[animalToView.id_public]?.health ? 'Public' : 'Private'}
+                                                            >
+                                                                {sectionPrivacy[animalToView.id_public]?.health ? '🌍 Public' : '🔒 Private'}
+                                                            </button>
+                                                        </div>
                                                         <div className="space-y-3 text-sm">
                                                             {/* Current Measurements Summary */}
                                                             {(animalToView.currentWeight || animalToView.bcs || animalToView.growthRecords?.length > 0) && (
@@ -12400,7 +12461,18 @@ const App = () => {
                                                 {/* Reproductive Status Card */}
                                                 {!animalToView.isNeutered && (animalToView.heatStatus || animalToView.lastHeatDate || animalToView.matingDates) && (
                                                     <div className="bg-white border-2 border-gray-300 rounded-lg p-4">
-                                                        <h4 className="font-semibold text-gray-700 mb-2">Reproductive Status</h4>
+                                                        <div className="flex items-center justify-between mb-2">
+                                                            <h4 className="font-semibold text-gray-700">Reproductive Status</h4>
+                                                            <button
+                                                                onClick={() => toggleSectionPrivacy('reproductive')}
+                                                                className={`px-3 py-1 rounded text-xs font-medium transition ${
+                                                                    sectionPrivacy[animalToView.id_public]?.reproductive ? 'bg-blue-100 text-blue-800' : 'bg-gray-100 text-gray-800'
+                                                                }`}
+                                                                title={sectionPrivacy[animalToView.id_public]?.reproductive ? 'Public' : 'Private'}
+                                                            >
+                                                                {sectionPrivacy[animalToView.id_public]?.reproductive ? '🌍 Public' : '🔒 Private'}
+                                                            </button>
+                                                        </div>
                                                         <div className="text-sm space-y-1">
                                                             {animalToView.heatStatus && <div><strong>Heat Status:</strong> {animalToView.heatStatus}</div>}
                                                             {animalToView.lastHeatDate && <div><strong>Last Heat:</strong> {new Date(animalToView.lastHeatDate).toLocaleDateString()}</div>}
