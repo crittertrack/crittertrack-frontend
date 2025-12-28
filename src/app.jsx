@@ -12054,6 +12054,12 @@ const App = () => {
                                                         <span className="text-sm text-gray-600">Origin:</span> <strong>{animalToView.origin}</strong>
                                                     </div>
                                                 )}
+                                                <OffspringSection
+                                                    animalId={animalToView.id_public}
+                                                    API_BASE_URL={API_BASE_URL}
+                                                    authToken={authToken}
+                                                    onViewAnimal={handleViewAnimal}
+                                                />
                                             </div>
                                         )}
 
@@ -12167,13 +12173,6 @@ const App = () => {
                                             </div>
                                         )}
 
-                                        {/* Offspring Section */}
-                                        <OffspringSection
-                                            animalId={animalToView.id_public}
-                                            API_BASE_URL={API_BASE_URL}
-                                            authToken={authToken}
-                                            onViewAnimal={handleViewAnimal}
-                                        />
                                     </div>
 
                                     {/* Pedigree Chart Modal */}
