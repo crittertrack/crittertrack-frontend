@@ -11883,7 +11883,17 @@ const App = () => {
                                                                             const monthDiff = today.getMonth() - birth.getMonth();
                                                                             if (monthDiff < 0 || (monthDiff === 0 && today.getDate() < birth.getDate())) age--;
                                                                             const months = (today.getMonth() - birth.getMonth() + 12) % 12;
-                                                                            return age > 0 ? `${age}y ${months}m` : `${months}m`;
+                                                                            let days = today.getDate() - birth.getDate();
+                                                                            if (days < 0) {
+                                                                                days += new Date(today.getFullYear(), today.getMonth(), 0).getDate();
+                                                                            }
+                                                                            if (age > 0) {
+                                                                                return `${age}y ${months}m ${days}d`;
+                                                                            } else if (months > 0) {
+                                                                                return `${months}m ${days}d`;
+                                                                            } else {
+                                                                                return `${days}d`;
+                                                                            }
                                                                         })() : '—'}
                                                                     </span>
                                                                 </div>
