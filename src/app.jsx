@@ -11972,6 +11972,63 @@ const App = () => {
                                                     </div>
                                                 )}
 
+                                                {/* Parents Card */}
+                                                {(animalToView.sireId_public || animalToView.damId_public || animalToView.fatherId_public || animalToView.motherId_public) && (
+                                                    <div className="bg-white border-2 border-gray-300 rounded-lg p-4">
+                                                        <h4 className="font-semibold text-gray-700 mb-2">Parents</h4>
+                                                        <div className="text-sm space-y-2">
+                                                            {(animalToView.sireId_public || animalToView.fatherId_public) && (
+                                                                <div>
+                                                                    <strong>Sire:</strong>{' '}
+                                                                    <button
+                                                                        onClick={async () => {
+                                                                            const sireId = animalToView.sireId_public || animalToView.fatherId_public;
+                                                                            try {
+                                                                                const response = await axios.get(`${API_BASE_URL}/animals/${sireId}`, {
+                                                                                    headers: { Authorization: `Bearer ${authToken}` }
+                                                                                });
+                                                                                if (response.data) {
+                                                                                    setAnimalToView(response.data);
+                                                                                    setDetailViewTab(1);
+                                                                                }
+                                                                            } catch (error) {
+                                                                                console.error('Error fetching sire:', error);
+                                                                            }
+                                                                        }}
+                                                                        className="text-blue-600 hover:text-blue-800 hover:underline cursor-pointer"
+                                                                    >
+                                                                        {animalToView.sireName || 'Unknown'}
+                                                                    </button>
+                                                                </div>
+                                                            )}
+                                                            {(animalToView.damId_public || animalToView.motherId_public) && (
+                                                                <div>
+                                                                    <strong>Dam:</strong>{' '}
+                                                                    <button
+                                                                        onClick={async () => {
+                                                                            const damId = animalToView.damId_public || animalToView.motherId_public;
+                                                                            try {
+                                                                                const response = await axios.get(`${API_BASE_URL}/animals/${damId}`, {
+                                                                                    headers: { Authorization: `Bearer ${authToken}` }
+                                                                                });
+                                                                                if (response.data) {
+                                                                                    setAnimalToView(response.data);
+                                                                                    setDetailViewTab(1);
+                                                                                }
+                                                                            } catch (error) {
+                                                                                console.error('Error fetching dam:', error);
+                                                                            }
+                                                                        }}
+                                                                        className="text-blue-600 hover:text-blue-800 hover:underline cursor-pointer"
+                                                                    >
+                                                                        {animalToView.damName || 'Unknown'}
+                                                                    </button>
+                                                                </div>
+                                                            )}
+                                                        </div>
+                                                    </div>
+                                                )}
+
                                                 {/* Health Card */}
                                                 {(animalToView.currentWeight || animalToView.bcs || animalToView.growthRecords?.length > 0 || animalToView.medicalConditions || animalToView.medications) && (
                                                     <div className="bg-white border-2 border-gray-300 rounded-lg p-4">
@@ -12017,14 +12074,35 @@ const App = () => {
                                                                 </div>
                                                             )}
 
-                                                            {/* Identification Card */}
-                                                            {(animalToView.microchipNumber || animalToView.registryCode || animalToView.breederyId) && (
+                                                            {/* Offspring Card */}
+                                                            {animalToView.offspring && animalToView.offspring.length > 0 && (
                                                                 <div className="bg-white border-2 border-gray-300 rounded-lg p-4">
-                                                                    <h4 className="font-semibold text-gray-700 mb-2">Identification</h4>
-                                                                    <div className="text-sm space-y-1">
-                                                                        {animalToView.microchipNumber && <div><strong>Microchip:</strong> {animalToView.microchipNumber}</div>}
-                                                                        {animalToView.registryCode && <div><strong>Registry:</strong> {animalToView.registryCode}</div>}
-                                                                        {animalToView.breederyId && <div><strong>Identification:</strong> {animalToView.breederyId}</div>}
+                                                                    <h4 className="font-semibold text-gray-700 mb-2">Offspring ({animalToView.offspring.length})</h4>
+                                                                    <div className="text-sm space-y-2">
+                                                                        {animalToView.offspring.map(child => (
+                                                                            <div key={child.id} className="flex justify-between items-center">
+                                                                                <button
+                                                                                    onClick={async () => {
+                                                                                        try {
+                                                                                            const response = await axios.get(`${API_BASE_URL}/animals/${child.id}`, {
+                                                                                                headers: { Authorization: `Bearer ${authToken}` }
+                                                                                            });
+                                                                                            if (response.data) {
+                                                                                                setAnimalToView(response.data);
+                                                                                                setDetailViewTab(1);
+                                                                                            }
+                                                                                        } catch (error) {
+                                                                                            console.error('Error fetching offspring:', error);
+                                                                                        }
+                                                                                    }}
+                                                                                    className="text-blue-600 hover:text-blue-800 hover:underline cursor-pointer flex-1 text-left"
+                                                                                >
+                                                                                    {child.name}
+                                                                                </button>
+                                                                                {child.sexCode === 'M' && <span className="text-xs text-gray-600">♂</span>}
+                                                                                {child.sexCode === 'F' && <span className="text-xs text-gray-600">♀</span>}
+                                                                            </div>
+                                                                        ))}
                                                                     </div>
                                                                 </div>
                                                             )}
