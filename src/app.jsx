@@ -5442,6 +5442,23 @@ const AnimalForm = ({
         fetchParentNames();
     }, [formData.fatherId_public, formData.motherId_public]);
 
+    const addMeasurement = () => {
+        if (!newMeasurement.date || !newMeasurement.weight) {
+            showModalMessage('Missing Data', 'Please enter at least a date and weight.');
+            return;
+        }
+        const newRecord = {
+            id: Date.now().toString(),
+            date: newMeasurement.date,
+            weight: newMeasurement.weight,
+            length: newMeasurement.length || null,
+            bcs: newMeasurement.bcs || null,
+            notes: newMeasurement.notes || ''
+        };
+        setGrowthRecords([...growthRecords, newRecord]);
+        setNewMeasurement({ date: '', weight: '', length: '', bcs: '', notes: '' });
+    };
+
     const handleSubmit = async (e) => {
         e.preventDefault();
         setLoading(true);
@@ -5919,6 +5936,23 @@ const AnimalForm = ({
                             </div>
                         </div>
                         
+                        {/* Current Owner */}
+                        <div className="bg-gray-50 p-4 rounded-lg border border-gray-200 space-y-4">
+                            <h3 className="text-lg font-semibold text-gray-700 border-b pb-2">Current Owner</h3>
+                            <div>
+                                <label className='block text-sm font-medium text-gray-700 mb-2'>Owner Name</label>
+                                <input 
+                                    type="text" 
+                                    name="currentOwner" 
+                                    value={formData.currentOwner} 
+                                    onChange={handleChange}
+                                    placeholder="Name of current owner"
+                                    className="block w-full p-2 border border-gray-300 rounded-md shadow-sm focus:ring-primary focus:border-primary" 
+                                />
+                                <p className="text-xs text-gray-500 mt-1">Records owner changes in ownership history.</p>
+                            </div>
+                        </div>
+                        
                         {/* Visibility */}
                         <div className="bg-gray-50 p-4 rounded-lg border border-gray-200 space-y-4">
                             <h3 className="text-lg font-semibold text-gray-700 border-b pb-2">Visibility</h3>
@@ -5969,37 +6003,7 @@ const AnimalForm = ({
                                 )}
                             </div>
                         </div>
-                    </div>
-                )}
-                
-                {/* Tab 4: Identification */}
-                {activeTab === 4 && (
-                    <div className="space-y-6">
-                        {/* Identification Numbers */}
-                        <div className="bg-gray-50 p-4 rounded-lg border border-gray-200 space-y-4">
-                            <h3 className="text-lg font-semibold text-gray-700 border-b pb-2">Identification Numbers</h3>
-                            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                                <div>
-                                    <label className="block text-sm font-medium text-gray-700">Identification</label>
-                                    <input type="text" name="breederyId" value={formData.breederyId} onChange={handleChange} 
-                                        className="mt-1 block w-full p-2 border border-gray-300 rounded-md shadow-sm focus:ring-primary focus:border-primary" 
-                                        placeholder="Breeder ID or Registry Code" />
-                                </div>
-                                
-                                <div>
-                                    <label className="block text-sm font-medium text-gray-700">Microchip Number</label>
-                                    <input type="text" name="microchipNumber" value={formData.microchipNumber} onChange={handleChange} 
-                                        className="mt-1 block w-full p-2 border border-gray-300 rounded-md shadow-sm focus:ring-primary focus:border-primary" />
-                                </div>
-                                
-                                <div className="md:col-span-2">
-                                    <label className="block text-sm font-medium text-gray-700">Pedigree Registration ID</label>
-                                    <input type="text" name="pedigreeRegistrationId" value={formData.pedigreeRegistrationId} onChange={handleChange} 
-                                        className="mt-1 block w-full p-2 border border-gray-300 rounded-md shadow-sm focus:ring-primary focus:border-primary" />
-                                </div>
-                            </div>
-                        </div>
-                        
+
                         {/* Genetic Code */}
                         <div className="bg-gray-50 p-4 rounded-lg border border-gray-200">
                             <GeneticCodeBuilder
@@ -6010,103 +6014,25 @@ const AnimalForm = ({
                                 onOpenCommunityForm={() => setShowCommunityGeneticsModal(true)}
                             />
                         </div>
-                        
-                        {/* Classification */}
+
+                        {/* Life Stage */}
                         <div className="bg-gray-50 p-4 rounded-lg border border-gray-200 space-y-4">
-                            <h3 className="text-lg font-semibold text-gray-700 border-b pb-2">Classification</h3>
+                            <h3 className="text-lg font-semibold text-gray-700 border-b pb-2">Life Stage</h3>
                             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                                 <div>
-                                    <label className="block text-sm font-medium text-gray-700">Species</label>
-                                    <input type="text" value={formData.species} disabled 
-                                        className="mt-1 block w-full p-2 border border-gray-300 rounded-md shadow-sm bg-gray-100 text-gray-600" />
-                                    <p className="text-xs text-gray-500 mt-1">Cannot be changed after creation</p>
-                                </div>
-                                
-                                <div>
-                                    <label className="block text-sm font-medium text-gray-700">Breed</label>
-                                    <input type="text" name="breed" value={formData.breed} onChange={handleChange} 
-                                        className="mt-1 block w-full p-2 border border-gray-300 rounded-md shadow-sm focus:ring-primary focus:border-primary" />
-                                </div>
-                                
-                                <div className="md:col-span-2">
-                                    <label className="block text-sm font-medium text-gray-700">Strain <span className="text-xs text-gray-500">(rodents)</span></label>
-                                    <input type="text" name="strain" value={formData.strain} onChange={handleChange} 
-                                        className="mt-1 block w-full p-2 border border-gray-300 rounded-md shadow-sm focus:ring-primary focus:border-primary" 
-                                        placeholder="e.g., C57BL/6, Wistar, Syrian" />
+                                    <label className="block text-sm font-medium text-gray-700">Current Life Stage</label>
+                                    <select name="lifeStage" value={formData.lifeStage} onChange={handleChange} 
+                                        className="mt-1 block w-full p-2 border border-gray-300 rounded-md shadow-sm focus:ring-primary focus:border-primary">
+                                        <option value="">Select Life Stage</option>
+                                        <option value="Juvenile">Juvenile</option>
+                                        <option value="Adult">Adult</option>
+                                        <option value="Senior">Senior</option>
+                                        <option value="Elderly">Elderly</option>
+                                    </select>
                                 </div>
                             </div>
                         </div>
-                        
-                        {/* Tags */}
-                        <div className="bg-gray-50 p-4 rounded-lg border border-gray-200" data-tutorial-target="tags-edit-section">
-                            <label className="block text-sm font-medium text-gray-700 mb-2">Tags (Lines, Enclosures, etc)</label>
-                            <input 
-                                type="text" 
-                                placeholder="Enter tags separated by commas (e.g., Line A, Enclosure 1)" 
-                                value={formData.tags.join(', ')} 
-                                onChange={(e) => {
-                                    const tagString = e.target.value;
-                                    const newTags = tagString.split(',').map(tag => tag.trim()).filter(tag => tag.length > 0);
-                                    setFormData({ ...formData, tags: newTags });
-                                }}
-                                className="block w-full p-2 border border-gray-300 rounded-md shadow-sm focus:ring-primary focus:border-primary" 
-                            />
-                            {formData.tags.length > 0 && (
-                                <div className="mt-2 flex flex-wrap gap-2">
-                                    {formData.tags.map((tag, idx) => (
-                                        <span key={idx} className="inline-flex items-center bg-primary text-black text-xs font-semibold px-3 py-1 rounded-full">
-                                            {tag}
-                                            <button
-                                                type="button"
-                                                onClick={() => {
-                                                    const newTags = formData.tags.filter((_, i) => i !== idx);
-                                                    setFormData({ ...formData, tags: newTags });
-                                                }}
-                                                className="ml-2 text-black hover:text-gray-600"
-                                            >
-                                                ×
-                                            </button>
-                                        </span>
-                                    ))}
-                                </div>
-                            )}
-                        </div>
-                        
-                        {/* Appearance */}
-                        <div className="bg-gray-50 p-4 rounded-lg border border-gray-200 space-y-4">
-                            <h3 className="text-lg font-semibold text-gray-700 border-b pb-2">Appearance</h3>
-                            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                                <div>
-                                    <label className="block text-sm font-medium text-gray-700">Color</label>
-                                    <input type="text" name="color" value={formData.color} onChange={handleChange} 
-                                        className="mt-1 block w-full p-2 border border-gray-300 rounded-md shadow-sm focus:ring-primary focus:border-primary" />
-                                </div>
-                                
-                                <div>
-                                    <label className="block text-sm font-medium text-gray-700">Coat Type</label>
-                                    <input type="text" name="coat" value={formData.coat} onChange={handleChange} 
-                                        className="mt-1 block w-full p-2 border border-gray-300 rounded-md shadow-sm focus:ring-primary focus:border-primary" 
-                                        placeholder="e.g., Short, Long, Rex" />
-                                </div>
-                                
-                                <div>
-                                    <label className="block text-sm font-medium text-gray-700">Coat Pattern</label>
-                                    <input type="text" name="coatPattern" value={formData.coatPattern} onChange={handleChange} 
-                                        className="mt-1 block w-full p-2 border border-gray-300 rounded-md shadow-sm focus:ring-primary focus:border-primary" 
-                                        placeholder="e.g., Solid, Hooded, Brindle" />
-                                </div>
-                                
-                                {formData.species === 'Rat' && (
-                                    <div>
-                                        <label className="block text-sm font-medium text-gray-700">Earset</label>
-                                        <input type="text" name="earset" value={formData.earset} onChange={handleChange} 
-                                            className="mt-1 block w-full p-2 border border-gray-300 rounded-md shadow-sm focus:ring-primary focus:border-primary" 
-                                            placeholder="e.g., Standard, Dumbo" />
-                                    </div>
-                                )}
-                            </div>
-                        </div>
-                        
+
                         {/* Measurements & Growth Tracking */}
                         <div className="bg-gray-50 p-4 rounded-lg border border-gray-200 space-y-4">
                             <h3 className="text-lg font-semibold text-gray-700 border-b pb-2">Measurements & Growth Tracking</h3>
@@ -6249,148 +6175,150 @@ const AnimalForm = ({
                                     
                                     <button
                                         type="button"
-                                        onClick={() => {
-                                            if (newMeasurement.date && newMeasurement.weight) {
-                                                setGrowthRecords([...growthRecords, {...newMeasurement, id: Date.now()}]);
-                                                setNewMeasurement({
-                                                    date: new Date().toISOString().substring(0, 10),
-                                                    weight: '',
-                                                    length: '',
-                                                    bcs: '',
-                                                    notes: ''
-                                                });
-                                            }
-                                        }}
-                                        className="px-3 py-1.5 text-sm bg-primary hover:bg-primary-dark text-black rounded-md transition"
+                                        onClick={addMeasurement}
+                                        className="w-full px-4 py-2 bg-blue-500 text-white rounded-md hover:bg-blue-600 text-sm font-medium"
                                     >
-                                        + Add Measurement
+                                        Add Measurement
                                     </button>
                                 </div>
                                 
-                                {/* Growth Chart Visualization */}
+                                {/* Measurements List */}
                                 {growthRecords.length > 0 && (
-                                    <div className="bg-white p-4 rounded-lg border border-gray-300">
-                                        <h5 className="text-xs font-semibold text-gray-600 mb-3">Growth Curve</h5>
-                                        <div className="relative h-48">
-                                            {/* Y-axis label */}
-                                            <div className="absolute left-0 top-1/2 -translate-y-1/2 -rotate-90 text-xs text-gray-500 font-medium">
-                                                Weight ({measurementUnits.weight})
-                                            </div>
-                                            {/* Chart container */}
-                                            <div className="ml-8 mr-2 h-full border border-gray-200 rounded relative">
-                                                {/* Simple SVG chart */}
-                                                {(() => {
-                                                    const sorted = [...growthRecords].sort((a, b) => new Date(a.date) - new Date(b.date));
-                                                    if (sorted.length === 0) return null;
-                                                    
-                                                    // Extract numeric weight values
-                                                    const weights = sorted.map(r => {
-                                                        const val = typeof r.weight === 'string' ? r.weight.match(/[\d.]+/) : r.weight;
-                                                        return val ? parseFloat(Array.isArray(val) ? val[0] : val) : 0;
-                                                    });
-                                                    
-                                                    const maxWeight = Math.max(...weights);
-                                                    const minWeight = Math.min(...weights);
-                                                    const weightRange = maxWeight - minWeight || 1;
-                                                    
-                                                    const width = 100;
-                                                    const height = 100;
-                                                    const padding = 12;
-                                                    
-                                                    const points = sorted.map((record, i) => {
-                                                        const x = padding + ((i / (sorted.length - 1 || 1)) * (width - 2 * padding));
-                                                        const y = height - padding - (((weights[i] - minWeight) / weightRange) * (height - 2 * padding));
-                                                        return { x, y, record, weight: weights[i] };
-                                                    });
-                                                    
-                                                    const pathData = points.map((p, i) => 
-                                                        `${i === 0 ? 'M' : 'L'} ${p.x} ${p.y}`
-                                                    ).join(' ');
-                                                    
-                                                    return (
-                                                        <svg viewBox={`0 0 ${width} ${height}`} className="w-full h-full">
-                                                            {/* Grid lines */}
-                                                            {[0, 25, 50, 75, 100].map(y => (
-                                                                <line key={y} x1={padding} y1={y} x2={width - padding} y2={y} 
-                                                                    stroke="#e5e7eb" strokeWidth="0.5" />
-                                                            ))}
-                                                            
-                                                            {/* Y-axis labels */}
-                                                            <text x={padding - 2} y={padding} fontSize="3" fill="#6b7280" textAnchor="end" alignmentBaseline="middle">
-                                                                {maxWeight.toFixed(1)}
-                                                            </text>
-                                                            <text x={padding - 2} y={height - padding} fontSize="3" fill="#6b7280" textAnchor="end" alignmentBaseline="middle">
-                                                                {minWeight.toFixed(1)}
-                                                            </text>
-                                                            
-                                                            {/* Growth line */}
-                                                            <path d={pathData} fill="none" stroke="#3b82f6" strokeWidth="2" />
-                                                            
-                                                            {/* Data points with larger hover areas */}
-                                                            {points.map((p, i) => (
-                                                                <g key={i}>
-                                                                    {/* Invisible larger circle for easier hovering */}
-                                                                    <circle cx={p.x} cy={p.y} r="5" fill="transparent" stroke="transparent" style={{cursor: 'pointer'}}>
-                                                                        <title>{`${p.record.date}: ${p.weight} ${measurementUnits.weight}${p.record.notes ? ' (' + p.record.notes + ')' : ''}`}</title>
-                                                                    </circle>
-                                                                    {/* Visible point */}
-                                                                    <circle cx={p.x} cy={p.y} r="2.5" fill="#3b82f6" stroke="white" strokeWidth="1" style={{pointerEvents: 'none'}} />
-                                                                </g>
-                                                            ))}
-                                                        </svg>
-                                                    );
-                                                })()}
-                                            </div>
-                                            {/* X-axis label */}
-                                            <div className="text-center mt-1 ml-8 mr-2 text-xs text-gray-500 font-medium">
-                                                Date
-                                            </div>
-                                        </div>
-                                        <p className="text-xs text-gray-500 mt-2">Hover over points to see details</p>
-                                    </div>
-                                )}
-                                
-                                {/* Records List */}
-                                {growthRecords.length > 0 && (
-                                    <div className="space-y-2">
-                                        <h5 className="text-xs font-semibold text-gray-600">Recorded Measurements</h5>
-                                        <div className="max-h-48 overflow-y-auto space-y-2">
-                                            {[...growthRecords].sort((a, b) => new Date(b.date) - new Date(a.date)).map((record, idx) => (
-                                                <div key={record.id || idx} className="flex items-center justify-between bg-white p-2 rounded border border-gray-200 text-sm">
-                                                    <div className="flex-1">
-                                                        <span className="font-medium">{record.date}</span>
-                                                        <span className="mx-2">•</span>
-                                                        <span className="text-gray-700">{record.weight} {measurementUnits.weight}</span>
-                                                        {record.length && (
-                                                            <>
-                                                                <span className="mx-2">•</span>
-                                                                <span className="text-gray-700">{record.length} {measurementUnits.length}</span>
-                                                            </>
-                                                        )}
-                                                        {record.bcs && (
-                                                            <>
-                                                                <span className="mx-2">•</span>
-                                                                <span className="text-gray-700">BCS: {record.bcs}</span>
-                                                            </>
-                                                        )}
-                                                        {record.notes && (
-                                                            <span className="ml-2 text-xs text-gray-500 italic">({record.notes})</span>
-                                                        )}
-                                                    </div>
-                                                    <button
-                                                        type="button"
-                                                        onClick={() => setGrowthRecords(growthRecords.filter(r => r.id !== record.id))}
-                                                        className="text-red-500 hover:text-red-700 p-1"
-                                                        title="Delete measurement"
-                                                    >
-                                                        <Trash2 size={14} />
-                                                    </button>
+                                    <div className="space-y-2 bg-gray-50 p-3 rounded-lg border border-gray-200 max-h-64 overflow-y-auto">
+                                        {growthRecords.map((record) => (
+                                            <div key={record.id} className="flex items-center justify-between p-2 bg-white rounded border border-gray-100 text-sm">
+                                                <div className="flex gap-4 text-gray-700 flex-1">
+                                                    <span className="font-medium">{record.date}</span>
+                                                    <span>{record.weight} {measurementUnits.weight}</span>
+                                                    {record.length && (
+                                                        <span>{record.length} {measurementUnits.length}</span>
+                                                    )}
+                                                    {record.bcs && (
+                                                        <>
+                                                            <span className="mx-2">•</span>
+                                                            <span className="text-gray-700">BCS: {record.bcs}</span>
+                                                        </>
+                                                    )}
+                                                    {record.notes && (
+                                                        <span className="ml-2 text-xs text-gray-500 italic">({record.notes})</span>
+                                                    )}
                                                 </div>
-                                            ))}
-                                        </div>
+                                                <button
+                                                    type="button"
+                                                    onClick={() => setGrowthRecords(growthRecords.filter(r => r.id !== record.id))}
+                                                    className="text-red-500 hover:text-red-700 p-1"
+                                                    title="Delete measurement"
+                                                >
+                                                    <Trash2 size={14} />
+                                                </button>
+                                            </div>
+                                        ))}
                                     </div>
                                 )}
                             </div>
+                        </div>
+
+                    </div>
+                )}
+                
+                {/* Tab 4: Identification */}
+                {activeTab === 4 && (
+                    <div className="space-y-6">
+                        {/* Identification Numbers */}
+                        <div className="bg-gray-50 p-4 rounded-lg border border-gray-200 space-y-4">
+                            <h3 className="text-lg font-semibold text-gray-700 border-b pb-2">Identification Numbers</h3>
+                            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                <div>
+                                    <label className="block text-sm font-medium text-gray-700">Identification</label>
+                                    <input type="text" name="breederyId" value={formData.breederyId} onChange={handleChange} 
+                                        className="mt-1 block w-full p-2 border border-gray-300 rounded-md shadow-sm focus:ring-primary focus:border-primary" 
+                                        placeholder="Breeder ID or Registry Code" />
+                                </div>
+                                
+                                <div>
+                                    <label className="block text-sm font-medium text-gray-700">Microchip Number</label>
+                                    <input type="text" name="microchipNumber" value={formData.microchipNumber} onChange={handleChange} 
+                                        className="mt-1 block w-full p-2 border border-gray-300 rounded-md shadow-sm focus:ring-primary focus:border-primary" />
+                                </div>
+                                
+                                <div className="md:col-span-2">
+                                    <label className="block text-sm font-medium text-gray-700">Pedigree Registration ID</label>
+                                    <input type="text" name="pedigreeRegistrationId" value={formData.pedigreeRegistrationId} onChange={handleChange} 
+                                        className="mt-1 block w-full p-2 border border-gray-300 rounded-md shadow-sm focus:ring-primary focus:border-primary" />
+                                </div>
+                            </div>
+                        </div>
+                        
+                        {/* Genetic Code */}
+                        <div className="bg-gray-50 p-4 rounded-lg border border-gray-200">
+                            <GeneticCodeBuilder
+                                species={formData.species}
+                                gender={formData.gender}
+                                value={formData.geneticCode}
+                                onChange={(value) => setFormData(prev => ({ ...prev, geneticCode: value }))}
+                                onOpenCommunityForm={() => setShowCommunityGeneticsModal(true)}
+                            />
+                        </div>
+                        
+                        {/* Classification */}
+                        <div className="bg-gray-50 p-4 rounded-lg border border-gray-200 space-y-4">
+                            <h3 className="text-lg font-semibold text-gray-700 border-b pb-2">Classification</h3>
+                            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                <div>
+                                    <label className="block text-sm font-medium text-gray-700">Species</label>
+                                    <input type="text" value={formData.species} disabled 
+                                        className="mt-1 block w-full p-2 border border-gray-300 rounded-md shadow-sm bg-gray-100 text-gray-600" />
+                                    <p className="text-xs text-gray-500 mt-1">Cannot be changed after creation</p>
+                                </div>
+                                
+                                <div>
+                                    <label className="block text-sm font-medium text-gray-700">Breed</label>
+                                    <input type="text" name="breed" value={formData.breed} onChange={handleChange} 
+                                        className="mt-1 block w-full p-2 border border-gray-300 rounded-md shadow-sm focus:ring-primary focus:border-primary" />
+                                </div>
+                                
+                                <div className="md:col-span-2">
+                                    <label className="block text-sm font-medium text-gray-700">Strain <span className="text-xs text-gray-500">(rodents)</span></label>
+                                    <input type="text" name="strain" value={formData.strain} onChange={handleChange} 
+                                        className="mt-1 block w-full p-2 border border-gray-300 rounded-md shadow-sm focus:ring-primary focus:border-primary" 
+                                        placeholder="e.g., C57BL/6, Wistar, Syrian" />
+                                </div>
+                            </div>
+                        </div>
+                        
+                        {/* Tags */}
+                        <div className="bg-gray-50 p-4 rounded-lg border border-gray-200" data-tutorial-target="tags-edit-section">
+                            <label className="block text-sm font-medium text-gray-700 mb-2">Tags (Lines, Enclosures, etc)</label>
+                            <input 
+                                type="text" 
+                                placeholder="Enter tags separated by commas (e.g., Line A, Enclosure 1)" 
+                                value={formData.tags.join(', ')} 
+                                onChange={(e) => {
+                                    const tagString = e.target.value;
+                                    const newTags = tagString.split(',').map(tag => tag.trim()).filter(tag => tag.length > 0);
+                                    setFormData({ ...formData, tags: newTags });
+                                }}
+                                className="block w-full p-2 border border-gray-300 rounded-md shadow-sm focus:ring-primary focus:border-primary" 
+                            />
+                            {formData.tags.length > 0 && (
+                                <div className="mt-2 flex flex-wrap gap-2">
+                                    {formData.tags.map((tag, idx) => (
+                                        <span key={idx} className="inline-flex items-center bg-primary text-black text-xs font-semibold px-3 py-1 rounded-full">
+                                            {tag}
+                                            <button
+                                                type="button"
+                                                onClick={() => {
+                                                    const newTags = formData.tags.filter((_, i) => i !== idx);
+                                                    setFormData({ ...formData, tags: newTags });
+                                                }}
+                                                className="ml-2 text-black hover:text-gray-600"
+                                            >
+                                                ×
+                                            </button>
+                                        </span>
+                                    ))}
+                                </div>
+                            )}
                         </div>
                     </div>
                 )}
@@ -6485,18 +6413,32 @@ const AnimalForm = ({
                         {/* Ownership History */}
                         <div className="bg-gray-50 p-4 rounded-lg border border-gray-200 space-y-4">
                             <h3 className="text-lg font-semibold text-gray-700 border-b pb-2">Ownership History</h3>
-                            <div>
-                                <label className='block text-sm font-medium text-gray-700 mb-2'>Owner Name (Private)</label>
-                                <input 
-                                    type="text" 
-                                    name="ownerName" 
-                                    value={formData.ownerName} 
-                                    onChange={handleChange}
-                                    placeholder="Current owner name (only visible to you)"
-                                    className="block w-full p-2 border border-gray-300 rounded-md shadow-sm focus:ring-primary focus:border-primary" 
-                                />
-                                <p className="text-xs text-gray-500 mt-1">This field is only shown in your private view, not on public profiles.</p>
-                            </div>
+                            <p className="text-sm text-gray-600 mb-3">Ownership changes are tracked here. Add/edit owners in the Status & Privacy tab.</p>
+                            {formData.ownershipHistory && formData.ownershipHistory.length > 0 ? (
+                                <div className="space-y-2">
+                                    {formData.ownershipHistory.map((owner, idx) => (
+                                        <div key={idx} className="flex items-center justify-between p-3 bg-white rounded border border-gray-200">
+                                            <div className="flex-1">
+                                                <p className="font-medium text-gray-800">{owner.name}</p>
+                                                <p className="text-xs text-gray-500">From: {owner.startDate || 'N/A'} {owner.endDate ? `To: ${owner.endDate}` : '(Current)'}</p>
+                                            </div>
+                                            <button
+                                                type="button"
+                                                onClick={() => {
+                                                    const updated = formData.ownershipHistory.filter((_, i) => i !== idx);
+                                                    setFormData({ ...formData, ownershipHistory: updated });
+                                                }}
+                                                className="text-red-500 hover:text-red-700 p-2"
+                                                title="Remove owner record"
+                                            >
+                                                <Trash2 size={16} />
+                                            </button>
+                                        </div>
+                                    ))}
+                                </div>
+                            ) : (
+                                <p className="text-sm text-gray-500 italic">No ownership history recorded yet.</p>
+                            )}
                         </div>
                     </div>
                 )}
