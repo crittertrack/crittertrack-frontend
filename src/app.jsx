@@ -5995,7 +5995,7 @@ const AnimalForm = ({
                                         placeholder="e.g., Solid, Hooded, Brindle" />
                                 </div>
                                 
-                                {formData.species === 'Rat' && (
+                                {(formData.species === 'Rat' || formData.species === 'Fancy Rat') && (
                                     <div>
                                         <label className="block text-sm font-medium text-gray-700">Earset</label>
                                         <input type="text" name="earset" value={formData.earset} onChange={handleChange} 
