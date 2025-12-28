@@ -10151,6 +10151,40 @@ const App = () => {
         return () => window.removeEventListener('resize', handleResize);
     }, []);
     
+    // Fetch parent animals when viewing an animal
+    React.useEffect(() => {
+        if (!animalToView) {
+            setSireData(null);
+            setDamData(null);
+            return;
+        }
+        
+        const fetchParents = async () => {
+            try {
+                const sireId = animalToView.sireId_public || animalToView.fatherId_public;
+                const damId = animalToView.damId_public || animalToView.motherId_public;
+                
+                if (sireId) {
+                    const response = await axios.get(`${API_BASE_URL}/animals/${sireId}`, {
+                        headers: { Authorization: `Bearer ${authToken}` }
+                    });
+                    setSireData(response.data);
+                }
+                
+                if (damId) {
+                    const response = await axios.get(`${API_BASE_URL}/animals/${damId}`, {
+                        headers: { Authorization: `Bearer ${authToken}` }
+                    });
+                    setDamData(response.data);
+                }
+            } catch (error) {
+                console.error('Error fetching parents:', error);
+            }
+        };
+        
+        fetchParents();
+    }, [animalToView, authToken]);
+    
     // Tutorial context hook
     const { hasSeenInitialTutorial, markInitialTutorialSeen, hasCompletedOnboarding, isLoading: tutorialLoading, markTutorialCompleted, completedTutorials, isTutorialCompleted, hasSeenWelcomeBanner, dismissWelcomeBanner } = useTutorial(); 
     const [animalToEdit, setAnimalToEdit] = useState(null);
@@ -10180,6 +10214,8 @@ const App = () => {
     const [animalToView, setAnimalToView] = useState(null);
     const [detailViewTab, setDetailViewTab] = useState(1); // Tab for detail view
     const [showTabs, setShowTabs] = useState(false); // Toggle for collapsible tabs panel
+    const [sireData, setSireData] = useState(null);
+    const [damData, setDamData] = useState(null);
     const [showPedigreeChart, setShowPedigreeChart] = useState(false);
     const [copySuccessAnimal, setCopySuccessAnimal] = useState(false);
     const [showImageModal, setShowImageModal] = useState(false);
@@ -12290,56 +12326,63 @@ const App = () => {
                                                 )}
 
                                                 {/* Parents Card */}
-                                                {(animalToView.sireId_public || animalToView.damId_public || animalToView.fatherId_public || animalToView.motherId_public) && (
+                                                {(sireData || damData) && (
                                                     <div className="bg-white border-2 border-gray-300 rounded-lg p-4">
-                                                        <h4 className="font-semibold text-gray-700 mb-2">Parents</h4>
-                                                        <div className="text-sm space-y-2">
-                                                            {(animalToView.sireId_public || animalToView.fatherId_public) && (
-                                                                <div>
-                                                                    <strong>Sire:</strong>{' '}
-                                                                    <button
-                                                                        onClick={async () => {
-                                                                            const sireId = animalToView.sireId_public || animalToView.fatherId_public;
-                                                                            try {
-                                                                                const response = await axios.get(`${API_BASE_URL}/animals/${sireId}`, {
-                                                                                    headers: { Authorization: `Bearer ${authToken}` }
-                                                                                });
-                                                                                if (response.data) {
-                                                                                    setAnimalToView(response.data);
-                                                                                    setDetailViewTab(1);
-                                                                                }
-                                                                            } catch (error) {
-                                                                                console.error('Error fetching sire:', error);
-                                                                            }
-                                                                        }}
-                                                                        className="text-blue-600 hover:text-blue-800 hover:underline cursor-pointer"
-                                                                    >
-                                                                        {animalToView.sireName || 'Unknown'}
-                                                                    </button>
+                                                        <h4 className="font-semibold text-gray-700 mb-4">Parents</h4>
+                                                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                                            {/* Sire Card */}
+                                                            {sireData && (
+                                                                <div 
+                                                                    onClick={() => {
+                                                                        setAnimalToView(sireData);
+                                                                        setDetailViewTab(1);
+                                                                    }}
+                                                                    className="bg-gray-50 rounded-lg border border-gray-200 p-3 cursor-pointer hover:shadow-md transition"
+                                                                >
+                                                                    <div className="w-full h-32 bg-gray-200 rounded-lg overflow-hidden flex items-center justify-center mb-3">
+                                                                        <AnimalImage src={sireData.imageUrl || sireData.photoUrl} alt={sireData.name} className="w-full h-full object-cover" iconSize={32} />
+                                                                    </div>
+                                                                    <div className="text-center">
+                                                                        <p className="font-semibold text-gray-800 text-sm">
+                                                                            {sireData.prefix ? `${sireData.prefix} ` : ''}{sireData.name}{sireData.suffix ? ` ${sireData.suffix}` : ''}
+                                                                        </p>
+                                                                        <p className="text-xs text-gray-600 mt-1">
+                                                                            {sireData.species} • {sireData.gender}
+                                                                        </p>
+                                                                        {sireData.birthDate && (
+                                                                            <p className="text-xs text-gray-500 mt-2">
+                                                                                Born: {new Date(sireData.birthDate).toLocaleDateString()}
+                                                                            </p>
+                                                                        )}
+                                                                    </div>
                                                                 </div>
                                                             )}
-                                                            {(animalToView.damId_public || animalToView.motherId_public) && (
-                                                                <div>
-                                                                    <strong>Dam:</strong>{' '}
-                                                                    <button
-                                                                        onClick={async () => {
-                                                                            const damId = animalToView.damId_public || animalToView.motherId_public;
-                                                                            try {
-                                                                                const response = await axios.get(`${API_BASE_URL}/animals/${damId}`, {
-                                                                                    headers: { Authorization: `Bearer ${authToken}` }
-                                                                                });
-                                                                                if (response.data) {
-                                                                                    setAnimalToView(response.data);
-                                                                                    setDetailViewTab(1);
-                                                                                }
-                                                                            } catch (error) {
-                                                                                console.error('Error fetching dam:', error);
-                                                                            }
-                                                                        }}
-                                                                        className="text-blue-600 hover:text-blue-800 hover:underline cursor-pointer"
-                                                                    >
-                                                                        {animalToView.damName || 'Unknown'}
-                                                                    </button>
+                                                            
+                                                            {/* Dam Card */}
+                                                            {damData && (
+                                                                <div 
+                                                                    onClick={() => {
+                                                                        setAnimalToView(damData);
+                                                                        setDetailViewTab(1);
+                                                                    }}
+                                                                    className="bg-gray-50 rounded-lg border border-gray-200 p-3 cursor-pointer hover:shadow-md transition"
+                                                                >
+                                                                    <div className="w-full h-32 bg-gray-200 rounded-lg overflow-hidden flex items-center justify-center mb-3">
+                                                                        <AnimalImage src={damData.imageUrl || damData.photoUrl} alt={damData.name} className="w-full h-full object-cover" iconSize={32} />
+                                                                    </div>
+                                                                    <div className="text-center">
+                                                                        <p className="font-semibold text-gray-800 text-sm">
+                                                                            {damData.prefix ? `${damData.prefix} ` : ''}{damData.name}{damData.suffix ? ` ${damData.suffix}` : ''}
+                                                                        </p>
+                                                                        <p className="text-xs text-gray-600 mt-1">
+                                                                            {damData.species} • {damData.gender}
+                                                                        </p>
+                                                                        {damData.birthDate && (
+                                                                            <p className="text-xs text-gray-500 mt-2">
+                                                                                Born: {new Date(damData.birthDate).toLocaleDateString()}
+                                                                            </p>
+                                                                        )}
+                                                                    </div>
                                                                 </div>
                                                             )}
                                                         </div>
