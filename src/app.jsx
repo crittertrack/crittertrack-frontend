@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useCallback, useRef, useMemo } from 'react';
 import { useParams, useNavigate, useLocation, Routes, Route } from 'react-router-dom';
 import axios from 'axios';
-import { LogOut, Cat, UserPlus, LogIn, ChevronLeft, Trash2, Edit, Save, PlusCircle, Plus, ArrowLeft, Loader2, RefreshCw, User, Users, ClipboardList, BookOpen, Settings, Mail, Globe, Bean, Milk, Search, X, Mars, Venus, Eye, EyeOff, Home, Heart, HeartOff, HeartHandshake, Bell, XCircle, CheckCircle, Download, FileText, Link, AlertCircle, Check, DollarSign, Archive, ArrowLeftRight, RotateCcw, Info, Hourglass, MessageSquare, Ban, Flag, Scissors } from 'lucide-react';
+import { LogOut, Cat, UserPlus, LogIn, ChevronLeft, ChevronDown, ChevronRight, Trash2, Edit, Save, PlusCircle, Plus, ArrowLeft, Loader2, RefreshCw, User, Users, ClipboardList, BookOpen, Settings, Mail, Globe, Bean, Milk, Search, X, Mars, Venus, Eye, EyeOff, Home, Heart, HeartOff, HeartHandshake, Bell, XCircle, CheckCircle, Download, FileText, Link, AlertCircle, Check, DollarSign, Archive, ArrowLeftRight, RotateCcw, Info, Hourglass, MessageSquare, Ban, Flag, Scissors } from 'lucide-react';
 import jsPDF from 'jspdf';
 import html2canvas from 'html2canvas';
 import 'flag-icons/css/flag-icons.min.css';
@@ -9875,6 +9875,7 @@ const App = () => {
     const [viewAnimalBreederInfo, setViewAnimalBreederInfo] = useState(null);
     const [animalToView, setAnimalToView] = useState(null);
     const [detailViewTab, setDetailViewTab] = useState(1); // Tab for detail view
+    const [showTabs, setShowTabs] = useState(false); // Toggle for collapsible tabs panel
     const [showPedigreeChart, setShowPedigreeChart] = useState(false);
     const [copySuccessAnimal, setCopySuccessAnimal] = useState(false);
     const [showImageModal, setShowImageModal] = useState(false);
@@ -11789,37 +11790,52 @@ const App = () => {
                                                 </div>
                                             </div>
                                         </div>
-                                        {/* Tab Navigation */}
-                                        <div className="bg-white border border-t-0 border-gray-300 px-6 pt-6 pb-6">
-                                            <div className="flex flex-wrap gap-1 pb-px">
-                                                {[
-                                                    { id: 1, label: 'Overview', icon: '📋' },
-                                                    { id: 2, label: 'Status & Privacy', icon: '🔒' },
-                                                    { id: 3, label: 'Physical', icon: '🎨' },
-                                                    { id: 4, label: 'Identification', icon: '🏷️' },
-                                                    { id: 5, label: 'Lineage', icon: '🌳' },
-                                                    { id: 6, label: 'Breeding', icon: '🫘' },
-                                                    { id: 7, label: 'Health', icon: '🏥' },
-                                                    { id: 8, label: 'Husbandry', icon: '🏠' },
-                                                    { id: 9, label: 'Behavior', icon: '🧠' },
-                                                    { id: 10, label: 'Records', icon: '📝' },
-                                                    { id: 11, label: 'End of Life', icon: '🕊️' }
-                                                ].map(tab => (
-                                                    <button
-                                                        key={tab.id}
-                                                        onClick={() => setDetailViewTab(tab.id)}
-                                                        className={`flex-shrink-0 px-2 sm:px-3 py-2 text-xs sm:text-sm font-medium rounded border transition-colors ${
-                                                            detailViewTab === tab.id 
-                                                                ? 'bg-primary text-black border-gray-400' 
-                                                                : 'bg-gray-50 text-gray-600 hover:text-gray-800 border-gray-300'
-                                                        }`}
-                                                        title={tab.label}
-                                                    >
-                                                        <span className="mr-1">{tab.icon}</span>
-                                                        <span className="hidden lg:inline">{tab.label}</span>
-                                                    </button>
-                                                ))}
+                                        {/* Tab Navigation - Collapsible */}
+                                        <div className="bg-white border border-t-0 border-gray-300">
+                                            {/* Toggle Button */}
+                                            <div className="px-4 py-2 flex items-center justify-between border-b border-gray-200">
+                                                <span className="text-sm font-semibold text-gray-700">Tabs</span>
+                                                <button
+                                                    onClick={() => setShowTabs(!showTabs)}
+                                                    className="p-1 hover:bg-gray-200 rounded transition-colors"
+                                                    title={showTabs ? "Collapse tabs" : "Expand tabs"}
+                                                >
+                                                    {showTabs ? '▼' : '▶'} 
+                                                </button>
                                             </div>
+
+                                            {/* Collapsible Tab Panel */}
+                                            {showTabs && (
+                                                <div className="px-4 py-3 flex flex-wrap gap-2">
+                                                    {[
+                                                        { id: 1, label: 'Overview', icon: '📋' },
+                                                        { id: 2, label: 'Status & Privacy', icon: '🔒' },
+                                                        { id: 3, label: 'Physical', icon: '🎨' },
+                                                        { id: 4, label: 'Identification', icon: '🏷️' },
+                                                        { id: 5, label: 'Lineage', icon: '🌳' },
+                                                        { id: 6, label: 'Breeding', icon: '🫘' },
+                                                        { id: 7, label: 'Health', icon: '🏥' },
+                                                        { id: 8, label: 'Husbandry', icon: '🏠' },
+                                                        { id: 9, label: 'Behavior', icon: '🧠' },
+                                                        { id: 10, label: 'Records', icon: '📝' },
+                                                        { id: 11, label: 'End of Life', icon: '🕊️' }
+                                                    ].map(tab => (
+                                                        <button
+                                                            key={tab.id}
+                                                            onClick={() => setDetailViewTab(tab.id)}
+                                                            className={`px-3 py-1.5 text-xs sm:text-sm font-medium rounded transition-colors ${
+                                                                detailViewTab === tab.id 
+                                                                    ? 'bg-primary text-black' 
+                                                                    : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
+                                                            }`}
+                                                            title={tab.label}
+                                                        >
+                                                            <span className="mr-1">{tab.icon}</span>
+                                                            {tab.label}
+                                                        </button>
+                                                    ))}
+                                                </div>
+                                            )}
                                         </div>
 
                                         {/* Tab Content Wrapper */}
@@ -11827,93 +11843,130 @@ const App = () => {
                                         {/* Tab 1: Overview */}
                                         {detailViewTab === 1 && (
                                             <div className="space-y-6">
-                                                {/* Main Card */}
-                                                <div className="bg-white border-2 border-gray-300 rounded-lg p-4 sm:p-6">
-                                                    {/* Name Section - Centered at Top with Gender Icon */}
-                                                    <div className="flex justify-center items-start mb-6 relative">
-                                                        <div className="text-center flex-1">
-                                                            <h2 className="text-3xl font-bold text-gray-800 mb-3">
+                                                {/* Main Card - Public Profile Style Layout */}
+                                                <div className="bg-white border-2 border-gray-300 rounded-lg overflow-hidden">
+                                                    {/* Card Top Section - Image Area */}
+                                                    <div className="p-4 sm:p-6 flex flex-col items-center relative pt-8">
+                                                        {/* Birthdate top-left */}
+                                                        {animalToView.birthDate && (
+                                                            <div className="absolute top-2 left-2 text-xs text-gray-600 bg-white/80 px-2 py-0.5 rounded">
+                                                                {new Date(animalToView.birthDate).toLocaleDateString()}
+                                                            </div>
+                                                        )}
+
+                                                        {/* Gender badge top-right */}
+                                                        <div className="absolute top-2 right-2">
+                                                            {animalToView.gender === 'Male' ? <Mars size={20} strokeWidth={2.5} className="text-blue-600" /> : <Venus size={20} strokeWidth={2.5} className="text-pink-600" />}
+                                                        </div>
+
+                                                        {/* Centered Profile Image */}
+                                                        <div className="flex items-center justify-center w-full h-40 mb-3">
+                                                            {(animalToView.imageUrl || animalToView.photoUrl) ? (
+                                                                <img src={animalToView.imageUrl || animalToView.photoUrl} alt={animalToView.name} className="max-w-32 max-h-32 w-auto h-auto object-contain rounded-md" />
+                                                            ) : (
+                                                                <div className="w-32 h-32 bg-gray-100 rounded-md flex items-center justify-center text-gray-400">
+                                                                    <Cat size={48} />
+                                                                </div>
+                                                            )}
+                                                        </div>
+
+                                                        {/* Icon row - owned, public, mating, pregnant, nursing */}
+                                                        <div className="w-full flex justify-center items-center space-x-2 py-2">
+                                                            {animalToView.isOwned ? (
+                                                                <Heart size={14} className="text-black" />
+                                                            ) : (
+                                                                <HeartOff size={14} className="text-black" />
+                                                            )}
+                                                            {animalToView.showOnPublicProfile ? (
+                                                                <Eye size={14} className="text-black" />
+                                                            ) : (
+                                                                <EyeOff size={14} className="text-black" />
+                                                            )}
+                                                            {animalToView.isInMating && <Hourglass size={14} className="text-black" />}
+                                                            {animalToView.isPregnant && <Bean size={14} className="text-black" />}
+                                                            {animalToView.isNursing && <Milk size={14} className="text-black" />}
+                                                        </div>
+
+                                                        {/* Name Section - Below Image */}
+                                                        <div className="w-full text-center pb-2">
+                                                            <h2 className="text-2xl font-bold text-gray-800">
                                                                 {animalToView.prefix ? `${animalToView.prefix} ` : ''}
                                                                 {animalToView.name}
                                                                 {animalToView.suffix ? ` ${animalToView.suffix}` : ''}
                                                             </h2>
-                                                            {/* Species/Breed/Strain/CTC - Centered */}
-                                                            <div className="text-sm text-gray-600 mb-4">
-                                                            <span>{animalToView.species}</span>
-                                                            {animalToView.breed && <span> • {animalToView.breed}</span>}
-                                                            {animalToView.strain && <span> • {animalToView.strain}</span>}
-                                                                <span> • {animalToView.id_public}</span>
-                                                            </div>
                                                         </div>
-                                                        <div className="absolute top-0 right-0">
-                                                            {animalToView.gender === 'Male' ? <Mars size={24} className="text-blue-600" /> : <Venus size={24} className="text-pink-600" />}
+
+                                                        {/* ID bottom-right */}
+                                                        <div className="w-full flex justify-end pr-2 pb-2">
+                                                            <div className="text-xs text-gray-500">{animalToView.id_public}</div>
                                                         </div>
                                                     </div>
 
-                                                    <div className="grid grid-cols-1 sm:grid-cols-3 gap-6">
-                                                        {/* Image Column */}
-                                                        <div className="flex flex-col items-center">
-                                                            <div className="w-40 h-40 bg-gray-100 rounded-lg overflow-hidden flex items-center justify-center">
-                                                                {(animalToView.imageUrl || animalToView.photoUrl) ? (
-                                                                    <img src={animalToView.imageUrl || animalToView.photoUrl} alt={animalToView.name} className="w-full h-full object-cover" />
-                                                                ) : (
-                                                                    <Cat size={72} className="text-gray-400" />
-                                                                )}
-                                                            </div>
-                                                            <div className={`w-40 py-2 text-center mt-3 rounded border-2 text-sm font-semibold ${
-                                                                animalToView.isViewOnly 
-                                                                    ? 'bg-orange-100 border-orange-400 text-orange-800' 
-                                                                    : 'bg-gray-200 border-gray-400 text-gray-800'
-                                                            }`}>
-                                                                {animalToView.isViewOnly ? 'Sold' : (animalToView.status || 'Unknown')}
-                                                            </div>
+                                                    {/* Status Bar at Bottom */}
+                                                    <div className="w-full bg-gray-100 py-2 text-center border-t border-gray-300">
+                                                        <div className="text-sm font-medium text-gray-700">
+                                                            {animalToView.isViewOnly ? 'Sold' : (animalToView.status || 'Unknown')}
+                                                        </div>
+                                                    </div>
+                                                </div>
+
+                                                {/* Species/Breed/Strain/CTC Info Card */}
+                                                <div className="bg-white border-2 border-gray-300 rounded-lg p-4">
+                                                    <div className="text-center text-sm text-gray-600">
+                                                        <span className="font-semibold">{animalToView.species}</span>
+                                                        {animalToView.breed && <span> • {animalToView.breed}</span>}
+                                                        {animalToView.strain && <span> • {animalToView.strain}</span>}
+                                                    </div>
+                                                </div>
+
+                                                {/* Age and Appearance Info Card */}
+                                                <div className="bg-white border-2 border-gray-300 rounded-lg p-4">
+                                                    <div className="space-y-2">
+                                                        <div className="mb-3">
+                                                            <span className="text-sm text-gray-600">Age:</span>
+                                                            <span className="ml-2 font-semibold">
+                                                                {animalToView.birthDate ? (() => {
+                                                                    const birth = new Date(animalToView.birthDate);
+                                                                    const today = new Date();
+                                                                    let age = today.getFullYear() - birth.getFullYear();
+                                                                    const monthDiff = today.getMonth() - birth.getMonth();
+                                                                    if (monthDiff < 0 || (monthDiff === 0 && today.getDate() < birth.getDate())) age--;
+                                                                    const months = (today.getMonth() - birth.getMonth() + 12) % 12;
+                                                                    let days = today.getDate() - birth.getDate();
+                                                                    if (days < 0) {
+                                                                        days += new Date(today.getFullYear(), today.getMonth(), 0).getDate();
+                                                                    }
+                                                                    if (age > 0) {
+                                                                        return `${age}y ${months}m ${days}d`;
+                                                                    } else if (months > 0) {
+                                                                        return `${months}m ${days}d`;
+                                                                    } else {
+                                                                        return `${days}d`;
+                                                                    }
+                                                                })() : '—'}
+                                                            </span>
                                                         </div>
 
-                                                        {/* Main Info Column */}
-                                                        <div className="sm:col-span-2">
-                                                            {/* Age and Status Icons */}
-                                                            <div className="mb-4 pb-4 border-b border-gray-200">
-                                                                <div className="mb-3">
-                                                                    <span className="text-sm text-gray-600">Age:</span>
-                                                                    <span className="ml-2 font-semibold">
-                                                                        {animalToView.birthDate ? (() => {
-                                                                            const birth = new Date(animalToView.birthDate);
-                                                                            const today = new Date();
-                                                                            let age = today.getFullYear() - birth.getFullYear();
-                                                                            const monthDiff = today.getMonth() - birth.getMonth();
-                                                                            if (monthDiff < 0 || (monthDiff === 0 && today.getDate() < birth.getDate())) age--;
-                                                                            const months = (today.getMonth() - birth.getMonth() + 12) % 12;
-                                                                            let days = today.getDate() - birth.getDate();
-                                                                            if (days < 0) {
-                                                                                days += new Date(today.getFullYear(), today.getMonth(), 0).getDate();
-                                                                            }
-                                                                            if (age > 0) {
-                                                                                return `${age}y ${months}m ${days}d`;
-                                                                            } else if (months > 0) {
-                                                                                return `${months}m ${days}d`;
-                                                                            } else {
-                                                                                return `${days}d`;
-                                                                            }
-                                                                        })() : '—'}
-                                                                    </span>
-                                                                </div>
+                                                        {/* Appearance */}
+                                                        {(animalToView.color || animalToView.coat || animalToView.coatPattern || animalToView.earset) && (
+                                                            <div className="text-sm">
+                                                                <span className="text-gray-600">Appearance:</span>
+                                                                <span className="ml-2 font-semibold">
+                                                                    {[
+                                                                        animalToView.color,
+                                                                        animalToView.coatPattern,
+                                                                        animalToView.coat,
+                                                                        animalToView.earset
+                                                                    ].filter(Boolean).join(' - ')}
+                                                                </span>
+                                                            </div>
+                                                        )}
+                                                    </div>
+                                                </div>
 
-                                                                {/* Appearance */}
-                                                                {(animalToView.color || animalToView.coat || animalToView.coatPattern || animalToView.earset) && (
-                                                                    <div className="mb-3 text-sm">
-                                                                        <span className="text-gray-600">Appearance:</span>
-                                                                        <span className="ml-2 font-semibold">
-                                                                            {[
-                                                                                animalToView.color,
-                                                                                animalToView.coatPattern,
-                                                                                animalToView.coat,
-                                                                                animalToView.earset
-                                                                            ].filter(Boolean).join(' - ')}
-                                                                        </span>
-                                                                    </div>
-                                                                )}
-                                                                {/* Status Icons */}
-                                                                <div className="flex gap-3 flex-wrap">
+                                                {/* Status Badges Card */}
+                                                <div className="bg-white border-2 border-gray-300 rounded-lg p-4">
+                                                    <div className="flex gap-3 flex-wrap">
                                                                     {animalToView.isPregnant && (
                                                                         <div className="flex items-center gap-1 bg-purple-100 px-2 py-1 rounded text-sm">
                                                                             <Bean size={16} className="text-purple-600" />
@@ -11965,8 +12018,8 @@ const App = () => {
                                                                 </div>
                                                             </div>
 
-                                                            {/* Timeline */}
-                                                            <div className="mb-4">
+                                                            {/* Timeline Card */}
+                                                            <div className="bg-white border-2 border-gray-300 rounded-lg p-4">
                                                                 <h4 className="font-semibold text-gray-700 mb-2">Timeline</h4>
                                                                 <div className="space-y-1 text-sm">
                                                                     <div><strong>Born:</strong> {formattedBirthDate}</div>
@@ -11979,9 +12032,9 @@ const App = () => {
                                                                 </div>
                                                             </div>
 
-                                                            {/* Health */}
+                                                            {/* Health Card */}
                                                             {(animalToView.currentWeight || animalToView.bcs || animalToView.growthRecords?.length > 0 || animalToView.medicalConditions || animalToView.medications) && (
-                                                                <div className="mb-4 pb-4 border-b border-gray-200">
+                                                                <div className="bg-white border-2 border-gray-300 rounded-lg p-4">
                                                                     <h4 className="font-semibold text-gray-700 mb-2">Health</h4>
                                                                     <div className="grid grid-cols-2 gap-2 text-sm">
                                                                         {/* Current Measurements */}
@@ -12015,9 +12068,9 @@ const App = () => {
                                                                 </div>
                                                             )}
 
-                                                            {/* Reproductive Snapshot */}
+                                                            {/* Reproductive Status Card */}
                                                             {!animalToView.isNeutered && (animalToView.heatStatus || animalToView.lastHeatDate || animalToView.matingDates) && (
-                                                                <div className="mb-4">
+                                                                <div className="bg-white border-2 border-gray-300 rounded-lg p-4">
                                                                     <h4 className="font-semibold text-gray-700 mb-2">Reproductive Status</h4>
                                                                     <div className="text-sm space-y-1">
                                                                         {animalToView.heatStatus && <div><strong>Heat Status:</strong> {animalToView.heatStatus}</div>}
@@ -12027,9 +12080,9 @@ const App = () => {
                                                                 </div>
                                                             )}
 
-                                                            {/* ID Numbers */}
+                                                            {/* Identification Card */}
                                                             {(animalToView.microchipNumber || animalToView.registryCode || animalToView.breederyId) && (
-                                                                <div className="mb-4">
+                                                                <div className="bg-white border-2 border-gray-300 rounded-lg p-4">
                                                                     <h4 className="font-semibold text-gray-700 mb-2">Identification</h4>
                                                                     <div className="text-sm space-y-1">
                                                                         {animalToView.microchipNumber && <div><strong>Microchip:</strong> {animalToView.microchipNumber}</div>}
@@ -12039,18 +12092,15 @@ const App = () => {
                                                                 </div>
                                                             )}
 
-                                                            {/* Genetic Code */}
+                                                            {/* Genetic Code Card */}
                                                             {animalToView.geneticCode && (
-                                                                <div className="mb-4">
+                                                                <div className="bg-white border-2 border-gray-300 rounded-lg p-4">
                                                                     <h4 className="font-semibold text-gray-700 mb-2">Genetic Code</h4>
                                                                     <div className="text-sm font-mono bg-gray-50 p-2 rounded border border-gray-200">
                                                                         {animalToView.geneticCode}
                                                                     </div>
                                                                 </div>
                                                             )}
-                                                        </div>
-                                                    </div>
-                                                </div>
 
                                                 {/* Quick Actions */}
                                                 <div className="bg-white border-2 border-gray-300 rounded-lg p-4">
