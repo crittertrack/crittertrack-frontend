@@ -12431,7 +12431,7 @@ const App = () => {
                                                                             {sireData.prefix ? `${sireData.prefix} ` : ''}{sireData.name}{sireData.suffix ? ` ${sireData.suffix}` : ''}
                                                                         </p>
                                                                         <p className="text-xs text-gray-600 mt-1">
-                                                                            {sireData.species} • {sireData.gender}
+                                                                            {sireData.gender}
                                                                         </p>
                                                                         {sireData.birthDate && (
                                                                             <p className="text-xs text-gray-500 mt-2">
@@ -12459,7 +12459,7 @@ const App = () => {
                                                                             {damData.prefix ? `${damData.prefix} ` : ''}{damData.name}{damData.suffix ? ` ${damData.suffix}` : ''}
                                                                         </p>
                                                                         <p className="text-xs text-gray-600 mt-1">
-                                                                            {damData.species} • {damData.gender}
+                                                                            {damData.gender}
                                                                         </p>
                                                                         {damData.birthDate && (
                                                                             <p className="text-xs text-gray-500 mt-2">
@@ -12495,7 +12495,7 @@ const App = () => {
                                                                             {offspring.prefix ? `${offspring.prefix} ` : ''}{offspring.name}{offspring.suffix ? ` ${offspring.suffix}` : ''}
                                                                         </p>
                                                                         <p className="text-xs text-gray-600 mt-1">
-                                                                            {offspring.species} • {offspring.gender}
+                                                                            {offspring.gender}
                                                                         </p>
                                                                         {offspring.birthDate && (
                                                                             <p className="text-xs text-gray-500 mt-2">
