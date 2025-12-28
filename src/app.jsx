@@ -11886,6 +11886,7 @@ const App = () => {
                                                                 {animalToView.isInMating && <Hourglass size={14} className="text-black" />}
                                                                 {animalToView.isPregnant && <Bean size={14} className="text-black" />}
                                                                 {animalToView.isNursing && <Milk size={14} className="text-black" />}
+                                                                {animalToView.isNeutered && <Scissors size={14} className="text-black" />}
                                                             </div>
 
                                                             {/* Status text */}
