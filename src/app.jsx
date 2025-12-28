@@ -7311,19 +7311,125 @@ const AuthView = ({ onLoginSuccess, showModalMessage, isRegister, setIsRegister,
 const AnimalList = ({ authToken, showModalMessage, onEditAnimal, onViewAnimal, fetchHiddenAnimals, navigate }) => {
     const [animals, setAnimals] = useState([]);
     const [loading, setLoading] = useState(true);
-    const [statusFilter, setStatusFilter] = useState('');
+    
+    // Load filters from localStorage or use defaults
+    const [statusFilter, setStatusFilter] = useState(() => {
+        try {
+            return localStorage.getItem('animalList_statusFilter') || '';
+        } catch { return ''; }
+    });
     // Manual search: `searchInput` is the controlled input, `appliedNameFilter` is sent to the API
-    const [searchInput, setSearchInput] = useState('');
-    const [appliedNameFilter, setAppliedNameFilter] = useState('');
-    const [selectedGenders, setSelectedGenders] = useState([...GENDER_OPTIONS]);
-    const [selectedSpecies, setSelectedSpecies] = useState([...DEFAULT_SPECIES_OPTIONS]);
-    const [statusFilterPregnant, setStatusFilterPregnant] = useState(false);
-    const [statusFilterNursing, setStatusFilterNursing] = useState(false);
-    const [statusFilterMating, setStatusFilterMating] = useState(false);
-    const [ownedFilterActive, setOwnedFilterActive] = useState(true);
-    const [publicFilter, setPublicFilter] = useState('');
+    const [searchInput, setSearchInput] = useState(() => {
+        try {
+            return localStorage.getItem('animalList_searchInput') || '';
+        } catch { return ''; }
+    });
+    const [appliedNameFilter, setAppliedNameFilter] = useState(() => {
+        try {
+            return localStorage.getItem('animalList_appliedNameFilter') || '';
+        } catch { return ''; }
+    });
+    const [selectedGenders, setSelectedGenders] = useState(() => {
+        try {
+            const saved = localStorage.getItem('animalList_selectedGenders');
+            return saved ? JSON.parse(saved) : [...GENDER_OPTIONS];
+        } catch { return [...GENDER_OPTIONS]; }
+    });
+    const [selectedSpecies, setSelectedSpecies] = useState(() => {
+        try {
+            const saved = localStorage.getItem('animalList_selectedSpecies');
+            return saved ? JSON.parse(saved) : [...DEFAULT_SPECIES_OPTIONS];
+        } catch { return [...DEFAULT_SPECIES_OPTIONS]; }
+    });
+    const [statusFilterPregnant, setStatusFilterPregnant] = useState(() => {
+        try {
+            return localStorage.getItem('animalList_statusFilterPregnant') === 'true';
+        } catch { return false; }
+    });
+    const [statusFilterNursing, setStatusFilterNursing] = useState(() => {
+        try {
+            return localStorage.getItem('animalList_statusFilterNursing') === 'true';
+        } catch { return false; }
+    });
+    const [statusFilterMating, setStatusFilterMating] = useState(() => {
+        try {
+            return localStorage.getItem('animalList_statusFilterMating') === 'true';
+        } catch { return false; }
+    });
+    const [ownedFilterActive, setOwnedFilterActive] = useState(() => {
+        try {
+            const saved = localStorage.getItem('animalList_ownedFilterActive');
+            return saved !== null ? saved === 'true' : true;
+        } catch { return true; }
+    });
+    const [publicFilter, setPublicFilter] = useState(() => {
+        try {
+            return localStorage.getItem('animalList_publicFilter') || '';
+        } catch { return ''; }
+    });
     const [bulkDeleteMode, setBulkDeleteMode] = useState({}); // { species: true/false }
     const [selectedAnimals, setSelectedAnimals] = useState({}); // { species: [id1, id2, ...] }
+    
+    // Save filters to localStorage whenever they change
+    useEffect(() => {
+        try {
+            localStorage.setItem('animalList_statusFilter', statusFilter);
+        } catch (e) { console.warn('Failed to save statusFilter', e); }
+    }, [statusFilter]);
+    
+    useEffect(() => {
+        try {
+            localStorage.setItem('animalList_searchInput', searchInput);
+        } catch (e) { console.warn('Failed to save searchInput', e); }
+    }, [searchInput]);
+    
+    useEffect(() => {
+        try {
+            localStorage.setItem('animalList_appliedNameFilter', appliedNameFilter);
+        } catch (e) { console.warn('Failed to save appliedNameFilter', e); }
+    }, [appliedNameFilter]);
+    
+    useEffect(() => {
+        try {
+            localStorage.setItem('animalList_selectedGenders', JSON.stringify(selectedGenders));
+        } catch (e) { console.warn('Failed to save selectedGenders', e); }
+    }, [selectedGenders]);
+    
+    useEffect(() => {
+        try {
+            localStorage.setItem('animalList_selectedSpecies', JSON.stringify(selectedSpecies));
+        } catch (e) { console.warn('Failed to save selectedSpecies', e); }
+    }, [selectedSpecies]);
+    
+    useEffect(() => {
+        try {
+            localStorage.setItem('animalList_statusFilterPregnant', statusFilterPregnant.toString());
+        } catch (e) { console.warn('Failed to save statusFilterPregnant', e); }
+    }, [statusFilterPregnant]);
+    
+    useEffect(() => {
+        try {
+            localStorage.setItem('animalList_statusFilterNursing', statusFilterNursing.toString());
+        } catch (e) { console.warn('Failed to save statusFilterNursing', e); }
+    }, [statusFilterNursing]);
+    
+    useEffect(() => {
+        try {
+            localStorage.setItem('animalList_statusFilterMating', statusFilterMating.toString());
+        } catch (e) { console.warn('Failed to save statusFilterMating', e); }
+    }, [statusFilterMating]);
+    
+    useEffect(() => {
+        try {
+            localStorage.setItem('animalList_ownedFilterActive', ownedFilterActive.toString());
+        } catch (e) { console.warn('Failed to save ownedFilterActive', e); }
+    }, [ownedFilterActive]);
+    
+    useEffect(() => {
+        try {
+            localStorage.setItem('animalList_publicFilter', publicFilter);
+        } catch (e) { console.warn('Failed to save publicFilter', e); }
+    }, [publicFilter]);
     
     const fetchAnimals = useCallback(async () => {
         setLoading(true);
