@@ -5159,6 +5159,53 @@ const AnimalForm = ({
         notes: ''
     });
     
+    // Health Records with Dates
+    const [vaccinationRecords, setVaccinationRecords] = useState(
+        animalToEdit?.vaccinationRecords || []
+    );
+    const [newVaccination, setNewVaccination] = useState({
+        date: new Date().toISOString().substring(0, 10),
+        name: '',
+        notes: ''
+    });
+    
+    const [dewormingRecordsArray, setDewormingRecordsArray] = useState(
+        animalToEdit?.dewormingRecordsArray || []
+    );
+    const [newDeworming, setNewDeworming] = useState({
+        date: new Date().toISOString().substring(0, 10),
+        medication: '',
+        notes: ''
+    });
+    
+    const [parasiteControlRecords, setParasiteControlRecords] = useState(
+        animalToEdit?.parasiteControlRecords || []
+    );
+    const [newParasiteControl, setNewParasiteControl] = useState({
+        date: new Date().toISOString().substring(0, 10),
+        treatment: '',
+        notes: ''
+    });
+    
+    const [medicalProcedureRecords, setMedicalProcedureRecords] = useState(
+        animalToEdit?.medicalProcedureRecords || []
+    );
+    const [newProcedure, setNewProcedure] = useState({
+        date: new Date().toISOString().substring(0, 10),
+        name: '',
+        notes: ''
+    });
+    
+    const [labResultRecords, setLabResultRecords] = useState(
+        animalToEdit?.labResultRecords || []
+    );
+    const [newLabResult, setNewLabResult] = useState({
+        date: new Date().toISOString().substring(0, 10),
+        testName: '',
+        result: '',
+        notes: ''
+    });
+    
     // Keep a ref for immediate pedigree selection (avoids lost state if user selects then immediately saves)
     const pedigreeRef = useRef({ father: (animalToEdit && animalToEdit.fatherId_public) || null, mother: (animalToEdit && animalToEdit.motherId_public) || null });
     // Small cached info for selected parents so we can show name/prefix next to CTID
@@ -5493,6 +5540,83 @@ const AnimalForm = ({
         setNewMeasurement({ date: '', weight: '', length: '', bcs: '', notes: '' });
     };
 
+    // Health Record Functions
+    const addVaccination = () => {
+        if (!newVaccination.date || !newVaccination.name) {
+            showModalMessage('Missing Data', 'Please enter at least a date and vaccination name.');
+            return;
+        }
+        const record = {
+            id: Date.now().toString(),
+            date: newVaccination.date,
+            name: newVaccination.name,
+            notes: newVaccination.notes || ''
+        };
+        setVaccinationRecords([...vaccinationRecords, record]);
+        setNewVaccination({ date: new Date().toISOString().substring(0, 10), name: '', notes: '' });
+    };
+
+    const addDeworming = () => {
+        if (!newDeworming.date || !newDeworming.medication) {
+            showModalMessage('Missing Data', 'Please enter at least a date and medication.');
+            return;
+        }
+        const record = {
+            id: Date.now().toString(),
+            date: newDeworming.date,
+            medication: newDeworming.medication,
+            notes: newDeworming.notes || ''
+        };
+        setDewormingRecordsArray([...dewormingRecordsArray, record]);
+        setNewDeworming({ date: new Date().toISOString().substring(0, 10), medication: '', notes: '' });
+    };
+
+    const addParasiteControl = () => {
+        if (!newParasiteControl.date || !newParasiteControl.treatment) {
+            showModalMessage('Missing Data', 'Please enter at least a date and treatment.');
+            return;
+        }
+        const record = {
+            id: Date.now().toString(),
+            date: newParasiteControl.date,
+            treatment: newParasiteControl.treatment,
+            notes: newParasiteControl.notes || ''
+        };
+        setParasiteControlRecords([...parasiteControlRecords, record]);
+        setNewParasiteControl({ date: new Date().toISOString().substring(0, 10), treatment: '', notes: '' });
+    };
+
+    const addMedicalProcedure = () => {
+        if (!newProcedure.date || !newProcedure.name) {
+            showModalMessage('Missing Data', 'Please enter at least a date and procedure name.');
+            return;
+        }
+        const record = {
+            id: Date.now().toString(),
+            date: newProcedure.date,
+            name: newProcedure.name,
+            notes: newProcedure.notes || ''
+        };
+        setMedicalProcedureRecords([...medicalProcedureRecords, record]);
+        setNewProcedure({ date: new Date().toISOString().substring(0, 10), name: '', notes: '' });
+    };
+
+    const addLabResult = () => {
+        if (!newLabResult.date || !newLabResult.testName) {
+            showModalMessage('Missing Data', 'Please enter at least a date and test name.');
+            return;
+        }
+        const record = {
+            id: Date.now().toString(),
+            date: newLabResult.date,
+            testName: newLabResult.testName,
+            result: newLabResult.result || '',
+            notes: newLabResult.notes || ''
+        };
+        setLabResultRecords([...labResultRecords, record]);
+        setNewLabResult({ date: new Date().toISOString().substring(0, 10), testName: '', result: '', notes: '' });
+    };
+
     const handleSubmit = async (e) => {
         e.preventDefault();
         setLoading(true);
@@ -5596,6 +5720,13 @@ const AnimalForm = ({
             // Include growth records
             payloadToSave.growthRecords = growthRecords;
             payloadToSave.measurementUnits = measurementUnits;
+            
+            // Include health records
+            payloadToSave.vaccinationRecords = vaccinationRecords;
+            payloadToSave.dewormingRecordsArray = dewormingRecordsArray;
+            payloadToSave.parasiteControlRecords = parasiteControlRecords;
+            payloadToSave.medicalProcedureRecords = medicalProcedureRecords;
+            payloadToSave.labResultRecords = labResultRecords;
             
             // Handle image deletion
             if (deleteImage && animalToEdit) {
@@ -6727,76 +6858,222 @@ const AnimalForm = ({
                 {activeTab === 7 && (
                     <div className="space-y-6">
                         {/* Preventive Care */}
-                        <div className="bg-gray-50 p-4 rounded-lg border border-gray-200 space-y-4">
+                        <div className="bg-gray-50 p-4 rounded-lg border border-gray-200 space-y-6">
                             <h3 className="text-lg font-semibold text-gray-700 border-b pb-2">Preventive Care</h3>
-                            <div className="space-y-4">
-                                <div>
-                                    <label className="block text-sm font-medium text-gray-700 mb-2">Vaccinations</label>
-                                    <textarea name="vaccinations" value={formData.vaccinations} onChange={handleChange} rows="2"
-                                        className="block w-full p-2 border border-gray-300 rounded-md shadow-sm focus:ring-primary focus:border-primary" 
-                                        placeholder="e.g., Rabies (2024-05-15), Distemper (2024-05-15)" />
+                            
+                            {/* Vaccinations */}
+                            <div className="space-y-3">
+                                <h4 className="text-sm font-semibold text-gray-700">Vaccinations</h4>
+                                <div className="bg-white p-3 rounded-lg border border-gray-200 space-y-3">
+                                    <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
+                                        <div>
+                                            <label className="block text-xs font-medium text-gray-700">Date</label>
+                                            <input type="date" value={newVaccination.date} onChange={(e) => setNewVaccination({...newVaccination, date: e.target.value})}
+                                                className="mt-1 block w-full p-2 text-sm border border-gray-300 rounded-md shadow-sm focus:ring-primary focus:border-primary" />
+                                        </div>
+                                        <div>
+                                            <label className="block text-xs font-medium text-gray-700">Vaccination Name</label>
+                                            <input type="text" value={newVaccination.name} onChange={(e) => setNewVaccination({...newVaccination, name: e.target.value})}
+                                                placeholder="e.g., Rabies, Distemper" className="mt-1 block w-full p-2 text-sm border border-gray-300 rounded-md shadow-sm focus:ring-primary focus:border-primary" />
+                                        </div>
+                                        <div>
+                                            <label className="block text-xs font-medium text-gray-700">Notes (optional)</label>
+                                            <input type="text" value={newVaccination.notes} onChange={(e) => setNewVaccination({...newVaccination, notes: e.target.value})}
+                                                placeholder="e.g., Booster, Clinic name" className="mt-1 block w-full p-2 text-sm border border-gray-300 rounded-md shadow-sm focus:ring-primary focus:border-primary" />
+                                        </div>
+                                    </div>
+                                    <button type="button" onClick={addVaccination} className="w-full px-4 py-2 bg-blue-500 text-white rounded-md hover:bg-blue-600 text-sm font-medium">
+                                        Add Vaccination Record
+                                    </button>
                                 </div>
-                                
-                                <div>
-                                    <label className="block text-sm font-medium text-gray-700 mb-2">Deworming Records</label>
-                                    <textarea name="dewormingRecords" value={formData.dewormingRecords} onChange={handleChange} rows="2"
-                                        className="block w-full p-2 border border-gray-300 rounded-md shadow-sm focus:ring-primary focus:border-primary" 
-                                        placeholder="e.g., Fenbendazole (2024-12-01)" />
-                                </div>
-                                
-                                <div>
-                                    <label className="block text-sm font-medium text-gray-700 mb-2">Parasite Control</label>
-                                    <textarea name="parasiteControl" value={formData.parasiteControl} onChange={handleChange} rows="2"
-                                        className="block w-full p-2 border border-gray-300 rounded-md shadow-sm focus:ring-primary focus:border-primary" 
-                                        placeholder="e.g., Flea/tick prevention, mite treatment" />
-                                </div>
+                                {vaccinationRecords.length > 0 && (
+                                    <div className="space-y-2 bg-white p-3 rounded-lg border border-gray-200 max-h-48 overflow-y-auto">
+                                        {vaccinationRecords.map((record) => (
+                                            <div key={record.id} className="flex items-center justify-between p-2 bg-gray-50 rounded border border-gray-100 text-sm">
+                                                <div className="flex-1">
+                                                    <strong>{record.date}:</strong> {record.name}
+                                                    {record.notes && <span className="text-xs text-gray-500 ml-2">({record.notes})</span>}
+                                                </div>
+                                                <button type="button" onClick={() => setVaccinationRecords(vaccinationRecords.filter(r => r.id !== record.id))}
+                                                    className="text-red-500 hover:text-red-700 p-1" title="Delete record">✕</button>
+                                            </div>
+                                        ))}
+                                    </div>
+                                )}
                             </div>
-                        </div>
-
-                        {/* Medical History */}
-                        <div className="bg-gray-50 p-4 rounded-lg border border-gray-200 space-y-4">
-                            <h3 className="text-lg font-semibold text-gray-700 border-b pb-2">Medical History</h3>
-                            <div className="space-y-4">
-                                <div>
-                                    <label className="block text-sm font-medium text-gray-700 mb-2">Medical Conditions</label>
-                                    <textarea name="medicalConditions" value={formData.medicalConditions} onChange={handleChange} rows="2"
-                                        className="block w-full p-2 border border-gray-300 rounded-md shadow-sm focus:ring-primary focus:border-primary" 
-                                        placeholder="e.g., Respiratory issues, dental disease" />
+                            
+                            {/* Deworming */}
+                            <div className="space-y-3 border-t border-gray-200 pt-4">
+                                <h4 className="text-sm font-semibold text-gray-700">Deworming Records</h4>
+                                <div className="bg-white p-3 rounded-lg border border-gray-200 space-y-3">
+                                    <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
+                                        <div>
+                                            <label className="block text-xs font-medium text-gray-700">Date</label>
+                                            <input type="date" value={newDeworming.date} onChange={(e) => setNewDeworming({...newDeworming, date: e.target.value})}
+                                                className="mt-1 block w-full p-2 text-sm border border-gray-300 rounded-md shadow-sm focus:ring-primary focus:border-primary" />
+                                        </div>
+                                        <div>
+                                            <label className="block text-xs font-medium text-gray-700">Medication</label>
+                                            <input type="text" value={newDeworming.medication} onChange={(e) => setNewDeworming({...newDeworming, medication: e.target.value})}
+                                                placeholder="e.g., Fenbendazole, Panacur" className="mt-1 block w-full p-2 text-sm border border-gray-300 rounded-md shadow-sm focus:ring-primary focus:border-primary" />
+                                        </div>
+                                        <div>
+                                            <label className="block text-xs font-medium text-gray-700">Notes (optional)</label>
+                                            <input type="text" value={newDeworming.notes} onChange={(e) => setNewDeworming({...newDeworming, notes: e.target.value})}
+                                                placeholder="e.g., Dosage, vet notes" className="mt-1 block w-full p-2 text-sm border border-gray-300 rounded-md shadow-sm focus:ring-primary focus:border-primary" />
+                                        </div>
+                                    </div>
+                                    <button type="button" onClick={addDeworming} className="w-full px-4 py-2 bg-blue-500 text-white rounded-md hover:bg-blue-600 text-sm font-medium">
+                                        Add Deworming Record
+                                    </button>
                                 </div>
-                                
-                                <div>
-                                    <label className="block text-sm font-medium text-gray-700 mb-2">Allergies</label>
-                                    <textarea name="allergies" value={formData.allergies} onChange={handleChange} rows="2"
-                                        className="block w-full p-2 border border-gray-300 rounded-md shadow-sm focus:ring-primary focus:border-primary" 
-                                        placeholder="e.g., Food allergies, medication allergies" />
+                                {dewormingRecordsArray.length > 0 && (
+                                    <div className="space-y-2 bg-white p-3 rounded-lg border border-gray-200 max-h-48 overflow-y-auto">
+                                        {dewormingRecordsArray.map((record) => (
+                                            <div key={record.id} className="flex items-center justify-between p-2 bg-gray-50 rounded border border-gray-100 text-sm">
+                                                <div className="flex-1">
+                                                    <strong>{record.date}:</strong> {record.medication}
+                                                    {record.notes && <span className="text-xs text-gray-500 ml-2">({record.notes})</span>}
+                                                </div>
+                                                <button type="button" onClick={() => setDewormingRecordsArray(dewormingRecordsArray.filter(r => r.id !== record.id))}
+                                                    className="text-red-500 hover:text-red-700 p-1" title="Delete record">✕</button>
+                                            </div>
+                                        ))}
+                                    </div>
+                                )}
+                            </div>
+                            
+                            {/* Parasite Control */}
+                            <div className="space-y-3 border-t border-gray-200 pt-4">
+                                <h4 className="text-sm font-semibold text-gray-700">Parasite Control</h4>
+                                <div className="bg-white p-3 rounded-lg border border-gray-200 space-y-3">
+                                    <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
+                                        <div>
+                                            <label className="block text-xs font-medium text-gray-700">Date</label>
+                                            <input type="date" value={newParasiteControl.date} onChange={(e) => setNewParasiteControl({...newParasiteControl, date: e.target.value})}
+                                                className="mt-1 block w-full p-2 text-sm border border-gray-300 rounded-md shadow-sm focus:ring-primary focus:border-primary" />
+                                        </div>
+                                        <div>
+                                            <label className="block text-xs font-medium text-gray-700">Treatment</label>
+                                            <input type="text" value={newParasiteControl.treatment} onChange={(e) => setNewParasiteControl({...newParasiteControl, treatment: e.target.value})}
+                                                placeholder="e.g., Flea/tick, mite treatment" className="mt-1 block w-full p-2 text-sm border border-gray-300 rounded-md shadow-sm focus:ring-primary focus:border-primary" />
+                                        </div>
+                                        <div>
+                                            <label className="block text-xs font-medium text-gray-700">Notes (optional)</label>
+                                            <input type="text" value={newParasiteControl.notes} onChange={(e) => setNewParasiteControl({...newParasiteControl, notes: e.target.value})}
+                                                placeholder="e.g., Product name, vet notes" className="mt-1 block w-full p-2 text-sm border border-gray-300 rounded-md shadow-sm focus:ring-primary focus:border-primary" />
+                                        </div>
+                                    </div>
+                                    <button type="button" onClick={addParasiteControl} className="w-full px-4 py-2 bg-blue-500 text-white rounded-md hover:bg-blue-600 text-sm font-medium">
+                                        Add Parasite Control Record
+                                    </button>
                                 </div>
-                                
-                                <div>
-                                    <label className="block text-sm font-medium text-gray-700 mb-2">Medications</label>
-                                    <textarea name="medications" value={formData.medications} onChange={handleChange} rows="2"
-                                        className="block w-full p-2 border border-gray-300 rounded-md shadow-sm focus:ring-primary focus:border-primary" 
-                                        placeholder="e.g., Daily medications, dosages" />
-                                </div>
+                                {parasiteControlRecords.length > 0 && (
+                                    <div className="space-y-2 bg-white p-3 rounded-lg border border-gray-200 max-h-48 overflow-y-auto">
+                                        {parasiteControlRecords.map((record) => (
+                                            <div key={record.id} className="flex items-center justify-between p-2 bg-gray-50 rounded border border-gray-100 text-sm">
+                                                <div className="flex-1">
+                                                    <strong>{record.date}:</strong> {record.treatment}
+                                                    {record.notes && <span className="text-xs text-gray-500 ml-2">({record.notes})</span>}
+                                                </div>
+                                                <button type="button" onClick={() => setParasiteControlRecords(parasiteControlRecords.filter(r => r.id !== record.id))}
+                                                    className="text-red-500 hover:text-red-700 p-1" title="Delete record">✕</button>
+                                            </div>
+                                        ))}
+                                    </div>
+                                )}
                             </div>
                         </div>
 
                         {/* Procedures & Diagnostics */}
-                        <div className="bg-gray-50 p-4 rounded-lg border border-gray-200 space-y-4">
+                        <div className="bg-gray-50 p-4 rounded-lg border border-gray-200 space-y-6">
                             <h3 className="text-lg font-semibold text-gray-700 border-b pb-2">Procedures & Diagnostics</h3>
-                            <div className="space-y-4">
-                                <div>
-                                    <label className="block text-sm font-medium text-gray-700 mb-2">Medical Procedures</label>
-                                    <textarea name="medicalProcedures" value={formData.medicalProcedures} onChange={handleChange} rows="2"
-                                        className="block w-full p-2 border border-gray-300 rounded-md shadow-sm focus:ring-primary focus:border-primary" 
-                                        placeholder="e.g., Neutering (2024-06-01), Tumor removal" />
+                            
+                            {/* Medical Procedures */}
+                            <div className="space-y-3">
+                                <h4 className="text-sm font-semibold text-gray-700">Medical Procedures</h4>
+                                <div className="bg-white p-3 rounded-lg border border-gray-200 space-y-3">
+                                    <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
+                                        <div>
+                                            <label className="block text-xs font-medium text-gray-700">Date</label>
+                                            <input type="date" value={newProcedure.date} onChange={(e) => setNewProcedure({...newProcedure, date: e.target.value})}
+                                                className="mt-1 block w-full p-2 text-sm border border-gray-300 rounded-md shadow-sm focus:ring-primary focus:border-primary" />
+                                        </div>
+                                        <div>
+                                            <label className="block text-xs font-medium text-gray-700">Procedure Name</label>
+                                            <input type="text" value={newProcedure.name} onChange={(e) => setNewProcedure({...newProcedure, name: e.target.value})}
+                                                placeholder="e.g., Neutering, Surgery" className="mt-1 block w-full p-2 text-sm border border-gray-300 rounded-md shadow-sm focus:ring-primary focus:border-primary" />
+                                        </div>
+                                        <div>
+                                            <label className="block text-xs font-medium text-gray-700">Notes (optional)</label>
+                                            <input type="text" value={newProcedure.notes} onChange={(e) => setNewProcedure({...newProcedure, notes: e.target.value})}
+                                                placeholder="e.g., Vet clinic, outcome" className="mt-1 block w-full p-2 text-sm border border-gray-300 rounded-md shadow-sm focus:ring-primary focus:border-primary" />
+                                        </div>
+                                    </div>
+                                    <button type="button" onClick={addMedicalProcedure} className="w-full px-4 py-2 bg-blue-500 text-white rounded-md hover:bg-blue-600 text-sm font-medium">
+                                        Add Procedure Record
+                                    </button>
                                 </div>
-                                
-                                <div>
-                                    <label className="block text-sm font-medium text-gray-700 mb-2">Laboratory Results</label>
-                                    <textarea name="labResults" value={formData.labResults} onChange={handleChange} rows="2"
-                                        className="block w-full p-2 border border-gray-300 rounded-md shadow-sm focus:ring-primary focus:border-primary" 
-                                        placeholder="e.g., Blood work results, test findings" />
+                                {medicalProcedureRecords.length > 0 && (
+                                    <div className="space-y-2 bg-white p-3 rounded-lg border border-gray-200 max-h-48 overflow-y-auto">
+                                        {medicalProcedureRecords.map((record) => (
+                                            <div key={record.id} className="flex items-center justify-between p-2 bg-gray-50 rounded border border-gray-100 text-sm">
+                                                <div className="flex-1">
+                                                    <strong>{record.date}:</strong> {record.name}
+                                                    {record.notes && <span className="text-xs text-gray-500 ml-2">({record.notes})</span>}
+                                                </div>
+                                                <button type="button" onClick={() => setMedicalProcedureRecords(medicalProcedureRecords.filter(r => r.id !== record.id))}
+                                                    className="text-red-500 hover:text-red-700 p-1" title="Delete record">✕</button>
+                                            </div>
+                                        ))}
+                                    </div>
+                                )}
+                            </div>
+                            
+                            {/* Lab Results */}
+                            <div className="space-y-3 border-t border-gray-200 pt-4">
+                                <h4 className="text-sm font-semibold text-gray-700">Laboratory Results</h4>
+                                <div className="bg-white p-3 rounded-lg border border-gray-200 space-y-3">
+                                    <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+                                        <div>
+                                            <label className="block text-xs font-medium text-gray-700">Date</label>
+                                            <input type="date" value={newLabResult.date} onChange={(e) => setNewLabResult({...newLabResult, date: e.target.value})}
+                                                className="mt-1 block w-full p-2 text-sm border border-gray-300 rounded-md shadow-sm focus:ring-primary focus:border-primary" />
+                                        </div>
+                                        <div>
+                                            <label className="block text-xs font-medium text-gray-700">Test Name</label>
+                                            <input type="text" value={newLabResult.testName} onChange={(e) => setNewLabResult({...newLabResult, testName: e.target.value})}
+                                                placeholder="e.g., Blood work, DNA test" className="mt-1 block w-full p-2 text-sm border border-gray-300 rounded-md shadow-sm focus:ring-primary focus:border-primary" />
+                                        </div>
+                                        <div className="md:col-span-2">
+                                            <label className="block text-xs font-medium text-gray-700">Result/Findings</label>
+                                            <input type="text" value={newLabResult.result} onChange={(e) => setNewLabResult({...newLabResult, result: e.target.value})}
+                                                placeholder="e.g., Negative, Normal, Abnormal" className="mt-1 block w-full p-2 text-sm border border-gray-300 rounded-md shadow-sm focus:ring-primary focus:border-primary" />
+                                        </div>
+                                        <div className="md:col-span-2">
+                                            <label className="block text-xs font-medium text-gray-700">Notes (optional)</label>
+                                            <input type="text" value={newLabResult.notes} onChange={(e) => setNewLabResult({...newLabResult, notes: e.target.value})}
+                                                placeholder="e.g., Lab name, reference range" className="mt-1 block w-full p-2 text-sm border border-gray-300 rounded-md shadow-sm focus:ring-primary focus:border-primary" />
+                                        </div>
+                                    </div>
+                                    <button type="button" onClick={addLabResult} className="w-full px-4 py-2 bg-blue-500 text-white rounded-md hover:bg-blue-600 text-sm font-medium">
+                                        Add Lab Result
+                                    </button>
                                 </div>
+                                {labResultRecords.length > 0 && (
+                                    <div className="space-y-2 bg-white p-3 rounded-lg border border-gray-200 max-h-48 overflow-y-auto">
+                                        {labResultRecords.map((record) => (
+                                            <div key={record.id} className="flex items-center justify-between p-2 bg-gray-50 rounded border border-gray-100 text-sm">
+                                                <div className="flex-1">
+                                                    <strong>{record.date}:</strong> {record.testName} - {record.result}
+                                                    {record.notes && <span className="text-xs text-gray-500 ml-2">({record.notes})</span>}
+                                                </div>
+                                                <button type="button" onClick={() => setLabResultRecords(labResultRecords.filter(r => r.id !== record.id))}
+                                                    className="text-red-500 hover:text-red-700 p-1" title="Delete record">✕</button>
+                                            </div>
+                                        ))}
+                                    </div>
+                                )}
                             </div>
                         </div>
 
