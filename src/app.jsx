@@ -5151,6 +5151,7 @@ const AnimalForm = ({
         date: new Date().toISOString().substring(0, 10),
         weight: '',
         length: '',
+        bcs: '',
         notes: ''
     });
     
@@ -6075,46 +6076,37 @@ const AnimalForm = ({
                         <div className="bg-gray-50 p-4 rounded-lg border border-gray-200 space-y-4">
                             <h3 className="text-lg font-semibold text-gray-700 border-b pb-2">Measurements & Growth Tracking</h3>
                             
-                            {/* Current Measurements */}
-                            <div className="space-y-2">
-                                <h4 className="text-sm font-semibold text-gray-600">Current Measurements</h4>
-                                <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                                    <div>
-                                        <label className="block text-sm font-medium text-gray-700">Body Weight <span className="text-xs text-gray-500">(grams or lbs)</span></label>
-                                        <input type="text" name="bodyWeight" value={formData.bodyWeight} onChange={handleChange} 
-                                            className="mt-1 block w-full p-2 border border-gray-300 rounded-md shadow-sm focus:ring-primary focus:border-primary" 
-                                            placeholder="e.g., 450g or 15 lbs" />
-                                    </div>
-                                    
-                                    <div>
-                                        <label className="block text-sm font-medium text-gray-700">Body Length <span className="text-xs text-gray-500">(cm or in)</span></label>
-                                        <input type="text" name="bodyLength" value={formData.bodyLength} onChange={handleChange} 
-                                            className="mt-1 block w-full p-2 border border-gray-300 rounded-md shadow-sm focus:ring-primary focus:border-primary" 
-                                            placeholder="e.g., 20cm" />
-                                    </div>
-                                    
-                                    {['Dog', 'Cat', 'Rabbit'].includes(formData.species) && (
-                                        <div>
-                                            <label className="block text-sm font-medium text-gray-700">Height at Withers <span className="text-xs text-gray-500">(cm or in)</span></label>
-                                            <input type="text" name="heightAtWithers" value={formData.heightAtWithers} onChange={handleChange} 
-                                                className="mt-1 block w-full p-2 border border-gray-300 rounded-md shadow-sm focus:ring-primary focus:border-primary" />
+                            {/* Current Measurement Display */}
+                            {growthRecords.length > 0 && (() => {
+                                const mostRecent = [...growthRecords].sort((a, b) => new Date(b.date) - new Date(a.date))[0];
+                                return (
+                                    <div className="bg-blue-50 p-3 rounded-lg border border-blue-200">
+                                        <h4 className="text-sm font-semibold text-gray-700 mb-2">Current Measurements</h4>
+                                        <div className="grid grid-cols-2 md:grid-cols-4 gap-3 text-sm">
+                                            <div>
+                                                <span className="text-xs text-gray-600">Weight:</span>
+                                                <p className="font-medium">{mostRecent.weight} {measurementUnits.weight}</p>
+                                            </div>
+                                            {mostRecent.length && (
+                                                <div>
+                                                    <span className="text-xs text-gray-600">Length:</span>
+                                                    <p className="font-medium">{mostRecent.length} {measurementUnits.length}</p>
+                                                </div>
+                                            )}
+                                            {mostRecent.bcs && (
+                                                <div>
+                                                    <span className="text-xs text-gray-600">BCS:</span>
+                                                    <p className="font-medium">{mostRecent.bcs}</p>
+                                                </div>
+                                            )}
+                                            <div>
+                                                <span className="text-xs text-gray-600">Date:</span>
+                                                <p className="font-medium">{mostRecent.date}</p>
+                                            </div>
                                         </div>
-                                    )}
-                                    
-                                    <div>
-                                        <label className="block text-sm font-medium text-gray-700">Body Condition Score</label>
-                                        <select name="bodyConditionScore" value={formData.bodyConditionScore} onChange={handleChange} 
-                                            className="mt-1 block w-full p-2 border border-gray-300 rounded-md shadow-sm focus:ring-primary focus:border-primary">
-                                            <option value="">Select BCS</option>
-                                            <option value="1">1 - Emaciated</option>
-                                            <option value="2">2 - Thin</option>
-                                            <option value="3">3 - Ideal</option>
-                                            <option value="4">4 - Overweight</option>
-                                            <option value="5">5 - Obese</option>
-                                        </select>
                                     </div>
-                                </div>
-                            </div>
+                                );
+                            })()}
                             
                             {/* Growth Records */}
                             <div className="space-y-3 mt-6">
@@ -6156,7 +6148,7 @@ const AnimalForm = ({
                                 {/* Add New Measurement */}
                                 <div className="bg-white p-3 rounded-lg border border-gray-300 space-y-3">
                                     <p className="text-xs font-medium text-gray-600">Add New Measurement</p>
-                                    <div className="grid grid-cols-1 md:grid-cols-4 gap-3">
+                                    <div className="grid grid-cols-1 md:grid-cols-5 gap-3">
                                         <div>
                                             <label className="block text-xs font-medium text-gray-700">Date</label>
                                             <input 
@@ -6189,7 +6181,21 @@ const AnimalForm = ({
                                             />
                                         </div>
                                         <div>
-                                            <label className="block text-xs font-medium text-gray-700">Notes</label>
+                                            <label className="block text-xs font-medium text-gray-700">BCS - optional</label>
+                                            <select 
+                                                value={newMeasurement.bcs}
+                                                onChange={(e) => setNewMeasurement({...newMeasurement, bcs: e.target.value})}
+                                                className="mt-1 block w-full p-2 text-sm border border-gray-300 rounded-md shadow-sm focus:ring-primary focus:border-primary">
+                                                <option value="">Select BCS</option>
+                                                <option value="1">1 - Emaciated</option>
+                                                <option value="2">2 - Thin</option>
+                                                <option value="3">3 - Ideal</option>
+                                                <option value="4">4 - Overweight</option>
+                                                <option value="5">5 - Obese</option>
+                                            </select>
+                                        </div>
+                                        <div>
+                                            <label className="block text-xs font-medium text-gray-700">Notes - optional</label>
                                             <input 
                                                 type="text" 
                                                 value={newMeasurement.notes}
@@ -6208,6 +6214,7 @@ const AnimalForm = ({
                                                     date: new Date().toISOString().substring(0, 10),
                                                     weight: '',
                                                     length: '',
+                                                    bcs: '',
                                                     notes: ''
                                                 });
                                             }
@@ -6316,6 +6323,12 @@ const AnimalForm = ({
                                                             <>
                                                                 <span className="mx-2">•</span>
                                                                 <span className="text-gray-700">{record.length} {measurementUnits.length}</span>
+                                                            </>
+                                                        )}
+                                                        {record.bcs && (
+                                                            <>
+                                                                <span className="mx-2">•</span>
+                                                                <span className="text-gray-700">BCS: {record.bcs}</span>
                                                             </>
                                                         )}
                                                         {record.notes && (
