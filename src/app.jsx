@@ -11820,20 +11820,19 @@ const App = () => {
                                                 ))}
                                             </div>
                                         </div>
-
                                         {/* Tab 1: Overview */}
                                         {detailViewTab === 1 && (
                                             <div className="space-y-6 p-6">
-                                                {/* Header: Species/Breed/Strain/CTC */}
-                                                <div className="text-sm text-gray-600">
-                                                    <span>{animalToView.species}</span>
-                                                    {animalToView.breed && <span> • {animalToView.breed}</span>}
-                                                    {animalToView.strain && <span> • {animalToView.strain}</span>}
-                                                    <span> • {animalToView.id_public}</span>
-                                                </div>
-
                                                 {/* Main Card */}
                                                 <div className="bg-white border-2 border-gray-300 rounded-lg p-4 sm:p-6">
+                                                    {/* Header: Species/Breed/Strain/CTC */}
+                                                    <div className="text-sm text-gray-600 mb-4 pb-4 border-b border-gray-200">
+                                                        <span>{animalToView.species}</span>
+                                                        {animalToView.breed && <span> • {animalToView.breed}</span>}
+                                                        {animalToView.strain && <span> • {animalToView.strain}</span>}
+                                                        <span> • {animalToView.id_public}</span>
+                                                    </div>
+
                                                     <div className="grid grid-cols-1 sm:grid-cols-3 gap-6">
                                                         {/* Image Column */}
                                                         <div className="flex flex-col items-center">
