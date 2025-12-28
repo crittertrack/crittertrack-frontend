@@ -6223,11 +6223,15 @@ const AnimalForm = ({
                                                         {/* Growth line */}
                                                         <path d={pathData} fill="none" stroke="#3b82f6" strokeWidth="2" />
                                                         
-                                                        {/* Data points */}
+                                                        {/* Data points with larger hover areas */}
                                                         {points.map((p, i) => (
                                                             <g key={i}>
-                                                                <circle cx={p.x} cy={p.y} r="2" fill="#3b82f6" />
-                                                                <title>{`${p.record.date}: ${p.record.weight}${p.record.notes ? ' (' + p.record.notes + ')' : ''}`}</title>
+                                                                {/* Invisible larger circle for easier hovering */}
+                                                                <circle cx={p.x} cy={p.y} r="5" fill="transparent" stroke="transparent" style={{cursor: 'pointer'}}>
+                                                                    <title>{`${p.record.date}: ${p.record.weight}${p.record.notes ? ' (' + p.record.notes + ')' : ''}`}</title>
+                                                                </circle>
+                                                                {/* Visible point */}
+                                                                <circle cx={p.x} cy={p.y} r="2.5" fill="#3b82f6" stroke="white" strokeWidth="1" style={{pointerEvents: 'none'}} />
                                                             </g>
                                                         ))}
                                                     </svg>
