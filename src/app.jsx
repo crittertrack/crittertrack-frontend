@@ -5656,7 +5656,7 @@ const AnimalForm = ({
                 
                 {/* Tab Navigation */}
                 <div className="border-b border-gray-200 -mx-6 px-6">
-                    <div className="flex overflow-x-auto space-x-1 pb-px">
+                    <div className="flex flex-wrap gap-1 pb-px">
                         {[
                             { id: 1, label: 'Overview', icon: '📋' },
                             { id: 2, label: 'Status & Privacy', icon: '🔒' },
@@ -5674,14 +5674,15 @@ const AnimalForm = ({
                                 key={tab.id}
                                 type="button"
                                 onClick={() => setActiveTab(tab.id)}
-                                className={`whitespace-nowrap px-4 py-2 text-sm font-medium rounded-t-lg transition-colors ${
+                                className={`flex-shrink-0 px-2 sm:px-3 py-2 text-xs sm:text-sm font-medium rounded-t-lg transition-colors ${
                                     activeTab === tab.id 
                                         ? 'bg-primary text-black border-b-2 border-primary' 
                                         : 'text-gray-600 hover:text-gray-800 hover:bg-gray-100'
                                 }`}
+                                title={tab.label}
                             >
                                 <span className="mr-1">{tab.icon}</span>
-                                <span className="hidden sm:inline">{tab.label}</span>
+                                <span className="hidden lg:inline">{tab.label}</span>
                             </button>
                         ))}
                     </div>
@@ -5777,8 +5778,18 @@ const AnimalForm = ({
                                     <select name="status" value={formData.status} onChange={handleChange} required 
                                         data-tutorial-target="status-dropdown"
                                         className="mt-1 block w-full p-2 border border-gray-300 rounded-md shadow-sm focus:ring-primary focus:border-primary">
-                                        {STATUS_OPTIONS.map(s => <option key={s} value={s}>{s}</option>)}
+                                        <option value="Pet">Pet - Personal animal, not for breeding/sale</option>
+                                        <option value="Breeder">Breeder - Active breeding animal</option>
+                                        <option value="Available">Available - For sale (shown in public showcase)</option>
+                                        <option value="Sold">Sold - Sold to new owner</option>
+                                        <option value="Retired">Retired - No longer breeding</option>
+                                        <option value="Deceased">Deceased - Animal has passed away</option>
+                                        <option value="Rehomed">Rehomed - Given to new home</option>
+                                        <option value="Unknown">Unknown</option>
                                     </select>
+                                    <p className="text-xs text-gray-500 mt-1">
+                                        Status controls visibility and business features. "Available" + Public = Appears in showcase.
+                                    </p>
                                 </div>
                             </div>
                         </div>
@@ -5850,32 +5861,7 @@ const AnimalForm = ({
                                     className="form-checkbox h-5 w-5 text-primary rounded focus:ring-primary" />
                                 <span className="text-sm font-medium text-gray-700">Public Profile</span>
                             </label>
-                        </div>
-                        
-                        {/* Lifecycle Status */}
-                        <div className="bg-gray-50 p-4 rounded-lg border border-gray-200 space-y-4">
-                            <h3 className="text-lg font-semibold text-gray-700 border-b pb-2">Lifecycle Status</h3>
-                            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                                <div>
-                                    <label className="block text-sm font-medium text-gray-700 mb-2">Status</label>
-                                    <select name="status" value={formData.status} onChange={handleChange} 
-                                        className="block w-full p-2 border border-gray-300 rounded-md shadow-sm focus:ring-primary focus:border-primary">
-                                        <option value="Alive">Alive</option>
-                                        <option value="Missing">Missing</option>
-                                        <option value="Retired">Retired</option>
-                                        <option value="Deceased">Deceased</option>
-                                    </select>
-                                </div>
-                                
-                                {formData.status === 'Deceased' && (
-                                    <div>
-                                        <label className="block text-sm font-medium text-gray-700 mb-2">Date of Death</label>
-                                        <input type="date" name="deceasedDate" value={formData.deceasedDate || ''} onChange={handleChange} 
-                                            min="1800-01-01" max={new Date().toISOString().split('T')[0]} 
-                                            className="block w-full p-2 border border-gray-300 rounded-md shadow-sm focus:ring-primary focus:border-primary" />
-                                    </div>
-                                )}
-                            </div>
+                            <p className="text-xs text-gray-500 mt-2">Public animals with "Available" status will appear in the global showcase.</p>
                         </div>
                     </div>
                 )}
