@@ -11823,7 +11823,7 @@ const App = () => {
 
                                         {/* Tab 1: Overview */}
                                         {detailViewTab === 1 && (
-                                            <div className="space-y-6 bg-white p-6">
+                                            <div className="space-y-6 p-6">
                                                 <div className="bg-white border-2 border-gray-300 rounded-lg p-4 sm:p-6">
                                                     <div className="flex flex-col sm:flex-row items-start sm:space-x-6 space-y-4 sm:space-y-0">
                                                         <div className="w-full sm:w-auto flex flex-col items-center sm:items-start">
@@ -11900,7 +11900,7 @@ const App = () => {
 
                                         {/* Tab 2: Status & Privacy */}
                                         {detailViewTab === 2 && (
-                                            <div className="space-y-6 bg-white p-6">
+                                            <div className="space-y-6 p-6">
                                                 <div className="bg-gray-50 p-4 rounded-lg border border-gray-200 space-y-4">
                                                     <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                                                         <div>
@@ -11969,7 +11969,7 @@ const App = () => {
 
                                         {/* Tab 3: Physical Profile */}
                                         {detailViewTab === 3 && (
-                                            <div className="space-y-6 bg-white p-6">
+                                            <div className="space-y-6 p-6">
                                                 <div className="bg-gray-50 p-4 rounded-lg border border-gray-200 space-y-4">
                                                     <h3 className="text-lg font-semibold text-gray-700">Appearance</h3>
                                                     <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm">
@@ -11997,7 +11997,7 @@ const App = () => {
 
                                         {/* Tab 4: Identification */}
                                         {detailViewTab === 4 && (
-                                            <div className="space-y-6 bg-white p-6">
+                                            <div className="space-y-6 p-6">
                                                 <div className="bg-gray-50 p-4 rounded-lg border border-gray-200 space-y-4">
                                                     <h3 className="text-lg font-semibold text-gray-700">Identification Numbers</h3>
                                                     <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm">
@@ -12019,7 +12019,7 @@ const App = () => {
 
                                         {/* Tab 5: Lineage */}
                                         {detailViewTab === 5 && (
-                                            <div className="space-y-6 bg-white p-6">
+                                            <div className="space-y-6 p-6">
                                                 <div className="bg-gray-50 p-4 rounded-lg border border-gray-200">
                                                     <div className="flex justify-between items-center mb-4">
                                                         <h3 className="text-lg font-semibold text-gray-700">Parents</h3>
@@ -12065,7 +12065,7 @@ const App = () => {
 
                                         {/* Tab 6: Breeding */}
                                         {detailViewTab === 6 && (
-                                            <div className="space-y-6 bg-white p-6">
+                                            <div className="space-y-6 p-6">
                                                 {(animalToView.isNeutered || animalToView.heatStatus || animalToView.isPregnant || animalToView.isNursing || animalToView.matingDates) && (
                                                     <div className="bg-gray-50 p-4 rounded-lg border border-gray-200 space-y-4">
                                                         <h3 className="text-lg font-semibold text-gray-700">Reproductive Status</h3>
@@ -12086,7 +12086,7 @@ const App = () => {
 
                                         {/* Tab 7: Health */}
                                         {detailViewTab === 7 && (
-                                            <div className="space-y-6 bg-white p-6">
+                                            <div className="space-y-6 p-6">
                                                 {(animalToView.vaccinations || animalToView.dewormingRecords || animalToView.parasiteControl || animalToView.primaryVet) && (
                                                     <div className="bg-gray-50 p-4 rounded-lg border border-gray-200 space-y-4">
                                                         <h3 className="text-lg font-semibold text-gray-700">Health Records</h3>
@@ -12109,7 +12109,7 @@ const App = () => {
 
                                         {/* Tab 8: Husbandry */}
                                         {detailViewTab === 8 && (
-                                            <div className="space-y-6 bg-white p-6">
+                                            <div className="space-y-6 p-6">
                                                 {(animalToView.dietType || animalToView.feedingSchedule || animalToView.supplements) && (
                                                     <div className="bg-gray-50 p-4 rounded-lg border border-gray-200 space-y-4">
                                                         <h3 className="text-lg font-semibold text-gray-700">Nutrition</h3>
@@ -12132,7 +12132,7 @@ const App = () => {
 
                                         {/* Tab 9: Behavior */}
                                         {detailViewTab === 9 && (
-                                            <div className="space-y-6 bg-white p-6">
+                                            <div className="space-y-6 p-6">
                                                 {(animalToView.temperament || animalToView.handlingTolerance || animalToView.socialStructure || animalToView.activityCycle) && (
                                                     <div className="bg-gray-50 p-4 rounded-lg border border-gray-200 space-y-4">
                                                         <h3 className="text-lg font-semibold text-gray-700">Behavior & Welfare</h3>
@@ -12147,7 +12147,7 @@ const App = () => {
 
                                         {/* Tab 10: Records */}
                                         {detailViewTab === 10 && (
-                                            <div className="space-y-6 bg-white p-6">
+                                            <div className="space-y-6 p-6">
                                                 {animalToView.remarks && (
                                                     <div className="bg-gray-50 p-4 rounded-lg border border-gray-200">
                                                         <h3 className="text-lg font-semibold text-gray-700 mb-3">Remarks / Notes</h3>
@@ -12159,7 +12159,7 @@ const App = () => {
 
                                         {/* Tab 11: End of Life */}
                                         {detailViewTab === 11 && (
-                                            <div className="space-y-6 bg-white p-6">
+                                            <div className="space-y-6 p-6">
                                                 {(animalToView.deceasedDate || animalToView.causeOfDeath || animalToView.insurance || animalToView.legalStatus) && (
                                                     <div className="bg-gray-50 p-4 rounded-lg border border-gray-200 space-y-4">
                                                         <h3 className="text-lg font-semibold text-gray-700">End of Life & Legal</h3>
