@@ -10691,7 +10691,7 @@ const App = () => {
         // Handle public profile viewing for non-logged-in users
         if (viewingPublicProfile) {
             return (
-                <div className="min-h-screen bg-page-bg flex flex-col items-center p-6 font-sans">
+                <div className="min-h-screen bg-primary flex flex-col items-center p-6 font-sans">
                     {showModal && <ModalMessage title={modalMessage.title} message={modalMessage.message} onClose={() => setShowModal(false)} />}
                     {viewingPublicAnimal && (
                         <ViewOnlyAnimalDetail 
@@ -10746,7 +10746,7 @@ const App = () => {
         // Genetics calculator for non-logged-in users
         if (currentView === 'genetics-calculator') {
             return (
-                <div className="min-h-screen bg-page-bg flex flex-col items-center p-6 font-sans">
+                <div className="min-h-screen bg-primary flex flex-col items-center p-6 font-sans">
                     {showModal && <ModalMessage title={modalMessage.title} message={modalMessage.message} onClose={() => setShowModal(false)} />}
                     
                     <header className="w-full max-w-4xl bg-white p-4 rounded-xl shadow-lg mb-6 flex justify-between items-center">
@@ -10799,7 +10799,7 @@ const App = () => {
         // Donation view for non-logged-in users
         if (currentView === 'donation') {
             return (
-                <div className="min-h-screen bg-page-bg flex flex-col items-center justify-center p-6 font-sans">
+                <div className="min-h-screen bg-primary flex flex-col items-center justify-center p-6 font-sans">
                     {showModal && <ModalMessage title={modalMessage.title} message={modalMessage.message} onClose={() => setShowModal(false)} />}
                     
                     <DonationView onBack={() => navigate('/')} />
@@ -10809,7 +10809,7 @@ const App = () => {
         
         // Default auth view with search button
         return (
-            <div className="min-h-screen bg-page-bg flex flex-col items-center justify-center p-6 font-sans">
+            <div className="min-h-screen bg-primary flex flex-col items-center justify-center p-6 font-sans">
                 {showModal && <ModalMessage title={modalMessage.title} message={modalMessage.message} onClose={() => setShowModal(false)} />}
                 
                 {/* Public navigation header */}
@@ -10966,7 +10966,7 @@ const App = () => {
     }
 
      return (
-        <div className="min-h-screen bg-page-bg flex flex-col font-sans">
+        <div className="min-h-screen bg-primary flex flex-col font-sans">
             {/* Fixed Donation Button - Top Left */}
             <div className="fixed top-4 left-4 z-[60]">
                 <button
@@ -12747,7 +12747,7 @@ const PublicAnimalPage = () => {
 
     if (loading) {
         return (
-            <div className="min-h-screen bg-page-bg flex items-center justify-center p-6">
+            <div className="min-h-screen bg-primary flex items-center justify-center p-6">
                 <Loader2 className="animate-spin text-primary" size={48} />
             </div>
         );
@@ -12755,7 +12755,7 @@ const PublicAnimalPage = () => {
 
     if (notFound) {
         return (
-            <div className="min-h-screen bg-page-bg flex flex-col items-center justify-center p-6">
+            <div className="min-h-screen bg-primary flex flex-col items-center justify-center p-6">
                 <div className="bg-white rounded-xl shadow-lg p-8 max-w-md text-center">
                     <XCircle size={64} className="text-red-500 mx-auto mb-4" />
                     <h1 className="text-2xl font-bold text-gray-800 mb-2">Animal Not Found</h1>
@@ -12774,7 +12774,7 @@ const PublicAnimalPage = () => {
     }
 
     return (
-        <div className="min-h-screen bg-page-bg flex flex-col items-center p-6">
+        <div className="min-h-screen bg-primary flex flex-col items-center p-6">
             <header className="w-full max-w-4xl bg-white p-4 rounded-xl shadow-lg mb-6 flex justify-between items-center">
                 <CustomAppLogo size="w-10 h-10" />
                 <button
@@ -12819,7 +12819,7 @@ const PublicProfilePage = () => {
 
     if (loading) {
         return (
-            <div className="min-h-screen bg-page-bg flex items-center justify-center p-6">
+            <div className="min-h-screen bg-primary flex items-center justify-center p-6">
                 <Loader2 className="animate-spin text-primary" size={48} />
             </div>
         );
@@ -12827,7 +12827,7 @@ const PublicProfilePage = () => {
 
     if (notFound) {
         return (
-            <div className="min-h-screen bg-page-bg flex flex-col items-center justify-center p-6">
+            <div className="min-h-screen bg-primary flex flex-col items-center justify-center p-6">
                 <div className="bg-white rounded-xl shadow-lg p-8 max-w-md text-center">
                     <XCircle size={64} className="text-red-500 mx-auto mb-4" />
                     <h1 className="text-2xl font-bold text-gray-800 mb-2">Profile Not Found</h1>
@@ -12846,7 +12846,7 @@ const PublicProfilePage = () => {
     }
 
     return (
-        <div className="min-h-screen bg-page-bg flex flex-col items-center p-6">
+        <div className="min-h-screen bg-primary flex flex-col items-center p-6">
             <header className="w-full max-w-4xl bg-white p-4 rounded-xl shadow-lg mb-6 flex justify-between items-center">
                 <CustomAppLogo size="w-10 h-10" />
                 <button
