@@ -1758,16 +1758,9 @@ const PublicProfileView = ({ profile, onBack, onViewAnimal, API_BASE_URL, onStar
                                                 onClick={() => onViewAnimal(animal)}
                                                 className="relative bg-white rounded-xl shadow-sm w-44 h-56 flex flex-col items-center overflow-hidden cursor-pointer hover:shadow-md transition border-2 border-gray-300 pt-3"
                                             >
-                                                {/* Country flag top-left */}
-                                                {(freshProfile?.country || profile.country) && (
-                                                    <div className="absolute top-2 left-2" title={getCountryName(freshProfile?.country || profile.country)}>
-                                                        <span className={`${getCountryFlag(freshProfile?.country || profile.country)} inline-block h-6 w-8`}></span>
-                                                    </div>
-                                                )}
-
-                                                {/* Birthdate top-left/center (adjusted if country flag present) */}
+                                                {/* Birthdate top-left */}
                                                 {birth && (
-                                                    <div className="absolute top-2 left-10 text-xs text-gray-600 bg-white/80 px-2 py-0.5 rounded">
+                                                    <div className="absolute top-2 left-2 text-xs text-gray-600 bg-white/80 px-2 py-0.5 rounded">
                                                         {birth}
                                                     </div>
                                                 )}
