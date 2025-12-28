@@ -11829,19 +11829,24 @@ const App = () => {
                                             <div className="space-y-6">
                                                 {/* Main Card */}
                                                 <div className="bg-white border-2 border-gray-300 rounded-lg p-4 sm:p-6">
-                                                    {/* Name Section - Centered at Top */}
-                                                    <div className="text-center mb-6">
-                                                        <h2 className="text-3xl font-bold text-gray-800 mb-3">
-                                                            {animalToView.prefix ? `${animalToView.prefix} ` : ''}
-                                                            {animalToView.name}
-                                                            {animalToView.suffix ? ` ${animalToView.suffix}` : ''}
-                                                        </h2>
-                                                        {/* Species/Breed/Strain/CTC - Centered */}
-                                                        <div className="text-sm text-gray-600 mb-4">
+                                                    {/* Name Section - Centered at Top with Gender Icon */}
+                                                    <div className="flex justify-center items-start mb-6 relative">
+                                                        <div className="text-center flex-1">
+                                                            <h2 className="text-3xl font-bold text-gray-800 mb-3">
+                                                                {animalToView.prefix ? `${animalToView.prefix} ` : ''}
+                                                                {animalToView.name}
+                                                                {animalToView.suffix ? ` ${animalToView.suffix}` : ''}
+                                                            </h2>
+                                                            {/* Species/Breed/Strain/CTC - Centered */}
+                                                            <div className="text-sm text-gray-600 mb-4">
                                                             <span>{animalToView.species}</span>
                                                             {animalToView.breed && <span> • {animalToView.breed}</span>}
                                                             {animalToView.strain && <span> • {animalToView.strain}</span>}
-                                                            <span> • {animalToView.id_public}</span>
+                                                                <span> • {animalToView.id_public}</span>
+                                                            </div>
+                                                        </div>
+                                                        <div className="absolute top-0 right-0">
+                                                            {animalToView.gender === 'Male' ? <Mars size={24} className="text-blue-600" /> : <Venus size={24} className="text-pink-600" />}
                                                         </div>
                                                     </div>
 
@@ -11866,14 +11871,6 @@ const App = () => {
 
                                                         {/* Main Info Column */}
                                                         <div className="sm:col-span-2">
-                                                            {/* Gender */}
-                                                            <div className="mb-4">
-                                                                <div className="flex items-center gap-4 text-lg">
-                                                                    <span>{animalToView.gender}</span>
-                                                                    {animalToView.gender === 'Male' ? <Mars size={20} className="text-blue-600" /> : <Venus size={20} className="text-pink-600" />}
-                                                                </div>
-                                                            </div>
-
                                                             {/* Age and Status Icons */}
                                                             <div className="mb-4 pb-4 border-b border-gray-200">
                                                                 <div className="mb-3">
