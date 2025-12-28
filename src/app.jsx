@@ -11924,39 +11924,35 @@ const App = () => {
                                                                 </p>
                                                             )}
 
-                                                            {/* Age */}
+                                                            {/* Date of Birth and Age/Deceased */}
                                                             {animalToView.birthDate && (
-                                                                <p className="text-sm text-gray-700">
-                                                                    Age: {(() => {
-                                                                        const birth = new Date(animalToView.birthDate);
-                                                                        const today = new Date();
-                                                                        let age = today.getFullYear() - birth.getFullYear();
-                                                                        const monthDiff = today.getMonth() - birth.getMonth();
-                                                                        if (monthDiff < 0 || (monthDiff === 0 && today.getDate() < birth.getDate())) age--;
-                                                                        const months = (today.getMonth() - birth.getMonth() + 12) % 12;
-                                                                        let days = today.getDate() - birth.getDate();
-                                                                        if (days < 0) {
-                                                                            days += new Date(today.getFullYear(), today.getMonth(), 0).getDate();
-                                                                        }
-                                                                        if (age > 0) {
-                                                                            return `${age}y ${months}m ${days}d`;
-                                                                        } else if (months > 0) {
-                                                                            return `${months}m ${days}d`;
-                                                                        } else {
-                                                                            return `${days}d`;
-                                                                        }
-                                                                    })()}
-                                                                </p>
-                                                            )}
-
-                                                            {/* Tags at Bottom */}
-                                                            {animalToView.tags && animalToView.tags.length > 0 && (
-                                                                <div className="flex gap-2 flex-wrap pt-4 border-t border-gray-200 mt-auto">
-                                                                    {animalToView.tags.map((tag, idx) => (
-                                                                        <span key={idx} className="bg-blue-100 text-blue-700 px-2 py-1 rounded text-xs font-medium">
-                                                                            {tag}
-                                                                        </span>
-                                                                    ))}
+                                                                <div className="text-sm text-gray-700 space-y-1">
+                                                                    <p>
+                                                                        Date of Birth: {new Date(animalToView.birthDate).toLocaleDateString()} ~ {(() => {
+                                                                            const birth = new Date(animalToView.birthDate);
+                                                                            const endDate = animalToView.deceasedDate ? new Date(animalToView.deceasedDate) : new Date();
+                                                                            let age = endDate.getFullYear() - birth.getFullYear();
+                                                                            const monthDiff = endDate.getMonth() - birth.getMonth();
+                                                                            if (monthDiff < 0 || (monthDiff === 0 && endDate.getDate() < birth.getDate())) age--;
+                                                                            const months = (endDate.getMonth() - birth.getMonth() + 12) % 12;
+                                                                            let days = endDate.getDate() - birth.getDate();
+                                                                            if (days < 0) {
+                                                                                days += new Date(endDate.getFullYear(), endDate.getMonth(), 0).getDate();
+                                                                            }
+                                                                            if (age > 0) {
+                                                                                return `${age}y ${months}m ${days}d`;
+                                                                            } else if (months > 0) {
+                                                                                return `${months}m ${days}d`;
+                                                                            } else {
+                                                                                return `${days}d`;
+                                                                            }
+                                                                        })()}
+                                                                    </p>
+                                                                    {animalToView.deceasedDate && (
+                                                                        <p className="text-red-600">
+                                                                            Deceased: {new Date(animalToView.deceasedDate).toLocaleDateString()}
+                                                                        </p>
+                                                                    )}
                                                                 </div>
                                                             )}
                                                         </div>
