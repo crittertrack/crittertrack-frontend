@@ -5772,7 +5772,7 @@ const AnimalForm = ({
             <form onSubmit={handleSubmit} className="space-y-6">
                 
                 {/* Tab Navigation */}
-                <div className="border-b border-gray-200 -mx-6 px-6">
+                <div className="border-b-2 border-gray-400 -mx-6 px-6">
                     <div className="flex flex-wrap gap-1 pb-px">
                         {[
                             { id: 1, label: 'Overview', icon: '📋' },
@@ -5791,10 +5791,10 @@ const AnimalForm = ({
                                 key={tab.id}
                                 type="button"
                                 onClick={() => setActiveTab(tab.id)}
-                                className={`flex-shrink-0 px-2 sm:px-3 py-2 text-xs sm:text-sm font-medium rounded-t-lg transition-colors ${
+                                className={`flex-shrink-0 px-2 sm:px-3 py-2 text-xs sm:text-sm font-medium rounded-t-lg transition-colors border-b-2 ${
                                     activeTab === tab.id 
-                                        ? 'bg-primary text-black border-b-2 border-primary' 
-                                        : 'text-gray-600 hover:text-gray-800 hover:bg-gray-100'
+                                        ? 'bg-primary text-black border-b-primary' 
+                                        : 'text-gray-600 hover:text-gray-800 hover:bg-gray-100 border-transparent'
                                 }`}
                                 title={tab.label}
                             >
@@ -11739,7 +11739,7 @@ const App = () => {
                                 };
                                 return (
                                     <>
-                                    <div className="w-full max-w-4xl bg-white p-6 rounded-xl shadow-lg">
+                                    <div className="w-full max-w-4xl p-6">
                                         <div className="flex items-start justify-between mb-6">
                                             <button onClick={() => navigate('/')} className="flex items-center text-gray-600 hover:text-gray-800 font-medium">
                                                 <ArrowLeft size={20} className="mr-2" />
@@ -11789,7 +11789,7 @@ const App = () => {
                                         </div>
 
                                         {/* Tab Navigation */}
-                                        <div className="border-b border-gray-200 -mx-6 px-6 mb-6">
+                                        <div className="border-b-2 border-gray-400 -mx-6 px-6 mb-6">
                                             <div className="flex flex-wrap gap-1 pb-px">
                                                 {[
                                                     { id: 1, label: 'Overview', icon: '📋' },
@@ -11807,10 +11807,10 @@ const App = () => {
                                                     <button
                                                         key={tab.id}
                                                         onClick={() => setDetailViewTab(tab.id)}
-                                                        className={`flex-shrink-0 px-2 sm:px-3 py-2 text-xs sm:text-sm font-medium rounded-t-lg transition-colors ${
+                                                        className={`flex-shrink-0 px-2 sm:px-3 py-2 text-xs sm:text-sm font-medium rounded-t-lg transition-colors border-b-2 ${
                                                             detailViewTab === tab.id 
-                                                                ? 'bg-primary text-black border-b-2 border-primary' 
-                                                                : 'text-gray-600 hover:text-gray-800 hover:bg-gray-100'
+                                                                ? 'bg-primary text-black border-b-primary' 
+                                                                : 'text-gray-600 hover:text-gray-800 hover:bg-gray-100 border-transparent'
                                                         }`}
                                                         title={tab.label}
                                                     >
