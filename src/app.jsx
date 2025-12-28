@@ -11824,67 +11824,196 @@ const App = () => {
                                         {/* Tab 1: Overview */}
                                         {detailViewTab === 1 && (
                                             <div className="space-y-6 p-6">
+                                                {/* Header: Species/Breed/Strain/CTC */}
+                                                <div className="text-sm text-gray-600">
+                                                    <span>{animalToView.species}</span>
+                                                    {animalToView.breed && <span> • {animalToView.breed}</span>}
+                                                    {animalToView.strain && <span> • {animalToView.strain}</span>}
+                                                    <span> • {animalToView.id_public}</span>
+                                                </div>
+
+                                                {/* Main Card */}
                                                 <div className="bg-white border-2 border-gray-300 rounded-lg p-4 sm:p-6">
-                                                    <div className="flex flex-col sm:flex-row items-start sm:space-x-6 space-y-4 sm:space-y-0">
-                                                        <div className="w-full sm:w-auto flex flex-col items-center sm:items-start">
+                                                    <div className="grid grid-cols-1 sm:grid-cols-3 gap-6">
+                                                        {/* Image Column */}
+                                                        <div className="flex flex-col items-center">
                                                             <div className="w-40 h-40 bg-gray-100 rounded-lg overflow-hidden flex items-center justify-center">
-                                                                { (animalToView.imageUrl || animalToView.photoUrl) ? (
+                                                                {(animalToView.imageUrl || animalToView.photoUrl) ? (
                                                                     <img src={animalToView.imageUrl || animalToView.photoUrl} alt={animalToView.name} className="w-full h-full object-cover" />
                                                                 ) : (
                                                                     <Cat size={72} className="text-gray-400" />
-                                                                ) }
+                                                                )}
                                                             </div>
-                                                            <div className={`w-40 py-2 text-center mt-2 rounded border-2 ${
+                                                            <div className={`w-40 py-2 text-center mt-3 rounded border-2 text-sm font-semibold ${
                                                                 animalToView.isViewOnly 
                                                                     ? 'bg-orange-100 border-orange-400 text-orange-800' 
                                                                     : 'bg-gray-200 border-gray-400 text-gray-800'
                                                             }`}>
-                                                                <div className="text-sm font-semibold">{animalToView.isViewOnly ? 'Sold' : (animalToView.status || 'Unknown')}</div>
-                                                            </div>
-                                                            <div className="w-40 flex justify-center items-center space-x-3 py-2">
-                                                                {animalToView.isOwned ? (
-                                                                    <Heart size={18} className="text-black" />
-                                                                ) : (
-                                                                    <HeartOff size={18} className="text-black" />
-                                                                )}
-                                                                {animalToView.showOnPublicProfile ? (
-                                                                    <Eye size={18} className="text-black" />
-                                                                ) : (
-                                                                    <EyeOff size={18} className="text-black" />
-                                                                )}
-                                                                {animalToView.isInMating && <Hourglass size={18} className="text-black" />}
-                                                                {animalToView.isPregnant && <Bean size={18} className="text-black" />}
-                                                                {animalToView.isNursing && <Milk size={18} className="text-black" />}
+                                                                {animalToView.isViewOnly ? 'Sold' : (animalToView.status || 'Unknown')}
                                                             </div>
                                                         </div>
-                                                        <div className="flex-1 w-full">
-                                                            <h2 className="text-2xl font-bold text-gray-800 mb-2">{animalToView.prefix ? `${animalToView.prefix} ` : ''}{animalToView.name}{animalToView.suffix ? ` ${animalToView.suffix}` : ''}</h2>
-                                                            <p className="text-sm text-gray-600 mb-4">
-                                                                {animalToView.species}
-                                                                {getSpeciesLatinName(animalToView.species) && (
-                                                                    <span className="italic text-gray-500"> ({getSpeciesLatinName(animalToView.species)})</span>
-                                                                )}
-                                                                &nbsp; • &nbsp; {animalToView.id_public}
-                                                            </p>
-                                                            <div className="grid grid-cols-1 sm:grid-cols-2 gap-x-6 gap-y-3 text-sm text-gray-700">
-                                                                <div><strong>Gender:</strong> {animalToView.gender}</div>
-                                                                <div><strong>Birth Date:</strong> {formattedBirthDate}</div>
-                                                                <div><strong>Color:</strong> {animalToView.color || '—'}</div>
-                                                                <div><strong>Coat:</strong> {animalToView.coat || '—'}</div>
-                                                                {(animalToView.species === 'Fancy Rat' || animalToView.species === 'Rat') && animalToView.earset && (
-                                                                    <div><strong>Earset:</strong> {animalToView.earset}</div>
-                                                                )}
-                                                                {animalToView.deceasedDate && (
-                                                                    <div><strong>Deceased Date:</strong> {new Intl.DateTimeFormat('en-US', { year: 'numeric', month: 'long', day: 'numeric' }).format(new Date(animalToView.deceasedDate))}</div>
-                                                                )}
-                                                                <div><strong>Breedery ID:</strong> {animalToView.breederyId || animalToView.registryCode || '—'}</div>
-                                                                <div><strong>Inbreeding COI:</strong> {animalToView.inbreedingCoefficient != null ? `${animalToView.inbreedingCoefficient.toFixed(2)}%` : 'N/A'}</div>
+
+                                                        {/* Main Info Column */}
+                                                        <div className="sm:col-span-2">
+                                                            {/* Name and Gender */}
+                                                            <div className="mb-4">
+                                                                <h2 className="text-3xl font-bold text-gray-800 mb-2">
+                                                                    {animalToView.prefix ? `${animalToView.prefix} ` : ''}
+                                                                    {animalToView.name}
+                                                                    {animalToView.suffix ? ` ${animalToView.suffix}` : ''}
+                                                                </h2>
+                                                                <div className="flex items-center gap-4 text-lg">
+                                                                    <span>{animalToView.gender}</span>
+                                                                    {animalToView.gender === 'Male' ? <User size={20} /> : <User size={20} />}
+                                                                </div>
                                                             </div>
+
+                                                            {/* Age and Status Icons */}
+                                                            <div className="mb-4 pb-4 border-b border-gray-200">
+                                                                <div className="mb-3">
+                                                                    <span className="text-sm text-gray-600">Age:</span>
+                                                                    <span className="ml-2 font-semibold">
+                                                                        {animalToView.birthDate ? (() => {
+                                                                            const birth = new Date(animalToView.birthDate);
+                                                                            const today = new Date();
+                                                                            let age = today.getFullYear() - birth.getFullYear();
+                                                                            const monthDiff = today.getMonth() - birth.getMonth();
+                                                                            if (monthDiff < 0 || (monthDiff === 0 && today.getDate() < birth.getDate())) age--;
+                                                                            const months = (today.getMonth() - birth.getMonth() + 12) % 12;
+                                                                            return age > 0 ? `${age}y ${months}m` : `${months}m`;
+                                                                        })() : '—'}
+                                                                    </span>
+                                                                </div>
+
+                                                                {/* Status Icons */}
+                                                                <div className="flex gap-3 flex-wrap">
+                                                                    {animalToView.isPregnant && (
+                                                                        <div className="flex items-center gap-1 bg-pink-100 px-2 py-1 rounded text-sm">
+                                                                            <Bean size={16} className="text-pink-600" />
+                                                                            <span>Pregnant</span>
+                                                                        </div>
+                                                                    )}
+                                                                    {animalToView.isNursing && (
+                                                                        <div className="flex items-center gap-1 bg-blue-100 px-2 py-1 rounded text-sm">
+                                                                            <Milk size={16} className="text-blue-600" />
+                                                                            <span>Nursing</span>
+                                                                        </div>
+                                                                    )}
+                                                                    {animalToView.isInMating && (
+                                                                        <div className="flex items-center gap-1 bg-purple-100 px-2 py-1 rounded text-sm">
+                                                                            <Hourglass size={16} className="text-purple-600" />
+                                                                            <span>In Mating</span>
+                                                                        </div>
+                                                                    )}
+                                                                    {animalToView.isNeutered && (
+                                                                        <div className="flex items-center gap-1 bg-gray-100 px-2 py-1 rounded text-sm">
+                                                                            <Check size={16} className="text-gray-600" />
+                                                                            <span>Neutered</span>
+                                                                        </div>
+                                                                    )}
+                                                                    {animalToView.isOwned && (
+                                                                        <div className="flex items-center gap-1 bg-red-100 px-2 py-1 rounded text-sm">
+                                                                            <Heart size={16} className="text-red-600" />
+                                                                            <span>Owned by Me</span>
+                                                                        </div>
+                                                                    )}
+                                                                    {animalToView.showOnPublicProfile && (
+                                                                        <div className="flex items-center gap-1 bg-green-100 px-2 py-1 rounded text-sm">
+                                                                            <Eye size={16} className="text-green-600" />
+                                                                            <span>Public Profile</span>
+                                                                        </div>
+                                                                    )}
+                                                                </div>
+                                                            </div>
+
+                                                            {/* Timeline */}
+                                                            <div className="mb-4">
+                                                                <h4 className="font-semibold text-gray-700 mb-2">Timeline</h4>
+                                                                <div className="space-y-1 text-sm">
+                                                                    <div><strong>Born:</strong> {formattedBirthDate}</div>
+                                                                    {animalToView.isPregnant && animalToView.expectedDueDate && (
+                                                                        <div><strong>Expected Due:</strong> {new Date(animalToView.expectedDueDate).toLocaleDateString()}</div>
+                                                                    )}
+                                                                    {animalToView.deceasedDate && (
+                                                                        <div><strong>Passed:</strong> {new Date(animalToView.deceasedDate).toLocaleDateString()}</div>
+                                                                    )}
+                                                                </div>
+                                                            </div>
+
+                                                            {/* Health Snapshot */}
+                                                            {(animalToView.currentWeight || animalToView.bcs || animalToView.medicalConditions || animalToView.medications) && (
+                                                                <div className="mb-4 pb-4 border-b border-gray-200">
+                                                                    <h4 className="font-semibold text-gray-700 mb-2">Health Snapshot</h4>
+                                                                    <div className="grid grid-cols-2 gap-2 text-sm">
+                                                                        {animalToView.currentWeight && (
+                                                                            <div>
+                                                                                <strong>Weight:</strong> {animalToView.currentWeight}g
+                                                                                {animalToView.weightTrend && (
+                                                                                    <span className={animalToView.weightTrend === 'up' ? 'text-red-600' : animalToView.weightTrend === 'down' ? 'text-green-600' : 'text-gray-600'}>
+                                                                                        {animalToView.weightTrend === 'up' ? ' ↑' : animalToView.weightTrend === 'down' ? ' ↓' : ' →'}
+                                                                                    </span>
+                                                                                )}
+                                                                            </div>
+                                                                        )}
+                                                                        {animalToView.bcs && <div><strong>BCS:</strong> {animalToView.bcs}</div>}
+                                                                        {animalToView.medicalConditions && <div className="col-span-2"><strong>Conditions:</strong> {animalToView.medicalConditions}</div>}
+                                                                        {animalToView.medications && <div className="col-span-2"><strong>Medications:</strong> {animalToView.medications}</div>}
+                                                                    </div>
+                                                                </div>
+                                                            )}
+
+                                                            {/* Reproductive Snapshot */}
+                                                            {!animalToView.isNeutered && (animalToView.heatStatus || animalToView.lastHeatDate || animalToView.matingDates) && (
+                                                                <div className="mb-4">
+                                                                    <h4 className="font-semibold text-gray-700 mb-2">Reproductive Status</h4>
+                                                                    <div className="text-sm space-y-1">
+                                                                        {animalToView.heatStatus && <div><strong>Heat Status:</strong> {animalToView.heatStatus}</div>}
+                                                                        {animalToView.lastHeatDate && <div><strong>Last Heat:</strong> {new Date(animalToView.lastHeatDate).toLocaleDateString()}</div>}
+                                                                        {animalToView.matingDates && <div><strong>Last Mating:</strong> {animalToView.matingDates}</div>}
+                                                                    </div>
+                                                                </div>
+                                                            )}
+
+                                                            {/* ID Numbers */}
+                                                            {(animalToView.microchipNumber || animalToView.registryCode || animalToView.breederyId) && (
+                                                                <div className="mb-4">
+                                                                    <h4 className="font-semibold text-gray-700 mb-2">Identification</h4>
+                                                                    <div className="text-sm space-y-1">
+                                                                        {animalToView.microchipNumber && <div><strong>Microchip:</strong> {animalToView.microchipNumber}</div>}
+                                                                        {animalToView.registryCode && <div><strong>Registry:</strong> {animalToView.registryCode}</div>}
+                                                                        {animalToView.breederyId && <div><strong>Breeder ID:</strong> {animalToView.breederyId}</div>}
+                                                                    </div>
+                                                                </div>
+                                                            )}
                                                         </div>
                                                     </div>
                                                 </div>
+
+                                                {/* Quick Actions */}
+                                                <div className="bg-white border-2 border-gray-300 rounded-lg p-4">
+                                                    <h4 className="font-semibold text-gray-700 mb-3">Quick Actions</h4>
+                                                    <div className="grid grid-cols-2 sm:grid-cols-3 gap-2">
+                                                        <button className="px-3 py-2 bg-blue-500 hover:bg-blue-600 text-white text-sm rounded transition">
+                                                            Log Weight
+                                                        </button>
+                                                        <button className="px-3 py-2 bg-green-500 hover:bg-green-600 text-white text-sm rounded transition">
+                                                            Health Record
+                                                        </button>
+                                                        <button className="px-3 py-2 bg-purple-500 hover:bg-purple-600 text-white text-sm rounded transition">
+                                                            Log Mating
+                                                        </button>
+                                                        <button className="px-3 py-2 bg-orange-500 hover:bg-orange-600 text-white text-sm rounded transition">
+                                                            Vet Visit
+                                                        </button>
+                                                        <button className="px-3 py-2 bg-gray-500 hover:bg-gray-600 text-white text-sm rounded transition">
+                                                            Status Change
+                                                        </button>
+                                                    </div>
+                                                </div>
+
+                                                {/* Tags */}
                                                 {animalToView.tags && animalToView.tags.length > 0 && (
-                                                    <div data-tutorial-target="tags-section" className="bg-white border-2 border-gray-300 rounded-lg p-6">
+                                                    <div className="bg-white border-2 border-gray-300 rounded-lg p-6">
                                                         <h3 className="text-lg font-semibold text-gray-800 mb-3">Tags</h3>
                                                         <div className="flex flex-wrap gap-2">
                                                             {animalToView.tags.map((tag, idx) => (
