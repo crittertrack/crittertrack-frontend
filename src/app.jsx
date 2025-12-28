@@ -11896,6 +11896,16 @@ const App = () => {
                                                             </h2>
                                                         </div>
 
+                                                        {/* Species/Breed/Strain/CTC Info - Below Name */}
+                                                        <div className="w-full text-center pb-2">
+                                                            <p className="text-sm text-gray-600">
+                                                                {animalToView.species}
+                                                                {animalToView.breed && ` • ${animalToView.breed}`}
+                                                                {animalToView.strain && ` • ${animalToView.strain}`}
+                                                                {animalToView.id_public && ` + ${animalToView.id_public}`}
+                                                            </p>
+                                                        </div>
+
                                                         {/* ID bottom-right */}
                                                         <div className="w-full flex justify-end pr-2 pb-2">
                                                             <div className="text-xs text-gray-500">{animalToView.id_public}</div>
@@ -11910,22 +11920,12 @@ const App = () => {
                                                     </div>
                                                 </div>
 
-                                                {/* Species/Breed/Strain/CTC Info Card */}
+                                                {/* Age and Appearance Card */}
                                                 <div className="bg-white border-2 border-gray-300 rounded-lg p-4">
-                                                    <div className="text-center text-sm text-gray-600">
-                                                        <span className="font-semibold">{animalToView.species}</span>
-                                                        {animalToView.breed && <span> • {animalToView.breed}</span>}
-                                                        {animalToView.strain && <span> • {animalToView.strain}</span>}
-                                                    </div>
-                                                </div>
-
-                                                {/* Age and Appearance Info Card */}
-                                                <div className="bg-white border-2 border-gray-300 rounded-lg p-4">
-                                                    <div className="space-y-2">
-                                                        <div className="mb-3">
-                                                            <span className="text-sm text-gray-600">Age:</span>
-                                                            <span className="ml-2 font-semibold">
-                                                                {animalToView.birthDate ? (() => {
+                                                    <div className="text-center space-y-2">
+                                                        {animalToView.birthDate && (
+                                                            <p className="text-sm text-gray-700">
+                                                                {(() => {
                                                                     const birth = new Date(animalToView.birthDate);
                                                                     const today = new Date();
                                                                     let age = today.getFullYear() - birth.getFullYear();
@@ -11943,23 +11943,20 @@ const App = () => {
                                                                     } else {
                                                                         return `${days}d`;
                                                                     }
-                                                                })() : '—'}
-                                                            </span>
-                                                        </div>
+                                                                })()}
+                                                            </p>
+                                                        )}
 
                                                         {/* Appearance */}
                                                         {(animalToView.color || animalToView.coat || animalToView.coatPattern || animalToView.earset) && (
-                                                            <div className="text-sm">
-                                                                <span className="text-gray-600">Appearance:</span>
-                                                                <span className="ml-2 font-semibold">
-                                                                    {[
-                                                                        animalToView.color,
-                                                                        animalToView.coatPattern,
-                                                                        animalToView.coat,
-                                                                        animalToView.earset
-                                                                    ].filter(Boolean).join(' - ')}
-                                                                </span>
-                                                            </div>
+                                                            <p className="text-sm text-gray-700">
+                                                                {[
+                                                                    animalToView.color,
+                                                                    animalToView.coatPattern,
+                                                                    animalToView.coat,
+                                                                    animalToView.earset
+                                                                ].filter(Boolean).join(' ')}
+                                                            </p>
                                                         )}
                                                     </div>
                                                 </div>
