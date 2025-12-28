@@ -6073,7 +6073,6 @@ const AnimalForm = ({
                             {growthRecords.length > 1 && (() => {
                                 const sorted = [...growthRecords].sort((a, b) => new Date(a.date) - new Date(b.date));
                                 const weights = sorted.map(r => parseFloat(r.weight) || 0).filter(w => w > 0);
-                                const dates = sorted.map(r => r.date);
                                 
                                 if (weights.length < 2) return null;
                                 
@@ -6084,9 +6083,9 @@ const AnimalForm = ({
                                 const chartMax = maxWeight + padding;
                                 const range = chartMax - chartMin;
                                 
-                                const width = 400;
-                                const height = 250;
-                                const margin = { top: 20, right: 20, bottom: 40, left: 40 };
+                                const width = 500;
+                                const height = 300;
+                                const margin = { top: 20, right: 30, bottom: 50, left: 70 };
                                 const graphWidth = width - margin.left - margin.right;
                                 const graphHeight = height - margin.top - margin.bottom;
                                 
@@ -6094,6 +6093,9 @@ const AnimalForm = ({
                                     x: margin.left + (idx / (sorted.length - 1)) * graphWidth,
                                     y: margin.top + graphHeight - ((parseFloat(record.weight) - chartMin) / range) * graphHeight,
                                     weight: record.weight,
+                                    length: record.length,
+                                    bcs: record.bcs,
+                                    notes: record.notes,
                                     date: record.date
                                 }));
                                 
@@ -6101,8 +6103,8 @@ const AnimalForm = ({
                                 
                                 return (
                                     <div className="bg-white p-4 rounded-lg border border-gray-200">
-                                        <h4 className="text-sm font-semibold text-gray-700 mb-3">Growth Curve</h4>
-                                        <svg width="100%" height="300" viewBox={`0 0 ${width} ${height}`} style={{ maxWidth: '100%' }}>
+                                        <h4 className="text-sm font-semibold text-gray-700 mb-3">Growth Curve (Weight)</h4>
+                                        <svg width="100%" height="350" viewBox={`0 0 ${width} ${height}`} style={{ maxWidth: '100%' }} preserveAspectRatio="xMidYMid meet">
                                             {/* Grid lines */}
                                             {[0, 0.25, 0.5, 0.75, 1].map((ratio, i) => {
                                                 const y = margin.top + graphHeight * (1 - ratio);
@@ -6110,7 +6112,7 @@ const AnimalForm = ({
                                                 return (
                                                     <g key={`grid-${i}`}>
                                                         <line x1={margin.left} y1={y} x2={width - margin.right} y2={y} stroke="#e5e7eb" strokeWidth="1" strokeDasharray="4" />
-                                                        <text x={margin.left - 8} y={y} textAnchor="end" dy="0.3em" fontSize="11" fill="#666">{weightLabel}</text>
+                                                        <text x={margin.left - 12} y={y} textAnchor="end" dy="0.3em" fontSize="11" fill="#666">{weightLabel}</text>
                                                     </g>
                                                 );
                                             })}
@@ -6120,14 +6122,19 @@ const AnimalForm = ({
                                             <line x1={margin.left} y1={height - margin.bottom} x2={width - margin.right} y2={height - margin.bottom} stroke="#333" strokeWidth="2" />
                                             
                                             {/* Y-axis label */}
-                                            <text x={15} y={margin.top + graphHeight / 2} textAnchor="middle" fontSize="12" fill="#666" transform={`rotate(-90 15 ${margin.top + graphHeight / 2})`}>
+                                            <text x={20} y={margin.top + graphHeight / 2} textAnchor="middle" fontSize="12" fill="#333" fontWeight="600" transform={`rotate(-90 20 ${margin.top + graphHeight / 2})`}>
                                                 Weight ({measurementUnits.weight})
                                             </text>
                                             
-                                            {/* X-axis labels */}
+                                            {/* X-axis label */}
+                                            <text x={margin.left + graphWidth / 2} y={height - 8} textAnchor="middle" fontSize="12" fill="#333" fontWeight="600">
+                                                Date
+                                            </text>
+                                            
+                                            {/* X-axis date labels */}
                                             {points.map((p, i) => (
-                                                i % Math.max(1, Math.floor(points.length / 6)) === 0 && (
-                                                    <text key={`date-${i}`} x={p.x} y={height - margin.bottom + 20} textAnchor="middle" fontSize="10" fill="#666">
+                                                i % Math.max(1, Math.floor(points.length / 5)) === 0 && (
+                                                    <text key={`date-${i}`} x={p.x} y={height - margin.bottom + 25} textAnchor="middle" fontSize="10" fill="#666">
                                                         {new Date(p.date).toLocaleDateString('en-US', { month: 'short', day: 'numeric' })}
                                                     </text>
                                                 )
@@ -6137,12 +6144,23 @@ const AnimalForm = ({
                                             <path d={pathData} fill="none" stroke="#3b82f6" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
                                             
                                             {/* Points */}
-                                            {points.map((p, i) => (
-                                                <circle key={`point-${i}`} cx={p.x} cy={p.y} r="4" fill="#3b82f6" stroke="#fff" strokeWidth="2">
-                                                    <title>{`${p.date}: ${p.weight} ${measurementUnits.weight}`}</title>
-                                                </circle>
-                                            ))}
+                                            {points.map((p, i) => {
+                                                const tooltipText = [
+                                                    `Date: ${p.date}`,
+                                                    `Weight: ${p.weight} ${measurementUnits.weight}`,
+                                                    p.length ? `Length: ${p.length} ${measurementUnits.length}` : null,
+                                                    p.bcs ? `BCS: ${p.bcs}` : null,
+                                                    p.notes ? `Notes: ${p.notes}` : null
+                                                ].filter(Boolean).join('\n');
+                                                
+                                                return (
+                                                    <circle key={`point-${i}`} cx={p.x} cy={p.y} r="4" fill="#3b82f6" stroke="#fff" strokeWidth="2">
+                                                        <title>{tooltipText}</title>
+                                                    </circle>
+                                                );
+                                            })}
                                         </svg>
+                                        <p className="text-xs text-gray-500 mt-2">Hover over points to see full measurement details including length, BCS, and notes.</p>
                                     </div>
                                 );
                             })()}
