@@ -15,7 +15,6 @@ as the default for the entire application.
 @layer base {
 html {
 font-family: 'Inter', sans-serif;
-background-color: #F1D1DC;
 }
 }
 
