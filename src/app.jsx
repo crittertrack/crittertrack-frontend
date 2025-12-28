@@ -10182,20 +10182,23 @@ const App = () => {
     const [showTabs, setShowTabs] = useState(false); // Toggle for collapsible tabs panel
     const [sireData, setSireData] = useState(null);
     const [damData, setDamData] = useState(null);
+    const [offspringData, setOffspringData] = useState([]);
     
     // Fetch parent animals when viewing an animal
     React.useEffect(() => {
         if (!animalToView) {
             setSireData(null);
             setDamData(null);
+            setOffspringData([]);
             return;
         }
         
-        const fetchParents = async () => {
+        const fetchPedigreeData = async () => {
             try {
                 const sireId = animalToView.sireId_public || animalToView.fatherId_public;
                 const damId = animalToView.damId_public || animalToView.motherId_public;
                 
+                // Fetch parents
                 if (sireId) {
                     const response = await axios.get(`${API_BASE_URL}/animals/${sireId}`, {
                         headers: { Authorization: `Bearer ${authToken}` }
@@ -10209,12 +10212,23 @@ const App = () => {
                     });
                     setDamData(response.data);
                 }
+                
+                // Fetch offspring
+                if (animalToView.offspring && animalToView.offspring.length > 0) {
+                    const offspringPromises = animalToView.offspring.map(child => 
+                        axios.get(`${API_BASE_URL}/animals/${child.id}`, {
+                            headers: { Authorization: `Bearer ${authToken}` }
+                        }).then(r => r.data).catch(e => { console.error('Error fetching offspring:', e); return null; })
+                    );
+                    const offspringResults = await Promise.all(offspringPromises);
+                    setOffspringData(offspringResults.filter(o => o !== null));
+                }
             } catch (error) {
-                console.error('Error fetching parents:', error);
+                console.error('Error fetching pedigree data:', error);
             }
         };
         
-        fetchParents();
+        fetchPedigreeData();
     }, [animalToView, authToken]);
     
     const [showPedigreeChart, setShowPedigreeChart] = useState(false);
@@ -12326,6 +12340,16 @@ const App = () => {
                                                     </div>
                                                 )}
 
+                                                {/* Genetic Code Card */}
+                                                {animalToView.geneticCode && (
+                                                    <div className="bg-white border-2 border-gray-300 rounded-lg p-4">
+                                                        <h4 className="font-semibold text-gray-700 mb-2">Genetic Code</h4>
+                                                        <div className="text-sm font-mono bg-gray-50 p-2 rounded border border-gray-200">
+                                                            {animalToView.geneticCode}
+                                                        </div>
+                                                    </div>
+                                                )}
+
                                                 {/* Parents Card */}
                                                 {(sireData || damData) && (
                                                     <div className="bg-white border-2 border-gray-300 rounded-lg p-4">
@@ -12390,6 +12414,42 @@ const App = () => {
                                                     </div>
                                                 )}
 
+                                                {/* Offspring Card */}
+                                                {animalToView.offspring && animalToView.offspring.length > 0 && (
+                                                    <div className="bg-white border-2 border-gray-300 rounded-lg p-4">
+                                                        <h4 className="font-semibold text-gray-700 mb-4">Offspring ({animalToView.offspring.length})</h4>
+                                                        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                                                            {offspringData.map(offspring => (
+                                                                <div 
+                                                                    key={offspring.id}
+                                                                    onClick={() => {
+                                                                        setAnimalToView(offspring);
+                                                                        setDetailViewTab(1);
+                                                                    }}
+                                                                    className="bg-gray-50 rounded-lg border border-gray-200 p-3 cursor-pointer hover:shadow-md transition"
+                                                                >
+                                                                    <div className="w-full h-48 bg-gray-200 rounded-lg overflow-hidden flex items-center justify-center mb-3">
+                                                                        <AnimalImage src={offspring.imageUrl || offspring.photoUrl} alt={offspring.name} className="w-full h-full object-cover" iconSize={32} />
+                                                                    </div>
+                                                                    <div className="text-center">
+                                                                        <p className="font-semibold text-gray-800 text-sm">
+                                                                            {offspring.prefix ? `${offspring.prefix} ` : ''}{offspring.name}{offspring.suffix ? ` ${offspring.suffix}` : ''}
+                                                                        </p>
+                                                                        <p className="text-xs text-gray-600 mt-1">
+                                                                            {offspring.species} • {offspring.gender}
+                                                                        </p>
+                                                                        {offspring.birthDate && (
+                                                                            <p className="text-xs text-gray-500 mt-2">
+                                                                                Born: {new Date(offspring.birthDate).toLocaleDateString()}
+                                                                            </p>
+                                                                        )}
+                                                                    </div>
+                                                                </div>
+                                                            ))}
+                                                        </div>
+                                                    </div>
+                                                )}
+
                                                 {/* Health Card */}
                                                 {(animalToView.currentWeight || animalToView.bcs || animalToView.growthRecords?.length > 0 || animalToView.medicalConditions || animalToView.medications) && (
                                                     <div className="bg-white border-2 border-gray-300 rounded-lg p-4">
@@ -12438,48 +12498,6 @@ const App = () => {
                                                                 </div>
                                                             )}
 
-                                                            {/* Offspring Card */}
-                                                            {animalToView.offspring && animalToView.offspring.length > 0 && (
-                                                                <div className="bg-white border-2 border-gray-300 rounded-lg p-4">
-                                                                    <h4 className="font-semibold text-gray-700 mb-2">Offspring ({animalToView.offspring.length})</h4>
-                                                                    <div className="text-sm space-y-2">
-                                                                        {animalToView.offspring.map(child => (
-                                                                            <div key={child.id} className="flex justify-between items-center">
-                                                                                <button
-                                                                                    onClick={async () => {
-                                                                                        try {
-                                                                                            const response = await axios.get(`${API_BASE_URL}/animals/${child.id}`, {
-                                                                                                headers: { Authorization: `Bearer ${authToken}` }
-                                                                                            });
-                                                                                            if (response.data) {
-                                                                                                setAnimalToView(response.data);
-                                                                                                setDetailViewTab(1);
-                                                                                            }
-                                                                                        } catch (error) {
-                                                                                            console.error('Error fetching offspring:', error);
-                                                                                        }
-                                                                                    }}
-                                                                                    className="text-blue-600 hover:text-blue-800 hover:underline cursor-pointer flex-1 text-left"
-                                                                                >
-                                                                                    {child.name}
-                                                                                </button>
-                                                                                {child.sexCode === 'M' && <span className="text-xs text-gray-600">♂</span>}
-                                                                                {child.sexCode === 'F' && <span className="text-xs text-gray-600">♀</span>}
-                                                                            </div>
-                                                                        ))}
-                                                                    </div>
-                                                                </div>
-                                                            )}
-
-                                                            {/* Genetic Code Card */}
-                                                            {animalToView.geneticCode && (
-                                                                <div className="bg-white border-2 border-gray-300 rounded-lg p-4">
-                                                                    <h4 className="font-semibold text-gray-700 mb-2">Genetic Code</h4>
-                                                                    <div className="text-sm font-mono bg-gray-50 p-2 rounded border border-gray-200">
-                                                                        {animalToView.geneticCode}
-                                                                    </div>
-                                                                </div>
-                                                            )}
 
                                             </div>
                                         )}
