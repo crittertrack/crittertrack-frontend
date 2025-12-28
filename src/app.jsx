@@ -10302,6 +10302,11 @@ const App = () => {
     const timeoutRef = useRef(null);
     const activeEvents = ['mousemove', 'keydown', 'scroll', 'click'];
 
+    const showModalMessage = useCallback((title, message) => {
+        setModalMessage({ title, message });
+        setShowModal(true);
+    }, []);
+
     // Toggle section privacy and save to animal
     const toggleSectionPrivacy = useCallback(async (sectionName) => {
         if (!animalToView) return;
@@ -10336,11 +10341,6 @@ const App = () => {
             showModalMessage('Error', 'Failed to save privacy settings');
         }
     }, [animalToView, sectionPrivacy, authToken, API_BASE_URL, showModalMessage]);
-
-    const showModalMessage = useCallback((title, message) => {
-        setModalMessage({ title, message });
-        setShowModal(true);
-    }, []);
 
     const handleLogout = useCallback((expired = false) => {
         setAuthToken(null);
