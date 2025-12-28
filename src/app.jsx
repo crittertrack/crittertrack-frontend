@@ -11843,79 +11843,79 @@ const App = () => {
                                         {/* Tab 1: Overview */}
                                         {detailViewTab === 1 && (
                                             <div className="space-y-6">
-                                                {/* Main Card - Public Profile Style Layout */}
+                                                {/* Main Card - Two Column Layout */}
                                                 <div className="bg-white border-2 border-gray-300 rounded-lg overflow-hidden">
-                                                    {/* Card Top Section - Image Area */}
-                                                    <div className="p-4 sm:p-6 flex flex-col items-center relative pt-8">
-                                                        {/* Birthdate top-left */}
-                                                        {animalToView.birthDate && (
-                                                            <div className="absolute top-2 left-2 text-xs text-gray-600 bg-white/80 px-2 py-0.5 rounded">
-                                                                {new Date(animalToView.birthDate).toLocaleDateString()}
-                                                            </div>
-                                                        )}
-
-                                                        {/* Gender badge top-right */}
-                                                        <div className="absolute top-2 right-2">
-                                                            {animalToView.gender === 'Male' ? <Mars size={20} strokeWidth={2.5} className="text-blue-600" /> : <Venus size={20} strokeWidth={2.5} className="text-pink-600" />}
-                                                        </div>
-
-                                                        {/* Centered Profile Image */}
-                                                        <div className="flex items-center justify-center w-full h-40 mb-3">
-                                                            {(animalToView.imageUrl || animalToView.photoUrl) ? (
-                                                                <img src={animalToView.imageUrl || animalToView.photoUrl} alt={animalToView.name} className="max-w-32 max-h-32 w-auto h-auto object-contain rounded-md" />
-                                                            ) : (
-                                                                <div className="w-32 h-32 bg-gray-100 rounded-md flex items-center justify-center text-gray-400">
-                                                                    <Cat size={48} />
+                                                    <div className="flex">
+                                                        {/* Left Column - Image */}
+                                                        <div className="w-1/3 p-4 sm:p-6 flex flex-col items-center justify-center relative min-h-80">
+                                                            {/* Birthdate badge */}
+                                                            {animalToView.birthDate && (
+                                                                <div className="absolute top-2 left-2 text-xs text-gray-600 bg-white/80 px-2 py-0.5 rounded">
+                                                                    {new Date(animalToView.birthDate).toLocaleDateString()}
                                                                 </div>
                                                             )}
+
+                                                            {/* Gender badge */}
+                                                            <div className="absolute top-2 right-2">
+                                                                {animalToView.gender === 'Male' ? <Mars size={20} strokeWidth={2.5} className="text-blue-600" /> : <Venus size={20} strokeWidth={2.5} className="text-pink-600" />}
+                                                            </div>
+
+                                                            {/* Profile Image */}
+                                                            <div className="flex items-center justify-center h-40 w-full">
+                                                                {(animalToView.imageUrl || animalToView.photoUrl) ? (
+                                                                    <img src={animalToView.imageUrl || animalToView.photoUrl} alt={animalToView.name} className="max-w-32 max-h-32 w-auto h-auto object-contain rounded-md" />
+                                                                ) : (
+                                                                    <div className="w-32 h-32 bg-gray-100 rounded-md flex items-center justify-center text-gray-400">
+                                                                        <Cat size={48} />
+                                                                    </div>
+                                                                )}
+                                                            </div>
+
+                                                            {/* Icon row */}
+                                                            <div className="flex justify-center items-center space-x-2 py-2 mt-2">
+                                                                {animalToView.isOwned ? (
+                                                                    <Heart size={14} className="text-black" />
+                                                                ) : (
+                                                                    <HeartOff size={14} className="text-black" />
+                                                                )}
+                                                                {animalToView.showOnPublicProfile ? (
+                                                                    <Eye size={14} className="text-black" />
+                                                                ) : (
+                                                                    <EyeOff size={14} className="text-black" />
+                                                                )}
+                                                                {animalToView.isInMating && <Hourglass size={14} className="text-black" />}
+                                                                {animalToView.isPregnant && <Bean size={14} className="text-black" />}
+                                                                {animalToView.isNursing && <Milk size={14} className="text-black" />}
+                                                            </div>
                                                         </div>
 
-                                                        {/* Icon row - owned, public, mating, pregnant, nursing */}
-                                                        <div className="w-full flex justify-center items-center space-x-2 py-2">
-                                                            {animalToView.isOwned ? (
-                                                                <Heart size={14} className="text-black" />
-                                                            ) : (
-                                                                <HeartOff size={14} className="text-black" />
-                                                            )}
-                                                            {animalToView.showOnPublicProfile ? (
-                                                                <Eye size={14} className="text-black" />
-                                                            ) : (
-                                                                <EyeOff size={14} className="text-black" />
-                                                            )}
-                                                            {animalToView.isInMating && <Hourglass size={14} className="text-black" />}
-                                                            {animalToView.isPregnant && <Bean size={14} className="text-black" />}
-                                                            {animalToView.isNursing && <Milk size={14} className="text-black" />}
-                                                        </div>
+                                                        {/* Right Column - Info */}
+                                                        <div className="w-2/3 p-4 sm:p-6 flex flex-col justify-between border-l border-gray-300">
+                                                            {/* Top Section */}
+                                                            <div className="flex-grow">
+                                                                {/* Name */}
+                                                                <h2 className="text-2xl font-bold text-gray-800 mb-2">
+                                                                    {animalToView.prefix ? `${animalToView.prefix} ` : ''}
+                                                                    {animalToView.name}
+                                                                    {animalToView.suffix ? ` ${animalToView.suffix}` : ''}
+                                                                </h2>
 
-                                                        {/* Name Section - Below Image */}
-                                                        <div className="w-full text-center pb-2">
-                                                            <h2 className="text-2xl font-bold text-gray-800">
-                                                                {animalToView.prefix ? `${animalToView.prefix} ` : ''}
-                                                                {animalToView.name}
-                                                                {animalToView.suffix ? ` ${animalToView.suffix}` : ''}
-                                                            </h2>
-                                                        </div>
+                                                                {/* Species/Breed/Strain/CTC */}
+                                                                <p className="text-sm text-gray-600 mb-4">
+                                                                    {animalToView.species}
+                                                                    {animalToView.breed && ` • ${animalToView.breed}`}
+                                                                    {animalToView.strain && ` • ${animalToView.strain}`}
+                                                                    {animalToView.id_public && ` • ${animalToView.id_public}`}
+                                                                </p>
+                                                            </div>
 
-                                                        {/* Species/Breed/Strain/CTC Info - Below Name */}
-                                                        <div className="w-full text-center pb-2">
-                                                            <p className="text-sm text-gray-600">
-                                                                {animalToView.species}
-                                                                {animalToView.breed && ` • ${animalToView.breed}`}
-                                                                {animalToView.strain && ` • ${animalToView.strain}`}
-                                                                {animalToView.id_public && ` + ${animalToView.id_public}`}
-                                                            </p>
-                                                        </div>
-
-                                                        {/* ID bottom-right */}
-                                                        <div className="w-full flex justify-end pr-2 pb-2">
-                                                            <div className="text-xs text-gray-500">{animalToView.id_public}</div>
-                                                        </div>
-                                                    </div>
-
-                                                    {/* Status Bar at Bottom */}
-                                                    <div className="w-full bg-gray-100 py-2 text-center border-t border-gray-300">
-                                                        <div className="text-sm font-medium text-gray-700">
-                                                            {animalToView.isViewOnly ? 'Sold' : (animalToView.status || 'Unknown')}
+                                                            {/* Bottom Section - ID and Status */}
+                                                            <div className="flex justify-between items-center pt-2 border-t border-gray-300">
+                                                                <div className="text-sm font-medium text-gray-700">
+                                                                    {animalToView.isViewOnly ? 'Sold' : (animalToView.status || 'Unknown')}
+                                                                </div>
+                                                                <div className="text-xs text-gray-500">{animalToView.id_public}</div>
+                                                            </div>
                                                         </div>
                                                     </div>
                                                 </div>
