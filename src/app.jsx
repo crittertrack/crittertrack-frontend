@@ -12340,7 +12340,7 @@ const App = () => {
                                                                     }}
                                                                     className="bg-gray-50 rounded-lg border border-gray-200 p-3 cursor-pointer hover:shadow-md transition"
                                                                 >
-                                                                    <div className="w-full h-32 bg-gray-200 rounded-lg overflow-hidden flex items-center justify-center mb-3">
+                                                                    <div className="w-full h-48 bg-gray-200 rounded-lg overflow-hidden flex items-center justify-center mb-3">
                                                                         <AnimalImage src={sireData.imageUrl || sireData.photoUrl} alt={sireData.name} className="w-full h-full object-cover" iconSize={32} />
                                                                     </div>
                                                                     <div className="text-center">
@@ -12368,7 +12368,7 @@ const App = () => {
                                                                     }}
                                                                     className="bg-gray-50 rounded-lg border border-gray-200 p-3 cursor-pointer hover:shadow-md transition"
                                                                 >
-                                                                    <div className="w-full h-32 bg-gray-200 rounded-lg overflow-hidden flex items-center justify-center mb-3">
+                                                                    <div className="w-full h-48 bg-gray-200 rounded-lg overflow-hidden flex items-center justify-center mb-3">
                                                                         <AnimalImage src={damData.imageUrl || damData.photoUrl} alt={damData.name} className="w-full h-full object-cover" iconSize={32} />
                                                                     </div>
                                                                     <div className="text-center">
