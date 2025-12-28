@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useCallback, useRef, useMemo } from 'react';
 import { useParams, useNavigate, useLocation, Routes, Route } from 'react-router-dom';
 import axios from 'axios';
-import { LogOut, Cat, UserPlus, LogIn, ChevronLeft, Trash2, Edit, Save, PlusCircle, Plus, ArrowLeft, Loader2, RefreshCw, User, Users, ClipboardList, BookOpen, Settings, Mail, Globe, Bean, Milk, Search, X, Mars, Venus, Eye, EyeOff, Home, Heart, HeartOff, HeartHandshake, Bell, XCircle, CheckCircle, Download, FileText, Link, AlertCircle, Check, DollarSign, Archive, ArrowLeftRight, RotateCcw, Info, Hourglass, MessageSquare, Ban, Flag } from 'lucide-react';
+import { LogOut, Cat, UserPlus, LogIn, ChevronLeft, Trash2, Edit, Save, PlusCircle, Plus, ArrowLeft, Loader2, RefreshCw, User, Users, ClipboardList, BookOpen, Settings, Mail, Globe, Bean, Milk, Search, X, Mars, Venus, Eye, EyeOff, Home, Heart, HeartOff, HeartHandshake, Bell, XCircle, CheckCircle, Download, FileText, Link, AlertCircle, Check, DollarSign, Archive, ArrowLeftRight, RotateCcw, Info, Hourglass, MessageSquare, Ban, Flag, Scissors } from 'lucide-react';
 import jsPDF from 'jspdf';
 import html2canvas from 'html2canvas';
 import 'flag-icons/css/flag-icons.min.css';
@@ -6647,8 +6647,8 @@ const AnimalForm = ({
                                 <h3 className="text-lg font-semibold text-gray-700 border-b pb-2">Mating & Pregnancy</h3>
                                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                                     <div className="md:col-span-2">
-                                        <label className="block text-sm font-medium text-gray-700 mb-2">Mating Date(s)</label>
-                                        <input type="text" name="matingDates" value={formData.matingDates} onChange={handleChange} 
+                                        <label className="block text-sm font-medium text-gray-700 mb-2">Mating Date</label>
+                                        <input type="date" name="matingDates" value={formData.matingDates} onChange={handleChange} 
                                             className="block w-full p-2 border border-gray-300 rounded-md shadow-sm focus:ring-primary focus:border-primary" 
                                             placeholder="e.g., 2025-01-15, 2025-01-16" />
                                     </div>
@@ -11920,7 +11920,7 @@ const App = () => {
                                                                     )}
                                                                     {animalToView.isNeutered && (
                                                                         <div className="flex items-center gap-1 bg-gray-100 px-2 py-1 rounded text-sm">
-                                                                            <Check size={16} className="text-gray-600" />
+                                                                            <Scissors size={16} className="text-gray-600" />
                                                                             <span>Neutered</span>
                                                                         </div>
                                                                     )}
@@ -11965,10 +11965,10 @@ const App = () => {
                                                                 </div>
                                                             </div>
 
-                                                            {/* Health Snapshot */}
+                                                            {/* Health */}
                                                             {(animalToView.currentWeight || animalToView.bcs || animalToView.medicalConditions || animalToView.medications) && (
                                                                 <div className="mb-4 pb-4 border-b border-gray-200">
-                                                                    <h4 className="font-semibold text-gray-700 mb-2">Health Snapshot</h4>
+                                                                    <h4 className="font-semibold text-gray-700 mb-2">Health</h4>
                                                                     <div className="grid grid-cols-2 gap-2 text-sm">
                                                                         {animalToView.currentWeight && (
                                                                             <div>
@@ -12006,7 +12006,7 @@ const App = () => {
                                                                     <div className="text-sm space-y-1">
                                                                         {animalToView.microchipNumber && <div><strong>Microchip:</strong> {animalToView.microchipNumber}</div>}
                                                                         {animalToView.registryCode && <div><strong>Registry:</strong> {animalToView.registryCode}</div>}
-                                                                        {animalToView.breederyId && <div><strong>Breeder ID:</strong> {animalToView.breederyId}</div>}
+                                                                        {animalToView.breederyId && <div><strong>Identification:</strong> {animalToView.breederyId}</div>}
                                                                     </div>
                                                                 </div>
                                                             )}
@@ -12178,7 +12178,7 @@ const App = () => {
                                                 <div className="bg-gray-50 p-4 rounded-lg border border-gray-200 space-y-4">
                                                     <h3 className="text-lg font-semibold text-gray-700">Identification Numbers</h3>
                                                     <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm">
-                                                        <div><span className="text-gray-600">Breeder ID:</span> <strong>{animalToView.breederyId || '—'}</strong></div>
+                                                        <div><span className="text-gray-600">Identification:</span> <strong>{animalToView.breederyId || '—'}</strong></div>
                                                         <div><span className="text-gray-600">Microchip:</span> <strong>{animalToView.microchipNumber || '—'}</strong></div>
                                                         <div><span className="text-gray-600">Pedigree Reg ID:</span> <strong>{animalToView.pedigreeRegistrationId || '—'}</strong></div>
                                                     </div>
