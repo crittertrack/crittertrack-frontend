@@ -11896,7 +11896,7 @@ const App = () => {
                                                         </div>
 
                                                         {/* Right Column - Info */}
-                                                        <div className="w-2/3 p-4 sm:p-6 flex flex-col justify-start border-l border-gray-300 space-y-3">
+                                                        <div className="w-2/3 p-4 sm:p-6 flex flex-col border-l border-gray-300 space-y-3">
                                                             {/* Species/Breed/Strain/CTC - At Top */}
                                                             <p className="text-sm text-gray-600">
                                                                 {animalToView.species}
@@ -11949,57 +11949,16 @@ const App = () => {
                                                                 </p>
                                                             )}
 
-                                                            {/* Active Tags/Status Badges */}
-                                                            <div className="flex gap-2 flex-wrap pt-2">
-                                                                {animalToView.isPregnant && (
-                                                                    <div className="flex items-center gap-1 bg-purple-100 px-2 py-1 rounded text-sm">
-                                                                        <Bean size={14} className="text-purple-600" />
-                                                                        <span>Pregnant</span>
-                                                                    </div>
-                                                                )}
-                                                                {animalToView.isNursing && (
-                                                                    <div className="flex items-center gap-1 bg-purple-100 px-2 py-1 rounded text-sm">
-                                                                        <Milk size={14} className="text-purple-600" />
-                                                                        <span>Nursing</span>
-                                                                    </div>
-                                                                )}
-                                                                {animalToView.isInMating && (
-                                                                    <div className="flex items-center gap-1 bg-purple-100 px-2 py-1 rounded text-sm">
-                                                                        <Hourglass size={14} className="text-purple-600" />
-                                                                        <span>In Mating</span>
-                                                                    </div>
-                                                                )}
-                                                                {animalToView.isNeutered && (
-                                                                    <div className="flex items-center gap-1 bg-gray-100 px-2 py-1 rounded text-sm">
-                                                                        <Scissors size={14} className="text-gray-600" />
-                                                                        <span>Neutered</span>
-                                                                    </div>
-                                                                )}
-                                                                <div className={`flex items-center gap-1 px-2 py-1 rounded text-sm ${
-                                                                    animalToView.isOwned
-                                                                        ? 'bg-red-100'
-                                                                        : 'bg-gray-100'
-                                                                }`}>
-                                                                    {animalToView.isOwned ? (
-                                                                        <Heart size={14} className="text-red-600" />
-                                                                    ) : (
-                                                                        <HeartOff size={14} className="text-gray-600" />
-                                                                    )}
-                                                                    <span>{animalToView.isOwned ? 'Owned by Me' : 'Owned by Other'}</span>
+                                                            {/* Tags at Bottom */}
+                                                            {animalToView.tags && animalToView.tags.length > 0 && (
+                                                                <div className="flex gap-2 flex-wrap pt-4 border-t border-gray-200 mt-auto">
+                                                                    {animalToView.tags.map((tag, idx) => (
+                                                                        <span key={idx} className="bg-blue-100 text-blue-700 px-2 py-1 rounded text-xs font-medium">
+                                                                            {tag}
+                                                                        </span>
+                                                                    ))}
                                                                 </div>
-                                                                <div className={`flex items-center gap-1 px-2 py-1 rounded text-sm ${
-                                                                    animalToView.showOnPublicProfile
-                                                                        ? 'bg-green-100'
-                                                                        : 'bg-gray-100'
-                                                                }`}>
-                                                                    {animalToView.showOnPublicProfile ? (
-                                                                        <Eye size={14} className="text-green-600" />
-                                                                    ) : (
-                                                                        <EyeOff size={14} className="text-gray-600" />
-                                                                    )}
-                                                                    <span>{animalToView.showOnPublicProfile ? 'Public' : 'Private'}</span>
-                                                                </div>
-                                                            </div>
+                                                            )}
                                                         </div>
                                                     </div>
                                                 </div>
