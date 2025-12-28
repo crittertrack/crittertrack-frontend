@@ -2497,6 +2497,14 @@ const LitterManagement = ({ authToken, API_BASE_URL, userProfile, showModalMessa
             try {
                 // Fetch animals and litters - they return immediately after setting data
                 await Promise.all([fetchMyAnimals(), fetchLitters()]);
+                
+                // Run one-time migration to set isDisplay: true for all existing animals
+                const migrationKey = 'crittertrack_visibility_migration_v1';
+                if (!localStorage.getItem(migrationKey)) {
+                    console.log('[Migration] Running visibility migration...');
+                    await migrateAnimalVisibility();
+                    localStorage.setItem(migrationKey, 'completed');
+                }
             } catch (error) {
                 console.error('Error loading data:', error);
             } finally {
@@ -2685,6 +2693,42 @@ const LitterManagement = ({ authToken, API_BASE_URL, userProfile, showModalMessa
         } catch (error) {
             console.error('Error fetching animals:', error);
             setMyAnimals([]);
+        }
+    };
+
+    // Migration function to set isDisplay to true for all existing animals
+    const migrateAnimalVisibility = async () => {
+        try {
+            const response = await axios.get(`${API_BASE_URL}/animals`, {
+                headers: { Authorization: `Bearer ${authToken}` }
+            });
+            const animalsData = response.data || [];
+            
+            console.log('[migrateAnimalVisibility] Migrating', animalsData.length, 'animals');
+            
+            let updated = 0;
+            for (const animal of animalsData) {
+                if (animal.isDisplay === false || animal.isDisplay === undefined || animal.isDisplay === null) {
+                    try {
+                        await axios.put(`${API_BASE_URL}/animals/${animal.id_public}`, 
+                            { ...animal, isDisplay: true },
+                            { headers: { Authorization: `Bearer ${authToken}` } }
+                        );
+                        updated++;
+                    } catch (err) {
+                        console.error(`Failed to update animal ${animal.id_public}:`, err);
+                    }
+                }
+            }
+            
+            console.log(`[migrateAnimalVisibility] Updated ${updated} animals to isDisplay: true`);
+            showModalMessage('Migration Complete', `Updated ${updated} animal(s) to have public profile enabled by default.`);
+            
+            // Refresh animals list
+            await fetchMyAnimals();
+        } catch (error) {
+            console.error('Error migrating animals:', error);
+            showModalMessage('Migration Error', 'Failed to migrate animal visibility settings.');
         }
     };
 
@@ -5044,7 +5088,7 @@ const AnimalForm = ({
             isNursing: false,
             isInMating: false,
             isOwned: true,
-            isDisplay: false,
+            isDisplay: true,
             // New fields defaults
             microchipNumber: '',
             pedigreeRegistrationId: '',
