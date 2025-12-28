@@ -5935,6 +5935,13 @@ const AnimalForm = ({
                 {/* Tab 3: Status & Privacy */}
                 {activeTab === 3 && (
                     <div className="space-y-6">
+                        {/* This tab is intentionally empty - Status & Privacy fields are in Tab 2 */}
+                    </div>
+                )}
+                
+                {/* Tab 4: Identification */}
+                {activeTab === 4 && (
+                    <div className="space-y-6">
                         {/* Identification Numbers */}
                         <div className="bg-gray-50 p-4 rounded-lg border border-gray-200 space-y-4">
                             <h3 className="text-lg font-semibold text-gray-700 border-b pb-2">Identification Numbers</h3>
@@ -6031,12 +6038,7 @@ const AnimalForm = ({
                                 </div>
                             )}
                         </div>
-                    </div>
-                )}
-                
-                {/* Tab 4: Identification */}
-                {activeTab === 4 && (
-                    <div className="space-y-6">
+                        
                         {/* Appearance */}
                         <div className="bg-gray-50 p-4 rounded-lg border border-gray-200 space-y-4">
                             <h3 className="text-lg font-semibold text-gray-700 border-b pb-2">Appearance</h3>
