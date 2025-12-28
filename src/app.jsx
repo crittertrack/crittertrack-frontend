@@ -12259,6 +12259,19 @@ const App = () => {
                                                                     )}
                                                                 </div>
                                                             )}
+                                                            
+                                                            {/* Tags at bottom of right column */}
+                                                            {animalToView.tags && animalToView.tags.length > 0 && (
+                                                                <div className="border-t border-gray-200 pt-3 mt-3">
+                                                                    <div className="flex flex-wrap gap-2">
+                                                                        {animalToView.tags.map((tag, idx) => (
+                                                                            <span key={idx} className="inline-flex items-center bg-primary text-black text-xs font-semibold px-2 py-1 rounded-full">
+                                                                                {tag}
+                                                                            </span>
+                                                                        ))}
+                                                                    </div>
+                                                                </div>
+                                                            )}
                                                         </div>
                                                     </div>
                                                 </div>
@@ -12424,19 +12437,6 @@ const App = () => {
                                                                 </div>
                                                             )}
 
-                                                {/* Tags */}
-                                                {animalToView.tags && animalToView.tags.length > 0 && (
-                                                    <div className="bg-white border-2 border-gray-300 rounded-lg p-6">
-                                                        <h3 className="text-lg font-semibold text-gray-800 mb-3">Tags</h3>
-                                                        <div className="flex flex-wrap gap-2">
-                                                            {animalToView.tags.map((tag, idx) => (
-                                                                <span key={idx} className="inline-flex items-center bg-primary text-black text-sm font-semibold px-3 py-1 rounded-full">
-                                                                    {tag}
-                                                                </span>
-                                                            ))}
-                                                        </div>
-                                                    </div>
-                                                )}
                                             </div>
                                         )}
 
