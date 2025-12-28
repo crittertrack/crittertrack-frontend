@@ -11898,6 +11898,20 @@ const App = () => {
                                                                     </span>
                                                                 </div>
 
+                                                                {/* Appearance */}
+                                                                {(animalToView.color || animalToView.coat || animalToView.coatPattern || animalToView.earset) && (
+                                                                    <div className="mb-3 text-sm">
+                                                                        <span className="text-gray-600">Appearance:</span>
+                                                                        <span className="ml-2 font-semibold">
+                                                                            {[
+                                                                                animalToView.color,
+                                                                                animalToView.coatPattern,
+                                                                                animalToView.coat,
+                                                                                animalToView.earset
+                                                                            ].filter(Boolean).join(' - ')}
+                                                                        </span>
+                                                                    </div>
+                                                                )}
                                                                 {/* Status Icons */}
                                                                 <div className="flex gap-3 flex-wrap">
                                                                     {animalToView.isPregnant && (
@@ -12007,19 +12021,6 @@ const App = () => {
                                                                         {animalToView.microchipNumber && <div><strong>Microchip:</strong> {animalToView.microchipNumber}</div>}
                                                                         {animalToView.registryCode && <div><strong>Registry:</strong> {animalToView.registryCode}</div>}
                                                                         {animalToView.breederyId && <div><strong>Identification:</strong> {animalToView.breederyId}</div>}
-                                                                    </div>
-                                                                </div>
-                                                            )}
-
-                                                            {/* Appearance */}
-                                                            {(animalToView.color || animalToView.coat || animalToView.coatPattern || animalToView.earset) && (
-                                                                <div className="mb-4">
-                                                                    <h4 className="font-semibold text-gray-700 mb-2">Appearance</h4>
-                                                                    <div className="text-sm space-y-1">
-                                                                        {animalToView.color && <div><strong>Color:</strong> {animalToView.color}</div>}
-                                                                        {animalToView.coat && <div><strong>Coat:</strong> {animalToView.coat}</div>}
-                                                                        {animalToView.coatPattern && <div><strong>Pattern:</strong> {animalToView.coatPattern}</div>}
-                                                                        {animalToView.earset && <div><strong>Earset:</strong> {animalToView.earset}</div>}
                                                                     </div>
                                                                 </div>
                                                             )}
