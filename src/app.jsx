@@ -10213,15 +10213,26 @@ const App = () => {
                     setDamData(response.data);
                 }
                 
-                // Fetch offspring
-                if (animalToView.offspring && animalToView.offspring.length > 0) {
-                    const offspringPromises = animalToView.offspring.map(child => 
-                        axios.get(`${API_BASE_URL}/animals/${child.id}`, {
-                            headers: { Authorization: `Bearer ${authToken}` }
-                        }).then(r => r.data).catch(e => { console.error('Error fetching offspring:', e); return null; })
-                    );
-                    const offspringResults = await Promise.all(offspringPromises);
-                    setOffspringData(offspringResults.filter(o => o !== null));
+                // Fetch offspring using the dedicated offspring endpoint
+                try {
+                    const offspringResponse = await axios.get(`${API_BASE_URL}/animals/${animalToView.id_public}/offspring`, {
+                        headers: { Authorization: `Bearer ${authToken}` }
+                    });
+                    
+                    const litters = offspringResponse.data || [];
+                    // Flatten offspring from all litters into a single array
+                    const allOffspring = [];
+                    litters.forEach(litter => {
+                        if (litter.offspring && Array.isArray(litter.offspring)) {
+                            allOffspring.push(...litter.offspring);
+                        }
+                    });
+                    
+                    console.log('Fetched offspring from API:', allOffspring);
+                    setOffspringData(allOffspring);
+                } catch (e) {
+                    console.log('No offspring endpoint available or no offspring found:', e.message);
+                    setOffspringData([]);
                 }
             } catch (error) {
                 console.error('Error fetching pedigree data:', error);
@@ -12463,44 +12474,38 @@ const App = () => {
                                                 )}
 
                                                 {/* Offspring Card */}
-                                                {animalToView.offspring && animalToView.offspring.length > 0 && (
+                                                {offspringData && offspringData.length > 0 && (
                                                     <div className="bg-white border-2 border-gray-300 rounded-lg p-4">
-                                                        <h4 className="font-semibold text-gray-700 mb-4">Offspring ({animalToView.offspring.length})</h4>
-                                                        {offspringData.length > 0 ? (
-                                                            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-                                                                {offspringData.map(offspring => (
-                                                                    <div 
-                                                                        key={offspring.id}
-                                                                        onClick={() => {
-                                                                            setAnimalToView(offspring);
-                                                                            setDetailViewTab(1);
-                                                                        }}
-                                                                        className="bg-gray-50 rounded-lg border border-gray-200 p-3 cursor-pointer hover:shadow-md transition"
-                                                                    >
-                                                                        <div className="w-full h-48 bg-gray-200 rounded-lg overflow-hidden flex items-center justify-center mb-3">
-                                                                            <AnimalImage src={offspring.imageUrl || offspring.photoUrl} alt={offspring.name} className="w-full h-full object-cover" iconSize={32} />
-                                                                        </div>
-                                                                        <div className="text-center">
-                                                                            <p className="font-semibold text-gray-800 text-sm">
-                                                                                {offspring.prefix ? `${offspring.prefix} ` : ''}{offspring.name}{offspring.suffix ? ` ${offspring.suffix}` : ''}
-                                                                            </p>
-                                                                            <p className="text-xs text-gray-600 mt-1">
-                                                                                {offspring.species} • {offspring.gender}
-                                                                            </p>
-                                                                            {offspring.birthDate && (
-                                                                                <p className="text-xs text-gray-500 mt-2">
-                                                                                    Born: {new Date(offspring.birthDate).toLocaleDateString()}
-                                                                                </p>
-                                                                            )}
-                                                                        </div>
+                                                        <h4 className="font-semibold text-gray-700 mb-4">Offspring ({offspringData.length})</h4>
+                                                        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                                                            {offspringData.map(offspring => (
+                                                                <div 
+                                                                    key={offspring.id_public}
+                                                                    onClick={() => {
+                                                                        setAnimalToView(offspring);
+                                                                        setDetailViewTab(1);
+                                                                    }}
+                                                                    className="bg-gray-50 rounded-lg border border-gray-200 p-3 cursor-pointer hover:shadow-md transition"
+                                                                >
+                                                                    <div className="w-full h-48 bg-gray-200 rounded-lg overflow-hidden flex items-center justify-center mb-3">
+                                                                        <AnimalImage src={offspring.imageUrl || offspring.photoUrl} alt={offspring.name} className="w-full h-full object-cover" iconSize={32} />
                                                                     </div>
-                                                                ))}
-                                                            </div>
-                                                        ) : (
-                                                            <div className="text-center text-sm text-gray-500 py-4">
-                                                                <p>Offspring found but loading details...</p>
-                                                            </div>
-                                                        )}
+                                                                    <div className="text-center">
+                                                                        <p className="font-semibold text-gray-800 text-sm">
+                                                                            {offspring.prefix ? `${offspring.prefix} ` : ''}{offspring.name}{offspring.suffix ? ` ${offspring.suffix}` : ''}
+                                                                        </p>
+                                                                        <p className="text-xs text-gray-600 mt-1">
+                                                                            {offspring.species} • {offspring.gender}
+                                                                        </p>
+                                                                        {offspring.birthDate && (
+                                                                            <p className="text-xs text-gray-500 mt-2">
+                                                                                Born: {new Date(offspring.birthDate).toLocaleDateString()}
+                                                                            </p>
+                                                                        )}
+                                                                    </div>
+                                                                </div>
+                                                            ))}
+                                                        </div>
                                                     </div>
                                                 )}
 
