@@ -5139,6 +5139,17 @@ const AnimalForm = ({
             legalStatus: '',
         }
     );
+    // Growth tracking state
+    const [growthRecords, setGrowthRecords] = useState(
+        animalToEdit?.growthRecords || []
+    );
+    const [newMeasurement, setNewMeasurement] = useState({
+        date: new Date().toISOString().substring(0, 10),
+        weight: '',
+        length: '',
+        notes: ''
+    });
+    
     // Keep a ref for immediate pedigree selection (avoids lost state if user selects then immediately saves)
     const pedigreeRef = useRef({ father: (animalToEdit && animalToEdit.fatherId_public) || null, mother: (animalToEdit && animalToEdit.motherId_public) || null });
     // Small cached info for selected parents so we can show name/prefix next to CTID
@@ -5525,6 +5536,9 @@ const AnimalForm = ({
             // Prepare explicit payload to send to the API and log it for debugging
             // Merge in any immediate pedigree selections stored in `pedigreeRef` to avoid race conditions
             const payloadToSave = { ...formData };
+            
+            // Include growth records
+            payloadToSave.growthRecords = growthRecords;
             
             // Handle image deletion
             if (deleteImage && animalToEdit) {
@@ -6052,44 +6066,212 @@ const AnimalForm = ({
                             </div>
                         </div>
                         
-                        {/* Measurements */}
+                        {/* Measurements & Growth Tracking */}
                         <div className="bg-gray-50 p-4 rounded-lg border border-gray-200 space-y-4">
-                            <h3 className="text-lg font-semibold text-gray-700 border-b pb-2">Measurements</h3>
-                            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                                <div>
-                                    <label className="block text-sm font-medium text-gray-700">Body Weight <span className="text-xs text-gray-500">(grams or lbs)</span></label>
-                                    <input type="text" name="bodyWeight" value={formData.bodyWeight} onChange={handleChange} 
-                                        className="mt-1 block w-full p-2 border border-gray-300 rounded-md shadow-sm focus:ring-primary focus:border-primary" 
-                                        placeholder="e.g., 450g or 15 lbs" />
-                                </div>
-                                
-                                <div>
-                                    <label className="block text-sm font-medium text-gray-700">Body Length <span className="text-xs text-gray-500">(cm or in)</span></label>
-                                    <input type="text" name="bodyLength" value={formData.bodyLength} onChange={handleChange} 
-                                        className="mt-1 block w-full p-2 border border-gray-300 rounded-md shadow-sm focus:ring-primary focus:border-primary" 
-                                        placeholder="e.g., 20cm" />
-                                </div>
-                                
-                                {['Dog', 'Cat', 'Rabbit'].includes(formData.species) && (
+                            <h3 className="text-lg font-semibold text-gray-700 border-b pb-2">Measurements & Growth Tracking</h3>
+                            
+                            {/* Current Measurements */}
+                            <div className="space-y-2">
+                                <h4 className="text-sm font-semibold text-gray-600">Current Measurements</h4>
+                                <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                                     <div>
-                                        <label className="block text-sm font-medium text-gray-700">Height at Withers <span className="text-xs text-gray-500">(cm or in)</span></label>
-                                        <input type="text" name="heightAtWithers" value={formData.heightAtWithers} onChange={handleChange} 
-                                            className="mt-1 block w-full p-2 border border-gray-300 rounded-md shadow-sm focus:ring-primary focus:border-primary" />
+                                        <label className="block text-sm font-medium text-gray-700">Body Weight <span className="text-xs text-gray-500">(grams or lbs)</span></label>
+                                        <input type="text" name="bodyWeight" value={formData.bodyWeight} onChange={handleChange} 
+                                            className="mt-1 block w-full p-2 border border-gray-300 rounded-md shadow-sm focus:ring-primary focus:border-primary" 
+                                            placeholder="e.g., 450g or 15 lbs" />
+                                    </div>
+                                    
+                                    <div>
+                                        <label className="block text-sm font-medium text-gray-700">Body Length <span className="text-xs text-gray-500">(cm or in)</span></label>
+                                        <input type="text" name="bodyLength" value={formData.bodyLength} onChange={handleChange} 
+                                            className="mt-1 block w-full p-2 border border-gray-300 rounded-md shadow-sm focus:ring-primary focus:border-primary" 
+                                            placeholder="e.g., 20cm" />
+                                    </div>
+                                    
+                                    {['Dog', 'Cat', 'Rabbit'].includes(formData.species) && (
+                                        <div>
+                                            <label className="block text-sm font-medium text-gray-700">Height at Withers <span className="text-xs text-gray-500">(cm or in)</span></label>
+                                            <input type="text" name="heightAtWithers" value={formData.heightAtWithers} onChange={handleChange} 
+                                                className="mt-1 block w-full p-2 border border-gray-300 rounded-md shadow-sm focus:ring-primary focus:border-primary" />
+                                        </div>
+                                    )}
+                                    
+                                    <div>
+                                        <label className="block text-sm font-medium text-gray-700">Body Condition Score</label>
+                                        <select name="bodyConditionScore" value={formData.bodyConditionScore} onChange={handleChange} 
+                                            className="mt-1 block w-full p-2 border border-gray-300 rounded-md shadow-sm focus:ring-primary focus:border-primary">
+                                            <option value="">Select BCS</option>
+                                            <option value="1">1 - Emaciated</option>
+                                            <option value="2">2 - Thin</option>
+                                            <option value="3">3 - Ideal</option>
+                                            <option value="4">4 - Overweight</option>
+                                            <option value="5">5 - Obese</option>
+                                        </select>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            {/* Growth Records */}
+                            <div className="space-y-3 mt-6">
+                                <h4 className="text-sm font-semibold text-gray-600">Growth History</h4>
+                                
+                                {/* Add New Measurement */}
+                                <div className="bg-white p-3 rounded-lg border border-gray-300 space-y-3">
+                                    <p className="text-xs font-medium text-gray-600">Add New Measurement</p>
+                                    <div className="grid grid-cols-1 md:grid-cols-4 gap-3">
+                                        <div>
+                                            <label className="block text-xs font-medium text-gray-700">Date</label>
+                                            <input 
+                                                type="date" 
+                                                value={newMeasurement.date}
+                                                onChange={(e) => setNewMeasurement({...newMeasurement, date: e.target.value})}
+                                                className="mt-1 block w-full p-2 text-sm border border-gray-300 rounded-md shadow-sm focus:ring-primary focus:border-primary" 
+                                            />
+                                        </div>
+                                        <div>
+                                            <label className="block text-xs font-medium text-gray-700">Weight</label>
+                                            <input 
+                                                type="text" 
+                                                value={newMeasurement.weight}
+                                                onChange={(e) => setNewMeasurement({...newMeasurement, weight: e.target.value})}
+                                                placeholder="e.g., 450g"
+                                                className="mt-1 block w-full p-2 text-sm border border-gray-300 rounded-md shadow-sm focus:ring-primary focus:border-primary" 
+                                            />
+                                        </div>
+                                        <div>
+                                            <label className="block text-xs font-medium text-gray-700">Length (optional)</label>
+                                            <input 
+                                                type="text" 
+                                                value={newMeasurement.length}
+                                                onChange={(e) => setNewMeasurement({...newMeasurement, length: e.target.value})}
+                                                placeholder="e.g., 20cm"
+                                                className="mt-1 block w-full p-2 text-sm border border-gray-300 rounded-md shadow-sm focus:ring-primary focus:border-primary" 
+                                            />
+                                        </div>
+                                        <div>
+                                            <label className="block text-xs font-medium text-gray-700">Notes</label>
+                                            <input 
+                                                type="text" 
+                                                value={newMeasurement.notes}
+                                                onChange={(e) => setNewMeasurement({...newMeasurement, notes: e.target.value})}
+                                                placeholder="e.g., pregnant, sick"
+                                                className="mt-1 block w-full p-2 text-sm border border-gray-300 rounded-md shadow-sm focus:ring-primary focus:border-primary" 
+                                            />
+                                        </div>
+                                    </div>
+                                    <button
+                                        type="button"
+                                        onClick={() => {
+                                            if (newMeasurement.date && newMeasurement.weight) {
+                                                setGrowthRecords([...growthRecords, {...newMeasurement, id: Date.now()}]);
+                                                setNewMeasurement({
+                                                    date: new Date().toISOString().substring(0, 10),
+                                                    weight: '',
+                                                    length: '',
+                                                    notes: ''
+                                                });
+                                            }
+                                        }}
+                                        className="px-3 py-1.5 text-sm bg-primary hover:bg-primary-dark text-black rounded-md transition"
+                                    >
+                                        + Add Measurement
+                                    </button>
+                                </div>
+                                
+                                {/* Growth Chart Visualization */}
+                                {growthRecords.length > 0 && (
+                                    <div className="bg-white p-4 rounded-lg border border-gray-300">
+                                        <h5 className="text-xs font-semibold text-gray-600 mb-3">Growth Curve</h5>
+                                        <div className="relative h-48 border border-gray-200 rounded">
+                                            {/* Simple SVG chart */}
+                                            {(() => {
+                                                const sorted = [...growthRecords].sort((a, b) => new Date(a.date) - new Date(b.date));
+                                                if (sorted.length === 0) return null;
+                                                
+                                                // Extract numeric weight values
+                                                const weights = sorted.map(r => {
+                                                    const match = r.weight.match(/[\d.]+/);
+                                                    return match ? parseFloat(match[0]) : 0;
+                                                });
+                                                
+                                                const maxWeight = Math.max(...weights);
+                                                const minWeight = Math.min(...weights);
+                                                const weightRange = maxWeight - minWeight || 1;
+                                                
+                                                const width = 100;
+                                                const height = 100;
+                                                const padding = 10;
+                                                
+                                                const points = sorted.map((record, i) => {
+                                                    const x = padding + ((i / (sorted.length - 1 || 1)) * (width - 2 * padding));
+                                                    const y = height - padding - (((weights[i] - minWeight) / weightRange) * (height - 2 * padding));
+                                                    return { x, y, record };
+                                                });
+                                                
+                                                const pathData = points.map((p, i) => 
+                                                    `${i === 0 ? 'M' : 'L'} ${p.x} ${p.y}`
+                                                ).join(' ');
+                                                
+                                                return (
+                                                    <svg viewBox={`0 0 ${width} ${height}`} className="w-full h-full">
+                                                        {/* Grid lines */}
+                                                        {[0, 25, 50, 75, 100].map(y => (
+                                                            <line key={y} x1={padding} y1={y} x2={width - padding} y2={y} 
+                                                                stroke="#e5e7eb" strokeWidth="0.5" />
+                                                        ))}
+                                                        
+                                                        {/* Growth line */}
+                                                        <path d={pathData} fill="none" stroke="#3b82f6" strokeWidth="2" />
+                                                        
+                                                        {/* Data points */}
+                                                        {points.map((p, i) => (
+                                                            <g key={i}>
+                                                                <circle cx={p.x} cy={p.y} r="2" fill="#3b82f6" />
+                                                                <title>{`${p.record.date}: ${p.record.weight}${p.record.notes ? ' (' + p.record.notes + ')' : ''}`}</title>
+                                                            </g>
+                                                        ))}
+                                                    </svg>
+                                                );
+                                            })()}
+                                        </div>
+                                        <p className="text-xs text-gray-500 mt-2">Hover over points to see details</p>
                                     </div>
                                 )}
                                 
-                                <div>
-                                    <label className="block text-sm font-medium text-gray-700">Body Condition Score</label>
-                                    <select name="bodyConditionScore" value={formData.bodyConditionScore} onChange={handleChange} 
-                                        className="mt-1 block w-full p-2 border border-gray-300 rounded-md shadow-sm focus:ring-primary focus:border-primary">
-                                        <option value="">Select BCS</option>
-                                        <option value="1">1 - Emaciated</option>
-                                        <option value="2">2 - Thin</option>
-                                        <option value="3">3 - Ideal</option>
-                                        <option value="4">4 - Overweight</option>
-                                        <option value="5">5 - Obese</option>
-                                    </select>
-                                </div>
+                                {/* Records List */}
+                                {growthRecords.length > 0 && (
+                                    <div className="space-y-2">
+                                        <h5 className="text-xs font-semibold text-gray-600">Recorded Measurements</h5>
+                                        <div className="max-h-48 overflow-y-auto space-y-2">
+                                            {[...growthRecords].sort((a, b) => new Date(b.date) - new Date(a.date)).map((record, idx) => (
+                                                <div key={record.id || idx} className="flex items-center justify-between bg-white p-2 rounded border border-gray-200 text-sm">
+                                                    <div className="flex-1">
+                                                        <span className="font-medium">{record.date}</span>
+                                                        <span className="mx-2">•</span>
+                                                        <span className="text-gray-700">{record.weight}</span>
+                                                        {record.length && (
+                                                            <>
+                                                                <span className="mx-2">•</span>
+                                                                <span className="text-gray-700">{record.length}</span>
+                                                            </>
+                                                        )}
+                                                        {record.notes && (
+                                                            <span className="ml-2 text-xs text-gray-500 italic">({record.notes})</span>
+                                                        )}
+                                                    </div>
+                                                    <button
+                                                        type="button"
+                                                        onClick={() => setGrowthRecords(growthRecords.filter(r => r.id !== record.id))}
+                                                        className="text-red-500 hover:text-red-700 p-1"
+                                                        title="Delete measurement"
+                                                    >
+                                                        <Trash2 size={14} />
+                                                    </button>
+                                                </div>
+                                            ))}
+                                        </div>
+                                    </div>
+                                )}
                             </div>
                         </div>
                     </div>
