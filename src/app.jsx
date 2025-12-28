@@ -11739,57 +11739,59 @@ const App = () => {
                                 };
                                 return (
                                     <>
-                                    <div className="w-full max-w-4xl p-6">
-                                        <div className="flex items-start justify-between mb-6">
-                                            <button onClick={() => navigate('/')} className="flex items-center text-gray-600 hover:text-gray-800 font-medium">
-                                                <ArrowLeft size={20} className="mr-2" />
-                                                Back to Dashboard
-                                            </button>
-                                            <div className="flex flex-wrap items-center gap-2">
-                                                <button
-                                                    onClick={handleShareAnimal}
-                                                    className="p-2 bg-primary hover:bg-primary/90 text-black font-semibold rounded-lg transition flex items-center justify-center"
-                                                    title={copySuccessAnimal ? 'Link Copied!' : 'Share Link'}
-                                                >
-                                                    <Link size={18} />
+                                    <div className="w-full max-w-4xl mx-auto">
+                                        <div className="bg-white border border-gray-300 rounded-t-lg p-6 mb-0">
+                                            <div className="flex items-start justify-between mb-0">
+                                                <button onClick={() => navigate('/')} className="flex items-center text-gray-600 hover:text-gray-800 font-medium">
+                                                    <ArrowLeft size={20} className="mr-2" />
+                                                    Back to Dashboard
                                                 </button>
-                                                {userProfile && animalToView.ownerId_public === userProfile.id_public && !animalToView.isViewOnly && (
-                                                    <>
-                                                        <button 
-                                                            data-tutorial-target="edit-animal-btn"
-                                                            onClick={() => { setAnimalToEdit(animalToView); setSpeciesToAdd(animalToView.species); navigate('/edit-animal'); }} 
-                                                            className="bg-primary hover:bg-primary/90 text-black font-semibold py-2 px-4 rounded-lg"
-                                                        >
-                                                            Edit
-                                                        </button>
-                                                        <button 
-                                                            onClick={() => { 
-                                                                setPreSelectedTransferAnimal(animalToView);
-                                                                setPreSelectedTransactionType('animal-sale');
-                                                                navigate('/budget');
-                                                            }}
-                                                            data-tutorial-target="transfer-animal-btn"
-                                                            className="bg-accent hover:bg-accent/90 text-white font-semibold py-2 px-4 rounded-lg transition flex items-center gap-2"
-                                                        >
-                                                            <ArrowLeftRight size={16} />
-                                                            Transfer
-                                                        </button>
-                                                    </>
-                                                )}
-                                                {animalToView.isViewOnly && (
+                                                <div className="flex flex-wrap items-center gap-2">
                                                     <button
-                                                        onClick={() => handleHideViewOnlyAnimal(animalToView.id_public)}
-                                                        className="px-3 py-1.5 bg-red-500 hover:bg-red-600 text-white font-semibold rounded-lg transition flex items-center gap-2"
+                                                        onClick={handleShareAnimal}
+                                                        className="p-2 bg-primary hover:bg-primary/90 text-black font-semibold rounded-lg transition flex items-center justify-center"
+                                                        title={copySuccessAnimal ? 'Link Copied!' : 'Share Link'}
                                                     >
-                                                        <Archive size={16} />
-                                                        Hide
+                                                        <Link size={18} />
                                                     </button>
-                                                )}
+                                                    {userProfile && animalToView.ownerId_public === userProfile.id_public && !animalToView.isViewOnly && (
+                                                        <>
+                                                            <button 
+                                                                data-tutorial-target="edit-animal-btn"
+                                                                onClick={() => { setAnimalToEdit(animalToView); setSpeciesToAdd(animalToView.species); navigate('/edit-animal'); }} 
+                                                                className="bg-primary hover:bg-primary/90 text-black font-semibold py-2 px-4 rounded-lg"
+                                                            >
+                                                                Edit
+                                                            </button>
+                                                            <button 
+                                                                onClick={() => { 
+                                                                    setPreSelectedTransferAnimal(animalToView);
+                                                                    setPreSelectedTransactionType('animal-sale');
+                                                                    navigate('/budget');
+                                                                }}
+                                                                data-tutorial-target="transfer-animal-btn"
+                                                                className="bg-accent hover:bg-accent/90 text-white font-semibold py-2 px-4 rounded-lg transition flex items-center gap-2"
+                                                            >
+                                                                <ArrowLeftRight size={16} />
+                                                                Transfer
+                                                            </button>
+                                                        </>
+                                                    )}
+                                                    {animalToView.isViewOnly && (
+                                                        <button
+                                                            onClick={() => handleHideViewOnlyAnimal(animalToView.id_public)}
+                                                            className="px-3 py-1.5 bg-red-500 hover:bg-red-600 text-white font-semibold rounded-lg transition flex items-center gap-2"
+                                                        >
+                                                            <Archive size={16} />
+                                                            Hide
+                                                        </button>
+                                                    )}
+                                                </div>
                                             </div>
                                         </div>
 
                                         {/* Tab Navigation */}
-                                        <div className="bg-white border border-gray-300 -mx-6 px-6 pt-4 pb-2 mb-6">
+                                        <div className="bg-white border border-t-0 border-gray-300 px-6 pt-0 pb-0">
                                             <div className="flex flex-wrap gap-1 pb-px">
                                                 {[
                                                     { id: 1, label: 'Overview', icon: '📋' },
@@ -11820,9 +11822,12 @@ const App = () => {
                                                 ))}
                                             </div>
                                         </div>
+
+                                        {/* Tab Content Wrapper */}
+                                        <div className="bg-white border border-t-0 border-gray-300 rounded-b-lg p-6">
                                         {/* Tab 1: Overview */}
                                         {detailViewTab === 1 && (
-                                            <div className="space-y-6 p-6">
+                                            <div className="space-y-6">
                                                 {/* Main Card */}
                                                 <div className="bg-white border-2 border-gray-300 rounded-lg p-4 sm:p-6">
                                                     {/* Header: Species/Breed/Strain/CTC */}
@@ -12028,7 +12033,7 @@ const App = () => {
 
                                         {/* Tab 2: Status & Privacy */}
                                         {detailViewTab === 2 && (
-                                            <div className="space-y-6 p-6">
+                                            <div className="space-y-6">
                                                 <div className="bg-gray-50 p-4 rounded-lg border border-gray-200 space-y-4">
                                                     <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                                                         <div>
@@ -12097,7 +12102,7 @@ const App = () => {
 
                                         {/* Tab 3: Physical Profile */}
                                         {detailViewTab === 3 && (
-                                            <div className="space-y-6 p-6">
+                                            <div className="space-y-6">
                                                 <div className="bg-gray-50 p-4 rounded-lg border border-gray-200 space-y-4">
                                                     <h3 className="text-lg font-semibold text-gray-700">Appearance</h3>
                                                     <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm">
@@ -12125,7 +12130,7 @@ const App = () => {
 
                                         {/* Tab 4: Identification */}
                                         {detailViewTab === 4 && (
-                                            <div className="space-y-6 p-6">
+                                            <div className="space-y-6">
                                                 <div className="bg-gray-50 p-4 rounded-lg border border-gray-200 space-y-4">
                                                     <h3 className="text-lg font-semibold text-gray-700">Identification Numbers</h3>
                                                     <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm">
@@ -12147,7 +12152,7 @@ const App = () => {
 
                                         {/* Tab 5: Lineage */}
                                         {detailViewTab === 5 && (
-                                            <div className="space-y-6 p-6">
+                                            <div className="space-y-6">
                                                 <div className="bg-gray-50 p-4 rounded-lg border border-gray-200">
                                                     <div className="flex justify-between items-center mb-4">
                                                         <h3 className="text-lg font-semibold text-gray-700">Parents</h3>
@@ -12193,7 +12198,7 @@ const App = () => {
 
                                         {/* Tab 6: Breeding */}
                                         {detailViewTab === 6 && (
-                                            <div className="space-y-6 p-6">
+                                            <div className="space-y-6">
                                                 {(animalToView.isNeutered || animalToView.heatStatus || animalToView.isPregnant || animalToView.isNursing || animalToView.matingDates) && (
                                                     <div className="bg-gray-50 p-4 rounded-lg border border-gray-200 space-y-4">
                                                         <h3 className="text-lg font-semibold text-gray-700">Reproductive Status</h3>
@@ -12214,7 +12219,7 @@ const App = () => {
 
                                         {/* Tab 7: Health */}
                                         {detailViewTab === 7 && (
-                                            <div className="space-y-6 p-6">
+                                            <div className="space-y-6">
                                                 {(animalToView.vaccinations || animalToView.dewormingRecords || animalToView.parasiteControl || animalToView.primaryVet) && (
                                                     <div className="bg-gray-50 p-4 rounded-lg border border-gray-200 space-y-4">
                                                         <h3 className="text-lg font-semibold text-gray-700">Health Records</h3>
@@ -12237,7 +12242,7 @@ const App = () => {
 
                                         {/* Tab 8: Husbandry */}
                                         {detailViewTab === 8 && (
-                                            <div className="space-y-6 p-6">
+                                            <div className="space-y-6">
                                                 {(animalToView.dietType || animalToView.feedingSchedule || animalToView.supplements) && (
                                                     <div className="bg-gray-50 p-4 rounded-lg border border-gray-200 space-y-4">
                                                         <h3 className="text-lg font-semibold text-gray-700">Nutrition</h3>
@@ -12260,7 +12265,7 @@ const App = () => {
 
                                         {/* Tab 9: Behavior */}
                                         {detailViewTab === 9 && (
-                                            <div className="space-y-6 p-6">
+                                            <div className="space-y-6">
                                                 {(animalToView.temperament || animalToView.handlingTolerance || animalToView.socialStructure || animalToView.activityCycle) && (
                                                     <div className="bg-gray-50 p-4 rounded-lg border border-gray-200 space-y-4">
                                                         <h3 className="text-lg font-semibold text-gray-700">Behavior & Welfare</h3>
@@ -12275,7 +12280,7 @@ const App = () => {
 
                                         {/* Tab 10: Records */}
                                         {detailViewTab === 10 && (
-                                            <div className="space-y-6 p-6">
+                                            <div className="space-y-6">
                                                 {animalToView.remarks && (
                                                     <div className="bg-gray-50 p-4 rounded-lg border border-gray-200">
                                                         <h3 className="text-lg font-semibold text-gray-700 mb-3">Remarks / Notes</h3>
@@ -12287,7 +12292,7 @@ const App = () => {
 
                                         {/* Tab 11: End of Life */}
                                         {detailViewTab === 11 && (
-                                            <div className="space-y-6 p-6">
+                                            <div className="space-y-6">
                                                 {(animalToView.deceasedDate || animalToView.causeOfDeath || animalToView.insurance || animalToView.legalStatus) && (
                                                     <div className="bg-gray-50 p-4 rounded-lg border border-gray-200 space-y-4">
                                                         <h3 className="text-lg font-semibold text-gray-700">End of Life & Legal</h3>
@@ -12301,6 +12306,7 @@ const App = () => {
                                             </div>
                                         )}
 
+                                        </div>
                                     </div>
 
                                     {/* Pedigree Chart Modal */}
