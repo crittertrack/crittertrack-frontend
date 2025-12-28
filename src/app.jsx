@@ -11959,6 +11959,19 @@ const App = () => {
                                                     </div>
                                                 </div>
 
+                                                {/* Identification Card */}
+                                                {(animalToView.microchipNumber || animalToView.registryCode || animalToView.breederyId || animalToView.pedigreeRegId) && (
+                                                    <div className="bg-white border-2 border-gray-300 rounded-lg p-4">
+                                                        <h4 className="font-semibold text-gray-700 mb-2">Identification</h4>
+                                                        <div className="text-sm space-y-1">
+                                                            {animalToView.microchipNumber && <div><strong>Microchip:</strong> {animalToView.microchipNumber}</div>}
+                                                            {animalToView.registryCode && <div><strong>Registry:</strong> {animalToView.registryCode}</div>}
+                                                            {animalToView.breederyId && <div><strong>Identification:</strong> {animalToView.breederyId}</div>}
+                                                            {animalToView.pedigreeRegId && <div><strong>Pedigree Reg ID:</strong> {animalToView.pedigreeRegId}</div>}
+                                                        </div>
+                                                    </div>
+                                                )}
+
                                                 {/* Health Card */}
                                                 {(animalToView.currentWeight || animalToView.bcs || animalToView.growthRecords?.length > 0 || animalToView.medicalConditions || animalToView.medications) && (
                                                     <div className="bg-white border-2 border-gray-300 rounded-lg p-4">
@@ -12025,28 +12038,6 @@ const App = () => {
                                                                     </div>
                                                                 </div>
                                                             )}
-
-                                                {/* Quick Actions */}
-                                                <div className="bg-white border-2 border-gray-300 rounded-lg p-4">
-                                                    <h4 className="font-semibold text-gray-700 mb-3">Quick Actions</h4>
-                                                    <div className="grid grid-cols-2 sm:grid-cols-3 gap-2">
-                                                        <button className="px-3 py-2 bg-blue-500 hover:bg-blue-600 text-white text-sm rounded transition">
-                                                            Log Weight
-                                                        </button>
-                                                        <button className="px-3 py-2 bg-green-500 hover:bg-green-600 text-white text-sm rounded transition">
-                                                            Health Record
-                                                        </button>
-                                                        <button className="px-3 py-2 bg-purple-500 hover:bg-purple-600 text-white text-sm rounded transition">
-                                                            Log Mating
-                                                        </button>
-                                                        <button className="px-3 py-2 bg-orange-500 hover:bg-orange-600 text-white text-sm rounded transition">
-                                                            Vet Visit
-                                                        </button>
-                                                        <button className="px-3 py-2 bg-gray-500 hover:bg-gray-600 text-white text-sm rounded transition">
-                                                            Status Change
-                                                        </button>
-                                                    </div>
-                                                </div>
 
                                                 {/* Tags */}
                                                 {animalToView.tags && animalToView.tags.length > 0 && (
