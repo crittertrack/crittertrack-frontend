@@ -11789,9 +11789,8 @@ const App = () => {
                                                 </div>
                                             </div>
                                         </div>
-
                                         {/* Tab Navigation */}
-                                        <div className="bg-white border border-t-0 border-gray-300 px-6 pt-6 pb-0">
+                                        <div className="bg-white border border-t-0 border-gray-300 px-6 pt-6 pb-6">
                                             <div className="flex flex-wrap gap-1 pb-px">
                                                 {[
                                                     { id: 1, label: 'Overview', icon: '📋' },
@@ -11871,7 +11870,7 @@ const App = () => {
                                                             <div className="mb-4">
                                                                 <div className="flex items-center gap-4 text-lg">
                                                                     <span>{animalToView.gender}</span>
-                                                                    {animalToView.gender === 'Male' ? <User size={20} /> : <User size={20} />}
+                                                                    {animalToView.gender === 'Male' ? <Mars size={20} className="text-blue-600" /> : <Venus size={20} className="text-pink-600" />}
                                                                 </div>
                                                             </div>
 
