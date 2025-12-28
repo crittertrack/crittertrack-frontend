@@ -3317,7 +3317,7 @@ const LitterManagement = ({ authToken, API_BASE_URL, userProfile, showModalMessa
 
     return (
         <div className="w-full max-w-6xl bg-white p-6 rounded-xl shadow-lg">
-            <div className="flex justify-between items-center mb-6">
+            <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-3 mb-6">
                 <h2 className="text-3xl font-bold text-gray-800 flex items-center">
                     <BookOpen size={24} className="mr-3 text-primary-dark" />
                     Litter Management
