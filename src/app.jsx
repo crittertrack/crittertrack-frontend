@@ -5725,8 +5725,8 @@ const AnimalForm = ({
                     <div className="flex flex-wrap gap-1 pb-px">
                         {[
                             { id: 1, label: 'Overview', icon: '📋' },
-                            { id: 2, label: 'Physical Profile', icon: '🎨' },
-                            { id: 3, label: 'Status & Privacy', icon: '🔒' },
+                            { id: 2, label: 'Status & Privacy', icon: '🔒' },
+                            { id: 3, label: 'Physical Profile', icon: '🎨' },
                             { id: 4, label: 'Identification', icon: '🏷️' },
                             { id: 5, label: 'Lineage & Origin', icon: '🌳' },
                             { id: 6, label: 'Reproduction & Breeding', icon: '🫘' },
@@ -5862,7 +5862,7 @@ const AnimalForm = ({
                     </div>
                 )}
                 
-                {/* Tab 2: Physical Profile */}
+                {/* Tab 2: Status & Privacy */}
                 {activeTab === 2 && (
                     <div className="space-y-6">
                         {/* Ownership */}
@@ -5932,10 +5932,43 @@ const AnimalForm = ({
                     </div>
                 )}
                 
-                {/* Tab 3: Status & Privacy */}
+                {/* Tab 3: Physical Profile */}
                 {activeTab === 3 && (
                     <div className="space-y-6">
-                        {/* This tab is intentionally empty - Status & Privacy fields are in Tab 2 */}
+                        {/* Appearance */}
+                        <div className="bg-gray-50 p-4 rounded-lg border border-gray-200 space-y-4">
+                            <h3 className="text-lg font-semibold text-gray-700 border-b pb-2">Appearance</h3>
+                            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                                <div>
+                                    <label className="block text-sm font-medium text-gray-700">Color</label>
+                                    <input type="text" name="color" value={formData.color} onChange={handleChange} 
+                                        className="mt-1 block w-full p-2 border border-gray-300 rounded-md shadow-sm focus:ring-primary focus:border-primary" />
+                                </div>
+                                
+                                <div>
+                                    <label className="block text-sm font-medium text-gray-700">Coat Type</label>
+                                    <input type="text" name="coat" value={formData.coat} onChange={handleChange} 
+                                        className="mt-1 block w-full p-2 border border-gray-300 rounded-md shadow-sm focus:ring-primary focus:border-primary" 
+                                        placeholder="e.g., Short, Long, Rex" />
+                                </div>
+                                
+                                <div>
+                                    <label className="block text-sm font-medium text-gray-700">Coat Pattern</label>
+                                    <input type="text" name="coatPattern" value={formData.coatPattern} onChange={handleChange} 
+                                        className="mt-1 block w-full p-2 border border-gray-300 rounded-md shadow-sm focus:ring-primary focus:border-primary" 
+                                        placeholder="e.g., Solid, Hooded, Brindle" />
+                                </div>
+                                
+                                {formData.species === 'Rat' && (
+                                    <div>
+                                        <label className="block text-sm font-medium text-gray-700">Earset</label>
+                                        <input type="text" name="earset" value={formData.earset} onChange={handleChange} 
+                                            className="mt-1 block w-full p-2 border border-gray-300 rounded-md shadow-sm focus:ring-primary focus:border-primary" 
+                                            placeholder="e.g., Standard, Dumbo" />
+                                    </div>
+                                )}
+                            </div>
+                        </div>
                     </div>
                 )}
                 
@@ -6428,53 +6461,6 @@ const AnimalForm = ({
                                                 </button>
                                             )}
                                         </div>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-
-                        {/* Breeder Section */}
-                        <div className="bg-gray-50 p-4 rounded-lg border border-gray-200 space-y-4">
-                            <h3 className="text-lg font-semibold text-gray-700 border-b pb-2">Breeder</h3>
-                            <div className='flex flex-col'>
-                                <label className='text-sm font-medium text-gray-600 mb-1'>Breeder</label>
-                                <div 
-                                    onClick={() => !loading && setModalTarget('breeder')}
-                                    className="flex flex-col items-start p-3 border border-gray-300 rounded-lg bg-white cursor-pointer hover:border-primary transition disabled:opacity-50"
-                                >
-                                    <div className="flex items-center space-x-2 w-full">
-                                        {formData.breederId_public && breederInfo ? (
-                                            <span className="text-gray-800">
-                                                {(() => {
-                                                    const showPersonal = breederInfo.showPersonalName ?? false;
-                                                    const showBreeder = breederInfo.showBreederName ?? false;
-                                                    
-                                                    if (showPersonal && showBreeder && breederInfo.personalName && breederInfo.breederName) {
-                                                        return `${breederInfo.personalName} (${breederInfo.breederName})`;
-                                                    } else if (showBreeder && breederInfo.breederName) {
-                                                        return breederInfo.breederName;
-                                                    } else if (showPersonal && breederInfo.personalName) {
-                                                        return breederInfo.personalName;
-                                                    } else {
-                                                        return 'Unknown Breeder';
-                                                    }
-                                                })()}
-                                            </span>
-                                        ) : (
-                                            <span className="text-gray-400">
-                                                {formData.breederId_public ? 'Loading...' : 'Click to Select Breeder'}
-                                            </span>
-                                        )}
-                                        {formData.breederId_public && (
-                                            <button
-                                                type="button"
-                                                onClick={(e) => { e.stopPropagation(); clearBreederSelection(); }}
-                                                title="Clear breeder selection"
-                                                className="text-sm text-red-500 hover:text-red-700 p-1 rounded"
-                                            >
-                                                <X size={14} />
-                                            </button>
-                                        )}
                                     </div>
                                 </div>
                             </div>
