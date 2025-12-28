@@ -2708,7 +2708,9 @@ const LitterManagement = ({ authToken, API_BASE_URL, userProfile, showModalMessa
             
             let updated = 0;
             for (const animal of animalsData) {
-                if (animal.isDisplay === false || animal.isDisplay === undefined || animal.isDisplay === null) {
+                // Only migrate animals where isDisplay was never set (undefined/null)
+                // Do NOT override explicit false values set by users
+                if (animal.isDisplay === undefined || animal.isDisplay === null) {
                     try {
                         await axios.put(`${API_BASE_URL}/animals/${animal.id_public}`, 
                             { ...animal, isDisplay: true },
