@@ -12358,23 +12358,6 @@ const App = () => {
                                                                 </div>
                                                             )}
                                                             
-                                                            {/* Recent Growth Records */}
-                                                            {animalToView.growthRecords && animalToView.growthRecords.length > 0 && (
-                                                                <div className="border-t border-gray-200 pt-2">
-                                                                    <p className="text-xs font-semibold text-gray-600 mb-2">Recent Measurements:</p>
-                                                                    <div className="space-y-1 max-h-32 overflow-y-auto">
-                                                                        {animalToView.growthRecords.slice(-5).reverse().map((record, idx) => (
-                                                                            <div key={idx} className="text-xs text-gray-600 border-l-2 border-blue-300 pl-2">
-                                                                                <strong>{record.date || 'No date'}:</strong> {record.weight} {animalToView.measurementUnits?.weight || 'g'}
-                                                                                {record.length && <span> • {record.length} {animalToView.measurementUnits?.length || 'cm'}</span>}
-                                                                                {record.bcs && <span> • BCS: {record.bcs}</span>}
-                                                                                {record.notes && <span className="text-gray-500"> ({record.notes})</span>}
-                                                                            </div>
-                                                                        ))}
-                                                                    </div>
-                                                                </div>
-                                                            )}
-                                                            
                                                             {/* Conditions and Medications */}
                                                             {(animalToView.medicalConditions || animalToView.medications) && (
                                                                 <div className="border-t border-gray-200 pt-2">
