@@ -7079,6 +7079,33 @@ const AnimalForm = ({
 
                         {/* Veterinary Care */}
                         <div className="bg-gray-50 p-4 rounded-lg border border-gray-200 space-y-4">
+                            <h3 className="text-lg font-semibold text-gray-700 border-b pb-2">Medical History</h3>
+                            <div className="space-y-4">
+                                <div>
+                                    <label className="block text-sm font-medium text-gray-700 mb-2">Medical Conditions</label>
+                                    <textarea name="medicalConditions" value={formData.medicalConditions} onChange={handleChange} rows="2"
+                                        className="block w-full p-2 border border-gray-300 rounded-md shadow-sm focus:ring-primary focus:border-primary" 
+                                        placeholder="e.g., Current conditions affecting the animal" />
+                                </div>
+                                
+                                <div>
+                                    <label className="block text-sm font-medium text-gray-700 mb-2">Current Medications</label>
+                                    <textarea name="medications" value={formData.medications} onChange={handleChange} rows="2"
+                                        className="block w-full p-2 border border-gray-300 rounded-md shadow-sm focus:ring-primary focus:border-primary" 
+                                        placeholder="e.g., Current medications and dosages" />
+                                </div>
+                                
+                                <div>
+                                    <label className="block text-sm font-medium text-gray-700 mb-2">Allergies</label>
+                                    <textarea name="allergies" value={formData.allergies} onChange={handleChange} rows="2"
+                                        className="block w-full p-2 border border-gray-300 rounded-md shadow-sm focus:ring-primary focus:border-primary" 
+                                        placeholder="e.g., Food allergies, medication allergies" />
+                                </div>
+                            </div>
+                        </div>
+
+                        {/* Veterinary Care */}
+                        <div className="bg-gray-50 p-4 rounded-lg border border-gray-200 space-y-4">
                             <h3 className="text-lg font-semibold text-gray-700 border-b pb-2">Veterinary Care</h3>
                             <div className="space-y-4">
                                 <div>
