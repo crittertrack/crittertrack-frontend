@@ -5772,7 +5772,7 @@ const AnimalForm = ({
             <form onSubmit={handleSubmit} className="space-y-6">
                 
                 {/* Tab Navigation */}
-                <div className="border-b-2 border-gray-400 -mx-6 px-6">
+                <div className="border border-gray-300 -mx-6 px-6 pt-4">
                     <div className="flex flex-wrap gap-1 pb-px">
                         {[
                             { id: 1, label: 'Overview', icon: '📋' },
@@ -5791,10 +5791,10 @@ const AnimalForm = ({
                                 key={tab.id}
                                 type="button"
                                 onClick={() => setActiveTab(tab.id)}
-                                className={`flex-shrink-0 px-2 sm:px-3 py-2 text-xs sm:text-sm font-medium rounded-t-lg transition-colors border-b-2 ${
+                                className={`flex-shrink-0 px-2 sm:px-3 py-2 text-xs sm:text-sm font-medium rounded border transition-colors ${
                                     activeTab === tab.id 
-                                        ? 'bg-primary text-black border-b-primary' 
-                                        : 'text-gray-600 hover:text-gray-800 hover:bg-gray-100 border-transparent'
+                                        ? 'bg-primary text-black border-gray-400' 
+                                        : 'bg-gray-50 text-gray-600 hover:text-gray-800 border-gray-300'
                                 }`}
                                 title={tab.label}
                             >
@@ -11789,7 +11789,7 @@ const App = () => {
                                         </div>
 
                                         {/* Tab Navigation */}
-                                        <div className="bg-white border-b-2 border-gray-400 -mx-6 px-6 mb-6">
+                                        <div className="bg-white border border-gray-300 -mx-6 px-6 pt-4 mb-6">
                                             <div className="flex flex-wrap gap-1 pb-px">
                                                 {[
                                                     { id: 1, label: 'Overview', icon: '📋' },
@@ -11807,10 +11807,10 @@ const App = () => {
                                                     <button
                                                         key={tab.id}
                                                         onClick={() => setDetailViewTab(tab.id)}
-                                                        className={`flex-shrink-0 px-2 sm:px-3 py-2 text-xs sm:text-sm font-medium rounded-t-lg transition-colors border-b-2 ${
+                                                        className={`flex-shrink-0 px-2 sm:px-3 py-2 text-xs sm:text-sm font-medium rounded border transition-colors ${
                                                             detailViewTab === tab.id 
-                                                                ? 'bg-primary text-black border-b-primary' 
-                                                                : 'text-gray-600 hover:text-gray-800 hover:bg-gray-100 border-transparent'
+                                                                ? 'bg-primary text-black border-gray-400' 
+                                                                : 'bg-gray-50 text-gray-600 hover:text-gray-800 border-gray-300'
                                                         }`}
                                                         title={tab.label}
                                                     >
