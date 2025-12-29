@@ -2209,7 +2209,7 @@ const ViewOnlyAnimalDetail = ({ animal, onClose, API_BASE_URL, onViewProfile }) 
                             )}
 
                             {/* Growth Records Section */}
-                            {animal.growthRecords && Array.isArray(animal.growthRecords) && animal.growthRecords.length > 0 && (
+                            {animal.sectionPrivacy?.measurements !== false && animal.growthRecords && Array.isArray(animal.growthRecords) && animal.growthRecords.length > 0 && (
                                 <div className="bg-gray-50 p-4 rounded-lg border border-gray-200">
                                     <h3 className="text-lg font-semibold text-gray-700 border-b pb-2 mb-3">Growth History</h3>
                                     <div className="overflow-x-auto">
@@ -2322,7 +2322,7 @@ const ViewOnlyAnimalDetail = ({ animal, onClose, API_BASE_URL, onViewProfile }) 
                     {detailViewTab === 5 && (
                         <div className="space-y-4">
                             {/* Preventive Care */}
-                            {(animal.vaccinations || animal.dewormingRecords || animal.parasiteControl || animal.allergies || animal.medications) && (
+                            {animal.sectionPrivacy?.health !== false && (animal.vaccinations || animal.dewormingRecords || animal.parasiteControl || animal.allergies || animal.medications) && (
                                 <div className="bg-gray-50 p-4 rounded-lg border border-gray-200">
                                     <h3 className="text-lg font-semibold text-gray-700 border-b pb-2 mb-3">Preventive Care</h3>
                                     <div className="space-y-3">
@@ -2371,7 +2371,7 @@ const ViewOnlyAnimalDetail = ({ animal, onClose, API_BASE_URL, onViewProfile }) 
                                 </div>
                             )}
                             {/* Medical History */}
-                            {(animal.medicalConditions || animal.medicalProcedures || animal.labResults || animal.vetVisits || animal.primaryVet) && (
+                            {animal.sectionPrivacy?.health !== false && (animal.medicalConditions || animal.medicalProcedures || animal.labResults || animal.vetVisits || animal.primaryVet) && (
                                 <div className="bg-gray-50 p-4 rounded-lg border border-gray-200">
                                     <h3 className="text-lg font-semibold text-gray-700 border-b pb-2 mb-3">Medical History</h3>
                                     <div className="space-y-3">
@@ -2423,7 +2423,7 @@ const ViewOnlyAnimalDetail = ({ animal, onClose, API_BASE_URL, onViewProfile }) 
                     {detailViewTab === 6 && (
                         <div className="space-y-4">
                             {/* Nutrition Section */}
-                            {(animal.dietType || animal.feedingSchedule || animal.supplements) && (
+                            {animal.sectionPrivacy?.husbandry !== false && (animal.dietType || animal.feedingSchedule || animal.supplements) && (
                                 <div className="bg-gray-50 p-4 rounded-lg border border-gray-200">
                                     <h3 className="text-lg font-semibold text-gray-700 border-b pb-2 mb-3">Nutrition</h3>
                                     <div className="space-y-2">
@@ -2434,7 +2434,7 @@ const ViewOnlyAnimalDetail = ({ animal, onClose, API_BASE_URL, onViewProfile }) 
                                 </div>
                             )}
                             {/* Husbandry Section */}
-                            {(animal.housingType || animal.bedding || animal.enrichment) && (
+                            {animal.sectionPrivacy?.husbandry !== false && (animal.housingType || animal.bedding || animal.enrichment) && (
                                 <div className="bg-gray-50 p-4 rounded-lg border border-gray-200">
                                     <h3 className="text-lg font-semibold text-gray-700 border-b pb-2 mb-3">Husbandry</h3>
                                     <div className="space-y-2">
@@ -2445,7 +2445,7 @@ const ViewOnlyAnimalDetail = ({ animal, onClose, API_BASE_URL, onViewProfile }) 
                                 </div>
                             )}
                             {/* Environment Section */}
-                            {(animal.temperatureRange || animal.humidity || animal.lighting || animal.noise) && (
+                            {animal.sectionPrivacy?.environment !== false && (animal.temperatureRange || animal.humidity || animal.lighting || animal.noise) && (
                                 <div className="bg-gray-50 p-4 rounded-lg border border-gray-200">
                                     <h3 className="text-lg font-semibold text-gray-700 border-b pb-2 mb-3">Environment</h3>
                                     <div className="space-y-2">
@@ -2463,7 +2463,7 @@ const ViewOnlyAnimalDetail = ({ animal, onClose, API_BASE_URL, onViewProfile }) 
                     {detailViewTab === 7 && (
                         <div className="space-y-4">
                             {/* Behavior & Welfare Section */}
-                            {(animal.temperament || animal.handlingTolerance || animal.socialStructure) && (
+                            {animal.sectionPrivacy?.behavior !== false && (animal.temperament || animal.handlingTolerance || animal.socialStructure) && (
                                 <div className="bg-gray-50 p-4 rounded-lg border border-gray-200">
                                     <h3 className="text-lg font-semibold text-gray-700 border-b pb-2 mb-3">Behavior & Welfare</h3>
                                     <div className="space-y-2">
@@ -2474,7 +2474,7 @@ const ViewOnlyAnimalDetail = ({ animal, onClose, API_BASE_URL, onViewProfile }) 
                                 </div>
                             )}
                             {/* Activity Cycle Section */}
-                            {animal.activityCycle && (
+                            {animal.sectionPrivacy?.activity !== false && animal.activityCycle && (
                                 <div className="bg-gray-50 p-4 rounded-lg border border-gray-200">
                                     <h3 className="text-lg font-semibold text-gray-700 border-b pb-2 mb-3">Activity Cycle</h3>
                                     <p className="text-sm text-gray-700">{animal.activityCycle}</p>
