@@ -2055,6 +2055,35 @@ const ViewOnlyAnimalDetail = ({ animal, onClose, API_BASE_URL, onViewProfile }) 
                                     </div>
                                 </div>
                             </div>
+                            {animal.breederId_public && (
+                                <div className="bg-gray-50 p-4 rounded-lg border border-gray-200">
+                                    <h3 className="text-lg font-semibold text-gray-700 border-b pb-2 mb-3">Breeder</h3>
+                                    <p className="text-gray-700">
+                                        {breederInfo ? (
+                                            <button
+                                                onClick={() => onViewProfile && onViewProfile(breederInfo)}
+                                                className="text-primary hover:underline font-medium"
+                                            >
+                                                {(() => {
+                                                    const showPersonal = breederInfo.showPersonalName ?? false;
+                                                    const showBreeder = breederInfo.showBreederName ?? false;
+                                                    if (showPersonal && showBreeder && breederInfo.personalName && breederInfo.breederName) {
+                                                        return `${breederInfo.personalName} (${breederInfo.breederName})`;
+                                                    } else if (showBreeder && breederInfo.breederName) {
+                                                        return breederInfo.breederName;
+                                                    } else if (showPersonal && breederInfo.personalName) {
+                                                        return breederInfo.personalName;
+                                                    } else {
+                                                        return 'Unknown Breeder';
+                                                    }
+                                                })()}
+                                            </button>
+                                        ) : (
+                                            <span className="font-mono text-accent">{animal.breederId_public}</span>
+                                        )}
+                                    </p>
+                                </div>
+                            )}
                         </div>
                     )}
 
@@ -2261,35 +2290,6 @@ const ViewOnlyAnimalDetail = ({ animal, onClose, API_BASE_URL, onViewProfile }) 
                                 <div className="bg-gray-50 p-4 rounded-lg border border-gray-200">
                                     <h3 className="text-lg font-semibold text-gray-700 border-b pb-2 mb-3">Remarks & Notes</h3>
                                     <p className="text-gray-700 whitespace-pre-wrap text-sm">{animal.remarks}</p>
-                                </div>
-                            )}
-                            {animal.breederId_public && (
-                                <div className="bg-gray-50 p-4 rounded-lg border border-gray-200">
-                                    <h3 className="text-lg font-semibold text-gray-700 border-b pb-2 mb-3">Breeder</h3>
-                                    <p className="text-gray-700">
-                                        {breederInfo ? (
-                                            <button
-                                                onClick={() => onViewProfile && onViewProfile(breederInfo)}
-                                                className="text-primary hover:underline font-medium"
-                                            >
-                                                {(() => {
-                                                    const showPersonal = breederInfo.showPersonalName ?? false;
-                                                    const showBreeder = breederInfo.showBreederName ?? false;
-                                                    if (showPersonal && showBreeder && breederInfo.personalName && breederInfo.breederName) {
-                                                        return `${breederInfo.personalName} (${breederInfo.breederName})`;
-                                                    } else if (showBreeder && breederInfo.breederName) {
-                                                        return breederInfo.breederName;
-                                                    } else if (showPersonal && breederInfo.personalName) {
-                                                        return breederInfo.personalName;
-                                                    } else {
-                                                        return 'Unknown Breeder';
-                                                    }
-                                                })()}
-                                            </button>
-                                        ) : (
-                                            <span className="font-mono text-accent">{animal.breederId_public}</span>
-                                        )}
-                                    </p>
                                 </div>
                             )}
                             {animal.sectionPrivacy?.endOfLife !== false && animal.deceasedDate && (
