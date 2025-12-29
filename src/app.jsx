@@ -13674,9 +13674,57 @@ const App = () => {
                                                 {(animalToView.vaccinations || animalToView.dewormingRecords || animalToView.parasiteControl || animalToView.primaryVet) && (
                                                     <div className="bg-gray-50 p-4 rounded-lg border border-gray-200 space-y-4">
                                                         <h3 className="text-lg font-semibold text-gray-700">Health Records</h3>
-                                                        {animalToView.vaccinations && <div><strong>Vaccinations:</strong> <p className="text-sm mt-1">{animalToView.vaccinations}</p></div>}
-                                                        {animalToView.dewormingRecords && <div><strong>Deworming:</strong> <p className="text-sm mt-1">{animalToView.dewormingRecords}</p></div>}
-                                                        {animalToView.parasiteControl && <div><strong>Parasite Control:</strong> <p className="text-sm mt-1">{animalToView.parasiteControl}</p></div>}
+                                                        {animalToView.vaccinations && (
+                                                            <div>
+                                                                <strong>Vaccinations:</strong>
+                                                                <ul className="text-sm mt-1 list-disc list-inside space-y-1">
+                                                                    {(() => {
+                                                                        const data = animalToView.vaccinations;
+                                                                        const parsed = typeof data === 'string' ? (() => { try { return JSON.parse(data); } catch { return []; } })() : Array.isArray(data) ? data : [];
+                                                                        return parsed.map((vacc, idx) => (
+                                                                            <li key={idx} className="text-gray-700">
+                                                                                {vacc.name} {vacc.date && `(${new Date(vacc.date).toLocaleDateString()})`}
+                                                                                {vacc.notes && <span className="text-gray-600"> - {vacc.notes}</span>}
+                                                                            </li>
+                                                                        ));
+                                                                    })()}
+                                                                </ul>
+                                                            </div>
+                                                        )}
+                                                        {animalToView.dewormingRecords && (
+                                                            <div>
+                                                                <strong>Deworming:</strong>
+                                                                <ul className="text-sm mt-1 list-disc list-inside space-y-1">
+                                                                    {(() => {
+                                                                        const data = animalToView.dewormingRecords;
+                                                                        const parsed = typeof data === 'string' ? (() => { try { return JSON.parse(data); } catch { return []; } })() : Array.isArray(data) ? data : [];
+                                                                        return parsed.map((record, idx) => (
+                                                                            <li key={idx} className="text-gray-700">
+                                                                                {record.medication} {record.date && `(${new Date(record.date).toLocaleDateString()})`}
+                                                                                {record.notes && <span className="text-gray-600"> - {record.notes}</span>}
+                                                                            </li>
+                                                                        ));
+                                                                    })()}
+                                                                </ul>
+                                                            </div>
+                                                        )}
+                                                        {animalToView.parasiteControl && (
+                                                            <div>
+                                                                <strong>Parasite Control:</strong>
+                                                                <ul className="text-sm mt-1 list-disc list-inside space-y-1">
+                                                                    {(() => {
+                                                                        const data = animalToView.parasiteControl;
+                                                                        const parsed = typeof data === 'string' ? (() => { try { return JSON.parse(data); } catch { return []; } })() : Array.isArray(data) ? data : [];
+                                                                        return parsed.map((record, idx) => (
+                                                                            <li key={idx} className="text-gray-700">
+                                                                                {record.treatment} {record.date && `(${new Date(record.date).toLocaleDateString()})`}
+                                                                                {record.notes && <span className="text-gray-600"> - {record.notes}</span>}
+                                                                            </li>
+                                                                        ));
+                                                                    })()}
+                                                                </ul>
+                                                            </div>
+                                                        )}
                                                         {animalToView.primaryVet && <div><strong>Primary Vet:</strong> <p className="text-sm mt-1">{animalToView.primaryVet}</p></div>}
                                                     </div>
                                                 )}
