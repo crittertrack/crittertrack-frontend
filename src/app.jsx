@@ -2280,12 +2280,6 @@ const ViewOnlyAnimalDetail = ({ animal, onClose, API_BASE_URL, onViewProfile }) 
                                     <p className="text-gray-700">{animal.currentOwnerName || animal.currentOwnerId}</p>
                                 </div>
                             )}
-                            {animal.sectionPrivacy?.genetics !== false && animal.geneticCode && (
-                                <div className="bg-gray-50 p-4 rounded-lg border border-gray-200">
-                                    <h3 className="text-lg font-semibold text-gray-700 border-b pb-2 mb-3">Genetic Code</h3>
-                                    <p className="text-gray-700 font-mono text-sm">{animal.geneticCode}</p>
-                                </div>
-                            )}
                             {animal.sectionPrivacy?.remarks !== false && animal.remarks && (
                                 <div className="bg-gray-50 p-4 rounded-lg border border-gray-200">
                                     <h3 className="text-lg font-semibold text-gray-700 border-b pb-2 mb-3">Remarks & Notes</h3>
