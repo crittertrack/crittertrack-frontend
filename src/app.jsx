@@ -5372,14 +5372,9 @@ const AnimalForm = ({
             litterCount: animalToEdit.litterCount || '',
             nursingStartDate: animalToEdit.nursingStartDate ? new Date(animalToEdit.nursingStartDate).toISOString().substring(0, 10) : '',
             weaningDate: animalToEdit.weaningDate ? new Date(animalToEdit.weaningDate).toISOString().substring(0, 10) : '',
-            vaccinations: animalToEdit.vaccinations || '',
-            dewormingRecords: animalToEdit.dewormingRecords || '',
-            parasiteControl: animalToEdit.parasiteControl || '',
             medicalConditions: animalToEdit.medicalConditions || '',
             allergies: animalToEdit.allergies || '',
             medications: animalToEdit.medications || '',
-            medicalProcedures: animalToEdit.medicalProcedures || '',
-            labResults: animalToEdit.labResults || '',
             vetVisits: animalToEdit.vetVisits || '',
             primaryVet: animalToEdit.primaryVet || '',
             dietType: animalToEdit.dietType || '',
@@ -5448,14 +5443,9 @@ const AnimalForm = ({
             litterCount: '',
             nursingStartDate: '',
             weaningDate: '',
-            vaccinations: '',
-            dewormingRecords: '',
-            parasiteControl: '',
             medicalConditions: '',
             allergies: '',
             medications: '',
-            medicalProcedures: '',
-            labResults: '',
             vetVisits: '',
             primaryVet: '',
             dietType: '',
@@ -6099,6 +6089,16 @@ const AnimalForm = ({
             payloadToSave.medicalProcedureRecords = medicalProcedureRecords; // Keep for backward compat
             payloadToSave.labResults = labResultRecords.length > 0 ? JSON.stringify(labResultRecords) : null;
             payloadToSave.labResultRecords = labResultRecords; // Keep for backward compat
+            
+            // Debug log for health records
+            console.log('[DEBUG] Health records in payload:', {
+                vaccinations: payloadToSave.vaccinations,
+                dewormingRecords: payloadToSave.dewormingRecords,
+                parasiteControl: payloadToSave.parasiteControl,
+                vaccinationRecordsCount: vaccinationRecords.length,
+                dewormingRecordsCount: dewormingRecordsArray.length,
+                parasiteControlCount: parasiteControlRecords.length
+            });
             
             // Handle image deletion
             if (deleteImage && animalToEdit) {
