@@ -12444,7 +12444,40 @@ const App = () => {
                                             <div className="space-y-6">
                                                 {/* Main Card - Two Column Layout */}
                                                 <div className="bg-white border-2 border-gray-300 rounded-lg overflow-hidden">
-                                                    <div className="flex">
+                                                    {/* Public Profile Toggle - Top Right */}
+                                                    <div className="absolute top-4 right-4 z-10">
+                                                        <button
+                                                            type="button"
+                                                            onClick={async () => {
+                                                                const newIsDisplay = !animalToView.isDisplay;
+                                                                try {
+                                                                    const response = await fetch(`${API_BASE_URL}/animals/${animalToView.id_public}`, {
+                                                                        method: 'PUT',
+                                                                        headers: {
+                                                                            'Content-Type': 'application/json',
+                                                                            'Authorization': `Bearer ${authToken}`
+                                                                        },
+                                                                        body: JSON.stringify({ isDisplay: newIsDisplay })
+                                                                    });
+                                                                    if (response.ok) {
+                                                                        setAnimalToView({ ...animalToView, isDisplay: newIsDisplay });
+                                                                        showModalMessage('Success', `Animal is now ${newIsDisplay ? 'public' : 'private'}.`);
+                                                                    } else {
+                                                                        showModalMessage('Error', 'Failed to update visibility.');
+                                                                    }
+                                                                } catch (err) {
+                                                                    console.error('Error updating visibility:', err);
+                                                                    showModalMessage('Error', 'Failed to update visibility.');
+                                                                }
+                                                            }}
+                                                            className={`px-3 py-1 rounded-full text-xs font-medium transition ${
+                                                                animalToView.isDisplay ? 'bg-blue-100 text-blue-800' : 'bg-gray-100 text-gray-800'
+                                                            }`}
+                                                        >
+                                                            {animalToView.isDisplay ? '🌍 Public' : '🔒 Private'}
+                                                        </button>
+                                                    </div>
+                                                    <div className="flex relative">
                                                         {/* Left Column - Image */}
                                                         <div className="w-1/3 p-4 sm:p-6 flex flex-col items-center justify-center relative min-h-80">
                                                             {/* Birthdate badge */}
@@ -12510,19 +12543,6 @@ const App = () => {
                                                                 {animalToView.name}
                                                                 {animalToView.suffix ? ` ${animalToView.suffix}` : ''}
                                                             </h2>
-
-                                                            {/* Privacy Controls */}
-                                                            <div className="flex gap-2 flex-wrap">
-                                                                <button
-                                                                    onClick={() => toggleSectionPrivacy('appearance')}
-                                                                    className={`px-3 py-1 rounded text-xs font-medium transition ${
-                                                                        sectionPrivacy[animalToView.id_public]?.appearance ? 'bg-blue-100 text-blue-800' : 'bg-gray-100 text-gray-800'
-                                                                    }`}
-                                                                    title="Appearance"
-                                                                >
-                                                                    🎨 {sectionPrivacy[animalToView.id_public]?.appearance ? 'Public' : 'Private'}
-                                                                </button>
-                                                            </div>
 
                                                             {/* Appearance */}
                                                             {(animalToView.color || animalToView.coat || animalToView.coatPattern || animalToView.earset) && (
