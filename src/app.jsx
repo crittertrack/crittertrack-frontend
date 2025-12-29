@@ -2197,16 +2197,32 @@ const ViewOnlyAnimalDetail = ({ animal, onClose, API_BASE_URL, onViewProfile }) 
                             )}
 
                             {/* Current Measurements Section */}
-                            {(animal.weight || animal.length || animal.heightAtShoulder) && (
-                                <div className="bg-gray-50 p-4 rounded-lg border border-gray-200">
-                                    <h3 className="text-lg font-semibold text-gray-700 border-b pb-2 mb-3">Current Measurements</h3>
-                                    <div className="space-y-2">
-                                        {animal.weight && <p className="text-sm"><span className="font-medium">Weight:</span> {animal.weight}</p>}
-                                        {animal.length && <p className="text-sm"><span className="font-medium">Length:</span> {animal.length}</p>}
-                                        {animal.heightAtShoulder && <p className="text-sm"><span className="font-medium">Height at Shoulder:</span> {animal.heightAtShoulder}</p>}
+                            {(() => {
+                                // Compute current measurements from growth records if available, otherwise use stored fields
+                                let currentWeight = null;
+                                let currentLength = null;
+                                
+                                if (animal.growthRecords && Array.isArray(animal.growthRecords) && animal.growthRecords.length > 0) {
+                                    const sorted = [...animal.growthRecords].sort((a, b) => new Date(b.date) - new Date(a.date));
+                                    currentWeight = sorted[0].weight;
+                                    const withLength = sorted.find(r => r.length);
+                                    currentLength = withLength ? withLength.length : null;
+                                } else {
+                                    currentWeight = animal.weight;
+                                    currentLength = animal.length;
+                                }
+                                
+                                return (currentWeight || currentLength || animal.heightAtShoulder) && (
+                                    <div className="bg-gray-50 p-4 rounded-lg border border-gray-200">
+                                        <h3 className="text-lg font-semibold text-gray-700 border-b pb-2 mb-3">Current Measurements</h3>
+                                        <div className="space-y-2">
+                                            {currentWeight && <p className="text-sm"><span className="font-medium">Weight:</span> {currentWeight}</p>}
+                                            {currentLength && <p className="text-sm"><span className="font-medium">Length:</span> {currentLength}</p>}
+                                            {animal.heightAtShoulder && <p className="text-sm"><span className="font-medium">Height at Shoulder:</span> {animal.heightAtShoulder}</p>}
+                                        </div>
                                     </div>
-                                </div>
-                            )}
+                                );
+                            })()}
 
                             {/* Growth Records Section */}
                             {animal.sectionPrivacy?.measurements !== false && animal.growthRecords && Array.isArray(animal.growthRecords) && animal.growthRecords.length > 0 && (
@@ -6766,30 +6782,33 @@ const AnimalForm = ({
                             
                             {/* Current Measurement Display */}
                             {growthRecords.length > 0 && (() => {
-                                const mostRecent = [...growthRecords].sort((a, b) => new Date(b.date) - new Date(a.date))[0];
+                                const sorted = [...growthRecords].sort((a, b) => new Date(b.date) - new Date(a.date));
+                                const mostRecentWeight = sorted[0];
+                                const mostRecentLength = sorted.find(r => r.length);
+                                
                                 return (
                                     <div className="bg-blue-50 p-3 rounded-lg border border-blue-200">
                                         <h4 className="text-sm font-semibold text-gray-700 mb-2">Current Measurements</h4>
                                         <div className="grid grid-cols-2 md:grid-cols-4 gap-3 text-sm">
                                             <div>
                                                 <span className="text-xs text-gray-600">Weight:</span>
-                                                <p className="font-medium">{mostRecent.weight} {measurementUnits.weight}</p>
+                                                <p className="font-medium">{mostRecentWeight.weight} {measurementUnits.weight}</p>
                                             </div>
-                                            {mostRecent.length && (
+                                            {mostRecentLength && mostRecentLength.length && (
                                                 <div>
                                                     <span className="text-xs text-gray-600">Length:</span>
-                                                    <p className="font-medium">{mostRecent.length} {measurementUnits.length}</p>
+                                                    <p className="font-medium">{mostRecentLength.length} {measurementUnits.length}</p>
                                                 </div>
                                             )}
-                                            {mostRecent.bcs && (
+                                            {mostRecentWeight.bcs && (
                                                 <div>
                                                     <span className="text-xs text-gray-600">BCS:</span>
-                                                    <p className="font-medium">{mostRecent.bcs}</p>
+                                                    <p className="font-medium">{mostRecentWeight.bcs}</p>
                                                 </div>
                                             )}
                                             <div>
                                                 <span className="text-xs text-gray-600">Date:</span>
-                                                <p className="font-medium">{mostRecent.date}</p>
+                                                <p className="font-medium">{mostRecentWeight.date}</p>
                                             </div>
                                         </div>
                                     </div>
@@ -13171,24 +13190,37 @@ const App = () => {
                                                         <h4 className="font-semibold text-gray-700 mb-2">Health</h4>
                                                         <div className="space-y-3 text-sm">
                                                             {/* Current Measurements Summary */}
-                                                            {(animalToView.currentWeight || animalToView.bcs || animalToView.growthRecords?.length > 0) && (
-                                                                <div className="grid grid-cols-2 gap-2">
-                                                                    {animalToView.currentWeight && (
-                                                                        <div>
-                                                                            <strong>Weight:</strong> {animalToView.currentWeight}g
-                                                                            {animalToView.weightTrend && (
-                                                                                <span className={animalToView.weightTrend === 'up' ? 'text-red-600' : animalToView.weightTrend === 'down' ? 'text-green-600' : 'text-gray-600'}>
-                                                                                    {animalToView.weightTrend === 'up' ? ' ↑' : animalToView.weightTrend === 'down' ? ' ↓' : ' →'}
-                                                                                </span>
-                                                                            )}
-                                                                        </div>
-                                                                    )}
-                                                                    {animalToView.bcs && <div><strong>BCS:</strong> {animalToView.bcs}</div>}
-                                                                    {animalToView.growthRecords && animalToView.growthRecords.length > 0 && animalToView.growthRecords[animalToView.growthRecords.length - 1].length && (
-                                                                        <div><strong>Length:</strong> {animalToView.growthRecords[animalToView.growthRecords.length - 1].length} {animalToView.measurementUnits?.length || 'cm'}</div>
-                                                                    )}
-                                                                </div>
-                                                            )}
+                                                            {(() => {
+                                                                // Compute current measurements from growth records if available
+                                                                let currentWeight = null;
+                                                                let currentLength = null;
+                                                                
+                                                                if (animalToView.growthRecords && Array.isArray(animalToView.growthRecords) && animalToView.growthRecords.length > 0) {
+                                                                    const sorted = [...animalToView.growthRecords].sort((a, b) => new Date(b.date) - new Date(a.date));
+                                                                    currentWeight = sorted[0].weight;
+                                                                    const withLength = sorted.find(r => r.length);
+                                                                    currentLength = withLength ? withLength.length : null;
+                                                                }
+                                                                
+                                                                return (currentWeight || animalToView.bcs || currentLength) && (
+                                                                    <div className="grid grid-cols-2 gap-2">
+                                                                        {currentWeight && (
+                                                                            <div>
+                                                                                <strong>Weight:</strong> {currentWeight}{animalToView.measurementUnits?.weight || 'g'}
+                                                                                {animalToView.weightTrend && (
+                                                                                    <span className={animalToView.weightTrend === 'up' ? 'text-red-600' : animalToView.weightTrend === 'down' ? 'text-green-600' : 'text-gray-600'}>
+                                                                                        {animalToView.weightTrend === 'up' ? ' ↑' : animalToView.weightTrend === 'down' ? ' ↓' : ' →'}
+                                                                                    </span>
+                                                                                )}
+                                                                            </div>
+                                                                        )}
+                                                                        {animalToView.bcs && <div><strong>BCS:</strong> {animalToView.bcs}</div>}
+                                                                        {currentLength && (
+                                                                            <div><strong>Length:</strong> {currentLength} {animalToView.measurementUnits?.length || 'cm'}</div>
+                                                                        )}
+                                                                    </div>
+                                                                );
+                                                            })()}
                                                             
                                                             {/* Conditions and Medications */}
                                                             {(animalToView.medicalConditions || animalToView.medications) && (
