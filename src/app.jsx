@@ -10375,15 +10375,22 @@ const App = () => {
             ...prev,
             [animalId]: animalToView.sectionPrivacy || {
                 appearance: true,
-                identification: true, // Always public
-                health: false,
-                reproductive: false,
-                genetics: false,
-                husbandry: false,
-                behavior: false,
-                records: false,
-                endOfLife: false,
-                remarks: false
+                identification: true,
+                health: true,
+                reproductive: true,
+                genetics: true,
+                husbandry: true,
+                behavior: true,
+                records: true,
+                endOfLife: true,
+                remarks: true,
+                owner: true,
+                lifeStage: true,
+                measurements: true,
+                origin: true,
+                medicalHistory: true,
+                environment: true,
+                activity: true
             }
         }));
         
