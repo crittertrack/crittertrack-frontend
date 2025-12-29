@@ -2280,10 +2280,28 @@ const ViewOnlyAnimalDetail = ({ animal, onClose, API_BASE_URL, onViewProfile }) 
                     {detailViewTab === 5 && (
                         <div className="space-y-4">
                             {/* Preventive Care */}
-                            {(animal.allergies || animal.medications) && (
+                            {(animal.vaccinations || animal.dewormingRecords || animal.parasiteControl || animal.allergies || animal.medications) && (
                                 <div className="bg-gray-50 p-4 rounded-lg border border-gray-200">
                                     <h3 className="text-lg font-semibold text-gray-700 border-b pb-2 mb-3">Preventive Care</h3>
-                                    <div className="space-y-2">
+                                    <div className="space-y-3">
+                                        {animal.vaccinations && (
+                                            <div>
+                                                <strong className="text-sm">Vaccinations:</strong>
+                                                <p className="text-sm mt-1">{typeof animal.vaccinations === 'string' ? animal.vaccinations : JSON.stringify(animal.vaccinations)}</p>
+                                            </div>
+                                        )}
+                                        {animal.dewormingRecords && (
+                                            <div>
+                                                <strong className="text-sm">Deworming Records:</strong>
+                                                <p className="text-sm mt-1">{typeof animal.dewormingRecords === 'string' ? animal.dewormingRecords : JSON.stringify(animal.dewormingRecords)}</p>
+                                            </div>
+                                        )}
+                                        {animal.parasiteControl && (
+                                            <div>
+                                                <strong className="text-sm">Parasite Control:</strong>
+                                                <p className="text-sm mt-1">{typeof animal.parasiteControl === 'string' ? animal.parasiteControl : JSON.stringify(animal.parasiteControl)}</p>
+                                            </div>
+                                        )}
                                         {animal.allergies && <p className="text-sm"><span className="font-medium">Allergies:</span> {animal.allergies}</p>}
                                         {animal.medications && <p className="text-sm"><span className="font-medium">Medications:</span> {animal.medications}</p>}
                                     </div>
@@ -5479,45 +5497,75 @@ const AnimalForm = ({
     });
     
     // Health Records with Dates
-    const [vaccinationRecords, setVaccinationRecords] = useState(
-        animalToEdit?.vaccinationRecords || []
-    );
+    const [vaccinationRecords, setVaccinationRecords] = useState(() => {
+        // Try to parse from database field 'vaccinations' first, then fallback to 'vaccinationRecords'
+        const data = animalToEdit?.vaccinations || animalToEdit?.vaccinationRecords;
+        if (!data) return [];
+        if (typeof data === 'string') {
+            try { return JSON.parse(data); } catch { return []; }
+        }
+        return Array.isArray(data) ? data : [];
+    });
     const [newVaccination, setNewVaccination] = useState({
         date: new Date().toISOString().substring(0, 10),
         name: '',
         notes: ''
     });
     
-    const [dewormingRecordsArray, setDewormingRecordsArray] = useState(
-        animalToEdit?.dewormingRecordsArray || []
-    );
+    const [dewormingRecordsArray, setDewormingRecordsArray] = useState(() => {
+        // Parse from database field 'dewormingRecords'
+        const data = animalToEdit?.dewormingRecords;
+        if (!data) return [];
+        if (typeof data === 'string') {
+            try { return JSON.parse(data); } catch { return []; }
+        }
+        return Array.isArray(data) ? data : [];
+    });
     const [newDeworming, setNewDeworming] = useState({
         date: new Date().toISOString().substring(0, 10),
         medication: '',
         notes: ''
     });
     
-    const [parasiteControlRecords, setParasiteControlRecords] = useState(
-        animalToEdit?.parasiteControlRecords || []
-    );
+    const [parasiteControlRecords, setParasiteControlRecords] = useState(() => {
+        // Parse from database field 'parasiteControl'
+        const data = animalToEdit?.parasiteControl;
+        if (!data) return [];
+        if (typeof data === 'string') {
+            try { return JSON.parse(data); } catch { return []; }
+        }
+        return Array.isArray(data) ? data : [];
+    });
     const [newParasiteControl, setNewParasiteControl] = useState({
         date: new Date().toISOString().substring(0, 10),
         treatment: '',
         notes: ''
     });
     
-    const [medicalProcedureRecords, setMedicalProcedureRecords] = useState(
-        animalToEdit?.medicalProcedureRecords || []
-    );
+    const [medicalProcedureRecords, setMedicalProcedureRecords] = useState(() => {
+        // Parse from database field 'medicalProcedures'
+        const data = animalToEdit?.medicalProcedures;
+        if (!data) return [];
+        if (typeof data === 'string') {
+            try { return JSON.parse(data); } catch { return []; }
+        }
+        return Array.isArray(data) ? data : [];
+    });
     const [newProcedure, setNewProcedure] = useState({
         date: new Date().toISOString().substring(0, 10),
         name: '',
         notes: ''
     });
     
-    const [labResultRecords, setLabResultRecords] = useState(
-        animalToEdit?.labResultRecords || []
-    );
+    const [labResultRecords, setLabResultRecords] = useState(() => {
+        // Parse from database field 'labResults'
+        const data = animalToEdit?.labResults;
+        if (!data) return [];
+        if (typeof data === 'string') {
+            try { return JSON.parse(data); } catch { return []; }
+        }
+        return Array.isArray(data) ? data : [];
+    });
     const [newLabResult, setNewLabResult] = useState({
         date: new Date().toISOString().substring(0, 10),
         testName: '',
@@ -6040,12 +6088,17 @@ const AnimalForm = ({
             payloadToSave.growthRecords = growthRecords;
             payloadToSave.measurementUnits = measurementUnits;
             
-            // Include health records
-            payloadToSave.vaccinationRecords = vaccinationRecords;
-            payloadToSave.dewormingRecordsArray = dewormingRecordsArray;
-            payloadToSave.parasiteControlRecords = parasiteControlRecords;
-            payloadToSave.medicalProcedureRecords = medicalProcedureRecords;
-            payloadToSave.labResultRecords = labResultRecords;
+            // Include health records - map to correct field names and serialize if needed
+            payloadToSave.vaccinations = vaccinationRecords.length > 0 ? JSON.stringify(vaccinationRecords) : null;
+            payloadToSave.vaccinationRecords = vaccinationRecords; // Keep for backward compat
+            payloadToSave.dewormingRecords = dewormingRecordsArray.length > 0 ? JSON.stringify(dewormingRecordsArray) : null;
+            payloadToSave.dewormingRecordsArray = dewormingRecordsArray; // Keep for backward compat
+            payloadToSave.parasiteControl = parasiteControlRecords.length > 0 ? JSON.stringify(parasiteControlRecords) : null;
+            payloadToSave.parasiteControlRecords = parasiteControlRecords; // Keep for backward compat
+            payloadToSave.medicalProcedures = medicalProcedureRecords.length > 0 ? JSON.stringify(medicalProcedureRecords) : null;
+            payloadToSave.medicalProcedureRecords = medicalProcedureRecords; // Keep for backward compat
+            payloadToSave.labResults = labResultRecords.length > 0 ? JSON.stringify(labResultRecords) : null;
+            payloadToSave.labResultRecords = labResultRecords; // Keep for backward compat
             
             // Handle image deletion
             if (deleteImage && animalToEdit) {
