@@ -6862,7 +6862,7 @@ const AnimalForm = ({
                                             {points.map((p, i) => (
                                                 i % Math.max(1, Math.floor(points.length / 5)) === 0 && (
                                                     <text key={`date-${i}`} x={p.x} y={height - margin.bottom + 25} textAnchor="middle" fontSize="10" fill="#666">
-                                                        {new Date(p.date).toLocaleDateString('en-US', { month: 'short', day: 'numeric' })}
+                                                        {new Date(p.date).toLocaleDateString()}
                                                     </text>
                                                 )
                                             ))}
@@ -6873,7 +6873,7 @@ const AnimalForm = ({
                                             {/* Points */}
                                             {points.map((p, i) => {
                                                 const tooltipText = [
-                                                    `Date: ${p.date}`,
+                                                    `Date: ${new Date(p.date).toLocaleDateString()}`,
                                                     `Weight: ${p.weight} ${measurementUnits.weight}`,
                                                     p.length ? `Length: ${p.length} ${measurementUnits.length}` : null,
                                                     p.bcs ? `BCS: ${p.bcs}` : null,
@@ -13496,7 +13496,7 @@ const App = () => {
                                                                 {points.map((p, i) => (
                                                                     i % Math.max(1, Math.floor(points.length / 5)) === 0 && (
                                                                         <text key={`date-${i}`} x={p.x} y={height - margin.bottom + 25} textAnchor="middle" fontSize="10" fill="#666">
-                                                                            {new Date(p.date).toLocaleDateString('en-US', { month: 'short', day: 'numeric' })}
+                                                                            {new Date(p.date).toLocaleDateString()}
                                                                         </text>
                                                                     )
                                                                 ))}
@@ -13507,7 +13507,7 @@ const App = () => {
                                                                 {/* Points */}
                                                                 {points.map((p, i) => {
                                                                     const tooltipText = [
-                                                                        `Date: ${p.date}`,
+                                                                        `Date: ${new Date(p.date).toLocaleDateString()}`,
                                                                         `Weight: ${p.weight} ${animalToView.measurementUnits?.weight || 'g'}`,
                                                                         p.length ? `Length: ${p.length} ${animalToView.measurementUnits?.length || 'cm'}` : null,
                                                                         p.bcs ? `BCS: ${p.bcs}` : null,
