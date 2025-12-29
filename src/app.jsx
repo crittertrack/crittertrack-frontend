@@ -2140,6 +2140,17 @@ const ViewOnlyAnimalDetail = ({ animal, onClose, API_BASE_URL, onViewProfile }) 
                                     <p className="text-gray-700">{animal.origin}</p>
                                 </div>
                             )}
+                            {animal.sectionPrivacy?.reproductive !== false && (
+                                <OffspringSection
+                                    animalId={animal.id_public}
+                                    API_BASE_URL={API_BASE_URL}
+                                    onViewAnimal={(offspring) => {
+                                        if (window.handleViewPublicAnimal) {
+                                            window.handleViewPublicAnimal(offspring);
+                                        }
+                                    }}
+                                />
+                            )}
                         </div>
                     )}
 
@@ -2280,17 +2291,6 @@ const ViewOnlyAnimalDetail = ({ animal, onClose, API_BASE_URL, onViewProfile }) 
                                         )}
                                     </p>
                                 </div>
-                            )}
-                            {animal.sectionPrivacy?.reproductive !== false && (
-                                <OffspringSection
-                                    animalId={animal.id_public}
-                                    API_BASE_URL={API_BASE_URL}
-                                    onViewAnimal={(offspring) => {
-                                        if (window.handleViewPublicAnimal) {
-                                            window.handleViewPublicAnimal(offspring);
-                                        }
-                                    }}
-                                />
                             )}
                             {animal.sectionPrivacy?.endOfLife !== false && animal.deceasedDate && (
                                 <div className="bg-gray-50 p-4 rounded-lg border border-gray-200">
