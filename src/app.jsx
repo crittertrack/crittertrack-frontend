@@ -2997,6 +2997,17 @@ const LitterManagement = ({ authToken, API_BASE_URL, userProfile, showModalMessa
             
             console.log('[fetchMyAnimals] Raw response:', animalsData.length, 'animals');
             
+            // Debug: Log health records for animals that have them
+            animalsData.forEach((animal, idx) => {
+                if (animal.vaccinations || animal.dewormingRecords || animal.parasiteControl) {
+                    console.log(`[fetchMyAnimals] Animal ${animal.id_public} has health records:`, {
+                        vaccinations: animal.vaccinations ? `${animal.vaccinations.length} bytes` : 'null',
+                        dewormingRecords: animal.dewormingRecords ? `${animal.dewormingRecords.length} bytes` : 'null',
+                        parasiteControl: animal.parasiteControl ? `${animal.parasiteControl.length} bytes` : 'null'
+                    });
+                }
+            });
+            
             // Set animals immediately so UI can render
             setMyAnimals(animalsData);
             
@@ -5492,7 +5503,14 @@ const AnimalForm = ({
         const data = animalToEdit?.vaccinations || animalToEdit?.vaccinationRecords;
         if (!data) return [];
         if (typeof data === 'string') {
-            try { return JSON.parse(data); } catch { return []; }
+            try { 
+                const parsed = JSON.parse(data);
+                console.log('[AnimalForm] Parsed vaccinationRecords from database:', parsed);
+                return parsed;
+            } catch { 
+                console.error('[AnimalForm] Failed to parse vaccinationRecords:', data);
+                return []; 
+            }
         }
         return Array.isArray(data) ? data : [];
     });
@@ -5507,7 +5525,14 @@ const AnimalForm = ({
         const data = animalToEdit?.dewormingRecords;
         if (!data) return [];
         if (typeof data === 'string') {
-            try { return JSON.parse(data); } catch { return []; }
+            try { 
+                const parsed = JSON.parse(data);
+                console.log('[AnimalForm] Parsed dewormingRecords from database:', parsed);
+                return parsed;
+            } catch { 
+                console.error('[AnimalForm] Failed to parse dewormingRecords:', data);
+                return []; 
+            }
         }
         return Array.isArray(data) ? data : [];
     });
@@ -5522,7 +5547,14 @@ const AnimalForm = ({
         const data = animalToEdit?.parasiteControl;
         if (!data) return [];
         if (typeof data === 'string') {
-            try { return JSON.parse(data); } catch { return []; }
+            try { 
+                const parsed = JSON.parse(data);
+                console.log('[AnimalForm] Parsed parasiteControl from database:', parsed);
+                return parsed;
+            } catch { 
+                console.error('[AnimalForm] Failed to parse parasiteControl:', data);
+                return []; 
+            }
         }
         return Array.isArray(data) ? data : [];
     });
