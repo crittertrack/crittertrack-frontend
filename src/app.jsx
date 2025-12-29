@@ -2016,10 +2016,26 @@ const ViewOnlyAnimalDetail = ({ animal, onClose, API_BASE_URL, onViewProfile }) 
                                     )}
                                 </div>
                             )}
+                            {animal.sectionPrivacy?.genetics !== false && animal.geneticCode && (
+                                <div className="bg-gray-50 p-4 rounded-lg border border-gray-200">
+                                    <h3 className="text-lg font-semibold text-gray-700 border-b pb-2 mb-3">Genetic Code</h3>
+                                    <p className="text-gray-700 font-mono text-sm">{animal.geneticCode}</p>
+                                </div>
+                            )}
                             {animal.sectionPrivacy?.lifeStage !== false && animal.lifeStage && (
                                 <div className="bg-gray-50 p-4 rounded-lg border border-gray-200">
                                     <h3 className="text-lg font-semibold text-gray-700 border-b pb-2 mb-3">Life Stage</h3>
                                     <p className="text-gray-700">{animal.lifeStage}</p>
+                                </div>
+                            )}
+                            {animal.sectionPrivacy?.measurements !== false && (animal.weight || animal.length || animal.heightAtShoulder) && (
+                                <div className="bg-gray-50 p-4 rounded-lg border border-gray-200">
+                                    <h3 className="text-lg font-semibold text-gray-700 border-b pb-2 mb-3">Current Measurements</h3>
+                                    <div className="space-y-2">
+                                        {animal.weight && <p className="text-sm"><span className="font-medium">Weight:</span> {animal.weight}</p>}
+                                        {animal.length && <p className="text-sm"><span className="font-medium">Length:</span> {animal.length}</p>}
+                                        {animal.heightAtShoulder && <p className="text-sm"><span className="font-medium">Height at Shoulder:</span> {animal.heightAtShoulder}</p>}
+                                    </div>
                                 </div>
                             )}
                         </div>
@@ -2028,6 +2044,16 @@ const ViewOnlyAnimalDetail = ({ animal, onClose, API_BASE_URL, onViewProfile }) 
                     {/* Tab 3: Lineage & Origin */}
                     {detailViewTab === 3 && (
                         <div className="space-y-4">
+                            {animal.sectionPrivacy?.identification !== false && (animal.microchipNumber || animal.registrationNumber || animal.tattooNumber) && (
+                                <div className="bg-gray-50 p-4 rounded-lg border border-gray-200">
+                                    <h3 className="text-lg font-semibold text-gray-700 border-b pb-2 mb-3">Identification Numbers</h3>
+                                    <div className="space-y-2">
+                                        {animal.microchipNumber && <p className="text-sm"><span className="font-medium">Microchip:</span> {animal.microchipNumber}</p>}
+                                        {animal.registrationNumber && <p className="text-sm"><span className="font-medium">Registration:</span> {animal.registrationNumber}</p>}
+                                        {animal.tattooNumber && <p className="text-sm"><span className="font-medium">Tattoo:</span> {animal.tattooNumber}</p>}
+                                    </div>
+                                </div>
+                            )}
                             {animal.sectionPrivacy?.reproductive !== false && (
                                 <div className="bg-gray-50 p-4 rounded-lg border border-gray-200">
                                     <h3 className="text-lg font-semibold text-gray-700 border-b pb-2 mb-4">Parents</h3>
@@ -2086,12 +2112,17 @@ const ViewOnlyAnimalDetail = ({ animal, onClose, API_BASE_URL, onViewProfile }) 
                         <div className="space-y-4">
                             {animal.sectionPrivacy?.health !== false && (
                                 <div className="bg-gray-50 p-4 rounded-lg border border-gray-200">
-                                    <h3 className="text-lg font-semibold text-gray-700 border-b pb-2 mb-3">Health Information</h3>
+                                    <h3 className="text-lg font-semibold text-gray-700 border-b pb-2 mb-3">Preventive Care</h3>
                                     <div className="space-y-2">
-                                        {animal.medicalConditions && <p className="text-sm"><span className="font-medium">Conditions:</span> {animal.medicalConditions}</p>}
                                         {animal.allergies && <p className="text-sm"><span className="font-medium">Allergies:</span> {animal.allergies}</p>}
                                         {animal.medications && <p className="text-sm"><span className="font-medium">Medications:</span> {animal.medications}</p>}
                                     </div>
+                                </div>
+                            )}
+                            {animal.sectionPrivacy?.medicalHistory !== false && animal.medicalConditions && (
+                                <div className="bg-gray-50 p-4 rounded-lg border border-gray-200">
+                                    <h3 className="text-lg font-semibold text-gray-700 border-b pb-2 mb-3">Medical History</h3>
+                                    <p className="text-sm text-gray-700">{animal.medicalConditions}</p>
                                 </div>
                             )}
                         </div>
@@ -2112,6 +2143,16 @@ const ViewOnlyAnimalDetail = ({ animal, onClose, API_BASE_URL, onViewProfile }) 
                                     </div>
                                 </div>
                             )}
+                            {animal.sectionPrivacy?.environment !== false && (animal.humidity || animal.lighting || animal.noise) && (
+                                <div className="bg-gray-50 p-4 rounded-lg border border-gray-200">
+                                    <h3 className="text-lg font-semibold text-gray-700 border-b pb-2 mb-3">Environment</h3>
+                                    <div className="space-y-2">
+                                        {animal.humidity && <p className="text-sm"><span className="font-medium">Humidity:</span> {animal.humidity}</p>}
+                                        {animal.lighting && <p className="text-sm"><span className="font-medium">Lighting:</span> {animal.lighting}</p>}
+                                        {animal.noise && <p className="text-sm"><span className="font-medium">Noise Level:</span> {animal.noise}</p>}
+                                    </div>
+                                </div>
+                            )}
                         </div>
                     )}
 
@@ -2125,8 +2166,13 @@ const ViewOnlyAnimalDetail = ({ animal, onClose, API_BASE_URL, onViewProfile }) 
                                         {animal.temperament && <p className="text-sm"><span className="font-medium">Temperament:</span> {animal.temperament}</p>}
                                         {animal.handlingTolerance && <p className="text-sm"><span className="font-medium">Handling:</span> {animal.handlingTolerance}</p>}
                                         {animal.socialStructure && <p className="text-sm"><span className="font-medium">Social:</span> {animal.socialStructure}</p>}
-                                        {animal.activityCycle && <p className="text-sm"><span className="font-medium">Activity:</span> {animal.activityCycle}</p>}
                                     </div>
+                                </div>
+                            )}
+                            {animal.sectionPrivacy?.activity !== false && animal.activityCycle && (
+                                <div className="bg-gray-50 p-4 rounded-lg border border-gray-200">
+                                    <h3 className="text-lg font-semibold text-gray-700 border-b pb-2 mb-3">Activity Cycle</h3>
+                                    <p className="text-sm text-gray-700">{animal.activityCycle}</p>
                                 </div>
                             )}
                         </div>
@@ -2135,6 +2181,12 @@ const ViewOnlyAnimalDetail = ({ animal, onClose, API_BASE_URL, onViewProfile }) 
                     {/* Tab 8: Records */}
                     {detailViewTab === 8 && (
                         <div className="space-y-4">
+                            {animal.sectionPrivacy?.owner !== false && (animal.currentOwnerId || animal.currentOwnerName) && (
+                                <div className="bg-gray-50 p-4 rounded-lg border border-gray-200">
+                                    <h3 className="text-lg font-semibold text-gray-700 border-b pb-2 mb-3">Current Owner</h3>
+                                    <p className="text-gray-700">{animal.currentOwnerName || animal.currentOwnerId}</p>
+                                </div>
+                            )}
                             {animal.sectionPrivacy?.genetics !== false && animal.geneticCode && (
                                 <div className="bg-gray-50 p-4 rounded-lg border border-gray-200">
                                     <h3 className="text-lg font-semibold text-gray-700 border-b pb-2 mb-3">Genetic Code</h3>
@@ -2186,6 +2238,15 @@ const ViewOnlyAnimalDetail = ({ animal, onClose, API_BASE_URL, onViewProfile }) 
                                         }
                                     }}
                                 />
+                            )}
+                            {animal.sectionPrivacy?.endOfLife !== false && animal.deceasedDate && (
+                                <div className="bg-gray-50 p-4 rounded-lg border border-gray-200">
+                                    <h3 className="text-lg font-semibold text-gray-700 border-b pb-2 mb-3">End of Life</h3>
+                                    <div className="space-y-2">
+                                        <p className="text-sm"><span className="font-medium">Date:</span> {new Date(animal.deceasedDate).toLocaleDateString()}</p>
+                                        {animal.causeOfDeath && <p className="text-sm"><span className="font-medium">Cause:</span> {animal.causeOfDeath}</p>}
+                                    </div>
+                                </div>
                             )}
                         </div>
                     )}
