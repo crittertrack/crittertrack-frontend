@@ -1959,9 +1959,10 @@ const ViewOnlyAnimalDetail = ({ animal, onClose, API_BASE_URL, onViewProfile }) 
                     {/* Tab 1: Overview */}
                     {detailViewTab === 1 && (
                         <div className="space-y-4">
+                            {/* Main Animal Card - 2 Column Layout */}
                             <div className="bg-white border-2 border-gray-300 rounded-lg overflow-hidden">
                                 <div className="flex relative">
-                                    {/* Left Column - Image */}
+                                    {/* Left Column - Image (1/3) */}
                                     <div className="w-1/3 p-4 sm:p-6 flex flex-col items-center justify-center relative min-h-80">
                                         {/* Birthdate badge */}
                                         {animal.birthDate && (
@@ -1992,17 +1993,17 @@ const ViewOnlyAnimalDetail = ({ animal, onClose, API_BASE_URL, onViewProfile }) 
                                         </div>
                                     </div>
 
-                                    {/* Right Column - Info */}
+                                    {/* Right Column - Info (2/3) */}
                                     <div className="w-2/3 p-4 sm:p-6 flex flex-col border-l border-gray-300 space-y-3">
                                         {/* Species/Breed/Strain/CTC - At Top */}
-                                        <p className="text-sm text-gray-600">
-                                            {animal.species}
-                                            {animal.breed && ` • ${animal.breed}`}
-                                            {animal.strain && ` • ${animal.strain}`}
-                                            {animal.id_public && ` • ${animal.id_public}`}
-                                        </p>
+                                        <div className="text-sm text-gray-600 font-medium space-y-1">
+                                            <p>{animal.species}</p>
+                                            {animal.breed && <p><span className="font-semibold">Breed:</span> {animal.breed}</p>}
+                                            {animal.strain && <p><span className="font-semibold">Strain:</span> {animal.strain}</p>}
+                                            {animal.id_public && <p><span className="font-semibold">CTC ID:</span> <span className="font-mono text-accent">{animal.id_public}</span></p>}
+                                        </div>
 
-                                        {/* Name */}
+                                        {/* Full Name */}
                                         <h2 className="text-2xl font-bold text-gray-800">
                                             {animal.prefix ? `${animal.prefix} ` : ''}
                                             {animal.name}
@@ -2012,12 +2013,12 @@ const ViewOnlyAnimalDetail = ({ animal, onClose, API_BASE_URL, onViewProfile }) 
                                         {/* Appearance */}
                                         {(animal.color || animal.coat || animal.coatPattern || animal.earset) && (
                                             <p className="text-sm text-gray-700">
-                                                {[
+                                                <span className="font-semibold">Appearance:</span> {[
                                                     animal.color,
                                                     animal.coatPattern,
                                                     animal.coat,
                                                     animal.earset
-                                                ].filter(Boolean).join(' ')}
+                                                ].filter(Boolean).join(', ')}
                                             </p>
                                         )}
 
@@ -2025,7 +2026,7 @@ const ViewOnlyAnimalDetail = ({ animal, onClose, API_BASE_URL, onViewProfile }) 
                                         {animal.birthDate && (
                                             <div className="text-sm text-gray-700 space-y-1">
                                                 <p>
-                                                    Date of Birth: {new Date(animal.birthDate).toLocaleDateString()} ~ {(() => {
+                                                    <span className="font-semibold">Date of Birth:</span> {new Date(animal.birthDate).toLocaleDateString()} (~{(() => {
                                                         const birth = new Date(animal.birthDate);
                                                         const endDate = animal.deceasedDate ? new Date(animal.deceasedDate) : new Date();
                                                         let age = endDate.getFullYear() - birth.getFullYear();
@@ -2043,10 +2044,10 @@ const ViewOnlyAnimalDetail = ({ animal, onClose, API_BASE_URL, onViewProfile }) 
                                                         } else {
                                                             return `${days}d`;
                                                         }
-                                                    })()}
+                                                    })()})
                                                 </p>
                                                 {animal.deceasedDate && (
-                                                    <p className="text-red-600">
+                                                    <p className="text-red-600 font-semibold">
                                                         Deceased: {new Date(animal.deceasedDate).toLocaleDateString()}
                                                     </p>
                                                 )}
@@ -2055,6 +2056,8 @@ const ViewOnlyAnimalDetail = ({ animal, onClose, API_BASE_URL, onViewProfile }) 
                                     </div>
                                 </div>
                             </div>
+
+                            {/* Breeder Section */}
                             {animal.breederId_public && (
                                 <div className="bg-gray-50 p-4 rounded-lg border border-gray-200">
                                     <h3 className="text-lg font-semibold text-gray-700 border-b pb-2 mb-3">Breeder</h3>
@@ -2084,49 +2087,9 @@ const ViewOnlyAnimalDetail = ({ animal, onClose, API_BASE_URL, onViewProfile }) 
                                     </p>
                                 </div>
                             )}
-                        </div>
-                    )}
 
-                    {/* Tab 2: Physical Profile */}
-                    {detailViewTab === 2 && (
-                        <div className="space-y-4">
-                            {animal.sectionPrivacy?.appearance !== false && (
-                                <div className="bg-gray-50 p-4 rounded-lg border border-gray-200">
-                                    <h3 className="text-lg font-semibold text-gray-700 border-b pb-2 mb-3">Appearance</h3>
-                                    {(animal.color || animal.coat || animal.coatPattern || animal.earset) && (
-                                        <p className="text-gray-700">{[animal.color, animal.coatPattern, animal.coat, animal.earset].filter(Boolean).join(', ')}</p>
-                                    )}
-                                </div>
-                            )}
-                            {animal.sectionPrivacy?.genetics !== false && animal.geneticCode && (
-                                <div className="bg-gray-50 p-4 rounded-lg border border-gray-200">
-                                    <h3 className="text-lg font-semibold text-gray-700 border-b pb-2 mb-3">Genetic Code</h3>
-                                    <p className="text-gray-700 font-mono text-sm">{animal.geneticCode}</p>
-                                </div>
-                            )}
-                            {animal.sectionPrivacy?.lifeStage !== false && animal.lifeStage && (
-                                <div className="bg-gray-50 p-4 rounded-lg border border-gray-200">
-                                    <h3 className="text-lg font-semibold text-gray-700 border-b pb-2 mb-3">Life Stage</h3>
-                                    <p className="text-gray-700">{animal.lifeStage}</p>
-                                </div>
-                            )}
-                            {animal.sectionPrivacy?.measurements !== false && (animal.weight || animal.length || animal.heightAtShoulder) && (
-                                <div className="bg-gray-50 p-4 rounded-lg border border-gray-200">
-                                    <h3 className="text-lg font-semibold text-gray-700 border-b pb-2 mb-3">Current Measurements</h3>
-                                    <div className="space-y-2">
-                                        {animal.weight && <p className="text-sm"><span className="font-medium">Weight:</span> {animal.weight}</p>}
-                                        {animal.length && <p className="text-sm"><span className="font-medium">Length:</span> {animal.length}</p>}
-                                        {animal.heightAtShoulder && <p className="text-sm"><span className="font-medium">Height at Shoulder:</span> {animal.heightAtShoulder}</p>}
-                                    </div>
-                                </div>
-                            )}
-                        </div>
-                    )}
-
-                    {/* Tab 3: Lineage & Origin */}
-                    {detailViewTab === 3 && (
-                        <div className="space-y-4">
-                            {animal.sectionPrivacy?.identification !== false && (animal.microchipNumber || animal.registrationNumber || animal.tattooNumber) && (
+                            {/* Identification Numbers Section */}
+                            {(animal.microchipNumber || animal.registrationNumber || animal.tattooNumber) && (
                                 <div className="bg-gray-50 p-4 rounded-lg border border-gray-200">
                                     <h3 className="text-lg font-semibold text-gray-700 border-b pb-2 mb-3">Identification Numbers</h3>
                                     <div className="space-y-2">
@@ -2136,7 +2099,29 @@ const ViewOnlyAnimalDetail = ({ animal, onClose, API_BASE_URL, onViewProfile }) 
                                     </div>
                                 </div>
                             )}
-                            {animal.sectionPrivacy?.reproductive !== false && (
+
+                            {/* Genetic Code Display Section */}
+                            {showGeneticCode && (
+                                <div className="bg-gray-50 p-4 rounded-lg border border-gray-200">
+                                    <h3 className="text-lg font-semibold text-gray-700 border-b pb-2 mb-3">Genetic Code</h3>
+                                    <p className="text-gray-700 font-mono text-sm break-all">{animal.geneticCode}</p>
+                                </div>
+                            )}
+
+                            {/* Medical Information Section */}
+                            {(animal.allergies || animal.medications || animal.medicalConditions) && (
+                                <div className="bg-gray-50 p-4 rounded-lg border border-gray-200">
+                                    <h3 className="text-lg font-semibold text-gray-700 border-b pb-2 mb-3">Medical Information</h3>
+                                    <div className="space-y-2">
+                                        {animal.allergies && <p className="text-sm"><span className="font-medium">Allergies:</span> {animal.allergies}</p>}
+                                        {animal.medications && <p className="text-sm"><span className="font-medium">Medications:</span> {animal.medications}</p>}
+                                        {animal.medicalConditions && <p className="text-sm"><span className="font-medium">Medical Conditions:</span> {animal.medicalConditions}</p>}
+                                    </div>
+                                </div>
+                            )}
+
+                            {/* Parents Section */}
+                            {(animal.fatherId_public || animal.sireId_public || animal.motherId_public || animal.damId_public) && (
                                 <div className="bg-gray-50 p-4 rounded-lg border border-gray-200">
                                     <h3 className="text-lg font-semibold text-gray-700 border-b pb-2 mb-4">Parents</h3>
                                     <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
@@ -2163,23 +2148,114 @@ const ViewOnlyAnimalDetail = ({ animal, onClose, API_BASE_URL, onViewProfile }) 
                                     </div>
                                 </div>
                             )}
-                            {animal.sectionPrivacy?.origin !== false && animal.origin && (
+                        </div>
+                    )}
+
+                    {/* Tab 2: Physical Profile */}
+                    {detailViewTab === 2 && (
+                        <div className="space-y-4">
+                            {/* Appearance Section */}
+                            {(animal.color || animal.coat || animal.coatPattern || animal.earset) && (
+                                <div className="bg-gray-50 p-4 rounded-lg border border-gray-200">
+                                    <h3 className="text-lg font-semibold text-gray-700 border-b pb-2 mb-3">Appearance</h3>
+                                    <div className="space-y-2">
+                                        {animal.color && <p className="text-sm"><span className="font-medium">Color:</span> {animal.color}</p>}
+                                        {animal.coatPattern && <p className="text-sm"><span className="font-medium">Coat Pattern:</span> {animal.coatPattern}</p>}
+                                        {animal.coat && <p className="text-sm"><span className="font-medium">Coat Type:</span> {animal.coat}</p>}
+                                        {animal.earset && <p className="text-sm"><span className="font-medium">Earset:</span> {animal.earset}</p>}
+                                    </div>
+                                </div>
+                            )}
+
+                            {/* Genetic Code Section */}
+                            {showGeneticCode && (
+                                <div className="bg-gray-50 p-4 rounded-lg border border-gray-200">
+                                    <h3 className="text-lg font-semibold text-gray-700 border-b pb-2 mb-3">Genetic Code</h3>
+                                    <p className="text-gray-700 font-mono text-sm break-all">{animal.geneticCode}</p>
+                                </div>
+                            )}
+
+                            {/* Life Stage Section */}
+                            {animal.lifeStage && (
+                                <div className="bg-gray-50 p-4 rounded-lg border border-gray-200">
+                                    <h3 className="text-lg font-semibold text-gray-700 border-b pb-2 mb-3">Life Stage</h3>
+                                    <p className="text-gray-700">{animal.lifeStage}</p>
+                                </div>
+                            )}
+
+                            {/* Current Measurements Section */}
+                            {(animal.weight || animal.length || animal.heightAtShoulder) && (
+                                <div className="bg-gray-50 p-4 rounded-lg border border-gray-200">
+                                    <h3 className="text-lg font-semibold text-gray-700 border-b pb-2 mb-3">Current Measurements</h3>
+                                    <div className="space-y-2">
+                                        {animal.weight && <p className="text-sm"><span className="font-medium">Weight:</span> {animal.weight}</p>}
+                                        {animal.length && <p className="text-sm"><span className="font-medium">Length:</span> {animal.length}</p>}
+                                        {animal.heightAtShoulder && <p className="text-sm"><span className="font-medium">Height at Shoulder:</span> {animal.heightAtShoulder}</p>}
+                                    </div>
+                                </div>
+                            )}
+                        </div>
+                    )}
+
+                    {/* Tab 3: Lineage & Origin */}
+                    {detailViewTab === 3 && (
+                        <div className="space-y-4">
+                            {/* Identification Numbers Section */}
+                            {(animal.microchipNumber || animal.registrationNumber || animal.tattooNumber) && (
+                                <div className="bg-gray-50 p-4 rounded-lg border border-gray-200">
+                                    <h3 className="text-lg font-semibold text-gray-700 border-b pb-2 mb-3">Identification Numbers</h3>
+                                    <div className="space-y-2">
+                                        {animal.microchipNumber && <p className="text-sm"><span className="font-medium">Microchip:</span> {animal.microchipNumber}</p>}
+                                        {animal.registrationNumber && <p className="text-sm"><span className="font-medium">Registration:</span> {animal.registrationNumber}</p>}
+                                        {animal.tattooNumber && <p className="text-sm"><span className="font-medium">Tattoo:</span> {animal.tattooNumber}</p>}
+                                    </div>
+                                </div>
+                            )}
+                            {/* Parents Section */}
+                            {(animal.fatherId_public || animal.sireId_public || animal.motherId_public || animal.damId_public) && (
+                                <div className="bg-gray-50 p-4 rounded-lg border border-gray-200">
+                                    <h3 className="text-lg font-semibold text-gray-700 border-b pb-2 mb-4">Parents</h3>
+                                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                                        <ViewOnlyParentCard 
+                                            parentId={animal.fatherId_public || animal.sireId_public} 
+                                            parentType="Sire"
+                                            API_BASE_URL={API_BASE_URL}
+                                            onViewAnimal={(parent) => {
+                                                if (window.handleViewPublicAnimal) {
+                                                    window.handleViewPublicAnimal(parent);
+                                                }
+                                            }}
+                                        />
+                                        <ViewOnlyParentCard 
+                                            parentId={animal.motherId_public || animal.damId_public} 
+                                            parentType="Dam"
+                                            API_BASE_URL={API_BASE_URL}
+                                            onViewAnimal={(parent) => {
+                                                if (window.handleViewPublicAnimal) {
+                                                    window.handleViewPublicAnimal(parent);
+                                                }
+                                            }}
+                                        />
+                                    </div>
+                                </div>
+                            )}
+                            {/* Origin Section */}
+                            {animal.origin && (
                                 <div className="bg-gray-50 p-4 rounded-lg border border-gray-200">
                                     <h3 className="text-lg font-semibold text-gray-700 border-b pb-2 mb-3">Origin</h3>
                                     <p className="text-gray-700">{animal.origin}</p>
                                 </div>
                             )}
-                            {animal.sectionPrivacy?.reproductive !== false && (
-                                <OffspringSection
-                                    animalId={animal.id_public}
-                                    API_BASE_URL={API_BASE_URL}
-                                    onViewAnimal={(offspring) => {
-                                        if (window.handleViewPublicAnimal) {
-                                            window.handleViewPublicAnimal(offspring);
-                                        }
-                                    }}
-                                />
-                            )}
+                            {/* Offspring Section */}
+                            <OffspringSection
+                                animalId={animal.id_public}
+                                API_BASE_URL={API_BASE_URL}
+                                onViewAnimal={(offspring) => {
+                                    if (window.handleViewPublicAnimal) {
+                                        window.handleViewPublicAnimal(offspring);
+                                    }
+                                }}
+                            />
                         </div>
                     )}
 
@@ -2203,7 +2279,8 @@ const ViewOnlyAnimalDetail = ({ animal, onClose, API_BASE_URL, onViewProfile }) 
                     {/* Tab 5: Health */}
                     {detailViewTab === 5 && (
                         <div className="space-y-4">
-                            {animal.sectionPrivacy?.health !== false && (
+                            {/* Preventive Care */}
+                            {(animal.allergies || animal.medications) && (
                                 <div className="bg-gray-50 p-4 rounded-lg border border-gray-200">
                                     <h3 className="text-lg font-semibold text-gray-700 border-b pb-2 mb-3">Preventive Care</h3>
                                     <div className="space-y-2">
@@ -2212,7 +2289,8 @@ const ViewOnlyAnimalDetail = ({ animal, onClose, API_BASE_URL, onViewProfile }) 
                                     </div>
                                 </div>
                             )}
-                            {animal.sectionPrivacy?.medicalHistory !== false && animal.medicalConditions && (
+                            {/* Medical History */}
+                            {animal.medicalConditions && (
                                 <div className="bg-gray-50 p-4 rounded-lg border border-gray-200">
                                     <h3 className="text-lg font-semibold text-gray-700 border-b pb-2 mb-3">Medical History</h3>
                                     <p className="text-sm text-gray-700">{animal.medicalConditions}</p>
@@ -2224,19 +2302,23 @@ const ViewOnlyAnimalDetail = ({ animal, onClose, API_BASE_URL, onViewProfile }) 
                     {/* Tab 6: Husbandry */}
                     {detailViewTab === 6 && (
                         <div className="space-y-4">
-                            {animal.sectionPrivacy?.husbandry !== false && (
+                            {/* Husbandry Section */}
+                            {(animal.dietType || animal.feedingSchedule || animal.supplements || animal.housingType || animal.bedding || animal.temperatureRange || animal.enrichment) && (
                                 <div className="bg-gray-50 p-4 rounded-lg border border-gray-200">
                                     <h3 className="text-lg font-semibold text-gray-700 border-b pb-2 mb-3">Husbandry</h3>
                                     <div className="space-y-2">
-                                        {animal.dietType && <p className="text-sm"><span className="font-medium">Diet:</span> {animal.dietType}</p>}
-                                        {animal.housingType && <p className="text-sm"><span className="font-medium">Housing:</span> {animal.housingType}</p>}
+                                        {animal.dietType && <p className="text-sm"><span className="font-medium">Diet Type:</span> {animal.dietType}</p>}
+                                        {animal.feedingSchedule && <p className="text-sm"><span className="font-medium">Feeding Schedule:</span> {animal.feedingSchedule}</p>}
+                                        {animal.supplements && <p className="text-sm"><span className="font-medium">Supplements:</span> {animal.supplements}</p>}
+                                        {animal.housingType && <p className="text-sm"><span className="font-medium">Housing Type:</span> {animal.housingType}</p>}
                                         {animal.bedding && <p className="text-sm"><span className="font-medium">Bedding:</span> {animal.bedding}</p>}
-                                        {animal.temperatureRange && <p className="text-sm"><span className="font-medium">Temperature:</span> {animal.temperatureRange}</p>}
+                                        {animal.temperatureRange && <p className="text-sm"><span className="font-medium">Temperature Range:</span> {animal.temperatureRange}</p>}
                                         {animal.enrichment && <p className="text-sm"><span className="font-medium">Enrichment:</span> {animal.enrichment}</p>}
                                     </div>
                                 </div>
                             )}
-                            {animal.sectionPrivacy?.environment !== false && (animal.humidity || animal.lighting || animal.noise) && (
+                            {/* Environment Section */}
+                            {(animal.humidity || animal.lighting || animal.noise) && (
                                 <div className="bg-gray-50 p-4 rounded-lg border border-gray-200">
                                     <h3 className="text-lg font-semibold text-gray-700 border-b pb-2 mb-3">Environment</h3>
                                     <div className="space-y-2">
@@ -2252,17 +2334,19 @@ const ViewOnlyAnimalDetail = ({ animal, onClose, API_BASE_URL, onViewProfile }) 
                     {/* Tab 7: Behavior */}
                     {detailViewTab === 7 && (
                         <div className="space-y-4">
-                            {animal.sectionPrivacy?.behavior !== false && (
+                            {/* Behavior & Welfare Section */}
+                            {(animal.temperament || animal.handlingTolerance || animal.socialStructure) && (
                                 <div className="bg-gray-50 p-4 rounded-lg border border-gray-200">
                                     <h3 className="text-lg font-semibold text-gray-700 border-b pb-2 mb-3">Behavior & Welfare</h3>
                                     <div className="space-y-2">
                                         {animal.temperament && <p className="text-sm"><span className="font-medium">Temperament:</span> {animal.temperament}</p>}
-                                        {animal.handlingTolerance && <p className="text-sm"><span className="font-medium">Handling:</span> {animal.handlingTolerance}</p>}
-                                        {animal.socialStructure && <p className="text-sm"><span className="font-medium">Social:</span> {animal.socialStructure}</p>}
+                                        {animal.handlingTolerance && <p className="text-sm"><span className="font-medium">Handling Tolerance:</span> {animal.handlingTolerance}</p>}
+                                        {animal.socialStructure && <p className="text-sm"><span className="font-medium">Social Structure:</span> {animal.socialStructure}</p>}
                                     </div>
                                 </div>
                             )}
-                            {animal.sectionPrivacy?.activity !== false && animal.activityCycle && (
+                            {/* Activity Cycle Section */}
+                            {animal.activityCycle && (
                                 <div className="bg-gray-50 p-4 rounded-lg border border-gray-200">
                                     <h3 className="text-lg font-semibold text-gray-700 border-b pb-2 mb-3">Activity Cycle</h3>
                                     <p className="text-sm text-gray-700">{animal.activityCycle}</p>
@@ -2274,24 +2358,27 @@ const ViewOnlyAnimalDetail = ({ animal, onClose, API_BASE_URL, onViewProfile }) 
                     {/* Tab 8: Records */}
                     {detailViewTab === 8 && (
                         <div className="space-y-4">
-                            {animal.sectionPrivacy?.owner !== false && (animal.currentOwnerId || animal.currentOwnerName) && (
+                            {/* Current Owner Section */}
+                            {(animal.currentOwnerId || animal.currentOwnerName) && (
                                 <div className="bg-gray-50 p-4 rounded-lg border border-gray-200">
                                     <h3 className="text-lg font-semibold text-gray-700 border-b pb-2 mb-3">Current Owner</h3>
                                     <p className="text-gray-700">{animal.currentOwnerName || animal.currentOwnerId}</p>
                                 </div>
                             )}
-                            {animal.sectionPrivacy?.remarks !== false && animal.remarks && (
+                            {/* Remarks & Notes Section */}
+                            {showRemarks && (
                                 <div className="bg-gray-50 p-4 rounded-lg border border-gray-200">
                                     <h3 className="text-lg font-semibold text-gray-700 border-b pb-2 mb-3">Remarks & Notes</h3>
                                     <p className="text-gray-700 whitespace-pre-wrap text-sm">{animal.remarks}</p>
                                 </div>
                             )}
-                            {animal.sectionPrivacy?.endOfLife !== false && animal.deceasedDate && (
+                            {/* End of Life Section */}
+                            {animal.deceasedDate && (
                                 <div className="bg-gray-50 p-4 rounded-lg border border-gray-200">
                                     <h3 className="text-lg font-semibold text-gray-700 border-b pb-2 mb-3">End of Life</h3>
                                     <div className="space-y-2">
-                                        <p className="text-sm"><span className="font-medium">Date:</span> {new Date(animal.deceasedDate).toLocaleDateString()}</p>
-                                        {animal.causeOfDeath && <p className="text-sm"><span className="font-medium">Cause:</span> {animal.causeOfDeath}</p>}
+                                        <p className="text-sm"><span className="font-medium">Deceased Date:</span> {new Date(animal.deceasedDate).toLocaleDateString()}</p>
+                                        {animal.causeOfDeath && <p className="text-sm"><span className="font-medium">Cause of Death:</span> {animal.causeOfDeath}</p>}
                                     </div>
                                 </div>
                             )}
@@ -13096,6 +13183,139 @@ const App = () => {
                                                         <span className="text-sm text-gray-600">Life Stage:</span> <strong>{animalToView.lifeStage}</strong>
                                                     </div>
                                                 )}
+
+                                                {/* Current Measurements */}
+                                                {(animalToView.currentWeight || animalToView.bcs || (animalToView.growthRecords && animalToView.growthRecords.length > 0)) && (
+                                                    <div className="bg-gray-50 p-4 rounded-lg border border-gray-200 space-y-4">
+                                                        <h3 className="text-lg font-semibold text-gray-700">Current Measurements</h3>
+                                                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm">
+                                                            {animalToView.currentWeight && (
+                                                                <div><span className="text-gray-600">Weight:</span> <strong>{animalToView.currentWeight} {animalToView.measurementUnits?.weight || 'g'}</strong></div>
+                                                            )}
+                                                            {animalToView.bcs && (
+                                                                <div><span className="text-gray-600">BCS:</span> <strong>{animalToView.bcs}</strong></div>
+                                                            )}
+                                                            {animalToView.growthRecords && animalToView.growthRecords.length > 0 && animalToView.growthRecords[animalToView.growthRecords.length - 1].length && (
+                                                                <div><span className="text-gray-600">Length:</span> <strong>{animalToView.growthRecords[animalToView.growthRecords.length - 1].length} {animalToView.measurementUnits?.length || 'cm'}</strong></div>
+                                                            )}
+                                                        </div>
+                                                    </div>
+                                                )}
+
+                                                {/* Growth Curve Chart */}
+                                                {animalToView.growthRecords && animalToView.growthRecords.length > 1 && (() => {
+                                                    const sorted = [...animalToView.growthRecords].sort((a, b) => new Date(a.date) - new Date(b.date));
+                                                    const weights = sorted.map(r => parseFloat(r.weight) || 0).filter(w => w > 0);
+                                                    
+                                                    if (weights.length < 2) return null;
+                                                    
+                                                    const minWeight = Math.min(...weights);
+                                                    const maxWeight = Math.max(...weights);
+                                                    const padding = (maxWeight - minWeight) * 0.1 || 5;
+                                                    const chartMin = Math.max(0, minWeight - padding);
+                                                    const chartMax = maxWeight + padding;
+                                                    const range = chartMax - chartMin;
+                                                    
+                                                    const width = 500;
+                                                    const height = 300;
+                                                    const margin = { top: 20, right: 30, bottom: 50, left: 70 };
+                                                    const graphWidth = width - margin.left - margin.right;
+                                                    const graphHeight = height - margin.top - margin.bottom;
+                                                    
+                                                    const points = sorted.map((record, idx) => ({
+                                                        x: margin.left + (idx / (sorted.length - 1)) * graphWidth,
+                                                        y: margin.top + graphHeight - ((parseFloat(record.weight) - chartMin) / range) * graphHeight,
+                                                        weight: record.weight,
+                                                        length: record.length,
+                                                        bcs: record.bcs,
+                                                        notes: record.notes,
+                                                        date: record.date
+                                                    }));
+                                                    
+                                                    const pathData = points.map((p, i) => `${i === 0 ? 'M' : 'L'} ${p.x} ${p.y}`).join(' ');
+                                                    
+                                                    return (
+                                                        <div className="bg-gray-50 p-4 rounded-lg border border-gray-200">
+                                                            <h3 className="text-lg font-semibold text-gray-700 mb-3">Growth Curve (Weight)</h3>
+                                                            <svg width="100%" height="350" viewBox={`0 0 ${width} ${height}`} style={{ maxWidth: '100%' }} preserveAspectRatio="xMidYMid meet">
+                                                                {/* Grid lines */}
+                                                                {[0, 0.25, 0.5, 0.75, 1].map((ratio, i) => {
+                                                                    const y = margin.top + graphHeight * (1 - ratio);
+                                                                    const weightLabel = (chartMin + range * ratio).toFixed(1);
+                                                                    return (
+                                                                        <g key={`grid-${i}`}>
+                                                                            <line x1={margin.left} y1={y} x2={width - margin.right} y2={y} stroke="#e5e7eb" strokeWidth="1" strokeDasharray="4" />
+                                                                            <text x={margin.left - 12} y={y} textAnchor="end" dy="0.3em" fontSize="11" fill="#666">{weightLabel}</text>
+                                                                        </g>
+                                                                    );
+                                                                })}
+                                                                
+                                                                {/* Axes */}
+                                                                <line x1={margin.left} y1={margin.top} x2={margin.left} y2={height - margin.bottom} stroke="#333" strokeWidth="2" />
+                                                                <line x1={margin.left} y1={height - margin.bottom} x2={width - margin.right} y2={height - margin.bottom} stroke="#333" strokeWidth="2" />
+                                                                
+                                                                {/* Y-axis label */}
+                                                                <text x={20} y={margin.top + graphHeight / 2} textAnchor="middle" fontSize="12" fill="#333" fontWeight="600" transform={`rotate(-90 20 ${margin.top + graphHeight / 2})`}>
+                                                                    Weight ({animalToView.measurementUnits?.weight || 'g'})
+                                                                </text>
+                                                                
+                                                                {/* X-axis label */}
+                                                                <text x={margin.left + graphWidth / 2} y={height - 8} textAnchor="middle" fontSize="12" fill="#333" fontWeight="600">
+                                                                    Date
+                                                                </text>
+                                                                
+                                                                {/* X-axis date labels */}
+                                                                {points.map((p, i) => (
+                                                                    i % Math.max(1, Math.floor(points.length / 5)) === 0 && (
+                                                                        <text key={`date-${i}`} x={p.x} y={height - margin.bottom + 25} textAnchor="middle" fontSize="10" fill="#666">
+                                                                            {new Date(p.date).toLocaleDateString('en-US', { month: 'short', day: 'numeric' })}
+                                                                        </text>
+                                                                    )
+                                                                ))}
+                                                                
+                                                                {/* Curve */}
+                                                                <path d={pathData} fill="none" stroke="#3b82f6" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
+                                                                
+                                                                {/* Points */}
+                                                                {points.map((p, i) => {
+                                                                    const tooltipText = [
+                                                                        `Date: ${p.date}`,
+                                                                        `Weight: ${p.weight} ${animalToView.measurementUnits?.weight || 'g'}`,
+                                                                        p.length ? `Length: ${p.length} ${animalToView.measurementUnits?.length || 'cm'}` : null,
+                                                                        p.bcs ? `BCS: ${p.bcs}` : null,
+                                                                        p.notes ? `Notes: ${p.notes}` : null
+                                                                    ].filter(Boolean).join('\n');
+                                                                    
+                                                                    // Color gradient from green (earliest) to red (latest)
+                                                                    const colorRatio = points.length > 1 ? i / (points.length - 1) : 0;
+                                                                    let dotColor;
+                                                                    if (colorRatio < 0.5) {
+                                                                        // Green to Yellow
+                                                                        const t = colorRatio * 2;
+                                                                        const r = Math.round(144 + (255 - 144) * t);
+                                                                        const g = 191;
+                                                                        const b = Math.round(71 + (0 - 71) * t);
+                                                                        dotColor = `rgb(${r}, ${g}, ${b})`;
+                                                                    } else {
+                                                                        // Yellow to Red
+                                                                        const t = (colorRatio - 0.5) * 2;
+                                                                        const r = 255;
+                                                                        const g = Math.round(191 - (191) * t);
+                                                                        const b = 0;
+                                                                        dotColor = `rgb(${r}, ${g}, ${b})`;
+                                                                    }
+                                                                    
+                                                                    return (
+                                                                        <circle key={`point-${i}`} cx={p.x} cy={p.y} r="5" fill={dotColor} stroke="#fff" strokeWidth="2">
+                                                                            <title>{tooltipText}</title>
+                                                                        </circle>
+                                                                    );
+                                                                })}
+                                                            </svg>
+                                                            <p className="text-xs text-gray-500 mt-2">Hover over points to see full measurement details including length, BCS, and notes.</p>
+                                                        </div>
+                                                    );
+                                                })()}
                                             </div>
                                         )}
 
