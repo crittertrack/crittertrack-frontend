@@ -1959,46 +1959,99 @@ const ViewOnlyAnimalDetail = ({ animal, onClose, API_BASE_URL, onViewProfile }) 
                     {/* Tab 1: Overview */}
                     {detailViewTab === 1 && (
                         <div className="space-y-4">
-                            <div className="flex gap-6">
-                                {/* Left: Image */}
-                                <div className="w-1/3 flex flex-col items-center">
-                                    <div className="w-40 h-40 bg-gray-100 rounded-lg shadow-md flex items-center justify-center overflow-hidden">
-                                        <AnimalImage 
-                                            src={imgSrc} 
-                                            alt={animal.name} 
-                                            className="w-full h-full object-cover"
-                                            iconSize={48}
-                                        />
+                            <div className="bg-white border-2 border-gray-300 rounded-lg overflow-hidden">
+                                <div className="flex relative">
+                                    {/* Left Column - Image */}
+                                    <div className="w-1/3 p-4 sm:p-6 flex flex-col items-center justify-center relative min-h-80">
+                                        {/* Birthdate badge */}
+                                        {animal.birthDate && (
+                                            <div className="absolute top-2 left-2 text-xs text-gray-600 bg-white/80 px-2 py-0.5 rounded">
+                                                {new Date(animal.birthDate).toLocaleDateString()}
+                                            </div>
+                                        )}
+
+                                        {/* Gender badge */}
+                                        <div className="absolute top-2 right-2">
+                                            {animal.gender === 'Male' ? <Mars size={20} strokeWidth={2.5} className="text-blue-600" /> : <Venus size={20} strokeWidth={2.5} className="text-pink-600" />}
+                                        </div>
+
+                                        {/* Profile Image */}
+                                        <div className="flex items-center justify-center h-40 w-full">
+                                            {(animal.imageUrl || animal.photoUrl) ? (
+                                                <img src={animal.imageUrl || animal.photoUrl} alt={animal.name} className="max-w-32 max-h-32 w-auto h-auto object-contain rounded-md" />
+                                            ) : (
+                                                <div className="w-32 h-32 bg-gray-100 rounded-md flex items-center justify-center text-gray-400">
+                                                    <Cat size={48} />
+                                                </div>
+                                            )}
+                                        </div>
+
+                                        {/* Status text */}
+                                        <div className="text-sm font-medium text-gray-700 mt-2">
+                                            {animal.status || 'Unknown'}
+                                        </div>
                                     </div>
-                                </div>
-                                {/* Right: Info */}
-                                <div className="w-2/3 space-y-3">
-                                    <p className="text-sm text-gray-600">
-                                        {animal.species}
-                                        {animal.breed && ` • ${animal.breed}`}
-                                        {animal.strain && ` • ${animal.strain}`}
-                                        {animal.id_public && ` • ${animal.id_public}`}
-                                    </p>
-                                    <h2 className="text-2xl font-bold text-gray-800">
-                                        {animal.prefix ? `${animal.prefix} ` : ''}{animal.name}{animal.suffix ? ` ${animal.suffix}` : ''}
-                                    </h2>
-                                    {animal.birthDate && (
-                                        <p className="text-sm text-gray-700">
-                                            Date of Birth: {new Date(animal.birthDate).toLocaleDateString()} ~ {(() => {
-                                                const birth = new Date(animal.birthDate);
-                                                const endDate = animal.deceasedDate ? new Date(animal.deceasedDate) : new Date();
-                                                let age = endDate.getFullYear() - birth.getFullYear();
-                                                const monthDiff = endDate.getMonth() - birth.getMonth();
-                                                if (monthDiff < 0) age--;
-                                                const months = (endDate.getMonth() - birth.getMonth() + 12) % 12;
-                                                const days = endDate.getDate() - birth.getDate();
-                                                return `${age}y ${months}m ${Math.max(0, days)}d`;
-                                            })()}
+
+                                    {/* Right Column - Info */}
+                                    <div className="w-2/3 p-4 sm:p-6 flex flex-col border-l border-gray-300 space-y-3">
+                                        {/* Species/Breed/Strain/CTC - At Top */}
+                                        <p className="text-sm text-gray-600">
+                                            {animal.species}
+                                            {animal.breed && ` • ${animal.breed}`}
+                                            {animal.strain && ` • ${animal.strain}`}
+                                            {animal.id_public && ` • ${animal.id_public}`}
                                         </p>
-                                    )}
-                                    <div className="flex gap-2 flex-wrap pt-2">
-                                        <span className="bg-gray-100 px-3 py-1 rounded text-xs font-medium text-gray-700">{animal.gender || 'Unknown'}</span>
-                                        <span className="bg-gray-100 px-3 py-1 rounded text-xs font-medium text-gray-700">{animal.status || 'Unknown'}</span>
+
+                                        {/* Name */}
+                                        <h2 className="text-2xl font-bold text-gray-800">
+                                            {animal.prefix ? `${animal.prefix} ` : ''}
+                                            {animal.name}
+                                            {animal.suffix ? ` ${animal.suffix}` : ''}
+                                        </h2>
+
+                                        {/* Appearance */}
+                                        {(animal.color || animal.coat || animal.coatPattern || animal.earset) && (
+                                            <p className="text-sm text-gray-700">
+                                                {[
+                                                    animal.color,
+                                                    animal.coatPattern,
+                                                    animal.coat,
+                                                    animal.earset
+                                                ].filter(Boolean).join(' ')}
+                                            </p>
+                                        )}
+
+                                        {/* Date of Birth and Age/Deceased */}
+                                        {animal.birthDate && (
+                                            <div className="text-sm text-gray-700 space-y-1">
+                                                <p>
+                                                    Date of Birth: {new Date(animal.birthDate).toLocaleDateString()} ~ {(() => {
+                                                        const birth = new Date(animal.birthDate);
+                                                        const endDate = animal.deceasedDate ? new Date(animal.deceasedDate) : new Date();
+                                                        let age = endDate.getFullYear() - birth.getFullYear();
+                                                        const monthDiff = endDate.getMonth() - birth.getMonth();
+                                                        if (monthDiff < 0 || (monthDiff === 0 && endDate.getDate() < birth.getDate())) age--;
+                                                        const months = (endDate.getMonth() - birth.getMonth() + 12) % 12;
+                                                        let days = endDate.getDate() - birth.getDate();
+                                                        if (days < 0) {
+                                                            days += new Date(endDate.getFullYear(), endDate.getMonth(), 0).getDate();
+                                                        }
+                                                        if (age > 0) {
+                                                            return `${age}y ${months}m ${days}d`;
+                                                        } else if (months > 0) {
+                                                            return `${months}m ${days}d`;
+                                                        } else {
+                                                            return `${days}d`;
+                                                        }
+                                                    })()}
+                                                </p>
+                                                {animal.deceasedDate && (
+                                                    <p className="text-red-600">
+                                                        Deceased: {new Date(animal.deceasedDate).toLocaleDateString()}
+                                                    </p>
+                                                )}
+                                            </div>
+                                        )}
                                     </div>
                                 </div>
                             </div>
