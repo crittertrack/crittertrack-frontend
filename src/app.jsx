@@ -4990,7 +4990,9 @@ const AnimalForm = ({
     LoadingSpinner,
     PlusCircle, ArrowLeft, Save, Trash2, RotateCcw,
     GENDER_OPTIONS, STATUS_OPTIONS,
-    AnimalImageUpload // Assuming this component is defined elsewhere
+    AnimalImageUpload, // Assuming this component is defined elsewhere
+    sectionPrivacy,
+    toggleSectionPrivacy
 }) => {
     
     // Initial state setup (using the passed props for options)
@@ -6136,7 +6138,18 @@ const AnimalForm = ({
                     <div className="space-y-6">
                         {/* Appearance */}
                         <div className="bg-gray-50 p-4 rounded-lg border border-gray-200 space-y-4">
-                            <h3 className="text-lg font-semibold text-gray-700 border-b pb-2">Appearance</h3>
+                            <div className="flex justify-between items-center border-b pb-2">
+                                <h3 className="text-lg font-semibold text-gray-700">Appearance</h3>
+                                <button
+                                    type="button"
+                                    onClick={() => toggleSectionPrivacy('appearance')}
+                                    className={`px-3 py-1 rounded-full text-xs font-medium transition ${
+                                        sectionPrivacy[animalToEdit.id_public]?.appearance ? 'bg-blue-100 text-blue-800' : 'bg-gray-100 text-gray-800'
+                                    }`}
+                                >
+                                    {sectionPrivacy[animalToEdit.id_public]?.appearance ? '🌍 Public' : '🔒 Private'}
+                                </button>
+                            </div>
                             <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                                 <div>
                                     <label className="block text-sm font-medium text-gray-700">Color</label>
@@ -6170,7 +6183,19 @@ const AnimalForm = ({
                         </div>
 
                         {/* Genetic Code */}
-                        <div className="bg-gray-50 p-4 rounded-lg border border-gray-200">
+                        <div className="bg-gray-50 p-4 rounded-lg border border-gray-200 space-y-4">
+                            <div className="flex justify-between items-center border-b pb-2">
+                                <h3 className="text-lg font-semibold text-gray-700">Genetic Code</h3>
+                                <button
+                                    type="button"
+                                    onClick={() => toggleSectionPrivacy('genetics')}
+                                    className={`px-3 py-1 rounded-full text-xs font-medium transition ${
+                                        sectionPrivacy[animalToEdit.id_public]?.genetics ? 'bg-blue-100 text-blue-800' : 'bg-gray-100 text-gray-800'
+                                    }`}
+                                >
+                                    {sectionPrivacy[animalToEdit.id_public]?.genetics ? '🌍 Public' : '🔒 Private'}
+                                </button>
+                            </div>
                             <GeneticCodeBuilder
                                 species={formData.species}
                                 gender={formData.gender}
@@ -6717,7 +6742,18 @@ const AnimalForm = ({
                     <div className="space-y-6">
                         {/* Reproductive Status */}
                         <div className="bg-gray-50 p-4 rounded-lg border border-gray-200 space-y-4">
-                            <h3 className="text-lg font-semibold text-gray-700 border-b pb-2">Reproductive Status</h3>
+                            <div className="flex justify-between items-center border-b pb-2">
+                                <h3 className="text-lg font-semibold text-gray-700">Reproductive Status</h3>
+                                <button
+                                    type="button"
+                                    onClick={() => toggleSectionPrivacy('reproductive')}
+                                    className={`px-3 py-1 rounded-full text-xs font-medium transition ${
+                                        sectionPrivacy[animalToEdit.id_public]?.reproductive ? 'bg-blue-100 text-blue-800' : 'bg-gray-100 text-gray-800'
+                                    }`}
+                                >
+                                    {sectionPrivacy[animalToEdit.id_public]?.reproductive ? '🌍 Public' : '🔒 Private'}
+                                </button>
+                            </div>
                             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                                 <label className="flex items-center space-x-2 cursor-pointer p-3 border rounded-lg bg-white hover:bg-gray-50 transition">
                                     <input
@@ -6859,7 +6895,23 @@ const AnimalForm = ({
                     <div className="space-y-6">
                         {/* Preventive Care */}
                         <div className="bg-gray-50 p-4 rounded-lg border border-gray-200 space-y-6">
-                            <h3 className="text-lg font-semibold text-gray-700 border-b pb-2">Preventive Care</h3>
+                            <div className="flex justify-between items-center border-b pb-2">
+                                <h3 className="text-lg font-semibold text-gray-700">Health & Veterinary</h3>
+                                <button
+                                    type="button"
+                                    onClick={() => toggleSectionPrivacy('health')}
+                                    className={`px-3 py-1 rounded-full text-xs font-medium transition ${
+                                        sectionPrivacy[animalToEdit.id_public]?.health ? 'bg-blue-100 text-blue-800' : 'bg-gray-100 text-gray-800'
+                                    }`}
+                                >
+                                    {sectionPrivacy[animalToEdit.id_public]?.health ? '🌍 Public' : '🔒 Private'}
+                                </button>
+                            </div>
+                            
+                            {/* Preventive Care Sub-section */}
+                            <div>
+                                <h4 className="text-sm font-semibold text-gray-700 border-b pb-2">Preventive Care</h4>
+                            </div>
                             
                             {/* Vaccinations */}
                             <div className="space-y-3">
@@ -7131,7 +7183,23 @@ const AnimalForm = ({
                     <div className="space-y-6">
                         {/* Diet */}
                         <div className="bg-gray-50 p-4 rounded-lg border border-gray-200 space-y-4">
-                            <h3 className="text-lg font-semibold text-gray-700 border-b pb-2">Diet</h3>
+                            <div className="flex justify-between items-center border-b pb-2">
+                                <h3 className="text-lg font-semibold text-gray-700">Husbandry</h3>
+                                <button
+                                    type="button"
+                                    onClick={() => toggleSectionPrivacy('husbandry')}
+                                    className={`px-3 py-1 rounded-full text-xs font-medium transition ${
+                                        sectionPrivacy[animalToEdit.id_public]?.husbandry ? 'bg-blue-100 text-blue-800' : 'bg-gray-100 text-gray-800'
+                                    }`}
+                                >
+                                    {sectionPrivacy[animalToEdit.id_public]?.husbandry ? '🌍 Public' : '🔒 Private'}
+                                </button>
+                            </div>
+                            
+                            {/* Diet Sub-section */}
+                            <div>
+                                <h4 className="text-sm font-semibold text-gray-700 border-b pb-2">Diet</h4>
+                            </div>
                             <div className="space-y-4">
                                 <div>
                                     <label className="block text-sm font-medium text-gray-700 mb-2">Diet Type</label>
@@ -7197,7 +7265,18 @@ const AnimalForm = ({
                     <div className="space-y-6">
                         {/* Behavior */}
                         <div className="bg-gray-50 p-4 rounded-lg border border-gray-200 space-y-4">
-                            <h3 className="text-lg font-semibold text-gray-700 border-b pb-2">Behavior</h3>
+                            <div className="flex justify-between items-center border-b pb-2">
+                                <h3 className="text-lg font-semibold text-gray-700">Behavior</h3>
+                                <button
+                                    type="button"
+                                    onClick={() => toggleSectionPrivacy('behavior')}
+                                    className={`px-3 py-1 rounded-full text-xs font-medium transition ${
+                                        sectionPrivacy[animalToEdit.id_public]?.behavior ? 'bg-blue-100 text-blue-800' : 'bg-gray-100 text-gray-800'
+                                    }`}
+                                >
+                                    {sectionPrivacy[animalToEdit.id_public]?.behavior ? '🌍 Public' : '🔒 Private'}
+                                </button>
+                            </div>
                             <div className="space-y-4">
                                 <div>
                                     <label className="block text-sm font-medium text-gray-700 mb-2">Temperament</label>
@@ -7243,6 +7322,18 @@ const AnimalForm = ({
                 {activeTab === 10 && (
                     <div className="space-y-6">
                         <div className="bg-gray-50 p-4 rounded-lg border border-gray-200">
+                            <div className="flex justify-between items-center border-b pb-2 mb-4">
+                                <h3 className="text-lg font-semibold text-gray-700">Remarks & Notes</h3>
+                                <button
+                                    type="button"
+                                    onClick={() => toggleSectionPrivacy('remarks')}
+                                    className={`px-3 py-1 rounded-full text-xs font-medium transition ${
+                                        sectionPrivacy[animalToEdit.id_public]?.remarks ? 'bg-blue-100 text-blue-800' : 'bg-gray-100 text-gray-800'
+                                    }`}
+                                >
+                                    {sectionPrivacy[animalToEdit.id_public]?.remarks ? '🌍 Public' : '🔒 Private'}
+                                </button>
+                            </div>
                             <label className="block text-sm font-medium text-gray-700 mb-2">Remarks / Notes</label>
                             <textarea name="remarks" value={formData.remarks} onChange={handleChange} rows="5"
                                 className="block w-full p-2 border border-gray-300 rounded-md shadow-sm focus:ring-primary focus:border-primary" 
@@ -7257,7 +7348,18 @@ const AnimalForm = ({
                     <div className="space-y-6">
                         {/* End of Life */}
                         <div className="bg-gray-50 p-4 rounded-lg border border-gray-200 space-y-4">
-                            <h3 className="text-lg font-semibold text-gray-700 border-b pb-2">End of Life</h3>
+                            <div className="flex justify-between items-center border-b pb-2">
+                                <h3 className="text-lg font-semibold text-gray-700">End of Life</h3>
+                                <button
+                                    type="button"
+                                    onClick={() => toggleSectionPrivacy('endOfLife')}
+                                    className={`px-3 py-1 rounded-full text-xs font-medium transition ${
+                                        sectionPrivacy[animalToEdit.id_public]?.endOfLife ? 'bg-blue-100 text-blue-800' : 'bg-gray-100 text-gray-800'
+                                    }`}
+                                >
+                                    {sectionPrivacy[animalToEdit.id_public]?.endOfLife ? '🌍 Public' : '🔒 Private'}
+                                </button>
+                            </div>
                             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                                 <div>
                                     <label className="block text-sm font-medium text-gray-700 mb-2">Date of Death</label>
@@ -12099,6 +12201,8 @@ const App = () => {
                                 GENDER_OPTIONS={GENDER_OPTIONS}
                                 STATUS_OPTIONS={STATUS_OPTIONS}
                                 AnimalImageUpload={AnimalImageUpload}
+                                sectionPrivacy={sectionPrivacy}
+                                toggleSectionPrivacy={toggleSectionPrivacy}
                             />
                         )
                     } />
@@ -12127,6 +12231,8 @@ const App = () => {
                                 GENDER_OPTIONS={GENDER_OPTIONS}
                                 STATUS_OPTIONS={STATUS_OPTIONS}
                                 AnimalImageUpload={AnimalImageUpload}
+                                sectionPrivacy={sectionPrivacy}
+                                toggleSectionPrivacy={toggleSectionPrivacy}
                             />
                         )
                     } />
@@ -12317,6 +12423,19 @@ const App = () => {
                                                                 {animalToView.suffix ? ` ${animalToView.suffix}` : ''}
                                                             </h2>
 
+                                                            {/* Privacy Controls */}
+                                                            <div className="flex gap-2 flex-wrap">
+                                                                <button
+                                                                    onClick={() => toggleSectionPrivacy('appearance')}
+                                                                    className={`px-3 py-1 rounded text-xs font-medium transition ${
+                                                                        sectionPrivacy[animalToView.id_public]?.appearance ? 'bg-blue-100 text-blue-800' : 'bg-gray-100 text-gray-800'
+                                                                    }`}
+                                                                    title="Appearance"
+                                                                >
+                                                                    🎨 {sectionPrivacy[animalToView.id_public]?.appearance ? 'Public' : 'Private'}
+                                                                </button>
+                                                            </div>
+
                                                             {/* Appearance */}
                                                             {(animalToView.color || animalToView.coat || animalToView.coatPattern || animalToView.earset) && (
                                                                 <p className="text-sm text-gray-700">
@@ -12393,18 +12512,7 @@ const App = () => {
                                                 {/* Genetic Code Card */}
                                                 {animalToView.geneticCode && (
                                                     <div className="bg-white border-2 border-gray-300 rounded-lg p-4">
-                                                        <div className="flex items-center justify-between mb-2">
-                                                            <h4 className="font-semibold text-gray-700">Genetic Code</h4>
-                                                            <button
-                                                                onClick={() => toggleSectionPrivacy('genetics')}
-                                                                className={`px-3 py-1 rounded text-xs font-medium transition ${
-                                                                    sectionPrivacy[animalToView.id_public]?.genetics ? 'bg-blue-100 text-blue-800' : 'bg-gray-100 text-gray-800'
-                                                                }`}
-                                                                title={sectionPrivacy[animalToView.id_public]?.genetics ? 'Public' : 'Private'}
-                                                            >
-                                                                {sectionPrivacy[animalToView.id_public]?.genetics ? '🌍 Public' : '🔒 Private'}
-                                                            </button>
-                                                        </div>
+                                                        <h4 className="font-semibold text-gray-700 mb-2">Genetic Code</h4>
                                                         <div className="text-sm font-mono bg-gray-50 p-2 rounded border border-gray-200">
                                                             {animalToView.geneticCode}
                                                         </div>
@@ -12414,18 +12522,7 @@ const App = () => {
                                                 {/* Health Card */}
                                                 {(animalToView.currentWeight || animalToView.bcs || animalToView.growthRecords?.length > 0 || animalToView.medicalConditions || animalToView.medications) && (
                                                     <div className="bg-white border-2 border-gray-300 rounded-lg p-4">
-                                                        <div className="flex items-center justify-between mb-2">
-                                                            <h4 className="font-semibold text-gray-700">Health</h4>
-                                                            <button
-                                                                onClick={() => toggleSectionPrivacy('health')}
-                                                                className={`px-3 py-1 rounded text-xs font-medium transition ${
-                                                                    sectionPrivacy[animalToView.id_public]?.health ? 'bg-blue-100 text-blue-800' : 'bg-gray-100 text-gray-800'
-                                                                }`}
-                                                                title={sectionPrivacy[animalToView.id_public]?.health ? 'Public' : 'Private'}
-                                                            >
-                                                                {sectionPrivacy[animalToView.id_public]?.health ? '🌍 Public' : '🔒 Private'}
-                                                            </button>
-                                                        </div>
+                                                        <h4 className="font-semibold text-gray-700 mb-2">Health</h4>
                                                         <div className="space-y-3 text-sm">
                                                             {/* Current Measurements Summary */}
                                                             {(animalToView.currentWeight || animalToView.bcs || animalToView.growthRecords?.length > 0) && (
@@ -12461,18 +12558,7 @@ const App = () => {
                                                 {/* Reproductive Status Card */}
                                                 {!animalToView.isNeutered && (animalToView.heatStatus || animalToView.lastHeatDate || animalToView.matingDates) && (
                                                     <div className="bg-white border-2 border-gray-300 rounded-lg p-4">
-                                                        <div className="flex items-center justify-between mb-2">
-                                                            <h4 className="font-semibold text-gray-700">Reproductive Status</h4>
-                                                            <button
-                                                                onClick={() => toggleSectionPrivacy('reproductive')}
-                                                                className={`px-3 py-1 rounded text-xs font-medium transition ${
-                                                                    sectionPrivacy[animalToView.id_public]?.reproductive ? 'bg-blue-100 text-blue-800' : 'bg-gray-100 text-gray-800'
-                                                                }`}
-                                                                title={sectionPrivacy[animalToView.id_public]?.reproductive ? 'Public' : 'Private'}
-                                                            >
-                                                                {sectionPrivacy[animalToView.id_public]?.reproductive ? '🌍 Public' : '🔒 Private'}
-                                                            </button>
-                                                        </div>
+                                                        <h4 className="font-semibold text-gray-700 mb-2">Reproductive Status</h4>
                                                         <div className="text-sm space-y-1">
                                                             {animalToView.heatStatus && <div><strong>Heat Status:</strong> {animalToView.heatStatus}</div>}
                                                             {animalToView.lastHeatDate && <div><strong>Last Heat:</strong> {new Date(animalToView.lastHeatDate).toLocaleDateString()}</div>}
