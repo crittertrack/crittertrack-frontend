@@ -2302,26 +2302,34 @@ const ViewOnlyAnimalDetail = ({ animal, onClose, API_BASE_URL, onViewProfile }) 
                     {/* Tab 6: Husbandry */}
                     {detailViewTab === 6 && (
                         <div className="space-y-4">
-                            {/* Husbandry Section */}
-                            {(animal.dietType || animal.feedingSchedule || animal.supplements || animal.housingType || animal.bedding || animal.temperatureRange || animal.enrichment) && (
+                            {/* Nutrition Section */}
+                            {(animal.dietType || animal.feedingSchedule || animal.supplements) && (
                                 <div className="bg-gray-50 p-4 rounded-lg border border-gray-200">
-                                    <h3 className="text-lg font-semibold text-gray-700 border-b pb-2 mb-3">Husbandry</h3>
+                                    <h3 className="text-lg font-semibold text-gray-700 border-b pb-2 mb-3">Nutrition</h3>
                                     <div className="space-y-2">
                                         {animal.dietType && <p className="text-sm"><span className="font-medium">Diet Type:</span> {animal.dietType}</p>}
                                         {animal.feedingSchedule && <p className="text-sm"><span className="font-medium">Feeding Schedule:</span> {animal.feedingSchedule}</p>}
                                         {animal.supplements && <p className="text-sm"><span className="font-medium">Supplements:</span> {animal.supplements}</p>}
+                                    </div>
+                                </div>
+                            )}
+                            {/* Husbandry Section */}
+                            {(animal.housingType || animal.bedding || animal.enrichment) && (
+                                <div className="bg-gray-50 p-4 rounded-lg border border-gray-200">
+                                    <h3 className="text-lg font-semibold text-gray-700 border-b pb-2 mb-3">Husbandry</h3>
+                                    <div className="space-y-2">
                                         {animal.housingType && <p className="text-sm"><span className="font-medium">Housing Type:</span> {animal.housingType}</p>}
                                         {animal.bedding && <p className="text-sm"><span className="font-medium">Bedding:</span> {animal.bedding}</p>}
-                                        {animal.temperatureRange && <p className="text-sm"><span className="font-medium">Temperature Range:</span> {animal.temperatureRange}</p>}
                                         {animal.enrichment && <p className="text-sm"><span className="font-medium">Enrichment:</span> {animal.enrichment}</p>}
                                     </div>
                                 </div>
                             )}
                             {/* Environment Section */}
-                            {(animal.humidity || animal.lighting || animal.noise) && (
+                            {(animal.temperatureRange || animal.humidity || animal.lighting || animal.noise) && (
                                 <div className="bg-gray-50 p-4 rounded-lg border border-gray-200">
                                     <h3 className="text-lg font-semibold text-gray-700 border-b pb-2 mb-3">Environment</h3>
                                     <div className="space-y-2">
+                                        {animal.temperatureRange && <p className="text-sm"><span className="font-medium">Temperature Range:</span> {animal.temperatureRange}</p>}
                                         {animal.humidity && <p className="text-sm"><span className="font-medium">Humidity:</span> {animal.humidity}</p>}
                                         {animal.lighting && <p className="text-sm"><span className="font-medium">Lighting:</span> {animal.lighting}</p>}
                                         {animal.noise && <p className="text-sm"><span className="font-medium">Noise Level:</span> {animal.noise}</p>}
@@ -5362,6 +5370,9 @@ const AnimalForm = ({
             housingType: animalToEdit.housingType || '',
             bedding: animalToEdit.bedding || '',
             temperatureRange: animalToEdit.temperatureRange || '',
+            humidity: animalToEdit.humidity || '',
+            lighting: animalToEdit.lighting || '',
+            noise: animalToEdit.noise || '',
             enrichment: animalToEdit.enrichment || '',
             temperament: animalToEdit.temperament || '',
             handlingTolerance: animalToEdit.handlingTolerance || '',
@@ -5435,6 +5446,9 @@ const AnimalForm = ({
             housingType: '',
             bedding: '',
             temperatureRange: '',
+            humidity: '',
+            lighting: '',
+            noise: '',
             enrichment: '',
             temperament: '',
             handlingTolerance: '',
@@ -7565,9 +7579,9 @@ const AnimalForm = ({
                                 </button>
                             </div>
                             
-                            {/* Diet Sub-section */}
+                            {/* Nutrition Sub-section */}
                             <div>
-                                <h4 className="text-sm font-semibold text-gray-700 border-b pb-2">Diet</h4>
+                                <h4 className="text-sm font-semibold text-gray-700 border-b pb-2">Nutrition</h4>
                             </div>
                             <div className="space-y-4">
                                 <div>
@@ -7591,6 +7605,33 @@ const AnimalForm = ({
                                         placeholder="e.g., Vitamin D, calcium powder" />
                                 </div>
                             </div>
+
+                            {/* Husbandry Sub-section */}
+                            <div>
+                                <h4 className="text-sm font-semibold text-gray-700 border-b pb-2">Husbandry</h4>
+                            </div>
+                            <div className="space-y-4">
+                                <div>
+                                    <label className="block text-sm font-medium text-gray-700 mb-2">Housing Type</label>
+                                    <input type="text" name="housingType" value={formData.housingType} onChange={handleChange} 
+                                        className="block w-full p-2 border border-gray-300 rounded-md shadow-sm focus:ring-primary focus:border-primary" 
+                                        placeholder="e.g., Wire cage, glass aquarium, multi-level enclosure" />
+                                </div>
+                                
+                                <div>
+                                    <label className="block text-sm font-medium text-gray-700 mb-2">Bedding / Substrate</label>
+                                    <input type="text" name="bedding" value={formData.bedding} onChange={handleChange} 
+                                        className="block w-full p-2 border border-gray-300 rounded-md shadow-sm focus:ring-primary focus:border-primary" 
+                                        placeholder="e.g., Aspen shavings, paper bedding, fleece liners" />
+                                </div>
+                                
+                                <div>
+                                    <label className="block text-sm font-medium text-gray-700 mb-2">Enrichment Items</label>
+                                    <textarea name="enrichment" value={formData.enrichment} onChange={handleChange} rows="2"
+                                        className="block w-full p-2 border border-gray-300 rounded-md shadow-sm focus:ring-primary focus:border-primary" 
+                                        placeholder="e.g., Exercise wheel, tunnels, chew toys, hammocks" />
+                                </div>
+                            </div>
                         </div>
 
                         {/* Environment */}
@@ -7609,31 +7650,31 @@ const AnimalForm = ({
                             </div>
                             <div className="space-y-4">
                                 <div>
-                                    <label className="block text-sm font-medium text-gray-700 mb-2">Housing Type</label>
-                                    <input type="text" name="housingType" value={formData.housingType} onChange={handleChange} 
-                                        className="block w-full p-2 border border-gray-300 rounded-md shadow-sm focus:ring-primary focus:border-primary" 
-                                        placeholder="e.g., Wire cage, glass aquarium, multi-level enclosure" />
-                                </div>
-                                
-                                <div>
-                                    <label className="block text-sm font-medium text-gray-700 mb-2">Bedding / Substrate</label>
-                                    <input type="text" name="bedding" value={formData.bedding} onChange={handleChange} 
-                                        className="block w-full p-2 border border-gray-300 rounded-md shadow-sm focus:ring-primary focus:border-primary" 
-                                        placeholder="e.g., Aspen shavings, paper bedding, fleece liners" />
-                                </div>
-                                
-                                <div>
                                     <label className="block text-sm font-medium text-gray-700 mb-2">Temperature Range</label>
                                     <input type="text" name="temperatureRange" value={formData.temperatureRange} onChange={handleChange} 
                                         className="block w-full p-2 border border-gray-300 rounded-md shadow-sm focus:ring-primary focus:border-primary" 
                                         placeholder="e.g., 68-72°F, 20-22°C" />
                                 </div>
-                                
+
                                 <div>
-                                    <label className="block text-sm font-medium text-gray-700 mb-2">Enrichment Items</label>
-                                    <textarea name="enrichment" value={formData.enrichment} onChange={handleChange} rows="2"
+                                    <label className="block text-sm font-medium text-gray-700 mb-2">Humidity</label>
+                                    <input type="text" name="humidity" value={formData.humidity} onChange={handleChange} 
                                         className="block w-full p-2 border border-gray-300 rounded-md shadow-sm focus:ring-primary focus:border-primary" 
-                                        placeholder="e.g., Exercise wheel, tunnels, chew toys, hammocks" />
+                                        placeholder="e.g., 40-60%, 50%" />
+                                </div>
+
+                                <div>
+                                    <label className="block text-sm font-medium text-gray-700 mb-2">Lighting</label>
+                                    <input type="text" name="lighting" value={formData.lighting} onChange={handleChange} 
+                                        className="block w-full p-2 border border-gray-300 rounded-md shadow-sm focus:ring-primary focus:border-primary" 
+                                        placeholder="e.g., 12:12 hour cycle, LED lights, UVB" />
+                                </div>
+
+                                <div>
+                                    <label className="block text-sm font-medium text-gray-700 mb-2">Noise Level</label>
+                                    <input type="text" name="noise" value={formData.noise} onChange={handleChange} 
+                                        className="block w-full p-2 border border-gray-300 rounded-md shadow-sm focus:ring-primary focus:border-primary" 
+                                        placeholder="e.g., Quiet, moderate, high" />
                                 </div>
                             </div>
                         </div>
@@ -13442,13 +13483,21 @@ const App = () => {
                                                         {animalToView.supplements && <div><strong>Supplements:</strong> <p className="text-sm mt-1">{animalToView.supplements}</p></div>}
                                                     </div>
                                                 )}
-                                                {(animalToView.housingType || animalToView.bedding || animalToView.temperatureRange || animalToView.enrichment) && (
+                                                {(animalToView.housingType || animalToView.bedding || animalToView.enrichment) && (
                                                     <div className="bg-gray-50 p-4 rounded-lg border border-gray-200 space-y-4">
-                                                        <h3 className="text-lg font-semibold text-gray-700">Housing & Environment</h3>
+                                                        <h3 className="text-lg font-semibold text-gray-700">Husbandry</h3>
                                                         {animalToView.housingType && <div><strong>Housing Type:</strong> <p className="text-sm mt-1">{animalToView.housingType}</p></div>}
                                                         {animalToView.bedding && <div><strong>Bedding:</strong> <p className="text-sm mt-1">{animalToView.bedding}</p></div>}
-                                                        {animalToView.temperatureRange && <div><strong>Temperature Range:</strong> <p className="text-sm mt-1">{animalToView.temperatureRange}</p></div>}
                                                         {animalToView.enrichment && <div><strong>Enrichment:</strong> <p className="text-sm mt-1">{animalToView.enrichment}</p></div>}
+                                                    </div>
+                                                )}
+                                                {(animalToView.temperatureRange || animalToView.humidity || animalToView.lighting || animalToView.noise) && (
+                                                    <div className="bg-gray-50 p-4 rounded-lg border border-gray-200 space-y-4">
+                                                        <h3 className="text-lg font-semibold text-gray-700">Environment</h3>
+                                                        {animalToView.temperatureRange && <div><strong>Temperature Range:</strong> <p className="text-sm mt-1">{animalToView.temperatureRange}</p></div>}
+                                                        {animalToView.humidity && <div><strong>Humidity:</strong> <p className="text-sm mt-1">{animalToView.humidity}</p></div>}
+                                                        {animalToView.lighting && <div><strong>Lighting:</strong> <p className="text-sm mt-1">{animalToView.lighting}</p></div>}
+                                                        {animalToView.noise && <div><strong>Noise Level:</strong> <p className="text-sm mt-1">{animalToView.noise}</p></div>}
                                                     </div>
                                                 )}
                                             </div>
