@@ -1823,6 +1823,19 @@ const ViewOnlyAnimalDetail = ({ animal, onClose, API_BASE_URL, onViewProfile }) 
     const [copySuccess, setCopySuccess] = useState(false);
     const [detailViewTab, setDetailViewTab] = useState(1);
     
+    // Helper function to parse health records from JSON strings
+    const parseHealthRecords = (data) => {
+        if (!data) return [];
+        if (typeof data === 'string') {
+            try {
+                return JSON.parse(data);
+            } catch (e) {
+                console.error('Failed to parse health records:', e);
+                return [];
+            }
+        }
+        return Array.isArray(data) ? data : [];
+    };
     const handleShare = () => {
         const url = `${window.location.origin}/animal/${animal.id_public}`;
         navigator.clipboard.writeText(url).then(() => {
@@ -2194,6 +2207,35 @@ const ViewOnlyAnimalDetail = ({ animal, onClose, API_BASE_URL, onViewProfile }) 
                                     </div>
                                 </div>
                             )}
+
+                            {/* Growth Records Section */}
+                            {animal.growthRecords && Array.isArray(animal.growthRecords) && animal.growthRecords.length > 0 && (
+                                <div className="bg-gray-50 p-4 rounded-lg border border-gray-200">
+                                    <h3 className="text-lg font-semibold text-gray-700 border-b pb-2 mb-3">Growth History</h3>
+                                    <div className="overflow-x-auto">
+                                        <table className="w-full text-sm">
+                                            <thead className="border-b border-gray-300">
+                                                <tr>
+                                                    <th className="text-left py-2 px-2">Date</th>
+                                                    <th className="text-left py-2 px-2">Weight</th>
+                                                    <th className="text-left py-2 px-2">Length</th>
+                                                    <th className="text-left py-2 px-2">BCS</th>
+                                                </tr>
+                                            </thead>
+                                            <tbody>
+                                                {animal.growthRecords.map((record, idx) => (
+                                                    <tr key={idx} className="border-b border-gray-200">
+                                                        <td className="py-2 px-2">{record.date ? new Date(record.date).toLocaleDateString() : '-'}</td>
+                                                        <td className="py-2 px-2">{record.weight ? `${record.weight} ${animal.measurementUnits?.weight || 'g'}` : '-'}</td>
+                                                        <td className="py-2 px-2">{record.length ? `${record.length} ${animal.measurementUnits?.length || 'cm'}` : '-'}</td>
+                                                        <td className="py-2 px-2">{record.bcs || '-'}</td>
+                                                    </tr>
+                                                ))}
+                                            </tbody>
+                                        </table>
+                                    </div>
+                                </div>
+                            )}
                         </div>
                     )}
 
@@ -2287,19 +2329,40 @@ const ViewOnlyAnimalDetail = ({ animal, onClose, API_BASE_URL, onViewProfile }) 
                                         {animal.vaccinations && (
                                             <div>
                                                 <strong className="text-sm">Vaccinations:</strong>
-                                                <p className="text-sm mt-1">{typeof animal.vaccinations === 'string' ? animal.vaccinations : JSON.stringify(animal.vaccinations)}</p>
+                                                <ul className="text-sm mt-1 list-disc list-inside space-y-1">
+                                                    {parseHealthRecords(animal.vaccinations).map((vacc, idx) => (
+                                                        <li key={idx} className="text-gray-700">
+                                                            {vacc.name} {vacc.date && `(${new Date(vacc.date).toLocaleDateString()})`}
+                                                            {vacc.notes && <span className="text-gray-600"> - {vacc.notes}</span>}
+                                                        </li>
+                                                    ))}
+                                                </ul>
                                             </div>
                                         )}
                                         {animal.dewormingRecords && (
                                             <div>
                                                 <strong className="text-sm">Deworming Records:</strong>
-                                                <p className="text-sm mt-1">{typeof animal.dewormingRecords === 'string' ? animal.dewormingRecords : JSON.stringify(animal.dewormingRecords)}</p>
+                                                <ul className="text-sm mt-1 list-disc list-inside space-y-1">
+                                                    {parseHealthRecords(animal.dewormingRecords).map((record, idx) => (
+                                                        <li key={idx} className="text-gray-700">
+                                                            {record.medication} {record.date && `(${new Date(record.date).toLocaleDateString()})`}
+                                                            {record.notes && <span className="text-gray-600"> - {record.notes}</span>}
+                                                        </li>
+                                                    ))}
+                                                </ul>
                                             </div>
                                         )}
                                         {animal.parasiteControl && (
                                             <div>
                                                 <strong className="text-sm">Parasite Control:</strong>
-                                                <p className="text-sm mt-1">{typeof animal.parasiteControl === 'string' ? animal.parasiteControl : JSON.stringify(animal.parasiteControl)}</p>
+                                                <ul className="text-sm mt-1 list-disc list-inside space-y-1">
+                                                    {parseHealthRecords(animal.parasiteControl).map((record, idx) => (
+                                                        <li key={idx} className="text-gray-700">
+                                                            {record.treatment} {record.date && `(${new Date(record.date).toLocaleDateString()})`}
+                                                            {record.notes && <span className="text-gray-600"> - {record.notes}</span>}
+                                                        </li>
+                                                    ))}
+                                                </ul>
                                             </div>
                                         )}
                                         {animal.allergies && <p className="text-sm"><span className="font-medium">Allergies:</span> {animal.allergies}</p>}
@@ -2308,10 +2371,49 @@ const ViewOnlyAnimalDetail = ({ animal, onClose, API_BASE_URL, onViewProfile }) 
                                 </div>
                             )}
                             {/* Medical History */}
-                            {animal.medicalConditions && (
+                            {(animal.medicalConditions || animal.medicalProcedures || animal.labResults || animal.vetVisits || animal.primaryVet) && (
                                 <div className="bg-gray-50 p-4 rounded-lg border border-gray-200">
                                     <h3 className="text-lg font-semibold text-gray-700 border-b pb-2 mb-3">Medical History</h3>
-                                    <p className="text-sm text-gray-700">{animal.medicalConditions}</p>
+                                    <div className="space-y-3">
+                                        {animal.medicalConditions && (
+                                            <div>
+                                                <strong className="text-sm">Medical Conditions:</strong>
+                                                <p className="text-sm text-gray-700 mt-1">{animal.medicalConditions}</p>
+                                            </div>
+                                        )}
+                                        {animal.medicalProcedures && (
+                                            <div>
+                                                <strong className="text-sm">Medical Procedures:</strong>
+                                                <ul className="text-sm mt-1 list-disc list-inside space-y-1">
+                                                    {parseHealthRecords(animal.medicalProcedures).map((proc, idx) => (
+                                                        <li key={idx} className="text-gray-700">
+                                                            {proc.procedure} {proc.date && `(${new Date(proc.date).toLocaleDateString()})`}
+                                                            {proc.notes && <span className="text-gray-600"> - {proc.notes}</span>}
+                                                        </li>
+                                                    ))}
+                                                </ul>
+                                            </div>
+                                        )}
+                                        {animal.labResults && (
+                                            <div>
+                                                <strong className="text-sm">Lab Results:</strong>
+                                                <ul className="text-sm mt-1 list-disc list-inside space-y-1">
+                                                    {parseHealthRecords(animal.labResults).map((result, idx) => (
+                                                        <li key={idx} className="text-gray-700">
+                                                            {result.testName} {result.date && `(${new Date(result.date).toLocaleDateString()})`}
+                                                            {result.result && <span className="text-gray-600"> - {result.result}</span>}
+                                                        </li>
+                                                    ))}
+                                                </ul>
+                                            </div>
+                                        )}
+                                        {animal.primaryVet && (
+                                            <div>
+                                                <strong className="text-sm">Primary Veterinarian:</strong>
+                                                <p className="text-sm text-gray-700 mt-1">{animal.primaryVet}</p>
+                                            </div>
+                                        )}
+                                    </div>
                                 </div>
                             )}
                         </div>
