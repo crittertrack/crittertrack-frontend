@@ -13517,10 +13517,10 @@ const App = () => {
                                                         }
                                                     }
                                                     
-                                                    // Show chart if there are any growth records
-                                                    if (!growthRecords || growthRecords.length === 0) return null;
+                                                    // Ensure growthRecords is an array
+                                                    if (!growthRecords) growthRecords = [];
                                                     
-                                                    // If only 1 entry, show empty chart placeholder
+                                                    // If fewer than 2 entries, show empty chart placeholder
                                                     if (growthRecords.length < 2) {
                                                         return (
                                                             <div className="bg-gray-50 p-4 rounded-lg border border-gray-200">
