@@ -13588,9 +13588,39 @@ const App = () => {
                                                             
                                                             {/* Conditions and Medications */}
                                                             {(animalToView.medicalConditions || animalToView.medications) && (
-                                                                <div className="border-t border-gray-200 pt-2">
-                                                                    {animalToView.medicalConditions && <div><strong>Conditions:</strong> {animalToView.medicalConditions}</div>}
-                                                                    {animalToView.medications && <div><strong>Medications:</strong> {animalToView.medications}</div>}
+                                                                <div className="border-t border-gray-200 pt-2 space-y-2">
+                                                                    {animalToView.medicalConditions && (() => {
+                                                                        const parsed = parseHealthRecords(animalToView.medicalConditions);
+                                                                        return parsed && parsed.length > 0 ? (
+                                                                            <div>
+                                                                                <strong>Conditions:</strong>
+                                                                                <ul className="text-sm mt-1 list-disc list-inside space-y-1">
+                                                                                    {parsed.map((condition, idx) => (
+                                                                                        <li key={idx} className="text-gray-700">
+                                                                                            {condition.condition || condition.name}
+                                                                                            {condition.notes && <span className="text-gray-600"> - {condition.notes}</span>}
+                                                                                        </li>
+                                                                                    ))}
+                                                                                </ul>
+                                                                            </div>
+                                                                        ) : null;
+                                                                    })()}
+                                                                    {animalToView.medications && (() => {
+                                                                        const parsed = parseHealthRecords(animalToView.medications);
+                                                                        return parsed && parsed.length > 0 ? (
+                                                                            <div>
+                                                                                <strong>Medications:</strong>
+                                                                                <ul className="text-sm mt-1 list-disc list-inside space-y-1">
+                                                                                    {parsed.map((med, idx) => (
+                                                                                        <li key={idx} className="text-gray-700">
+                                                                                            {med.medication || med.name}
+                                                                                            {med.notes && <span className="text-gray-600"> - {med.notes}</span>}
+                                                                                        </li>
+                                                                                    ))}
+                                                                                </ul>
+                                                                            </div>
+                                                                        ) : null;
+                                                                    })()}
                                                                 </div>
                                                             )}
                                                         </div>
@@ -14175,9 +14205,54 @@ const App = () => {
                                                 {(animalToView.medicalConditions || animalToView.allergies || animalToView.medications) && (
                                                     <div className="bg-gray-50 p-4 rounded-lg border border-gray-200 space-y-4">
                                                         <h3 className="text-lg font-semibold text-gray-700">Medical Information</h3>
-                                                        {animalToView.medicalConditions && <div><strong>Medical Conditions:</strong> <p className="text-sm mt-1">{animalToView.medicalConditions}</p></div>}
-                                                        {animalToView.allergies && <div><strong>Allergies:</strong> <p className="text-sm mt-1">{animalToView.allergies}</p></div>}
-                                                        {animalToView.medications && <div><strong>Medications:</strong> <p className="text-sm mt-1">{animalToView.medications}</p></div>}
+                                                        {animalToView.medicalConditions && (() => {
+                                                            const parsed = parseHealthRecords(animalToView.medicalConditions);
+                                                            return parsed && parsed.length > 0 ? (
+                                                                <div>
+                                                                    <strong>Medical Conditions:</strong>
+                                                                    <ul className="text-sm mt-1 list-disc list-inside space-y-1">
+                                                                        {parsed.map((condition, idx) => (
+                                                                            <li key={idx} className="text-gray-700">
+                                                                                {condition.condition || condition.name}
+                                                                                {condition.notes && <span className="text-gray-600"> - {condition.notes}</span>}
+                                                                            </li>
+                                                                        ))}
+                                                                    </ul>
+                                                                </div>
+                                                            ) : null;
+                                                        })()}
+                                                        {animalToView.allergies && (() => {
+                                                            const parsed = parseHealthRecords(animalToView.allergies);
+                                                            return parsed && parsed.length > 0 ? (
+                                                                <div>
+                                                                    <strong>Allergies:</strong>
+                                                                    <ul className="text-sm mt-1 list-disc list-inside space-y-1">
+                                                                        {parsed.map((allergy, idx) => (
+                                                                            <li key={idx} className="text-gray-700">
+                                                                                {allergy.allergen || allergy.name}
+                                                                                {allergy.notes && <span className="text-gray-600"> - {allergy.notes}</span>}
+                                                                            </li>
+                                                                        ))}
+                                                                    </ul>
+                                                                </div>
+                                                            ) : null;
+                                                        })()}
+                                                        {animalToView.medications && (() => {
+                                                            const parsed = parseHealthRecords(animalToView.medications);
+                                                            return parsed && parsed.length > 0 ? (
+                                                                <div>
+                                                                    <strong>Medications:</strong>
+                                                                    <ul className="text-sm mt-1 list-disc list-inside space-y-1">
+                                                                        {parsed.map((med, idx) => (
+                                                                            <li key={idx} className="text-gray-700">
+                                                                                {med.medication || med.name}
+                                                                                {med.notes && <span className="text-gray-600"> - {med.notes}</span>}
+                                                                            </li>
+                                                                        ))}
+                                                                    </ul>
+                                                                </div>
+                                                            ) : null;
+                                                        })()}
                                                     </div>
                                                 )}
                                             </div>
