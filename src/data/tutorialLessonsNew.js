@@ -279,7 +279,7 @@ const GETTING_STARTED_LESSONS = [
       {
         stepNumber: 4,
         title: 'Current Owner',
-        content: 'This shows who currently owns the animal. If you own it, it shows you. If you\'ve sold it, you can assign the new owner here. This helps maintain ownership history.',
+        content: 'This field records who currently owns the animal for your personal administrative use. Enter the owner\'s name to keep detailed ownership records. This helps you maintain a complete ownership history.',
         highlightElement: '[data-tutorial-target="current-owner-field"]',
         actionType: 'click',
         tips: [
