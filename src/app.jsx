@@ -7714,41 +7714,45 @@ const AnimalForm = ({
                         </div>
 
                         {/* Estrus & Cycle (Females and non-binary animals) */}
-                        {(formData.gender === 'Female' || formData.gender === 'Intersex' || formData.gender === 'Unknown') && !formData.isNeutered && (
+                        {(formData.gender === 'Female' || formData.gender === 'Intersex' || formData.gender === 'Unknown') && (
                             <div className="bg-gray-50 p-4 rounded-lg border border-gray-200 space-y-4">
-                                <h3 className="text-lg font-semibold text-gray-700 border-b pb-2">Estrus & Cycle</h3>
+                                <h3 className="text-lg font-semibold text-gray-700 border-b pb-2">Estrus & Cycle {formData.isNeutered && <span className="text-xs font-normal text-gray-500">(History)</span>}</h3>
                                 <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                                     <div>
                                         <label className="block text-sm font-medium text-gray-700 mb-2">Heat (Estrus) Status</label>
                                         <input type="text" name="heatStatus" value={formData.heatStatus} onChange={handleChange} 
-                                            className="block w-full p-2 border border-gray-300 rounded-md shadow-sm focus:ring-primary focus:border-primary" 
+                                            disabled={formData.isNeutered}
+                                            className={`block w-full p-2 border rounded-md shadow-sm focus:ring-primary focus:border-primary ${formData.isNeutered ? 'bg-gray-100 border-gray-200' : 'border-gray-300'}`}
                                             placeholder="e.g., In Heat, Between Cycles" />
                                     </div>
                                     
                                     <div>
                                         <label className="block text-sm font-medium text-gray-700 mb-2">Last Heat Date</label>
                                         <input type="date" name="lastHeatDate" value={formData.lastHeatDate} onChange={handleChange} 
-                                            className="block w-full p-2 border border-gray-300 rounded-md shadow-sm focus:ring-primary focus:border-primary" />
+                                            disabled={formData.isNeutered}
+                                            className={`block w-full p-2 border rounded-md shadow-sm focus:ring-primary focus:border-primary ${formData.isNeutered ? 'bg-gray-100 border-gray-200' : 'border-gray-300'}`} />
                                     </div>
                                     
                                     <div>
                                         <label className="block text-sm font-medium text-gray-700 mb-2">Ovulation Date</label>
                                         <input type="date" name="ovulationDate" value={formData.ovulationDate} onChange={handleChange} 
-                                            className="block w-full p-2 border border-gray-300 rounded-md shadow-sm focus:ring-primary focus:border-primary" />
+                                            disabled={formData.isNeutered}
+                                            className={`block w-full p-2 border rounded-md shadow-sm focus:ring-primary focus:border-primary ${formData.isNeutered ? 'bg-gray-100 border-gray-200' : 'border-gray-300'}`} />
                                     </div>
                                 </div>
                             </div>
                         )}
 
                         {/* Mating & Pregnancy */}
-                        {!formData.isNeutered && (
+                        {(formData.gender === 'Female' || formData.gender === 'Intersex' || formData.gender === 'Unknown' || formData.gender === 'Male') && (
                             <div className="bg-gray-50 p-4 rounded-lg border border-gray-200 space-y-4">
-                                <h3 className="text-lg font-semibold text-gray-700 border-b pb-2">Mating & Pregnancy</h3>
+                                <h3 className="text-lg font-semibold text-gray-700 border-b pb-2">Mating & Pregnancy {formData.isNeutered && <span className="text-xs font-normal text-gray-500">(History)</span>}</h3>
                                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                                     <div className="md:col-span-2">
                                         <label className="block text-sm font-medium text-gray-700 mb-2">Mating Date</label>
                                         <input type="date" name="matingDates" value={formData.matingDates} onChange={handleChange} 
-                                            className="block w-full p-2 border border-gray-300 rounded-md shadow-sm focus:ring-primary focus:border-primary" 
+                                            disabled={formData.isNeutered}
+                                            className={`block w-full p-2 border rounded-md shadow-sm focus:ring-primary focus:border-primary ${formData.isNeutered ? 'bg-gray-100 border-gray-200' : 'border-gray-300'}`}
                                             placeholder="e.g., 2025-01-15, 2025-01-16" />
                                     </div>
                                     
@@ -7760,6 +7764,7 @@ const AnimalForm = ({
                                                     name="isPregnant"
                                                     checked={formData.isPregnant}
                                                     onChange={handleChange}
+                                                    disabled={formData.isNeutered}
                                                     className="form-checkbox h-5 w-5 text-primary rounded focus:ring-primary"
                                                 />
                                                 <span className="text-sm font-medium text-gray-700">Pregnant</span>
@@ -7786,9 +7791,9 @@ const AnimalForm = ({
                         )}
 
                         {/* Nursing */}
-                        {(formData.gender === 'Female' || formData.gender === 'Intersex' || formData.gender === 'Unknown') && !formData.isNeutered && (
+                        {(formData.gender === 'Female' || formData.gender === 'Intersex' || formData.gender === 'Unknown') && (
                             <div className="bg-gray-50 p-4 rounded-lg border border-gray-200 space-y-4">
-                                <h3 className="text-lg font-semibold text-gray-700 border-b pb-2">Nursing</h3>
+                                <h3 className="text-lg font-semibold text-gray-700 border-b pb-2">Nursing {formData.isNeutered && <span className="text-xs font-normal text-gray-500">(History)</span>}</h3>
                                 <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                                     <label className="flex items-center space-x-2 cursor-pointer p-3 border rounded-lg bg-white hover:bg-gray-50 transition">
                                         <input
@@ -7796,6 +7801,7 @@ const AnimalForm = ({
                                             name="isNursing"
                                             checked={formData.isNursing}
                                             onChange={handleChange}
+                                            disabled={formData.isNeutered}
                                             className="form-checkbox h-5 w-5 text-primary rounded focus:ring-primary"
                                         />
                                         <span className="text-sm font-medium text-gray-700">Currently Nursing</span>
@@ -7821,9 +7827,9 @@ const AnimalForm = ({
                         )}
 
                         {/* Stud Information (Males, Intersex, Unknown) */}
-                        {(formData.gender === 'Male' || formData.gender === 'Intersex' || formData.gender === 'Unknown') && !formData.isNeutered && (
+                        {(formData.gender === 'Male' || formData.gender === 'Intersex' || formData.gender === 'Unknown') && (
                             <div className="bg-gray-50 p-4 rounded-lg border border-gray-200 space-y-4">
-                                <h3 className="text-lg font-semibold text-gray-700 border-b pb-2">Stud Information</h3>
+                                <h3 className="text-lg font-semibold text-gray-700 border-b pb-2">Stud Information {formData.isNeutered && <span className="text-xs font-normal text-gray-500">(History)</span>}</h3>
                                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                                     <label className="flex items-center space-x-2 cursor-pointer p-3 border rounded-lg bg-white hover:bg-gray-50 transition">
                                         <input
@@ -7831,6 +7837,7 @@ const AnimalForm = ({
                                             name="isStudAnimal"
                                             checked={formData.isStudAnimal}
                                             onChange={handleChange}
+                                            disabled={formData.isNeutered}
                                             className="form-checkbox h-5 w-5 text-primary rounded focus:ring-primary"
                                         />
                                         <span className="text-sm font-medium text-gray-700">Stud Animal</span>
@@ -7850,7 +7857,8 @@ const AnimalForm = ({
                                     <div>
                                         <label className="block text-sm font-medium text-gray-700 mb-2">Last Mating Date</label>
                                         <input type="date" name="lastMatingDate" value={formData.lastMatingDate} onChange={handleChange} 
-                                            className="block w-full p-2 border border-gray-300 rounded-md shadow-sm focus:ring-primary focus:border-primary" />
+                                            disabled={formData.isNeutered}
+                                            className={`block w-full p-2 border rounded-md shadow-sm focus:ring-primary focus:border-primary ${formData.isNeutered ? 'bg-gray-100 border-gray-200' : 'border-gray-300'}`} />
                                     </div>
                                     
                                     <div>
@@ -7872,9 +7880,9 @@ const AnimalForm = ({
                         )}
 
                         {/* Breeding History & Fertility (Females, Intersex, Unknown) */}
-                        {(formData.gender === 'Female' || formData.gender === 'Intersex' || formData.gender === 'Unknown') && !formData.isNeutered && (
+                        {(formData.gender === 'Female' || formData.gender === 'Intersex' || formData.gender === 'Unknown') && (
                             <div className="bg-gray-50 p-4 rounded-lg border border-gray-200 space-y-4">
-                                <h3 className="text-lg font-semibold text-gray-700 border-b pb-2">Breeding History & Fertility</h3>
+                                <h3 className="text-lg font-semibold text-gray-700 border-b pb-2">Breeding History & Fertility {formData.isNeutered && <span className="text-xs font-normal text-gray-500">(History)</span>}</h3>
                                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                                     <div>
                                         <label className="block text-sm font-medium text-gray-700 mb-2">Fertility Status</label>
