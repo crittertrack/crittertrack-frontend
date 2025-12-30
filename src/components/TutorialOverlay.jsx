@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useRef, useCallback } from 'react';
 import { X, ChevronLeft, ChevronRight, Check, BookOpen } from 'lucide-react';
-import { TUTORIAL_LESSONS } from '../data/tutorialLessons';
+import { TUTORIAL_LESSONS } from '../data/tutorialLessonsNew';
 import { useTutorial } from '../contexts/TutorialContext';
 
 /**
