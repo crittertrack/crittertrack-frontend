@@ -13474,18 +13474,32 @@ const App = () => {
                                                             growthRecords = [];
                                                         }
                                                     }
-                                                    return (animalToView.currentWeight || animalToView.bcs || (growthRecords && growthRecords.length > 0)) && (
+                                                    
+                                                    // Compute current weight and length from growth records
+                                                    let currentWeight = null;
+                                                    let currentLength = null;
+                                                    if (growthRecords && Array.isArray(growthRecords) && growthRecords.length > 0) {
+                                                        const sorted = [...growthRecords].sort((a, b) => new Date(b.date) - new Date(a.date));
+                                                        currentWeight = sorted[0].weight;
+                                                        const withLength = sorted.find(r => r.length);
+                                                        currentLength = withLength ? withLength.length : null;
+                                                    }
+                                                    
+                                                    // Fallback to stored values if no growth records
+                                                    if (!currentWeight) currentWeight = animalToView.currentWeight;
+                                                    
+                                                    return (currentWeight || animalToView.bcs || currentLength) && (
                                                         <div className="bg-gray-50 p-4 rounded-lg border border-gray-200 space-y-4">
                                                             <h3 className="text-lg font-semibold text-gray-700">Current Measurements</h3>
                                                             <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm">
-                                                                {animalToView.currentWeight && (
-                                                                    <div><span className="text-gray-600">Weight:</span> <strong>{animalToView.currentWeight} {animalToView.measurementUnits?.weight || 'g'}</strong></div>
+                                                                {currentWeight && (
+                                                                    <div><span className="text-gray-600">Weight:</span> <strong>{currentWeight} {animalToView.measurementUnits?.weight || 'g'}</strong></div>
                                                                 )}
                                                                 {animalToView.bcs && (
                                                                     <div><span className="text-gray-600">BCS:</span> <strong>{animalToView.bcs}</strong></div>
                                                                 )}
-                                                                {growthRecords && growthRecords.length > 0 && growthRecords[growthRecords.length - 1].length && (
-                                                                    <div><span className="text-gray-600">Length:</span> <strong>{growthRecords[growthRecords.length - 1].length} {animalToView.measurementUnits?.length || 'cm'}</strong></div>
+                                                                {currentLength && (
+                                                                    <div><span className="text-gray-600">Length:</span> <strong>{currentLength} {animalToView.measurementUnits?.length || 'cm'}</strong></div>
                                                                 )}
                                                             </div>
                                                         </div>
