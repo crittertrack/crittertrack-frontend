@@ -267,7 +267,7 @@ const GETTING_STARTED_LESSONS = [
       {
         stepNumber: 3,
         title: 'Assign Breeder',
-        content: 'Click here to specify who the breeder of this animal is. When you click this button, a search modal will appear showing breeders that could be the breeder. You can search for breeders across your collection and the global database.',
+        content: 'Click here to specify who the breeder of this animal is. When you click this button, a search modal will appear letting you pick a user that could be the breeder. You can search for breeders across the entire website.',
         highlightElement: '[data-tutorial-target="ownership-section"]',
         actionType: 'click',
         tips: [
