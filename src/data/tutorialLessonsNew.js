@@ -152,7 +152,6 @@ const GETTING_STARTED_LESSONS = [
         stepNumber: 1,
         title: 'Welcome to Animal Overview',
         content: 'You\'re now on the Overview tab. This is where you enter basic information about your animal. Don\'t worry about filling everything now - you can complete other tabs and come back.',
-        highlightElement: '[data-tutorial-target="overview-tab"]',
         tips: [
           'Information saves progressively',
           'Only the Save button at the end finalizes everything',
@@ -164,6 +163,7 @@ const GETTING_STARTED_LESSONS = [
         title: 'Animal Image',
         content: 'Click here to upload a photo of your animal. A clear, front-facing photo works best. You can update this anytime.',
         highlightElement: '[data-tutorial-target="animal-image-upload"]',
+        actionType: 'click',
         tips: [
           'Recommended size: 400x400 pixels or larger',
           'Formats: JPG, PNG, WebP',
@@ -175,6 +175,7 @@ const GETTING_STARTED_LESSONS = [
         title: 'Name with Prefix/Suffix',
         content: 'Enter your animal\'s name here. You can also add a Prefix and Suffix. Prefixes and Suffixes are usually abbreviated versions of your breeder "watermark" or affixes - for example, if your breeder prefix is "Starlight Stables", you might use "SS" as a prefix.',
         highlightElement: '[data-tutorial-target="animal-name-section"]',
+        actionType: 'click',
         tips: [
           'Prefix example: "SS" for "Starlight Stables"',
           'Name example: "Luna" or "Max"',
@@ -187,6 +188,7 @@ const GETTING_STARTED_LESSONS = [
         title: 'Gender Selection',
         content: 'Select your animal\'s gender. Options include Male, Female, Intersex, and Unknown. For this tutorial, leave it as Unknown for now.',
         highlightElement: '[data-tutorial-target="animal-gender-select"]',
+        actionType: 'click',
         tips: [
           'Intersex and Unknown are available for non-binary animals',
           'Gender affects breeding features',
@@ -198,6 +200,7 @@ const GETTING_STARTED_LESSONS = [
         title: 'Date of Birth',
         content: 'Enter when your animal was born. This is important for tracking age and health records. If unknown, you can enter an approximate date.',
         highlightElement: '[data-tutorial-target="animal-birthdate-input"]',
+        actionType: 'click',
         tips: [
           'Format: YYYY-MM-DD',
           'Use your best estimate if exact date unknown',
@@ -209,6 +212,7 @@ const GETTING_STARTED_LESSONS = [
         title: 'Status Selection',
         content: 'Select the current status of your animal. Options include: Pet (living animal in your collection), Breeder (breeding animal), Available (for sale), Sold (sold to someone else), Retired (no longer breeding), Deceased (passed away), Rehomed (given to another home), or Unknown. Choose what best describes your animal\'s current situation.',
         highlightElement: '[data-tutorial-target="animal-status-select"]',
+        actionType: 'click',
         tips: [
           'Status affects visibility and features available',
           'Can be changed as your animal\'s situation changes',
