@@ -4817,10 +4817,19 @@ const SpeciesManager = ({ speciesOptions, setSpeciesOptions, onCancel, showModal
 
     return (
         <div className="w-full max-w-3xl bg-white p-6 rounded-xl shadow-lg">
-            <h2 className="text-2xl font-bold text-gray-800 mb-6 flex items-center">
-                <Settings size={20} className="mr-2 text-primary-dark" />
-                Manage Species (Global for All Users)
-            </h2>
+            <div className="flex justify-between items-start mb-6">
+                <h2 className="text-2xl font-bold text-gray-800 flex items-center">
+                    <Settings size={20} className="mr-2 text-primary-dark" />
+                    Manage Species (Global for All Users)
+                </h2>
+                <button
+                    onClick={onCancel}
+                    data-tutorial-target="back-to-selector-btn"
+                    className="flex items-center text-gray-600 hover:text-gray-800 transition"
+                >
+                    <ArrowLeft size={18} className="mr-1" /> Back
+                </button>
+            </div>
 
             <form onSubmit={handleAddSpecies} className="mb-6 p-3 sm:p-4 border rounded-lg bg-gray-50 space-y-3 overflow-x-hidden">
                 <div className="flex flex-col space-y-2 min-w-0">
@@ -4916,19 +4925,12 @@ const SpeciesManager = ({ speciesOptions, setSpeciesOptions, onCancel, showModal
                 )}
             </div>
             
-            <div className="mt-6 border-t pt-4 flex justify-between items-center">
+            <div className="mt-6 border-t pt-4">
                 <button
                     onClick={() => setShowFeedbackModal(true)}
                     className="flex items-center text-purple-600 hover:text-purple-700 transition font-medium"
                 >
                     <Mail size={18} className="mr-1" /> Request Species Customization
-                </button>
-                <button
-                    onClick={onCancel}
-                    data-tutorial-target="back-to-selector-btn"
-                    className="flex items-center text-gray-600 hover:text-gray-800 transition"
-                >
-                    <ArrowLeft size={18} className="mr-1" /> Back to Selector
                 </button>
             </div>
 
