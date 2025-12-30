@@ -7825,8 +7825,8 @@ const AnimalForm = ({
                         )}
 
 
-                        {/* Stud Information - Males always, Intersex/Unknown only when Can Sire checked */}
-                        {(formData.gender === 'Male' || (formData.gender === 'Intersex' && formData.isStudAnimal) || (formData.gender === 'Unknown' && formData.isStudAnimal)) && (
+                        {/* Stud Information - Only when Stud Animal/Can Sire is checked */}
+                        {((formData.gender === 'Male' && formData.isStudAnimal) || (formData.gender === 'Intersex' && formData.isStudAnimal) || (formData.gender === 'Unknown' && formData.isStudAnimal)) && (
                             <div className="bg-gray-50 p-4 rounded-lg border border-gray-200 space-y-4">
                                 <div className="flex items-start justify-between">
                                     <h3 className="text-lg font-semibold text-gray-700 border-b pb-2 flex-1">Stud Information <span className="text-xs font-normal text-gray-500">(Active Status)</span></h3>
@@ -7856,8 +7856,8 @@ const AnimalForm = ({
                             </div>
                         )}
 
-                        {/* Dam Information - Females always, Intersex/Unknown only when Can Bear checked */}
-                        {(formData.gender === 'Female' || (formData.gender === 'Intersex' && formData.isDamAnimal) || (formData.gender === 'Unknown' && formData.isDamAnimal)) && (
+                        {/* Dam Information - Only when Breeding Dam/Can Bear is checked */}
+                        {((formData.gender === 'Female' && formData.isDamAnimal) || (formData.gender === 'Intersex' && formData.isDamAnimal) || (formData.gender === 'Unknown' && formData.isDamAnimal)) && (
                             <div className="bg-gray-50 p-4 rounded-lg border border-gray-200 space-y-4">
                                 <div className="flex items-start justify-between">
                                     <h3 className="text-lg font-semibold text-gray-700 border-b pb-2 flex-1">Dam Information <span className="text-xs font-normal text-gray-500">(Active Status)</span></h3>
