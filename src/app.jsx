@@ -1220,7 +1220,7 @@ const LocalAnimalSearchModal = ({ title, currentId, onSelect, onClose, authToken
         <div className="fixed inset-0 bg-gray-600 bg-opacity-75 flex items-center justify-center p-4 z-50">
             <div className="bg-white rounded-xl shadow-2xl p-6 w-full max-w-xl max-h-[90vh] flex flex-col">
                 <div className="flex justify-between items-center border-b pb-3 mb-4">
-                    <h3 className="text-xl font-bold text-gray-800">{title} Selector (Local Animals Only)</h3>
+                    <h3 className="text-xl font-bold text-gray-800">{title} Selector</h3>
                     <button onClick={onClose} className="text-gray-500 hover:text-gray-800"><X size={24} /></button>
                 </div>
 
@@ -4118,7 +4118,7 @@ const LitterManagement = ({ authToken, API_BASE_URL, userProfile, showModalMessa
                         {/* Other Parent 1 (Optional) */}
                         <div>
                             <label className="block text-sm font-medium text-gray-700 mb-1">
-                                Other Parent 1 (Optional - Non-binary/Unknown)
+                                Other Parent 1 (Optional - Intersex/Unknown)
                             </label>
                             <button
                                 type="button"
@@ -4154,7 +4154,7 @@ const LitterManagement = ({ authToken, API_BASE_URL, userProfile, showModalMessa
                         {/* Other Parent 2 (Optional) */}
                         <div>
                             <label className="block text-sm font-medium text-gray-700 mb-1">
-                                Other Parent 2 (Optional - Non-binary/Unknown)
+                                Other Parent 2 (Optional - Intersex/Unknown)
                             </label>
                             <button
                                 type="button"
