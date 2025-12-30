@@ -4832,12 +4832,14 @@ const SpeciesManager = ({ speciesOptions, setSpeciesOptions, onCancel, showModal
                             onChange={(e) => setNewSpeciesName(e.target.value)}
                             required
                             disabled={loading}
+                            data-tutorial-target="species-name-input"
                             className="flex-grow p-2 border border-gray-300 rounded-lg box-border min-w-0"
                         />
                         <select
                             value={selectedCategory}
                             onChange={(e) => setSelectedCategory(e.target.value)}
                             disabled={loading}
+                            data-tutorial-target="species-category-dropdown"
                             className="p-2 border border-gray-300 rounded-lg box-border sm:flex-shrink-0 sm:w-auto w-full"
                         >
                             {categories.map(cat => (
@@ -4851,6 +4853,7 @@ const SpeciesManager = ({ speciesOptions, setSpeciesOptions, onCancel, showModal
                         value={newSpeciesLatinName}
                         onChange={(e) => setNewSpeciesLatinName(e.target.value)}
                         disabled={loading}
+                        data-tutorial-target="species-latin-input"
                         className="w-full p-2 border border-gray-300 rounded-lg"
                     />
                 </div>
@@ -4922,6 +4925,7 @@ const SpeciesManager = ({ speciesOptions, setSpeciesOptions, onCancel, showModal
                 </button>
                 <button
                     onClick={onCancel}
+                    data-tutorial-target="back-to-selector-btn"
                     className="flex items-center text-gray-600 hover:text-gray-800 transition"
                 >
                     <ArrowLeft size={18} className="mr-1" /> Back to Selector
@@ -5014,7 +5018,7 @@ const SpeciesSelector = ({ speciesOptions, onSelectSpecies, onManageSpecies, sea
     });
     
     return (
-        <div className="w-full max-w-4xl bg-white p-6 rounded-xl shadow-lg">
+        <div className="w-full max-w-4xl bg-white p-6 rounded-xl shadow-lg" data-tutorial-target="species-selector">
             <h2 className="text-3xl font-bold text-gray-800 mb-6 flex items-center">
                 <Cat size={24} className="mr-3 text-primary-dark" />
                 Select Species for New Animal
@@ -5026,13 +5030,14 @@ const SpeciesSelector = ({ speciesOptions, onSelectSpecies, onManageSpecies, sea
                 </p>
             </div>
             
-            <div className="mb-4 flex space-x-3">
+            <div className="mb-4 flex space-x-3" data-tutorial-target="species-search-section">
                 <input
                     type="text"
                     placeholder="Search species..."
                     value={searchTerm}
                     onChange={(e) => setSearchTerm(e.target.value)}
                     className="flex-grow p-2 border border-gray-300 rounded-lg"
+                    data-tutorial-target="species-search-input"
                 />
                 <select
                     value={categoryFilter}
@@ -5045,7 +5050,7 @@ const SpeciesSelector = ({ speciesOptions, onSelectSpecies, onManageSpecies, sea
                 </select>
             </div>
             
-            <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-4 mb-6 max-h-96 overflow-y-auto">
+            <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-4 mb-6 max-h-96 overflow-y-auto" data-tutorial-target="default-species-section">
                 {sortedSpecies.length === 0 ? (
                     <p className="col-span-full text-center text-gray-500 p-4">No species found matching your filters.</p>
                 ) : (
@@ -5053,6 +5058,7 @@ const SpeciesSelector = ({ speciesOptions, onSelectSpecies, onManageSpecies, sea
                         <button
                             key={species._id || species.name}
                             onClick={() => onSelectSpecies(species.name)}
+                            data-tutorial-target={species.name === 'Fancy Mouse' ? 'species-fancy-mouse' : undefined}
                             className={`p-6 border-2 text-lg font-semibold rounded-lg transition duration-150 shadow-md relative text-center ${
                                 species.isDefault 
                                     ? 'border-primary-dark bg-primary text-gray-800 hover:bg-primary/80' 
@@ -5076,7 +5082,7 @@ const SpeciesSelector = ({ speciesOptions, onSelectSpecies, onManageSpecies, sea
                     <span className="font-semibold">{sortedSpecies.length}</span> species available
                 </p>
                 <button
-                    data-tutorial-target="add-new-species-btn"
+                    data-tutorial-target="add-species-btn"
                     onClick={onManageSpecies}
                     className="text-primary-dark hover:text-primary transition duration-150 font-medium flex items-center"
                 >
