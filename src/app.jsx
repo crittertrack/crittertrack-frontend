@@ -7953,6 +7953,13 @@ const AnimalForm = ({
                                                     className="block w-full p-2 border border-blue-200 rounded-md shadow-sm focus:ring-primary focus:border-primary" 
                                                     placeholder="Number of successful breedings" min="0" />
                                             </div>
+                                            
+                                            <div>
+                                                <label className="block text-sm font-medium text-gray-700 mb-2">Total Offspring Produced</label>
+                                                <input type="number" name="offspringCount" value={formData.offspringCount} onChange={handleChange} 
+                                                    className="block w-full p-2 border border-blue-200 rounded-md shadow-sm focus:ring-primary focus:border-primary" 
+                                                    placeholder="Total number of offspring" min="0" />
+                                            </div>
                                         </>
                                     )}
                                     
