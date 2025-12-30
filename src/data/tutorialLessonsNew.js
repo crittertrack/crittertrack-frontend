@@ -256,7 +256,8 @@ const GETTING_STARTED_LESSONS = [
         stepNumber: 2,
         title: 'Ownership - Currently Owned',
         content: 'This checkbox indicates that you currently own this animal. It should be checked for animals in your collection. Uncheck it if you\'ve already sold or rehomed the animal.',
-        highlightElement: '[data-tutorial-target="owned-by-me-checkbox"]',
+        highlightElement: '[data-tutorial-target="ownership-section"]',
+        actionType: 'click',
         tips: [
           'Checked = you own the animal',
           'Unchecked = you used to own it but don\'t anymore',
@@ -267,7 +268,8 @@ const GETTING_STARTED_LESSONS = [
         stepNumber: 3,
         title: 'Assign Breeder',
         content: 'Click here to specify who the breeder of this animal is. When you click this button, a search modal will appear showing animals that could be the breeder. You can search for animals across your collection and the global database.',
-        highlightElement: '[data-tutorial-target="assign-breeder-btn"]',
+        highlightElement: '[data-tutorial-target="ownership-section"]',
+        actionType: 'click',
         tips: [
           'This tracks breeding history',
           'Can search by name or ID',
@@ -279,6 +281,7 @@ const GETTING_STARTED_LESSONS = [
         title: 'Current Owner',
         content: 'This shows who currently owns the animal. If you own it, it shows you. If you\'ve sold it, you can assign the new owner here. This helps maintain ownership history.',
         highlightElement: '[data-tutorial-target="current-owner-field"]',
+        actionType: 'click',
         tips: [
           'Updates automatically when you own the animal',
           'Shows new owner when transferred',
@@ -289,7 +292,8 @@ const GETTING_STARTED_LESSONS = [
         stepNumber: 5,
         title: 'Public Profile Visibility',
         content: 'This checkbox controls whether your animal appears on your public profile. When checked, other CritterTrack users can see this animal\'s information (subject to other privacy toggles). When unchecked, the animal is only visible to you.',
-        highlightElement: '[data-tutorial-target="public-profile-checkbox"]',
+        highlightElement: '[data-tutorial-target="visibility-section"]',
+        actionType: 'click',
         tips: [
           'Checked = appears on your public profile',
           'Unchecked = private to you only',

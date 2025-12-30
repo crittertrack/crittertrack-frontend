@@ -6737,7 +6737,7 @@ const AnimalForm = ({
                                 key={tab.id}
                                 type="button"
                                 onClick={() => setActiveTab(tab.id)}
-                                data-tutorial-target={tab.id === 2 ? 'status-privacy-tab' : undefined}
+                                data-tutorial-target={tab.id === 2 ? 'status-privacy-tab' : tab.id === 3 ? 'physical-tab' : undefined}
                                 className={`flex-shrink-0 px-2 sm:px-3 py-2 text-xs sm:text-sm font-medium rounded border transition-colors ${
                                     activeTab === tab.id 
                                         ? 'bg-primary text-black border-gray-400' 
@@ -6866,7 +6866,7 @@ const AnimalForm = ({
                 {activeTab === 2 && (
                     <div className="space-y-6">
                         {/* Ownership */}
-                        <div className="bg-gray-50 p-4 rounded-lg border border-gray-200 space-y-4">
+                        <div data-tutorial-target="ownership-section" className="bg-gray-50 p-4 rounded-lg border border-gray-200 space-y-4">
                             <h3 className="text-lg font-semibold text-gray-700 border-b pb-2">Ownership</h3>
                             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                                 <label className="flex items-center space-x-2 cursor-pointer p-3 border rounded-lg bg-white hover:bg-gray-50 transition">
@@ -6920,7 +6920,7 @@ const AnimalForm = ({
                         </div>
                         
                         {/* Current Owner */}
-                        <div className="bg-gray-50 p-4 rounded-lg border border-gray-200 space-y-4">
+                        <div data-tutorial-target="current-owner-field" className="bg-gray-50 p-4 rounded-lg border border-gray-200 space-y-4">
                             <div className="flex justify-between items-center border-b pb-2">
                                 <h3 className="text-lg font-semibold text-gray-700">Current Owner</h3>
                                 <button
@@ -6948,7 +6948,7 @@ const AnimalForm = ({
                         </div>
                         
                         {/* Visibility */}
-                        <div className="bg-gray-50 p-4 rounded-lg border border-gray-200 space-y-4">
+                        <div data-tutorial-target="visibility-section" className="bg-gray-50 p-4 rounded-lg border border-gray-200 space-y-4">
                             <h3 className="text-lg font-semibold text-gray-700 border-b pb-2">Visibility</h3>
                             <label className="flex items-center space-x-2 cursor-pointer p-3 border rounded-lg bg-white hover:bg-gray-50 transition">
                                 <input type="checkbox" name="isDisplay" checked={formData.isDisplay} onChange={handleChange} 
