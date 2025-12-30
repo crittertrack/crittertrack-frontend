@@ -293,13 +293,15 @@ const GeneticCodeBuilder = ({ species, gender, value, onChange, onOpenCommunityF
                   Genetic Code Builder - {species}
                 </h2>
                 <div className="flex gap-2">
-                  <button
-                    type="button"
-                    onClick={() => setMode(mode === 'visual' ? 'manual' : 'visual')}
-                    className="px-4 py-2 bg-gray-100 hover:bg-gray-200 text-gray-800 rounded-lg transition"
-                  >
+                  <div data-tutorial-target="switch-manual-btn">
+                    <button
+                      type="button"
+                      onClick={() => setMode(mode === 'visual' ? 'manual' : 'visual')}
+                      className="px-4 py-2 bg-gray-100 hover:bg-gray-200 text-gray-800 rounded-lg transition"
+                    >
                     {mode === 'visual' ? 'Switch to Manual' : 'Switch to Visual'}
                   </button>
+                  </div>
                   <div data-tutorial-target="genetic-cancel-btn">
                     <button
                       type="button"
