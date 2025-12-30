@@ -3010,6 +3010,10 @@ const LitterManagement = ({ authToken, API_BASE_URL, userProfile, showModalMessa
         breedingPairCodeName: '',
         sireId_public: '',
         damId_public: '',
+        otherParent1Id_public: '',
+        otherParent1Role: '',
+        otherParent2Id_public: '',
+        otherParent2Role: '',
         pairingDate: '',
         birthDate: '',
         maleCount: '',
@@ -3025,6 +3029,8 @@ const LitterManagement = ({ authToken, API_BASE_URL, userProfile, showModalMessa
     const [damSearch, setDamSearch] = useState('');
     const [sireSpeciesFilter, setSireSpeciesFilter] = useState('');
     const [damSpeciesFilter, setDamSpeciesFilter] = useState('');
+    const [otherParent1Search, setOtherParent1Search] = useState('');
+    const [otherParent2Search, setOtherParent2Search] = useState('');
     const [linkingAnimals, setLinkingAnimals] = useState(false);
     const [availableToLink, setAvailableToLink] = useState({ litter: null, animals: [] });
     const [expandedLitter, setExpandedLitter] = useState(null);
@@ -3306,6 +3312,10 @@ const LitterManagement = ({ authToken, API_BASE_URL, userProfile, showModalMessa
                 breedingPairCodeName: formData.breedingPairCodeName || null,
                 sireId_public: formData.sireId_public,
                 damId_public: formData.damId_public,
+                otherParent1Id_public: formData.otherParent1Id_public || null,
+                otherParent1Role: formData.otherParent1Role || null,
+                otherParent2Id_public: formData.otherParent2Id_public || null,
+                otherParent2Role: formData.otherParent2Role || null,
                 pairingDate: formData.pairingDate || null,
                 birthDate: formData.birthDate || null,
                 numberBorn: totalCount > 0 ? totalCount : (formData.linkedOffspringIds?.length || 0),
@@ -3602,6 +3612,10 @@ const LitterManagement = ({ authToken, API_BASE_URL, userProfile, showModalMessa
             breedingPairCodeName: litter.breedingPairCodeName || '',
             sireId_public: litter.sireId_public,
             damId_public: litter.damId_public,
+            otherParent1Id_public: litter.otherParent1Id_public || '',
+            otherParent1Role: litter.otherParent1Role || '',
+            otherParent2Id_public: litter.otherParent2Id_public || '',
+            otherParent2Role: litter.otherParent2Role || '',
             pairingDate: litter.pairingDate || '',
             birthDate: litter.birthDate || '',
             maleCount: litter.maleCount || '',
@@ -3688,6 +3702,10 @@ const LitterManagement = ({ authToken, API_BASE_URL, userProfile, showModalMessa
                 breedingPairCodeName: formData.breedingPairCodeName,
                 sireId_public: formData.sireId_public,
                 damId_public: formData.damId_public,
+                otherParent1Id_public: formData.otherParent1Id_public || null,
+                otherParent1Role: formData.otherParent1Role || null,
+                otherParent2Id_public: formData.otherParent2Id_public || null,
+                otherParent2Role: formData.otherParent2Role || null,
                 pairingDate: formData.pairingDate,
                 birthDate: formData.birthDate,
                 maleCount: formData.maleCount,
@@ -3706,6 +3724,10 @@ const LitterManagement = ({ authToken, API_BASE_URL, userProfile, showModalMessa
                 breedingPairCodeName: '',
                 sireId_public: '',
                 damId_public: '',
+                otherParent1Id_public: '',
+                otherParent1Role: '',
+                otherParent2Id_public: '',
+                otherParent2Role: '',
                 pairingDate: '',
                 birthDate: '',
                 maleCount: '',
@@ -3909,6 +3931,10 @@ const LitterManagement = ({ authToken, API_BASE_URL, userProfile, showModalMessa
                                     breedingPairCodeName: '',
                                     sireId_public: '',
                                     damId_public: '',
+                                    otherParent1Id_public: '',
+                                    otherParent1Role: '',
+                                    otherParent2Id_public: '',
+                                    otherParent2Role: '',
                                     pairingDate: '',
                                     birthDate: '',
                                     maleCount: '',
@@ -4060,6 +4086,88 @@ const LitterManagement = ({ authToken, API_BASE_URL, userProfile, showModalMessa
                                     </option>
                                 ))}
                             </select>
+                        </div>
+
+                        {/* Other Parent 1 (Optional) */}
+                        <div>
+                            <label className="block text-sm font-medium text-gray-700 mb-1">
+                                Other Parent 1 (Optional - Non-binary/Unknown)
+                            </label>
+                            <input
+                                type="text"
+                                placeholder="Search other parent 1..."
+                                value={formData.otherParent1Search || ''}
+                                onChange={(e) => setFormData({...formData, otherParent1Search: e.target.value})}
+                                className="w-full px-3 py-1.5 text-sm border border-gray-300 rounded-lg mb-2 focus:ring-2 focus:ring-primary focus:border-transparent"
+                            />
+                            <select
+                                value={formData.otherParent1Id_public}
+                                onChange={(e) => setFormData({...formData, otherParent1Id_public: e.target.value})}
+                                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent"
+                            >
+                                <option value="">Select Other Parent 1</option>
+                                {myAnimals.filter(a => 
+                                    (formData.otherParent1Search || '') === '' || 
+                                    a.name.toLowerCase().includes((formData.otherParent1Search || '').toLowerCase()) ||
+                                    a.id_public.includes((formData.otherParent1Search || ''))
+                                ).map(animal => (
+                                    <option key={animal.id_public} value={animal.id_public}>
+                                        {animal.prefix ? `${animal.prefix} ` : ''}{animal.name}{animal.suffix ? ` ${animal.suffix}` : ''} - {animal.id_public} ({animal.species})
+                                    </option>
+                                ))}
+                            </select>
+                            {formData.otherParent1Id_public && (
+                                <select
+                                    value={formData.otherParent1Role}
+                                    onChange={(e) => setFormData({...formData, otherParent1Role: e.target.value})}
+                                    className="w-full px-3 py-2 border border-gray-300 rounded-lg mt-2 focus:ring-2 focus:ring-primary focus:border-transparent"
+                                >
+                                    <option value="">Select Role</option>
+                                    <option value="Sire">Sire</option>
+                                    <option value="Dam">Dam</option>
+                                </select>
+                            )}
+                        </div>
+
+                        {/* Other Parent 2 (Optional) */}
+                        <div>
+                            <label className="block text-sm font-medium text-gray-700 mb-1">
+                                Other Parent 2 (Optional - Non-binary/Unknown)
+                            </label>
+                            <input
+                                type="text"
+                                placeholder="Search other parent 2..."
+                                value={formData.otherParent2Search || ''}
+                                onChange={(e) => setFormData({...formData, otherParent2Search: e.target.value})}
+                                className="w-full px-3 py-1.5 text-sm border border-gray-300 rounded-lg mb-2 focus:ring-2 focus:ring-primary focus:border-transparent"
+                            />
+                            <select
+                                value={formData.otherParent2Id_public}
+                                onChange={(e) => setFormData({...formData, otherParent2Id_public: e.target.value})}
+                                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent"
+                            >
+                                <option value="">Select Other Parent 2</option>
+                                {myAnimals.filter(a => 
+                                    (formData.otherParent2Search || '') === '' || 
+                                    a.name.toLowerCase().includes((formData.otherParent2Search || '').toLowerCase()) ||
+                                    a.id_public.includes((formData.otherParent2Search || ''))
+                                ).map(animal => (
+                                    <option key={animal.id_public} value={animal.id_public}>
+                                        {animal.prefix ? `${animal.prefix} ` : ''}{animal.name}{animal.suffix ? ` ${animal.suffix}` : ''} - {animal.id_public} ({animal.species})
+                                    </option>
+                                ))}
+                            </select>
+                            {formData.otherParent2Id_public && (
+                                <select
+                                    value={formData.otherParent2Role}
+                                    onChange={(e) => setFormData({...formData, otherParent2Role: e.target.value})}
+                                    className="w-full px-3 py-2 border border-gray-300 rounded-lg mt-2 focus:ring-2 focus:ring-primary focus:border-transparent"
+                                >
+                                    <option value="">Select Role</option>
+                                    <option value="Sire">Sire</option>
+                                    <option value="Dam">Dam</option>
+                                </select>
+                            )}
                         </div>
                     </div>
 
