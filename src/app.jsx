@@ -1913,16 +1913,13 @@ const ViewOnlyAnimalDetail = ({ animal, onClose, API_BASE_URL, onViewProfile }) 
                     <div className="flex overflow-x-auto">
                         {[
                             { id: 1, label: 'Overview', icon: '📋' },
-                            { id: 2, label: 'Status & Privacy', icon: '🔒' },
                             { id: 3, label: 'Physical', icon: '🎨' },
-                            { id: 4, label: 'Identification', icon: '🏷️' },
                             { id: 5, label: 'Lineage', icon: '🌳' },
                             { id: 6, label: 'Breeding', icon: '🫘' },
                             { id: 7, label: 'Health', icon: '🏥' },
                             { id: 8, label: 'Husbandry', icon: '🏠' },
                             { id: 9, label: 'Behavior', icon: '🧠' },
-                            { id: 10, label: 'Records', icon: '📝' },
-                            { id: 11, label: 'End of Life', icon: '🕊️' }
+                            { id: 10, label: 'Records', icon: '📝' }
                         ].map(tab => (
                             <button
                                 key={tab.id}
@@ -2181,8 +2178,8 @@ const ViewOnlyAnimalDetail = ({ animal, onClose, API_BASE_URL, onViewProfile }) 
                         </div>
                     )}
 
-                    {/* Tab 2: Physical Profile */}
-                    {detailViewTab === 2 && (
+                    {/* Tab 3: Physical */}
+                    {detailViewTab === 3 && (
                         <div className="space-y-4">
                             {/* Appearance Section */}
                             {(animal.color || animal.coat || animal.coatPattern || animal.earset) && (
@@ -2282,8 +2279,8 @@ const ViewOnlyAnimalDetail = ({ animal, onClose, API_BASE_URL, onViewProfile }) 
                         </div>
                     )}
 
-                    {/* Tab 3: Lineage & Origin */}
-                    {detailViewTab === 3 && (
+                    {/* Tab 5: Lineage */}
+                    {detailViewTab === 5 && (
                         <div className="space-y-4">
                             {/* Origin Section */}
                             {animal.origin && (
@@ -2333,8 +2330,8 @@ const ViewOnlyAnimalDetail = ({ animal, onClose, API_BASE_URL, onViewProfile }) 
                         </div>
                     )}
 
-                    {/* Tab 4: Reproduction */}
-                    {detailViewTab === 4 && (
+                    {/* Tab 6: Breeding */}
+                    {detailViewTab === 6 && (
                         <div className="space-y-4">
                             {animal.sectionPrivacy?.reproductive !== false && (
                                 <div className="bg-gray-50 p-4 rounded-lg border border-gray-200">
@@ -2350,8 +2347,8 @@ const ViewOnlyAnimalDetail = ({ animal, onClose, API_BASE_URL, onViewProfile }) 
                         </div>
                     )}
 
-                    {/* Tab 5: Health */}
-                    {detailViewTab === 5 && (
+                    {/* Tab 7: Health */}
+                    {detailViewTab === 7 && (
                         <div className="space-y-4">
                             {/* Preventive Care */}
                             {animal.sectionPrivacy?.health !== false && (animal.vaccinations || animal.dewormingRecords || animal.parasiteControl || animal.allergies || animal.medications) && (
@@ -2522,8 +2519,8 @@ const ViewOnlyAnimalDetail = ({ animal, onClose, API_BASE_URL, onViewProfile }) 
                         </div>
                     )}
 
-                    {/* Tab 6: Husbandry */}
-                    {detailViewTab === 6 && (
+                    {/* Tab 8: Husbandry */}
+                    {detailViewTab === 8 && (
                         <div className="space-y-4">
                             {/* Nutrition Section */}
                             {animal.sectionPrivacy?.husbandry !== false && (animal.dietType || animal.feedingSchedule || animal.supplements) && (
@@ -2562,8 +2559,8 @@ const ViewOnlyAnimalDetail = ({ animal, onClose, API_BASE_URL, onViewProfile }) 
                         </div>
                     )}
 
-                    {/* Tab 7: Behavior */}
-                    {detailViewTab === 7 && (
+                    {/* Tab 9: Behavior */}
+                    {detailViewTab === 9 && (
                         <div className="space-y-4">
                             {/* Behavior & Welfare Section */}
                             {animal.sectionPrivacy?.behavior !== false && (animal.temperament || animal.handlingTolerance || animal.socialStructure) && (
@@ -2586,8 +2583,8 @@ const ViewOnlyAnimalDetail = ({ animal, onClose, API_BASE_URL, onViewProfile }) 
                         </div>
                     )}
 
-                    {/* Tab 8: Records */}
-                    {detailViewTab === 8 && (
+                    {/* Tab 10: Records */}
+                    {detailViewTab === 10 && (
                         <div className="space-y-4">
                             {/* Current Owner Section */}
                             {(animal.currentOwnerId || animal.currentOwnerName) && (
