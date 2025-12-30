@@ -5173,9 +5173,12 @@ const SpeciesSelector = ({ speciesOptions, onSelectSpecies, onManageSpecies, sea
 
 
 // Small helper component for animal image selection/preview
-const AnimalImageUpload = ({ imageUrl, onFileChange, onDeleteImage, disabled = false, Trash2 }) => (
+const AnimalImageUpload = ({ imageUrl, onFileChange, onDeleteImage, disabled = false, Trash2, onImageClick }) => (
     <div data-tutorial-target="photo-upload-section" className="flex items-center space-x-4">
-        <div className="w-28 h-28 bg-gray-100 rounded-lg overflow-hidden flex items-center justify-center border">
+        <div 
+            className={`w-28 h-28 bg-gray-100 rounded-lg overflow-hidden flex items-center justify-center border ${onImageClick ? 'cursor-pointer hover:opacity-80 transition-opacity' : ''}`}
+            onClick={() => onImageClick && imageUrl && onImageClick(imageUrl)}
+        >
             <AnimalImage src={imageUrl} alt="Animal" className="w-full h-full object-cover" iconSize={36} />
         </div>
         <div className="flex-1">
@@ -5968,6 +5971,7 @@ const AnimalForm = ({
     const [deleteImage, setDeleteImage] = useState(false);
     const [showCommunityGeneticsModal, setShowCommunityGeneticsModal] = useState(false);
     const [activeTab, setActiveTab] = useState(1); // Tab navigation state
+    const [enlargedImage, setEnlargedImage] = useState(null); // For image enlargement modal
 
     const handleChange = (e) => {
         const { name, value, type, checked } = e.target;
@@ -6759,6 +6763,7 @@ const AnimalForm = ({
                                     setAnimalImagePreview(null);
                                     setDeleteImage(true);
                                 }}
+                                onImageClick={() => setEnlargedImage(animalImagePreview)}
                                 disabled={loading}
                                 Trash2={Trash2}
                             />
@@ -8489,6 +8494,38 @@ const AnimalForm = ({
                     API_BASE_URL={API_BASE_URL}
                     showModalMessage={showModalMessage}
                 />
+            )}
+            
+            {/* Image Enlargement Modal */}
+            {enlargedImage && (
+                <div className="fixed inset-0 bg-black bg-opacity-75 flex items-center justify-center p-4 z-50">
+                    <div className="bg-white rounded-lg shadow-xl max-w-2xl w-full max-h-[90vh] overflow-auto">
+                        <div className="flex justify-between items-center p-4 border-b">
+                            <h3 className="text-lg font-semibold text-gray-900">Photo</h3>
+                            <button
+                                onClick={() => setEnlargedImage(null)}
+                                className="text-gray-500 hover:text-gray-700 transition-colors"
+                                title="Close"
+                            >
+                                <X size={24} />
+                            </button>
+                        </div>
+                        <div className="p-4 flex justify-center">
+                            <img src={enlargedImage} alt="Enlarged photo" className="max-w-full max-h-[70vh] object-contain" />
+                        </div>
+                        <div className="flex justify-end gap-2 p-4 border-t">
+                            <a
+                                href={enlargedImage}
+                                download
+                                className="inline-flex items-center px-4 py-2 bg-primary text-black rounded-md hover:bg-primary/90 transition-colors"
+                                title="Download photo"
+                            >
+                                <Download size={18} className="mr-2" />
+                                Download Photo
+                            </a>
+                        </div>
+                    </div>
+                </div>
             )}
         </div>
     );
@@ -11283,6 +11320,7 @@ const App = () => {
     const [viewAnimalBreederInfo, setViewAnimalBreederInfo] = useState(null);
     const [animalToView, setAnimalToView] = useState(null);
     const [detailViewTab, setDetailViewTab] = useState(1); // Tab for detail view
+    const [enlargedAnimalViewImage, setEnlargedAnimalViewImage] = useState(null); // For image enlargement modal in view-animal
     const [showTabs, setShowTabs] = useState(true); // Toggle for collapsible tabs panel
     const [sireData, setSireData] = useState(null);
     const [damData, setDamData] = useState(null);
@@ -13444,7 +13482,12 @@ const App = () => {
                                                             {/* Profile Image */}
                                                             <div className="flex items-center justify-center h-40 w-full">
                                                                 {(animalToView.imageUrl || animalToView.photoUrl) ? (
-                                                                    <img src={animalToView.imageUrl || animalToView.photoUrl} alt={animalToView.name} className="max-w-32 max-h-32 w-auto h-auto object-contain rounded-md" />
+                                                                    <img 
+                                                                        src={animalToView.imageUrl || animalToView.photoUrl} 
+                                                                        alt={animalToView.name} 
+                                                                        className="max-w-32 max-h-32 w-auto h-auto object-contain rounded-md cursor-pointer hover:opacity-80 transition-opacity" 
+                                                                        onClick={() => setEnlargedAnimalViewImage(animalToView.imageUrl || animalToView.photoUrl)}
+                                                                    />
                                                                 ) : (
                                                                     <div className="w-32 h-32 bg-gray-100 rounded-md flex items-center justify-center text-gray-400">
                                                                         <Cat size={48} />
@@ -14369,6 +14412,38 @@ const App = () => {
                                             API_BASE_URL={API_BASE_URL}
                                             authToken={authToken}
                                         />
+                                    )}
+                                    
+                                    {/* Image Enlargement Modal */}
+                                    {enlargedAnimalViewImage && (
+                                        <div className="fixed inset-0 bg-black bg-opacity-75 flex items-center justify-center p-4 z-50">
+                                            <div className="bg-white rounded-lg shadow-xl max-w-2xl w-full max-h-[90vh] overflow-auto">
+                                                <div className="flex justify-between items-center p-4 border-b">
+                                                    <h3 className="text-lg font-semibold text-gray-900">Photo</h3>
+                                                    <button
+                                                        onClick={() => setEnlargedAnimalViewImage(null)}
+                                                        className="text-gray-500 hover:text-gray-700 transition-colors"
+                                                        title="Close"
+                                                    >
+                                                        <X size={24} />
+                                                    </button>
+                                                </div>
+                                                <div className="p-4 flex justify-center">
+                                                    <img src={enlargedAnimalViewImage} alt="Enlarged photo" className="max-w-full max-h-[70vh] object-contain" />
+                                                </div>
+                                                <div className="flex justify-end gap-2 p-4 border-t">
+                                                    <a
+                                                        href={enlargedAnimalViewImage}
+                                                        download
+                                                        className="inline-flex items-center px-4 py-2 bg-primary text-black rounded-md hover:bg-primary/90 transition-colors"
+                                                        title="Download photo"
+                                                    >
+                                                        <Download size={18} className="mr-2" />
+                                                        Download Photo
+                                                    </a>
+                                                </div>
+                                            </div>
+                                        </div>
                                     )}
                                     </>
                                 );
