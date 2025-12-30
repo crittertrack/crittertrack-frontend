@@ -5974,36 +5974,6 @@ const AnimalForm = ({
         });
     };
     
-    // Track ownership history when currentOwner changes
-    useEffect(() => {
-        if (!formData.currentOwner) return;
-        
-        // Check if this owner is already in history
-        const existingIndex = formData.ownershipHistory?.findIndex(h => h.name === formData.currentOwner);
-        
-        if (existingIndex >= 0) {
-            // Update existing entry - set endDate to empty (current owner)
-            const updated = [...(formData.ownershipHistory || [])];
-            updated[existingIndex] = {
-                ...updated[existingIndex],
-                endDate: null
-            };
-            setFormData(prev => ({ ...prev, ownershipHistory: updated }));
-        } else if (formData.currentOwner) {
-            // Add new owner to history with today's date
-            const today = new Date().toISOString().substring(0, 10);
-            const newOwner = {
-                name: formData.currentOwner,
-                startDate: today,
-                endDate: null
-            };
-            setFormData(prev => ({
-                ...prev,
-                ownershipHistory: [...(prev.ownershipHistory || []), newOwner]
-            }));
-        }
-    }, [formData.currentOwner]);
-    
         const handleSelectPedigree = async (idOrAnimal, assignedRole = null) => {
             const id = idOrAnimal && typeof idOrAnimal === 'object' ? idOrAnimal.id_public : idOrAnimal;
             
@@ -6508,6 +6478,29 @@ const AnimalForm = ({
                 dewormingRecordsCount: dewormingRecordsArray.length,
                 parasiteControlCount: parasiteControlRecords.length
             });
+            
+            // Update ownership history only when saving (not on every form change)
+            if (formData.currentOwner) {
+                const ownershipHistory = payloadToSave.ownershipHistory || [];
+                const existingIndex = ownershipHistory.findIndex(h => h.name === formData.currentOwner);
+                
+                if (existingIndex >= 0) {
+                    // Update existing entry - set endDate to empty (current owner)
+                    ownershipHistory[existingIndex] = {
+                        ...ownershipHistory[existingIndex],
+                        endDate: null
+                    };
+                } else {
+                    // Add new owner to history with today's date
+                    const today = new Date().toISOString().substring(0, 10);
+                    ownershipHistory.push({
+                        name: formData.currentOwner,
+                        startDate: today,
+                        endDate: null
+                    });
+                }
+                payloadToSave.ownershipHistory = ownershipHistory;
+            }
             
             // Handle image deletion
             if (deleteImage && animalToEdit) {
