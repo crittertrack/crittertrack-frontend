@@ -1913,13 +1913,16 @@ const ViewOnlyAnimalDetail = ({ animal, onClose, API_BASE_URL, onViewProfile }) 
                     <div className="flex overflow-x-auto">
                         {[
                             { id: 1, label: 'Overview', icon: '📋' },
-                            { id: 2, label: 'Physical Profile', icon: '🎨' },
-                            { id: 3, label: 'Lineage & Origin', icon: '🌳' },
-                            { id: 4, label: 'Reproduction', icon: '👶' },
-                            { id: 5, label: 'Health', icon: '🏥' },
-                            { id: 6, label: 'Husbandry', icon: '🏠' },
-                            { id: 7, label: 'Behavior', icon: '😊' },
-                            { id: 8, label: 'Records', icon: '📝' }
+                            { id: 2, label: 'Status & Privacy', icon: '🔒' },
+                            { id: 3, label: 'Physical', icon: '🎨' },
+                            { id: 4, label: 'Identification', icon: '🏷️' },
+                            { id: 5, label: 'Lineage', icon: '🌳' },
+                            { id: 6, label: 'Breeding', icon: '🫘' },
+                            { id: 7, label: 'Health', icon: '🏥' },
+                            { id: 8, label: 'Husbandry', icon: '🏠' },
+                            { id: 9, label: 'Behavior', icon: '🧠' },
+                            { id: 10, label: 'Records', icon: '📝' },
+                            { id: 11, label: 'End of Life', icon: '🕊️' }
                         ].map(tab => (
                             <button
                                 key={tab.id}
@@ -6651,15 +6654,15 @@ const AnimalForm = ({
                         {[
                             { id: 1, label: 'Overview', icon: '📋' },
                             { id: 2, label: 'Status & Privacy', icon: '🔒' },
-                            { id: 3, label: 'Physical Profile', icon: '🎨' },
+                            { id: 3, label: 'Physical', icon: '🎨' },
                             { id: 4, label: 'Identification', icon: '🏷️' },
-                            { id: 5, label: 'Lineage & Origin', icon: '🌳' },
-                            { id: 6, label: 'Reproduction & Breeding', icon: '🫘' },
-                            { id: 7, label: 'Health & Veterinary', icon: '🏥' },
-                            { id: 8, label: 'Nutrition & Husbandry', icon: '🏠' },
-                            { id: 9, label: 'Behavior & Welfare', icon: '🧠' },
-                            { id: 10, label: 'Records & Notes', icon: '📝' },
-                            { id: 11, label: 'End of Life & Legal', icon: '🕊️' }
+                            { id: 5, label: 'Lineage', icon: '🌳' },
+                            { id: 6, label: 'Breeding', icon: '🫘' },
+                            { id: 7, label: 'Health', icon: '🏥' },
+                            { id: 8, label: 'Husbandry', icon: '🏠' },
+                            { id: 9, label: 'Behavior', icon: '🧠' },
+                            { id: 10, label: 'Records', icon: '📝' },
+                            { id: 11, label: 'End of Life', icon: '🕊️' }
                         ].map(tab => (
                             <button
                                 key={tab.id}
