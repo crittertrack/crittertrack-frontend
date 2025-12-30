@@ -46,9 +46,11 @@ export const TutorialOverlay = React.forwardRef(({ lessonId, onClose, onComplete
     setShowAdvancedFeaturesPrompt(false);
   }, [lessonId]);
 
-  // Handle waitForAction - automatically advance when highlighted element is clicked
+  // Handle waitForAction and actionType: 'click' - automatically advance when highlighted element is clicked
   useEffect(() => {
-    if (!currentStep?.waitForAction || !currentStep?.highlightElement) {
+    const shouldWaitForClick = currentStep?.waitForAction || currentStep?.actionType === 'click';
+    
+    if (!shouldWaitForClick || !currentStep?.highlightElement) {
       return;
     }
 
@@ -60,6 +62,27 @@ export const TutorialOverlay = React.forwardRef(({ lessonId, onClose, onComplete
         setTimeout(() => {
           if (!isLastStep) {
             setCurrentStepIndex(prev => prev + 1);
+          } else {
+            // If this is the last step of the lesson, complete it
+            if (lesson) {
+              // Determine if this is the final onboarding lesson (budget-basics)
+              const isOnboardingComplete = lesson.id === 'budget-basics';
+              
+              // Determine if this is the final advanced features lesson
+              const isAdvancedFeaturesComplete = lesson.id === 'advanced-features-complete';
+              
+              markTutorialCompleted(lesson.id, isOnboardingComplete, isAdvancedFeaturesComplete);
+
+              // Always show advanced features prompt after completing onboarding
+              if (isOnboardingComplete) {
+                setShowAdvancedFeaturesPrompt(true);
+                return;
+              }
+            }
+            
+            if (onComplete) {
+              onComplete(lesson?.id);
+            }
           }
         }, 300);
       }
@@ -70,7 +93,7 @@ export const TutorialOverlay = React.forwardRef(({ lessonId, onClose, onComplete
     return () => {
       document.removeEventListener('click', handleElementClick, true);
     };
-  }, [currentStep, isLastStep]);
+  }, [currentStep, isLastStep, lesson, markTutorialCompleted, onComplete]);
 
   const handleComplete = useCallback(() => {
     if (lesson) {
