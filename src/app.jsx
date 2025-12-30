@@ -5599,6 +5599,7 @@ const AnimalForm = ({
             bodyConditionScore: animalToEdit.bodyConditionScore || '',
             origin: animalToEdit.origin || 'Captive-bred',
             isNeutered: animalToEdit.isNeutered || false,
+            isInfertile: animalToEdit.isInfertile || false,
             heatStatus: animalToEdit.heatStatus || '',
             lastHeatDate: animalToEdit.lastHeatDate ? new Date(animalToEdit.lastHeatDate).toISOString().substring(0, 10) : '',
             ovulationDate: animalToEdit.ovulationDate ? new Date(animalToEdit.ovulationDate).toISOString().substring(0, 10) : '',
@@ -5682,6 +5683,7 @@ const AnimalForm = ({
             bodyConditionScore: '',
             origin: 'Captive-bred',
             isNeutered: false,
+            isInfertile: false,
             heatStatus: '',
             lastHeatDate: '',
             ovulationDate: '',
@@ -7722,6 +7724,17 @@ const AnimalForm = ({
                                     <span className="text-sm font-medium text-gray-700">In Mating</span>
                                 </label>
 
+                                <label className="flex items-center space-x-2 cursor-pointer p-3 border rounded-lg bg-white hover:bg-gray-50 transition">
+                                    <input
+                                        type="checkbox"
+                                        name="isInfertile"
+                                        checked={formData.isInfertile || false}
+                                        onChange={handleChange}
+                                        className="form-checkbox h-5 w-5 text-primary rounded focus:ring-primary"
+                                    />
+                                    <span className="text-sm font-medium text-gray-700">Infertile</span>
+                                </label>
+
                                 {(formData.gender === 'Female' || formData.gender === 'Intersex' || formData.gender === 'Unknown') && (
                                     <label className="flex items-center space-x-2 cursor-pointer p-3 border rounded-lg bg-white hover:bg-gray-50 transition">
                                         <input
@@ -7757,7 +7770,7 @@ const AnimalForm = ({
                                             name="isStudAnimal"
                                             checked={formData.isStudAnimal}
                                             onChange={handleChange}
-                                            disabled={formData.isNeutered}
+                                            disabled={formData.isNeutered || formData.isInfertile}
                                             className="form-checkbox h-5 w-5 text-primary rounded focus:ring-primary"
                                         />
                                         <span className="text-sm font-medium text-gray-700">Stud Animal</span>
@@ -7771,7 +7784,7 @@ const AnimalForm = ({
                                             name="isDamAnimal"
                                             checked={formData.isDamAnimal || false}
                                             onChange={handleChange}
-                                            disabled={formData.isNeutered}
+                                            disabled={formData.isNeutered || formData.isInfertile}
                                             className="form-checkbox h-5 w-5 text-primary rounded focus:ring-primary"
                                         />
                                         <span className="text-sm font-medium text-gray-700">Breeding Dam</span>
@@ -7786,7 +7799,7 @@ const AnimalForm = ({
                                                 name="isStudAnimal"
                                                 checked={formData.isStudAnimal}
                                                 onChange={handleChange}
-                                                disabled={formData.isNeutered}
+                                                disabled={formData.isNeutered || formData.isInfertile}
                                                 className="form-checkbox h-5 w-5 text-primary rounded focus:ring-primary"
                                             />
                                             <span className="text-sm font-medium text-gray-700">Can Sire</span>
@@ -7798,7 +7811,7 @@ const AnimalForm = ({
                                                 name="isDamAnimal"
                                                 checked={formData.isDamAnimal || false}
                                                 onChange={handleChange}
-                                                disabled={formData.isNeutered}
+                                                disabled={formData.isNeutered || formData.isInfertile}
                                                 className="form-checkbox h-5 w-5 text-primary rounded focus:ring-primary"
                                             />
                                             <span className="text-sm font-medium text-gray-700">Can Bear</span>
@@ -7876,7 +7889,6 @@ const AnimalForm = ({
                                             <option value="Unknown">Unknown</option>
                                             <option value="Fertile">Fertile</option>
                                             <option value="Subfertile">Subfertile</option>
-                                            <option value="Infertile">Infertile</option>
                                         </select>
                                     </div>
                                     
@@ -7907,7 +7919,6 @@ const AnimalForm = ({
                                             <option value="Unknown">Unknown</option>
                                             <option value="Fertile">Fertile</option>
                                             <option value="Subfertile">Subfertile</option>
-                                            <option value="Infertile">Infertile</option>
                                         </select>
                                     </div>
                                     
