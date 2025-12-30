@@ -2009,12 +2009,21 @@ const ViewOnlyAnimalDetail = ({ animal, onClose, API_BASE_URL, onViewProfile }) 
                                     {/* Right Column - Info (2/3) */}
                                     <div className="w-2/3 p-4 sm:p-6 flex flex-col border-l border-gray-300 space-y-3">
                                         {/* Species/Breed/Strain/CTC - At Top */}
-                                        <div className="text-sm text-gray-600 font-medium space-y-1">
-                                            <p>{animal.species}</p>
-                                            {animal.breed && <p><span className="font-semibold">Breed:</span> {animal.breed}</p>}
-                                            {animal.strain && <p><span className="font-semibold">Strain:</span> {animal.strain}</p>}
-                                            {animal.id_public && <p><span className="font-semibold">CTC ID:</span> <span className="font-mono text-accent">{animal.id_public}</span></p>}
-                                        </div>
+                                        <p className="text-sm text-gray-600">
+                                            {animal.species}
+                                            {animal.breed && ` • ${animal.breed}`}
+                                            {animal.strain && ` • ${animal.strain}`}
+                                            {animal.id_public && ` • ${animal.id_public}`}
+                                        </p>
+
+                                        {/* Identification Numbers - If enabled by owner */}
+                                        {(animal.microchipNumber || animal.registrationNumber || animal.tattooNumber) && (
+                                            <div className="text-xs text-gray-500 space-y-0.5">
+                                                {animal.microchipNumber && <p>Microchip: {animal.microchipNumber}</p>}
+                                                {animal.registrationNumber && <p>Registration: {animal.registrationNumber}</p>}
+                                                {animal.tattooNumber && <p>Tattoo: {animal.tattooNumber}</p>}
+                                            </div>
+                                        )}
 
                                         {/* Full Name */}
                                         <h2 className="text-2xl font-bold text-gray-800">
@@ -2445,8 +2454,38 @@ const ViewOnlyAnimalDetail = ({ animal, onClose, API_BASE_URL, onViewProfile }) 
                                                 </div>
                                             ) : null;
                                         })()}
-                                        {animal.allergies && <p className="text-sm"><span className="font-medium">Allergies:</span> {animal.allergies}</p>}
-                                        {animal.medications && <p className="text-sm"><span className="font-medium">Medications:</span> {animal.medications}</p>}
+                                        {animal.allergies && (() => {
+                                            const parsed = parseHealthRecords(animal.allergies);
+                                            return parsed && parsed.length > 0 ? (
+                                                <div>
+                                                    <strong className="text-sm">Allergies:</strong>
+                                                    <ul className="text-sm mt-1 list-disc list-inside space-y-1">
+                                                        {parsed.map((allergy, idx) => (
+                                                            <li key={idx} className="text-gray-700">
+                                                                {allergy.allergen || allergy.name}
+                                                                {allergy.notes && <span className="text-gray-600"> - {allergy.notes}</span>}
+                                                            </li>
+                                                        ))}
+                                                    </ul>
+                                                </div>
+                                            ) : null;
+                                        })()}
+                                        {animal.medications && (() => {
+                                            const parsed = parseHealthRecords(animal.medications);
+                                            return parsed && parsed.length > 0 ? (
+                                                <div>
+                                                    <strong className="text-sm">Medications:</strong>
+                                                    <ul className="text-sm mt-1 list-disc list-inside space-y-1">
+                                                        {parsed.map((med, idx) => (
+                                                            <li key={idx} className="text-gray-700">
+                                                                {med.medication || med.name}
+                                                                {med.notes && <span className="text-gray-600"> - {med.notes}</span>}
+                                                            </li>
+                                                        ))}
+                                                    </ul>
+                                                </div>
+                                            ) : null;
+                                        })()}
                                     </div>
                                 </div>
                             )}
@@ -13460,14 +13499,14 @@ const App = () => {
                                                                 {animalToView.id_public && ` • ${animalToView.id_public}`}
                                                             </p>
 
-                                                            {/* Name */}
-                                                            <h2 className="text-2xl font-bold text-gray-800">
-                                                                {animalToView.prefix ? `${animalToView.prefix} ` : ''}
-                                                                {animalToView.name}
-                                                                {animalToView.suffix ? ` ${animalToView.suffix}` : ''}
-                                                            </h2>
-
-                                                            {/* Appearance */}
+                                            {/* Identification Numbers */}
+                                            {(animalToView.breederyId || animalToView.microchipNumber || animalToView.pedigreeRegistrationId) && (
+                                                <div className="text-xs text-gray-500 space-y-0.5">
+                                                    {animalToView.breederyId && <p>Identification: {animalToView.breederyId}</p>}
+                                                    {animalToView.microchipNumber && <p>Microchip: {animalToView.microchipNumber}</p>}
+                                                    {animalToView.pedigreeRegistrationId && <p>Pedigree Reg: {animalToView.pedigreeRegistrationId}</p>}
+                                                </div>
+                                            )}
                                                             {(animalToView.color || animalToView.coat || animalToView.coatPattern || animalToView.earset) && (
                                                                 <p className="text-sm text-gray-700">
                                                                     {[
