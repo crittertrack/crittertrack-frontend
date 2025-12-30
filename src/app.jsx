@@ -5096,7 +5096,7 @@ const SpeciesSelector = ({ speciesOptions, onSelectSpecies, onManageSpecies, sea
 
 // Small helper component for animal image selection/preview
 const AnimalImageUpload = ({ imageUrl, onFileChange, onDeleteImage, disabled = false, Trash2 }) => (
-    <div data-tutorial-target="photo-upload-section" className="flex items-center space-x-4">
+    <div data-tutorial-target="animal-image-upload" className="flex items-center space-x-4">
         <div className="w-28 h-28 bg-gray-100 rounded-lg overflow-hidden flex items-center justify-center border">
             <AnimalImage src={imageUrl} alt="Animal" className="w-full h-full object-cover" iconSize={36} />
         </div>
@@ -6735,6 +6735,7 @@ const AnimalForm = ({
                                 key={tab.id}
                                 type="button"
                                 onClick={() => setActiveTab(tab.id)}
+                                data-tutorial-target={tab.id === 2 ? 'status-privacy-tab' : undefined}
                                 className={`flex-shrink-0 px-2 sm:px-3 py-2 text-xs sm:text-sm font-medium rounded border transition-colors ${
                                     activeTab === tab.id 
                                         ? 'bg-primary text-black border-gray-400' 
@@ -6797,7 +6798,7 @@ const AnimalForm = ({
                         </div>
                         
                         {/* Identity Fields */}
-                        <div data-tutorial-target="general-info-container" className="bg-gray-50 p-4 rounded-lg border border-gray-200 space-y-4">
+                        <div data-tutorial-target="animal-name-section" className="bg-gray-50 p-4 rounded-lg border border-gray-200 space-y-4">
                             <h3 className="text-lg font-semibold text-gray-700 border-b pb-2">Identity</h3>
                             <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                                 <div>
@@ -6823,6 +6824,7 @@ const AnimalForm = ({
                                 <div>
                                     <label className="block text-sm font-medium text-gray-700">Gender*</label>
                                     <select name="gender" value={formData.gender} onChange={handleChange} required 
+                                        data-tutorial-target="animal-gender-select"
                                         className="mt-1 block w-full p-2 border border-gray-300 rounded-md shadow-sm focus:ring-primary focus:border-primary">
                                         {GENDER_OPTIONS.map(g => <option key={g} value={g}>{g}</option>)}
                                     </select>
@@ -6831,13 +6833,14 @@ const AnimalForm = ({
                                 <div>
                                     <label className="block text-sm font-medium text-gray-700">Date of Birth*</label>
                                     <input type="date" name="birthDate" value={formData.birthDate} onChange={handleChange} min="1800-01-01" max={new Date().toISOString().split('T')[0]} required 
+                                        data-tutorial-target="animal-birthdate-input"
                                         className="mt-1 block w-full p-2 border border-gray-300 rounded-md shadow-sm focus:ring-primary focus:border-primary" />
                                 </div>
                                 
                                 <div className="md:col-span-2">
                                     <label className="block text-sm font-medium text-gray-700">Status*</label>
                                     <select name="status" value={formData.status} onChange={handleChange} required 
-                                        data-tutorial-target="status-dropdown"
+                                        data-tutorial-target="animal-status-select"
                                         className="mt-1 block w-full p-2 border border-gray-300 rounded-md shadow-sm focus:ring-primary focus:border-primary">
                                         <option value="Pet">Pet - Personal animal, not for breeding/sale</option>
                                         <option value="Breeder">Breeder - Active breeding animal</option>
