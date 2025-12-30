@@ -1708,6 +1708,24 @@ const PublicProfileView = ({ profile, onBack, onViewAnimal, API_BASE_URL, onStar
                                 >
                                     <Venus size={18} className="text-black" />
                                 </button>
+                                <button 
+                                    onClick={() => setGenderFilters(prev => ({ ...prev, Intersex: !prev.Intersex }))}
+                                    className={`p-2 rounded-lg transition duration-150 shadow-sm ${
+                                        genderFilters.Intersex ? 'bg-purple-400' : 'bg-gray-300 hover:bg-gray-400'
+                                    }`}
+                                    title="Intersex"
+                                >
+                                    <VenusAndMars size={18} className="text-black" />
+                                </button>
+                                <button 
+                                    onClick={() => setGenderFilters(prev => ({ ...prev, Unknown: !prev.Unknown }))}
+                                    className={`p-2 rounded-lg transition duration-150 shadow-sm ${
+                                        genderFilters.Unknown ? 'bg-gray-600' : 'bg-gray-300 hover:bg-gray-400'
+                                    }`}
+                                    title="Unknown"
+                                >
+                                    <Circle size={18} className="text-black" />
+                                </button>
                             </div>
                         </div>
                         
@@ -10315,10 +10333,29 @@ const AnimalList = ({ authToken, showModalMessage, onEditAnimal, onViewAnimal, f
                             <span className='text-sm font-medium text-gray-700 whitespace-nowrap'>Gender:</span>
                             {GENDER_OPTIONS.map(gender => {
                                 const isSelected = selectedGenders.includes(gender);
-                                const Icon = gender === 'Male' ? Mars : Venus;
-                                let bgColor = isSelected 
-                                    ? (gender === 'Male' ? 'bg-primary' : 'bg-pink-400') 
-                                    : 'bg-gray-300 hover:bg-gray-400';
+                                let Icon, bgColor;
+                                
+                                switch(gender) {
+                                    case 'Male':
+                                        Icon = Mars;
+                                        bgColor = isSelected ? 'bg-primary' : 'bg-gray-300 hover:bg-gray-400';
+                                        break;
+                                    case 'Female':
+                                        Icon = Venus;
+                                        bgColor = isSelected ? 'bg-pink-400' : 'bg-gray-300 hover:bg-gray-400';
+                                        break;
+                                    case 'Intersex':
+                                        Icon = VenusAndMars;
+                                        bgColor = isSelected ? 'bg-purple-400' : 'bg-gray-300 hover:bg-gray-400';
+                                        break;
+                                    case 'Unknown':
+                                        Icon = Circle;
+                                        bgColor = isSelected ? 'bg-gray-600' : 'bg-gray-300 hover:bg-gray-400';
+                                        break;
+                                    default:
+                                        Icon = Circle;
+                                        bgColor = 'bg-gray-300 hover:bg-gray-400';
+                                }
                                 
                                 return (
                                     <button key={gender} onClick={() => toggleGender(gender)}
