@@ -4082,45 +4082,7 @@ const LitterManagement = ({ authToken, API_BASE_URL, userProfile, showModalMessa
                                 </select>
                             )}
                         </div>
-                    </div>
 
-                    {/* Predicted COI Display */}
-                    {(formData.sireId_public && formData.damId_public) && (
-                        <div className="mb-4 p-4 bg-blue-50 border-2 border-blue-200 rounded-lg">
-                            <div className="flex items-center justify-between">
-                                <div>
-                                    <p className="text-sm font-semibold text-gray-700">Predicted Offspring COI:</p>
-                                    <p className="text-xs text-gray-600 mt-1">
-                                        Coefficient of Inbreeding for offspring from this pairing
-                                    </p>
-                                </div>
-                                <div className="text-right">
-                                    {calculatingCOI ? (
-                                        <div className="flex items-center gap-2">
-                                            <Loader2 className="animate-spin" size={20} />
-                                            <span className="text-sm text-gray-600">Calculating...</span>
-                                        </div>
-                                    ) : predictedCOI != null ? (
-                                        <div>
-                                            <p className="text-2xl font-bold text-blue-600">
-                                                {predictedCOI.toFixed(2)}%
-                                            </p>
-                                            <p className="text-xs text-gray-500">
-                                                {predictedCOI === 0 ? 'No inbreeding' : 
-                                                 predictedCOI < 5 ? 'Low inbreeding' : 
-                                                 predictedCOI < 10 ? 'Moderate inbreeding' : 
-                                                 'High inbreeding'}
-                                            </p>
-                                        </div>
-                                    ) : (
-                                        <p className="text-sm text-gray-500">N/A</p>
-                                    )}
-                                </div>
-                            </div>
-                        </div>
-                    )}
-
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
                         {/* Birth Date */}
                         <div>
                             <label className="block text-sm font-medium text-gray-700 mb-1">
@@ -4135,7 +4097,10 @@ const LitterManagement = ({ authToken, API_BASE_URL, userProfile, showModalMessa
                                 className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent"
                             />
                         </div>
+                    </div>
 
+                    {/* Male and Female Count */}
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
                         {/* Male Count */}
                         <div>
                             <label className="block text-sm font-medium text-gray-700 mb-1">
