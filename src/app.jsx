@@ -2016,15 +2016,6 @@ const ViewOnlyAnimalDetail = ({ animal, onClose, API_BASE_URL, onViewProfile }) 
                                             {animal.id_public && ` • ${animal.id_public}`}
                                         </p>
 
-                                        {/* Identification Numbers - If enabled by owner */}
-                                        {(animal.microchipNumber || animal.registrationNumber || animal.tattooNumber) && (
-                                            <div className="text-xs text-gray-500 space-y-0.5">
-                                                {animal.microchipNumber && <p>Microchip: {animal.microchipNumber}</p>}
-                                                {animal.registrationNumber && <p>Registration: {animal.registrationNumber}</p>}
-                                                {animal.tattooNumber && <p>Tattoo: {animal.tattooNumber}</p>}
-                                            </div>
-                                        )}
-
                                         {/* Full Name */}
                                         <h2 className="text-2xl font-bold text-gray-800">
                                             {animal.prefix ? `${animal.prefix} ` : ''}
@@ -13499,26 +13490,14 @@ const App = () => {
                                                                 {animalToView.id_public && ` • ${animalToView.id_public}`}
                                                             </p>
 
-                                            {/* Identification Numbers */}
-                                            {(animalToView.breederyId || animalToView.microchipNumber || animalToView.pedigreeRegistrationId) && (
-                                                <div className="text-xs text-gray-500 space-y-0.5">
-                                                    {animalToView.breederyId && <p>Identification: {animalToView.breederyId}</p>}
-                                                    {animalToView.microchipNumber && <p>Microchip: {animalToView.microchipNumber}</p>}
-                                                    {animalToView.pedigreeRegistrationId && <p>Pedigree Reg: {animalToView.pedigreeRegistrationId}</p>}
-                                                </div>
-                                            )}
-                                                            {(animalToView.color || animalToView.coat || animalToView.coatPattern || animalToView.earset) && (
-                                                                <p className="text-sm text-gray-700">
-                                                                    {[
-                                                                        animalToView.color,
-                                                                        animalToView.coatPattern,
-                                                                        animalToView.coat,
-                                                                        animalToView.earset
-                                                                    ].filter(Boolean).join(' ')}
-                                                                </p>
-                                                            )}
+                                                            {/* Name */}
+                                                            <h2 className="text-2xl font-bold text-gray-800">
+                                                                {animalToView.prefix ? `${animalToView.prefix} ` : ''}
+                                                                {animalToView.name}
+                                                                {animalToView.suffix ? ` ${animalToView.suffix}` : ''}
+                                                            </h2>
 
-                                                            {/* Date of Birth and Age/Deceased */}
+                                                            {/* Appearance */}
                                                             {animalToView.birthDate && (
                                                                 <div className="text-sm text-gray-700 space-y-1">
                                                                     <p>
