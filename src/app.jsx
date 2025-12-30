@@ -7808,7 +7808,40 @@ const AnimalForm = ({
                             </div>
                         </div>
 
-
+                        {/* Estrus/Cycle - Only for females (not hidden when neutered) */}
+                        {(formData.gender === 'Female' || formData.gender === 'Intersex' || formData.gender === 'Unknown') && (
+                            <div className="bg-gray-50 p-4 rounded-lg border border-gray-200 space-y-4">
+                                <h3 className="text-lg font-semibold text-gray-700 border-b pb-2">Estrus/Cycle</h3>
+                                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                    <div>
+                                        <label className="block text-sm font-medium text-gray-700 mb-2">Heat Status</label>
+                                        <select name="heatStatus" value={formData.heatStatus} onChange={handleChange}
+                                            disabled={formData.isNeutered}
+                                            className={`block w-full p-2 border rounded-md shadow-sm focus:ring-primary focus:border-primary ${formData.isNeutered ? 'bg-gray-100 border-gray-200' : 'border-gray-300'}`}>
+                                            <option value="">Select status...</option>
+                                            <option value="Pre-estrus">Pre-estrus</option>
+                                            <option value="Estrus">Estrus</option>
+                                            <option value="Post-estrus">Post-estrus</option>
+                                            <option value="Anestrus">Anestrus</option>
+                                        </select>
+                                    </div>
+                                    
+                                    <div>
+                                        <label className="block text-sm font-medium text-gray-700 mb-2">Last Heat Date</label>
+                                        <input type="date" name="lastHeatDate" value={formData.lastHeatDate} onChange={handleChange}
+                                            disabled={formData.isNeutered}
+                                            className={`block w-full p-2 border rounded-md shadow-sm focus:ring-primary focus:border-primary ${formData.isNeutered ? 'bg-gray-100 border-gray-200' : 'border-gray-300'}`} />
+                                    </div>
+                                    
+                                    <div>
+                                        <label className="block text-sm font-medium text-gray-700 mb-2">Ovulation Date</label>
+                                        <input type="date" name="ovulationDate" value={formData.ovulationDate} onChange={handleChange}
+                                            disabled={formData.isNeutered}
+                                            className={`block w-full p-2 border rounded-md shadow-sm focus:ring-primary focus:border-primary ${formData.isNeutered ? 'bg-gray-100 border-gray-200' : 'border-gray-300'}`} />
+                                    </div>
+                                </div>
+                            </div>
+                        )}
 
                         {/* Mating - Hidden when neutered/spayed */}
                         {!formData.isNeutered && (formData.gender === 'Female' || formData.gender === 'Intersex' || formData.gender === 'Unknown' || formData.gender === 'Male') && (
