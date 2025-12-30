@@ -2102,13 +2102,13 @@ const ViewOnlyAnimalDetail = ({ animal, onClose, API_BASE_URL, onViewProfile }) 
                             )}
 
                             {/* Identification Numbers Section */}
-                            {(animal.microchipNumber || animal.registrationNumber || animal.tattooNumber) && (
+                            {(animal.breederyId || animal.microchipNumber || animal.pedigreeRegistrationId) && (
                                 <div className="bg-gray-50 p-4 rounded-lg border border-gray-200">
                                     <h3 className="text-lg font-semibold text-gray-700 border-b pb-2 mb-3">Identification Numbers</h3>
                                     <div className="space-y-2">
+                                        {animal.breederyId && <p className="text-sm"><span className="font-medium">Identification:</span> {animal.breederyId}</p>}
                                         {animal.microchipNumber && <p className="text-sm"><span className="font-medium">Microchip:</span> {animal.microchipNumber}</p>}
-                                        {animal.registrationNumber && <p className="text-sm"><span className="font-medium">Registration:</span> {animal.registrationNumber}</p>}
-                                        {animal.tattooNumber && <p className="text-sm"><span className="font-medium">Tattoo:</span> {animal.tattooNumber}</p>}
+                                        {animal.pedigreeRegistrationId && <p className="text-sm"><span className="font-medium">Pedigree Reg ID:</span> {animal.pedigreeRegistrationId}</p>}
                                     </div>
                                 </div>
                             )}
