@@ -2225,33 +2225,43 @@ const ViewOnlyAnimalDetail = ({ animal, onClose, API_BASE_URL, onViewProfile }) 
                             })()}
 
                             {/* Growth Records Section */}
-                            {animal.sectionPrivacy?.measurements !== false && animal.growthRecords && Array.isArray(animal.growthRecords) && animal.growthRecords.length > 0 && (
-                                <div className="bg-gray-50 p-4 rounded-lg border border-gray-200">
-                                    <h3 className="text-lg font-semibold text-gray-700 border-b pb-2 mb-3">Growth History</h3>
-                                    <div className="overflow-x-auto">
-                                        <table className="w-full text-sm">
-                                            <thead className="border-b border-gray-300">
-                                                <tr>
-                                                    <th className="text-left py-2 px-2">Date</th>
-                                                    <th className="text-left py-2 px-2">Weight</th>
-                                                    <th className="text-left py-2 px-2">Length</th>
-                                                    <th className="text-left py-2 px-2">BCS</th>
-                                                </tr>
-                                            </thead>
-                                            <tbody>
-                                                {animal.growthRecords.map((record, idx) => (
-                                                    <tr key={idx} className="border-b border-gray-200">
-                                                        <td className="py-2 px-2">{record.date ? new Date(record.date).toLocaleDateString() : '-'}</td>
-                                                        <td className="py-2 px-2">{record.weight ? `${record.weight} ${animal.measurementUnits?.weight || 'g'}` : '-'}</td>
-                                                        <td className="py-2 px-2">{record.length ? `${record.length} ${animal.measurementUnits?.length || 'cm'}` : '-'}</td>
-                                                        <td className="py-2 px-2">{record.bcs || '-'}</td>
+                            {(() => {
+                                let growthRecords = animal.growthRecords;
+                                if (typeof growthRecords === 'string') {
+                                    try {
+                                        growthRecords = JSON.parse(growthRecords);
+                                    } catch (e) {
+                                        growthRecords = [];
+                                    }
+                                }
+                                return animal.sectionPrivacy?.measurements !== false && growthRecords && Array.isArray(growthRecords) && growthRecords.length > 0 && (
+                                    <div className="bg-gray-50 p-4 rounded-lg border border-gray-200">
+                                        <h3 className="text-lg font-semibold text-gray-700 border-b pb-2 mb-3">Growth History</h3>
+                                        <div className="overflow-x-auto">
+                                            <table className="w-full text-sm">
+                                                <thead className="border-b border-gray-300">
+                                                    <tr>
+                                                        <th className="text-left py-2 px-2">Date</th>
+                                                        <th className="text-left py-2 px-2">Weight</th>
+                                                        <th className="text-left py-2 px-2">Length</th>
+                                                        <th className="text-left py-2 px-2">BCS</th>
                                                     </tr>
-                                                ))}
-                                            </tbody>
-                                        </table>
+                                                </thead>
+                                                <tbody>
+                                                    {growthRecords.map((record, idx) => (
+                                                        <tr key={idx} className="border-b border-gray-200">
+                                                            <td className="py-2 px-2">{record.date ? new Date(record.date).toLocaleDateString() : '-'}</td>
+                                                            <td className="py-2 px-2">{record.weight ? `${record.weight} ${animal.measurementUnits?.weight || 'g'}` : '-'}</td>
+                                                            <td className="py-2 px-2">{record.length ? `${record.length} ${animal.measurementUnits?.length || 'cm'}` : '-'}</td>
+                                                            <td className="py-2 px-2">{record.bcs || '-'}</td>
+                                                        </tr>
+                                                    ))}
+                                                </tbody>
+                                            </table>
+                                        </div>
                                     </div>
-                                </div>
-                            )}
+                                );
+                            })()}
                         </div>
                     )}
 
@@ -13194,9 +13204,19 @@ const App = () => {
                                                                 // Compute current measurements from growth records if available
                                                                 let currentWeight = null;
                                                                 let currentLength = null;
+                                                                let growthRecords = animalToView.growthRecords;
                                                                 
-                                                                if (animalToView.growthRecords && Array.isArray(animalToView.growthRecords) && animalToView.growthRecords.length > 0) {
-                                                                    const sorted = [...animalToView.growthRecords].sort((a, b) => new Date(b.date) - new Date(a.date));
+                                                                // Parse growthRecords if it's a string
+                                                                if (typeof growthRecords === 'string') {
+                                                                    try {
+                                                                        growthRecords = JSON.parse(growthRecords);
+                                                                    } catch (e) {
+                                                                        growthRecords = [];
+                                                                    }
+                                                                }
+                                                                
+                                                                if (growthRecords && Array.isArray(growthRecords) && growthRecords.length > 0) {
+                                                                    const sorted = [...growthRecords].sort((a, b) => new Date(b.date) - new Date(a.date));
                                                                     currentWeight = sorted[0].weight;
                                                                     const withLength = sorted.find(r => r.length);
                                                                     currentLength = withLength ? withLength.length : null;
@@ -13445,29 +13465,49 @@ const App = () => {
                                                 )}
 
                                                 {/* Current Measurements */}
-                                                {(animalToView.currentWeight || animalToView.bcs || (animalToView.growthRecords && animalToView.growthRecords.length > 0)) && (
-                                                    <div className="bg-gray-50 p-4 rounded-lg border border-gray-200 space-y-4">
-                                                        <h3 className="text-lg font-semibold text-gray-700">Current Measurements</h3>
-                                                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm">
-                                                            {animalToView.currentWeight && (
-                                                                <div><span className="text-gray-600">Weight:</span> <strong>{animalToView.currentWeight} {animalToView.measurementUnits?.weight || 'g'}</strong></div>
-                                                            )}
-                                                            {animalToView.bcs && (
-                                                                <div><span className="text-gray-600">BCS:</span> <strong>{animalToView.bcs}</strong></div>
-                                                            )}
-                                                            {animalToView.growthRecords && animalToView.growthRecords.length > 0 && animalToView.growthRecords[animalToView.growthRecords.length - 1].length && (
-                                                                <div><span className="text-gray-600">Length:</span> <strong>{animalToView.growthRecords[animalToView.growthRecords.length - 1].length} {animalToView.measurementUnits?.length || 'cm'}</strong></div>
-                                                            )}
+                                                {(() => {
+                                                    let growthRecords = animalToView.growthRecords;
+                                                    if (typeof growthRecords === 'string') {
+                                                        try {
+                                                            growthRecords = JSON.parse(growthRecords);
+                                                        } catch (e) {
+                                                            growthRecords = [];
+                                                        }
+                                                    }
+                                                    return (animalToView.currentWeight || animalToView.bcs || (growthRecords && growthRecords.length > 0)) && (
+                                                        <div className="bg-gray-50 p-4 rounded-lg border border-gray-200 space-y-4">
+                                                            <h3 className="text-lg font-semibold text-gray-700">Current Measurements</h3>
+                                                            <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm">
+                                                                {animalToView.currentWeight && (
+                                                                    <div><span className="text-gray-600">Weight:</span> <strong>{animalToView.currentWeight} {animalToView.measurementUnits?.weight || 'g'}</strong></div>
+                                                                )}
+                                                                {animalToView.bcs && (
+                                                                    <div><span className="text-gray-600">BCS:</span> <strong>{animalToView.bcs}</strong></div>
+                                                                )}
+                                                                {growthRecords && growthRecords.length > 0 && growthRecords[growthRecords.length - 1].length && (
+                                                                    <div><span className="text-gray-600">Length:</span> <strong>{growthRecords[growthRecords.length - 1].length} {animalToView.measurementUnits?.length || 'cm'}</strong></div>
+                                                                )}
+                                                            </div>
                                                         </div>
-                                                    </div>
-                                                )}
+                                                    );
+                                                })()}
 
                                                 {/* Growth Curve Chart */}
-                                                {animalToView.growthRecords && animalToView.growthRecords.length > 1 && (() => {
-                                                    const sorted = [...animalToView.growthRecords].sort((a, b) => new Date(a.date) - new Date(b.date));
-                                                    const weights = sorted.map(r => parseFloat(r.weight) || 0).filter(w => w > 0);
+                                                {(() => {
+                                                    let growthRecords = animalToView.growthRecords;
+                                                    if (typeof growthRecords === 'string') {
+                                                        try {
+                                                            growthRecords = JSON.parse(growthRecords);
+                                                        } catch (e) {
+                                                            growthRecords = [];
+                                                        }
+                                                    }
                                                     
-                                                    if (weights.length < 2) return null;
+                                                    return growthRecords && growthRecords.length > 1 && (() => {
+                                                        const sorted = [...growthRecords].sort((a, b) => new Date(a.date) - new Date(b.date));
+                                                        const weights = sorted.map(r => parseFloat(r.weight) || 0).filter(w => w > 0);
+                                                        
+                                                        if (weights.length < 2) return null;
                                                     
                                                     const minWeight = Math.min(...weights);
                                                     const maxWeight = Math.max(...weights);
@@ -13575,6 +13615,7 @@ const App = () => {
                                                             <p className="text-xs text-gray-500 mt-2">Hover over points to see full measurement details including length, BCS, and notes.</p>
                                                         </div>
                                                     );
+                                                    })();
                                                 })()}
                                             </div>
                                         )}
