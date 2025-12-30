@@ -19,6 +19,7 @@ const GETTING_STARTED_LESSONS = [
         title: 'Add Animal Button',
         content: 'Click the "Add Animal" button to start creating your first animal record. This is the primary way to add new animals to your collection.',
         highlightElement: '[data-tutorial-target="add-animal-btn"]',
+        actionType: 'click',
         tips: [
           'You can add multiple animals at once by creating them sequentially',
           'All information can be edited later',
