@@ -7682,10 +7682,10 @@ const AnimalForm = ({
                 {/* Tab 6: Reproduction & Breeding */}
                 {activeTab === 6 && (
                     <div className="space-y-6">
-                        {/* Reproductive Status */}
+                        {/* Reproductive Status - Key Status Indicators */}
                         <div className="bg-gray-50 p-4 rounded-lg border border-gray-200 space-y-4">
                             <div className="flex justify-between items-center border-b pb-2">
-                                <h3 className="text-lg font-semibold text-gray-700">Reproductive Status</h3>
+                                <h3 className="text-lg font-semibold text-gray-700">⚪ Reproductive Status</h3>
                                 <button
                                     type="button"
                                     onClick={() => toggleSectionPrivacy('reproductive')}
@@ -7696,7 +7696,7 @@ const AnimalForm = ({
                                     {sectionPrivacy[animalToEdit?.id_public]?.reproductive ? '🌍 Public' : '🔒 Private'}
                                 </button>
                             </div>
-                            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                            <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
                                 <label className="flex items-center space-x-2 cursor-pointer p-3 border rounded-lg bg-white hover:bg-gray-50 transition">
                                     <input
                                         type="checkbox"
@@ -7719,40 +7719,68 @@ const AnimalForm = ({
                                     />
                                     <span className="text-sm font-medium text-gray-700">In Mating</span>
                                 </label>
+
+                                {(formData.gender === 'Female' || formData.gender === 'Intersex' || formData.gender === 'Unknown') && (
+                                    <label className="flex items-center space-x-2 cursor-pointer p-3 border rounded-lg bg-white hover:bg-gray-50 transition">
+                                        <input
+                                            type="checkbox"
+                                            name="isPregnant"
+                                            checked={formData.isPregnant}
+                                            onChange={handleChange}
+                                            disabled={formData.isNeutered}
+                                            className="form-checkbox h-5 w-5 text-primary rounded focus:ring-primary"
+                                        />
+                                        <span className="text-sm font-medium text-gray-700">Pregnant</span>
+                                    </label>
+                                )}
+
+                                {(formData.gender === 'Female' || formData.gender === 'Intersex' || formData.gender === 'Unknown') && (
+                                    <label className="flex items-center space-x-2 cursor-pointer p-3 border rounded-lg bg-white hover:bg-gray-50 transition">
+                                        <input
+                                            type="checkbox"
+                                            name="isNursing"
+                                            checked={formData.isNursing}
+                                            onChange={handleChange}
+                                            disabled={formData.isNeutered}
+                                            className="form-checkbox h-5 w-5 text-primary rounded focus:ring-primary"
+                                        />
+                                        <span className="text-sm font-medium text-gray-700">Nursing</span>
+                                    </label>
+                                )}
+
+                                {(formData.gender === 'Male' || formData.gender === 'Intersex' || formData.gender === 'Unknown') && (
+                                    <label className="flex items-center space-x-2 cursor-pointer p-3 border rounded-lg bg-white hover:bg-gray-50 transition">
+                                        <input
+                                            type="checkbox"
+                                            name="isStudAnimal"
+                                            checked={formData.isStudAnimal}
+                                            onChange={handleChange}
+                                            disabled={formData.isNeutered}
+                                            className="form-checkbox h-5 w-5 text-primary rounded focus:ring-primary"
+                                        />
+                                        <span className="text-sm font-medium text-gray-700">{formData.gender === 'Male' ? 'Stud Animal' : formData.gender === 'Intersex' ? 'Can Sire' : 'Can Sire (Unknown)'}</span>
+                                    </label>
+                                )}
+
+                                {(formData.gender === 'Female' || formData.gender === 'Intersex' || formData.gender === 'Unknown') && (
+                                    <label className="flex items-center space-x-2 cursor-pointer p-3 border rounded-lg bg-white hover:bg-gray-50 transition">
+                                        <input
+                                            type="checkbox"
+                                            name="isDamAnimal"
+                                            checked={formData.isDamAnimal || false}
+                                            onChange={handleChange}
+                                            disabled={formData.isNeutered}
+                                            className="form-checkbox h-5 w-5 text-primary rounded focus:ring-primary"
+                                        />
+                                        <span className="text-sm font-medium text-gray-700">{formData.gender === 'Female' ? 'Breeding Dam' : formData.gender === 'Intersex' ? 'Can Bear' : 'Can Bear (Unknown)'}</span>
+                                    </label>
+                                )}
                             </div>
                         </div>
 
-                        {/* Estrus & Cycle (Females and non-binary animals) */}
-                        {(formData.gender === 'Female' || formData.gender === 'Intersex' || formData.gender === 'Unknown') && (
-                            <div className="bg-gray-50 p-4 rounded-lg border border-gray-200 space-y-4">
-                                <h3 className="text-lg font-semibold text-gray-700 border-b pb-2">Estrus & Cycle {formData.isNeutered && <span className="text-xs font-normal text-gray-500">(History)</span>}</h3>
-                                <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                                    <div>
-                                        <label className="block text-sm font-medium text-gray-700 mb-2">Heat (Estrus) Status</label>
-                                        <input type="text" name="heatStatus" value={formData.heatStatus} onChange={handleChange} 
-                                            disabled={formData.isNeutered}
-                                            className={`block w-full p-2 border rounded-md shadow-sm focus:ring-primary focus:border-primary ${formData.isNeutered ? 'bg-gray-100 border-gray-200' : 'border-gray-300'}`}
-                                            placeholder="e.g., In Heat, Between Cycles" />
-                                    </div>
-                                    
-                                    <div>
-                                        <label className="block text-sm font-medium text-gray-700 mb-2">Last Heat Date</label>
-                                        <input type="date" name="lastHeatDate" value={formData.lastHeatDate} onChange={handleChange} 
-                                            disabled={formData.isNeutered}
-                                            className={`block w-full p-2 border rounded-md shadow-sm focus:ring-primary focus:border-primary ${formData.isNeutered ? 'bg-gray-100 border-gray-200' : 'border-gray-300'}`} />
-                                    </div>
-                                    
-                                    <div>
-                                        <label className="block text-sm font-medium text-gray-700 mb-2">Ovulation Date</label>
-                                        <input type="date" name="ovulationDate" value={formData.ovulationDate} onChange={handleChange} 
-                                            disabled={formData.isNeutered}
-                                            className={`block w-full p-2 border rounded-md shadow-sm focus:ring-primary focus:border-primary ${formData.isNeutered ? 'bg-gray-100 border-gray-200' : 'border-gray-300'}`} />
-                                    </div>
-                                </div>
-                            </div>
-                        )}
 
-                        {/* Mating & Pregnancy */}
+
+                        {/* Mating */}
                         {(formData.gender === 'Female' || formData.gender === 'Intersex' || formData.gender === 'Unknown' || formData.gender === 'Male') && (
                             <div className="bg-gray-50 p-4 rounded-lg border border-gray-200 space-y-4">
                                 <h3 className="text-lg font-semibold text-gray-700 border-b pb-2">Mating {formData.isNeutered && <span className="text-xs font-normal text-gray-500">(History)</span>}</h3>
@@ -7766,77 +7794,20 @@ const AnimalForm = ({
                                     </div>
                                     
                                     {(formData.gender === 'Female' || formData.gender === 'Intersex' || formData.gender === 'Unknown') && (
-                                        <>
-                                            <label className="flex items-center space-x-2 cursor-pointer p-3 border rounded-lg bg-white hover:bg-gray-50 transition">
-                                                <input
-                                                    type="checkbox"
-                                                    name="isPregnant"
-                                                    checked={formData.isPregnant}
-                                                    onChange={handleChange}
-                                                    disabled={formData.isNeutered}
-                                                    className="form-checkbox h-5 w-5 text-primary rounded focus:ring-primary"
-                                                />
-                                                <span className="text-sm font-medium text-gray-700">Pregnant</span>
-                                            </label>
-                                            
-                                            {formData.isPregnant && (
-                                                <div>
-                                                    <label className="block text-sm font-medium text-gray-700 mb-2">Expected Due Date</label>
-                                                    <input type="date" name="expectedDueDate" value={formData.expectedDueDate} onChange={handleChange} 
-                                                        className="block w-full p-2 border border-gray-300 rounded-md shadow-sm focus:ring-primary focus:border-primary" />
-                                                </div>
-                                            )}
-                                            
-                                            <div className="md:col-span-2">
-                                                <label className="block text-sm font-medium text-gray-700 mb-2">Litter Count (History)</label>
-                                                <input type="number" name="litterCount" value={formData.litterCount} onChange={handleChange} 
-                                                    className="block w-full p-2 border border-gray-300 rounded-md shadow-sm focus:ring-primary focus:border-primary" 
-                                                    placeholder="Total number of previous litters" />
-                                            </div>
-                                        </>
+                                        <div className="md:col-span-2">
+                                            <label className="block text-sm font-medium text-gray-700 mb-2">Litter Count (History)</label>
+                                            <input type="number" name="litterCount" value={formData.litterCount} onChange={handleChange} 
+                                                className="block w-full p-2 border border-gray-300 rounded-md shadow-sm focus:ring-primary focus:border-primary" 
+                                                placeholder="Total number of previous litters" />
+                                        </div>
                                     )}
                                 </div>
                             </div>
                         )}
 
-                        {/* Nursing */}
-                        {(formData.gender === 'Female' || formData.gender === 'Intersex' || formData.gender === 'Unknown') && (
-                            <div className="bg-gray-50 p-4 rounded-lg border border-gray-200 space-y-4">
-                                <h3 className="text-lg font-semibold text-gray-700 border-b pb-2">Nursing {formData.isNeutered && <span className="text-xs font-normal text-gray-500">(History)</span>}</h3>
-                                <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                                    <label className="flex items-center space-x-2 cursor-pointer p-3 border rounded-lg bg-white hover:bg-gray-50 transition">
-                                        <input
-                                            type="checkbox"
-                                            name="isNursing"
-                                            checked={formData.isNursing}
-                                            onChange={handleChange}
-                                            disabled={formData.isNeutered}
-                                            className="form-checkbox h-5 w-5 text-primary rounded focus:ring-primary"
-                                        />
-                                        <span className="text-sm font-medium text-gray-700">Currently Nursing</span>
-                                    </label>
-                                    
-                                    {formData.isNursing && (
-                                        <>
-                                            <div>
-                                                <label className="block text-sm font-medium text-gray-700 mb-2">Nursing Start Date</label>
-                                                <input type="date" name="nursingStartDate" value={formData.nursingStartDate} onChange={handleChange} 
-                                                    className="block w-full p-2 border border-gray-300 rounded-md shadow-sm focus:ring-primary focus:border-primary" />
-                                            </div>
-                                            
-                                            <div>
-                                                <label className="block text-sm font-medium text-gray-700 mb-2">Weaning Date</label>
-                                                <input type="date" name="weaningDate" value={formData.weaningDate} onChange={handleChange} 
-                                                    className="block w-full p-2 border border-gray-300 rounded-md shadow-sm focus:ring-primary focus:border-primary" />
-                                            </div>
-                                        </>
-                                    )}
-                                </div>
-                            </div>
-                        )}
 
-                        {/* Stud Information (Males, Intersex, Unknown) */}
-                        {(formData.gender === 'Male' || formData.gender === 'Intersex' || formData.gender === 'Unknown') && (
+                        {/* Stud Information (Males, Intersex, Unknown) - Shows when isStudAnimal is checked */}
+                        {(formData.gender === 'Male' || (formData.gender === 'Intersex' && formData.isStudAnimal) || (formData.gender === 'Unknown' && formData.isStudAnimal)) && (
                             <div className="bg-gray-50 p-4 rounded-lg border border-gray-200 space-y-4">
                                 <div className="flex items-start justify-between">
                                     <h3 className="text-lg font-semibold text-gray-700 border-b pb-2 flex-1">Stud Information <span className="text-xs font-normal text-gray-500">(Active Status)</span></h3>
@@ -7844,18 +7815,6 @@ const AnimalForm = ({
                                     {formData.gender === 'Intersex' && <span className="text-xs bg-purple-100 text-purple-700 px-2 py-1 rounded ml-2 whitespace-nowrap">Sire Role</span>}
                                 </div>
                                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                                    <label className="flex items-center space-x-2 cursor-pointer p-3 border rounded-lg bg-white hover:bg-gray-50 transition">
-                                        <input
-                                            type="checkbox"
-                                            name="isStudAnimal"
-                                            checked={formData.isStudAnimal}
-                                            onChange={handleChange}
-                                            disabled={formData.isNeutered}
-                                            className="form-checkbox h-5 w-5 text-primary rounded focus:ring-primary"
-                                        />
-                                        <span className="text-sm font-medium text-gray-700">{formData.gender === 'Male' ? 'Stud Animal' : 'Can Sire (Stud)'}</span>
-                                    </label>
-                                    
                                     <div>
                                         <label className="block text-sm font-medium text-gray-700 mb-2">Sire Fertility Status <span className="text-xs text-gray-500 font-normal">(Sperm Production)</span></label>
                                         <select name="fertilityStatus" value={formData.fertilityStatus} onChange={handleChange} 
@@ -7878,8 +7837,8 @@ const AnimalForm = ({
                             </div>
                         )}
 
-                        {/* Dam Information (Females, Intersex, Unknown) */}
-                        {(formData.gender === 'Female' || formData.gender === 'Intersex' || formData.gender === 'Unknown') && (
+                        {/* Dam Information (Females, Intersex, Unknown) - Shows when isDamAnimal is checked */}
+                        {(formData.gender === 'Female' || (formData.gender === 'Intersex' && formData.isDamAnimal) || (formData.gender === 'Unknown' && formData.isDamAnimal)) && (
                             <div className="bg-gray-50 p-4 rounded-lg border border-gray-200 space-y-4">
                                 <div className="flex items-start justify-between">
                                     <h3 className="text-lg font-semibold text-gray-700 border-b pb-2 flex-1">Dam Information <span className="text-xs font-normal text-gray-500">(Active Status)</span></h3>
@@ -7887,18 +7846,6 @@ const AnimalForm = ({
                                     {formData.gender === 'Intersex' && <span className="text-xs bg-purple-100 text-purple-700 px-2 py-1 rounded ml-2 whitespace-nowrap">Dam Role</span>}
                                 </div>
                                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                                    <label className="flex items-center space-x-2 cursor-pointer p-3 border rounded-lg bg-white hover:bg-gray-50 transition">
-                                        <input
-                                            type="checkbox"
-                                            name="isDamAnimal"
-                                            checked={formData.isDamAnimal || false}
-                                            onChange={handleChange}
-                                            disabled={formData.isNeutered}
-                                            className="form-checkbox h-5 w-5 text-primary rounded focus:ring-primary"
-                                        />
-                                        <span className="text-sm font-medium text-gray-700">{formData.gender === 'Female' ? 'Breeding Dam' : 'Can Bear (Dam)'}</span>
-                                    </label>
-                                    
                                     <div>
                                         <label className="block text-sm font-medium text-gray-700 mb-2">Dam Fertility Status <span className="text-xs text-gray-500 font-normal">(Egg/Gestation)</span></label>
                                         <select name="damFertilityStatus" value={formData.damFertilityStatus || formData.fertilityStatus} onChange={(e) => handleChange({target: {name: 'damFertilityStatus', value: e.target.value}})} 
