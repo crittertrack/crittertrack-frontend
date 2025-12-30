@@ -1899,8 +1899,8 @@ const ViewOnlyAnimalDetail = ({ animal, onClose, API_BASE_URL, onViewProfile }) 
     const imgSrc = animal.imageUrl || animal.photoUrl || null;
     const birthDate = animal.birthDate ? new Date(animal.birthDate).toLocaleDateString() : 'Unknown';
 
-    // Only show remarks and genetic code if owner's privacy settings allow AND data exists
-    const showRemarks = ownerPrivacySettings?.showRemarksPublic && animal.remarks;
+    // Only show remarks and genetic code if privacy settings allow AND data exists
+    const showRemarks = animal.sectionPrivacy?.records !== false && animal.remarks;
     const showGeneticCode = ownerPrivacySettings?.showGeneticCodePublic && animal.geneticCode;
     
     console.log('Animal data:', { 
