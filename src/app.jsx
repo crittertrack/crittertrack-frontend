@@ -13354,7 +13354,7 @@ const App = () => {
                                         {detailViewTab === 1 && (
                                             <div className="space-y-6">
                                                 {/* Main Card - Two Column Layout */}
-                                                <div className="bg-white border-2 border-gray-300 rounded-lg overflow-hidden">
+                                                <div className="bg-white border-2 border-gray-300 rounded-lg overflow-hidden relative">
                                                     {/* Public Profile Toggle - Top Right */}
                                                     <div className="absolute top-4 right-4 z-10">
                                                         <button
