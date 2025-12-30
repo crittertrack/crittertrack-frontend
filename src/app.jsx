@@ -13517,7 +13517,52 @@ const App = () => {
                                                         }
                                                     }
                                                     
-                                                    return growthRecords && growthRecords.length > 1 && (() => {
+                                                    // Show chart if there are any growth records
+                                                    if (!growthRecords || growthRecords.length === 0) return null;
+                                                    
+                                                    // If only 1 entry, show empty chart placeholder
+                                                    if (growthRecords.length < 2) {
+                                                        return (
+                                                            <div className="bg-gray-50 p-4 rounded-lg border border-gray-200">
+                                                                <h3 className="text-lg font-semibold text-gray-700 mb-3">Growth Curve (Weight)</h3>
+                                                                <svg width="100%" height="350" viewBox="0 0 500 300" style={{ maxWidth: '100%' }} preserveAspectRatio="xMidYMid meet">
+                                                                    {/* Grid lines */}
+                                                                    {[0, 0.25, 0.5, 0.75, 1].map((ratio, i) => {
+                                                                        const y = 20 + 260 * (1 - ratio);
+                                                                        return (
+                                                                            <g key={`grid-${i}`}>
+                                                                                <line x1={70} y1={y} x2={470} y2={y} stroke="#e5e7eb" strokeWidth="1" strokeDasharray="4" />
+                                                                                <text x={58} y={y} textAnchor="end" dy="0.3em" fontSize="11" fill="#999">—</text>
+                                                                            </g>
+                                                                        );
+                                                                    })}
+                                                                    
+                                                                    {/* Axes */}
+                                                                    <line x1={70} y1={20} x2={70} y2={280} stroke="#333" strokeWidth="2" />
+                                                                    <line x1={70} y1={280} x2={470} y2={280} stroke="#333" strokeWidth="2" />
+                                                                    
+                                                                    {/* Y-axis label */}
+                                                                    <text x={20} y={150} textAnchor="middle" fontSize="12" fill="#999" fontWeight="600" transform="rotate(-90 20 150)">
+                                                                        Weight ({animalToView.measurementUnits?.weight || 'g'})
+                                                                    </text>
+                                                                    
+                                                                    {/* X-axis label */}
+                                                                    <text x={270} y={295} textAnchor="middle" fontSize="12" fill="#999" fontWeight="600">
+                                                                        Date
+                                                                    </text>
+                                                                    
+                                                                    {/* Empty state message */}
+                                                                    <text x={270} y={150} textAnchor="middle" fontSize="14" fill="#999">
+                                                                        Add more entries to see growth chart
+                                                                    </text>
+                                                                </svg>
+                                                                <p className="text-xs text-gray-500 mt-2">Growth curve will appear once you have 2 or more measurement entries.</p>
+                                                            </div>
+                                                        );
+                                                    }
+                                                    
+                                                    // Full interactive chart with 2+ entries
+                                                    return (() => {
                                                         const sorted = [...growthRecords].sort((a, b) => new Date(a.date) - new Date(b.date));
                                                         const weights = sorted.map(r => parseFloat(r.weight) || 0).filter(w => w > 0);
                                                         
