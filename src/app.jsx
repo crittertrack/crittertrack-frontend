@@ -7763,7 +7763,7 @@ const AnimalForm = ({
                                     </label>
                                 )}
 
-                                {formData.gender === 'Male' && (
+                                {formData.gender === 'Male' && !formData.isNeutered && (
                                     <label className="flex items-center space-x-2 cursor-pointer p-3 border rounded-lg bg-white hover:bg-gray-50 transition">
                                         <input
                                             type="checkbox"
@@ -7777,7 +7777,7 @@ const AnimalForm = ({
                                     </label>
                                 )}
 
-                                {formData.gender === 'Female' && (
+                                {formData.gender === 'Female' && !formData.isNeutered && (
                                     <label className="flex items-center space-x-2 cursor-pointer p-3 border rounded-lg bg-white hover:bg-gray-50 transition">
                                         <input
                                             type="checkbox"
@@ -7791,7 +7791,7 @@ const AnimalForm = ({
                                     </label>
                                 )}
 
-                                {(formData.gender === 'Intersex' || formData.gender === 'Unknown') && (
+                                {(formData.gender === 'Intersex' || formData.gender === 'Unknown') && !formData.isNeutered && (
                                     <>
                                         <label className="flex items-center space-x-2 cursor-pointer p-3 border rounded-lg bg-white hover:bg-gray-50 transition">
                                             <input
