@@ -2476,6 +2476,19 @@ const ViewOnlyAnimalDetail = ({ animal, onClose, API_BASE_URL, onViewProfile }) 
                                                 </ul>
                                             </div>
                                         )}
+                                        {animal.vetVisits && (
+                                            <div>
+                                                <strong className="text-sm">Veterinary Visits:</strong>
+                                                <ul className="text-sm mt-1 list-disc list-inside space-y-1">
+                                                    {parseHealthRecords(animal.vetVisits).map((visit, idx) => (
+                                                        <li key={idx} className="text-gray-700">
+                                                            {visit.date && `${new Date(visit.date).toLocaleDateString()}: `}{visit.reason}
+                                                            {visit.notes && <span className="text-gray-600"> - {visit.notes}</span>}
+                                                        </li>
+                                                    ))}
+                                                </ul>
+                                            </div>
+                                        )}
                                         {animal.primaryVet && (
                                             <div>
                                                 <strong className="text-sm">Primary Veterinarian:</strong>
@@ -5789,6 +5802,25 @@ const AnimalForm = ({
         notes: ''
     });
     
+    const [vetVisitsArray, setVetVisitsArray] = useState(() => {
+        const data = animalToEdit?.vetVisits;
+        if (!data) return [];
+        if (typeof data === 'string') {
+            try { 
+                const parsed = JSON.parse(data);
+                return parsed;
+            } catch { 
+                return []; 
+            }
+        }
+        return Array.isArray(data) ? data : [];
+    });
+    const [newVetVisit, setNewVetVisit] = useState({
+        date: new Date().toISOString().substring(0, 10),
+        reason: '',
+        notes: ''
+    });
+    
     const [medicalProcedureRecords, setMedicalProcedureRecords] = useState(() => {
         // Parse from database field 'medicalProcedures'
         const data = animalToEdit?.medicalProcedures;
@@ -6241,6 +6273,21 @@ const AnimalForm = ({
         setMedicationsArray([...medicationsArray, record]);
         setNewMedication({ name: '', notes: '' });
     };
+    
+    const addVetVisit = () => {
+        if (!newVetVisit.date || !newVetVisit.reason) {
+            showModalMessage('Missing Data', 'Please enter at least a date and visit reason.');
+            return;
+        }
+        const record = {
+            id: Date.now().toString(),
+            date: newVetVisit.date,
+            reason: newVetVisit.reason,
+            notes: newVetVisit.notes || ''
+        };
+        setVetVisitsArray([...vetVisitsArray, record]);
+        setNewVetVisit({ date: new Date().toISOString().substring(0, 10), reason: '', notes: '' });
+    };
 
     const addMedicalProcedure = () => {
         if (!newProcedure.date || !newProcedure.name) {
@@ -6387,6 +6434,7 @@ const AnimalForm = ({
             payloadToSave.medicalConditions = medicalConditionsArray.length > 0 ? JSON.stringify(medicalConditionsArray) : null;
             payloadToSave.allergies = allergiesArray.length > 0 ? JSON.stringify(allergiesArray) : null;
             payloadToSave.medications = medicationsArray.length > 0 ? JSON.stringify(medicationsArray) : null;
+            payloadToSave.vetVisits = vetVisitsArray.length > 0 ? JSON.stringify(vetVisitsArray) : null;
             payloadToSave.medicalProcedures = medicalProcedureRecords.length > 0 ? JSON.stringify(medicalProcedureRecords) : null;
             payloadToSave.medicalProcedureRecords = medicalProcedureRecords; // Keep for backward compat
             payloadToSave.labResults = labResultRecords.length > 0 ? JSON.stringify(labResultRecords) : null;
@@ -7991,11 +8039,45 @@ const AnimalForm = ({
                         <div className="bg-gray-50 p-4 rounded-lg border border-gray-200 space-y-4">
                             <h3 className="text-lg font-semibold text-gray-700 border-b pb-2">Veterinary Care</h3>
                             <div className="space-y-4">
-                                <div>
-                                    <label className="block text-sm font-medium text-gray-700 mb-2">Veterinary Visits</label>
-                                    <textarea name="vetVisits" value={formData.vetVisits} onChange={handleChange} rows="2"
-                                        className="block w-full p-2 border border-gray-300 rounded-md shadow-sm focus:ring-primary focus:border-primary" 
-                                        placeholder="e.g., Annual checkup (2024-11-20), Emergency visit (2024-12-05)" />
+                                {/* Veterinary Visits */}
+                                <div className="space-y-3">
+                                    <h4 className="text-sm font-semibold text-gray-700">Veterinary Visits</h4>
+                                    <div className="bg-white p-3 rounded-lg border border-gray-200 space-y-3">
+                                        <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
+                                            <div>
+                                                <label className="block text-xs font-medium text-gray-700">Date</label>
+                                                <input type="date" value={newVetVisit.date} onChange={(e) => setNewVetVisit({...newVetVisit, date: e.target.value})}
+                                                    className="mt-1 block w-full p-2 text-sm border border-gray-300 rounded-md shadow-sm focus:ring-primary focus:border-primary" />
+                                            </div>
+                                            <div>
+                                                <label className="block text-xs font-medium text-gray-700">Visit Reason</label>
+                                                <input type="text" value={newVetVisit.reason} onChange={(e) => setNewVetVisit({...newVetVisit, reason: e.target.value})}
+                                                    placeholder="e.g., Annual checkup, Emergency" className="mt-1 block w-full p-2 text-sm border border-gray-300 rounded-md shadow-sm focus:ring-primary focus:border-primary" />
+                                            </div>
+                                            <div>
+                                                <label className="block text-xs font-medium text-gray-700">Notes (optional)</label>
+                                                <input type="text" value={newVetVisit.notes} onChange={(e) => setNewVetVisit({...newVetVisit, notes: e.target.value})}
+                                                    placeholder="e.g., Vaccines given, Diagnosis" className="mt-1 block w-full p-2 text-sm border border-gray-300 rounded-md shadow-sm focus:ring-primary focus:border-primary" />
+                                            </div>
+                                        </div>
+                                        <button type="button" onClick={addVetVisit} className="w-full px-4 py-2 bg-blue-500 text-white rounded-md hover:bg-blue-600 text-sm font-medium">
+                                            Add Veterinary Visit
+                                        </button>
+                                    </div>
+                                    {vetVisitsArray.length > 0 && (
+                                        <div className="space-y-2 bg-white p-3 rounded-lg border border-gray-200 max-h-48 overflow-y-auto">
+                                            {vetVisitsArray.map((record) => (
+                                                <div key={record.id} className="flex items-center justify-between p-2 bg-gray-50 rounded border border-gray-100 text-sm">
+                                                    <div className="flex-1">
+                                                        <strong>{record.date}:</strong> {record.reason}
+                                                        {record.notes && <span className="text-xs text-gray-500 ml-2">({record.notes})</span>}
+                                                    </div>
+                                                    <button type="button" onClick={() => setVetVisitsArray(vetVisitsArray.filter(r => r.id !== record.id))}
+                                                        className="text-red-500 hover:text-red-700 p-1" title="Delete record">✕</button>
+                                                </div>
+                                            ))}
+                                        </div>
+                                    )}
                                 </div>
                                 
                                 <div>
