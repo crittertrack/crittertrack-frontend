@@ -7736,28 +7736,26 @@ const AnimalForm = ({
                                     <span className="text-sm font-medium text-gray-700">Infertile</span>
                                 </label>
 
-                                {(formData.gender === 'Female' || formData.gender === 'Intersex' || formData.gender === 'Unknown') && (
+                                {(formData.gender === 'Female' || formData.gender === 'Intersex' || formData.gender === 'Unknown') && !formData.isNeutered && !formData.isInfertile && (
                                     <label className="flex items-center space-x-2 cursor-pointer p-3 border rounded-lg bg-white hover:bg-gray-50 transition">
                                         <input
                                             type="checkbox"
                                             name="isPregnant"
                                             checked={formData.isPregnant}
                                             onChange={handleChange}
-                                            disabled={formData.isNeutered}
                                             className="form-checkbox h-5 w-5 text-primary rounded focus:ring-primary"
                                         />
                                         <span className="text-sm font-medium text-gray-700">Pregnant</span>
                                     </label>
                                 )}
 
-                                {(formData.gender === 'Female' || formData.gender === 'Intersex' || formData.gender === 'Unknown') && (
+                                {(formData.gender === 'Female' || formData.gender === 'Intersex' || formData.gender === 'Unknown') && !formData.isNeutered && !formData.isInfertile && (
                                     <label className="flex items-center space-x-2 cursor-pointer p-3 border rounded-lg bg-white hover:bg-gray-50 transition">
                                         <input
                                             type="checkbox"
                                             name="isNursing"
                                             checked={formData.isNursing}
                                             onChange={handleChange}
-                                            disabled={formData.isNeutered}
                                             className="form-checkbox h-5 w-5 text-primary rounded focus:ring-primary"
                                         />
                                         <span className="text-sm font-medium text-gray-700">Nursing</span>
