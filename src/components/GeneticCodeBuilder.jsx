@@ -267,14 +267,15 @@ const GeneticCodeBuilder = ({ species, gender, value, onChange, onOpenCommunityF
             <div className="flex-1 p-2 border border-gray-300 rounded bg-gray-50 font-mono text-sm min-h-[42px] flex items-center">
               {value || <span className="text-gray-400">Not set</span>}
             </div>
-            <button
-              type="button"
-              data-tutorial-target="genetic-code-add-btn"
-              onClick={() => setShowBuilderModal(true)}
-              className="px-4 py-2 bg-accent hover:bg-accent/90 text-white rounded font-medium transition whitespace-nowrap"
-            >
+            <div data-tutorial-target="genetic-code-add-btn">
+              <button
+                type="button"
+                onClick={() => setShowBuilderModal(true)}
+                className="px-4 py-2 bg-accent hover:bg-accent/90 text-white rounded font-medium transition whitespace-nowrap"
+              >
               {value ? 'Edit Genes' : 'Add'}
             </button>
+            </div>
           </div>
           
           <p className="text-xs text-gray-500">
