@@ -5638,7 +5638,7 @@ const AnimalForm = ({
             prefix: '',
             suffix: '',
             name: '',
-            gender: GENDER_OPTIONS[0],
+            gender: 'Unknown',
             birthDate: '', 
             deceasedDate: '',
             status: 'Pet',
@@ -7699,8 +7699,8 @@ const AnimalForm = ({
                             </div>
                         </div>
 
-                        {/* Estrus & Cycle (Females only) */}
-                        {formData.gender === 'Female' && !formData.isNeutered && (
+                        {/* Estrus & Cycle (Females and non-binary animals) */}
+                        {(formData.gender === 'Female' || formData.gender === 'Intersex' || formData.gender === 'Unknown') && !formData.isNeutered && (
                             <div className="bg-gray-50 p-4 rounded-lg border border-gray-200 space-y-4">
                                 <h3 className="text-lg font-semibold text-gray-700 border-b pb-2">Estrus & Cycle</h3>
                                 <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
@@ -7738,7 +7738,7 @@ const AnimalForm = ({
                                             placeholder="e.g., 2025-01-15, 2025-01-16" />
                                     </div>
                                     
-                                    {formData.gender === 'Female' && (
+                                    {(formData.gender === 'Female' || formData.gender === 'Intersex' || formData.gender === 'Unknown') && (
                                         <>
                                             <label className="flex items-center space-x-2 cursor-pointer p-3 border rounded-lg bg-white hover:bg-gray-50 transition">
                                                 <input
@@ -7772,7 +7772,7 @@ const AnimalForm = ({
                         )}
 
                         {/* Nursing */}
-                        {formData.gender === 'Female' && !formData.isNeutered && (
+                        {(formData.gender === 'Female' || formData.gender === 'Intersex' || formData.gender === 'Unknown') && !formData.isNeutered && (
                             <div className="bg-gray-50 p-4 rounded-lg border border-gray-200 space-y-4">
                                 <h3 className="text-lg font-semibold text-gray-700 border-b pb-2">Nursing</h3>
                                 <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
