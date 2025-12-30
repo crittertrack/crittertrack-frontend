@@ -3022,6 +3022,8 @@ const LitterManagement = ({ authToken, API_BASE_URL, userProfile, showModalMessa
         damId_public: '',
         otherParent1Id_public: '',
         otherParent1Role: '',
+        otherParent2Id_public: '',
+        otherParent2Role: '',
         pairingDate: '',
         birthDate: '',
         maleCount: '',
@@ -3270,8 +3272,10 @@ const LitterManagement = ({ authToken, API_BASE_URL, userProfile, showModalMessa
             setFormData({...formData, sireId_public: animal.id_public});
         } else if (modalTarget === 'dam-litter') {
             setFormData({...formData, damId_public: animal.id_public});
-        } else if (modalTarget === 'other-parent-litter') {
+        } else if (modalTarget === 'other-parent1-litter') {
             setFormData({...formData, otherParent1Id_public: animal.id_public});
+        } else if (modalTarget === 'other-parent2-litter') {
+            setFormData({...formData, otherParent2Id_public: animal.id_public});
         }
         setModalTarget(null);
     };
@@ -3280,9 +3284,13 @@ const LitterManagement = ({ authToken, API_BASE_URL, userProfile, showModalMessa
     const handleSubmit = async (e) => {
         e.preventDefault();
         
-        // Check if we have both parents (either direct Sire/Dam or via Other Parent role)
-        const hasSire = formData.sireId_public || (formData.otherParent1Id_public && formData.otherParent1Role === 'Sire');
-        const hasDam = formData.damId_public || (formData.otherParent1Id_public && formData.otherParent1Role === 'Dam');
+        // Check if we have both parents (either direct Sire/Dam or via Other Parent roles)
+        const hasSire = formData.sireId_public || 
+                       (formData.otherParent1Id_public && formData.otherParent1Role === 'Sire') ||
+                       (formData.otherParent2Id_public && formData.otherParent2Role === 'Sire');
+        const hasDam = formData.damId_public || 
+                      (formData.otherParent1Id_public && formData.otherParent1Role === 'Dam') ||
+                      (formData.otherParent2Id_public && formData.otherParent2Role === 'Dam');
         
         if (!hasSire || !hasDam) {
             showModalMessage('Error', 'Please select both a Sire and a Dam');
@@ -3290,14 +3298,22 @@ const LitterManagement = ({ authToken, API_BASE_URL, userProfile, showModalMessa
         }
 
         try {
-            // Get parent details - handle Other Parent filling either role
+            // Get parent details - handle Other Parents filling either role
             let sire = myAnimals.find(a => a.id_public === formData.sireId_public);
             let dam = myAnimals.find(a => a.id_public === formData.damId_public);
             
+            // Check otherParent1 for roles
             if (formData.otherParent1Id_public) {
                 const otherParent = myAnimals.find(a => a.id_public === formData.otherParent1Id_public);
                 if (formData.otherParent1Role === 'Sire' && !sire) sire = otherParent;
                 if (formData.otherParent1Role === 'Dam' && !dam) dam = otherParent;
+            }
+            
+            // Check otherParent2 for roles
+            if (formData.otherParent2Id_public) {
+                const otherParent = myAnimals.find(a => a.id_public === formData.otherParent2Id_public);
+                if (formData.otherParent2Role === 'Sire' && !sire) sire = otherParent;
+                if (formData.otherParent2Role === 'Dam' && !dam) dam = otherParent;
             }
 
             if (!sire || !dam) {
@@ -3342,6 +3358,8 @@ const LitterManagement = ({ authToken, API_BASE_URL, userProfile, showModalMessa
                 damId_public: formData.damId_public,
                 otherParent1Id_public: formData.otherParent1Id_public || null,
                 otherParent1Role: formData.otherParent1Role || null,
+                otherParent2Id_public: formData.otherParent2Id_public || null,
+                otherParent2Role: formData.otherParent2Role || null,
                 pairingDate: formData.pairingDate || null,
                 birthDate: formData.birthDate || null,
                 numberBorn: totalCount > 0 ? totalCount : (formData.linkedOffspringIds?.length || 0),
@@ -3640,6 +3658,8 @@ const LitterManagement = ({ authToken, API_BASE_URL, userProfile, showModalMessa
             damId_public: litter.damId_public,
             otherParent1Id_public: litter.otherParent1Id_public || '',
             otherParent1Role: litter.otherParent1Role || '',
+            otherParent2Id_public: litter.otherParent2Id_public || '',
+            otherParent2Role: litter.otherParent2Role || '',
             pairingDate: litter.pairingDate || '',
             birthDate: litter.birthDate || '',
             maleCount: litter.maleCount || '',
@@ -3654,9 +3674,13 @@ const LitterManagement = ({ authToken, API_BASE_URL, userProfile, showModalMessa
     const handleUpdateLitter = async (e) => {
         e.preventDefault();
         
-        // Check if we have both parents (either direct Sire/Dam or via Other Parent role)
-        const hasSire = formData.sireId_public || (formData.otherParent1Id_public && formData.otherParent1Role === 'Sire');
-        const hasDam = formData.damId_public || (formData.otherParent1Id_public && formData.otherParent1Role === 'Dam');
+        // Check if we have both parents (either direct Sire/Dam or via Other Parent roles)
+        const hasSire = formData.sireId_public || 
+                       (formData.otherParent1Id_public && formData.otherParent1Role === 'Sire') ||
+                       (formData.otherParent2Id_public && formData.otherParent2Role === 'Sire');
+        const hasDam = formData.damId_public || 
+                      (formData.otherParent1Id_public && formData.otherParent1Role === 'Dam') ||
+                      (formData.otherParent2Id_public && formData.otherParent2Role === 'Dam');
         
         if (!hasSire || !hasDam) {
             showModalMessage('Error', 'Please select both a Sire and a Dam');
@@ -3664,14 +3688,22 @@ const LitterManagement = ({ authToken, API_BASE_URL, userProfile, showModalMessa
         }
 
         try {
-            // Get parent details - handle Other Parent filling either role
+            // Get parent details - handle Other Parents filling either role
             let sire = myAnimals.find(a => a.id_public === formData.sireId_public);
             let dam = myAnimals.find(a => a.id_public === formData.damId_public);
             
+            // Check otherParent1 for roles
             if (formData.otherParent1Id_public) {
                 const otherParent = myAnimals.find(a => a.id_public === formData.otherParent1Id_public);
                 if (formData.otherParent1Role === 'Sire' && !sire) sire = otherParent;
                 if (formData.otherParent1Role === 'Dam' && !dam) dam = otherParent;
+            }
+            
+            // Check otherParent2 for roles
+            if (formData.otherParent2Id_public) {
+                const otherParent = myAnimals.find(a => a.id_public === formData.otherParent2Id_public);
+                if (formData.otherParent2Role === 'Sire' && !sire) sire = otherParent;
+                if (formData.otherParent2Role === 'Dam' && !dam) dam = otherParent;
             }
 
             // Create offspring animals if requested
@@ -4070,11 +4102,11 @@ const LitterManagement = ({ authToken, API_BASE_URL, userProfile, showModalMessa
                         {/* Other Parent (Optional) */}
                         <div>
                             <label className="block text-sm font-medium text-gray-700 mb-1">
-                                Other Parent (Optional - Intersex/Unknown)
+                                Other Parent 1 (Optional - Intersex/Unknown)
                             </label>
                             <button
                                 type="button"
-                                onClick={() => setModalTarget('other-parent-litter')}
+                                onClick={() => setModalTarget('other-parent1-litter')}
                                 className="w-full px-3 py-2 border border-gray-300 rounded-lg bg-white hover:bg-gray-50 text-left transition focus:ring-2 focus:ring-primary focus:border-transparent"
                             >
                                 {formData.otherParent1Id_public ? (
@@ -4087,13 +4119,49 @@ const LitterManagement = ({ authToken, API_BASE_URL, userProfile, showModalMessa
                                         </div>
                                     </div>
                                 ) : (
-                                    <div className="text-gray-400">Select Other Parent...</div>
+                                    <div className="text-gray-400">Select Other Parent 1...</div>
                                 )}
                             </button>
                             {formData.otherParent1Id_public && (
                                 <select
                                     value={formData.otherParent1Role}
                                     onChange={(e) => setFormData({...formData, otherParent1Role: e.target.value})}
+                                    className="w-full px-3 py-2 border border-gray-300 rounded-lg mt-2 focus:ring-2 focus:ring-primary focus:border-transparent"
+                                >
+                                    <option value="">Select Role...</option>
+                                    <option value="Sire" disabled={!!formData.sireId_public}>Sire{formData.sireId_public ? ' (Already selected)' : ''}</option>
+                                    <option value="Dam" disabled={!!formData.damId_public}>Dam{formData.damId_public ? ' (Already selected)' : ''}</option>
+                                </select>
+                            )}
+                        </div>
+
+                        {/* Other Parent 2 (Optional) */}
+                        <div>
+                            <label className="block text-sm font-medium text-gray-700 mb-1">
+                                Other Parent 2 (Optional - Intersex/Unknown)
+                            </label>
+                            <button
+                                type="button"
+                                onClick={() => setModalTarget('other-parent2-litter')}
+                                className="w-full px-3 py-2 border border-gray-300 rounded-lg bg-white hover:bg-gray-50 text-left transition focus:ring-2 focus:ring-primary focus:border-transparent"
+                            >
+                                {formData.otherParent2Id_public ? (
+                                    <div>
+                                        <div className="font-medium">
+                                            {myAnimals.find(a => a.id_public === formData.otherParent2Id_public)?.name || 'Unknown'} ({formData.otherParent2Role})
+                                        </div>
+                                        <div className="text-xs text-gray-500">
+                                            {formData.otherParent2Id_public}
+                                        </div>
+                                    </div>
+                                ) : (
+                                    <div className="text-gray-400">Select Other Parent 2...</div>
+                                )}
+                            </button>
+                            {formData.otherParent2Id_public && (
+                                <select
+                                    value={formData.otherParent2Role}
+                                    onChange={(e) => setFormData({...formData, otherParent2Role: e.target.value})}
                                     className="w-full px-3 py-2 border border-gray-300 rounded-lg mt-2 focus:ring-2 focus:ring-primary focus:border-transparent"
                                 >
                                     <option value="">Select Role...</option>
@@ -4788,10 +4856,27 @@ const LitterManagement = ({ authToken, API_BASE_URL, userProfile, showModalMessa
                 />
             )}
 
-            {/* Other Parent Modal */}
-            {modalTarget === 'other-parent-litter' && (
+            {/* Other Parent 1 Modal */}
+            {modalTarget === 'other-parent1-litter' && (
                 <LocalAnimalSearchModal
-                    title="Select Other Parent"
+                    title="Select Other Parent 1"
+                    onSelect={handleSelectOtherParentForLitter}
+                    onClose={() => setModalTarget(null)}
+                    authToken={authToken}
+                    showModalMessage={showModalMessage}
+                    API_BASE_URL={API_BASE_URL}
+                    X={X}
+                    Search={Search}
+                    Loader2={Loader2}
+                    LoadingSpinner={LoadingSpinner}
+                    genderFilter={['Intersex', 'Unknown']}
+                />
+            )}
+
+            {/* Other Parent 2 Modal */}
+            {modalTarget === 'other-parent2-litter' && (
+                <LocalAnimalSearchModal
+                    title="Select Other Parent 2"
                     onSelect={handleSelectOtherParentForLitter}
                     onClose={() => setModalTarget(null)}
                     authToken={authToken}
