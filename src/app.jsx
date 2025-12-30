@@ -6724,7 +6724,6 @@ const AnimalForm = ({
                         <div>
                             <AnimalImageUpload 
                                 imageUrl={animalImagePreview} 
-                                onImageClick={() => animalImagePreview && setEnlargedImage(animalImagePreview)}
                                 onFileChange={async (e) => {
                                     if (e.target.files && e.target.files[0]) {
                                         const original = e.target.files[0];
