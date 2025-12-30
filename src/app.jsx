@@ -2282,6 +2282,13 @@ const ViewOnlyAnimalDetail = ({ animal, onClose, API_BASE_URL, onViewProfile }) 
                     {/* Tab 3: Lineage & Origin */}
                     {detailViewTab === 3 && (
                         <div className="space-y-4">
+                            {/* Origin Section */}
+                            {animal.origin && (
+                                <div className="bg-gray-50 p-4 rounded-lg border border-gray-200">
+                                    <h3 className="text-lg font-semibold text-gray-700 border-b pb-2 mb-3">Origin</h3>
+                                    <p className="text-gray-700">{animal.origin}</p>
+                                </div>
+                            )}
                             {/* Parents Section */}
                             {(animal.fatherId_public || animal.sireId_public || animal.motherId_public || animal.damId_public) && (
                                 <div className="bg-gray-50 p-4 rounded-lg border border-gray-200">
@@ -2308,13 +2315,6 @@ const ViewOnlyAnimalDetail = ({ animal, onClose, API_BASE_URL, onViewProfile }) 
                                             }}
                                         />
                                     </div>
-                                </div>
-                            )}
-                            {/* Origin Section */}
-                            {animal.origin && (
-                                <div className="bg-gray-50 p-4 rounded-lg border border-gray-200">
-                                    <h3 className="text-lg font-semibold text-gray-700 border-b pb-2 mb-3">Origin</h3>
-                                    <p className="text-gray-700">{animal.origin}</p>
                                 </div>
                             )}
                             {/* Offspring Section */}
