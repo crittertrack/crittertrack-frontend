@@ -1209,7 +1209,11 @@ const LocalAnimalSearchModal = ({ title, currentId, onSelect, onClose, authToken
             
             // Apply gender filter if specified
             if (genderFilter) {
-                filteredLocal = filteredLocal.filter(a => a.gender === genderFilter);
+                if (Array.isArray(genderFilter)) {
+                    filteredLocal = filteredLocal.filter(a => genderFilter.includes(a.gender));
+                } else {
+                    filteredLocal = filteredLocal.filter(a => a.gender === genderFilter);
+                }
             }
             
             setLocalAnimals(filteredLocal);
@@ -4812,6 +4816,7 @@ const LitterManagement = ({ authToken, API_BASE_URL, userProfile, showModalMessa
                     Search={Search}
                     Loader2={Loader2}
                     LoadingSpinner={LoadingSpinner}
+                    genderFilter={['Intersex', 'Unknown']}
                 />
             )}
         </div>
