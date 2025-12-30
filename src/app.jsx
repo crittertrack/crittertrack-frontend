@@ -1818,7 +1818,6 @@ const PublicProfileView = ({ profile, onBack, onViewAnimal, API_BASE_URL, onStar
 // View-Only Animal Detail Modal
 const ViewOnlyAnimalDetail = ({ animal, onClose, API_BASE_URL, onViewProfile }) => {
     const [breederInfo, setBreederInfo] = useState(null);
-    const [ownerPrivacySettings, setOwnerPrivacySettings] = useState(null);
     const [showPedigree, setShowPedigree] = useState(false);
     const [copySuccess, setCopySuccess] = useState(false);
     const [detailViewTab, setDetailViewTab] = useState(1);
@@ -1866,48 +1865,18 @@ const ViewOnlyAnimalDetail = ({ animal, onClose, API_BASE_URL, onViewProfile }) 
         fetchBreeder();
     }, [animal?.breederId_public, API_BASE_URL]);
     
-    // Fetch owner's privacy settings
-    React.useEffect(() => {
-        const fetchOwnerPrivacy = async () => {
-            if (animal?.ownerId_public) {
-                try {
-                    const response = await axios.get(
-                        `${API_BASE_URL}/public/profiles/search?query=${animal.ownerId_public}&limit=1`
-                    );
-                    console.log('Owner privacy response:', response.data);
-                    if (response.data && response.data.length > 0) {
-                        const settings = {
-                            showGeneticCodePublic: response.data[0].showGeneticCodePublic ?? false,
-                            showRemarksPublic: response.data[0].showRemarksPublic ?? false
-                        };
-                        console.log('Owner privacy settings:', settings);
-                        setOwnerPrivacySettings(settings);
-                    }
-                } catch (error) {
-                    console.error('Failed to fetch owner privacy settings:', error);
-                    setOwnerPrivacySettings({ showGeneticCodePublic: false, showRemarksPublic: false });
-                }
-            } else {
-                setOwnerPrivacySettings({ showGeneticCodePublic: false, showRemarksPublic: false });
-            }
-        };
-        fetchOwnerPrivacy();
-    }, [animal?.ownerId_public, API_BASE_URL]);
-    
     if (!animal) return null;
 
     const imgSrc = animal.imageUrl || animal.photoUrl || null;
     const birthDate = animal.birthDate ? new Date(animal.birthDate).toLocaleDateString() : 'Unknown';
 
-    // Only show remarks and genetic code if privacy settings allow AND data exists
+    // Only show remarks and genetic code if section privacy allows AND data exists
     const showRemarks = animal.sectionPrivacy?.records !== false && animal.remarks;
-    const showGeneticCode = ownerPrivacySettings?.showGeneticCodePublic && animal.geneticCode;
+    const showGeneticCode = animal.sectionPrivacy?.identification !== false && animal.geneticCode;
     
     console.log('Animal data:', { 
-        ownerId_public: animal.ownerId_public,
         hasRemarks: !!animal.remarks, 
         hasGeneticCode: !!animal.geneticCode,
-        ownerPrivacySettings,
         showRemarks,
         showGeneticCode
     });
