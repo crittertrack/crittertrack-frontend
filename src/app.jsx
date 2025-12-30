@@ -7133,9 +7133,27 @@ const AnimalForm = ({
                                 const graphWidth = width - margin.left - margin.right;
                                 const graphHeight = height - margin.top - margin.bottom;
                                 
+                                // Calculate length range for right Y-axis
+                                const lengths = sorted
+                                    .filter(record => record.length && !isNaN(parseFloat(record.length)))
+                                    .map(record => parseFloat(record.length));
+                                
+                                const hasLengthData = lengths.length >= 2;
+                                
+                                let minLength, maxLength, lengthRange, lengthChartMin, lengthChartMax;
+                                if (hasLengthData) {
+                                    minLength = Math.min(...lengths);
+                                    maxLength = Math.max(...lengths);
+                                    const lengthPadding = (maxLength - minLength) * 0.1 || 1;
+                                    lengthChartMin = Math.max(0, minLength - lengthPadding);
+                                    lengthChartMax = maxLength + lengthPadding;
+                                    lengthRange = lengthChartMax - lengthChartMin;
+                                }
+                                
                                 const points = sorted.map((record, idx) => ({
                                     x: margin.left + (idx / (sorted.length - 1)) * graphWidth,
                                     y: margin.top + graphHeight - ((parseFloat(record.weight) - chartMin) / range) * graphHeight,
+                                    yLength: hasLengthData && record.length ? margin.top + graphHeight - ((parseFloat(record.length) - lengthChartMin) / lengthRange) * graphHeight : null,
                                     weight: record.weight,
                                     length: record.length,
                                     bcs: record.bcs,
@@ -7144,10 +7162,25 @@ const AnimalForm = ({
                                 }));
                                 
                                 const pathData = points.map((p, i) => `${i === 0 ? 'M' : 'L'} ${p.x} ${p.y}`).join(' ');
+                                const pathDataLength = hasLengthData ? points.filter(p => p.yLength !== null).map((p, i, arr) => `${i === 0 ? 'M' : 'L'} ${p.x} ${p.yLength}`).join(' ') : '';
                                 
                                 return (
                                     <div className="bg-white p-4 rounded-lg border border-gray-200">
-                                        <h4 className="text-sm font-semibold text-gray-700 mb-3">Growth Curve (Weight)</h4>
+                                        <div className="flex items-center justify-between mb-3">
+                                            <h4 className="text-sm font-semibold text-gray-700">Growth Curve (Weight & Length)</h4>
+                                            <div className="flex gap-4 text-xs">
+                                                <div className="flex items-center gap-1">
+                                                    <div className="w-3 h-0.5 bg-blue-500"></div>
+                                                    <span className="text-gray-600">Weight</span>
+                                                </div>
+                                                {hasLengthData && (
+                                                    <div className="flex items-center gap-1">
+                                                        <div className="w-3 h-0.5 bg-orange-500"></div>
+                                                        <span className="text-gray-600">Length</span>
+                                                    </div>
+                                                )}
+                                            </div>
+                                        </div>
                                         <svg width="100%" height="350" viewBox={`0 0 ${width} ${height}`} style={{ maxWidth: '100%' }} preserveAspectRatio="xMidYMid meet">
                                             {/* Grid lines */}
                                             {[0, 0.25, 0.5, 0.75, 1].map((ratio, i) => {
@@ -7157,18 +7190,31 @@ const AnimalForm = ({
                                                     <g key={`grid-${i}`}>
                                                         <line x1={margin.left} y1={y} x2={width - margin.right} y2={y} stroke="#e5e7eb" strokeWidth="1" strokeDasharray="4" />
                                                         <text x={margin.left - 12} y={y} textAnchor="end" dy="0.3em" fontSize="11" fill="#666">{weightLabel}</text>
+                                                        {hasLengthData && (
+                                                            <text x={width - margin.right + 12} y={y} textAnchor="start" dy="0.3em" fontSize="11" fill="#ff8c42">
+                                                                {(lengthChartMin + lengthRange * ratio).toFixed(1)}
+                                                            </text>
+                                                        )}
                                                     </g>
                                                 );
                                             })}
                                             
                                             {/* Axes */}
-                                            <line x1={margin.left} y1={margin.top} x2={margin.left} y2={height - margin.bottom} stroke="#333" strokeWidth="2" />
+                                            <line x1={margin.left} y1={margin.top} x2={margin.left} y2={height - margin.bottom} stroke="#3b82f6" strokeWidth="2" />
                                             <line x1={margin.left} y1={height - margin.bottom} x2={width - margin.right} y2={height - margin.bottom} stroke="#333" strokeWidth="2" />
+                                            {hasLengthData && (
+                                                <line x1={width - margin.right} y1={margin.top} x2={width - margin.right} y2={height - margin.bottom} stroke="#ff8c42" strokeWidth="2" />
+                                            )}
                                             
-                                            {/* Y-axis label */}
-                                            <text x={20} y={margin.top + graphHeight / 2} textAnchor="middle" fontSize="12" fill="#333" fontWeight="600" transform={`rotate(-90 20 ${margin.top + graphHeight / 2})`}>
+                                            {/* Y-axis labels */}
+                                            <text x={20} y={margin.top + graphHeight / 2} textAnchor="middle" fontSize="12" fill="#3b82f6" fontWeight="600" transform={`rotate(-90 20 ${margin.top + graphHeight / 2})`}>
                                                 Weight ({measurementUnits.weight})
                                             </text>
+                                            {hasLengthData && (
+                                                <text x={width - 20} y={margin.top + graphHeight / 2} textAnchor="middle" fontSize="12" fill="#ff8c42" fontWeight="600" transform={`rotate(90 ${width - 20} ${margin.top + graphHeight / 2})`}>
+                                                    Length ({measurementUnits.length})
+                                                </text>
+                                            )}
                                             
                                             {/* X-axis label */}
                                             <text x={margin.left + graphWidth / 2} y={height - 8} textAnchor="middle" fontSize="12" fill="#333" fontWeight="600">
@@ -7184,8 +7230,13 @@ const AnimalForm = ({
                                                 )
                                             ))}
                                             
-                                            {/* Curve */}
+                                            {/* Weight Curve */}
                                             <path d={pathData} fill="none" stroke="#3b82f6" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
+                                            
+                                            {/* Length Curve */}
+                                            {hasLengthData && (
+                                                <path d={pathDataLength} fill="none" stroke="#ff8c42" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
+                                            )}
                                             
                                             {/* Points */}
                                             {points.map((p, i) => {
@@ -7223,7 +7274,7 @@ const AnimalForm = ({
                                                 );
                                             })}
                                         </svg>
-                                        <p className="text-xs text-gray-500 mt-2">Hover over points to see full measurement details including length, BCS, and notes.</p>
+                                        <p className="text-xs text-gray-500 mt-2">Blue axis (left): Weight. {hasLengthData ? 'Orange axis (right): Length. ' : ''}Hover over points to see full measurement details.</p>
                                     </div>
                                 );
                             })()}
