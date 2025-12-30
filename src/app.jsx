@@ -7712,17 +7712,18 @@ const AnimalForm = ({
                                     </span>
                                 </label>
                                 
-                                <label className="flex items-center space-x-2 cursor-pointer p-3 border rounded-lg bg-white hover:bg-gray-50 transition">
-                                    <input
-                                        type="checkbox"
-                                        name="isInMating"
-                                        checked={formData.isInMating}
-                                        onChange={handleChange}
-                                        disabled={formData.isNeutered}
-                                        className="form-checkbox h-5 w-5 text-primary rounded focus:ring-primary"
-                                    />
-                                    <span className="text-sm font-medium text-gray-700">In Mating</span>
-                                </label>
+                                {!formData.isNeutered && !formData.isInfertile && (
+                                    <label className="flex items-center space-x-2 cursor-pointer p-3 border rounded-lg bg-white hover:bg-gray-50 transition">
+                                        <input
+                                            type="checkbox"
+                                            name="isInMating"
+                                            checked={formData.isInMating}
+                                            onChange={handleChange}
+                                            className="form-checkbox h-5 w-5 text-primary rounded focus:ring-primary"
+                                        />
+                                        <span className="text-sm font-medium text-gray-700">In Mating</span>
+                                    </label>
+                                )}
 
                                 <label className="flex items-center space-x-2 cursor-pointer p-3 border rounded-lg bg-white hover:bg-gray-50 transition">
                                     <input
