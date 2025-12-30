@@ -4077,8 +4077,8 @@ const LitterManagement = ({ authToken, API_BASE_URL, userProfile, showModalMessa
                                     className="w-full px-3 py-2 border border-gray-300 rounded-lg mt-2 focus:ring-2 focus:ring-primary focus:border-transparent"
                                 >
                                     <option value="">Select Role...</option>
-                                    <option value="Sire">Sire</option>
-                                    <option value="Dam">Dam</option>
+                                    <option value="Sire" disabled={!!formData.sireId_public}>Sire{formData.sireId_public ? ' (Already selected)' : ''}</option>
+                                    <option value="Dam" disabled={!!formData.damId_public}>Dam{formData.damId_public ? ' (Already selected)' : ''}</option>
                                 </select>
                             )}
                         </div>
