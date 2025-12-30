@@ -7902,10 +7902,10 @@ const AnimalForm = ({
                                     </div>
                                     
                                     <div>
-                                        <label className="block text-sm font-medium text-gray-700 mb-2">Total Offspring Produced</label>
+                                        <label className="block text-sm font-medium text-gray-700 mb-2">Offspring Gestated <span className="text-xs text-gray-500 font-normal">(as Dam)</span></label>
                                         <input type="number" name="offspringCount" value={formData.offspringCount} onChange={handleChange} 
                                             className="block w-full p-2 border border-gray-300 rounded-md shadow-sm focus:ring-primary focus:border-primary" 
-                                            placeholder="Total number of offspring sired/produced" min="0" />
+                                            placeholder="Total number of offspring birthed/gestated" min="0" />
                                     </div>
                                     
                                     <div className="md:col-span-2">
