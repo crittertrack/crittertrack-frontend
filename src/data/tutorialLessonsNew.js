@@ -38,8 +38,7 @@ const GETTING_STARTED_LESSONS = [
       {
         stepNumber: 1,
         title: 'Welcome to Species Selection',
-        content: 'You are now on the species selection screen. This is where you choose what type of animal you\'re creating. Let me walk you through all the features here.',
-        highlightElement: '[data-tutorial-target="species-selector"]',
+        content: 'You are now on the species selection screen. This is where you choose what type of animal you\'re creating. Let me walk you through all the features on this page.',
         tips: [
           'Default species are pre-loaded for you',
           'You can create custom species for your collection',
@@ -49,7 +48,7 @@ const GETTING_STARTED_LESSONS = [
       {
         stepNumber: 2,
         title: 'Default Species',
-        content: 'These are the pre-loaded species available to all CritterTrack users. They include common small animals like Fancy Mice, Fancy Rats, and various Hamster species. For this tutorial, we\'ll use one of these.',
+        content: 'These are the pre-loaded species available to all CritterTrack users. They include common small animals like Fancy Mice, Fancy Rats, and various Hamster species. We\'ll use Fancy Mouse later on. First, let me show you a few other parts of this page.',
         highlightElement: '[data-tutorial-target="default-species-section"]',
         tips: [
           'Default species cannot be deleted',
@@ -59,7 +58,7 @@ const GETTING_STARTED_LESSONS = [
       },
       {
         stepNumber: 3,
-        title: 'Search & Categories',
+        title: 'Species Search Bar',
         content: 'Use the search bar to find species by name. You can also filter by category (Rodent, Mammal, Reptile, etc.) to narrow down your options.',
         highlightElement: '[data-tutorial-target="species-search-section"]',
         tips: [
@@ -70,8 +69,8 @@ const GETTING_STARTED_LESSONS = [
       },
       {
         stepNumber: 4,
-        title: 'Add New Species',
-        content: 'In the bottom right corner, you\'ll see the "Add New Species" button. Click it to create a custom species for your collection. Let\'s explore this feature.',
+        title: 'Add New Species Button',
+        content: 'In the bottom right corner, you\'ll see the highlighted "Add New Species" button. Click it to create a custom species for your collection. Let\'s explore how to add a custom species.',
         highlightElement: '[data-tutorial-target="add-species-btn"]',
         actionType: 'click',
         tips: [
@@ -93,9 +92,10 @@ const GETTING_STARTED_LESSONS = [
       },
       {
         stepNumber: 6,
-        title: 'Category',
+        title: 'Category Selection',
         content: 'Select a category that best fits your species. This helps organize your species list and makes searching easier. Categories include Rodent, Mammal, Reptile, Bird, Amphibian, Fish, Invertebrate, and Other.',
         highlightElement: '[data-tutorial-target="species-category-dropdown"]',
+        actionType: 'click',
         tips: [
           'Choose the most specific category available',
           'You can change this later',
@@ -105,7 +105,7 @@ const GETTING_STARTED_LESSONS = [
       {
         stepNumber: 7,
         title: 'Latin/Scientific Name',
-        content: 'Enter the scientific name of your species. This is optional but highly recommended for clarity and accuracy. For example, a Fancy Mouse\'s scientific name is "Mus musculus".',
+        content: 'Enter the scientific name of your species here. This is optional but highly recommended for clarity and accuracy. For example, a Fancy Mouse\'s scientific name is "Mus musculus".',
         highlightElement: '[data-tutorial-target="species-latin-input"]',
         tips: [
           'Scientific names follow Latin nomenclature',
@@ -115,8 +115,8 @@ const GETTING_STARTED_LESSONS = [
       },
       {
         stepNumber: 8,
-        title: 'Back to Selector',
-        content: 'Now let\'s go back to select a default species for your animal. Click the "Back to Selector" button to return to the species list.',
+        title: 'Return to Species Selector',
+        content: 'Now let\'s go back to select a default species for your animal. Click the highlighted "Back to Selector" button to return to the species list.',
         highlightElement: '[data-tutorial-target="back-to-selector-btn"]',
         actionType: 'click',
         tips: [
