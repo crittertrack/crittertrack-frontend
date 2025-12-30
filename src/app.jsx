@@ -2125,10 +2125,46 @@ const ViewOnlyAnimalDetail = ({ animal, onClose, API_BASE_URL, onViewProfile }) 
                             {(animal.allergies || animal.medications || animal.medicalConditions) && (
                                 <div className="bg-gray-50 p-4 rounded-lg border border-gray-200">
                                     <h3 className="text-lg font-semibold text-gray-700 border-b pb-2 mb-3">Medical Information</h3>
-                                    <div className="space-y-2">
-                                        {animal.allergies && <p className="text-sm"><span className="font-medium">Allergies:</span> {animal.allergies}</p>}
-                                        {animal.medications && <p className="text-sm"><span className="font-medium">Medications:</span> {animal.medications}</p>}
-                                        {animal.medicalConditions && <p className="text-sm"><span className="font-medium">Medical Conditions:</span> {animal.medicalConditions}</p>}
+                                    <div className="space-y-3">
+                                        {animal.allergies && (
+                                            <div>
+                                                <strong className="text-sm">Allergies:</strong>
+                                                <ul className="text-sm mt-1 list-disc list-inside space-y-1">
+                                                    {parseHealthRecords(animal.allergies).map((allergy, idx) => (
+                                                        <li key={idx} className="text-gray-700">
+                                                            {allergy.allergen || allergy.name}
+                                                            {allergy.notes && <span className="text-gray-600"> - {allergy.notes}</span>}
+                                                        </li>
+                                                    ))}
+                                                </ul>
+                                            </div>
+                                        )}
+                                        {animal.medications && (
+                                            <div>
+                                                <strong className="text-sm">Medications:</strong>
+                                                <ul className="text-sm mt-1 list-disc list-inside space-y-1">
+                                                    {parseHealthRecords(animal.medications).map((med, idx) => (
+                                                        <li key={idx} className="text-gray-700">
+                                                            {med.medication || med.name}
+                                                            {med.notes && <span className="text-gray-600"> - {med.notes}</span>}
+                                                        </li>
+                                                    ))}
+                                                </ul>
+                                            </div>
+                                        )}
+                                        {animal.medicalConditions && (
+                                            <div>
+                                                <strong className="text-sm">Medical Conditions:</strong>
+                                                <ul className="text-sm mt-1 list-disc list-inside space-y-1">
+                                                    {parseHealthRecords(animal.medicalConditions).map((condition, idx) => (
+                                                        <li key={idx} className="text-gray-700">
+                                                            {condition.condition || condition.name}
+                                                            {condition.notes && <span className="text-gray-600"> - {condition.notes}</span>}
+                                                        </li>
+                                                    ))}
+                                                </ul>
+                                            </div>
+                                        )}
                                     </div>
                                 </div>
                             )}
@@ -2404,7 +2440,14 @@ const ViewOnlyAnimalDetail = ({ animal, onClose, API_BASE_URL, onViewProfile }) 
                                         {animal.medicalConditions && (
                                             <div>
                                                 <strong className="text-sm">Medical Conditions:</strong>
-                                                <p className="text-sm text-gray-700 mt-1">{animal.medicalConditions}</p>
+                                                <ul className="text-sm mt-1 list-disc list-inside space-y-1">
+                                                    {parseHealthRecords(animal.medicalConditions).map((condition, idx) => (
+                                                        <li key={idx} className="text-gray-700">
+                                                            {condition.condition || condition.name}
+                                                            {condition.notes && <span className="text-gray-600"> - {condition.notes}</span>}
+                                                        </li>
+                                                    ))}
+                                                </ul>
                                             </div>
                                         )}
                                         {animal.medicalProcedures && (
