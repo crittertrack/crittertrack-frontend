@@ -2282,17 +2282,6 @@ const ViewOnlyAnimalDetail = ({ animal, onClose, API_BASE_URL, onViewProfile }) 
                     {/* Tab 3: Lineage & Origin */}
                     {detailViewTab === 3 && (
                         <div className="space-y-4">
-                            {/* Identification Numbers Section */}
-                            {(animal.microchipNumber || animal.registrationNumber || animal.tattooNumber) && (
-                                <div className="bg-gray-50 p-4 rounded-lg border border-gray-200">
-                                    <h3 className="text-lg font-semibold text-gray-700 border-b pb-2 mb-3">Identification Numbers</h3>
-                                    <div className="space-y-2">
-                                        {animal.microchipNumber && <p className="text-sm"><span className="font-medium">Microchip:</span> {animal.microchipNumber}</p>}
-                                        {animal.registrationNumber && <p className="text-sm"><span className="font-medium">Registration:</span> {animal.registrationNumber}</p>}
-                                        {animal.tattooNumber && <p className="text-sm"><span className="font-medium">Tattoo:</span> {animal.tattooNumber}</p>}
-                                    </div>
-                                </div>
-                            )}
                             {/* Parents Section */}
                             {(animal.fatherId_public || animal.sireId_public || animal.motherId_public || animal.damId_public) && (
                                 <div className="bg-gray-50 p-4 rounded-lg border border-gray-200">
