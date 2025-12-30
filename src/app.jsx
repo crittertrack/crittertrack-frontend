@@ -13,7 +13,7 @@ import PrivacyPolicy from './components/PrivacyPolicy';
 import InstallPWA from './components/InstallPWA';
 import { TutorialProvider, useTutorial } from './contexts/TutorialContext';
 import { InitialTutorialModal, TutorialOverlay, TutorialHighlight } from './components/TutorialOverlay';
-import { TUTORIAL_LESSONS } from './data/tutorialLessons';
+import { TUTORIAL_LESSONS } from './data/tutorialLessonsNew';
 import InfoTab from './components/InfoTab';
 import WelcomeBanner from './components/WelcomeBanner';
 
