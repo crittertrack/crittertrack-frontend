@@ -1012,7 +1012,11 @@ const ParentSearchModal = ({
         const idValue = isIdSearch ? `CTC${idMatch[1]}` : null;
 
         // --- CONSTRUCT FILTER QUERIES ---
-        const genderQuery = requiredGender ? `&gender=${requiredGender}` : '';
+        const genderQuery = requiredGender 
+            ? (Array.isArray(requiredGender) 
+                ? `&gender=${requiredGender.map(g => encodeURIComponent(g)).join('&gender=')}`
+                : `&gender=${requiredGender}`)
+            : '';
         const birthdateQuery = birthDate ? `&birthdateBefore=${birthDate}` : '';
         const speciesQuery = species ? `&species=${encodeURIComponent(species)}` : '';
 
@@ -5943,6 +5947,8 @@ const AnimalForm = ({
     };
     const [loading, setLoading] = useState(false);
     const [modalTarget, setModalTarget] = useState(null); 
+    const [pendingParentForRole, setPendingParentForRole] = useState(null); // 'father' or 'mother' - tracks which parent role to assign to selected Intersex/Unknown animal
+    const [pendingParentAnimal, setPendingParentAnimal] = useState(null); // The full animal object awaiting role assignment
     const [animalImageFile, setAnimalImageFile] = useState(null);
     const [animalImagePreview, setAnimalImagePreview] = useState(animalToEdit?.imageUrl || animalToEdit?.photoUrl || null);
     const [deleteImage, setDeleteImage] = useState(false);
@@ -5998,7 +6004,7 @@ const AnimalForm = ({
         }
     }, [formData.currentOwner]);
     
-        const handleSelectPedigree = async (idOrAnimal) => {
+        const handleSelectPedigree = async (idOrAnimal, assignedRole = null) => {
             const id = idOrAnimal && typeof idOrAnimal === 'object' ? idOrAnimal.id_public : idOrAnimal;
             
             // Handle breeder selection differently
@@ -6029,11 +6035,25 @@ const AnimalForm = ({
                 return;
             }
             
+            // Handle 'other-parent' case: show role selection modal if not already assigned
+            if (modalTarget === 'other-parent' && !assignedRole) {
+                if (idOrAnimal && typeof idOrAnimal === 'object') {
+                    setPendingParentAnimal(idOrAnimal);
+                    setModalTarget(null); // Close the search modal
+                } else {
+                    console.warn('Other parent selection requires animal object');
+                }
+                return;
+            }
+            
+            // Determine target based on assignedRole (for 'other-parent') or modalTarget
+            const effectiveTarget = assignedRole || modalTarget;
+            
             // Handle parent selection
-            const idKey = modalTarget === 'father' ? 'fatherId_public' : 'motherId_public';
+            const idKey = effectiveTarget === 'father' ? 'fatherId_public' : 'motherId_public';
             setFormData(prev => ({ ...prev, [idKey]: id }));
         // Update ref immediately so save uses the latest selection even if state update is pending
-        if (modalTarget === 'father') {
+        if (effectiveTarget === 'father') {
             pedigreeRef.current.father = id;
         } else {
             pedigreeRef.current.mother = id;
@@ -6043,7 +6063,7 @@ const AnimalForm = ({
         if (idOrAnimal && typeof idOrAnimal === 'object') {
             const a = idOrAnimal;
             const info = { id_public: a.id_public, prefix: a.prefix || '', suffix: a.suffix || '', name: a.name || '', backendId: a._id || a.id_backend || null };
-            if (modalTarget === 'father') {
+            if (effectiveTarget === 'father') {
                 setFatherInfo(info);
                 pedigreeRef.current.fatherBackendId = info.backendId;
             } else {
@@ -6053,10 +6073,10 @@ const AnimalForm = ({
         } else if (id) {
             // Fetch a small summary for display (non-blocking for the user)
             try {
-                console.debug('Selecting parent id:', id, 'for modalTarget:', modalTarget);
+                console.debug('Selecting parent id:', id, 'for effectiveTarget:', effectiveTarget);
                 const info = await fetchAnimalSummary(id);
                 console.debug('Fetched parent summary:', info);
-                if (modalTarget === 'father') {
+                if (effectiveTarget === 'father') {
                     setFatherInfo(info);
                     pedigreeRef.current.fatherBackendId = info?.backendId || null;
                 }
@@ -6069,7 +6089,7 @@ const AnimalForm = ({
             }
         } else {
             // cleared selection
-            if (modalTarget === 'father') setFatherInfo(null);
+            if (effectiveTarget === 'father') setFatherInfo(null);
             else setMotherInfo(null);
         }
 
@@ -6611,14 +6631,34 @@ const AnimalForm = ({
     };
     
     const currentId = animalToEdit?.id_public;
-    const requiredGender = modalTarget === 'father' ? 'Male' : 'Female';
+    const requiredGender = modalTarget === 'father' ? 'Male' : modalTarget === 'mother' ? 'Female' : modalTarget === 'other-parent' ? ['Intersex', 'Unknown'] : null;
 
     return (
         <div className="w-full max-w-2xl mx-auto bg-white p-6 rounded-xl shadow-lg">
             {/* --- Parent Search Modal --- */}
-            {modalTarget && modalTarget !== 'breeder' && ( 
+            {modalTarget && modalTarget !== 'breeder' && modalTarget !== 'other-parent' && ( 
                 <ParentSearchModal
                     title={modalTarget === 'father' ? 'Sire' : 'Dam'} 
+                    currentId={currentId} 
+                    onSelect={handleSelectPedigree} 
+                    onClose={() => setModalTarget(null)} 
+                    authToken={authToken} 
+                    showModalMessage={showModalMessage}
+                    API_BASE_URL={API_BASE_URL}
+                    X={X}
+                    Search={Search}
+                    Loader2={Loader2}
+                    LoadingSpinner={LoadingSpinner}
+                    requiredGender={requiredGender}
+                    birthDate={formData.birthDate}
+                    species={formData.species}
+                /> 
+            )}
+
+            {/* --- Other Parent Search Modal (Intersex/Unknown) --- */}
+            {modalTarget === 'other-parent' && ( 
+                <ParentSearchModal
+                    title="Other Parent" 
                     currentId={currentId} 
                     onSelect={handleSelectPedigree} 
                     onClose={() => setModalTarget(null)} 
@@ -6645,6 +6685,61 @@ const AnimalForm = ({
                     modalTarget={modalTarget}
                     userProfile={userProfile}
                 />
+            )}
+
+            {/* --- Parent Role Selection Modal (for Intersex/Unknown) --- */}
+            {pendingParentAnimal && (
+                <div className="fixed inset-0 bg-gray-600 bg-opacity-75 flex items-center justify-center p-4 z-50">
+                    <div className="bg-white rounded-xl shadow-2xl p-6 w-full max-w-sm">
+                        <h3 className="text-xl font-bold text-gray-800 mb-4">Assign Parent Role</h3>
+                        <p className="text-gray-600 mb-6">
+                            {pendingParentAnimal.prefix && `${pendingParentAnimal.prefix} `}
+                            {pendingParentAnimal.name}
+                            {pendingParentAnimal.suffix && ` ${pendingParentAnimal.suffix}`}
+                            <br />
+                            <span className="text-sm text-gray-500">({pendingParentAnimal.id_public})</span>
+                        </p>
+                        <p className="text-gray-700 mb-4 font-medium">
+                            How would you like to assign this {pendingParentAnimal.gender} animal?
+                        </p>
+                        <div className="flex gap-3">
+                            <button
+                                type="button"
+                                onClick={() => {
+                                    setPendingParentForRole('father');
+                                    handleSelectPedigree(pendingParentAnimal, 'father');
+                                    setPendingParentAnimal(null);
+                                    setPendingParentForRole(null);
+                                }}
+                                className="flex-1 bg-blue-500 hover:bg-blue-600 text-white font-semibold py-2 px-4 rounded-lg transition"
+                            >
+                                As Sire
+                            </button>
+                            <button
+                                type="button"
+                                onClick={() => {
+                                    setPendingParentForRole('mother');
+                                    handleSelectPedigree(pendingParentAnimal, 'mother');
+                                    setPendingParentAnimal(null);
+                                    setPendingParentForRole(null);
+                                }}
+                                className="flex-1 bg-pink-500 hover:bg-pink-600 text-white font-semibold py-2 px-4 rounded-lg transition"
+                            >
+                                As Dam
+                            </button>
+                        </div>
+                        <button
+                            type="button"
+                            onClick={() => {
+                                setPendingParentAnimal(null);
+                                setPendingParentForRole(null);
+                            }}
+                            className="w-full mt-3 bg-gray-200 hover:bg-gray-300 text-gray-800 font-semibold py-2 px-4 rounded-lg transition"
+                        >
+                            Cancel
+                        </button>
+                    </div>
+                </div>
             )}
 
             <h2 className="text-3xl font-bold text-gray-800 mb-6 flex items-center justify-between">
@@ -7432,7 +7527,7 @@ const AnimalForm = ({
                             className="bg-gray-50 p-4 rounded-lg border border-gray-200 space-y-4"
                         >
                             <h3 className="text-lg font-semibold text-gray-700 border-b pb-2">Pedigree: Sire and Dam 🌳</h3>
-                            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
                                 <div className='flex flex-col'>
                                     <label className='text-sm font-medium text-gray-600 mb-1'>Sire (Father)</label>
                                     <div 
@@ -7488,6 +7583,19 @@ const AnimalForm = ({
                                                     <X size={14} />
                                                 </button>
                                             )}
+                                        </div>
+                                    </div>
+                                </div>
+                                <div className='flex flex-col'>
+                                    <label className='text-sm font-medium text-gray-600 mb-1'>Other Parent</label>
+                                    <div 
+                                        onClick={() => !loading && setModalTarget('other-parent')}
+                                        className="flex flex-col items-start p-3 border border-gray-300 rounded-lg bg-white cursor-pointer hover:border-primary transition disabled:opacity-50"
+                                    >
+                                        <div className="flex items-center space-x-2 w-full">
+                                            <span className="text-gray-400">
+                                                Search Intersex/Unknown
+                                            </span>
                                         </div>
                                     </div>
                                 </div>
