@@ -302,6 +302,7 @@ const GeneticCodeBuilder = ({ species, gender, value, onChange, onOpenCommunityF
                   </button>
                   <button
                     type="button"
+                    data-tutorial-target="genetic-cancel-btn"
                     onClick={() => setShowBuilderModal(false)}
                     className="px-4 py-2 bg-gray-200 hover:bg-gray-300 text-gray-800 rounded-lg transition"
                   >
