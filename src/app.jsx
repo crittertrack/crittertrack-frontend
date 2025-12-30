@@ -3280,15 +3280,25 @@ const LitterManagement = ({ authToken, API_BASE_URL, userProfile, showModalMessa
     const handleSubmit = async (e) => {
         e.preventDefault();
         
-        if (!formData.sireId_public || !formData.damId_public) {
-            showModalMessage('Error', 'Please select both parents');
+        // Check if we have both parents (either direct Sire/Dam or via Other Parent role)
+        const hasSire = formData.sireId_public || (formData.otherParent1Id_public && formData.otherParent1Role === 'Sire');
+        const hasDam = formData.damId_public || (formData.otherParent1Id_public && formData.otherParent1Role === 'Dam');
+        
+        if (!hasSire || !hasDam) {
+            showModalMessage('Error', 'Please select both a Sire and a Dam');
             return;
         }
 
         try {
-            // Get parent details
-            const sire = myAnimals.find(a => a.id_public === formData.sireId_public);
-            const dam = myAnimals.find(a => a.id_public === formData.damId_public);
+            // Get parent details - handle Other Parent filling either role
+            let sire = myAnimals.find(a => a.id_public === formData.sireId_public);
+            let dam = myAnimals.find(a => a.id_public === formData.damId_public);
+            
+            if (formData.otherParent1Id_public) {
+                const otherParent = myAnimals.find(a => a.id_public === formData.otherParent1Id_public);
+                if (formData.otherParent1Role === 'Sire' && !sire) sire = otherParent;
+                if (formData.otherParent1Role === 'Dam' && !dam) dam = otherParent;
+            }
 
             if (!sire || !dam) {
                 showModalMessage('Error', 'Selected parents not found');
@@ -3644,15 +3654,25 @@ const LitterManagement = ({ authToken, API_BASE_URL, userProfile, showModalMessa
     const handleUpdateLitter = async (e) => {
         e.preventDefault();
         
-        if (!formData.sireId_public || !formData.damId_public) {
-            showModalMessage('Error', 'Please select both parents');
+        // Check if we have both parents (either direct Sire/Dam or via Other Parent role)
+        const hasSire = formData.sireId_public || (formData.otherParent1Id_public && formData.otherParent1Role === 'Sire');
+        const hasDam = formData.damId_public || (formData.otherParent1Id_public && formData.otherParent1Role === 'Dam');
+        
+        if (!hasSire || !hasDam) {
+            showModalMessage('Error', 'Please select both a Sire and a Dam');
             return;
         }
 
         try {
-            // Get parent details for offspring creation
-            const sire = myAnimals.find(a => a.id_public === formData.sireId_public);
-            const dam = myAnimals.find(a => a.id_public === formData.damId_public);
+            // Get parent details - handle Other Parent filling either role
+            let sire = myAnimals.find(a => a.id_public === formData.sireId_public);
+            let dam = myAnimals.find(a => a.id_public === formData.damId_public);
+            
+            if (formData.otherParent1Id_public) {
+                const otherParent = myAnimals.find(a => a.id_public === formData.otherParent1Id_public);
+                if (formData.otherParent1Role === 'Sire' && !sire) sire = otherParent;
+                if (formData.otherParent1Role === 'Dam' && !dam) dam = otherParent;
+            }
 
             // Create offspring animals if requested
             const offspringPromises = [];
