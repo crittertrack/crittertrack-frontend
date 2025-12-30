@@ -1499,7 +1499,7 @@ const PublicProfileView = ({ profile, onBack, onViewAnimal, API_BASE_URL, onStar
     const [loading, setLoading] = useState(true);
     const [copySuccess, setCopySuccess] = useState(false);
     const [speciesFilter, setSpeciesFilter] = useState('');
-    const [genderFilters, setGenderFilters] = useState({ Male: true, Female: true });
+    const [genderFilters, setGenderFilters] = useState({ Male: true, Female: true, Intersex: true, Unknown: true });
     const [statusFilter, setStatusFilter] = useState('');
     const [freshProfile, setFreshProfile] = useState(profile);
     
@@ -9881,8 +9881,9 @@ const AnimalList = ({ authToken, showModalMessage, onEditAnimal, onViewAnimal, f
     const [selectedGenders, setSelectedGenders] = useState(() => {
         try {
             const saved = localStorage.getItem('animalList_selectedGenders');
-            return saved ? JSON.parse(saved) : [...GENDER_OPTIONS];
-        } catch { return [...GENDER_OPTIONS]; }
+            // Default to all genders if not previously saved
+            return saved ? JSON.parse(saved) : ['Male', 'Female', 'Intersex', 'Unknown'];
+        } catch { return ['Male', 'Female', 'Intersex', 'Unknown']; }
     });
     const [selectedSpecies, setSelectedSpecies] = useState(() => {
         try {
