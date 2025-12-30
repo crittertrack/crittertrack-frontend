@@ -11245,7 +11245,7 @@ const App = () => {
     const [viewAnimalBreederInfo, setViewAnimalBreederInfo] = useState(null);
     const [animalToView, setAnimalToView] = useState(null);
     const [detailViewTab, setDetailViewTab] = useState(1); // Tab for detail view
-    const [showTabs, setShowTabs] = useState(false); // Toggle for collapsible tabs panel
+    const [showTabs, setShowTabs] = useState(true); // Toggle for collapsible tabs panel
     const [sireData, setSireData] = useState(null);
     const [damData, setDamData] = useState(null);
     const [offspringData, setOffspringData] = useState([]);
