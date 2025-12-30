@@ -7857,7 +7857,7 @@ const AnimalForm = ({
                         )}
 
                         {/* Mating - Hidden when neutered/spayed */}
-                        {!formData.isNeutered && (formData.gender === 'Female' || formData.gender === 'Intersex' || formData.gender === 'Unknown' || formData.gender === 'Male') && (
+                        {!formData.isNeutered && !formData.isInfertile && (formData.gender === 'Female' || formData.gender === 'Intersex' || formData.gender === 'Unknown' || formData.gender === 'Male') && (
                             <div className="bg-gray-50 p-4 rounded-lg border border-gray-200 space-y-4">
                                 <h3 className="text-lg font-semibold text-gray-700 border-b pb-2">Mating {formData.isNeutered && <span className="text-xs font-normal text-gray-500">(History)</span>}</h3>
                                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
