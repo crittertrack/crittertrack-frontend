@@ -269,6 +269,7 @@ const GeneticCodeBuilder = ({ species, gender, value, onChange, onOpenCommunityF
             </div>
             <button
               type="button"
+              data-tutorial-target="genetic-code-add-btn"
               onClick={() => setShowBuilderModal(true)}
               className="px-4 py-2 bg-accent hover:bg-accent/90 text-white rounded font-medium transition whitespace-nowrap"
             >
