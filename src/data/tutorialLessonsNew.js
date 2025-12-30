@@ -387,7 +387,6 @@ const GETTING_STARTED_LESSONS = [
         stepNumber: 6,
         title: 'Genetic Builder Overview',
         content: 'Welcome to the Genetic Code Builder! This tool helps you document the genetic traits of your animal. You can select genes using dropdown menus (available for Fancy Mouse) or switch to manual mode to enter genetics for any species.',
-        highlightElement: '[data-tutorial-target="switch-manual-btn"]',
         actionType: 'click',
         tips: [
           'Dropdown mode available for Fancy Mouse',
@@ -400,7 +399,6 @@ const GETTING_STARTED_LESSONS = [
         stepNumber: 7,
         title: 'Close Genetic Builder',
         content: 'Let\'s go back to the Physical tab. Click the Cancel button to close this builder.',
-        highlightElement: '[data-tutorial-target="genetic-cancel-btn"]',
         actionType: 'click',
         tips: [
           'You can always come back to add genetic info',
