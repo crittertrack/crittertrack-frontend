@@ -1165,7 +1165,7 @@ const ParentSearchModal = ({
 };
 
 
-const LocalAnimalSearchModal = ({ title, currentId, onSelect, onClose, authToken, showModalMessage, API_BASE_URL, X, Search, Loader2, LoadingSpinner }) => {
+const LocalAnimalSearchModal = ({ title, currentId, onSelect, onClose, authToken, showModalMessage, API_BASE_URL, X, Search, Loader2, LoadingSpinner, genderFilter }) => {
     const [searchTerm, setSearchTerm] = useState('');
     const [hasSearched, setHasSearched] = useState(false);
     const [localAnimals, setLocalAnimals] = useState([]);
@@ -1205,7 +1205,13 @@ const LocalAnimalSearchModal = ({ title, currentId, onSelect, onClose, authToken
             const localResponse = await axios.get(`${API_BASE_URL}/animals?name=${trimmedSearchTerm}`, {
                 headers: { Authorization: `Bearer ${authToken}` }
             });
-            const filteredLocal = localResponse.data.filter(a => a.id_public !== currentId);
+            let filteredLocal = localResponse.data.filter(a => a.id_public !== currentId);
+            
+            // Apply gender filter if specified
+            if (genderFilter) {
+                filteredLocal = filteredLocal.filter(a => a.gender === genderFilter);
+            }
+            
             setLocalAnimals(filteredLocal);
         } catch (error) {
             console.error('Local Search Error:', error);
@@ -4772,6 +4778,7 @@ const LitterManagement = ({ authToken, API_BASE_URL, userProfile, showModalMessa
                     Search={Search}
                     Loader2={Loader2}
                     LoadingSpinner={LoadingSpinner}
+                    genderFilter="Male"
                 />
             )}
 
@@ -4788,6 +4795,7 @@ const LitterManagement = ({ authToken, API_BASE_URL, userProfile, showModalMessa
                     Search={Search}
                     Loader2={Loader2}
                     LoadingSpinner={LoadingSpinner}
+                    genderFilter="Female"
                 />
             )}
 
