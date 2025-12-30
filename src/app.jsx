@@ -13238,6 +13238,18 @@ const App = () => {
                     <Route path="/view-animal" element={
                         animalToView && (
                             (() => {
+                                const parseHealthRecords = (data) => {
+                                    if (!data) return [];
+                                    if (typeof data === 'string') {
+                                        try {
+                                            return JSON.parse(data);
+                                        } catch (e) {
+                                            console.error('Failed to parse health records:', e);
+                                            return [];
+                                        }
+                                    }
+                                    return Array.isArray(data) ? data : [];
+                                };
                                 const formattedBirthDate = animalToView.birthDate
                                     ? new Intl.DateTimeFormat('en-US', { year: 'numeric', month: 'long', day: 'numeric' }).format(new Date(animalToView.birthDate))
                                     : '—';
