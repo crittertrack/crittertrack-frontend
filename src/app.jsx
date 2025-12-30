@@ -6964,7 +6964,7 @@ const AnimalForm = ({
                 {activeTab === 3 && (
                     <div className="space-y-6">
                         {/* Appearance */}
-                        <div className="bg-gray-50 p-4 rounded-lg border border-gray-200 space-y-4">
+                        <div data-tutorial-target="appearance-section" className="bg-gray-50 p-4 rounded-lg border border-gray-200 space-y-4">
                             <div className="flex justify-between items-center border-b pb-2">
                                 <h3 className="text-lg font-semibold text-gray-700">Appearance</h3>
                                 <button
@@ -7050,19 +7050,21 @@ const AnimalForm = ({
                                 <div>
                                     <label className="block text-sm font-medium text-gray-700">Current Life Stage</label>
                                     <select name="lifeStage" value={formData.lifeStage} onChange={handleChange} 
+                                        data-tutorial-target="life-stage-select"
                                         className="mt-1 block w-full p-2 border border-gray-300 rounded-md shadow-sm focus:ring-primary focus:border-primary">
                                         <option value="">Select Life Stage</option>
+                                        <option value="Newborn">Newborn</option>
                                         <option value="Juvenile">Juvenile</option>
                                         <option value="Adult">Adult</option>
                                         <option value="Senior">Senior</option>
-                                        <option value="Elderly">Elderly</option>
+                                        <option value="Unknown">Unknown</option>
                                     </select>
                                 </div>
                             </div>
                         </div>
 
                         {/* Measurements & Growth Tracking */}
-                        <div className="bg-gray-50 p-4 rounded-lg border border-gray-200 space-y-4">
+                        <div data-tutorial-target="measurements-growth-section" className="bg-gray-50 p-4 rounded-lg border border-gray-200 space-y-4">
                             <div className="flex justify-between items-center border-b pb-2">
                                 <h3 className="text-lg font-semibold text-gray-700">Measurements & Growth Tracking</h3>
                                 <button
@@ -7083,7 +7085,7 @@ const AnimalForm = ({
                                 const mostRecentLength = sorted.find(r => r.length);
                                 
                                 return (
-                                    <div className="bg-blue-50 p-3 rounded-lg border border-blue-200">
+                                    <div data-tutorial-target="current-measurements-growth-chart" className="bg-blue-50 p-3 rounded-lg border border-blue-200">
                                         <h4 className="text-sm font-semibold text-gray-700 mb-2">Current Measurements</h4>
                                         <div className="grid grid-cols-2 md:grid-cols-4 gap-3 text-sm">
                                             <div>

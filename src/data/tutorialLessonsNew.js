@@ -338,7 +338,8 @@ const GETTING_STARTED_LESSONS = [
         stepNumber: 2,
         title: 'Color',
         content: 'Enter the color of your animal\'s coat. Examples: Black, White, Brown, Grey, Spotted, etc. Be as specific as you need for your records.',
-        highlightElement: '[data-tutorial-target="animal-color-input"]',
+        highlightElement: '[data-tutorial-target="appearance-section"]',
+        actionType: 'click',
         tips: [
           'Use standard color names or your own system',
           'This helps identify and track traits',
@@ -349,7 +350,8 @@ const GETTING_STARTED_LESSONS = [
         stepNumber: 3,
         title: 'Coat Type',
         content: 'Specify the texture of your animal\'s coat. Common options: Short hair, Long hair, Curly, Wavy, Hairless, etc.',
-        highlightElement: '[data-tutorial-target="animal-coat-input"]',
+        highlightElement: '[data-tutorial-target="appearance-section"]',
+        actionType: 'click',
         tips: [
           'Coat type is genetic',
           'Important for breeding selection',
@@ -360,7 +362,8 @@ const GETTING_STARTED_LESSONS = [
         stepNumber: 4,
         title: 'Coat Pattern',
         content: 'Describe any patterns in the coat. Examples: Solid, Striped, Spotted, Banded, Dalmatian, etc.',
-        highlightElement: '[data-tutorial-target="animal-pattern-input"]',
+        highlightElement: '[data-tutorial-target="appearance-section"]',
+        actionType: 'click',
         tips: [
           'Pattern is often genetic',
           'Helps identify specific animals',
@@ -383,13 +386,14 @@ const GETTING_STARTED_LESSONS = [
       {
         stepNumber: 6,
         title: 'Genetic Builder Overview',
-        content: 'Welcome to the Genetic Code Builder! This tool helps you document the genetic traits of your Fancy Mouse. You can see buttons to "Select Animal" (to auto-fill from existing animals) and "Switch to Manual" (for manual entry). For now, let\'s see what\'s available. The manual version is available for ALL species if you prefer that method.',
-        highlightElement: '[data-tutorial-target="genetic-builder-container"]',
+        content: 'Welcome to the Genetic Code Builder! This tool helps you document the genetic traits of your animal. You can select genes using dropdown menus (available for Fancy Mouse) or switch to manual mode to enter genetics for any species.',
+        highlightElement: '[data-tutorial-target="switch-manual-btn"]',
+        actionType: 'click',
         tips: [
-          'Builder is species-specific',
-          'Fancy Mouse has advanced genetics features',
-          'Other species should use manual entry',
-          'Both methods produce the same result'
+          'Dropdown mode available for Fancy Mouse',
+          'Manual mode available for all species',
+          'Both methods produce the same result',
+          'Click "Switch to Manual" to continue'
         ]
       },
       {
@@ -407,7 +411,7 @@ const GETTING_STARTED_LESSONS = [
       {
         stepNumber: 8,
         title: 'Life Stage',
-        content: 'Select the current life stage of your animal: Juvenile (young), Adult (mature), or Senior (elderly). This is calculated based on the species and date of birth but can be manually adjusted.',
+        content: 'Select the current life stage of your animal: Newborn (just born), Juvenile (young), Adult (mature), Senior (elderly), or Unknown. This is calculated based on the species and date of birth but can be manually adjusted.',
         highlightElement: '[data-tutorial-target="life-stage-select"]',
         tips: [
           'Affects health monitoring and breeding eligibility',
@@ -419,7 +423,7 @@ const GETTING_STARTED_LESSONS = [
         stepNumber: 9,
         title: 'Measurements & Growth Tracking',
         content: 'This section tracks your animal\'s physical measurements over time. This is particularly useful for monitoring growth, health, and development. Let\'s add some sample measurements.',
-        highlightElement: '[data-tutorial-target="measurements-section"]',
+        highlightElement: '[data-tutorial-target="measurements-growth-section"]',
         tips: [
           'Track weight and length over time',
           'Helps monitor health trends',
@@ -463,8 +467,8 @@ const GETTING_STARTED_LESSONS = [
       {
         stepNumber: 13,
         title: 'View Growth Chart',
-        content: 'Notice the "Current Measurements" section shows your latest measurement, and the "Growth Curve" chart visualizes how your animal has grown over the two dates you entered. This helps you monitor development.',
-        highlightElement: '[data-tutorial-target="growth-chart-container"]',
+        content: 'Notice the "Current Measurements" section shows your latest measurement, and the "Growth Curve" chart visualizes how your animal has grown over the dates you entered. This helps you monitor development.',
+        highlightElement: '[data-tutorial-target="current-measurements-growth-chart"]',
         tips: [
           'Chart updates automatically with new measurements',
           'Shows growth trajectory',
