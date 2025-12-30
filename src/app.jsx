@@ -7705,7 +7705,9 @@ const AnimalForm = ({
                                         onChange={handleChange}
                                         className="form-checkbox h-5 w-5 text-primary rounded focus:ring-primary"
                                     />
-                                    <span className="text-sm font-medium text-gray-700">{formData.gender === 'Female' ? 'Spayed' : 'Neutered'}</span>
+                                    <span className="text-sm font-medium text-gray-700">
+                                        {formData.gender === 'Female' ? 'Spayed' : formData.gender === 'Intersex' ? 'Neutered / Spayed' : 'Neutered'}
+                                    </span>
                                 </label>
                                 
                                 <label className="flex items-center space-x-2 cursor-pointer p-3 border rounded-lg bg-white hover:bg-gray-50 transition">
