@@ -5735,6 +5735,60 @@ const AnimalForm = ({
         notes: ''
     });
     
+    const [medicalConditionsArray, setMedicalConditionsArray] = useState(() => {
+        const data = animalToEdit?.medicalConditions;
+        if (!data) return [];
+        if (typeof data === 'string') {
+            try { 
+                const parsed = JSON.parse(data);
+                return parsed;
+            } catch { 
+                return []; 
+            }
+        }
+        return Array.isArray(data) ? data : [];
+    });
+    const [newMedicalCondition, setNewMedicalCondition] = useState({
+        name: '',
+        notes: ''
+    });
+    
+    const [allergiesArray, setAllergiesArray] = useState(() => {
+        const data = animalToEdit?.allergies;
+        if (!data) return [];
+        if (typeof data === 'string') {
+            try { 
+                const parsed = JSON.parse(data);
+                return parsed;
+            } catch { 
+                return []; 
+            }
+        }
+        return Array.isArray(data) ? data : [];
+    });
+    const [newAllergy, setNewAllergy] = useState({
+        name: '',
+        notes: ''
+    });
+    
+    const [medicationsArray, setMedicationsArray] = useState(() => {
+        const data = animalToEdit?.medications;
+        if (!data) return [];
+        if (typeof data === 'string') {
+            try { 
+                const parsed = JSON.parse(data);
+                return parsed;
+            } catch { 
+                return []; 
+            }
+        }
+        return Array.isArray(data) ? data : [];
+    });
+    const [newMedication, setNewMedication] = useState({
+        name: '',
+        notes: ''
+    });
+    
     const [medicalProcedureRecords, setMedicalProcedureRecords] = useState(() => {
         // Parse from database field 'medicalProcedures'
         const data = animalToEdit?.medicalProcedures;
@@ -6145,6 +6199,48 @@ const AnimalForm = ({
         setParasiteControlRecords([...parasiteControlRecords, record]);
         setNewParasiteControl({ date: new Date().toISOString().substring(0, 10), treatment: '', notes: '' });
     };
+    
+    const addMedicalCondition = () => {
+        if (!newMedicalCondition.name) {
+            showModalMessage('Missing Data', 'Please enter a condition name.');
+            return;
+        }
+        const record = {
+            id: Date.now().toString(),
+            name: newMedicalCondition.name,
+            notes: newMedicalCondition.notes || ''
+        };
+        setMedicalConditionsArray([...medicalConditionsArray, record]);
+        setNewMedicalCondition({ name: '', notes: '' });
+    };
+    
+    const addAllergy = () => {
+        if (!newAllergy.name) {
+            showModalMessage('Missing Data', 'Please enter an allergy name.');
+            return;
+        }
+        const record = {
+            id: Date.now().toString(),
+            name: newAllergy.name,
+            notes: newAllergy.notes || ''
+        };
+        setAllergiesArray([...allergiesArray, record]);
+        setNewAllergy({ name: '', notes: '' });
+    };
+    
+    const addMedication = () => {
+        if (!newMedication.name) {
+            showModalMessage('Missing Data', 'Please enter a medication name.');
+            return;
+        }
+        const record = {
+            id: Date.now().toString(),
+            name: newMedication.name,
+            notes: newMedication.notes || ''
+        };
+        setMedicationsArray([...medicationsArray, record]);
+        setNewMedication({ name: '', notes: '' });
+    };
 
     const addMedicalProcedure = () => {
         if (!newProcedure.date || !newProcedure.name) {
@@ -6288,6 +6384,9 @@ const AnimalForm = ({
             payloadToSave.dewormingRecordsArray = dewormingRecordsArray; // Keep for backward compat
             payloadToSave.parasiteControl = parasiteControlRecords.length > 0 ? JSON.stringify(parasiteControlRecords) : null;
             payloadToSave.parasiteControlRecords = parasiteControlRecords; // Keep for backward compat
+            payloadToSave.medicalConditions = medicalConditionsArray.length > 0 ? JSON.stringify(medicalConditionsArray) : null;
+            payloadToSave.allergies = allergiesArray.length > 0 ? JSON.stringify(allergiesArray) : null;
+            payloadToSave.medications = medicationsArray.length > 0 ? JSON.stringify(medicationsArray) : null;
             payloadToSave.medicalProcedures = medicalProcedureRecords.length > 0 ? JSON.stringify(medicalProcedureRecords) : null;
             payloadToSave.medicalProcedureRecords = medicalProcedureRecords; // Keep for backward compat
             payloadToSave.labResults = labResultRecords.length > 0 ? JSON.stringify(labResultRecords) : null;
@@ -6298,6 +6397,9 @@ const AnimalForm = ({
                 vaccinations: payloadToSave.vaccinations,
                 dewormingRecords: payloadToSave.dewormingRecords,
                 parasiteControl: payloadToSave.parasiteControl,
+                medicalConditions: payloadToSave.medicalConditions,
+                allergies: payloadToSave.allergies,
+                medications: payloadToSave.medications,
                 vaccinationRecordsCount: vaccinationRecords.length,
                 dewormingRecordsCount: dewormingRecordsArray.length,
                 parasiteControlCount: parasiteControlRecords.length
@@ -7775,25 +7877,112 @@ const AnimalForm = ({
                                 </button>
                             </div>
                             <div className="space-y-4">
-                                <div>
-                                    <label className="block text-sm font-medium text-gray-700 mb-2">Medical Conditions</label>
-                                    <textarea name="medicalConditions" value={formData.medicalConditions} onChange={handleChange} rows="2"
-                                        className="block w-full p-2 border border-gray-300 rounded-md shadow-sm focus:ring-primary focus:border-primary" 
-                                        placeholder="e.g., Current conditions affecting the animal" />
+                                {/* Medical Conditions */}
+                                <div className="space-y-3">
+                                    <h4 className="text-sm font-semibold text-gray-700">Medical Conditions</h4>
+                                    <div className="bg-white p-3 rounded-lg border border-gray-200 space-y-3">
+                                        <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+                                            <div>
+                                                <label className="block text-xs font-medium text-gray-700">Condition Name</label>
+                                                <input type="text" value={newMedicalCondition.name} onChange={(e) => setNewMedicalCondition({...newMedicalCondition, name: e.target.value})}
+                                                    placeholder="e.g., Diabetes, Respiratory infection" className="mt-1 block w-full p-2 text-sm border border-gray-300 rounded-md shadow-sm focus:ring-primary focus:border-primary" />
+                                            </div>
+                                            <div>
+                                                <label className="block text-xs font-medium text-gray-700">Notes (optional)</label>
+                                                <input type="text" value={newMedicalCondition.notes} onChange={(e) => setNewMedicalCondition({...newMedicalCondition, notes: e.target.value})}
+                                                    placeholder="e.g., Ongoing treatment" className="mt-1 block w-full p-2 text-sm border border-gray-300 rounded-md shadow-sm focus:ring-primary focus:border-primary" />
+                                            </div>
+                                        </div>
+                                        <button type="button" onClick={addMedicalCondition} className="w-full px-4 py-2 bg-blue-500 text-white rounded-md hover:bg-blue-600 text-sm font-medium">
+                                            Add Medical Condition
+                                        </button>
+                                    </div>
+                                    {medicalConditionsArray.length > 0 && (
+                                        <div className="space-y-2 bg-white p-3 rounded-lg border border-gray-200 max-h-48 overflow-y-auto">
+                                            {medicalConditionsArray.map((record) => (
+                                                <div key={record.id} className="flex items-center justify-between p-2 bg-gray-50 rounded border border-gray-100 text-sm">
+                                                    <div className="flex-1">
+                                                        <strong>{record.name}</strong>
+                                                        {record.notes && <span className="text-xs text-gray-500 ml-2">({record.notes})</span>}
+                                                    </div>
+                                                    <button type="button" onClick={() => setMedicalConditionsArray(medicalConditionsArray.filter(r => r.id !== record.id))}
+                                                        className="text-red-500 hover:text-red-700 p-1" title="Delete record">✕</button>
+                                                </div>
+                                            ))}
+                                        </div>
+                                    )}
                                 </div>
                                 
-                                <div>
-                                    <label className="block text-sm font-medium text-gray-700 mb-2">Current Medications</label>
-                                    <textarea name="medications" value={formData.medications} onChange={handleChange} rows="2"
-                                        className="block w-full p-2 border border-gray-300 rounded-md shadow-sm focus:ring-primary focus:border-primary" 
-                                        placeholder="e.g., Current medications and dosages" />
+                                {/* Allergies */}
+                                <div className="space-y-3 border-t border-gray-200 pt-4">
+                                    <h4 className="text-sm font-semibold text-gray-700">Allergies</h4>
+                                    <div className="bg-white p-3 rounded-lg border border-gray-200 space-y-3">
+                                        <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+                                            <div>
+                                                <label className="block text-xs font-medium text-gray-700">Allergy Name</label>
+                                                <input type="text" value={newAllergy.name} onChange={(e) => setNewAllergy({...newAllergy, name: e.target.value})}
+                                                    placeholder="e.g., Peanuts, Penicillin" className="mt-1 block w-full p-2 text-sm border border-gray-300 rounded-md shadow-sm focus:ring-primary focus:border-primary" />
+                                            </div>
+                                            <div>
+                                                <label className="block text-xs font-medium text-gray-700">Notes (optional)</label>
+                                                <input type="text" value={newAllergy.notes} onChange={(e) => setNewAllergy({...newAllergy, notes: e.target.value})}
+                                                    placeholder="e.g., Severe reaction" className="mt-1 block w-full p-2 text-sm border border-gray-300 rounded-md shadow-sm focus:ring-primary focus:border-primary" />
+                                            </div>
+                                        </div>
+                                        <button type="button" onClick={addAllergy} className="w-full px-4 py-2 bg-blue-500 text-white rounded-md hover:bg-blue-600 text-sm font-medium">
+                                            Add Allergy
+                                        </button>
+                                    </div>
+                                    {allergiesArray.length > 0 && (
+                                        <div className="space-y-2 bg-white p-3 rounded-lg border border-gray-200 max-h-48 overflow-y-auto">
+                                            {allergiesArray.map((record) => (
+                                                <div key={record.id} className="flex items-center justify-between p-2 bg-gray-50 rounded border border-gray-100 text-sm">
+                                                    <div className="flex-1">
+                                                        <strong>{record.name}</strong>
+                                                        {record.notes && <span className="text-xs text-gray-500 ml-2">({record.notes})</span>}
+                                                    </div>
+                                                    <button type="button" onClick={() => setAllergiesArray(allergiesArray.filter(r => r.id !== record.id))}
+                                                        className="text-red-500 hover:text-red-700 p-1" title="Delete record">✕</button>
+                                                </div>
+                                            ))}
+                                        </div>
+                                    )}
                                 </div>
                                 
-                                <div>
-                                    <label className="block text-sm font-medium text-gray-700 mb-2">Allergies</label>
-                                    <textarea name="allergies" value={formData.allergies} onChange={handleChange} rows="2"
-                                        className="block w-full p-2 border border-gray-300 rounded-md shadow-sm focus:ring-primary focus:border-primary" 
-                                        placeholder="e.g., Food allergies, medication allergies" />
+                                {/* Medications */}
+                                <div className="space-y-3 border-t border-gray-200 pt-4">
+                                    <h4 className="text-sm font-semibold text-gray-700">Current Medications</h4>
+                                    <div className="bg-white p-3 rounded-lg border border-gray-200 space-y-3">
+                                        <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+                                            <div>
+                                                <label className="block text-xs font-medium text-gray-700">Medication Name</label>
+                                                <input type="text" value={newMedication.name} onChange={(e) => setNewMedication({...newMedication, name: e.target.value})}
+                                                    placeholder="e.g., Antibiotic, Pain reliever" className="mt-1 block w-full p-2 text-sm border border-gray-300 rounded-md shadow-sm focus:ring-primary focus:border-primary" />
+                                            </div>
+                                            <div>
+                                                <label className="block text-xs font-medium text-gray-700">Notes (optional)</label>
+                                                <input type="text" value={newMedication.notes} onChange={(e) => setNewMedication({...newMedication, notes: e.target.value})}
+                                                    placeholder="e.g., Dosage, frequency" className="mt-1 block w-full p-2 text-sm border border-gray-300 rounded-md shadow-sm focus:ring-primary focus:border-primary" />
+                                            </div>
+                                        </div>
+                                        <button type="button" onClick={addMedication} className="w-full px-4 py-2 bg-blue-500 text-white rounded-md hover:bg-blue-600 text-sm font-medium">
+                                            Add Medication
+                                        </button>
+                                    </div>
+                                    {medicationsArray.length > 0 && (
+                                        <div className="space-y-2 bg-white p-3 rounded-lg border border-gray-200 max-h-48 overflow-y-auto">
+                                            {medicationsArray.map((record) => (
+                                                <div key={record.id} className="flex items-center justify-between p-2 bg-gray-50 rounded border border-gray-100 text-sm">
+                                                    <div className="flex-1">
+                                                        <strong>{record.name}</strong>
+                                                        {record.notes && <span className="text-xs text-gray-500 ml-2">({record.notes})</span>}
+                                                    </div>
+                                                    <button type="button" onClick={() => setMedicationsArray(medicationsArray.filter(r => r.id !== record.id))}
+                                                        className="text-red-500 hover:text-red-700 p-1" title="Delete record">✕</button>
+                                                </div>
+                                            ))}
+                                        </div>
+                                    )}
                                 </div>
                             </div>
                         </div>
