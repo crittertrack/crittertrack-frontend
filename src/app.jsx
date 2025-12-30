@@ -7829,7 +7829,10 @@ const AnimalForm = ({
                         {/* Stud Information (Males, Intersex, Unknown) */}
                         {(formData.gender === 'Male' || formData.gender === 'Intersex' || formData.gender === 'Unknown') && (
                             <div className="bg-gray-50 p-4 rounded-lg border border-gray-200 space-y-4">
-                                <h3 className="text-lg font-semibold text-gray-700 border-b pb-2">Stud Information {formData.isNeutered && <span className="text-xs font-normal text-gray-500">(History)</span>}</h3>
+                                <div className="flex items-start justify-between">
+                                    <h3 className="text-lg font-semibold text-gray-700 border-b pb-2 flex-1">Stud Information {formData.isNeutered && <span className="text-xs font-normal text-gray-500">(History)</span>}</h3>
+                                    {formData.gender === 'Unknown' && <span className="text-xs bg-blue-100 text-blue-700 px-2 py-1 rounded ml-2 whitespace-nowrap">Sperm Fertility</span>}
+                                </div>
                                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                                     <label className="flex items-center space-x-2 cursor-pointer p-3 border rounded-lg bg-white hover:bg-gray-50 transition">
                                         <input
@@ -7844,7 +7847,7 @@ const AnimalForm = ({
                                     </label>
                                     
                                     <div>
-                                        <label className="block text-sm font-medium text-gray-700 mb-2">Fertility Status</label>
+                                        <label className="block text-sm font-medium text-gray-700 mb-2">Sire Fertility Status <span className="text-xs text-gray-500 font-normal">(Sperm Production)</span></label>
                                         <select name="fertilityStatus" value={formData.fertilityStatus} onChange={handleChange} 
                                             className="block w-full p-2 border border-gray-300 rounded-md shadow-sm focus:ring-primary focus:border-primary">
                                             <option value="Unknown">Unknown</option>
@@ -7882,10 +7885,13 @@ const AnimalForm = ({
                         {/* Breeding History & Fertility (Females, Intersex, Unknown) */}
                         {(formData.gender === 'Female' || formData.gender === 'Intersex' || formData.gender === 'Unknown') && (
                             <div className="bg-gray-50 p-4 rounded-lg border border-gray-200 space-y-4">
-                                <h3 className="text-lg font-semibold text-gray-700 border-b pb-2">Breeding History & Fertility {formData.isNeutered && <span className="text-xs font-normal text-gray-500">(History)</span>}</h3>
+                                <div className="flex items-start justify-between">
+                                    <h3 className="text-lg font-semibold text-gray-700 border-b pb-2 flex-1">Breeding History & Fertility {formData.isNeutered && <span className="text-xs font-normal text-gray-500">(History)</span>}</h3>
+                                    {formData.gender === 'Unknown' && <span className="text-xs bg-pink-100 text-pink-700 px-2 py-1 rounded ml-2 whitespace-nowrap">Egg Fertility</span>}
+                                </div>
                                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                                     <div>
-                                        <label className="block text-sm font-medium text-gray-700 mb-2">Fertility Status</label>
+                                        <label className="block text-sm font-medium text-gray-700 mb-2">Dam Fertility Status <span className="text-xs text-gray-500 font-normal">(Egg/Gestation)</span></label>
                                         <select name="fertilityStatus" value={formData.fertilityStatus} onChange={handleChange} 
                                             className="block w-full p-2 border border-gray-300 rounded-md shadow-sm focus:ring-primary focus:border-primary">
                                             <option value="Unknown">Unknown</option>
