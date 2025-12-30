@@ -2488,19 +2488,22 @@ const ViewOnlyAnimalDetail = ({ animal, onClose, API_BASE_URL, onViewProfile }) 
                                                 </ul>
                                             </div>
                                         )}
-                                        {animal.vetVisits && (
-                                            <div>
-                                                <strong className="text-sm">Veterinary Visits:</strong>
-                                                <ul className="text-sm mt-1 list-disc list-inside space-y-1">
-                                                    {parseHealthRecords(animal.vetVisits).map((visit, idx) => (
-                                                        <li key={idx} className="text-gray-700">
-                                                            {visit.date && `${new Date(visit.date).toLocaleDateString()}: `}{visit.reason}
-                                                            {visit.notes && <span className="text-gray-600"> - {visit.notes}</span>}
-                                                        </li>
-                                                    ))}
-                                                </ul>
-                                            </div>
-                                        )}
+                                        {animal.vetVisits && (() => {
+                                            const parsed = parseHealthRecords(animal.vetVisits);
+                                            return parsed && parsed.length > 0 ? (
+                                                <div>
+                                                    <strong className="text-sm">Veterinary Visits:</strong>
+                                                    <ul className="text-sm mt-1 list-disc list-inside space-y-1">
+                                                        {parsed.map((visit, idx) => (
+                                                            <li key={idx} className="text-gray-700">
+                                                                {visit.date && `${new Date(visit.date).toLocaleDateString()}: `}{visit.reason}
+                                                                {visit.notes && <span className="text-gray-600"> - {visit.notes}</span>}
+                                                            </li>
+                                                        ))}
+                                                    </ul>
+                                                </div>
+                                            ) : null;
+                                        })()}
                                         {animal.primaryVet && (
                                             <div>
                                                 <strong className="text-sm">Primary Veterinarian:</strong>
