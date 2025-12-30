@@ -1724,7 +1724,7 @@ const PublicProfileView = ({ profile, onBack, onViewAnimal, API_BASE_URL, onStar
                                 <button 
                                     onClick={() => setGenderFilters(prev => ({ ...prev, Unknown: !prev.Unknown }))}
                                     className={`p-2 rounded-lg transition duration-150 shadow-sm ${
-                                        genderFilters.Unknown ? 'bg-gray-400' : 'bg-gray-300 hover:bg-gray-400'
+                                        genderFilters.Unknown ? 'bg-teal-400' : 'bg-gray-300 hover:bg-gray-400'
                                     }`}
                                     title="Unknown"
                                 >
