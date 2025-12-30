@@ -6852,10 +6852,10 @@ const AnimalForm = ({
                                     type="button"
                                     onClick={() => toggleSectionPrivacy('owner')}
                                     className={`px-3 py-1 rounded-full text-xs font-medium transition ${
-                                        sectionPrivacy[animalToEdit.id_public]?.owner ? 'bg-blue-100 text-blue-800' : 'bg-gray-100 text-gray-800'
+                                        sectionPrivacy[animalToEdit?.id_public]?.owner ? 'bg-blue-100 text-blue-800' : 'bg-gray-100 text-gray-800'
                                     }`}
                                 >
-                                    {sectionPrivacy[animalToEdit.id_public]?.owner ? '🌍 Public' : '🔒 Private'}
+                                    {sectionPrivacy[animalToEdit?.id_public]?.owner ? '🌍 Public' : '🔒 Private'}
                                 </button>
                             </div>
                             <div>
@@ -6896,10 +6896,10 @@ const AnimalForm = ({
                                     type="button"
                                     onClick={() => toggleSectionPrivacy('appearance')}
                                     className={`px-3 py-1 rounded-full text-xs font-medium transition ${
-                                        sectionPrivacy[animalToEdit.id_public]?.appearance ? 'bg-blue-100 text-blue-800' : 'bg-gray-100 text-gray-800'
+                                        sectionPrivacy[animalToEdit?.id_public]?.appearance ? 'bg-blue-100 text-blue-800' : 'bg-gray-100 text-gray-800'
                                     }`}
                                 >
-                                    {sectionPrivacy[animalToEdit.id_public]?.appearance ? '🌍 Public' : '🔒 Private'}
+                                    {sectionPrivacy[animalToEdit?.id_public]?.appearance ? '🌍 Public' : '🔒 Private'}
                                 </button>
                             </div>
                             <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
@@ -6942,10 +6942,10 @@ const AnimalForm = ({
                                     type="button"
                                     onClick={() => toggleSectionPrivacy('genetics')}
                                     className={`px-3 py-1 rounded-full text-xs font-medium transition ${
-                                        sectionPrivacy[animalToEdit.id_public]?.genetics ? 'bg-blue-100 text-blue-800' : 'bg-gray-100 text-gray-800'
+                                        sectionPrivacy[animalToEdit?.id_public]?.genetics ? 'bg-blue-100 text-blue-800' : 'bg-gray-100 text-gray-800'
                                     }`}
                                 >
-                                    {sectionPrivacy[animalToEdit.id_public]?.genetics ? '🌍 Public' : '🔒 Private'}
+                                    {sectionPrivacy[animalToEdit?.id_public]?.genetics ? '🌍 Public' : '🔒 Private'}
                                 </button>
                             </div>
                             <GeneticCodeBuilder
@@ -6965,10 +6965,10 @@ const AnimalForm = ({
                                     type="button"
                                     onClick={() => toggleSectionPrivacy('lifeStage')}
                                     className={`px-3 py-1 rounded-full text-xs font-medium transition ${
-                                        sectionPrivacy[animalToEdit.id_public]?.lifeStage ? 'bg-blue-100 text-blue-800' : 'bg-gray-100 text-gray-800'
+                                        sectionPrivacy[animalToEdit?.id_public]?.lifeStage ? 'bg-blue-100 text-blue-800' : 'bg-gray-100 text-gray-800'
                                     }`}
                                 >
-                                    {sectionPrivacy[animalToEdit.id_public]?.lifeStage ? '🌍 Public' : '🔒 Private'}
+                                    {sectionPrivacy[animalToEdit?.id_public]?.lifeStage ? '🌍 Public' : '🔒 Private'}
                                 </button>
                             </div>
                             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -6994,10 +6994,10 @@ const AnimalForm = ({
                                     type="button"
                                     onClick={() => toggleSectionPrivacy('measurements')}
                                     className={`px-3 py-1 rounded-full text-xs font-medium transition ${
-                                        sectionPrivacy[animalToEdit.id_public]?.measurements ? 'bg-blue-100 text-blue-800' : 'bg-gray-100 text-gray-800'
+                                        sectionPrivacy[animalToEdit?.id_public]?.measurements ? 'bg-blue-100 text-blue-800' : 'bg-gray-100 text-gray-800'
                                     }`}
                                 >
-                                    {sectionPrivacy[animalToEdit.id_public]?.measurements ? '🌍 Public' : '🔒 Private'}
+                                    {sectionPrivacy[animalToEdit?.id_public]?.measurements ? '🌍 Public' : '🔒 Private'}
                                 </button>
                             </div>
                             
@@ -7314,10 +7314,10 @@ const AnimalForm = ({
                                     type="button"
                                     onClick={() => toggleSectionPrivacy('identification')}
                                     className={`px-3 py-1 rounded-full text-xs font-medium transition ${
-                                        sectionPrivacy[animalToEdit.id_public]?.identification ? 'bg-blue-100 text-blue-800' : 'bg-gray-100 text-gray-800'
+                                        sectionPrivacy[animalToEdit?.id_public]?.identification ? 'bg-blue-100 text-blue-800' : 'bg-gray-100 text-gray-800'
                                     }`}
                                 >
-                                    {sectionPrivacy[animalToEdit.id_public]?.identification ? '🌍 Public' : '🔒 Private'}
+                                    {sectionPrivacy[animalToEdit?.id_public]?.identification ? '🌍 Public' : '🔒 Private'}
                                 </button>
                             </div>
                             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -7484,10 +7484,10 @@ const AnimalForm = ({
                                     type="button"
                                     onClick={() => toggleSectionPrivacy('origin')}
                                     className={`px-3 py-1 rounded-full text-xs font-medium transition ${
-                                        sectionPrivacy[animalToEdit.id_public]?.origin ? 'bg-blue-100 text-blue-800' : 'bg-gray-100 text-gray-800'
+                                        sectionPrivacy[animalToEdit?.id_public]?.origin ? 'bg-blue-100 text-blue-800' : 'bg-gray-100 text-gray-800'
                                     }`}
                                 >
-                                    {sectionPrivacy[animalToEdit.id_public]?.origin ? '🌍 Public' : '🔒 Private'}
+                                    {sectionPrivacy[animalToEdit?.id_public]?.origin ? '🌍 Public' : '🔒 Private'}
                                 </button>
                             </div>
                             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -7547,10 +7547,10 @@ const AnimalForm = ({
                                     type="button"
                                     onClick={() => toggleSectionPrivacy('reproductive')}
                                     className={`px-3 py-1 rounded-full text-xs font-medium transition ${
-                                        sectionPrivacy[animalToEdit.id_public]?.reproductive ? 'bg-blue-100 text-blue-800' : 'bg-gray-100 text-gray-800'
+                                        sectionPrivacy[animalToEdit?.id_public]?.reproductive ? 'bg-blue-100 text-blue-800' : 'bg-gray-100 text-gray-800'
                                     }`}
                                 >
-                                    {sectionPrivacy[animalToEdit.id_public]?.reproductive ? '🌍 Public' : '🔒 Private'}
+                                    {sectionPrivacy[animalToEdit?.id_public]?.reproductive ? '🌍 Public' : '🔒 Private'}
                                 </button>
                             </div>
                             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -7700,10 +7700,10 @@ const AnimalForm = ({
                                     type="button"
                                     onClick={() => toggleSectionPrivacy('health')}
                                     className={`px-3 py-1 rounded-full text-xs font-medium transition ${
-                                        sectionPrivacy[animalToEdit.id_public]?.health ? 'bg-blue-100 text-blue-800' : 'bg-gray-100 text-gray-800'
+                                        sectionPrivacy[animalToEdit?.id_public]?.health ? 'bg-blue-100 text-blue-800' : 'bg-gray-100 text-gray-800'
                                     }`}
                                 >
-                                    {sectionPrivacy[animalToEdit.id_public]?.health ? '🌍 Public' : '🔒 Private'}
+                                    {sectionPrivacy[animalToEdit?.id_public]?.health ? '🌍 Public' : '🔒 Private'}
                                 </button>
                             </div>
                             
@@ -7936,10 +7936,10 @@ const AnimalForm = ({
                                     type="button"
                                     onClick={() => toggleSectionPrivacy('medicalHistory')}
                                     className={`px-3 py-1 rounded-full text-xs font-medium transition ${
-                                        sectionPrivacy[animalToEdit.id_public]?.medicalHistory ? 'bg-blue-100 text-blue-800' : 'bg-gray-100 text-gray-800'
+                                        sectionPrivacy[animalToEdit?.id_public]?.medicalHistory ? 'bg-blue-100 text-blue-800' : 'bg-gray-100 text-gray-800'
                                     }`}
                                 >
-                                    {sectionPrivacy[animalToEdit.id_public]?.medicalHistory ? '🌍 Public' : '🔒 Private'}
+                                    {sectionPrivacy[animalToEdit?.id_public]?.medicalHistory ? '🌍 Public' : '🔒 Private'}
                                 </button>
                             </div>
                             <div className="space-y-4">
@@ -8120,10 +8120,10 @@ const AnimalForm = ({
                                     type="button"
                                     onClick={() => toggleSectionPrivacy('husbandry')}
                                     className={`px-3 py-1 rounded-full text-xs font-medium transition ${
-                                        sectionPrivacy[animalToEdit.id_public]?.husbandry ? 'bg-blue-100 text-blue-800' : 'bg-gray-100 text-gray-800'
+                                        sectionPrivacy[animalToEdit?.id_public]?.husbandry ? 'bg-blue-100 text-blue-800' : 'bg-gray-100 text-gray-800'
                                     }`}
                                 >
-                                    {sectionPrivacy[animalToEdit.id_public]?.husbandry ? '🌍 Public' : '🔒 Private'}
+                                    {sectionPrivacy[animalToEdit?.id_public]?.husbandry ? '🌍 Public' : '🔒 Private'}
                                 </button>
                             </div>
                             
@@ -8190,10 +8190,10 @@ const AnimalForm = ({
                                     type="button"
                                     onClick={() => toggleSectionPrivacy('environment')}
                                     className={`px-3 py-1 rounded-full text-xs font-medium transition ${
-                                        sectionPrivacy[animalToEdit.id_public]?.environment ? 'bg-blue-100 text-blue-800' : 'bg-gray-100 text-gray-800'
+                                        sectionPrivacy[animalToEdit?.id_public]?.environment ? 'bg-blue-100 text-blue-800' : 'bg-gray-100 text-gray-800'
                                     }`}
                                 >
-                                    {sectionPrivacy[animalToEdit.id_public]?.environment ? '🌍 Public' : '🔒 Private'}
+                                    {sectionPrivacy[animalToEdit?.id_public]?.environment ? '🌍 Public' : '🔒 Private'}
                                 </button>
                             </div>
                             <div className="space-y-4">
@@ -8240,10 +8240,10 @@ const AnimalForm = ({
                                     type="button"
                                     onClick={() => toggleSectionPrivacy('behavior')}
                                     className={`px-3 py-1 rounded-full text-xs font-medium transition ${
-                                        sectionPrivacy[animalToEdit.id_public]?.behavior ? 'bg-blue-100 text-blue-800' : 'bg-gray-100 text-gray-800'
+                                        sectionPrivacy[animalToEdit?.id_public]?.behavior ? 'bg-blue-100 text-blue-800' : 'bg-gray-100 text-gray-800'
                                     }`}
                                 >
-                                    {sectionPrivacy[animalToEdit.id_public]?.behavior ? '🌍 Public' : '🔒 Private'}
+                                    {sectionPrivacy[animalToEdit?.id_public]?.behavior ? '🌍 Public' : '🔒 Private'}
                                 </button>
                             </div>
                             <div className="space-y-4">
@@ -8278,10 +8278,10 @@ const AnimalForm = ({
                                     type="button"
                                     onClick={() => toggleSectionPrivacy('activity')}
                                     className={`px-3 py-1 rounded-full text-xs font-medium transition ${
-                                        sectionPrivacy[animalToEdit.id_public]?.activity ? 'bg-blue-100 text-blue-800' : 'bg-gray-100 text-gray-800'
+                                        sectionPrivacy[animalToEdit?.id_public]?.activity ? 'bg-blue-100 text-blue-800' : 'bg-gray-100 text-gray-800'
                                     }`}
                                 >
-                                    {sectionPrivacy[animalToEdit.id_public]?.activity ? '🌍 Public' : '🔒 Private'}
+                                    {sectionPrivacy[animalToEdit?.id_public]?.activity ? '🌍 Public' : '🔒 Private'}
                                 </button>
                             </div>
                             <div>
@@ -8308,10 +8308,10 @@ const AnimalForm = ({
                                     type="button"
                                     onClick={() => toggleSectionPrivacy('remarks')}
                                     className={`px-3 py-1 rounded-full text-xs font-medium transition ${
-                                        sectionPrivacy[animalToEdit.id_public]?.remarks ? 'bg-blue-100 text-blue-800' : 'bg-gray-100 text-gray-800'
+                                        sectionPrivacy[animalToEdit?.id_public]?.remarks ? 'bg-blue-100 text-blue-800' : 'bg-gray-100 text-gray-800'
                                     }`}
                                 >
-                                    {sectionPrivacy[animalToEdit.id_public]?.remarks ? '🌍 Public' : '🔒 Private'}
+                                    {sectionPrivacy[animalToEdit?.id_public]?.remarks ? '🌍 Public' : '🔒 Private'}
                                 </button>
                             </div>
                             <label className="block text-sm font-medium text-gray-700 mb-2">Remarks / Notes</label>
@@ -8334,10 +8334,10 @@ const AnimalForm = ({
                                     type="button"
                                     onClick={() => toggleSectionPrivacy('endOfLife')}
                                     className={`px-3 py-1 rounded-full text-xs font-medium transition ${
-                                        sectionPrivacy[animalToEdit.id_public]?.endOfLife ? 'bg-blue-100 text-blue-800' : 'bg-gray-100 text-gray-800'
+                                        sectionPrivacy[animalToEdit?.id_public]?.endOfLife ? 'bg-blue-100 text-blue-800' : 'bg-gray-100 text-gray-800'
                                     }`}
                                 >
-                                    {sectionPrivacy[animalToEdit.id_public]?.endOfLife ? '🌍 Public' : '🔒 Private'}
+                                    {sectionPrivacy[animalToEdit?.id_public]?.endOfLife ? '🌍 Public' : '🔒 Private'}
                                 </button>
                             </div>
                             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
