@@ -10459,7 +10459,7 @@ const AnimalList = ({ authToken, showModalMessage, onEditAnimal, onViewAnimal, f
                                         break;
                                     case 'Unknown':
                                         Icon = Circle;
-                                        bgColor = isSelected ? 'bg-gray-600' : 'bg-gray-300 hover:bg-gray-400';
+                                        bgColor = isSelected ? 'bg-teal-400' : 'bg-gray-300 hover:bg-gray-400';
                                         break;
                                     default:
                                         Icon = Circle;
