@@ -779,12 +779,13 @@ const GETTING_STARTED_LESSONS = [
       {
         stepNumber: 7,
         title: 'Stud Information',
-        content: 'If your animal is a stud (breeding male), fill in details here: whether he\'s available for breeding and his stud fee (if you offer breeding services).',
+        content: 'If your animal is a stud (breeding male), track his fertility status and genetics information here. To make him available for breeding in the showcase, go to the Status & Privacy tab and enable "Available for Stud" with a fee.',
         highlightElement: '[data-tutorial-target="stud-info-section"]',
         tips: [
-          'Available for Breeding: checkbox',
-          'Stud Fee: enter amount if applicable',
-          'Optional for breeding males'
+          'Track sire fertility status',
+          'Add genetics/fertility notes',
+          'Use Status tab to set "For Stud" and fee',
+          'Public + "For Stud" = Appears in showcase'
         ]
       },
       {
