@@ -7501,12 +7501,14 @@ const AnimalForm = ({
                                 <div>
                                     <label className="block text-sm font-medium text-gray-700">Breed</label>
                                     <input type="text" name="breed" value={formData.breed} onChange={handleChange} 
+                                        data-tutorial-target="breed-select"
                                         className="mt-1 block w-full p-2 border border-gray-300 rounded-md shadow-sm focus:ring-primary focus:border-primary" />
                                 </div>
                                 
                                 <div className="md:col-span-2">
                                     <label className="block text-sm font-medium text-gray-700">Strain <span className="text-xs text-gray-500">(rodents)</span></label>
                                     <input type="text" name="strain" value={formData.strain} onChange={handleChange} 
+                                        data-tutorial-target="strain-input"
                                         className="mt-1 block w-full p-2 border border-gray-300 rounded-md shadow-sm focus:ring-primary focus:border-primary" 
                                         placeholder="e.g., C57BL/6, Wistar, Syrian" />
                                 </div>

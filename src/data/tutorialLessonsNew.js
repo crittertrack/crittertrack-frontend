@@ -553,7 +553,7 @@ const GETTING_STARTED_LESSONS = [
       {
         stepNumber: 6,
         title: 'Breed Selection',
-        content: 'Select the breed of your animal if applicable. Breed is a sub-category of species - think of it like: Species = Mouse > Breed = Fancy Mouse, or Species = Dog > Breed = Labrador. Breeds are only applicable for certain species like dogs, rabbits, cats, and fancy mice.',
+        content: 'Fill in the breed of your animal if applicable.',
         highlightElement: '[data-tutorial-target="breed-select"]',
         tips: [
           'Breeds are species-specific',
