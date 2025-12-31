@@ -2024,6 +2024,19 @@ const ViewOnlyAnimalDetail = ({ animal, onClose, API_BASE_URL, onViewProfile }) 
                                             {animal.suffix ? ` ${animal.suffix}` : ''}
                                         </h2>
 
+                                        {/* Stud Fee if Available for Breeding */}
+                                        {animal.availableForBreeding && (animal.studFeeCurrency || animal.studFeeAmount) && (
+                                            <div className="bg-blue-50 border border-blue-200 rounded-lg p-3 flex items-center gap-2">
+                                                <span className="text-lg">🫘</span>
+                                                <div>
+                                                    <p className="text-sm font-semibold text-gray-700">Available for Stud</p>
+                                                    <p className="text-sm text-gray-600">
+                                                        {animal.studFeeCurrency === 'Negotiable' ? 'Negotiable' : `${animal.studFeeCurrency === 'USD' ? '$' : animal.studFeeCurrency === 'EUR' ? '€' : animal.studFeeCurrency === 'GBP' ? '£' : animal.studFeeCurrency === 'CAD' ? 'C$' : animal.studFeeCurrency === 'AUD' ? 'A$' : animal.studFeeCurrency === 'JPY' ? '¥' : animal.studFeeCurrency}${animal.studFeeAmount ? ` ${animal.studFeeAmount}` : ''}`}
+                                                    </p>
+                                                </div>
+                                            </div>
+                                        )}
+
                                         {/* Appearance */}
                                         {(animal.color || animal.coat || animal.coatPattern || animal.earset) && (
                                             <p className="text-sm text-gray-700">
@@ -5556,7 +5569,8 @@ const AnimalForm = ({
             // Stud/Fertility fields (sire role)
             isStudAnimal: animalToEdit.isStudAnimal || false,
             availableForBreeding: animalToEdit.availableForBreeding || false,
-            studFee: animalToEdit.studFee || '',
+            studFeeCurrency: animalToEdit.studFeeCurrency || 'USD',
+            studFeeAmount: animalToEdit.studFeeAmount || '',
             fertilityStatus: animalToEdit.fertilityStatus || 'Unknown',
             lastMatingDate: animalToEdit.lastMatingDate ? new Date(animalToEdit.lastMatingDate).toISOString().substring(0, 10) : '',
             successfulMatings: animalToEdit.successfulMatings || '',
@@ -5643,7 +5657,8 @@ const AnimalForm = ({
             // Stud/Fertility fields (sire role)
             isStudAnimal: false,
             availableForBreeding: false,
-            studFee: '',
+            studFeeCurrency: 'USD',
+            studFeeAmount: '',
             fertilityStatus: 'Unknown',
             lastMatingDate: '',
             successfulMatings: '',
@@ -7922,9 +7937,21 @@ const AnimalForm = ({
                                     
                                     <div>
                                         <label className="block text-sm font-medium text-gray-700 mb-2">Stud Fee</label>
-                                        <input type="text" name="studFee" value={formData.studFee || ''} onChange={handleChange} 
-                                            className="block w-full p-2 border border-gray-300 rounded-md shadow-sm focus:ring-primary focus:border-primary" 
-                                            placeholder="e.g., $500 or negotiable" />
+                                        <div className="flex gap-2">
+                                            <select name="studFeeCurrency" value={formData.studFeeCurrency || 'USD'} onChange={handleChange} 
+                                                className="block w-24 p-2 border border-gray-300 rounded-md shadow-sm focus:ring-primary focus:border-primary">
+                                                <option value="USD">USD ($)</option>
+                                                <option value="EUR">EUR (€)</option>
+                                                <option value="GBP">GBP (£)</option>
+                                                <option value="CAD">CAD (C$)</option>
+                                                <option value="AUD">AUD (A$)</option>
+                                                <option value="JPY">JPY (¥)</option>
+                                                <option value="Negotiable">Negotiable</option>
+                                            </select>
+                                            <input type="number" name="studFeeAmount" value={formData.studFeeAmount || ''} onChange={handleChange} 
+                                                className="block flex-1 p-2 border border-gray-300 rounded-md shadow-sm focus:ring-primary focus:border-primary" 
+                                                placeholder="Amount" min="0" step="0.01" disabled={formData.studFeeCurrency === 'Negotiable'} />
+                                        </div>
                                     </div>
                                     
                                     <div className="md:col-span-2">
@@ -11743,6 +11770,10 @@ const App = () => {
     const [availableAnimals, setAvailableAnimals] = useState([]);
     const [currentAvailableIndex, setCurrentAvailableIndex] = useState(0);
     
+    // Available stud animals showcase
+    const [studAnimals, setStudAnimals] = useState([]);
+    const [currentStudIndex, setCurrentStudIndex] = useState(0);
+    
     // Transfer modal states
     const [showTransferModal, setShowTransferModal] = useState(false);
     const [transferAnimal, setTransferAnimal] = useState(null);
@@ -12125,6 +12156,71 @@ const App = () => {
         return () => {
             clearInterval(refreshInterval);
             delete window.refreshAvailableAnimals;
+        };
+    }, [authToken, API_BASE_URL]);
+
+    // Fetch and cycle through stud animals
+    useEffect(() => {
+        const fetchStudAnimals = async () => {
+            if (authToken) {
+                try {
+                    console.log('[Stud Animals] Fetching stud animals...');
+                    // Get public animals with status=Available AND availableForBreeding=true
+                    const response = await axios.get(`${API_BASE_URL}/public/global/animals`);
+                    console.log('[Stud Animals] API Response count:', response.data?.length);
+                    if (response.data && response.data.length > 0) {
+                        // Filter for public animals that are available for stud
+                        const filtered = response.data.filter(animal => 
+                            animal.availableForBreeding === true || animal.availableForBreeding === 'true'
+                        );
+                        console.log('[Stud Animals] Filtered count:', filtered.length, 'animals');
+
+                        // Enrich animals with owner country
+                        const ownerIds = [...new Set(filtered.map(animal => animal.ownerId_public).filter(Boolean))];
+                        const ownerProfiles = await Promise.all(ownerIds.map(async (id_public) => {
+                            try {
+                                const profileResp = await axios.get(`${API_BASE_URL}/public/profile/${id_public}`);
+                                return { id_public, country: profileResp.data?.country || null };
+                            } catch (err) {
+                                console.warn('[Stud Animals] Failed to fetch profile for', id_public, err?.message);
+                                return { id_public, country: null };
+                            }
+                        }));
+                        const ownerCountryMap = new Map(ownerProfiles.map(p => [p.id_public, p.country]));
+                        const enriched = filtered.map(animal => ({
+                            ...animal,
+                            ownerCountry: ownerCountryMap.get(animal.ownerId_public) || null,
+                        }));
+
+                        // Shuffle to show random animals
+                        const shuffled = enriched.sort(() => Math.random() - 0.5);
+                        setStudAnimals(shuffled);
+                        setCurrentStudIndex(0);
+                    } else {
+                        console.log('[Stud Animals] No animals found in response');
+                        setStudAnimals([]);
+                    }
+                } catch (error) {
+                    console.error('[Stud Animals] Failed to fetch:', error);
+                    setStudAnimals([]);
+                }
+            } else {
+                console.log('[Stud Animals] No authToken, skipping fetch');
+            }
+        };
+        
+        // Store the function for manual refresh
+        window.refreshStudAnimals = fetchStudAnimals;
+        
+        // Initial fetch
+        fetchStudAnimals();
+        
+        // Continuous refresh every 2 minutes
+        const refreshInterval = setInterval(fetchStudAnimals, 120000);
+        
+        return () => {
+            clearInterval(refreshInterval);
+            delete window.refreshStudAnimals;
         };
     }, [authToken, API_BASE_URL]);
 
@@ -12889,7 +12985,7 @@ const App = () => {
                     >
                         <div className="bg-gradient-to-r from-primary to-accent p-2 relative">
                             <p className="text-xs font-semibold text-black text-center flex items-center justify-center gap-1">
-                                <span>🏷️</span> Available Now
+                                <span>🏷️</span> For Sale
                             </p>
                             <button
                                 onClick={(e) => {
@@ -12932,6 +13028,80 @@ const App = () => {
                             <div className="mt-2 flex items-center justify-between">
                                 <span className="text-xs text-gray-500">
                                     {availableAnimals[currentAvailableIndex].gender}
+                                </span>
+                                <span className="text-xs text-accent font-medium">
+                                    Click to view →
+                                </span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            )}
+            
+            {/* Stud Animal Showcase - Bottom Right */}
+            {currentView === 'list' && (() => {
+                console.log('[Stud Animals Showcase] studAnimals.length:', studAnimals.length, 'currentIndex:', currentStudIndex);
+                return studAnimals.length > 0 && studAnimals[currentStudIndex];
+            })() && (
+                <div className="hidden lg:block absolute bottom-20 right-4 z-[60] w-48">
+                    <div 
+                        key={currentStudIndex}
+                        onClick={() => setViewingPublicAnimal(studAnimals[currentStudIndex])}
+                        className="bg-white rounded-xl shadow-lg overflow-hidden cursor-pointer hover:shadow-xl transition-all hover:scale-[1.02] animate-fadeInScale"
+                        style={{
+                            animation: 'fadeInScale 0.5s ease-in-out'
+                        }}
+                    >
+                        <div className="bg-gradient-to-r from-purple-500 to-pink-500 p-2 relative">
+                            <p className="text-xs font-semibold text-white text-center flex items-center justify-center gap-1">
+                                <span>🫘</span> For Stud
+                            </p>
+                            <button
+                                onClick={(e) => {
+                                    e.stopPropagation();
+                                    window.refreshStudAnimals && window.refreshStudAnimals();
+                                }}
+                                className="absolute right-1 top-1/2 -translate-y-1/2 p-1 hover:bg-white/20 rounded transition-colors"
+                                title="Refresh stud animals"
+                            >
+                                <RefreshCw size={14} className="text-white" />
+                            </button>
+                        </div>
+                        {studAnimals[currentStudIndex].imageUrl && (
+                            <img 
+                                src={studAnimals[currentStudIndex].imageUrl} 
+                                alt={studAnimals[currentStudIndex].name}
+                                className="w-full h-32 object-cover"
+                            />
+                        )}
+                        <div className="p-2">
+                            <div className="flex items-start gap-2">
+                                <div className="flex-1 min-w-0">
+                                    <p className="font-semibold text-sm text-gray-800 truncate">
+                                        {studAnimals[currentStudIndex].prefix && `${studAnimals[currentStudIndex].prefix} `}
+                                        {studAnimals[currentStudIndex].name}
+                                        {studAnimals[currentStudIndex].suffix && ` ${studAnimals[currentStudIndex].suffix}`}
+                                    </p>
+                                    <p className="text-xs text-gray-600 truncate">
+                                        {studAnimals[currentStudIndex].species}
+                                        {studAnimals[currentStudIndex].variety && ` • ${studAnimals[currentStudIndex].variety}`}
+                                    </p>
+                                </div>
+                                {studAnimals[currentStudIndex].ownerCountry && (
+                                    <span
+                                        className={`${getCountryFlag(studAnimals[currentStudIndex].ownerCountry)} inline-block h-4 w-6 flex-shrink-0 mt-1`}
+                                        title={getCountryName(studAnimals[currentStudIndex].ownerCountry)}
+                                    ></span>
+                                )}
+                            </div>
+                            {studAnimals[currentStudIndex].studFeeAmount && (
+                                <p className="text-xs text-purple-600 font-semibold mt-1">
+                                    Fee: {studAnimals[currentStudIndex].studFeeCurrency === 'Negotiable' ? 'Negotiable' : `${studAnimals[currentStudIndex].studFeeCurrency === 'USD' ? '$' : studAnimals[currentStudIndex].studFeeCurrency === 'EUR' ? '€' : ''}${studAnimals[currentStudIndex].studFeeAmount}`}
+                                </p>
+                            )}
+                            <div className="mt-2 flex items-center justify-between">
+                                <span className="text-xs text-gray-500">
+                                    {studAnimals[currentStudIndex].gender}
                                 </span>
                                 <span className="text-xs text-accent font-medium">
                                     Click to view →
