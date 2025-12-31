@@ -7883,7 +7883,7 @@ const AnimalForm = ({
 
                         {/* Stud Information - Only when Stud Animal/Can Sire is checked and not neutered */}
                         {!formData.isNeutered && ((formData.gender === 'Male' && formData.isStudAnimal) || (formData.gender === 'Intersex' && formData.isStudAnimal) || (formData.gender === 'Unknown' && formData.isStudAnimal)) && (
-                            <div className="bg-gray-50 p-4 rounded-lg border border-gray-200 space-y-4">
+                            <div className="bg-gray-50 p-4 rounded-lg border border-gray-200 space-y-4" data-tutorial-target="stud-info-section">
                                 <div className="flex items-start justify-between">
                                     <h3 className="text-lg font-semibold text-gray-700 border-b pb-2 flex-1">Stud Information <span className="text-xs font-normal text-gray-500">(Active Status)</span></h3>
                                     {formData.gender === 'Unknown' && <span className="text-xs bg-blue-100 text-blue-700 px-2 py-1 rounded ml-2 whitespace-nowrap">Sperm Fertility</span>}
@@ -7913,7 +7913,7 @@ const AnimalForm = ({
 
                         {/* Dam Information - Only when Breeding Dam/Can Bear is checked and not neutered/spayed */}
                         {!formData.isNeutered && ((formData.gender === 'Female' && formData.isDamAnimal) || (formData.gender === 'Intersex' && formData.isDamAnimal) || (formData.gender === 'Unknown' && formData.isDamAnimal)) && (
-                            <div className="bg-gray-50 p-4 rounded-lg border border-gray-200 space-y-4">
+                            <div className="bg-gray-50 p-4 rounded-lg border border-gray-200 space-y-4" data-tutorial-target="dam-info-section">
                                 <div className="flex items-start justify-between">
                                     <h3 className="text-lg font-semibold text-gray-700 border-b pb-2 flex-1">Dam Information <span className="text-xs font-normal text-gray-500">(Active Status)</span></h3>
                                     {formData.gender === 'Unknown' && <span className="text-xs bg-pink-100 text-pink-700 px-2 py-1 rounded ml-2 whitespace-nowrap">Egg Fertility</span>}
@@ -7943,7 +7943,7 @@ const AnimalForm = ({
 
                         {/* Breeding History (All animals - Historical Data) */}
                         {(formData.gender === 'Male' || formData.gender === 'Female' || formData.gender === 'Intersex' || formData.gender === 'Unknown') && (
-                            <div className="bg-blue-50 p-4 rounded-lg border border-blue-200 space-y-4">
+                            <div className="bg-blue-50 p-4 rounded-lg border border-blue-200 space-y-4" data-tutorial-target="breeding-history-section">
                                 <h3 className="text-lg font-semibold text-gray-700 border-b pb-2 flex items-center"><span className="text-blue-600 mr-2">📋</span>Breeding History <span className="text-xs font-normal text-gray-500">(Historical Data)</span></h3>
                                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                                     {(formData.gender === 'Male' || formData.gender === 'Intersex' || formData.gender === 'Unknown') && (
