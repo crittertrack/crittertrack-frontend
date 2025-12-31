@@ -508,9 +508,9 @@ const GETTING_STARTED_LESSONS = [
       },
       {
         stepNumber: 2,
-        title: 'Identification Number',
-        content: 'Enter any custom identification number for your animal. This might be your personal breeder ID, a tattoo number, or any system you use. This is separate from the CritterTrack system ID.',
-        highlightElement: '[data-tutorial-target="custom-id-input"]',
+        title: 'Identification (Breeder ID)',
+        content: 'Enter any custom identification number for your animal. This might be your personal breeder ID, a tattoo number, or any system you use. This field is separate from the microchip number and pedigree registration ID - each serves a different purpose.',
+        highlightElement: '[data-tutorial-target="identification-breeder-id"]',
         tips: [
           'Optional but recommended',
           'Use your own numbering system',
@@ -541,9 +541,9 @@ const GETTING_STARTED_LESSONS = [
       },
       {
         stepNumber: 5,
-        title: 'Classification - Species',
-        content: 'This shows your selected species (Fancy Mouse). The species cannot be changed after creation - this ensures consistency in your records.',
-        highlightElement: '[data-tutorial-target="classification-species"]',
+        title: 'Classification Section',
+        content: 'The Classification section shows your selected species (Fancy Mouse) and lets you specify the breed. The species cannot be changed after creation - this ensures consistency in your records.',
+        highlightElement: '[data-tutorial-target="classification-section"]',
         tips: [
           'Species is permanent',
           'Set correctly during creation',
@@ -553,12 +553,12 @@ const GETTING_STARTED_LESSONS = [
       {
         stepNumber: 6,
         title: 'Breed Selection',
-        content: 'Select the breed of your animal if applicable. Fancy Mice have recognized breeds that determine show standards and genetic lines.',
+        content: 'Select the breed of your animal if applicable. Breed is a sub-category of species - think of it like: Species = Mouse > Breed = Fancy Mouse, or Species = Dog > Breed = Labrador. Breeds are only applicable for certain species like dogs, rabbits, cats, and fancy mice.',
         highlightElement: '[data-tutorial-target="breed-select"]',
         tips: [
           'Breeds are species-specific',
-          'Important for show animals',
-          'Helps with breeding decisions'
+          'Only applicable for certain species',
+          'Example: Species Mouse > Breed Fancy Mouse'
         ]
       },
       {
@@ -577,6 +577,7 @@ const GETTING_STARTED_LESSONS = [
         title: 'Tags Feature',
         content: 'Tags allow you to categorize and organize your animals. You can create custom tags like "Show Animal", "Breeding Stock", "Pet", "For Sale", etc. Add tags by typing and pressing Enter.',
         highlightElement: '[data-tutorial-target="tags-section"]',
+        actionType: 'click',
         tips: [
           'Tags help organize your collection',
           'Create your own tag system',
@@ -587,7 +588,7 @@ const GETTING_STARTED_LESSONS = [
       {
         stepNumber: 9,
         title: 'Move to Lineage Tab',
-        content: 'Let\'s continue to the Lineage tab to set up parent information. Click the "Lineage" tab.',
+        content: 'Let\'s continue to the Lineage tab to set up parent information and build your animal\'s pedigree. Click the "Lineage" tab.',
         highlightElement: '[data-tutorial-target="lineage-tab"]',
         actionType: 'click',
         tips: [

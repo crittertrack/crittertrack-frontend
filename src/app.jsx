@@ -7461,20 +7461,20 @@ const AnimalForm = ({
                                 </button>
                             </div>
                             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                                <div>
+                                <div data-tutorial-target="identification-breeder-id">
                                     <label className="block text-sm font-medium text-gray-700">Identification</label>
                                     <input type="text" name="breederyId" value={formData.breederyId} onChange={handleChange} 
                                         className="mt-1 block w-full p-2 border border-gray-300 rounded-md shadow-sm focus:ring-primary focus:border-primary" 
                                         placeholder="Breeder ID or Registry Code" />
                                 </div>
                                 
-                                <div>
+                                <div data-tutorial-target="microchip-input">
                                     <label className="block text-sm font-medium text-gray-700">Microchip Number</label>
                                     <input type="text" name="microchipNumber" value={formData.microchipNumber} onChange={handleChange} 
                                         className="mt-1 block w-full p-2 border border-gray-300 rounded-md shadow-sm focus:ring-primary focus:border-primary" />
                                 </div>
                                 
-                                <div className="md:col-span-2">
+                                <div className="md:col-span-2" data-tutorial-target="registration-id-input">
                                     <label className="block text-sm font-medium text-gray-700">Pedigree Registration ID</label>
                                     <input type="text" name="pedigreeRegistrationId" value={formData.pedigreeRegistrationId} onChange={handleChange} 
                                         className="mt-1 block w-full p-2 border border-gray-300 rounded-md shadow-sm focus:ring-primary focus:border-primary" />
@@ -7483,7 +7483,7 @@ const AnimalForm = ({
                         </div>
                         
                         {/* Classification */}
-                        <div className="bg-gray-50 p-4 rounded-lg border border-gray-200 space-y-4">
+                        <div className="bg-gray-50 p-4 rounded-lg border border-gray-200 space-y-4" data-tutorial-target="classification-section">
                             <h3 className="text-lg font-semibold text-gray-700 border-b pb-2">Classification</h3>
                             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                                 <div>
@@ -7509,7 +7509,7 @@ const AnimalForm = ({
                         </div>
                         
                         {/* Tags */}
-                        <div className="bg-gray-50 p-4 rounded-lg border border-gray-200" data-tutorial-target="tags-edit-section">
+                        <div className="bg-gray-50 p-4 rounded-lg border border-gray-200" data-tutorial-target="tags-section">
                             <label className="block text-sm font-medium text-gray-700 mb-2">Tags (Lines, Enclosures, etc)</label>
                             <input 
                                 type="text" 
