@@ -539,7 +539,7 @@ export const TutorialHighlight = ({ elementSelector, onHighlightClose, isModalOp
       {/* Highlight border only - no dark overlay */}
       <div
         ref={highlightRef}
-        className="fixed border-4 border-amber-400 rounded-lg pointer-events-none z-[99999] animate-pulse"
+        className="fixed border-4 border-amber-400 rounded-lg pointer-events-none z-[999999] animate-pulse"
         style={{
           top: position.top - padding,
           left: position.left - padding,
@@ -551,7 +551,7 @@ export const TutorialHighlight = ({ elementSelector, onHighlightClose, isModalOp
 
       {/* Pointer arrow */}
       <div
-        className="fixed bg-amber-400 text-amber-900 px-3 py-1 rounded-full text-sm font-bold z-[99999] animate-bounce"
+        className="fixed bg-amber-400 text-amber-900 px-3 py-1 rounded-full text-sm font-bold z-[999999] animate-bounce"
         style={{
           top: position.top - 40,
           left: position.left + position.width / 2 - 15,
