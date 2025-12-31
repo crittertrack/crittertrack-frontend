@@ -5529,6 +5529,7 @@ const AnimalForm = ({
             isPregnant: animalToEdit.isPregnant || false,
             isNursing: animalToEdit.isNursing || false,
             isInMating: animalToEdit.isInMating || false,
+            breedingRole: animalToEdit.breedingRole || 'both',
             isOwned: animalToEdit.isOwned ?? true,
             isDisplay: animalToEdit.isDisplay ?? false,
             // New fields for comprehensive mammal profile
@@ -5613,6 +5614,7 @@ const AnimalForm = ({
             isPregnant: false,
             isNursing: false,
             isInMating: false,
+            breedingRole: 'both',
             isOwned: true,
             isDisplay: true,
             // New fields defaults
@@ -7951,8 +7953,40 @@ const AnimalForm = ({
                         {(formData.gender === 'Male' || formData.gender === 'Female' || formData.gender === 'Intersex' || formData.gender === 'Unknown') && (
                             <div className="bg-blue-50 p-4 rounded-lg border border-blue-200 space-y-4" data-tutorial-target="breeding-history-section">
                                 <h3 className="text-lg font-semibold text-gray-700 border-b pb-2 flex items-center"><span className="text-blue-600 mr-2">📋</span>Breeding History <span className="text-xs font-normal text-gray-500">(Historical Data)</span></h3>
+                                
+                                {/* Breeding Role Selector - for animals with unclear breeding roles */}
+                                {(formData.gender === 'Intersex' || formData.gender === 'Unknown') && (
+                                    <div className="bg-white p-3 rounded-lg border border-blue-200 mb-4">
+                                        <label className="block text-sm font-medium text-gray-700 mb-3">Breeding Role</label>
+                                        <div className="flex gap-4">
+                                            <label className="flex items-center space-x-2">
+                                                <input type="radio" name="breedingRole" value="sire" 
+                                                    checked={formData.breedingRole === 'sire'} 
+                                                    onChange={(e) => setFormData({...formData, breedingRole: e.target.value})}
+                                                    className="w-4 h-4" />
+                                                <span className="text-sm">Sire Only</span>
+                                            </label>
+                                            <label className="flex items-center space-x-2">
+                                                <input type="radio" name="breedingRole" value="dam" 
+                                                    checked={formData.breedingRole === 'dam'} 
+                                                    onChange={(e) => setFormData({...formData, breedingRole: e.target.value})}
+                                                    className="w-4 h-4" />
+                                                <span className="text-sm">Dam Only</span>
+                                            </label>
+                                            <label className="flex items-center space-x-2">
+                                                <input type="radio" name="breedingRole" value="both" 
+                                                    checked={formData.breedingRole === 'both'} 
+                                                    onChange={(e) => setFormData({...formData, breedingRole: e.target.value})}
+                                                    className="w-4 h-4" />
+                                                <span className="text-sm">Both Sire & Dam</span>
+                                            </label>
+                                        </div>
+                                    </div>
+                                )}
+                                
                                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                                    {(formData.gender === 'Male' || formData.gender === 'Intersex' || formData.gender === 'Unknown') && (
+                                    {/* Sire/Male fields */}
+                                    {(formData.gender === 'Male' || formData.gender === 'Intersex' || (formData.gender === 'Unknown' && (formData.breedingRole === 'sire' || formData.breedingRole === 'both'))) && (
                                         <>
                                             <div>
                                                 <label className="block text-sm font-medium text-gray-700 mb-2">Last Mating Date <span className="text-xs text-gray-500 font-normal">(Sire)</span></label>
@@ -7966,17 +8000,11 @@ const AnimalForm = ({
                                                     className="block w-full p-2 border border-blue-200 rounded-md shadow-sm focus:ring-primary focus:border-primary" 
                                                     placeholder="Number of successful breedings" min="0" />
                                             </div>
-                                            
-                                            <div>
-                                                <label className="block text-sm font-medium text-gray-700 mb-2">Total Offspring Produced</label>
-                                                <input type="number" name="offspringCount" value={formData.offspringCount} onChange={handleChange} 
-                                                    className="block w-full p-2 border border-blue-200 rounded-md shadow-sm focus:ring-primary focus:border-primary" 
-                                                    placeholder="Total number of offspring" min="0" />
-                                            </div>
                                         </>
                                     )}
                                     
-                                    {(formData.gender === 'Female' || formData.gender === 'Intersex' || formData.gender === 'Unknown') && (
+                                    {/* Dam/Female fields */}
+                                    {(formData.gender === 'Female' || formData.gender === 'Intersex' || (formData.gender === 'Unknown' && (formData.breedingRole === 'dam' || formData.breedingRole === 'both'))) && (
                                         <>
                                             <div>
                                                 <label className="block text-sm font-medium text-gray-700 mb-2">Last Pregnancy Date <span className="text-xs text-gray-500 font-normal">(Dam)</span></label>
@@ -7990,15 +8018,16 @@ const AnimalForm = ({
                                                     className="block w-full p-2 border border-blue-200 rounded-md shadow-sm focus:ring-primary focus:border-primary" 
                                                     placeholder="Total number of litters" />
                                             </div>
-                                            
-                                            <div className="md:col-span-2">
-                                                <label className="block text-sm font-medium text-gray-700 mb-2">Total Offspring Produced</label>
-                                                <input type="number" name="offspringCount" value={formData.offspringCount} onChange={handleChange} 
-                                                    className="block w-full p-2 border border-blue-200 rounded-md shadow-sm focus:ring-primary focus:border-primary" 
-                                                    placeholder="Total number of offspring" min="0" />
-                                            </div>
                                         </>
                                     )}
+                                    
+                                    {/* Total Offspring - shown once at the end */}
+                                    <div className={formData.gender === 'Intersex' || formData.gender === 'Unknown' ? 'md:col-span-2' : ''}>
+                                        <label className="block text-sm font-medium text-gray-700 mb-2">Total Offspring Produced</label>
+                                        <input type="number" name="offspringCount" value={formData.offspringCount} onChange={handleChange} 
+                                            className="block w-full p-2 border border-blue-200 rounded-md shadow-sm focus:ring-primary focus:border-primary" 
+                                            placeholder="Total number of offspring" min="0" />
+                                    </div>
                                 </div>
                             </div>
                         )}

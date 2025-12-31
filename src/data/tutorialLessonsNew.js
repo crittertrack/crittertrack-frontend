@@ -755,7 +755,7 @@ const GETTING_STARTED_LESSONS = [
       },
       {
         stepNumber: 5,
-        title: 'Nursing',
+        title: 'Nursing Status',
         content: 'Check this box if your female is currently nursing offspring. This affects her health needs and breeding availability.',
         highlightElement: '[data-tutorial-target="nursing-checkbox"]',
         tips: [
@@ -779,34 +779,34 @@ const GETTING_STARTED_LESSONS = [
       {
         stepNumber: 7,
         title: 'Stud Information',
-        content: 'If your animal is a stud (breeding male), fill in details here: whether he\'s available for breeding, his stud fee, and any notes about his traits or availability.',
+        content: 'If your animal is a stud (breeding male), fill in details here: whether he\'s available for breeding and his stud fee (if you offer breeding services).',
         highlightElement: '[data-tutorial-target="stud-info-section"]',
         tips: [
-          'Optional for breeding males',
-          'Helps manage breeding program',
-          'Can include fee information'
+          'Available for Breeding: checkbox',
+          'Stud Fee: enter amount if applicable',
+          'Optional for breeding males'
         ]
       },
       {
         stepNumber: 8,
         title: 'Dam Information',
-        content: 'If your animal is a dam (breeding female), fill in details here: breeding history, number of litters, and any notes about her as a mother.',
+        content: 'If your animal is a dam (breeding female), fill in her fertility status and any genetics or fertility-related notes about her.',
         highlightElement: '[data-tutorial-target="dam-info-section"]',
         tips: [
-          'Optional for breeding females',
-          'Tracks reproductive history',
-          'Important for breeding decisions'
+          'Track fertility status',
+          'Add genetics/fertility notes',
+          'Optional for breeding females'
         ]
       },
       {
         stepNumber: 9,
         title: 'Breeding History',
-        content: 'This section shows all litters produced by this animal (if it\'s a breeding animal) or animals it\'s sired/mothered. It\'s auto-populated as you create litters in the Litters section.',
+        content: 'This section lets you record a brief summary of your animal\'s reproductive events. First select if this animal was a Sire, Dam, or Both. Then fill in mating dates, successful matings count, total offspring produced, total litters, and date of last pregnancy.',
         highlightElement: '[data-tutorial-target="breeding-history-section"]',
         tips: [
-          'Auto-populated from Litters feature',
-          'Shows all offspring',
-          'Helps track productivity'
+          'Select Sire, Dam, or Both',
+          'Fill in reproductive summary',
+          'Helps track breeding productivity'
         ]
       },
       {
