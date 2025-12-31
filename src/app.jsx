@@ -6737,7 +6737,7 @@ const AnimalForm = ({
                                 key={tab.id}
                                 type="button"
                                 onClick={() => setActiveTab(tab.id)}
-                                data-tutorial-target={tab.id === 2 ? 'status-privacy-tab' : tab.id === 3 ? 'physical-tab' : tab.id === 4 ? 'identification-tab' : undefined}
+                                data-tutorial-target={tab.id === 2 ? 'status-privacy-tab' : tab.id === 3 ? 'physical-tab' : tab.id === 4 ? 'identification-tab' : tab.id === 5 ? 'lineage-tab' : tab.id === 6 ? 'breeding-tab' : tab.id === 7 ? 'health-tab' : tab.id === 8 ? 'husbandry-tab' : tab.id === 9 ? 'behavior-tab' : tab.id === 10 ? 'records-tab' : tab.id === 11 ? 'end-of-life-tab' : undefined}
                                 className={`flex-shrink-0 px-2 sm:px-3 py-2 text-xs sm:text-sm font-medium rounded border transition-colors ${
                                     activeTab === tab.id 
                                         ? 'bg-primary text-black border-gray-400' 
@@ -7296,7 +7296,7 @@ const AnimalForm = ({
                                 <h4 className="text-sm font-semibold text-gray-600">Growth History</h4>
                                 
                                 {/* Unit Selection */}
-                                <div className="bg-blue-50 p-3 rounded-lg border border-blue-200">
+                                <div className="bg-blue-50 p-3 rounded-lg border border-blue-200" data-tutorial-target="measurement-units-select">
                                     <p className="text-xs font-medium text-gray-700 mb-2">Measurement Units</p>
                                     <div className="grid grid-cols-2 gap-3">
                                         <div>
@@ -7398,6 +7398,7 @@ const AnimalForm = ({
                                     <button
                                         type="button"
                                         onClick={addMeasurement}
+                                        data-tutorial-target="add-measurement-btn"
                                         className="w-full px-4 py-2 bg-blue-500 text-white rounded-md hover:bg-blue-600 text-sm font-medium"
                                     >
                                         Add Measurement
@@ -7559,6 +7560,7 @@ const AnimalForm = ({
                                     <label className='text-sm font-medium text-gray-600 mb-1'>Sire (Father)</label>
                                     <div 
                                         onClick={() => !loading && setModalTarget('father')}
+                                        data-tutorial-target="select-sire-btn"
                                         className="flex flex-col items-start p-3 border border-gray-300 rounded-lg bg-white cursor-pointer hover:border-primary transition disabled:opacity-50"
                                     >
                                         <div className="flex items-center space-x-2 w-full">
@@ -7588,6 +7590,7 @@ const AnimalForm = ({
                                     <label className='text-sm font-medium text-gray-600 mb-1'>Dam (Mother)</label>
                                     <div 
                                         onClick={() => !loading && setModalTarget('mother')}
+                                        data-tutorial-target="select-dam-btn"
                                         className="flex flex-col items-start p-3 border border-gray-300 rounded-lg bg-white cursor-pointer hover:border-primary transition disabled:opacity-50"
                                     >
                                         <div className="flex items-center space-x-2 w-full">
@@ -7617,6 +7620,7 @@ const AnimalForm = ({
                                     <label className='text-sm font-medium text-gray-600 mb-1'>Other Parent</label>
                                     <div 
                                         onClick={() => !loading && setModalTarget('other-parent')}
+                                        data-tutorial-target="select-other-parent-btn"
                                         className="flex flex-col items-start p-3 border border-gray-300 rounded-lg bg-white cursor-pointer hover:border-primary transition disabled:opacity-50"
                                     >
                                         <div className="flex items-center space-x-2 w-full">
@@ -7644,7 +7648,7 @@ const AnimalForm = ({
                                 </button>
                             </div>
                             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                                <div>
+                                <div data-tutorial-target="origin-select">
                                     <label className='block text-sm font-medium text-gray-700 mb-2'>Origin</label>
                                     <select name="origin" value={formData.origin} onChange={handleChange} 
                                         className="block w-full p-2 border border-gray-300 rounded-md shadow-sm focus:ring-primary focus:border-primary">
@@ -7657,7 +7661,7 @@ const AnimalForm = ({
                         </div>
 
                         {/* Ownership History */}
-                        <div className="bg-gray-50 p-4 rounded-lg border border-gray-200 space-y-4">
+                        <div className="bg-gray-50 p-4 rounded-lg border border-gray-200 space-y-4" data-tutorial-target="ownership-history">
                             <h3 className="text-lg font-semibold text-gray-700 border-b pb-2">Ownership History</h3>
                             <p className="text-sm text-gray-600 mb-3">Ownership changes are tracked here. Add/edit owners in the Status & Privacy tab.</p>
                             {formData.ownershipHistory && formData.ownershipHistory.length > 0 ? (
@@ -7693,7 +7697,7 @@ const AnimalForm = ({
                 {activeTab === 6 && (
                     <div className="space-y-6">
                         {/* Reproductive Status - Key Status Indicators */}
-                        <div className="bg-gray-50 p-4 rounded-lg border border-gray-200 space-y-4">
+                        <div className="bg-gray-50 p-4 rounded-lg border border-gray-200 space-y-4" data-tutorial-target="reproductive-status-section">
                             <div className="flex justify-between items-center border-b pb-2">
                                 <h3 className="text-lg font-semibold text-gray-700">⚪ Reproductive Status</h3>
                                 <button
@@ -13680,7 +13684,7 @@ const App = () => {
                                                         <button
                                                             key={tab.id}
                                                             onClick={() => setDetailViewTab(tab.id)}
-                                                            data-tutorial-target={tab.id === 2 ? 'status-privacy-tab' : tab.id === 3 ? 'physical-tab' : tab.id === 4 ? 'identification-tab' : undefined}
+                                                            data-tutorial-target={tab.id === 2 ? 'status-privacy-tab' : tab.id === 3 ? 'physical-tab' : tab.id === 4 ? 'identification-tab' : tab.id === 5 ? 'lineage-tab' : tab.id === 6 ? 'breeding-tab' : tab.id === 7 ? 'health-tab' : tab.id === 8 ? 'husbandry-tab' : tab.id === 9 ? 'behavior-tab' : tab.id === 10 ? 'records-tab' : tab.id === 11 ? 'end-of-life-tab' : undefined}
                                                             className={`px-3 py-1.5 text-xs sm:text-sm font-medium rounded transition-colors ${
                                                                 detailViewTab === tab.id 
                                                                     ? 'bg-primary text-black' 
