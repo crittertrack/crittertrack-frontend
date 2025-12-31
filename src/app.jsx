@@ -7174,6 +7174,17 @@ const AnimalForm = ({
                                 const weightPathData = weightPoints.map((p, i) => `${i === 0 ? 'M' : 'L'} ${p.x} ${p.y}`).join(' ');
                                 const lengthPathData = lengthPoints.map((p, i) => `${i === 0 ? 'M' : 'L'} ${p.x} ${p.y}`).join(' ');
                                 
+                                const getBCSDescription = (bcsValue) => {
+                                    const bcsMap = {
+                                        '1': 'Emaciated',
+                                        '2': 'Thin',
+                                        '3': 'Ideal',
+                                        '4': 'Overweight',
+                                        '5': 'Obese'
+                                    };
+                                    return bcsMap[bcsValue] || bcsValue;
+                                };
+                                
                                 const renderChart = (points, label, color, pathData, chartMin, chartMax) => {
                                     const range = chartMax - chartMin;
                                     return (
@@ -7222,7 +7233,7 @@ const AnimalForm = ({
                                                     `Date: ${new Date(p.date).toLocaleDateString()}`,
                                                     `Weight: ${p.weight} ${measurementUnits.weight}`,
                                                     p.length ? `Length: ${p.length} ${measurementUnits.length}` : null,
-                                                    p.bcs ? `BCS: ${p.bcs}` : null,
+                                                    p.bcs ? `BCS: ${p.bcs} - ${getBCSDescription(p.bcs)}` : null,
                                                     p.notes ? `Notes: ${p.notes}` : null
                                                 ].filter(Boolean).join('\n');
                                                 
@@ -14310,6 +14321,17 @@ const App = () => {
                                                         const weightPathData = weightPoints.map((p, i) => `${i === 0 ? 'M' : 'L'} ${p.x} ${p.y}`).join(' ');
                                                         const lengthPathData = lengthPoints.map((p, i) => `${i === 0 ? 'M' : 'L'} ${p.x} ${p.y}`).join(' ');
                                                         
+                                                        const getBCSDescription = (bcsValue) => {
+                                                            const bcsMap = {
+                                                                '1': 'Emaciated',
+                                                                '2': 'Thin',
+                                                                '3': 'Ideal',
+                                                                '4': 'Overweight',
+                                                                '5': 'Obese'
+                                                            };
+                                                            return bcsMap[bcsValue] || bcsValue;
+                                                        };
+                                                        
                                                         const renderChart = (points, label, color, pathData, chartMin, chartMax) => {
                                                             const range = chartMax - chartMin;
                                                             return (
@@ -14358,7 +14380,7 @@ const App = () => {
                                                                             `Date: ${new Date(p.date).toLocaleDateString()}`,
                                                                             `Weight: ${p.weight} ${animalToView.measurementUnits?.weight || 'g'}`,
                                                                             p.length ? `Length: ${p.length} ${animalToView.measurementUnits?.length || 'cm'}` : null,
-                                                                            p.bcs ? `BCS: ${p.bcs}` : null,
+                                                                            p.bcs ? `BCS: ${p.bcs} - ${getBCSDescription(p.bcs)}` : null,
                                                                             p.notes ? `Notes: ${p.notes}` : null
                                                                         ].filter(Boolean).join('\n');
                                                                         
