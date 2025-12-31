@@ -7725,7 +7725,7 @@ const AnimalForm = ({
                                 </label>
                                 
                                 {!formData.isNeutered && !formData.isInfertile && (
-                                    <label className="flex items-center space-x-2 cursor-pointer p-3 border rounded-lg bg-white hover:bg-gray-50 transition">
+                                    <label className="flex items-center space-x-2 cursor-pointer p-3 border rounded-lg bg-white hover:bg-gray-50 transition" data-tutorial-target="mating-pregnancy-checkbox">
                                         <input
                                             type="checkbox"
                                             name="isInMating"
@@ -7762,7 +7762,7 @@ const AnimalForm = ({
                                 )}
 
                                 {(formData.gender === 'Female' || formData.gender === 'Intersex' || formData.gender === 'Unknown') && (
-                                    <label className="flex items-center space-x-2 cursor-pointer p-3 border rounded-lg bg-white hover:bg-gray-50 transition">
+                                    <label className="flex items-center space-x-2 cursor-pointer p-3 border rounded-lg bg-white hover:bg-gray-50 transition" data-tutorial-target="nursing-checkbox">
                                         <input
                                             type="checkbox"
                                             name="isNursing"
@@ -7803,7 +7803,7 @@ const AnimalForm = ({
                                 )}
 
                                 {(formData.gender === 'Intersex' || formData.gender === 'Unknown') && !formData.isNeutered && !formData.isInfertile && (
-                                    <>
+                                    <div className="col-span-full space-y-3" data-tutorial-target="can-sire-bear-section">
                                         <label className="flex items-center space-x-2 cursor-pointer p-3 border rounded-lg bg-white hover:bg-gray-50 transition">
                                             <input
                                                 type="checkbox"
@@ -7827,14 +7827,14 @@ const AnimalForm = ({
                                             />
                                             <span className="text-sm font-medium text-gray-700">Can Bear</span>
                                         </label>
-                                    </>
+                                    </div>
                                 )}
                             </div>
                         </div>
 
                         {/* Estrus/Cycle - Only for females when not neutered */}
                         {(formData.gender === 'Female' || formData.gender === 'Intersex' || formData.gender === 'Unknown') && !formData.isNeutered && (
-                            <div className="bg-gray-50 p-4 rounded-lg border border-gray-200 space-y-4">
+                            <div className="bg-gray-50 p-4 rounded-lg border border-gray-200 space-y-4" data-tutorial-target="estrus-cycle-section">
                                 <h3 className="text-lg font-semibold text-gray-700 border-b pb-2">Estrus/Cycle</h3>
                                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                                     <div>
