@@ -8018,7 +8018,7 @@ const AnimalForm = ({
                             </div>
                             
                             {/* Preventive Care Sub-section */}
-                            <div>
+                            <div data-tutorial-target="preventive-care-section">
                                 <h4 className="text-sm font-semibold text-gray-700 border-b pb-2">Preventive Care</h4>
                             </div>
                             
@@ -8147,7 +8147,7 @@ const AnimalForm = ({
                         </div>
 
                         {/* Procedures & Diagnostics */}
-                        <div className="bg-gray-50 p-4 rounded-lg border border-gray-200 space-y-6">
+                        <div className="bg-gray-50 p-4 rounded-lg border border-gray-200 space-y-6" data-tutorial-target="procedures-section">
                             <h3 className="text-lg font-semibold text-gray-700 border-b pb-2">Procedures & Diagnostics</h3>
                             
                             {/* Medical Procedures */}
@@ -8239,7 +8239,7 @@ const AnimalForm = ({
                         </div>
 
                         {/* Veterinary Care */}
-                        <div className="bg-gray-50 p-4 rounded-lg border border-gray-200 space-y-4">
+                        <div className="bg-gray-50 p-4 rounded-lg border border-gray-200 space-y-4" data-tutorial-target="medical-history-section">
                             <div className="flex justify-between items-center border-b pb-2">
                                 <h3 className="text-lg font-semibold text-gray-700">Medical History</h3>
                                 <button
@@ -8364,7 +8364,7 @@ const AnimalForm = ({
                         </div>
 
                         {/* Veterinary Care */}
-                        <div className="bg-gray-50 p-4 rounded-lg border border-gray-200 space-y-4">
+                        <div className="bg-gray-50 p-4 rounded-lg border border-gray-200 space-y-4" data-tutorial-target="vet-care-section">
                             <h3 className="text-lg font-semibold text-gray-700 border-b pb-2">Veterinary Care</h3>
                             <div className="space-y-4">
                                 {/* Veterinary Visits */}
@@ -8438,7 +8438,7 @@ const AnimalForm = ({
                             </div>
                             
                             {/* Nutrition Sub-section */}
-                            <div>
+                            <div data-tutorial-target="nutrition-section">
                                 <h4 className="text-sm font-semibold text-gray-700 border-b pb-2">Nutrition</h4>
                             </div>
                             <div className="space-y-4">
