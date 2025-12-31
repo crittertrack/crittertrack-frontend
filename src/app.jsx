@@ -6900,7 +6900,7 @@ const AnimalForm = ({
                                         <option value="Unknown">Unknown</option>
                                     </select>
                                     <p className="text-xs text-gray-500 mt-1">
-                                        Status controls visibility and business features. "Available" + Public = Appears in showcase.
+                                        Status tracks the animal's current state. Use "For Sale" or "For Stud" options in the Privacy tab to control showcase visibility.
                                     </p>
                                 </div>
                             </div>
@@ -7001,13 +7001,13 @@ const AnimalForm = ({
                                     className="form-checkbox h-5 w-5 text-primary rounded focus:ring-primary" />
                                 <span className="text-sm font-medium text-gray-700">Public Profile</span>
                             </label>
-                            <p className="text-xs text-gray-500 mt-2">Public animals with "Available" status will appear in the global showcase.</p>
+                            <p className="text-xs text-gray-500 mt-2">Public animals marked as "For Sale" or "For Stud" will appear in the showcase.</p>
                         </div>
                         
                         {/* Availability for Sale/Stud */}
                         <div className="bg-gray-50 p-4 rounded-lg border border-gray-200 space-y-4">
                             <h3 className="text-lg font-semibold text-gray-700 border-b pb-2">Availability for Sale or Stud</h3>
-                            <p className="text-xs text-gray-500">Make this animal available in the public showcase (only if Public Profile is enabled)</p>
+                            <p className="text-xs text-gray-500">Enable "For Sale" or "For Stud" to make this animal visible in the public showcase (requires Public Profile enabled)</p>
                             
                             {/* For Sale Section */}
                             <div className="bg-white p-4 rounded-lg border border-gray-200">
