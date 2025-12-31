@@ -668,7 +668,7 @@ const GETTING_STARTED_LESSONS = [
       {
         stepNumber: 6,
         title: 'Origin Information',
-        content: 'Select the origin of your animal: "Bred In-House" (you bred it), "Purchased" (bought from someone else), or "Unknown" (unsure of origin). This helps track where your animals come from.',
+        content: 'Select the origin of your animal: "Captive-Bred" (domestically bred), "Wild-caught" or "Rescue". This helps track where your animals come from.',
         highlightElement: '[data-tutorial-target="origin-select"]',
         tips: [
           'Helps track breeding history',
@@ -689,17 +689,6 @@ const GETTING_STARTED_LESSONS = [
       },
       {
         stepNumber: 8,
-        title: 'Pedigree Chart Button',
-        content: 'Once you have parent information, you can click this button to view a detailed pedigree chart showing your animal\'s family tree. This is extremely helpful for breeding decisions.',
-        highlightElement: '[data-tutorial-target="view-pedigree-btn"]',
-        tips: [
-          'Generates automatically from parent data',
-          'Shows up to 4 generations',
-          'Can be downloaded as PDF'
-        ]
-      },
-      {
-        stepNumber: 9,
         title: 'Move to Breeding Tab',
         content: 'Let\'s continue to the Breeding tab to learn about reproductive information. Click the "Breeding" tab.',
         highlightElement: '[data-tutorial-target="breeding-tab"]',
@@ -778,13 +767,13 @@ const GETTING_STARTED_LESSONS = [
       {
         stepNumber: 6,
         title: 'Can Sire / Can Bear',
-        content: 'These checkboxes explicitly indicate whether your animal can father (Sire) or mother (Bear) offspring. Check both boxes if your animal is a healthy breeder. This is a key feature for breeding management.',
+        content: 'These checkboxes indicate breeding capability. For unknown gender animals like this one, you see both "Can Sire" and "Can Bear". For male animals, "Stud Animal" appears. For female animals, "Breeding Dam" appears. For this tutorial, please check both boxes to see the full breeding features.',
         highlightElement: '[data-tutorial-target="can-sire-bear-section"]',
         actionType: 'checkMultiple',
         tips: [
-          'Can be unchecked if animal becomes infertile',
-          'Critical for breeding programs',
-          'Overrides gender in some cases'
+          'For tutorial: check both boxes',
+          'Male animals: "Stud Animal" checkbox',
+          'Female animals: "Breeding Dam" checkbox'
         ]
       },
       {
