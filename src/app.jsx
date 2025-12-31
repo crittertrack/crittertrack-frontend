@@ -8465,7 +8465,7 @@ const AnimalForm = ({
                             </div>
 
                             {/* Husbandry Sub-section */}
-                            <div>
+                            <div data-tutorial-target="husbandry-details-section">
                                 <h4 className="text-sm font-semibold text-gray-700 border-b pb-2">Husbandry</h4>
                             </div>
                             <div className="space-y-4">
@@ -8493,7 +8493,7 @@ const AnimalForm = ({
                         </div>
 
                         {/* Environment */}
-                        <div className="bg-gray-50 p-4 rounded-lg border border-gray-200 space-y-4">
+                        <div className="bg-gray-50 p-4 rounded-lg border border-gray-200 space-y-4" data-tutorial-target="environment-section">
                             <div className="flex justify-between items-center border-b pb-2">
                                 <h3 className="text-lg font-semibold text-gray-700">Environment</h3>
                                 <button
@@ -8556,7 +8556,7 @@ const AnimalForm = ({
                                     {sectionPrivacy[animalToEdit?.id_public]?.behavior ? '🌍 Public' : '🔒 Private'}
                                 </button>
                             </div>
-                            <div className="space-y-4">
+                            <div className="space-y-4" data-tutorial-target="behavior-items-section">
                                 <div>
                                     <label className="block text-sm font-medium text-gray-700 mb-2">Temperament</label>
                                     <input type="text" name="temperament" value={formData.temperament} onChange={handleChange} 
@@ -8596,7 +8596,7 @@ const AnimalForm = ({
                             </div>
                             <div>
                                 <label className="block text-sm font-medium text-gray-700 mb-2">Activity Cycle</label>
-                                <select name="activityCycle" value={formData.activityCycle} onChange={handleChange} 
+                                <select name="activityCycle" value={formData.activityCycle} onChange={handleChange} data-tutorial-target="activity-pattern-select"
                                     className="block w-full p-2 border border-gray-300 rounded-md shadow-sm focus:ring-primary focus:border-primary">
                                     <option value="">Select Activity Pattern</option>
                                     <option value="Diurnal">Diurnal (Active during day)</option>
@@ -8611,7 +8611,7 @@ const AnimalForm = ({
                 {/* Tab 10: Records & Notes */}
                 {activeTab === 10 && (
                     <div className="space-y-6">
-                        <div className="bg-gray-50 p-4 rounded-lg border border-gray-200">
+                        <div className="bg-gray-50 p-4 rounded-lg border border-gray-200" data-tutorial-target="remarks-section">
                             <div className="flex justify-between items-center border-b pb-2 mb-4">
                                 <h3 className="text-lg font-semibold text-gray-700">Remarks & Notes</h3>
                                 <button
@@ -8653,21 +8653,21 @@ const AnimalForm = ({
                             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                                 <div>
                                     <label className="block text-sm font-medium text-gray-700 mb-2">Date of Death</label>
-                                    <input type="date" name="deceasedDate" value={formData.deceasedDate || ''} onChange={handleChange} 
+                                    <input type="date" name="deceasedDate" value={formData.deceasedDate || ''} onChange={handleChange} data-tutorial-target="date-of-death-input"
                                         min="1800-01-01" max={new Date().toISOString().split('T')[0]} 
                                         className="block w-full p-2 border border-gray-300 rounded-md shadow-sm focus:ring-primary focus:border-primary" />
                                 </div>
                                 
                                 <div>
                                     <label className="block text-sm font-medium text-gray-700 mb-2">Cause of Death</label>
-                                    <input type="text" name="causeOfDeath" value={formData.causeOfDeath} onChange={handleChange} 
+                                    <input type="text" name="causeOfDeath" value={formData.causeOfDeath} onChange={handleChange} data-tutorial-target="cause-of-death-input"
                                         className="block w-full p-2 border border-gray-300 rounded-md shadow-sm focus:ring-primary focus:border-primary" 
                                         placeholder="e.g., Natural causes, illness, injury" />
                                 </div>
                                 
                                 <div className="md:col-span-2">
                                     <label className="block text-sm font-medium text-gray-700 mb-2">Necropsy Results</label>
-                                    <textarea name="necropsyResults" value={formData.necropsyResults} onChange={handleChange} rows="3"
+                                    <textarea name="necropsyResults" value={formData.necropsyResults} onChange={handleChange} rows="3" data-tutorial-target="necropsy-results-textarea"
                                         className="block w-full p-2 border border-gray-300 rounded-md shadow-sm focus:ring-primary focus:border-primary" 
                                         placeholder="Post-mortem examination findings..." />
                                 </div>
@@ -8675,7 +8675,7 @@ const AnimalForm = ({
                         </div>
 
                         {/* Legal / Administrative */}
-                        <div className="bg-gray-50 p-4 rounded-lg border border-gray-200 space-y-4">
+                        <div className="bg-gray-50 p-4 rounded-lg border border-gray-200 space-y-4" data-tutorial-target="legal-admin-section">
                             <h3 className="text-lg font-semibold text-gray-700 border-b pb-2">Legal / Administrative</h3>
                             <div className="space-y-4">
                                 <div>
