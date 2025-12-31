@@ -5555,6 +5555,8 @@ const AnimalForm = ({
             weaningDate: animalToEdit.weaningDate ? new Date(animalToEdit.weaningDate).toISOString().substring(0, 10) : '',
             // Stud/Fertility fields (sire role)
             isStudAnimal: animalToEdit.isStudAnimal || false,
+            availableForBreeding: animalToEdit.availableForBreeding || false,
+            studFee: animalToEdit.studFee || '',
             fertilityStatus: animalToEdit.fertilityStatus || 'Unknown',
             lastMatingDate: animalToEdit.lastMatingDate ? new Date(animalToEdit.lastMatingDate).toISOString().substring(0, 10) : '',
             successfulMatings: animalToEdit.successfulMatings || '',
@@ -5640,6 +5642,8 @@ const AnimalForm = ({
             weaningDate: '',
             // Stud/Fertility fields (sire role)
             isStudAnimal: false,
+            availableForBreeding: false,
+            studFee: '',
             fertilityStatus: 'Unknown',
             lastMatingDate: '',
             successfulMatings: '',
@@ -7906,6 +7910,21 @@ const AnimalForm = ({
                                             <option value="Fertile">Fertile</option>
                                             <option value="Subfertile">Subfertile</option>
                                         </select>
+                                    </div>
+                                    
+                                    <div className="flex items-end">
+                                        <label className="flex items-center space-x-2 h-10">
+                                            <input type="checkbox" name="availableForBreeding" checked={formData.availableForBreeding || false} onChange={handleChange} 
+                                                className="w-4 h-4" />
+                                            <span className="text-sm font-medium text-gray-700">Available for Breeding</span>
+                                        </label>
+                                    </div>
+                                    
+                                    <div>
+                                        <label className="block text-sm font-medium text-gray-700 mb-2">Stud Fee</label>
+                                        <input type="text" name="studFee" value={formData.studFee || ''} onChange={handleChange} 
+                                            className="block w-full p-2 border border-gray-300 rounded-md shadow-sm focus:ring-primary focus:border-primary" 
+                                            placeholder="e.g., $500 or negotiable" />
                                     </div>
                                     
                                     <div className="md:col-span-2">
