@@ -13417,6 +13417,16 @@ const App = () => {
                         setHasSkippedTutorialThisSession(true);
                     }}
                     onComplete={(signal) => {
+                        // Handle "start-features" signal from Getting Started completion
+                        if (signal === 'start-features') {
+                            // Start the first Key Features tutorial
+                            setCurrentTutorialIndex(0);
+                            setCurrentTutorialId(TUTORIAL_LESSONS.features[0].id);
+                            setCurrentTutorialStep(null);
+                            setShowTutorialOverlay(true);
+                            return;
+                        }
+
                         // Handle "start-advanced" signal from onboarding completion
                         if (signal === 'start-advanced') {
                             // Start the first advanced features tutorial

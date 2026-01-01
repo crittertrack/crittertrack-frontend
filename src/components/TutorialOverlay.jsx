@@ -285,7 +285,7 @@ export const TutorialOverlay = React.forwardRef(({ lessonId, onClose, onComplete
                 <button
                   onClick={() => {
                     if (onComplete) {
-                      onComplete({ startTour: currentStep?.actionData?.nextTour });
+                      onComplete('start-features');
                     }
                   }}
                   className="flex items-center gap-1 px-4 py-1.5 rounded text-xs font-semibold transition bg-accent hover:bg-accent/90 text-white"
