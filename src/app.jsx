@@ -3543,6 +3543,12 @@ const LitterManagement = ({ authToken, API_BASE_URL, userProfile, showModalMessa
     const handleLinkAnimals = async (litter) => {
         try {
             // Search for animals with matching parents and birthdate
+            // Require birthdate to be set first
+            if (!litter.birthDate) {
+                showModalMessage('Required', 'Please enter a birth date for the litter before linking animals.');
+                return;
+            }
+
             const response = await axios.get(`${API_BASE_URL}/animals`, {
                 headers: { Authorization: `Bearer ${authToken}` }
             });
@@ -4142,11 +4148,7 @@ const LitterManagement = ({ authToken, API_BASE_URL, userProfile, showModalMessa
                                                         const newLinked = e.target.checked
                                                             ? [...(formData.linkedOffspringIds || []), animal.id_public]
                                                             : (formData.linkedOffspringIds || []).filter(id => id !== animal.id_public);
-                                                        // Auto-fill birthDate from first selected offspring
-                                                        const newBirthDate = e.target.checked && animal.birthDate && !formData.birthDate
-                                                            ? animal.birthDate
-                                                            : formData.birthDate;
-                                                        setFormData({...formData, linkedOffspringIds: newLinked, birthDate: newBirthDate});
+                                                        setFormData({...formData, linkedOffspringIds: newLinked});
                                                     }}
                                                     className="h-4 w-4 text-primary rounded border-gray-300 focus:ring-primary"
                                                 />
@@ -13864,6 +13866,7 @@ const App = () => {
                                                     <div className="absolute top-4 right-4 z-10">
                                                         <button
                                                             type="button"
+                                                            data-tutorial-target="detail-private-toggle"
                                                             onClick={async () => {
                                                                 const newIsDisplay = !animalToView.isDisplay;
                                                                 try {

@@ -1252,9 +1252,10 @@ const KEY_FEATURES_LESSONS = [
       {
         stepNumber: 3,
         title: 'Private Toggle',
-        content: 'The private/public toggle controls whether this entire animal appears on your public profile. When private (eye icon closed), only you can see it.',
-        highlightElement: '[data-tutorial-target="private-toggle"]',
+        content: 'The private/public toggle controls whether this entire animal appears on your public profile. When set to private, only you can see it. When public, everyone can view it. You can find this toggle at the top right of the detail overview screen.',
+        highlightElement: '[data-tutorial-target="detail-private-toggle"]',
         tips: [
+          'Located at top right of detail view',
           'Controls whole animal visibility',
           'Different from section-specific toggles',
           'Can be toggled anytime'
@@ -1367,23 +1368,25 @@ const KEY_FEATURES_LESSONS = [
       {
         stepNumber: 4,
         title: 'Link Existing Animals',
-        content: 'After creating the litter, you can link existing animals as offspring. Click "Link Animals" to connect animals that are offspring from this litter.',
+        content: 'After creating the litter with parents and a birth date, you can link existing animals as offspring. Click "Link Animals" to connect animals that are offspring from this specific litter.',
         highlightElement: '[data-tutorial-target="link-animals-btn"]',
         tips: [
-          'Link animals already in your collection',
+          'Birth date is required before linking',
+          'Only animals matching parents and date appear',
           'Updates their parent information',
           'Completes the family tree'
         ]
       },
       {
         stepNumber: 5,
-        title: 'Create New Offspring',
-        content: 'Alternatively, you can directly create new offspring animals. With a birth date filled in, click "Create Offspring" to add new animals and automatically set them as children of this litter.',
+        title: 'Create New Offspring Animals',
+        content: 'In the "New Offspring Animals" section (separate from the male/female count fields), you can directly create new offspring animals. With a birth date filled in, click "Create Offspring" to add new animals and automatically set them as children of this litter with the sire and dam already assigned.',
         highlightElement: '[data-tutorial-target="create-offspring-btn"]',
         tips: [
-          'Creates animals with parent links',
-          'Requires birth date',
-          'Quicker than creating separately'
+          'Different from male/female count fields',
+          'Found in "New Offspring Animals" section',
+          'Creates animals with parent links pre-filled',
+          'Requires birth date to use'
         ]
       },
       {
