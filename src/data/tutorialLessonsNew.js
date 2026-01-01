@@ -1673,13 +1673,15 @@ const KEY_FEATURES_LESSONS = [
       },
       {
         stepNumber: 11,
-        title: 'Congratulations on Key Features!',
-        content: 'You\'ve completed the Key Features tour! You now understand how to view and edit animals, manage litters, configure your profile, and handle breeding finances. Would you like to explore the Advanced Features tour?',
-        highlightElement: '[data-tutorial-target="features-complete-message"]',
+        title: 'Next: Advanced Features Tour',
+        content: 'Congratulations on completing the Key Features tour! You now understand how to view and edit animals, manage litters, configure your profile, and handle breeding finances. Would you like to start the "Advanced Features" tour? This will teach you about searching, genetics, COI calculations, and community features.',
+        actionType: 'startNextTour',
+        actionData: { nextTour: 'advanced' },
         tips: [
-          'Key features cover core functionality',
-          'You can now breed and share',
-          'Advanced features go deeper'
+          'Advanced Features builds on Key Features',
+          'Covers genetics, searches, and community',
+          'You can start it anytime from the tutorial menu',
+          'Optional but highly recommended'
         ]
       }
     ]
@@ -2261,7 +2263,8 @@ const ALL_LESSONS_ARRAY = [
 // Export in the format expected by app.jsx
 export const TUTORIAL_LESSONS = {
   onboarding: GETTING_STARTED_LESSONS,
-  features: [...KEY_FEATURES_LESSONS, ...ADVANCED_FEATURES_LESSONS],
+  features: KEY_FEATURES_LESSONS,
+  advanced: ADVANCED_FEATURES_LESSONS,
   all: ALL_LESSONS_ARRAY
 };
 

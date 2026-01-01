@@ -13,7 +13,8 @@ export const TutorialOverlay = React.forwardRef(({ lessonId, onClose, onComplete
   const { markTutorialCompleted, completedTutorials } = useTutorial();
 
   const lesson = TUTORIAL_LESSONS.onboarding.find(l => l.id === lessonId) || 
-                 TUTORIAL_LESSONS.features.find(l => l.id === lessonId);
+                 TUTORIAL_LESSONS.features.find(l => l.id === lessonId) ||
+                 TUTORIAL_LESSONS.advanced.find(l => l.id === lessonId);
 
   const currentStep = lesson?.steps[currentStepIndex];
   const isFirstStep = currentStepIndex === 0;
@@ -157,6 +158,7 @@ export const TutorialOverlay = React.forwardRef(({ lessonId, onClose, onComplete
   // Determine which tutorial array we're in and calculate lesson number
   const isInOnboarding = TUTORIAL_LESSONS.onboarding.some(l => l.id === lessonId);
   const isInFeatures = TUTORIAL_LESSONS.features.some(l => l.id === lessonId);
+  const isInAdvanced = TUTORIAL_LESSONS.advanced.some(l => l.id === lessonId);
   
   let lessonNumber = 1;
   let totalLessons = 1;
@@ -167,6 +169,9 @@ export const TutorialOverlay = React.forwardRef(({ lessonId, onClose, onComplete
   } else if (isInFeatures) {
     lessonNumber = TUTORIAL_LESSONS.features.findIndex(l => l.id === lessonId) + 1;
     totalLessons = TUTORIAL_LESSONS.features.length;
+  } else if (isInAdvanced) {
+    lessonNumber = TUTORIAL_LESSONS.advanced.findIndex(l => l.id === lessonId) + 1;
+    totalLessons = TUTORIAL_LESSONS.advanced.length;
   }
 
   return (
@@ -285,13 +290,15 @@ export const TutorialOverlay = React.forwardRef(({ lessonId, onClose, onComplete
                 <button
                   onClick={() => {
                     if (onComplete) {
-                      onComplete('start-features');
+                      const nextTour = currentStep?.actionData?.nextTour || 'features';
+                      const completeAction = nextTour === 'advanced' ? 'start-advanced' : 'start-features';
+                      onComplete(completeAction);
                     }
                   }}
                   className="flex items-center gap-1 px-4 py-1.5 rounded text-xs font-semibold transition bg-accent hover:bg-accent/90 text-white"
                 >
                   <ChevronRight size={14} />
-                  Start Key Features Tour
+                  {currentStep?.actionData?.nextTour === 'advanced' ? 'Start Advanced Features Tour' : 'Start Key Features Tour'}
                 </button>
               </>
             ) : (

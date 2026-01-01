@@ -13437,19 +13437,20 @@ const App = () => {
                             return;
                         }
 
-                        // Handle "start-advanced" signal from onboarding completion
+                        // Handle "start-advanced" signal from Key Features completion
                         if (signal === 'start-advanced') {
                             // Start the first advanced features tutorial
                             setCurrentTutorialIndex(0);
-                            setCurrentTutorialId(TUTORIAL_LESSONS.features[0].id);
+                            setCurrentTutorialId(TUTORIAL_LESSONS.advanced[0].id);
                             setCurrentTutorialStep(null);
-                            setShowTutorialOverlay(true); // Ensure overlay stays visible
+                            setShowTutorialOverlay(true);
                             return;
                         }
 
                         // Determine which tutorial array we're in
                         const isInOnboarding = TUTORIAL_LESSONS.onboarding.some(lesson => lesson.id === currentTutorialId);
                         const isInFeatures = TUTORIAL_LESSONS.features.some(lesson => lesson.id === currentTutorialId);
+                        const isInAdvanced = TUTORIAL_LESSONS.advanced.some(lesson => lesson.id === currentTutorialId);
 
                         if (isInOnboarding) {
                             // Move to next lesson in onboarding sequence
@@ -13479,6 +13480,23 @@ const App = () => {
                                     return nextIndex;
                                 } else {
                                     // All feature lessons completed
+                                    setShowTutorialOverlay(false);
+                                    setCurrentTutorialId(null);
+                                    setCurrentTutorialStep(null);
+                                    return 0;
+                                }
+                            });
+                        } else if (isInAdvanced) {
+                            // Move to next lesson in advanced features sequence
+                            setCurrentTutorialIndex(prevIndex => {
+                                const nextIndex = prevIndex + 1;
+                                if (nextIndex < TUTORIAL_LESSONS.advanced.length) {
+                                    // Show next lesson
+                                    setCurrentTutorialId(TUTORIAL_LESSONS.advanced[nextIndex].id);
+                                    setCurrentTutorialStep(null);
+                                    return nextIndex;
+                                } else {
+                                    // All advanced lessons completed
                                     setShowTutorialOverlay(false);
                                     setCurrentTutorialId(null);
                                     setCurrentTutorialStep(null);
