@@ -7005,68 +7005,58 @@ const AnimalForm = ({
                         </div>
                         
                         {/* Availability for Sale/Stud */}
-                        <div className="bg-gray-50 p-4 rounded-lg border border-gray-200 space-y-4">
+                        <div data-tutorial-target="availability-for-sale-stud" className="bg-gray-50 p-4 rounded-lg border border-gray-200 space-y-4">
                             <h3 className="text-lg font-semibold text-gray-700 border-b pb-2">Availability for Sale or Stud</h3>
                             <p className="text-xs text-gray-500">Enable "For Sale" or "For Stud" to make this animal visible in the public showcase (requires Public Profile enabled)</p>
                             
                             {/* For Sale Section */}
-                            <div className="bg-white p-4 rounded-lg border border-gray-200">
-                                <label className="flex items-center space-x-2 cursor-pointer mb-3">
+                            <div className="bg-white p-4 rounded-lg border border-gray-200 space-y-3">
+                                <div className="flex items-center space-x-2">
                                     <input type="checkbox" name="isForSale" checked={formData.isForSale} onChange={handleChange} 
                                         className="form-checkbox h-5 w-5 text-primary rounded focus:ring-primary" />
                                     <span className="text-sm font-medium text-gray-700">🏷️ Available for Sale</span>
-                                </label>
+                                </div>
                                 {formData.isForSale && (
-                                    <div className="ml-7 space-y-3 pt-3 border-t border-gray-200">
-                                        <div>
-                                            <label className="block text-sm font-medium text-gray-700 mb-2">Sale Price</label>
-                                            <div className="flex gap-2">
-                                                <select name="salePriceCurrency" value={formData.salePriceCurrency} onChange={handleChange} 
-                                                    className="block w-24 p-2 border border-gray-300 rounded-md shadow-sm focus:ring-primary focus:border-primary">
-                                                    <option value="USD">USD ($)</option>
-                                                    <option value="EUR">EUR (€)</option>
-                                                    <option value="GBP">GBP (£)</option>
-                                                    <option value="CAD">CAD (C$)</option>
-                                                    <option value="AUD">AUD (A$)</option>
-                                                    <option value="JPY">JPY (¥)</option>
-                                                    <option value="Negotiable">Negotiable</option>
-                                                </select>
-                                                <input type="number" name="salePriceAmount" value={formData.salePriceAmount || ''} onChange={handleChange} 
-                                                    className="block flex-1 p-2 border border-gray-300 rounded-md shadow-sm focus:ring-primary focus:border-primary" 
-                                                    placeholder="Amount" min="0" step="0.01" disabled={formData.salePriceCurrency === 'Negotiable'} />
-                                            </div>
-                                        </div>
+                                    <div className="ml-7 flex gap-2">
+                                        <select name="salePriceCurrency" value={formData.salePriceCurrency} onChange={handleChange} 
+                                            className="block w-24 p-2 border border-gray-300 rounded-md shadow-sm focus:ring-primary focus:border-primary">
+                                            <option value="USD">USD ($)</option>
+                                            <option value="EUR">EUR (€)</option>
+                                            <option value="GBP">GBP (£)</option>
+                                            <option value="CAD">CAD (C$)</option>
+                                            <option value="AUD">AUD (A$)</option>
+                                            <option value="JPY">JPY (¥)</option>
+                                            <option value="Negotiable">Negotiable</option>
+                                        </select>
+                                        <input type="number" name="salePriceAmount" value={formData.salePriceAmount || ''} onChange={handleChange} 
+                                            className="block flex-1 p-2 border border-gray-300 rounded-md shadow-sm focus:ring-primary focus:border-primary" 
+                                            placeholder="Price amount" min="0" step="0.01" disabled={formData.salePriceCurrency === 'Negotiable'} />
                                     </div>
                                 )}
                             </div>
                             
                             {/* For Stud Section */}
-                            <div className="bg-white p-4 rounded-lg border border-gray-200">
-                                <label className="flex items-center space-x-2 cursor-pointer mb-3">
+                            <div className="bg-white p-4 rounded-lg border border-gray-200 space-y-3">
+                                <div className="flex items-center space-x-2">
                                     <input type="checkbox" name="availableForBreeding" checked={formData.availableForBreeding} onChange={handleChange} 
                                         className="form-checkbox h-5 w-5 text-primary rounded focus:ring-primary" />
                                     <span className="text-sm font-medium text-gray-700">🫘 Available for Stud</span>
-                                </label>
+                                </div>
                                 {formData.availableForBreeding && (
-                                    <div className="ml-7 space-y-3 pt-3 border-t border-gray-200">
-                                        <div>
-                                            <label className="block text-sm font-medium text-gray-700 mb-2">Stud Fee</label>
-                                            <div className="flex gap-2">
-                                                <select name="studFeeCurrency" value={formData.studFeeCurrency || 'USD'} onChange={handleChange} 
-                                                    className="block w-24 p-2 border border-gray-300 rounded-md shadow-sm focus:ring-primary focus:border-primary">
-                                                    <option value="USD">USD ($)</option>
-                                                    <option value="EUR">EUR (€)</option>
-                                                    <option value="GBP">GBP (£)</option>
-                                                    <option value="CAD">CAD (C$)</option>
-                                                    <option value="AUD">AUD (A$)</option>
-                                                    <option value="JPY">JPY (¥)</option>
-                                                    <option value="Negotiable">Negotiable</option>
-                                                </select>
-                                                <input type="number" name="studFeeAmount" value={formData.studFeeAmount || ''} onChange={handleChange} 
-                                                    className="block flex-1 p-2 border border-gray-300 rounded-md shadow-sm focus:ring-primary focus:border-primary" 
-                                                    placeholder="Amount" min="0" step="0.01" disabled={formData.studFeeCurrency === 'Negotiable'} />
-                                            </div>
-                                        </div>
+                                    <div className="ml-7 flex gap-2">
+                                        <select name="studFeeCurrency" value={formData.studFeeCurrency || 'USD'} onChange={handleChange} 
+                                            className="block w-24 p-2 border border-gray-300 rounded-md shadow-sm focus:ring-primary focus:border-primary">
+                                            <option value="USD">USD ($)</option>
+                                            <option value="EUR">EUR (€)</option>
+                                            <option value="GBP">GBP (£)</option>
+                                            <option value="CAD">CAD (C$)</option>
+                                            <option value="AUD">AUD (A$)</option>
+                                            <option value="JPY">JPY (¥)</option>
+                                            <option value="Negotiable">Negotiable</option>
+                                        </select>
+                                        <input type="number" name="studFeeAmount" value={formData.studFeeAmount || ''} onChange={handleChange} 
+                                            className="block flex-1 p-2 border border-gray-300 rounded-md shadow-sm focus:ring-primary focus:border-primary" 
+                                            placeholder="Fee amount" min="0" step="0.01" disabled={formData.studFeeCurrency === 'Negotiable'} />
                                     </div>
                                 )}
                             </div>

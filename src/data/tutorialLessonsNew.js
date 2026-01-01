@@ -303,6 +303,21 @@ const GETTING_STARTED_LESSONS = [
       },
       {
         stepNumber: 6,
+        title: 'Availability for Sale or Stud',
+        content: 'Use this section to make your animal available in the public showcase. When you enable "Available for Sale" or "Available for Stud", the price/fee fields will appear inline below the checkbox. Set your desired currency and amount (or select Negotiable). Only public animals marked for sale or stud will appear in the showcase.',
+        highlightElement: '[data-tutorial-target="availability-for-sale-stud"]',
+        tips: [
+          'Enable "Available for Sale" to list with a price',
+          'Enable "Available for Stud" to offer breeding services',
+          'When enabled, currency and amount fields appear directly below',
+          'Select currency (USD/EUR/GBP/CAD/AUD/JPY) or choose Negotiable',
+          'Enter the price or fee amount in the amount field',
+          'Requires Public Profile to be enabled',
+          'Public + For Sale/Stud = appears in showcase'
+        ]
+      },
+      {
+        stepNumber: 7,
         title: 'Move to Physical Tab',
         content: 'Now let\'s continue to the Physical tab to add more details about your animal\'s physical characteristics. Click the "Physical" tab.',
         highlightElement: '[data-tutorial-target="physical-tab"]',
