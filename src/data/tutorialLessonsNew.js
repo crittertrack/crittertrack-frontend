@@ -1685,10 +1685,8 @@ const KEY_FEATURES_LESSONS = [
         ]
       }
     ]
-  }
-];
+  },
 
-const ADVANCED_FEATURES_LESSONS = [
   {
     id: 'af-searching',
     title: '5. Searching & Filtering Animals',
@@ -1760,60 +1758,6 @@ const ADVANCED_FEATURES_LESSONS = [
           'Combine multiple filters',
           'Very specific searches',
           'Find traits quickly'
-        ]
-      }
-    ]
-  },
-
-  {
-    id: 'af-tags-management',
-    title: '1. Tags & Mass Management',
-    description: 'Organize animals with tags and bulk operations',
-    tour: 'advanced-features',
-    tourOrder: 1,
-    steps: [
-      {
-        stepNumber: 1,
-        title: 'Tags Overview',
-        content: 'Tags are labels you create to organize your collection. Common tags: "Show Animals", "Breeding Stock", "Pets", "For Sale", "Problem Behaviors", etc.',
-        highlightElement: '[data-tutorial-target="tags-explanation"]',
-        tips: [
-          'Flexible organization system',
-          'Create your own tags',
-          'Multiple tags per animal'
-        ]
-      },
-      {
-        stepNumber: 2,
-        title: 'Adding Tags',
-        content: 'In the animal form, find the Tags field. Type a tag name and press Enter to add it. Tags can be new or existing from your tag list.',
-        highlightElement: '[data-tutorial-target="add-tags-field"]',
-        tips: [
-          'Create tags on the fly',
-          'Tag suggestions appear',
-          'Press Enter to confirm'
-        ]
-      },
-      {
-        stepNumber: 3,
-        title: 'Filtering by Tags',
-        content: 'Use the Tag filter in the search section to show only animals with specific tags. This helps organize your collection.',
-        highlightElement: '[data-tutorial-target="tag-filter"]',
-        tips: [
-          'Quick organization viewing',
-          'Combine with other filters',
-          'Shows tagged animals'
-        ]
-      },
-      {
-        stepNumber: 4,
-        title: 'Mass Management',
-        content: 'Select multiple animals using checkboxes, then bulk operations appear: Change status, add/remove tags, delete multiple, or export data.',
-        highlightElement: '[data-tutorial-target="mass-management-section"]',
-        tips: [
-          'Efficient for large collections',
-          'Speed up updates',
-          'Apply changes to many at once'
         ]
       }
     ]
@@ -1922,6 +1866,62 @@ const ADVANCED_FEATURES_LESSONS = [
           'Secure communication',
           'Respect privacy settings',
           'Both parties control messaging'
+        ]
+      }
+    ]
+  }
+];
+
+const ADVANCED_FEATURES_LESSONS = [
+  {
+    id: 'af-tags-management',
+    title: '1. Tags & Mass Management',
+    description: 'Organize animals with tags and bulk operations',
+    tour: 'advanced-features',
+    tourOrder: 1,
+    steps: [
+      {
+        stepNumber: 1,
+        title: 'Tags Overview',
+        content: 'Tags are labels you create to organize your collection. Common tags: "Show Animals", "Breeding Stock", "Pets", "For Sale", "Problem Behaviors", etc.',
+        highlightElement: '[data-tutorial-target="tags-explanation"]',
+        tips: [
+          'Flexible organization system',
+          'Create your own tags',
+          'Multiple tags per animal'
+        ]
+      },
+      {
+        stepNumber: 2,
+        title: 'Adding Tags',
+        content: 'In the animal form, find the Tags field. Type a tag name and press Enter to add it. Tags can be new or existing from your tag list.',
+        highlightElement: '[data-tutorial-target="add-tags-field"]',
+        tips: [
+          'Create tags on the fly',
+          'Tag suggestions appear',
+          'Press Enter to confirm'
+        ]
+      },
+      {
+        stepNumber: 3,
+        title: 'Filtering by Tags',
+        content: 'Use the Tag filter in the search section to show only animals with specific tags. This helps organize your collection.',
+        highlightElement: '[data-tutorial-target="tag-filter"]',
+        tips: [
+          'Quick organization viewing',
+          'Combine with other filters',
+          'Shows tagged animals'
+        ]
+      },
+      {
+        stepNumber: 4,
+        title: 'Mass Management',
+        content: 'Select multiple animals using checkboxes, then bulk operations appear: Change status, add/remove tags, delete multiple, or export data.',
+        highlightElement: '[data-tutorial-target="mass-management-section"]',
+        tips: [
+          'Efficient for large collections',
+          'Speed up updates',
+          'Apply changes to many at once'
         ]
       }
     ]
@@ -2106,147 +2106,6 @@ const ADVANCED_FEATURES_LESSONS = [
           'Avoid lethal combinations',
           'Plan for traits',
           'Understand genetics'
-        ]
-      }
-    ]
-  },
-
-  {
-    id: 'af-pedigree-charts',
-    title: '8. Pedigree Charts & Family Trees',
-    description: 'Generate and interpret pedigree charts',
-    tour: 'advanced-features',
-    tourOrder: 8,
-    steps: [
-      {
-        stepNumber: 1,
-        title: 'Pedigree Chart Overview',
-        content: 'Pedigree charts visualize an animal\'s family tree up to several generations. They show parents, grandparents, and further ancestors, with photos and key information.',
-        highlightElement: '[data-tutorial-target="pedigree-chart"]',
-        tips: [
-          'Visual family representation',
-          'Multiple generations shown',
-          'Professional display'
-        ]
-      },
-      {
-        stepNumber: 2,
-        title: 'Viewing the Chart',
-        content: 'The chart displays the target animal on the left, with ancestors branching to the right. Photos, names, and identification appear on each card.',
-        highlightElement: '[data-tutorial-target="chart-structure"]',
-        tips: [
-          'Read from left to right',
-          'Shows 4+ generations',
-          'Complete visual pedigree'
-        ]
-      },
-      {
-        stepNumber: 3,
-        title: 'Animal Information on Chart',
-        content: 'Each animal card shows: name, breed/variety, gender, color/coat, and CT ID. This gives you quick identification of each ancestor.',
-        highlightElement: '[data-tutorial-target="chart-info"]',
-        tips: [
-          'Quick visual reference',
-          'Key traits shown',
-          'Identifies animals clearly'
-        ]
-      },
-      {
-        stepNumber: 4,
-        title: 'Download as PDF',
-        content: 'Most pedigree charts can be downloaded as PDF for printing, sharing, or archiving. Use the Download button on the chart.',
-        highlightElement: '[data-tutorial-target="download-pedigree-btn"]',
-        tips: [
-          'Professional documentation',
-          'Shareable format',
-          'Print for records'
-        ]
-      },
-      {
-        stepNumber: 5,
-        title: 'Using Pedigrees',
-        content: 'Use pedigree charts to understand genetic diversity, avoid accidental inbreeding, verify lineage, and make breeding decisions. They\'re essential tools for breeders.',
-        highlightElement: '[data-tutorial-target="pedigree-uses"]',
-        tips: [
-          'Breeding planning tool',
-          'Understand genetics',
-          'Make informed decisions'
-        ]
-      }
-    ]
-  },
-
-  {
-    id: 'af-advanced-transfers',
-    title: '9. Advanced Transfer Features',
-    description: 'Master complex animal transfers',
-    tour: 'advanced-features',
-    tourOrder: 9,
-    steps: [
-      {
-        stepNumber: 1,
-        title: 'Transfer System Overview',
-        content: 'The advanced transfer system allows you to sell, purchase, or notify other breeders about animals. This builds community connections while protecting intellectual property.',
-        highlightElement: '[data-tutorial-target="transfer-system"]',
-        tips: [
-          'Community building',
-          'Record preservation',
-          'Relationship tracking'
-        ]
-      },
-      {
-        stepNumber: 2,
-        title: 'Initiating a Sale',
-        content: 'To sell an animal to another CritterTrack user, use the "Animal Sale" > "Transfer Ownership" option. Specify the buyer and price, then initiate the transfer.',
-        highlightElement: '[data-tutorial-target="initiate-sale"]',
-        tips: [
-          'Two-user system',
-          'Both keep records',
-          'Transparent transaction'
-        ]
-      },
-      {
-        stepNumber: 3,
-        title: 'After Transfer',
-        content: 'After transfer: You see the animal as "Sold" with view-only access. You retain breeding history and can see changes the new owner makes. The new owner has full editing rights. Neither of you can delete the animal.',
-        highlightElement: '[data-tutorial-target="post-transfer"]',
-        tips: [
-          'View-only copy for seller',
-          'Full access for buyer',
-          'Permanent record'
-        ]
-      },
-      {
-        stepNumber: 4,
-        title: 'Purchasing from Breeders',
-        content: 'To purchase an animal, use "Animal Purchase". You can either manually enter details or use "Notify Seller" if the breeder is on CritterTrack.',
-        highlightElement: '[data-tutorial-target="animal-purchase"]',
-        tips: [
-          'Two methods available',
-          'Notify Seller is preferred',
-          'Keeps community connected'
-        ]
-      },
-      {
-        stepNumber: 5,
-        title: 'Notify Seller System',
-        content: 'When you notify a seller, they get a special view-only version of your animal showing their genetic contribution. They can see what you\'ve done with their animal without being able to edit.',
-        highlightElement: '[data-tutorial-target="notify-seller-system"]',
-        tips: [
-          'Non-invasive tracking',
-          'Breeder gets updates',
-          'Read-only access'
-        ]
-      },
-      {
-        stepNumber: 6,
-        title: 'Congratulations!',
-        content: 'You\'ve completed the Advanced Features tour! You now understand the full power of CritterTrack including searches, genetics, pedigrees, and community features.',
-        highlightElement: '[data-tutorial-target="advanced-complete-message"]',
-        tips: [
-          'You\'re now an advanced user',
-          'Ready for complex breeding programs',
-          'Full platform master'
         ]
       }
     ]
