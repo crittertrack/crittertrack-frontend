@@ -1708,9 +1708,10 @@ const KEY_FEATURES_LESSONS = [
       {
         stepNumber: 2,
         title: 'Basic Search',
-        content: 'Enter an animal name, ID, or keyword in the search box. Results appear as you type, showing matching animals from your collection.',
+        content: 'Enter an animal name, ID, or keyword in the search box, then click the Search button to find matching animals. You can also press Enter to execute the search.',
         highlightElement: '[data-tutorial-target="search-box"]',
         tips: [
+          'Click the Search button to find results',
           'Case-insensitive search',
           'Works on names and IDs',
           'Fast results'
