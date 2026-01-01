@@ -1200,6 +1200,8 @@ const GETTING_STARTED_LESSONS = [
         stepNumber: 5,
         title: 'Next: Key Features Tour',
         content: 'Congratulations on completing the Getting Started tour! You now know how to create and configure animals. Would you like to start the "Key Features" tour? This will teach you about viewing and editing animals, creating litters, managing your profile, and handling finances.',
+        actionType: 'startNextTour',
+        actionData: { nextTour: 'features' },
         tips: [
           'Key Features builds on Getting Started',
           'Covers litters, profile, budget',

@@ -274,26 +274,48 @@ export const TutorialOverlay = React.forwardRef(({ lessonId, onClose, onComplete
               Skip
             </button>
 
-            <button
-              onClick={handleNext}
-              className={`flex items-center gap-1 px-4 py-1.5 rounded text-xs font-semibold transition ${
-                isLastStep
-                  ? 'bg-accent hover:bg-accent/90 text-white'
-                  : 'bg-primary hover:bg-primary/90 text-black'
-              }`}
-            >
-              {isLastStep ? (
-                <>
-                  <Check size={14} />
-                  Done
-                </>
-              ) : (
-                <>
-                  Next
+            {currentStep?.actionType === 'startNextTour' ? (
+              <>
+                <button
+                  onClick={handleSkip}
+                  className="px-4 py-1.5 text-xs text-gray-700 hover:text-gray-900 font-semibold transition hover:bg-white rounded"
+                >
+                  Maybe Later
+                </button>
+                <button
+                  onClick={() => {
+                    if (onComplete) {
+                      onComplete({ startTour: currentStep?.actionData?.nextTour });
+                    }
+                  }}
+                  className="flex items-center gap-1 px-4 py-1.5 rounded text-xs font-semibold transition bg-accent hover:bg-accent/90 text-white"
+                >
                   <ChevronRight size={14} />
-                </>
-              )}
-            </button>
+                  Start Key Features Tour
+                </button>
+              </>
+            ) : (
+              <button
+                onClick={handleNext}
+                className={`flex items-center gap-1 px-4 py-1.5 rounded text-xs font-semibold transition ${
+                  isLastStep
+                    ? 'bg-accent hover:bg-accent/90 text-white'
+                    : 'bg-primary hover:bg-primary/90 text-black'
+                }`}
+              >
+                {isLastStep ? (
+                  <>
+                    <Check size={14} />
+                    Done
+                  </>
+                ) : (
+                  <>
+                    Next
+                    <ChevronRight size={14} />
+                  </>
+                )}
+              </button>
+            )}
           </div>
         </div>
       </div>
