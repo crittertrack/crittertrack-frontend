@@ -660,10 +660,11 @@ const GETTING_STARTED_LESSONS = [
       {
         stepNumber: 4,
         title: 'Close Sire Selector',
-        content: 'For now, let\'s close this selector without selecting a parent. Press Escape or click outside the modal to close it.',
+        content: 'For now, let\'s close this selector without selecting a parent. Click the X button in the top right corner of the modal to close it.',
         highlightElement: '[data-tutorial-target="modal-close-btn"]',
         actionType: 'close',
         tips: [
+          'Click the X button to close the modal',
           'Parents are optional for tutorial',
           'Can add them anytime later',
           'Doesn\'t affect animal creation'
@@ -949,7 +950,7 @@ const GETTING_STARTED_LESSONS = [
       {
         stepNumber: 3,
         title: 'Husbandry Details',
-        content: 'Record cage/enclosure setup, bedding type, lighting schedule, temperature, humidity, and any other environmental factors specific to your care method.',
+        content: 'Record cage/enclosure setup, bedding type, and any other husbandry details specific to your care method. (Temperature, humidity, and lighting schedule are tracked in the Environment section.)',
         highlightElement: '[data-tutorial-target="husbandry-details-section"]',
         tips: [
           'Species-specific requirements vary',
@@ -1117,7 +1118,7 @@ const GETTING_STARTED_LESSONS = [
         stepNumber: 7,
         title: 'Legal & Administrative',
         content: 'Document any legal or administrative aspects of the animal\'s passing: burial location, cremation, organ donation, etc.',
-        highlightElement: '[data-tutorial-target="legal-admin-textarea"]',
+        highlightElement: '[data-tutorial-target="legal-admin-section"]',
         tips: [
           'Some may be required in your area',
           'Document disposal method',
@@ -1160,10 +1161,11 @@ const GETTING_STARTED_LESSONS = [
       {
         stepNumber: 2,
         title: 'Example Privacy Toggles',
-        content: 'For example, the "Public Profile" checkbox controls whether the whole animal appears publicly. Individual sections might have their own toggles. The "Current Owner" field might have a toggle to show/hide owner information. Health records might be toggle-able. These toggles let you share some info while keeping other details private.',
-        highlightElement: '[data-tutorial-target="privacy-examples"]',
+        content: 'For example, the "Public Profile" checkbox controls whether the whole animal appears publicly. Individual sections might have their own toggles. The "Current Owner" field has a toggle to show/hide owner information - you can decide whether to display owner details publicly or keep them private. These toggles let you share some info while keeping other details private.',
+        highlightElement: '[data-tutorial-target="visibility-section"], [data-tutorial-target="owner-privacy-toggle"]',
         tips: [
           'Different sections have different toggles',
+          'Toggle buttons show 🌍 Public or 🔒 Private',
           'Strategic privacy increases sharing',
           'You control what\'s visible',
           'Helpful for protecting sensitive info'
@@ -1197,11 +1199,11 @@ const GETTING_STARTED_LESSONS = [
       {
         stepNumber: 5,
         title: 'Next: Key Features Tour',
-        content: 'Would you like to start the "Key Features" tour? This will teach you about viewing and editing animals, creating litters, managing your profile, and handling finances. Click "Start Key Features Tour" to continue.',
-        highlightElement: '[data-tutorial-target="start-key-features-tour-btn"]',
+        content: 'Congratulations on completing the Getting Started tour! You now know how to create and configure animals. Would you like to start the "Key Features" tour? This will teach you about viewing and editing animals, creating litters, managing your profile, and handling finances.',
         tips: [
           'Key Features builds on Getting Started',
           'Covers litters, profile, budget',
+          'You can start it anytime from the tutorial menu',
           'Optional but highly recommended'
         ]
       }

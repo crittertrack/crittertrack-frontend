@@ -6971,6 +6971,7 @@ const AnimalForm = ({
                                 <h3 className="text-lg font-semibold text-gray-700">Current Owner</h3>
                                 <button
                                     type="button"
+                                    data-tutorial-target="owner-privacy-toggle"
                                     onClick={() => toggleSectionPrivacy('owner')}
                                     className={`px-3 py-1 rounded-full text-xs font-medium transition ${
                                         sectionPrivacy[animalToEdit?.id_public]?.owner ? 'bg-blue-100 text-blue-800' : 'bg-gray-100 text-gray-800'
