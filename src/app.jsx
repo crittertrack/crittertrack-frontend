@@ -9220,21 +9220,26 @@ const ProfileEditForm = ({ userProfile, showModalMessage, onSaveSuccess, onCance
             <form onSubmit={handleProfileUpdate} className="space-y-6 mb-8 p-4 sm:p-6 border rounded-lg bg-gray-50 overflow-x-hidden">
                 <h3 className="text-xl font-semibold text-gray-800 border-b pb-2">Public Profile Information</h3>
                 
-                <ProfileImagePlaceholder 
-                    url={profileImageURL} 
-                    onFileChange={handleImageChange} 
-                    disabled={profileLoading} 
-                />
+                <div data-tutorial-target="profile-image-upload">
+                    <ProfileImagePlaceholder 
+                        url={profileImageURL} 
+                        onFileChange={handleImageChange} 
+                        disabled={profileLoading} 
+                    />
+                </div>
 
                 <div className="space-y-4 min-w-0">
-                    <input type="text" name="personalName" placeholder="Personal Name *" value={personalName} onChange={(e) => setPersonalName(e.target.value)} required 
-                        className="w-full p-3 border border-gray-300 rounded-lg focus:ring-primary focus:border-primary transition box-border" disabled={profileLoading} />
-                    <input type="text" name="breederName" placeholder="Breeder Name (Optional)" value={breederName} onChange={(e) => setBreederName(e.target.value)}
-                        className="w-full p-3 border border-gray-300 rounded-lg focus:ring-primary focus:border-primary transition box-border" disabled={profileLoading} />
-                    <input type="url" name="websiteURL" placeholder="Website URL (Optional) e.g., https://example.com" value={websiteURL} onChange={(e) => setWebsiteURL(e.target.value)}
-                        className="w-full p-3 border border-gray-300 rounded-lg focus:ring-primary focus:border-primary transition box-border" disabled={profileLoading} />
+                    <div data-tutorial-target="name-fields">
+                        <input type="text" name="personalName" placeholder="Personal Name *" value={personalName} onChange={(e) => setPersonalName(e.target.value)} required 
+                            className="w-full p-3 border border-gray-300 rounded-lg focus:ring-primary focus:border-primary transition box-border" disabled={profileLoading} />
+                        <input type="text" name="breederName" placeholder="Breeder Name (Optional)" value={breederName} onChange={(e) => setBreederName(e.target.value)}
+                            className="w-full p-3 border border-gray-300 rounded-lg focus:ring-primary focus:border-primary transition box-border" disabled={profileLoading} />
+                    </div>
+                    <div data-tutorial-target="website-country-fields">
+                        <input type="url" name="websiteURL" placeholder="Website URL (Optional) e.g., https://example.com" value={websiteURL} onChange={(e) => setWebsiteURL(e.target.value)}
+                            className="w-full p-3 border border-gray-300 rounded-lg focus:ring-primary focus:border-primary transition box-border" disabled={profileLoading} />
                     
-                    <select value={country} onChange={(e) => setCountry(e.target.value)}
+                        <select value={country} onChange={(e) => setCountry(e.target.value)}
                         className="w-full p-3 border border-gray-300 rounded-lg focus:ring-primary focus:border-primary transition box-border" disabled={profileLoading}>
                         <option value="">Select Country (Optional)</option>
                         <option value="US">🇺🇸 United States</option>
@@ -9271,9 +9276,10 @@ const ProfileEditForm = ({ userProfile, showModalMessage, onSaveSuccess, onCance
                         <option value="HK">🇭🇰 Hong Kong</option>
                         <option value="MY">🇲🇾 Malaysia</option>
                         <option value="TH">🇹🇭 Thailand</option>
-                    </select>
+                        </select>
+                    </div>
 
-                    <div className="pt-2 space-y-2">
+                    <div data-tutorial-target="public-visibility-checkboxes" className="pt-2 space-y-2">
                         <h4 className="text-base font-medium text-gray-800 pt-2 border-t border-gray-200">Public Profile Visibility:</h4>
                         
                         <label className="flex items-center space-x-2 text-sm text-gray-700">
@@ -9305,7 +9311,7 @@ const ProfileEditForm = ({ userProfile, showModalMessage, onSaveSuccess, onCance
                         )}
                     </div>
 
-                    <div className="pt-4 space-y-2 border-t border-gray-200">
+                    <div data-tutorial-target="messaging-preferences" className="pt-4 space-y-2 border-t border-gray-200">
                         <h4 className="text-base font-medium text-gray-800">Messaging Preferences:</h4>
                         
                         <label className="flex items-center space-x-2 text-sm text-gray-700">
@@ -9315,7 +9321,7 @@ const ProfileEditForm = ({ userProfile, showModalMessage, onSaveSuccess, onCance
                         </label>
                     </div>
 
-                    <div className="pt-4 space-y-3 border-t border-gray-200">
+                    <div data-tutorial-target="email-notifications" className="pt-4 space-y-3 border-t border-gray-200">
                         <h4 className="text-base font-medium text-gray-800">Email Notifications:</h4>
                         <p className="text-sm text-gray-600">Choose what types of notifications to receive via email:</p>
                         
@@ -9375,7 +9381,7 @@ const ProfileEditForm = ({ userProfile, showModalMessage, onSaveSuccess, onCance
                     </div>
                 </div>
 
-                <div className="flex justify-end pt-2">
+                <div data-tutorial-target="profile-save-cancel" className="flex justify-end pt-2">
                     <button type="submit" disabled={profileLoading}
                         className="bg-accent hover:bg-accent/90 text-white font-bold py-2 px-4 rounded-lg shadow-md transition duration-150 flex items-center justify-center disabled:opacity-50"
                     >
@@ -9752,7 +9758,7 @@ const ProfileView = ({ userProfile, showModalMessage, fetchUserProfile, authToke
                     </div>
                 </div>
 
-                <div className="p-4 bg-gray-50 rounded-lg border border-gray-200 overflow-x-hidden">
+                <div className="p-4 bg-gray-50 rounded-lg border border-gray-200 overflow-x-hidden" data-tutorial-target="personal-id-section">
                     <p className="text-lg font-semibold text-gray-700">Personal ID:</p>
                     <p className="text-2xl sm:text-3xl font-extrabold text-accent truncate">{userProfile.id_public}</p>
                 </div>
@@ -12004,17 +12010,19 @@ const App = () => {
 
         // When viewing profile, advance to step 2 (where edit button is highlighted)
         if (currentView === 'profile' && currentTutorialStep?.stepNumber === 1) {
-            tutorialOverlayRef.current.advanceStep();
+            if (currentTutorialId === 'kf-profile-settings') {
+                tutorialOverlayRef.current.advanceStep();
+            }
         }
     }, [currentView, showTutorialOverlay, currentTutorialId, currentTutorialStep]);
 
-    // Auto-advance tutorial for lesson 4 step 3 when edit profile button is clicked
+    // Auto-advance tutorial for lesson 3 step 2 when edit profile button is clicked
     useEffect(() => {
-        if (!showTutorialOverlay || currentTutorialId !== 'profile-settings' || !tutorialOverlayRef.current) {
+        if (!showTutorialOverlay || currentTutorialId !== 'kf-profile-settings' || !tutorialOverlayRef.current) {
             return;
         }
 
-        // When edit profile button is clicked, advance to step 3 (privacy settings)
+        // When edit profile button is clicked, advance to step 3 (profile image)
         if (profileEditButtonClicked && currentTutorialStep?.stepNumber === 2) {
             tutorialOverlayRef.current.advanceStep();
             setProfileEditButtonClicked(false);

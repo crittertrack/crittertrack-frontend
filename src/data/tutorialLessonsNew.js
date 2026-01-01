@@ -1392,11 +1392,12 @@ const KEY_FEATURES_LESSONS = [
       {
         stepNumber: 6,
         title: 'Litter Card Details',
-        content: 'Click on a litter card to view details. Here you can see the parents, offspring, and manage the litter.',
+        content: 'Once you\'ve created a litter, click on a litter card to view its details. Here you can see the parents, offspring, and manage the litter from an expanded view.',
         highlightElement: '[data-tutorial-target="litter-card"]',
         tips: [
+          'Requires a litter to be created first',
           'Shows complete litter information',
-          'Edit, link, or add offspring',
+          'Edit, link, or add offspring from here',
           'View parentage clearly'
         ]
       },
@@ -1438,18 +1439,19 @@ const KEY_FEATURES_LESSONS = [
         stepNumber: 1,
         title: 'Profile Summary',
         content: 'Your profile page shows a summary of your settings and information. You can see your Personal ID here - this is a unique identifier in CritterTrack. Your Personal ID is used by other users to find and contact you.',
-        highlightElement: '[data-tutorial-target="profile-summary"]',
+        highlightElement: '[data-tutorial-target="personal-id-section"]',
         tips: [
           'Personal ID is unique to you',
           'Shown to other users',
-          'Used for sharing and transfers'
+          'Used for sharing and transfers',
+          'Share this ID to receive notifications'
         ]
       },
       {
         stepNumber: 2,
         title: 'Edit Profile Button',
         content: 'Click "Edit Profile" to modify your profile information including name, image, and public settings.',
-        highlightElement: '[data-tutorial-target="edit-profile-btn"]',
+        highlightElement: '[data-tutorial-target="profile-edit-btn"]',
         actionType: 'click',
         tips: [
           'Opens edit mode for profile',
@@ -1480,7 +1482,7 @@ const KEY_FEATURES_LESSONS = [
         ]
       },
       {
-        stepNumber: 5,
+        stepNumber: 6,
         title: 'Website & Country',
         content: 'Add your website (if you have a breeding website) and select your country. These help other users find and learn about you.',
         highlightElement: '[data-tutorial-target="website-country-fields"]',
@@ -1491,7 +1493,7 @@ const KEY_FEATURES_LESSONS = [
         ]
       },
       {
-        stepNumber: 6,
+        stepNumber: 7,
         title: 'Public Profile Visibility',
         content: 'These checkboxes control what information is visible on your public profile. Check which aspects you want to share: Personal Name, Breeder Name, website, country, etc. If private, only you see that info.',
         highlightElement: '[data-tutorial-target="public-visibility-checkboxes"]',
@@ -1502,7 +1504,7 @@ const KEY_FEATURES_LESSONS = [
         ]
       },
       {
-        stepNumber: 7,
+        stepNumber: 8,
         title: 'Messaging Preferences',
         content: 'Configure how other users can contact you. You can allow messages, emails, or both. This controls your preferred method of communication.',
         highlightElement: '[data-tutorial-target="messaging-preferences"]',
@@ -1513,7 +1515,7 @@ const KEY_FEATURES_LESSONS = [
         ]
       },
       {
-        stepNumber: 8,
+        stepNumber: 9,
         title: 'Email Notifications',
         content: 'Set up email notifications for important events like messages, transfer requests, or system updates. Choose which notifications you want to receive.',
         highlightElement: '[data-tutorial-target="email-notifications"]',
@@ -1524,7 +1526,7 @@ const KEY_FEATURES_LESSONS = [
         ]
       },
       {
-        stepNumber: 9,
+        stepNumber: 10,
         title: 'Save or Cancel',
         content: 'Use the Save button to keep your changes or Cancel to discard them. Changes are applied immediately upon save.',
         highlightElement: '[data-tutorial-target="profile-save-cancel"]',
@@ -1535,7 +1537,7 @@ const KEY_FEATURES_LESSONS = [
         ]
       },
       {
-        stepNumber: 10,
+        stepNumber: 11,
         title: 'Move to Budget',
         content: 'Now let\'s explore the Budget section to understand financial tracking. Click the "Budget" button in the header.',
         highlightElement: '[data-tutorial-target="budget-btn"]',
