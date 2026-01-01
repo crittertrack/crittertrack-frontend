@@ -1288,14 +1288,17 @@ const UserSearchModal = ({ onClose, showModalMessage, onSelectUser, API_BASE_URL
     const [userResults, setUserResults] = useState([]);
     const [animalResults, setAnimalResults] = useState([]);
     const [loading, setLoading] = useState(false);
+    const [hasSearched, setHasSearched] = useState(false);
 
     const handleSearch = async () => {
         if (!searchTerm || searchTerm.trim().length < 2) {
             setUserResults([]);
             setAnimalResults([]);
+            setHasSearched(false);
             return;
         }
 
+        setHasSearched(true);
         setLoading(true);
         
         try {
@@ -1423,7 +1426,7 @@ const UserSearchModal = ({ onClose, showModalMessage, onSelectUser, API_BASE_URL
                 {modalTarget !== 'breeder' && (
                     <div className="flex space-x-2 mb-4">
                         <button
-                            onClick={() => { setSearchType('users'); setUserResults([]); setAnimalResults([]); }}
+                            onClick={() => { setSearchType('users'); setUserResults([]); setAnimalResults([]); setHasSearched(false); }}
                             className={`flex-1 py-2 px-4 rounded-lg font-semibold transition ${
                                 searchType === 'users' 
                                     ? 'bg-primary text-black' 
@@ -1434,7 +1437,7 @@ const UserSearchModal = ({ onClose, showModalMessage, onSelectUser, API_BASE_URL
                             Users
                         </button>
                         <button
-                            onClick={() => { setSearchType('animals'); setUserResults([]); setAnimalResults([]); }}
+                            onClick={() => { setSearchType('animals'); setUserResults([]); setAnimalResults([]); setHasSearched(false); }}
                             className={`flex-1 py-2 px-4 rounded-lg font-semibold transition ${
                                 searchType === 'animals' 
                                     ? 'bg-primary text-black' 
@@ -1488,7 +1491,7 @@ const UserSearchModal = ({ onClose, showModalMessage, onSelectUser, API_BASE_URL
                                 : results.map(animal => <AnimalResultCard key={animal.id_public} animal={animal} />)
                             }
                         </div>
-                    ) : searchTerm && !loading ? (
+                    ) : hasSearched && !loading ? (
                         <p className="text-center text-gray-500 py-4">
                             No {searchType === 'users' ? 'users' : 'animals'} found matching your search.
                         </p>
