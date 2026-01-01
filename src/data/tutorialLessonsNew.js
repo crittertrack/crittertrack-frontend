@@ -1452,7 +1452,6 @@ const KEY_FEATURES_LESSONS = [
         title: 'Edit Profile Button',
         content: 'Click "Edit Profile" to modify your profile information including name, image, and public settings.',
         highlightElement: '[data-tutorial-target="profile-edit-btn"]',
-        actionType: 'click',
         tips: [
           'Opens edit mode for profile',
           'Can change all public info',
@@ -1482,7 +1481,7 @@ const KEY_FEATURES_LESSONS = [
         ]
       },
       {
-        stepNumber: 6,
+        stepNumber: 5,
         title: 'Website & Country',
         content: 'Add your website (if you have a breeding website) and select your country. These help other users find and learn about you.',
         highlightElement: '[data-tutorial-target="website-country-fields"]',
@@ -1493,7 +1492,7 @@ const KEY_FEATURES_LESSONS = [
         ]
       },
       {
-        stepNumber: 7,
+        stepNumber: 6,
         title: 'Public Profile Visibility',
         content: 'These checkboxes control what information is visible on your public profile. Check which aspects you want to share: Personal Name, Breeder Name, website, country, etc. If private, only you see that info.',
         highlightElement: '[data-tutorial-target="public-visibility-checkboxes"]',
@@ -1504,7 +1503,7 @@ const KEY_FEATURES_LESSONS = [
         ]
       },
       {
-        stepNumber: 8,
+        stepNumber: 7,
         title: 'Messaging Preferences',
         content: 'Configure how other users can contact you. You can allow messages, emails, or both. This controls your preferred method of communication.',
         highlightElement: '[data-tutorial-target="messaging-preferences"]',
@@ -1515,7 +1514,7 @@ const KEY_FEATURES_LESSONS = [
         ]
       },
       {
-        stepNumber: 9,
+        stepNumber: 8,
         title: 'Email Notifications',
         content: 'Set up email notifications for important events like messages, transfer requests, or system updates. Choose which notifications you want to receive.',
         highlightElement: '[data-tutorial-target="email-notifications"]',
@@ -1526,7 +1525,7 @@ const KEY_FEATURES_LESSONS = [
         ]
       },
       {
-        stepNumber: 10,
+        stepNumber: 9,
         title: 'Save or Cancel',
         content: 'Use the Save button to keep your changes or Cancel to discard them. Changes are applied immediately upon save.',
         highlightElement: '[data-tutorial-target="profile-save-cancel"]',
@@ -1537,7 +1536,7 @@ const KEY_FEATURES_LESSONS = [
         ]
       },
       {
-        stepNumber: 11,
+        stepNumber: 10,
         title: 'Move to Budget',
         content: 'Now let\'s explore the Budget section to understand financial tracking. Click the "Budget" button in the header.',
         highlightElement: '[data-tutorial-target="budget-btn"]',
