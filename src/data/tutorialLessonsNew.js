@@ -1689,10 +1689,10 @@ const KEY_FEATURES_LESSONS = [
 const ADVANCED_FEATURES_LESSONS = [
   {
     id: 'af-searching',
-    title: '1. Searching & Filtering Animals',
+    title: '5. Searching & Filtering Animals',
     description: 'Master advanced search and filtering',
-    tour: 'advanced-features',
-    tourOrder: 1,
+    tour: 'key-features',
+    tourOrder: 5,
     steps: [
       {
         stepNumber: 1,
@@ -1765,10 +1765,10 @@ const ADVANCED_FEATURES_LESSONS = [
 
   {
     id: 'af-tags-management',
-    title: '2. Tags & Mass Management',
+    title: '1. Tags & Mass Management',
     description: 'Organize animals with tags and bulk operations',
     tour: 'advanced-features',
-    tourOrder: 2,
+    tourOrder: 1,
     steps: [
       {
         stepNumber: 1,
@@ -1819,10 +1819,10 @@ const ADVANCED_FEATURES_LESSONS = [
 
   {
     id: 'af-notifications',
-    title: '3. Notification System',
+    title: '6. Notification System',
     description: 'Stay informed with notifications',
-    tour: 'advanced-features',
-    tourOrder: 3,
+    tour: 'key-features',
+    tourOrder: 6,
     steps: [
       {
         stepNumber: 1,
@@ -1873,10 +1873,10 @@ const ADVANCED_FEATURES_LESSONS = [
 
   {
     id: 'af-messaging',
-    title: '4. Messaging System',
+    title: '7. Messaging System',
     description: 'Communicate with other breeders',
-    tour: 'advanced-features',
-    tourOrder: 4,
+    tour: 'key-features',
+    tourOrder: 7,
     steps: [
       {
         stepNumber: 1,
@@ -1927,10 +1927,10 @@ const ADVANCED_FEATURES_LESSONS = [
 
   {
     id: 'af-public-profiles',
-    title: '5. Public Profiles & Sharing',
+    title: '2. Public Profiles & Sharing',
     description: 'Share your breeding program with the community',
     tour: 'advanced-features',
-    tourOrder: 5,
+    tourOrder: 2,
     steps: [
       {
         stepNumber: 1,
@@ -1981,10 +1981,10 @@ const ADVANCED_FEATURES_LESSONS = [
 
   {
     id: 'af-understanding-coi',
-    title: '6. Understanding Coefficient of Inbreeding (COI)',
+    title: '3. Understanding Coefficient of Inbreeding (COI)',
     description: 'Learn about genetic diversity and inbreeding coefficient',
     tour: 'advanced-features',
-    tourOrder: 6,
+    tourOrder: 3,
     steps: [
       {
         stepNumber: 1,
@@ -2046,10 +2046,10 @@ const ADVANCED_FEATURES_LESSONS = [
 
   {
     id: 'af-genetics-calculator',
-    title: '7. Genetics Calculator',
+    title: '4. Genetics Calculator',
     description: 'Use the genetics calculator to predict offspring traits',
     tour: 'advanced-features',
-    tourOrder: 7,
+    tourOrder: 4,
     steps: [
       {
         stepNumber: 1,
