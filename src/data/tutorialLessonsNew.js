@@ -1698,7 +1698,7 @@ const KEY_FEATURES_LESSONS = [
         stepNumber: 1,
         title: 'Search Overview',
         content: 'The search feature allows you to find animals in your collection or the global community by name, ID, species, or other criteria. Learn to use search effectively.',
-        highlightElement: '[data-tutorial-target="search-section"]',
+        highlightElement: '[data-tutorial-target="search-icon"]',
         tips: [
           'Powerful discovery tool',
           'Works on your animals and global',
