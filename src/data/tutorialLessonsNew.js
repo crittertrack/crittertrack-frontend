@@ -1251,6 +1251,17 @@ const KEY_FEATURES_LESSONS = [
       },
       {
         stepNumber: 3,
+        title: 'Private Toggle',
+        content: 'The private/public toggle controls whether this entire animal appears on your public profile. When private (eye icon closed), only you can see it.',
+        highlightElement: '[data-tutorial-target="private-toggle"]',
+        tips: [
+          'Controls whole animal visibility',
+          'Different from section-specific toggles',
+          'Can be toggled anytime'
+        ]
+      },
+      {
+        stepNumber: 4,
         title: 'Edit Button',
         content: 'Click the "Edit" button in the top right corner to enter edit mode. This allows you to modify any information in the animal record.',
         highlightElement: '[data-tutorial-target="edit-animal-btn"]',
@@ -1262,7 +1273,7 @@ const KEY_FEATURES_LESSONS = [
         ]
       },
       {
-        stepNumber: 4,
+        stepNumber: 5,
         title: 'Edit View Overview',
         content: 'You\'re now in the edit view. Notice it works exactly like the create form - same tabs, same fields, same Save button. You can edit any information here.',
         highlightElement: '[data-tutorial-target="edit-form"]',
@@ -1273,7 +1284,7 @@ const KEY_FEATURES_LESSONS = [
         ]
       },
       {
-        stepNumber: 5,
+        stepNumber: 6,
         title: 'Delete Button',
         content: 'When you\'re in edit mode, you can find the Delete button (usually in red) at the bottom of the form. This allows you to remove an animal from your collection entirely. Warning: This action cannot be undone, so use with caution.',
         highlightElement: '[data-tutorial-target="delete-animal-btn"]',
@@ -1285,20 +1296,9 @@ const KEY_FEATURES_LESSONS = [
         ]
       },
       {
-        stepNumber: 6,
-        title: 'Private Toggle',
-        content: 'The private/public toggle controls whether this entire animal appears on your public profile. When private (eye icon closed), only you can see it.',
-        highlightElement: '[data-tutorial-target="private-toggle"]',
-        tips: [
-          'Controls whole animal visibility',
-          'Different from section-specific toggles',
-          'Can be toggled anytime'
-        ]
-      },
-      {
         stepNumber: 7,
         title: 'Close Edit Without Saving',
-        content: 'For now, let\'s go back to the main animal list without making changes. Click the back arrow at the top left to close edit mode and return to your list. You can always reopen an existing animal to view or edit it again.',
+        content: 'For now, let\'s go back to the main animal list without making changes. Click the back arrow at the top right to close edit mode and return to your list. You can always reopen an existing animal to view or edit it again.',
         highlightElement: '[data-tutorial-target="close-edit-btn"]',
         actionType: 'click',
         tips: [
@@ -1333,8 +1333,8 @@ const KEY_FEATURES_LESSONS = [
       {
         stepNumber: 1,
         title: 'Litter Management',
-        content: 'You\'re now in the Litters section. This is where you track breeding litters and manage offspring. Click the "Add Litter" button to create a new litter.',
-        highlightElement: '[data-tutorial-target="add-litter-btn"]',
+        content: 'You\'re now in the Litters section. This is where you track breeding litters and manage offspring. Click the "New Litter" button to create a new litter.',
+        highlightElement: '[data-tutorial-target="new-litter-btn"]',
         actionType: 'click',
         tips: [
           'Litters organize offspring by breeding',
