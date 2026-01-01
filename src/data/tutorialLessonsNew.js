@@ -1239,6 +1239,18 @@ const KEY_FEATURES_LESSONS = [
       },
       {
         stepNumber: 2,
+        title: 'Pedigree Chart Button',
+        content: 'On the Lineage tab, you can click the "View Pedigree" button to see a detailed family tree chart of your animal. This shows parents, grandparents, and further back generations. When you\'re done viewing, close this pedigree screen by clicking the X or close button.',
+        highlightElement: '[data-tutorial-target="pedigree-btn"]',
+        tips: [
+          'Visual representation of pedigree',
+          'Requires parent data to be useful',
+          'Can be downloaded as PDF',
+          'Close the pedigree screen when done'
+        ]
+      },
+      {
+        stepNumber: 3,
         title: 'Edit Button',
         content: 'Click the "Edit" button in the top right corner to enter edit mode. This allows you to modify any information in the animal record.',
         highlightElement: '[data-tutorial-target="edit-animal-btn"]',
@@ -1250,7 +1262,7 @@ const KEY_FEATURES_LESSONS = [
         ]
       },
       {
-        stepNumber: 3,
+        stepNumber: 4,
         title: 'Edit View Overview',
         content: 'You\'re now in the edit view. Notice it works exactly like the create form - same tabs, same fields, same Save button. You can edit any information here.',
         highlightElement: '[data-tutorial-target="edit-form"]',
@@ -1261,41 +1273,19 @@ const KEY_FEATURES_LESSONS = [
         ]
       },
       {
-        stepNumber: 4,
-        title: 'Close Edit Without Saving',
-        content: 'For now, let\'s go back to the detail view without making changes. Click the back arrow or X to close edit mode.',
-        highlightElement: '[data-tutorial-target="close-edit-btn"]',
-        actionType: 'click',
-        tips: [
-          'Close without saving discards changes',
-          'Returns to detail view',
-          'Data remains unchanged'
-        ]
-      },
-      {
         stepNumber: 5,
-        title: 'Pedigree Chart Button',
-        content: 'On the Lineage tab, you can click the "View Pedigree" button to see a detailed family tree chart of your animal. This shows parents, grandparents, and further back generations.',
-        highlightElement: '[data-tutorial-target="view-pedigree-btn"]',
-        tips: [
-          'Visual representation of pedigree',
-          'Requires parent data to be useful',
-          'Can be downloaded as PDF'
-        ]
-      },
-      {
-        stepNumber: 6,
         title: 'Delete Button',
-        content: 'The Delete button (usually in red) allows you to remove an animal from your collection. Warning: This action cannot be undone, so use with caution.',
+        content: 'When you\'re in edit mode, you can find the Delete button (usually in red) at the bottom of the form. This allows you to remove an animal from your collection entirely. Warning: This action cannot be undone, so use with caution.',
         highlightElement: '[data-tutorial-target="delete-animal-btn"]',
         tips: [
+          'Located in edit mode at the bottom',
           'Permanent action - cannot undo',
           'Cannot delete animals with offspring',
           'Consider marking as Deceased instead'
         ]
       },
       {
-        stepNumber: 7,
+        stepNumber: 6,
         title: 'Private Toggle',
         content: 'The private/public toggle controls whether this entire animal appears on your public profile. When private (eye icon closed), only you can see it.',
         highlightElement: '[data-tutorial-target="private-toggle"]',
@@ -1303,6 +1293,19 @@ const KEY_FEATURES_LESSONS = [
           'Controls whole animal visibility',
           'Different from section-specific toggles',
           'Can be toggled anytime'
+        ]
+      },
+      {
+        stepNumber: 7,
+        title: 'Close Edit Without Saving',
+        content: 'For now, let\'s go back to the main animal list without making changes. Click the back arrow at the top left to close edit mode and return to your list. You can always reopen an existing animal to view or edit it again.',
+        highlightElement: '[data-tutorial-target="close-edit-btn"]',
+        actionType: 'click',
+        tips: [
+          'Back arrow closes edit mode without saving',
+          'Returns you to the main animal list',
+          'Your data remains unchanged',
+          'You can reopen any animal anytime to view or edit'
         ]
       },
       {
