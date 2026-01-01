@@ -11712,8 +11712,6 @@ const App = () => {
     const [sendingMessage, setSendingMessage] = useState(false);
 
     const [showUserSearchModal, setShowUserSearchModal] = useState(false);
-    const [showHeaderSearchInput, setShowHeaderSearchInput] = useState(false);
-    const [headerSearchQuery, setHeaderSearchQuery] = useState('');
     const [viewingPublicProfile, setViewingPublicProfile] = useState(null);
     const [viewingPublicAnimal, setViewingPublicAnimal] = useState(null);
     const [viewAnimalBreederInfo, setViewAnimalBreederInfo] = useState(null);
@@ -13130,15 +13128,10 @@ const App = () => {
 
                     <div className="flex items-center space-x-3">
                         <button 
-                            onClick={() => {
-                                setShowHeaderSearchInput(!showHeaderSearchInput);
-                                if (!showHeaderSearchInput) {
-                                    setHeaderSearchQuery('');
-                                }
-                            }}
+                            onClick={() => setShowUserSearchModal(true)} 
                             className="flex flex-col items-center justify-center bg-gray-100 hover:bg-gray-200 text-gray-600 py-2 px-3 rounded-lg transition duration-150 shadow-sm"
-                            title="Search Animals"
-                            data-tutorial-target="search-icon"
+                            title="Search Users by Name or ID"
+                            data-tutorial-target="global-search-btn"
                         >
                             <Search size={18} className="mb-1" />
                             <span className="text-xs">Search</span>
@@ -13194,15 +13187,10 @@ const App = () => {
                         
                         <div className="flex items-center space-x-2">
                             <button 
-                                onClick={() => {
-                                    setShowHeaderSearchInput(!showHeaderSearchInput);
-                                    if (!showHeaderSearchInput) {
-                                        setHeaderSearchQuery('');
-                                    }
-                                }}
+                                onClick={() => setShowUserSearchModal(true)} 
                                 className="flex items-center justify-center bg-gray-100 hover:bg-gray-200 text-gray-600 p-2 rounded-lg transition duration-150 shadow-sm"
-                                title="Search Animals"
-                                data-tutorial-target="search-icon"
+                                title="Search"
+                                data-tutorial-target="global-search-btn"
                             >
                                 <Search size={18} />
                             </button>
@@ -13277,38 +13265,6 @@ const App = () => {
                     </nav>
                 </div>
             </header>
-
-            {/* Header Search Input - Manual search with button */}
-            {showHeaderSearchInput && (
-                <div className="w-full max-w-4xl mx-auto bg-gray-50 p-4 rounded-lg border-2 border-gray-200 mb-4 flex gap-2">
-                    <input
-                        type="text"
-                        placeholder="Search animals by name, ID, or other criteria..."
-                        value={headerSearchQuery}
-                        onChange={(e) => setHeaderSearchQuery(e.target.value)}
-                        className="flex-1 px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent"
-                        data-tutorial-target="search-box"
-                    />
-                    <button
-                        onClick={() => {
-                            setSearchQuery(headerSearchQuery);
-                            setShowHeaderSearchInput(false);
-                        }}
-                        className="bg-primary hover:bg-primary/80 text-black font-semibold py-2 px-4 rounded-lg transition"
-                    >
-                        Search
-                    </button>
-                    <button
-                        onClick={() => {
-                            setShowHeaderSearchInput(false);
-                            setHeaderSearchQuery('');
-                        }}
-                        className="bg-gray-300 hover:bg-gray-400 text-gray-700 font-semibold py-2 px-4 rounded-lg transition"
-                    >
-                        Cancel
-                    </button>
-                </div>
-            )}
 
             {showNotifications && (
                 <NotificationPanel
