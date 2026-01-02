@@ -13220,10 +13220,10 @@ const App = () => {
                                 <span>Help</span>
                             </button>
                         )}
-                        {userProfile?.id_public === 'CTU1' && !isMobile && (
-                            <button onClick={() => setShowAdminPanel(true)} className={`px-4 py-2 text-xs font-medium rounded-lg transition duration-150 flex flex-col items-center text-red-600 hover:bg-red-50`} title="Admin Panel">
+                        {['admin', 'moderator'].includes(userProfile?.role) && !isMobile && (
+                            <button onClick={() => setShowAdminPanel(true)} className={`px-4 py-2 text-xs font-medium rounded-lg transition duration-150 flex flex-col items-center text-red-600 hover:bg-red-50`} title="Moderation Panel">
                                 <Shield size={18} className="mb-1" />
-                                <span>Admin</span>
+                                <span>Moderation</span>
                             </button>
                         )}
                     </nav>
