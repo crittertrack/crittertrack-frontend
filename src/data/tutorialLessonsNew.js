@@ -1777,12 +1777,12 @@ const KEY_FEATURES_LESSONS = [
       {
         stepNumber: 2,
         title: 'Message Notifications',
-        content: 'Receive alerts when other CritterTrack users send you messages. These appear in your notification center.',
-        highlightElement: '[data-tutorial-target="message-notifications"]',
+        content: 'Receive alerts when other CritterTrack users send you messages. Click the Messages button in the header to view your conversations with other breeders.',
+        highlightElement: '[data-tutorial-target="messages-btn"]',
         tips: [
           'Community communication',
           'Stay in touch with breeders',
-          'Optional email alerts'
+          'Unread count badge shows new messages'
         ]
       },
       {

@@ -13160,6 +13160,7 @@ const App = () => {
                         
                         <button
                             onClick={() => setShowMessages(true)}
+                            data-tutorial-target="messages-btn"
                             className="relative flex flex-col items-center justify-center bg-gray-100 hover:bg-gray-200 text-gray-600 py-2 px-3 rounded-lg transition duration-150 shadow-sm"
                             title="Messages"
                         >
@@ -13218,6 +13219,7 @@ const App = () => {
                             
                             <button
                                 onClick={() => setShowMessages(true)}
+                                data-tutorial-target="messages-btn"
                                 className="relative flex items-center justify-center bg-gray-100 hover:bg-gray-200 text-gray-600 p-2 rounded-lg transition duration-150 shadow-sm"
                                 title="Messages"
                             >
