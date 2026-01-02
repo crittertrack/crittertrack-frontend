@@ -3,6 +3,7 @@ import './ReportModal.css';
 
 export default function ReportModal({ isOpen, contentType, contentId, contentOwnerId, authToken, onClose, onSubmit }) {
     const [category, setCategory] = useState('');
+    const [reportedField, setReportedField] = useState('');
     const [description, setDescription] = useState('');
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState('');
@@ -17,6 +18,26 @@ export default function ReportModal({ isOpen, contentType, contentId, contentOwn
         { value: 'other', label: 'Other' }
     ];
 
+    const animalFields = [
+        { value: 'animal_name', label: 'Animal Name' },
+        { value: 'animal_color', label: 'Color/Genetics' },
+        { value: 'animal_image', label: 'Image' },
+        { value: 'animal_description', label: 'Description' },
+        { value: 'animal_remarks', label: 'Remarks' },
+        { value: 'other', label: 'Other' }
+    ];
+
+    const profileFields = [
+        { value: 'profile_name', label: 'Personal Name' },
+        { value: 'profile_breeder_name', label: 'Breeder Name' },
+        { value: 'profile_image', label: 'Profile Image' },
+        { value: 'profile_description', label: 'Description' },
+        { value: 'profile_website', label: 'Website' },
+        { value: 'other', label: 'Other' }
+    ];
+
+    const fields = contentType === 'animal' ? animalFields : profileFields;
+
     const handleSubmit = async (e) => {
         e.preventDefault();
         setError('');
@@ -24,6 +45,12 @@ export default function ReportModal({ isOpen, contentType, contentId, contentOwn
 
         if (!category) {
             setError('Please select a report category');
+            setLoading(false);
+            return;
+        }
+
+        if (!reportedField) {
+            setError('Please select what part was reported');
             setLoading(false);
             return;
         }
@@ -59,6 +86,7 @@ export default function ReportModal({ isOpen, contentType, contentId, contentOwn
                     contentId,
                     contentOwnerId,
                     category,
+                    reportedField,
                     description
                 })
             });
@@ -71,6 +99,7 @@ export default function ReportModal({ isOpen, contentType, contentId, contentOwn
 
             setSuccess(true);
             setCategory('');
+            setReportedField('');
             setDescription('');
 
             if (onSubmit) {
@@ -90,6 +119,7 @@ export default function ReportModal({ isOpen, contentType, contentId, contentOwn
 
     const handleClose = () => {
         setCategory('');
+        setReportedField('');
         setDescription('');
         setError('');
         setSuccess(false);
@@ -127,6 +157,23 @@ export default function ReportModal({ isOpen, contentType, contentId, contentOwn
                                     {categories.map(cat => (
                                         <option key={cat.value} value={cat.value}>
                                             {cat.label}
+                                        </option>
+                                    ))}
+                                </select>
+                            </div>
+
+                            <div className="form-group">
+                                <label htmlFor="field">What specifically is problematic? *</label>
+                                <select
+                                    id="field"
+                                    value={reportedField}
+                                    onChange={(e) => setReportedField(e.target.value)}
+                                    disabled={loading}
+                                >
+                                    <option value="">Select the part that's problematic...</option>
+                                    {fields.map(f => (
+                                        <option key={f.value} value={f.value}>
+                                            {f.label}
                                         </option>
                                     ))}
                                 </select>
