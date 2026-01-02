@@ -7,7 +7,8 @@ export default function ModerationAuthModal({ isOpen, onClose, onSuccess, API_BA
     const [twoFactorCode, setTwoFactorCode] = useState('');
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState('');
-    const [step, setStep] = useState('password'); // 'password' or 'twofa'
+    const [step, setStep] = useState('password'); // 'password' or 'request-code' or 'twofa'
+    const [resendCooldown, setResendCooldown] = useState(0);
 
     const handlePasswordSubmit = async (e) => {
         e.preventDefault();
@@ -37,7 +38,7 @@ export default function ModerationAuthModal({ isOpen, onClose, onSuccess, API_BA
             }
 
             if (data.requiresTwoFactor) {
-                setStep('twofa');
+                setStep('request-code');
                 setPassword('');
             } else {
                 onSuccess();
@@ -47,6 +48,50 @@ export default function ModerationAuthModal({ isOpen, onClose, onSuccess, API_BA
         } finally {
             setLoading(false);
         }
+    };
+
+    const handleRequestCode = async () => {
+        setError('');
+        setLoading(true);
+
+        try {
+            const response = await fetch(`${API_BASE_URL}/auth/request-moderation-2fa-code`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Authorization': `Bearer ${authToken}`
+                }
+            });
+
+            const data = await response.json();
+
+            if (!response.ok) {
+                throw new Error(data.error || 'Failed to send code');
+            }
+
+            setStep('twofa');
+            setResendCooldown(60);
+            
+            // Start countdown timer for resend button
+            const interval = setInterval(() => {
+                setResendCooldown(prev => {
+                    if (prev <= 1) {
+                        clearInterval(interval);
+                        return 0;
+                    }
+                    return prev - 1;
+                });
+            }, 1000);
+        } catch (err) {
+            setError(err.message);
+        } finally {
+            setLoading(false);
+        }
+    };
+
+    const handleResendCode = async () => {
+        if (resendCooldown > 0) return;
+        await handleRequestCode();
     };
 
     const handleTwoFactorSubmit = async (e) => {
@@ -131,10 +176,38 @@ export default function ModerationAuthModal({ isOpen, onClose, onSuccess, API_BA
                                 {loading ? 'Verifying...' : 'Next'}
                             </button>
                         </form>
+                    ) : step === 'request-code' ? (
+                        <div className="mod-auth-request-code">
+                            <p className="mod-auth-message">
+                                A 6-digit verification code will be sent to your email.
+                            </p>
+                            
+                            <button
+                                type="button"
+                                onClick={handleRequestCode}
+                                disabled={loading}
+                                className="mod-auth-submit"
+                            >
+                                {loading ? 'Sending...' : 'Send Code to Email'}
+                            </button>
+
+                            <button
+                                type="button"
+                                onClick={() => {
+                                    setStep('password');
+                                    setTwoFactorCode('');
+                                    setError('');
+                                }}
+                                disabled={loading}
+                                className="mod-auth-back"
+                            >
+                                Back
+                            </button>
+                        </div>
                     ) : (
                         <form onSubmit={handleTwoFactorSubmit}>
                             <p className="mod-auth-2fa-info">
-                                Enter the 6-digit code from your authenticator app
+                                Enter the 6-digit code we just sent to your email
                             </p>
                             <div className="form-group">
                                 <label htmlFor="code">2FA Code *</label>
@@ -161,9 +234,22 @@ export default function ModerationAuthModal({ isOpen, onClose, onSuccess, API_BA
 
                             <button
                                 type="button"
+                                onClick={handleResendCode}
+                                disabled={loading || resendCooldown > 0}
+                                className="mod-auth-resend"
+                            >
+                                {resendCooldown > 0 
+                                    ? `Resend in ${resendCooldown}s`
+                                    : 'Resend Code'}
+                            </button>
+
+                            <button
+                                type="button"
                                 onClick={() => {
-                                    setStep('password');
+                                    setStep('request-code');
                                     setTwoFactorCode('');
+                                    setResendCooldown(0);
+                                    setError('');
                                 }}
                                 disabled={loading}
                                 className="mod-auth-back"

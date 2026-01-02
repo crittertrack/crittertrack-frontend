@@ -198,3 +198,48 @@
 .mod-auth-close:hover {
     background: rgba(255, 255, 255, 0.3);
 }
+.mod-auth-request-code {
+    animation: fadeIn 0.3s ease-out;
+}
+
+@keyframes fadeIn {
+    from {
+        opacity: 0;
+    }
+    to {
+        opacity: 1;
+    }
+}
+
+.mod-auth-message {
+    text-align: center;
+    color: #666;
+    font-size: 15px;
+    margin-bottom: 25px;
+    line-height: 1.5;
+}
+
+.mod-auth-resend {
+    width: 100%;
+    padding: 10px;
+    background: transparent;
+    color: #d32f2f;
+    border: 1px solid #e0e0e0;
+    border-radius: 8px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.2s;
+    margin-top: 10px;
+    font-size: 13px;
+}
+
+.mod-auth-resend:hover:not(:disabled) {
+    background: #fff3e0;
+    border-color: #d32f2f;
+}
+
+.mod-auth-resend:disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
+    color: #999;
+}
