@@ -90,8 +90,12 @@ const AdminPanel = ({ isOpen, onClose, authToken, API_BASE_URL, showModalMessage
 
     // Fetch maintenance status when panel opens
     useEffect(() => {
-        if (isOpen && isAuthenticated) {
-            fetchMaintenanceStatus();
+        if (isOpen) {
+            setShowPasswordPrompt(false); // Ensure password prompt is hidden
+            setIsAuthenticated(true); // Ensure authenticated state
+            if (isAuthenticated) {
+                fetchMaintenanceStatus();
+            }
         }
     }, [isOpen]);
 
