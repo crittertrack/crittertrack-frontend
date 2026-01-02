@@ -190,9 +190,12 @@ const EnhancedAdminPanel = ({ isOpen, onClose, authToken, API_BASE_URL, userRole
             if (response.ok) {
                 const data = await response.json();
                 setDashboardStats(data);
+            } else {
+                console.warn('Dashboard stats endpoint not available:', response.status);
             }
         } catch (error) {
             console.error('Error fetching dashboard stats:', error);
+            // Don't break the UI if stats fail to load
         }
     };
 
