@@ -4,6 +4,7 @@ import {
     Loader2, Save, Plus, Trash2, Edit, Eye, Search, Download, Upload,
     ChevronDown, ChevronRight, CheckCircle, Clock, Flag, MessageSquare
 } from 'lucide-react';
+import ModOversightPanel from './moderation/ModOversightPanel';
 
 // Error Boundary Component
 class ErrorBoundary extends React.Component {
@@ -483,53 +484,82 @@ const EnhancedAdminPanel = ({ isOpen, onClose, authToken, API_BASE_URL, userRole
                         )}
 
                         {/* User Management - DISABLED: Component deleted */}
-                        {/* {activeSection === 'users' && (
-                            <React.Suspense fallback={<div className="p-8">Loading User Management...</div>}>
-                                <UserManagement authToken={authToken} API_BASE_URL={API_BASE_URL} />
-                            </React.Suspense>
-                        )} */}
+                        {activeSection === 'users' && (
+                            <div className="p-8">
+                                <h3 className="text-2xl font-bold text-gray-800 mb-4">User Management</h3>
+                                <div className="bg-yellow-50 border border-yellow-200 rounded-lg p-6">
+                                    <p className="text-yellow-800">This feature is currently being rebuilt. Please use the moderation tools for user-related actions.</p>
+                                </div>
+                            </div>
+                        )}
 
                         {/* Animal Management - DISABLED: Component deleted */}
-                        {/* {activeSection === 'animals' && (
-                            <React.Suspense fallback={<div className="p-8">Loading Animal Management...</div>}>
-                                <AnimalManagement authToken={authToken} API_BASE_URL={API_BASE_URL} />
-                            </React.Suspense>
-                        )} */}
+                        {activeSection === 'animals' && (
+                            <div className="p-8">
+                                <h3 className="text-2xl font-bold text-gray-800 mb-4">Animal Records</h3>
+                                <div className="bg-yellow-50 border border-yellow-200 rounded-lg p-6">
+                                    <p className="text-yellow-800">This feature is currently being rebuilt.</p>
+                                </div>
+                            </div>
+                        )}
 
-                        {/* Moderation Tools - DISABLED: Component deleted */}
-                        {/* {activeSection === 'moderation' && (
-                            <React.Suspense fallback={<div className="p-8">Loading Moderation Tools...</div>}>
-                                <ModerationTools authToken={authToken} API_BASE_URL={API_BASE_URL} userRole={userRole} />
-                            </React.Suspense>
-                        )} */}
+                        {/* Moderation Tools */}
+                        {activeSection === 'moderation' && (
+                            <div className="p-8">
+                                <ModOversightPanel
+                                    isOpen={true}
+                                    onClose={() => setActiveSection('dashboard')}
+                                    API_BASE_URL={API_BASE_URL}
+                                    authToken={authToken}
+                                    onActionTaken={() => {
+                                        // Refresh dashboard stats after action
+                                        if (isAuthenticated) {
+                                            fetchDashboardStats();
+                                        }
+                                    }}
+                                />
+                            </div>
+                        )}
 
                         {/* Data Audit - DISABLED: Component deleted */}
-                        {/* {activeSection === 'data-audit' && (
-                            <React.Suspense fallback={<div className="p-8">Loading Data Audit...</div>}>
-                                <DataAudit authToken={authToken} API_BASE_URL={API_BASE_URL} />
-                            </React.Suspense>
-                        )} */}
+                        {activeSection === 'data-audit' && (
+                            <div className="p-8">
+                                <h3 className="text-2xl font-bold text-gray-800 mb-4">Data Integrity</h3>
+                                <div className="bg-yellow-50 border border-yellow-200 rounded-lg p-6">
+                                    <p className="text-yellow-800">This feature is currently being rebuilt.</p>
+                                </div>
+                            </div>
+                        )}
 
                         {/* System Settings - DISABLED: Component deleted */}
-                        {/* {activeSection === 'system-settings' && (
-                            <React.Suspense fallback={<div className="p-8">Loading System Settings...</div>}>
-                                <SystemSettings authToken={authToken} API_BASE_URL={API_BASE_URL} />
-                            </React.Suspense>
-                        )} */}
+                        {activeSection === 'system-settings' && (
+                            <div className="p-8">
+                                <h3 className="text-2xl font-bold text-gray-800 mb-4">System Settings</h3>
+                                <div className="bg-yellow-50 border border-yellow-200 rounded-lg p-6">
+                                    <p className="text-yellow-800">This feature is currently being rebuilt.</p>
+                                </div>
+                            </div>
+                        )}
 
                         {/* Reports - DISABLED: Component deleted */}
-                        {/* {activeSection === 'reports' && (
-                            <React.Suspense fallback={<div className="p-8">Loading Reports...</div>}>
-                                <Reports authToken={authToken} API_BASE_URL={API_BASE_URL} />
-                            </React.Suspense>
-                        )} */}
+                        {activeSection === 'reports' && (
+                            <div className="p-8">
+                                <h3 className="text-2xl font-bold text-gray-800 mb-4">Reports & Analytics</h3>
+                                <div className="bg-yellow-50 border border-yellow-200 rounded-lg p-6">
+                                    <p className="text-yellow-800">This feature is currently being rebuilt.</p>
+                                </div>
+                            </div>
+                        )}
 
                         {/* Communication - DISABLED: Component deleted */}
-                        {/* {activeSection === 'communication' && (
-                            <React.Suspense fallback={<div className="p-8">Loading Communication...</div>}>
-                                <Communication authToken={authToken} API_BASE_URL={API_BASE_URL} userRole={userRole} />
-                            </React.Suspense>
-                        )} */}
+                        {activeSection === 'communication' && (
+                            <div className="p-8">
+                                <h3 className="text-2xl font-bold text-gray-800 mb-4">Communication</h3>
+                                <div className="bg-yellow-50 border border-yellow-200 rounded-lg p-6">
+                                    <p className="text-yellow-800">This feature is currently being rebuilt.</p>
+                                </div>
+                            </div>
+                        )}
                     </div>
                 </div>
         </div>
