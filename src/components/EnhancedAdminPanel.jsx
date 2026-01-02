@@ -84,8 +84,7 @@ const EnhancedAdminPanel = ({ isOpen, onClose, authToken, API_BASE_URL, userRole
                             'Authorization': `Bearer ${authToken}`
                         },
                         body: JSON.stringify({ 
-                            email: userEmail,
-                            userId: userId
+                            email: userEmail
                         })
                     });
 

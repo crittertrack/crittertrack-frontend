@@ -13501,7 +13501,7 @@ const App = () => {
                     API_BASE_URL={API_BASE_URL}
                     userRole={userProfile?.role}
                     userEmail={userProfile?.email}
-                    userId={userProfile?.id}
+                    userId={userProfile?.id_public}
                     username={userProfile?.personalName}
                 />
             )}
