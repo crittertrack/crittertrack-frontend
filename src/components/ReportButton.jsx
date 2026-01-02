@@ -10,15 +10,27 @@ export default function ReportButton({ contentType, contentId, contentOwnerId, a
     useEffect(() => {
         // Get current user ID from token
         const token = authToken || localStorage.getItem('token');
+        console.log('ReportButton: authToken prop:', authToken ? 'provided' : 'not provided');
+        console.log('ReportButton: token from storage:', token ? 'found' : 'not found');
         if (token) {
             try {
                 const payload = JSON.parse(atob(token.split('.')[1]));
+                console.log('ReportButton: current user ID:', payload.id);
+                console.log('ReportButton: content owner ID:', contentOwnerId);
                 setCurrentUserId(payload.id);
                 // Hide report button if user owns the content
-                setIsOwner(String(payload.id) === String(contentOwnerId));
+                const ownerCheck = String(payload.id) === String(contentOwnerId);
+                console.log('ReportButton: isOwner:', ownerCheck);
+                setIsOwner(ownerCheck);
             } catch (err) {
                 console.error('Failed to parse token:', err);
+                setCurrentUserId(null);
+                setIsOwner(false);
             }
+        } else {
+            console.log('ReportButton: No token available');
+            setCurrentUserId(null);
+            setIsOwner(false);
         }
     }, [contentOwnerId, authToken]);
 
@@ -29,7 +41,11 @@ export default function ReportButton({ contentType, contentId, contentOwnerId, a
     };
 
     // Don't show report button if no authToken (unauthenticated) or user owns the content
-    if (!authToken || isOwner) {
+    if (!authToken) {
+        return null;
+    }
+
+    if (isOwner) {
         return null;
     }
 
