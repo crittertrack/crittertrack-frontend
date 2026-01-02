@@ -13272,7 +13272,11 @@ const App = () => {
                                             <Shield size={18} className="mb-1" />
                                             <span>Panel</span>
                                         </button>
-                                        <button onClick={() => {\n                                            setInModeratorMode(false);\n                                            setShowAdminPanel(false);\n                                            localStorage.removeItem('moderationAuthenticated');\n                                        }} className={`px-4 py-2 text-xs font-medium rounded-lg transition duration-150 flex flex-col items-center text-green-600 hover:bg-green-50`} title="Exit Moderation Mode">
+                                        <button onClick={() => {
+                                            setInModeratorMode(false);
+                                            setShowAdminPanel(false);
+                                            localStorage.removeItem('moderationAuthenticated');
+                                        }} className={`px-4 py-2 text-xs font-medium rounded-lg transition duration-150 flex flex-col items-center text-green-600 hover:bg-green-50`} title="Exit Moderation Mode">
                                             <CheckCircle size={18} className="mb-1" />
                                             <span>Exit Mod</span>
                                         </button>
