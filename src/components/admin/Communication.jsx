@@ -115,6 +115,7 @@ const Communication = ({ authToken, API_BASE_URL, userRole }) => {
     };
 
     const handleDeleteTemplate = async (templateId) => {
+        // eslint-disable-next-line no-restricted-globals
         if (!confirm('Delete this template?')) return;
 
         try {

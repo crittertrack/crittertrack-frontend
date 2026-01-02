@@ -77,6 +77,7 @@ const DataAudit = ({ authToken, API_BASE_URL }) => {
             return;
         }
 
+        // eslint-disable-next-line no-restricted-globals
         if (!confirm('This will restore the database to the selected backup. Continue?')) {
             return;
         }

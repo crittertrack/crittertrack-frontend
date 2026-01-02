@@ -11,7 +11,7 @@ import BudgetingTab from './components/BudgetingTab';
 import TermsOfService from './components/TermsOfService';
 import PrivacyPolicy from './components/PrivacyPolicy';
 import InstallPWA from './components/InstallPWA';
-import AdminPanel from './components/AdminPanel';
+import AdminPanel from './components/EnhancedAdminPanel';
 import UrgentNotificationModal from './components/UrgentNotificationModal';
 import MaintenanceModeBanner from './components/MaintenanceModeBanner';
 import { TutorialProvider, useTutorial } from './contexts/TutorialContext';
@@ -13492,15 +13492,17 @@ const App = () => {
                     }}
                 />
             )}
-
-            {/* Admin Panel Modal */}
-            {showAdminPanel && userProfile?.id_public === 'CTU1' && (
+            {/* Moderation Panel - Full Page */}
+            {showAdminPanel && ['admin', 'moderator'].includes(userProfile?.role) && (
                 <AdminPanel
                     isOpen={showAdminPanel}
                     onClose={() => setShowAdminPanel(false)}
                     authToken={authToken}
                     API_BASE_URL={API_BASE_URL}
-                    showModalMessage={showModalMessage}
+                    userRole={userProfile?.role}
+                    userEmail={userProfile?.email}
+                    userId={userProfile?.id}
+                    username={userProfile?.personalName}
                 />
             )}
 

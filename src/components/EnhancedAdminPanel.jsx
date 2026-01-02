@@ -159,105 +159,107 @@ const EnhancedAdminPanel = ({ isOpen, onClose, authToken, API_BASE_URL, userRole
         }
     };
 
-    if (!isOpen) return null;
-
-    // 2FA Modal
-    if (show2FA) {
-        return (
-            <TwoFactorAuth
-                isOpen={show2FA}
-                onClose={handle2FAClose}
-                onVerify={handle2FASuccess}
-                email={userEmail}
-                authToken={authToken}
-                API_BASE_URL={API_BASE_URL}
-                isLoading={isLoadingLogin}
-            />
-        );
-    }
-
-    // Password prompt
-    if (showPasswordPrompt) {
-        return (
-            <div className="fixed inset-0 bg-black bg-opacity-50 z-50 flex items-center justify-center p-4">
-                <div className="bg-white rounded-xl shadow-2xl max-w-md w-full">
-                    <div className="bg-gradient-to-r from-red-600 to-red-700 text-white p-6 flex items-center justify-between rounded-t-xl">
-                        <div className="flex items-center gap-3">
-                            <Lock size={24} />
-                            <h2 className="text-xl font-bold">Admin Authentication</h2>
-                        </div>
-                    </div>
-
-                    <form onSubmit={handlePasswordSubmit} className="p-6 space-y-4">
-                        <p className="text-sm text-gray-600 mb-4">Enter admin password to access admin panel:</p>
-
-                        <input
-                            type="password"
-                            value={adminPassword}
-                            onChange={(e) => {
-                                setAdminPassword(e.target.value);
-                                setPasswordError('');
-                            }}
-                            placeholder="Admin password"
-                            disabled={isLoadingLogin}
-                            className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-red-600 focus:border-transparent disabled:bg-gray-100 disabled:cursor-not-allowed"
-                            autoFocus
-                        />
-
-                        {passwordError && (
-                            <div className="text-sm text-red-600 font-medium">{passwordError}</div>
-                        )}
-
-                        <div className="flex gap-3 pt-4">
-                            <button
-                                type="button"
-                                onClick={onClose}
-                                disabled={isLoadingLogin}
-                                className="flex-1 px-4 py-2 bg-gray-200 text-gray-800 font-semibold rounded-lg hover:bg-gray-300 transition disabled:bg-gray-100 disabled:cursor-not-allowed"
-                            >
-                                Cancel
-                            </button>
-                            <button
-                                type="submit"
-                                disabled={isLoadingLogin}
-                                className="flex-1 px-4 py-2 bg-red-600 text-white font-semibold rounded-lg hover:bg-red-700 transition disabled:bg-red-400 disabled:cursor-not-allowed flex items-center justify-center gap-2"
-                            >
-                                {isLoadingLogin ? (
-                                    <>
-                                        <Loader2 size={16} className="animate-spin" />
-                                        Verifying...
-                                    </>
-                                ) : (
-                                    'Unlock'
-                                )}
-                            </button>
-                        </div>
-                    </form>
+    // If not authenticated yet, show password/2FA screens
+    if (!isAuthenticated) {
+        // 2FA Modal
+        if (show2FA) {
+            return (
+                <div className="min-h-screen w-full bg-gray-50 flex items-center justify-center">
+                    <TwoFactorAuth
+                        isOpen={show2FA}
+                        onClose={handle2FAClose}
+                        onVerify={handle2FASuccess}
+                        email={userEmail}
+                        authToken={authToken}
+                        API_BASE_URL={API_BASE_URL}
+                        isLoading={isLoadingLogin}
+                    />
                 </div>
-            </div>
-        );
+            );
+        }
+
+        // Password prompt
+        if (showPasswordPrompt) {
+            return (
+                <div className="fixed inset-0 bg-black bg-opacity-50 z-50 flex items-center justify-center p-4">
+                    <div className="bg-white rounded-xl shadow-2xl max-w-md w-full">
+                        <div className="bg-gradient-to-r from-red-600 to-red-700 text-white p-6 flex items-center justify-between rounded-t-xl">
+                            <div className="flex items-center gap-3">
+                                <Lock size={24} />
+                                <h2 className="text-xl font-bold">Admin Authentication</h2>
+                            </div>
+                        </div>
+
+                        <form onSubmit={handlePasswordSubmit} className="p-6 space-y-4">
+                            <p className="text-sm text-gray-600 mb-4">Enter admin password to access admin panel:</p>
+
+                            <input
+                                type="password"
+                                value={adminPassword}
+                                onChange={(e) => {
+                                    setAdminPassword(e.target.value);
+                                    setPasswordError('');
+                                }}
+                                placeholder="Admin password"
+                                disabled={isLoadingLogin}
+                                className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-red-600 focus:border-transparent disabled:bg-gray-100 disabled:cursor-not-allowed"
+                                autoFocus
+                            />
+
+                            {passwordError && (
+                                <div className="text-sm text-red-600 font-medium">{passwordError}</div>
+                            )}
+
+                            <div className="flex gap-3 pt-4">
+                                <button
+                                    type="button"
+                                    onClick={onClose}
+                                    disabled={isLoadingLogin}
+                                    className="flex-1 px-4 py-2 bg-gray-200 text-gray-800 font-semibold rounded-lg hover:bg-gray-300 transition disabled:bg-gray-100 disabled:cursor-not-allowed"
+                                >
+                                    Cancel
+                                </button>
+                                <button
+                                    type="submit"
+                                    disabled={isLoadingLogin}
+                                    className="flex-1 px-4 py-2 bg-red-600 text-white font-semibold rounded-lg hover:bg-red-700 transition disabled:bg-red-400 disabled:cursor-not-allowed flex items-center justify-center gap-2"
+                                >
+                                    {isLoadingLogin ? (
+                                        <>
+                                            <Loader2 size={16} className="animate-spin" />
+                                            Verifying...
+                                        </>
+                                    ) : (
+                                        'Unlock'
+                                    )}
+                                </button>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            );
+        }
     }
 
     return (
-        <div className="fixed inset-0 bg-black bg-opacity-50 z-50 flex items-center justify-center p-4">
-            <div className="bg-white rounded-xl shadow-2xl max-w-6xl w-full max-h-[95vh] overflow-hidden flex flex-col">
-                {/* Header */}
-                <div className="bg-gradient-to-r from-red-600 to-red-700 text-white p-6 flex items-center justify-between">
-                    <div className="flex items-center gap-3">
-                        <Shield size={28} />
-                        <div>
-                            <h2 className="text-2xl font-bold">CritterTrack Moderation Panel</h2>
-                            <p className="text-sm text-red-100 mt-1 capitalize">Role: {userRole}</p>
-                        </div>
+        <div className="min-h-screen w-full bg-gray-50 flex flex-col">
+            {/* Header */}
+            <div className="bg-gradient-to-r from-red-600 to-red-700 text-white p-6 flex items-center justify-between shadow-lg">
+                <div className="flex items-center gap-3">
+                    <Shield size={28} />
+                    <div>
+                        <h2 className="text-3xl font-bold">CritterTrack Moderation Panel</h2>
+                        <p className="text-sm text-red-100 mt-1 capitalize">Role: {userRole}</p>
                     </div>
-                    <button
-                        onClick={onClose}
-                        className="p-2 hover:bg-white/20 rounded-lg transition"
-                    >
-                        <X size={24} />
-                    </button>
                 </div>
-
+                <button
+                    onClick={onClose}
+                    className="p-2 hover:bg-white/20 rounded-lg transition text-lg"
+                    title="Close"
+                >
+                    <X size={28} />
+                </button>
+            </div>
                 {/* Main Content */}
                 <div className="flex flex-1 overflow-hidden">
                     {/* Sidebar Navigation */}
@@ -377,7 +379,6 @@ const EnhancedAdminPanel = ({ isOpen, onClose, authToken, API_BASE_URL, userRole
                         )}
                     </div>
                 </div>
-            </div>
         </div>
     );
 };
