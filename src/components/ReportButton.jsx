@@ -12,14 +12,17 @@ export default function ReportButton({ contentType, contentId, contentOwnerId, a
         const token = authToken || localStorage.getItem('authToken');
         console.log('ReportButton: authToken prop:', authToken ? 'provided' : 'not provided');
         console.log('ReportButton: token from storage:', token ? 'found' : 'not found');
+        console.log('ReportButton: contentOwnerId prop:', contentOwnerId);
         if (token) {
             try {
                 const payload = JSON.parse(atob(token.split('.')[1]));
-                console.log('ReportButton: current user ID:', payload.id);
+                console.log('ReportButton: JWT payload:', payload);
+                const userId = payload.user?.id || payload.id;
+                console.log('ReportButton: current user ID:', userId);
                 console.log('ReportButton: content owner ID:', contentOwnerId);
-                setCurrentUserId(payload.id);
+                setCurrentUserId(userId);
                 // Hide report button if user owns the content
-                const ownerCheck = String(payload.id) === String(contentOwnerId);
+                const ownerCheck = String(userId) === String(contentOwnerId);
                 console.log('ReportButton: isOwner:', ownerCheck);
                 setIsOwner(ownerCheck);
             } catch (err) {
