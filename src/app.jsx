@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useCallback, useRef, useMemo } from 'react';
 import { useParams, useNavigate, useLocation, Routes, Route } from 'react-router-dom';
 import axios from 'axios';
-import { LogOut, Cat, UserPlus, LogIn, ChevronLeft, ChevronDown, ChevronRight, Trash2, Edit, Save, PlusCircle, Plus, ArrowLeft, Loader2, RefreshCw, User, Users, ClipboardList, BookOpen, Settings, Mail, Globe, Bean, Milk, Search, X, Mars, Venus, Eye, EyeOff, Home, Heart, HeartOff, HeartHandshake, Bell, XCircle, CheckCircle, Download, FileText, Link, AlertCircle, Check, DollarSign, Archive, ArrowLeftRight, RotateCcw, Info, Hourglass, MessageSquare, Ban, Flag, Scissors, VenusAndMars, Circle, Shield } from 'lucide-react';
+import { LogOut, Cat, UserPlus, LogIn, ChevronLeft, ChevronDown, ChevronRight, Trash2, Edit, Save, PlusCircle, Plus, ArrowLeft, Loader2, RefreshCw, User, Users, ClipboardList, BookOpen, Settings, Mail, Globe, Bean, Milk, Search, X, Mars, Venus, Eye, EyeOff, Home, Heart, HeartOff, HeartHandshake, Bell, XCircle, CheckCircle, Download, FileText, Link, AlertCircle, Check, DollarSign, Archive, ArrowLeftRight, RotateCcw, Info, Hourglass, MessageSquare, Ban, Flag, Scissors, VenusAndMars, Circle, Shield, Lock } from 'lucide-react';
 import jsPDF from 'jspdf';
 import html2canvas from 'html2canvas';
 import 'flag-icons/css/flag-icons.min.css';
@@ -20,6 +20,7 @@ import { TUTORIAL_LESSONS } from './data/tutorialLessonsNew';
 import InfoTab from './components/InfoTab';
 import WelcomeBanner from './components/WelcomeBanner';
 import ReportButton from './components/ReportButton';
+import ModerationAuthModal from './components/moderation/ModerationAuthModal';
 
 // const API_BASE_URL = 'http://localhost:5000/api'; // Local development
 // const API_BASE_URL = 'https://crittertrack-pedigree-production.up.railway.app/api'; // Direct Railway (for testing)
@@ -11884,6 +11885,8 @@ const App = () => {
     // Tutorial modal states
     const [showInfoTab, setShowInfoTab] = useState(false);
     const [showAdminPanel, setShowAdminPanel] = useState(false);
+    const [inModeratorMode, setInModeratorMode] = useState(false);
+    const [showModerationAuthModal, setShowModerationAuthModal] = useState(false);
     const [maintenanceMode, setMaintenanceMode] = useState(false);
     const [maintenanceMessage, setMaintenanceMessage] = useState('');
     const [showUrgentNotification, setShowUrgentNotification] = useState(false);
@@ -13249,10 +13252,25 @@ const App = () => {
                             </button>
                         )}
                         {['admin', 'moderator'].includes(userProfile?.role) && !isMobile && (
-                            <button onClick={() => setShowAdminPanel(true)} className={`px-4 py-2 text-xs font-medium rounded-lg transition duration-150 flex flex-col items-center text-red-600 hover:bg-red-50`} title="Moderation Panel">
-                                <Shield size={18} className="mb-1" />
-                                <span>Moderation</span>
-                            </button>
+                            <>
+                                {!inModeratorMode ? (
+                                    <button onClick={() => setShowModerationAuthModal(true)} className={`px-4 py-2 text-xs font-medium rounded-lg transition duration-150 flex flex-col items-center text-red-600 hover:bg-red-50`} title="Enter Moderation Mode">
+                                        <Lock size={18} className="mb-1" />
+                                        <span>Moderation</span>
+                                    </button>
+                                ) : (
+                                    <>
+                                        <button onClick={() => setShowAdminPanel(!showAdminPanel)} className={`px-4 py-2 text-xs font-medium rounded-lg transition duration-150 flex flex-col items-center ${showAdminPanel ? 'text-red-600 bg-red-50' : 'text-red-600 hover:bg-red-50'}`} title="Open Moderation Panel">
+                                            <Shield size={18} className="mb-1" />
+                                            <span>Panel</span>
+                                        </button>
+                                        <button onClick={() => setInModeratorMode(false)} className={`px-4 py-2 text-xs font-medium rounded-lg transition duration-150 flex flex-col items-center text-green-600 hover:bg-green-50`} title="Exit Moderation Mode">
+                                            <CheckCircle size={18} className="mb-1" />
+                                            <span>Exit Mod</span>
+                                        </button>
+                                    </>
+                                )}
+                            </>
                         )}
                     </nav>
 
@@ -13520,8 +13538,23 @@ const App = () => {
                     }}
                 />
             )}
-            {/* Moderation Panel - Full Page */}
-            {showAdminPanel && ['admin', 'moderator'].includes(userProfile?.role) && (
+
+            {/* Moderation Auth Modal */}
+            {showModerationAuthModal && authToken && (
+                <ModerationAuthModal
+                    isOpen={showModerationAuthModal}
+                    onClose={() => setShowModerationAuthModal(false)}
+                    onSuccess={() => {
+                        setInModeratorMode(true);
+                        setShowModerationAuthModal(false);
+                    }}
+                    API_BASE_URL={API_BASE_URL}
+                    authToken={authToken}
+                />
+            )}
+
+            {/* Moderation Panel - Opens while in Moderator Mode */}
+            {showAdminPanel && inModeratorMode && ['admin', 'moderator'].includes(userProfile?.role) && (
                 <AdminPanel
                     isOpen={showAdminPanel}
                     onClose={() => setShowAdminPanel(false)}
