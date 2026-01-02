@@ -3,8 +3,8 @@ import { X, AlertCircle, Send, Loader2, Lock, Bell, Radio, Power, CheckCircle } 
 
 const AdminPanel = ({ isOpen, onClose, authToken, API_BASE_URL, showModalMessage, onMaintenanceModeChange }) => {
     const [adminPassword, setAdminPassword] = useState('');
-    const [isAuthenticated, setIsAuthenticated] = useState(false);
-    const [showPasswordPrompt, setShowPasswordPrompt] = useState(true);
+    const [isAuthenticated, setIsAuthenticated] = useState(true); // Already authenticated via moderation login
+    const [showPasswordPrompt, setShowPasswordPrompt] = useState(false); // Skip password prompt
     const [passwordError, setPasswordError] = useState('');
     const [passwordAttempts, setPasswordAttempts] = useState(0);
     
@@ -87,6 +87,13 @@ const AdminPanel = ({ isOpen, onClose, authToken, API_BASE_URL, showModalMessage
             console.error('Error fetching maintenance status:', error);
         }
     };
+
+    // Fetch maintenance status when panel opens
+    useEffect(() => {
+        if (isOpen && isAuthenticated) {
+            fetchMaintenanceStatus();
+        }
+    }, [isOpen]);
 
     const handleSendNotification = async () => {
         if (!notificationTitle.trim() || !notificationContent.trim()) {
