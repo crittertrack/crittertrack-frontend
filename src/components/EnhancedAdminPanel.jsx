@@ -77,6 +77,7 @@ const EnhancedAdminPanel = ({ isOpen, onClose, authToken, API_BASE_URL, userRole
             if (response.ok) {
                 // Password verified - now show 2FA
                 setShow2FA(true);
+                setShowPasswordPrompt(false); // Hide password prompt, show 2FA
                 setAdminPassword('');
                 setPasswordAttempts(0);
                 // Track failed login attempt for audit
