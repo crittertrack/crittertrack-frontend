@@ -1,10 +1,10 @@
 import React, { useState, useEffect } from 'react';
 import { X, AlertCircle, Send, Loader2, Lock, Bell, Radio, Power, CheckCircle } from 'lucide-react';
 
-const AdminPanel = ({ isOpen, onClose, authToken, API_BASE_URL, showModalMessage, onMaintenanceModeChange }) => {
+const AdminPanel = ({ isOpen, onClose, authToken, API_BASE_URL, showModalMessage, onMaintenanceModeChange, skipAuthentication = false }) => {
     const [adminPassword, setAdminPassword] = useState('');
-    const [isAuthenticated, setIsAuthenticated] = useState(true); // Already authenticated via moderation login
-    const [showPasswordPrompt, setShowPasswordPrompt] = useState(false); // Skip password prompt
+    const [isAuthenticated, setIsAuthenticated] = useState(skipAuthentication); // Skip auth if coming from moderation mode
+    const [showPasswordPrompt, setShowPasswordPrompt] = useState(!skipAuthentication); // Hide prompt if skipping auth
     const [passwordError, setPasswordError] = useState('');
     const [passwordAttempts, setPasswordAttempts] = useState(0);
     
@@ -90,14 +90,12 @@ const AdminPanel = ({ isOpen, onClose, authToken, API_BASE_URL, showModalMessage
 
     // Fetch maintenance status when panel opens
     useEffect(() => {
-        if (isOpen) {
-            setShowPasswordPrompt(false); // Ensure password prompt is hidden
-            setIsAuthenticated(true); // Ensure authenticated state
-            if (isAuthenticated) {
-                fetchMaintenanceStatus();
-            }
+        if (isOpen && (skipAuthentication || isAuthenticated)) {
+            setShowPasswordPrompt(skipAuthentication ? false : showPasswordPrompt);
+            setIsAuthenticated(skipAuthentication ? true : isAuthenticated);
+            fetchMaintenanceStatus();
         }
-    }, [isOpen]);
+    }, [isOpen, skipAuthentication]);
 
     const handleSendNotification = async () => {
         if (!notificationTitle.trim() || !notificationContent.trim()) {

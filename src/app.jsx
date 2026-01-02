@@ -13577,6 +13577,7 @@ const App = () => {
                     userEmail={userProfile?.email}
                     userId={userProfile?.id_public}
                     username={userProfile?.personalName}
+                    skipAuthentication={true}
                 />
             )}
 
