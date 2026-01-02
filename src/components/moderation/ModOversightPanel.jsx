@@ -1,6 +1,94 @@
-import React, { useState, useEffect } from 'react';
-import { ChevronLeft, ChevronRight, AlertCircle, Check, X as XIcon } from 'lucide-react';
+import React, { useEffect, useMemo, useState } from 'react';
+import { ChevronLeft, ChevronRight, AlertCircle } from 'lucide-react';
 import './ModOversightPanel.css';
+
+const REPORT_TYPES = [
+    { value: 'profile', label: 'Profiles' },
+    { value: 'animal', label: 'Animals' },
+    { value: 'message', label: 'Messages' }
+];
+
+const STATUS_FILTERS = [
+    { value: 'pending', label: 'Pending' },
+    { value: 'reviewed', label: 'In Review' },
+    { value: 'resolved', label: 'Resolved' },
+    { value: 'dismissed', label: 'Dismissed' },
+    { value: 'all', label: 'All' }
+];
+
+const STATUS_BADGE_COLORS = {
+    pending: '#ff6f00',
+    reviewed: '#1976d2',
+    resolved: '#388e3c',
+    dismissed: '#666'
+};
+
+const CATEGORY_BADGE_COLORS = {
+    'Inappropriate/Offensive Content': '#f44336',
+    'Harassment or Bullying': '#e91e63',
+    'Spam': '#ff9800',
+    'Copyright/Licensing Violation': '#9c27b0',
+    'Community Guidelines Violation': '#2196f3',
+    Other: '#757575'
+};
+
+const parseReason = (reason = '') => {
+    if (!reason) {
+        return {
+            categoryLabel: 'Report',
+            fieldLabel: '',
+            description: ''
+        };
+    }
+
+    const [headerPart, detailPart] = reason.split('::').map((part) => part?.trim() || '');
+    const [categoryLabel = 'Report', fieldLabel = ''] = (headerPart || '').split('·').map((part) => part?.trim() || '');
+
+    return {
+        categoryLabel: categoryLabel || 'Report',
+        fieldLabel,
+        description: detailPart || reason
+    };
+};
+
+const formatReporter = (report = {}) => {
+    const reporter = report.reporterId || {};
+    const name = reporter.personalName || reporter.breederName || null;
+    const identifier = reporter.email || reporter.id_public || 'Unknown';
+    return name ? `${name} · ${identifier}` : identifier;
+};
+
+const getSubjectTitle = (report = {}) => {
+    if (report.reportedAnimalId) {
+        const animal = report.reportedAnimalId;
+        return `Animal · ${animal.name || animal.id_public || 'Unknown'}`;
+    }
+
+    if (report.reportedUserId) {
+        const user = report.reportedUserId;
+        const name = user.personalName || user.breederName || user.email;
+        return `Profile · ${name || user.id_public || 'Unknown'}`;
+    }
+
+    if (report.messageId) {
+        return 'Direct Message';
+    }
+
+    return 'Report';
+};
+
+const getSubjectOwner = (report = {}) => {
+    if (report.reportedAnimalId) {
+        return report.reportedAnimalId.ownerId || 'Unknown owner';
+    }
+
+    if (report.reportedUserId) {
+        const user = report.reportedUserId;
+        return user.personalName || user.breederName || user.email || user.id_public || 'Unknown owner';
+    }
+
+    return 'Unknown owner';
+};
 
 export default function ModOversightPanel({ 
     isOpen, 
@@ -14,25 +102,40 @@ export default function ModOversightPanel({
     const [selectedReport, setSelectedReport] = useState(null);
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState('');
-    const [statusFilter, setStatusFilter] = useState('open'); // 'open', 'in_review', 'resolved', 'all'
+    const [statusFilter, setStatusFilter] = useState('pending');
+    const [reportType, setReportType] = useState('profile');
+    const [adminNotes, setAdminNotes] = useState('');
+    const [actionLoading, setActionLoading] = useState(false);
+
+    const baseUrl = useMemo(() => API_BASE_URL || '/api', [API_BASE_URL]);
 
     // Fetch reports on load
     useEffect(() => {
         if (isOpen && !isCollapsed) {
             fetchReports();
         }
-    }, [isOpen, statusFilter]);
+    }, [isOpen, isCollapsed, statusFilter, reportType]);
 
     const fetchReports = async () => {
+        if (!authToken) {
+            setError('Moderator authentication required');
+            return;
+        }
+
         setLoading(true);
         setError('');
 
         try {
-            const url = statusFilter === 'all' 
-                ? `${API_BASE_URL}/api/admin/reports/list`
-                : `${API_BASE_URL}/api/admin/reports/list?status=${statusFilter}`;
+            const params = new URLSearchParams({
+                type: reportType,
+                limit: '50'
+            });
 
-            const response = await fetch(url, {
+            if (statusFilter !== 'all') {
+                params.append('status', statusFilter);
+            }
+
+            const response = await fetch(`${baseUrl}/moderation/reports?${params.toString()}`, {
                 headers: {
                     'Authorization': `Bearer ${authToken}`
                 }
@@ -41,10 +144,17 @@ export default function ModOversightPanel({
             const data = await response.json();
 
             if (!response.ok) {
-                throw new Error(data.error || 'Failed to fetch reports');
+                throw new Error(data.message || data.error || 'Failed to fetch reports');
             }
 
             setReports(data.reports || []);
+            if (selectedReport) {
+                const refreshedSelection = (data.reports || []).find((report) => report._id === selectedReport._id);
+                if (refreshedSelection) {
+                    setSelectedReport(refreshedSelection);
+                    setAdminNotes(refreshedSelection.adminNotes || '');
+                }
+            }
         } catch (err) {
             setError(err.message);
         } finally {
@@ -52,12 +162,14 @@ export default function ModOversightPanel({
         }
     };
 
-    const handleTakeAction = async (action, details = {}) => {
-        if (!selectedReport) return;
+    const handleUpdateStatus = async (nextStatus) => {
+        if (!selectedReport || !nextStatus) return;
+        setActionLoading(true);
+        setError('');
 
         try {
             const response = await fetch(
-                `${API_BASE_URL}/api/admin/reports/${selectedReport._id}/action`,
+                `${baseUrl}/moderation/reports/${reportType}/${selectedReport._id}/status`,
                 {
                     method: 'POST',
                     headers: {
@@ -65,8 +177,8 @@ export default function ModOversightPanel({
                         'Authorization': `Bearer ${authToken}`
                     },
                     body: JSON.stringify({
-                        action,
-                        ...details
+                        status: nextStatus,
+                        adminNotes: adminNotes.trim() || undefined
                     })
                 }
             );
@@ -74,53 +186,32 @@ export default function ModOversightPanel({
             const data = await response.json();
 
             if (!response.ok) {
-                throw new Error(data.error || 'Failed to take action');
+                throw new Error(data.message || data.error || 'Failed to update report');
             }
 
-            // Update the report in the list
-            setReports(reports.map(r => 
-                r._id === selectedReport._id 
-                    ? { ...r, status: 'resolved', actionTaken: action }
-                    : r
-            ));
-
-            setSelectedReport(null);
+            setReports((prev) => prev.map((report) => (report._id === data.report._id ? data.report : report)));
+            setSelectedReport(data.report);
+            setAdminNotes(data.report?.adminNotes || '');
             if (onActionTaken) onActionTaken();
         } catch (err) {
             setError(err.message);
+        } finally {
+            setActionLoading(false);
         }
     };
 
-    const getReportTitle = (report) => {
-        if (report.contentType === 'animal') {
-            return `Animal: ${report.contentDetails?.name || 'Unknown'}`;
-        } else if (report.contentType === 'profile') {
-            return `Profile: ${report.contentDetails?.personalName || 'Unknown'}`;
-        }
-        return 'Report';
+    const getCategoryBadgeColor = (label) => CATEGORY_BADGE_COLORS[label] || CATEGORY_BADGE_COLORS.Other;
+    const getStatusBadgeColor = (status) => STATUS_BADGE_COLORS[status] || '#666';
+
+    const handleSelectReport = (report) => {
+        setSelectedReport(report);
+        setAdminNotes(report?.adminNotes || '');
     };
 
-    const getCategoryBadgeColor = (category) => {
-        const colors = {
-            inappropriate_content: '#f44336',
-            spam: '#ff9800',
-            harassment: '#e91e63',
-            misinformation: '#2196f3',
-            copyright: '#9c27b0',
-            other: '#757575'
-        };
-        return colors[category] || '#757575';
-    };
-
-    const getStatusBadgeColor = (status) => {
-        const colors = {
-            open: '#ff6f00',
-            in_review: '#1976d2',
-            resolved: '#388e3c',
-            dismissed: '#666'
-        };
-        return colors[status] || '#666';
-    };
+    const parsedSelectedReason = useMemo(
+        () => (selectedReport ? parseReason(selectedReport.reason) : null),
+        [selectedReport]
+    );
 
     if (!isOpen) return null;
 
@@ -141,13 +232,27 @@ export default function ModOversightPanel({
                 <div className="mod-panel-content">
                     {/* Filter tabs */}
                     <div className="mod-filter-tabs">
-                        {['open', 'in_review', 'resolved', 'all'].map(status => (
+                        {REPORT_TYPES.map((type) => (
                             <button
-                                key={status}
-                                className={`mod-filter-tab ${statusFilter === status ? 'active' : ''}`}
-                                onClick={() => setStatusFilter(status)}
+                                key={type.value}
+                                className={`mod-filter-tab ${reportType === type.value ? 'active' : ''}`}
+                                onClick={() => {
+                                    setReportType(type.value);
+                                    setSelectedReport(null);
+                                }}
                             >
-                                {status.replace('_', ' ').toUpperCase()}
+                                {type.label}
+                            </button>
+                        ))}
+                    </div>
+                    <div className="mod-filter-tabs secondary">
+                        {STATUS_FILTERS.map((status) => (
+                            <button
+                                key={status.value}
+                                className={`mod-filter-tab ${statusFilter === status.value ? 'active' : ''}`}
+                                onClick={() => setStatusFilter(status.value)}
+                            >
+                                {status.label}
                             </button>
                         ))}
                     </div>
@@ -157,86 +262,85 @@ export default function ModOversightPanel({
                         <div className="mod-detail-view">
                             <button 
                                 className="mod-back-button"
-                                onClick={() => setSelectedReport(null)}
+                                onClick={() => {
+                                    setSelectedReport(null);
+                                    setAdminNotes('');
+                                }}
                             >
                                 ← Back to Reports
                             </button>
 
                             <div className="mod-report-detail">
-                                <h4>Report Details</h4>
-                                
-                                <div className="mod-detail-section">
-                                    <strong>Content:</strong>
-                                    <p>{getReportTitle(selectedReport)}</p>
-                                </div>
+                                <h4>{getSubjectTitle(selectedReport)}</h4>
 
                                 <div className="mod-detail-section">
-                                    <strong>Reported Field:</strong>
-                                    <p>{selectedReport.reportedField || 'Not specified'}</p>
+                                    <strong>Status:</strong>
+                                    <span 
+                                        className="mod-badge"
+                                        style={{ backgroundColor: getStatusBadgeColor(selectedReport.status) }}
+                                    >
+                                        {selectedReport.status.replace('_', ' ').toUpperCase()}
+                                    </span>
                                 </div>
 
                                 <div className="mod-detail-section">
                                     <strong>Category:</strong>
                                     <span 
                                         className="mod-badge"
-                                        style={{ backgroundColor: getCategoryBadgeColor(selectedReport.category) }}
+                                        style={{ backgroundColor: getCategoryBadgeColor(parsedSelectedReason?.categoryLabel) }}
                                     >
-                                        {selectedReport.category.replace(/_/g, ' ')}
+                                        {parsedSelectedReason?.categoryLabel || 'Report'}
                                     </span>
                                 </div>
 
                                 <div className="mod-detail-section">
+                                    <strong>Field:</strong>
+                                    <p>{parsedSelectedReason?.fieldLabel || 'General'}</p>
+                                </div>
+
+                                <div className="mod-detail-section">
                                     <strong>Reporter:</strong>
-                                    <p>{selectedReport.reporterEmail || 'Anonymous'}</p>
+                                    <p>{formatReporter(selectedReport)}</p>
                                 </div>
 
                                 <div className="mod-detail-section">
                                     <strong>Reason:</strong>
-                                    <p>{selectedReport.description}</p>
+                                    <p>{parsedSelectedReason?.description || 'No additional context provided.'}</p>
                                 </div>
 
                                 <div className="mod-detail-section">
                                     <strong>Content Owner:</strong>
-                                    <p>{selectedReport.contentOwnerDetails?.personalName || selectedReport.contentOwnerDetails?.breederName || 'Unknown'}</p>
+                                    <p>{getSubjectOwner(selectedReport)}</p>
                                 </div>
 
-                                {selectedReport.status !== 'resolved' && (
-                                    <div className="mod-actions">
-                                        <h5>Take Action</h5>
-                                        <button 
-                                            className="mod-action-btn warn"
-                                            onClick={() => handleTakeAction('user_warned')}
-                                        >
-                                            Warn User
-                                        </button>
-                                        <button 
-                                            className="mod-action-btn remove"
-                                            onClick={() => handleTakeAction('content_removed')}
-                                        >
-                                            Remove Content
-                                        </button>
-                                        <button 
-                                            className="mod-action-btn replace"
-                                            onClick={() => handleTakeAction('content_replaced', {
-                                                replacementText: 'Content removed due to moderation'
-                                            })}
-                                        >
-                                            Replace Content
-                                        </button>
-                                        <button 
-                                            className="mod-action-btn suspend"
-                                            onClick={() => handleTakeAction('user_suspended')}
-                                        >
-                                            Suspend User
-                                        </button>
-                                        <button 
-                                            className="mod-action-btn ban"
-                                            onClick={() => handleTakeAction('user_banned')}
-                                        >
-                                            Ban User
-                                        </button>
+                                <div className="mod-detail-section">
+                                    <strong>Moderator Notes:</strong>
+                                    <textarea
+                                        className="mod-notes-textarea"
+                                        value={adminNotes}
+                                        onChange={(e) => setAdminNotes(e.target.value)}
+                                        placeholder="Add context for your fellow moderators..."
+                                        rows={4}
+                                    />
+                                </div>
+
+                                <div className="mod-actions">
+                                    <h5>Update Status</h5>
+                                    <div className="mod-action-grid">
+                                        {STATUS_FILTERS.filter((status) => status.value !== 'all').map((status) => (
+                                            <button
+                                                key={status.value}
+                                                type="button"
+                                                className={`mod-action-btn ${selectedReport.status === status.value ? 'active' : ''}`}
+                                                onClick={() => handleUpdateStatus(status.value)}
+                                                disabled={actionLoading || selectedReport.status === status.value}
+                                            >
+                                                {status.label}
+                                            </button>
+                                        ))}
                                     </div>
-                                )}
+                                    {actionLoading && <div className="mod-loading">Applying update...</div>}
+                                </div>
                             </div>
                         </div>
                     ) : (
@@ -254,33 +358,39 @@ export default function ModOversightPanel({
                                 <div className="mod-empty">No reports found</div>
                             ) : (
                                 <div className="mod-reports-list">
-                                    {reports.map(report => (
-                                        <div 
-                                            key={report._id}
-                                            className="mod-report-item"
-                                            onClick={() => setSelectedReport(report)}
-                                        >
-                                            <div className="mod-report-header">
-                                                <span className="mod-report-title">
-                                                    {getReportTitle(report)}
-                                                </span>
-                                                <span 
-                                                    className="mod-status-badge"
-                                                    style={{ backgroundColor: getStatusBadgeColor(report.status) }}
-                                                >
-                                                    {report.status}
-                                                </span>
+                                    {reports.map((report) => {
+                                        const reasonMeta = parseReason(report.reason);
+                                        return (
+                                            <div 
+                                                key={report._id}
+                                                className="mod-report-item"
+                                                onClick={() => handleSelectReport(report)}
+                                            >
+                                                <div className="mod-report-header">
+                                                    <span className="mod-report-title">
+                                                        {getSubjectTitle(report)}
+                                                    </span>
+                                                    <span 
+                                                        className="mod-status-badge"
+                                                        style={{ backgroundColor: getStatusBadgeColor(report.status) }}
+                                                    >
+                                                        {report.status.replace('_', ' ').toUpperCase()}
+                                                    </span>
+                                                </div>
+                                                <div className="mod-report-meta">
+                                                    <span className="mod-report-category">
+                                                        {reasonMeta.categoryLabel}
+                                                    </span>
+                                                    <span className="mod-report-field">
+                                                        {reasonMeta.fieldLabel || 'General'}
+                                                    </span>
+                                                </div>
+                                                <p className="mod-report-snippet">
+                                                    {reasonMeta.description || 'No additional context provided.'}
+                                                </p>
                                             </div>
-                                            <div className="mod-report-meta">
-                                                <span className="mod-report-category">
-                                                    {report.category}
-                                                </span>
-                                                <span className="mod-report-field">
-                                                    {report.reportedField || 'General'}
-                                                </span>
-                                            </div>
-                                        </div>
-                                    ))}
+                                        );
+                                    })}
                                 </div>
                             )}
                         </div>

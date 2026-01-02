@@ -2,7 +2,14 @@ import React, { useState, useEffect } from 'react';
 import ReportModal from './ReportModal';
 import './ReportButton.css';
 
-export default function ReportButton({ contentType, contentId, contentOwnerId, authToken, tooltipText = 'Report this content' }) {
+export default function ReportButton({
+    contentType,
+    contentId,
+    contentOwnerId,
+    authToken,
+    API_BASE_URL,
+    tooltipText = 'Report this content'
+}) {
     const [isModalOpen, setIsModalOpen] = useState(false);
     const [currentUserId, setCurrentUserId] = useState(null);
     const [isOwner, setIsOwner] = useState(false);
@@ -59,6 +66,7 @@ export default function ReportButton({ contentType, contentId, contentOwnerId, a
                 contentId={contentId}
                 contentOwnerId={contentOwnerId}
                 authToken={authToken}
+                API_BASE_URL={API_BASE_URL}
                 onClose={() => setIsModalOpen(false)}
                 onSubmit={() => {
                     // Could trigger a toast notification here if needed
