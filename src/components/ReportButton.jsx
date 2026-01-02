@@ -1,0 +1,60 @@
+import React, { useState, useEffect } from 'react';
+import ReportModal from './ReportModal';
+import './ReportButton.css';
+
+export default function ReportButton({ contentType, contentId, contentOwnerId, tooltipText = 'Report this content' }) {
+    const [isModalOpen, setIsModalOpen] = useState(false);
+    const [currentUserId, setCurrentUserId] = useState(null);
+    const [isOwner, setIsOwner] = useState(false);
+
+    useEffect(() => {
+        // Get current user ID from token
+        const token = localStorage.getItem('token');
+        if (token) {
+            try {
+                const payload = JSON.parse(atob(token.split('.')[1]));
+                setCurrentUserId(payload.id);
+                // Hide report button if user owns the content
+                setIsOwner(String(payload.id) === String(contentOwnerId));
+            } catch (err) {
+                console.error('Failed to parse token:', err);
+            }
+        }
+    }, [contentOwnerId]);
+
+    const handleOpenReport = (e) => {
+        e.preventDefault();
+        e.stopPropagation();
+        setIsModalOpen(true);
+    };
+
+    // Don't show report button if user owns the content
+    if (isOwner) {
+        return null;
+    }
+
+    return (
+        <>
+            <button
+                className="report-button"
+                onClick={handleOpenReport}
+                title={tooltipText}
+                aria-label="Report this content"
+            >
+                <span className="report-button-icon">⚠</span>
+                <span className="report-button-text">Report</span>
+            </button>
+
+            <ReportModal
+                isOpen={isModalOpen}
+                contentType={contentType}
+                contentId={contentId}
+                contentOwnerId={contentOwnerId}
+                onClose={() => setIsModalOpen(false)}
+                onSubmit={() => {
+                    // Could trigger a toast notification here if needed
+                }}
+            />
+        </>
+    );
+}
