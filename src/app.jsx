@@ -11885,7 +11885,12 @@ const App = () => {
     // Tutorial modal states
     const [showInfoTab, setShowInfoTab] = useState(false);
     const [showAdminPanel, setShowAdminPanel] = useState(false);
-    const [inModeratorMode, setInModeratorMode] = useState(false);
+    const [inModeratorMode, setInModeratorMode] = useState(() => {
+        if (typeof window !== 'undefined') {
+            return localStorage.getItem('moderationAuthenticated') === 'true';
+        }
+        return false;
+    });
     const [showModerationAuthModal, setShowModerationAuthModal] = useState(false);
     const [maintenanceMode, setMaintenanceMode] = useState(false);
     const [maintenanceMessage, setMaintenanceMessage] = useState('');
@@ -11944,8 +11949,11 @@ const App = () => {
     const handleLogout = useCallback((expired = false) => {
         setAuthToken(null);
         setUserProfile(null);
-        navigate('/');
+        setInModeratorMode(false);
+        setShowAdminPanel(false);
         localStorage.removeItem('authToken');
+        localStorage.removeItem('moderationAuthenticated');
+        navigate('/');
         if (expired) {
             showModalMessage('Session Expired', 'You were logged out due to 15 minutes of inactivity.');
         }
@@ -13264,7 +13272,7 @@ const App = () => {
                                             <Shield size={18} className="mb-1" />
                                             <span>Panel</span>
                                         </button>
-                                        <button onClick={() => setInModeratorMode(false)} className={`px-4 py-2 text-xs font-medium rounded-lg transition duration-150 flex flex-col items-center text-green-600 hover:bg-green-50`} title="Exit Moderation Mode">
+                                        <button onClick={() => {\n                                            setInModeratorMode(false);\n                                            setShowAdminPanel(false);\n                                            localStorage.removeItem('moderationAuthenticated');\n                                        }} className={`px-4 py-2 text-xs font-medium rounded-lg transition duration-150 flex flex-col items-center text-green-600 hover:bg-green-50`} title="Exit Moderation Mode">
                                             <CheckCircle size={18} className="mb-1" />
                                             <span>Exit Mod</span>
                                         </button>
@@ -13540,13 +13548,14 @@ const App = () => {
             )}
 
             {/* Moderation Auth Modal */}
-            {showModerationAuthModal && authToken && (
+            {showModerationAuthModal && authToken && !inModeratorMode && (
                 <ModerationAuthModal
                     isOpen={showModerationAuthModal}
                     onClose={() => setShowModerationAuthModal(false)}
                     onSuccess={() => {
                         setInModeratorMode(true);
                         setShowModerationAuthModal(false);
+                        localStorage.setItem('moderationAuthenticated', 'true');
                     }}
                     API_BASE_URL={API_BASE_URL}
                     authToken={authToken}
