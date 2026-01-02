@@ -116,7 +116,7 @@ export default function UserManagementTab({ API_BASE_URL, authToken }) {
     };
 
     const handleChangeRole = async (userId, newRole) => {
-        if (!confirm(`Change user role to: ${newRole}?`)) return;
+        if (!window.confirm(`Change user role to: ${newRole}?`)) return;
 
         try {
             const response = await fetch(`${API_BASE_URL}/api/admin/users/${userId}/role`, {
