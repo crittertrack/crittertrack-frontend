@@ -153,9 +153,7 @@ const EnhancedAdminPanel = ({ isOpen, onClose, authToken, API_BASE_URL, userRole
             if (!userDeviceInfo) return;
 
             const loginData = {
-                userId: userId,
                 username: username,
-                ipAddress: 'pending-from-backend', // Backend will get actual IP
                 userAgent: userDeviceInfo.userAgent,
                 deviceInfo: {
                     platform: userDeviceInfo.platform,
