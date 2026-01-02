@@ -4,15 +4,6 @@ import {
     Loader2, Save, Plus, Trash2, Edit, Eye, Search, Download, Upload,
     ChevronDown, ChevronRight, CheckCircle, Clock, Flag, MessageSquare
 } from 'lucide-react';
-import UserManagement from './admin/UserManagement';
-import AnimalManagement from './admin/AnimalManagement';
-import ModerationTools from './admin/ModerationTools';
-import SystemSettings from './admin/SystemSettings';
-import Reports from './admin/Reports';
-import Communication from './admin/Communication';
-import DataAudit from './admin/DataAudit';
-import TwoFactorAuth from './TwoFactorAuth';
-import LoginTracking from './LoginTracking';
 
 // Error Boundary Component
 class ErrorBoundary extends React.Component {
@@ -251,22 +242,10 @@ const EnhancedAdminPanel = ({ isOpen, onClose, authToken, API_BASE_URL, userRole
     if (!isAuthenticated) {
         console.log('[EnhancedAdminPanel] Not authenticated yet, showing auth screens');
         // 2FA Modal
-        if (show2FA) {
-            console.log('[EnhancedAdminPanel] Showing 2FA screen');
-            return (
-                <div className="min-h-screen w-full bg-gray-50 flex items-center justify-center">
-                    <TwoFactorAuth
-                        isOpen={show2FA}
-                        onClose={handle2FAClose}
-                        onVerify={handle2FASuccess}
-                        email={userEmail}
-                        authToken={authToken}
-                        API_BASE_URL={API_BASE_URL}
-                        isLoading={isLoadingLogin}
-                    />
-                </div>
-            );
-        }
+        // TwoFactorAuth component deleted - 2FA now handled by ModerationAuthModal
+        // if (show2FA) {
+        //     ...
+        // }
 
         // Code request screen (after password verification)
         if (showCodeRequestScreen) {
@@ -492,65 +471,65 @@ const EnhancedAdminPanel = ({ isOpen, onClose, authToken, API_BASE_URL, userRole
                                     </div>
                                 </div>
 
-                                {/* Login Activity Tracking */}
-                                <div className="mt-8">
+                                {/* Login Activity Tracking - DISABLED: Component deleted */}
+                                {/* <div className="mt-8">
                                     {authToken && API_BASE_URL && (
                                         <React.Suspense fallback={<div className="text-gray-500">Loading login history...</div>}>
                                             <LoginTracking authToken={authToken} API_BASE_URL={API_BASE_URL} />
                                         </React.Suspense>
                                     )}
-                                </div>
+                                </div> */}
                             </div>
                         )}
 
-                        {/* User Management */}
-                        {activeSection === 'users' && (
+                        {/* User Management - DISABLED: Component deleted */}
+                        {/* {activeSection === 'users' && (
                             <React.Suspense fallback={<div className="p-8">Loading User Management...</div>}>
                                 <UserManagement authToken={authToken} API_BASE_URL={API_BASE_URL} />
                             </React.Suspense>
-                        )}
+                        )} */}
 
-                        {/* Animal Management */}
-                        {activeSection === 'animals' && (
+                        {/* Animal Management - DISABLED: Component deleted */}
+                        {/* {activeSection === 'animals' && (
                             <React.Suspense fallback={<div className="p-8">Loading Animal Management...</div>}>
                                 <AnimalManagement authToken={authToken} API_BASE_URL={API_BASE_URL} />
                             </React.Suspense>
-                        )}
+                        )} */}
 
-                        {/* Moderation Tools */}
-                        {activeSection === 'moderation' && (
+                        {/* Moderation Tools - DISABLED: Component deleted */}
+                        {/* {activeSection === 'moderation' && (
                             <React.Suspense fallback={<div className="p-8">Loading Moderation Tools...</div>}>
                                 <ModerationTools authToken={authToken} API_BASE_URL={API_BASE_URL} userRole={userRole} />
                             </React.Suspense>
-                        )}
+                        )} */}
 
-                        {/* Data Audit */}
-                        {activeSection === 'data-audit' && (
+                        {/* Data Audit - DISABLED: Component deleted */}
+                        {/* {activeSection === 'data-audit' && (
                             <React.Suspense fallback={<div className="p-8">Loading Data Audit...</div>}>
                                 <DataAudit authToken={authToken} API_BASE_URL={API_BASE_URL} />
                             </React.Suspense>
-                        )}
+                        )} */}
 
-                        {/* System Settings */}
-                        {activeSection === 'system-settings' && (
+                        {/* System Settings - DISABLED: Component deleted */}
+                        {/* {activeSection === 'system-settings' && (
                             <React.Suspense fallback={<div className="p-8">Loading System Settings...</div>}>
                                 <SystemSettings authToken={authToken} API_BASE_URL={API_BASE_URL} />
                             </React.Suspense>
-                        )}
+                        )} */}
 
-                        {/* Reports */}
-                        {activeSection === 'reports' && (
+                        {/* Reports - DISABLED: Component deleted */}
+                        {/* {activeSection === 'reports' && (
                             <React.Suspense fallback={<div className="p-8">Loading Reports...</div>}>
                                 <Reports authToken={authToken} API_BASE_URL={API_BASE_URL} />
                             </React.Suspense>
-                        )}
+                        )} */}
 
-                        {/* Communication */}
-                        {activeSection === 'communication' && (
+                        {/* Communication - DISABLED: Component deleted */}
+                        {/* {activeSection === 'communication' && (
                             <React.Suspense fallback={<div className="p-8">Loading Communication...</div>}>
                                 <Communication authToken={authToken} API_BASE_URL={API_BASE_URL} userRole={userRole} />
                             </React.Suspense>
-                        )}
+                        )} */}
                     </div>
                 </div>
         </div>
