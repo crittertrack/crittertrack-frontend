@@ -19,10 +19,20 @@ const LoginTracking = ({ authToken, API_BASE_URL }) => {
             });
             if (response.ok) {
                 const data = await response.json();
-                setLoginHistory(data);
+                // Ensure data is an array
+                if (Array.isArray(data)) {
+                    setLoginHistory(data);
+                } else {
+                    console.warn('Login history response is not an array:', data);
+                    setLoginHistory([]);
+                }
+            } else {
+                console.warn('Failed to fetch login history:', response.status);
+                setLoginHistory([]);
             }
         } catch (error) {
             console.error('Error fetching login history:', error);
+            setLoginHistory([]);
         } finally {
             setLoading(false);
         }

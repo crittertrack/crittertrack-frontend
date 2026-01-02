@@ -14,6 +14,54 @@ import DataAudit from './admin/DataAudit';
 import TwoFactorAuth from './TwoFactorAuth';
 import LoginTracking from './LoginTracking';
 
+// Error Boundary Component
+class ErrorBoundary extends React.Component {
+    constructor(props) {
+        super(props);
+        this.state = { hasError: false, error: null };
+    }
+
+    static getDerivedStateFromError(error) {
+        return { hasError: true, error };
+    }
+
+    componentDidCatch(error, errorInfo) {
+        console.error('Admin Panel Error:', error);
+        console.error('Error Info:', errorInfo);
+    }
+
+    render() {
+        if (this.state.hasError) {
+            return (
+                <div className="fixed inset-0 bg-red-50 z-50 flex items-center justify-center p-4">
+                    <div className="bg-white rounded-lg shadow-lg max-w-md w-full border border-red-200">
+                        <div className="bg-red-600 text-white p-4 rounded-t-lg">
+                            <h2 className="text-lg font-bold">Admin Panel Error</h2>
+                        </div>
+                        <div className="p-6">
+                            <p className="text-red-700 font-semibold mb-2">An error occurred:</p>
+                            <pre className="bg-gray-100 p-3 rounded text-xs overflow-auto max-h-40 text-red-900">
+                                {this.state.error?.toString()}
+                            </pre>
+                            <button
+                                onClick={() => {
+                                    this.setState({ hasError: false });
+                                    this.props.onClose?.();
+                                }}
+                                className="mt-4 w-full px-4 py-2 bg-red-600 text-white font-semibold rounded-lg hover:bg-red-700 transition"
+                            >
+                                Close Admin Panel
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            );
+        }
+
+        return this.props.children;
+    }
+}
+
 const EnhancedAdminPanel = ({ isOpen, onClose, authToken, API_BASE_URL, userRole, userEmail, userId, username }) => {
     const [activeSection, setActiveSection] = useState('dashboard');
     const [adminPassword, setAdminPassword] = useState('');
@@ -170,9 +218,11 @@ const EnhancedAdminPanel = ({ isOpen, onClose, authToken, API_BASE_URL, userRole
 
     const handle2FASuccess = async () => {
         // 2FA verification succeeded
+        console.log('✓ 2FA verification successful, setting authenticated=true');
         setShow2FA(false);
         setIsAuthenticated(true);
         setShowPasswordPrompt(false);
+        setActiveSection('dashboard');
         // Track successful login
         await trackLoginAttempt(true, 'success_2fa_verified');
     };
@@ -201,8 +251,10 @@ const EnhancedAdminPanel = ({ isOpen, onClose, authToken, API_BASE_URL, userRole
 
     // If not authenticated yet, show password/2FA screens
     if (!isAuthenticated) {
+        console.log('[EnhancedAdminPanel] Not authenticated yet, showing auth screens');
         // 2FA Modal
         if (show2FA) {
+            console.log('[EnhancedAdminPanel] Showing 2FA screen');
             return (
                 <div className="min-h-screen w-full bg-gray-50 flex items-center justify-center">
                     <TwoFactorAuth
@@ -218,8 +270,9 @@ const EnhancedAdminPanel = ({ isOpen, onClose, authToken, API_BASE_URL, userRole
             );
         }
 
-        // Code Request Screen (after password verification)
+        // Code request screen (after password verification)
         if (showCodeRequestScreen) {
+            console.log('[EnhancedAdminPanel] Showing code request screen');
             return (
                 <div className="fixed inset-0 bg-black bg-opacity-50 z-50 flex items-center justify-center p-4">
                     <div className="bg-white rounded-xl shadow-2xl max-w-md w-full">
@@ -282,6 +335,7 @@ const EnhancedAdminPanel = ({ isOpen, onClose, authToken, API_BASE_URL, userRole
 
         // Password prompt
         if (showPasswordPrompt) {
+            console.log('[EnhancedAdminPanel] Showing password prompt');
             return (
                 <div className="fixed inset-0 bg-black bg-opacity-50 z-50 flex items-center justify-center p-4">
                     <div className="bg-white rounded-xl shadow-2xl max-w-md w-full">
@@ -344,7 +398,9 @@ const EnhancedAdminPanel = ({ isOpen, onClose, authToken, API_BASE_URL, userRole
     }
 
     return (
-        <div className="min-h-screen w-full bg-gray-50 flex flex-col">
+        <ErrorBoundary onClose={onClose}>
+            <div className="min-h-screen w-full bg-gray-50 flex flex-col">
+            {console.log('[EnhancedAdminPanel] Rendering authenticated admin panel')}
             {/* Header */}
             <div className="bg-gradient-to-r from-red-600 to-red-700 text-white p-6 flex items-center justify-between shadow-lg">
                 <div className="flex items-center gap-3">
@@ -440,48 +496,67 @@ const EnhancedAdminPanel = ({ isOpen, onClose, authToken, API_BASE_URL, userRole
 
                                 {/* Login Activity Tracking */}
                                 <div className="mt-8">
-                                    <LoginTracking authToken={authToken} API_BASE_URL={API_BASE_URL} />
+                                    {authToken && API_BASE_URL && (
+                                        <React.Suspense fallback={<div className="text-gray-500">Loading login history...</div>}>
+                                            <LoginTracking authToken={authToken} API_BASE_URL={API_BASE_URL} />
+                                        </React.Suspense>
+                                    )}
                                 </div>
                             </div>
                         )}
 
                         {/* User Management */}
                         {activeSection === 'users' && (
-                            <UserManagement authToken={authToken} API_BASE_URL={API_BASE_URL} />
+                            <React.Suspense fallback={<div className="p-8">Loading User Management...</div>}>
+                                <UserManagement authToken={authToken} API_BASE_URL={API_BASE_URL} />
+                            </React.Suspense>
                         )}
 
                         {/* Animal Management */}
                         {activeSection === 'animals' && (
-                            <AnimalManagement authToken={authToken} API_BASE_URL={API_BASE_URL} />
+                            <React.Suspense fallback={<div className="p-8">Loading Animal Management...</div>}>
+                                <AnimalManagement authToken={authToken} API_BASE_URL={API_BASE_URL} />
+                            </React.Suspense>
                         )}
 
                         {/* Moderation Tools */}
                         {activeSection === 'moderation' && (
-                            <ModerationTools authToken={authToken} API_BASE_URL={API_BASE_URL} userRole={userRole} />
+                            <React.Suspense fallback={<div className="p-8">Loading Moderation Tools...</div>}>
+                                <ModerationTools authToken={authToken} API_BASE_URL={API_BASE_URL} userRole={userRole} />
+                            </React.Suspense>
                         )}
 
                         {/* Data Audit */}
                         {activeSection === 'data-audit' && (
-                            <DataAudit authToken={authToken} API_BASE_URL={API_BASE_URL} />
+                            <React.Suspense fallback={<div className="p-8">Loading Data Audit...</div>}>
+                                <DataAudit authToken={authToken} API_BASE_URL={API_BASE_URL} />
+                            </React.Suspense>
                         )}
 
                         {/* System Settings */}
                         {activeSection === 'system-settings' && (
-                            <SystemSettings authToken={authToken} API_BASE_URL={API_BASE_URL} />
+                            <React.Suspense fallback={<div className="p-8">Loading System Settings...</div>}>
+                                <SystemSettings authToken={authToken} API_BASE_URL={API_BASE_URL} />
+                            </React.Suspense>
                         )}
 
                         {/* Reports */}
                         {activeSection === 'reports' && (
-                            <Reports authToken={authToken} API_BASE_URL={API_BASE_URL} />
+                            <React.Suspense fallback={<div className="p-8">Loading Reports...</div>}>
+                                <Reports authToken={authToken} API_BASE_URL={API_BASE_URL} />
+                            </React.Suspense>
                         )}
 
                         {/* Communication */}
                         {activeSection === 'communication' && (
-                            <Communication authToken={authToken} API_BASE_URL={API_BASE_URL} userRole={userRole} />
+                            <React.Suspense fallback={<div className="p-8">Loading Communication...</div>}>
+                                <Communication authToken={authToken} API_BASE_URL={API_BASE_URL} userRole={userRole} />
+                            </React.Suspense>
                         )}
                     </div>
                 </div>
         </div>
+        </ErrorBoundary>
     );
 };
 
