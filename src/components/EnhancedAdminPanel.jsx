@@ -75,13 +75,37 @@ const EnhancedAdminPanel = ({ isOpen, onClose, authToken, API_BASE_URL, userRole
             });
 
             if (response.ok) {
-                // Password verified - now show 2FA
-                setShow2FA(true);
-                setShowPasswordPrompt(false); // Hide password prompt, show 2FA
-                setAdminPassword('');
-                setPasswordAttempts(0);
-                // Track failed login attempt for audit
-                await trackLoginAttempt(false, 'password_verified_2fa_pending');
+                // Password verified - send 2FA code via email
+                try {
+                    const sendCodeResponse = await fetch(`${API_BASE_URL}/admin/send-2fa-code`, {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                            'Authorization': `Bearer ${authToken}`
+                        },
+                        body: JSON.stringify({ 
+                            email: userEmail,
+                            userId: userId
+                        })
+                    });
+
+                    if (sendCodeResponse.ok) {
+                        // Code sent successfully - show 2FA screen
+                        setShow2FA(true);
+                        setShowPasswordPrompt(false);
+                        setAdminPassword('');
+                        setPasswordAttempts(0);
+                        await trackLoginAttempt(false, 'password_verified_2fa_pending');
+                    } else {
+                        const errorData = await sendCodeResponse.json();
+                        setPasswordError(`Failed to send verification code: ${errorData.error}`);
+                        await trackLoginAttempt(false, '2fa_code_send_failed');
+                    }
+                } catch (codeError) {
+                    console.error('Error sending 2FA code:', codeError);
+                    setPasswordError('Failed to send verification code. Please try again.');
+                    await trackLoginAttempt(false, '2fa_code_send_error');
+                }
             } else {
                 setPasswordAttempts(prev => prev + 1);
                 setPasswordError(`Incorrect admin password (${3 - passwordAttempts - 1} attempts remaining)`);
