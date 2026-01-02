@@ -53,11 +53,11 @@ class ErrorBoundary extends React.Component {
     }
 }
 
-const EnhancedAdminPanel = ({ isOpen, onClose, authToken, API_BASE_URL, userRole, userEmail, userId, username }) => {
+const EnhancedAdminPanel = ({ isOpen, onClose, authToken, API_BASE_URL, userRole, userEmail, userId, username, skipAuthentication = false }) => {
     const [activeSection, setActiveSection] = useState('dashboard');
     const [adminPassword, setAdminPassword] = useState('');
-    const [isAuthenticated, setIsAuthenticated] = useState(false);
-    const [showPasswordPrompt, setShowPasswordPrompt] = useState(true);
+    const [isAuthenticated, setIsAuthenticated] = useState(skipAuthentication);
+    const [showPasswordPrompt, setShowPasswordPrompt] = useState(!skipAuthentication);
     const [showCodeRequestScreen, setShowCodeRequestScreen] = useState(false);
     const [show2FA, setShow2FA] = useState(false);
     const [passwordError, setPasswordError] = useState('');
