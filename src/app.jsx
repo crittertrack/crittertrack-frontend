@@ -12,6 +12,8 @@ import TermsOfService from './components/TermsOfService';
 import PrivacyPolicy from './components/PrivacyPolicy';
 import InstallPWA from './components/InstallPWA';
 import AdminPanel from './components/AdminPanel';
+import UrgentNotificationModal from './components/UrgentNotificationModal';
+import MaintenanceModeBanner from './components/MaintenanceModeBanner';
 import { TutorialProvider, useTutorial } from './contexts/TutorialContext';
 import { InitialTutorialModal, TutorialOverlay, TutorialHighlight } from './components/TutorialOverlay';
 import { TUTORIAL_LESSONS } from './data/tutorialLessonsNew';
@@ -11859,6 +11861,10 @@ const App = () => {
     // Tutorial modal states
     const [showInfoTab, setShowInfoTab] = useState(false);
     const [showAdminPanel, setShowAdminPanel] = useState(false);
+    const [maintenanceMode, setMaintenanceMode] = useState(false);
+    const [maintenanceMessage, setMaintenanceMessage] = useState('');
+    const [showUrgentNotification, setShowUrgentNotification] = useState(false);
+    const [urgentNotificationData, setUrgentNotificationData] = useState({ title: '', content: '' });
     const [currentTutorialId, setCurrentTutorialId] = useState(null);
     const [showTutorialOverlay, setShowTutorialOverlay] = useState(false);
     const [currentTutorialIndex, setCurrentTutorialIndex] = useState(0);
@@ -11951,7 +11957,91 @@ const App = () => {
         };
     }, [authToken, resetIdleTimer]);
 
-    // Show initial tutorial on first login
+    // Poll for maintenance mode and urgent notifications
+    useEffect(() => {
+        if (!authToken || userProfile?.id_public === 'CTU1') {
+            return; // Don't need to check if admin or not logged in
+        }
+
+        const pollForUpdates = async () => {
+            try {
+                const response = await axios.get(`${API_BASE_URL}/admin/maintenance-status`, {
+                    headers: { Authorization: `Bearer ${authToken}` }
+                });
+                const data = response.data;
+                
+                if (data.active && !maintenanceMode) {
+                    // Maintenance mode just activated
+                    setMaintenanceMode(true);
+                    setMaintenanceMessage(data.message || 'System Maintenance in Progress');
+                    
+                    // Show urgent notification to user about maintenance
+                    setUrgentNotificationData({
+                        title: 'SYSTEM MAINTENANCE ACTIVATED',
+                        content: data.message || 'The system is going into maintenance mode. You will be logged out shortly.'
+                    });
+                    setShowUrgentNotification(true);
+                    
+                    // Logout user after 5 seconds
+                    setTimeout(() => {
+                        handleLogout();
+                    }, 5000);
+                } else if (!data.active && maintenanceMode) {
+                    // Maintenance mode just deactivated
+                    setMaintenanceMode(false);
+                    setMaintenanceMessage('');
+                    showModalMessage('Notice', 'Maintenance mode has been deactivated. System is back online.');
+                }
+            } catch (error) {
+                console.error('Error checking maintenance status:', error);
+            }
+        };
+
+        const pollInterval = setInterval(pollForUpdates, 10000); // Check every 10 seconds
+        pollForUpdates(); // Check immediately on mount
+
+        return () => clearInterval(pollInterval);
+    }, [authToken, userProfile, maintenanceMode, API_BASE_URL, showModalMessage, handleLogout]);
+
+    // Listen for urgent notifications via WebSocket or server-sent events
+    useEffect(() => {
+        if (!authToken) {
+            return;
+        }
+
+        // Set up WebSocket or EventSource for real-time urgent notifications
+        // This assumes the backend has a WebSocket endpoint at /ws/urgent-notifications
+        // or an EventSource endpoint at /api/urgent-notifications/stream
+        try {
+            // Try EventSource first for simpler setup
+            const eventSource = new EventSource(
+                `${API_BASE_URL}/admin/urgent-notifications-stream`,
+                { withCredentials: true }
+            );
+
+            eventSource.addEventListener('urgent-alert', (event) => {
+                try {
+                    const data = JSON.parse(event.data);
+                    setUrgentNotificationData({
+                        title: data.title || 'URGENT ALERT',
+                        content: data.content || ''
+                    });
+                    setShowUrgentNotification(true);
+                } catch (error) {
+                    console.error('Error parsing urgent notification:', error);
+                }
+            });
+
+            eventSource.addEventListener('error', () => {
+                console.error('EventSource connection error');
+                eventSource.close();
+            });
+
+            return () => eventSource.close();
+        } catch (error) {
+            console.error('Error setting up urgent notification stream:', error);
+        }
+    }, [authToken, API_BASE_URL]);
     useEffect(() => {
         if (authToken && !hasCompletedOnboarding && !tutorialLoading && userProfile) {
             // Show the initial welcome tutorial
