@@ -19,11 +19,14 @@ const EnhancedAdminPanel = ({ isOpen, onClose, authToken, API_BASE_URL, userRole
     const [adminPassword, setAdminPassword] = useState('');
     const [isAuthenticated, setIsAuthenticated] = useState(false);
     const [showPasswordPrompt, setShowPasswordPrompt] = useState(true);
+    const [showCodeRequestScreen, setShowCodeRequestScreen] = useState(false);
     const [show2FA, setShow2FA] = useState(false);
     const [passwordError, setPasswordError] = useState('');
     const [passwordAttempts, setPasswordAttempts] = useState(0);
     const [userDeviceInfo, setUserDeviceInfo] = useState(null);
     const [isLoadingLogin, setIsLoadingLogin] = useState(false);
+    const [requestingCode, setRequestingCode] = useState(false);
+    const [codeRequestError, setCodeRequestError] = useState('');
     const [dashboardStats, setDashboardStats] = useState({
         totalUsers: 0,
         activeUsers: 0,
@@ -75,36 +78,12 @@ const EnhancedAdminPanel = ({ isOpen, onClose, authToken, API_BASE_URL, userRole
             });
 
             if (response.ok) {
-                // Password verified - send 2FA code via email
-                try {
-                    const sendCodeResponse = await fetch(`${API_BASE_URL}/admin/send-2fa-code`, {
-                        method: 'POST',
-                        headers: {
-                            'Content-Type': 'application/json',
-                            'Authorization': `Bearer ${authToken}`
-                        },
-                        body: JSON.stringify({ 
-                            email: userEmail
-                        })
-                    });
-
-                    if (sendCodeResponse.ok) {
-                        // Code sent successfully - show 2FA screen
-                        setShow2FA(true);
-                        setShowPasswordPrompt(false);
-                        setAdminPassword('');
-                        setPasswordAttempts(0);
-                        await trackLoginAttempt(false, 'password_verified_2fa_pending');
-                    } else {
-                        const errorData = await sendCodeResponse.json();
-                        setPasswordError(`Failed to send verification code: ${errorData.error}`);
-                        await trackLoginAttempt(false, '2fa_code_send_failed');
-                    }
-                } catch (codeError) {
-                    console.error('Error sending 2FA code:', codeError);
-                    setPasswordError('Failed to send verification code. Please try again.');
-                    await trackLoginAttempt(false, '2fa_code_send_error');
-                }
+                // Password verified - show code request screen instead of sending immediately
+                setShowPasswordPrompt(false);
+                setShowCodeRequestScreen(true);
+                setAdminPassword('');
+                setPasswordAttempts(0);
+                await trackLoginAttempt(false, 'password_verified_awaiting_code_request');
             } else {
                 setPasswordAttempts(prev => prev + 1);
                 setPasswordError(`Incorrect admin password (${3 - passwordAttempts - 1} attempts remaining)`);
@@ -154,6 +133,41 @@ const EnhancedAdminPanel = ({ isOpen, onClose, authToken, API_BASE_URL, userRole
         }
     };
 
+    const handleRequestCode = async () => {
+        setCodeRequestError('');
+        setRequestingCode(true);
+
+        try {
+            const sendCodeResponse = await fetch(`${API_BASE_URL}/admin/send-2fa-code`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Authorization': `Bearer ${authToken}`
+                },
+                body: JSON.stringify({ 
+                    email: userEmail
+                })
+            });
+
+            if (sendCodeResponse.ok) {
+                // Code sent successfully - show 2FA screen
+                setShow2FA(true);
+                setShowCodeRequestScreen(false);
+                await trackLoginAttempt(false, 'password_verified_2fa_code_sent');
+            } else {
+                const errorData = await sendCodeResponse.json();
+                setCodeRequestError(`Failed to send verification code: ${errorData.error}`);
+                await trackLoginAttempt(false, '2fa_code_send_failed');
+            }
+        } catch (codeError) {
+            console.error('Error sending 2FA code:', codeError);
+            setCodeRequestError('Failed to send verification code. Please try again.');
+            await trackLoginAttempt(false, '2fa_code_send_error');
+        } finally {
+            setRequestingCode(false);
+        }
+    };
+
     const handle2FASuccess = async () => {
         // 2FA verification succeeded
         setShow2FA(false);
@@ -197,6 +211,68 @@ const EnhancedAdminPanel = ({ isOpen, onClose, authToken, API_BASE_URL, userRole
                         API_BASE_URL={API_BASE_URL}
                         isLoading={isLoadingLogin}
                     />
+                </div>
+            );
+        }
+
+        // Code Request Screen (after password verification)
+        if (showCodeRequestScreen) {
+            return (
+                <div className="fixed inset-0 bg-black bg-opacity-50 z-50 flex items-center justify-center p-4">
+                    <div className="bg-white rounded-xl shadow-2xl max-w-md w-full">
+                        <div className="bg-gradient-to-r from-green-600 to-green-700 text-white p-6 flex items-center justify-between rounded-t-xl">
+                            <div className="flex items-center gap-3">
+                                <CheckCircle size={24} />
+                                <h2 className="text-xl font-bold">Password Verified</h2>
+                            </div>
+                        </div>
+
+                        <div className="p-6 space-y-6">
+                            <div>
+                                <p className="text-gray-700 font-medium mb-2">✓ Password verified successfully</p>
+                                <p className="text-sm text-gray-600">Request your verification code to continue accessing the moderation panel.</p>
+                            </div>
+
+                            {codeRequestError && (
+                                <div className="bg-red-50 border border-red-200 rounded-lg p-4">
+                                    <p className="text-sm text-red-600">{codeRequestError}</p>
+                                </div>
+                            )}
+
+                            <div className="flex gap-3 pt-4">
+                                <button
+                                    type="button"
+                                    onClick={() => {
+                                        setShowCodeRequestScreen(false);
+                                        setShowPasswordPrompt(true);
+                                        setCodeRequestError('');
+                                    }}
+                                    disabled={requestingCode}
+                                    className="flex-1 px-4 py-2 bg-gray-200 text-gray-800 font-semibold rounded-lg hover:bg-gray-300 transition disabled:bg-gray-100 disabled:cursor-not-allowed"
+                                >
+                                    Back
+                                </button>
+                                <button
+                                    type="button"
+                                    onClick={handleRequestCode}
+                                    disabled={requestingCode}
+                                    className="flex-1 px-4 py-2 bg-green-600 text-white font-semibold rounded-lg hover:bg-green-700 transition disabled:bg-green-400 disabled:cursor-not-allowed flex items-center justify-center gap-2"
+                                >
+                                    {requestingCode ? (
+                                        <>
+                                            <Loader2 size={16} className="animate-spin" />
+                                            Sending...
+                                        </>
+                                    ) : (
+                                        <>
+                                            <Mail size={16} />
+                                            Request Code
+                                        </>
+                                    )}
+                                </button>
+                            </div>
+                        </div>
+                    </div>
                 </div>
             );
         }
