@@ -10,20 +10,13 @@ export default function ReportButton({ contentType, contentId, contentOwnerId, a
     useEffect(() => {
         // Get current user ID from token
         const token = authToken || localStorage.getItem('authToken');
-        console.log('ReportButton: authToken prop:', authToken ? 'provided' : 'not provided');
-        console.log('ReportButton: token from storage:', token ? 'found' : 'not found');
-        console.log('ReportButton: contentOwnerId prop:', contentOwnerId);
         if (token) {
             try {
                 const payload = JSON.parse(atob(token.split('.')[1]));
-                console.log('ReportButton: JWT payload:', payload);
                 const userId = payload.user?.id || payload.id;
-                console.log('ReportButton: current user ID:', userId);
-                console.log('ReportButton: content owner ID:', contentOwnerId);
                 setCurrentUserId(userId);
                 // Hide report button if user owns the content
                 const ownerCheck = String(userId) === String(contentOwnerId);
-                console.log('ReportButton: isOwner:', ownerCheck);
                 setIsOwner(ownerCheck);
             } catch (err) {
                 console.error('Failed to parse token:', err);
@@ -31,7 +24,6 @@ export default function ReportButton({ contentType, contentId, contentOwnerId, a
                 setIsOwner(false);
             }
         } else {
-            console.log('ReportButton: No token available');
             setCurrentUserId(null);
             setIsOwner(false);
         }
@@ -43,12 +35,9 @@ export default function ReportButton({ contentType, contentId, contentOwnerId, a
         setIsModalOpen(true);
     };
 
-    // Don't show report button if no authToken (unauthenticated) or user owns the content
-    if (!authToken) {
-        return null;
-    }
-
-    if (isOwner) {
+    // Don't show report button if no token available (unauthenticated) or user owns the content
+    const token = authToken || localStorage.getItem('authToken');
+    if (!token || isOwner) {
         return null;
     }
 
