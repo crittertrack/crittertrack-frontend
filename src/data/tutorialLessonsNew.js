@@ -1869,6 +1869,9 @@ const KEY_FEATURES_LESSONS = [
           'Optional but highly recommended'
         ]
       }
+    ]
+  }
+];
 
 const ADVANCED_FEATURES_LESSONS = [
   {
