@@ -48,7 +48,7 @@ export default function ReportModal({ isOpen, contentType, contentId, contentOwn
                 return;
             }
 
-            const response = await fetch('/api/reports/submit', {
+            const response = await fetch('/api/admin/reports/submit', {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
