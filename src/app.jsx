@@ -12765,6 +12765,7 @@ const App = () => {
                             animal={viewingPublicAnimal}
                             onClose={() => setViewingPublicAnimal(null)}
                             API_BASE_URL={API_BASE_URL}
+                            authToken={authToken}
                             onViewProfile={(user) => setViewingPublicProfile(user)}
                         />
                     )}
@@ -12805,6 +12806,7 @@ const App = () => {
                         onBack={() => { setViewingPublicProfile(null); navigate('/'); }}
                         onViewAnimal={(animal) => setViewingPublicAnimal(animal)}
                         API_BASE_URL={API_BASE_URL}
+                        authToken={authToken}
                     />
                 </div>
             );
@@ -12851,6 +12853,7 @@ const App = () => {
                             animal={viewingPublicAnimal}
                             onClose={() => setViewingPublicAnimal(null)}
                             API_BASE_URL={API_BASE_URL}
+                            authToken={authToken}
                             onViewProfile={(user) => setViewingPublicProfile(user)}
                         />
                     )}
@@ -12916,6 +12919,7 @@ const App = () => {
                         animal={viewingPublicAnimal}
                         onClose={() => setViewingPublicAnimal(null)}
                         API_BASE_URL={API_BASE_URL}
+                        authToken={authToken}
                         onViewProfile={(user) => setViewingPublicProfile(user)}
                     />
                 )}
@@ -15413,6 +15417,7 @@ const PublicAnimalPage = () => {
                 animal={animal}
                 onClose={() => navigate('/')}
                 API_BASE_URL={API_BASE_URL}
+                authToken={authToken}
                 onViewProfile={(user) => navigate(`/user/${user.id_public}`)}
             />
         </div>
@@ -15486,6 +15491,7 @@ const PublicProfilePage = () => {
                 onBack={() => navigate('/')}
                 onViewAnimal={(animal) => navigate(`/animal/${animal.id_public}`)}
                 API_BASE_URL={API_BASE_URL}
+                authToken={authToken}
             />
         </div>
     );
