@@ -1818,16 +1818,6 @@ const PublicProfileView = ({ profile, onBack, onViewAnimal, API_BASE_URL, onStar
                                                     </div>
                                                 )}
 
-                                                {/* Report button - conditionally rendered by ReportButton component */}
-                                                <div className="absolute top-2 right-10">
-                                                    <ReportButton
-                                                        contentType="animal"
-                                                        contentId={animal.id_public}
-                                                        contentOwnerId={profile.userId}
-                                                        tooltipText="Report this animal"
-                                                    />
-                                                </div>
-
                                                 {/* Centered profile image */}
                                                 <div className="flex items-center justify-center w-full px-2 mt-1 h-28">
                                                     {imgSrc ? (
@@ -1957,6 +1947,12 @@ const ViewOnlyAnimalDetail = ({ animal, onClose, API_BASE_URL, onViewProfile }) 
                                 <Link size={16} />
                                 {copySuccess ? 'Link Copied!' : 'Share'}
                             </button>
+                            <ReportButton
+                                contentType="animal"
+                                contentId={animal.id_public}
+                                contentOwnerId={animal.ownerId_public}
+                                tooltipText="Report this animal"
+                            />
                             <button onClick={onClose} className="text-gray-500 hover:text-gray-800">
                                 <X size={28} />
                             </button>
