@@ -9,7 +9,7 @@ export default function ReportButton({ contentType, contentId, contentOwnerId, a
 
     useEffect(() => {
         // Get current user ID from token
-        const token = authToken || localStorage.getItem('token');
+        const token = authToken || localStorage.getItem('authToken');
         console.log('ReportButton: authToken prop:', authToken ? 'provided' : 'not provided');
         console.log('ReportButton: token from storage:', token ? 'found' : 'not found');
         if (token) {

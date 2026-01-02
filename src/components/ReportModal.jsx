@@ -41,7 +41,7 @@ export default function ReportModal({ isOpen, contentType, contentId, contentOwn
         }
 
         try {
-            const token = authToken || localStorage.getItem('token');
+            const token = authToken || localStorage.getItem('authToken');
             if (!token) {
                 setError('You must be logged in to submit a report');
                 setLoading(false);
