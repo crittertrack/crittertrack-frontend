@@ -1494,7 +1494,7 @@ const KEY_FEATURES_LESSONS = [
       {
         stepNumber: 6,
         title: 'Public Profile Visibility',
-        content: 'These checkboxes control what information is visible on your public profile. Check which aspects you want to share: Personal Name, Breeder Name, website, country, etc. If private, only you see that info.',
+        content: 'These checkboxes control what information is visible on your public profile. Check which aspects you want to share: Personal Name, Breeder Name, website, etc. If private, only you see that info.',
         highlightElement: '[data-tutorial-target="public-visibility-checkboxes"]',
         tips: [
           'Strategic visibility increases interest',
