@@ -1830,13 +1830,14 @@ const KEY_FEATURES_LESSONS = [
       },
       {
         stepNumber: 2,
-        title: 'Send Message',
-        content: 'Click on a breeder\'s profile and find the "Message" button. Or, access your messages directly from the header to start a conversation.',
-        highlightElement: '[data-tutorial-target="message-button"]',
+        title: 'Send Message from Profile',
+        content: 'To message another breeder, first find their profile (you can search for them using the global search). Once on their profile, click the "Message" button to start a conversation. This lets you reach out about their animals, ask breeding questions, or coordinate transfers.',
+        highlightElement: '[data-tutorial-target="profile-message-btn"]',
         tips: [
-          'Find breeders through public profiles',
-          'Click to open message interface',
-          'Or go to Messages in header'
+          'Find breeders through global search',
+          'View their public profile',
+          'Click Message button to start chat',
+          'Requires them to allow messages'
         ]
       },
       {

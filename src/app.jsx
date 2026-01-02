@@ -1621,6 +1621,7 @@ const PublicProfileView = ({ profile, onBack, onViewAnimal, API_BASE_URL, onStar
                     {onStartMessage && freshProfile?.allowMessages === true && (
                         <button
                             onClick={onStartMessage}
+                            data-tutorial-target="profile-message-btn"
                             className="px-3 py-1.5 bg-accent hover:bg-accent/80 text-white font-semibold rounded-lg transition flex items-center gap-2"
                         >
                             <MessageSquare size={16} />
