@@ -5,6 +5,8 @@ import {
     ChevronDown, ChevronRight, CheckCircle, Clock, Flag, MessageSquare
 } from 'lucide-react';
 import ModOversightPanel from './moderation/ModOversightPanel';
+import UserManagementTab from './admin/UserManagementTab';
+import AuditLogTab from './admin/AuditLogTab';
 
 // Error Boundary Component
 class ErrorBoundary extends React.Component {
@@ -483,13 +485,13 @@ const EnhancedAdminPanel = ({ isOpen, onClose, authToken, API_BASE_URL, userRole
                             </div>
                         )}
 
-                        {/* User Management - DISABLED: Component deleted */}
+                        {/* User Management */}
                         {activeSection === 'users' && (
                             <div className="p-8">
-                                <h3 className="text-2xl font-bold text-gray-800 mb-4">User Management</h3>
-                                <div className="bg-yellow-50 border border-yellow-200 rounded-lg p-6">
-                                    <p className="text-yellow-800">This feature is currently being rebuilt. Please use the moderation tools for user-related actions.</p>
-                                </div>
+                                <UserManagementTab 
+                                    API_BASE_URL={API_BASE_URL}
+                                    authToken={authToken}
+                                />
                             </div>
                         )}
 
@@ -521,13 +523,13 @@ const EnhancedAdminPanel = ({ isOpen, onClose, authToken, API_BASE_URL, userRole
                             </div>
                         )}
 
-                        {/* Data Audit - DISABLED: Component deleted */}
+                        {/* Data Audit */}
                         {activeSection === 'data-audit' && (
                             <div className="p-8">
-                                <h3 className="text-2xl font-bold text-gray-800 mb-4">Data Integrity</h3>
-                                <div className="bg-yellow-50 border border-yellow-200 rounded-lg p-6">
-                                    <p className="text-yellow-800">This feature is currently being rebuilt.</p>
-                                </div>
+                                <AuditLogTab
+                                    API_BASE_URL={API_BASE_URL}
+                                    authToken={authToken}
+                                />
                             </div>
                         )}
 
