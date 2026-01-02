@@ -28,8 +28,8 @@ export default function ReportButton({ contentType, contentId, contentOwnerId, a
         setIsModalOpen(true);
     };
 
-    // Don't show report button if user owns the content
-    if (isOwner) {
+    // Don't show report button if no authToken (unauthenticated) or user owns the content
+    if (!authToken || isOwner) {
         return null;
     }
 
