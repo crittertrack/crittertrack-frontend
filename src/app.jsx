@@ -19,6 +19,7 @@ import { InitialTutorialModal, TutorialOverlay, TutorialHighlight } from './comp
 import { TUTORIAL_LESSONS } from './data/tutorialLessonsNew';
 import InfoTab from './components/InfoTab';
 import WelcomeBanner from './components/WelcomeBanner';
+import ReportButton from './components/ReportButton';
 
 // const API_BASE_URL = 'http://localhost:5000/api'; // Local development
 // const API_BASE_URL = 'https://crittertrack-pedigree-production.up.railway.app/api'; // Direct Railway (for testing)
@@ -1638,6 +1639,12 @@ const PublicProfileView = ({ profile, onBack, onViewAnimal, API_BASE_URL, onStar
                         <Link size={16} />
                         {copySuccess ? 'Link Copied!' : 'Share Profile'}
                     </button>
+                    <ReportButton
+                        contentType="profile"
+                        contentId={profile.id_public}
+                        contentOwnerId={profile.userId}
+                        tooltipText="Report this profile"
+                    />
                 </div>
             </div>
 
@@ -1810,6 +1817,16 @@ const PublicProfileView = ({ profile, onBack, onViewAnimal, API_BASE_URL, onStar
                                                         {animal.gender === 'Male' ? <Mars size={16} strokeWidth={2.5} className="text-primary" /> : animal.gender === 'Female' ? <Venus size={16} strokeWidth={2.5} className="text-accent" /> : animal.gender === 'Intersex' ? <VenusAndMars size={16} strokeWidth={2.5} className="text-purple-500" /> : <Circle size={16} strokeWidth={2.5} className="text-gray-500" />}
                                                     </div>
                                                 )}
+
+                                                {/* Report button - conditionally rendered by ReportButton component */}
+                                                <div className="absolute top-2 right-10">
+                                                    <ReportButton
+                                                        contentType="animal"
+                                                        contentId={animal.id_public}
+                                                        contentOwnerId={profile.userId}
+                                                        tooltipText="Report this animal"
+                                                    />
+                                                </div>
 
                                                 {/* Centered profile image */}
                                                 <div className="flex items-center justify-center w-full px-2 mt-1 h-28">
