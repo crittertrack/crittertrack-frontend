@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useCallback, useRef, useMemo } from 'react';
 import { useParams, useNavigate, useLocation, Routes, Route } from 'react-router-dom';
 import axios from 'axios';
-import { LogOut, Cat, UserPlus, LogIn, ChevronLeft, ChevronDown, ChevronRight, Trash2, Edit, Save, PlusCircle, Plus, ArrowLeft, Loader2, RefreshCw, User, Users, ClipboardList, BookOpen, Settings, Mail, Globe, Bean, Milk, Search, X, Mars, Venus, Eye, EyeOff, Home, Heart, HeartOff, HeartHandshake, Bell, XCircle, CheckCircle, Download, FileText, Link, AlertCircle, Check, DollarSign, Archive, ArrowLeftRight, RotateCcw, Info, Hourglass, MessageSquare, Ban, Flag, Scissors, VenusAndMars, Circle } from 'lucide-react';
+import { LogOut, Cat, UserPlus, LogIn, ChevronLeft, ChevronDown, ChevronRight, Trash2, Edit, Save, PlusCircle, Plus, ArrowLeft, Loader2, RefreshCw, User, Users, ClipboardList, BookOpen, Settings, Mail, Globe, Bean, Milk, Search, X, Mars, Venus, Eye, EyeOff, Home, Heart, HeartOff, HeartHandshake, Bell, XCircle, CheckCircle, Download, FileText, Link, AlertCircle, Check, DollarSign, Archive, ArrowLeftRight, RotateCcw, Info, Hourglass, MessageSquare, Ban, Flag, Scissors, VenusAndMars, Circle, Shield } from 'lucide-react';
 import jsPDF from 'jspdf';
 import html2canvas from 'html2canvas';
 import 'flag-icons/css/flag-icons.min.css';
@@ -11,6 +11,7 @@ import BudgetingTab from './components/BudgetingTab';
 import TermsOfService from './components/TermsOfService';
 import PrivacyPolicy from './components/PrivacyPolicy';
 import InstallPWA from './components/InstallPWA';
+import AdminPanel from './components/AdminPanel';
 import { TutorialProvider, useTutorial } from './contexts/TutorialContext';
 import { InitialTutorialModal, TutorialOverlay, TutorialHighlight } from './components/TutorialOverlay';
 import { TUTORIAL_LESSONS } from './data/tutorialLessonsNew';
@@ -11857,6 +11858,7 @@ const App = () => {
 
     // Tutorial modal states
     const [showInfoTab, setShowInfoTab] = useState(false);
+    const [showAdminPanel, setShowAdminPanel] = useState(false);
     const [currentTutorialId, setCurrentTutorialId] = useState(null);
     const [showTutorialOverlay, setShowTutorialOverlay] = useState(false);
     const [currentTutorialIndex, setCurrentTutorialIndex] = useState(0);
@@ -13128,6 +13130,12 @@ const App = () => {
                                 <span>Help</span>
                             </button>
                         )}
+                        {userProfile?.id_public === 'CTU1' && !isMobile && (
+                            <button onClick={() => setShowAdminPanel(true)} className={`px-4 py-2 text-xs font-medium rounded-lg transition duration-150 flex flex-col items-center text-red-600 hover:bg-red-50`} title="Admin Panel">
+                                <Shield size={18} className="mb-1" />
+                                <span>Admin</span>
+                            </button>
+                        )}
                     </nav>
 
                     <div className="flex items-center space-x-3">
@@ -13392,6 +13400,17 @@ const App = () => {
                         setCurrentTutorialId(lessonId);
                         setShowTutorialOverlay(true);
                     }}
+                />
+            )}
+
+            {/* Admin Panel Modal */}
+            {showAdminPanel && userProfile?.id_public === 'CTU1' && (
+                <AdminPanel
+                    isOpen={showAdminPanel}
+                    onClose={() => setShowAdminPanel(false)}
+                    authToken={authToken}
+                    API_BASE_URL={API_BASE_URL}
+                    showModalMessage={showModalMessage}
                 />
             )}
 
