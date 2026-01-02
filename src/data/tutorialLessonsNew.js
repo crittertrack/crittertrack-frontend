@@ -1670,19 +1670,6 @@ const KEY_FEATURES_LESSONS = [
           'Read-only access for seller',
           'They cannot edit your records'
         ]
-      },
-      {
-        stepNumber: 11,
-        title: 'Next: Advanced Features Tour',
-        content: 'Congratulations on completing the Key Features tour! You now understand how to view and edit animals, manage litters, configure your profile, and handle breeding finances. Would you like to start the "Advanced Features" tour? This will teach you about searching, genetics, COI calculations, and community features.',
-        actionType: 'startNextTour',
-        actionData: { nextTour: 'advanced' },
-        tips: [
-          'Advanced Features builds on Key Features',
-          'Covers genetics, searches, and community',
-          'You can start it anytime from the tutorial menu',
-          'Optional but highly recommended'
-        ]
       }
     ]
   },
@@ -1868,10 +1855,20 @@ const KEY_FEATURES_LESSONS = [
           'Respect privacy settings',
           'Both parties control messaging'
         ]
+      },
+      {
+        stepNumber: 5,
+        title: 'Next: Advanced Features Tour',
+        content: 'Congratulations on completing the Key Features tour! You now understand how to view and edit animals, manage litters, configure your profile, handle breeding finances, search and filter, receive notifications, and communicate with other breeders. Would you like to start the "Advanced Features" tour? This will teach you about tags, genetics, COI calculations, and more advanced community features.',
+        actionType: 'startNextTour',
+        actionData: { nextTour: 'advanced' },
+        tips: [
+          'Advanced Features builds on Key Features',
+          'Covers tags, genetics, and advanced search',
+          'You can start it anytime from the tutorial menu',
+          'Optional but highly recommended'
+        ]
       }
-    ]
-  }
-];
 
 const ADVANCED_FEATURES_LESSONS = [
   {
