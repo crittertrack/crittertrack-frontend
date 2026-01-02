@@ -9,6 +9,7 @@ const ModerationTools = ({ authToken, API_BASE_URL, userRole }) => {
     const [filterStatus, setFilterStatus] = useState('open');
     const [moderatorNote, setModeratorNote] = useState('');
     const [action, setAction] = useState('');
+    const [replacementText, setReplacementText] = useState('');
     const [actionLoading, setActionLoading] = useState(false);
     const [error, setError] = useState('');
 
@@ -74,6 +75,11 @@ const ModerationTools = ({ authToken, API_BASE_URL, userRole }) => {
             return;
         }
 
+        if (actionType === 'replace_content' && !replacementText.trim()) {
+            setError('Replacement text is required for replace action');
+            return;
+        }
+
         if (userRole !== 'admin') {
             setError('Only admins can take actions on reports');
             return;
@@ -81,19 +87,25 @@ const ModerationTools = ({ authToken, API_BASE_URL, userRole }) => {
 
         try {
             setActionLoading(true);
+            const body = {
+                action: actionType,
+                reason: moderatorNote
+            };
+            if (actionType === 'replace_content') {
+                body.replacementText = replacementText;
+            }
+            
             const response = await fetch(`${API_BASE_URL}/admin/reports/${reportId}/action`, {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
                     'Authorization': `Bearer ${authToken}`
                 },
-                body: JSON.stringify({
-                    action: actionType,
-                    reason: moderatorNote
-                })
+                body: JSON.stringify(body)
             });
             if (response.ok) {
                 setModeratorNote('');
+                setReplacementText('');
                 setAction('');
                 fetchReports();
                 setShowReportDetail(false);
@@ -144,6 +156,23 @@ const ModerationTools = ({ authToken, API_BASE_URL, userRole }) => {
 
     const formatDate = (dateString) => {
         return new Date(dateString).toLocaleDateString() + ' ' + new Date(dateString).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+    };
+
+    const getFieldLabel = (field) => {
+        const fieldMap = {
+            'animal_name': 'Animal Name',
+            'animal_color': 'Animal Color',
+            'animal_image': 'Animal Image',
+            'animal_description': 'Animal Description',
+            'animal_remarks': 'Animal Remarks',
+            'profile_name': 'Profile Name',
+            'profile_image': 'Profile Image',
+            'profile_breeder_name': 'Breeder Name',
+            'profile_description': 'Profile Description',
+            'profile_website': 'Website',
+            'other': 'Other'
+        };
+        return fieldMap[field] || field;
     };
 
     return (
@@ -271,8 +300,12 @@ const ModerationTools = ({ authToken, API_BASE_URL, userRole }) => {
                                         <p className="font-semibold text-gray-800">{getContentTypeLabel(selectedReport.contentType)}</p>
                                     </div>
                                     <div>
+                                        <p className="text-gray-600">Reported Field:</p>
+                                        <p className="font-semibold text-gray-800">{selectedReport.reportedField ? getFieldLabel(selectedReport.reportedField) : 'Not specified'}</p>
+                                    </div>
+                                    <div>
                                         <p className="text-gray-600">Reported Content:</p>
-                                        <p className="font-semibold text-gray-800">
+                                        <p className="font-semibold text-gray-800 text-xs">
                                             {selectedReport.contentDetails ? (
                                                 selectedReport.contentType === 'animal' ? (
                                                     `${selectedReport.contentDetails.name} (${selectedReport.contentDetails.id_public})`
@@ -286,7 +319,7 @@ const ModerationTools = ({ authToken, API_BASE_URL, userRole }) => {
                                     </div>
                                     <div>
                                         <p className="text-gray-600">Reported User:</p>
-                                        <p className="font-semibold text-gray-800">
+                                        <p className="font-semibold text-gray-800 text-xs">
                                             {selectedReport.contentOwnerId ? (
                                                 `${selectedReport.contentOwnerId.email || selectedReport.contentOwnerId.personalName || 'Unknown'}`
                                             ) : (
@@ -296,7 +329,7 @@ const ModerationTools = ({ authToken, API_BASE_URL, userRole }) => {
                                     </div>
                                     <div>
                                         <p className="text-gray-600">Reported By:</p>
-                                        <p className="font-semibold text-gray-800">
+                                        <p className="font-semibold text-gray-800 text-xs">
                                             {selectedReport.reporterId?.email || 'Anonymous reporter'}
                                         </p>
                                     </div>
