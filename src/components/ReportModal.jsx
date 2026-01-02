@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import './ReportModal.css';
 
-export default function ReportModal({ isOpen, contentType, contentId, contentOwnerId, onClose, onSubmit }) {
+export default function ReportModal({ isOpen, contentType, contentId, contentOwnerId, authToken, onClose, onSubmit }) {
     const [category, setCategory] = useState('');
     const [description, setDescription] = useState('');
     const [loading, setLoading] = useState(false);
@@ -41,7 +41,7 @@ export default function ReportModal({ isOpen, contentType, contentId, contentOwn
         }
 
         try {
-            const token = localStorage.getItem('token');
+            const token = authToken || localStorage.getItem('token');
             if (!token) {
                 setError('You must be logged in to submit a report');
                 setLoading(false);

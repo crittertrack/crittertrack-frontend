@@ -2,14 +2,14 @@ import React, { useState, useEffect } from 'react';
 import ReportModal from './ReportModal';
 import './ReportButton.css';
 
-export default function ReportButton({ contentType, contentId, contentOwnerId, tooltipText = 'Report this content' }) {
+export default function ReportButton({ contentType, contentId, contentOwnerId, authToken, tooltipText = 'Report this content' }) {
     const [isModalOpen, setIsModalOpen] = useState(false);
     const [currentUserId, setCurrentUserId] = useState(null);
     const [isOwner, setIsOwner] = useState(false);
 
     useEffect(() => {
         // Get current user ID from token
-        const token = localStorage.getItem('token');
+        const token = authToken || localStorage.getItem('token');
         if (token) {
             try {
                 const payload = JSON.parse(atob(token.split('.')[1]));
@@ -20,7 +20,7 @@ export default function ReportButton({ contentType, contentId, contentOwnerId, t
                 console.error('Failed to parse token:', err);
             }
         }
-    }, [contentOwnerId]);
+    }, [contentOwnerId, authToken]);
 
     const handleOpenReport = (e) => {
         e.preventDefault();
@@ -50,6 +50,7 @@ export default function ReportButton({ contentType, contentId, contentOwnerId, t
                 contentType={contentType}
                 contentId={contentId}
                 contentOwnerId={contentOwnerId}
+                authToken={authToken}
                 onClose={() => setIsModalOpen(false)}
                 onSubmit={() => {
                     // Could trigger a toast notification here if needed

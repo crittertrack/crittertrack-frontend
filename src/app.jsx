@@ -1511,7 +1511,7 @@ const UserSearchModal = ({ onClose, showModalMessage, onSelectUser, API_BASE_URL
 };
 
 // Public Profile View Component - Shows a breeder's public animals
-const PublicProfileView = ({ profile, onBack, onViewAnimal, API_BASE_URL, onStartMessage }) => {
+const PublicProfileView = ({ profile, onBack, onViewAnimal, API_BASE_URL, onStartMessage, authToken }) => {
     const [animals, setAnimals] = useState([]);
     const [loading, setLoading] = useState(true);
     const [copySuccess, setCopySuccess] = useState(false);
@@ -1643,6 +1643,7 @@ const PublicProfileView = ({ profile, onBack, onViewAnimal, API_BASE_URL, onStar
                         contentType="profile"
                         contentId={profile.id_public}
                         contentOwnerId={profile.userId}
+                        authToken={authToken}
                         tooltipText="Report this profile"
                     />
                 </div>
@@ -1862,7 +1863,7 @@ const PublicProfileView = ({ profile, onBack, onViewAnimal, API_BASE_URL, onStar
 };
 
 // View-Only Animal Detail Modal
-const ViewOnlyAnimalDetail = ({ animal, onClose, API_BASE_URL, onViewProfile }) => {
+const ViewOnlyAnimalDetail = ({ animal, onClose, API_BASE_URL, onViewProfile, authToken }) => {
     const [breederInfo, setBreederInfo] = useState(null);
     const [showPedigree, setShowPedigree] = useState(false);
     const [copySuccess, setCopySuccess] = useState(false);
@@ -1951,6 +1952,7 @@ const ViewOnlyAnimalDetail = ({ animal, onClose, API_BASE_URL, onViewProfile }) 
                                 contentType="animal"
                                 contentId={animal.id_public}
                                 contentOwnerId={animal.ownerId_public}
+                                authToken={authToken}
                                 tooltipText="Report this animal"
                             />
                             <button onClick={onClose} className="text-gray-500 hover:text-gray-800">
@@ -13197,6 +13199,7 @@ const App = () => {
                     animal={viewingPublicAnimal}
                     onClose={() => setViewingPublicAnimal(null)}
                     API_BASE_URL={API_BASE_URL}
+                    authToken={authToken}
                     onViewProfile={(user) => navigate(`/user/${user.id_public}`)}
                 />
             )}
