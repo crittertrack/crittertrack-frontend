@@ -1651,7 +1651,7 @@ const PublicProfileView = ({ profile, onBack, onViewAnimal, API_BASE_URL, onStar
                     <ReportButton
                         contentType="profile"
                         contentId={profile.id_public}
-                        contentOwnerId={profile._id}
+                        contentOwnerId={profile.userId_backend}
                         authToken={authToken}
                         tooltipText="Report this profile"
                     />
