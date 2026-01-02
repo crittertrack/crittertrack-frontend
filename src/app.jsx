@@ -1327,6 +1327,10 @@ const UserSearchModal = ({ onClose, showModalMessage, onSelectUser, API_BASE_URL
                 console.log('Fetching animals from:', url);
                 const response = await axios.get(url);
                 console.log('Animal search response:', response.data);
+                if (response.data && response.data.length > 0) {
+                    console.log('First animal object keys:', Object.keys(response.data[0]));
+                    console.log('First animal object:', response.data[0]);
+                }
                 setAnimalResults(response.data || []);
                 setUserResults([]);
             }
@@ -1646,7 +1650,7 @@ const PublicProfileView = ({ profile, onBack, onViewAnimal, API_BASE_URL, onStar
                     <ReportButton
                         contentType="profile"
                         contentId={profile.id_public}
-                        contentOwnerId={profile.userId}
+                        contentOwnerId={profile._id}
                         authToken={authToken}
                         tooltipText="Report this profile"
                     />
@@ -1955,7 +1959,7 @@ const ViewOnlyAnimalDetail = ({ animal, onClose, API_BASE_URL, onViewProfile, au
                             <ReportButton
                                 contentType="animal"
                                 contentId={animal.id_public}
-                                contentOwnerId={animal.ownerId_public}
+                                contentOwnerId={animal.ownerId}
                                 authToken={authToken}
                                 tooltipText="Report this animal"
                             />
