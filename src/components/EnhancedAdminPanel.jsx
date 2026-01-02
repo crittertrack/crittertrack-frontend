@@ -11,14 +11,19 @@ import SystemSettings from './admin/SystemSettings';
 import Reports from './admin/Reports';
 import Communication from './admin/Communication';
 import DataAudit from './admin/DataAudit';
+import TwoFactorAuth from './TwoFactorAuth';
+import LoginTracking from './LoginTracking';
 
-const EnhancedAdminPanel = ({ isOpen, onClose, authToken, API_BASE_URL, userRole }) => {
+const EnhancedAdminPanel = ({ isOpen, onClose, authToken, API_BASE_URL, userRole, userEmail, userId, username }) => {
     const [activeSection, setActiveSection] = useState('dashboard');
     const [adminPassword, setAdminPassword] = useState('');
     const [isAuthenticated, setIsAuthenticated] = useState(false);
     const [showPasswordPrompt, setShowPasswordPrompt] = useState(true);
+    const [show2FA, setShow2FA] = useState(false);
     const [passwordError, setPasswordError] = useState('');
     const [passwordAttempts, setPasswordAttempts] = useState(0);
+    const [userDeviceInfo, setUserDeviceInfo] = useState(null);
+    const [isLoadingLogin, setIsLoadingLogin] = useState(false);
     const [dashboardStats, setDashboardStats] = useState({
         totalUsers: 0,
         activeUsers: 0,
@@ -28,6 +33,18 @@ const EnhancedAdminPanel = ({ isOpen, onClose, authToken, API_BASE_URL, userRole
         lastBackup: null
     });
     const [loading, setLoading] = useState(false);
+
+    // Capture device information on mount
+    useEffect(() => {
+        const deviceInfo = {
+            userAgent: navigator.userAgent,
+            language: navigator.language,
+            platform: navigator.platform,
+            screenResolution: `${window.screen.width}x${window.screen.height}`,
+            timezone: Intl.DateTimeFormat().resolvedOptions().timeZone
+        };
+        setUserDeviceInfo(deviceInfo);
+    }, []);
 
     // Load dashboard stats
     useEffect(() => {
@@ -39,9 +56,11 @@ const EnhancedAdminPanel = ({ isOpen, onClose, authToken, API_BASE_URL, userRole
     const handlePasswordSubmit = async (e) => {
         e.preventDefault();
         setPasswordError('');
+        setIsLoadingLogin(true);
 
         if (passwordAttempts >= 3) {
             setPasswordError('Too many failed attempts. Please close and reopen the admin panel.');
+            setIsLoadingLogin(false);
             return;
         }
 
@@ -56,18 +75,73 @@ const EnhancedAdminPanel = ({ isOpen, onClose, authToken, API_BASE_URL, userRole
             });
 
             if (response.ok) {
-                setIsAuthenticated(true);
-                setShowPasswordPrompt(false);
+                // Password verified - now show 2FA
+                setShow2FA(true);
                 setAdminPassword('');
                 setPasswordAttempts(0);
+                // Track failed login attempt for audit
+                await trackLoginAttempt(false, 'password_verified_2fa_pending');
             } else {
                 setPasswordAttempts(prev => prev + 1);
                 setPasswordError(`Incorrect admin password (${3 - passwordAttempts - 1} attempts remaining)`);
+                // Track failed login attempt
+                await trackLoginAttempt(false, 'password_incorrect');
             }
         } catch (error) {
             console.error('Error verifying password:', error);
             setPasswordError('Error verifying password');
+            // Track error
+            await trackLoginAttempt(false, 'password_verification_error');
+        } finally {
+            setIsLoadingLogin(false);
         }
+    };
+
+    const trackLoginAttempt = async (success, status) => {
+        try {
+            if (!userDeviceInfo) return;
+
+            const loginData = {
+                userId: userId,
+                username: username,
+                ipAddress: 'pending-from-backend', // Backend will get actual IP
+                userAgent: userDeviceInfo.userAgent,
+                deviceInfo: {
+                    platform: userDeviceInfo.platform,
+                    language: userDeviceInfo.language,
+                    screenResolution: userDeviceInfo.screenResolution,
+                    timezone: userDeviceInfo.timezone
+                },
+                status: status,
+                twoFactorPending: !success,
+                timestamp: new Date().toISOString()
+            };
+
+            await fetch(`${API_BASE_URL}/admin/track-login`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Authorization': `Bearer ${authToken}`
+                },
+                body: JSON.stringify(loginData)
+            });
+        } catch (error) {
+            console.error('Error tracking login attempt:', error);
+        }
+    };
+
+    const handle2FASuccess = async () => {
+        // 2FA verification succeeded
+        setShow2FA(false);
+        setIsAuthenticated(true);
+        setShowPasswordPrompt(false);
+        // Track successful login
+        await trackLoginAttempt(true, 'success_2fa_verified');
+    };
+
+    const handle2FAClose = () => {
+        setShow2FA(false);
+        setShowPasswordPrompt(true);
     };
 
     const fetchDashboardStats = async () => {
@@ -85,6 +159,21 @@ const EnhancedAdminPanel = ({ isOpen, onClose, authToken, API_BASE_URL, userRole
     };
 
     if (!isOpen) return null;
+
+    // 2FA Modal
+    if (show2FA) {
+        return (
+            <TwoFactorAuth
+                isOpen={show2FA}
+                onClose={handle2FAClose}
+                onVerify={handle2FASuccess}
+                email={userEmail}
+                authToken={authToken}
+                API_BASE_URL={API_BASE_URL}
+                isLoading={isLoadingLogin}
+            />
+        );
+    }
 
     // Password prompt
     if (showPasswordPrompt) {
@@ -109,7 +198,8 @@ const EnhancedAdminPanel = ({ isOpen, onClose, authToken, API_BASE_URL, userRole
                                 setPasswordError('');
                             }}
                             placeholder="Admin password"
-                            className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-red-600 focus:border-transparent"
+                            disabled={isLoadingLogin}
+                            className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-red-600 focus:border-transparent disabled:bg-gray-100 disabled:cursor-not-allowed"
                             autoFocus
                         />
 
@@ -121,15 +211,24 @@ const EnhancedAdminPanel = ({ isOpen, onClose, authToken, API_BASE_URL, userRole
                             <button
                                 type="button"
                                 onClick={onClose}
-                                className="flex-1 px-4 py-2 bg-gray-200 text-gray-800 font-semibold rounded-lg hover:bg-gray-300 transition"
+                                disabled={isLoadingLogin}
+                                className="flex-1 px-4 py-2 bg-gray-200 text-gray-800 font-semibold rounded-lg hover:bg-gray-300 transition disabled:bg-gray-100 disabled:cursor-not-allowed"
                             >
                                 Cancel
                             </button>
                             <button
                                 type="submit"
-                                className="flex-1 px-4 py-2 bg-red-600 text-white font-semibold rounded-lg hover:bg-red-700 transition"
+                                disabled={isLoadingLogin}
+                                className="flex-1 px-4 py-2 bg-red-600 text-white font-semibold rounded-lg hover:bg-red-700 transition disabled:bg-red-400 disabled:cursor-not-allowed flex items-center justify-center gap-2"
                             >
-                                Unlock
+                                {isLoadingLogin ? (
+                                    <>
+                                        <Loader2 size={16} className="animate-spin" />
+                                        Verifying...
+                                    </>
+                                ) : (
+                                    'Unlock'
+                                )}
                             </button>
                         </div>
                     </form>
@@ -228,6 +327,11 @@ const EnhancedAdminPanel = ({ isOpen, onClose, authToken, API_BASE_URL, userRole
                                                 : 'No backups yet'}
                                         </p>
                                     </div>
+                                </div>
+
+                                {/* Login Activity Tracking */}
+                                <div className="mt-8">
+                                    <LoginTracking authToken={authToken} API_BASE_URL={API_BASE_URL} />
                                 </div>
                             </div>
                         )}

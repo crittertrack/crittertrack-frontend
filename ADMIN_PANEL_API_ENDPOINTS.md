@@ -43,7 +43,230 @@ Verify admin password before granting access to admin panel.
 
 ---
 
-## 2. DASHBOARD & ANALYTICS
+## 2. TWO-FACTOR AUTHENTICATION (2FA)
+
+### POST `/api/admin/send-2fa-code`
+Send a one-time 6-digit verification code to admin/moderator email.
+
+**Request:**
+```json
+{
+  "email": "admin@crittertrack.com",
+  "userId": "admin_user_id"
+}
+```
+
+**Response (200 OK):**
+```json
+{
+  "success": true,
+  "message": "6-digit code sent to admin@crittertrack.com",
+  "expiresIn": 300
+}
+```
+
+**Response (400 Bad Request):**
+```json
+{
+  "error": "Email not found or not a valid admin/moderator"
+}
+```
+
+---
+
+### POST `/api/admin/verify-2fa`
+Verify the 6-digit email code for admin/moderator access.
+
+**Headers:** `Authorization: Bearer {authToken}`
+
+**Request:**
+```json
+{
+  "code": "123456"
+}
+```
+
+**Response (200 OK):**
+```json
+{
+  "authenticated": true,
+  "message": "2FA verification successful"
+}
+```
+
+**Response (400 Bad Request):**
+```json
+{
+  "error": "Invalid or expired code"
+}
+```
+
+**Response (429 Too Many Requests):**
+```json
+{
+  "error": "Too many failed attempts. Please try again later."
+}
+```
+
+---
+
+### POST `/api/admin/resend-2fa-code`
+Resend the 6-digit verification code (rate limited after 4 minutes 59 seconds).
+
+**Headers:** `Authorization: Bearer {authToken}`
+
+**Request:**
+```json
+{
+  "email": "admin@crittertrack.com"
+}
+```
+
+**Response (200 OK):**
+```json
+{
+  "success": true,
+  "message": "New code sent to admin@crittertrack.com",
+  "expiresIn": 300
+}
+```
+
+**Response (429 Too Many Requests):**
+```json
+{
+  "error": "Code resend not available yet. Please wait 4 minutes 59 seconds."
+}
+```
+
+---
+
+## 3. LOGIN TRACKING & AUDIT
+
+### POST `/api/admin/track-login`
+Track admin/moderator login attempts with device and IP information.
+
+**Headers:** `Authorization: Bearer {authToken}`
+
+**Request:**
+```json
+{
+  "userId": "admin_user_id",
+  "username": "admin_username",
+  "ipAddress": "192.168.1.1",
+  "userAgent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64)...",
+  "deviceInfo": {
+    "platform": "Win32",
+    "language": "en-US",
+    "screenResolution": "1920x1080",
+    "timezone": "America/New_York"
+  },
+  "status": "success_2fa_verified",
+  "twoFactorPending": false,
+  "timestamp": "2025-01-02T15:30:00Z"
+}
+```
+
+**Response (200 OK):**
+```json
+{
+  "logged": true,
+  "logId": "login_log_id_123",
+  "message": "Login attempt recorded"
+}
+```
+
+---
+
+### GET `/api/admin/login-history`
+Get login history for current user (paginated).
+
+**Headers:** `Authorization: Bearer {authToken}`
+
+**Query Parameters:**
+- `limit` (optional): Number of records per page (default: 50)
+- `offset` (optional): Pagination offset (default: 0)
+- `days` (optional): Filter by last N days (default: 30)
+- `status` (optional): Filter by status ('success', 'failed', 'suspicious')
+
+**Response (200 OK):**
+```json
+[
+  {
+    "id": "login_log_id_123",
+    "timestamp": "2025-01-02T15:30:00Z",
+    "ipAddress": "192.168.1.1",
+    "location": "New York, USA",
+    "deviceName": "Chrome on Windows",
+    "userAgent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64)...",
+    "platform": "Win32",
+    "language": "en-US",
+    "screenResolution": "1920x1080",
+    "timezone": "America/New_York",
+    "status": "success",
+    "twoFactorVerified": true,
+    "failureReason": null
+  },
+  {
+    "id": "login_log_id_122",
+    "timestamp": "2025-01-02T10:15:00Z",
+    "ipAddress": "192.168.1.50",
+    "location": "New York, USA",
+    "deviceName": "Safari on macOS",
+    "userAgent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7)...",
+    "platform": "MacIntel",
+    "language": "en-US",
+    "screenResolution": "1440x900",
+    "timezone": "America/New_York",
+    "status": "success",
+    "twoFactorVerified": true,
+    "failureReason": null
+  }
+]
+```
+
+---
+
+### GET `/api/admin/login-history/{userId}`
+Get login history for a specific user (admin only).
+
+**Headers:** `Authorization: Bearer {authToken}`
+
+**Query Parameters:** Same as above
+
+**Response (200 OK):** Same as above
+
+---
+
+### GET `/api/admin/suspicious-logins`
+Get list of suspicious login attempts across all admins/moderators.
+
+**Headers:** `Authorization: Bearer {authToken}`
+
+**Query Parameters:**
+- `limit` (optional): Number of records per page (default: 50)
+- `offset` (optional): Pagination offset (default: 0)
+- `days` (optional): Filter by last N days (default: 7)
+
+**Response (200 OK):**
+```json
+[
+  {
+    "id": "suspicious_login_id_123",
+    "userId": "admin_user_id_456",
+    "username": "admin_username",
+    "timestamp": "2025-01-02T15:30:00Z",
+    "ipAddress": "203.0.113.45",
+    "location": "Unknown Location",
+    "reason": "IP address from different country",
+    "status": "flagged",
+    "actionTaken": "2FA_required"
+  }
+]
+```
+
+---
+
+## 4. DASHBOARD & ANALYTICS
 
 ### GET `/api/admin/dashboard-stats`
 Fetch overall system statistics for dashboard.
@@ -64,7 +287,7 @@ Fetch overall system statistics for dashboard.
 
 ---
 
-## 3. USER MANAGEMENT
+## 5. USER MANAGEMENT
 
 ### GET `/api/admin/users`
 Retrieve list of all users with pagination and filtering.
@@ -198,7 +421,7 @@ Delete user account.
 
 ---
 
-## 4. ANIMAL RECORDS MANAGEMENT
+## 6. ANIMAL RECORDS MANAGEMENT
 
 ### GET `/api/admin/animals`
 Retrieve all animal records with optional filtering.
@@ -321,7 +544,7 @@ Get version history for an animal record.
 
 ---
 
-## 5. MODERATION & CONTENT REVIEW
+## 7. MODERATION & CONTENT REVIEW
 
 ### GET `/api/admin/reports`
 Fetch content reports and user edit approvals.
@@ -441,7 +664,7 @@ Send moderator message to user about a report.
 
 ---
 
-## 6. SYSTEM SETTINGS & CONFIGURATION
+## 8. SYSTEM SETTINGS & CONFIGURATION
 
 ### GET `/api/admin/system-settings`
 Retrieve current system settings.
@@ -532,7 +755,7 @@ Revoke an API key.
 
 ---
 
-## 7. REPORTS & ANALYTICS
+## 9. REPORTS & ANALYTICS
 
 ### GET `/api/admin/reports/analytics`
 Get analytics and statistics.
@@ -568,7 +791,7 @@ Export report data.
 
 ---
 
-## 8. COMMUNICATION & MESSAGING
+## 10. COMMUNICATION & MESSAGING
 
 ### POST `/api/admin/send-broadcast`
 Send broadcast message to all/selected users.
@@ -672,7 +895,7 @@ Post message to moderator chat.
 
 ---
 
-## 9. DATA INTEGRITY & AUDITING
+## 11. DATA INTEGRITY & AUDITING
 
 ### GET `/api/admin/audit-logs`
 Get system audit logs.
@@ -799,7 +1022,7 @@ Delete validation rule.
 
 ---
 
-## 10. MAINTENANCE MODE
+## 12. MAINTENANCE MODE
 
 ### GET `/api/admin/maintenance-status`
 Check maintenance mode status.
@@ -837,7 +1060,7 @@ Activate/deactivate maintenance mode.
 
 ---
 
-## 11. URGENT NOTIFICATIONS
+## 13. URGENT NOTIFICATIONS
 
 ### POST `/api/admin/send-urgent-notification`
 Send urgent on-screen alert to active users.
