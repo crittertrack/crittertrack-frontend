@@ -1766,8 +1766,8 @@ const KEY_FEATURES_LESSONS = [
       {
         stepNumber: 1,
         title: 'Notifications Overview',
-        content: 'Notifications alert you to important events: messages from other users, animal transfer requests, breeding inquiries, and system updates.',
-        highlightElement: '[data-tutorial-target="notification-center"]',
+        content: 'Notifications alert you to important events: messages from other users, animal transfer requests, breeding inquiries, and system updates. Click the bell icon in the header to access your notification center.',
+        highlightElement: '[data-tutorial-target="notification-bell"]',
         tips: [
           'Stay connected to community',
           'Never miss important info',
