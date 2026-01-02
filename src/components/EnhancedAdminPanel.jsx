@@ -397,7 +397,7 @@ const EnhancedAdminPanel = ({ isOpen, onClose, authToken, API_BASE_URL, userRole
 
     return (
         <ErrorBoundary onClose={onClose}>
-            <div className="min-h-screen w-full bg-gray-50 flex flex-col">
+            <div className="fixed inset-0 z-50 bg-gray-50 flex flex-col">
             {console.log('[EnhancedAdminPanel] Rendering authenticated admin panel')}
             {/* Header */}
             <div className="bg-gradient-to-r from-red-600 to-red-700 text-white p-6 flex items-center justify-between shadow-lg">
