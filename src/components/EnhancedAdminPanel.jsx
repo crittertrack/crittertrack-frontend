@@ -7,6 +7,8 @@ import {
 import ModOversightPanel from './moderation/ModOversightPanel';
 import UserManagementTab from './admin/UserManagementTab';
 import AuditLogTab from './admin/AuditLogTab';
+import CommunicationTab from './admin/CommunicationTab';
+import SystemSettingsTab from './admin/SystemSettingsTab';
 
 // Error Boundary Component
 class ErrorBoundary extends React.Component {
@@ -533,13 +535,13 @@ const EnhancedAdminPanel = ({ isOpen, onClose, authToken, API_BASE_URL, userRole
                             </div>
                         )}
 
-                        {/* System Settings - DISABLED: Component deleted */}
+                        {/* System Settings */}
                         {activeSection === 'system-settings' && (
                             <div className="p-8">
-                                <h3 className="text-2xl font-bold text-gray-800 mb-4">System Settings</h3>
-                                <div className="bg-yellow-50 border border-yellow-200 rounded-lg p-6">
-                                    <p className="text-yellow-800">This feature is currently being rebuilt.</p>
-                                </div>
+                                <SystemSettingsTab
+                                    API_BASE_URL={API_BASE_URL}
+                                    authToken={authToken}
+                                />
                             </div>
                         )}
 
@@ -553,13 +555,13 @@ const EnhancedAdminPanel = ({ isOpen, onClose, authToken, API_BASE_URL, userRole
                             </div>
                         )}
 
-                        {/* Communication - DISABLED: Component deleted */}
+                        {/* Communication */}
                         {activeSection === 'communication' && (
                             <div className="p-8">
-                                <h3 className="text-2xl font-bold text-gray-800 mb-4">Communication</h3>
-                                <div className="bg-yellow-50 border border-yellow-200 rounded-lg p-6">
-                                    <p className="text-yellow-800">This feature is currently being rebuilt.</p>
-                                </div>
+                                <CommunicationTab
+                                    API_BASE_URL={API_BASE_URL}
+                                    authToken={authToken}
+                                />
                             </div>
                         )}
                     </div>
