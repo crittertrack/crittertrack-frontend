@@ -1239,18 +1239,6 @@ const KEY_FEATURES_LESSONS = [
       },
       {
         stepNumber: 2,
-        title: 'Pedigree Chart Button',
-        content: 'On the Lineage tab, you can click the "View Pedigree" button to see a detailed family tree chart of your animal. This shows parents, grandparents, and further back generations. When you\'re done viewing, close this pedigree screen by clicking the X or close button.',
-        highlightElement: '[data-tutorial-target="pedigree-btn"]',
-        tips: [
-          'Visual representation of pedigree',
-          'Requires parent data to be useful',
-          'Can be downloaded as PDF',
-          'Close the pedigree screen when done'
-        ]
-      },
-      {
-        stepNumber: 3,
         title: 'Private Toggle',
         content: 'The private/public toggle controls whether this entire animal appears on your public profile. When set to private, only you can see it. When public, everyone can view it. You can find this toggle at the top right of the detail overview screen.',
         highlightElement: '[data-tutorial-target="detail-private-toggle"]',
@@ -1259,6 +1247,18 @@ const KEY_FEATURES_LESSONS = [
           'Controls whole animal visibility',
           'Different from section-specific toggles',
           'Can be toggled anytime'
+        ]
+      },
+      {
+        stepNumber: 3,
+        title: 'Pedigree Chart Button',
+        content: 'On the Lineage tab, you can click the "View Pedigree" button to see a detailed family tree chart of your animal. This shows parents, grandparents, and further back generations. When you\'re done viewing, close this pedigree screen by clicking the X or close button.',
+        highlightElement: '[data-tutorial-target="pedigree-btn"]',
+        tips: [
+          'Visual representation of pedigree',
+          'Requires parent data to be useful',
+          'Can be downloaded as PDF',
+          'Close the pedigree screen when done'
         ]
       },
       {
