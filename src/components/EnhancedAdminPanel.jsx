@@ -244,7 +244,10 @@ const EnhancedAdminPanel = ({ isOpen, onClose, authToken, API_BASE_URL, userRole
                 <div className="bg-gradient-to-r from-red-600 to-red-700 text-white p-6 flex items-center justify-between">
                     <div className="flex items-center gap-3">
                         <Shield size={28} />
-                        <h2 className="text-2xl font-bold">CritterTrack Admin Panel</h2>
+                        <div>
+                            <h2 className="text-2xl font-bold">CritterTrack Moderation Panel</h2>
+                            <p className="text-sm text-red-100 mt-1 capitalize">Role: {userRole}</p>
+                        </div>
                     </div>
                     <button
                         onClick={onClose}
@@ -261,13 +264,14 @@ const EnhancedAdminPanel = ({ isOpen, onClose, authToken, API_BASE_URL, userRole
                         <nav className="p-4 space-y-2">
                             {[
                                 { id: 'dashboard', label: 'Dashboard', icon: BarChart3 },
+                                { id: 'moderation', label: 'Moderation Tools', icon: AlertTriangle },
+                                { id: 'reports', label: 'Reports & Analytics', icon: BarChart3 },
+                                { id: 'communication', label: 'Communication', icon: Mail },
+                                // Admin-only features
                                 { id: 'users', label: 'User Management', icon: Users, requiredRole: 'admin' },
                                 { id: 'animals', label: 'Animal Records', icon: Shield, requiredRole: 'admin' },
-                                { id: 'moderation', label: 'Moderation Tools', icon: AlertTriangle },
                                 { id: 'data-audit', label: 'Data Integrity', icon: Lock, requiredRole: 'admin' },
-                                { id: 'system-settings', label: 'System Settings', icon: Settings, requiredRole: 'admin' },
-                                { id: 'reports', label: 'Reports & Analytics', icon: BarChart3 },
-                                { id: 'communication', label: 'Communication', icon: Mail }
+                                { id: 'system-settings', label: 'System Settings', icon: Settings, requiredRole: 'admin' }
                             ].map(section => {
                                 const Icon = section.icon;
                                 const hasAccess = !section.requiredRole || userRole === section.requiredRole;
