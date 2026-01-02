@@ -1677,75 +1677,80 @@ const KEY_FEATURES_LESSONS = [
   {
     id: 'af-searching',
     title: '5. Searching & Filtering Animals',
-    description: 'Master advanced search and filtering',
+    description: 'Master search and filtering tools',
     tour: 'key-features',
     tourOrder: 5,
     steps: [
       {
         stepNumber: 1,
-        title: 'Search Overview',
-        content: 'The search feature allows you to find animals in your collection or the global community by name, ID, species, or other criteria. Learn to use search effectively.',
-        highlightElement: '[data-tutorial-target="search-icon"]',
+        title: 'Global Search in Header',
+        content: 'The Search button in the header is your global search tool. It allows you to search across all users and animals on CritterTrack by name or ID. This finds animals from the entire community, not just your collection.',
+        highlightElement: '[data-tutorial-target="global-search-btn"]',
         tips: [
-          'Powerful discovery tool',
-          'Works on your animals and global',
-          'Multiple filter options'
+          'Search the entire CritterTrack community',
+          'Find users and their animals',
+          'Search by name or ID only',
+          'Opens a dedicated search modal'
         ]
       },
       {
         stepNumber: 2,
-        title: 'Basic Search',
-        content: 'Enter an animal name, ID, or keyword in the search box, then click the Search button to find matching animals. You can also press Enter to execute the search.',
-        highlightElement: '[data-tutorial-target="search-box"]',
+        title: 'My Animals Search Bar',
+        content: 'In your "My Animals" section, you\'ll find a separate search bar that lets you search within your own collection by animal name. This is local to your animals only.',
+        highlightElement: '[data-tutorial-target="my-animals-search"]',
         tips: [
-          'Click the Search button to find results',
-          'Case-insensitive search',
-          'Works on names and IDs',
-          'Fast results'
+          'Search only your animals',
+          'Quick filtering of your collection',
+          'Enter animal name to search',
+          'Combines with filters below'
         ]
       },
       {
         stepNumber: 3,
         title: 'Species Filter',
-        content: 'Filter results by species using the Species dropdown. This narrows results to a specific animal type.',
+        content: 'In your "My Animals" section, use the Species dropdown to filter your collection by animal type. Combine this with the search bar for quick access to specific animals.',
         highlightElement: '[data-tutorial-target="species-filter"]',
         tips: [
-          'Helps find specific types',
-          'Can search within species',
-          'Speeds up results'
+          'Filter your collection by type',
+          'Narrows down results quickly',
+          'Works with name search above',
+          'Helps organize large collections'
         ]
       },
       {
         stepNumber: 4,
         title: 'Gender Filter',
-        content: 'Filter by gender (Male, Female, Intersex, Unknown) to find animals with specific reproductive roles.',
+        content: 'Use the Gender filter to find males, females, or other genders in your collection. This is helpful when planning breeding pairs.',
         highlightElement: '[data-tutorial-target="gender-filter"]',
         tips: [
-          'Useful for breeding',
-          'Find males or females quickly',
-          'Helps plan pairings'
+          'Find breeding prospects',
+          'Organize by reproductive role',
+          'Combine with species filter',
+          'Plan your breeding program'
         ]
       },
       {
         stepNumber: 5,
         title: 'Status Filter',
-        content: 'Filter by status (Pet, Breeder, Available, Sold, etc.) to find animals in specific situations.',
+        content: 'Filter by status (Pet, Breeder, Available, Sold, etc.) to quickly find animals in specific situations within your collection.',
         highlightElement: '[data-tutorial-target="status-filter"]',
         tips: [
           'Find breeding stock',
-          'See available for sale',
-          'Track sold animals'
+          'See available for sale animals',
+          'Track sold animals',
+          'Manage collection purpose'
         ]
       },
       {
         stepNumber: 6,
-        title: 'Advanced Filters',
-        content: 'Additional filters might include date ranges, color, coat type, or custom tags. These help you find very specific animals.',
-        highlightElement: '[data-tutorial-target="advanced-filters"]',
+        title: 'Combined Filtering',
+        content: 'Use multiple filters together: search by name, filter by species and gender, then by status. This gives you powerful tools to find exactly what you\'re looking for in your collection.',
+        highlightElement: '[data-tutorial-target="my-animals-section"]',
         tips: [
-          'Combine multiple filters',
-          'Very specific searches',
-          'Find traits quickly'
+          'Layer multiple filters',
+          'Quick specific searches',
+          'Very flexible organization',
+          'Manage large collections easily'
         ]
       }
     ]
