@@ -271,6 +271,36 @@ const ModerationTools = ({ authToken, API_BASE_URL, userRole }) => {
                                         <p className="font-semibold text-gray-800">{getContentTypeLabel(selectedReport.contentType)}</p>
                                     </div>
                                     <div>
+                                        <p className="text-gray-600">Reported Content:</p>
+                                        <p className="font-semibold text-gray-800">
+                                            {selectedReport.contentDetails ? (
+                                                selectedReport.contentType === 'animal' ? (
+                                                    `${selectedReport.contentDetails.name} (${selectedReport.contentDetails.id_public})`
+                                                ) : (
+                                                    selectedReport.contentDetails.personalName || selectedReport.contentDetails.breederName || selectedReport.contentDetails.id_public
+                                                )
+                                            ) : (
+                                                <span className="text-gray-500">Unknown content</span>
+                                            )}
+                                        </p>
+                                    </div>
+                                    <div>
+                                        <p className="text-gray-600">Reported User:</p>
+                                        <p className="font-semibold text-gray-800">
+                                            {selectedReport.contentOwnerId ? (
+                                                `${selectedReport.contentOwnerId.email || selectedReport.contentOwnerId.personalName || 'Unknown'}`
+                                            ) : (
+                                                <span className="text-gray-500">Unknown user</span>
+                                            )}
+                                        </p>
+                                    </div>
+                                    <div>
+                                        <p className="text-gray-600">Reported By:</p>
+                                        <p className="font-semibold text-gray-800">
+                                            {selectedReport.reporterId?.email || 'Anonymous reporter'}
+                                        </p>
+                                    </div>
+                                    <div>
                                         <p className="text-gray-600">Status:</p>
                                         <p className="font-semibold text-gray-800 capitalize">{selectedReport.status.replace('_', ' ')}</p>
                                     </div>
