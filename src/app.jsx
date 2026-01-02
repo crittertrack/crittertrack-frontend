@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useCallback, useRef, useMemo } from 'react';
 import { useParams, useNavigate, useLocation, Routes, Route } from 'react-router-dom';
 import axios from 'axios';
-import { LogOut, Cat, UserPlus, LogIn, ChevronLeft, ChevronDown, ChevronRight, Trash2, Edit, Save, PlusCircle, Plus, ArrowLeft, Loader2, RefreshCw, User, Users, ClipboardList, BookOpen, Settings, Mail, Globe, Bean, Milk, Search, X, Mars, Venus, Eye, EyeOff, Home, Heart, HeartOff, HeartHandshake, Bell, XCircle, CheckCircle, Download, FileText, Link, AlertCircle, Check, DollarSign, Archive, ArrowLeftRight, RotateCcw, Info, Hourglass, MessageSquare, Ban, Flag, Scissors, VenusAndMars, Circle, Shield } from 'lucide-react';
+import { LogOut, Cat, UserPlus, LogIn, ChevronLeft, ChevronDown, ChevronRight, Trash2, Edit, Save, PlusCircle, Plus, ArrowLeft, Loader2, RefreshCw, User, Users, ClipboardList, BookOpen, Settings, Mail, Globe, Bean, Milk, Search, X, Mars, Venus, Eye, EyeOff, Home, Heart, HeartOff, HeartHandshake, Bell, XCircle, CheckCircle, Download, FileText, Link, AlertCircle, Check, DollarSign, Archive, ArrowLeftRight, RotateCcw, Info, Hourglass, MessageSquare, Ban, Flag, Scissors, VenusAndMars, Circle, Shield, Lock } from 'lucide-react';
 import jsPDF from 'jspdf';
 import html2canvas from 'html2canvas';
 import 'flag-icons/css/flag-icons.min.css';
@@ -20,6 +20,8 @@ import { TUTORIAL_LESSONS } from './data/tutorialLessonsNew';
 import InfoTab from './components/InfoTab';
 import WelcomeBanner from './components/WelcomeBanner';
 import ReportButton from './components/ReportButton';
+import ModerationAuthModal from './components/moderation/ModerationAuthModal';
+import ModOversightPanel from './components/moderation/ModOversightPanel';
 
 // const API_BASE_URL = 'http://localhost:5000/api'; // Local development
 // const API_BASE_URL = 'https://crittertrack-pedigree-production.up.railway.app/api'; // Direct Railway (for testing)
@@ -11884,6 +11886,8 @@ const App = () => {
     // Tutorial modal states
     const [showInfoTab, setShowInfoTab] = useState(false);
     const [showAdminPanel, setShowAdminPanel] = useState(false);
+    const [inModerationMode, setInModerationMode] = useState(false);
+    const [showModerationAuth, setShowModerationAuth] = useState(false);
     const [maintenanceMode, setMaintenanceMode] = useState(false);
     const [maintenanceMessage, setMaintenanceMessage] = useState('');
     const [showUrgentNotification, setShowUrgentNotification] = useState(false);
@@ -13254,6 +13258,18 @@ const App = () => {
                                 <span>Moderation</span>
                             </button>
                         )}
+                        {['admin', 'moderator'].includes(userProfile?.role) && !inModerationMode && !isMobile && (
+                            <button onClick={() => setShowModerationAuth(true)} className={`px-4 py-2 text-xs font-medium rounded-lg transition duration-150 flex flex-col items-center text-orange-600 hover:bg-orange-50`} title="Enter Moderation Mode">
+                                <Lock size={18} className="mb-1" />
+                                <span>Mod Mode</span>
+                            </button>
+                        )}
+                        {inModerationMode && !isMobile && (
+                            <button onClick={() => setInModerationMode(false)} className={`px-4 py-2 text-xs font-medium rounded-lg transition duration-150 flex flex-col items-center text-green-600 hover:bg-green-50`} title="Exit Moderation Mode">
+                                <CheckCircle size={18} className="mb-1" />
+                                <span>Exit Mod</span>
+                            </button>
+                        )}
                     </nav>
 
                     <div className="flex items-center space-x-3">
@@ -13531,6 +13547,34 @@ const App = () => {
                     userEmail={userProfile?.email}
                     userId={userProfile?.id_public}
                     username={userProfile?.personalName}
+                />
+            )}
+
+            {/* Moderation Mode Auth Modal */}
+            {showModerationAuth && authToken && (
+                <ModerationAuthModal
+                    isOpen={showModerationAuth}
+                    onClose={() => setShowModerationAuth(false)}
+                    onSuccess={() => {
+                        setInModerationMode(true);
+                        setShowModerationAuth(false);
+                    }}
+                    API_BASE_URL={API_BASE_URL}
+                    authToken={authToken}
+                />
+            )}
+
+            {/* Moderation Oversight Panel */}
+            {inModerationMode && authToken && (
+                <ModOversightPanel
+                    isOpen={inModerationMode}
+                    onClose={() => setInModerationMode(false)}
+                    API_BASE_URL={API_BASE_URL}
+                    authToken={authToken}
+                    onActionTaken={() => {
+                        // Refresh reports after action taken
+                        console.log('Moderation action taken - reports updated');
+                    }}
                 />
             )}
 
