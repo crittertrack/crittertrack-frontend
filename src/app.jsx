@@ -1312,6 +1312,10 @@ const UserSearchModal = ({ onClose, showModalMessage, onSelectUser, API_BASE_URL
                 console.log('Fetching users from:', url);
                 const response = await axios.get(url);
                 console.log('User search response:', response.data);
+                if (response.data && response.data.length > 0) {
+                    console.log('First user object keys:', Object.keys(response.data[0]));
+                    console.log('First user object:', response.data[0]);
+                }
                 setUserResults(response.data || []);
                 setAnimalResults([]);
             } else {
