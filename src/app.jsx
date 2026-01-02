@@ -15417,7 +15417,7 @@ const PublicAnimalPage = () => {
                 animal={animal}
                 onClose={() => navigate('/')}
                 API_BASE_URL={API_BASE_URL}
-                authToken={authToken}
+                authToken={null}
                 onViewProfile={(user) => navigate(`/user/${user.id_public}`)}
             />
         </div>
@@ -15491,7 +15491,7 @@ const PublicProfilePage = () => {
                 onBack={() => navigate('/')}
                 onViewAnimal={(animal) => navigate(`/animal/${animal.id_public}`)}
                 API_BASE_URL={API_BASE_URL}
-                authToken={authToken}
+                authToken={null}
             />
         </div>
     );
