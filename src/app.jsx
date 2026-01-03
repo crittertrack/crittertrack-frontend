@@ -9126,10 +9126,14 @@ const ProfileEditForm = ({ userProfile, showModalMessage, onSaveSuccess, onCance
         };
         
         console.log('[PROFILE UPDATE] allowMessages being sent:', allowMessages, 'Type:', typeof allowMessages);
+        console.log('[PROFILE UPDATE] Bio state:', bio, 'Type:', typeof bio, 'Length:', bio ? bio.length : 'null');
+        console.log('[PROFILE UPDATE] showBio state:', showBio, 'Type:', typeof showBio);
         
         console.log('[PROFILE UPDATE] Sending payload:', {
             showBreederName: payload.showBreederName,
             breederName: payload.breederName,
+            bio: payload.bio,
+            showBio: payload.showBio,
             showBreederNameType: typeof payload.showBreederName
         });
 
