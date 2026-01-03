@@ -136,6 +136,8 @@ export default function ReportModal({
                 throw new Error('Unable to identify the message you are reporting.');
             }
 
+            console.log('[ReportModal] Submitting report to:', endpoint, 'with payload:', payload);
+
             const response = await fetch(endpoint, {
                 method: 'POST',
                 headers: {
@@ -147,10 +149,13 @@ export default function ReportModal({
 
             const data = await response.json();
 
+            console.log('[ReportModal] Response status:', response.status, 'data:', data);
+
             if (!response.ok) {
                 throw new Error(data.error || 'Failed to submit report');
             }
 
+            console.log('[ReportModal] Report submitted successfully!');
             setSuccess(true);
             setCategory('');
             setReportedField('');
