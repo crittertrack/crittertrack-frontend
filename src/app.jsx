@@ -12008,12 +12008,17 @@ const App = () => {
                 const reportType = flagData.context?.type === 'profile' ? 'profile' : 
                                   flagData.context?.type === 'animal' ? 'animal' : 'message';
                 
+                // Get the correct user ID based on context type
+                const userId = flagData.context?.type === 'profile' 
+                    ? flagData.context?.userId 
+                    : flagData.context?.ownerId;
+                
                 const reportData = {
                     reason: flagData.reason,
                     category: flagData.category,
                     description: `Moderator flag: ${flagData.reason}`,
                     reportedContentId: flagData.context?.id,
-                    reportedUserId: flagData.context?.ownerId
+                    reportedUserId: userId
                 };
 
                 const response = await axios.post(
@@ -12043,8 +12048,10 @@ const App = () => {
                 window.location.reload();
             }
             else if (flagData.action === 'warn') {
-                // Warn user
-                const userId = flagData.context?.ownerId;
+                // Warn user - get correct user ID based on context type
+                const userId = flagData.context?.type === 'profile' 
+                    ? flagData.context?.userId 
+                    : flagData.context?.ownerId;
                 
                 const response = await axios.post(
                     `${API_BASE_URL}/api/moderation/users/${userId}/warn`,
@@ -12058,8 +12065,10 @@ const App = () => {
                 showModalMessage('Warning Sent', `User has been warned. Total warnings: ${response.data.warningCount}`);
             }
             else if (flagData.action === 'suspend') {
-                // Suspend user
-                const userId = flagData.context?.ownerId;
+                // Suspend user - get correct user ID based on context type
+                const userId = flagData.context?.type === 'profile' 
+                    ? flagData.context?.userId 
+                    : flagData.context?.ownerId;
                 
                 const response = await axios.post(
                     `${API_BASE_URL}/api/moderation/users/${userId}/status`,
@@ -12074,8 +12083,10 @@ const App = () => {
                 showModalMessage('User Suspended', `User has been suspended for ${flagData.durationDays} days.`);
             }
             else if (flagData.action === 'ban') {
-                // Ban user
-                const userId = flagData.context?.ownerId;
+                // Ban user - get correct user ID based on context type
+                const userId = flagData.context?.type === 'profile' 
+                    ? flagData.context?.userId 
+                    : flagData.context?.ownerId;
                 
                 const response = await axios.post(
                     `${API_BASE_URL}/api/moderation/users/${userId}/status`,
