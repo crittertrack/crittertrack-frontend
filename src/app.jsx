@@ -21,6 +21,8 @@ import InfoTab from './components/InfoTab';
 import WelcomeBanner from './components/WelcomeBanner';
 import ReportButton from './components/ReportButton';
 import ModerationAuthModal from './components/moderation/ModerationAuthModal';
+import ModOversightPanel from './components/moderation/ModOversightPanel';
+import ModeratorActionSidebar from './components/moderation/ModeratorActionSidebar';
 
 // const API_BASE_URL = 'http://localhost:5000/api'; // Local development
 // const API_BASE_URL = 'https://crittertrack-pedigree-production.up.railway.app/api'; // Direct Railway (for testing)
@@ -1520,7 +1522,7 @@ const UserSearchModal = ({ onClose, showModalMessage, onSelectUser, API_BASE_URL
 };
 
 // Public Profile View Component - Shows a breeder's public animals
-const PublicProfileView = ({ profile, onBack, onViewAnimal, API_BASE_URL, onStartMessage, authToken }) => {
+const PublicProfileView = ({ profile, onBack, onViewAnimal, API_BASE_URL, onStartMessage, authToken, setModCurrentContext }) => {
     const [animals, setAnimals] = useState([]);
     const [loading, setLoading] = useState(true);
     const [copySuccess, setCopySuccess] = useState(false);
@@ -1528,6 +1530,23 @@ const PublicProfileView = ({ profile, onBack, onViewAnimal, API_BASE_URL, onStar
     const [genderFilters, setGenderFilters] = useState({ Male: true, Female: true, Intersex: true, Unknown: true });
     const [statusFilter, setStatusFilter] = useState('');
     const [freshProfile, setFreshProfile] = useState(profile);
+    
+    // Set moderator context when viewing this profile
+    useEffect(() => {
+        if (setModCurrentContext && profile) {
+            setModCurrentContext({
+                type: 'profile',
+                id: profile.id_public,
+                name: profile.personalName || profile.breederName,
+                userId: profile.userId_backend
+            });
+        }
+        return () => {
+            if (setModCurrentContext) {
+                setModCurrentContext(null);
+            }
+        };
+    }, [profile, setModCurrentContext]);
     
     // Force-refetch latest public profile to ensure flags like allowMessages are current
     useEffect(() => {
@@ -11885,6 +11904,8 @@ const App = () => {
     // Tutorial modal states
     const [showInfoTab, setShowInfoTab] = useState(false);
     const [showAdminPanel, setShowAdminPanel] = useState(false);
+    const [showModReportQueue, setShowModReportQueue] = useState(false);
+    const [modCurrentContext, setModCurrentContext] = useState(null);
     const [inModeratorMode, setInModeratorMode] = useState(() => {
         if (typeof window !== 'undefined') {
             return localStorage.getItem('moderationAuthenticated') === 'true';
@@ -11951,11 +11972,24 @@ const App = () => {
         setUserProfile(null);
         setInModeratorMode(false);
         setShowAdminPanel(false);
+        setShowModReportQueue(false);
         localStorage.removeItem('authToken');
         localStorage.removeItem('moderationAuthenticated');
         navigate('/');
         if (expired) {
             showModalMessage('Session Expired', 'You were logged out due to 15 minutes of inactivity.');
+        }
+    }, [showModalMessage]);
+
+    const handleModQuickFlag = useCallback(async (flagData) => {
+        try {
+            console.log('Quick flag action:', flagData);
+            // TODO: Implement backend endpoint for moderator quick actions
+            // For now, just show a confirmation
+            showModalMessage('Action Logged', `${flagData.action} flagged for context: ${flagData.context?.type || 'unknown'}`);
+        } catch (error) {
+            console.error('Error handling quick flag:', error);
+            showModalMessage('Error', 'Failed to process moderator action');
         }
     }, [showModalMessage]);
 
@@ -12826,6 +12860,7 @@ const App = () => {
                         onViewAnimal={(animal) => setViewingPublicAnimal(animal)}
                         API_BASE_URL={API_BASE_URL}
                         authToken={authToken}
+                        setModCurrentContext={setModCurrentContext}
                     />
                 </div>
             );
@@ -13578,6 +13613,30 @@ const App = () => {
                     userId={userProfile?.id_public}
                     username={userProfile?.personalName}
                     skipAuthentication={true}
+                />
+            )}
+
+            {/* Moderation Report Queue - Full page view of all reports */}
+            {showModReportQueue && inModeratorMode && ['admin', 'moderator'].includes(userProfile?.role) && (
+                <ModOversightPanel
+                    isOpen={showModReportQueue}
+                    onClose={() => setShowModReportQueue(false)}
+                    authToken={authToken}
+                    API_BASE_URL={API_BASE_URL}
+                    onActionTaken={() => {
+                        // Refresh or update state if needed
+                    }}
+                />
+            )}
+
+            {/* Moderator Action Sidebar - Shows while browsing in moderator mode */}
+            {inModeratorMode && !showModReportQueue && ['admin', 'moderator'].includes(userProfile?.role) && (
+                <ModeratorActionSidebar
+                    isActive={true}
+                    onOpenReportQueue={() => setShowModReportQueue(true)}
+                    onQuickFlag={handleModQuickFlag}
+                    currentPage={location.pathname}
+                    currentContext={modCurrentContext}
                 />
             )}
 
@@ -15547,6 +15606,7 @@ const PublicProfilePage = () => {
                 onViewAnimal={(animal) => navigate(`/animal/${animal.id_public}`)}
                 API_BASE_URL={API_BASE_URL}
                 authToken={null}
+                setModCurrentContext={null}
             />
         </div>
     );

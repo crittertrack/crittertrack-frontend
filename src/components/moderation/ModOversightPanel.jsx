@@ -1,5 +1,5 @@
 import React, { useEffect, useMemo, useState } from 'react';
-import { ChevronLeft, ChevronRight, AlertCircle } from 'lucide-react';
+import { AlertCircle } from 'lucide-react';
 import './ModOversightPanel.css';
 
 const REPORT_TYPES = [
@@ -54,8 +54,18 @@ const parseReason = (reason = '') => {
 const formatReporter = (report = {}) => {
     const reporter = report.reporterId || {};
     const name = reporter.personalName || reporter.breederName || null;
-    const identifier = reporter.email || reporter.id_public || 'Unknown';
-    return name ? `${name} · ${identifier}` : identifier;
+    const ctu = reporter.id_public ? `${reporter.id_public}` : null;
+    const email = reporter.email || null;
+    
+    if (name && ctu && email) {
+        return `${name} (${ctu}) · ${email}`;
+    } else if (name && ctu) {
+        return `${name} (${ctu})`;
+    } else if (name && email) {
+        return `${name} · ${email}`;
+    } else {
+        return ctu || email || 'Unknown';
+    }
 };
 
 const getSubjectTitle = (report = {}) => {
@@ -84,10 +94,36 @@ const getSubjectOwner = (report = {}) => {
 
     if (report.reportedUserId) {
         const user = report.reportedUserId;
-        return user.personalName || user.breederName || user.email || user.id_public || 'Unknown owner';
+        const name = user.personalName || null;
+        const breederName = user.breederName || null;
+        const ctu = user.id_public || null;
+        const email = user.email || null;
+        
+        if (name && ctu) {
+            return `${name} (${ctu})`;
+        } else if (ctu) {
+            return ctu;
+        } else if (name) {
+            return `${name} · ${email || 'No ID'}`;
+        } else {
+            return email || 'Unknown owner';
+        }
     }
 
     return 'Unknown owner';
+};
+
+const getContentOwnerDetails = (report = {}) => {
+    if (report.reportedUserId) {
+        const user = report.reportedUserId;
+        return {
+            personalName: user.personalName || null,
+            breederName: user.breederName || null,
+            ctu: user.id_public || null,
+            email: user.email || null
+        };
+    }
+    return null;
 };
 
 export default function ModOversightPanel({ 
@@ -97,7 +133,6 @@ export default function ModOversightPanel({
     authToken,
     onActionTaken 
 }) {
-    const [isCollapsed, setIsCollapsed] = useState(false);
     const [reports, setReports] = useState([]);
     const [selectedReport, setSelectedReport] = useState(null);
     const [loading, setLoading] = useState(false);
@@ -216,20 +251,19 @@ export default function ModOversightPanel({
     if (!isOpen) return null;
 
     return (
-        <div className={`mod-panel ${isCollapsed ? 'collapsed' : ''}`}>
+        <div className="mod-panel">
             <div className="mod-panel-header">
                 <h3>Moderation Oversight</h3>
                 <button 
-                    className="mod-panel-toggle"
-                    onClick={() => setIsCollapsed(!isCollapsed)}
-                    title={isCollapsed ? 'Expand' : 'Collapse'}
+                    className="mod-close-button"
+                    onClick={onClose}
+                    title="Exit Moderation Mode"
                 >
-                    {isCollapsed ? <ChevronLeft size={20} /> : <ChevronRight size={20} />}
+                    ✕
                 </button>
             </div>
 
-            {!isCollapsed && (
-                <div className="mod-panel-content">
+            <div className="mod-panel-content">
                     {/* Filter tabs */}
                     <div className="mod-filter-tabs">
                         {REPORT_TYPES.map((type) => (
@@ -312,6 +346,38 @@ export default function ModOversightPanel({
                                     <strong>Content Owner:</strong>
                                     <p>{getSubjectOwner(selectedReport)}</p>
                                 </div>
+
+                                {getContentOwnerDetails(selectedReport) && (
+                                    <div className="mod-detail-section">
+                                        <strong>Content Owner Details:</strong>
+                                        <div className="mod-content-details">
+                                            {getContentOwnerDetails(selectedReport).personalName && (
+                                                <div className="mod-detail-item">
+                                                    <span className="mod-detail-label">Personal Name:</span>
+                                                    <span>{getContentOwnerDetails(selectedReport).personalName}</span>
+                                                </div>
+                                            )}
+                                            {getContentOwnerDetails(selectedReport).breederName && (
+                                                <div className="mod-detail-item">
+                                                    <span className="mod-detail-label">Breeder Name:</span>
+                                                    <span>{getContentOwnerDetails(selectedReport).breederName}</span>
+                                                </div>
+                                            )}
+                                            {getContentOwnerDetails(selectedReport).ctu && (
+                                                <div className="mod-detail-item">
+                                                    <span className="mod-detail-label">CTU:</span>
+                                                    <span>{getContentOwnerDetails(selectedReport).ctu}</span>
+                                                </div>
+                                            )}
+                                            {getContentOwnerDetails(selectedReport).email && (
+                                                <div className="mod-detail-item">
+                                                    <span className="mod-detail-label">Email:</span>
+                                                    <span>{getContentOwnerDetails(selectedReport).email}</span>
+                                                </div>
+                                            )}
+                                        </div>
+                                    </div>
+                                )}
 
                                 <div className="mod-detail-section">
                                     <strong>Moderator Notes:</strong>
@@ -406,7 +472,6 @@ export default function ModOversightPanel({
                         </button>
                     </div>
                 </div>
-            )}
         </div>
     );
 }
