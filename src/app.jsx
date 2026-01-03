@@ -9915,6 +9915,34 @@ const AuthView = ({ onLoginSuccess, showModalMessage, isRegister, setIsRegister,
     const [verificationCode, setVerificationCode] = useState('');
     const [agreedToTerms, setAgreedToTerms] = useState(false);
 
+    // Restore verification state from localStorage on mount
+    useEffect(() => {
+        const savedVerificationState = localStorage.getItem('pendingVerification');
+        if (savedVerificationState) {
+            try {
+                const { email: savedEmail, verificationStep: savedStep } = JSON.parse(savedVerificationState);
+                setEmail(savedEmail);
+                setVerificationStep(savedStep);
+                setIsRegister(true);
+            } catch (error) {
+                console.error('Failed to restore verification state:', error);
+                localStorage.removeItem('pendingVerification');
+            }
+        }
+    }, []);
+
+    // Persist verification state to localStorage when it changes
+    useEffect(() => {
+        if (verificationStep && email) {
+            localStorage.setItem('pendingVerification', JSON.stringify({ 
+                email, 
+                verificationStep: true 
+            }));
+        } else {
+            localStorage.removeItem('pendingVerification');
+        }
+    }, [verificationStep, email]);
+
     const handleSubmit = async (e) => {
         e.preventDefault();
         setLoading(true);
@@ -9955,6 +9983,7 @@ const AuthView = ({ onLoginSuccess, showModalMessage, isRegister, setIsRegister,
                     email,
                     code: verificationCode
                 });
+                localStorage.removeItem('pendingVerification');
                 showModalMessage('Registration Success', 'Your account has been verified! You are now logged in.');
                 onLoginSuccess(response.data.token);
                 setVerificationStep(false);
@@ -10001,6 +10030,7 @@ const AuthView = ({ onLoginSuccess, showModalMessage, isRegister, setIsRegister,
     const handleBackToRegistration = () => {
         setVerificationStep(false);
         setVerificationCode('');
+        localStorage.removeItem('pendingVerification');
     };
 
     const handleClearCode = () => {
