@@ -10003,6 +10003,10 @@ const AuthView = ({ onLoginSuccess, showModalMessage, isRegister, setIsRegister,
         setVerificationCode('');
     };
 
+    const handleClearCode = () => {
+        setVerificationCode('');
+    };
+
     return (
         <div className="max-w-md w-full bg-white p-8 rounded-xl shadow-2xl">
             <h2 className="text-3xl font-extrabold text-gray-900 mb-6 text-center">
@@ -10040,21 +10044,29 @@ const AuthView = ({ onLoginSuccess, showModalMessage, isRegister, setIsRegister,
                         {loading ? <Loader2 className="animate-spin mr-2" size={20} /> : 'Verify & Create Account'}
                     </button>
 
-                    <div className="flex flex-col space-y-2 mt-4">
+                    <div className="flex flex-col space-y-2 mt-4 border-t pt-4">
+                        <button 
+                            type="button" 
+                            onClick={handleClearCode}
+                            disabled={loading}
+                            className="text-sm text-accent hover:text-accent/80 transition duration-150 font-medium py-1"
+                        >
+                            Clear Code & Try Again
+                        </button>
                         <button 
                             type="button" 
                             onClick={handleResendCode}
                             disabled={loading}
-                            className="text-sm text-accent hover:text-accent/80 transition duration-150 font-medium"
+                            className="text-sm text-accent hover:text-accent/80 transition duration-150 font-medium py-1"
                         >
                             Resend Code
                         </button>
                         <button 
                             type="button" 
                             onClick={handleBackToRegistration}
-                            className="text-sm text-gray-600 hover:text-gray-800 transition duration-150"
+                            className="text-sm text-gray-600 hover:text-gray-800 transition duration-150 py-1"
                         >
-                            ← Back to Registration
+                            ← Change Email or Start Over
                         </button>
                     </div>
                 </form>
