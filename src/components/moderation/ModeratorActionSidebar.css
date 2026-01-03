@@ -196,6 +196,9 @@
     margin-top: auto;
     padding-top: 16px;
     border-top: 1px solid #e0e0e0;
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
 }
 
 .mod-open-queue-btn {
@@ -214,6 +217,24 @@
 .mod-open-queue-btn:hover {
     transform: translateY(-2px);
     box-shadow: 0 4px 12px rgba(211, 47, 47, 0.3);
+}
+
+.mod-exit-btn {
+    width: 100%;
+    padding: 12px;
+    background: linear-gradient(135deg, #388e3c 0%, #2e7d32 100%);
+    color: white;
+    border: none;
+    border-radius: 6px;
+    font-size: 13px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.2s;
+}
+
+.mod-exit-btn:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(56, 142, 60, 0.3);
 }
 
 /* Scrollbar styling */

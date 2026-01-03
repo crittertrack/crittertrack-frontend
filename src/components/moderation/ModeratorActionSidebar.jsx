@@ -6,6 +6,7 @@ export default function ModeratorActionSidebar({
     isActive,
     onOpenReportQueue,
     onQuickFlag,
+    onExitModeration,
     currentPage,
     currentContext
 }) {
@@ -120,6 +121,12 @@ export default function ModeratorActionSidebar({
                             onClick={onOpenReportQueue}
                         >
                             Open Report Queue
+                        </button>
+                        <button 
+                            className="mod-exit-btn"
+                            onClick={onExitModeration}
+                        >
+                            Exit Moderation Mode
                         </button>
                     </div>
                 </div>

@@ -146,10 +146,10 @@ export default function ModOversightPanel({
 
     // Fetch reports on load
     useEffect(() => {
-        if (isOpen && !isCollapsed) {
+        if (isOpen) {
             fetchReports();
         }
-    }, [isOpen, isCollapsed, statusFilter, reportType]);
+    }, [isOpen, statusFilter, reportType]);
 
     const fetchReports = async () => {
         if (!authToken) {
