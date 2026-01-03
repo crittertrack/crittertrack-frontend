@@ -1760,7 +1760,7 @@ const MouseGeneticsCalculator = ({ API_BASE_URL, authToken, myAnimals = [] }) =>
             </button>
           </div>
 
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-6" data-tutorial-target="parent-selectors">
         {/* Sire/Father */}
         <div className="bg-blue-50 rounded-lg p-4 border-2 border-blue-300">
           <div className="flex justify-between items-center mb-4">
@@ -1768,6 +1768,7 @@ const MouseGeneticsCalculator = ({ API_BASE_URL, authToken, myAnimals = [] }) =>
             {authToken && myAnimals.length > 0 && (
               <button
                 onClick={() => openAnimalSelector('parent1')}
+                data-tutorial-target="select-animal-btn"
                 className="flex items-center gap-1 px-3 py-1 bg-blue-600 hover:bg-blue-700 text-white text-sm rounded-lg transition"
                 title="Select from your animals"
               >

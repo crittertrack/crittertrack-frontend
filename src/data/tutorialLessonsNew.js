@@ -1189,6 +1189,7 @@ const GETTING_STARTED_LESSONS = [
         title: 'Congratulations!',
         content: 'You\'ve successfully completed the Getting Started tour and created your first animal! You now understand how to document every aspect of an animal in CritterTrack - from basic info to genetics to health to breeding records.',
         highlightElement: '[data-tutorial-target="success-message"]',
+        hideHighlightPrompt: true,
         tips: [
           'You can create more animals anytime',
           'Edit animals at any time',
@@ -1230,6 +1231,7 @@ const KEY_FEATURES_LESSONS = [
         title: 'Click on an Existing Animal',
         content: 'To view an animal\'s full details, click on any animal card in your My Animals list. This opens the detailed view with all tabs and information.',
         highlightElement: '[data-tutorial-target="animal-card"]',
+        hideHighlightPrompt: true,
         actionType: 'click',
         tips: [
           'Each animal has a complete record',
@@ -1278,6 +1280,7 @@ const KEY_FEATURES_LESSONS = [
         title: 'Edit View Overview',
         content: 'You\'re now in the edit view. Notice it works exactly like the create form - same tabs, same fields, same Save button. You can edit any information here.',
         highlightElement: '[data-tutorial-target="edit-form"]',
+        hideHighlightPrompt: true,
         tips: [
           'Familiar interface from Getting Started',
           'All previous data is pre-filled',
@@ -1301,6 +1304,7 @@ const KEY_FEATURES_LESSONS = [
         title: 'Close Edit Without Saving',
         content: 'For now, let\'s go back to the main animal list without making changes. Click the back arrow at the top right to close edit mode and return to your list. You can always reopen an existing animal to view or edit it again.',
         highlightElement: '[data-tutorial-target="close-edit-btn"]',
+        hideHighlightPrompt: true,
         actionType: 'click',
         tips: [
           'Back arrow closes edit mode without saving',
@@ -1370,6 +1374,7 @@ const KEY_FEATURES_LESSONS = [
         title: 'Link Existing Animals',
         content: 'After creating the litter with parents and a birth date, you can link existing animals as offspring. Click "Link Animals" to connect animals that are offspring from this specific litter.',
         highlightElement: '[data-tutorial-target="link-animals-btn"]',
+        hideHighlightPrompt: true,
         tips: [
           'Birth date is required before linking',
           'Only animals matching parents and date appear',
@@ -1382,6 +1387,7 @@ const KEY_FEATURES_LESSONS = [
         title: 'Create New Offspring Animals',
         content: 'In the "New Offspring Animals" section (separate from the male/female count fields), you can directly create new offspring animals. With a birth date filled in, click "Create Offspring" to add new animals and automatically set them as children of this litter with the sire and dam already assigned.',
         highlightElement: '[data-tutorial-target="create-offspring-btn"]',
+        hideHighlightPrompt: true,
         tips: [
           'Different from male/female count fields',
           'Found in "New Offspring Animals" section',
@@ -1406,6 +1412,7 @@ const KEY_FEATURES_LESSONS = [
         title: 'Litter Actions',
         content: 'On the expanded litter view, you\'ll see buttons to: Edit the litter, Link animals to it, Add new offspring, and Delete the litter. These give you full control over litter management.',
         highlightElement: '[data-tutorial-target="litter-actions"]',
+        hideHighlightPrompt: true,
         tips: [
           'Edit changes parent or dates',
           'Link connects existing animals',
@@ -1496,6 +1503,7 @@ const KEY_FEATURES_LESSONS = [
         title: 'Public Profile Visibility',
         content: 'These checkboxes control what information is visible on your public profile. Check which aspects you want to share: Personal Name, Breeder Name, website, etc. If private, only you see that info.',
         highlightElement: '[data-tutorial-target="public-visibility-checkboxes"]',
+        hideHighlightPrompt: true,
         tips: [
           'Strategic visibility increases interest',
           'Can be very selective',
@@ -1585,6 +1593,7 @@ const KEY_FEATURES_LESSONS = [
         title: 'Expense Fields',
         content: 'On the Expense form, fill in: Date, Category (food, housing, medical, equipment, other), Description, Amount, and optional notes. This creates a detailed expense record.',
         highlightElement: '[data-tutorial-target="expense-form"]',
+        hideHighlightPrompt: true,
         tips: [
           'Categorize for better tracking',
           'Be specific in description',
@@ -1596,6 +1605,7 @@ const KEY_FEATURES_LESSONS = [
         title: 'Close & Reopen Add Transaction',
         content: 'Let\'s explore other transaction types. Close this transaction and reopen the "Add Transaction" button.',
         highlightElement: '[data-tutorial-target="add-transaction-btn"]',
+        hideHighlightPrompt: true,
         tips: [
           'Multiple transaction types available',
           'Each serves different purpose',
@@ -1607,6 +1617,7 @@ const KEY_FEATURES_LESSONS = [
         title: 'Animal Sale - Manual Entry',
         content: 'Select "Animal Sale" then "Manual Entry". This records a sale without using the transfer system - you just record the basic sale details manually.',
         highlightElement: '[data-tutorial-target="animal-sale-manual"]',
+        hideHighlightPrompt: true,
         actionType: 'click',
         tips: [
           'Manual entry is simple',
@@ -1619,6 +1630,7 @@ const KEY_FEATURES_LESSONS = [
         title: 'Manual Sale Fields',
         content: 'Enter: Date, Animal (if you want to link it), Buyer, Sale Price, and Notes. This creates a record of the transaction.',
         highlightElement: '[data-tutorial-target="manual-sale-form"]',
+        hideHighlightPrompt: true,
         tips: [
           'Simple transaction entry',
           'Works for any animal',
@@ -1630,6 +1642,7 @@ const KEY_FEATURES_LESSONS = [
         title: 'Close & Reopen - Transfer Ownership',
         content: 'Let\'s look at Transfer Ownership, which is more sophisticated. Close this, reopen Add Transaction, select "Animal Sale", then "Transfer Ownership".',
         highlightElement: '[data-tutorial-target="animal-sale-transfer"]',
+        hideHighlightPrompt: true,
         tips: [
           'Transfer creates relationships',
           'Both users stay connected',
@@ -1641,6 +1654,7 @@ const KEY_FEATURES_LESSONS = [
         title: 'Transfer Ownership Features',
         content: 'Transfer Ownership initiates an animal transfer between CritterTrack users. The key features are: The animal gets a "Sold" status in your collection, you retain a view-only copy of the animal\'s record, the new owner gains full editing rights, and you can see all future changes they make. Neither party can delete the animal.',
         highlightElement: '[data-tutorial-target="transfer-ownership-form"]',
+        hideHighlightPrompt: true,
         tips: [
           'Maintains breeding history',
           'Both parties keep records',
@@ -1653,6 +1667,7 @@ const KEY_FEATURES_LESSONS = [
         title: 'Close & Reopen - Animal Purchase',
         content: 'Now let\'s look at purchases. Close this, reopen Add Transaction, and select "Animal Purchase". Since manual entry is the same as sales, we\'ll focus on the "Notify Seller" option.',
         highlightElement: '[data-tutorial-target="animal-purchase-notify"]',
+        hideHighlightPrompt: true,
         tips: [
           'Purchase is the other side of sale',
           'Notify Seller is special feature',
@@ -1664,6 +1679,7 @@ const KEY_FEATURES_LESSONS = [
         title: 'Notify Seller Feature',
         content: 'The "Notify Seller" feature sends a notification to the original breeder that you\'ve acquired their animal. You enter their Personal ID, and they receive a notification. The seller gets a view-only copy showing that you now own the animal and any information you\'ve added.',
         highlightElement: '[data-tutorial-target="notify-seller-form"]',
+        hideHighlightPrompt: true,
         tips: [
           'Keeps breeding community connected',
           'Seller gets updates on animal',
@@ -1779,6 +1795,7 @@ const KEY_FEATURES_LESSONS = [
         title: 'Transfer Request Notifications',
         content: 'When someone initiates an animal transfer with you (either to buy or to receive your animal), you\'ll be notified.',
         highlightElement: '[data-tutorial-target="transfer-notifications"]',
+        hideHighlightPrompt: true,
         tips: [
           'Don\'t miss sale opportunities',
           'Stay on top of incoming animals',
@@ -1790,6 +1807,7 @@ const KEY_FEATURES_LESSONS = [
         title: 'System Notifications',
         content: 'Receive alerts about important system events, updates, or maintenance. These are typically low-priority but keep you informed.',
         highlightElement: '[data-tutorial-target="system-notifications"]',
+        hideHighlightPrompt: true,
         tips: [
           'Stay aware of platform changes',
           'Know about new features',
@@ -1822,6 +1840,7 @@ const KEY_FEATURES_LESSONS = [
         title: 'Messaging Overview',
         content: 'Send messages to other CritterTrack users. This is how you inquire about animals, discuss breeding, coordinate transfers, or build relationships in the breeding community.',
         highlightElement: '[data-tutorial-target="messaging-section"]',
+        hideHighlightPrompt: true,
         tips: [
           'Direct communication tool',
           'Build breeding connections',
@@ -1833,6 +1852,7 @@ const KEY_FEATURES_LESSONS = [
         title: 'Send Message from Profile',
         content: 'To message another breeder, first find their profile (you can search for them using the global search). Once on their profile, click the "Message" button to start a conversation. This lets you reach out about their animals, ask breeding questions, or coordinate transfers.',
         highlightElement: '[data-tutorial-target="profile-message-btn"]',
+        hideHighlightPrompt: true,
         tips: [
           'Find breeders through global search',
           'View their public profile',
@@ -1845,6 +1865,7 @@ const KEY_FEATURES_LESSONS = [
         title: 'Message Conversations',
         content: 'Messages are organized in conversations. Each conversation shows the history of messages between you and another user.',
         highlightElement: '[data-tutorial-target="message-conversations"]',
+        hideHighlightPrompt: true,
         tips: [
           'See full conversation history',
           'Know what was discussed',
@@ -1856,6 +1877,7 @@ const KEY_FEATURES_LESSONS = [
         title: 'Privacy in Messaging',
         content: 'Messages are private between you and the recipient. Neither party can force messages onto non-responders - messaging requires mutual agreement if messaging preferences are restricted.',
         highlightElement: '[data-tutorial-target="messaging-privacy"]',
+        hideHighlightPrompt: true,
         tips: [
           'Secure communication',
           'Respect privacy settings',
@@ -1892,6 +1914,7 @@ const ADVANCED_FEATURES_LESSONS = [
         title: 'Tags Overview',
         content: 'Tags are labels you create to organize your collection. Common tags: "Show Animals", "Breeding Stock", "Pets", "For Sale", "Problem Behaviors", etc.',
         highlightElement: '[data-tutorial-target="tags-explanation"]',
+        hideHighlightPrompt: true,
         tips: [
           'Flexible organization system',
           'Create your own tags',
@@ -1903,6 +1926,7 @@ const ADVANCED_FEATURES_LESSONS = [
         title: 'Adding Tags',
         content: 'In the animal form, find the Tags field. Type a tag name and press Enter to add it. Tags can be new or existing from your tag list.',
         highlightElement: '[data-tutorial-target="add-tags-field"]',
+        hideHighlightPrompt: true,
         tips: [
           'Create tags on the fly',
           'Tag suggestions appear',
@@ -1914,6 +1938,7 @@ const ADVANCED_FEATURES_LESSONS = [
         title: 'Filtering by Tags',
         content: 'Use the Tag filter in the search section to show only animals with specific tags. This helps organize your collection.',
         highlightElement: '[data-tutorial-target="tag-filter"]',
+        hideHighlightPrompt: true,
         tips: [
           'Quick organization viewing',
           'Combine with other filters',
@@ -1946,6 +1971,7 @@ const ADVANCED_FEATURES_LESSONS = [
         title: 'Public Profile Overview',
         content: 'Your public profile is how other breeders find and learn about you. It shows your information, animals (if public), and enables connections.',
         highlightElement: '[data-tutorial-target="public-profile-section"]',
+        hideHighlightPrompt: true,
         tips: [
           'Professional identity',
           'Shows your breeding program',
@@ -1957,6 +1983,7 @@ const ADVANCED_FEATURES_LESSONS = [
         title: 'Profile Visibility Control',
         content: 'Use visibility toggles to control what appears on your public profile. You can be selective about what you share while maintaining community connections.',
         highlightElement: '[data-tutorial-target="profile-visibility"]',
+        hideHighlightPrompt: true,
         tips: [
           'Strategic sharing',
           'Balance openness and privacy',
@@ -1968,6 +1995,7 @@ const ADVANCED_FEATURES_LESSONS = [
         title: 'Public Animal Profiles',
         content: 'When you make an animal public, other users can see its profile including lineage, genetics (if shared), breeding history, and availability.',
         highlightElement: '[data-tutorial-target="public-animal-profile"]',
+        hideHighlightPrompt: true,
         tips: [
           'Market your breeding stock',
           'Show off prize animals',
@@ -2000,6 +2028,7 @@ const ADVANCED_FEATURES_LESSONS = [
         title: 'What is COI?',
         content: 'The Coefficient of Inbreeding (COI) is a mathematical measure of genetic diversity. It ranges from 0% (no common ancestors) to 100% (completely inbred). Lower COI is healthier.',
         highlightElement: '[data-tutorial-target="coi-explanation"]',
+        hideHighlightPrompt: true,
         tips: [
           '0% = maximum diversity',
           '100% = completely inbred',
@@ -2011,6 +2040,7 @@ const ADVANCED_FEATURES_LESSONS = [
         title: 'Why COI Matters',
         content: 'High inbreeding (high COI) increases genetic problems, reduces fitness, and increases disease susceptibility. Selective breeding requires monitoring COI to maintain healthy animals.',
         highlightElement: '[data-tutorial-target="why-coi-matters"]',
+        hideHighlightPrompt: true,
         tips: [
           'Genetics matter',
           'Health depends on diversity',
@@ -2022,6 +2052,7 @@ const ADVANCED_FEATURES_LESSONS = [
         title: 'Viewing COI',
         content: 'When viewing an animal, look for the COI percentage. It\'s usually shown on the animal card or in the details. It reflects that animal\'s genetic diversity.',
         highlightElement: '[data-tutorial-target="coi-display"]',
+        hideHighlightPrompt: true,
         tips: [
           'Check before breeding',
           'Use in breeding decisions',
@@ -2033,6 +2064,7 @@ const ADVANCED_FEATURES_LESSONS = [
         title: 'Predicted COI for Pairings',
         content: 'When selecting potential breeding pairs, the system can predict the COI of offspring. Higher predictions mean more inbreeding - choose pairings carefully.',
         highlightElement: '[data-tutorial-target="predicted-coi"]',
+        hideHighlightPrompt: true,
         tips: [
           'Plan ahead',
           'Avoid excessive inbreeding',
@@ -2044,6 +2076,7 @@ const ADVANCED_FEATURES_LESSONS = [
         title: 'Ethical Breeding',
         content: 'Responsible breeders use COI to make ethical decisions. Never breed animals with excessively high COI. Always prioritize health over appearance.',
         highlightElement: '[data-tutorial-target="ethical-breeding"]',
+        hideHighlightPrompt: true,
         tips: [
           'Health first',
           'Consider COI in every decision',
@@ -2063,8 +2096,8 @@ const ADVANCED_FEATURES_LESSONS = [
       {
         stepNumber: 1,
         title: 'Genetics Calculator Overview',
-        content: 'The Genetics Calculator is a tool for predicting offspring genetic traits. It works with species like Fancy Mice that have defined genetic loci.',
-        highlightElement: '[data-tutorial-target="genetics-calculator"]',
+        content: 'Click the "Genetics" button in the header to access the Genetics Calculator - a tool for predicting offspring genetic traits. It works with species like Fancy Mice that have defined genetic loci.',
+        highlightElement: '[data-tutorial-target="genetics-btn"]',
         tips: [
           'Predict offspring appearance',
           'Understand inheritance',
@@ -2074,8 +2107,8 @@ const ADVANCED_FEATURES_LESSONS = [
       {
         stepNumber: 2,
         title: 'Selecting Animals',
-        content: 'Click "Select Animal" buttons to choose the parents. You can select animals from your collection - their genetic codes are automatically filled in.',
-        highlightElement: '[data-tutorial-target="select-calc-animals"]',
+        content: 'Click the "Select Animal" button to choose parents from your collection. Their genetic codes are automatically filled in when you select them.',
+        highlightElement: '[data-tutorial-target="select-animal-btn"]',
         tips: [
           'Use your animals',
           'Genetic code auto-fills',
@@ -2085,8 +2118,8 @@ const ADVANCED_FEATURES_LESSONS = [
       {
         stepNumber: 3,
         title: 'Genetic Loci',
-        content: 'Each genetic locus represents a trait. Select the combination for each parent using dropdowns. The calculator shows all possible combinations for each locus.',
-        highlightElement: '[data-tutorial-target="genetic-loci"]',
+        content: 'Each genetic locus represents a trait. Select the combination for each parent using the dropdowns. The Sire (father) section is blue and the Dam (mother) section is pink.',
+        highlightElement: '[data-tutorial-target="parent-selectors"]',
         tips: [
           'One row per genetic trait',
           'Select parent genotypes',
@@ -2095,9 +2128,20 @@ const ADVANCED_FEATURES_LESSONS = [
       },
       {
         stepNumber: 4,
+        title: 'Calculate Offspring',
+        content: 'First, select genetic combinations for both parents (or input "a/a" for both as a test). Then click "Calculate Offspring" to see all possible outcomes.',
+        highlightElement: '[data-tutorial-target="calculate-offspring-btn"]',
+        tips: [
+          'Both parents must have selections',
+          'Button activates when ready',
+          'Results show all possibilities'
+        ]
+      },
+      {
+        stepNumber: 5,
         title: 'Predicted Offspring',
-        content: 'The calculator shows all possible offspring combinations and their probabilities. Click on combinations to see phenotypes (appearance) and any special notes.',
-        highlightElement: '[data-tutorial-target="offspring-predictions"]',
+        content: 'The "Possible Offspring Outcomes" section shows all possible combinations and their probabilities. Click on combinations to see phenotypes (appearance) and any special notes.',
+        highlightElement: '[data-tutorial-target="offspring-results"]',
         tips: [
           'See all possibilities',
           'Probabilities shown',
@@ -2105,14 +2149,23 @@ const ADVANCED_FEATURES_LESSONS = [
         ]
       },
       {
-        stepNumber: 5,
+        stepNumber: 6,
         title: 'Phenotype Information',
         content: 'Each phenotype (appearance) is displayed with relevant information like colors, markings, and any lethal or problematic combinations highlighted in red.',
-        highlightElement: '[data-tutorial-target="phenotype-info"]',
         tips: [
           'Avoid lethal combinations',
           'Plan for traits',
           'Understand genetics'
+        ]
+      },
+      {
+        stepNumber: 7,
+        title: 'Tutorial Complete!',
+        content: 'Congratulations! You\'ve completed all CritterTrack tutorials. You now know how to manage your entire breeding program - from adding animals to tracking genetics and finances. You can always revisit these tutorials from the Help section in the header. Thank you for taking the time to learn all that CritterTrack has to offer!',
+        tips: [
+          'Access tutorials anytime from Help',
+          'All features are at your fingertips',
+          'Happy breeding!'
         ]
       }
     ]

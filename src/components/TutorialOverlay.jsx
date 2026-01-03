@@ -251,7 +251,7 @@ export const TutorialOverlay = React.forwardRef(({ lessonId, onClose, onComplete
           )}
 
           {/* Highlighted element indicator */}
-          {currentStep.highlightElement && (
+          {currentStep.highlightElement && !currentStep.hideHighlightPrompt && (
             <div className="bg-amber-50 border-l-3 border-amber-400 rounded p-3">
               <p className="text-xs text-amber-800">
                 ✨ <strong>Look for the highlighted element on the screen →</strong>

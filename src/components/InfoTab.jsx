@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { BookOpen, ChevronDown, Play, RotateCcw, X, ChevronLeft } from 'lucide-react';
-import { TUTORIAL_LESSONS } from '../data/tutorialLessons';
+import { TUTORIAL_LESSONS } from '../data/tutorialLessonsNew';
 import { useTutorial } from '../contexts/TutorialContext';
 import { TutorialOverlay } from './TutorialOverlay';
 
@@ -10,7 +10,7 @@ import { TutorialOverlay } from './TutorialOverlay';
  * Users can view lessons, restart tutorials, and explore features
  */
 export const InfoTab = ({ onClose, isMobile }) => {
-  const [activeTab, setActiveTab] = useState('getting-started'); // 'getting-started' or 'advanced'
+  const [activeTab, setActiveTab] = useState('getting-started'); // 'getting-started', 'key-features', or 'advanced'
   const [selectedLesson, setSelectedLesson] = useState(null);
   const [expandedLesson, setExpandedLesson] = useState(null);
   const [runningTutorialId, setRunningTutorialId] = useState(null);
@@ -19,8 +19,13 @@ export const InfoTab = ({ onClose, isMobile }) => {
 
   const onboardingLessons = TUTORIAL_LESSONS.onboarding;
   const featureLessons = TUTORIAL_LESSONS.features;
+  const advancedLessons = TUTORIAL_LESSONS.advanced;
 
-  const currentLessons = activeTab === 'getting-started' ? onboardingLessons : featureLessons;
+  const currentLessons = activeTab === 'getting-started' 
+    ? onboardingLessons 
+    : activeTab === 'key-features'
+    ? featureLessons
+    : advancedLessons;
 
   const handleStartTutorial = (lessonId) => {
     setRunningTutorialId(lessonId);
@@ -201,6 +206,16 @@ export const InfoTab = ({ onClose, isMobile }) => {
                 }`}
               >
                 🚀 Getting Started
+              </button>
+              <button
+                onClick={() => setActiveTab('key-features')}
+                className={`px-4 py-3 font-semibold transition border-b-4 ${
+                  activeTab === 'key-features'
+                    ? 'border-primary text-primary'
+                    : 'border-transparent text-gray-600 hover:text-gray-800'
+                }`}
+              >
+                📋 Key Features
               </button>
               <button
                 onClick={() => setActiveTab('advanced')}
