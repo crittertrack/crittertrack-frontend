@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import axios from 'axios';
-import { X, AlertTriangle, Eye, MessageSquare, UserX, Ban, Flag } from 'lucide-react';
+import { X, AlertTriangle, Eye, MessageSquare, UserX, Ban, Flag, TrendingDown } from 'lucide-react';
 import './ModActionModals.css';
 
 // Flag Content Modal
