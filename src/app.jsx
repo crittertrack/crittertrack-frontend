@@ -12579,7 +12579,11 @@ const App = () => {
             });
             setUnreadMessageCount(response.data?.count || 0);
         } catch (error) {
-            console.error('Failed to fetch message count:', error);
+            // Silently fail for message count - backend may not have this endpoint yet
+            if (error.response?.status !== 404 && error.response?.status !== 500) {
+                console.error('Failed to fetch message count:', error);
+            }
+            setUnreadMessageCount(0);
         }
     }, [authToken, API_BASE_URL]);
 
