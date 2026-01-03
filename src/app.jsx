@@ -3762,13 +3762,20 @@ const LitterManagement = ({ authToken, API_BASE_URL, userProfile, showModalMessa
     };
 
     const handleEditLitter = (litter) => {
+        // Format birthDate and pairingDate for date inputs (YYYY-MM-DD format)
+        const formatDateForInput = (dateString) => {
+            if (!dateString) return '';
+            const date = new Date(dateString);
+            return date.toISOString().split('T')[0];
+        };
+
         setEditingLitter(litter._id);
         setFormData({
             breedingPairCodeName: litter.breedingPairCodeName || '',
             sireId_public: litter.sireId_public,
             damId_public: litter.damId_public,
-            pairingDate: litter.pairingDate || '',
-            birthDate: litter.birthDate || '',
+            pairingDate: formatDateForInput(litter.pairingDate),
+            birthDate: formatDateForInput(litter.birthDate),
             maleCount: litter.maleCount || null,
             femaleCount: litter.femaleCount || null,
             notes: litter.notes || '',
@@ -3875,8 +3882,8 @@ const LitterManagement = ({ authToken, API_BASE_URL, userProfile, showModalMessa
                 otherParent1Role: '',
                 pairingDate: '',
                 birthDate: '',
-                maleCount: '',
-                femaleCount: '',
+                maleCount: null,
+                femaleCount: null,
                 notes: '',
                 linkedOffspringIds: []
             });
