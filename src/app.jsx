@@ -15525,6 +15525,11 @@ const PublicAnimalPage = () => {
     const [animal, setAnimal] = useState(null);
     const [loading, setLoading] = useState(true);
     const [notFound, setNotFound] = useState(false);
+    const [modCurrentContext, setModCurrentContext] = useState(null);
+
+    // Check if user is in moderator mode
+    const authToken = localStorage.getItem('authToken');
+    const inModeratorMode = localStorage.getItem('moderationAuthenticated') === 'true';
 
     useEffect(() => {
         const fetchAnimal = async () => {
@@ -15587,9 +15592,27 @@ const PublicAnimalPage = () => {
                 animal={animal}
                 onClose={() => navigate('/')}
                 API_BASE_URL={API_BASE_URL}
-                authToken={null}
+                authToken={authToken}
                 onViewProfile={(user) => navigate(`/user/${user.id_public}`)}
+                setModCurrentContext={setModCurrentContext}
             />
+            
+            {/* Moderator Action Sidebar */}
+            {inModeratorMode && (
+                <ModeratorActionSidebar
+                    isActive={true}
+                    onOpenReportQueue={() => navigate('/')}
+                    onQuickFlag={(flagData) => {
+                        console.log('Quick flag from animal page:', flagData);
+                    }}
+                    onExitModeration={() => {
+                        localStorage.removeItem('moderationAuthenticated');
+                        navigate('/');
+                    }}
+                    currentPage={location.pathname}
+                    currentContext={modCurrentContext}
+                />
+            )}
         </div>
     );
 };
