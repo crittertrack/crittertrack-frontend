@@ -29,21 +29,25 @@
         window.location.reload(true); // Force refresh from server
       }
 
-      // Register service worker with aggressive auto-update
+      // Register service worker with update checking
       if ('serviceWorker' in navigator) {
         window.addEventListener('load', () => {
           navigator.serviceWorker.register('/service-worker.js')
             .then((registration) => {
               console.log('[App] SW registered:', registration);
               
-              // AGGRESSIVE: Check for updates every 5 seconds
+              // Check for updates every 60 seconds (reduced from 5 seconds)
               const updateInterval = setInterval(() => {
-                console.log('[App] Checking for service worker updates (interval)...');
-                registration.update();
-              }, 5000);
+                console.log('[App] Checking for service worker updates...');
+                registration.update().catch(err => {
+                  console.warn('[App] SW update check failed:', err);
+                });
+              }, 60000);
               
               // Check immediately on startup
-              registration.update();
+              registration.update().catch(err => {
+                console.warn('[App] Initial SW update check failed:', err);
+              });
               
               // Listen for new service worker installation
               registration.addEventListener('updatefound', () => {
@@ -60,7 +64,6 @@
                     window.dispatchEvent(new Event('sw-update-available'));
                     
                     // Auto-reload after 5 seconds if user doesn't interact
-                    // This ensures old users get updates without being prompted
                     setTimeout(() => {
                       console.log('[App] Auto-reloading to apply new version...');
                       window.location.reload();
