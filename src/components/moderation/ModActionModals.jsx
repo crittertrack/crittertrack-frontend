@@ -224,39 +224,59 @@ export const WarnUserModal = ({ isOpen, onClose, onSubmit, context, currentWarni
     const [reason, setReason] = useState('');
     const [category, setCategory] = useState('policy_violation');
     const [liveWarningCount, setLiveWarningCount] = useState(currentWarnings);
+    const [isSubmitting, setIsSubmitting] = useState(false);
 
     // Fetch fresh warning count when modal opens
-    useEffect(() => {
-        if (isOpen && context?.userId && authToken && API_BASE_URL) {
-            const fetchUserWarnings = async () => {
-                try {
-                    const response = await axios.get(`${API_BASE_URL}/users/profile/${context.userId}`, {
-                        headers: { Authorization: `Bearer ${authToken}` }
-                    });
-                    setLiveWarningCount(response.data?.warningCount || 0);
-                } catch (error) {
-                    console.error('Failed to fetch user warning count:', error);
-                    setLiveWarningCount(currentWarnings);
-                }
-            };
-            fetchUserWarnings();
+    const fetchWarningCount = async () => {
+        if (context?.userId && authToken && API_BASE_URL) {
+            try {
+                const response = await axios.get(`${API_BASE_URL}/users/profile/${context.userId}`, {
+                    headers: { Authorization: `Bearer ${authToken}` }
+                });
+                console.log('[WarnUserModal] Fetched warning count:', response.data?.warningCount);
+                setLiveWarningCount(response.data?.warningCount || 0);
+            } catch (error) {
+                console.error('Failed to fetch user warning count:', error);
+                setLiveWarningCount(currentWarnings);
+            }
         } else {
             setLiveWarningCount(currentWarnings);
+        }
+    };
+
+    useEffect(() => {
+        if (isOpen) {
+            fetchWarningCount();
         }
     }, [isOpen, context?.userId, authToken, API_BASE_URL, currentWarnings]);
 
     if (!isOpen) return null;
 
-    const handleSubmit = () => {
-        onSubmit({
-            action: 'warn',
-            reason,
-            category,
-            context
-        });
-        setReason('');
-        setCategory('policy_violation');
-        onClose();
+    const handleSubmit = async () => {
+        setIsSubmitting(true);
+        console.log('[WarnUserModal] Submitting warning');
+        
+        try {
+            await onSubmit({
+                action: 'warn',
+                reason,
+                category,
+                context
+            });
+            
+            // Refresh warning count after submission completes
+            console.log('[WarnUserModal] Warning submitted, refreshing count');
+            await new Promise(resolve => setTimeout(resolve, 300));
+            await fetchWarningCount();
+            
+            // Keep modal open for a moment to show updated count
+            await new Promise(resolve => setTimeout(resolve, 1000));
+        } finally {
+            setIsSubmitting(false);
+            setReason('');
+            setCategory('policy_violation');
+            onClose();
+        }
     };
 
     return (
@@ -312,9 +332,9 @@ export const WarnUserModal = ({ isOpen, onClose, onSubmit, context, currentWarni
                     </div>
                 </div>
                 <div className="mod-modal-footer">
-                    <button onClick={onClose} className="btn-cancel">Cancel</button>
-                    <button onClick={handleSubmit} disabled={!reason.trim()} className="btn-submit btn-warn">
-                        Send Warning
+                    <button onClick={onClose} className="btn-cancel" disabled={isSubmitting}>Cancel</button>
+                    <button onClick={handleSubmit} disabled={!reason.trim() || isSubmitting} className="btn-submit btn-warn">
+                        {isSubmitting ? 'Sending & Refreshing...' : 'Send Warning'}
                     </button>
                 </div>
             </div>
