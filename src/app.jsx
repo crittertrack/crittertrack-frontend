@@ -3679,6 +3679,37 @@ const LitterManagement = ({ authToken, API_BASE_URL, userProfile, showModalMessa
         }
     };
 
+    const handleAddAllToLitter = async () => {
+        try {
+            if (!availableToLink.animals || availableToLink.animals.length === 0) return;
+            
+            // Get all animal IDs to add
+            const animalIdsToAdd = availableToLink.animals.map(a => a.id_public);
+            const updatedOffspringIds = [...(availableToLink.litter.offspringIds_public || []), ...animalIdsToAdd];
+            
+            await axios.put(`${API_BASE_URL}/litters/${availableToLink.litter._id}`, {
+                offspringIds_public: updatedOffspringIds,
+                numberBorn: updatedOffspringIds.length
+            }, {
+                headers: { Authorization: `Bearer ${authToken}` }
+            });
+            
+            showModalMessage('Success', `${animalIdsToAdd.length} animal(s) linked to litter!`);
+            
+            // Clear available list
+            setAvailableToLink({
+                ...availableToLink,
+                animals: []
+            });
+            
+            // Refresh litters to show updated count
+            fetchLitters();
+        } catch (error) {
+            console.error('Error linking animals to litter:', error);
+            showModalMessage('Error', 'Failed to link animals to litter');
+        }
+    };
+
     const handleDeleteLitter = async (litterId) => {
         if (!window.confirm('Are you sure you want to delete this litter? This will not delete the animals, only the litter record.')) {
             return;
@@ -4790,7 +4821,15 @@ const LitterManagement = ({ authToken, API_BASE_URL, userProfile, showModalMessa
                             )}
                         </div>
 
-                        <div className="border-t p-4">
+                        <div className="border-t p-4 space-y-2">
+                            {availableToLink.animals && availableToLink.animals.length > 0 && (
+                                <button
+                                    onClick={handleAddAllToLitter}
+                                    className="w-full bg-primary hover:bg-primary/90 text-black font-semibold py-2 px-4 rounded-lg"
+                                >
+                                    Add All ({availableToLink.animals.length})
+                                </button>
+                            )}
                             <button
                                 onClick={() => setLinkingAnimals(false)}
                                 className="w-full bg-gray-200 hover:bg-gray-300 text-gray-800 font-semibold py-2 px-4 rounded-lg"
