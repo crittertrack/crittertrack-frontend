@@ -381,61 +381,65 @@ const EnhancedAdminPanel = ({ isOpen, onClose, authToken, API_BASE_URL, userRole
 
     return (
         <ErrorBoundary onClose={onClose}>
-            <div className="fixed inset-0 z-50 bg-white flex flex-col">
+            <div className="fixed inset-0 z-50 bg-gray-50 flex flex-col">
             {console.log('[EnhancedAdminPanel] Rendering authenticated admin panel')}
             {/* Header */}
-            <div className="bg-gradient-to-r from-red-600 to-red-700 text-white p-4 sm:p-6 flex items-center justify-between shadow-lg flex-shrink-0">
+            <div className="bg-gradient-to-r from-red-600 to-red-700 text-white p-6 flex items-center justify-between shadow-lg">
                 <div className="flex items-center gap-3">
-                    <Shield size={24} className="sm:w-7 sm:h-7" />
+                    <Shield size={28} />
                     <div>
-                        <h2 className="text-xl sm:text-2xl font-bold">Moderation Panel</h2>
-                        <p className="text-xs sm:text-sm text-red-100 mt-1 capitalize">Role: {userRole}</p>
+                        <h2 className="text-3xl font-bold">CritterTrack Moderation Panel</h2>
+                        <p className="text-sm text-red-100 mt-1 capitalize">Role: {userRole}</p>
                     </div>
                 </div>
                 <button
                     onClick={onClose}
-                    className="p-2 hover:bg-white/20 rounded-lg transition"
+                    className="p-2 hover:bg-white/20 rounded-lg transition text-lg"
                     title="Close"
                 >
-                    <X size={24} />
+                    <X size={28} />
                 </button>
             </div>
-
-            {/* Tab Navigation */}
-            <div className="flex bg-gray-50 border-b border-gray-200 overflow-x-auto flex-shrink-0">
-                {[
-                    { id: 'dashboard', label: 'Dashboard', icon: BarChart3 },
-                    { id: 'moderation', label: 'Reports', icon: AlertTriangle },
-                    { id: 'communication', label: 'Communication', icon: Mail },
-                    // Admin-only features
-                    { id: 'users', label: 'Users', icon: Users, requiredRole: 'admin' },
-                    { id: 'data-audit', label: 'Audit Log', icon: Lock, requiredRole: 'admin' },
-                    { id: 'system-settings', label: 'Settings', icon: Settings, requiredRole: 'admin' }
-                ].map(section => {
-                    const Icon = section.icon;
-                    const hasAccess = !section.requiredRole || userRole === section.requiredRole;
-                    if (!hasAccess) return null;
-
-                    return (
-                        <button
-                            key={section.id}
-                            onClick={() => setActiveSection(section.id)}
-                            className={`flex items-center gap-2 px-4 sm:px-6 py-3 sm:py-4 border-b-2 transition whitespace-nowrap text-sm sm:text-base ${
-                                activeSection === section.id
-                                    ? 'border-red-600 text-red-600 bg-white'
-                                    : 'border-transparent text-gray-600 hover:text-gray-900 hover:bg-gray-100'
-                            }`}
-                        >
-                            <Icon size={18} />
-                            <span className="font-medium">{section.label}</span>
-                        </button>
-                    );
-                })}
-            </div>
-
                 {/* Main Content */}
-                <div className="flex-1 overflow-y-auto"
->
+                <div className="flex flex-1 overflow-hidden">
+                    {/* Sidebar Navigation */}
+                    <div className="w-64 bg-gray-50 border-r border-gray-200 overflow-y-auto">
+                        <nav className="p-4 space-y-2">
+                            {[
+                                { id: 'dashboard', label: 'Dashboard', icon: BarChart3 },
+                                { id: 'moderation', label: 'Moderation Tools', icon: AlertTriangle },
+                                { id: 'reports', label: 'Reports & Analytics', icon: BarChart3 },
+                                { id: 'communication', label: 'Communication', icon: Mail },
+                                // Admin-only features
+                                { id: 'users', label: 'User Management', icon: Users, requiredRole: 'admin' },
+                                { id: 'animals', label: 'Animal Records', icon: Shield, requiredRole: 'admin' },
+                                { id: 'data-audit', label: 'Data Integrity', icon: Lock, requiredRole: 'admin' },
+                                { id: 'system-settings', label: 'System Settings', icon: Settings, requiredRole: 'admin' }
+                            ].map(section => {
+                                const Icon = section.icon;
+                                const hasAccess = !section.requiredRole || userRole === section.requiredRole;
+                                if (!hasAccess) return null;
+
+                                return (
+                                    <button
+                                        key={section.id}
+                                        onClick={() => setActiveSection(section.id)}
+                                        className={`w-full flex items-center gap-3 px-4 py-3 rounded-lg transition ${
+                                            activeSection === section.id
+                                                ? 'bg-red-600 text-white'
+                                                : 'text-gray-700 hover:bg-gray-100'
+                                        }`}
+                                    >
+                                        <Icon size={20} />
+                                        <span className="font-medium">{section.label}</span>
+                                    </button>
+                                );
+                            })}
+                        </nav>
+                    </div>
+
+                    {/* Content Area */}
+                    <div className="flex-1 overflow-y-auto">
                         {/* Dashboard */}
                         {activeSection === 'dashboard' && (
                             <div className="p-8">
