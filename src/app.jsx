@@ -11502,24 +11502,6 @@ const WarningBanner = ({ authToken, API_BASE_URL }) => {
                                 </p>
                             </div>
                         </div>
-                        <button
-                            onClick={async () => {
-                                try {
-                                    await axios.patch(
-                                        `${API_BASE_URL}/notifications/${warning._id}`,
-                                        { read: true },
-                                        { headers: { Authorization: `Bearer ${authToken}` } }
-                                    );
-                                    setWarningNotifications(prev => prev.filter(w => w._id !== warning._id));
-                                } catch (error) {
-                                    console.error('Error marking warning as read:', error);
-                                }
-                            }}
-                            className="ml-3 flex-shrink-0 text-yellow-600 hover:text-yellow-800"
-                            title="Acknowledge and dismiss"
-                        >
-                            <X size={20} />
-                        </button>
                     </div>
                 </div>
             ))}
