@@ -561,7 +561,7 @@ const EnhancedAdminPanel = ({ isOpen, onClose, authToken, API_BASE_URL, userRole
                         )}
                     </div>
                 </div>
-        </div>
+            </div>
         </ErrorBoundary>
     );
 };
