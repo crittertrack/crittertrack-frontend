@@ -4208,11 +4208,12 @@ const LitterManagement = ({ authToken, API_BASE_URL, userProfile, showModalMessa
                                 Number of Males (Optional)
                             </label>
                             <input
-                                type="text"
-                                value={formData.maleCount}
-                                onChange={(e) => setFormData({...formData, maleCount: e.target.value})}
+                                type="number"
+                                value={formData.maleCount || ''}
+                                onChange={(e) => setFormData({...formData, maleCount: e.target.value ? parseInt(e.target.value) : ''})}
                                 className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent"
-                                placeholder="e.g., 5 or just notes"
+                                placeholder="e.g., 5"
+                                min="0"
                             />
                         </div>
 
@@ -4222,11 +4223,12 @@ const LitterManagement = ({ authToken, API_BASE_URL, userProfile, showModalMessa
                                 Number of Females (Optional)
                             </label>
                             <input
-                                type="text"
-                                value={formData.femaleCount}
-                                onChange={(e) => setFormData({...formData, femaleCount: e.target.value})}
+                                type="number"
+                                value={formData.femaleCount || ''}
+                                onChange={(e) => setFormData({...formData, femaleCount: e.target.value ? parseInt(e.target.value) : ''})}
                                 className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent"
-                                placeholder="e.g., 3 or just notes"
+                                placeholder="e.g., 3"
+                                min="0"
                             />
                         </div>
                     </div>
@@ -4483,6 +4485,13 @@ const LitterManagement = ({ authToken, API_BASE_URL, userProfile, showModalMessa
                                         {litter.pairingDate && (
                                             <p className="text-sm text-gray-600 mb-3">
                                                 <strong>Pairing Date:</strong> {new Date(litter.pairingDate).toLocaleDateString()}
+                                            </p>
+                                        )}
+
+                                        {(litter.maleCount || litter.femaleCount) && (
+                                            <p className="text-sm text-gray-600 mb-3">
+                                                {litter.maleCount && <><strong>Males:</strong> {litter.maleCount}<br /></>}
+                                                {litter.femaleCount && <><strong>Females:</strong> {litter.femaleCount}</>}
                                             </p>
                                         )}
 
