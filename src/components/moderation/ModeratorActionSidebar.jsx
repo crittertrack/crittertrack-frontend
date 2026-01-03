@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Shield, AlertTriangle, Eye, MessageSquare, Ban, UserX } from 'lucide-react';
+import { Shield, AlertTriangle, Eye, MessageSquare, Ban, UserX, Edit3 } from 'lucide-react';
 import './ModeratorActionSidebar.css';
 
 export default function ModeratorActionSidebar({ 
@@ -79,11 +79,11 @@ export default function ModeratorActionSidebar({
 
                         <button 
                             className="mod-quick-btn hide"
-                            onClick={() => handleQuickFlag('hide')}
-                            title="Hide from public view"
+                            onClick={() => handleQuickFlag('edit')}
+                            title="Edit or clear specific fields"
                         >
-                            <Eye size={16} />
-                            <span>Hide Content</span>
+                            <Edit3 size={16} />
+                            <span>Edit Content</span>
                         </button>
 
                         <button 
