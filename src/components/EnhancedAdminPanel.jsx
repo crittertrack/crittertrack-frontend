@@ -438,7 +438,7 @@ const EnhancedAdminPanel = ({ isOpen, onClose, authToken, API_BASE_URL, userRole
 >
                         {/* Dashboard */}
                         {activeSection === 'dashboard' && (
-                            <div className="p-6 sm:p-8 max-w-7xl mx-auto">
+                            <div className="p-8">
                                 <h3 className="text-2xl font-bold text-gray-800 mb-6">Dashboard Overview</h3>
                                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
                                     <StatCard label="Total Users" value={dashboardStats.totalUsers} icon={Users} />
@@ -485,7 +485,7 @@ const EnhancedAdminPanel = ({ isOpen, onClose, authToken, API_BASE_URL, userRole
 
                         {/* User Management */}
                         {activeSection === 'users' && (
-                            <div className="p-6 sm:p-8 max-w-7xl mx-auto">
+                            <div className="p-8">
                                 <UserManagementTab 
                                     API_BASE_URL={API_BASE_URL}
                                     authToken={authToken}
@@ -495,7 +495,7 @@ const EnhancedAdminPanel = ({ isOpen, onClose, authToken, API_BASE_URL, userRole
 
                         {/* Animal Management - DISABLED: Component deleted */}
                         {activeSection === 'animals' && (
-                            <div className="p-6 sm:p-8 max-w-7xl mx-auto">
+                            <div className="p-8">
                                 <h3 className="text-2xl font-bold text-gray-800 mb-4">Animal Records</h3>
                                 <div className="bg-yellow-50 border border-yellow-200 rounded-lg p-6">
                                     <p className="text-yellow-800">This feature is currently being rebuilt.</p>
@@ -522,7 +522,7 @@ const EnhancedAdminPanel = ({ isOpen, onClose, authToken, API_BASE_URL, userRole
 
                         {/* Data Audit */}
                         {activeSection === 'data-audit' && (
-                            <div className="p-6 sm:p-8 max-w-7xl mx-auto">
+                            <div className="p-8">
                                 <AuditLogTab
                                     API_BASE_URL={API_BASE_URL}
                                     authToken={authToken}
@@ -532,7 +532,7 @@ const EnhancedAdminPanel = ({ isOpen, onClose, authToken, API_BASE_URL, userRole
 
                         {/* System Settings */}
                         {activeSection === 'system-settings' && (
-                            <div className="p-6 sm:p-8 max-w-7xl mx-auto">
+                            <div className="p-8">
                                 <SystemSettingsTab
                                     API_BASE_URL={API_BASE_URL}
                                     authToken={authToken}
@@ -542,7 +542,7 @@ const EnhancedAdminPanel = ({ isOpen, onClose, authToken, API_BASE_URL, userRole
 
                         {/* Reports - DISABLED: Component deleted */}
                         {activeSection === 'reports' && (
-                            <div className="p-6 sm:p-8 max-w-7xl mx-auto">
+                            <div className="p-8">
                                 <h3 className="text-2xl font-bold text-gray-800 mb-4">Reports & Analytics</h3>
                                 <div className="bg-yellow-50 border border-yellow-200 rounded-lg p-6">
                                     <p className="text-yellow-800">This feature is currently being rebuilt.</p>
@@ -552,7 +552,7 @@ const EnhancedAdminPanel = ({ isOpen, onClose, authToken, API_BASE_URL, userRole
 
                         {/* Communication */}
                         {activeSection === 'communication' && (
-                            <div className="p-6 sm:p-8 max-w-7xl mx-auto">
+                            <div className="p-8">
                                 <CommunicationTab
                                     API_BASE_URL={API_BASE_URL}
                                     authToken={authToken}
