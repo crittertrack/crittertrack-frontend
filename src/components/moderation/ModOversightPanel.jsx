@@ -171,7 +171,10 @@ export default function ModOversightPanel({
                 params.append('status', statusFilter);
             }
 
-            const response = await fetch(`${baseUrl}/moderation/reports?${params.toString()}`, {
+            const url = `${baseUrl}/moderation/reports?${params.toString()}`;
+            console.log('[ModOversightPanel] Fetching reports from:', url, 'with reportType:', reportType, 'statusFilter:', statusFilter);
+
+            const response = await fetch(url, {
                 headers: {
                     'Authorization': `Bearer ${authToken}`
                 }
@@ -179,10 +182,13 @@ export default function ModOversightPanel({
 
             const data = await response.json();
 
+            console.log('[ModOversightPanel] Response status:', response.status, 'Data:', data);
+
             if (!response.ok) {
                 throw new Error(data.message || data.error || 'Failed to fetch reports');
             }
 
+            console.log('[ModOversightPanel] Successfully fetched', (data.reports || []).length, 'reports');
             setReports(data.reports || []);
             if (selectedReport) {
                 const refreshedSelection = (data.reports || []).find((report) => report._id === selectedReport._id);
@@ -192,6 +198,7 @@ export default function ModOversightPanel({
                 }
             }
         } catch (err) {
+            console.error('[ModOversightPanel] Error fetching reports:', err);
             setError(err.message);
         } finally {
             setLoading(false);
