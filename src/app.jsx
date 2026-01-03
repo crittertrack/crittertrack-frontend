@@ -4372,8 +4372,9 @@ const LitterManagement = ({ authToken, API_BASE_URL, userProfile, showModalMessa
                     </div>
                 ) : (
                     filteredLitters.map(litter => {
-                        const sire = myAnimals.find(a => a.id_public === litter.sireId_public);
-                        const dam = myAnimals.find(a => a.id_public === litter.damId_public);
+                        // Use parent data from litter object (includes transferred/hidden animals)
+                        const sire = litter.sire || myAnimals.find(a => a.id_public === litter.sireId_public);
+                        const dam = litter.dam || myAnimals.find(a => a.id_public === litter.damId_public);
                         const isExpanded = expandedLitter === litter._id;
                         const offspringList = myAnimals.filter(a => 
                             litter.offspringIds_public && litter.offspringIds_public.includes(a.id_public)
@@ -4468,8 +4469,8 @@ const LitterManagement = ({ authToken, API_BASE_URL, userProfile, showModalMessa
                                                 {/* Sire Card */}
                                                 {sire && (
                                                     <div 
-                                                        onClick={() => onViewAnimal(sire)}
-                                                        className="relative bg-white rounded-lg shadow-sm border border-gray-300 p-3 cursor-pointer hover:shadow-md transition flex items-center gap-3"
+                                                        onClick={sire.isTransferred ? undefined : () => onViewAnimal(sire)}
+                                                        className={`relative bg-white rounded-lg shadow-sm border border-gray-300 p-3 flex items-center gap-3 ${sire.isTransferred ? 'opacity-75' : 'cursor-pointer hover:shadow-md'} transition`}
                                                     >
                                                         <div className="w-20 h-20 bg-gray-100 rounded-md overflow-hidden flex-shrink-0">
                                                             {sire.imageUrl || sire.photoUrl ? (
@@ -4496,8 +4497,8 @@ const LitterManagement = ({ authToken, API_BASE_URL, userProfile, showModalMessa
                                                 {/* Dam Card */}
                                                 {dam && (
                                                     <div 
-                                                        onClick={() => onViewAnimal(dam)}
-                                                        className="relative bg-white rounded-lg shadow-sm border border-gray-300 p-3 cursor-pointer hover:shadow-md transition flex items-center gap-3"
+                                                        onClick={dam.isTransferred ? undefined : () => onViewAnimal(dam)}
+                                                        className={`relative bg-white rounded-lg shadow-sm border border-gray-300 p-3 flex items-center gap-3 ${dam.isTransferred ? 'opacity-75' : 'cursor-pointer hover:shadow-md'} transition`}
                                                     >
                                                         <div className="w-20 h-20 bg-gray-100 rounded-md overflow-hidden flex-shrink-0">
                                                             {dam.imageUrl || dam.photoUrl ? (
