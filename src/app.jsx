@@ -16022,12 +16022,162 @@ const PublicProfilePage = () => {
     const [profile, setProfile] = useState(null);
     const [loading, setLoading] = useState(true);
     const [notFound, setNotFound] = useState(false);
+    const [showModal, setShowModal] = useState(false);
+    const [modalContent, setModalContent] = useState({ title: '', message: '' });
 
     // Check if user is logged in and in moderator mode
     const authToken = localStorage.getItem('authToken');
     const inModeratorMode = localStorage.getItem('moderationAuthenticated') === 'true';
     const [userProfile, setUserProfile] = useState(null);
     const [modCurrentContext, setModCurrentContext] = useState(null);
+
+    const showModalMessage = (title, message) => {
+        setModalContent({ title, message });
+        setShowModal(true);
+    };
+
+    const handleModQuickFlag = useCallback(async (flagData) => {
+        console.log('[MOD ACTION] HANDLER CALLED with:', flagData);
+        try {
+            console.log('[MOD ACTION] Inside try block');
+            console.log('[MOD ACTION] Starting action:', flagData);
+            console.log('[MOD ACTION] API_BASE_URL:', API_BASE_URL);
+            console.log('[MOD ACTION] authToken:', authToken ? 'present' : 'MISSING');
+
+            // Handle different action types
+            if (flagData.action === 'flag') {
+                // Create a report for flagged content
+                const reportType = flagData.context?.type === 'profile' ? 'profile' : 
+                                  flagData.context?.type === 'animal' ? 'animal' : 'message';
+                
+                // Get the correct user ID based on context type
+                const userId = flagData.context?.type === 'profile' 
+                    ? flagData.context?.userId 
+                    : flagData.context?.ownerId;
+                
+                const reportData = {
+                    reason: flagData.reason,
+                    category: flagData.category,
+                    description: `Moderator flag: ${flagData.reason}`,
+                    reportedContentId: flagData.context?.id,
+                    reportedUserId: userId
+                };
+
+                console.log('[MOD ACTION FLAG] Submitting flag:', { reportType, reportData });
+
+                const response = await axios.post(
+                    `${API_BASE_URL}/api/reports/${reportType}`,
+                    reportData,
+                    { headers: { Authorization: `Bearer ${authToken}` } }
+                );
+
+                console.log('[MOD ACTION FLAG] Success:', response.data);
+                showModalMessage('Flag Submitted', 'Content has been flagged and added to the report queue.');
+            } 
+            else if (flagData.action === 'edit') {
+                // Edit/redact content fields
+                const contentType = flagData.context?.type;
+                const contentId = flagData.context?.id;
+                
+                console.log('[MOD ACTION EDIT] Submitting edit:', { contentType, contentId, fieldEdits: flagData.fieldEdits });
+                
+                const response = await axios.patch(
+                    `${API_BASE_URL}/api/moderation/content/${contentType}/${contentId}/edit`,
+                    {
+                        fieldEdits: flagData.fieldEdits,
+                        reason: flagData.reason
+                    },
+                    { headers: { Authorization: `Bearer ${authToken}` } }
+                );
+
+                console.log('[MOD ACTION EDIT] Success:', response.data);
+                showModalMessage('Content Edited', 'Content has been updated successfully.');
+                // Refresh the current view
+                window.location.reload();
+            }
+            else if (flagData.action === 'warn') {
+                // Warn user - get correct user ID based on context type
+                const userId = flagData.context?.type === 'profile' 
+                    ? flagData.context?.userId 
+                    : flagData.context?.ownerId;
+                
+                console.log('[MOD ACTION WARN] Warning user:', { userId, reason: flagData.reason, category: flagData.category });
+                
+                const response = await axios.post(
+                    `${API_BASE_URL}/api/moderation/users/${userId}/warn`,
+                    {
+                        reason: flagData.reason,
+                        category: flagData.category
+                    },
+                    { headers: { Authorization: `Bearer ${authToken}` } }
+                );
+
+                console.log('[MOD ACTION WARN] Success:', response.data);
+                showModalMessage('Warning Sent', `User has been warned. Total warnings: ${response.data.warningCount}`);
+            }
+            else if (flagData.action === 'suspend') {
+                // Suspend user - get correct user ID based on context type
+                const userId = flagData.context?.type === 'profile' 
+                    ? flagData.context?.userId 
+                    : flagData.context?.ownerId;
+                
+                console.log('[MOD ACTION SUSPEND] Suspending user:', { userId, reason: flagData.reason, durationDays: flagData.durationDays });
+                
+                const response = await axios.post(
+                    `${API_BASE_URL}/api/moderation/users/${userId}/status`,
+                    {
+                        status: 'suspended',
+                        reason: flagData.reason,
+                        durationDays: flagData.durationDays
+                    },
+                    { headers: { Authorization: `Bearer ${authToken}` } }
+                );
+
+                console.log('[MOD ACTION SUSPEND] Success:', response.data);
+                showModalMessage('User Suspended', `User has been suspended for ${flagData.durationDays} days.`);
+            }
+            else if (flagData.action === 'ban') {
+                // Ban user - get correct user ID based on context type
+                const userId = flagData.context?.type === 'profile' 
+                    ? flagData.context?.userId 
+                    : flagData.context?.ownerId;
+                
+                console.log('[MOD ACTION BAN] Banning user:', { userId, reason: flagData.reason, ipBan: flagData.ipBan });
+                
+                const response = await axios.post(
+                    `${API_BASE_URL}/api/moderation/users/${userId}/status`,
+                    {
+                        status: 'banned',
+                        reason: flagData.reason,
+                        ipBan: flagData.ipBan
+                    },
+                    { headers: { Authorization: `Bearer ${authToken}` } }
+                );
+
+                console.log('[MOD ACTION BAN] Success:', response.data);
+                showModalMessage('User Banned', 'User has been permanently banned.');
+            }
+        } catch (error) {
+            console.error('[MOD ACTION] ERROR OCCURRED:', {
+                message: error.message,
+                status: error.response?.status,
+                statusText: error.response?.statusText,
+                errorData: error.response?.data,
+                errorResponse: error.response,
+                fullError: error
+            });
+            
+            // Extract error message for user feedback
+            const errorMsg = error.response?.data?.message 
+                || error.response?.data?.error 
+                || error.message 
+                || 'An error occurred while performing this action.';
+            
+            console.error('[MOD ACTION] Showing error message to user:', errorMsg);
+            showModalMessage('Action Failed', errorMsg);
+        }
+    }, [authToken]);
+
 
     useEffect(() => {
         // Fetch current user profile if authenticated
@@ -16125,6 +16275,22 @@ const PublicProfilePage = () => {
                     currentPage={window.location.pathname}
                     currentContext={modCurrentContext}
                 />
+            )}
+            
+            {/* Modal for moderation action feedback */}
+            {showModal && (
+                <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+                    <div className="bg-white rounded-lg shadow-lg p-6 max-w-md w-full mx-4">
+                        <h2 className="text-xl font-bold text-gray-800 mb-4">{modalContent.title}</h2>
+                        <p className="text-gray-600 mb-6">{modalContent.message}</p>
+                        <button
+                            onClick={() => setShowModal(false)}
+                            className="w-full px-4 py-2 bg-primary text-black font-semibold rounded-lg hover:bg-primary/90 transition"
+                        >
+                            OK
+                        </button>
+                    </div>
+                </div>
             )}
         </div>
     );
