@@ -13064,8 +13064,12 @@ const App = () => {
                     axios.get(`${API_BASE_URL}/public/users/newest?limit=5`),
                     axios.get(`${API_BASE_URL}/public/users/active?minutes=15`)
                 ]);
-                const newest = newestResponse.data || [];
-                const active = activeResponse.data || [];
+                let newest = newestResponse.data || [];
+                let active = activeResponse.data || [];
+                
+                // Filter out banned/deleted users (those without id_public or marked as deleted)
+                newest = newest.filter(u => u.id_public && u.accountStatus !== 'banned');
+                active = active.filter(u => u.id_public && u.accountStatus !== 'banned');
                 
                 // Remove duplicates: filter out active users who are already in newest
                 const newestIds = new Set(newest.map(u => u.id_public));
