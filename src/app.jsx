@@ -13996,8 +13996,8 @@ const App = () => {
             {/* Profile Card and Community Activity - shown only on list view */}
             {currentView === 'list' && (
                 <div className="w-full max-w-4xl mb-6 flex flex-col sm:flex-row gap-4">
-                    {/* Profile Card */}
-                    {currentView !== 'profile' && userProfile && <UserProfileCard userProfile={userProfile} />}
+                    {/* Profile Card - Hidden on mobile */}
+                    {currentView !== 'profile' && userProfile && <div className="hidden sm:block"><UserProfileCard userProfile={userProfile} /></div>}
                     
                     {/* Community Activity Banner */}
                     {(newestUsers.length > 0 || activeUsers.length > 0) && (
