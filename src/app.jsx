@@ -12651,7 +12651,7 @@ const App = () => {
     useEffect(() => {
         const fetchSpecies = async () => {
             try {
-                const response = await axios.get(`${API_BASE_URL}/api/species`);
+                const response = await axios.get(`${API_BASE_URL}/species`);
                 setSpeciesOptions(response.data);
             } catch (error) {
                 console.error('Failed to fetch species:', error);
