@@ -10127,17 +10127,16 @@ const AuthView = ({ onLoginSuccess, showModalMessage, isRegister, setIsRegister,
                     
                     {forgotPasswordStep === 2 && (
                         <div>
-                            <p className="text-sm text-gray-600 mb-4">Check your email for the reset code.</p>
+                            <p className="text-sm text-gray-600 mb-4">Check your email for the password reset code/link and paste it below.</p>
                             <input
                                 type="text"
-                                placeholder="Enter reset code"
+                                placeholder="Enter reset code or token"
                                 value={resetCode}
-                                onChange={(e) => setResetCode(e.target.value.replace(/\D/g, '').slice(0, 6))}
+                                onChange={(e) => setResetCode(e.target.value)}
                                 required
-                                maxLength={6}
-                                pattern="[0-9]{6}"
-                                className="w-full p-3 border border-gray-300 rounded-lg focus:ring-primary focus:border-primary transition text-center text-2xl tracking-widest font-mono"
+                                className="w-full p-3 border border-gray-300 rounded-lg focus:ring-primary focus:border-primary transition font-mono text-sm"
                             />
+                            <p className="text-xs text-gray-500 mt-2">Copy the entire code from your email and paste it here.</p>
                         </div>
                     )}
                     
@@ -10164,12 +10163,12 @@ const AuthView = ({ onLoginSuccess, showModalMessage, isRegister, setIsRegister,
                     
                     <button
                         type="submit"
-                        disabled={loading || (forgotPasswordStep === 1 && !resetEmail) || (forgotPasswordStep === 2 && resetCode.length !== 6) || (forgotPasswordStep === 3 && (!newPassword || !confirmNewPassword))}
+                        disabled={loading || (forgotPasswordStep === 1 && !resetEmail) || (forgotPasswordStep === 2 && !resetCode.trim()) || (forgotPasswordStep === 3 && (!newPassword || !confirmNewPassword))}
                         className="w-full bg-primary text-black font-bold py-3 rounded-lg shadow-md hover:bg-primary/90 transition duration-150 flex items-center justify-center disabled:opacity-50"
                     >
                         {loading ? <Loader2 className="animate-spin mr-2" size={20} /> : (
                             forgotPasswordStep === 1 ? 'Send Reset Code' : 
-                            forgotPasswordStep === 2 ? 'Enter Code' : 
+                            forgotPasswordStep === 2 ? 'Verify Code' : 
                             'Reset Password'
                         )}
                     </button>
