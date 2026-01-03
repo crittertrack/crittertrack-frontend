@@ -596,11 +596,11 @@ export const LiftWarningModal = ({ isOpen, onClose, onSubmit, context, currentWa
                         <div className="form-group">
                             <label>Select Warning to Lift</label>
                             <div style={{ maxHeight: '250px', overflowY: 'auto', border: '1px solid #e5e7eb', borderRadius: '0.5rem', padding: '0.75rem' }}>
-                                {activeWarnings.map((warning, index) => {
-                                    const actualIndex = warnings.findIndex(w => w === warning);
+                                {liveWarnings.map((warning, actualIndex) => {
+                                    if (warning.isLifted) return null;
                                     return (
                                         <div 
-                                            key={index}
+                                            key={actualIndex}
                                             onClick={() => setSelectedWarningIndex(actualIndex)}
                                             style={{
                                                 padding: '0.75rem',
@@ -613,7 +613,7 @@ export const LiftWarningModal = ({ isOpen, onClose, onSubmit, context, currentWa
                                             }}
                                         >
                                             <div style={{ fontWeight: 'bold', marginBottom: '0.25rem' }}>
-                                                Warning #{index + 1}
+                                                Warning #{actualIndex + 1}
                                             </div>
                                             <div style={{ fontSize: '0.875rem', color: '#666' }}>
                                                 <strong>Date:</strong> {new Date(warning.date).toLocaleString()}
