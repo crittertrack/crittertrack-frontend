@@ -110,7 +110,7 @@ const BudgetingTab = ({ authToken, API_BASE_URL, showModalMessage, preSelectedAn
 
     const fetchTransactions = async () => {
         try {
-            const response = await axios.get(`${API_BASE_URL}/budget/transactions`, {
+            const response = await axios.get(`${API_BASE_URL}/api/budget/transactions`, {
                 headers: { Authorization: `Bearer ${authToken}` }
             });
             setTransactions(response.data || []);
@@ -293,14 +293,14 @@ const BudgetingTab = ({ authToken, API_BASE_URL, showModalMessage, preSelectedAn
 
             if (editingTransaction) {
                 await axios.put(
-                    `${API_BASE_URL}/budget/transactions/${editingTransaction._id}`,
+                    `${API_BASE_URL}/api/budget/transactions/${editingTransaction._id}`,
                     transactionData,
                     { headers: { Authorization: `Bearer ${authToken}` } }
                 );
                 showModalMessage('Success', 'Transaction updated successfully');
             } else {
                 await axios.post(
-                    `${API_BASE_URL}/budget/transactions`,
+                    `${API_BASE_URL}/api/budget/transactions`,
                     transactionData,
                     { headers: { Authorization: `Bearer ${authToken}` } }
                 );
@@ -324,7 +324,7 @@ const BudgetingTab = ({ authToken, API_BASE_URL, showModalMessage, preSelectedAn
         }
 
         try {
-            await axios.delete(`${API_BASE_URL}/budget/transactions/${id}`, {
+            await axios.delete(`${API_BASE_URL}/api/budget/transactions/${id}`, {
                 headers: { Authorization: `Bearer ${authToken}` }
             });
             showModalMessage('Success', 'Transaction deleted successfully');
