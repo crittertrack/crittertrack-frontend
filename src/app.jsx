@@ -12324,7 +12324,7 @@ const App = () => {
                 console.log('[MOD ACTION FLAG] Submitting flag:', { reportType, reportData });
 
                 const response = await axios.post(
-                    `${API_BASE_URL}/api/reports/${reportType}`,
+                    `${API_BASE_URL}/reports/${reportType}`,
                     reportData,
                     { headers: { Authorization: `Bearer ${authToken}` } }
                 );
@@ -12340,7 +12340,7 @@ const App = () => {
                 console.log('[MOD ACTION EDIT] Submitting edit:', { contentType, contentId, fieldEdits: flagData.fieldEdits });
                 
                 const response = await axios.patch(
-                    `${API_BASE_URL}/api/moderation/content/${contentType}/${contentId}/edit`,
+                    `${API_BASE_URL}/moderation/content/${contentType}/${contentId}/edit`,
                     {
                         fieldEdits: flagData.fieldEdits,
                         reason: flagData.reason
@@ -12362,7 +12362,7 @@ const App = () => {
                 console.log('[MOD ACTION WARN] Warning user:', { userId, reason: flagData.reason, category: flagData.category });
                 
                 const response = await axios.post(
-                    `${API_BASE_URL}/api/moderation/users/${userId}/warn`,
+                    `${API_BASE_URL}/moderation/users/${userId}/warn`,
                     {
                         reason: flagData.reason,
                         category: flagData.category
@@ -12382,7 +12382,7 @@ const App = () => {
                 console.log('[MOD ACTION SUSPEND] Suspending user:', { userId, reason: flagData.reason, durationDays: flagData.durationDays });
                 
                 const response = await axios.post(
-                    `${API_BASE_URL}/api/moderation/users/${userId}/status`,
+                    `${API_BASE_URL}/moderation/users/${userId}/status`,
                     {
                         status: 'suspended',
                         reason: flagData.reason,
@@ -12403,7 +12403,7 @@ const App = () => {
                 console.log('[MOD ACTION BAN] Banning user:', { userId, reason: flagData.reason, ipBan: flagData.ipBan });
                 
                 const response = await axios.post(
-                    `${API_BASE_URL}/api/moderation/users/${userId}/status`,
+                    `${API_BASE_URL}/moderation/users/${userId}/status`,
                     {
                         status: 'banned',
                         reason: flagData.reason,
@@ -16066,7 +16066,7 @@ const PublicProfilePage = () => {
                 console.log('[MOD ACTION FLAG] Submitting flag:', { reportType, reportData });
 
                 const response = await axios.post(
-                    `${API_BASE_URL}/api/reports/${reportType}`,
+                    `${API_BASE_URL}/reports/${reportType}`,
                     reportData,
                     { headers: { Authorization: `Bearer ${authToken}` } }
                 );
@@ -16082,7 +16082,7 @@ const PublicProfilePage = () => {
                 console.log('[MOD ACTION EDIT] Submitting edit:', { contentType, contentId, fieldEdits: flagData.fieldEdits });
                 
                 const response = await axios.patch(
-                    `${API_BASE_URL}/api/moderation/content/${contentType}/${contentId}/edit`,
+                    `${API_BASE_URL}/moderation/content/${contentType}/${contentId}/edit`,
                     {
                         fieldEdits: flagData.fieldEdits,
                         reason: flagData.reason
@@ -16104,7 +16104,7 @@ const PublicProfilePage = () => {
                 console.log('[MOD ACTION WARN] Warning user:', { userId, reason: flagData.reason, category: flagData.category });
                 
                 const response = await axios.post(
-                    `${API_BASE_URL}/api/moderation/users/${userId}/warn`,
+                    `${API_BASE_URL}/moderation/users/${userId}/warn`,
                     {
                         reason: flagData.reason,
                         category: flagData.category
@@ -16124,7 +16124,7 @@ const PublicProfilePage = () => {
                 console.log('[MOD ACTION SUSPEND] Suspending user:', { userId, reason: flagData.reason, durationDays: flagData.durationDays });
                 
                 const response = await axios.post(
-                    `${API_BASE_URL}/api/moderation/users/${userId}/status`,
+                    `${API_BASE_URL}/moderation/users/${userId}/status`,
                     {
                         status: 'suspended',
                         reason: flagData.reason,
@@ -16145,7 +16145,7 @@ const PublicProfilePage = () => {
                 console.log('[MOD ACTION BAN] Banning user:', { userId, reason: flagData.reason, ipBan: flagData.ipBan });
                 
                 const response = await axios.post(
-                    `${API_BASE_URL}/api/moderation/users/${userId}/status`,
+                    `${API_BASE_URL}/moderation/users/${userId}/status`,
                     {
                         status: 'banned',
                         reason: flagData.reason,
