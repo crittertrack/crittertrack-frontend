@@ -230,13 +230,13 @@ export const WarnUserModal = ({ isOpen, onClose, onSubmit, context, currentWarni
     const fetchWarningCount = async () => {
         if (context?.userId && authToken && API_BASE_URL) {
             try {
-                const response = await axios.get(`${API_BASE_URL}/users/profile/${context.userId}`, {
+                const response = await axios.get(`${API_BASE_URL}/moderation/users/${context.userId}/info`, {
                     headers: { Authorization: `Bearer ${authToken}` }
                 });
-                console.log('[WarnUserModal] Fetched warning count:', response.data?.warningCount);
+                console.log('[WarnUserModal] Fetched user info:', response.data);
                 setLiveWarningCount(response.data?.warningCount || 0);
             } catch (error) {
-                console.error('Failed to fetch user warning count:', error);
+                console.error('Failed to fetch user warning info:', error);
                 setLiveWarningCount(currentWarnings);
             }
         } else {
