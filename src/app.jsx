@@ -9924,6 +9924,8 @@ const AuthView = ({ onLoginSuccess, showModalMessage, isRegister, setIsRegister,
     const [resetCode, setResetCode] = useState('');
     const [newPassword, setNewPassword] = useState('');
     const [confirmNewPassword, setConfirmNewPassword] = useState('');
+    const [suspensionInfo, setSuspensionInfo] = useState(null);
+    const [suspensionTimeRemaining, setSuspensionTimeRemaining] = useState(null);
 
     // Restore verification state from localStorage on mount
     useEffect(() => {
@@ -9962,6 +9964,48 @@ const AuthView = ({ onLoginSuccess, showModalMessage, isRegister, setIsRegister,
             localStorage.removeItem('pendingVerification');
         }
     }, [verificationStep, email]);
+
+    // Check for suspension info and update timer
+    useEffect(() => {
+        const suspensionEndTime = localStorage.getItem('suspensionEndTime');
+        const suspensionReason = localStorage.getItem('suspensionReason');
+        
+        if (suspensionEndTime) {
+            setSuspensionInfo({
+                endTime: parseInt(suspensionEndTime),
+                reason: suspensionReason || 'Your account has been suspended.'
+            });
+        }
+    }, []);
+
+    // Update suspension countdown timer
+    useEffect(() => {
+        if (!suspensionInfo) return;
+        
+        const updateTimer = () => {
+            const now = new Date().getTime();
+            const timeLeft = suspensionInfo.endTime - now;
+            
+            if (timeLeft <= 0) {
+                // Suspension expired
+                setSuspensionTimeRemaining(null);
+                localStorage.removeItem('suspensionEndTime');
+                localStorage.removeItem('suspensionReason');
+                setSuspensionInfo(null);
+            } else {
+                const days = Math.floor(timeLeft / (1000 * 60 * 60 * 24));
+                const hours = Math.floor((timeLeft % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
+                const minutes = Math.floor((timeLeft % (1000 * 60 * 60)) / (1000 * 60));
+                
+                setSuspensionTimeRemaining(`${days}d ${hours}h ${minutes}m`);
+            }
+        };
+        
+        updateTimer();
+        const interval = setInterval(updateTimer, 60000); // Update every minute
+        
+        return () => clearInterval(interval);
+    }, [suspensionInfo]);
 
     const handleSubmit = async (e) => {
         e.preventDefault();
@@ -10250,6 +10294,25 @@ const AuthView = ({ onLoginSuccess, showModalMessage, isRegister, setIsRegister,
             ) : (
                 // Step 1: Registration/Login Form
                 <form onSubmit={handleSubmit} className="space-y-4">
+                    
+                    {suspensionInfo && (
+                        <div className="bg-red-100 border-l-4 border-red-500 p-4 rounded">
+                            <div className="flex items-start">
+                                <div className="flex-shrink-0">
+                                    <AlertCircle className="h-5 w-5 text-red-500" />
+                                </div>
+                                <div className="ml-3">
+                                    <p className="text-sm font-medium text-red-800">Account Suspended</p>
+                                    <p className="text-sm text-red-700 mt-1">{suspensionInfo.reason}</p>
+                                    {suspensionTimeRemaining && (
+                                        <p className="text-sm text-red-700 mt-2 font-semibold">
+                                            Time remaining: <span className="text-lg">{suspensionTimeRemaining}</span>
+                                        </p>
+                                    )}
+                                </div>
+                            </div>
+                        </div>
+                    )}
                     
                     {isRegister && (
                         <input type="text" placeholder="Your Personal Name *" value={personalName} onChange={(e) => setPersonalName(e.target.value)} required 
@@ -12409,7 +12472,41 @@ const App = () => {
                 );
 
                 console.log('[MOD ACTION SUSPEND] Success:', response.data);
-                showModalMessage('User Suspended', `User has been suspended for ${flagData.durationDays} days.`);
+                
+                // Check if the suspended user is the current logged-in user
+                const isSuspendedUserCurrentUser = userProfile && userProfile.id_public === userId;
+                
+                if (isSuspendedUserCurrentUser) {
+                    // Log out the suspended user
+                    console.log('[MOD ACTION SUSPEND] Suspended user is current user - logging them out');
+                    
+                    // Calculate suspension end time
+                    const suspensionEndTime = new Date().getTime() + (flagData.durationDays * 24 * 60 * 60 * 1000);
+                    
+                    // Store suspension info for display on login screen
+                    localStorage.setItem('suspensionEndTime', suspensionEndTime.toString());
+                    localStorage.setItem('suspensionReason', flagData.reason || 'Your account has been suspended.');
+                    
+                    // Log out
+                    setAuthToken(null);
+                    setUserProfile(null);
+                    try {
+                        localStorage.removeItem('authToken');
+                    } catch (e) {
+                        console.warn('Could not clear authToken from localStorage', e);
+                    }
+                    
+                    // Show suspension message with timer
+                    showModalMessage(
+                        'Account Suspended',
+                        `Your account has been suspended for ${flagData.durationDays} days. Reason: ${flagData.reason || 'No reason provided'}. You will be able to log back in after the suspension period ends.`
+                    );
+                    
+                    // Redirect to login
+                    navigate('/');
+                } else {
+                    showModalMessage('User Suspended', `User has been suspended for ${flagData.durationDays} days.`);
+                }
             }
             else if (flagData.action === 'ban') {
                 // Ban user - get correct user ID based on context type
