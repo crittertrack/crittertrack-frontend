@@ -1,4 +1,5 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
+import axios from 'axios';
 import { X, AlertTriangle, Eye, MessageSquare, UserX, Ban, Flag } from 'lucide-react';
 import './ModActionModals.css';
 
@@ -219,9 +220,30 @@ export const EditContentModal = ({ isOpen, onClose, onSubmit, context }) => {
 };
 
 // Warn User Modal
-export const WarnUserModal = ({ isOpen, onClose, onSubmit, context, currentWarnings = 0 }) => {
+export const WarnUserModal = ({ isOpen, onClose, onSubmit, context, currentWarnings = 0, API_BASE_URL, authToken }) => {
     const [reason, setReason] = useState('');
     const [category, setCategory] = useState('policy_violation');
+    const [liveWarningCount, setLiveWarningCount] = useState(currentWarnings);
+
+    // Fetch fresh warning count when modal opens
+    useEffect(() => {
+        if (isOpen && context?.userId && authToken && API_BASE_URL) {
+            const fetchUserWarnings = async () => {
+                try {
+                    const response = await axios.get(`${API_BASE_URL}/users/profile/${context.userId}`, {
+                        headers: { Authorization: `Bearer ${authToken}` }
+                    });
+                    setLiveWarningCount(response.data?.warningCount || 0);
+                } catch (error) {
+                    console.error('Failed to fetch user warning count:', error);
+                    setLiveWarningCount(currentWarnings);
+                }
+            };
+            fetchUserWarnings();
+        } else {
+            setLiveWarningCount(currentWarnings);
+        }
+    }, [isOpen, context?.userId, authToken, API_BASE_URL, currentWarnings]);
 
     if (!isOpen) return null;
 
@@ -250,8 +272,8 @@ export const WarnUserModal = ({ isOpen, onClose, onSubmit, context, currentWarni
                 <div className="mod-modal-body">
                     <div className="warning-count-banner">
                         <AlertTriangle size={18} />
-                        <span>User currently has <strong>{currentWarnings}</strong> warning(s)</span>
-                        {currentWarnings >= 2 && (
+                        <span>User currently has <strong>{liveWarningCount}</strong> warning(s)</span>
+                        {liveWarningCount >= 2 && (
                             <span className="text-red-600 ml-2">(Next warning will trigger auto-suspension)</span>
                         )}
                     </div>
@@ -469,6 +491,66 @@ export const BanUserModal = ({ isOpen, onClose, onSubmit, context }) => {
                     <button onClick={onClose} className="btn-cancel">Cancel</button>
                     <button onClick={handleSubmit} disabled={!reason.trim()} className="btn-submit btn-ban">
                         Permanently Ban User
+                    </button>
+                </div>
+            </div>
+        </div>
+    );
+};
+
+// Lift Warning Modal
+export const LiftWarningModal = ({ isOpen, onClose, onSubmit, context, currentWarnings = 0 }) => {
+    const [reason, setReason] = useState('');
+
+    if (!isOpen) return null;
+
+    const handleSubmit = () => {
+        onSubmit({
+            action: 'lift-warning',
+            reason,
+            context
+        });
+        setReason('');
+        onClose();
+    };
+
+    return (
+        <div className="mod-modal-overlay">
+            <div className="mod-modal">
+                <div className="mod-modal-header">
+                    <AlertTriangle size={24} className="text-green-600" />
+                    <h2>Lift Warning</h2>
+                    <button onClick={onClose} className="mod-modal-close">
+                        <X size={20} />
+                    </button>
+                </div>
+                <div className="mod-modal-body">
+                    <div className="warning-count-banner">
+                        <AlertTriangle size={18} />
+                        <span>User currently has <strong>{currentWarnings}</strong> warning(s)</span>
+                    </div>
+                    
+                    {context && (
+                        <div className="mod-context-info">
+                            <strong>Lifting Warning For:</strong> {context.ownerName || context.name}
+                        </div>
+                    )}
+
+                    <div className="form-group">
+                        <label>Reason for Lifting Warning (required)</label>
+                        <textarea
+                            value={reason}
+                            onChange={(e) => setReason(e.target.value)}
+                            placeholder="Explain why this warning is being lifted (e.g., user appeal granted, warning was in error, etc.)..."
+                            rows={4}
+                            required
+                        />
+                    </div>
+                </div>
+                <div className="mod-modal-footer">
+                    <button onClick={onClose} className="btn-cancel">Cancel</button>
+                    <button onClick={handleSubmit} disabled={!reason.trim()} className="btn-submit" style={{backgroundColor: '#10b981'}}>
+                        Lift Warning (Remove 1)
                     </button>
                 </div>
             </div>

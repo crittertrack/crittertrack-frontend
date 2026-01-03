@@ -15,7 +15,9 @@ export default function ModeratorActionSidebar({
     onQuickFlag,
     onExitModeration,
     currentPage,
-    currentContext
+    currentContext,
+    API_BASE_URL,
+    authToken
 }) {
     const [isCollapsed, setIsCollapsed] = useState(false);
     const [notes, setNotes] = useState('');
@@ -162,6 +164,8 @@ export default function ModeratorActionSidebar({
                 onSubmit={handleModalSubmit}
                 context={currentContext}
                 currentWarnings={currentContext?.warningCount || 0}
+                API_BASE_URL={API_BASE_URL}
+                authToken={authToken}
             />
             <SuspendUserModal
                 isOpen={activeModal === 'suspend'}

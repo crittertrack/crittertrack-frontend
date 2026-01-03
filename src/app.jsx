@@ -13285,6 +13285,8 @@ const App = () => {
                             }}
                             currentPage={location.pathname}
                             currentContext={modCurrentContext}
+                            API_BASE_URL={API_BASE_URL}
+                            authToken={authToken}
                         />
                     )}
                     
@@ -16291,6 +16293,8 @@ const PublicProfilePage = () => {
                     }}
                     currentPage={window.location.pathname}
                     currentContext={modCurrentContext}
+                    API_BASE_URL={API_BASE_URL}
+                    authToken={authToken}
                 />
             )}
             
