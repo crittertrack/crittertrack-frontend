@@ -12862,6 +12862,23 @@ const App = () => {
                         authToken={authToken}
                         setModCurrentContext={setModCurrentContext}
                     />
+
+                    {/* Moderator Action Sidebar - Shows in moderator mode even when viewing public profiles */}
+                    {inModeratorMode && !showModReportQueue && ['admin', 'moderator'].includes(userProfile?.role) && (
+                        <ModeratorActionSidebar
+                            isActive={true}
+                            onOpenReportQueue={() => setShowModReportQueue(true)}
+                            onQuickFlag={handleModQuickFlag}
+                            onExitModeration={() => {
+                                setInModeratorMode(false);
+                                setShowAdminPanel(false);
+                                setShowModReportQueue(false);
+                                localStorage.removeItem('moderationAuthenticated');
+                            }}
+                            currentPage={location.pathname}
+                            currentContext={modCurrentContext}
+                        />
+                    )}
                 </div>
             );
         }
@@ -15544,6 +15561,29 @@ const PublicProfilePage = () => {
     const [loading, setLoading] = useState(true);
     const [notFound, setNotFound] = useState(false);
 
+    // Check if user is logged in and in moderator mode
+    const authToken = localStorage.getItem('authToken');
+    const inModeratorMode = localStorage.getItem('moderationAuthenticated') === 'true';
+    const [userProfile, setUserProfile] = useState(null);
+    const [modCurrentContext, setModCurrentContext] = useState(null);
+
+    useEffect(() => {
+        // Fetch current user profile if authenticated
+        const fetchUserProfile = async () => {
+            if (authToken) {
+                try {
+                    const response = await axios.get(`${API_BASE_URL}/users/profile`, {
+                        headers: { Authorization: `Bearer ${authToken}` }
+                    });
+                    setUserProfile(response.data);
+                } catch (error) {
+                    console.error('Error fetching user profile:', error);
+                }
+            }
+        };
+        fetchUserProfile();
+    }, [authToken]);
+
     useEffect(() => {
         const fetchProfile = async () => {
             try {
@@ -15580,7 +15620,7 @@ const PublicProfilePage = () => {
                         onClick={() => navigate('/')}
                         className="w-full px-4 py-2 bg-primary text-black font-semibold rounded-lg hover:bg-primary/90 transition"
                     >
-                        Login / Register
+                        {authToken ? 'Go to Dashboard' : 'Login / Register'}
                     </button>
                 </div>
             </div>
@@ -15595,7 +15635,7 @@ const PublicProfilePage = () => {
                     onClick={() => navigate('/')}
                     className="px-3 py-2 bg-gray-200 hover:bg-gray-300 text-gray-700 font-semibold rounded-lg transition"
                 >
-                    Home
+                    {authToken ? 'Dashboard' : 'Home'}
                 </button>
             </header>
             <PublicProfileView
@@ -15603,9 +15643,27 @@ const PublicProfilePage = () => {
                 onBack={() => navigate('/')}
                 onViewAnimal={(animal) => navigate(`/animal/${animal.id_public}`)}
                 API_BASE_URL={API_BASE_URL}
-                authToken={null}
-                setModCurrentContext={null}
+                authToken={authToken}
+                setModCurrentContext={setModCurrentContext}
             />
+            
+            {/* Moderator Action Sidebar - Shows if user is authenticated moderator */}
+            {inModeratorMode && userProfile && ['admin', 'moderator'].includes(userProfile?.role) && (
+                <ModeratorActionSidebar
+                    isActive={true}
+                    onOpenReportQueue={() => navigate('/')}
+                    onQuickFlag={(flagData) => {
+                        console.log('Quick flag from public route:', flagData);
+                        // Could send to API here
+                    }}
+                    onExitModeration={() => {
+                        localStorage.removeItem('moderationAuthenticated');
+                        window.location.href = '/';
+                    }}
+                    currentPage={window.location.pathname}
+                    currentContext={modCurrentContext}
+                />
+            )}
         </div>
     );
 };
