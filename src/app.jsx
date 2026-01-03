@@ -13023,6 +13023,54 @@ const App = () => {
                             </button>
                         </div>
                     </header>
+
+                    {/* Moderator Warning Banner */}
+                    {notifications.filter(n => n.type === 'moderator_warning' && !n.read).length > 0 && (
+                        <div className="w-full max-w-4xl mb-6">
+                            {notifications.filter(n => n.type === 'moderator_warning' && !n.read).map((warning) => (
+                                <div key={warning._id} className="bg-yellow-50 border-l-4 border-yellow-400 p-4 rounded-lg shadow-md mb-3">
+                                    <div className="flex items-start">
+                                        <div className="flex-shrink-0">
+                                            <AlertCircle className="h-6 w-6 text-yellow-400" />
+                                        </div>
+                                        <div className="ml-3 flex-1">
+                                            <h3 className="text-lg font-bold text-yellow-800">⚠️ Official Warning from Moderation Team</h3>
+                                            <div className="mt-2 text-yellow-700">
+                                                <p className="text-sm font-medium">{warning.message}</p>
+                                                {warning.metadata?.warningCount && (
+                                                    <p className="text-xs mt-2 font-semibold">
+                                                        Total Warnings: {warning.metadata.warningCount} 
+                                                        {warning.metadata.warningCount >= 3 && <span className="text-red-600"> - Your account may be subject to suspension</span>}
+                                                    </p>
+                                                )}
+                                                <p className="text-xs mt-1 text-gray-600">
+                                                    Issued: {new Date(warning.createdAt).toLocaleString()}
+                                                </p>
+                                            </div>
+                                        </div>
+                                        <button
+                                            onClick={async () => {
+                                                try {
+                                                    await axios.patch(
+                                                        `${API_BASE_URL}/notifications/${warning._id}`,
+                                                        { read: true },
+                                                        { headers: { Authorization: `Bearer ${authToken}` } }
+                                                    );
+                                                    fetchNotifications();
+                                                } catch (error) {
+                                                    console.error('Error marking warning as read:', error);
+                                                }
+                                            }}
+                                            className="ml-3 flex-shrink-0 text-yellow-600 hover:text-yellow-800"
+                                            title="Acknowledge and dismiss"
+                                        >
+                                            <X size={20} />
+                                        </button>
+                                    </div>
+                                </div>
+                            ))}
+                        </div>
+                    )}
                     
                     {showUserSearchModal && (
                         <UserSearchModal 
