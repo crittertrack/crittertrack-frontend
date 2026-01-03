@@ -12296,7 +12296,9 @@ const App = () => {
 
     const handleModQuickFlag = useCallback(async (flagData) => {
         try {
-            console.log('Quick flag action:', flagData);
+            console.log('[MOD ACTION] Starting action:', flagData);
+            console.log('[MOD ACTION] API_BASE_URL:', API_BASE_URL);
+            console.log('[MOD ACTION] authToken:', authToken ? 'present' : 'MISSING');
 
             // Handle different action types
             if (flagData.action === 'flag') {
@@ -12317,18 +12319,23 @@ const App = () => {
                     reportedUserId: userId
                 };
 
+                console.log('[MOD ACTION FLAG] Submitting flag:', { reportType, reportData });
+
                 const response = await axios.post(
                     `${API_BASE_URL}/api/reports/${reportType}`,
                     reportData,
                     { headers: { Authorization: `Bearer ${authToken}` } }
                 );
 
+                console.log('[MOD ACTION FLAG] Success:', response.data);
                 showModalMessage('Flag Submitted', 'Content has been flagged and added to the report queue.');
             } 
             else if (flagData.action === 'edit') {
                 // Edit/redact content fields
                 const contentType = flagData.context?.type;
                 const contentId = flagData.context?.id;
+                
+                console.log('[MOD ACTION EDIT] Submitting edit:', { contentType, contentId, fieldEdits: flagData.fieldEdits });
                 
                 const response = await axios.patch(
                     `${API_BASE_URL}/api/moderation/content/${contentType}/${contentId}/edit`,
@@ -12339,6 +12346,7 @@ const App = () => {
                     { headers: { Authorization: `Bearer ${authToken}` } }
                 );
 
+                console.log('[MOD ACTION EDIT] Success:', response.data);
                 showModalMessage('Content Edited', 'Content has been updated successfully.');
                 // Refresh the current view
                 window.location.reload();
@@ -12349,6 +12357,8 @@ const App = () => {
                     ? flagData.context?.userId 
                     : flagData.context?.ownerId;
                 
+                console.log('[MOD ACTION WARN] Warning user:', { userId, reason: flagData.reason, category: flagData.category });
+                
                 const response = await axios.post(
                     `${API_BASE_URL}/api/moderation/users/${userId}/warn`,
                     {
@@ -12358,6 +12368,7 @@ const App = () => {
                     { headers: { Authorization: `Bearer ${authToken}` } }
                 );
 
+                console.log('[MOD ACTION WARN] Success:', response.data);
                 showModalMessage('Warning Sent', `User has been warned. Total warnings: ${response.data.warningCount}`);
             }
             else if (flagData.action === 'suspend') {
@@ -12365,6 +12376,8 @@ const App = () => {
                 const userId = flagData.context?.type === 'profile' 
                     ? flagData.context?.userId 
                     : flagData.context?.ownerId;
+                
+                console.log('[MOD ACTION SUSPEND] Suspending user:', { userId, reason: flagData.reason, durationDays: flagData.durationDays });
                 
                 const response = await axios.post(
                     `${API_BASE_URL}/api/moderation/users/${userId}/status`,
@@ -12376,6 +12389,7 @@ const App = () => {
                     { headers: { Authorization: `Bearer ${authToken}` } }
                 );
 
+                console.log('[MOD ACTION SUSPEND] Success:', response.data);
                 showModalMessage('User Suspended', `User has been suspended for ${flagData.durationDays} days.`);
             }
             else if (flagData.action === 'ban') {
@@ -12383,6 +12397,8 @@ const App = () => {
                 const userId = flagData.context?.type === 'profile' 
                     ? flagData.context?.userId 
                     : flagData.context?.ownerId;
+                
+                console.log('[MOD ACTION BAN] Banning user:', { userId, reason: flagData.reason, ipBan: flagData.ipBan });
                 
                 const response = await axios.post(
                     `${API_BASE_URL}/api/moderation/users/${userId}/status`,
@@ -12394,11 +12410,27 @@ const App = () => {
                     { headers: { Authorization: `Bearer ${authToken}` } }
                 );
 
+                console.log('[MOD ACTION BAN] Success:', response.data);
                 showModalMessage('User Banned', 'User has been permanently banned.');
             }
         } catch (error) {
-            console.error('Error handling quick flag:', error);
-            showModalMessage('Error', error.response?.data?.message || 'Failed to process moderator action');
+            console.error('[MOD ACTION] ERROR OCCURRED:', {
+                message: error.message,
+                status: error.response?.status,
+                statusText: error.response?.statusText,
+                errorData: error.response?.data,
+                errorResponse: error.response,
+                fullError: error
+            });
+            
+            // Extract error message for user feedback
+            const errorMsg = error.response?.data?.message 
+                || error.response?.data?.error 
+                || error.message 
+                || 'An error occurred while performing this action.';
+            
+            console.error('[MOD ACTION] Showing error message to user:', errorMsg);
+            showModalMessage('Action Failed', errorMsg);
         }
     }, [showModalMessage, authToken, API_BASE_URL]);
 
