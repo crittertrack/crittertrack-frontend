@@ -12571,15 +12571,15 @@ const App = () => {
     useEffect(() => {
         const fetchSpecies = async () => {
             try {
-                const response = await axios.get(`${API_BASE_URL}/species`);
+                const response = await axios.get(`${API_BASE_URL}/api/species`);
                 setSpeciesOptions(response.data);
             } catch (error) {
                 console.error('Failed to fetch species:', error);
                 // Fallback to defaults if API fails
                 setSpeciesOptions([
-                    { name: 'Mouse', category: 'Rodent', isDefault: true },
-                    { name: 'Rat', category: 'Rodent', isDefault: true },
-                    { name: 'Hamster', category: 'Rodent', isDefault: true }
+                    { name: 'Fancy Mouse', category: 'Rodent', isDefault: true },
+                    { name: 'Fancy Rat', category: 'Rodent', isDefault: true },
+                    { name: 'Russian Dwarf Hamster', category: 'Rodent', isDefault: true }
                 ]);
             }
         };
