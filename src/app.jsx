@@ -1891,11 +1891,28 @@ const PublicProfileView = ({ profile, onBack, onViewAnimal, API_BASE_URL, onStar
 };
 
 // View-Only Animal Detail Modal
-const ViewOnlyAnimalDetail = ({ animal, onClose, API_BASE_URL, onViewProfile, authToken }) => {
+const ViewOnlyAnimalDetail = ({ animal, onClose, API_BASE_URL, onViewProfile, authToken, setModCurrentContext }) => {
     const [breederInfo, setBreederInfo] = useState(null);
     const [showPedigree, setShowPedigree] = useState(false);
     const [copySuccess, setCopySuccess] = useState(false);
     const [detailViewTab, setDetailViewTab] = useState(1);
+    
+    // Set moderator context when viewing this animal
+    useEffect(() => {
+        if (setModCurrentContext && animal) {
+            setModCurrentContext({
+                type: 'animal',
+                id: animal.id_public,
+                name: animal.name,
+                ownerId: animal.ownerId
+            });
+        }
+        return () => {
+            if (setModCurrentContext) {
+                setModCurrentContext(null);
+            }
+        };
+    }, [animal, setModCurrentContext]);
     
     // Helper function to parse health records from JSON strings
     const parseHealthRecords = (data) => {
@@ -12820,6 +12837,27 @@ const App = () => {
                             API_BASE_URL={API_BASE_URL}
                             authToken={authToken}
                             onViewProfile={(user) => setViewingPublicProfile(user)}
+                            setModCurrentContext={setModCurrentContext}
+                        />
+                    )}
+
+                    {/* Moderator Action Sidebar - Shows when viewing animals in mod mode */}
+                    {inModeratorMode && !showModReportQueue && localStorage.getItem('moderationAuthenticated') === 'true' && (
+                        <ModeratorActionSidebar
+                            isActive={true}
+                            onOpenReportQueue={() => setShowModReportQueue(true)}
+                            onQuickFlag={handleModQuickFlag}
+                            onExitModeration={() => {
+                                setInModeratorMode(false);
+                                setShowAdminPanel(false);
+                                setShowModReportQueue(false);
+                                localStorage.removeItem('moderationAuthenticated');
+                                setViewingPublicProfile(null);
+                                setViewingPublicAnimal(null);
+                                navigate('/');
+                            }}
+                            currentPage={location.pathname}
+                            currentContext={modCurrentContext}
                         />
                     )}
                     
@@ -12926,6 +12964,7 @@ const App = () => {
                             API_BASE_URL={API_BASE_URL}
                             authToken={authToken}
                             onViewProfile={(user) => setViewingPublicProfile(user)}
+                            setModCurrentContext={setModCurrentContext}
                         />
                     )}
                     
@@ -12991,6 +13030,7 @@ const App = () => {
                         onClose={() => setViewingPublicAnimal(null)}
                         API_BASE_URL={API_BASE_URL}
                         authToken={authToken}
+                        setModCurrentContext={setModCurrentContext}
                         onViewProfile={(user) => setViewingPublicProfile(user)}
                     />
                 )}
@@ -13274,6 +13314,7 @@ const App = () => {
                     animal={viewingPublicAnimal}
                     onClose={() => setViewingPublicAnimal(null)}
                     API_BASE_URL={API_BASE_URL}
+                    setModCurrentContext={setModCurrentContext}
                     authToken={authToken}
                     onViewProfile={(user) => navigate(`/user/${user.id_public}`)}
                 />
