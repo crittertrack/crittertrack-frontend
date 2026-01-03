@@ -1700,7 +1700,7 @@ const PublicProfileView = ({ profile, onBack, onViewAnimal, API_BASE_URL, onStar
                     )}
                     
                     {/* Bio - Show if available and public */}
-                    {(freshProfile?.showBioPublic || profile.showBioPublic) && (freshProfile?.bio || profile.bio) && (
+                    {(freshProfile?.showBio ?? profile.showBio ?? true) && (freshProfile?.bio || profile.bio) && (
                         <p className="text-sm text-gray-700 mt-3 p-3 bg-gray-50 rounded-lg border border-gray-200">
                             {freshProfile?.bio || profile.bio}
                         </p>
@@ -9045,7 +9045,7 @@ const ProfileEditForm = ({ userProfile, showModalMessage, onSaveSuccess, onCance
     const [showGeneticCodePublic, setShowGeneticCodePublic] = useState(userProfile.showGeneticCodePublic ?? false);
     const [showRemarksPublic, setShowRemarksPublic] = useState(userProfile.showRemarksPublic ?? false);
     const [bio, setBio] = useState(userProfile.bio || '');
-    const [showBioPublic, setShowBioPublic] = useState(userProfile.showBioPublic ?? false);
+    const [showBio, setShowBio] = useState(userProfile.showBio ?? true);
     const [allowMessages, setAllowMessages] = useState(userProfile.allowMessages === undefined ? true : !!userProfile.allowMessages);
     const [emailNotificationPreference, setEmailNotificationPreference] = useState(userProfile.emailNotificationPreference || 'none');
     const [country, setCountry] = useState(userProfile.country || '');
@@ -9119,7 +9119,7 @@ const ProfileEditForm = ({ userProfile, showModalMessage, onSaveSuccess, onCance
             showGeneticCodePublic: showGeneticCodePublic,
             showRemarksPublic: showRemarksPublic,
             bio: bio || null,
-            showBioPublic: bio ? showBioPublic : false,
+            showBio: bio ? showBio : true,
             allowMessages: allowMessages,
             emailNotificationPreference: emailNotificationPreference,
             country: country || null,
@@ -9402,7 +9402,7 @@ const ProfileEditForm = ({ userProfile, showModalMessage, onSaveSuccess, onCance
                         
                         {bio && (
                             <label className="flex items-center space-x-2 text-sm text-gray-700">
-                                <input type="checkbox" checked={showBioPublic} onChange={(e) => setShowBioPublic(e.target.checked)} 
+                                <input type="checkbox" checked={showBio} onChange={(e) => setShowBio(e.target.checked)} 
                                     className="rounded text-primary-dark focus:ring-primary-dark" disabled={profileLoading} />
                                 <span>Display **Bio** on your public profile card.</span>
                             </label>
@@ -9822,9 +9822,9 @@ const ProfileView = ({ userProfile, showModalMessage, fetchUserProfile, authToke
                     <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-2 py-2">
                         <span className="text-sm sm:text-base text-gray-800 truncate">Bio ({userProfile.bio ? userProfile.bio.substring(0, 30) + (userProfile.bio.length > 30 ? '...' : '') : 'N/A'})</span>
                         <span className={`px-3 py-1 text-xs font-semibold rounded-full whitespace-nowrap ${ 
-                            (userProfile.showBioPublic ?? false) ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800'
+                            (userProfile.showBio ?? true) ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800'
                         }`}>
-                            {(userProfile.showBioPublic ?? false) ? 'Public' : 'Private'}
+                            {(userProfile.showBio ?? true) ? 'Public' : 'Private'}
                         </span>
                     </div>
 
