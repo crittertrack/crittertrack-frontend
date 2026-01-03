@@ -1699,6 +1699,13 @@ const PublicProfileView = ({ profile, onBack, onViewAnimal, API_BASE_URL, onStar
                         </p>
                     )}
                     
+                    {/* Bio - Show if available and public */}
+                    {(freshProfile?.showBioPublic || profile.showBioPublic) && (freshProfile?.bio || profile.bio) && (
+                        <p className="text-sm text-gray-700 mt-3 p-3 bg-gray-50 rounded-lg border border-gray-200">
+                            {freshProfile?.bio || profile.bio}
+                        </p>
+                    )}
+                    
                     {/* Email - Show if public */}
                     {(freshProfile?.showEmailPublic ?? profile.showEmailPublic) && (freshProfile?.email || profile.email) && (
                         <p className="text-sm text-gray-700 mt-2 flex items-center gap-2 break-all">
@@ -9037,6 +9044,8 @@ const ProfileEditForm = ({ userProfile, showModalMessage, onSaveSuccess, onCance
     const [showEmailPublic, setShowEmailPublic] = useState(userProfile.showEmailPublic ?? false); 
     const [showGeneticCodePublic, setShowGeneticCodePublic] = useState(userProfile.showGeneticCodePublic ?? false);
     const [showRemarksPublic, setShowRemarksPublic] = useState(userProfile.showRemarksPublic ?? false);
+    const [bio, setBio] = useState(userProfile.bio || '');
+    const [showBioPublic, setShowBioPublic] = useState(userProfile.showBioPublic ?? false);
     const [allowMessages, setAllowMessages] = useState(userProfile.allowMessages === undefined ? true : !!userProfile.allowMessages);
     const [emailNotificationPreference, setEmailNotificationPreference] = useState(userProfile.emailNotificationPreference || 'none');
     const [country, setCountry] = useState(userProfile.country || '');
@@ -9109,6 +9118,8 @@ const ProfileEditForm = ({ userProfile, showModalMessage, onSaveSuccess, onCance
             showEmailPublic: showEmailPublic,
             showGeneticCodePublic: showGeneticCodePublic,
             showRemarksPublic: showRemarksPublic,
+            bio: bio || null,
+            showBioPublic: bio ? showBioPublic : false,
             allowMessages: allowMessages,
             emailNotificationPreference: emailNotificationPreference,
             country: country || null,
@@ -9306,6 +9317,18 @@ const ProfileEditForm = ({ userProfile, showModalMessage, onSaveSuccess, onCance
                         <input type="url" name="websiteURL" placeholder="Website URL (Optional) e.g., https://example.com" value={websiteURL} onChange={(e) => setWebsiteURL(e.target.value)}
                             className="w-full p-3 border border-gray-300 rounded-lg focus:ring-primary focus:border-primary transition box-border" disabled={profileLoading} />
                     
+                        <textarea 
+                            name="bio" 
+                            placeholder="Bio (Optional) - Tell other breeders about yourself and your breeding program" 
+                            value={bio} 
+                            onChange={(e) => setBio(e.target.value)}
+                            rows="4"
+                            maxLength="500"
+                            className="w-full p-3 border border-gray-300 rounded-lg focus:ring-primary focus:border-primary transition box-border resize-none" 
+                            disabled={profileLoading}
+                        />
+                        {bio && <p className="text-xs text-gray-500 mt-1">{bio.length}/500 characters</p>}
+
                         <select value={country} onChange={(e) => setCountry(e.target.value)}
                         className="w-full p-3 border border-gray-300 rounded-lg focus:ring-primary focus:border-primary transition box-border" disabled={profileLoading}>
                         <option value="">Select Country (Optional)</option>
@@ -9374,6 +9397,14 @@ const ProfileEditForm = ({ userProfile, showModalMessage, onSaveSuccess, onCance
                                 <input type="checkbox" checked={showWebsiteURL} onChange={(e) => setShowWebsiteURL(e.target.checked)} 
                                     className="rounded text-primary-dark focus:ring-primary-dark" disabled={profileLoading} />
                                 <span>Display **Website URL** on your public profile card.</span>
+                            </label>
+                        )}
+                        
+                        {bio && (
+                            <label className="flex items-center space-x-2 text-sm text-gray-700">
+                                <input type="checkbox" checked={showBioPublic} onChange={(e) => setShowBioPublic(e.target.checked)} 
+                                    className="rounded text-primary-dark focus:ring-primary-dark" disabled={profileLoading} />
+                                <span>Display **Bio** on your public profile card.</span>
                             </label>
                         )}
                     </div>
@@ -9785,6 +9816,15 @@ const ProfileView = ({ userProfile, showModalMessage, fetchUserProfile, authToke
                             (userProfile.showWebsiteURL ?? false) ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800'
                         }`}>
                             {(userProfile.showWebsiteURL ?? false) ? 'Public' : 'Private'}
+                        </span>
+                    </div>
+
+                    <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-2 py-2">
+                        <span className="text-sm sm:text-base text-gray-800 truncate">Bio ({userProfile.bio ? userProfile.bio.substring(0, 30) + (userProfile.bio.length > 30 ? '...' : '') : 'N/A'})</span>
+                        <span className={`px-3 py-1 text-xs font-semibold rounded-full whitespace-nowrap ${ 
+                            (userProfile.showBioPublic ?? false) ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800'
+                        }`}>
+                            {(userProfile.showBioPublic ?? false) ? 'Public' : 'Private'}
                         </span>
                     </div>
 
@@ -13447,7 +13487,7 @@ const App = () => {
                             <span>Profile</span>
                         </button>
                         {!isMobile && (
-                            <button onClick={() => setShowInfoTab(true)} className={`px-4 py-2 text-xs font-medium rounded-lg transition duration-150 flex flex-col items-center text-gray-600 hover:bg-gray-100`} title="Tutorials & Help">
+                            <button onClick={() => setShowInfoTab(true)} data-tutorial-target="help-btn" className={`px-4 py-2 text-xs font-medium rounded-lg transition duration-150 flex flex-col items-center text-gray-600 hover:bg-gray-100`} title="Tutorials & Help">
                                 <BookOpen size={18} className="mb-1" />
                                 <span>Help</span>
                             </button>
@@ -13903,7 +13943,8 @@ const App = () => {
                                     setCurrentTutorialStep(null);
                                     return nextIndex;
                                 } else {
-                                    // All advanced lessons completed
+                                    // All advanced lessons completed - mark initial tutorial as seen
+                                    markInitialTutorialSeen();
                                     setShowTutorialOverlay(false);
                                     setCurrentTutorialId(null);
                                     setCurrentTutorialStep(null);

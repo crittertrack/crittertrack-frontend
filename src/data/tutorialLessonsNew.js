@@ -650,6 +650,7 @@ const GETTING_STARTED_LESSONS = [
         title: 'Parent Search System',
         content: 'This modal lets you search for the sire. Notice the buttons for "Local" (your animals), "Global" (community animals), and "Both". You can also search by name or ID. The system only shows animals that match your current animal\'s species and the correct gender.',
         highlightElement: '[data-tutorial-target="parent-search-modal"]',
+        hideHighlightPrompt: true,
         tips: [
           'Local Animals: Your collection only',
           'Global Animals: Community collection',
@@ -662,6 +663,7 @@ const GETTING_STARTED_LESSONS = [
         title: 'Close Sire Selector',
         content: 'For now, let\'s close this selector without selecting a parent. Click the X button in the top right corner of the modal to close it.',
         highlightElement: '[data-tutorial-target="modal-close-btn"]',
+        hideHighlightPrompt: true,
         actionType: 'close',
         tips: [
           'Click the X button to close the modal',
@@ -1604,8 +1606,6 @@ const KEY_FEATURES_LESSONS = [
         stepNumber: 4,
         title: 'Close & Reopen Add Transaction',
         content: 'Let\'s explore other transaction types. Close this transaction and reopen the "Add Transaction" button.',
-        highlightElement: '[data-tutorial-target="add-transaction-btn"]',
-        hideHighlightPrompt: true,
         tips: [
           'Multiple transaction types available',
           'Each serves different purpose',
@@ -1762,6 +1762,7 @@ const KEY_FEATURES_LESSONS = [
         title: 'Combined Filtering',
         content: 'Use multiple filters together: search by name, filter by species and gender, then by status. This gives you powerful tools to find exactly what you\'re looking for in your collection.',
         highlightElement: '[data-tutorial-target="my-animals-section"]',
+        hideHighlightPrompt: true,
         tips: [
           'Layer multiple filters',
           'Quick specific searches',
@@ -1936,13 +1937,14 @@ const ADVANCED_FEATURES_LESSONS = [
       {
         stepNumber: 3,
         title: 'Filtering by Tags',
-        content: 'Use the Tag filter in the search section to show only animals with specific tags. This helps organize your collection.',
+        content: 'You can search for animals by their tags using the "Search by animal name" field. For example, typing "LineB" will show all animals with that tag. The search works for both animal names and tags.',
         highlightElement: '[data-tutorial-target="tag-filter"]',
         hideHighlightPrompt: true,
         tips: [
-          'Quick organization viewing',
-          'Combine with other filters',
-          'Shows tagged animals'
+          'Search field finds tag names',
+          'Works for both names and tags',
+          'Combine with species/gender filters',
+          'Great for line breeding organization'
         ]
       },
       {
@@ -2162,6 +2164,7 @@ const ADVANCED_FEATURES_LESSONS = [
         stepNumber: 7,
         title: 'Tutorial Complete!',
         content: 'Congratulations! You\'ve completed all CritterTrack tutorials. You now know how to manage your entire breeding program - from adding animals to tracking genetics and finances. You can always revisit these tutorials from the Help section in the header. Thank you for taking the time to learn all that CritterTrack has to offer!',
+        highlightElement: '[data-tutorial-target="help-btn"]',
         tips: [
           'Access tutorials anytime from Help',
           'All features are at your fingertips',

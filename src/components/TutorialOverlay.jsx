@@ -433,7 +433,7 @@ export const InitialTutorialModal = ({ onStart, onSkip, onPermanentSkip }) => {
           </div>
 
           <p className="text-gray-600 text-xs">
-            💡 <strong>Tip:</strong> You can always access tutorials later from the Info tab at any time.
+            💡 <strong>Tip:</strong> You can always access tutorials later from the Help section at any time.
           </p>
         </div>
 
