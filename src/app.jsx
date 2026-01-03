@@ -11657,13 +11657,30 @@ const WarningBanner = ({ authToken, API_BASE_URL }) => {
                 return;
             }
             try {
-                const response = await axios.get(`${API_BASE_URL}/notifications`, {
+                // Fetch user profile to get warning count
+                const response = await axios.get(`${API_BASE_URL}/users/profile`, {
                     headers: { Authorization: `Bearer ${authToken}` }
                 });
-                const warnings = response.data?.filter(n => n.type === 'moderator_warning' && !n.read) || [];
-                setWarningNotifications(warnings);
+                
+                // Create a warning notification object from the user's warning count
+                const warningCount = response.data?.warningCount || 0;
+                if (warningCount > 0) {
+                    setWarningNotifications([{
+                        _id: `warning-${warningCount}`,
+                        type: 'moderator_warning',
+                        message: `You have received ${warningCount} warning${warningCount !== 1 ? 's' : ''} from the moderation team.`,
+                        metadata: {
+                            warningCount: warningCount,
+                            category: 'moderation'
+                        },
+                        createdAt: new Date(),
+                        read: false
+                    }]);
+                } else {
+                    setWarningNotifications([]);
+                }
             } catch (error) {
-                console.error('Failed to fetch warnings:', error);
+                console.error('Failed to fetch user profile:', error);
             } finally {
                 setLoading(false);
             }
