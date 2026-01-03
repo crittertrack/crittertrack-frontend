@@ -11449,6 +11449,84 @@ const MessagesView = ({ authToken, API_BASE_URL, onClose, showModalMessage, sele
     );
 };
 
+// Moderator Warning Banner Component
+const WarningBanner = ({ authToken, API_BASE_URL }) => {
+    const [warningNotifications, setWarningNotifications] = useState([]);
+    const [loading, setLoading] = useState(true);
+
+    useEffect(() => {
+        const fetchWarnings = async () => {
+            if (!authToken) {
+                setLoading(false);
+                return;
+            }
+            try {
+                const response = await axios.get(`${API_BASE_URL}/notifications`, {
+                    headers: { Authorization: `Bearer ${authToken}` }
+                });
+                const warnings = response.data?.filter(n => n.type === 'moderator_warning' && !n.read) || [];
+                setWarningNotifications(warnings);
+            } catch (error) {
+                console.error('Failed to fetch warnings:', error);
+            } finally {
+                setLoading(false);
+            }
+        };
+        fetchWarnings();
+    }, [authToken, API_BASE_URL]);
+
+    if (loading || warningNotifications.length === 0) {
+        return null;
+    }
+
+    return (
+        <div className="w-full max-w-4xl mb-6">
+            {warningNotifications.map((warning) => (
+                <div key={warning._id} className="bg-yellow-50 border-l-4 border-yellow-400 p-4 rounded-lg shadow-md mb-3">
+                    <div className="flex items-start">
+                        <div className="flex-shrink-0">
+                            <AlertCircle className="h-6 w-6 text-yellow-400" />
+                        </div>
+                        <div className="ml-3 flex-1">
+                            <h3 className="text-lg font-bold text-yellow-800">⚠️ Official Warning from Moderation Team</h3>
+                            <div className="mt-2 text-yellow-700">
+                                <p className="text-sm font-medium">{warning.message}</p>
+                                {warning.metadata?.warningCount && (
+                                    <p className="text-xs mt-2 font-semibold">
+                                        Total Warnings: {warning.metadata.warningCount} 
+                                        {warning.metadata.warningCount >= 3 && <span className="text-red-600"> - Your account may be subject to suspension</span>}
+                                    </p>
+                                )}
+                                <p className="text-xs mt-1 text-gray-600">
+                                    Issued: {new Date(warning.createdAt).toLocaleString()}
+                                </p>
+                            </div>
+                        </div>
+                        <button
+                            onClick={async () => {
+                                try {
+                                    await axios.patch(
+                                        `${API_BASE_URL}/notifications/${warning._id}`,
+                                        { read: true },
+                                        { headers: { Authorization: `Bearer ${authToken}` } }
+                                    );
+                                    setWarningNotifications(prev => prev.filter(w => w._id !== warning._id));
+                                } catch (error) {
+                                    console.error('Error marking warning as read:', error);
+                                }
+                            }}
+                            className="ml-3 flex-shrink-0 text-yellow-600 hover:text-yellow-800"
+                            title="Acknowledge and dismiss"
+                        >
+                            <X size={20} />
+                        </button>
+                    </div>
+                </div>
+            ))}
+        </div>
+    );
+};
+
 // Notification Panel Component
 const NotificationPanel = ({ authToken, API_BASE_URL, onClose, showModalMessage, onNotificationChange, onViewAnimal }) => {
     const [notifications, setNotifications] = useState([]);
@@ -13024,54 +13102,6 @@ const App = () => {
                         </div>
                     </header>
 
-                    {/* Moderator Warning Banner */}
-                    {notifications.filter(n => n.type === 'moderator_warning' && !n.read).length > 0 && (
-                        <div className="w-full max-w-4xl mb-6">
-                            {notifications.filter(n => n.type === 'moderator_warning' && !n.read).map((warning) => (
-                                <div key={warning._id} className="bg-yellow-50 border-l-4 border-yellow-400 p-4 rounded-lg shadow-md mb-3">
-                                    <div className="flex items-start">
-                                        <div className="flex-shrink-0">
-                                            <AlertCircle className="h-6 w-6 text-yellow-400" />
-                                        </div>
-                                        <div className="ml-3 flex-1">
-                                            <h3 className="text-lg font-bold text-yellow-800">⚠️ Official Warning from Moderation Team</h3>
-                                            <div className="mt-2 text-yellow-700">
-                                                <p className="text-sm font-medium">{warning.message}</p>
-                                                {warning.metadata?.warningCount && (
-                                                    <p className="text-xs mt-2 font-semibold">
-                                                        Total Warnings: {warning.metadata.warningCount} 
-                                                        {warning.metadata.warningCount >= 3 && <span className="text-red-600"> - Your account may be subject to suspension</span>}
-                                                    </p>
-                                                )}
-                                                <p className="text-xs mt-1 text-gray-600">
-                                                    Issued: {new Date(warning.createdAt).toLocaleString()}
-                                                </p>
-                                            </div>
-                                        </div>
-                                        <button
-                                            onClick={async () => {
-                                                try {
-                                                    await axios.patch(
-                                                        `${API_BASE_URL}/notifications/${warning._id}`,
-                                                        { read: true },
-                                                        { headers: { Authorization: `Bearer ${authToken}` } }
-                                                    );
-                                                    fetchNotifications();
-                                                } catch (error) {
-                                                    console.error('Error marking warning as read:', error);
-                                                }
-                                            }}
-                                            className="ml-3 flex-shrink-0 text-yellow-600 hover:text-yellow-800"
-                                            title="Acknowledge and dismiss"
-                                        >
-                                            <X size={20} />
-                                        </button>
-                                    </div>
-                                </div>
-                            ))}
-                        </div>
-                    )}
-                    
                     {showUserSearchModal && (
                         <UserSearchModal 
                             onClose={() => setShowUserSearchModal(false)} 
@@ -13704,6 +13734,9 @@ const App = () => {
                     </nav>
                 </div>
             </header>
+
+            {/* Moderator Warning Banner */}
+            <WarningBanner authToken={authToken} API_BASE_URL={API_BASE_URL} />
 
             {showNotifications && (
                 <NotificationPanel
