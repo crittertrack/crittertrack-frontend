@@ -11709,7 +11709,7 @@ const MessagesView = ({ authToken, API_BASE_URL, onClose, showModalMessage, sele
 };
 
 // Moderator Warning Banner Component
-const WarningBanner = ({ authToken, API_BASE_URL }) => {
+const WarningBanner = ({ authToken, API_BASE_URL, userProfile }) => {
     const [warningNotifications, setWarningNotifications] = useState([]);
     const [loading, setLoading] = useState(true);
 
@@ -11720,13 +11720,22 @@ const WarningBanner = ({ authToken, API_BASE_URL }) => {
                 return;
             }
             try {
-                // Fetch user profile to get warning count
-                const response = await axios.get(`${API_BASE_URL}/users/profile`, {
-                    headers: { Authorization: `Bearer ${authToken}` }
-                });
+                // Use passed userProfile or fetch if not available
+                let warningCount = 0;
+                
+                if (userProfile?.warningCount !== undefined) {
+                    warningCount = userProfile.warningCount;
+                } else {
+                    // Fetch user profile to get warning count
+                    const response = await axios.get(`${API_BASE_URL}/users/profile`, {
+                        headers: { Authorization: `Bearer ${authToken}` }
+                    });
+                    warningCount = response.data?.warningCount || 0;
+                }
+                
+                console.log('[WARNING BANNER] Checking warnings:', { warningCount, userProfile: userProfile?.warningCount });
                 
                 // Create a warning notification object from the user's warning count
-                const warningCount = response.data?.warningCount || 0;
                 if (warningCount > 0) {
                     setWarningNotifications([{
                         _id: `warning-${warningCount}`,
@@ -11749,38 +11758,40 @@ const WarningBanner = ({ authToken, API_BASE_URL }) => {
             }
         };
         fetchWarnings();
-    }, [authToken, API_BASE_URL]);
+    }, [authToken, API_BASE_URL, userProfile?.warningCount]);
 
     if (loading || warningNotifications.length === 0) {
         return null;
     }
 
     return (
-        <div className="w-full max-w-4xl mb-6">
-            {warningNotifications.map((warning) => (
-                <div key={warning._id} className="bg-yellow-50 border-l-4 border-yellow-400 p-4 rounded-lg shadow-md mb-3">
-                    <div className="flex items-start">
-                        <div className="flex-shrink-0">
-                            <AlertCircle className="h-6 w-6 text-yellow-400" />
-                        </div>
-                        <div className="ml-3 flex-1">
-                            <h3 className="text-lg font-bold text-yellow-800">⚠️ Official Warning from Moderation Team</h3>
-                            <div className="mt-2 text-yellow-700">
-                                <p className="text-sm font-medium">{warning.message}</p>
-                                {warning.metadata?.warningCount && (
-                                    <p className="text-xs mt-2 font-semibold">
-                                        Total Warnings: {warning.metadata.warningCount} 
-                                        {warning.metadata.warningCount >= 3 && <span className="text-red-600"> - Your account may be subject to suspension</span>}
+        <div className="w-full flex justify-center">
+            <div className="w-full max-w-4xl px-6">
+                {warningNotifications.map((warning) => (
+                    <div key={warning._id} className="bg-yellow-50 border-l-4 border-yellow-400 p-4 rounded-lg shadow-md mb-3">
+                        <div className="flex items-start">
+                            <div className="flex-shrink-0">
+                                <AlertCircle className="h-6 w-6 text-yellow-400" />
+                            </div>
+                            <div className="ml-3 flex-1">
+                                <h3 className="text-lg font-bold text-yellow-800">⚠️ Official Warning from Moderation Team</h3>
+                                <div className="mt-2 text-yellow-700">
+                                    <p className="text-sm font-medium">{warning.message}</p>
+                                    {warning.metadata?.warningCount && (
+                                        <p className="text-xs mt-2 font-semibold">
+                                            Total Warnings: {warning.metadata.warningCount} 
+                                            {warning.metadata.warningCount >= 3 && <span className="text-red-600"> - Your account may be subject to suspension</span>}
+                                        </p>
+                                    )}
+                                    <p className="text-xs mt-1 text-gray-600">
+                                        Issued: {new Date(warning.createdAt).toLocaleString()}
                                     </p>
-                                )}
-                                <p className="text-xs mt-1 text-gray-600">
-                                    Issued: {new Date(warning.createdAt).toLocaleString()}
-                                </p>
+                                </div>
                             </div>
                         </div>
                     </div>
-                </div>
-            ))}
+                ))}
+            </div>
         </div>
     );
 };
@@ -14071,7 +14082,7 @@ const App = () => {
             </header>
 
             {/* Moderator Warning Banner */}
-            <WarningBanner authToken={authToken} API_BASE_URL={API_BASE_URL} />
+            <WarningBanner authToken={authToken} API_BASE_URL={API_BASE_URL} userProfile={userProfile} />
 
             {showNotifications && (
                 <NotificationPanel
