@@ -12543,12 +12543,13 @@ const App = () => {
                     ? flagData.context?.userId 
                     : flagData.context?.ownerId;
                 
-                console.log('[MOD ACTION LIFT_WARNING] Lifting warning for user:', { userId, reason: flagData.reason });
+                console.log('[MOD ACTION LIFT_WARNING] Lifting warning for user:', { userId, reason: flagData.reason, warningIndex: flagData.warningIndex });
                 
                 const response = await axios.post(
                     `${API_BASE_URL}/moderation/users/${userId}/lift-warning`,
                     {
-                        reason: flagData.reason
+                        reason: flagData.reason,
+                        warningIndex: flagData.warningIndex
                     },
                     { headers: { Authorization: `Bearer ${authToken}` } }
                 );
@@ -16337,12 +16338,13 @@ const PublicProfilePage = () => {
                     ? flagData.context?.userId 
                     : flagData.context?.ownerId;
                 
-                console.log('[MOD ACTION LIFT_WARNING] Lifting warning for user:', { userId, reason: flagData.reason });
+                console.log('[MOD ACTION LIFT_WARNING] Lifting warning for user:', { userId, reason: flagData.reason, warningIndex: flagData.warningIndex });
                 
                 const response = await axios.post(
                     `${API_BASE_URL}/moderation/users/${userId}/lift-warning`,
                     {
-                        reason: flagData.reason
+                        reason: flagData.reason,
+                        warningIndex: flagData.warningIndex
                     },
                     { headers: { Authorization: `Bearer ${authToken}` } }
                 );

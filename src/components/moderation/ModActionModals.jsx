@@ -519,18 +519,23 @@ export const BanUserModal = ({ isOpen, onClose, onSubmit, context }) => {
 };
 
 // Lift Warning Modal
-export const LiftWarningModal = ({ isOpen, onClose, onSubmit, context, currentWarnings = 0 }) => {
+export const LiftWarningModal = ({ isOpen, onClose, onSubmit, context, currentWarnings = 0, warnings = [] }) => {
     const [reason, setReason] = useState('');
+    const [selectedWarningIndex, setSelectedWarningIndex] = useState(null);
 
     if (!isOpen) return null;
+
+    const activeWarnings = warnings.filter(w => !w.isLifted);
 
     const handleSubmit = () => {
         onSubmit({
             action: 'lift-warning',
             reason,
+            warningIndex: selectedWarningIndex,
             context
         });
         setReason('');
+        setSelectedWarningIndex(null);
         onClose();
     };
 
@@ -547,12 +552,57 @@ export const LiftWarningModal = ({ isOpen, onClose, onSubmit, context, currentWa
                 <div className="mod-modal-body">
                     <div className="warning-count-banner">
                         <AlertTriangle size={18} />
-                        <span>User currently has <strong>{currentWarnings}</strong> warning(s)</span>
+                        <span>User currently has <strong>{currentWarnings}</strong> active warning(s)</span>
                     </div>
                     
                     {context && (
                         <div className="mod-context-info">
                             <strong>Lifting Warning For:</strong> {context.ownerName || context.name}
+                        </div>
+                    )}
+
+                    {activeWarnings.length > 0 ? (
+                        <div className="form-group">
+                            <label>Select Warning to Lift</label>
+                            <div style={{ maxHeight: '250px', overflowY: 'auto', border: '1px solid #e5e7eb', borderRadius: '0.5rem', padding: '0.75rem' }}>
+                                {activeWarnings.map((warning, index) => {
+                                    const actualIndex = warnings.findIndex(w => w === warning);
+                                    return (
+                                        <div 
+                                            key={index}
+                                            onClick={() => setSelectedWarningIndex(actualIndex)}
+                                            style={{
+                                                padding: '0.75rem',
+                                                marginBottom: '0.5rem',
+                                                border: selectedWarningIndex === actualIndex ? '2px solid #3b82f6' : '1px solid #e5e7eb',
+                                                backgroundColor: selectedWarningIndex === actualIndex ? '#eff6ff' : '#ffffff',
+                                                borderRadius: '0.375rem',
+                                                cursor: 'pointer',
+                                                transition: 'all 0.2s'
+                                            }}
+                                        >
+                                            <div style={{ fontWeight: 'bold', marginBottom: '0.25rem' }}>
+                                                Warning #{index + 1}
+                                            </div>
+                                            <div style={{ fontSize: '0.875rem', color: '#666' }}>
+                                                <strong>Date:</strong> {new Date(warning.date).toLocaleString()}
+                                            </div>
+                                            <div style={{ fontSize: '0.875rem', color: '#666' }}>
+                                                <strong>Reason:</strong> {warning.reason}
+                                            </div>
+                                            {warning.category && (
+                                                <div style={{ fontSize: '0.875rem', color: '#666' }}>
+                                                    <strong>Category:</strong> {warning.category}
+                                                </div>
+                                            )}
+                                        </div>
+                                    );
+                                })}
+                            </div>
+                        </div>
+                    ) : (
+                        <div style={{ padding: '1rem', backgroundColor: '#f3f4f6', borderRadius: '0.5rem', color: '#666' }}>
+                            User has no active warnings to lift.
                         </div>
                     )}
 
@@ -569,8 +619,13 @@ export const LiftWarningModal = ({ isOpen, onClose, onSubmit, context, currentWa
                 </div>
                 <div className="mod-modal-footer">
                     <button onClick={onClose} className="btn-cancel">Cancel</button>
-                    <button onClick={handleSubmit} disabled={!reason.trim()} className="btn-submit" style={{backgroundColor: '#10b981'}}>
-                        Lift Warning (Remove 1)
+                    <button 
+                        onClick={handleSubmit} 
+                        disabled={!reason.trim() || selectedWarningIndex === null} 
+                        className="btn-submit" 
+                        style={{backgroundColor: '#10b981'}}
+                    >
+                        Lift Selected Warning
                     </button>
                 </div>
             </div>
