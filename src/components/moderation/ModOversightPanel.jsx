@@ -131,7 +131,8 @@ export default function ModOversightPanel({
     onClose, 
     API_BASE_URL, 
     authToken,
-    onActionTaken 
+    onActionTaken,
+    embedded = false  // New prop to indicate if this is embedded in AdminPanel
 }) {
     const [reports, setReports] = useState([]);
     const [selectedReport, setSelectedReport] = useState(null);
@@ -250,18 +251,22 @@ export default function ModOversightPanel({
 
     if (!isOpen) return null;
 
+    const containerClass = embedded ? 'mod-panel-embedded' : 'mod-panel';
+
     return (
-        <div className="mod-panel">
-            <div className="mod-panel-header">
-                <h3>Moderation Oversight</h3>
-                <button 
-                    className="mod-close-button"
-                    onClick={onClose}
-                    title="Exit Moderation Mode"
-                >
-                    ✕
-                </button>
-            </div>
+        <div className={containerClass}>
+            {!embedded && (
+                <div className="mod-panel-header">
+                    <h3>Moderation Oversight</h3>
+                    <button 
+                        className="mod-close-button"
+                        onClick={onClose}
+                        title="Exit Moderation Mode"
+                    >
+                        ✕
+                    </button>
+                </div>
+            )}
 
             <div className="mod-panel-content">
                     {/* Filter tabs */}

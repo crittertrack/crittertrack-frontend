@@ -381,68 +381,64 @@ const EnhancedAdminPanel = ({ isOpen, onClose, authToken, API_BASE_URL, userRole
 
     return (
         <ErrorBoundary onClose={onClose}>
-            <div className="fixed inset-0 z-50 bg-gray-50 flex flex-col">
+            <div className="fixed inset-0 z-50 bg-white flex flex-col">
             {console.log('[EnhancedAdminPanel] Rendering authenticated admin panel')}
             {/* Header */}
-            <div className="bg-gradient-to-r from-red-600 to-red-700 text-white p-6 flex items-center justify-between shadow-lg">
+            <div className="bg-gradient-to-r from-red-600 to-red-700 text-white p-4 sm:p-6 flex items-center justify-between shadow-lg flex-shrink-0">
                 <div className="flex items-center gap-3">
-                    <Shield size={28} />
+                    <Shield size={24} className="sm:w-7 sm:h-7" />
                     <div>
-                        <h2 className="text-3xl font-bold">CritterTrack Moderation Panel</h2>
-                        <p className="text-sm text-red-100 mt-1 capitalize">Role: {userRole}</p>
+                        <h2 className="text-xl sm:text-2xl font-bold">Moderation Panel</h2>
+                        <p className="text-xs sm:text-sm text-red-100 mt-1 capitalize">Role: {userRole}</p>
                     </div>
                 </div>
                 <button
                     onClick={onClose}
-                    className="p-2 hover:bg-white/20 rounded-lg transition text-lg"
+                    className="p-2 hover:bg-white/20 rounded-lg transition"
                     title="Close"
                 >
-                    <X size={28} />
+                    <X size={24} />
                 </button>
             </div>
+
+            {/* Tab Navigation */}
+            <div className="flex bg-gray-50 border-b border-gray-200 overflow-x-auto flex-shrink-0">
+                {[
+                    { id: 'dashboard', label: 'Dashboard', icon: BarChart3 },
+                    { id: 'moderation', label: 'Reports', icon: AlertTriangle },
+                    { id: 'communication', label: 'Communication', icon: Mail },
+                    // Admin-only features
+                    { id: 'users', label: 'Users', icon: Users, requiredRole: 'admin' },
+                    { id: 'data-audit', label: 'Audit Log', icon: Lock, requiredRole: 'admin' },
+                    { id: 'system-settings', label: 'Settings', icon: Settings, requiredRole: 'admin' }
+                ].map(section => {
+                    const Icon = section.icon;
+                    const hasAccess = !section.requiredRole || userRole === section.requiredRole;
+                    if (!hasAccess) return null;
+
+                    return (
+                        <button
+                            key={section.id}
+                            onClick={() => setActiveSection(section.id)}
+                            className={`flex items-center gap-2 px-4 sm:px-6 py-3 sm:py-4 border-b-2 transition whitespace-nowrap text-sm sm:text-base ${
+                                activeSection === section.id
+                                    ? 'border-red-600 text-red-600 bg-white'
+                                    : 'border-transparent text-gray-600 hover:text-gray-900 hover:bg-gray-100'
+                            }`}
+                        >
+                            <Icon size={18} />
+                            <span className="font-medium">{section.label}</span>
+                        </button>
+                    );
+                })}
+            </div>
+
                 {/* Main Content */}
-                <div className="flex flex-1 overflow-hidden">
-                    {/* Sidebar Navigation */}
-                    <div className="w-64 bg-gray-50 border-r border-gray-200 overflow-y-auto">
-                        <nav className="p-4 space-y-2">
-                            {[
-                                { id: 'dashboard', label: 'Dashboard', icon: BarChart3 },
-                                { id: 'moderation', label: 'Moderation Tools', icon: AlertTriangle },
-                                { id: 'reports', label: 'Reports & Analytics', icon: BarChart3 },
-                                { id: 'communication', label: 'Communication', icon: Mail },
-                                // Admin-only features
-                                { id: 'users', label: 'User Management', icon: Users, requiredRole: 'admin' },
-                                { id: 'animals', label: 'Animal Records', icon: Shield, requiredRole: 'admin' },
-                                { id: 'data-audit', label: 'Data Integrity', icon: Lock, requiredRole: 'admin' },
-                                { id: 'system-settings', label: 'System Settings', icon: Settings, requiredRole: 'admin' }
-                            ].map(section => {
-                                const Icon = section.icon;
-                                const hasAccess = !section.requiredRole || userRole === section.requiredRole;
-                                if (!hasAccess) return null;
-
-                                return (
-                                    <button
-                                        key={section.id}
-                                        onClick={() => setActiveSection(section.id)}
-                                        className={`w-full flex items-center gap-3 px-4 py-3 rounded-lg transition ${
-                                            activeSection === section.id
-                                                ? 'bg-red-600 text-white'
-                                                : 'text-gray-700 hover:bg-gray-100'
-                                        }`}
-                                    >
-                                        <Icon size={20} />
-                                        <span className="font-medium">{section.label}</span>
-                                    </button>
-                                );
-                            })}
-                        </nav>
-                    </div>
-
-                    {/* Content Area */}
-                    <div className="flex-1 overflow-y-auto">
+                <div className="flex-1 overflow-y-auto"
+>
                         {/* Dashboard */}
                         {activeSection === 'dashboard' && (
-                            <div className="p-8">
+                            <div className="p-6 sm:p-8 max-w-7xl mx-auto">
                                 <h3 className="text-2xl font-bold text-gray-800 mb-6">Dashboard Overview</h3>
                                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
                                     <StatCard label="Total Users" value={dashboardStats.totalUsers} icon={Users} />
@@ -489,7 +485,7 @@ const EnhancedAdminPanel = ({ isOpen, onClose, authToken, API_BASE_URL, userRole
 
                         {/* User Management */}
                         {activeSection === 'users' && (
-                            <div className="p-8">
+                            <div className="p-6 sm:p-8 max-w-7xl mx-auto">
                                 <UserManagementTab 
                                     API_BASE_URL={API_BASE_URL}
                                     authToken={authToken}
@@ -499,7 +495,7 @@ const EnhancedAdminPanel = ({ isOpen, onClose, authToken, API_BASE_URL, userRole
 
                         {/* Animal Management - DISABLED: Component deleted */}
                         {activeSection === 'animals' && (
-                            <div className="p-8">
+                            <div className="p-6 sm:p-8 max-w-7xl mx-auto">
                                 <h3 className="text-2xl font-bold text-gray-800 mb-4">Animal Records</h3>
                                 <div className="bg-yellow-50 border border-yellow-200 rounded-lg p-6">
                                     <p className="text-yellow-800">This feature is currently being rebuilt.</p>
@@ -509,25 +505,24 @@ const EnhancedAdminPanel = ({ isOpen, onClose, authToken, API_BASE_URL, userRole
 
                         {/* Moderation Tools */}
                         {activeSection === 'moderation' && (
-                            <div className="p-8">
-                                <ModOversightPanel
-                                    isOpen={true}
-                                    onClose={() => setActiveSection('dashboard')}
-                                    API_BASE_URL={API_BASE_URL}
-                                    authToken={authToken}
-                                    onActionTaken={() => {
-                                        // Refresh dashboard stats after action
-                                        if (isAuthenticated) {
-                                            fetchDashboardStats();
-                                        }
-                                    }}
-                                />
-                            </div>
+                            <ModOversightPanel
+                                isOpen={true}
+                                onClose={() => setActiveSection('dashboard')}
+                                API_BASE_URL={API_BASE_URL}
+                                authToken={authToken}
+                                embedded={true}
+                                onActionTaken={() => {
+                                    // Refresh dashboard stats after action
+                                    if (isAuthenticated) {
+                                        fetchDashboardStats();
+                                    }
+                                }}
+                            />
                         )}
 
                         {/* Data Audit */}
                         {activeSection === 'data-audit' && (
-                            <div className="p-8">
+                            <div className="p-6 sm:p-8 max-w-7xl mx-auto">
                                 <AuditLogTab
                                     API_BASE_URL={API_BASE_URL}
                                     authToken={authToken}
@@ -537,7 +532,7 @@ const EnhancedAdminPanel = ({ isOpen, onClose, authToken, API_BASE_URL, userRole
 
                         {/* System Settings */}
                         {activeSection === 'system-settings' && (
-                            <div className="p-8">
+                            <div className="p-6 sm:p-8 max-w-7xl mx-auto">
                                 <SystemSettingsTab
                                     API_BASE_URL={API_BASE_URL}
                                     authToken={authToken}
@@ -547,7 +542,7 @@ const EnhancedAdminPanel = ({ isOpen, onClose, authToken, API_BASE_URL, userRole
 
                         {/* Reports - DISABLED: Component deleted */}
                         {activeSection === 'reports' && (
-                            <div className="p-8">
+                            <div className="p-6 sm:p-8 max-w-7xl mx-auto">
                                 <h3 className="text-2xl font-bold text-gray-800 mb-4">Reports & Analytics</h3>
                                 <div className="bg-yellow-50 border border-yellow-200 rounded-lg p-6">
                                     <p className="text-yellow-800">This feature is currently being rebuilt.</p>
@@ -557,7 +552,7 @@ const EnhancedAdminPanel = ({ isOpen, onClose, authToken, API_BASE_URL, userRole
 
                         {/* Communication */}
                         {activeSection === 'communication' && (
-                            <div className="p-8">
+                            <div className="p-6 sm:p-8 max-w-7xl mx-auto">
                                 <CommunicationTab
                                     API_BASE_URL={API_BASE_URL}
                                     authToken={authToken}
