@@ -15522,6 +15522,7 @@ const App = () => {
 const PublicAnimalPage = () => {
     const { animalId } = useParams();
     const navigate = useNavigate();
+    const location = useLocation();
     const [animal, setAnimal] = useState(null);
     const [loading, setLoading] = useState(true);
     const [notFound, setNotFound] = useState(false);
