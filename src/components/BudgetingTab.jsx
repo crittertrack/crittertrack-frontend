@@ -116,9 +116,15 @@ const BudgetingTab = ({ authToken, API_BASE_URL, showModalMessage, preSelectedAn
             setTransactions(response.data || []);
         } catch (error) {
             console.error('Error fetching transactions:', error);
-            // If endpoint doesn't exist yet, use empty array
-            if (error.response?.status !== 404) {
+            // If 404 or empty, just use empty array - don't show error
+            if (error.response?.status === 404 || error.response?.status === 204) {
+                setTransactions([]);
+            } else if (error.response?.status) {
+                // Only show error for actual server errors (500, 403, etc)
                 showModalMessage('Error', 'Failed to load transactions');
+            } else {
+                // Network error or no response
+                setTransactions([]);
             }
         } finally {
             setLoading(false);
