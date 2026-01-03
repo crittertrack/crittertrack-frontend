@@ -9914,6 +9914,11 @@ const AuthView = ({ onLoginSuccess, showModalMessage, isRegister, setIsRegister,
     const [verificationStep, setVerificationStep] = useState(false);
     const [verificationCode, setVerificationCode] = useState('');
     const [agreedToTerms, setAgreedToTerms] = useState(false);
+    const [forgotPasswordStep, setForgotPasswordStep] = useState(0); // 0=off, 1=email, 2=code, 3=new password
+    const [resetEmail, setResetEmail] = useState('');
+    const [resetCode, setResetCode] = useState('');
+    const [newPassword, setNewPassword] = useState('');
+    const [confirmNewPassword, setConfirmNewPassword] = useState('');
 
     // Restore verification state from localStorage on mount
     useEffect(() => {
@@ -10014,7 +10019,65 @@ const AuthView = ({ onLoginSuccess, showModalMessage, isRegister, setIsRegister,
         }
     };
 
-    const handleResendCode = async () => {
+    const handleForgotPassword = async (e) => {
+        e.preventDefault();
+        if (forgotPasswordStep === 1) {
+            // Step 1: Request password reset
+            setLoading(true);
+            try {
+                await axios.post(`${API_BASE_URL}/auth/forgot-password`, { email: resetEmail });
+                showModalMessage('Reset Code Sent', 'Check your email for the password reset code.');
+                setForgotPasswordStep(2);
+            } catch (error) {
+                console.error('Forgot password error:', error.response?.data || error.message);
+                showModalMessage(
+                    'Request Failed',
+                    error.response?.data?.message || 'Failed to send reset code. Please try again.'
+                );
+            } finally {
+                setLoading(false);
+            }
+        } else if (forgotPasswordStep === 2) {
+            // Step 2: Verify code and proceed to password change
+            setForgotPasswordStep(3);
+        } else if (forgotPasswordStep === 3) {
+            // Step 3: Reset password with code and new password
+            if (newPassword !== confirmNewPassword) {
+                showModalMessage('Password Mismatch', 'Passwords do not match.');
+                return;
+            }
+            setLoading(true);
+            try {
+                await axios.post(`${API_BASE_URL}/auth/reset-password`, {
+                    email: resetEmail,
+                    token: resetCode,
+                    newPassword
+                });
+                showModalMessage('Success', 'Password reset successful! You can now log in with your new password.');
+                setForgotPasswordStep(0);
+                setResetEmail('');
+                setResetCode('');
+                setNewPassword('');
+                setConfirmNewPassword('');
+            } catch (error) {
+                console.error('Reset password error:', error.response?.data || error.message);
+                showModalMessage(
+                    'Reset Failed',
+                    error.response?.data?.message || 'Failed to reset password. Please try again.'
+                );
+            } finally {
+                setLoading(false);
+            }
+        }
+    };
+
+    const closeForgotPassword = () => {
+        setForgotPasswordStep(0);
+        setResetEmail('');
+        setResetCode('');
+        setNewPassword('');
+        setConfirmNewPassword('');
+    };
         setLoading(true);
         try {
             await axios.post(`${API_BASE_URL}/auth/resend-verification`, { email });
@@ -10040,10 +10103,84 @@ const AuthView = ({ onLoginSuccess, showModalMessage, isRegister, setIsRegister,
     return (
         <div className="max-w-md w-full bg-white p-8 rounded-xl shadow-2xl">
             <h2 className="text-3xl font-extrabold text-gray-900 mb-6 text-center">
-                {verificationStep ? 'Verify Your Email' : mainTitle}
+                {forgotPasswordStep > 0 ? 'Reset Password' : (verificationStep ? 'Verify Your Email' : mainTitle)}
             </h2>
 
-            {verificationStep ? (
+            {forgotPasswordStep > 0 ? (
+                // Forgot Password Flow
+                <form onSubmit={handleForgotPassword} className="space-y-4">
+                    {forgotPasswordStep === 1 && (
+                        <div>
+                            <p className="text-sm text-gray-600 mb-4">Enter the email address associated with your account.</p>
+                            <input
+                                type="email"
+                                placeholder="Email Address *"
+                                value={resetEmail}
+                                onChange={(e) => setResetEmail(e.target.value)}
+                                required
+                                className="w-full p-3 border border-gray-300 rounded-lg focus:ring-primary focus:border-primary transition"
+                            />
+                        </div>
+                    )}
+                    
+                    {forgotPasswordStep === 2 && (
+                        <div>
+                            <p className="text-sm text-gray-600 mb-4">Check your email for the reset code.</p>
+                            <input
+                                type="text"
+                                placeholder="Enter reset code"
+                                value={resetCode}
+                                onChange={(e) => setResetCode(e.target.value.replace(/\D/g, '').slice(0, 6))}
+                                required
+                                maxLength={6}
+                                pattern="[0-9]{6}"
+                                className="w-full p-3 border border-gray-300 rounded-lg focus:ring-primary focus:border-primary transition text-center text-2xl tracking-widest font-mono"
+                            />
+                        </div>
+                    )}
+                    
+                    {forgotPasswordStep === 3 && (
+                        <div className="space-y-3">
+                            <input
+                                type="password"
+                                placeholder="New Password *"
+                                value={newPassword}
+                                onChange={(e) => setNewPassword(e.target.value)}
+                                required
+                                className="w-full p-3 border border-gray-300 rounded-lg focus:ring-primary focus:border-primary transition"
+                            />
+                            <input
+                                type="password"
+                                placeholder="Confirm Password *"
+                                value={confirmNewPassword}
+                                onChange={(e) => setConfirmNewPassword(e.target.value)}
+                                required
+                                className="w-full p-3 border border-gray-300 rounded-lg focus:ring-primary focus:border-primary transition"
+                            />
+                        </div>
+                    )}
+                    
+                    <button
+                        type="submit"
+                        disabled={loading || (forgotPasswordStep === 1 && !resetEmail) || (forgotPasswordStep === 2 && resetCode.length !== 6) || (forgotPasswordStep === 3 && (!newPassword || !confirmNewPassword))}
+                        className="w-full bg-primary text-black font-bold py-3 rounded-lg shadow-md hover:bg-primary/90 transition duration-150 flex items-center justify-center disabled:opacity-50"
+                    >
+                        {loading ? <Loader2 className="animate-spin mr-2" size={20} /> : (
+                            forgotPasswordStep === 1 ? 'Send Reset Code' : 
+                            forgotPasswordStep === 2 ? 'Enter Code' : 
+                            'Reset Password'
+                        )}
+                    </button>
+                    
+                    <button
+                        type="button"
+                        onClick={closeForgotPassword}
+                        className="w-full text-sm text-gray-600 hover:text-gray-800 transition py-2"
+                    >
+                        ← Back to Login
+                    </button>
+                </form>
+            ) : verificationStep ? (
                 // Step 2: Verification Code Form
                 <form onSubmit={handleSubmit} className="space-y-4">
                     <div className="text-center mb-4">
@@ -10165,11 +10302,18 @@ const AuthView = ({ onLoginSuccess, showModalMessage, isRegister, setIsRegister,
                 </form>
             )}
             
-            {!verificationStep && (
+            {!verificationStep && forgotPasswordStep === 0 && (
                 <>
-                    <div className="mt-6 text-center">
+                    <div className="mt-6 text-center space-y-3">
+                        {!isRegister && (
+                            <button type="button" onClick={() => setForgotPasswordStep(1)}
+                                className="block w-full text-sm text-accent hover:text-accent/80 transition duration-150 font-medium"
+                            >
+                                Forgot Password?
+                            </button>
+                        )}
                         <button type="button" onClick={() => setIsRegister(prev => !prev)}
-                            className="text-sm text-accent hover:text-accent/80 transition duration-150 font-medium"
+                            className="block w-full text-sm text-accent hover:text-accent/80 transition duration-150 font-medium"
                         >
                             {isRegister ? 'Already have an account? Log In' : "Don't have an account? Register Here"}
                         </button>
