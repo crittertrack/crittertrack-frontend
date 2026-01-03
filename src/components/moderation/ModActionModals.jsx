@@ -519,13 +519,44 @@ export const BanUserModal = ({ isOpen, onClose, onSubmit, context }) => {
 };
 
 // Lift Warning Modal
-export const LiftWarningModal = ({ isOpen, onClose, onSubmit, context, currentWarnings = 0, warnings = [] }) => {
+export const LiftWarningModal = ({ isOpen, onClose, onSubmit, context, currentWarnings = 0, warnings = [], API_BASE_URL, authToken }) => {
     const [reason, setReason] = useState('');
     const [selectedWarningIndex, setSelectedWarningIndex] = useState(null);
+    const [liveWarnings, setLiveWarnings] = useState(warnings);
+    const [liveWarningCount, setLiveWarningCount] = useState(currentWarnings);
+
+    // Fetch fresh warnings when modal opens
+    const fetchUserWarnings = async () => {
+        if (context?.userId && authToken && API_BASE_URL) {
+            try {
+                const response = await axios.get(`${API_BASE_URL}/moderation/users/${context.userId}/info`, {
+                    headers: { Authorization: `Bearer ${authToken}` }
+                });
+                console.log('[LiftWarningModal] Fetched user info:', response.data);
+                setLiveWarnings(response.data?.warnings || []);
+                setLiveWarningCount(response.data?.warningCount || 0);
+            } catch (error) {
+                console.error('Failed to fetch user warnings:', error);
+                setLiveWarnings(warnings);
+                setLiveWarningCount(currentWarnings);
+            }
+        } else {
+            setLiveWarnings(warnings);
+            setLiveWarningCount(currentWarnings);
+        }
+    };
+
+    useEffect(() => {
+        if (isOpen) {
+            fetchUserWarnings();
+            setSelectedWarningIndex(null);
+            setReason('');
+        }
+    }, [isOpen, context?.userId, authToken, API_BASE_URL]);
 
     if (!isOpen) return null;
 
-    const activeWarnings = warnings.filter(w => !w.isLifted);
+    const activeWarnings = liveWarnings.filter(w => !w.isLifted);
 
     const handleSubmit = () => {
         onSubmit({
@@ -552,7 +583,7 @@ export const LiftWarningModal = ({ isOpen, onClose, onSubmit, context, currentWa
                 <div className="mod-modal-body">
                     <div className="warning-count-banner">
                         <AlertTriangle size={18} />
-                        <span>User currently has <strong>{currentWarnings}</strong> active warning(s)</span>
+                        <span>User currently has <strong>{liveWarningCount}</strong> active warning(s)</span>
                     </div>
                     
                     {context && (

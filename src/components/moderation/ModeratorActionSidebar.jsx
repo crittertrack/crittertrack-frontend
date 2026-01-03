@@ -195,6 +195,9 @@ export default function ModeratorActionSidebar({
                 onSubmit={handleModalSubmit}
                 context={currentContext}
                 currentWarnings={currentContext?.warningCount || 0}
+                warnings={currentContext?.warnings || []}
+                API_BASE_URL={API_BASE_URL}
+                authToken={authToken}
             />
         </div>
     );
