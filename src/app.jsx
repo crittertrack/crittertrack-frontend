@@ -13680,7 +13680,7 @@ const App = () => {
             )}
 
             {/* Moderator Action Sidebar - Shows while browsing in moderator mode */}
-            {inModeratorMode && !showModReportQueue && ['admin', 'moderator'].includes(userProfile?.role) && (
+            {inModeratorMode && !showModReportQueue && localStorage.getItem('moderationAuthenticated') === 'true' && (
                 <ModeratorActionSidebar
                     isActive={true}
                     onOpenReportQueue={() => setShowModReportQueue(true)}
@@ -15689,7 +15689,7 @@ const PublicProfilePage = () => {
             />
             
             {/* Moderator Action Sidebar - Shows if user is authenticated moderator */}
-            {inModeratorMode && userProfile && ['admin', 'moderator'].includes(userProfile?.role) && (
+            {inModeratorMode && localStorage.getItem('moderationAuthenticated') === 'true' && (
                 <ModeratorActionSidebar
                     isActive={true}
                     onOpenReportQueue={() => navigate('/')}
