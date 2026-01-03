@@ -12828,17 +12828,17 @@ const App = () => {
         }
     }, [showTutorialOverlay, currentTutorialId, currentTutorialStep, litterFormDataRef.current?.sireId_public, litterFormDataRef.current?.damId_public, litterFormDataRef.current?.birthDate]);
 
+    // Auth token effect - set up axios defaults
     useEffect(() => {
         if (authToken) {
             axios.defaults.headers.common['Authorization'] = `Bearer ${authToken}`;
-            fetchUserProfile(authToken);
         } else {
             delete axios.defaults.headers.common['Authorization'];
             localStorage.removeItem('authToken');
             setUserProfile(null);
             navigate('/');
         }
-    }, [authToken]);
+    }, [authToken, navigate]);
 
     const fetchUserProfile = useCallback(async (token) => {
         try {
@@ -12859,6 +12859,21 @@ const App = () => {
             setAuthToken(null);
         }
     }, [showModalMessage]);
+
+    // Periodically refresh user profile to catch warning/suspension changes
+    useEffect(() => {
+        if (!authToken) return;
+        
+        // Fetch immediately, then set up periodic refetch
+        fetchUserProfile(authToken);
+        
+        // Refetch user profile every 30 seconds to catch warning/suspension updates
+        const interval = setInterval(() => {
+            fetchUserProfile(authToken);
+        }, 30000);
+        
+        return () => clearInterval(interval);
+    }, [authToken, fetchUserProfile]);
 
     // Fetch animals for genetics calculator when needed
     useEffect(() => {
