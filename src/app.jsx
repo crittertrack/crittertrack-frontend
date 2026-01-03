@@ -3426,9 +3426,10 @@ const LitterManagement = ({ authToken, API_BASE_URL, userProfile, showModalMessa
             }
 
             // Create litter with optional tracking counts
-            const maleCountNum = formData.maleCount ? parseInt(formData.maleCount) : 0;
-            const femaleCountNum = formData.femaleCount ? parseInt(formData.femaleCount) : 0;
-            const totalCount = maleCountNum + femaleCountNum;
+            // Preserve null for unspecified counts, don't convert to 0
+            const maleCountNum = formData.maleCount !== null && formData.maleCount !== '' ? parseInt(formData.maleCount) : null;
+            const femaleCountNum = formData.femaleCount !== null && formData.femaleCount !== '' ? parseInt(formData.femaleCount) : null;
+            const totalCount = (maleCountNum || 0) + (femaleCountNum || 0);
             
             const litterPayload = {
                 breedingPairCodeName: formData.breedingPairCodeName || null,
