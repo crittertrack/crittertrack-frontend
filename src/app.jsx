@@ -2049,9 +2049,9 @@ const ViewOnlyAnimalDetail = ({ animal, onClose, API_BASE_URL, onViewProfile, au
                         <div className="space-y-4">
                             {/* Main Animal Card - 2 Column Layout */}
                             <div className="bg-white border-2 border-gray-300 rounded-lg overflow-hidden">
-                                <div className="flex relative">
-                                    {/* Left Column - Image (1/3) */}
-                                    <div className="w-1/3 p-4 sm:p-6 flex flex-col items-center justify-center relative min-h-80">
+                                <div className="flex flex-col md:flex-row relative">
+                                    {/* Left Column - Image (1/3 on desktop, full width on mobile) */}
+                                    <div className="w-full md:w-1/3 p-4 sm:p-6 flex flex-col items-center justify-center relative min-h-60 md:min-h-80">
                                         {/* Birthdate badge */}
                                         {animal.birthDate && (
                                             <div className="absolute top-2 left-2 text-xs text-gray-600 bg-white/80 px-2 py-0.5 rounded">
@@ -2081,8 +2081,8 @@ const ViewOnlyAnimalDetail = ({ animal, onClose, API_BASE_URL, onViewProfile, au
                                         </div>
                                     </div>
 
-                                    {/* Right Column - Info (2/3) */}
-                                    <div className="w-2/3 p-4 sm:p-6 flex flex-col border-l border-gray-300 space-y-3">
+                                    {/* Right Column - Info (2/3 on desktop, full width on mobile) */}
+                                    <div className="w-full md:w-2/3 p-4 sm:p-6 flex flex-col border-t md:border-t-0 md:border-l border-gray-300 space-y-3">
                                         {/* Species/Breed/Strain/CTC - At Top */}
                                         <p className="text-sm text-gray-600">
                                             {animal.species}
@@ -7043,13 +7043,13 @@ const AnimalForm = ({
                         
                         {/* Current Owner */}
                         <div data-tutorial-target="current-owner-field" className="bg-gray-50 p-4 rounded-lg border border-gray-200 space-y-4">
-                            <div className="flex justify-between items-center border-b pb-2">
+                            <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-2 border-b pb-2">
                                 <h3 className="text-lg font-semibold text-gray-700">Current Owner</h3>
                                 <button
                                     type="button"
                                     data-tutorial-target="owner-privacy-toggle"
                                     onClick={() => toggleSectionPrivacy('owner')}
-                                    className={`px-3 py-1 rounded-full text-xs font-medium transition ${
+                                    className={`px-2 sm:px-3 py-1 rounded-full text-xs font-medium transition whitespace-nowrap ${
                                         sectionPrivacy[animalToEdit?.id_public]?.owner ? 'bg-blue-100 text-blue-800' : 'bg-gray-100 text-gray-800'
                                     }`}
                                 >
@@ -7146,12 +7146,12 @@ const AnimalForm = ({
                     <div className="space-y-6">
                         {/* Appearance */}
                         <div data-tutorial-target="appearance-section" className="bg-gray-50 p-4 rounded-lg border border-gray-200 space-y-4">
-                            <div className="flex justify-between items-center border-b pb-2">
+                            <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-2 border-b pb-2">
                                 <h3 className="text-lg font-semibold text-gray-700">Appearance</h3>
                                 <button
                                     type="button"
                                     onClick={() => toggleSectionPrivacy('appearance')}
-                                    className={`px-3 py-1 rounded-full text-xs font-medium transition ${
+                                    className={`px-2 sm:px-3 py-1 rounded-full text-xs font-medium transition whitespace-nowrap ${
                                         sectionPrivacy[animalToEdit?.id_public]?.appearance ? 'bg-blue-100 text-blue-800' : 'bg-gray-100 text-gray-800'
                                     }`}
                                 >
@@ -7192,12 +7192,12 @@ const AnimalForm = ({
 
                         {/* Genetic Code */}
                         <div className="bg-gray-50 p-4 rounded-lg border border-gray-200 space-y-4">
-                            <div className="flex justify-between items-center border-b pb-2">
+                            <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-2 border-b pb-2">
                                 <h3 className="text-lg font-semibold text-gray-700">Genetic Code</h3>
                                 <button
                                     type="button"
                                     onClick={() => toggleSectionPrivacy('genetics')}
-                                    className={`px-3 py-1 rounded-full text-xs font-medium transition ${
+                                    className={`px-2 sm:px-3 py-1 rounded-full text-xs font-medium transition whitespace-nowrap ${
                                         sectionPrivacy[animalToEdit?.id_public]?.genetics ? 'bg-blue-100 text-blue-800' : 'bg-gray-100 text-gray-800'
                                     }`}
                                 >
@@ -7215,12 +7215,12 @@ const AnimalForm = ({
 
                         {/* Life Stage */}
                         <div className="bg-gray-50 p-4 rounded-lg border border-gray-200 space-y-4">
-                            <div className="flex justify-between items-center border-b pb-2">
+                            <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-2 border-b pb-2">
                                 <h3 className="text-lg font-semibold text-gray-700">Life Stage</h3>
                                 <button
                                     type="button"
                                     onClick={() => toggleSectionPrivacy('lifeStage')}
-                                    className={`px-3 py-1 rounded-full text-xs font-medium transition ${
+                                    className={`px-2 sm:px-3 py-1 rounded-full text-xs font-medium transition whitespace-nowrap ${
                                         sectionPrivacy[animalToEdit?.id_public]?.lifeStage ? 'bg-blue-100 text-blue-800' : 'bg-gray-100 text-gray-800'
                                     }`}
                                 >
@@ -7246,12 +7246,12 @@ const AnimalForm = ({
 
                         {/* Measurements & Growth Tracking */}
                         <div data-tutorial-target="measurements-growth-section" className="bg-gray-50 p-4 rounded-lg border border-gray-200 space-y-4">
-                            <div className="flex justify-between items-center border-b pb-2">
+                            <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-2 border-b pb-2">
                                 <h3 className="text-lg font-semibold text-gray-700">Measurements & Growth Tracking</h3>
                                 <button
                                     type="button"
                                     onClick={() => toggleSectionPrivacy('measurements')}
-                                    className={`px-3 py-1 rounded-full text-xs font-medium transition ${
+                                    className={`px-2 sm:px-3 py-1 rounded-full text-xs font-medium transition whitespace-nowrap ${
                                         sectionPrivacy[animalToEdit?.id_public]?.measurements ? 'bg-blue-100 text-blue-800' : 'bg-gray-100 text-gray-800'
                                     }`}
                                 >
@@ -7630,12 +7630,12 @@ const AnimalForm = ({
                     <div className="space-y-6">
                         {/* Identification Numbers */}
                         <div className="bg-gray-50 p-4 rounded-lg border border-gray-200 space-y-4">
-                            <div className="flex justify-between items-center border-b pb-2">
+                            <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-2 border-b pb-2">
                                 <h3 className="text-lg font-semibold text-gray-700">Identification Numbers</h3>
                                 <button
                                     type="button"
                                     onClick={() => toggleSectionPrivacy('identification')}
-                                    className={`px-3 py-1 rounded-full text-xs font-medium transition ${
+                                    className={`px-2 sm:px-3 py-1 rounded-full text-xs font-medium transition whitespace-nowrap ${
                                         sectionPrivacy[animalToEdit?.id_public]?.identification ? 'bg-blue-100 text-blue-800' : 'bg-gray-100 text-gray-800'
                                     }`}
                                 >
@@ -7818,12 +7818,12 @@ const AnimalForm = ({
 
                         {/* Origin Section */}
                         <div className="bg-gray-50 p-4 rounded-lg border border-gray-200 space-y-4">
-                            <div className="flex justify-between items-center border-b pb-2">
+                            <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-2 border-b pb-2">
                                 <h3 className="text-lg font-semibold text-gray-700">Origin</h3>
                                 <button
                                     type="button"
                                     onClick={() => toggleSectionPrivacy('origin')}
-                                    className={`px-3 py-1 rounded-full text-xs font-medium transition ${
+                                    className={`px-2 sm:px-3 py-1 rounded-full text-xs font-medium transition whitespace-nowrap ${
                                         sectionPrivacy[animalToEdit?.id_public]?.origin ? 'bg-blue-100 text-blue-800' : 'bg-gray-100 text-gray-800'
                                     }`}
                                 >
@@ -7881,12 +7881,12 @@ const AnimalForm = ({
                     <div className="space-y-6">
                         {/* Reproductive Status - Key Status Indicators */}
                         <div className="bg-gray-50 p-4 rounded-lg border border-gray-200 space-y-4" data-tutorial-target="reproductive-status-section">
-                            <div className="flex justify-between items-center border-b pb-2">
+                            <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-2 border-b pb-2">
                                 <h3 className="text-lg font-semibold text-gray-700">⚪ Reproductive Status</h3>
                                 <button
                                     type="button"
                                     onClick={() => toggleSectionPrivacy('reproductive')}
-                                    className={`px-3 py-1 rounded-full text-xs font-medium transition ${
+                                    className={`px-2 sm:px-3 py-1 rounded-full text-xs font-medium transition whitespace-nowrap ${
                                         sectionPrivacy[animalToEdit?.id_public]?.reproductive ? 'bg-blue-100 text-blue-800' : 'bg-gray-100 text-gray-800'
                                     }`}
                                 >
@@ -8214,12 +8214,12 @@ const AnimalForm = ({
                     <div className="space-y-6">
                         {/* Preventive Care */}
                         <div className="bg-gray-50 p-4 rounded-lg border border-gray-200 space-y-6">
-                            <div className="flex justify-between items-center border-b pb-2">
+                            <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-2 border-b pb-2">
                                 <h3 className="text-lg font-semibold text-gray-700">Health & Veterinary</h3>
                                 <button
                                     type="button"
                                     onClick={() => toggleSectionPrivacy('health')}
-                                    className={`px-3 py-1 rounded-full text-xs font-medium transition ${
+                                    className={`px-2 sm:px-3 py-1 rounded-full text-xs font-medium transition whitespace-nowrap ${
                                         sectionPrivacy[animalToEdit?.id_public]?.health ? 'bg-blue-100 text-blue-800' : 'bg-gray-100 text-gray-800'
                                     }`}
                                 >
@@ -8450,12 +8450,12 @@ const AnimalForm = ({
 
                         {/* Veterinary Care */}
                         <div className="bg-gray-50 p-4 rounded-lg border border-gray-200 space-y-4" data-tutorial-target="medical-history-section">
-                            <div className="flex justify-between items-center border-b pb-2">
+                            <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-2 border-b pb-2">
                                 <h3 className="text-lg font-semibold text-gray-700">Medical History</h3>
                                 <button
                                     type="button"
                                     onClick={() => toggleSectionPrivacy('medicalHistory')}
-                                    className={`px-3 py-1 rounded-full text-xs font-medium transition ${
+                                    className={`px-2 sm:px-3 py-1 rounded-full text-xs font-medium transition whitespace-nowrap ${
                                         sectionPrivacy[animalToEdit?.id_public]?.medicalHistory ? 'bg-blue-100 text-blue-800' : 'bg-gray-100 text-gray-800'
                                     }`}
                                 >
@@ -8634,12 +8634,12 @@ const AnimalForm = ({
                     <div className="space-y-6">
                         {/* Diet */}
                         <div className="bg-gray-50 p-4 rounded-lg border border-gray-200 space-y-4">
-                            <div className="flex justify-between items-center border-b pb-2">
+                            <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-2 border-b pb-2">
                                 <h3 className="text-lg font-semibold text-gray-700">Husbandry</h3>
                                 <button
                                     type="button"
                                     onClick={() => toggleSectionPrivacy('husbandry')}
-                                    className={`px-3 py-1 rounded-full text-xs font-medium transition ${
+                                    className={`px-2 sm:px-3 py-1 rounded-full text-xs font-medium transition whitespace-nowrap ${
                                         sectionPrivacy[animalToEdit?.id_public]?.husbandry ? 'bg-blue-100 text-blue-800' : 'bg-gray-100 text-gray-800'
                                     }`}
                                 >
