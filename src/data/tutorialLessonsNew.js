@@ -1776,17 +1776,6 @@ const KEY_FEATURES_LESSONS = [
       },
       {
         stepNumber: 2,
-        title: 'Message Notifications',
-        content: 'Receive alerts when other CritterTrack users send you messages. Click the Messages button in the header to view your conversations with other breeders.',
-        highlightElement: '[data-tutorial-target="messages-btn"]',
-        tips: [
-          'Community communication',
-          'Stay in touch with breeders',
-          'Unread count badge shows new messages'
-        ]
-      },
-      {
-        stepNumber: 3,
         title: 'Transfer Request Notifications',
         content: 'When someone initiates an animal transfer with you (either to buy or to receive your animal), you\'ll be notified.',
         highlightElement: '[data-tutorial-target="transfer-notifications"]',
@@ -1797,7 +1786,7 @@ const KEY_FEATURES_LESSONS = [
         ]
       },
       {
-        stepNumber: 4,
+        stepNumber: 3,
         title: 'System Notifications',
         content: 'Receive alerts about important system events, updates, or maintenance. These are typically low-priority but keep you informed.',
         highlightElement: '[data-tutorial-target="system-notifications"]',
@@ -1805,6 +1794,17 @@ const KEY_FEATURES_LESSONS = [
           'Stay aware of platform changes',
           'Know about new features',
           'Understand any issues'
+        ]
+      },
+      {
+        stepNumber: 4,
+        title: 'Message Notifications',
+        content: 'Receive alerts when other CritterTrack users send you messages. Click the Messages button in the header to view your conversations with other breeders.',
+        highlightElement: '[data-tutorial-target="messages-btn"]',
+        tips: [
+          'Community communication',
+          'Stay in touch with breeders',
+          'Unread count badge shows new messages'
         ]
       }
     ]
