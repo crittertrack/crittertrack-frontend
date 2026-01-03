@@ -3762,11 +3762,21 @@ const LitterManagement = ({ authToken, API_BASE_URL, userProfile, showModalMessa
     };
 
     const handleEditLitter = (litter) => {
-        // Format birthDate and pairingDate for date inputs (YYYY-MM-DD format)
+        // Format birthDate and pairingDate for date inputs
+        // Date inputs expect YYYY-MM-DD format
         const formatDateForInput = (dateString) => {
             if (!dateString) return '';
-            const date = new Date(dateString);
-            return date.toISOString().split('T')[0];
+            try {
+                // If it's already in YYYY-MM-DD format, return as-is
+                if (typeof dateString === 'string' && dateString.match(/^\d{4}-\d{2}-\d{2}/)) {
+                    return dateString.split('T')[0];
+                }
+                // Otherwise parse and format
+                const date = new Date(dateString);
+                return date.toISOString().split('T')[0];
+            } catch (e) {
+                return '';
+            }
         };
 
         setEditingLitter(litter._id);
