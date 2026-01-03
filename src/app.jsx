@@ -12290,39 +12290,15 @@ const App = () => {
             return;
         }
 
-        // Set up WebSocket or EventSource for real-time urgent notifications
-        // This assumes the backend has a WebSocket endpoint at /ws/urgent-notifications
-        // or an EventSource endpoint at /api/urgent-notifications/stream
-        try {
-            // Try EventSource first for simpler setup
-            const eventSource = new EventSource(
-                `${API_BASE_URL}/admin/urgent-notifications-stream`,
-                { withCredentials: true }
-            );
+        // TODO: Implement urgent notifications when backend EventSource endpoint is available
+        // EventSource doesn't support custom headers, so auth needs to be handled via query params
+        // For now, urgent notifications are disabled to prevent 401 errors
+        
+        return () => {
+            // Cleanup if needed
+        };
+    }, [authToken, userProfile, maintenanceMode, API_BASE_URL, showModalMessage, handleLogout]);
 
-            eventSource.addEventListener('urgent-alert', (event) => {
-                try {
-                    const data = JSON.parse(event.data);
-                    setUrgentNotificationData({
-                        title: data.title || 'URGENT ALERT',
-                        content: data.content || ''
-                    });
-                    setShowUrgentNotification(true);
-                } catch (error) {
-                    console.error('Error parsing urgent notification:', error);
-                }
-            });
-
-            eventSource.addEventListener('error', () => {
-                console.error('EventSource connection error');
-                eventSource.close();
-            });
-
-            return () => eventSource.close();
-        } catch (error) {
-            console.error('Error setting up urgent notification stream:', error);
-        }
-    }, [authToken, API_BASE_URL]);
     useEffect(() => {
         if (authToken && !hasCompletedOnboarding && !tutorialLoading && userProfile) {
             // Show the initial welcome tutorial
