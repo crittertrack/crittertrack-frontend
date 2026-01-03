@@ -9934,6 +9934,16 @@ const AuthView = ({ onLoginSuccess, showModalMessage, isRegister, setIsRegister,
                 localStorage.removeItem('pendingVerification');
             }
         }
+        
+        // Check URL for password reset token
+        const params = new URLSearchParams(window.location.search);
+        const resetToken = params.get('token');
+        const resetTokenEmail = params.get('email');
+        if (resetToken && resetTokenEmail) {
+            setForgotPasswordStep(3);
+            setResetCode(resetToken);
+            setResetEmail(resetTokenEmail);
+        }
     }, []);
 
     // Persist verification state to localStorage when it changes
@@ -10026,19 +10036,20 @@ const AuthView = ({ onLoginSuccess, showModalMessage, isRegister, setIsRegister,
             setLoading(true);
             try {
                 await axios.post(`${API_BASE_URL}/auth/forgot-password`, { email: resetEmail });
-                showModalMessage('Reset Code Sent', 'Check your email for the password reset code.');
+                showModalMessage('Check Your Email', 'A password reset email has been sent. Click the button in the email to continue.');
                 setForgotPasswordStep(2);
             } catch (error) {
                 console.error('Forgot password error:', error.response?.data || error.message);
                 showModalMessage(
                     'Request Failed',
-                    error.response?.data?.message || 'Failed to send reset code. Please try again.'
+                    error.response?.data?.message || 'Failed to send reset email. Please try again.'
                 );
             } finally {
                 setLoading(false);
             }
         } else if (forgotPasswordStep === 2) {
-            // Step 2: Verify code and proceed to password change
+            // Step 2: User should have clicked the button in email - skip to step 3
+            // This shouldn't normally be reached, but kept for safety
             setForgotPasswordStep(3);
         } else if (forgotPasswordStep === 3) {
             // Step 3: Reset password with code and new password
@@ -10127,21 +10138,14 @@ const AuthView = ({ onLoginSuccess, showModalMessage, isRegister, setIsRegister,
                     
                     {forgotPasswordStep === 2 && (
                         <div>
-                            <p className="text-sm text-gray-600 mb-4">Check your email for the password reset code/link and paste it below.</p>
-                            <input
-                                type="text"
-                                placeholder="Enter reset code or token"
-                                value={resetCode}
-                                onChange={(e) => setResetCode(e.target.value)}
-                                required
-                                className="w-full p-3 border border-gray-300 rounded-lg focus:ring-primary focus:border-primary transition font-mono text-sm"
-                            />
-                            <p className="text-xs text-gray-500 mt-2">Copy the entire code from your email and paste it here.</p>
+                            <p className="text-sm text-gray-600 mb-4">✉️ Check your email for a password reset button. Click it to proceed with resetting your password.</p>
+                            <p className="text-xs text-gray-500 bg-blue-50 p-3 rounded border border-blue-200">The reset link will expire in 1 hour.</p>
                         </div>
                     )}
                     
                     {forgotPasswordStep === 3 && (
                         <div className="space-y-3">
+                            <p className="text-sm text-gray-600 mb-4">Enter your new password.</p>
                             <input
                                 type="password"
                                 placeholder="New Password *"
@@ -10163,12 +10167,12 @@ const AuthView = ({ onLoginSuccess, showModalMessage, isRegister, setIsRegister,
                     
                     <button
                         type="submit"
-                        disabled={loading || (forgotPasswordStep === 1 && !resetEmail) || (forgotPasswordStep === 2 && !resetCode.trim()) || (forgotPasswordStep === 3 && (!newPassword || !confirmNewPassword))}
+                        disabled={loading || (forgotPasswordStep === 1 && !resetEmail) || (forgotPasswordStep === 2) || (forgotPasswordStep === 3 && (!newPassword || !confirmNewPassword))}
                         className="w-full bg-primary text-black font-bold py-3 rounded-lg shadow-md hover:bg-primary/90 transition duration-150 flex items-center justify-center disabled:opacity-50"
                     >
                         {loading ? <Loader2 className="animate-spin mr-2" size={20} /> : (
-                            forgotPasswordStep === 1 ? 'Send Reset Code' : 
-                            forgotPasswordStep === 2 ? 'Verify Code' : 
+                            forgotPasswordStep === 1 ? 'Send Reset Email' : 
+                            forgotPasswordStep === 2 ? 'I clicked the email button' : 
                             'Reset Password'
                         )}
                     </button>
