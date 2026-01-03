@@ -12295,7 +12295,9 @@ const App = () => {
     }, [showModalMessage]);
 
     const handleModQuickFlag = useCallback(async (flagData) => {
+        console.log('[MOD ACTION] HANDLER CALLED with:', flagData);
         try {
+            console.log('[MOD ACTION] Inside try block');
             console.log('[MOD ACTION] Starting action:', flagData);
             console.log('[MOD ACTION] API_BASE_URL:', API_BASE_URL);
             console.log('[MOD ACTION] authToken:', authToken ? 'present' : 'MISSING');
@@ -16114,7 +16116,7 @@ const PublicProfilePage = () => {
                     onOpenReportQueue={() => navigate('/')}
                     onQuickFlag={(flagData) => {
                         console.log('Quick flag from public route:', flagData);
-                        // Could send to API here
+                        handleModQuickFlag(flagData);
                     }}
                     onExitModeration={() => {
                         localStorage.removeItem('moderationAuthenticated');
