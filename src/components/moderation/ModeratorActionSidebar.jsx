@@ -1,6 +1,13 @@
 import React, { useState } from 'react';
 import { Shield, AlertTriangle, Eye, MessageSquare, Ban, UserX, Edit3 } from 'lucide-react';
 import './ModeratorActionSidebar.css';
+import { 
+    FlagContentModal, 
+    EditContentModal, 
+    WarnUserModal, 
+    SuspendUserModal, 
+    BanUserModal 
+} from './ModActionModals';
 
 export default function ModeratorActionSidebar({ 
     isActive,
@@ -12,17 +19,21 @@ export default function ModeratorActionSidebar({
 }) {
     const [isCollapsed, setIsCollapsed] = useState(false);
     const [notes, setNotes] = useState('');
+    const [activeModal, setActiveModal] = useState(null);
 
     const handleQuickFlag = (action) => {
+        setActiveModal(action);
+    };
+
+    const handleModalSubmit = (actionData) => {
         if (onQuickFlag) {
             onQuickFlag({
-                action,
-                context: currentContext,
-                page: currentPage,
+                ...actionData,
                 notes: notes.trim()
             });
         }
         setNotes('');
+        setActiveModal(null);
     };
 
     if (!isActive) return null;
@@ -131,6 +142,39 @@ export default function ModeratorActionSidebar({
                     </div>
                 </div>
             )}
+
+            {/* Modals */}
+            <FlagContentModal
+                isOpen={activeModal === 'flag'}
+                onClose={() => setActiveModal(null)}
+                onSubmit={handleModalSubmit}
+                context={currentContext}
+            />
+            <EditContentModal
+                isOpen={activeModal === 'edit'}
+                onClose={() => setActiveModal(null)}
+                onSubmit={handleModalSubmit}
+                context={currentContext}
+            />
+            <WarnUserModal
+                isOpen={activeModal === 'warn'}
+                onClose={() => setActiveModal(null)}
+                onSubmit={handleModalSubmit}
+                context={currentContext}
+                currentWarnings={currentContext?.warningCount || 0}
+            />
+            <SuspendUserModal
+                isOpen={activeModal === 'suspend'}
+                onClose={() => setActiveModal(null)}
+                onSubmit={handleModalSubmit}
+                context={currentContext}
+            />
+            <BanUserModal
+                isOpen={activeModal === 'ban'}
+                onClose={() => setActiveModal(null)}
+                onSubmit={handleModalSubmit}
+                context={currentContext}
+            />
         </div>
     );
 }
