@@ -12001,14 +12001,99 @@ const App = () => {
     const handleModQuickFlag = useCallback(async (flagData) => {
         try {
             console.log('Quick flag action:', flagData);
-            // TODO: Implement backend endpoint for moderator quick actions
-            // For now, just show a confirmation
-            showModalMessage('Action Logged', `${flagData.action} flagged for context: ${flagData.context?.type || 'unknown'}`);
+
+            // Handle different action types
+            if (flagData.action === 'flag') {
+                // Create a report for flagged content
+                const reportType = flagData.context?.type === 'profile' ? 'profile' : 
+                                  flagData.context?.type === 'animal' ? 'animal' : 'message';
+                
+                const reportData = {
+                    reason: flagData.reason,
+                    category: flagData.category,
+                    description: `Moderator flag: ${flagData.reason}`,
+                    reportedContentId: flagData.context?.id,
+                    reportedUserId: flagData.context?.ownerId
+                };
+
+                const response = await axios.post(
+                    `${API_BASE_URL}/api/reports/${reportType}`,
+                    reportData,
+                    { headers: { Authorization: `Bearer ${authToken}` } }
+                );
+
+                showModalMessage('Flag Submitted', 'Content has been flagged and added to the report queue.');
+            } 
+            else if (flagData.action === 'edit') {
+                // Edit/redact content fields
+                const contentType = flagData.context?.type;
+                const contentId = flagData.context?.id;
+                
+                const response = await axios.patch(
+                    `${API_BASE_URL}/api/moderation/content/${contentType}/${contentId}/edit`,
+                    {
+                        fieldEdits: flagData.fieldEdits,
+                        reason: flagData.reason
+                    },
+                    { headers: { Authorization: `Bearer ${authToken}` } }
+                );
+
+                showModalMessage('Content Edited', 'Content has been updated successfully.');
+                // Refresh the current view
+                window.location.reload();
+            }
+            else if (flagData.action === 'warn') {
+                // Warn user
+                const userId = flagData.context?.ownerId;
+                
+                const response = await axios.post(
+                    `${API_BASE_URL}/api/moderation/users/${userId}/warn`,
+                    {
+                        reason: flagData.reason,
+                        category: flagData.category
+                    },
+                    { headers: { Authorization: `Bearer ${authToken}` } }
+                );
+
+                showModalMessage('Warning Sent', `User has been warned. Total warnings: ${response.data.warningCount}`);
+            }
+            else if (flagData.action === 'suspend') {
+                // Suspend user
+                const userId = flagData.context?.ownerId;
+                
+                const response = await axios.post(
+                    `${API_BASE_URL}/api/moderation/users/${userId}/status`,
+                    {
+                        status: 'suspended',
+                        reason: flagData.reason,
+                        durationDays: flagData.durationDays
+                    },
+                    { headers: { Authorization: `Bearer ${authToken}` } }
+                );
+
+                showModalMessage('User Suspended', `User has been suspended for ${flagData.durationDays} days.`);
+            }
+            else if (flagData.action === 'ban') {
+                // Ban user
+                const userId = flagData.context?.ownerId;
+                
+                const response = await axios.post(
+                    `${API_BASE_URL}/api/moderation/users/${userId}/status`,
+                    {
+                        status: 'banned',
+                        reason: flagData.reason,
+                        ipBan: flagData.ipBan
+                    },
+                    { headers: { Authorization: `Bearer ${authToken}` } }
+                );
+
+                showModalMessage('User Banned', 'User has been permanently banned.');
+            }
         } catch (error) {
             console.error('Error handling quick flag:', error);
-            showModalMessage('Error', 'Failed to process moderator action');
+            showModalMessage('Error', error.response?.data?.message || 'Failed to process moderator action');
         }
-    }, [showModalMessage]);
+    }, [showModalMessage, authToken, API_BASE_URL]);
 
     const resetIdleTimer = useCallback(() => {
         if (timeoutRef.current) {
