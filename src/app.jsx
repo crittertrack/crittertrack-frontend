@@ -12432,6 +12432,37 @@ const App = () => {
                 console.log('[MOD ACTION BAN] Success:', response.data);
                 showModalMessage('User Banned', 'User has been permanently banned.');
             }
+            else if (flagData.action === 'lift-warning') {
+                // Lift warning from user
+                const userId = flagData.context?.type === 'profile' 
+                    ? flagData.context?.userId 
+                    : flagData.context?.ownerId;
+                
+                console.log('[MOD ACTION LIFT_WARNING] Lifting warning for user:', { userId, reason: flagData.reason });
+                
+                const response = await axios.post(
+                    `${API_BASE_URL}/moderation/users/${userId}/lift-warning`,
+                    {
+                        reason: flagData.reason
+                    },
+                    { headers: { Authorization: `Bearer ${authToken}` } }
+                );
+
+                console.log('[MOD ACTION LIFT_WARNING] Success:', response.data);
+                showModalMessage('Warning Lifted', `User's warning count is now ${response.data.warningCount}.`);
+                
+                // Refetch user profile to update warning banner
+                if (userProfile && userProfile._id === userId) {
+                    try {
+                        const updatedProfile = await axios.get(`${API_BASE_URL}/users/profile`, {
+                            headers: { Authorization: `Bearer ${authToken}` }
+                        });
+                        setUserProfile(updatedProfile.data);
+                    } catch (err) {
+                        console.error('Failed to refresh user profile:', err);
+                    }
+                }
+            }
         } catch (error) {
             console.error('[MOD ACTION] ERROR OCCURRED:', {
                 message: error.message,
@@ -12451,7 +12482,7 @@ const App = () => {
             console.error('[MOD ACTION] Showing error message to user:', errorMsg);
             showModalMessage('Action Failed', errorMsg);
         }
-    }, [showModalMessage, authToken, API_BASE_URL]);
+    }, [showModalMessage, authToken, API_BASE_URL, userProfile]);
 
     const resetIdleTimer = useCallback(() => {
         if (timeoutRef.current) {
@@ -16175,6 +16206,25 @@ const PublicProfilePage = () => {
 
                 console.log('[MOD ACTION BAN] Success:', response.data);
                 showModalMessage('User Banned', 'User has been permanently banned.');
+            }
+            else if (flagData.action === 'lift-warning') {
+                // Lift warning from user
+                const userId = flagData.context?.type === 'profile' 
+                    ? flagData.context?.userId 
+                    : flagData.context?.ownerId;
+                
+                console.log('[MOD ACTION LIFT_WARNING] Lifting warning for user:', { userId, reason: flagData.reason });
+                
+                const response = await axios.post(
+                    `${API_BASE_URL}/moderation/users/${userId}/lift-warning`,
+                    {
+                        reason: flagData.reason
+                    },
+                    { headers: { Authorization: `Bearer ${authToken}` } }
+                );
+
+                console.log('[MOD ACTION LIFT_WARNING] Success:', response.data);
+                showModalMessage('Warning Lifted', `User's warning count is now ${response.data.warningCount}.`);
             }
         } catch (error) {
             console.error('[MOD ACTION] ERROR OCCURRED:', {
