@@ -15000,6 +15000,18 @@ const App = () => {
                                                             </h2>
 
                                                             {/* Appearance */}
+                                                            {(animalToView.color || animalToView.coat || animalToView.coatPattern || animalToView.earset) && (
+                                                                <p className="text-sm text-gray-700">
+                                                                    <span className="font-semibold">Appearance:</span> {[
+                                                                        animalToView.color,
+                                                                        animalToView.coatPattern,
+                                                                        animalToView.coat,
+                                                                        animalToView.earset
+                                                                    ].filter(Boolean).join(', ')}
+                                                                </p>
+                                                            )}
+
+                                                            {/* Date of Birth */}
                                                             {animalToView.birthDate && (
                                                                 <div className="text-sm text-gray-700 space-y-1">
                                                                     <p>
