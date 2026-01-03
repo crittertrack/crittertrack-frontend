@@ -457,7 +457,7 @@ const BudgetingTab = ({ authToken, API_BASE_URL, showModalMessage, preSelectedAn
                 </div>
 
                 {/* Statistics Cards */}
-                <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+                <div className="grid grid-cols-1 md:grid-cols-4 gap-4" data-tutorial-target="budget-overview">
                     <div className="bg-green-50 border-2 border-green-300 rounded-lg p-4">
                         <div className="text-green-600 text-sm font-medium mb-1 flex items-center gap-1">
                             <TrendingUp size={16} />

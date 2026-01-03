@@ -1922,13 +1922,13 @@ const ADVANCED_FEATURES_LESSONS = [
       },
       {
         stepNumber: 4,
-        title: 'Mass Management',
-        content: 'Select multiple animals using checkboxes, then bulk operations appear: Change status, add/remove tags, delete multiple, or export data.',
-        highlightElement: '[data-tutorial-target="mass-management-section"]',
+        title: 'Mass Delete',
+        content: 'Click the trash icon to enter mass delete mode. Select multiple animals using checkboxes, then click "Delete Selected" to remove them all at once.',
+        highlightElement: '[data-tutorial-target="bulk-delete-btn"]',
         tips: [
           'Efficient for large collections',
-          'Speed up updates',
-          'Apply changes to many at once'
+          'Delete multiple animals at once',
+          'Click Cancel to exit without deleting'
         ]
       }
     ]
@@ -1977,7 +1977,7 @@ const ADVANCED_FEATURES_LESSONS = [
       {
         stepNumber: 4,
         title: 'Sharing Animals',
-        content: 'Share links to your public animals with other breeders. They can view the full pedigree and contact you about the animal.',
+        content: 'First, open an existing animal from your collection to view its details. Then, click the "Share" button to copy the unique link to your clipboard. You can share this link with other breeders so they can view the full pedigree and contact you about the animal.',
         highlightElement: '[data-tutorial-target="share-animal-btn"]',
         tips: [
           'Direct promotion',

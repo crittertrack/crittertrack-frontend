@@ -14199,10 +14199,12 @@ const App = () => {
                                                 <div className="flex flex-wrap items-center gap-2">
                                                     <button
                                                         onClick={handleShareAnimal}
-                                                        className="p-2 bg-primary hover:bg-primary/90 text-black font-semibold rounded-lg transition flex items-center justify-center"
+                                                        data-tutorial-target="share-animal-btn"
+                                                        className="px-3 py-2 bg-primary hover:bg-primary/90 text-black font-semibold rounded-lg transition flex items-center gap-2"
                                                         title={copySuccessAnimal ? 'Link Copied!' : 'Share Link'}
                                                     >
                                                         <Link size={18} />
+                                                        <span className="text-sm">{copySuccessAnimal ? 'Link Copied!' : 'Share'}</span>
                                                     </button>
                                                     {userProfile && animalToView.ownerId_public === userProfile.id_public && !animalToView.isViewOnly && (
                                                         <>
