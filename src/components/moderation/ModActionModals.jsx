@@ -663,3 +663,63 @@ export const LiftWarningModal = ({ isOpen, onClose, onSubmit, context, currentWa
         </div>
     );
 };
+
+// Lift Suspension Modal
+export const LiftSuspensionModal = ({ isOpen, onClose, onSubmit, context }) => {
+    const [reason, setReason] = useState('');
+
+    if (!isOpen) return null;
+
+    const handleSubmit = () => {
+        onSubmit({
+            action: 'lift-suspension',
+            reason,
+            context
+        });
+        setReason('');
+        onClose();
+    };
+
+    return (
+        <div className="mod-modal-overlay">
+            <div className="mod-modal">
+                <div className="mod-modal-header">
+                    <TrendingDown size={24} className="text-green-600" />
+                    <h2>Lift Suspension</h2>
+                    <button onClick={onClose} className="mod-modal-close">
+                        <X size={20} />
+                    </button>
+                </div>
+                <div className="mod-modal-body">
+                    {context && (
+                        <div className="mod-context-info">
+                            <strong>Lifting Suspension For:</strong> {context.ownerName || context.name}
+                        </div>
+                    )}
+
+                    <div className="form-group">
+                        <label>Reason for Lifting Suspension (required)</label>
+                        <textarea
+                            value={reason}
+                            onChange={(e) => setReason(e.target.value)}
+                            placeholder="Explain why this suspension is being lifted (e.g., appeal granted, suspension period served early, etc.)..."
+                            rows={4}
+                            required
+                        />
+                    </div>
+                </div>
+                <div className="mod-modal-footer">
+                    <button onClick={onClose} className="btn-cancel">Cancel</button>
+                    <button 
+                        onClick={handleSubmit} 
+                        disabled={!reason.trim()} 
+                        className="btn-submit" 
+                        style={{backgroundColor: '#10b981'}}
+                    >
+                        Lift Suspension
+                    </button>
+                </div>
+            </div>
+        </div>
+    );
+};

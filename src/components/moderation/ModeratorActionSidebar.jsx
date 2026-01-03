@@ -7,7 +7,8 @@ import {
     WarnUserModal, 
     SuspendUserModal, 
     BanUserModal,
-    LiftWarningModal
+    LiftWarningModal,
+    LiftSuspensionModal
 } from './ModActionModals';
 
 export default function ModeratorActionSidebar({ 
@@ -135,6 +136,15 @@ export default function ModeratorActionSidebar({
                             <TrendingDown size={16} />
                             <span>Lift Warning</span>
                         </button>
+
+                        <button 
+                            className="mod-quick-btn lift-suspension"
+                            onClick={() => setActiveModal('lift-suspension')}
+                            title="Remove suspension from user account"
+                        >
+                            <TrendingDown size={16} />
+                            <span>Lift Suspension</span>
+                        </button>
                     </div>
 
                     {/* Link to full report queue */}
@@ -198,6 +208,12 @@ export default function ModeratorActionSidebar({
                 warnings={currentContext?.warnings || []}
                 API_BASE_URL={API_BASE_URL}
                 authToken={authToken}
+            />
+            <LiftSuspensionModal
+                isOpen={activeModal === 'lift-suspension'}
+                onClose={() => setActiveModal(null)}
+                onSubmit={handleModalSubmit}
+                context={currentContext}
             />
         </div>
     );

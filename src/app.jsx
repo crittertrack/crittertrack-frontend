@@ -10068,6 +10068,47 @@ const AuthView = ({ onLoginSuccess, showModalMessage, isRegister, setIsRegister,
                 onLoginSuccess(response.data.token);
             } catch (error) {
                 console.error('Login error:', error.response?.data || error.message);
+                
+                // Check if this is a suspension or ban error (403)
+                if (error.response?.status === 403) {
+                    const message = error.response?.data?.message || '';
+                    
+                    if (message.includes('Account suspended')) {
+                        // Parse suspension message and extract expiry time
+                        console.log('[LOGIN] User account suspended:', message);
+                        
+                        // Extract hours remaining from message (e.g., "Expires in 48 hour(s)")
+                        const hoursMatch = message.match(/(\d+)\s+hour/);
+                        const daysRemaining = hoursMatch ? Math.ceil(parseInt(hoursMatch[1]) / 24) : 1;
+                        
+                        // Calculate suspension end time
+                        const suspensionEndTime = new Date().getTime() + (daysRemaining * 24 * 60 * 60 * 1000);
+                        
+                        // Extract reason (everything before "Expires in")
+                        const reasonMatch = message.match(/^Account suspended:\s*(.+?)\s+Expires in/);
+                        const suspensionReason = reasonMatch ? reasonMatch[1] : 'Your account has been suspended.';
+                        
+                        // Store suspension info for display on login screen
+                        localStorage.setItem('suspensionEndTime', suspensionEndTime.toString());
+                        localStorage.setItem('suspensionReason', suspensionReason);
+                        
+                        // Trigger re-render of suspension banner
+                        setSuspensionInfo({
+                            endTime: suspensionEndTime,
+                            reason: suspensionReason
+                        });
+                        
+                        // Don't show error modal for suspension - let the banner display it
+                        return;
+                    } else if (message.includes('Account banned')) {
+                        showModalMessage(
+                            'Account Banned',
+                            message || 'Your account has been permanently banned.'
+                        );
+                        return;
+                    }
+                }
+                
                 showModalMessage(
                     'Login Failed',
                     error.response?.data?.message || 'An unexpected error occurred. Please try again.'
@@ -12568,6 +12609,26 @@ const App = () => {
                         console.error('Failed to refresh user profile:', err);
                     }
                 }
+            }
+            else if (flagData.action === 'lift-suspension') {
+                // Lift suspension from user
+                const userId = flagData.context?.type === 'profile' 
+                    ? flagData.context?.userId 
+                    : flagData.context?.ownerId;
+                
+                console.log('[MOD ACTION LIFT_SUSPENSION] Lifting suspension for user:', { userId, reason: flagData.reason });
+                
+                const response = await axios.post(
+                    `${API_BASE_URL}/moderation/users/${userId}/status`,
+                    {
+                        status: 'active',
+                        reason: flagData.reason
+                    },
+                    { headers: { Authorization: `Bearer ${authToken}` } }
+                );
+
+                console.log('[MOD ACTION LIFT_SUSPENSION] Success:', response.data);
+                showModalMessage('Suspension Lifted', 'User account has been reactivated and can now log in.');
             }
         } catch (error) {
             console.error('[MOD ACTION] ERROR OCCURRED:', {
@@ -16351,6 +16412,26 @@ const PublicProfilePage = () => {
 
                 console.log('[MOD ACTION LIFT_WARNING] Success:', response.data);
                 showModalMessage('Warning Lifted', `User's warning count is now ${response.data.warningCount}.`);
+            }
+            else if (flagData.action === 'lift-suspension') {
+                // Lift suspension from user
+                const userId = flagData.context?.type === 'profile' 
+                    ? flagData.context?.userId 
+                    : flagData.context?.ownerId;
+                
+                console.log('[MOD ACTION LIFT_SUSPENSION] Lifting suspension for user:', { userId, reason: flagData.reason });
+                
+                const response = await axios.post(
+                    `${API_BASE_URL}/moderation/users/${userId}/status`,
+                    {
+                        status: 'active',
+                        reason: flagData.reason
+                    },
+                    { headers: { Authorization: `Bearer ${authToken}` } }
+                );
+
+                console.log('[MOD ACTION LIFT_SUSPENSION] Success:', response.data);
+                showModalMessage('Suspension Lifted', 'User account has been reactivated and can now log in.');
             }
         } catch (error) {
             console.error('[MOD ACTION] ERROR OCCURRED:', {
