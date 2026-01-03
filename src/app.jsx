@@ -3126,8 +3126,8 @@ const LitterManagement = ({ authToken, API_BASE_URL, userProfile, showModalMessa
         damId_public: '',
         pairingDate: '',
         birthDate: '',
-        maleCount: '',
-        femaleCount: '',
+        maleCount: null,
+        femaleCount: null,
         notes: '',
         linkedOffspringIds: []
     });
@@ -3599,8 +3599,8 @@ const LitterManagement = ({ authToken, API_BASE_URL, userProfile, showModalMessa
                 damId_public: '',
                 pairingDate: '',
                 birthDate: '',
-                maleCount: '',
-                femaleCount: '',
+                maleCount: null,
+                femaleCount: null,
                 notes: '',
                 linkedOffspringIds: []
             });
@@ -3769,8 +3769,8 @@ const LitterManagement = ({ authToken, API_BASE_URL, userProfile, showModalMessa
             damId_public: litter.damId_public,
             pairingDate: litter.pairingDate || '',
             birthDate: litter.birthDate || '',
-            maleCount: litter.maleCount || '',
-            femaleCount: litter.femaleCount || '',
+            maleCount: litter.maleCount || null,
+            femaleCount: litter.femaleCount || null,
             notes: litter.notes || '',
             linkedOffspringIds: litter.offspringIds_public || []
         });
@@ -4209,8 +4209,8 @@ const LitterManagement = ({ authToken, API_BASE_URL, userProfile, showModalMessa
                             </label>
                             <input
                                 type="number"
-                                value={formData.maleCount || ''}
-                                onChange={(e) => setFormData({...formData, maleCount: e.target.value ? parseInt(e.target.value) : ''})}
+                                value={typeof formData.maleCount === 'number' ? formData.maleCount : (formData.maleCount || '')}
+                                onChange={(e) => setFormData({...formData, maleCount: e.target.value ? parseInt(e.target.value) : null})}
                                 className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent"
                                 placeholder="e.g., 5"
                                 min="0"
@@ -4224,8 +4224,8 @@ const LitterManagement = ({ authToken, API_BASE_URL, userProfile, showModalMessa
                             </label>
                             <input
                                 type="number"
-                                value={formData.femaleCount || ''}
-                                onChange={(e) => setFormData({...formData, femaleCount: e.target.value ? parseInt(e.target.value) : ''})}
+                                value={typeof formData.femaleCount === 'number' ? formData.femaleCount : (formData.femaleCount || '')}
+                                onChange={(e) => setFormData({...formData, femaleCount: e.target.value ? parseInt(e.target.value) : null})}
                                 className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent"
                                 placeholder="e.g., 3"
                                 min="0"
