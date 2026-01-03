@@ -2870,11 +2870,14 @@ const ParentMiniCard = ({ parent, label, onViewAnimal }) => {
         );
     }
 
+    // Determine if the parent is clickable (owned by user or public)
+    const isClickable = !parent.isHidden;
+
     return (
         <div 
-            className="flex items-center space-x-2 bg-gray-50 rounded-lg p-2 border border-gray-200 cursor-pointer hover:bg-gray-100 transition" 
+            className={`flex items-center space-x-2 bg-gray-50 rounded-lg p-2 border border-gray-200 ${isClickable ? 'cursor-pointer hover:bg-gray-100' : 'opacity-75'} transition`}
             style={{ width: 'auto', minWidth: '180px' }}
-            onClick={() => onViewAnimal && onViewAnimal(parent)}
+            onClick={isClickable ? (() => onViewAnimal && onViewAnimal(parent)) : undefined}
         >
             <div className="w-10 h-10 bg-gray-200 rounded-md overflow-hidden flex items-center justify-center flex-shrink-0">
                 {parent.imageUrl || parent.photoUrl ? (
