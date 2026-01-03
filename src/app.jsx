@@ -13903,26 +13903,7 @@ const App = () => {
                 />
             )}
 
-            {/* Initial Tutorial Modal - Welcome screen for new users */}
-            {authToken && !hasCompletedOnboarding && !tutorialLoading && userProfile && !hasSkippedTutorialThisSession && !showTutorialOverlay && (
-                <InitialTutorialModal
-                    onStart={() => {
-                        // Start the first lesson
-                        setCurrentTutorialIndex(0);
-                        setCurrentTutorialId(TUTORIAL_LESSONS.onboarding[0].id);
-                        setShowTutorialOverlay(true);
-                    }}
-                    onSkip={() => {
-                        // User skipped for now - don't show again this session
-                        setHasSkippedTutorialThisSession(true);
-                    }}
-                    onPermanentSkip={() => {
-                        // User marked as "Don't show again"
-                        markInitialTutorialSeen();
-                        setHasSkippedTutorialThisSession(true);
-                    }}
-                />
-            )}
+            {/* Tutorial Modal disabled - only available via Help button. Users can still access tutorials through the UI. */}
 
             {/* Tutorial Overlay Modal */}
             {showTutorialOverlay && currentTutorialId && (
