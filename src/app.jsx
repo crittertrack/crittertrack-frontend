@@ -12579,7 +12579,11 @@ const App = () => {
                 setSpeciesOptions([
                     { name: 'Fancy Mouse', category: 'Rodent', isDefault: true },
                     { name: 'Fancy Rat', category: 'Rodent', isDefault: true },
-                    { name: 'Russian Dwarf Hamster', category: 'Rodent', isDefault: true }
+                    { name: 'Russian Dwarf Hamster', category: 'Rodent', isDefault: true },
+                    { name: 'Campbells Dwarf Hamster', category: 'Rodent', isDefault: true },
+                    { name: 'Chinese Dwarf Hamster', category: 'Rodent', isDefault: true },
+                    { name: 'Syrian Hamster', category: 'Rodent', isDefault: true },
+                    { name: 'Guinea Pig', category: 'Rodent', isDefault: true }
                 ]);
             }
         };
