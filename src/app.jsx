@@ -11710,7 +11710,7 @@ const MessagesView = ({ authToken, API_BASE_URL, onClose, showModalMessage, sele
 
 // Moderator Warning Banner Component
 const WarningBanner = ({ authToken, API_BASE_URL, userProfile }) => {
-    const [warningNotifications, setWarningNotifications] = useState([]);
+    const [warnings, setWarnings] = useState([]);
     const [loading, setLoading] = useState(true);
 
     useEffect(() => {
@@ -11720,37 +11720,28 @@ const WarningBanner = ({ authToken, API_BASE_URL, userProfile }) => {
                 return;
             }
             try {
-                // Use passed userProfile or fetch if not available
-                let warningCount = 0;
+                // Get warnings from userProfile or fetch if not available
+                let userWarnings = [];
                 
-                if (userProfile?.warningCount !== undefined) {
-                    warningCount = userProfile.warningCount;
+                if (userProfile?.warnings !== undefined) {
+                    userWarnings = userProfile.warnings || [];
                 } else {
-                    // Fetch user profile to get warning count
+                    // Fetch user profile to get warnings
                     const response = await axios.get(`${API_BASE_URL}/users/profile`, {
                         headers: { Authorization: `Bearer ${authToken}` }
                     });
-                    warningCount = response.data?.warningCount || 0;
+                    userWarnings = response.data?.warnings || [];
                 }
                 
-                console.log('[WARNING BANNER] Checking warnings:', { warningCount, userProfile: userProfile?.warningCount });
+                // Filter to only active (non-lifted) warnings
+                const activeWarnings = userWarnings.filter(w => !w.isLifted);
                 
-                // Create a warning notification object from the user's warning count
-                if (warningCount > 0) {
-                    setWarningNotifications([{
-                        _id: `warning-${warningCount}`,
-                        type: 'moderator_warning',
-                        message: `You have received ${warningCount} warning${warningCount !== 1 ? 's' : ''} from the moderation team.`,
-                        metadata: {
-                            warningCount: warningCount,
-                            category: 'moderation'
-                        },
-                        createdAt: new Date(),
-                        read: false
-                    }]);
-                } else {
-                    setWarningNotifications([]);
-                }
+                console.log('[WARNING BANNER] Checking warnings:', { 
+                    totalWarnings: activeWarnings.length, 
+                    warnings: activeWarnings 
+                });
+                
+                setWarnings(activeWarnings);
             } catch (error) {
                 console.error('Failed to fetch user profile:', error);
             } finally {
@@ -11758,39 +11749,45 @@ const WarningBanner = ({ authToken, API_BASE_URL, userProfile }) => {
             }
         };
         fetchWarnings();
-    }, [authToken, API_BASE_URL, userProfile?.warningCount]);
+    }, [authToken, API_BASE_URL, userProfile?.warnings]);
 
-    if (loading || warningNotifications.length === 0) {
+    if (loading || warnings.length === 0) {
         return null;
     }
 
     return (
         <div className="w-full flex justify-center">
             <div className="w-full max-w-4xl px-6">
-                {warningNotifications.map((warning) => (
-                    <div key={warning._id} className="bg-yellow-50 border-l-4 border-yellow-400 p-4 rounded-lg shadow-md mb-3">
-                        <div className="flex items-start">
-                            <div className="flex-shrink-0">
-                                <AlertCircle className="h-6 w-6 text-yellow-400" />
-                            </div>
-                            <div className="ml-3 flex-1">
-                                <h3 className="text-lg font-bold text-yellow-800">⚠️ Official Warning from Moderation Team</h3>
-                                <div className="mt-2 text-yellow-700">
-                                    <p className="text-sm font-medium">{warning.message}</p>
-                                    {warning.metadata?.warningCount && (
-                                        <p className="text-xs mt-2 font-semibold">
-                                            Total Warnings: {warning.metadata.warningCount} 
-                                            {warning.metadata.warningCount >= 3 && <span className="text-red-600"> - Your account may be subject to suspension</span>}
-                                        </p>
-                                    )}
-                                    <p className="text-xs mt-1 text-gray-600">
-                                        Issued: {new Date(warning.createdAt).toLocaleString()}
-                                    </p>
+                <div className="bg-yellow-50 border-l-4 border-yellow-400 p-4 rounded-lg shadow-md mb-3">
+                    <div className="flex items-start">
+                        <div className="flex-shrink-0">
+                            <AlertCircle className="h-6 w-6 text-yellow-400" />
+                        </div>
+                        <div className="ml-3 flex-1">
+                            <h3 className="text-lg font-bold text-yellow-800">⚠️ Official Warning{warnings.length !== 1 ? 's' : ''} from Moderation Team</h3>
+                            <div className="mt-3 text-yellow-700">
+                                <p className="text-sm font-semibold mb-2">
+                                    You have {warnings.length} active warning{warnings.length !== 1 ? 's' : ''}:
+                                </p>
+                                <div className="space-y-3">
+                                    {warnings.map((warning, index) => (
+                                        <div key={index} className="bg-yellow-100 p-2 rounded text-xs">
+                                            <p className="font-semibold">Warning #{index + 1}</p>
+                                            <p className="mt-1"><strong>Reason:</strong> {warning.reason}</p>
+                                            <p className="mt-1"><strong>Date:</strong> {new Date(warning.date).toLocaleString()}</p>
+                                            {warning.category && <p className="mt-1"><strong>Category:</strong> {warning.category}</p>}
+                                        </div>
+                                    ))}
                                 </div>
+                                {warnings.length >= 3 && (
+                                    <p className="text-xs mt-3 text-red-600 font-semibold">
+                                        ⚠️ You have reached 3 warnings - your account is suspended. Contact moderators for appeal.
+                                    </p>
+                                )}
                             </div>
                         </div>
                     </div>
-                ))}
+                </div>
             </div>
         </div>
     );
@@ -12867,10 +12864,10 @@ const App = () => {
         // Fetch immediately, then set up periodic refetch
         fetchUserProfile(authToken);
         
-        // Refetch user profile every 30 seconds to catch warning/suspension updates
+        // Refetch user profile every 10 seconds to catch warning/suspension updates
         const interval = setInterval(() => {
             fetchUserProfile(authToken);
-        }, 30000);
+        }, 10000);
         
         return () => clearInterval(interval);
     }, [authToken, fetchUserProfile]);
