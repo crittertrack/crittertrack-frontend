@@ -20,20 +20,29 @@ export default function SystemSettingsTab({ API_BASE_URL, authToken }) {
         try {
             const response = await fetch(`${API_BASE_URL}/api/admin/system-settings/all`, {
                 headers: {
-                    'Authorization': `Bearer ${authToken}`
+                    'Authorization': `Bearer ${authToken}`,
+                    'Content-Type': 'application/json'
                 }
             });
 
-            const data = await response.json();
-
             if (!response.ok) {
-                throw new Error(data.error || 'Failed to fetch settings');
+                const text = await response.text();
+                let errorMessage;
+                try {
+                    const data = JSON.parse(text);
+                    errorMessage = data.error || `Server error: ${response.status}`;
+                } catch {
+                    errorMessage = `Server returned HTML instead of JSON. Status: ${response.status}`;
+                }
+                throw new Error(errorMessage);
             }
 
+            const data = await response.json();
             setSettings(data.settings || {});
             setMaintenanceMessage(data.settings?.maintenance_message?.value || '');
         } catch (err) {
             setError(err.message);
+            console.error('Error fetching settings:', err);
         } finally {
             setLoading(false);
         }
