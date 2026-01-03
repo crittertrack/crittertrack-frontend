@@ -10078,6 +10078,8 @@ const AuthView = ({ onLoginSuccess, showModalMessage, isRegister, setIsRegister,
         setNewPassword('');
         setConfirmNewPassword('');
     };
+
+    const handleResendCode = async () => {
         setLoading(true);
         try {
             await axios.post(`${API_BASE_URL}/auth/resend-verification`, { email });
