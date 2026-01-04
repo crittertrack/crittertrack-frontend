@@ -16339,26 +16339,26 @@ const App = () => {
                     className="fixed inset-0 bg-black bg-opacity-90 flex items-center justify-center z-50 p-4"
                     onClick={() => setShowImageModal(false)}
                 >
-                    <div className="relative max-w-7xl max-h-full">
+                    <div className="relative max-w-7xl max-h-full flex flex-col items-center gap-4">
                         <button
                             onClick={(e) => {
                                 e.stopPropagation();
                                 setShowImageModal(false);
                             }}
-                            className="absolute -top-12 right-0 text-white hover:text-gray-300 transition"
+                            className="self-end text-white hover:text-gray-300 transition"
                         >
                             <X size={32} />
                         </button>
                         <img 
                             src={enlargedImageUrl} 
                             alt="Enlarged view" 
-                            className="max-w-full max-h-[90vh] object-contain"
+                            className="max-w-full max-h-[75vh] object-contain"
                             onClick={(e) => e.stopPropagation()}
                         />
                         <a
                             href={enlargedImageUrl}
                             download
-                            className="absolute -bottom-16 left-1/2 transform -translate-x-1/2 bg-blue-600 hover:bg-blue-700 text-white px-6 py-2 rounded-lg flex items-center gap-2 transition"
+                            className="bg-blue-600 hover:bg-blue-700 text-white px-6 py-2 rounded-lg flex items-center gap-2 transition"
                             onClick={(e) => e.stopPropagation()}
                         >
                             <Download size={20} />
