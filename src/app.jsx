@@ -16868,27 +16868,33 @@ const AppRouter = () => {
                         position: 'fixed',
                         top: '80px',
                         left: '16px',
-                        zIndex: 60,
-                        backgroundColor: 'white',
-                        padding: '8px 12px',
-                        borderRadius: '6px',
-                        boxShadow: '0 1px 4px rgba(0,0,0,0.1)',
-                        display: 'flex',
-                        alignItems: 'center',
-                        gap: '8px'
+                        zIndex: 60
                     }}
                 >
-                    <div id="google_translate_element"></div>
+                    <div 
+                        id="google_translate_element" 
+                        style={{
+                            backgroundColor: 'white',
+                            padding: '8px 12px',
+                            borderRadius: '6px',
+                            boxShadow: '0 1px 4px rgba(0,0,0,0.1)',
+                            paddingRight: '32px'
+                        }}
+                    ></div>
                     <button
                         onClick={hideTranslateWidget}
                         style={{
+                            position: 'absolute',
+                            top: '4px',
+                            right: '4px',
                             background: 'none',
                             border: 'none',
                             cursor: 'pointer',
-                            padding: '2px',
+                            padding: '4px',
                             display: 'flex',
                             alignItems: 'center',
-                            color: '#666'
+                            color: '#666',
+                            zIndex: 61
                         }}
                         title="Hide translator"
                     >
