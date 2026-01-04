@@ -16771,14 +16771,14 @@ const PublicProfilePage = () => {
 const AppRouter = () => {
     return (
         <>
-            {/* Google Translate Widget - Fixed top right */}
+            {/* Google Translate Widget - Fixed left side below donation button */}
             <div 
                 id="google_translate_element" 
                 style={{
                     position: 'fixed',
-                    top: '8px',
-                    right: '8px',
-                    zIndex: 9999,
+                    top: '80px',
+                    left: '16px',
+                    zIndex: 60,
                     backgroundColor: 'white',
                     padding: '4px 8px',
                     borderRadius: '6px',
