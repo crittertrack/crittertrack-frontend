@@ -16861,26 +16861,27 @@ const AppRouter = () => {
 
     return (
         <>
-            {/* Google Translate Widget - Fixed left side below donation button */}
-            {showTranslateWidget && (
+            {/* Google Translate Widget - Always rendered but moved off-screen when hidden */}
+            <div 
+                style={{
+                    position: 'fixed',
+                    top: '80px',
+                    left: showTranslateWidget ? '16px' : '-9999px',
+                    zIndex: 60,
+                    transition: 'left 0.3s ease'
+                }}
+            >
                 <div 
+                    id="google_translate_element" 
                     style={{
-                        position: 'fixed',
-                        top: '80px',
-                        left: '16px',
-                        zIndex: 60
+                        backgroundColor: 'white',
+                        padding: '8px 12px',
+                        borderRadius: '6px',
+                        boxShadow: '0 1px 4px rgba(0,0,0,0.1)',
+                        paddingRight: '32px'
                     }}
-                >
-                    <div 
-                        id="google_translate_element" 
-                        style={{
-                            backgroundColor: 'white',
-                            padding: '8px 12px',
-                            borderRadius: '6px',
-                            boxShadow: '0 1px 4px rgba(0,0,0,0.1)',
-                            paddingRight: '32px'
-                        }}
-                    ></div>
+                ></div>
+                {showTranslateWidget && (
                     <button
                         onClick={hideTranslateWidget}
                         style={{
@@ -16900,8 +16901,8 @@ const AppRouter = () => {
                     >
                         <X size={16} />
                     </button>
-                </div>
-            )}
+                )}
+            </div>
 
             {/* Show translate button when hidden */}
             {!showTranslateWidget && (
@@ -16920,9 +16921,14 @@ const AppRouter = () => {
                         cursor: 'pointer',
                         display: 'flex',
                         alignItems: 'center',
-                        color: '#666'
+                        color: '#666',
+                        fontSize: '16px'
                     }}
                     title="Show translator"
+                >
+                    🌐
+                </button>
+            )}
                 >
                     🌐
                 </button>
