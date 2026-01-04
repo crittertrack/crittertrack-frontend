@@ -16665,13 +16665,14 @@ const AppRouter = () => {
                 id="google_translate_element" 
                 style={{
                     position: 'fixed',
-                    top: '10px',
-                    right: '10px',
+                    top: '8px',
+                    right: '8px',
                     zIndex: 9999,
                     backgroundColor: 'white',
-                    padding: '5px 10px',
-                    borderRadius: '8px',
-                    boxShadow: '0 2px 8px rgba(0,0,0,0.15)'
+                    padding: '3px 6px',
+                    borderRadius: '6px',
+                    boxShadow: '0 1px 4px rgba(0,0,0,0.1)',
+                    fontSize: '12px'
                 }}
             ></div>
             
