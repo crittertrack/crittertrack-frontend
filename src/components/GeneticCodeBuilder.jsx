@@ -212,8 +212,8 @@ const GeneticCodeBuilder = ({ species, gender, value, onChange, onOpenCommunityF
   
   // Build genetic code string from genotype object
   const buildGeneticCode = (genotype) => {
-    // Define the correct order of genes
-    const geneOrder = ['A', 'B', 'C', 'D', 'E', 'P', 'S', 'W', 'Spl', 'Rn', 'Si', 'Mobr', 'go', 'Re', 'Hr', 'Fz', 'ln', 'Satin', 'Caracul', 'Rex'];
+    // Define the correct order of genes (matching GENE_LOCI keys)
+    const geneOrder = ['A', 'B', 'C', 'D', 'E', 'P', 'S', 'W', 'Spl', 'Rn', 'Si', 'Mobr', 'U', 'Go', 'Re', 'Sa', 'Rst', 'Fz', 'Nu'];
     
     return geneOrder
       .filter(locus => genotype[locus] && genotype[locus] !== '')
