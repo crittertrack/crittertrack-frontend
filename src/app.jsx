@@ -12376,16 +12376,16 @@ const App = () => {
                 const sireId = animalToView.sireId_public || animalToView.fatherId_public;
                 const damId = animalToView.damId_public || animalToView.motherId_public;
                 
-                // Fetch parents
+                // Fetch parents using /any/ endpoint to get parents regardless of ownership
                 if (sireId) {
-                    const response = await axios.get(`${API_BASE_URL}/animals/${sireId}`, {
+                    const response = await axios.get(`${API_BASE_URL}/animals/any/${sireId}`, {
                         headers: { Authorization: `Bearer ${authToken}` }
                     });
                     setSireData(response.data);
                 }
                 
                 if (damId) {
-                    const response = await axios.get(`${API_BASE_URL}/animals/${damId}`, {
+                    const response = await axios.get(`${API_BASE_URL}/animals/any/${damId}`, {
                         headers: { Authorization: `Bearer ${authToken}` }
                     });
                     setDamData(response.data);
