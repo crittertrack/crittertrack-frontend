@@ -1950,7 +1950,7 @@ const PublicProfileView = ({ profile, onBack, onViewAnimal, API_BASE_URL, onStar
 };
 
 // View-Only Animal Detail Modal
-const ViewOnlyAnimalDetail = ({ animal, onClose, API_BASE_URL, onViewProfile, authToken, setModCurrentContext }) => {
+const ViewOnlyAnimalDetail = ({ animal, onClose, API_BASE_URL, onViewProfile, authToken, setModCurrentContext, setShowImageModal, setEnlargedImageUrl }) => {
     const [breederInfo, setBreederInfo] = useState(null);
     const [showPedigree, setShowPedigree] = useState(false);
     const [copySuccess, setCopySuccess] = useState(false);
@@ -2119,7 +2119,17 @@ const ViewOnlyAnimalDetail = ({ animal, onClose, API_BASE_URL, onViewProfile, au
                                         {/* Profile Image */}
                                         <div className="flex items-center justify-center h-40 w-full">
                                             {(animal.imageUrl || animal.photoUrl) ? (
-                                                <img src={animal.imageUrl || animal.photoUrl} alt={animal.name} className="max-w-32 max-h-32 w-auto h-auto object-contain rounded-md" />
+                                                <img 
+                                                    src={animal.imageUrl || animal.photoUrl} 
+                                                    alt={animal.name} 
+                                                    className="max-w-32 max-h-32 w-auto h-auto object-contain rounded-md cursor-pointer hover:opacity-80 transition"
+                                                    onClick={() => {
+                                                        if (setEnlargedImageUrl && setShowImageModal) {
+                                                            setEnlargedImageUrl(animal.imageUrl || animal.photoUrl);
+                                                            setShowImageModal(true);
+                                                        }
+                                                    }}
+                                                />
                                             ) : (
                                                 <div className="w-32 h-32 bg-gray-100 rounded-md flex items-center justify-center text-gray-400">
                                                     <Cat size={48} />
@@ -13738,6 +13748,8 @@ const App = () => {
                             authToken={authToken}
                             onViewProfile={(user) => setViewingPublicProfile(user)}
                             setModCurrentContext={setModCurrentContext}
+                            setShowImageModal={setShowImageModal}
+                            setEnlargedImageUrl={setEnlargedImageUrl}
                         />
                     )}
                     
@@ -13805,6 +13817,8 @@ const App = () => {
                         authToken={authToken}
                         setModCurrentContext={setModCurrentContext}
                         onViewProfile={(user) => setViewingPublicProfile(user)}
+                        setShowImageModal={setShowImageModal}
+                        setEnlargedImageUrl={setEnlargedImageUrl}
                     />
                 )}
                 
@@ -14090,6 +14104,8 @@ const App = () => {
                     setModCurrentContext={setModCurrentContext}
                     authToken={authToken}
                     onViewProfile={(user) => navigate(`/user/${user.id_public}`)}
+                    setShowImageModal={setShowImageModal}
+                    setEnlargedImageUrl={setEnlargedImageUrl}
                 />
             )}
             
@@ -16434,6 +16450,8 @@ const PublicAnimalPage = () => {
                 authToken={authToken}
                 onViewProfile={(user) => navigate(`/user/${user.id_public}`)}
                 setModCurrentContext={setModCurrentContext}
+                setShowImageModal={setShowImageModal}
+                setEnlargedImageUrl={setEnlargedImageUrl}
             />
             
             {/* Moderator Action Sidebar */}
