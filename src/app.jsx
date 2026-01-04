@@ -199,6 +199,11 @@ const PedigreeChart = ({ animalId, animalData, onClose, API_BASE_URL, authToken 
                         }
                     }
 
+                    // If animal exists but is not public/accessible (has ID but no data), return hidden marker
+                    if (!animalInfo && id) {
+                        return { isHidden: true, id_public: id };
+                    }
+                    
                     if (!animalInfo) return null;
 
                     // Fetch breeder info for each animal
@@ -422,12 +427,28 @@ const PedigreeChart = ({ animalId, animalData, onClose, API_BASE_URL, authToken 
         const bgColor = isSire ? 'bg-[#d4f1f5]' : 'bg-[#f8e8ee]';
         const GenderIcon = isSire ? Mars : Venus;
         
+        // Direct parents always show - either full data, "Unknown", or "Hidden" (private)
         if (!animal) {
             return (
                 <div className={`border border-gray-700 rounded p-2 ${bgColor} relative h-full flex items-center justify-center`}>
                     <div className="text-center">
                         <Cat size={32} className="hide-for-pdf text-gray-300 mx-auto mb-2" />
                         <div className="text-xs text-gray-400">Unknown</div>
+                    </div>
+                    <div className="absolute top-2 right-2">
+                        <GenderIcon size={20} className="text-gray-900" strokeWidth={2.5} />
+                    </div>
+                </div>
+            );
+        }
+        
+        if (animal.isHidden) {
+            return (
+                <div className={`border border-gray-700 rounded p-2 ${bgColor} relative h-full flex items-center justify-center`}>
+                    <div className="text-center">
+                        <EyeOff size={32} className="hide-for-pdf text-gray-500 mx-auto mb-2" />
+                        <div className="text-xs text-gray-600 font-semibold">Hidden</div>
+                        <div className="text-xs text-gray-500 mt-1">Private Profile</div>
                     </div>
                     <div className="absolute top-2 right-2">
                         <GenderIcon size={20} className="text-gray-900" strokeWidth={2.5} />
@@ -515,6 +536,24 @@ const PedigreeChart = ({ animalId, animalData, onClose, API_BASE_URL, authToken 
             );
         }
         
+        if (animal.isHidden) {
+            return (
+                <div className={`border border-gray-700 rounded p-1.5 ${bgColor} flex gap-1.5 h-full items-center relative`}>
+                    {/* Icon placeholder - 1/3 width */}
+                    <div className="hide-for-pdf w-1/3 aspect-square bg-gray-100 rounded-lg border-2 border-gray-900 overflow-hidden flex items-center justify-center flex-shrink-0">
+                        <EyeOff size={20} className="text-gray-500" />
+                    </div>
+                    {/* Text */}
+                    <div className="flex-1 flex items-center justify-start">
+                        <span className="text-xs text-gray-600 font-semibold">Hidden</span>
+                    </div>
+                    <div className="absolute top-1 right-1">
+                        <GenderIcon size={14} className="text-gray-900" strokeWidth={2.5} />
+                    </div>
+                </div>
+            );
+        }
+        
         const imgSrc = animal.imageUrl || animal.photoUrl || null;
         const colorCoat = [animal.color, animal.coat].filter(Boolean).join(' ') || 'N/A';
         
@@ -580,6 +619,18 @@ const PedigreeChart = ({ animalId, animalData, onClose, API_BASE_URL, authToken 
             return (
                 <div className={`border border-gray-700 rounded p-1 ${bgColor} flex items-center justify-center h-full relative`}>
                     <span className="text-xs text-gray-400">Unknown</span>
+                    <div className="absolute top-0.5 right-0.5">
+                        <GenderIcon size={12} className="text-gray-900" strokeWidth={2.5} />
+                    </div>
+                </div>
+            );
+        }
+        
+        if (animal.isHidden) {
+            return (
+                <div className={`border border-gray-700 rounded p-1 ${bgColor} flex flex-col items-center justify-center h-full relative`}>
+                    <EyeOff size={16} className="text-gray-500 mb-1" />
+                    <span className="text-xs text-gray-600 font-semibold">Hidden</span>
                     <div className="absolute top-0.5 right-0.5">
                         <GenderIcon size={12} className="text-gray-900" strokeWidth={2.5} />
                     </div>
@@ -15183,69 +15234,85 @@ const App = () => {
                                                     </div>
                                                 )}
 
-                                                {/* Parents Card */}
-                                                {(sireData || damData) && (
-                                                    <div className="bg-white border-2 border-gray-300 rounded-lg p-4">
-                                                        <h4 className="font-semibold text-gray-700 mb-4">Parents</h4>
-                                                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                                                            {/* Sire Card */}
-                                                            {sireData && (
-                                                                <div 
-                                                                    onClick={() => {
-                                                                        setAnimalToView(sireData);
-                                                                        setDetailViewTab(1);
-                                                                    }}
-                                                                    className="bg-gray-50 rounded-lg border border-gray-200 p-3 cursor-pointer hover:shadow-md transition"
-                                                                >
-                                                                    <div className="w-full h-48 bg-gray-200 rounded-lg overflow-hidden flex items-center justify-center mb-3">
-                                                                        <AnimalImage src={sireData.imageUrl || sireData.photoUrl} alt={sireData.name} className="w-full h-full object-cover" iconSize={32} />
-                                                                    </div>
-                                                                    <div className="text-center">
-                                                                        <p className="font-semibold text-gray-800 text-sm">
-                                                                            {sireData.prefix ? `${sireData.prefix} ` : ''}{sireData.name}{sireData.suffix ? ` ${sireData.suffix}` : ''}
-                                                                        </p>
-                                                                        <p className="text-xs text-gray-600 mt-1">
-                                                                            {sireData.gender}
-                                                                        </p>
-                                                                        {sireData.birthDate && (
-                                                                            <p className="text-xs text-gray-500 mt-2">
-                                                                                Born: {new Date(sireData.birthDate).toLocaleDateString()}
-                                                                            </p>
-                                                                        )}
-                                                                    </div>
+                                                {/* Parents Card - Always Visible */}
+                                                <div className="bg-white border-2 border-gray-300 rounded-lg p-4">
+                                                    <h4 className="font-semibold text-gray-700 mb-4">Parents</h4>
+                                                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                                        {/* Sire Card */}
+                                                        {sireData ? (
+                                                            <div 
+                                                                onClick={() => {
+                                                                    setAnimalToView(sireData);
+                                                                    setDetailViewTab(1);
+                                                                }}
+                                                                className="bg-gray-50 rounded-lg border border-gray-200 p-3 cursor-pointer hover:shadow-md transition"
+                                                            >
+                                                                <div className="w-full h-48 bg-gray-200 rounded-lg overflow-hidden flex items-center justify-center mb-3">
+                                                                    <AnimalImage src={sireData.imageUrl || sireData.photoUrl} alt={sireData.name} className="w-full h-full object-cover" iconSize={32} />
                                                                 </div>
-                                                            )}
-                                                            
-                                                            {/* Dam Card */}
-                                                            {damData && (
-                                                                <div 
-                                                                    onClick={() => {
-                                                                        setAnimalToView(damData);
-                                                                        setDetailViewTab(1);
-                                                                    }}
-                                                                    className="bg-gray-50 rounded-lg border border-gray-200 p-3 cursor-pointer hover:shadow-md transition"
-                                                                >
-                                                                    <div className="w-full h-48 bg-gray-200 rounded-lg overflow-hidden flex items-center justify-center mb-3">
-                                                                        <AnimalImage src={damData.imageUrl || damData.photoUrl} alt={damData.name} className="w-full h-full object-cover" iconSize={32} />
-                                                                    </div>
-                                                                    <div className="text-center">
-                                                                        <p className="font-semibold text-gray-800 text-sm">
-                                                                            {damData.prefix ? `${damData.prefix} ` : ''}{damData.name}{damData.suffix ? ` ${damData.suffix}` : ''}
+                                                                <div className="text-center">
+                                                                    <p className="font-semibold text-gray-800 text-sm">
+                                                                        {sireData.prefix ? `${sireData.prefix} ` : ''}{sireData.name}{sireData.suffix ? ` ${sireData.suffix}` : ''}
+                                                                    </p>
+                                                                    <p className="text-xs text-gray-600 mt-1">
+                                                                        {sireData.gender}
+                                                                    </p>
+                                                                    {sireData.birthDate && (
+                                                                        <p className="text-xs text-gray-500 mt-2">
+                                                                            Born: {new Date(sireData.birthDate).toLocaleDateString()}
                                                                         </p>
-                                                                        <p className="text-xs text-gray-600 mt-1">
-                                                                            {damData.gender}
-                                                                        </p>
-                                                                        {damData.birthDate && (
-                                                                            <p className="text-xs text-gray-500 mt-2">
-                                                                                Born: {new Date(damData.birthDate).toLocaleDateString()}
-                                                                            </p>
-                                                                        )}
-                                                                    </div>
+                                                                    )}
                                                                 </div>
-                                                            )}
-                                                        </div>
+                                                            </div>
+                                                        ) : (
+                                                            <div className="bg-gray-50 rounded-lg border-2 border-dashed border-gray-300 p-3">
+                                                                <div className="w-full h-48 bg-gray-100 rounded-lg flex items-center justify-center mb-3">
+                                                                    <Cat size={48} className="text-gray-400" />
+                                                                </div>
+                                                                <div className="text-center">
+                                                                    <p className="text-sm text-gray-500 italic">Father unknown</p>
+                                                                </div>
+                                                            </div>
+                                                        )}
+                                                        
+                                                        {/* Dam Card */}
+                                                        {damData ? (
+                                                            <div 
+                                                                onClick={() => {
+                                                                    setAnimalToView(damData);
+                                                                    setDetailViewTab(1);
+                                                                }}
+                                                                className="bg-gray-50 rounded-lg border border-gray-200 p-3 cursor-pointer hover:shadow-md transition"
+                                                            >
+                                                                <div className="w-full h-48 bg-gray-200 rounded-lg overflow-hidden flex items-center justify-center mb-3">
+                                                                    <AnimalImage src={damData.imageUrl || damData.photoUrl} alt={damData.name} className="w-full h-full object-cover" iconSize={32} />
+                                                                </div>
+                                                                <div className="text-center">
+                                                                    <p className="font-semibold text-gray-800 text-sm">
+                                                                        {damData.prefix ? `${damData.prefix} ` : ''}{damData.name}{damData.suffix ? ` ${damData.suffix}` : ''}
+                                                                    </p>
+                                                                    <p className="text-xs text-gray-600 mt-1">
+                                                                        {damData.gender}
+                                                                    </p>
+                                                                    {damData.birthDate && (
+                                                                        <p className="text-xs text-gray-500 mt-2">
+                                                                            Born: {new Date(damData.birthDate).toLocaleDateString()}
+                                                                        </p>
+                                                                    )}
+                                                                </div>
+                                                            </div>
+                                                        ) : (
+                                                            <div className="bg-gray-50 rounded-lg border-2 border-dashed border-gray-300 p-3">
+                                                                <div className="w-full h-48 bg-gray-100 rounded-lg flex items-center justify-center mb-3">
+                                                                    <Cat size={48} className="text-gray-400" />
+                                                                </div>
+                                                                <div className="text-center">
+                                                                    <p className="text-sm text-gray-500 italic">Mother unknown</p>
+                                                                </div>
+                                                            </div>
+                                                        )}
                                                     </div>
-                                                )}
+                                                </div>
 
                                                 {/* Offspring Card */}
                                                 {offspringData && offspringData.length > 0 && (
