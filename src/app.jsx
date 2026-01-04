@@ -16659,11 +16659,28 @@ const PublicProfilePage = () => {
 // Router Wrapper Component
 const AppRouter = () => {
     return (
-        <Routes>
-            <Route path="/animal/:animalId" element={<PublicAnimalPage />} />
-            <Route path="/user/:userId" element={<PublicProfilePage />} />
-            <Route path="/*" element={<AppWithTutorial />} />
-        </Routes>
+        <>
+            {/* Google Translate Widget - Fixed top right */}
+            <div 
+                id="google_translate_element" 
+                style={{
+                    position: 'fixed',
+                    top: '10px',
+                    right: '10px',
+                    zIndex: 9999,
+                    backgroundColor: 'white',
+                    padding: '5px 10px',
+                    borderRadius: '8px',
+                    boxShadow: '0 2px 8px rgba(0,0,0,0.15)'
+                }}
+            ></div>
+            
+            <Routes>
+                <Route path="/animal/:animalId" element={<PublicAnimalPage />} />
+                <Route path="/user/:userId" element={<PublicProfilePage />} />
+                <Route path="/*" element={<AppWithTutorial />} />
+            </Routes>
+        </>
     );
 };
 
