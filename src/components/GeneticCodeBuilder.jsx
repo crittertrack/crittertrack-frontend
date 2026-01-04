@@ -212,9 +212,12 @@ const GeneticCodeBuilder = ({ species, gender, value, onChange, onOpenCommunityF
   
   // Build genetic code string from genotype object
   const buildGeneticCode = (genotype) => {
-    return Object.entries(genotype)
-      .filter(([_, value]) => value && value !== '')
-      .map(([_, value]) => value)
+    // Define the correct order of genes
+    const geneOrder = ['A', 'B', 'C', 'D', 'E', 'P', 'S', 'W', 'Spl', 'Rn', 'Si', 'Mobr', 'go', 'Re', 'Hr', 'Fz', 'ln', 'Satin', 'Caracul', 'Rex'];
+    
+    return geneOrder
+      .filter(locus => genotype[locus] && genotype[locus] !== '')
+      .map(locus => genotype[locus])
       .join(' ');
   };
   
