@@ -16669,10 +16669,9 @@ const AppRouter = () => {
                     right: '8px',
                     zIndex: 9999,
                     backgroundColor: 'white',
-                    padding: '3px 6px',
+                    padding: '4px 8px',
                     borderRadius: '6px',
-                    boxShadow: '0 1px 4px rgba(0,0,0,0.1)',
-                    fontSize: '12px'
+                    boxShadow: '0 1px 4px rgba(0,0,0,0.1)'
                 }}
             ></div>
             
