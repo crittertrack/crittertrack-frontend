@@ -2195,16 +2195,22 @@ const ViewOnlyAnimalDetail = ({ animal, onClose, API_BASE_URL, onViewProfile, au
                                                     <span className="font-semibold">Date of Birth:</span> {new Date(animal.birthDate).toLocaleDateString()} (~{(() => {
                                                         const birth = new Date(animal.birthDate);
                                                         const endDate = animal.deceasedDate ? new Date(animal.deceasedDate) : new Date();
-                                                        let age = endDate.getFullYear() - birth.getFullYear();
-                                                        const monthDiff = endDate.getMonth() - birth.getMonth();
-                                                        if (monthDiff < 0 || (monthDiff === 0 && endDate.getDate() < birth.getDate())) age--;
-                                                        const months = (endDate.getMonth() - birth.getMonth() + 12) % 12;
+                                                        let years = endDate.getFullYear() - birth.getFullYear();
+                                                        let months = endDate.getMonth() - birth.getMonth();
                                                         let days = endDate.getDate() - birth.getDate();
+                                                        
                                                         if (days < 0) {
-                                                            days += new Date(endDate.getFullYear(), endDate.getMonth(), 0).getDate();
+                                                            months--;
+                                                            const prevMonth = new Date(endDate.getFullYear(), endDate.getMonth(), 0);
+                                                            days += prevMonth.getDate();
                                                         }
-                                                        if (age > 0) {
-                                                            return `${age}y ${months}m ${days}d`;
+                                                        if (months < 0) {
+                                                            years--;
+                                                            months += 12;
+                                                        }
+                                                        
+                                                        if (years > 0) {
+                                                            return `${years}y ${months}m ${days}d`;
                                                         } else if (months > 0) {
                                                             return `${months}m ${days}d`;
                                                         } else {
@@ -15078,16 +15084,22 @@ const App = () => {
                                                                         Date of Birth: {new Date(animalToView.birthDate).toLocaleDateString()} ~ {(() => {
                                                                             const birth = new Date(animalToView.birthDate);
                                                                             const endDate = animalToView.deceasedDate ? new Date(animalToView.deceasedDate) : new Date();
-                                                                            let age = endDate.getFullYear() - birth.getFullYear();
-                                                                            const monthDiff = endDate.getMonth() - birth.getMonth();
-                                                                            if (monthDiff < 0 || (monthDiff === 0 && endDate.getDate() < birth.getDate())) age--;
-                                                                            const months = (endDate.getMonth() - birth.getMonth() + 12) % 12;
+                                                                            let years = endDate.getFullYear() - birth.getFullYear();
+                                                                            let months = endDate.getMonth() - birth.getMonth();
                                                                             let days = endDate.getDate() - birth.getDate();
+                                                                            
                                                                             if (days < 0) {
-                                                                                days += new Date(endDate.getFullYear(), endDate.getMonth(), 0).getDate();
+                                                                                months--;
+                                                                                const prevMonth = new Date(endDate.getFullYear(), endDate.getMonth(), 0);
+                                                                                days += prevMonth.getDate();
                                                                             }
-                                                                            if (age > 0) {
-                                                                                return `${age}y ${months}m ${days}d`;
+                                                                            if (months < 0) {
+                                                                                years--;
+                                                                                months += 12;
+                                                                            }
+                                                                            
+                                                                            if (years > 0) {
+                                                                                return `${years}y ${months}m ${days}d`;
                                                                             } else if (months > 0) {
                                                                                 return `${months}m ${days}d`;
                                                                             } else {
