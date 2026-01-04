@@ -16929,10 +16929,6 @@ const AppRouter = () => {
                     🌐
                 </button>
             )}
-                >
-                    🌐
-                </button>
-            )}
             
             <Routes>
                 <Route path="/animal/:animalId" element={<PublicAnimalPage />} />
