@@ -14016,7 +14016,7 @@ const App = () => {
                                 )}
                                 {availableAnimals[currentAvailableIndex].availableForBreeding && availableAnimals[currentAvailableIndex].studFeeAmount && (
                                     <p className="text-xs text-purple-600 font-semibold">
-                                        Stud: {availableAnimals[currentAvailableIndex].studFeeCurrency === 'Negotiable' ? 'Negotiable' : `${availableAnimals[currentAvailableIndex].studFeeCurrency === 'USD' ? '$' : availableAnimals[currentAvailableIndex].studFeeCurrency === 'EUR' ? '€' : ''}${availableAnimals[currentAvailableIndex].studFeeAmount}`}
+                                        Fee: {availableAnimals[currentAvailableIndex].studFeeCurrency === 'Negotiable' ? 'Negotiable' : `${availableAnimals[currentAvailableIndex].studFeeCurrency === 'USD' ? '$' : availableAnimals[currentAvailableIndex].studFeeCurrency === 'EUR' ? '€' : ''}${availableAnimals[currentAvailableIndex].studFeeAmount}`}
                                     </p>
                                 )}
                             </div>
