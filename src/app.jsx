@@ -16984,6 +16984,7 @@ const PublicProfilePage = () => {
 
 // Router Wrapper Component
 const AppRouter = () => {
+    const location = useLocation();
     const [showTranslateWidget, setShowTranslateWidget] = useState(() => {
         const saved = localStorage.getItem('showTranslateWidget');
         return saved === null ? true : saved === 'true';
@@ -16998,6 +16999,70 @@ const AppRouter = () => {
         setShowTranslateWidget(true);
         localStorage.setItem('showTranslateWidget', 'true');
     };
+
+    // Clean up and reinitialize Google Translate on route change to prevent white screens
+    useEffect(() => {
+        // Store current language selection before cleanup
+        const currentLang = document.documentElement.lang;
+        
+        // Clean up Google Translate iframe and elements that cause issues
+        const cleanupGoogleTranslate = () => {
+            // Remove Google Translate iframe that can cause white screens
+            const iframes = document.querySelectorAll('iframe[class*="goog-te"]');
+            iframes.forEach(iframe => {
+                if (iframe.parentNode) {
+                    iframe.parentNode.removeChild(iframe);
+                }
+            });
+
+            // Remove the top bar that Google Translate adds
+            const topBar = document.querySelector('.goog-te-banner-frame');
+            if (topBar && topBar.parentNode) {
+                topBar.parentNode.removeChild(topBar);
+            }
+
+            // Reset body top margin that Google Translate adds
+            if (document.body.style.top) {
+                document.body.style.top = '';
+            }
+            
+            // Remove skiptranslate class from body
+            document.body.classList.remove('translated-ltr', 'translated-rtl');
+            
+            // Clean up any lingering translate elements
+            const translateElements = document.querySelectorAll('[class*="goog-te"]');
+            translateElements.forEach(el => {
+                if (el.id !== 'google_translate_element' && el.parentNode) {
+                    el.parentNode.removeChild(el);
+                }
+            });
+        };
+
+        // Debounce cleanup to avoid too many reinitialization on rapid navigation
+        const timer = setTimeout(() => {
+            cleanupGoogleTranslate();
+            
+            // Reinitialize Google Translate if it exists
+            if (window.google && window.google.translate && window.googleTranslateElementInit) {
+                try {
+                    // Clear the container first
+                    const container = document.getElementById('google_translate_element');
+                    if (container) {
+                        container.innerHTML = '';
+                    }
+                    
+                    // Reinitialize
+                    window.googleTranslateElementInit();
+                } catch (error) {
+                    console.warn('Google Translate reinitialization error:', error);
+                }
+            }
+        }, 100);
+
+        return () => {
+            clearTimeout(timer);
+        };
+    }, [location.pathname]);
 
     return (
         <>
