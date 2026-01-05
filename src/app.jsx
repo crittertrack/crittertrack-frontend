@@ -2541,19 +2541,46 @@ const PrivateAnimalDetail = ({ animal, onClose, onEdit, API_BASE_URL, authToken,
                     {/* Tab 7: Health */}
                     {detailViewTab === 7 && (
                         <div className="space-y-6">
+                            {/* 1st Section: Preventive Care */}
                             <div className="bg-gray-50 p-4 rounded-lg border border-gray-200 space-y-4">
-                                <h3 className="text-lg font-semibold text-gray-700">Health & Medical</h3>
-                                <div className="space-y-4">
+                                <h3 className="text-lg font-semibold text-gray-700">Preventive Care</h3>
+                                <div className="space-y-3 text-sm">
+                                    <div><span className="text-gray-600">Vaccinations:</span> <strong>{animal.vaccinations || '—'}</strong></div>
+                                    <div><span className="text-gray-600">Deworming Records:</span> <strong>{animal.dewormingRecords || '—'}</strong></div>
+                                    <div><span className="text-gray-600">Parasite Control:</span> <strong>{animal.parasiteControl || '—'}</strong></div>
+                                </div>
+                            </div>
+
+                            {/* 2nd Section: Procedures & Diagnostics */}
+                            <div className="bg-gray-50 p-4 rounded-lg border border-gray-200 space-y-4">
+                                <h3 className="text-lg font-semibold text-gray-700">Procedures & Diagnostics</h3>
+                                <div className="space-y-3 text-sm">
+                                    <div><span className="text-gray-600">Medical Procedures:</span> <strong>{animal.medicalProcedures || '—'}</strong></div>
+                                    <div><span className="text-gray-600">Laboratory Results:</span> <strong>{animal.laboratoryResults || '—'}</strong></div>
+                                </div>
+                            </div>
+
+                            {/* 3rd Section: Active Medical Records */}
+                            <div className="bg-gray-50 p-4 rounded-lg border border-gray-200 space-y-4">
+                                <h3 className="text-lg font-semibold text-gray-700">Active Medical Records</h3>
+                                <div className="space-y-3">
                                     <div>
                                         <span className="text-gray-600 text-sm font-semibold">Medical Conditions:</span>
                                         <p className="text-sm text-gray-700 mt-1 whitespace-pre-wrap">{animal.medicalConditions || '—'}</p>
                                     </div>
                                     <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm">
                                         <div><span className="text-gray-600">Allergies:</span> <strong>{animal.allergies || '—'}</strong></div>
-                                        <div><span className="text-gray-600">Medications:</span> <strong>{animal.medications || '—'}</strong></div>
-                                        <div><span className="text-gray-600">Primary Vet:</span> <strong>{animal.primaryVet || '—'}</strong></div>
-                                        <div><span className="text-gray-600">Vaccinations:</span> <strong>{animal.vaccinations || '—'}</strong></div>
+                                        <div><span className="text-gray-600">Current Medications:</span> <strong>{animal.medications || '—'}</strong></div>
                                     </div>
+                                </div>
+                            </div>
+
+                            {/* 4th Section: Veterinary Care */}
+                            <div className="bg-gray-50 p-4 rounded-lg border border-gray-200 space-y-4">
+                                <h3 className="text-lg font-semibold text-gray-700">Veterinary Care</h3>
+                                <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm">
+                                    <div><span className="text-gray-600">Primary Veterinarian:</span> <strong>{animal.primaryVet || '—'}</strong></div>
+                                    <div><span className="text-gray-600">Veterinary Visits:</span> <strong>{animal.vetVisits || '—'}</strong></div>
                                 </div>
                             </div>
                         </div>
@@ -2562,16 +2589,31 @@ const PrivateAnimalDetail = ({ animal, onClose, onEdit, API_BASE_URL, authToken,
                     {/* Tab 8: Husbandry */}
                     {detailViewTab === 8 && (
                         <div className="space-y-6">
+                            {/* 1st Section: Nutrition */}
                             <div className="bg-gray-50 p-4 rounded-lg border border-gray-200 space-y-4">
-                                <h3 className="text-lg font-semibold text-gray-700">Husbandry & Care</h3>
-                                <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm">
-                                    <div><span className="text-gray-600">Diet:</span> <strong>{animal.dietType || '—'}</strong></div>
+                                <h3 className="text-lg font-semibold text-gray-700">Nutrition</h3>
+                                <div className="space-y-3 text-sm">
+                                    <div><span className="text-gray-600">Diet Type:</span> <strong>{animal.dietType || '—'}</strong></div>
                                     <div><span className="text-gray-600">Feeding Schedule:</span> <strong>{animal.feedingSchedule || '—'}</strong></div>
-                                    <div><span className="text-gray-600">Housing:</span> <strong>{animal.housingType || '—'}</strong></div>
+                                </div>
+                            </div>
+
+                            {/* 2nd Section: Husbandry */}
+                            <div className="bg-gray-50 p-4 rounded-lg border border-gray-200 space-y-4">
+                                <h3 className="text-lg font-semibold text-gray-700">Husbandry</h3>
+                                <div className="space-y-3 text-sm">
+                                    <div><span className="text-gray-600">Housing Type:</span> <strong>{animal.housingType || '—'}</strong></div>
                                     <div><span className="text-gray-600">Bedding:</span> <strong>{animal.bedding || '—'}</strong></div>
-                                    <div><span className="text-gray-600">Temperature:</span> <strong>{animal.temperatureRange || '—'}</strong></div>
+                                    <div><span className="text-gray-600">Enrichment:</span> <strong>{animal.enrichment || '—'}</strong></div>
+                                </div>
+                            </div>
+
+                            {/* 3rd Section: Environment */}
+                            <div className="bg-gray-50 p-4 rounded-lg border border-gray-200 space-y-4">
+                                <h3 className="text-lg font-semibold text-gray-700">Environment</h3>
+                                <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm">
+                                    <div><span className="text-gray-600">Temperature Range:</span> <strong>{animal.temperatureRange || '—'}</strong></div>
                                     <div><span className="text-gray-600">Humidity:</span> <strong>{animal.humidity || '—'}</strong></div>
-                                    <div className="md:col-span-2"><span className="text-gray-600">Enrichment:</span> <strong>{animal.enrichment || '—'}</strong></div>
                                 </div>
                             </div>
                         </div>
@@ -2580,12 +2622,20 @@ const PrivateAnimalDetail = ({ animal, onClose, onEdit, API_BASE_URL, authToken,
                     {/* Tab 9: Behavior */}
                     {detailViewTab === 9 && (
                         <div className="space-y-6">
+                            {/* 1st Section: Behavior */}
                             <div className="bg-gray-50 p-4 rounded-lg border border-gray-200 space-y-4">
-                                <h3 className="text-lg font-semibold text-gray-700">Behavior & Temperament</h3>
-                                <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm">
+                                <h3 className="text-lg font-semibold text-gray-700">Behavior</h3>
+                                <div className="space-y-3 text-sm">
                                     <div><span className="text-gray-600">Temperament:</span> <strong>{animal.temperament || '—'}</strong></div>
                                     <div><span className="text-gray-600">Handling Tolerance:</span> <strong>{animal.handlingTolerance || '—'}</strong></div>
                                     <div><span className="text-gray-600">Social Structure:</span> <strong>{animal.socialStructure || '—'}</strong></div>
+                                </div>
+                            </div>
+
+                            {/* 2nd Section: Activity */}
+                            <div className="bg-gray-50 p-4 rounded-lg border border-gray-200 space-y-4">
+                                <h3 className="text-lg font-semibold text-gray-700">Activity</h3>
+                                <div className="space-y-3 text-sm">
                                     <div><span className="text-gray-600">Activity Cycle:</span> <strong>{animal.activityCycle || '—'}</strong></div>
                                 </div>
                             </div>
@@ -2595,6 +2645,7 @@ const PrivateAnimalDetail = ({ animal, onClose, onEdit, API_BASE_URL, authToken,
                     {/* Tab 10: Records */}
                     {detailViewTab === 10 && (
                         <div className="space-y-6">
+                            {/* 1st Section: Remarks & Notes */}
                             <div className="bg-gray-50 p-4 rounded-lg border border-gray-200 space-y-4">
                                 <h3 className="text-lg font-semibold text-gray-700">Remarks & Notes</h3>
                                 <p className="text-sm text-gray-700 whitespace-pre-wrap">{animal.remarks || '—'}</p>
@@ -2605,12 +2656,20 @@ const PrivateAnimalDetail = ({ animal, onClose, onEdit, API_BASE_URL, authToken,
                     {/* Tab 11: End of Life */}
                     {detailViewTab === 11 && (
                         <div className="space-y-6">
+                            {/* 1st Section: Information */}
                             <div className="bg-gray-50 p-4 rounded-lg border border-gray-200 space-y-4">
-                                <h3 className="text-lg font-semibold text-gray-700">End of Life</h3>
-                                <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm">
+                                <h3 className="text-lg font-semibold text-gray-700">Information</h3>
+                                <div className="space-y-3 text-sm">
                                     <div><span className="text-gray-600">Deceased Date:</span> <strong>{animal.deceasedDate ? new Date(animal.deceasedDate).toLocaleDateString() : '—'}</strong></div>
                                     <div><span className="text-gray-600">Cause of Death:</span> <strong>{animal.causeOfDeath || '—'}</strong></div>
-                                    <div className="md:col-span-2"><span className="text-gray-600">Necropsy Results:</span> <strong>{animal.necropsyResults || '—'}</strong></div>
+                                    <div><span className="text-gray-600">Necropsy Results:</span> <strong>{animal.necropsyResults || '—'}</strong></div>
+                                </div>
+                            </div>
+
+                            {/* 2nd Section: Legal/Administrative */}
+                            <div className="bg-gray-50 p-4 rounded-lg border border-gray-200 space-y-4">
+                                <h3 className="text-lg font-semibold text-gray-700">Legal/Administrative</h3>
+                                <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm">
                                     <div><span className="text-gray-600">Insurance:</span> <strong>{animal.insurance || '—'}</strong></div>
                                     <div><span className="text-gray-600">Legal Status:</span> <strong>{animal.legalStatus || '—'}</strong></div>
                                 </div>
