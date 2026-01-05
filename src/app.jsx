@@ -16610,16 +16610,13 @@ const App = () => {
                     } />
                     <Route path="/view-animal" element={
                         animalToView && (() => {
-                            // Determine if this animal is view-only for the current user
-                            // (sold, transferred, or no longer owned but they have access)
-                            const isViewOnlyForCurrentUser = animalToView.status === 'sold' || 
-                                                            animalToView.status === 'transferred' || 
-                                                            animalToView.status === 'purchased' ||
-                                                            (animalToView.isViewOnly === true && animalToView.ownerId_public !== userProfile?.id_public) ||
-                                                            (animalToView.currentOwner && animalToView.currentOwner !== userProfile?.id_public);
+                            // Simple ownership check: 
+                            // If I own the animal (ownerId_public matches my ID) → Full edit access
+                            // Otherwise → Read-only access (I transferred it away)
+                            const isViewOnlyForCurrentUser = animalToView.ownerId_public !== userProfile?.id_public;
                             
                             if (isViewOnlyForCurrentUser) {
-                                // Show read-only version for sold/transferred animals
+                                // Show read-only version for animals I no longer own
                                 return (
                                     <ViewOnlyPrivateAnimalDetail
                                         animal={animalToView}
@@ -16631,7 +16628,7 @@ const App = () => {
                                     />
                                 );
                             } else {
-                                // Show full edit version for owned animals
+                                // Show full edit version for animals I own
                                 return (
                                     <PrivateAnimalDetail
                                         animal={animalToView}
