@@ -2,9 +2,11 @@ import React, { useState, useEffect } from 'react';
 import {
     X, Users, Settings, BarChart3, Mail, Shield, Lock, AlertTriangle,
     Loader2, Save, Plus, Trash2, Edit, Eye, Search, Download, Upload,
-    ChevronDown, ChevronRight, CheckCircle, Clock, Flag, MessageSquare
+    ChevronDown, ChevronRight, CheckCircle, Clock, Flag, MessageSquare, FileText
 } from 'lucide-react';
 import ModOversightPanel from './moderation/ModOversightPanel';
+import UserManagementPanel from './moderation/UserManagementPanel';
+import AuditLogViewer from './moderation/AuditLogViewer';
 import UserManagementTab from './admin/UserManagementTab';
 import AuditLogTab from './admin/AuditLogTab';
 import CommunicationTab from './admin/CommunicationTab';
@@ -408,10 +410,12 @@ const EnhancedAdminPanel = ({ isOpen, onClose, authToken, API_BASE_URL, userRole
                             {[
                                 { id: 'dashboard', label: 'Dashboard', icon: BarChart3 },
                                 { id: 'moderation', label: 'Moderation Tools', icon: AlertTriangle },
+                                { id: 'user-management', label: 'User Management', icon: Users },
+                                { id: 'audit-logs', label: 'Audit Logs', icon: FileText },
                                 { id: 'reports', label: 'Reports & Analytics', icon: BarChart3 },
                                 { id: 'communication', label: 'Communication', icon: Mail },
                                 // Admin-only features
-                                { id: 'users', label: 'User Management', icon: Users, requiredRole: 'admin' },
+                                { id: 'users', label: 'Admin Users', icon: Users, requiredRole: 'admin' },
                                 { id: 'animals', label: 'Animal Records', icon: Shield, requiredRole: 'admin' },
                                 { id: 'data-audit', label: 'Data Integrity', icon: Lock, requiredRole: 'admin' },
                                 { id: 'system-settings', label: 'System Settings', icon: Settings, requiredRole: 'admin' }
@@ -522,6 +526,20 @@ const EnhancedAdminPanel = ({ isOpen, onClose, authToken, API_BASE_URL, userRole
                                     }
                                 }}
                             />
+                        )}
+
+                        {/* User Management Panel */}
+                        {activeSection === 'user-management' && (
+                            <div className="p-8">
+                                <UserManagementPanel />
+                            </div>
+                        )}
+
+                        {/* Audit Logs */}
+                        {activeSection === 'audit-logs' && (
+                            <div className="p-8">
+                                <AuditLogViewer />
+                            </div>
                         )}
 
                         {/* Data Audit */}
