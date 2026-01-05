@@ -1014,7 +1014,7 @@ const MouseGeneticsCalculator = ({ API_BASE_URL, authToken, myAnimals = [] }) =>
     const parts = codeString.replace(/,/g, ' ').trim().split(/\s+/);
     
     parts.forEach(part => {
-      // Try to match format with slash: A/A or a/a
+      // Try to match format with slash: A/A, a/a, Go/go, etc.
       let match = part.match(/^([A-Za-z]+)\/([A-Za-z]+)$/);
       let allele1, allele2;
       
@@ -1022,7 +1022,8 @@ const MouseGeneticsCalculator = ({ API_BASE_URL, authToken, myAnimals = [] }) =>
         allele1 = match[1];
         allele2 = match[2];
       } else {
-        // Try to match format without slash: AA, Aa, aa
+        // Try to match format without slash but only for single-character alleles: AA, Aa, aa
+        // Don't try to parse multi-character alleles without slash (Go, Re, etc. should have /)
         match = part.match(/^([A-Za-z])([A-Za-z])$/);
         if (match) {
           allele1 = match[1];
@@ -1031,29 +1032,45 @@ const MouseGeneticsCalculator = ({ API_BASE_URL, authToken, myAnimals = [] }) =>
       }
       
       if (allele1 && allele2) {
+        let found = false;
+        
         // First, try to find an exact match (preserving case)
         const exactMatch = `${allele1}/${allele2}`;
         
         for (const [locus, data] of Object.entries(GENE_LOCI)) {
-          const found = data.combinations.find(combo => combo === exactMatch);
-          
-          if (found) {
-            genotype[locus] = found;
-            return; // Exit early if exact match found
+          if (data.combinations.includes(exactMatch)) {
+            genotype[locus] = exactMatch;
+            found = true;
+            break;
           }
         }
         
-        // If no exact match, try case-insensitive matching
-        const normalized = `${allele1.toLowerCase()}/${allele2.toLowerCase()}`;
+        // If no exact match, try the reverse order
+        if (!found) {
+          const reverseMatch = `${allele2}/${allele1}`;
+          for (const [locus, data] of Object.entries(GENE_LOCI)) {
+            if (data.combinations.includes(reverseMatch)) {
+              genotype[locus] = reverseMatch;
+              found = true;
+              break;
+            }
+          }
+        }
         
-        for (const [locus, data] of Object.entries(GENE_LOCI)) {
-          const matchingCombo = data.combinations.find(combo => 
-            combo.toLowerCase() === normalized
-          );
+        // If still no match, try case-insensitive matching
+        if (!found) {
+          const normalized = `${allele1.toLowerCase()}/${allele2.toLowerCase()}`;
           
-          if (matchingCombo) {
-            genotype[locus] = matchingCombo; // Use the properly formatted version from GENE_LOCI
-            break;
+          for (const [locus, data] of Object.entries(GENE_LOCI)) {
+            const matchingCombo = data.combinations.find(combo => 
+              combo.toLowerCase() === normalized
+            );
+            
+            if (matchingCombo) {
+              genotype[locus] = matchingCombo; // Use the properly formatted version from GENE_LOCI
+              found = true;
+              break;
+            }
           }
         }
       }
