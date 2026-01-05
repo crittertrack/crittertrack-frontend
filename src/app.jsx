@@ -4413,12 +4413,14 @@ const ViewOnlyAnimalDetail = ({ animal, onClose, API_BASE_URL, onViewProfile, au
                     {detailViewTab === 10 && (
                         <div className="space-y-6">
                             {/* Current Owner Section */}
-                            {!sectionPrivacy.currentOwner && animal.currentOwner && (
-                                <div className="bg-gray-50 p-4 rounded-lg border border-gray-200">
-                                    <h3 className="text-lg font-semibold text-gray-700 border-b pb-2 mb-3">Current Owner</h3>
-                                    <p className="text-gray-700">{animal.currentOwner}</p>
-                                </div>
-                            )}
+                            <div className="bg-gray-50 p-4 rounded-lg border border-gray-200">
+                                <h3 className="text-lg font-semibold text-gray-700 border-b pb-2 mb-3">Current Owner</h3>
+                                {!sectionPrivacy.currentOwner ? (
+                                    <p className="text-gray-700">{animal.currentOwner || '—'}</p>
+                                ) : (
+                                    <p className="text-sm text-gray-500 italic">Private</p>
+                                )}
+                            </div>
                             
                             {/* Remarks & Notes Section */}
                             {showRemarks && (
