@@ -7933,19 +7933,7 @@ const AnimalForm = ({
                         
                         {/* Current Owner */}
                         <div data-tutorial-target="current-owner-field" className="bg-gray-50 p-4 rounded-lg border border-gray-200 space-y-4">
-                            <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-2 border-b pb-2">
-                                <h3 className="text-lg font-semibold text-gray-700">Current Owner</h3>
-                                <button
-                                    type="button"
-                                    data-tutorial-target="owner-privacy-toggle"
-                                    onClick={() => toggleSectionPrivacy('owner')}
-                                    className={`px-2 sm:px-3 py-1 rounded-full text-xs font-medium transition whitespace-nowrap ${
-                                        sectionPrivacy[animalToEdit?.id_public]?.owner ? 'bg-blue-100 text-blue-800' : 'bg-gray-100 text-gray-800'
-                                    }`}
-                                >
-                                    {sectionPrivacy[animalToEdit?.id_public]?.owner ? '🌍 Public' : '🔒 Private'}
-                                </button>
-                            </div>
+                            <h3 className="text-lg font-semibold text-gray-700 border-b pb-2">Current Owner</h3>
                             <div>
                                 <label className='block text-sm font-medium text-gray-700 mb-2'>Owner Name</label>
                                 <input 
@@ -8025,18 +8013,7 @@ const AnimalForm = ({
                     <div className="space-y-6">
                         {/* Appearance */}
                         <div data-tutorial-target="appearance-section" className="bg-gray-50 p-4 rounded-lg border border-gray-200 space-y-4">
-                            <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-2 border-b pb-2">
-                                <h3 className="text-lg font-semibold text-gray-700">Appearance</h3>
-                                <button
-                                    type="button"
-                                    onClick={() => toggleSectionPrivacy('appearance')}
-                                    className={`px-2 sm:px-3 py-1 rounded-full text-xs font-medium transition whitespace-nowrap ${
-                                        sectionPrivacy[animalToEdit?.id_public]?.appearance ? 'bg-blue-100 text-blue-800' : 'bg-gray-100 text-gray-800'
-                                    }`}
-                                >
-                                    {sectionPrivacy[animalToEdit?.id_public]?.appearance ? '🌍 Public' : '🔒 Private'}
-                                </button>
-                            </div>
+                            <h3 className="text-lg font-semibold text-gray-700 border-b pb-2">Appearance</h3>
                             <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                                 <div>
                                     <label className="block text-sm font-medium text-gray-700">Color</label>
@@ -8102,18 +8079,7 @@ const AnimalForm = ({
 
                         {/* Measurements & Growth Tracking */}
                         <div data-tutorial-target="measurements-growth-section" className="bg-gray-50 p-4 rounded-lg border border-gray-200 space-y-4">
-                            <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-2 border-b pb-2">
-                                <h3 className="text-lg font-semibold text-gray-700">Measurements & Growth Tracking</h3>
-                                <button
-                                    type="button"
-                                    onClick={() => toggleSectionPrivacy('measurements')}
-                                    className={`px-2 sm:px-3 py-1 rounded-full text-xs font-medium transition whitespace-nowrap ${
-                                        sectionPrivacy[animalToEdit?.id_public]?.measurements ? 'bg-blue-100 text-blue-800' : 'bg-gray-100 text-gray-800'
-                                    }`}
-                                >
-                                    {sectionPrivacy[animalToEdit?.id_public]?.measurements ? '🌍 Public' : '🔒 Private'}
-                                </button>
-                            </div>
+                            <h3 className="text-lg font-semibold text-gray-700 border-b pb-2">Measurements & Growth Tracking</h3>
                             
                             {/* Current Measurement Display */}
                             {growthRecords.length > 0 && (() => {
@@ -8486,18 +8452,7 @@ const AnimalForm = ({
                     <div className="space-y-6">
                         {/* Identification Numbers */}
                         <div className="bg-gray-50 p-4 rounded-lg border border-gray-200 space-y-4">
-                            <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-2 border-b pb-2">
-                                <h3 className="text-lg font-semibold text-gray-700">Identification Numbers</h3>
-                                <button
-                                    type="button"
-                                    onClick={() => toggleSectionPrivacy('identification')}
-                                    className={`px-2 sm:px-3 py-1 rounded-full text-xs font-medium transition whitespace-nowrap ${
-                                        sectionPrivacy[animalToEdit?.id_public]?.identification ? 'bg-blue-100 text-blue-800' : 'bg-gray-100 text-gray-800'
-                                    }`}
-                                >
-                                    {sectionPrivacy[animalToEdit?.id_public]?.identification ? '🌍 Public' : '🔒 Private'}
-                                </button>
-                            </div>
+                            <h3 className="text-lg font-semibold text-gray-700 border-b pb-2">Identification Numbers</h3>
                             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                                 <div data-tutorial-target="identification-breeder-id">
                                     <label className="block text-sm font-medium text-gray-700">Identification</label>
@@ -8725,18 +8680,7 @@ const AnimalForm = ({
                     <div className="space-y-6">
                         {/* Reproductive Status - Key Status Indicators */}
                         <div className="bg-gray-50 p-4 rounded-lg border border-gray-200 space-y-4" data-tutorial-target="reproductive-status-section">
-                            <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-2 border-b pb-2">
-                                <h3 className="text-lg font-semibold text-gray-700">⚪ Reproductive Status</h3>
-                                <button
-                                    type="button"
-                                    onClick={() => toggleSectionPrivacy('reproductive')}
-                                    className={`px-2 sm:px-3 py-1 rounded-full text-xs font-medium transition whitespace-nowrap ${
-                                        sectionPrivacy[animalToEdit?.id_public]?.reproductive ? 'bg-blue-100 text-blue-800' : 'bg-gray-100 text-gray-800'
-                                    }`}
-                                >
-                                    {sectionPrivacy[animalToEdit?.id_public]?.reproductive ? '🌍 Public' : '🔒 Private'}
-                                </button>
-                            </div>
+                            <h3 className="text-lg font-semibold text-gray-700 border-b pb-2">⚪ Reproductive Status</h3>
                             <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
                                 <label className="flex items-center space-x-2 cursor-pointer p-3 border rounded-lg bg-white hover:bg-gray-50 transition">
                                     <input
@@ -9251,18 +9195,7 @@ const AnimalForm = ({
 
                         {/* Active Medical Records */}
                         <div className="bg-gray-50 p-4 rounded-lg border border-gray-200 space-y-4" data-tutorial-target="medical-history-section">
-                            <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-2 border-b pb-2">
-                                <h3 className="text-lg font-semibold text-gray-700">Active Medical Records</h3>
-                                <button
-                                    type="button"
-                                    onClick={() => toggleSectionPrivacy('medicalHistory')}
-                                    className={`px-2 sm:px-3 py-1 rounded-full text-xs font-medium transition whitespace-nowrap ${
-                                        sectionPrivacy[animalToEdit?.id_public]?.medicalHistory ? 'bg-blue-100 text-blue-800' : 'bg-gray-100 text-gray-800'
-                                    }`}
-                                >
-                                    {sectionPrivacy[animalToEdit?.id_public]?.medicalHistory ? '🌍 Public' : '🔒 Private'}
-                                </button>
-                            </div>
+                            <h3 className="text-lg font-semibold text-gray-700 border-b pb-2">Active Medical Records</h3>
                             <div className="space-y-4">
                                 {/* Medical Conditions */}
                                 <div className="space-y-3">
@@ -9528,18 +9461,7 @@ const AnimalForm = ({
                     <div className="space-y-6">
                         {/* Behavior */}
                         <div className="bg-gray-50 p-4 rounded-lg border border-gray-200 space-y-4">
-                            <div className="flex justify-between items-center border-b pb-2">
-                                <h3 className="text-lg font-semibold text-gray-700">Behavior</h3>
-                                <button
-                                    type="button"
-                                    onClick={() => toggleSectionPrivacy('behavior')}
-                                    className={`px-3 py-1 rounded-full text-xs font-medium transition ${
-                                        sectionPrivacy[animalToEdit?.id_public]?.behavior ? 'bg-blue-100 text-blue-800' : 'bg-gray-100 text-gray-800'
-                                    }`}
-                                >
-                                    {sectionPrivacy[animalToEdit?.id_public]?.behavior ? '🌍 Public' : '🔒 Private'}
-                                </button>
-                            </div>
+                            <h3 className="text-lg font-semibold text-gray-700 border-b pb-2">Behavior</h3>
                             <div className="space-y-4" data-tutorial-target="behavior-items-section">
                                 <div>
                                     <label className="block text-sm font-medium text-gray-700 mb-2">Temperament</label>
@@ -9566,18 +9488,7 @@ const AnimalForm = ({
 
                         {/* Activity */}
                         <div className="bg-gray-50 p-4 rounded-lg border border-gray-200 space-y-4">
-                            <div className="flex justify-between items-center border-b pb-2">
-                                <h3 className="text-lg font-semibold text-gray-700">Activity</h3>
-                                <button
-                                    type="button"
-                                    onClick={() => toggleSectionPrivacy('activity')}
-                                    className={`px-3 py-1 rounded-full text-xs font-medium transition ${
-                                        sectionPrivacy[animalToEdit?.id_public]?.activity ? 'bg-blue-100 text-blue-800' : 'bg-gray-100 text-gray-800'
-                                    }`}
-                                >
-                                    {sectionPrivacy[animalToEdit?.id_public]?.activity ? '🌍 Public' : '🔒 Private'}
-                                </button>
-                            </div>
+                            <h3 className="text-lg font-semibold text-gray-700 border-b pb-2">Activity</h3>
                             <div>
                                 <label className="block text-sm font-medium text-gray-700 mb-2">Activity Cycle</label>
                                 <select name="activityCycle" value={formData.activityCycle} onChange={handleChange} data-tutorial-target="activity-pattern-select"
@@ -9610,18 +9521,7 @@ const AnimalForm = ({
                     <div className="space-y-6">
                         {/* End of Life */}
                         <div className="bg-gray-50 p-4 rounded-lg border border-gray-200 space-y-4">
-                            <div className="flex justify-between items-center border-b pb-2">
-                                <h3 className="text-lg font-semibold text-gray-700">End of Life</h3>
-                                <button
-                                    type="button"
-                                    onClick={() => toggleSectionPrivacy('endOfLife')}
-                                    className={`px-3 py-1 rounded-full text-xs font-medium transition ${
-                                        sectionPrivacy[animalToEdit?.id_public]?.endOfLife ? 'bg-blue-100 text-blue-800' : 'bg-gray-100 text-gray-800'
-                                    }`}
-                                >
-                                    {sectionPrivacy[animalToEdit?.id_public]?.endOfLife ? '🌍 Public' : '🔒 Private'}
-                                </button>
-                            </div>
+                            <h3 className="text-lg font-semibold text-gray-700 border-b pb-2">End of Life</h3>
                             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                                 <div>
                                     <label className="block text-sm font-medium text-gray-700 mb-2">Date of Death</label>
