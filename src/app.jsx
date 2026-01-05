@@ -17584,27 +17584,33 @@ const AppRouter = () => {
     const [ipChecked, setIpChecked] = useState(false);
 
     useEffect(() => {
+        // Only run if maintenance mode is on
+        if (!MAINTENANCE_MODE) {
+            setIpChecked(true);
+            return;
+        }
+
         // Get client IP from backend
         const getClientIp = async () => {
             try {
                 const response = await axios.get(`${API_BASE_URL}/client-ip`);
-                setClientIp(response.data.ip || response.data.clientIp);
+                const detectedIp = response.data.ip || response.data.clientIp;
+                console.log('Detected client IP:', detectedIp);
+                setClientIp(detectedIp);
             } catch (error) {
                 console.warn('Could not determine client IP:', error);
             }
             setIpChecked(true);
         };
 
-        if (!ipChecked && MAINTENANCE_MODE) {
-            getClientIp();
-        } else if (!MAINTENANCE_MODE) {
-            setIpChecked(true);
-        }
-    }, [ipChecked]);
+        getClientIp();
+    }, []); // Run once on mount
 
     // Show maintenance mode if enabled (but not for excluded IPs like CTU1)
     const excludedIPs = ['86.80.92.156']; // CTU1 admin IP
     const shouldShowMaintenance = MAINTENANCE_MODE && ipChecked && !excludedIPs.includes(clientIp);
+    
+    console.log('Maintenance check:', { MAINTENANCE_MODE, ipChecked, clientIp, shouldShowMaintenance, excludedIPs });
     
     if (shouldShowMaintenance) {
         return <MaintenanceMode />;
