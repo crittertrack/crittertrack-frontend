@@ -17610,13 +17610,16 @@ const AppRouter = () => {
     const excludedIPs = ['86.80.92.156']; // CTU1 admin IP
     const queryParams = new URLSearchParams(window.location.search);
     const bypassMaintenance = queryParams.get('bypass-maintenance') === 'true';
-    const shouldShowMaintenance = MAINTENANCE_MODE && ipChecked && !excludedIPs.includes(clientIp) && !bypassMaintenance;
     
-    console.log('Maintenance check:', { MAINTENANCE_MODE, ipChecked, clientIp, shouldShowMaintenance, excludedIPs, bypassMaintenance });
-    
-    if (shouldShowMaintenance) {
+    // If bypass is requested, skip maintenance mode entirely
+    if (bypassMaintenance) {
+        // Continue to render the app
+    } else if (MAINTENANCE_MODE && ipChecked && !excludedIPs.includes(clientIp)) {
+        // Show maintenance mode only if IP doesn't match and bypass not requested
         return <MaintenanceMode />;
     }
+    
+    console.log('Maintenance check:', { MAINTENANCE_MODE, ipChecked, clientIp, excludedIPs, bypassMaintenance });
 
     return (
         <>
