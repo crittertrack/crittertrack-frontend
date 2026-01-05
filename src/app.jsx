@@ -2931,7 +2931,7 @@ const ViewOnlyPrivateAnimalDetail = ({ animal, onClose, API_BASE_URL, authToken,
                                             {animal.breederId_public && animal.ownerId_public && animal.breederId_public !== animal.ownerId_public ? (
                                                 <div className="space-y-1">
                                                     <div><span className="inline-block bg-amber-100 text-amber-800 px-3 py-1 rounded font-semibold">Sold</span></div>
-                                                    {animal.status && <div className="text-xs text-gray-600">Current: {animal.status}</div>}
+                                                    {animal.status && <div><span className="inline-block bg-amber-100 text-amber-800 px-3 py-1 rounded font-semibold">{animal.status}</span></div>}
                                                 </div>
                                             ) : (
                                                 <span className="text-gray-700">{animal.status || 'Unknown'}</span>
