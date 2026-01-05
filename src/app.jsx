@@ -2927,8 +2927,12 @@ const ViewOnlyPrivateAnimalDetail = ({ animal, onClose, API_BASE_URL, authToken,
                                                 </div>
                                             )}
                                         </div>
-                                        <div className="text-sm font-medium text-gray-700 mt-2">
-                                            {animal.status || 'Unknown'}
+                                        <div className="text-sm font-medium mt-2">
+                                            {animal.breederId_public && animal.ownerId_public && animal.breederId_public !== animal.ownerId_public ? (
+                                                <span className="inline-block bg-amber-100 text-amber-800 px-3 py-1 rounded font-semibold">Sold</span>
+                                            ) : (
+                                                <span className="text-gray-700">{animal.status || 'Unknown'}</span>
+                                            )}
                                         </div>
                                     </div>
 
@@ -2957,17 +2961,6 @@ const ViewOnlyPrivateAnimalDetail = ({ animal, onClose, API_BASE_URL, authToken,
                                                     <p className="text-sm text-gray-600">
                                                         {animal.salePriceCurrency === 'Negotiable' || !animal.salePriceAmount ? 'Negotiable' : `${animal.salePriceCurrency === 'USD' ? '$' : animal.salePriceCurrency === 'EUR' ? '€' : animal.salePriceCurrency === 'GBP' ? '£' : animal.salePriceCurrency === 'CAD' ? 'C$' : animal.salePriceCurrency === 'AUD' ? 'A$' : animal.salePriceCurrency === 'JPY' ? '¥' : animal.salePriceCurrency}${animal.salePriceAmount ? ` ${animal.salePriceAmount}` : ''}`}
                                                     </p>
-                                                </div>
-                                            </div>
-                                        )}
-
-                                        {/* Sold / Transferred Badge - Show when viewing animal I transferred away */}
-                                        {animal.breederId_public && animal.ownerId_public && animal.breederId_public !== animal.ownerId_public && (
-                                            <div className="bg-purple-50 border border-purple-200 rounded-lg p-3 flex items-center gap-2">
-                                                <span className="text-lg">✅</span>
-                                                <div>
-                                                    <p className="text-sm font-semibold text-gray-700">Sold / Transferred</p>
-                                                    <p className="text-sm text-gray-600">This animal is now owned by someone else</p>
                                                 </div>
                                             </div>
                                         )}
