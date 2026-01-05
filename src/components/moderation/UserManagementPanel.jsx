@@ -32,7 +32,7 @@ const UserManagementPanel = () => {
         try {
             setLoading(true);
             const token = localStorage.getItem('token');
-            const response = await axios.get(`${API_URL}/api/admin/users/moderation-overview`, {
+            const response = await axios.get(`${API_URL}/admin/users/moderation-overview`, {
                 headers: { Authorization: `Bearer ${token}` }
             });
             setUsers(response.data);
@@ -51,7 +51,7 @@ const UserManagementPanel = () => {
         try {
             const token = localStorage.getItem('token');
             await axios.post(
-                `${API_URL}/api/moderation/lift-suspension`,
+                `${API_URL}/moderation/lift-suspension`,
                 { userId },
                 { headers: { Authorization: `Bearer ${token}` } }
             );
@@ -67,7 +67,7 @@ const UserManagementPanel = () => {
         try {
             const token = localStorage.getItem('token');
             await axios.post(
-                `${API_URL}/api/moderation/lift-ban`,
+                `${API_URL}/moderation/lift-ban`,
                 { userId },
                 { headers: { Authorization: `Bearer ${token}` } }
             );
