@@ -16228,18 +16228,43 @@ const App = () => {
                         )
                     } />
                     <Route path="/view-animal" element={
-                        animalToView && (
-                            <PrivateAnimalDetail
-                                animal={animalToView}
-                                onClose={() => navigate('/')}
-                                onEdit={handleEditAnimal}
-                                API_BASE_URL={API_BASE_URL}
-                                authToken={authToken}
-                                setShowImageModal={setShowImageModal}
-                                setEnlargedImageUrl={setEnlargedImageUrl}
-                                toggleSectionPrivacy={toggleSectionPrivacy}
-                            />
-                        )
+                        animalToView && (() => {
+                            // Determine if this animal is view-only for the current user
+                            // (sold, transferred, or no longer owned but they have access)
+                            const isViewOnlyForCurrentUser = animalToView.status === 'sold' || 
+                                                            animalToView.status === 'transferred' || 
+                                                            animalToView.status === 'purchased' ||
+                                                            (animalToView.isViewOnly === true) ||
+                                                            (animalToView.currentOwner && animalToView.currentOwner !== userProfile?.id_public);
+                            
+                            if (isViewOnlyForCurrentUser) {
+                                // Show read-only version for sold/transferred animals
+                                return (
+                                    <ViewOnlyPrivateAnimalDetail
+                                        animal={animalToView}
+                                        onClose={() => navigate('/')}
+                                        API_BASE_URL={API_BASE_URL}
+                                        authToken={authToken}
+                                        setShowImageModal={setShowImageModal}
+                                        setEnlargedImageUrl={setEnlargedImageUrl}
+                                    />
+                                );
+                            } else {
+                                // Show full edit version for owned animals
+                                return (
+                                    <PrivateAnimalDetail
+                                        animal={animalToView}
+                                        onClose={() => navigate('/')}
+                                        onEdit={handleEditAnimal}
+                                        API_BASE_URL={API_BASE_URL}
+                                        authToken={authToken}
+                                        setShowImageModal={setShowImageModal}
+                                        setEnlargedImageUrl={setEnlargedImageUrl}
+                                        toggleSectionPrivacy={toggleSectionPrivacy}
+                                    />
+                                );
+                            }
+                        })()
                     } />
                     <Route path="/view-animal-old-backup" element={
                         animalToView && (
