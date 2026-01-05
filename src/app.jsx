@@ -10214,12 +10214,19 @@ const AuthView = ({ onLoginSuccess, showModalMessage, isRegister, setIsRegister,
                         // Parse suspension message and extract expiry time
                         console.log('[LOGIN] User account suspended:', message);
                         
-                        // Extract hours remaining from message (e.g., "Expires in 48 hour(s)")
-                        const hoursMatch = message.match(/(\d+)\s+hour/);
-                        const daysRemaining = hoursMatch ? Math.ceil(parseInt(hoursMatch[1]) / 24) : 1;
+                        // Try to extract the actual expiry timestamp from the message
+                        const timestampMatch = message.match(/ExpiryTimestamp:\s*(\d+)/);
+                        let suspensionEndTime;
                         
-                        // Calculate suspension end time
-                        const suspensionEndTime = new Date().getTime() + (daysRemaining * 24 * 60 * 60 * 1000);
+                        if (timestampMatch) {
+                            // Use the actual expiry timestamp from the backend
+                            suspensionEndTime = parseInt(timestampMatch[1]);
+                        } else {
+                            // Fallback: Extract hours remaining from message (e.g., "Expires in 48 hour(s)")
+                            const hoursMatch = message.match(/(\d+)\s+hour/);
+                            const hoursRemaining = hoursMatch ? parseInt(hoursMatch[1]) : 24;
+                            suspensionEndTime = new Date().getTime() + (hoursRemaining * 60 * 60 * 1000);
+                        }
                         
                         // Extract reason (everything before "Expires in")
                         const reasonMatch = message.match(/^Account suspended:\s*(.+?)\s+Expires in/);
