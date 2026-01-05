@@ -2533,15 +2533,19 @@ const ViewOnlyAnimalDetail = ({ animal, onClose, API_BASE_URL, onViewProfile, au
                     {/* Tab 6: Breeding */}
                     {detailViewTab === 6 && (
                         <div className="space-y-4">
+                            {/* Always show reproductive status section if not private */}
                             {animal.sectionPrivacy?.reproductive !== false && (
                                 <div className="bg-gray-50 p-4 rounded-lg border border-gray-200">
                                     <h3 className="text-lg font-semibold text-gray-700 border-b pb-2 mb-3">Reproductive Status</h3>
                                     <div className="space-y-2">
-                                        <p className="text-sm"><span className="font-medium">Neutered:</span> {animal.isNeutered ? 'Yes' : 'No'}</p>
+                                        <p className="text-sm"><span className="font-medium">Neutered/Spayed:</span> {animal.isNeutered ? 'Yes' : 'No'}</p>
                                         {animal.isInfertile && <p className="text-sm"><span className="font-medium">Infertile:</span> Yes</p>}
                                         {animal.isInMating && <p className="text-sm"><span className="font-medium">In Mating:</span> Yes</p>}
                                         {animal.isPregnant && <p className="text-sm"><span className="font-medium">Pregnant:</span> Yes</p>}
                                         {animal.isNursing && <p className="text-sm"><span className="font-medium">Nursing:</span> Yes</p>}
+                                        {!animal.isNeutered && !animal.isInfertile && !animal.isInMating && !animal.isPregnant && !animal.isNursing && (
+                                            <p className="text-sm text-gray-500 italic">No special reproductive status</p>
+                                        )}
                                     </div>
                                 </div>
                             )}
