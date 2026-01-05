@@ -2547,7 +2547,14 @@ const ViewOnlyAnimalDetail = ({ animal, onClose, API_BASE_URL, onViewProfile, au
                             )}
                             
                             {/* Breeding History Section */}
-                            {animal.sectionPrivacy?.reproductive !== false && (animal.lastMatingDate || animal.successfulMatings || animal.lastPregnancyDate || animal.litterCount || animal.offspringCount || animal.breedingRole) && (
+                            {animal.sectionPrivacy?.reproductive !== false && (
+                                animal.lastMatingDate || 
+                                (animal.successfulMatings !== null && animal.successfulMatings !== undefined) || 
+                                animal.lastPregnancyDate || 
+                                animal.litterCount || 
+                                (animal.offspringCount !== null && animal.offspringCount !== undefined) || 
+                                animal.breedingRole
+                            ) && (
                                 <div className="bg-blue-50 p-4 rounded-lg border border-blue-200">
                                     <h3 className="text-lg font-semibold text-gray-700 border-b pb-2 mb-3 flex items-center">
                                         <span className="text-blue-600 mr-2">📋</span>
@@ -2565,7 +2572,7 @@ const ViewOnlyAnimalDetail = ({ animal, onClose, API_BASE_URL, onViewProfile, au
                                                 <span className="font-medium">Last Mating Date:</span> {new Date(animal.lastMatingDate).toLocaleDateString()}
                                             </p>
                                         )}
-                                        {animal.successfulMatings !== null && animal.successfulMatings !== undefined && (
+                                        {(animal.successfulMatings !== null && animal.successfulMatings !== undefined) && (
                                             <p className="text-sm">
                                                 <span className="font-medium">Successful Matings:</span> {animal.successfulMatings}
                                             </p>
@@ -2580,7 +2587,7 @@ const ViewOnlyAnimalDetail = ({ animal, onClose, API_BASE_URL, onViewProfile, au
                                                 <span className="font-medium">Litter Count:</span> {animal.litterCount}
                                             </p>
                                         )}
-                                        {animal.offspringCount !== null && animal.offspringCount !== undefined && (
+                                        {(animal.offspringCount !== null && animal.offspringCount !== undefined) && (
                                             <p className="text-sm">
                                                 <span className="font-medium">Total Offspring:</span> {animal.offspringCount}
                                             </p>
