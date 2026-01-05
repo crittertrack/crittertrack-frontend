@@ -1953,7 +1953,7 @@ const PublicProfileView = ({ profile, onBack, onViewAnimal, API_BASE_URL, onStar
 // ==================== PRIVATE ANIMAL DETAIL (OWNER VIEW) ====================
 // Shows ALL data for animal owners viewing their own animals (ignores privacy toggles)
 // Accessed from: MY ANIMALS LIST
-const PrivateAnimalDetail = ({ animal, onClose, onEdit, API_BASE_URL, authToken, setShowImageModal, setEnlargedImageUrl }) => {
+const PrivateAnimalDetail = ({ animal, onClose, onEdit, API_BASE_URL, authToken, setShowImageModal, setEnlargedImageUrl, toggleSectionPrivacy }) => {
     const [breederInfo, setBreederInfo] = useState(null);
     const [showPedigree, setShowPedigree] = useState(false);
     const [detailViewTab, setDetailViewTab] = useState(1);
@@ -2112,7 +2112,33 @@ const PrivateAnimalDetail = ({ animal, onClose, onEdit, API_BASE_URL, authToken,
                                         </div>
                                     </div>
 
-                                    <div className="w-full md:w-2/3 p-4 sm:p-6 flex flex-col border-t md:border-t-0 md:border-l border-gray-300 space-y-3">
+                                    <div className="w-full md:w-2/3 p-4 sm:p-6 flex flex-col border-t md:border-t-0 md:border-l border-gray-300 space-y-3 relative">
+                                        {/* Public Profile Toggle - Top Right */}
+                                        <label
+                                            onClick={(e) => {
+                                                const isCurrentlyDisplay = animal.isDisplay;
+                                                const updatedAnimal = { ...animal, isDisplay: !isCurrentlyDisplay };
+                                                axios.put(`${API_BASE_URL}/animals/${animal.id_public}`, { isDisplay: !isCurrentlyDisplay }, {
+                                                    headers: { Authorization: `Bearer ${authToken}` }
+                                                }).catch(err => console.error('Failed to update isDisplay:', err));
+                                            }}
+                                            className="absolute top-4 right-4 px-3 py-1.5 text-xs font-medium rounded-lg transition flex items-center gap-1 cursor-pointer"
+                                            style={{
+                                                backgroundColor: animal.isDisplay ? '#dbeafe' : '#f3f4f6',
+                                                color: animal.isDisplay ? '#1e40af' : '#374151'
+                                            }}
+                                            title="Toggle public profile visibility"
+                                        >
+                                            <input
+                                                type="checkbox"
+                                                checked={animal.isDisplay || false}
+                                                onChange={() => {}}
+                                                className="form-checkbox h-4 w-4 rounded"
+                                                style={{ cursor: 'pointer' }}
+                                            />
+                                            <span>{animal.isDisplay ? '🌍 Public' : '🔒 Private'}</span>
+                                        </label>
+
                                         {/* Species/Breed/Strain/CTC - At Top */}
                                         <p className="text-sm text-gray-600">
                                             {animal.species || 'Unknown'}
@@ -7705,17 +7731,6 @@ const AnimalForm = ({
                                 />
                                 <p className="text-xs text-gray-500 mt-1">Records owner changes in ownership history.</p>
                             </div>
-                        </div>
-                        
-                        {/* Visibility */}
-                        <div data-tutorial-target="visibility-section" className="bg-gray-50 p-4 rounded-lg border border-gray-200 space-y-4">
-                            <h3 className="text-lg font-semibold text-gray-700 border-b pb-2">Visibility</h3>
-                            <label className="flex items-center space-x-2 cursor-pointer p-3 border rounded-lg bg-white hover:bg-gray-50 transition">
-                                <input type="checkbox" name="isDisplay" checked={formData.isDisplay} onChange={handleChange} 
-                                    className="form-checkbox h-5 w-5 text-primary rounded focus:ring-primary" />
-                                <span className="text-sm font-medium text-gray-700">Public Profile</span>
-                            </label>
-                            <p className="text-xs text-gray-500 mt-2">Public animals marked as "For Sale" or "For Stud" will appear in the showcase.</p>
                         </div>
                         
                         {/* Availability for Sale/Stud */}
@@ -15461,6 +15476,7 @@ const App = () => {
                                 authToken={authToken}
                                 setShowImageModal={setShowImageModal}
                                 setEnlargedImageUrl={setEnlargedImageUrl}
+                                toggleSectionPrivacy={toggleSectionPrivacy}
                             />
                         )
                     } />
