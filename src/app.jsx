@@ -2927,9 +2927,12 @@ const ViewOnlyPrivateAnimalDetail = ({ animal, onClose, API_BASE_URL, authToken,
                                                 </div>
                                             )}
                                         </div>
-                                        <div className="text-sm font-medium mt-2">
+                                        <div className="text-sm font-medium mt-2 flex gap-2 flex-wrap items-center">
                                             {animal.breederId_public && animal.ownerId_public && animal.breederId_public !== animal.ownerId_public ? (
-                                                <span className="inline-block bg-amber-100 text-amber-800 px-3 py-1 rounded font-semibold">Sold</span>
+                                                <>
+                                                    <span className="inline-block bg-amber-100 text-amber-800 px-3 py-1 rounded font-semibold">Sold</span>
+                                                    {animal.status && <span className="text-gray-700">{animal.status}</span>}
+                                                </>
                                             ) : (
                                                 <span className="text-gray-700">{animal.status || 'Unknown'}</span>
                                             )}
