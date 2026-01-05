@@ -2776,7 +2776,10 @@ const ViewOnlyAnimalDetail = ({ animal, onClose, API_BASE_URL, onViewProfile, au
     const showRemarks = animal.remarks;
     const showGeneticCode = animal.geneticCode;
     
-    console.log('Animal data:', { 
+    console.log('ViewOnlyAnimalDetail rendering', { 
+        animalId: animal.id_public,
+        animalName: animal.name,
+        detailViewTab,
         hasRemarks: !!animal.remarks, 
         hasGeneticCode: !!animal.geneticCode,
         showRemarks,
