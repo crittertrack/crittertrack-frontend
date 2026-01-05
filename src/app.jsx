@@ -17579,8 +17579,12 @@ const AppRouter = () => {
         };
     }, [location.pathname]);
 
-    // Show maintenance mode if enabled
-    if (MAINTENANCE_MODE) {
+    // Show maintenance mode if enabled (but not for excluded users like CTU1 admins)
+    const currentUserId = localStorage.getItem('userId');
+    const excludedUsers = ['CTU1']; // Admin users who can access during maintenance
+    const shouldShowMaintenance = MAINTENANCE_MODE && !excludedUsers.includes(currentUserId);
+    
+    if (shouldShowMaintenance) {
         return <MaintenanceMode />;
     }
 
