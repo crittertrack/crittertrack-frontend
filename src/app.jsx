@@ -10063,6 +10063,7 @@ const AuthView = ({ onLoginSuccess, showModalMessage, isRegister, setIsRegister,
     const [confirmNewPassword, setConfirmNewPassword] = useState('');
     const [suspensionInfo, setSuspensionInfo] = useState(null);
     const [suspensionTimeRemaining, setSuspensionTimeRemaining] = useState(null);
+    const [banInfo, setBanInfo] = useState(null);
 
     // Restore verification state from localStorage on mount
     useEffect(() => {
@@ -10111,6 +10112,17 @@ const AuthView = ({ onLoginSuccess, showModalMessage, isRegister, setIsRegister,
             setSuspensionInfo({
                 endTime: parseInt(suspensionEndTime),
                 reason: suspensionReason || 'Your account has been suspended.'
+            });
+        }
+        
+        // Check for ban info
+        const banReason = localStorage.getItem('banReason');
+        const banType = localStorage.getItem('banType');
+        
+        if (banReason) {
+            setBanInfo({
+                reason: banReason,
+                type: banType || 'banned'
             });
         }
     }, []);
@@ -10206,8 +10218,11 @@ const AuthView = ({ onLoginSuccess, showModalMessage, isRegister, setIsRegister,
                 // Clear any old suspension data on successful login
                 localStorage.removeItem('suspensionEndTime');
                 localStorage.removeItem('suspensionReason');
+                localStorage.removeItem('banReason');
+                localStorage.removeItem('banType');
                 setSuspensionInfo(null);
                 setSuspensionTimeRemaining(null);
+                setBanInfo(null);
                 
                 onLoginSuccess(response.data.token);
             } catch (error) {
@@ -10252,10 +10267,22 @@ const AuthView = ({ onLoginSuccess, showModalMessage, isRegister, setIsRegister,
                         // Don't show error modal for suspension - let the banner display it
                         return;
                     } else if (message.includes('Account banned')) {
-                        showModalMessage(
-                            'Account Banned',
-                            message || 'Your account has been permanently banned.'
-                        );
+                        // Extract ban reason and type
+                        const banReasonMatch = message.match(/^Account banned:\s*(.+?)(?:\s+\(IP Ban\))?$/);
+                        const banReason = banReasonMatch ? banReasonMatch[1] : 'Your account has been permanently banned.';
+                        const isIPBan = message.includes('IP Ban');
+                        
+                        // Store ban info for display on login screen
+                        localStorage.setItem('banReason', banReason);
+                        localStorage.setItem('banType', isIPBan ? 'ip-ban' : 'banned');
+                        
+                        // Trigger re-render of ban banner
+                        setBanInfo({
+                            reason: banReason,
+                            type: isIPBan ? 'ip-ban' : 'banned'
+                        });
+                        
+                        // Don't show error modal for ban - let the banner display it
                         return;
                     }
                 }
@@ -10264,8 +10291,11 @@ const AuthView = ({ onLoginSuccess, showModalMessage, isRegister, setIsRegister,
                 // This handles the case where suspension was lifted but user typed wrong password
                 localStorage.removeItem('suspensionEndTime');
                 localStorage.removeItem('suspensionReason');
+                localStorage.removeItem('banReason');
+                localStorage.removeItem('banType');
                 setSuspensionInfo(null);
                 setSuspensionTimeRemaining(null);
+                setBanInfo(null);
                 
                 showModalMessage(
                     'Login Failed',
@@ -10508,6 +10538,37 @@ const AuthView = ({ onLoginSuccess, showModalMessage, isRegister, setIsRegister,
                                             Time remaining: <span className="text-lg">{suspensionTimeRemaining}</span>
                                         </p>
                                     )}
+                                    <p className="text-xs text-red-600 mt-2">
+                                        <a href={`mailto:support@crittertrack.app?subject=Suspension Appeal&body=I would like to appeal my account suspension.%0D%0A%0D%0AReason for suspension: ${encodeURIComponent(suspensionInfo.reason)}%0D%0A%0D%0AMy appeal:`} className="underline hover:text-red-800">
+                                            Submit an appeal
+                                        </a>
+                                    </p>
+                                </div>
+                            </div>
+                        </div>
+                    )}
+                    
+                    {banInfo && (
+                        <div className="bg-red-900 border-l-4 border-red-700 p-4 rounded">
+                            <div className="flex items-start">
+                                <div className="flex-shrink-0">
+                                    <Ban className="h-5 w-5 text-red-200" />
+                                </div>
+                                <div className="ml-3">
+                                    <p className="text-sm font-medium text-red-100">
+                                        Account {banInfo.type === 'ip-ban' ? 'IP Banned' : 'Permanently Banned'}
+                                    </p>
+                                    <p className="text-sm text-red-200 mt-1">{banInfo.reason}</p>
+                                    <p className="text-sm text-red-300 mt-2">
+                                        {banInfo.type === 'ip-ban' 
+                                            ? 'Your IP address has been banned from creating accounts or accessing the platform.' 
+                                            : 'This account has been permanently banned from accessing the platform.'}
+                                    </p>
+                                    <p className="text-xs text-red-200 mt-2">
+                                        <a href={`mailto:support@crittertrack.app?subject=${banInfo.type === 'ip-ban' ? 'IP Ban' : 'Ban'} Appeal&body=I would like to appeal my account ban.%0D%0A%0D%0AReason for ban: ${encodeURIComponent(banInfo.reason)}%0D%0A%0D%0AMy appeal:`} className="underline hover:text-red-100">
+                                            Submit an appeal
+                                        </a>
+                                    </p>
                                 </div>
                             </div>
                         </div>
@@ -12797,6 +12858,30 @@ const App = () => {
 
                 console.log('[MOD ACTION LIFT_SUSPENSION] Success:', response.data);
                 showModalMessage('Suspension Lifted', 'User account has been reactivated and can now log in.');
+            }
+            else if (flagData.action === 'lift-ban') {
+                // Lift ban from user
+                const userId = flagData.context?.type === 'profile' 
+                    ? flagData.context?.userId 
+                    : flagData.context?.ownerId;
+                
+                console.log('[MOD ACTION LIFT_BAN] Lifting ban for user:', { userId, reason: flagData.reason });
+                
+                if (!userId) {
+                    throw new Error('User ID not found in context');
+                }
+                
+                const response = await axios.post(
+                    `${API_BASE_URL}/moderation/users/${userId}/status`,
+                    {
+                        status: 'active',
+                        reason: flagData.reason
+                    },
+                    { headers: { Authorization: `Bearer ${authToken}` } }
+                );
+
+                console.log('[MOD ACTION LIFT_BAN] Success:', response.data);
+                showModalMessage('Ban Lifted', 'User account has been reactivated and can now log in.');
             }
         } catch (error) {
             console.error('[MOD ACTION] ERROR OCCURRED:', {

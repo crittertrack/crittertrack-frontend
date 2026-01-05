@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Shield, AlertTriangle, Eye, MessageSquare, Ban, UserX, Edit3, TrendingDown } from 'lucide-react';
+import { Shield, AlertTriangle, Eye, MessageSquare, Ban, UserX, Edit3, TrendingDown, Check } from 'lucide-react';
 import './ModeratorActionSidebar.css';
 import { 
     FlagContentModal, 
@@ -8,7 +8,8 @@ import {
     SuspendUserModal, 
     BanUserModal,
     LiftWarningModal,
-    LiftSuspensionModal
+    LiftSuspensionModal,
+    LiftBanModal
 } from './ModActionModals';
 
 export default function ModeratorActionSidebar({ 
@@ -145,6 +146,15 @@ export default function ModeratorActionSidebar({
                             <TrendingDown size={16} />
                             <span>Lift Suspension</span>
                         </button>
+
+                        <button 
+                            className="mod-quick-btn lift-ban"
+                            onClick={() => setActiveModal('lift-ban')}
+                            title="Remove ban from user account"
+                        >
+                            <Check size={16} />
+                            <span>Lift Ban</span>
+                        </button>
                     </div>
 
                     {/* Link to full report queue */}
@@ -211,6 +221,12 @@ export default function ModeratorActionSidebar({
             />
             <LiftSuspensionModal
                 isOpen={activeModal === 'lift-suspension'}
+                onClose={() => setActiveModal(null)}
+                onSubmit={handleModalSubmit}
+                context={currentContext}
+            />
+            <LiftBanModal
+                isOpen={activeModal === 'lift-ban'}
                 onClose={() => setActiveModal(null)}
                 onSubmit={handleModalSubmit}
                 context={currentContext}

@@ -724,3 +724,63 @@ export const LiftSuspensionModal = ({ isOpen, onClose, onSubmit, context }) => {
         </div>
     );
 };
+
+// Lift Ban Modal
+export const LiftBanModal = ({ isOpen, onClose, onSubmit, context }) => {
+    const [reason, setReason] = useState('');
+
+    if (!isOpen) return null;
+
+    const handleSubmit = () => {
+        onSubmit({
+            action: 'lift-ban',
+            reason,
+            context
+        });
+        setReason('');
+        onClose();
+    };
+
+    return (
+        <div className="mod-modal-overlay">
+            <div className="mod-modal">
+                <div className="mod-modal-header">
+                    <Check size={24} className="text-green-600" />
+                    <h2>Lift Ban</h2>
+                    <button onClick={onClose} className="mod-modal-close">
+                        <X size={20} />
+                    </button>
+                </div>
+                <div className="mod-modal-body">
+                    {context && (
+                        <div className="mod-context-info">
+                            <strong>Lifting Ban For:</strong> {context.ownerName || context.name}
+                        </div>
+                    )}
+
+                    <div className="form-group">
+                        <label>Reason for Lifting Ban (required)</label>
+                        <textarea
+                            value={reason}
+                            onChange={(e) => setReason(e.target.value)}
+                            placeholder="Explain why this ban is being lifted (e.g., appeal granted, ban was in error, circumstances changed, etc.)..."
+                            rows={4}
+                            required
+                        />
+                    </div>
+                </div>
+                <div className="mod-modal-footer">
+                    <button onClick={onClose} className="btn-cancel">Cancel</button>
+                    <button 
+                        onClick={handleSubmit} 
+                        disabled={!reason.trim()} 
+                        className="btn-submit" 
+                        style={{backgroundColor: '#10b981'}}
+                    >
+                        Lift Ban
+                    </button>
+                </div>
+            </div>
+        </div>
+    );
+};
