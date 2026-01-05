@@ -2422,33 +2422,46 @@ const PrivateAnimalDetail = ({ animal, onClose, onEdit, API_BASE_URL, authToken,
 
                     {/* Tab 5: Lineage */}
                     {detailViewTab === 5 && (
-                        <div className="space-y-4">
-                            <div className="flex justify-between items-center border-b pb-2">
-                                <h3 className="text-lg font-semibold text-gray-700">Lineage</h3>
-                                <button
-                                    onClick={() => setShowPedigree(true)}
-                                    data-tutorial-target="pedigree-btn"
-                                    className="px-3 py-1 bg-primary hover:bg-primary/90 text-black font-semibold rounded-lg transition text-sm"
-                                >
-                                    View Pedigree Chart
-                                </button>
+                        <div className="space-y-6">
+                            {/* 1st Section: Pedigree */}
+                            <div className="bg-gray-50 p-4 rounded-lg border border-gray-200 space-y-4">
+                                <div className="flex justify-between items-center">
+                                    <h3 className="text-lg font-semibold text-gray-700">Pedigree: Sire and Dam 🌳</h3>
+                                    <button
+                                        onClick={() => setShowPedigree(true)}
+                                        data-tutorial-target="pedigree-btn"
+                                        className="px-3 py-1 bg-primary hover:bg-primary/90 text-black font-semibold rounded-lg transition text-sm"
+                                    >
+                                        View Pedigree Chart
+                                    </button>
+                                </div>
+                                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                    <ViewOnlyParentCard 
+                                        parentId={animal.fatherId_public || animal.sireId_public} 
+                                        parentType="Sire"
+                                        API_BASE_URL={API_BASE_URL}
+                                        onViewAnimal={() => {}}
+                                    />
+                                    <ViewOnlyParentCard 
+                                        parentId={animal.motherId_public || animal.damId_public} 
+                                        parentType="Dam"
+                                        API_BASE_URL={API_BASE_URL}
+                                        onViewAnimal={() => {}}
+                                    />
+                                </div>
                             </div>
-                            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                                <ViewOnlyParentCard 
-                                    parentId={animal.fatherId_public || animal.sireId_public} 
-                                    parentType="Sire"
-                                    API_BASE_URL={API_BASE_URL}
-                                    onViewAnimal={() => {}}
-                                />
-                                <ViewOnlyParentCard 
-                                    parentId={animal.motherId_public || animal.damId_public} 
-                                    parentType="Dam"
-                                    API_BASE_URL={API_BASE_URL}
-                                    onViewAnimal={() => {}}
-                                />
+
+                            {/* 2nd Section: Origin */}
+                            <div className="bg-gray-50 p-4 rounded-lg border border-gray-200 space-y-4">
+                                <h3 className="text-lg font-semibold text-gray-700">Origin</h3>
+                                <p className="text-sm text-gray-700">{animal.origin || '—'}</p>
                             </div>
-                            <OffspringSection animalId={animal.id_public} API_BASE_URL={API_BASE_URL} authToken={authToken} onViewAnimal={() => {}} />
-                            <p className="text-sm text-gray-600 mt-4"><strong>Origin:</strong> {animal.origin || '—'}</p>
+
+                            {/* 3rd Section: Ownership History */}
+                            <div className="bg-gray-50 p-4 rounded-lg border border-gray-200 space-y-4">
+                                <h3 className="text-lg font-semibold text-gray-700">Ownership History</h3>
+                                <OffspringSection animalId={animal.id_public} API_BASE_URL={API_BASE_URL} authToken={authToken} onViewAnimal={() => {}} />
+                            </div>
                         </div>
                     )}
 
