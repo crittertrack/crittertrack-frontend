@@ -388,6 +388,7 @@ export const SuspendUserModal = ({ isOpen, onClose, onSubmit, context }) => {
                     <div className="form-group">
                         <label>Suspension Duration</label>
                         <select value={duration} onChange={(e) => setDuration(e.target.value)}>
+                            <option value="0.0208">30 Minutes (Testing)</option>
                             <option value="1">1 Day</option>
                             <option value="3">3 Days</option>
                             <option value="7">7 Days</option>
