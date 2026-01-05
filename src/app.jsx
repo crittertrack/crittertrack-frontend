@@ -2941,7 +2941,7 @@ const ViewOnlyAnimalDetail = ({ animal, onClose, API_BASE_URL, onViewProfile, au
                                         )}
 
                                         {/* Appearance */}
-                                        {sectionPrivacy.appearance && (animal.color || animal.coat || animal.coatPattern || (animal.species === 'Fancy Rat' && animal.earset)) && (
+                                        {(animal.color || animal.coat || animal.coatPattern || (animal.species === 'Fancy Rat' && animal.earset)) && (
                                             <p className="text-sm text-gray-700">
                                                 <span className="font-semibold">Appearance:</span> {[
                                                     animal.color,
@@ -3025,7 +3025,6 @@ const ViewOnlyAnimalDetail = ({ animal, onClose, API_BASE_URL, onViewProfile, au
                             )}
 
                             {/* Identification Numbers Section */}
-                            {sectionPrivacy.identification && (
                             <div className="bg-gray-50 p-4 rounded-lg border border-gray-200">
                                 <h3 className="text-lg font-semibold text-gray-700 border-b pb-2 mb-3">Identification Numbers</h3>
                                 <div className="space-y-2">
@@ -3034,14 +3033,11 @@ const ViewOnlyAnimalDetail = ({ animal, onClose, API_BASE_URL, onViewProfile, au
                                     <p className="text-sm"><span className="font-medium">Pedigree Reg ID:</span> {animal.pedigreeRegistrationId || '—'}</p>
                                 </div>
                             </div>
-                            )}
                             {/* Genetic Code Display Section */}
-                            {sectionPrivacy.genetics && (
                             <div className="bg-gray-50 p-4 rounded-lg border border-gray-200">
                                 <h3 className="text-lg font-semibold text-gray-700 border-b pb-2 mb-3">Genetic Code</h3>
                                 <p className="text-gray-700 font-mono text-sm break-all">{animal.geneticCode || '—'}</p>
                             </div>
-                            )}
                             {/* Medical Information Section */}
                             {(animal.allergies || animal.medications || animal.medicalConditions) && (
                                 <div className="bg-gray-50 p-4 rounded-lg border border-gray-200">
