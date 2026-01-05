@@ -10202,6 +10202,13 @@ const AuthView = ({ onLoginSuccess, showModalMessage, isRegister, setIsRegister,
             // Login flow (unchanged)
             try {
                 const response = await axios.post(`${API_BASE_URL}/auth/login`, { email, password });
+                
+                // Clear any old suspension data on successful login
+                localStorage.removeItem('suspensionEndTime');
+                localStorage.removeItem('suspensionReason');
+                setSuspensionInfo(null);
+                setSuspensionTimeRemaining(null);
+                
                 onLoginSuccess(response.data.token);
             } catch (error) {
                 console.error('Login error:', error.response?.data || error.message);
@@ -10252,6 +10259,13 @@ const AuthView = ({ onLoginSuccess, showModalMessage, isRegister, setIsRegister,
                         return;
                     }
                 }
+                
+                // If login failed for any reason OTHER than suspension, clear old suspension data
+                // This handles the case where suspension was lifted but user typed wrong password
+                localStorage.removeItem('suspensionEndTime');
+                localStorage.removeItem('suspensionReason');
+                setSuspensionInfo(null);
+                setSuspensionTimeRemaining(null);
                 
                 showModalMessage(
                     'Login Failed',
