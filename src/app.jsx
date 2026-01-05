@@ -2798,7 +2798,7 @@ const PrivateAnimalDetail = ({ animal, onClose, onEdit, API_BASE_URL, authToken,
 // ==================== VIEW-ONLY PRIVATE ANIMAL DETAIL (SOLD/TRANSFERRED) ====================
 // Identical to PrivateAnimalDetail but without edit/delete and privacy controls
 // Used for animals you have view-only access to (sold, transferred, purchased)
-const ViewOnlyPrivateAnimalDetail = ({ animal, onClose, API_BASE_URL, authToken, setShowImageModal, setEnlargedImageUrl }) => {
+const ViewOnlyPrivateAnimalDetail = ({ animal, onClose, API_BASE_URL, authToken, setShowImageModal, setEnlargedImageUrl, onHideAnimal, showModalMessage }) => {
     const [breederInfo, setBreederInfo] = useState(null);
     const [showPedigree, setShowPedigree] = useState(false);
     const [detailViewTab, setDetailViewTab] = useState(1);
@@ -2858,6 +2858,21 @@ const ViewOnlyPrivateAnimalDetail = ({ animal, onClose, API_BASE_URL, authToken,
                             <span className="text-xs bg-orange-100 text-orange-800 px-2 py-1 rounded font-medium">
                                 📋 VIEW-ONLY - Read Only Access
                             </span>
+                            {onHideAnimal && (
+                                <button
+                                    onClick={() => {
+                                        if (window.confirm(`Hide ${animal.name || 'this animal'}? You can restore it anytime from the hidden animals section.`)) {
+                                            onHideAnimal(animal.id_public);
+                                            onClose();
+                                        }
+                                    }}
+                                    className="px-3 py-1.5 bg-gray-200 hover:bg-gray-300 text-gray-700 font-semibold rounded-lg transition flex items-center gap-2"
+                                    title="Hide this animal - move to hidden section"
+                                >
+                                    <Eye size={16} />
+                                    Hide
+                                </button>
+                            )}
                             <button onClick={onClose} className="text-gray-500 hover:text-gray-800">
                                 <X size={28} />
                             </button>
@@ -16879,6 +16894,8 @@ const App = () => {
                                         authToken={authToken}
                                         setShowImageModal={setShowImageModal}
                                         setEnlargedImageUrl={setEnlargedImageUrl}
+                                        onHideAnimal={handleHideAnimal}
+                                        showModalMessage={showModalMessage}
                                     />
                                 );
                             }
