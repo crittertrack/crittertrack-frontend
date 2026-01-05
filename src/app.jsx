@@ -2574,7 +2574,6 @@ const PrivateAnimalDetail = ({ animal, onClose, onEdit, API_BASE_URL, authToken,
                                             <h3 className="text-lg font-semibold text-gray-700">Dam Information</h3>
                                             <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm">
                                                 <div><span className="text-gray-600">Dam Fertility Status:</span> <strong>{animal.damFertilityStatus || animal.fertilityStatus || '—'}</strong></div>
-                                                <div><span className="text-gray-600">Litter Count:</span> <strong>{animal.litterCount || '—'}</strong></div>
                                             </div>
                                         </div>
                                     )}
@@ -3286,7 +3285,6 @@ const ViewOnlyPrivateAnimalDetail = ({ animal, onClose, API_BASE_URL, authToken,
                                             <h3 className="text-lg font-semibold text-gray-700">Dam Information</h3>
                                             <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm">
                                                 <div><span className="text-gray-600">Dam Fertility Status:</span> <strong>{animal.damFertilityStatus || animal.fertilityStatus || '—'}</strong></div>
-                                                <div><span className="text-gray-600">Litter Count:</span> <strong>{animal.litterCount || '—'}</strong></div>
                                             </div>
                                         </div>
                                     )}
@@ -4091,7 +4089,6 @@ const ViewOnlyAnimalDetail = ({ animal, onClose, API_BASE_URL, onViewProfile, au
                                     <h3 className="text-lg font-semibold text-gray-700">Dam Information</h3>
                                     <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm">
                                         <div><span className="text-gray-600">Dam Fertility Status:</span> <strong>{animal.damFertilityStatus || animal.fertilityStatus || '—'}</strong></div>
-                                        <div><span className="text-gray-600">Litter Count:</span> <strong>{animal.litterCount || '—'}</strong></div>
                                     </div>
                                 </div>
                             )}
@@ -18770,3 +18767,4 @@ const AppWithTutorial = () => {
 };
 
 export default AppRouter;
+
