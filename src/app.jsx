@@ -8383,10 +8383,9 @@ const AnimalForm = ({
                             </div>
                         )}
 
-                        {/* Breeding History (All animals - Historical Data) */}
-                        {(formData.gender === 'Male' || formData.gender === 'Female' || formData.gender === 'Intersex' || formData.gender === 'Unknown') && (
-                            <div className="bg-blue-50 p-4 rounded-lg border border-blue-200 space-y-4" data-tutorial-target="breeding-history-section">
-                                <h3 className="text-lg font-semibold text-gray-700 border-b pb-2 flex items-center"><span className="text-blue-600 mr-2">📋</span>Breeding History <span className="text-xs font-normal text-gray-500">(Historical Data)</span></h3>
+                        {/* Breeding History (All animals - Historical Data) - ALWAYS SHOWN */}
+                        <div className="bg-blue-50 p-4 rounded-lg border border-blue-200 space-y-4" data-tutorial-target="breeding-history-section">
+                            <h3 className="text-lg font-semibold text-gray-700 border-b pb-2 flex items-center"><span className="text-blue-600 mr-2">📋</span>Breeding History <span className="text-xs font-normal text-gray-500">(Historical Data)</span></h3>
                                 
                                 {/* Breeding Role Selector - for animals with unclear breeding roles */}
                                 {(formData.gender === 'Intersex' || formData.gender === 'Unknown') && (
@@ -8466,7 +8465,6 @@ const AnimalForm = ({
                                     </div>
                                 </div>
                             </div>
-                        )}
                     </div>
                 )}
 
