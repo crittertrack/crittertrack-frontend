@@ -1056,23 +1056,6 @@ const MouseGeneticsCalculator = ({ API_BASE_URL, authToken, myAnimals = [] }) =>
             }
           }
         }
-        
-        // If still no match, try case-insensitive matching
-        if (!found) {
-          const normalized = `${allele1.toLowerCase()}/${allele2.toLowerCase()}`;
-          
-          for (const [locus, data] of Object.entries(GENE_LOCI)) {
-            const matchingCombo = data.combinations.find(combo => 
-              combo.toLowerCase() === normalized
-            );
-            
-            if (matchingCombo) {
-              genotype[locus] = matchingCombo; // Use the properly formatted version from GENE_LOCI
-              found = true;
-              break;
-            }
-          }
-        }
       }
     });
     
