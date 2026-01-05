@@ -2706,7 +2706,7 @@ const ViewOnlyAnimalDetail = ({ animal, onClose, API_BASE_URL, onViewProfile, au
                     {detailViewTab === 7 && (
                         <div className="space-y-4">
                             {/* Preventive Care */}
-                            {animal.sectionPrivacy?.health !== false && (animal.vaccinations || animal.dewormingRecords || animal.parasiteControl || animal.allergies || animal.medications) && (
+                            {animal.sectionPrivacy?.health !== false && (animal.vaccinations || animal.dewormingRecords || animal.parasiteControl) && (
                                 <div className="bg-gray-50 p-4 rounded-lg border border-gray-200">
                                     <h3 className="text-lg font-semibold text-gray-700 border-b pb-2 mb-3">Preventive Care</h3>
                                     <div className="space-y-3">
@@ -2761,27 +2761,12 @@ const ViewOnlyAnimalDetail = ({ animal, onClose, API_BASE_URL, onViewProfile, au
                                     </div>
                                 </div>
                             )}
-                            {/* Medical History */}
-                            {animal.sectionPrivacy?.health !== false && (animal.medicalConditions || animal.medicalProcedures || animal.labResults || animal.vetVisits || animal.allergies || animal.medications || animal.primaryVet) && (
+                            
+                            {/* Procedures & Diagnostics */}
+                            {animal.sectionPrivacy?.health !== false && (animal.medicalProcedures || animal.labResults) && (
                                 <div className="bg-gray-50 p-4 rounded-lg border border-gray-200">
-                                    <h3 className="text-lg font-semibold text-gray-700 border-b pb-2 mb-3">Medical History</h3>
+                                    <h3 className="text-lg font-semibold text-gray-700 border-b pb-2 mb-3">Procedures & Diagnostics</h3>
                                     <div className="space-y-3">
-                                        {animal.medicalConditions && (() => {
-                                            const parsed = parseHealthRecords(animal.medicalConditions);
-                                            return parsed && parsed.length > 0 ? (
-                                                <div>
-                                                    <strong className="text-sm">Medical Conditions:</strong>
-                                                    <ul className="text-sm mt-1 list-disc list-inside space-y-1">
-                                                        {parsed.map((condition, idx) => (
-                                                            <li key={idx} className="text-gray-700">
-                                                                {condition.condition || condition.name}
-                                                                {condition.notes && <span className="text-gray-600"> - {condition.notes}</span>}
-                                                            </li>
-                                                        ))}
-                                                    </ul>
-                                                </div>
-                                            ) : null;
-                                        })()}
                                         {animal.medicalProcedures && (() => {
                                             const parsed = parseHealthRecords(animal.medicalProcedures);
                                             return parsed && parsed.length > 0 ? (
@@ -2814,16 +2799,25 @@ const ViewOnlyAnimalDetail = ({ animal, onClose, API_BASE_URL, onViewProfile, au
                                                 </div>
                                             ) : null;
                                         })()}
-                                        {animal.vetVisits && (() => {
-                                            const parsed = parseHealthRecords(animal.vetVisits);
+                                    </div>
+                                </div>
+                            )}
+                            
+                            {/* Medical Conditions & Ongoing Care */}
+                            {animal.sectionPrivacy?.health !== false && (animal.medicalConditions || animal.allergies || animal.medications) && (
+                                <div className="bg-gray-50 p-4 rounded-lg border border-gray-200">
+                                    <h3 className="text-lg font-semibold text-gray-700 border-b pb-2 mb-3">Medical Conditions & Ongoing Care</h3>
+                                    <div className="space-y-3">
+                                        {animal.medicalConditions && (() => {
+                                            const parsed = parseHealthRecords(animal.medicalConditions);
                                             return parsed && parsed.length > 0 ? (
                                                 <div>
-                                                    <strong className="text-sm">Veterinary Visits:</strong>
+                                                    <strong className="text-sm">Medical Conditions:</strong>
                                                     <ul className="text-sm mt-1 list-disc list-inside space-y-1">
-                                                        {parsed.map((visit, idx) => (
+                                                        {parsed.map((condition, idx) => (
                                                             <li key={idx} className="text-gray-700">
-                                                                {visit.date && `${new Date(visit.date).toLocaleDateString()}: `}{visit.reason}
-                                                                {visit.notes && <span className="text-gray-600"> - {visit.notes}</span>}
+                                                                {condition.condition || condition.name}
+                                                                {condition.notes && <span className="text-gray-600"> - {condition.notes}</span>}
                                                             </li>
                                                         ))}
                                                     </ul>
@@ -2856,6 +2850,31 @@ const ViewOnlyAnimalDetail = ({ animal, onClose, API_BASE_URL, onViewProfile, au
                                                             <li key={idx} className="text-gray-700">
                                                                 {med.medication || med.name}
                                                                 {med.notes && <span className="text-gray-600"> - {med.notes}</span>}
+                                                            </li>
+                                                        ))}
+                                                    </ul>
+                                                </div>
+                                            ) : null;
+                                        })()}
+                                    </div>
+                                </div>
+                            )}
+                            
+                            {/* Veterinary Care */}
+                            {animal.sectionPrivacy?.health !== false && (animal.vetVisits || animal.primaryVet) && (
+                                <div className="bg-gray-50 p-4 rounded-lg border border-gray-200">
+                                    <h3 className="text-lg font-semibold text-gray-700 border-b pb-2 mb-3">Veterinary Care</h3>
+                                    <div className="space-y-3">
+                                        {animal.vetVisits && (() => {
+                                            const parsed = parseHealthRecords(animal.vetVisits);
+                                            return parsed && parsed.length > 0 ? (
+                                                <div>
+                                                    <strong className="text-sm">Veterinary Visits:</strong>
+                                                    <ul className="text-sm mt-1 list-disc list-inside space-y-1">
+                                                        {parsed.map((visit, idx) => (
+                                                            <li key={idx} className="text-gray-700">
+                                                                {visit.date && `${new Date(visit.date).toLocaleDateString()}: `}{visit.reason}
+                                                                {visit.notes && <span className="text-gray-600"> - {visit.notes}</span>}
                                                             </li>
                                                         ))}
                                                     </ul>
