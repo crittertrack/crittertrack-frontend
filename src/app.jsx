@@ -2695,6 +2695,718 @@ const PrivateAnimalDetail = ({ animal, onClose, onEdit, API_BASE_URL, authToken,
     );
 };
 
+// ==================== VIEW-ONLY PRIVATE ANIMAL DETAIL (SOLD/TRANSFERRED) ====================
+// Identical to PrivateAnimalDetail but without edit/delete and privacy controls
+// Used for animals you have view-only access to (sold, transferred, purchased)
+const ViewOnlyPrivateAnimalDetail = ({ animal, onClose, API_BASE_URL, authToken, setShowImageModal, setEnlargedImageUrl }) => {
+    const [breederInfo, setBreederInfo] = useState(null);
+    const [showPedigree, setShowPedigree] = useState(false);
+    const [detailViewTab, setDetailViewTab] = useState(1);
+    const [showAllDetailTabs, setShowAllDetailTabs] = useState(false);
+    
+    // Helper function to parse health records from JSON strings
+    const parseHealthRecords = (data) => {
+        if (!data) return [];
+        if (typeof data === 'string') {
+            try {
+                return JSON.parse(data);
+            } catch (e) {
+                console.error('Failed to parse health records:', e);
+                return [];
+            }
+        }
+        return Array.isArray(data) ? data : [];
+    };
+    
+    // Fetch breeder info when component mounts or animal changes
+    React.useEffect(() => {
+        const fetchBreeder = async () => {
+            if (animal?.breederId_public) {
+                try {
+                    const response = await axios.get(
+                        `${API_BASE_URL}/public/profiles/search?query=${animal.breederId_public}&limit=1`
+                    );
+                    if (response.data && response.data.length > 0) {
+                        setBreederInfo(response.data[0]);
+                    }
+                } catch (error) {
+                    console.error('Failed to fetch breeder info:', error);
+                    setBreederInfo(null);
+                }
+            } else {
+                setBreederInfo(null);
+            }
+        };
+        fetchBreeder();
+    }, [animal?.breederId_public, API_BASE_URL]);
+    
+    if (!animal) return null;
+
+    return (
+        <div className="fixed inset-0 bg-accent/10 flex items-center justify-center p-4 z-50 overflow-y-auto">
+            <div className="bg-primary rounded-xl shadow-2xl w-full max-w-5xl max-h-[90vh] overflow-y-auto">
+                {/* Header */}
+                <div className="bg-white rounded-t-lg p-4 border-b border-gray-300">
+                    <div className="flex justify-between items-center">
+                        <button 
+                            onClick={onClose} 
+                            className="flex items-center text-gray-600 hover:text-gray-800 transition"
+                        >
+                            <ArrowLeft size={18} className="mr-1" /> Back
+                        </button>
+                        <div className="flex items-center gap-2">
+                            <span className="text-xs bg-orange-100 text-orange-800 px-2 py-1 rounded font-medium">
+                                📋 VIEW-ONLY - Read Only Access
+                            </span>
+                            <button onClick={onClose} className="text-gray-500 hover:text-gray-800">
+                                <X size={28} />
+                            </button>
+                        </div>
+                    </div>
+                </div>
+
+                {/* Tabs - ALL 11 TABS (same as PrivateAnimalDetail) */}
+                <div className="bg-white border-b border-gray-300 px-6 pt-4">
+                    <div 
+                        className="flex flex-wrap gap-1 pb-px transition-all duration-300 overflow-hidden" 
+                        style={{ maxHeight: showAllDetailTabs ? '500px' : '80px' }}
+                    >
+                        {[
+                            { id: 1, label: 'Overview', icon: '📋' },
+                            { id: 2, label: 'Status & Privacy', icon: '🔒' },
+                            { id: 3, label: 'Physical', icon: '🎨' },
+                            { id: 4, label: 'Identification', icon: '🏷️' },
+                            { id: 5, label: 'Lineage', icon: '🌳' },
+                            { id: 6, label: 'Breeding', icon: '🫘' },
+                            { id: 7, label: 'Health', icon: '🏥' },
+                            { id: 8, label: 'Husbandry', icon: '🏠' },
+                            { id: 9, label: 'Behavior', icon: '🧠' },
+                            { id: 10, label: 'Records', icon: '📝' },
+                            { id: 11, label: 'End of Life', icon: '⚖️' }
+                        ].map(tab => (
+                            <button
+                                key={tab.id}
+                                type="button"
+                                onClick={() => setDetailViewTab(tab.id)}
+                                className={`flex-shrink-0 px-2 sm:px-3 py-2 text-xs sm:text-sm font-medium rounded border transition-colors ${
+                                    detailViewTab === tab.id 
+                                        ? 'bg-primary text-black border-gray-400' 
+                                        : 'bg-gray-50 text-gray-600 hover:text-gray-800 border-gray-300'
+                                }`}
+                                title={tab.label}
+                            >
+                                <span className="mr-1">{tab.icon}</span>
+                                <span className="hidden lg:inline">{tab.label}</span>
+                            </button>
+                        ))}
+                    </div>
+                    <button
+                        type="button"
+                        onClick={() => setShowAllDetailTabs(!showAllDetailTabs)}
+                        className="text-xs text-primary hover:text-primary/80 py-1 font-medium transition-transform inline-block"
+                    >
+                        {showAllDetailTabs ? '▲ Show Less' : '▼ Show All Tabs'}
+                    </button>
+                </div>
+
+                {/* Tab Content - COPY OF PRIVATE DETAIL (no edit/delete/privacy toggle in Tab 1) */}
+                <div className="bg-white border border-t-0 border-gray-300 rounded-b-lg p-6 overflow-y-auto max-h-[calc(90vh-180px)]">
+                    {/* Tab 1: Overview - NO PRIVACY TOGGLE */}
+                    {detailViewTab === 1 && (
+                        <div className="space-y-4">
+                            <div className="bg-white border-2 border-gray-300 rounded-lg overflow-hidden">
+                                <div className="flex flex-col md:flex-row relative">
+                                    <div className="w-full md:w-1/3 p-4 sm:p-6 flex flex-col items-center justify-center relative min-h-60 md:min-h-80">
+                                        <div className="absolute top-2 left-2 text-xs text-gray-600 bg-white/80 px-2 py-0.5 rounded">
+                                            {animal.birthDate ? new Date(animal.birthDate).toLocaleDateString() : '—'}
+                                        </div>
+                                        <div className="absolute top-2 right-2">
+                                            {animal.gender === 'Male' ? <Mars size={20} strokeWidth={2.5} className="text-blue-600" /> : animal.gender === 'Female' ? <Venus size={20} strokeWidth={2.5} className="text-pink-600" /> : animal.gender === 'Intersex' ? <VenusAndMars size={20} strokeWidth={2.5} className="text-purple-500" /> : <Circle size={20} strokeWidth={2.5} className="text-gray-500" />}
+                                        </div>
+                                        <div className="flex items-center justify-center h-40 w-full">
+                                            {(animal.imageUrl || animal.photoUrl) ? (
+                                                <img 
+                                                    src={animal.imageUrl || animal.photoUrl} 
+                                                    alt={animal.name} 
+                                                    className="max-w-32 max-h-32 w-auto h-auto object-contain rounded-md cursor-pointer hover:opacity-80 transition"
+                                                    onClick={() => {
+                                                        if (setEnlargedImageUrl && setShowImageModal) {
+                                                            setEnlargedImageUrl(animal.imageUrl || animal.photoUrl);
+                                                            setShowImageModal(true);
+                                                        }
+                                                    }}
+                                                />
+                                            ) : (
+                                                <div className="w-32 h-32 bg-gray-100 rounded-md flex items-center justify-center text-gray-400">
+                                                    <Cat size={48} />
+                                                </div>
+                                            )}
+                                        </div>
+                                        <div className="text-sm font-medium text-gray-700 mt-2">
+                                            {animal.status || 'Unknown'}
+                                        </div>
+                                    </div>
+
+                                    <div className="w-full md:w-2/3 p-4 sm:p-6 flex flex-col border-t md:border-t-0 md:border-l border-gray-300 space-y-3">
+                                        {/* Species/Breed/Strain/CTC - At Top (NO PRIVACY TOGGLE) */}
+                                        <p className="text-sm text-gray-600">
+                                            {animal.species || 'Unknown'}
+                                            {animal.breed && ` • ${animal.breed}`}
+                                            {animal.strain && ` • ${animal.strain}`}
+                                            {animal.id_public && ` • ${animal.id_public}`}
+                                        </p>
+
+                                        {/* Full Name */}
+                                        <h2 className="text-2xl font-bold text-gray-800">
+                                            {animal.prefix ? `${animal.prefix} ` : ''}
+                                            {animal.name}
+                                            {animal.suffix ? ` ${animal.suffix}` : ''}
+                                        </h2>
+
+                                        {/* For Sale Badge */}
+                                        {animal.isForSale && (
+                                            <div className="bg-green-50 border border-green-200 rounded-lg p-3 flex items-center gap-2">
+                                                <span className="text-lg">🏷️</span>
+                                                <div>
+                                                    <p className="text-sm font-semibold text-gray-700">For Sale</p>
+                                                    <p className="text-sm text-gray-600">
+                                                        {animal.salePriceCurrency === 'Negotiable' || !animal.salePriceAmount ? 'Negotiable' : `${animal.salePriceCurrency === 'USD' ? '$' : animal.salePriceCurrency === 'EUR' ? '€' : animal.salePriceCurrency === 'GBP' ? '£' : animal.salePriceCurrency === 'CAD' ? 'C$' : animal.salePriceCurrency === 'AUD' ? 'A$' : animal.salePriceCurrency === 'JPY' ? '¥' : animal.salePriceCurrency}${animal.salePriceAmount ? ` ${animal.salePriceAmount}` : ''}`}
+                                                    </p>
+                                                </div>
+                                            </div>
+                                        )}
+
+                                        {/* For Stud Badge */}
+                                        {animal.availableForBreeding && (
+                                            <div className="bg-blue-50 border border-blue-200 rounded-lg p-3 flex items-center gap-2">
+                                                <span className="text-lg">🫘</span>
+                                                <div>
+                                                    <p className="text-sm font-semibold text-gray-700">Available for Stud</p>
+                                                    <p className="text-sm text-gray-600">
+                                                        {animal.studFeeCurrency === 'Negotiable' || !animal.studFeeAmount ? 'Negotiable' : `${animal.studFeeCurrency === 'USD' ? '$' : animal.studFeeCurrency === 'EUR' ? '€' : animal.studFeeCurrency === 'GBP' ? '£' : animal.studFeeCurrency === 'CAD' ? 'C$' : animal.studFeeCurrency === 'AUD' ? 'A$' : animal.studFeeCurrency === 'JPY' ? '¥' : animal.studFeeCurrency}${animal.studFeeAmount ? ` ${animal.studFeeAmount}` : ''}`}
+                                                    </p>
+                                                </div>
+                                            </div>
+                                        )}
+
+                                        {/* Appearance */}
+                                        <p className="text-sm text-gray-700">
+                                            <span className="font-semibold">Appearance:</span> {[
+                                                animal.color,
+                                                animal.coatPattern,
+                                                animal.coat,
+                                                animal.earset
+                                            ].filter(Boolean).join(', ') || '—'}
+                                        </p>
+
+                                        {/* Genetic Code */}
+                                        {animal.geneticCode && (
+                                            <p className="text-sm text-gray-700">
+                                                <span className="font-semibold">Genetic Code:</span> <code className="bg-gray-100 px-1 rounded font-mono">{animal.geneticCode}</code>
+                                            </p>
+                                        )}
+
+                                        {/* Date of Birth and Age/Deceased */}
+                                        <div className="text-sm text-gray-700 space-y-1">
+                                            <p>
+                                                <span className="font-semibold">Date of Birth:</span> {animal.birthDate ? `${new Date(animal.birthDate).toLocaleDateString()} (~${(() => {
+                                                    const birth = new Date(animal.birthDate);
+                                                    const endDate = animal.deceasedDate ? new Date(animal.deceasedDate) : new Date();
+                                                    let years = endDate.getFullYear() - birth.getFullYear();
+                                                    let months = endDate.getMonth() - birth.getMonth();
+                                                    let days = endDate.getDate() - birth.getDate();
+                                                    
+                                                    if (days < 0) {
+                                                        months--;
+                                                        const prevMonth = new Date(endDate.getFullYear(), endDate.getMonth(), 0);
+                                                        days += prevMonth.getDate();
+                                                    }
+                                                    if (months < 0) {
+                                                        years--;
+                                                        months += 12;
+                                                    }
+                                                    
+                                                    if (years > 0) {
+                                                        return `${years}y ${months}m ${days}d`;
+                                                    } else if (months > 0) {
+                                                        return `${months}m ${days}d`;
+                                                    } else {
+                                                        return `${days}d`;
+                                                    }
+                                                })()})` : '—'}
+                                            </p>
+                                            {animal.deceasedDate && (
+                                                <p className="text-red-600 font-semibold">
+                                                    Deceased: {new Date(animal.deceasedDate).toLocaleDateString()}
+                                                </p>
+                                            )}
+                                        </div>
+
+                                        {/* Remarks */}
+                                        {animal.remarks && (
+                                            <div className="text-sm text-gray-700">
+                                                <span className="font-semibold">Remarks:</span>
+                                                <p className="mt-1 whitespace-pre-wrap">{animal.remarks}</p>
+                                            </div>
+                                        )}
+                                    </div>
+                                </div>
+                            </div>
+
+                            {/* Breeder Section */}
+                            <div className="bg-gray-50 p-4 rounded-lg border border-gray-200">
+                                <h3 className="text-lg font-semibold text-gray-700 border-b pb-2 mb-3">Breeder</h3>
+                                <p className="text-gray-700">
+                                    {breederInfo ? (() => {
+                                        const showPersonal = breederInfo.showPersonalName ?? false;
+                                        const showBreeder = breederInfo.showBreederName ?? false;
+                                        if (showPersonal && showBreeder && breederInfo.personalName && breederInfo.breederName) {
+                                            return `${breederInfo.personalName} (${breederInfo.breederName})`;
+                                        } else if (showBreeder && breederInfo.breederName) {
+                                            return breederInfo.breederName;
+                                        } else if (showPersonal && breederInfo.personalName) {
+                                            return breederInfo.personalName;
+                                        } else {
+                                            return 'Unknown Breeder';
+                                        }
+                                    })() : (animal.breederId_public ? <span className="font-mono text-accent">{animal.breederId_public}</span> : '—')}
+                                </p>
+                            </div>
+
+                            {/* Identification Numbers Section */}
+                            <div className="bg-gray-50 p-4 rounded-lg border border-gray-200">
+                                <h3 className="text-lg font-semibold text-gray-700 border-b pb-2 mb-3">Identification Numbers</h3>
+                                <div className="space-y-2">
+                                    <p className="text-sm"><span className="font-medium">Identification:</span> {animal.breederyId || '—'}</p>
+                                    <p className="text-sm"><span className="font-medium">Microchip:</span> {animal.microchipNumber || '—'}</p>
+                                    <p className="text-sm"><span className="font-medium">Pedigree Reg ID:</span> {animal.pedigreeRegistrationId || '—'}</p>
+                                </div>
+                            </div>
+
+                            {/* Genetic Code Display Section */}
+                            <div className="bg-gray-50 p-4 rounded-lg border border-gray-200">
+                                <h3 className="text-lg font-semibold text-gray-700 border-b pb-2 mb-3">Genetic Code</h3>
+                                <p className="text-gray-700 font-mono text-sm break-all">{animal.geneticCode || '—'}</p>
+                            </div>
+
+                            {/* Parents Section */}
+                            <div className="bg-gray-50 p-4 rounded-lg border border-gray-200">
+                                <h3 className="text-lg font-semibold text-gray-700 border-b pb-2 mb-4">Parents</h3>
+                                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                                    <ViewOnlyParentCard 
+                                        parentId={animal.fatherId_public || animal.sireId_public} 
+                                        parentType="Sire"
+                                        API_BASE_URL={API_BASE_URL}
+                                        onViewAnimal={() => {}}
+                                    />
+                                    <ViewOnlyParentCard 
+                                        parentId={animal.motherId_public || animal.damId_public} 
+                                        parentType="Dam"
+                                        API_BASE_URL={API_BASE_URL}
+                                        onViewAnimal={() => {}}
+                                    />
+                                </div>
+                            </div>
+                        </div>
+                    )}
+
+                    {/* Tab 2: Status & Privacy */}
+                    {detailViewTab === 2 && (
+                        <div className="space-y-6">
+                            {/* 1st Section: Ownership */}
+                            <div className="bg-gray-50 p-4 rounded-lg border border-gray-200 space-y-4">
+                                <h3 className="text-lg font-semibold text-gray-700">Ownership</h3>
+                                <div className="space-y-3 text-sm">
+                                    <div className="flex items-center gap-2">
+                                        <span className="text-gray-600">Currently Owned:</span>
+                                        <strong>{animal.isOwned ? '✓ Yes' : '✗ No'}</strong>
+                                    </div>
+                                    <div>
+                                        <span className="text-gray-600 block mb-1">Breeder:</span>
+                                        <strong>{breederInfo ? `${breederInfo.breederName || breederInfo.personalName || 'Unknown'}` : (animal.breederId_public || '—')}</strong>
+                                    </div>
+                                </div>
+                            </div>
+
+                            {/* 2nd Section: Current Owner */}
+                            <div className="bg-gray-50 p-4 rounded-lg border border-gray-200 space-y-4">
+                                <h3 className="text-lg font-semibold text-gray-700">Current Owner</h3>
+                                <div className="text-sm">
+                                    <span className="text-gray-600">Owner Name:</span>
+                                    <strong className="block mt-1">{animal.currentOwner || '—'}</strong>
+                                </div>
+                            </div>
+
+                            {/* 3rd Section: Availability for Sale or Stud */}
+                            <div className="bg-gray-50 p-4 rounded-lg border border-gray-200 space-y-4">
+                                <h3 className="text-lg font-semibold text-gray-700">Availability for Sale or Stud</h3>
+                                <div className="space-y-3 text-sm">
+                                    <div>
+                                        <span className="text-gray-600">For Sale:</span>
+                                        <strong className="block mt-1">
+                                            {animal.isForSale ? `✓ Yes - ${animal.salePriceCurrency || ''} ${animal.salePriceAmount || 'Negotiable'}`.trim() : '✗ No'}
+                                        </strong>
+                                    </div>
+                                    <div>
+                                        <span className="text-gray-600">For Stud:</span>
+                                        <strong className="block mt-1">
+                                            {animal.availableForBreeding ? `✓ Yes - ${animal.studFeeCurrency || ''} ${animal.studFeeAmount || 'Negotiable'}`.trim() : '✗ No'}
+                                        </strong>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    )}
+
+                    {/* Tab 3: Physical */}
+                    {detailViewTab === 3 && (
+                        <div className="space-y-6">
+                            <div className="bg-gray-50 p-4 rounded-lg border border-gray-200 space-y-4">
+                                <h3 className="text-lg font-semibold text-gray-700">Appearance</h3>
+                                <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm">
+                                    <div><span className="text-gray-600">Color:</span> <strong>{animal.color || '—'}</strong></div>
+                                    <div><span className="text-gray-600">Coat Pattern:</span> <strong>{animal.coatPattern || '—'}</strong></div>
+                                    <div><span className="text-gray-600">Coat Type:</span> <strong>{animal.coat || '—'}</strong></div>
+                                    {animal.species === 'Fancy Rat' && <div><span className="text-gray-600">Earset:</span> <strong>{animal.earset || '—'}</strong></div>}
+                                </div>
+                            </div>
+                            <div className="bg-gray-50 p-4 rounded-lg border border-gray-200 space-y-4">
+                                <h3 className="text-lg font-semibold text-gray-700">Genetic Code</h3>
+                                <p className="text-gray-700 font-mono text-sm break-all">{animal.geneticCode || '—'}</p>
+                            </div>
+                            <div className="bg-gray-50 p-4 rounded-lg border border-gray-200 space-y-4">
+                                <h3 className="text-lg font-semibold text-gray-700">Life Stage</h3>
+                                <p className="text-gray-700 text-sm">{animal.lifeStage || '—'}</p>
+                            </div>
+                            <div className="bg-gray-50 p-4 rounded-lg border border-gray-200 space-y-4">
+                                <h3 className="text-lg font-semibold text-gray-700">Measurements</h3>
+                                <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm">
+                                    <div><span className="text-gray-600">Weight:</span> <strong>{animal.bodyWeight || '—'}</strong></div>
+                                    <div><span className="text-gray-600">Length:</span> <strong>{animal.bodyLength || '—'}</strong></div>
+                                    <div><span className="text-gray-600">Height:</span> <strong>{animal.heightAtWithers || '—'}</strong></div>
+                                    <div><span className="text-gray-600">Body Condition:</span> <strong>{animal.bodyConditionScore || '—'}</strong></div>
+                                </div>
+                            </div>
+                        </div>
+                    )}
+
+                    {/* Tab 4: Identification */}
+                    {detailViewTab === 4 && (
+                        <div className="space-y-6">
+                            {/* 1st Section: Identification Numbers */}
+                            <div className="bg-gray-50 p-4 rounded-lg border border-gray-200 space-y-4">
+                                <h3 className="text-lg font-semibold text-gray-700">Identification Numbers</h3>
+                                <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm">
+                                    <div><span className="text-gray-600">Identification:</span> <strong>{animal.id_public || '—'}</strong></div>
+                                    <div><span className="text-gray-600">Microchip Number:</span> <strong>{animal.microchipNumber || '—'}</strong></div>
+                                    <div><span className="text-gray-600">Pedigree Registration ID:</span> <strong>{animal.pedigreeRegistrationId || '—'}</strong></div>
+                                </div>
+                            </div>
+
+                            {/* 2nd Section: Classification */}
+                            <div className="bg-gray-50 p-4 rounded-lg border border-gray-200 space-y-4">
+                                <h3 className="text-lg font-semibold text-gray-700">Classification</h3>
+                                <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm">
+                                    <div><span className="text-gray-600">Species:</span> <strong>{animal.species || '—'}</strong></div>
+                                    <div><span className="text-gray-600">Breed:</span> <strong>{animal.breed || '—'}</strong></div>
+                                    <div><span className="text-gray-600">Strain:</span> <strong>{animal.strain || '—'}</strong></div>
+                                </div>
+                            </div>
+
+                            {/* 3rd Section: Tags */}
+                            <div className="bg-gray-50 p-4 rounded-lg border border-gray-200 space-y-4">
+                                <h3 className="text-lg font-semibold text-gray-700">Tags</h3>
+                                {animal.tags && animal.tags.length > 0 ? (
+                                    <div className="flex flex-wrap gap-2">
+                                        {animal.tags.map((tag, idx) => (
+                                            <span key={idx} className="bg-blue-100 text-blue-800 px-2 py-1 rounded text-sm">
+                                                {tag}
+                                            </span>
+                                        ))}
+                                    </div>
+                                ) : <p className="text-gray-700 text-sm">—</p>}
+                            </div>
+                        </div>
+                    )}
+
+                    {/* Tab 5: Lineage */}
+                    {detailViewTab === 5 && (
+                        <div className="space-y-6">
+                            {/* 1st Section: Pedigree */}
+                            <div className="bg-gray-50 p-4 rounded-lg border border-gray-200 space-y-4">
+                                <div className="flex justify-between items-center">
+                                    <h3 className="text-lg font-semibold text-gray-700">Pedigree: Sire and Dam 🌳</h3>
+                                    <button
+                                        onClick={() => setShowPedigree(true)}
+                                        data-tutorial-target="pedigree-btn"
+                                        className="px-3 py-1 bg-primary hover:bg-primary/90 text-black font-semibold rounded-lg transition text-sm"
+                                    >
+                                        View Pedigree Chart
+                                    </button>
+                                </div>
+                                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                    <ViewOnlyParentCard 
+                                        parentId={animal.fatherId_public || animal.sireId_public} 
+                                        parentType="Sire"
+                                        API_BASE_URL={API_BASE_URL}
+                                        onViewAnimal={() => {}}
+                                    />
+                                    <ViewOnlyParentCard 
+                                        parentId={animal.motherId_public || animal.damId_public} 
+                                        parentType="Dam"
+                                        API_BASE_URL={API_BASE_URL}
+                                        onViewAnimal={() => {}}
+                                    />
+                                </div>
+                            </div>
+
+                            {/* 2nd Section: Origin */}
+                            <div className="bg-gray-50 p-4 rounded-lg border border-gray-200 space-y-4">
+                                <h3 className="text-lg font-semibold text-gray-700">Origin</h3>
+                                <p className="text-sm text-gray-700">{animal.origin || '—'}</p>
+                            </div>
+
+                            {/* 3rd Section: Ownership History */}
+                            <div className="bg-gray-50 p-4 rounded-lg border border-gray-200 space-y-4">
+                                <h3 className="text-lg font-semibold text-gray-700">Ownership History</h3>
+                                <p className="text-sm text-gray-700">—</p>
+                            </div>
+
+                            {/* Offspring Section */}
+                            <OffspringSection animalId={animal.id_public} API_BASE_URL={API_BASE_URL} authToken={authToken} onViewAnimal={() => {}} />
+                        </div>
+                    )}
+
+                    {/* Tab 6: Breeding */}
+                    {detailViewTab === 6 && (
+                        <div className="space-y-6">
+                            {/* 1st Section: Reproductive Status */}
+                            <div className="bg-gray-50 p-4 rounded-lg border border-gray-200 space-y-4">
+                                <h3 className="text-lg font-semibold text-gray-700">Reproductive Status</h3>
+                                <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm">
+                                    <div><span className="text-gray-600">Neutered/Spayed:</span> <strong>{animal.isNeutered ? '✓ Yes' : '✗ No'}</strong></div>
+                                    <div><span className="text-gray-600">Infertile:</span> <strong>{animal.isInfertile ? '✓ Yes' : '✗ No'}</strong></div>
+                                    <div><span className="text-gray-600">In Mating:</span> <strong>{animal.isInMating ? '✓ Yes' : '✗ No'}</strong></div>
+                                    <div><span className="text-gray-600">Pregnant:</span> <strong>{animal.isPregnant ? '✓ Yes' : '✗ No'}</strong></div>
+                                    <div><span className="text-gray-600">Nursing:</span> <strong>{animal.isNursing ? '✓ Yes' : '✗ No'}</strong></div>
+                                </div>
+                            </div>
+
+                            {/* 2nd Section: Estrus/Cycle (Female/Intersex/Unknown only) */}
+                            {(animal.gender === 'Female' || animal.gender === 'Intersex' || animal.gender === 'Unknown') && !animal.isNeutered && (
+                                <div className="bg-gray-50 p-4 rounded-lg border border-gray-200 space-y-4">
+                                    <h3 className="text-lg font-semibold text-gray-700">Estrus/Cycle</h3>
+                                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm">
+                                        <div><span className="text-gray-600">Estrus Cycle:</span> <strong>{animal.estrusCycle || '—'}</strong></div>
+                                        <div><span className="text-gray-600">Last Estrus:</span> <strong>{animal.lastEstrus ? new Date(animal.lastEstrus).toLocaleDateString() : '—'}</strong></div>
+                                    </div>
+                                </div>
+                            )}
+
+                            {/* 3rd Section: Mating */}
+                            <div className="bg-gray-50 p-4 rounded-lg border border-gray-200 space-y-4">
+                                <h3 className="text-lg font-semibold text-gray-700">Mating</h3>
+                                <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm">
+                                    <div><span className="text-gray-600">Mating Dates:</span> <strong>{animal.matingDates || '—'}</strong></div>
+                                    <div><span className="text-gray-600">Expected Due Date:</span> <strong>{animal.expectedDueDate ? new Date(animal.expectedDueDate).toLocaleDateString() : '—'}</strong></div>
+                                </div>
+                            </div>
+
+                            {/* 4th Section: Stud/Dam Information */}
+                            {!animal.isNeutered && !animal.isInfertile && (
+                                <>
+                                    {(animal.gender === 'Male' || animal.gender === 'Intersex' || animal.gender === 'Unknown') && (
+                                        <div className="bg-gray-50 p-4 rounded-lg border border-gray-200 space-y-4">
+                                            <h3 className="text-lg font-semibold text-gray-700">Stud Information</h3>
+                                            <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm">
+                                                <div><span className="text-gray-600">Fertility Status:</span> <strong>{animal.fertilityStatus || '—'}</strong></div>
+                                                <div><span className="text-gray-600">Successful Matings:</span> <strong>{animal.successfulMatings || '—'}</strong></div>
+                                            </div>
+                                            {animal.fertilityNotes && (
+                                                <div><span className="text-gray-600 text-sm">Notes:</span> <p className="text-sm text-gray-700 mt-1">{animal.fertilityNotes}</p></div>
+                                            )}
+                                        </div>
+                                    )}
+                                    {(animal.gender === 'Female' || animal.gender === 'Intersex' || animal.gender === 'Unknown') && (
+                                        <div className="bg-gray-50 p-4 rounded-lg border border-gray-200 space-y-4">
+                                            <h3 className="text-lg font-semibold text-gray-700">Dam Information</h3>
+                                            <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm">
+                                                <div><span className="text-gray-600">Dam Fertility Status:</span> <strong>{animal.damFertilityStatus || animal.fertilityStatus || '—'}</strong></div>
+                                                <div><span className="text-gray-600">Litter Count:</span> <strong>{animal.litterCount || '—'}</strong></div>
+                                            </div>
+                                        </div>
+                                    )}
+                                </>
+                            )}
+
+                            {/* 5th Section: Breeding History */}
+                            <div className="bg-gray-50 p-4 rounded-lg border border-gray-200 space-y-4">
+                                <h3 className="text-lg font-semibold text-gray-700">Breeding History</h3>
+                                <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm">
+                                    <div><span className="text-gray-600">Offspring Count:</span> <strong>{animal.offspringCount || '—'}</strong></div>
+                                    <div><span className="text-gray-600">Litter Count:</span> <strong>{animal.litterCount || '—'}</strong></div>
+                                </div>
+                            </div>
+                        </div>
+                    )}
+
+                    {/* Tab 7: Health */}
+                    {detailViewTab === 7 && (
+                        <div className="space-y-6">
+                            {/* 1st Section: Preventive Care */}
+                            <div className="bg-gray-50 p-4 rounded-lg border border-gray-200 space-y-4">
+                                <h3 className="text-lg font-semibold text-gray-700">Preventive Care</h3>
+                                <div className="space-y-3 text-sm">
+                                    <div><span className="text-gray-600">Vaccinations:</span> <strong>{animal.vaccinations || '—'}</strong></div>
+                                    <div><span className="text-gray-600">Deworming Records:</span> <strong>{animal.dewormingRecords || '—'}</strong></div>
+                                    <div><span className="text-gray-600">Parasite Control:</span> <strong>{animal.parasiteControl || '—'}</strong></div>
+                                </div>
+                            </div>
+
+                            {/* 2nd Section: Procedures & Diagnostics */}
+                            <div className="bg-gray-50 p-4 rounded-lg border border-gray-200 space-y-4">
+                                <h3 className="text-lg font-semibold text-gray-700">Procedures & Diagnostics</h3>
+                                <div className="space-y-3 text-sm">
+                                    <div><span className="text-gray-600">Medical Procedures:</span> <strong>{animal.medicalProcedures || '—'}</strong></div>
+                                    <div><span className="text-gray-600">Laboratory Results:</span> <strong>{animal.laboratoryResults || '—'}</strong></div>
+                                </div>
+                            </div>
+
+                            {/* 3rd Section: Active Medical Records */}
+                            <div className="bg-gray-50 p-4 rounded-lg border border-gray-200 space-y-4">
+                                <h3 className="text-lg font-semibold text-gray-700">Active Medical Records</h3>
+                                <div className="space-y-3">
+                                    <div>
+                                        <span className="text-gray-600 text-sm font-semibold">Medical Conditions:</span>
+                                        <p className="text-sm text-gray-700 mt-1 whitespace-pre-wrap">{animal.medicalConditions || '—'}</p>
+                                    </div>
+                                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm">
+                                        <div><span className="text-gray-600">Allergies:</span> <strong>{animal.allergies || '—'}</strong></div>
+                                        <div><span className="text-gray-600">Current Medications:</span> <strong>{animal.medications || '—'}</strong></div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            {/* 4th Section: Veterinary Care */}
+                            <div className="bg-gray-50 p-4 rounded-lg border border-gray-200 space-y-4">
+                                <h3 className="text-lg font-semibold text-gray-700">Veterinary Care</h3>
+                                <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm">
+                                    <div><span className="text-gray-600">Primary Veterinarian:</span> <strong>{animal.primaryVet || '—'}</strong></div>
+                                    <div><span className="text-gray-600">Veterinary Visits:</span> <strong>{animal.vetVisits || '—'}</strong></div>
+                                </div>
+                            </div>
+                        </div>
+                    )}
+
+                    {/* Tab 8: Husbandry */}
+                    {detailViewTab === 8 && (
+                        <div className="space-y-6">
+                            {/* 1st Section: Nutrition */}
+                            <div className="bg-gray-50 p-4 rounded-lg border border-gray-200 space-y-4">
+                                <h3 className="text-lg font-semibold text-gray-700">Nutrition</h3>
+                                <div className="space-y-3 text-sm">
+                                    <div><span className="text-gray-600">Diet Type:</span> <strong>{animal.dietType || '—'}</strong></div>
+                                    <div><span className="text-gray-600">Feeding Schedule:</span> <strong>{animal.feedingSchedule || '—'}</strong></div>
+                                    <div><span className="text-gray-600">Supplements:</span> <strong>{animal.supplements || '—'}</strong></div>
+                                </div>
+                            </div>
+
+                            {/* 2nd Section: Husbandry */}
+                            <div className="bg-gray-50 p-4 rounded-lg border border-gray-200 space-y-4">
+                                <h3 className="text-lg font-semibold text-gray-700">Husbandry</h3>
+                                <div className="space-y-3 text-sm">
+                                    <div><span className="text-gray-600">Housing Type:</span> <strong>{animal.housingType || '—'}</strong></div>
+                                    <div><span className="text-gray-600">Bedding:</span> <strong>{animal.bedding || '—'}</strong></div>
+                                    <div><span className="text-gray-600">Enrichment:</span> <strong>{animal.enrichment || '—'}</strong></div>
+                                </div>
+                            </div>
+
+                            {/* 3rd Section: Environment */}
+                            <div className="bg-gray-50 p-4 rounded-lg border border-gray-200 space-y-4">
+                                <h3 className="text-lg font-semibold text-gray-700">Environment</h3>
+                                <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm">
+                                    <div><span className="text-gray-600">Temperature Range:</span> <strong>{animal.temperatureRange || '—'}</strong></div>
+                                    <div><span className="text-gray-600">Humidity:</span> <strong>{animal.humidity || '—'}</strong></div>
+                                    <div><span className="text-gray-600">Lighting:</span> <strong>{animal.lighting || '—'}</strong></div>
+                                    <div><span className="text-gray-600">Noise Level:</span> <strong>{animal.noise || '—'}</strong></div>
+                                </div>
+                            </div>
+                        </div>
+                    )}
+
+                    {/* Tab 9: Behavior */}
+                    {detailViewTab === 9 && (
+                        <div className="space-y-6">
+                            {/* 1st Section: Behavior */}
+                            <div className="bg-gray-50 p-4 rounded-lg border border-gray-200 space-y-4">
+                                <h3 className="text-lg font-semibold text-gray-700">Behavior</h3>
+                                <div className="space-y-3 text-sm">
+                                    <div><span className="text-gray-600">Temperament:</span> <strong>{animal.temperament || '—'}</strong></div>
+                                    <div><span className="text-gray-600">Handling Tolerance:</span> <strong>{animal.handlingTolerance || '—'}</strong></div>
+                                    <div><span className="text-gray-600">Social Structure:</span> <strong>{animal.socialStructure || '—'}</strong></div>
+                                </div>
+                            </div>
+
+                            {/* 2nd Section: Activity */}
+                            <div className="bg-gray-50 p-4 rounded-lg border border-gray-200 space-y-4">
+                                <h3 className="text-lg font-semibold text-gray-700">Activity</h3>
+                                <div className="space-y-3 text-sm">
+                                    <div><span className="text-gray-600">Activity Cycle:</span> <strong>{animal.activityCycle || '—'}</strong></div>
+                                </div>
+                            </div>
+                        </div>
+                    )}
+
+                    {/* Tab 10: Records */}
+                    {detailViewTab === 10 && (
+                        <div className="space-y-6">
+                            {/* 1st Section: Remarks & Notes */}
+                            <div className="bg-gray-50 p-4 rounded-lg border border-gray-200 space-y-4">
+                                <h3 className="text-lg font-semibold text-gray-700">Remarks & Notes</h3>
+                                <p className="text-sm text-gray-700 whitespace-pre-wrap">{animal.remarks || '—'}</p>
+                            </div>
+                        </div>
+                    )}
+
+                    {/* Tab 11: End of Life */}
+                    {detailViewTab === 11 && (
+                        <div className="space-y-6">
+                            {/* 1st Section: Information */}
+                            <div className="bg-gray-50 p-4 rounded-lg border border-gray-200 space-y-4">
+                                <h3 className="text-lg font-semibold text-gray-700">Information</h3>
+                                <div className="space-y-3 text-sm">
+                                    <div><span className="text-gray-600">Deceased Date:</span> <strong>{animal.deceasedDate ? new Date(animal.deceasedDate).toLocaleDateString() : '—'}</strong></div>
+                                    <div><span className="text-gray-600">Cause of Death:</span> <strong>{animal.causeOfDeath || '—'}</strong></div>
+                                    <div><span className="text-gray-600">Necropsy Results:</span> <strong>{animal.necropsyResults || '—'}</strong></div>
+                                </div>
+                            </div>
+
+                            {/* 2nd Section: Legal/Administrative */}
+                            <div className="bg-gray-50 p-4 rounded-lg border border-gray-200 space-y-4">
+                                <h3 className="text-lg font-semibold text-gray-700">Legal/Administrative</h3>
+                                <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm">
+                                    <div><span className="text-gray-600">Insurance:</span> <strong>{animal.insurance || '—'}</strong></div>
+                                    <div><span className="text-gray-600">Legal Status:</span> <strong>{animal.legalStatus || '—'}</strong></div>
+                                </div>
+                            </div>
+                        </div>
+                    )}
+                </div>
+
+                {/* Pedigree Chart Modal */}
+                {showPedigree && (
+                    <PedigreeChart
+                        animalId={animal.id_public}
+                        API_BASE_URL={API_BASE_URL}
+                        authToken={authToken}
+                        onClose={() => setShowPedigree(false)}
+                    />
+                )}
+            </div>
+        </div>
+    );
+};
+
 // ==================== PUBLIC ANIMAL DETAIL (VIEW-ONLY FOR OTHERS) ====================
 // Respects privacy toggles - only shows public sections
 // Accessed from: Global search, user profiles, offspring links
