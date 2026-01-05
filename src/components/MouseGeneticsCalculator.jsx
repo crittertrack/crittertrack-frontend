@@ -765,7 +765,7 @@ const calculatePhenotype = (genotype, originalGenotype = null) => {
 
   // Brown/Black base
   const isBrown = genotype.B === 'b/b';
-  if (genotype.B === 'B/b') carriers.push('Chocolate');
+  if (genotype.B === 'B/b' || genotype.B === 'b/B') carriers.push('Chocolate');
   
   if (isAgoutiPattern) {
     pattern = 'Agouti';
@@ -812,7 +812,7 @@ const calculatePhenotype = (genotype, originalGenotype = null) => {
     else if (color === 'Cinnamon Tan') color = 'Cinnamon Argente Tan';
     else if (color === 'Black Tan') color = 'Blue Tan';
     else if (color === 'Chocolate Tan') color = 'Lilac Tan';
-  } else if (genotype.D === 'D/d') {
+  } else if (genotype.D === 'D/d' || genotype.D === 'd/D') {
     carriers.push('Blue');
   }
 
@@ -828,7 +828,7 @@ const calculatePhenotype = (genotype, originalGenotype = null) => {
     if (!color.includes('Fawn') && !color.includes('Red') && !color.includes('Dove') && !color.includes('Argente') && !color.includes('Champagne')) {
       color = `Pink-Eyed ${color}`;
     }
-  } else if (genotype.P === 'P/p') {
+  } else if (genotype.P === 'P/p' || genotype.P === 'p/P') {
     carriers.push('Pink-eye');
   }
 
@@ -869,28 +869,28 @@ const calculatePhenotype = (genotype, originalGenotype = null) => {
   }
 
   // E-locus carriers
-  if (genotype.E === 'E/e') carriers.push('Recessive Red');
+  if (genotype.E === 'E/e' || genotype.E === 'e/E') carriers.push('Recessive Red');
 
   // Markings
   // Don't add Pied if it's already in the color name (for Ay/Avy)
   if (genotype.S === 's/s' && !color.includes('Pied')) {
     markings.push('Pied');
-  } else if (genotype.S === 'S/s') {
+  } else if (genotype.S === 'S/s' || genotype.S === 's/S') {
     carriers.push('Pied');
   }
 
   // W-locus markings with all combinations
-  if (genotype.W === 'W/w') {
+  if (genotype.W === 'W/w' || genotype.W === 'w/W') {
     markings.push('Variegated');
   } else if (genotype.W === 'W/W') {
     markings.push('Double Variegated');
     notes.push('Possibly lethal depending on line');
-  } else if (genotype.W === 'Wsh/w') {
+  } else if (genotype.W === 'Wsh/w' || genotype.W === 'w/Wsh') {
     markings.push('Banded');
   } else if (genotype.W === 'Wsh/Wsh') {
     markings.push('Double Banded');
     notes.push('Possibly lethal depending on line');
-  } else if (genotype.W === 'Rw/w') {
+  } else if (genotype.W === 'Rw/w' || genotype.W === 'w/Rw') {
     markings.push('Rumpwhite');
   } else if (genotype.W === 'Rw/Rw') {
     markings.push('Double Rumpwhite');
@@ -936,7 +936,7 @@ const calculatePhenotype = (genotype, originalGenotype = null) => {
   // Texture - only show if coat genes were explicitly selected
   if (coatGenesSelected) {
     const hasLonghair = genotype.Go === 'go/go';
-    const hasAstrex = genotype.Re === 'Re/re' || genotype.Re === 'Re/Re';
+    const hasAstrex = genotype.Re === 'Re/re' || genotype.Re === 're/Re' || genotype.Re === 'Re/Re';
     
     // Check for Texel (longhair + astrex combination)
     const isTexel = hasLonghair && hasAstrex;
@@ -945,7 +945,7 @@ const calculatePhenotype = (genotype, originalGenotype = null) => {
       texture = 'Texel';
     } else if (hasAstrex) {
       texture = 'Astrex';
-    } else if (genotype.Re === 're/Re') {
+    } else if (genotype.Re === 're/Re' || genotype.Re === 'Re/re') {
       carriers.push('Astrex');
     }
 
@@ -955,25 +955,25 @@ const calculatePhenotype = (genotype, originalGenotype = null) => {
     } else if (genotype.Go === 'go/go' && !isTexel) {
       // Don't add Longhair if it's Texel (Longhair + Astrex)
       markings.push('Longhair');
-    } else if (genotype.Go === 'Go/go') {
+    } else if (genotype.Go === 'Go/go' || genotype.Go === 'go/Go') {
       carriers.push('Longhair');
     }
     
     if (genotype.Sa === 'sa/sa') {
       texture = texture ? `${texture} Satin` : 'Satin';
-    } else if (genotype.Sa === 'Sa/sa') {
+    } else if (genotype.Sa === 'Sa/sa' || genotype.Sa === 'sa/Sa') {
       carriers.push('Satin');
     }
     
     if (genotype.Rst === 'rst/rst') {
       texture = texture ? `${texture} Rosette` : 'Rosette';
-    } else if (genotype.Rst === 'Rst/rst') {
+    } else if (genotype.Rst === 'Rst/rst' || genotype.Rst === 'rst/Rst') {
       carriers.push('Rosette');
     }
     
     if (genotype.Fz === 'fz/fz') {
       texture = texture ? `${texture} Fuzz` : 'Fuzz';
-    } else if (genotype.Fz === 'Fz/fz') {
+    } else if (genotype.Fz === 'Fz/fz' || genotype.Fz === 'fz/Fz') {
       carriers.push('Fuzz');
     }
     
