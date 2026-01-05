@@ -10139,7 +10139,7 @@ const AuthView = ({ onLoginSuccess, showModalMessage, isRegister, setIsRegister,
         };
         
         updateTimer();
-        const interval = setInterval(updateTimer, 60000); // Update every minute
+        const interval = setInterval(updateTimer, 1000); // Update every second
         
         return () => clearInterval(interval);
     }, [suspensionInfo]);
