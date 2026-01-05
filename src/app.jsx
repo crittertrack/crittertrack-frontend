@@ -3178,9 +3178,10 @@ const ViewOnlyAnimalDetail = ({ animal, onClose, API_BASE_URL, onViewProfile, au
                 {/* Pedigree Chart Modal */}
                 {showPedigree && (
                     <PedigreeChart
-                        animalData={animal}
+                        animalId={animal.id_public}
                         onClose={() => setShowPedigree(false)}
                         API_BASE_URL={API_BASE_URL}
+                        authToken={authToken}
                     />
                 )}
             </div>
