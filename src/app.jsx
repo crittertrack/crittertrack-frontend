@@ -18796,14 +18796,16 @@ const AppRouter = () => {
     console.log('Access check:', { clientIp, isAdminIP, ADMIN_IP, hasAdminToken });
     
     // If not admin IP and no token, show maintenance screen
-    if (clientIp && !isAdminIP && !hasAdminToken) {
-        return <MaintenanceMode />;
-    }
+    // TEMPORARILY DISABLED FOR TESTING
+    // if (clientIp && !isAdminIP && !hasAdminToken) {
+    //     return <MaintenanceMode />;
+    // }
     
     // If still checking IP, show loading or maintenance screen
-    if (!clientIp) {
-        return <MaintenanceMode />;
-    }
+    // TEMPORARILY DISABLED FOR TESTING
+    // if (!clientIp) {
+    //     return <MaintenanceMode />;
+    // }
 
     return (
         <>
