@@ -29,9 +29,6 @@ import ModeratorActionSidebar from './components/moderation/ModeratorActionSideb
 // const API_BASE_URL = 'https://crittertrack-pedigree-production.up.railway.app/api'; // Direct Railway (for testing)
 const API_BASE_URL = '/api'; // Production via Vercel proxy
 
-// MAINTENANCE MODE - Set to true to show maintenance screen to all users
-const MAINTENANCE_MODE = true;
-
 const GENDER_OPTIONS = ['Male', 'Female', 'Intersex', 'Unknown'];
 const STATUS_OPTIONS = ['Pet', 'Breeder', 'Available', 'Sold', 'Retired', 'Deceased', 'Rehomed', 'Unknown']; 
 
@@ -17579,47 +17576,38 @@ const AppRouter = () => {
         };
     }, [location.pathname]);
 
-    // Check client IP for maintenance mode bypass
+    // MAINTENANCE MODE LOCK - Only allow access from admin IP
     const [clientIp, setClientIp] = useState(null);
-    const [ipChecked, setIpChecked] = useState(false);
 
     useEffect(() => {
-        // Only run if maintenance mode is on
-        if (!MAINTENANCE_MODE) {
-            setIpChecked(true);
-            return;
-        }
-
-        // Get client IP from backend
         const getClientIp = async () => {
             try {
                 const response = await axios.get(`${API_BASE_URL}/client-ip`);
                 const detectedIp = response.data.ip || response.data.clientIp;
-                console.log('Detected client IP:', detectedIp);
                 setClientIp(detectedIp);
             } catch (error) {
-                console.warn('Could not determine client IP:', error);
+                console.warn('Could not determine IP');
+                setClientIp('unknown');
             }
-            setIpChecked(true);
         };
-
         getClientIp();
-    }, []); // Run once on mount
+    }, []);
 
-    // Show maintenance mode if enabled (but not for excluded IPs like CTU1)
-    const excludedIPs = ['86.80.92.156']; // CTU1 admin IP
-    const queryParams = new URLSearchParams(window.location.search);
-    const bypassMaintenance = queryParams.get('bypass-maintenance') === 'true';
+    // LOCK DOWN: Only allow 86.80.92.156
+    const ADMIN_IP = '86.80.92.156';
+    const isAdminIP = clientIp === ADMIN_IP;
     
-    // If bypass is requested, skip maintenance mode entirely
-    if (bypassMaintenance) {
-        // Continue to render the app
-    } else if (MAINTENANCE_MODE && ipChecked && !excludedIPs.includes(clientIp)) {
-        // Show maintenance mode only if IP doesn't match and bypass not requested
+    console.log('IP Check:', { clientIp, isAdminIP, ADMIN_IP });
+    
+    // If not admin IP, show maintenance screen
+    if (clientIp && !isAdminIP) {
         return <MaintenanceMode />;
     }
     
-    console.log('Maintenance check:', { MAINTENANCE_MODE, ipChecked, clientIp, excludedIPs, bypassMaintenance });
+    // If still checking IP, show loading or maintenance screen
+    if (!clientIp) {
+        return <MaintenanceMode />;
+    }
 
     return (
         <>
