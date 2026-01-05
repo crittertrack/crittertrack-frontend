@@ -9105,7 +9105,7 @@ const AnimalForm = ({
                                                 placeholder="e.g., Booster, Clinic name" className="mt-1 block w-full p-2 text-sm border border-gray-300 rounded-md shadow-sm focus:ring-primary focus:border-primary" />
                                         </div>
                                     </div>
-                                    <button type="button" onClick={addVaccination} className="w-full px-4 py-2 bg-blue-500 text-white rounded-md hover:bg-blue-600 text-sm font-medium">
+                                    <button type="button" onClick={addVaccination} className="w-full px-4 py-2 bg-primary hover:bg-primary/90 text-black rounded-lg text-sm font-medium">
                                         Add Vaccination Record
                                     </button>
                                 </div>
@@ -9146,7 +9146,7 @@ const AnimalForm = ({
                                                 placeholder="e.g., Dosage, vet notes" className="mt-1 block w-full p-2 text-sm border border-gray-300 rounded-md shadow-sm focus:ring-primary focus:border-primary" />
                                         </div>
                                     </div>
-                                    <button type="button" onClick={addDeworming} className="w-full px-4 py-2 bg-blue-500 text-white rounded-md hover:bg-blue-600 text-sm font-medium">
+                                    <button type="button" onClick={addDeworming} className="w-full px-4 py-2 bg-primary hover:bg-primary/90 text-black rounded-lg text-sm font-medium">
                                         Add Deworming Record
                                     </button>
                                 </div>
@@ -9187,7 +9187,7 @@ const AnimalForm = ({
                                                 placeholder="e.g., Product name, vet notes" className="mt-1 block w-full p-2 text-sm border border-gray-300 rounded-md shadow-sm focus:ring-primary focus:border-primary" />
                                         </div>
                                     </div>
-                                    <button type="button" onClick={addParasiteControl} className="w-full px-4 py-2 bg-blue-500 text-white rounded-md hover:bg-blue-600 text-sm font-medium">
+                                    <button type="button" onClick={addParasiteControl} className="w-full px-4 py-2 bg-primary hover:bg-primary/90 text-black rounded-lg text-sm font-medium">
                                         Add Parasite Control Record
                                     </button>
                                 </div>
@@ -9233,7 +9233,7 @@ const AnimalForm = ({
                                                 placeholder="e.g., Vet clinic, outcome" className="mt-1 block w-full p-2 text-sm border border-gray-300 rounded-md shadow-sm focus:ring-primary focus:border-primary" />
                                         </div>
                                     </div>
-                                    <button type="button" onClick={addMedicalProcedure} className="w-full px-4 py-2 bg-blue-500 text-white rounded-md hover:bg-blue-600 text-sm font-medium">
+                                    <button type="button" onClick={addMedicalProcedure} className="w-full px-4 py-2 bg-primary hover:bg-primary/90 text-black rounded-lg text-sm font-medium">
                                         Add Procedure Record
                                     </button>
                                 </div>
@@ -9279,7 +9279,7 @@ const AnimalForm = ({
                                                 placeholder="e.g., Lab name, reference range" className="mt-1 block w-full p-2 text-sm border border-gray-300 rounded-md shadow-sm focus:ring-primary focus:border-primary" />
                                         </div>
                                     </div>
-                                    <button type="button" onClick={addLabResult} className="w-full px-4 py-2 bg-blue-500 text-white rounded-md hover:bg-blue-600 text-sm font-medium">
+                                    <button type="button" onClick={addLabResult} className="w-full px-4 py-2 bg-primary hover:bg-primary/90 text-black rounded-lg text-sm font-medium">
                                         Add Lab Result
                                     </button>
                                 </div>
