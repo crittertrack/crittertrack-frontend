@@ -2595,6 +2595,7 @@ const PrivateAnimalDetail = ({ animal, onClose, onEdit, API_BASE_URL, authToken,
                                 <div className="space-y-3 text-sm">
                                     <div><span className="text-gray-600">Diet Type:</span> <strong>{animal.dietType || '—'}</strong></div>
                                     <div><span className="text-gray-600">Feeding Schedule:</span> <strong>{animal.feedingSchedule || '—'}</strong></div>
+                                    <div><span className="text-gray-600">Supplements:</span> <strong>{animal.supplements || '—'}</strong></div>
                                 </div>
                             </div>
 
@@ -2614,6 +2615,8 @@ const PrivateAnimalDetail = ({ animal, onClose, onEdit, API_BASE_URL, authToken,
                                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm">
                                     <div><span className="text-gray-600">Temperature Range:</span> <strong>{animal.temperatureRange || '—'}</strong></div>
                                     <div><span className="text-gray-600">Humidity:</span> <strong>{animal.humidity || '—'}</strong></div>
+                                    <div><span className="text-gray-600">Lighting:</span> <strong>{animal.lighting || '—'}</strong></div>
+                                    <div><span className="text-gray-600">Noise Level:</span> <strong>{animal.noise || '—'}</strong></div>
                                 </div>
                             </div>
                         </div>
@@ -3307,7 +3310,32 @@ const ViewOnlyAnimalDetail = ({ animal, onClose, API_BASE_URL, onViewProfile, au
                                 </div>
                             )}
 
-                            {/* 4th Section: Breeding History */}
+                            {/* 5th Section: Stud Information */}
+                            {(animal.gender === 'Male' || animal.gender === 'Intersex' || animal.gender === 'Unknown') && !animal.isNeutered && !animal.isInfertile && (animal.fertilityStatus || animal.successfulMatings || animal.fertilityNotes) && (
+                                <div className="bg-gray-50 p-4 rounded-lg border border-gray-200 space-y-4">
+                                    <h3 className="text-lg font-semibold text-gray-700">Stud Information</h3>
+                                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm">
+                                        <div><span className="text-gray-600">Fertility Status:</span> <strong>{animal.fertilityStatus || '—'}</strong></div>
+                                        <div><span className="text-gray-600">Successful Matings:</span> <strong>{animal.successfulMatings || '—'}</strong></div>
+                                    </div>
+                                    {animal.fertilityNotes && (
+                                        <div><span className="text-gray-600 text-sm">Notes:</span> <p className="text-sm text-gray-700 mt-1">{animal.fertilityNotes}</p></div>
+                                    )}
+                                </div>
+                            )}
+
+                            {/* 6th Section: Dam Information */}
+                            {(animal.gender === 'Female' || animal.gender === 'Intersex' || animal.gender === 'Unknown') && !animal.isNeutered && !animal.isInfertile && (animal.damFertilityStatus || animal.litterCount) && (
+                                <div className="bg-gray-50 p-4 rounded-lg border border-gray-200 space-y-4">
+                                    <h3 className="text-lg font-semibold text-gray-700">Dam Information</h3>
+                                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm">
+                                        <div><span className="text-gray-600">Dam Fertility Status:</span> <strong>{animal.damFertilityStatus || animal.fertilityStatus || '—'}</strong></div>
+                                        <div><span className="text-gray-600">Litter Count:</span> <strong>{animal.litterCount || '—'}</strong></div>
+                                    </div>
+                                </div>
+                            )}
+
+                            {/* 7th Section: Breeding History */}
                             {(animal.litterCount || animal.offspringCount) && (
                                 <div className="bg-gray-50 p-4 rounded-lg border border-gray-200 space-y-4">
                                     <h3 className="text-lg font-semibold text-gray-700">Breeding History</h3>
