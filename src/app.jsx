@@ -8811,7 +8811,20 @@ const AnimalForm = ({
                         
                         {/* Current Owner */}
                         <div data-tutorial-target="current-owner-field" className="bg-gray-50 p-4 rounded-lg border border-gray-200 space-y-4">
-                            <h3 className="text-lg font-semibold text-gray-700 border-b pb-2">Current Owner</h3>
+                            <div className="flex justify-between items-center mb-4">
+                                <h3 className="text-lg font-semibold text-gray-700 border-b pb-2">Current Owner</h3>
+                                <button
+                                    onClick={() => toggleSectionPrivacy(animalToEdit?.id_public, 'currentOwner')}
+                                    className="px-3 py-1.5 text-xs font-medium rounded-lg transition cursor-pointer"
+                                    style={{
+                                        backgroundColor: sectionPrivacy[animalToEdit?.id_public].currentOwner ? '#dbeafe' : '#f3f4f6',
+                                        color: sectionPrivacy[animalToEdit?.id_public].currentOwner ? '#1e40af' : '#374151'
+                                    }}
+                                    title="Toggle public visibility"
+                                >
+                                    <span>{sectionPrivacy[animalToEdit?.id_public]?.currentOwner ? '🔒 Private' : '🌍 Public'}</span>
+                                </button>
+                            </div>
                             <div>
                                 <label className='block text-sm font-medium text-gray-700 mb-2'>Owner Name</label>
                                 <input 
@@ -8989,28 +9002,34 @@ const AnimalForm = ({
                                     <p className="text-xs text-gray-600 mt-1">Current measurements & growth history</p>
                                 </div>
                                 <div className="flex gap-4">
-                                    <button
-                                        onClick={() => toggleSectionPrivacy(animalToEdit?.id_public, 'currentMeasurements')}
-                                        className="px-3 py-1.5 text-xs font-medium rounded-lg transition cursor-pointer"
-                                        style={{
-                                            backgroundColor: sectionPrivacy[animalToEdit?.id_public].currentMeasurements ? '#dbeafe' : '#f3f4f6',
-                                            color: sectionPrivacy[animalToEdit?.id_public].currentMeasurements ? '#1e40af' : '#374151'
-                                        }}
-                                        title="Toggle public visibility"
-                                    >
-                                        <span>{sectionPrivacy[animalToEdit?.id_public]?.currentMeasurements ? '🔒 Private' : '🌍 Public'}</span>
-                                    </button>
-                                    <button
-                                        onClick={() => toggleSectionPrivacy(animalToEdit?.id_public, 'growthHistory')}
-                                        className="px-3 py-1.5 text-xs font-medium rounded-lg transition cursor-pointer"
-                                        style={{
-                                            backgroundColor: sectionPrivacy[animalToEdit?.id_public].growthHistory ? '#dbeafe' : '#f3f4f6',
-                                            color: sectionPrivacy[animalToEdit?.id_public].growthHistory ? '#1e40af' : '#374151'
-                                        }}
-                                        title="Toggle public visibility"
-                                    >
-                                        <span>{sectionPrivacy[animalToEdit?.id_public]?.growthHistory ? '🔒 Private' : '🌍 Public'}</span>
-                                    </button>
+                                    <div className="flex flex-col items-center gap-1">
+                                        <span className="text-xs text-gray-600">Current</span>
+                                        <button
+                                            onClick={() => toggleSectionPrivacy(animalToEdit?.id_public, 'currentMeasurements')}
+                                            className="px-3 py-1.5 text-xs font-medium rounded-lg transition cursor-pointer"
+                                            style={{
+                                                backgroundColor: sectionPrivacy[animalToEdit?.id_public].currentMeasurements ? '#dbeafe' : '#f3f4f6',
+                                                color: sectionPrivacy[animalToEdit?.id_public].currentMeasurements ? '#1e40af' : '#374151'
+                                            }}
+                                            title="Toggle public visibility"
+                                        >
+                                            <span>{sectionPrivacy[animalToEdit?.id_public]?.currentMeasurements ? '🔒 Private' : '🌍 Public'}</span>
+                                        </button>
+                                    </div>
+                                    <div className="flex flex-col items-center gap-1">
+                                        <span className="text-xs text-gray-600">History</span>
+                                        <button
+                                            onClick={() => toggleSectionPrivacy(animalToEdit?.id_public, 'growthHistory')}
+                                            className="px-3 py-1.5 text-xs font-medium rounded-lg transition cursor-pointer"
+                                            style={{
+                                                backgroundColor: sectionPrivacy[animalToEdit?.id_public].growthHistory ? '#dbeafe' : '#f3f4f6',
+                                                color: sectionPrivacy[animalToEdit?.id_public].growthHistory ? '#1e40af' : '#374151'
+                                            }}
+                                            title="Toggle public visibility"
+                                        >
+                                            <span>{sectionPrivacy[animalToEdit?.id_public]?.growthHistory ? '🔒 Private' : '🌍 Public'}</span>
+                                        </button>
+                                    </div>
                                 </div>
                             </div>
                             
@@ -9885,7 +9904,20 @@ const AnimalForm = ({
 
                         {/* Breeding History (All animals - Historical Data) - ALWAYS SHOWN */}
                         <div className="bg-blue-50 p-4 rounded-lg border border-blue-200 space-y-4" data-tutorial-target="breeding-history-section">
-                            <h3 className="text-lg font-semibold text-gray-700 border-b pb-2 flex items-center"><span className="text-blue-600 mr-2">📋</span>Breeding History <span className="text-xs font-normal text-gray-500">(Historical Data)</span></h3>
+                            <div className="flex justify-between items-center mb-4">
+                                <h3 className="text-lg font-semibold text-gray-700 border-b pb-2 flex items-center"><span className="text-blue-600 mr-2">📋</span>Breeding History <span className="text-xs font-normal text-gray-500">(Historical Data)</span></h3>
+                                <button
+                                    onClick={() => toggleSectionPrivacy(animalToEdit?.id_public, 'breedingHistory')}
+                                    className="px-3 py-1.5 text-xs font-medium rounded-lg transition cursor-pointer"
+                                    style={{
+                                        backgroundColor: sectionPrivacy[animalToEdit?.id_public].breedingHistory ? '#dbeafe' : '#f3f4f6',
+                                        color: sectionPrivacy[animalToEdit?.id_public].breedingHistory ? '#1e40af' : '#374151'
+                                    }}
+                                    title="Toggle public visibility"
+                                >
+                                    <span>{sectionPrivacy[animalToEdit?.id_public]?.breedingHistory ? '🔒 Private' : '🌍 Public'}</span>
+                                </button>
+                            </div>
                                 
                                 {/* Breeding Role Selector - for animals with unclear breeding roles */}
                                 {(formData.gender === 'Intersex' || formData.gender === 'Unknown') && (
