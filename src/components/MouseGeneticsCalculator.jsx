@@ -178,6 +178,30 @@ const calculatePhenotype = (genotype, originalGenotype = null) => {
   const coatGenesSelected = originalGenotype && 
     ['Go', 'Re', 'Sa', 'Rst', 'Fz', 'Nu'].some(gene => originalGenotype[gene] && originalGenotype[gene] !== '');
 
+  // Helper function to apply dilutions to a color name
+  const applyDilution = (colorName) => {
+    if (genotype.D === 'd/d') {
+      if (colorName.includes('Black') && !colorName.includes('Blue')) {
+        colorName = colorName.replace('Black', 'Blue');
+      } else if (colorName === 'Siamese') {
+        colorName = 'Blue Siamese';
+      } else if (colorName === 'Himalayan') {
+        colorName = 'Blue Himalayan';
+      } else if (colorName === 'Burmese') {
+        colorName = 'Blue Burmese';
+      } else if (colorName === 'Stone') {
+        colorName = 'Blue Stone';
+      } else if (colorName === 'Sepia') {
+        colorName = 'Blue Sepia';
+      } else if (colorName.includes('Chocolate')) {
+        colorName = colorName.replace('Chocolate', 'Lilac');
+      } else if (colorName.includes('Cinnamon') && !colorName.includes('Argente')) {
+        colorName = colorName.replace('Cinnamon', 'Cinnamon Argente');
+      }
+    }
+    return colorName;
+  };
+
   // Helper function to check C-locus combinations in both directions
   const isCCombo = (combo1, combo2 = null) => {
     if (!combo2) {
@@ -261,35 +285,35 @@ const calculatePhenotype = (genotype, originalGenotype = null) => {
     
     // If Spl is present with eligible C-dilutes, use Splashed
     if (hasSpl && !excludedCForSpl.includes(genotype.C)) {
-      return { phenotype: addMarkingsIfNeeded('Agouti Splashed Fox'), carriers, hidden, notes: [] };
+      return { phenotype: addMarkingsIfNeeded(applyDilution('Agouti Splashed Fox')), carriers, hidden, notes: [] };
     }
     
     if (isCCombo('ch/c', 'c/ch')) {
-      return { phenotype: addMarkingsIfNeeded('Agouti Himalayan Fox'), carriers, hidden, notes: [] };
+      return { phenotype: addMarkingsIfNeeded(applyDilution('Agouti Himalayan Fox')), carriers, hidden, notes: [] };
     }
     if (isCCombo('ch/ch')) {
-      return { phenotype: addMarkingsIfNeeded('Agouti Siamese Fox'), carriers, hidden, notes: [] };
+      return { phenotype: addMarkingsIfNeeded(applyDilution('Agouti Siamese Fox')), carriers, hidden, notes: [] };
     }
     if (isCCombo('ce/c', 'c/ce')) {
-      return { phenotype: addMarkingsIfNeeded('Agouti Bone Fox'), carriers, hidden, notes: [] };
+      return { phenotype: addMarkingsIfNeeded(applyDilution('Agouti Bone Fox')), carriers, hidden, notes: [] };
     }
     if (isCCombo('ce/ch', 'ch/ce')) {
-      return { phenotype: addMarkingsIfNeeded('Agouti Colorpoint Beige Fox'), carriers, hidden, notes: [] };
+      return { phenotype: addMarkingsIfNeeded(applyDilution('Agouti Colorpoint Beige Fox')), carriers, hidden, notes: [] };
     }
     if (isCCombo('ce/ce')) {
-      return { phenotype: addMarkingsIfNeeded('Agouti Beige Fox'), carriers, hidden, notes: [] };
+      return { phenotype: addMarkingsIfNeeded(applyDilution('Agouti Beige Fox')), carriers, hidden, notes: [] };
     }
     if (isCCombo('cch/c', 'c/cch')) {
-      return { phenotype: addMarkingsIfNeeded('Agouti Stone Fox'), carriers, hidden, notes: [] };
+      return { phenotype: addMarkingsIfNeeded(applyDilution('Agouti Stone Fox')), carriers, hidden, notes: [] };
     }
     if (isCCombo('cch/ch', 'ch/cch')) {
-      return { phenotype: addMarkingsIfNeeded('Agouti Burmese Fox'), carriers, hidden, notes: [] };
+      return { phenotype: addMarkingsIfNeeded(applyDilution('Agouti Burmese Fox')), carriers, hidden, notes: [] };
     }
     if (isCCombo('cch/ce', 'ce/cch')) {
-      return { phenotype: addMarkingsIfNeeded('Agouti Mock Chocolate Fox'), carriers, hidden, notes: [] };
+      return { phenotype: addMarkingsIfNeeded(applyDilution('Agouti Mock Chocolate Fox')), carriers, hidden, notes: [] };
     }
     if (genotype.C === 'cch/cch') {
-      return { phenotype: addMarkingsIfNeeded('Chinchilla'), carriers, hidden, notes: [] };
+      return { phenotype: addMarkingsIfNeeded(applyDilution('Chinchilla')), carriers, hidden, notes: [] };
     }
   }
 
@@ -304,35 +328,35 @@ const calculatePhenotype = (genotype, originalGenotype = null) => {
     
     // If Spl is present with eligible C-dilutes, use Splashed
     if (hasSpl && !excludedCForSpl.includes(genotype.C)) {
-      return { phenotype: addMarkingsIfNeeded('Agouti Splashed'), carriers, hidden, notes: [] };
+      return { phenotype: addMarkingsIfNeeded(applyDilution('Agouti Splashed')), carriers, hidden, notes: [] };
     }
     
     if (isCCombo('ch/c', 'c/ch')) {
-      return { phenotype: addMarkingsIfNeeded('Agouti Himalayan'), carriers, hidden, notes: [] };
+      return { phenotype: addMarkingsIfNeeded(applyDilution('Agouti Himalayan')), carriers, hidden, notes: [] };
     }
     if (isCCombo('ch/ch')) {
-      return { phenotype: addMarkingsIfNeeded('Agouti Siamese'), carriers, hidden, notes: [] };
+      return { phenotype: addMarkingsIfNeeded(applyDilution('Agouti Siamese')), carriers, hidden, notes: [] };
     }
     if (isCCombo('ce/c', 'c/ce')) {
-      return { phenotype: addMarkingsIfNeeded('Agouti Bone'), carriers, hidden, notes: [] };
+      return { phenotype: addMarkingsIfNeeded(applyDilution('Agouti Bone')), carriers, hidden, notes: [] };
     }
     if (isCCombo('ce/ch', 'ch/ce')) {
-      return { phenotype: addMarkingsIfNeeded('Agouti Colorpoint Beige'), carriers, hidden, notes: [] };
+      return { phenotype: addMarkingsIfNeeded(applyDilution('Agouti Colorpoint Beige')), carriers, hidden, notes: [] };
     }
     if (isCCombo('ce/ce')) {
-      return { phenotype: addMarkingsIfNeeded('Agouti Beige'), carriers, hidden, notes: [] };
+      return { phenotype: addMarkingsIfNeeded(applyDilution('Agouti Beige')), carriers, hidden, notes: [] };
     }
     if (isCCombo('cch/c', 'c/cch')) {
-      return { phenotype: addMarkingsIfNeeded('Agouti Stone'), carriers, hidden, notes: [] };
+      return { phenotype: addMarkingsIfNeeded(applyDilution('Agouti Stone')), carriers, hidden, notes: [] };
     }
     if (isCCombo('cch/ch', 'ch/cch')) {
-      return { phenotype: addMarkingsIfNeeded('Agouti Burmese'), carriers, hidden, notes: [] };
+      return { phenotype: addMarkingsIfNeeded(applyDilution('Agouti Burmese')), carriers, hidden, notes: [] };
     }
     if (isCCombo('cch/ce', 'ce/cch')) {
-      return { phenotype: addMarkingsIfNeeded('Agouti Mock Chocolate'), carriers, hidden, notes: [] };
+      return { phenotype: addMarkingsIfNeeded(applyDilution('Agouti Mock Chocolate')), carriers, hidden, notes: [] };
     }
     if (genotype.C === 'cch/cch') {
-      return { phenotype: addMarkingsIfNeeded('Silver Agouti'), carriers, hidden, notes: [] };
+      return { phenotype: addMarkingsIfNeeded(applyDilution('Silver Agouti')), carriers, hidden, notes: [] };
     }
   }
 
@@ -347,35 +371,35 @@ const calculatePhenotype = (genotype, originalGenotype = null) => {
     
     // If Spl is present with eligible C-dilutes, use Splashed
     if (hasSpl && !excludedCForSpl.includes(genotype.C)) {
-      return { phenotype: addMarkingsIfNeeded('Black Splashed Fox'), carriers, hidden, notes: [] };
+      return { phenotype: addMarkingsIfNeeded(applyDilution('Black Splashed Fox')), carriers, hidden, notes: [] };
     }
     
     if (isCCombo('ch/c', 'c/ch')) {
-      return { phenotype: addMarkingsIfNeeded('Himalayan Fox'), carriers, hidden, notes: [] };
+      return { phenotype: addMarkingsIfNeeded(applyDilution('Himalayan Fox')), carriers, hidden, notes: [] };
     }
     if (isCCombo('ch/ch')) {
-      return { phenotype: addMarkingsIfNeeded('Siamese Fox'), carriers, hidden, notes: [] };
+      return { phenotype: addMarkingsIfNeeded(applyDilution('Siamese Fox')), carriers, hidden, notes: [] };
     }
     if (isCCombo('ce/c', 'c/ce')) {
-      return { phenotype: addMarkingsIfNeeded('Bone Fox'), carriers, hidden, notes: [] };
+      return { phenotype: addMarkingsIfNeeded(applyDilution('Bone Fox')), carriers, hidden, notes: [] };
     }
     if (isCCombo('ce/ch', 'ch/ce')) {
-      return { phenotype: addMarkingsIfNeeded('Colorpoint Beige Fox'), carriers, hidden, notes: [] };
+      return { phenotype: addMarkingsIfNeeded(applyDilution('Colorpoint Beige Fox')), carriers, hidden, notes: [] };
     }
     if (isCCombo('ce/ce')) {
-      return { phenotype: addMarkingsIfNeeded('Beige Fox'), carriers, hidden, notes: [] };
+      return { phenotype: addMarkingsIfNeeded(applyDilution('Beige Fox')), carriers, hidden, notes: [] };
     }
     if (isCCombo('cch/c', 'c/cch')) {
-      return { phenotype: addMarkingsIfNeeded('Stone Fox'), carriers, hidden, notes: [] };
+      return { phenotype: addMarkingsIfNeeded(applyDilution('Stone Fox')), carriers, hidden, notes: [] };
     }
     if (isCCombo('cch/ch', 'ch/cch')) {
-      return { phenotype: addMarkingsIfNeeded('Burmese Fox'), carriers, hidden, notes: [] };
+      return { phenotype: addMarkingsIfNeeded(applyDilution('Burmese Fox')), carriers, hidden, notes: [] };
     }
     if (isCCombo('cch/ce', 'ce/cch')) {
-      return { phenotype: addMarkingsIfNeeded('Mock Chocolate Fox'), carriers, hidden, notes: [] };
+      return { phenotype: addMarkingsIfNeeded(applyDilution('Mock Chocolate Fox')), carriers, hidden, notes: [] };
     }
     if (genotype.C === 'cch/cch') {
-      return { phenotype: addMarkingsIfNeeded('Sepia Fox'), carriers, hidden, notes: [] };
+      return { phenotype: addMarkingsIfNeeded(applyDilution('Sepia Fox')), carriers, hidden, notes: [] };
     }
   }
 
@@ -390,35 +414,35 @@ const calculatePhenotype = (genotype, originalGenotype = null) => {
     
     // If Spl is present with eligible C-dilutes, use Splashed
     if (hasSpl && !excludedCForSpl.includes(genotype.C)) {
-      return { phenotype: addMarkingsIfNeeded('Black Splashed'), carriers, hidden, notes: [] };
+      return { phenotype: addMarkingsIfNeeded(applyDilution('Black Splashed')), carriers, hidden, notes: [] };
     }
     
     if (isCCombo('ch/c', 'c/ch')) {
-      return { phenotype: addMarkingsIfNeeded('Himalayan'), carriers, hidden, notes: [] };
+      return { phenotype: addMarkingsIfNeeded(applyDilution('Himalayan')), carriers, hidden, notes: [] };
     }
     if (isCCombo('ch/ch')) {
-      return { phenotype: addMarkingsIfNeeded('Siamese'), carriers, hidden, notes: [] };
+      return { phenotype: addMarkingsIfNeeded(applyDilution('Siamese')), carriers, hidden, notes: [] };
     }
     if (isCCombo('ce/c', 'c/ce')) {
-      return { phenotype: addMarkingsIfNeeded('Bone'), carriers, hidden, notes: [] };
+      return { phenotype: addMarkingsIfNeeded(applyDilution('Bone')), carriers, hidden, notes: [] };
     }
     if (isCCombo('ce/ch', 'ch/ce')) {
-      return { phenotype: addMarkingsIfNeeded('Colorpoint Beige'), carriers, hidden, notes: [] };
+      return { phenotype: addMarkingsIfNeeded(applyDilution('Colorpoint Beige')), carriers, hidden, notes: [] };
     }
     if (isCCombo('ce/ce')) {
-      return { phenotype: addMarkingsIfNeeded('Beige'), carriers, hidden, notes: [] };
+      return { phenotype: addMarkingsIfNeeded(applyDilution('Beige')), carriers, hidden, notes: [] };
     }
     if (isCCombo('cch/c', 'c/cch')) {
-      return { phenotype: addMarkingsIfNeeded('Stone'), carriers, hidden, notes: [] };
+      return { phenotype: addMarkingsIfNeeded(applyDilution('Stone')), carriers, hidden, notes: [] };
     }
     if (isCCombo('cch/ch', 'ch/cch')) {
-      return { phenotype: addMarkingsIfNeeded('Burmese'), carriers, hidden, notes: [] };
+      return { phenotype: addMarkingsIfNeeded(applyDilution('Burmese')), carriers, hidden, notes: [] };
     }
     if (isCCombo('cch/ce', 'ce/cch')) {
-      return { phenotype: addMarkingsIfNeeded('Mock Chocolate'), carriers, hidden, notes: [] };
+      return { phenotype: addMarkingsIfNeeded(applyDilution('Mock Chocolate')), carriers, hidden, notes: [] };
     }
     if (genotype.C === 'cch/cch') {
-      return { phenotype: addMarkingsIfNeeded('Sepia'), carriers, hidden, notes: [] };
+      return { phenotype: addMarkingsIfNeeded(applyDilution('Sepia')), carriers, hidden, notes: [] };
     }
   }
 
