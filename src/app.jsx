@@ -1993,7 +1993,7 @@ const PublicProfileView = ({ profile, onBack, onViewAnimal, API_BASE_URL, onStar
 // ==================== PRIVATE ANIMAL DETAIL (OWNER VIEW) ====================
 // Shows ALL data for animal owners viewing their own animals (ignores privacy toggles)
 // Accessed from: MY ANIMALS LIST
-const PrivateAnimalDetail = ({ animal, onClose, onEdit, API_BASE_URL, authToken, setShowImageModal, setEnlargedImageUrl, toggleSectionPrivacy }) => {
+const PrivateAnimalDetail = ({ animal, onClose, onEdit, API_BASE_URL, authToken, setShowImageModal, setEnlargedImageUrl, toggleSectionPrivacy, onUpdateAnimal }) => {
     const [breederInfo, setBreederInfo] = useState(null);
     const [showPedigree, setShowPedigree] = useState(false);
     const [detailViewTab, setDetailViewTab] = useState(1);
@@ -2160,8 +2160,10 @@ const PrivateAnimalDetail = ({ animal, onClose, onEdit, API_BASE_URL, authToken,
                                                 axios.put(`${API_BASE_URL}/animals/${animal.id_public}`, { isDisplay: newIsDisplay }, {
                                                     headers: { Authorization: `Bearer ${authToken}` }
                                                 }).then(() => {
-                                                    // Close modal and parent will refetch
-                                                    onClose();
+                                                    // Update animal state directly without closing modal
+                                                    if (onUpdateAnimal) {
+                                                        onUpdateAnimal({ ...animal, isDisplay: newIsDisplay });
+                                                    }
                                                 }).catch(err => {
                                                     console.error('Failed to update isDisplay:', err);
                                                 });
@@ -16535,6 +16537,7 @@ const App = () => {
                                         setShowImageModal={setShowImageModal}
                                         setEnlargedImageUrl={setEnlargedImageUrl}
                                         toggleSectionPrivacy={toggleSectionPrivacy}
+                                        onUpdateAnimal={setAnimalToView}
                                     />
                                 );
                             }
