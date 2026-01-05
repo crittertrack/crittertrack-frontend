@@ -130,6 +130,18 @@ const formatArrayDisplay = (data) => {
     return String(data);
 };
 
+// Helper function to format date strings for display
+const formatDateDisplay = (dateString) => {
+    if (!dateString) return '—';
+    try {
+        const date = new Date(dateString);
+        if (isNaN(date.getTime())) return '—';
+        return date.toLocaleDateString('en-US', { year: 'numeric', month: 'short', day: 'numeric' });
+    } catch (e) {
+        return dateString; // Return as-is if parsing fails
+    }
+};
+
 const ModalMessage = ({ title, message, onClose }) => (
   <div className="fixed inset-0 bg-gray-600 bg-opacity-75 flex items-center justify-center p-4 z-50">
     <div className="bg-white rounded-xl shadow-2xl p-6 w-full max-w-sm">
@@ -2537,8 +2549,8 @@ const PrivateAnimalDetail = ({ animal, onClose, onEdit, API_BASE_URL, authToken,
                             <div className="bg-gray-50 p-4 rounded-lg border border-gray-200 space-y-4">
                                 <h3 className="text-lg font-semibold text-gray-700">Mating</h3>
                                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm">
-                                    <div><span className="text-gray-600">Mating Dates:</span> <strong>{animal.matingDates || '—'}</strong></div>
-                                    <div><span className="text-gray-600">Expected Due Date:</span> <strong>{animal.expectedDueDate ? new Date(animal.expectedDueDate).toLocaleDateString() : '—'}</strong></div>
+                                    <div><span className="text-gray-600">Mating Dates:</span> <strong>{formatDateDisplay(animal.matingDates)}</strong></div>
+                                    <div><span className="text-gray-600">Expected Due Date:</span> <strong>{formatDateDisplay(animal.expectedDueDate)}</strong></div>
                                 </div>
                             </div>
 
@@ -3249,8 +3261,8 @@ const ViewOnlyPrivateAnimalDetail = ({ animal, onClose, API_BASE_URL, authToken,
                             <div className="bg-gray-50 p-4 rounded-lg border border-gray-200 space-y-4">
                                 <h3 className="text-lg font-semibold text-gray-700">Mating</h3>
                                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm">
-                                    <div><span className="text-gray-600">Mating Dates:</span> <strong>{animal.matingDates || '—'}</strong></div>
-                                    <div><span className="text-gray-600">Expected Due Date:</span> <strong>{animal.expectedDueDate ? new Date(animal.expectedDueDate).toLocaleDateString() : '—'}</strong></div>
+                                    <div><span className="text-gray-600">Mating Dates:</span> <strong>{formatDateDisplay(animal.matingDates)}</strong></div>
+                                    <div><span className="text-gray-600">Expected Due Date:</span> <strong>{formatDateDisplay(animal.expectedDueDate)}</strong></div>
                                 </div>
                             </div>
 
@@ -4054,8 +4066,8 @@ const ViewOnlyAnimalDetail = ({ animal, onClose, API_BASE_URL, onViewProfile, au
                             <div className="bg-gray-50 p-4 rounded-lg border border-gray-200 space-y-4">
                                 <h3 className="text-lg font-semibold text-gray-700">Mating</h3>
                                 <div className="space-y-3 text-sm">
-                                    <div><span className="text-gray-600">Mating Dates:</span> <strong>{animal.matingDates || '—'}</strong></div>
-                                    <div><span className="text-gray-600">Expected Due Date:</span> <strong>{animal.expectedDueDate ? new Date(animal.expectedDueDate).toLocaleDateString() : '—'}</strong></div>
+                                    <div><span className="text-gray-600">Mating Dates:</span> <strong>{formatDateDisplay(animal.matingDates)}</strong></div>
+                                    <div><span className="text-gray-600">Expected Due Date:</span> <strong>{formatDateDisplay(animal.expectedDueDate)}</strong></div>
                                 </div>
                             </div>
 
@@ -17539,7 +17551,7 @@ const App = () => {
                                                             <div><span className="text-gray-600">Neutered/Spayed:</span> <strong>{animalToView.isNeutered ? 'Yes' : 'No'}</strong></div>
                                                             <div><span className="text-gray-600">Heat Status:</span> <strong>{animalToView.heatStatus || '—'}</strong></div>
                                                             <div><span className="text-gray-600">Last Heat Date:</span> <strong>{animalToView.lastHeatDate ? new Date(animalToView.lastHeatDate).toLocaleDateString() : '—'}</strong></div>
-                                                            <div><span className="text-gray-600">Mating Dates:</span> <strong>{animalToView.matingDates || '—'}</strong></div>
+                                                            <div><span className="text-gray-600">Mating Dates:</span> <strong>{formatDateDisplay(animalToView.matingDates)}</strong></div>
                                                             <div><span className="text-gray-600">Expected Due Date:</span> <strong>{animalToView.expectedDueDate ? new Date(animalToView.expectedDueDate).toLocaleDateString() : '—'}</strong></div>
                                                             <div><span className="text-gray-600">Litter Count:</span> <strong>{animalToView.litterCount || '—'}</strong></div>
                                                             <div><span className="text-gray-600">Nursing Start Date:</span> <strong>{animalToView.nursingStartDate ? new Date(animalToView.nursingStartDate).toLocaleDateString() : '—'}</strong></div>
