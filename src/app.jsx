@@ -2075,21 +2075,6 @@ const PrivateAnimalDetail = ({ animal, onClose, onEdit, API_BASE_URL, authToken,
                                     Edit
                                 </button>
                             )}
-                            {onHideAnimal && (
-                                <button
-                                    onClick={() => {
-                                        if (window.confirm(`Hide ${animal.name || 'this animal'}? You can restore it anytime from the hidden animals section.`)) {
-                                            onHideAnimal(animal.id_public);
-                                            onClose();
-                                        }
-                                    }}
-                                    className="px-3 py-1.5 bg-gray-200 hover:bg-gray-300 text-gray-700 font-semibold rounded-lg transition flex items-center gap-2"
-                                    title="Hide this animal - move to hidden section"
-                                >
-                                    <Eye size={16} />
-                                    Hide
-                                </button>
-                            )}
                             <button onClick={onClose} className="text-gray-500 hover:text-gray-800">
                                 <X size={28} />
                             </button>
