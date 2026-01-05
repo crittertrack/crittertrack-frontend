@@ -17585,6 +17585,7 @@ const AppRouter = () => {
                 const response = await axios.get(`${API_BASE_URL}/client-ip`);
                 const detectedIp = response.data.ip || response.data.clientIp;
                 setClientIp(detectedIp);
+                console.log('Backend detected IP:', detectedIp);
             } catch (error) {
                 console.warn('Could not determine IP');
                 setClientIp('unknown');
@@ -17593,14 +17594,16 @@ const AppRouter = () => {
         getClientIp();
     }, []);
 
-    // LOCK DOWN: Only allow 86.80.92.156
+    // LOCK DOWN: Only allow 86.80.92.156 OR with admin token
     const ADMIN_IP = '86.80.92.156';
+    const ADMIN_TOKEN = localStorage.getItem('crittertrack_admin_token');
     const isAdminIP = clientIp === ADMIN_IP;
+    const hasAdminToken = ADMIN_TOKEN === 'emergency_access_2025';
     
-    console.log('IP Check:', { clientIp, isAdminIP, ADMIN_IP });
+    console.log('Access check:', { clientIp, isAdminIP, ADMIN_IP, hasAdminToken });
     
-    // If not admin IP, show maintenance screen
-    if (clientIp && !isAdminIP) {
+    // If not admin IP and no token, show maintenance screen
+    if (clientIp && !isAdminIP && !hasAdminToken) {
         return <MaintenanceMode />;
     }
     
