@@ -2114,30 +2114,27 @@ const PrivateAnimalDetail = ({ animal, onClose, onEdit, API_BASE_URL, authToken,
 
                                     <div className="w-full md:w-2/3 p-4 sm:p-6 flex flex-col border-t md:border-t-0 md:border-l border-gray-300 space-y-3 relative">
                                         {/* Public Profile Toggle - Top Right */}
-                                        <label
-                                            onClick={(e) => {
-                                                const isCurrentlyDisplay = animal.isDisplay;
-                                                const updatedAnimal = { ...animal, isDisplay: !isCurrentlyDisplay };
-                                                axios.put(`${API_BASE_URL}/animals/${animal.id_public}`, { isDisplay: !isCurrentlyDisplay }, {
+                                        <button
+                                            onClick={() => {
+                                                const newIsDisplay = !animal.isDisplay;
+                                                axios.put(`${API_BASE_URL}/animals/${animal.id_public}`, { isDisplay: newIsDisplay }, {
                                                     headers: { Authorization: `Bearer ${authToken}` }
-                                                }).catch(err => console.error('Failed to update isDisplay:', err));
+                                                }).then(() => {
+                                                    // Reload animal data after successful update
+                                                    window.location.reload();
+                                                }).catch(err => {
+                                                    console.error('Failed to update isDisplay:', err);
+                                                });
                                             }}
-                                            className="absolute top-4 right-4 px-3 py-1.5 text-xs font-medium rounded-lg transition flex items-center gap-1 cursor-pointer"
+                                            className="absolute top-4 right-4 px-3 py-1.5 text-xs font-medium rounded-lg transition cursor-pointer"
                                             style={{
                                                 backgroundColor: animal.isDisplay ? '#dbeafe' : '#f3f4f6',
                                                 color: animal.isDisplay ? '#1e40af' : '#374151'
                                             }}
                                             title="Toggle public profile visibility"
                                         >
-                                            <input
-                                                type="checkbox"
-                                                checked={animal.isDisplay || false}
-                                                onChange={() => {}}
-                                                className="form-checkbox h-4 w-4 rounded"
-                                                style={{ cursor: 'pointer' }}
-                                            />
                                             <span>{animal.isDisplay ? '🌍 Public' : '🔒 Private'}</span>
-                                        </label>
+                                        </button>
 
                                         {/* Species/Breed/Strain/CTC - At Top */}
                                         <p className="text-sm text-gray-600">
@@ -2358,7 +2355,7 @@ const PrivateAnimalDetail = ({ animal, onClose, onEdit, API_BASE_URL, authToken,
                                     <div><span className="text-gray-600">Color:</span> <strong>{animal.color || '—'}</strong></div>
                                     <div><span className="text-gray-600">Coat Pattern:</span> <strong>{animal.coatPattern || '—'}</strong></div>
                                     <div><span className="text-gray-600">Coat Type:</span> <strong>{animal.coat || '—'}</strong></div>
-                                    <div><span className="text-gray-600">Earset:</span> <strong>{animal.earset || '—'}</strong></div>
+                                    {animal.species === 'Fancy Rat' && <div><span className="text-gray-600">Earset:</span> <strong>{animal.earset || '—'}</strong></div>}
                                 </div>
                             </div>
                             <div className="bg-gray-50 p-4 rounded-lg border border-gray-200 space-y-4">
@@ -2460,8 +2457,11 @@ const PrivateAnimalDetail = ({ animal, onClose, onEdit, API_BASE_URL, authToken,
                             {/* 3rd Section: Ownership History */}
                             <div className="bg-gray-50 p-4 rounded-lg border border-gray-200 space-y-4">
                                 <h3 className="text-lg font-semibold text-gray-700">Ownership History</h3>
-                                <OffspringSection animalId={animal.id_public} API_BASE_URL={API_BASE_URL} authToken={authToken} onViewAnimal={() => {}} />
+                                <p className="text-sm text-gray-700">—</p>
                             </div>
+
+                            {/* Offspring Section */}
+                            <OffspringSection animalId={animal.id_public} API_BASE_URL={API_BASE_URL} authToken={authToken} onViewAnimal={() => {}} />
                         </div>
                     )}
 
@@ -2935,13 +2935,13 @@ const ViewOnlyAnimalDetail = ({ animal, onClose, API_BASE_URL, onViewProfile, au
                                         )}
 
                                         {/* Appearance */}
-                                        {sectionPrivacy.appearance && (animal.color || animal.coat || animal.coatPattern || animal.earset) && (
+                                        {sectionPrivacy.appearance && (animal.color || animal.coat || animal.coatPattern || (animal.species === 'Fancy Rat' && animal.earset)) && (
                                             <p className="text-sm text-gray-700">
                                                 <span className="font-semibold">Appearance:</span> {[
                                                     animal.color,
                                                     animal.coatPattern,
                                                     animal.coat,
-                                                    animal.earset
+                                                    ...(animal.species === 'Fancy Rat' ? [animal.earset] : [])
                                                 ].filter(Boolean).join(', ')}
                                             </p>
                                         )}
@@ -3134,7 +3134,7 @@ const ViewOnlyAnimalDetail = ({ animal, onClose, API_BASE_URL, onViewProfile, au
                     <p className="text-sm"><span className="font-medium">Color:</span> {animal.color || '—'}</p>
                     <p className="text-sm"><span className="font-medium">Coat Pattern:</span> {animal.coatPattern || '—'}</p>
                     <p className="text-sm"><span className="font-medium">Coat Type:</span> {animal.coat || '—'}</p>
-                    <p className="text-sm"><span className="font-medium">Earset:</span> {animal.earset || '—'}</p>
+                    {animal.species === 'Fancy Rat' && <p className="text-sm"><span className="font-medium">Earset:</span> {animal.earset || '—'}</p>}
                 </div>
             </div>
             <div className="bg-gray-50 p-4 rounded-lg border border-gray-200">
@@ -9300,10 +9300,10 @@ const AnimalForm = ({
                             </div>
                         </div>
 
-                        {/* Veterinary Care */}
+                        {/* Active Medical Records */}
                         <div className="bg-gray-50 p-4 rounded-lg border border-gray-200 space-y-4" data-tutorial-target="medical-history-section">
                             <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-2 border-b pb-2">
-                                <h3 className="text-lg font-semibold text-gray-700">Medical History</h3>
+                                <h3 className="text-lg font-semibold text-gray-700">Active Medical Records</h3>
                                 <button
                                     type="button"
                                     onClick={() => toggleSectionPrivacy('medicalHistory')}
