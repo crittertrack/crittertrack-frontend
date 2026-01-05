@@ -3539,8 +3539,12 @@ const ViewOnlyAnimalDetail = ({ animal, onClose, API_BASE_URL, onViewProfile, au
     const [copySuccess, setCopySuccess] = useState(false);
     const [detailViewTab, setDetailViewTab] = useState(1);
     
-    // Get section privacy settings from animal data
+    // Get section privacy settings from animal data (default to true/public if not set)
     const sectionPrivacy = animal?.sectionPrivacy || {};
+    
+    console.log('ViewOnlyAnimalDetail - sectionPrivacy:', sectionPrivacy);
+    console.log('ViewOnlyAnimalDetail - currentOwner field:', animal?.currentOwner);
+    console.log('ViewOnlyAnimalDetail - currentOwner privacy:', sectionPrivacy.currentOwner);
     
     // Set moderator context when viewing this animal
     useEffect(() => {
@@ -4415,7 +4419,7 @@ const ViewOnlyAnimalDetail = ({ animal, onClose, API_BASE_URL, onViewProfile, au
                             {/* Current Owner Section */}
                             <div className="bg-gray-50 p-4 rounded-lg border border-gray-200">
                                 <h3 className="text-lg font-semibold text-gray-700 border-b pb-2 mb-3">Current Owner</h3>
-                                <p className="text-gray-700">{sectionPrivacy.currentOwner ? (animal.currentOwner || '—') : '—'}</p>
+                                <p className="text-gray-700">{(sectionPrivacy.currentOwner !== false) ? (animal.currentOwner || '—') : '—'}</p>
                             </div>
                             
                             {/* Remarks & Notes Section */}
@@ -14356,11 +14360,18 @@ const App = () => {
         
         // Save to backend
         try {
-            await axios.put(`${API_BASE_URL}/animals/${animalId}`, {
+            const response = await axios.put(`${API_BASE_URL}/animals/${animalId}`, {
                 sectionPrivacy: newPrivacy
             }, {
                 headers: { Authorization: `Bearer ${authToken}` }
             });
+            
+            // Update the animal in myAnimals list with the new privacy settings
+            if (response.data && response.data.animal) {
+                setMyAnimals(prev => prev.map(a => 
+                    a.id_public === animalId ? response.data.animal : a
+                ));
+            }
         } catch (error) {
             console.error('Error saving section privacy:', error);
             // Revert on error
@@ -15285,14 +15296,29 @@ const App = () => {
         navigate('/edit-animal');
     };
 
-    const handleViewAnimal = (animal) => {
+    const handleViewAnimal = async (animal) => {
         console.log('[handleViewAnimal] Viewing animal:', animal);
+        
+        // Fetch latest animal data from backend to ensure privacy settings are current
+        let currentAnimal = animal;
+        if (authToken) {
+            try {
+                const response = await axios.get(`${API_BASE_URL}/animals/${animal.id_public}`, {
+                    headers: { Authorization: `Bearer ${authToken}` }
+                });
+                currentAnimal = response.data;
+                console.log('[handleViewAnimal] Fetched latest animal data with sectionPrivacy:', response.data.sectionPrivacy);
+            } catch (error) {
+                console.warn('[handleViewAnimal] Failed to fetch latest data, using cached:', error);
+                // Fall back to the passed animal data if fetch fails
+            }
+        }
         
         // Normalize parent field names (backend uses sireId_public/damId_public, frontend uses fatherId_public/motherId_public)
         const normalizedAnimal = {
-            ...animal,
-            fatherId_public: animal.fatherId_public || animal.sireId_public,
-            motherId_public: animal.motherId_public || animal.damId_public
+            ...currentAnimal,
+            fatherId_public: currentAnimal.fatherId_public || currentAnimal.sireId_public,
+            motherId_public: currentAnimal.motherId_public || currentAnimal.damId_public
         };
         
         // Set initial inbreeding coefficient for immediate display
