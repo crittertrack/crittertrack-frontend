@@ -2928,7 +2928,6 @@ const ViewOnlyAnimalDetail = ({ animal, onClose, API_BASE_URL, onViewProfile, au
                                     </div>
                                 </div>
                             )}
-                            )}
 
                     {/* Tab 3: Physical */}
                     {detailViewTab === 3 && (
