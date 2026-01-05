@@ -17652,7 +17652,7 @@ const AppRouter = () => {
     const ADMIN_IP = '86.80.92.156';
     const ADMIN_TOKEN = localStorage.getItem('crittertrack_admin_token');
     const isAdminIP = clientIp === ADMIN_IP;
-    const hasAdminToken = ADMIN_TOKEN === 'emergency_access_2025';
+    const hasAdminToken = ADMIN_TOKEN === 'emergency_access_jan5_2025_secure';
     
     console.log('Access check:', { clientIp, isAdminIP, ADMIN_IP, hasAdminToken });
     
