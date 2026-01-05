@@ -2508,6 +2508,9 @@ const ViewOnlyAnimalDetail = ({ animal, onClose, API_BASE_URL, onViewProfile, au
     const [copySuccess, setCopySuccess] = useState(false);
     const [detailViewTab, setDetailViewTab] = useState(1);
     
+    // Get section privacy settings from animal data
+    const sectionPrivacy = animal?.sectionPrivacy || {};
+    
     // Set moderator context when viewing this animal
     useEffect(() => {
         if (setModCurrentContext && animal) {
@@ -2739,7 +2742,7 @@ const ViewOnlyAnimalDetail = ({ animal, onClose, API_BASE_URL, onViewProfile, au
                                         )}
 
                                         {/* Appearance */}
-                                        {(animal.color || animal.coat || animal.coatPattern || animal.earset) && (
+                                        {sectionPrivacy.appearance && (animal.color || animal.coat || animal.coatPattern || animal.earset) && (
                                             <p className="text-sm text-gray-700">
                                                 <span className="font-semibold">Appearance:</span> {[
                                                     animal.color,
@@ -2823,19 +2826,23 @@ const ViewOnlyAnimalDetail = ({ animal, onClose, API_BASE_URL, onViewProfile, au
                             )}
 
                             {/* Identification Numbers Section */}
-            <div className="bg-gray-50 p-4 rounded-lg border border-gray-200">
-                <h3 className="text-lg font-semibold text-gray-700 border-b pb-2 mb-3">Identification Numbers</h3>
-                <div className="space-y-2">
-                    <p className="text-sm"><span className="font-medium">Identification:</span> {animal.breederyId || '—'}</p>
-                    <p className="text-sm"><span className="font-medium">Microchip:</span> {animal.microchipNumber || '—'}</p>
-                    <p className="text-sm"><span className="font-medium">Pedigree Reg ID:</span> {animal.pedigreeRegistrationId || '—'}</p>
-                </div>
-            </div>
+                            {sectionPrivacy.identification && (
+                            <div className="bg-gray-50 p-4 rounded-lg border border-gray-200">
+                                <h3 className="text-lg font-semibold text-gray-700 border-b pb-2 mb-3">Identification Numbers</h3>
+                                <div className="space-y-2">
+                                    <p className="text-sm"><span className="font-medium">Identification:</span> {animal.breederyId || '—'}</p>
+                                    <p className="text-sm"><span className="font-medium">Microchip:</span> {animal.microchipNumber || '—'}</p>
+                                    <p className="text-sm"><span className="font-medium">Pedigree Reg ID:</span> {animal.pedigreeRegistrationId || '—'}</p>
+                                </div>
+                            </div>
+                            )}
                             {/* Genetic Code Display Section */}
-            <div className="bg-gray-50 p-4 rounded-lg border border-gray-200">
-                <h3 className="text-lg font-semibold text-gray-700 border-b pb-2 mb-3">Genetic Code</h3>
-                <p className="text-gray-700 font-mono text-sm break-all">{animal.geneticCode || '—'}</p>
-            </div>
+                            {sectionPrivacy.genetics && (
+                            <div className="bg-gray-50 p-4 rounded-lg border border-gray-200">
+                                <h3 className="text-lg font-semibold text-gray-700 border-b pb-2 mb-3">Genetic Code</h3>
+                                <p className="text-gray-700 font-mono text-sm break-all">{animal.geneticCode || '—'}</p>
+                            </div>
+                            )}
                             {/* Medical Information Section */}
                             {(animal.allergies || animal.medications || animal.medicalConditions) && (
                                 <div className="bg-gray-50 p-4 rounded-lg border border-gray-200">
@@ -2894,7 +2901,7 @@ const ViewOnlyAnimalDetail = ({ animal, onClose, API_BASE_URL, onViewProfile, au
                             )}
 
                             {/* Parents Section */}
-                            {(animal.fatherId_public || animal.sireId_public || animal.motherId_public || animal.damId_public) && (
+                            {sectionPrivacy.lineage && (animal.fatherId_public || animal.sireId_public || animal.motherId_public || animal.damId_public) && (
                                 <div className="bg-gray-50 p-4 rounded-lg border border-gray-200">
                                     <h3 className="text-lg font-semibold text-gray-700 border-b pb-2 mb-4">Parents</h3>
                                     <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
@@ -2921,8 +2928,7 @@ const ViewOnlyAnimalDetail = ({ animal, onClose, API_BASE_URL, onViewProfile, au
                                     </div>
                                 </div>
                             )}
-                        </div>
-                    )}
+                            )}
 
                     {/* Tab 3: Physical */}
                     {detailViewTab === 3 && (
@@ -13087,9 +13093,9 @@ const App = () => {
 
     // Toggle section privacy and save to animal
     const toggleSectionPrivacy = useCallback(async (sectionName) => {
-        if (!animalToView) return;
+        if (!animalToEdit) return;
         
-        const animalId = animalToView.id_public;
+        const animalId = animalToEdit.id_public;
         const currentPrivacy = sectionPrivacy[animalId] || {};
         const newPrivacy = {
             ...currentPrivacy,
@@ -13118,7 +13124,7 @@ const App = () => {
             }));
             showModalMessage('Error', 'Failed to save privacy settings');
         }
-    }, [animalToView, sectionPrivacy, authToken, API_BASE_URL, showModalMessage]);
+    }, [animalToEdit, sectionPrivacy, authToken, API_BASE_URL, showModalMessage]);
 
     const handleLogout = useCallback((expired = false) => {
         setAuthToken(null);
