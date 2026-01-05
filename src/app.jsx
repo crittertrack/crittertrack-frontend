@@ -8928,15 +8928,17 @@ const AnimalForm = ({
                         <div className="bg-gray-50 p-4 rounded-lg border border-gray-200 space-y-4">
                             <div className="flex justify-between items-center mb-4">
                                 <h3 className="text-lg font-semibold text-gray-700">Genetic Code</h3>
-                                <label className="flex items-center gap-2 text-sm">
-                                    <input 
-                                        type="checkbox" 
-                                        checked={sectionPrivacy[animalToEdit?.id_public]?.geneticCode ?? true}
-                                        onChange={() => toggleSectionPrivacy(animalToEdit?.id_public, 'geneticCode')}
-                                        className="w-4 h-4 rounded"
-                                    />
-                                    <span className="text-gray-600">Public</span>
-                                </label>
+                                <button
+                                    onClick={() => toggleSectionPrivacy(animalToEdit?.id_public, 'geneticCode')}
+                                    className="px-3 py-1.5 text-xs font-medium rounded-lg transition cursor-pointer"
+                                    style={{
+                                        backgroundColor: sectionPrivacy[animalToEdit?.id_public]?.geneticCode ? '#f3f4f6' : '#dbeafe',
+                                        color: sectionPrivacy[animalToEdit?.id_public]?.geneticCode ? '#374151' : '#1e40af'
+                                    }}
+                                    title="Toggle public visibility"
+                                >
+                                    <span>{sectionPrivacy[animalToEdit?.id_public]?.geneticCode ? '🔒 Private' : '🌍 Public'}</span>
+                                </button>
                             </div>
                             <GeneticCodeBuilder
                                 species={formData.species}
@@ -8951,15 +8953,17 @@ const AnimalForm = ({
                         <div className="bg-gray-50 p-4 rounded-lg border border-gray-200 space-y-4">
                             <div className="flex justify-between items-center mb-4">
                                 <h3 className="text-lg font-semibold text-gray-700">Life Stage</h3>
-                                <label className="flex items-center gap-2 text-sm">
-                                    <input 
-                                        type="checkbox" 
-                                        checked={sectionPrivacy[animalToEdit?.id_public]?.lifeStage ?? true}
-                                        onChange={() => toggleSectionPrivacy(animalToEdit?.id_public, 'lifeStage')}
-                                        className="w-4 h-4 rounded"
-                                    />
-                                    <span className="text-gray-600">Public</span>
-                                </label>
+                                <button
+                                    onClick={() => toggleSectionPrivacy(animalToEdit?.id_public, 'lifeStage')}
+                                    className="px-3 py-1.5 text-xs font-medium rounded-lg transition cursor-pointer"
+                                    style={{
+                                        backgroundColor: sectionPrivacy[animalToEdit?.id_public]?.lifeStage ? '#f3f4f6' : '#dbeafe',
+                                        color: sectionPrivacy[animalToEdit?.id_public]?.lifeStage ? '#374151' : '#1e40af'
+                                    }}
+                                    title="Toggle public visibility"
+                                >
+                                    <span>{sectionPrivacy[animalToEdit?.id_public]?.lifeStage ? '🔒 Private' : '🌍 Public'}</span>
+                                </button>
                             </div>
                             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                                 <div>
@@ -8985,24 +8989,28 @@ const AnimalForm = ({
                                     <p className="text-xs text-gray-600 mt-1">Current measurements & growth history</p>
                                 </div>
                                 <div className="flex gap-4">
-                                    <label className="flex items-center gap-2 text-sm">
-                                        <input 
-                                            type="checkbox" 
-                                            checked={sectionPrivacy[animalToEdit?.id_public]?.currentMeasurements ?? true}
-                                            onChange={() => toggleSectionPrivacy(animalToEdit?.id_public, 'currentMeasurements')}
-                                            className="w-4 h-4 rounded"
-                                        />
-                                        <span className="text-gray-600">Measurements</span>
-                                    </label>
-                                    <label className="flex items-center gap-2 text-sm">
-                                        <input 
-                                            type="checkbox" 
-                                            checked={sectionPrivacy[animalToEdit?.id_public]?.growthHistory ?? true}
-                                            onChange={() => toggleSectionPrivacy(animalToEdit?.id_public, 'growthHistory')}
-                                            className="w-4 h-4 rounded"
-                                        />
-                                        <span className="text-gray-600">Growth History</span>
-                                    </label>
+                                    <button
+                                        onClick={() => toggleSectionPrivacy(animalToEdit?.id_public, 'currentMeasurements')}
+                                        className="px-3 py-1.5 text-xs font-medium rounded-lg transition cursor-pointer"
+                                        style={{
+                                            backgroundColor: sectionPrivacy[animalToEdit?.id_public]?.currentMeasurements ? '#f3f4f6' : '#dbeafe',
+                                            color: sectionPrivacy[animalToEdit?.id_public]?.currentMeasurements ? '#374151' : '#1e40af'
+                                        }}
+                                        title="Toggle public visibility"
+                                    >
+                                        <span>{sectionPrivacy[animalToEdit?.id_public]?.currentMeasurements ? '🔒 Private' : '🌍 Public'}</span>
+                                    </button>
+                                    <button
+                                        onClick={() => toggleSectionPrivacy(animalToEdit?.id_public, 'growthHistory')}
+                                        className="px-3 py-1.5 text-xs font-medium rounded-lg transition cursor-pointer"
+                                        style={{
+                                            backgroundColor: sectionPrivacy[animalToEdit?.id_public]?.growthHistory ? '#f3f4f6' : '#dbeafe',
+                                            color: sectionPrivacy[animalToEdit?.id_public]?.growthHistory ? '#374151' : '#1e40af'
+                                        }}
+                                        title="Toggle public visibility"
+                                    >
+                                        <span>{sectionPrivacy[animalToEdit?.id_public]?.growthHistory ? '🔒 Private' : '🌍 Public'}</span>
+                                    </button>
                                 </div>
                             </div>
                             
@@ -9556,15 +9564,17 @@ const AnimalForm = ({
                         <div className="bg-gray-50 p-4 rounded-lg border border-gray-200 space-y-4">
                             <div className="flex justify-between items-center mb-4">
                                 <h3 className="text-lg font-semibold text-gray-700">Origin</h3>
-                                <label className="flex items-center gap-2 text-sm">
-                                    <input 
-                                        type="checkbox" 
-                                        checked={sectionPrivacy[animalToEdit?.id_public]?.origin ?? true}
-                                        onChange={() => toggleSectionPrivacy(animalToEdit?.id_public, 'origin')}
-                                        className="w-4 h-4 rounded"
-                                    />
-                                    <span className="text-gray-600">Public</span>
-                                </label>
+                                <button
+                                    onClick={() => toggleSectionPrivacy(animalToEdit?.id_public, 'origin')}
+                                    className="px-3 py-1.5 text-xs font-medium rounded-lg transition cursor-pointer"
+                                    style={{
+                                        backgroundColor: sectionPrivacy[animalToEdit?.id_public]?.origin ? '#f3f4f6' : '#dbeafe',
+                                        color: sectionPrivacy[animalToEdit?.id_public]?.origin ? '#374151' : '#1e40af'
+                                    }}
+                                    title="Toggle public visibility"
+                                >
+                                    <span>{sectionPrivacy[animalToEdit?.id_public]?.origin ? '🔒 Private' : '🌍 Public'}</span>
+                                </button>
                             </div>
                             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                                 <div data-tutorial-target="origin-select">
@@ -9717,15 +9727,17 @@ const AnimalForm = ({
                             <div className="bg-gray-50 p-4 rounded-lg border border-gray-200 space-y-4" data-tutorial-target="estrus-cycle-section">
                                 <div className="flex justify-between items-center mb-4">
                                     <h3 className="text-lg font-semibold text-gray-700">Estrus/Cycle</h3>
-                                    <label className="flex items-center gap-2 text-sm">
-                                        <input 
-                                            type="checkbox" 
-                                            checked={sectionPrivacy[animalToEdit?.id_public]?.estrusCycle ?? true}
-                                            onChange={() => toggleSectionPrivacy(animalToEdit?.id_public, 'estrusCycle')}
-                                            className="w-4 h-4 rounded"
-                                        />
-                                        <span className="text-gray-600">Public</span>
-                                    </label>
+                                    <button
+                                        onClick={() => toggleSectionPrivacy(animalToEdit?.id_public, 'estrusCycle')}
+                                        className="px-3 py-1.5 text-xs font-medium rounded-lg transition cursor-pointer"
+                                        style={{
+                                            backgroundColor: sectionPrivacy[animalToEdit?.id_public]?.estrusCycle ? '#f3f4f6' : '#dbeafe',
+                                            color: sectionPrivacy[animalToEdit?.id_public]?.estrusCycle ? '#374151' : '#1e40af'
+                                        }}
+                                        title="Toggle public visibility"
+                                    >
+                                        <span>{sectionPrivacy[animalToEdit?.id_public]?.estrusCycle ? '🔒 Private' : '🌍 Public'}</span>
+                                    </button>
                                 </div>
                                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                                     <div>
@@ -9760,15 +9772,17 @@ const AnimalForm = ({
                             <div className="bg-gray-50 p-4 rounded-lg border border-gray-200 space-y-4">
                                 <div className="flex justify-between items-center mb-4">
                                     <h3 className="text-lg font-semibold text-gray-700">Mating {formData.isNeutered && <span className="text-xs font-normal text-gray-500">(History)</span>}</h3>
-                                    <label className="flex items-center gap-2 text-sm">
-                                        <input 
-                                            type="checkbox" 
-                                            checked={sectionPrivacy[animalToEdit?.id_public]?.mating ?? true}
-                                            onChange={() => toggleSectionPrivacy(animalToEdit?.id_public, 'mating')}
-                                            className="w-4 h-4 rounded"
-                                        />
-                                        <span className="text-gray-600">Public</span>
-                                    </label>
+                                    <button
+                                        onClick={() => toggleSectionPrivacy(animalToEdit?.id_public, 'mating')}
+                                        className="px-3 py-1.5 text-xs font-medium rounded-lg transition cursor-pointer"
+                                        style={{
+                                            backgroundColor: sectionPrivacy[animalToEdit?.id_public]?.mating ? '#f3f4f6' : '#dbeafe',
+                                            color: sectionPrivacy[animalToEdit?.id_public]?.mating ? '#374151' : '#1e40af'
+                                        }}
+                                        title="Toggle public visibility"
+                                    >
+                                        <span>{sectionPrivacy[animalToEdit?.id_public]?.mating ? '🔒 Private' : '🌍 Public'}</span>
+                                    </button>
                                 </div>
                                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                                     <div className="md:col-span-2">
@@ -9792,15 +9806,17 @@ const AnimalForm = ({
                                         {formData.gender === 'Unknown' && <span className="text-xs bg-blue-100 text-blue-700 px-2 py-1 rounded mt-1 inline-block">Sperm Fertility</span>}
                                         {formData.gender === 'Intersex' && <span className="text-xs bg-purple-100 text-purple-700 px-2 py-1 rounded mt-1 inline-block">Sire Role</span>}
                                     </div>
-                                    <label className="flex items-center gap-2 text-sm">
-                                        <input 
-                                            type="checkbox" 
-                                            checked={sectionPrivacy[animalToEdit?.id_public]?.studInformation ?? true}
-                                            onChange={() => toggleSectionPrivacy(animalToEdit?.id_public, 'studInformation')}
-                                            className="w-4 h-4 rounded"
-                                        />
-                                        <span className="text-gray-600">Public</span>
-                                    </label>
+                                    <button
+                                        onClick={() => toggleSectionPrivacy(animalToEdit?.id_public, 'studInformation')}
+                                        className="px-3 py-1.5 text-xs font-medium rounded-lg transition cursor-pointer"
+                                        style={{
+                                            backgroundColor: sectionPrivacy[animalToEdit?.id_public]?.studInformation ? '#f3f4f6' : '#dbeafe',
+                                            color: sectionPrivacy[animalToEdit?.id_public]?.studInformation ? '#374151' : '#1e40af'
+                                        }}
+                                        title="Toggle public visibility"
+                                    >
+                                        <span>{sectionPrivacy[animalToEdit?.id_public]?.studInformation ? '🔒 Private' : '🌍 Public'}</span>
+                                    </button>
                                 </div>
                                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                                     <div>
@@ -9833,15 +9849,17 @@ const AnimalForm = ({
                                         {formData.gender === 'Unknown' && <span className="text-xs bg-pink-100 text-pink-700 px-2 py-1 rounded mt-1 inline-block">Egg Fertility</span>}
                                         {formData.gender === 'Intersex' && <span className="text-xs bg-purple-100 text-purple-700 px-2 py-1 rounded mt-1 inline-block">Dam Role</span>}
                                     </div>
-                                    <label className="flex items-center gap-2 text-sm">
-                                        <input 
-                                            type="checkbox" 
-                                            checked={sectionPrivacy[animalToEdit?.id_public]?.damInformation ?? true}
-                                            onChange={() => toggleSectionPrivacy(animalToEdit?.id_public, 'damInformation')}
-                                            className="w-4 h-4 rounded"
-                                        />
-                                        <span className="text-gray-600">Public</span>
-                                    </label>
+                                    <button
+                                        onClick={() => toggleSectionPrivacy(animalToEdit?.id_public, 'damInformation')}
+                                        className="px-3 py-1.5 text-xs font-medium rounded-lg transition cursor-pointer"
+                                        style={{
+                                            backgroundColor: sectionPrivacy[animalToEdit?.id_public]?.damInformation ? '#f3f4f6' : '#dbeafe',
+                                            color: sectionPrivacy[animalToEdit?.id_public]?.damInformation ? '#374151' : '#1e40af'
+                                        }}
+                                        title="Toggle public visibility"
+                                    >
+                                        <span>{sectionPrivacy[animalToEdit?.id_public]?.damInformation ? '🔒 Private' : '🌍 Public'}</span>
+                                    </button>
                                 </div>
                                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                                     <div>
@@ -9957,15 +9975,17 @@ const AnimalForm = ({
                         <div className="bg-gray-50 p-4 rounded-lg border border-gray-200 space-y-6">
                             <div className="flex justify-between items-center mb-4">
                                 <h3 className="text-lg font-semibold text-gray-700">Preventive Care</h3>
-                                <label className="flex items-center gap-2 text-sm">
-                                    <input 
-                                        type="checkbox" 
-                                        checked={sectionPrivacy[animalToEdit?.id_public]?.preventiveCare ?? true}
-                                        onChange={() => toggleSectionPrivacy(animalToEdit?.id_public, 'preventiveCare')}
-                                        className="w-4 h-4 rounded"
-                                    />
-                                    <span className="text-gray-600">Public</span>
-                                </label>
+                                <button
+                                    onClick={() => toggleSectionPrivacy(animalToEdit?.id_public, 'preventiveCare')}
+                                    className="px-3 py-1.5 text-xs font-medium rounded-lg transition cursor-pointer"
+                                    style={{
+                                        backgroundColor: sectionPrivacy[animalToEdit?.id_public]?.preventiveCare ? '#f3f4f6' : '#dbeafe',
+                                        color: sectionPrivacy[animalToEdit?.id_public]?.preventiveCare ? '#374151' : '#1e40af'
+                                    }}
+                                    title="Toggle public visibility"
+                                >
+                                    <span>{sectionPrivacy[animalToEdit?.id_public]?.preventiveCare ? '🔒 Private' : '🌍 Public'}</span>
+                                </button>
                             </div>
                             
                             {/* Vaccinations */}
@@ -10096,15 +10116,17 @@ const AnimalForm = ({
                         <div className="bg-gray-50 p-4 rounded-lg border border-gray-200 space-y-6" data-tutorial-target="procedures-section">
                             <div className="flex justify-between items-center mb-4">
                                 <h3 className="text-lg font-semibold text-gray-700">Procedures & Diagnostics</h3>
-                                <label className="flex items-center gap-2 text-sm">
-                                    <input 
-                                        type="checkbox" 
-                                        checked={sectionPrivacy[animalToEdit?.id_public]?.proceduresAndDiagnostics ?? true}
-                                        onChange={() => toggleSectionPrivacy(animalToEdit?.id_public, 'proceduresAndDiagnostics')}
-                                        className="w-4 h-4 rounded"
-                                    />
-                                    <span className="text-gray-600">Public</span>
-                                </label>
+                                <button
+                                    onClick={() => toggleSectionPrivacy(animalToEdit?.id_public, 'proceduresAndDiagnostics')}
+                                    className="px-3 py-1.5 text-xs font-medium rounded-lg transition cursor-pointer"
+                                    style={{
+                                        backgroundColor: sectionPrivacy[animalToEdit?.id_public]?.proceduresAndDiagnostics ? '#f3f4f6' : '#dbeafe',
+                                        color: sectionPrivacy[animalToEdit?.id_public]?.proceduresAndDiagnostics ? '#374151' : '#1e40af'
+                                    }}
+                                    title="Toggle public visibility"
+                                >
+                                    <span>{sectionPrivacy[animalToEdit?.id_public]?.proceduresAndDiagnostics ? '🔒 Private' : '🌍 Public'}</span>
+                                </button>
                             </div>
                             
                             {/* Medical Procedures */}
@@ -10199,15 +10221,17 @@ const AnimalForm = ({
                         <div className="bg-gray-50 p-4 rounded-lg border border-gray-200 space-y-4" data-tutorial-target="medical-history-section">
                             <div className="flex justify-between items-center mb-4">
                                 <h3 className="text-lg font-semibold text-gray-700">Active Medical Records</h3>
-                                <label className="flex items-center gap-2 text-sm">
-                                    <input 
-                                        type="checkbox" 
-                                        checked={sectionPrivacy[animalToEdit?.id_public]?.activeMedicalRecords ?? true}
-                                        onChange={() => toggleSectionPrivacy(animalToEdit?.id_public, 'activeMedicalRecords')}
-                                        className="w-4 h-4 rounded"
-                                    />
-                                    <span className="text-gray-600">Public</span>
-                                </label>
+                                <button
+                                    onClick={() => toggleSectionPrivacy(animalToEdit?.id_public, 'activeMedicalRecords')}
+                                    className="px-3 py-1.5 text-xs font-medium rounded-lg transition cursor-pointer"
+                                    style={{
+                                        backgroundColor: sectionPrivacy[animalToEdit?.id_public]?.activeMedicalRecords ? '#f3f4f6' : '#dbeafe',
+                                        color: sectionPrivacy[animalToEdit?.id_public]?.activeMedicalRecords ? '#374151' : '#1e40af'
+                                    }}
+                                    title="Toggle public visibility"
+                                >
+                                    <span>{sectionPrivacy[animalToEdit?.id_public]?.activeMedicalRecords ? '🔒 Private' : '🌍 Public'}</span>
+                                </button>
                             </div>
                             <div className="space-y-4">
                                 {/* Medical Conditions */}
@@ -10324,15 +10348,17 @@ const AnimalForm = ({
                         <div className="bg-gray-50 p-4 rounded-lg border border-gray-200 space-y-4" data-tutorial-target="vet-care-section">
                             <div className="flex justify-between items-center mb-4">
                                 <h3 className="text-lg font-semibold text-gray-700">Veterinary Care</h3>
-                                <label className="flex items-center gap-2 text-sm">
-                                    <input 
-                                        type="checkbox" 
-                                        checked={sectionPrivacy[animalToEdit?.id_public]?.veterinaryCare ?? true}
-                                        onChange={() => toggleSectionPrivacy(animalToEdit?.id_public, 'veterinaryCare')}
-                                        className="w-4 h-4 rounded"
-                                    />
-                                    <span className="text-gray-600">Public</span>
-                                </label>
+                                <button
+                                    onClick={() => toggleSectionPrivacy(animalToEdit?.id_public, 'veterinaryCare')}
+                                    className="px-3 py-1.5 text-xs font-medium rounded-lg transition cursor-pointer"
+                                    style={{
+                                        backgroundColor: sectionPrivacy[animalToEdit?.id_public]?.veterinaryCare ? '#f3f4f6' : '#dbeafe',
+                                        color: sectionPrivacy[animalToEdit?.id_public]?.veterinaryCare ? '#374151' : '#1e40af'
+                                    }}
+                                    title="Toggle public visibility"
+                                >
+                                    <span>{sectionPrivacy[animalToEdit?.id_public]?.veterinaryCare ? '🔒 Private' : '🌍 Public'}</span>
+                                </button>
                             </div>
                             <div className="space-y-4">
                                 {/* Veterinary Visits */}
@@ -10394,15 +10420,17 @@ const AnimalForm = ({
                         <div className="bg-gray-50 p-4 rounded-lg border border-gray-200 space-y-4">
                             <div className="flex justify-between items-center mb-4">
                                 <h3 className="text-lg font-semibold text-gray-700">Nutrition</h3>
-                                <label className="flex items-center gap-2 text-sm">
-                                    <input 
-                                        type="checkbox" 
-                                        checked={sectionPrivacy[animalToEdit?.id_public]?.nutrition ?? true}
-                                        onChange={() => toggleSectionPrivacy(animalToEdit?.id_public, 'nutrition')}
-                                        className="w-4 h-4 rounded"
-                                    />
-                                    <span className="text-gray-600">Public</span>
-                                </label>
+                                <button
+                                    onClick={() => toggleSectionPrivacy(animalToEdit?.id_public, 'nutrition')}
+                                    className="px-3 py-1.5 text-xs font-medium rounded-lg transition cursor-pointer"
+                                    style={{
+                                        backgroundColor: sectionPrivacy[animalToEdit?.id_public]?.nutrition ? '#f3f4f6' : '#dbeafe',
+                                        color: sectionPrivacy[animalToEdit?.id_public]?.nutrition ? '#374151' : '#1e40af'
+                                    }}
+                                    title="Toggle public visibility"
+                                >
+                                    <span>{sectionPrivacy[animalToEdit?.id_public]?.nutrition ? '🔒 Private' : '🌍 Public'}</span>
+                                </button>
                             </div>
                             <div className="space-y-4">
                                 <div>
@@ -10432,15 +10460,17 @@ const AnimalForm = ({
                         <div className="bg-gray-50 p-4 rounded-lg border border-gray-200 space-y-4" data-tutorial-target="husbandry-details-section">
                             <div className="flex justify-between items-center mb-4">
                                 <h3 className="text-lg font-semibold text-gray-700">Husbandry</h3>
-                                <label className="flex items-center gap-2 text-sm">
-                                    <input 
-                                        type="checkbox" 
-                                        checked={sectionPrivacy[animalToEdit?.id_public]?.husbandry ?? true}
-                                        onChange={() => toggleSectionPrivacy(animalToEdit?.id_public, 'husbandry')}
-                                        className="w-4 h-4 rounded"
-                                    />
-                                    <span className="text-gray-600">Public</span>
-                                </label>
+                                <button
+                                    onClick={() => toggleSectionPrivacy(animalToEdit?.id_public, 'husbandry')}
+                                    className="px-3 py-1.5 text-xs font-medium rounded-lg transition cursor-pointer"
+                                    style={{
+                                        backgroundColor: sectionPrivacy[animalToEdit?.id_public]?.husbandry ? '#f3f4f6' : '#dbeafe',
+                                        color: sectionPrivacy[animalToEdit?.id_public]?.husbandry ? '#374151' : '#1e40af'
+                                    }}
+                                    title="Toggle public visibility"
+                                >
+                                    <span>{sectionPrivacy[animalToEdit?.id_public]?.husbandry ? '🔒 Private' : '🌍 Public'}</span>
+                                </button>
                             </div>
                             <div className="space-y-4">
                                 <div>
@@ -10470,15 +10500,17 @@ const AnimalForm = ({
                         <div className="bg-gray-50 p-4 rounded-lg border border-gray-200 space-y-4" data-tutorial-target="environment-section">
                             <div className="flex justify-between items-center mb-4">
                                 <h3 className="text-lg font-semibold text-gray-700">Environment</h3>
-                                <label className="flex items-center gap-2 text-sm">
-                                    <input 
-                                        type="checkbox" 
-                                        checked={sectionPrivacy[animalToEdit?.id_public]?.environment ?? true}
-                                        onChange={() => toggleSectionPrivacy(animalToEdit?.id_public, 'environment')}
-                                        className="w-4 h-4 rounded"
-                                    />
-                                    <span className="text-gray-600">Public</span>
-                                </label>
+                                <button
+                                    onClick={() => toggleSectionPrivacy(animalToEdit?.id_public, 'environment')}
+                                    className="px-3 py-1.5 text-xs font-medium rounded-lg transition cursor-pointer"
+                                    style={{
+                                        backgroundColor: sectionPrivacy[animalToEdit?.id_public]?.environment ? '#f3f4f6' : '#dbeafe',
+                                        color: sectionPrivacy[animalToEdit?.id_public]?.environment ? '#374151' : '#1e40af'
+                                    }}
+                                    title="Toggle public visibility"
+                                >
+                                    <span>{sectionPrivacy[animalToEdit?.id_public]?.environment ? '🔒 Private' : '🌍 Public'}</span>
+                                </button>
                             </div>
                             <div className="space-y-4">
                                 <div>
@@ -10520,15 +10552,17 @@ const AnimalForm = ({
                         <div className="bg-gray-50 p-4 rounded-lg border border-gray-200 space-y-4">
                             <div className="flex justify-between items-center mb-4">
                                 <h3 className="text-lg font-semibold text-gray-700">Behavior</h3>
-                                <label className="flex items-center gap-2 text-sm">
-                                    <input 
-                                        type="checkbox" 
-                                        checked={sectionPrivacy[animalToEdit?.id_public]?.behavior ?? true}
-                                        onChange={() => toggleSectionPrivacy(animalToEdit?.id_public, 'behavior')}
-                                        className="w-4 h-4 rounded"
-                                    />
-                                    <span className="text-gray-600">Public</span>
-                                </label>
+                                <button
+                                    onClick={() => toggleSectionPrivacy(animalToEdit?.id_public, 'behavior')}
+                                    className="px-3 py-1.5 text-xs font-medium rounded-lg transition cursor-pointer"
+                                    style={{
+                                        backgroundColor: sectionPrivacy[animalToEdit?.id_public]?.behavior ? '#f3f4f6' : '#dbeafe',
+                                        color: sectionPrivacy[animalToEdit?.id_public]?.behavior ? '#374151' : '#1e40af'
+                                    }}
+                                    title="Toggle public visibility"
+                                >
+                                    <span>{sectionPrivacy[animalToEdit?.id_public]?.behavior ? '🔒 Private' : '🌍 Public'}</span>
+                                </button>
                             </div>
                             <div className="space-y-4" data-tutorial-target="behavior-items-section">
                                 <div>
@@ -10558,15 +10592,17 @@ const AnimalForm = ({
                         <div className="bg-gray-50 p-4 rounded-lg border border-gray-200 space-y-4">
                             <div className="flex justify-between items-center mb-4">
                                 <h3 className="text-lg font-semibold text-gray-700">Activity</h3>
-                                <label className="flex items-center gap-2 text-sm">
-                                    <input 
-                                        type="checkbox" 
-                                        checked={sectionPrivacy[animalToEdit?.id_public]?.activity ?? true}
-                                        onChange={() => toggleSectionPrivacy(animalToEdit?.id_public, 'activity')}
-                                        className="w-4 h-4 rounded"
-                                    />
-                                    <span className="text-gray-600">Public</span>
-                                </label>
+                                <button
+                                    onClick={() => toggleSectionPrivacy(animalToEdit?.id_public, 'activity')}
+                                    className="px-3 py-1.5 text-xs font-medium rounded-lg transition cursor-pointer"
+                                    style={{
+                                        backgroundColor: sectionPrivacy[animalToEdit?.id_public]?.activity ? '#f3f4f6' : '#dbeafe',
+                                        color: sectionPrivacy[animalToEdit?.id_public]?.activity ? '#374151' : '#1e40af'
+                                    }}
+                                    title="Toggle public visibility"
+                                >
+                                    <span>{sectionPrivacy[animalToEdit?.id_public]?.activity ? '🔒 Private' : '🌍 Public'}</span>
+                                </button>
                             </div>
                             <div>
                                 <label className="block text-sm font-medium text-gray-700 mb-2">Activity Cycle</label>
@@ -10588,15 +10624,17 @@ const AnimalForm = ({
                         <div className="bg-gray-50 p-4 rounded-lg border border-gray-200" data-tutorial-target="remarks-section">
                             <div className="flex justify-between items-center mb-4">
                                 <h3 className="text-lg font-semibold text-gray-700">Remarks & Notes</h3>
-                                <label className="flex items-center gap-2 text-sm">
-                                    <input 
-                                        type="checkbox" 
-                                        checked={sectionPrivacy[animalToEdit?.id_public]?.remarks ?? true}
-                                        onChange={() => toggleSectionPrivacy(animalToEdit?.id_public, 'remarks')}
-                                        className="w-4 h-4 rounded"
-                                    />
-                                    <span className="text-gray-600">Public</span>
-                                </label>
+                                <button
+                                    onClick={() => toggleSectionPrivacy(animalToEdit?.id_public, 'remarks')}
+                                    className="px-3 py-1.5 text-xs font-medium rounded-lg transition cursor-pointer"
+                                    style={{
+                                        backgroundColor: sectionPrivacy[animalToEdit?.id_public]?.remarks ? '#f3f4f6' : '#dbeafe',
+                                        color: sectionPrivacy[animalToEdit?.id_public]?.remarks ? '#374151' : '#1e40af'
+                                    }}
+                                    title="Toggle public visibility"
+                                >
+                                    <span>{sectionPrivacy[animalToEdit?.id_public]?.remarks ? '🔒 Private' : '🌍 Public'}</span>
+                                </button>
                             </div>
                             <textarea name="remarks" value={formData.remarks} onChange={handleChange} rows="5"
                                 className="block w-full p-2 border border-gray-300 rounded-md shadow-sm focus:ring-primary focus:border-primary" 
@@ -10613,15 +10651,17 @@ const AnimalForm = ({
                         <div className="bg-gray-50 p-4 rounded-lg border border-gray-200 space-y-4">
                             <div className="flex justify-between items-center mb-4">
                                 <h3 className="text-lg font-semibold text-gray-700">End of Life</h3>
-                                <label className="flex items-center gap-2 text-sm">
-                                    <input 
-                                        type="checkbox" 
-                                        checked={sectionPrivacy[animalToEdit?.id_public]?.endOfLife ?? true}
-                                        onChange={() => toggleSectionPrivacy(animalToEdit?.id_public, 'endOfLife')}
-                                        className="w-4 h-4 rounded"
-                                    />
-                                    <span className="text-gray-600">Public</span>
-                                </label>
+                                <button
+                                    onClick={() => toggleSectionPrivacy(animalToEdit?.id_public, 'endOfLife')}
+                                    className="px-3 py-1.5 text-xs font-medium rounded-lg transition cursor-pointer"
+                                    style={{
+                                        backgroundColor: sectionPrivacy[animalToEdit?.id_public]?.endOfLife ? '#f3f4f6' : '#dbeafe',
+                                        color: sectionPrivacy[animalToEdit?.id_public]?.endOfLife ? '#374151' : '#1e40af'
+                                    }}
+                                    title="Toggle public visibility"
+                                >
+                                    <span>{sectionPrivacy[animalToEdit?.id_public]?.endOfLife ? '🔒 Private' : '🌍 Public'}</span>
+                                </button>
                             </div>
                             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                                 <div>
@@ -10651,15 +10691,17 @@ const AnimalForm = ({
                         <div className="bg-gray-50 p-4 rounded-lg border border-gray-200 space-y-4" data-tutorial-target="legal-admin-section">
                             <div className="flex justify-between items-center mb-4">
                                 <h3 className="text-lg font-semibold text-gray-700">Legal / Administrative</h3>
-                                <label className="flex items-center gap-2 text-sm">
-                                    <input 
-                                        type="checkbox" 
-                                        checked={sectionPrivacy[animalToEdit?.id_public]?.legalAdministrative ?? true}
-                                        onChange={() => toggleSectionPrivacy(animalToEdit?.id_public, 'legalAdministrative')}
-                                        className="w-4 h-4 rounded"
-                                    />
-                                    <span className="text-gray-600">Public</span>
-                                </label>
+                                <button
+                                    onClick={() => toggleSectionPrivacy(animalToEdit?.id_public, 'legalAdministrative')}
+                                    className="px-3 py-1.5 text-xs font-medium rounded-lg transition cursor-pointer"
+                                    style={{
+                                        backgroundColor: sectionPrivacy[animalToEdit?.id_public]?.legalAdministrative ? '#f3f4f6' : '#dbeafe',
+                                        color: sectionPrivacy[animalToEdit?.id_public]?.legalAdministrative ? '#374151' : '#1e40af'
+                                    }}
+                                    title="Toggle public visibility"
+                                >
+                                    <span>{sectionPrivacy[animalToEdit?.id_public]?.legalAdministrative ? '🔒 Private' : '🌍 Public'}</span>
+                                </button>
                             </div>
                             <div className="space-y-4">
                                 <div>
