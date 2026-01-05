@@ -8622,33 +8622,6 @@ const AnimalForm = ({
                                     </label>
                                 )}
 
-                                {(formData.gender === 'Intersex' || formData.gender === 'Unknown') && !formData.isNeutered && !formData.isInfertile && (
-                                    <div className="col-span-full space-y-3" data-tutorial-target="can-sire-bear-section">
-                                        <label className="flex items-center space-x-2 cursor-pointer p-3 border rounded-lg bg-white hover:bg-gray-50 transition">
-                                            <input
-                                                type="checkbox"
-                                                name="isStudAnimal"
-                                                checked={formData.isStudAnimal}
-                                                onChange={handleChange}
-                                                disabled={formData.isNeutered || formData.isInfertile}
-                                                className="form-checkbox h-5 w-5 text-primary rounded focus:ring-primary"
-                                            />
-                                            <span className="text-sm font-medium text-gray-700">Can Sire</span>
-                                        </label>
-                                        
-                                        <label className="flex items-center space-x-2 cursor-pointer p-3 border rounded-lg bg-white hover:bg-gray-50 transition">
-                                            <input
-                                                type="checkbox"
-                                                name="isDamAnimal"
-                                                checked={formData.isDamAnimal || false}
-                                                onChange={handleChange}
-                                                disabled={formData.isNeutered || formData.isInfertile}
-                                                className="form-checkbox h-5 w-5 text-primary rounded focus:ring-primary"
-                                            />
-                                            <span className="text-sm font-medium text-gray-700">Can Bear</span>
-                                        </label>
-                                    </div>
-                                )}
                             </div>
                         </div>
 
@@ -8701,8 +8674,8 @@ const AnimalForm = ({
                         )}
 
 
-                        {/* Stud Information - Only when Stud Animal/Can Sire is checked and not neutered */}
-                        {!formData.isNeutered && ((formData.gender === 'Male' && formData.isStudAnimal) || (formData.gender === 'Intersex' && formData.isStudAnimal) || (formData.gender === 'Unknown' && formData.isStudAnimal)) && (
+                        {/* Stud Information - Always shown when not neutered and not infertile */}
+                        {!formData.isNeutered && !formData.isInfertile && (formData.gender === 'Male' || formData.gender === 'Intersex' || formData.gender === 'Unknown') && (
                             <div className="bg-gray-50 p-4 rounded-lg border border-gray-200 space-y-4" data-tutorial-target="stud-info-section">
                                 <div className="flex items-start justify-between">
                                     <h3 className="text-lg font-semibold text-gray-700 border-b pb-2 flex-1">Stud Information <span className="text-xs font-normal text-gray-500">(Active Status)</span></h3>
@@ -8731,8 +8704,8 @@ const AnimalForm = ({
                             </div>
                         )}
 
-                        {/* Dam Information - Only when Breeding Dam/Can Bear is checked and not neutered/spayed */}
-                        {!formData.isNeutered && ((formData.gender === 'Female' && formData.isDamAnimal) || (formData.gender === 'Intersex' && formData.isDamAnimal) || (formData.gender === 'Unknown' && formData.isDamAnimal)) && (
+                        {/* Dam Information - Always shown when not neutered and not infertile */}
+                        {!formData.isNeutered && !formData.isInfertile && (formData.gender === 'Female' || formData.gender === 'Intersex' || formData.gender === 'Unknown') && (
                             <div className="bg-gray-50 p-4 rounded-lg border border-gray-200 space-y-4" data-tutorial-target="dam-info-section">
                                 <div className="flex items-start justify-between">
                                     <h3 className="text-lg font-semibold text-gray-700 border-b pb-2 flex-1">Dam Information <span className="text-xs font-normal text-gray-500">(Active Status)</span></h3>
