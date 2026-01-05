@@ -64,8 +64,10 @@
     flex-direction: column;
     flex: 1;
     overflow-y: auto;
+    overflow-x: hidden;
     padding: 16px;
     gap: 16px;
+    max-height: calc(100vh - 80px - 60px); /* viewport height minus top offset minus header */
 }
 
 .mod-context-display {
