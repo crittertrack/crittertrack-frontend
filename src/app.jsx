@@ -14358,20 +14358,14 @@ const App = () => {
             [animalId]: newPrivacy
         }));
         
-        // Save to backend
+        // Save to backend (backend will sync to PublicAnimal automatically)
         try {
-            const response = await axios.put(`${API_BASE_URL}/animals/${animalId}`, {
+            await axios.put(`${API_BASE_URL}/animals/${animalId}`, {
                 sectionPrivacy: newPrivacy
             }, {
                 headers: { Authorization: `Bearer ${authToken}` }
             });
-            
-            // Update the animal in myAnimals list with the new privacy settings
-            if (response.data && response.data.animal) {
-                setMyAnimals(prev => prev.map(a => 
-                    a.id_public === animalId ? response.data.animal : a
-                ));
-            }
+            // Changes will be reflected when user next views the animal (handleViewAnimal fetches fresh data)
         } catch (error) {
             console.error('Error saving section privacy:', error);
             // Revert on error
