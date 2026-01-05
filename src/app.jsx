@@ -12761,7 +12761,16 @@ const App = () => {
                     ? flagData.context?.userId 
                     : flagData.context?.ownerId;
                 
-                console.log('[MOD ACTION LIFT_SUSPENSION] Lifting suspension for user:', { userId, reason: flagData.reason });
+                console.log('[MOD ACTION LIFT_SUSPENSION] Lifting suspension for user:', { 
+                    userId, 
+                    reason: flagData.reason,
+                    context: flagData.context,
+                    fullFlagData: flagData
+                });
+                
+                if (!userId) {
+                    throw new Error('User ID not found in context');
+                }
                 
                 const response = await axios.post(
                     `${API_BASE_URL}/moderation/users/${userId}/status`,
