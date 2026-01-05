@@ -13,6 +13,7 @@ import PrivacyPolicy from './components/PrivacyPolicy';
 import InstallPWA from './components/InstallPWA';
 import AdminPanel from './components/EnhancedAdminPanel';
 import UrgentNotificationModal from './components/UrgentNotificationModal';
+import MaintenanceMode from './MaintenanceMode';
 import MaintenanceModeBanner from './components/MaintenanceModeBanner';
 import { TutorialProvider, useTutorial } from './contexts/TutorialContext';
 import { InitialTutorialModal, TutorialOverlay, TutorialHighlight } from './components/TutorialOverlay';
@@ -27,6 +28,9 @@ import ModeratorActionSidebar from './components/moderation/ModeratorActionSideb
 // const API_BASE_URL = 'http://localhost:5000/api'; // Local development
 // const API_BASE_URL = 'https://crittertrack-pedigree-production.up.railway.app/api'; // Direct Railway (for testing)
 const API_BASE_URL = '/api'; // Production via Vercel proxy
+
+// MAINTENANCE MODE - Set to true to show maintenance screen to all users
+const MAINTENANCE_MODE = true;
 
 const GENDER_OPTIONS = ['Male', 'Female', 'Intersex', 'Unknown'];
 const STATUS_OPTIONS = ['Pet', 'Breeder', 'Available', 'Sold', 'Retired', 'Deceased', 'Rehomed', 'Unknown']; 
@@ -2928,6 +2932,8 @@ const ViewOnlyAnimalDetail = ({ animal, onClose, API_BASE_URL, onViewProfile, au
                                     </div>
                                 </div>
                             )}
+                        </div>
+                    )}
 
                     {/* Tab 3: Physical */}
                     {detailViewTab === 3 && (
@@ -17572,6 +17578,11 @@ const AppRouter = () => {
             clearTimeout(timer);
         };
     }, [location.pathname]);
+
+    // Show maintenance mode if enabled
+    if (MAINTENANCE_MODE) {
+        return <MaintenanceMode />;
+    }
 
     return (
         <>
