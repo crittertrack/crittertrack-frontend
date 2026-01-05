@@ -2553,7 +2553,15 @@ const ViewOnlyAnimalDetail = ({ animal, onClose, API_BASE_URL, onViewProfile, au
                                 animal.lastPregnancyDate || 
                                 animal.litterCount || 
                                 (animal.offspringCount !== null && animal.offspringCount !== undefined) || 
-                                animal.breedingRole
+                                animal.breedingRole ||
+                                animal.isStudAnimal ||
+                                animal.isDamAnimal ||
+                                animal.fertilityStatus ||
+                                animal.fertilityNotes ||
+                                animal.damFertilityStatus ||
+                                animal.damFertilityNotes ||
+                                animal.studFeeAmount ||
+                                animal.availableForBreeding
                             ) && (
                                 <div className="bg-blue-50 p-4 rounded-lg border border-blue-200">
                                     <h3 className="text-lg font-semibold text-gray-700 border-b pb-2 mb-3 flex items-center">
@@ -2597,11 +2605,20 @@ const ViewOnlyAnimalDetail = ({ animal, onClose, API_BASE_URL, onViewProfile, au
                             )}
                             
                             {/* Stud/Dam Information */}
-                            {animal.sectionPrivacy?.reproductive !== false && (animal.isStudAnimal || animal.isDamAnimal) && (
+                            {animal.sectionPrivacy?.reproductive !== false && (
+                                animal.isStudAnimal || 
+                                animal.isDamAnimal || 
+                                animal.availableForBreeding || 
+                                animal.studFeeAmount || 
+                                animal.fertilityStatus || 
+                                animal.fertilityNotes || 
+                                animal.damFertilityStatus || 
+                                animal.damFertilityNotes
+                            ) && (
                                 <div className="bg-gray-50 p-4 rounded-lg border border-gray-200">
                                     <h3 className="text-lg font-semibold text-gray-700 border-b pb-2 mb-3">Breeding Availability</h3>
                                     <div className="space-y-3">
-                                        {animal.isStudAnimal && (
+                                        {(animal.isStudAnimal || animal.availableForBreeding || animal.studFeeAmount || animal.fertilityStatus || animal.fertilityNotes) && (
                                             <div>
                                                 <p className="text-sm font-medium text-gray-700 mb-2">Stud Information</p>
                                                 <div className="space-y-1 ml-3">
@@ -2610,9 +2627,9 @@ const ViewOnlyAnimalDetail = ({ animal, onClose, API_BASE_URL, onViewProfile, au
                                                             <span className="font-medium">Available for Breeding:</span> Yes
                                                         </p>
                                                     )}
-                                                    {animal.studFeeAmount && (
+                                                    {animal.studFeeAmount !== null && animal.studFeeAmount !== undefined && (
                                                         <p className="text-sm">
-                                                            <span className="font-medium">Stud Fee:</span> {animal.studFeeCurrency} {animal.studFeeAmount}
+                                                            <span className="font-medium">Stud Fee:</span> {animal.studFeeCurrency || 'USD'} {animal.studFeeAmount}
                                                         </p>
                                                     )}
                                                     {animal.fertilityStatus && animal.fertilityStatus !== 'Unknown' && (
@@ -2628,7 +2645,7 @@ const ViewOnlyAnimalDetail = ({ animal, onClose, API_BASE_URL, onViewProfile, au
                                                 </div>
                                             </div>
                                         )}
-                                        {animal.isDamAnimal && (
+                                        {(animal.isDamAnimal || animal.damFertilityStatus || animal.damFertilityNotes) && (
                                             <div>
                                                 <p className="text-sm font-medium text-gray-700 mb-2">Dam Information</p>
                                                 <div className="space-y-1 ml-3">
