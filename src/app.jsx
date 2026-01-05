@@ -2546,22 +2546,14 @@ const ViewOnlyAnimalDetail = ({ animal, onClose, API_BASE_URL, onViewProfile, au
                                 </div>
                             )}
                             
-                            {/* Breeding History Section */}
+                            {/* Breeding History Section - Only shows if breeding history data exists */}
                             {animal.sectionPrivacy?.reproductive !== false && (
                                 animal.lastMatingDate || 
                                 (animal.successfulMatings !== null && animal.successfulMatings !== undefined) || 
                                 animal.lastPregnancyDate || 
                                 animal.litterCount || 
                                 (animal.offspringCount !== null && animal.offspringCount !== undefined) || 
-                                animal.breedingRole ||
-                                animal.isStudAnimal ||
-                                animal.isDamAnimal ||
-                                animal.fertilityStatus ||
-                                animal.fertilityNotes ||
-                                animal.damFertilityStatus ||
-                                animal.damFertilityNotes ||
-                                animal.studFeeAmount ||
-                                animal.availableForBreeding
+                                animal.breedingRole
                             ) && (
                                 <div className="bg-blue-50 p-4 rounded-lg border border-blue-200">
                                     <h3 className="text-lg font-semibold text-gray-700 border-b pb-2 mb-3 flex items-center">
