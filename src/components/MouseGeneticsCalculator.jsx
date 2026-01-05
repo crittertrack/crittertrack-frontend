@@ -917,14 +917,14 @@ const calculatePhenotype = (genotype, originalGenotype = null) => {
   // Roan (Rn) - recessive trait
   if (genotype.Rn === 'rn/rn') {
     markings.push('Roan');
-  } else if (genotype.Rn === 'Rn/rn') {
+  } else if (genotype.Rn === 'Rn/rn' || genotype.Rn === 'rn/Rn') {
     carriers.push('Roan');
   }
 
   // Silvered (Si) - recessive trait
   if (genotype.Si === 'si/si') {
     markings.push('Silvered');
-  } else if (genotype.Si === 'Si/si') {
+  } else if (genotype.Si === 'Si/si' || genotype.Si === 'si/Si') {
     carriers.push('Silvered');
   }
 
