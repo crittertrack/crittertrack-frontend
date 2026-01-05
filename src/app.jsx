@@ -2579,64 +2579,39 @@ const ViewOnlyAnimalDetail = ({ animal, onClose, API_BASE_URL, onViewProfile, au
                 </div>
             </div>
                             {/* Stud/Dam Information */}
-                            {(animal.isStudAnimal || 
-                                animal.isDamAnimal || 
-                                animal.availableForBreeding || 
-                                (animal.studFeeAmount !== null && animal.studFeeAmount !== undefined) || 
-                                (animal.fertilityStatus && animal.fertilityStatus !== 'Unknown') || 
-                                animal.fertilityNotes || 
-                                (animal.damFertilityStatus && animal.damFertilityStatus !== 'Unknown') || 
-                                animal.damFertilityNotes) && (
-                                <div className="bg-gray-50 p-4 rounded-lg border border-gray-200">
-                                    <h3 className="text-lg font-semibold text-gray-700 border-b pb-2 mb-3">Breeding Availability</h3>
-                                    <div className="space-y-3">
-                                        {(animal.isStudAnimal || animal.availableForBreeding || (animal.studFeeAmount !== null && animal.studFeeAmount !== undefined) || (animal.fertilityStatus && animal.fertilityStatus !== 'Unknown') || animal.fertilityNotes) && (
-                                            <div>
-                                                <p className="text-sm font-medium text-gray-700 mb-2">Stud Information</p>
-                                                <div className="space-y-1 ml-3">
-                                                    {animal.availableForBreeding && (
-                                                        <p className="text-sm">
-                                                            <span className="font-medium">Available for Breeding:</span> Yes
-                                                        </p>
-                                                    )}
-                                                    {(animal.studFeeAmount !== null && animal.studFeeAmount !== undefined) && (
-                                                        <p className="text-sm">
-                                                            <span className="font-medium">Stud Fee:</span> {animal.studFeeCurrency || 'USD'} {animal.studFeeAmount}
-                                                        </p>
-                                                    )}
-                                                    {animal.fertilityStatus && animal.fertilityStatus !== 'Unknown' && (
-                                                        <p className="text-sm">
-                                                            <span className="font-medium">Fertility Status:</span> {animal.fertilityStatus}
-                                                        </p>
-                                                    )}
-                                                    {animal.fertilityNotes && (
-                                                        <p className="text-sm">
-                                                            <span className="font-medium">Notes:</span> {animal.fertilityNotes}
-                                                        </p>
-                                                    )}
-                                                </div>
-                                            </div>
-                                        )}
-                                        {(animal.isDamAnimal || (animal.damFertilityStatus && animal.damFertilityStatus !== 'Unknown') || animal.damFertilityNotes) && (
-                                            <div>
-                                                <p className="text-sm font-medium text-gray-700 mb-2">Dam Information</p>
-                                                <div className="space-y-1 ml-3">
-                                                    {animal.damFertilityStatus && animal.damFertilityStatus !== 'Unknown' && (
-                                                        <p className="text-sm">
-                                                            <span className="font-medium">Fertility Status:</span> {animal.damFertilityStatus}
-                                                        </p>
-                                                    )}
-                                                    {animal.damFertilityNotes && (
-                                                        <p className="text-sm">
-                                                            <span className="font-medium">Notes:</span> {animal.damFertilityNotes}
-                                                        </p>
-                                                    )}
-                                                </div>
-                                            </div>
-                                        )}
+                            <div className="bg-gray-50 p-4 rounded-lg border border-gray-200">
+                                <h3 className="text-lg font-semibold text-gray-700 border-b pb-2 mb-3">Breeding Availability</h3>
+                                <div className="space-y-3">
+                                    <div>
+                                        <p className="text-sm font-medium text-gray-700 mb-2">Stud Information</p>
+                                        <div className="space-y-1 ml-3">
+                                            <p className="text-sm">
+                                                <span className="font-medium">Available for Breeding:</span> {animal.availableForBreeding ? 'Yes' : 'No'}
+                                            </p>
+                                            <p className="text-sm">
+                                                <span className="font-medium">Stud Fee:</span> {(animal.studFeeAmount !== null && animal.studFeeAmount !== undefined) ? `${animal.studFeeCurrency || 'USD'} ${animal.studFeeAmount}` : '—'}
+                                            </p>
+                                            <p className="text-sm">
+                                                <span className="font-medium">Fertility Status:</span> {(animal.fertilityStatus && animal.fertilityStatus !== 'Unknown') ? animal.fertilityStatus : '—'}
+                                            </p>
+                                            <p className="text-sm">
+                                                <span className="font-medium">Notes:</span> {animal.fertilityNotes || '—'}
+                                            </p>
+                                        </div>
+                                    </div>
+                                    <div>
+                                        <p className="text-sm font-medium text-gray-700 mb-2">Dam Information</p>
+                                        <div className="space-y-1 ml-3">
+                                            <p className="text-sm">
+                                                <span className="font-medium">Fertility Status:</span> {(animal.damFertilityStatus && animal.damFertilityStatus !== 'Unknown') ? animal.damFertilityStatus : '—'}
+                                            </p>
+                                            <p className="text-sm">
+                                                <span className="font-medium">Notes:</span> {animal.damFertilityNotes || '—'}
+                                            </p>
+                                        </div>
                                     </div>
                                 </div>
-                            )}
+                            </div>
                         </div>
                     )}
 
