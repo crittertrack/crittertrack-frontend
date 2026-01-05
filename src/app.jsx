@@ -3271,25 +3271,23 @@ const ViewOnlyAnimalDetail = ({ animal, onClose, API_BASE_URL, onViewProfile, au
                     {detailViewTab === 6 && (
                         <div className="space-y-6">
                             {/* 1st Section: Reproductive Status */}
-                            {(animal.isNeutered || animal.heatStatus || animal.isPregnant || animal.isNursing) && (
-                                <div className="bg-gray-50 p-4 rounded-lg border border-gray-200 space-y-4">
-                                    <h3 className="text-lg font-semibold text-gray-700">Reproductive Status</h3>
-                                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm">
-                                        <div><span className="text-gray-600">Neutered/Spayed:</span> <strong>{animal.isNeutered ? '✓ Yes' : '✗ No'}</strong></div>
-                                        <div><span className="text-gray-600">Infertile:</span> <strong>{animal.isInfertile ? '✓ Yes' : '✗ No'}</strong></div>
-                                        {!animal.isNeutered && (
-                                            <>
-                                                <div><span className="text-gray-600">In Mating:</span> <strong>{animal.inMating ? '✓ Yes' : '✗ No'}</strong></div>
-                                                <div><span className="text-gray-600">Pregnant:</span> <strong>{animal.isPregnant ? '✓ Yes' : '✗ No'}</strong></div>
-                                                <div><span className="text-gray-600">Nursing:</span> <strong>{animal.isNursing ? '✓ Yes' : '✗ No'}</strong></div>
-                                            </>
-                                        )}
-                                    </div>
+                            <div className="bg-gray-50 p-4 rounded-lg border border-gray-200 space-y-4">
+                                <h3 className="text-lg font-semibold text-gray-700">Reproductive Status</h3>
+                                <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm">
+                                    <div><span className="text-gray-600">Neutered/Spayed:</span> <strong>{animal.isNeutered ? '✓ Yes' : '✗ No'}</strong></div>
+                                    <div><span className="text-gray-600">Infertile:</span> <strong>{animal.isInfertile ? '✓ Yes' : '✗ No'}</strong></div>
+                                    {!animal.isNeutered && (
+                                        <>
+                                            <div><span className="text-gray-600">In Mating:</span> <strong>{animal.inMating ? '✓ Yes' : '✗ No'}</strong></div>
+                                            <div><span className="text-gray-600">Pregnant:</span> <strong>{animal.isPregnant ? '✓ Yes' : '✗ No'}</strong></div>
+                                            <div><span className="text-gray-600">Nursing:</span> <strong>{animal.isNursing ? '✓ Yes' : '✗ No'}</strong></div>
+                                        </>
+                                    )}
                                 </div>
-                            )}
+                            </div>
 
                             {/* 2nd Section: Estrus/Cycle (Female only) */}
-                            {(animal.gender === 'Female' || animal.gender === 'Intersex' || animal.gender === 'Unknown') && (animal.heatStatus || animal.lastHeatDate) && (
+                            {(animal.gender === 'Female' || animal.gender === 'Intersex' || animal.gender === 'Unknown') && (
                                 <div className="bg-gray-50 p-4 rounded-lg border border-gray-200 space-y-4">
                                     <h3 className="text-lg font-semibold text-gray-700">Estrus/Cycle</h3>
                                     <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm">
@@ -3300,18 +3298,16 @@ const ViewOnlyAnimalDetail = ({ animal, onClose, API_BASE_URL, onViewProfile, au
                             )}
 
                             {/* 3rd Section: Mating */}
-                            {(animal.matingDates || animal.expectedDueDate) && (
-                                <div className="bg-gray-50 p-4 rounded-lg border border-gray-200 space-y-4">
-                                    <h3 className="text-lg font-semibold text-gray-700">Mating</h3>
-                                    <div className="space-y-3 text-sm">
-                                        <div><span className="text-gray-600">Mating Dates:</span> <strong>{animal.matingDates || '—'}</strong></div>
-                                        <div><span className="text-gray-600">Expected Due Date:</span> <strong>{animal.expectedDueDate ? new Date(animal.expectedDueDate).toLocaleDateString() : '—'}</strong></div>
-                                    </div>
+                            <div className="bg-gray-50 p-4 rounded-lg border border-gray-200 space-y-4">
+                                <h3 className="text-lg font-semibold text-gray-700">Mating</h3>
+                                <div className="space-y-3 text-sm">
+                                    <div><span className="text-gray-600">Mating Dates:</span> <strong>{animal.matingDates || '—'}</strong></div>
+                                    <div><span className="text-gray-600">Expected Due Date:</span> <strong>{animal.expectedDueDate ? new Date(animal.expectedDueDate).toLocaleDateString() : '—'}</strong></div>
                                 </div>
-                            )}
+                            </div>
 
                             {/* 5th Section: Stud Information */}
-                            {(animal.gender === 'Male' || animal.gender === 'Intersex' || animal.gender === 'Unknown') && !animal.isNeutered && !animal.isInfertile && (animal.fertilityStatus || animal.successfulMatings || animal.fertilityNotes) && (
+                            {(animal.gender === 'Male' || animal.gender === 'Intersex' || animal.gender === 'Unknown') && !animal.isNeutered && !animal.isInfertile && (
                                 <div className="bg-gray-50 p-4 rounded-lg border border-gray-200 space-y-4">
                                     <h3 className="text-lg font-semibold text-gray-700">Stud Information</h3>
                                     <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm">
@@ -3325,7 +3321,7 @@ const ViewOnlyAnimalDetail = ({ animal, onClose, API_BASE_URL, onViewProfile, au
                             )}
 
                             {/* 6th Section: Dam Information */}
-                            {(animal.gender === 'Female' || animal.gender === 'Intersex' || animal.gender === 'Unknown') && !animal.isNeutered && !animal.isInfertile && (animal.damFertilityStatus || animal.litterCount) && (
+                            {(animal.gender === 'Female' || animal.gender === 'Intersex' || animal.gender === 'Unknown') && !animal.isNeutered && !animal.isInfertile && (
                                 <div className="bg-gray-50 p-4 rounded-lg border border-gray-200 space-y-4">
                                     <h3 className="text-lg font-semibold text-gray-700">Dam Information</h3>
                                     <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm">
@@ -3336,15 +3332,13 @@ const ViewOnlyAnimalDetail = ({ animal, onClose, API_BASE_URL, onViewProfile, au
                             )}
 
                             {/* 7th Section: Breeding History */}
-                            {(animal.litterCount || animal.offspringCount) && (
-                                <div className="bg-gray-50 p-4 rounded-lg border border-gray-200 space-y-4">
-                                    <h3 className="text-lg font-semibold text-gray-700">Breeding History</h3>
-                                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm">
-                                        <div><span className="text-gray-600">Offspring Count:</span> <strong>{animal.offspringCount || '—'}</strong></div>
-                                        <div><span className="text-gray-600">Litter Count:</span> <strong>{animal.litterCount || '—'}</strong></div>
-                                    </div>
+                            <div className="bg-gray-50 p-4 rounded-lg border border-gray-200 space-y-4">
+                                <h3 className="text-lg font-semibold text-gray-700">Breeding History</h3>
+                                <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm">
+                                    <div><span className="text-gray-600">Offspring Count:</span> <strong>{animal.offspringCount || '—'}</strong></div>
+                                    <div><span className="text-gray-600">Litter Count:</span> <strong>{animal.litterCount || '—'}</strong></div>
                                 </div>
-                            )}
+                            </div>
                         </div>
                     )}
 
@@ -3352,9 +3346,8 @@ const ViewOnlyAnimalDetail = ({ animal, onClose, API_BASE_URL, onViewProfile, au
                     {detailViewTab === 7 && (
                         <div className="space-y-6">
                             {/* 1st Section: Preventive Care */}
-                            {(animal.vaccinations || animal.dewormingRecords || animal.parasiteControl) && (
-                                <div className="bg-gray-50 p-4 rounded-lg border border-gray-200 space-y-4">
-                                    <h3 className="text-lg font-semibold text-gray-700">Preventive Care</h3>
+                            <div className="bg-gray-50 p-4 rounded-lg border border-gray-200 space-y-4">
+                                <h3 className="text-lg font-semibold text-gray-700">Preventive Care</h3>
                                     {animal.vaccinations && (
                                         <div>
                                             <strong className="text-sm">Vaccinations:</strong>
@@ -3406,22 +3399,20 @@ const ViewOnlyAnimalDetail = ({ animal, onClose, API_BASE_URL, onViewProfile, au
                                             </ul>
                                         </div>
                                     )}
-                                </div>
-                            )}
+                                {!animal.vaccinations && !animal.dewormingRecords && !animal.parasiteControl && <p className="text-sm text-gray-600">—</p>}
+                            </div>
 
                             {/* 2nd Section: Procedures & Diagnostics */}
-                            {(animal.medicalProcedures || animal.laboratoryResults) && (
-                                <div className="bg-gray-50 p-4 rounded-lg border border-gray-200 space-y-4">
-                                    <h3 className="text-lg font-semibold text-gray-700">Procedures & Diagnostics</h3>
-                                    {animal.medicalProcedures && <div><strong className="text-sm">Medical Procedures:</strong> <p className="text-sm mt-1">{animal.medicalProcedures}</p></div>}
-                                    {animal.laboratoryResults && <div><strong className="text-sm">Laboratory Results:</strong> <p className="text-sm mt-1">{animal.laboratoryResults}</p></div>}
-                                </div>
-                            )}
+                            <div className="bg-gray-50 p-4 rounded-lg border border-gray-200 space-y-4">
+                                <h3 className="text-lg font-semibold text-gray-700">Procedures & Diagnostics</h3>
+                                {animal.medicalProcedures && <div><strong className="text-sm">Medical Procedures:</strong> <p className="text-sm mt-1">{animal.medicalProcedures}</p></div>}
+                                {animal.laboratoryResults && <div><strong className="text-sm">Laboratory Results:</strong> <p className="text-sm mt-1">{animal.laboratoryResults}</p></div>}
+                                {!animal.medicalProcedures && !animal.laboratoryResults && <p className="text-sm text-gray-600">—</p>}
+                            </div>
 
                             {/* 3rd Section: Active Medical Records */}
-                            {(animal.medicalConditions || animal.allergies || animal.medications) && (
-                                <div className="bg-gray-50 p-4 rounded-lg border border-gray-200 space-y-4">
-                                    <h3 className="text-lg font-semibold text-gray-700">Active Medical Records</h3>
+                            <div className="bg-gray-50 p-4 rounded-lg border border-gray-200 space-y-4">
+                                <h3 className="text-lg font-semibold text-gray-700">Active Medical Records</h3>
                                     {animal.medicalConditions && (() => {
                                         const parsed = parseHealthRecords(animal.medicalConditions);
                                         return parsed && parsed.length > 0 ? (
@@ -3470,17 +3461,16 @@ const ViewOnlyAnimalDetail = ({ animal, onClose, API_BASE_URL, onViewProfile, au
                                             </div>
                                         ) : null;
                                     })()}
-                                </div>
-                            )}
+                                    {!animal.medicalConditions && !animal.allergies && !animal.medications && <p className="text-sm text-gray-600">—</p>}
+                            </div>
 
                             {/* 4th Section: Veterinary Care */}
-                            {(animal.primaryVet || animal.vetVisits) && (
-                                <div className="bg-gray-50 p-4 rounded-lg border border-gray-200 space-y-4">
-                                    <h3 className="text-lg font-semibold text-gray-700">Veterinary Care</h3>
-                                    {animal.primaryVet && <div><strong className="text-sm">Primary Veterinarian:</strong> <p className="text-sm mt-1">{animal.primaryVet}</p></div>}
-                                    {animal.vetVisits && <div><strong className="text-sm">Veterinary Visits:</strong> <p className="text-sm mt-1">{animal.vetVisits}</p></div>}
-                                </div>
-                            )}
+                            <div className="bg-gray-50 p-4 rounded-lg border border-gray-200 space-y-4">
+                                <h3 className="text-lg font-semibold text-gray-700">Veterinary Care</h3>
+                                {animal.primaryVet && <div><strong className="text-sm">Primary Veterinarian:</strong> <p className="text-sm mt-1">{animal.primaryVet}</p></div>}
+                                {animal.vetVisits && <div><strong className="text-sm">Veterinary Visits:</strong> <p className="text-sm mt-1">{animal.vetVisits}</p></div>}
+                                {!animal.primaryVet && !animal.vetVisits && <p className="text-sm text-gray-600">—</p>}
+                            </div>
                         </div>
                     )}
 
@@ -3488,35 +3478,32 @@ const ViewOnlyAnimalDetail = ({ animal, onClose, API_BASE_URL, onViewProfile, au
                     {detailViewTab === 8 && (
                         <div className="space-y-6">
                             {/* 1st Section: Nutrition */}
-                            {(animal.dietType || animal.feedingSchedule || animal.supplements) && (
-                                <div className="bg-gray-50 p-4 rounded-lg border border-gray-200 space-y-4">
-                                    <h3 className="text-lg font-semibold text-gray-700">Nutrition</h3>
-                                    {animal.dietType && <div><strong className="text-sm">Diet Type:</strong> <p className="text-sm mt-1">{animal.dietType}</p></div>}
-                                    {animal.feedingSchedule && <div><strong className="text-sm">Feeding Schedule:</strong> <p className="text-sm mt-1">{animal.feedingSchedule}</p></div>}
-                                    {animal.supplements && <div><strong className="text-sm">Supplements:</strong> <p className="text-sm mt-1">{animal.supplements}</p></div>}
-                                </div>
-                            )}
+                            <div className="bg-gray-50 p-4 rounded-lg border border-gray-200 space-y-4">
+                                <h3 className="text-lg font-semibold text-gray-700">Nutrition</h3>
+                                {animal.dietType && <div><strong className="text-sm">Diet Type:</strong> <p className="text-sm mt-1">{animal.dietType}</p></div>}
+                                {animal.feedingSchedule && <div><strong className="text-sm">Feeding Schedule:</strong> <p className="text-sm mt-1">{animal.feedingSchedule}</p></div>}
+                                {animal.supplements && <div><strong className="text-sm">Supplements:</strong> <p className="text-sm mt-1">{animal.supplements}</p></div>}
+                                {!animal.dietType && !animal.feedingSchedule && !animal.supplements && <p className="text-sm text-gray-600">—</p>}
+                            </div>
 
                             {/* 2nd Section: Husbandry */}
-                            {(animal.housingType || animal.bedding || animal.enrichment) && (
-                                <div className="bg-gray-50 p-4 rounded-lg border border-gray-200 space-y-4">
-                                    <h3 className="text-lg font-semibold text-gray-700">Husbandry</h3>
-                                    {animal.housingType && <div><strong className="text-sm">Housing Type:</strong> <p className="text-sm mt-1">{animal.housingType}</p></div>}
-                                    {animal.bedding && <div><strong className="text-sm">Bedding:</strong> <p className="text-sm mt-1">{animal.bedding}</p></div>}
-                                    {animal.enrichment && <div><strong className="text-sm">Enrichment:</strong> <p className="text-sm mt-1">{animal.enrichment}</p></div>}
-                                </div>
-                            )}
+                            <div className="bg-gray-50 p-4 rounded-lg border border-gray-200 space-y-4">
+                                <h3 className="text-lg font-semibold text-gray-700">Husbandry</h3>
+                                {animal.housingType && <div><strong className="text-sm">Housing Type:</strong> <p className="text-sm mt-1">{animal.housingType}</p></div>}
+                                {animal.bedding && <div><strong className="text-sm">Bedding:</strong> <p className="text-sm mt-1">{animal.bedding}</p></div>}
+                                {animal.enrichment && <div><strong className="text-sm">Enrichment:</strong> <p className="text-sm mt-1">{animal.enrichment}</p></div>}
+                                {!animal.housingType && !animal.bedding && !animal.enrichment && <p className="text-sm text-gray-600">—</p>}
+                            </div>
 
                             {/* 3rd Section: Environment */}
-                            {(animal.temperatureRange || animal.humidity || animal.lighting || animal.noise) && (
-                                <div className="bg-gray-50 p-4 rounded-lg border border-gray-200 space-y-4">
-                                    <h3 className="text-lg font-semibold text-gray-700">Environment</h3>
-                                    {animal.temperatureRange && <div><strong className="text-sm">Temperature Range:</strong> <p className="text-sm mt-1">{animal.temperatureRange}</p></div>}
-                                    {animal.humidity && <div><strong className="text-sm">Humidity:</strong> <p className="text-sm mt-1">{animal.humidity}</p></div>}
-                                    {animal.lighting && <div><strong className="text-sm">Lighting:</strong> <p className="text-sm mt-1">{animal.lighting}</p></div>}
-                                    {animal.noise && <div><strong className="text-sm">Noise Level:</strong> <p className="text-sm mt-1">{animal.noise}</p></div>}
-                                </div>
-                            )}
+                            <div className="bg-gray-50 p-4 rounded-lg border border-gray-200 space-y-4">
+                                <h3 className="text-lg font-semibold text-gray-700">Environment</h3>
+                                {animal.temperatureRange && <div><strong className="text-sm">Temperature Range:</strong> <p className="text-sm mt-1">{animal.temperatureRange}</p></div>}
+                                {animal.humidity && <div><strong className="text-sm">Humidity:</strong> <p className="text-sm mt-1">{animal.humidity}</p></div>}
+                                {animal.lighting && <div><strong className="text-sm">Lighting:</strong> <p className="text-sm mt-1">{animal.lighting}</p></div>}
+                                {animal.noise && <div><strong className="text-sm">Noise Level:</strong> <p className="text-sm mt-1">{animal.noise}</p></div>}
+                                {!animal.temperatureRange && !animal.humidity && !animal.lighting && !animal.noise && <p className="text-sm text-gray-600">—</p>}
+                            </div>
                         </div>
                     )}
 
@@ -3524,22 +3511,20 @@ const ViewOnlyAnimalDetail = ({ animal, onClose, API_BASE_URL, onViewProfile, au
                     {detailViewTab === 9 && (
                         <div className="space-y-6">
                             {/* 1st Section: Behavior */}
-                            {(animal.temperament || animal.handlingTolerance || animal.socialStructure) && (
-                                <div className="bg-gray-50 p-4 rounded-lg border border-gray-200 space-y-4">
-                                    <h3 className="text-lg font-semibold text-gray-700">Behavior</h3>
-                                    {animal.temperament && <div><strong className="text-sm">Temperament:</strong> <p className="text-sm mt-1">{animal.temperament}</p></div>}
-                                    {animal.handlingTolerance && <div><strong className="text-sm">Handling Tolerance:</strong> <p className="text-sm mt-1">{animal.handlingTolerance}</p></div>}
-                                    {animal.socialStructure && <div><strong className="text-sm">Social Structure:</strong> <p className="text-sm mt-1">{animal.socialStructure}</p></div>}
-                                </div>
-                            )}
+                            <div className="bg-gray-50 p-4 rounded-lg border border-gray-200 space-y-4">
+                                <h3 className="text-lg font-semibold text-gray-700">Behavior</h3>
+                                {animal.temperament && <div><strong className="text-sm">Temperament:</strong> <p className="text-sm mt-1">{animal.temperament}</p></div>}
+                                {animal.handlingTolerance && <div><strong className="text-sm">Handling Tolerance:</strong> <p className="text-sm mt-1">{animal.handlingTolerance}</p></div>}
+                                {animal.socialStructure && <div><strong className="text-sm">Social Structure:</strong> <p className="text-sm mt-1">{animal.socialStructure}</p></div>}
+                                {!animal.temperament && !animal.handlingTolerance && !animal.socialStructure && <p className="text-sm text-gray-600">—</p>}
+                            </div>
 
                             {/* 2nd Section: Activity */}
-                            {animal.activityCycle && (
-                                <div className="bg-gray-50 p-4 rounded-lg border border-gray-200 space-y-4">
-                                    <h3 className="text-lg font-semibold text-gray-700">Activity</h3>
-                                    <div><strong className="text-sm">Activity Cycle:</strong> <p className="text-sm mt-1">{animal.activityCycle}</p></div>
-                                </div>
-                            )}
+                            <div className="bg-gray-50 p-4 rounded-lg border border-gray-200 space-y-4">
+                                <h3 className="text-lg font-semibold text-gray-700">Activity</h3>
+                                {animal.activityCycle && <div><strong className="text-sm">Activity Cycle:</strong> <p className="text-sm mt-1">{animal.activityCycle}</p></div>}
+                                {!animal.activityCycle && <p className="text-sm text-gray-600">—</p>}
+                            </div>
                         </div>
                     )}
 
