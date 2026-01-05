@@ -14108,7 +14108,7 @@ const App = () => {
             </div>
             
             {/* Available Animal Showcase - Top Right */}
-            {currentView === 'list' && !moderationModeActive && (() => {
+            {currentView === 'list' && !inModeratorMode && (() => {
                 console.log('[Available Animals Showcase] availableAnimals.length:', availableAnimals.length, 'currentIndex:', currentAvailableIndex);
                 return availableAnimals.length > 0 && availableAnimals[currentAvailableIndex];
             })() && (

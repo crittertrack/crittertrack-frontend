@@ -46,7 +46,7 @@ const UserManagementPanel = () => {
     };
 
     const handleLiftSuspension = async (userId) => {
-        if (!confirm('Are you sure you want to lift this suspension?')) return;
+        if (!window.confirm('Are you sure you want to lift this suspension?')) return;
 
         try {
             const token = localStorage.getItem('token');
@@ -62,7 +62,7 @@ const UserManagementPanel = () => {
     };
 
     const handleLiftBan = async (userId) => {
-        if (!confirm('Are you sure you want to lift this ban?')) return;
+        if (!window.confirm('Are you sure you want to lift this ban?')) return;
 
         try {
             const token = localStorage.getItem('token');
