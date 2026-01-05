@@ -4415,7 +4415,7 @@ const ViewOnlyAnimalDetail = ({ animal, onClose, API_BASE_URL, onViewProfile, au
                             {/* Current Owner Section */}
                             <div className="bg-gray-50 p-4 rounded-lg border border-gray-200">
                                 <h3 className="text-lg font-semibold text-gray-700 border-b pb-2 mb-3">Current Owner</h3>
-                                <p className="text-gray-700">{!sectionPrivacy.currentOwner ? (animal.currentOwner || '—') : '—'}</p>
+                                <p className="text-gray-700">{sectionPrivacy.currentOwner ? (animal.currentOwner || '—') : '—'}</p>
                             </div>
                             
                             {/* Remarks & Notes Section */}
@@ -8844,7 +8844,7 @@ const AnimalForm = ({
                                     }}
                                     title="Toggle public visibility"
                                 >
-                                    <span>{sectionPrivacy[animalToEdit?.id_public]?.currentOwner ? '🔒 Private' : '🌍 Public'}</span>
+                                    <span>{sectionPrivacy[animalToEdit?.id_public]?.currentOwner ? '🌍 Public' : '🔒 Private'}</span>
                                 </button>
                             </div>
                             <div>
@@ -8972,7 +8972,7 @@ const AnimalForm = ({
                                     }}
                                     title="Toggle public visibility"
                                 >
-                                    <span>{sectionPrivacy[animalToEdit?.id_public]?.geneticCode ? '🔒 Private' : '🌍 Public'}</span>
+                                    <span>{sectionPrivacy[animalToEdit?.id_public]?.geneticCode ? '🌍 Public' : '🔒 Private'}</span>
                                 </button>
                             </div>
                             <GeneticCodeBuilder
@@ -8997,7 +8997,7 @@ const AnimalForm = ({
                                     }}
                                     title="Toggle public visibility"
                                 >
-                                    <span>{sectionPrivacy[animalToEdit?.id_public]?.lifeStage ? '🔒 Private' : '🌍 Public'}</span>
+                                    <span>{sectionPrivacy[animalToEdit?.id_public]?.lifeStage ? '🌍 Public' : '🔒 Private'}</span>
                                 </button>
                             </div>
                             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -9035,7 +9035,7 @@ const AnimalForm = ({
                                             }}
                                             title="Toggle public visibility"
                                         >
-                                            <span>{sectionPrivacy[animalToEdit?.id_public]?.currentMeasurements ? '🔒 Private' : '🌍 Public'}</span>
+                                            <span>{sectionPrivacy[animalToEdit?.id_public]?.currentMeasurements ? '🌍 Public' : '🔒 Private'}</span>
                                         </button>
                                     </div>
                                     <div className="flex flex-col items-center gap-1">
@@ -9049,7 +9049,7 @@ const AnimalForm = ({
                                             }}
                                             title="Toggle public visibility"
                                         >
-                                            <span>{sectionPrivacy[animalToEdit?.id_public]?.growthHistory ? '🔒 Private' : '🌍 Public'}</span>
+                                            <span>{sectionPrivacy[animalToEdit?.id_public]?.growthHistory ? '🌍 Public' : '🔒 Private'}</span>
                                         </button>
                                     </div>
                                 </div>
@@ -9614,7 +9614,7 @@ const AnimalForm = ({
                                     }}
                                     title="Toggle public visibility"
                                 >
-                                    <span>{sectionPrivacy[animalToEdit?.id_public]?.origin ? '🔒 Private' : '🌍 Public'}</span>
+                                    <span>{sectionPrivacy[animalToEdit?.id_public]?.origin ? '🌍 Public' : '🔒 Private'}</span>
                                 </button>
                             </div>
                             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -9777,7 +9777,7 @@ const AnimalForm = ({
                                         }}
                                         title="Toggle public visibility"
                                     >
-                                        <span>{sectionPrivacy[animalToEdit?.id_public]?.estrusCycle ? '🔒 Private' : '🌍 Public'}</span>
+                                        <span>{sectionPrivacy[animalToEdit?.id_public]?.estrusCycle ? '🌍 Public' : '🔒 Private'}</span>
                                     </button>
                                 </div>
                                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -9822,7 +9822,7 @@ const AnimalForm = ({
                                         }}
                                         title="Toggle public visibility"
                                     >
-                                        <span>{sectionPrivacy[animalToEdit?.id_public]?.mating ? '🔒 Private' : '🌍 Public'}</span>
+                                        <span>{sectionPrivacy[animalToEdit?.id_public]?.mating ? '🌍 Public' : '🔒 Private'}</span>
                                     </button>
                                 </div>
                                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -9856,7 +9856,7 @@ const AnimalForm = ({
                                         }}
                                         title="Toggle public visibility"
                                     >
-                                        <span>{sectionPrivacy[animalToEdit?.id_public]?.studInformation ? '🔒 Private' : '🌍 Public'}</span>
+                                        <span>{sectionPrivacy[animalToEdit?.id_public]?.studInformation ? '🌍 Public' : '🔒 Private'}</span>
                                     </button>
                                 </div>
                                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -9899,7 +9899,7 @@ const AnimalForm = ({
                                         }}
                                         title="Toggle public visibility"
                                     >
-                                        <span>{sectionPrivacy[animalToEdit?.id_public]?.damInformation ? '🔒 Private' : '🌍 Public'}</span>
+                                        <span>{sectionPrivacy[animalToEdit?.id_public]?.damInformation ? '🌍 Public' : '🔒 Private'}</span>
                                     </button>
                                 </div>
                                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -9937,7 +9937,7 @@ const AnimalForm = ({
                                     }}
                                     title="Toggle public visibility"
                                 >
-                                    <span>{sectionPrivacy[animalToEdit?.id_public]?.breedingHistory ? '🔒 Private' : '🌍 Public'}</span>
+                                    <span>{sectionPrivacy[animalToEdit?.id_public]?.breedingHistory ? '🌍 Public' : '🔒 Private'}</span>
                                 </button>
                             </div>
                                 
@@ -10038,7 +10038,7 @@ const AnimalForm = ({
                                     }}
                                     title="Toggle public visibility"
                                 >
-                                    <span>{sectionPrivacy[animalToEdit?.id_public]?.preventiveCare ? '🔒 Private' : '🌍 Public'}</span>
+                                    <span>{sectionPrivacy[animalToEdit?.id_public]?.preventiveCare ? '🌍 Public' : '🔒 Private'}</span>
                                 </button>
                             </div>
                             
@@ -10179,7 +10179,7 @@ const AnimalForm = ({
                                     }}
                                     title="Toggle public visibility"
                                 >
-                                    <span>{sectionPrivacy[animalToEdit?.id_public]?.proceduresAndDiagnostics ? '🔒 Private' : '🌍 Public'}</span>
+                                    <span>{sectionPrivacy[animalToEdit?.id_public]?.proceduresAndDiagnostics ? '🌍 Public' : '🔒 Private'}</span>
                                 </button>
                             </div>
                             
@@ -10284,7 +10284,7 @@ const AnimalForm = ({
                                     }}
                                     title="Toggle public visibility"
                                 >
-                                    <span>{sectionPrivacy[animalToEdit?.id_public]?.activeMedicalRecords ? '🔒 Private' : '🌍 Public'}</span>
+                                    <span>{sectionPrivacy[animalToEdit?.id_public]?.activeMedicalRecords ? '🌍 Public' : '🔒 Private'}</span>
                                 </button>
                             </div>
                             <div className="space-y-4">
@@ -10411,7 +10411,7 @@ const AnimalForm = ({
                                     }}
                                     title="Toggle public visibility"
                                 >
-                                    <span>{sectionPrivacy[animalToEdit?.id_public]?.veterinaryCare ? '🔒 Private' : '🌍 Public'}</span>
+                                    <span>{sectionPrivacy[animalToEdit?.id_public]?.veterinaryCare ? '🌍 Public' : '🔒 Private'}</span>
                                 </button>
                             </div>
                             <div className="space-y-4">
@@ -10483,7 +10483,7 @@ const AnimalForm = ({
                                     }}
                                     title="Toggle public visibility"
                                 >
-                                    <span>{sectionPrivacy[animalToEdit?.id_public]?.nutrition ? '🔒 Private' : '🌍 Public'}</span>
+                                    <span>{sectionPrivacy[animalToEdit?.id_public]?.nutrition ? '🌍 Public' : '🔒 Private'}</span>
                                 </button>
                             </div>
                             <div className="space-y-4">
@@ -10523,7 +10523,7 @@ const AnimalForm = ({
                                     }}
                                     title="Toggle public visibility"
                                 >
-                                    <span>{sectionPrivacy[animalToEdit?.id_public]?.husbandry ? '🔒 Private' : '🌍 Public'}</span>
+                                    <span>{sectionPrivacy[animalToEdit?.id_public]?.husbandry ? '🌍 Public' : '🔒 Private'}</span>
                                 </button>
                             </div>
                             <div className="space-y-4">
@@ -10563,7 +10563,7 @@ const AnimalForm = ({
                                     }}
                                     title="Toggle public visibility"
                                 >
-                                    <span>{sectionPrivacy[animalToEdit?.id_public]?.environment ? '🔒 Private' : '🌍 Public'}</span>
+                                    <span>{sectionPrivacy[animalToEdit?.id_public]?.environment ? '🌍 Public' : '🔒 Private'}</span>
                                 </button>
                             </div>
                             <div className="space-y-4">
@@ -10615,7 +10615,7 @@ const AnimalForm = ({
                                     }}
                                     title="Toggle public visibility"
                                 >
-                                    <span>{sectionPrivacy[animalToEdit?.id_public]?.behavior ? '🔒 Private' : '🌍 Public'}</span>
+                                    <span>{sectionPrivacy[animalToEdit?.id_public]?.behavior ? '🌍 Public' : '🔒 Private'}</span>
                                 </button>
                             </div>
                             <div className="space-y-4" data-tutorial-target="behavior-items-section">
@@ -10655,7 +10655,7 @@ const AnimalForm = ({
                                     }}
                                     title="Toggle public visibility"
                                 >
-                                    <span>{sectionPrivacy[animalToEdit?.id_public]?.activity ? '🔒 Private' : '🌍 Public'}</span>
+                                    <span>{sectionPrivacy[animalToEdit?.id_public]?.activity ? '🌍 Public' : '🔒 Private'}</span>
                                 </button>
                             </div>
                             <div>
@@ -10687,7 +10687,7 @@ const AnimalForm = ({
                                     }}
                                     title="Toggle public visibility"
                                 >
-                                    <span>{sectionPrivacy[animalToEdit?.id_public]?.remarks ? '🔒 Private' : '🌍 Public'}</span>
+                                    <span>{sectionPrivacy[animalToEdit?.id_public]?.remarks ? '🌍 Public' : '🔒 Private'}</span>
                                 </button>
                             </div>
                             <textarea name="remarks" value={formData.remarks} onChange={handleChange} rows="5"
@@ -10714,7 +10714,7 @@ const AnimalForm = ({
                                     }}
                                     title="Toggle public visibility"
                                 >
-                                    <span>{sectionPrivacy[animalToEdit?.id_public]?.endOfLife ? '🔒 Private' : '🌍 Public'}</span>
+                                    <span>{sectionPrivacy[animalToEdit?.id_public]?.endOfLife ? '🌍 Public' : '🔒 Private'}</span>
                                 </button>
                             </div>
                             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -10754,7 +10754,7 @@ const AnimalForm = ({
                                     }}
                                     title="Toggle public visibility"
                                 >
-                                    <span>{sectionPrivacy[animalToEdit?.id_public]?.legalAdministrative ? '🔒 Private' : '🌍 Public'}</span>
+                                    <span>{sectionPrivacy[animalToEdit?.id_public]?.legalAdministrative ? '🌍 Public' : '🔒 Private'}</span>
                                 </button>
                             </div>
                             <div className="space-y-4">
@@ -18996,6 +18996,7 @@ const AppWithTutorial = () => {
 };
 
 export default AppRouter;
+
 
 
 
