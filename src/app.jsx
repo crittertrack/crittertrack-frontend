@@ -12813,6 +12813,31 @@ const App = () => {
             resetIdleTimer();
 
             activeEvents.forEach(event => window.addEventListener(event, resetIdleTimer));
+            
+            // Add axios response interceptor to catch suspension/ban
+            const interceptor = axios.interceptors.response.use(
+                response => response,
+                error => {
+                    if (error.response?.status === 403 && error.response?.data?.forceLogout) {
+                        const accountStatus = error.response?.data?.accountStatus;
+                        const message = error.response?.data?.message || 'Your account status has changed.';
+                        
+                        console.log('[AUTH] Force logout triggered:', { accountStatus, message });
+                        
+                        // Clear auth and show message
+                        handleLogout();
+                        showModalMessage(
+                            accountStatus === 'suspended' ? 'Account Suspended' : 'Account Status Changed',
+                            message
+                        );
+                    }
+                    return Promise.reject(error);
+                }
+            );
+            
+            return () => {
+                axios.interceptors.response.eject(interceptor);
+            };
         } else {
             if (timeoutRef.current) {
                 clearTimeout(timeoutRef.current);
@@ -12826,7 +12851,7 @@ const App = () => {
             }
             activeEvents.forEach(event => window.removeEventListener(event, resetIdleTimer));
         };
-    }, [authToken, resetIdleTimer]);
+    }, [authToken, resetIdleTimer, handleLogout, showModalMessage]);
 
     // Poll for maintenance mode and urgent notifications
     useEffect(() => {
