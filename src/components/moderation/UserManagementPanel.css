@@ -1,8 +1,9 @@
 .user-management-panel {
     width: 100%;
-    max-width: 1600px;
+    max-width: 1400px;
     margin: 0 auto;
     padding: 24px;
+    padding-right: 80px;
     background: #1a1a1a;
     color: #e0e0e0;
 }
