@@ -2538,9 +2538,106 @@ const ViewOnlyAnimalDetail = ({ animal, onClose, API_BASE_URL, onViewProfile, au
                                     <h3 className="text-lg font-semibold text-gray-700 border-b pb-2 mb-3">Reproductive Status</h3>
                                     <div className="space-y-2">
                                         <p className="text-sm"><span className="font-medium">Neutered:</span> {animal.isNeutered ? 'Yes' : 'No'}</p>
+                                        {animal.isInfertile && <p className="text-sm"><span className="font-medium">Infertile:</span> Yes</p>}
                                         {animal.isInMating && <p className="text-sm"><span className="font-medium">In Mating:</span> Yes</p>}
                                         {animal.isPregnant && <p className="text-sm"><span className="font-medium">Pregnant:</span> Yes</p>}
                                         {animal.isNursing && <p className="text-sm"><span className="font-medium">Nursing:</span> Yes</p>}
+                                    </div>
+                                </div>
+                            )}
+                            
+                            {/* Breeding History Section */}
+                            {animal.sectionPrivacy?.reproductive !== false && (animal.lastMatingDate || animal.successfulMatings || animal.lastPregnancyDate || animal.litterCount || animal.offspringCount || animal.breedingRole) && (
+                                <div className="bg-blue-50 p-4 rounded-lg border border-blue-200">
+                                    <h3 className="text-lg font-semibold text-gray-700 border-b pb-2 mb-3 flex items-center">
+                                        <span className="text-blue-600 mr-2">📋</span>
+                                        Breeding History
+                                        <span className="text-xs font-normal text-gray-500 ml-2">(Historical Data)</span>
+                                    </h3>
+                                    <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+                                        {animal.breedingRole && (
+                                            <p className="text-sm">
+                                                <span className="font-medium">Breeding Role:</span> {animal.breedingRole.charAt(0).toUpperCase() + animal.breedingRole.slice(1)}
+                                            </p>
+                                        )}
+                                        {animal.lastMatingDate && (
+                                            <p className="text-sm">
+                                                <span className="font-medium">Last Mating Date:</span> {new Date(animal.lastMatingDate).toLocaleDateString()}
+                                            </p>
+                                        )}
+                                        {animal.successfulMatings !== null && animal.successfulMatings !== undefined && (
+                                            <p className="text-sm">
+                                                <span className="font-medium">Successful Matings:</span> {animal.successfulMatings}
+                                            </p>
+                                        )}
+                                        {animal.lastPregnancyDate && (
+                                            <p className="text-sm">
+                                                <span className="font-medium">Last Pregnancy Date:</span> {new Date(animal.lastPregnancyDate).toLocaleDateString()}
+                                            </p>
+                                        )}
+                                        {animal.litterCount && (
+                                            <p className="text-sm">
+                                                <span className="font-medium">Litter Count:</span> {animal.litterCount}
+                                            </p>
+                                        )}
+                                        {animal.offspringCount !== null && animal.offspringCount !== undefined && (
+                                            <p className="text-sm">
+                                                <span className="font-medium">Total Offspring:</span> {animal.offspringCount}
+                                            </p>
+                                        )}
+                                    </div>
+                                </div>
+                            )}
+                            
+                            {/* Stud/Dam Information */}
+                            {animal.sectionPrivacy?.reproductive !== false && (animal.isStudAnimal || animal.isDamAnimal) && (
+                                <div className="bg-gray-50 p-4 rounded-lg border border-gray-200">
+                                    <h3 className="text-lg font-semibold text-gray-700 border-b pb-2 mb-3">Breeding Availability</h3>
+                                    <div className="space-y-3">
+                                        {animal.isStudAnimal && (
+                                            <div>
+                                                <p className="text-sm font-medium text-gray-700 mb-2">Stud Information</p>
+                                                <div className="space-y-1 ml-3">
+                                                    {animal.availableForBreeding && (
+                                                        <p className="text-sm">
+                                                            <span className="font-medium">Available for Breeding:</span> Yes
+                                                        </p>
+                                                    )}
+                                                    {animal.studFeeAmount && (
+                                                        <p className="text-sm">
+                                                            <span className="font-medium">Stud Fee:</span> {animal.studFeeCurrency} {animal.studFeeAmount}
+                                                        </p>
+                                                    )}
+                                                    {animal.fertilityStatus && animal.fertilityStatus !== 'Unknown' && (
+                                                        <p className="text-sm">
+                                                            <span className="font-medium">Fertility Status:</span> {animal.fertilityStatus}
+                                                        </p>
+                                                    )}
+                                                    {animal.fertilityNotes && (
+                                                        <p className="text-sm">
+                                                            <span className="font-medium">Notes:</span> {animal.fertilityNotes}
+                                                        </p>
+                                                    )}
+                                                </div>
+                                            </div>
+                                        )}
+                                        {animal.isDamAnimal && (
+                                            <div>
+                                                <p className="text-sm font-medium text-gray-700 mb-2">Dam Information</p>
+                                                <div className="space-y-1 ml-3">
+                                                    {animal.damFertilityStatus && animal.damFertilityStatus !== 'Unknown' && (
+                                                        <p className="text-sm">
+                                                            <span className="font-medium">Fertility Status:</span> {animal.damFertilityStatus}
+                                                        </p>
+                                                    )}
+                                                    {animal.damFertilityNotes && (
+                                                        <p className="text-sm">
+                                                            <span className="font-medium">Notes:</span> {animal.damFertilityNotes}
+                                                        </p>
+                                                    )}
+                                                </div>
+                                            </div>
+                                        )}
                                     </div>
                                 </div>
                             )}
