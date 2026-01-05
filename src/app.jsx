@@ -2077,7 +2077,8 @@ const ViewOnlyAnimalDetail = ({ animal, onClose, API_BASE_URL, onViewProfile, au
                             { id: 7, label: 'Health', icon: '🏥' },
                             { id: 8, label: 'Husbandry', icon: '🏠' },
                             { id: 9, label: 'Behavior', icon: '🧠' },
-                            { id: 10, label: 'Records', icon: '📝' }
+                            { id: 10, label: 'Records', icon: '📝' },
+                            { id: 11, label: 'End of Life', icon: '⚖️' }
                         ].map(tab => (
                             <button
                                 key={tab.id}
@@ -2512,383 +2513,212 @@ const ViewOnlyAnimalDetail = ({ animal, onClose, API_BASE_URL, onViewProfile, au
 
                     {/* Tab 6: Breeding */}
                     {detailViewTab === 6 && (
-                        <div className="space-y-4">
-                            {/* Reproductive Status - Always visible */}
-                            <div className="bg-gray-50 p-4 rounded-lg border border-gray-200">
-                                <h3 className="text-lg font-semibold text-gray-700 border-b pb-2 mb-3">Reproductive Status</h3>
-                                <div className="space-y-2">
-                                    <p className="text-sm"><span className="font-medium">Neutered/Spayed:</span> {animal.isNeutered ? 'Yes' : 'No'}</p>
-                                    {animal.isInfertile && <p className="text-sm"><span className="font-medium">Infertile:</span> Yes</p>}
-                                    {animal.isInMating && <p className="text-sm"><span className="font-medium">In Mating:</span> Yes</p>}
-                                    {animal.isPregnant && <p className="text-sm"><span className="font-medium">Pregnant:</span> Yes</p>}
-                                    {animal.isNursing && <p className="text-sm"><span className="font-medium">Nursing:</span> Yes</p>}
-                                    {!animal.isNeutered && !animal.isInfertile && !animal.isInMating && !animal.isPregnant && !animal.isNursing && (
-                                        <p className="text-sm text-gray-500 italic">No special reproductive status</p>
-                                    )}
-                                </div>
-                            </div>
-                            
-                            {/* Estrus/Cycle Section */}
-            <div className="bg-gray-50 p-4 rounded-lg border border-gray-200">
-                <h3 className="text-lg font-semibold text-gray-700 border-b pb-2 mb-3">Estrus/Cycle</h3>
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
-                    <p className="text-sm">
-                        <span className="font-medium">Heat Status:</span> {animal.heatStatus || '—'}
-                    </p>
-                    <p className="text-sm">
-                        <span className="font-medium">Last Heat Date:</span> {animal.lastHeatDate ? new Date(animal.lastHeatDate).toLocaleDateString() : '—'}
-                    </p>
-                    <p className="text-sm">
-                        <span className="font-medium">Ovulation Date:</span> {animal.ovulationDate ? new Date(animal.ovulationDate).toLocaleDateString() : '—'}
-                    </p>
-                </div>
-            </div>
-                            {/* Mating Section */}
-            <div className="bg-gray-50 p-4 rounded-lg border border-gray-200">
-                <h3 className="text-lg font-semibold text-gray-700 border-b pb-2 mb-3">Mating</h3>
-                <p className="text-sm">
-                    <span className="font-medium">Mating Date:</span> {animal.matingDates ? new Date(animal.matingDates).toLocaleDateString() : '—'}
-                </p>
-            </div>
-                            {/* Breeding History Section */}
-            <div className="bg-blue-50 p-4 rounded-lg border border-blue-200">
-                <h3 className="text-lg font-semibold text-gray-700 border-b pb-2 mb-3 flex items-center">
-                    <span className="text-blue-600 mr-2">📋</span>
-                    Breeding History
-                    <span className="text-xs font-normal text-gray-500 ml-2">(Historical Data)</span>
-                </h3>
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
-                    <p className="text-sm">
-                        <span className="font-medium">Breeding Role:</span> {animal.breedingRole ? (animal.breedingRole.charAt(0).toUpperCase() + animal.breedingRole.slice(1)) : '—'}
-                    </p>
-                    <p className="text-sm">
-                        <span className="font-medium">Last Mating Date:</span> {animal.lastMatingDate ? new Date(animal.lastMatingDate).toLocaleDateString() : '—'}
-                    </p>
-                    <p className="text-sm">
-                        <span className="font-medium">Successful Matings:</span> {animal.successfulMatings !== null && animal.successfulMatings !== undefined ? animal.successfulMatings : '—'}
-                    </p>
-                    <p className="text-sm">
-                        <span className="font-medium">Last Pregnancy Date:</span> {animal.lastPregnancyDate ? new Date(animal.lastPregnancyDate).toLocaleDateString() : '—'}
-                    </p>
-                    <p className="text-sm">
-                        <span className="font-medium">Litter Count:</span> {animal.litterCount || '—'}
-                    </p>
-                    <p className="text-sm">
-                        <span className="font-medium">Total Offspring:</span> {animal.offspringCount !== null && animal.offspringCount !== undefined ? animal.offspringCount : '—'}
-                    </p>
-                </div>
-            </div>
-                            {/* Stud/Dam Information */}
-                            <div className="bg-gray-50 p-4 rounded-lg border border-gray-200">
-                                <h3 className="text-lg font-semibold text-gray-700 border-b pb-2 mb-3">Breeding Availability</h3>
-                                <div className="space-y-3">
-                                    <div>
-                                        <p className="text-sm font-medium text-gray-700 mb-2">Stud Information</p>
-                                        <div className="space-y-1 ml-3">
-                                            <p className="text-sm">
-                                                <span className="font-medium">Available for Breeding:</span> {animal.availableForBreeding ? 'Yes' : 'No'}
-                                            </p>
-                                            <p className="text-sm">
-                                                <span className="font-medium">Stud Fee:</span> {(animal.studFeeAmount !== null && animal.studFeeAmount !== undefined) ? `${animal.studFeeCurrency || 'USD'} ${animal.studFeeAmount}` : '—'}
-                                            </p>
-                                            <p className="text-sm">
-                                                <span className="font-medium">Fertility Status:</span> {(animal.fertilityStatus && animal.fertilityStatus !== 'Unknown') ? animal.fertilityStatus : '—'}
-                                            </p>
-                                            <p className="text-sm">
-                                                <span className="font-medium">Notes:</span> {animal.fertilityNotes || '—'}
-                                            </p>
-                                        </div>
-                                    </div>
-                                    <div>
-                                        <p className="text-sm font-medium text-gray-700 mb-2">Dam Information</p>
-                                        <div className="space-y-1 ml-3">
-                                            <p className="text-sm">
-                                                <span className="font-medium">Fertility Status:</span> {(animal.damFertilityStatus && animal.damFertilityStatus !== 'Unknown') ? animal.damFertilityStatus : '—'}
-                                            </p>
-                                            <p className="text-sm">
-                                                <span className="font-medium">Notes:</span> {animal.damFertilityNotes || '—'}
-                                            </p>
-                                        </div>
+                        <div className="space-y-6">
+                            {(animal.isNeutered || animal.heatStatus || animal.isPregnant || animal.isNursing || animal.matingDates) && (
+                                <div className="bg-gray-50 p-4 rounded-lg border border-gray-200 space-y-4">
+                                    <h3 className="text-lg font-semibold text-gray-700">Reproductive Status</h3>
+                                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm">
+                                        <div><span className="text-gray-600">Neutered/Spayed:</span> <strong>{animal.isNeutered ? 'Yes' : 'No'}</strong></div>
+                                        <div><span className="text-gray-600">Heat Status:</span> <strong>{animal.heatStatus || '—'}</strong></div>
+                                        <div><span className="text-gray-600">Last Heat Date:</span> <strong>{animal.lastHeatDate ? new Date(animal.lastHeatDate).toLocaleDateString() : '—'}</strong></div>
+                                        <div><span className="text-gray-600">Mating Dates:</span> <strong>{animal.matingDates || '—'}</strong></div>
+                                        <div><span className="text-gray-600">Expected Due Date:</span> <strong>{animal.expectedDueDate ? new Date(animal.expectedDueDate).toLocaleDateString() : '—'}</strong></div>
+                                        <div><span className="text-gray-600">Litter Count:</span> <strong>{animal.litterCount || '—'}</strong></div>
+                                        <div><span className="text-gray-600">Nursing Start Date:</span> <strong>{animal.nursingStartDate ? new Date(animal.nursingStartDate).toLocaleDateString() : '—'}</strong></div>
+                                        <div><span className="text-gray-600">Weaning Date:</span> <strong>{animal.weaningDate ? new Date(animal.weaningDate).toLocaleDateString() : '—'}</strong></div>
                                     </div>
                                 </div>
-                            </div>
+                            )}
                         </div>
                     )}
 
                     {/* Tab 7: Health */}
                     {detailViewTab === 7 && (
-                        <div className="space-y-4">
-                            {/* Preventive Care */}
-                            <div className="bg-gray-50 p-4 rounded-lg border border-gray-200">
-                                <h3 className="text-lg font-semibold text-gray-700 border-b pb-2 mb-3">Preventive Care</h3>
-                                    <div className="space-y-3">
+                        <div className="space-y-6">
+                            {(animal.vaccinations || animal.dewormingRecords || animal.parasiteControl || animal.primaryVet) && (
+                                <div className="bg-gray-50 p-4 rounded-lg border border-gray-200 space-y-4">
+                                    <h3 className="text-lg font-semibold text-gray-700">Health Records</h3>
+                                    {animal.vaccinations && (
                                         <div>
-                                            <strong className="text-sm">Vaccinations:</strong>
-                                            {(() => {
-                                                const parsed = parseHealthRecords(animal.vaccinations);
-                                                return parsed && parsed.length > 0 ? (
-                                                    <ul className="text-sm mt-1 list-disc list-inside space-y-1">
-                                                        {parsed.map((vacc, idx) => (
-                                                            <li key={idx} className="text-gray-700">
-                                                                {vacc.name} {vacc.date && `(${new Date(vacc.date).toLocaleDateString()})`}
-                                                                {vacc.notes && <span className="text-gray-600"> - {vacc.notes}</span>}
-                                                            </li>
-                                                        ))}
-                                                    </ul>
-                                                ) : (
-                                                    <p className="text-sm text-gray-500 italic mt-1">No vaccination records</p>
-                                                );
-                                            })()}
-                                        </div>
-                                        <div>
-                                            <strong className="text-sm">Deworming Records:</strong>
-                                            {(() => {
-                                                const parsed = parseHealthRecords(animal.dewormingRecords);
-                                                return parsed && parsed.length > 0 ? (
-                                                    <ul className="text-sm mt-1 list-disc list-inside space-y-1">
-                                                        {parsed.map((record, idx) => (
-                                                            <li key={idx} className="text-gray-700">
-                                                                {record.medication} {record.date && `(${new Date(record.date).toLocaleDateString()})`}
-                                                                {record.notes && <span className="text-gray-600"> - {record.notes}</span>}
-                                                            </li>
-                                                        ))}
-                                                    </ul>
-                                                ) : (
-                                                    <p className="text-sm text-gray-500 italic mt-1">No deworming records</p>
-                                                );
-                                            })()}
-                                        </div>
-                                        <div>
-                                            <strong className="text-sm">Parasite Control:</strong>
-                                            {(() => {
-                                                const parsed = parseHealthRecords(animal.parasiteControl);
-                                                return parsed && parsed.length > 0 ? (
-                                                    <ul className="text-sm mt-1 list-disc list-inside space-y-1">
-                                                        {parsed.map((record, idx) => (
-                                                            <li key={idx} className="text-gray-700">
-                                                                {record.treatment} {record.date && `(${new Date(record.date).toLocaleDateString()})`}
-                                                                {record.notes && <span className="text-gray-600"> - {record.notes}</span>}
-                                                            </li>
-                                                        ))}
-                                                    </ul>
-                                                ) : (
-                                                    <p className="text-sm text-gray-500 italic mt-1">No parasite control records</p>
-                                                );
-                                            })()}
-                                        </div>
-                                    </div>
-                                </div>
-                            
-                            {/* Procedures & Diagnostics */}
-                            <div className="bg-gray-50 p-4 rounded-lg border border-gray-200">
-                                    <h3 className="text-lg font-semibold text-gray-700 border-b pb-2 mb-3">Procedures & Diagnostics</h3>
-                                    <div className="space-y-3">
-                                        <div>
-                                            <strong className="text-sm">Medical Procedures:</strong>
-                                            {(() => {
-                                                const parsed = parseHealthRecords(animal.medicalProcedures);
-                                                return parsed && parsed.length > 0 ? (
-                                                    <ul className="text-sm mt-1 list-disc list-inside space-y-1">
-                                                        {parsed.map((proc, idx) => (
-                                                            <li key={idx} className="text-gray-700">
-                                                                {proc.procedure} {proc.date && `(${new Date(proc.date).toLocaleDateString()})`}
-                                                                {proc.notes && <span className="text-gray-600"> - {proc.notes}</span>}
-                                                            </li>
-                                                        ))}
-                                                    </ul>
-                                                ) : (
-                                                    <p className="text-sm text-gray-500 italic mt-1">No medical procedures recorded</p>
-                                                );
-                                            })()}
-                                        </div>
-                                        <div>
-                                            <strong className="text-sm">Lab Results:</strong>
-                                            {(() => {
-                                                const parsed = parseHealthRecords(animal.labResults);
-                                                return parsed && parsed.length > 0 ? (
-                                                    <ul className="text-sm mt-1 list-disc list-inside space-y-1">
-                                                        {parsed.map((result, idx) => (
-                                                            <li key={idx} className="text-gray-700">
-                                                                {result.testName} {result.date && `(${new Date(result.date).toLocaleDateString()})`}
-                                                                {result.result && <span className="text-gray-600"> - {result.result}</span>}
-                                                            </li>
-                                                        ))}
-                                                    </ul>
-                                                ) : (
-                                                    <p className="text-sm text-gray-500 italic mt-1">No lab results recorded</p>
-                                                );
-                                            })()}
-                                        </div>
-                                    </div>
-                                </div>
-                            
-                            {/* Medical Conditions & Ongoing Care */}
-                            <div className="bg-gray-50 p-4 rounded-lg border border-gray-200">
-                                    <h3 className="text-lg font-semibold text-gray-700 border-b pb-2 mb-3">Medical Conditions & Ongoing Care</h3>
-                                    <div className="space-y-3">
-                                        <div>
-                                            <strong className="text-sm">Medical Conditions:</strong>
-                                            {(() => {
-                                                const parsed = parseHealthRecords(animal.medicalConditions);
-                                                return parsed && parsed.length > 0 ? (
-                                                    <ul className="text-sm mt-1 list-disc list-inside space-y-1">
-                                                        {parsed.map((condition, idx) => (
-                                                            <li key={idx} className="text-gray-700">
-                                                                {condition.condition || condition.name}
-                                                                {condition.notes && <span className="text-gray-600"> - {condition.notes}</span>}
-                                                            </li>
-                                                        ))}
-                                                    </ul>
-                                                ) : (
-                                                    <p className="text-sm text-gray-500 italic mt-1">No medical conditions recorded</p>
-                                                );
-                                            })()}
-                                        </div>
-                                        <div>
-                                            <strong className="text-sm">Allergies:</strong>
-                                            {(() => {
-                                                const parsed = parseHealthRecords(animal.allergies);
-                                                return parsed && parsed.length > 0 ? (
-                                                    <ul className="text-sm mt-1 list-disc list-inside space-y-1">
-                                                        {parsed.map((allergy, idx) => (
-                                                            <li key={idx} className="text-gray-700">
-                                                                {allergy.allergen || allergy.name}
-                                                                {allergy.notes && <span className="text-gray-600"> - {allergy.notes}</span>}
-                                                            </li>
-                                                        ))}
-                                                    </ul>
-                                                ) : (
-                                                    <p className="text-sm text-gray-500 italic mt-1">No allergies recorded</p>
-                                                );
-                                            })()}
-                                        </div>
-                                        <div>
-                                            <strong className="text-sm">Medications:</strong>
-                                            {(() => {
-                                                const parsed = parseHealthRecords(animal.medications);
-                                                return parsed && parsed.length > 0 ? (
-                                                    <ul className="text-sm mt-1 list-disc list-inside space-y-1">
-                                                        {parsed.map((med, idx) => (
-                                                            <li key={idx} className="text-gray-700">
-                                                                {med.medication || med.name}
-                                                                {med.notes && <span className="text-gray-600"> - {med.notes}</span>}
-                                                            </li>
-                                                        ))}
-                                                    </ul>
-                                                ) : (
-                                                    <p className="text-sm text-gray-500 italic mt-1">No medications recorded</p>
-                                                );
-                                            })()}
-                                        </div>
-                                    </div>
-                                </div>
-                            
-                            {/* Veterinary Care */}
-                            <div className="bg-gray-50 p-4 rounded-lg border border-gray-200">
-                                <h3 className="text-lg font-semibold text-gray-700 border-b pb-2 mb-3">Veterinary Care</h3>
-                                <div className="space-y-3">
-                                    <div>
-                                        <strong className="text-sm">Veterinary Visits:</strong>
-                                        {(() => {
-                                            const parsed = parseHealthRecords(animal.vetVisits);
-                                            return parsed && parsed.length > 0 ? (
-                                                <ul className="text-sm mt-1 list-disc list-inside space-y-1">
-                                                    {parsed.map((visit, idx) => (
+                                            <strong>Vaccinations:</strong>
+                                            <ul className="text-sm mt-1 list-disc list-inside space-y-1">
+                                                {(() => {
+                                                    const data = animal.vaccinations;
+                                                    const parsed = typeof data === 'string' ? (() => { try { return JSON.parse(data); } catch { return []; } })() : Array.isArray(data) ? data : [];
+                                                    return parsed.map((vacc, idx) => (
                                                         <li key={idx} className="text-gray-700">
-                                                            {visit.date && `${new Date(visit.date).toLocaleDateString()}: `}{visit.reason}
-                                                            {visit.notes && <span className="text-gray-600"> - {visit.notes}</span>}
+                                                            {vacc.name} {vacc.date && `(${new Date(vacc.date).toLocaleDateString()})`}
+                                                            {vacc.notes && <span className="text-gray-600"> - {vacc.notes}</span>}
+                                                        </li>
+                                                    ));
+                                                })()}
+                                            </ul>
+                                        </div>
+                                    )}
+                                    {animal.dewormingRecords && (
+                                        <div>
+                                            <strong>Deworming:</strong>
+                                            <ul className="text-sm mt-1 list-disc list-inside space-y-1">
+                                                {(() => {
+                                                    const data = animal.dewormingRecords;
+                                                    const parsed = typeof data === 'string' ? (() => { try { return JSON.parse(data); } catch { return []; } })() : Array.isArray(data) ? data : [];
+                                                    return parsed.map((record, idx) => (
+                                                        <li key={idx} className="text-gray-700">
+                                                            {record.medication} {record.date && `(${new Date(record.date).toLocaleDateString()})`}
+                                                            {record.notes && <span className="text-gray-600"> - {record.notes}</span>}
+                                                        </li>
+                                                    ));
+                                                })()}
+                                            </ul>
+                                        </div>
+                                    )}
+                                    {animal.parasiteControl && (
+                                        <div>
+                                            <strong>Parasite Control:</strong>
+                                            <ul className="text-sm mt-1 list-disc list-inside space-y-1">
+                                                {(() => {
+                                                    const data = animal.parasiteControl;
+                                                    const parsed = typeof data === 'string' ? (() => { try { return JSON.parse(data); } catch { return []; } })() : Array.isArray(data) ? data : [];
+                                                    return parsed.map((record, idx) => (
+                                                        <li key={idx} className="text-gray-700">
+                                                            {record.treatment} {record.date && `(${new Date(record.date).toLocaleDateString()})`}
+                                                            {record.notes && <span className="text-gray-600"> - {record.notes}</span>}
+                                                        </li>
+                                                    ));
+                                                })()}
+                                            </ul>
+                                        </div>
+                                    )}
+                                    {animal.primaryVet && <div><strong>Primary Vet:</strong> <p className="text-sm mt-1">{animal.primaryVet}</p></div>}
+                                </div>
+                            )}
+                            {(animal.medicalConditions || animal.allergies || animal.medications) && (
+                                <div className="bg-gray-50 p-4 rounded-lg border border-gray-200 space-y-4">
+                                    <h3 className="text-lg font-semibold text-gray-700">Medical Information</h3>
+                                    {animal.medicalConditions && (() => {
+                                        const parsed = parseHealthRecords(animal.medicalConditions);
+                                        return parsed && parsed.length > 0 ? (
+                                            <div>
+                                                <strong>Medical Conditions:</strong>
+                                                <ul className="text-sm mt-1 list-disc list-inside space-y-1">
+                                                    {parsed.map((condition, idx) => (
+                                                        <li key={idx} className="text-gray-700">
+                                                            {condition.condition || condition.name}
+                                                            {condition.notes && <span className="text-gray-600"> - {condition.notes}</span>}
                                                         </li>
                                                     ))}
                                                 </ul>
-                                            ) : (
-                                                <p className="text-sm text-gray-500 italic mt-1">No veterinary visits recorded</p>
-                                            );
-                                        })()}
-                                    </div>
-                                    <div>
-                                        <strong className="text-sm">Primary Veterinarian:</strong>
-                                        <p className="text-sm text-gray-700 mt-1">{animal.primaryVet || '—'}</p>
-                                    </div>
+                                            </div>
+                                        ) : null;
+                                    })()}
+                                    {animal.allergies && (() => {
+                                        const parsed = parseHealthRecords(animal.allergies);
+                                        return parsed && parsed.length > 0 ? (
+                                            <div>
+                                                <strong>Allergies:</strong>
+                                                <ul className="text-sm mt-1 list-disc list-inside space-y-1">
+                                                    {parsed.map((allergy, idx) => (
+                                                        <li key={idx} className="text-gray-700">
+                                                            {allergy.allergen || allergy.name}
+                                                            {allergy.notes && <span className="text-gray-600"> - {allergy.notes}</span>}
+                                                        </li>
+                                                    ))}
+                                                </ul>
+                                            </div>
+                                        ) : null;
+                                    })()}
+                                    {animal.medications && (() => {
+                                        const parsed = parseHealthRecords(animal.medications);
+                                        return parsed && parsed.length > 0 ? (
+                                            <div>
+                                                <strong>Medications:</strong>
+                                                <ul className="text-sm mt-1 list-disc list-inside space-y-1">
+                                                    {parsed.map((med, idx) => (
+                                                        <li key={idx} className="text-gray-700">
+                                                            {med.medication || med.name}
+                                                            {med.notes && <span className="text-gray-600"> - {med.notes}</span>}
+                                                        </li>
+                                                    ))}
+                                                </ul>
+                                            </div>
+                                        ) : null;
+                                    })()}
                                 </div>
-                            </div>
+                            )}
                         </div>
                     )}
 
                     {/* Tab 8: Husbandry */}
                     {detailViewTab === 8 && (
-                        <div className="space-y-4">
-                            {/* Nutrition Section */}
-                            <div className="bg-gray-50 p-4 rounded-lg border border-gray-200">
-                                <h3 className="text-lg font-semibold text-gray-700 border-b pb-2 mb-3">Nutrition</h3>
-                                <div className="space-y-2">
-                                    <p className="text-sm"><span className="font-medium">Diet Type:</span> {animal.dietType || '—'}</p>
-                                    <p className="text-sm"><span className="font-medium">Feeding Schedule:</span> {animal.feedingSchedule || '—'}</p>
-                                    <p className="text-sm"><span className="font-medium">Supplements:</span> {animal.supplements || '—'}</p>
+                        <div className="space-y-6">
+                            {(animal.dietType || animal.feedingSchedule || animal.supplements) && (
+                                <div className="bg-gray-50 p-4 rounded-lg border border-gray-200 space-y-4">
+                                    <h3 className="text-lg font-semibold text-gray-700">Nutrition</h3>
+                                    {animal.dietType && <div><strong>Diet Type:</strong> <p className="text-sm mt-1">{animal.dietType}</p></div>}
+                                    {animal.feedingSchedule && <div><strong>Feeding Schedule:</strong> <p className="text-sm mt-1">{animal.feedingSchedule}</p></div>}
+                                    {animal.supplements && <div><strong>Supplements:</strong> <p className="text-sm mt-1">{animal.supplements}</p></div>}
                                 </div>
-                            </div>
-                            {/* Husbandry Section */}
-                            <div className="bg-gray-50 p-4 rounded-lg border border-gray-200">
-                                <h3 className="text-lg font-semibold text-gray-700 border-b pb-2 mb-3">Husbandry</h3>
-                                <div className="space-y-2">
-                                    <p className="text-sm"><span className="font-medium">Housing Type:</span> {animal.housingType || '—'}</p>
-                                    <p className="text-sm"><span className="font-medium">Bedding:</span> {animal.bedding || '—'}</p>
-                                    <p className="text-sm"><span className="font-medium">Enrichment:</span> {animal.enrichment || '—'}</p>
+                            )}
+                            {(animal.housingType || animal.bedding || animal.enrichment) && (
+                                <div className="bg-gray-50 p-4 rounded-lg border border-gray-200 space-y-4">
+                                    <h3 className="text-lg font-semibold text-gray-700">Husbandry</h3>
+                                    {animal.housingType && <div><strong>Housing Type:</strong> <p className="text-sm mt-1">{animal.housingType}</p></div>}
+                                    {animal.bedding && <div><strong>Bedding:</strong> <p className="text-sm mt-1">{animal.bedding}</p></div>}
+                                    {animal.enrichment && <div><strong>Enrichment:</strong> <p className="text-sm mt-1">{animal.enrichment}</p></div>}
                                 </div>
-                            </div>
-                            {/* Environment Section */}
-                            <div className="bg-gray-50 p-4 rounded-lg border border-gray-200">
-                                <h3 className="text-lg font-semibold text-gray-700 border-b pb-2 mb-3">Environment</h3>
-                                <div className="space-y-2">
-                                    <p className="text-sm"><span className="font-medium">Temperature Range:</span> {animal.temperatureRange || '—'}</p>
-                                    <p className="text-sm"><span className="font-medium">Humidity:</span> {animal.humidity || '—'}</p>
-                                    <p className="text-sm"><span className="font-medium">Lighting:</span> {animal.lighting || '—'}</p>
-                                    <p className="text-sm"><span className="font-medium">Noise Level:</span> {animal.noise || '—'}</p>
+                            )}
+                            {(animal.temperatureRange || animal.humidity || animal.lighting || animal.noise) && (
+                                <div className="bg-gray-50 p-4 rounded-lg border border-gray-200 space-y-4">
+                                    <h3 className="text-lg font-semibold text-gray-700">Environment</h3>
+                                    {animal.temperatureRange && <div><strong>Temperature Range:</strong> <p className="text-sm mt-1">{animal.temperatureRange}</p></div>}
+                                    {animal.humidity && <div><strong>Humidity:</strong> <p className="text-sm mt-1">{animal.humidity}</p></div>}
+                                    {animal.lighting && <div><strong>Lighting:</strong> <p className="text-sm mt-1">{animal.lighting}</p></div>}
+                                    {animal.noise && <div><strong>Noise Level:</strong> <p className="text-sm mt-1">{animal.noise}</p></div>}
                                 </div>
-                            </div>
+                            )}
                         </div>
                     )}
 
                     {/* Tab 9: Behavior */}
                     {detailViewTab === 9 && (
-                        <div className="space-y-4">
-                            {/* Behavior & Welfare Section */}
-                            <div className="bg-gray-50 p-4 rounded-lg border border-gray-200">
-                                <h3 className="text-lg font-semibold text-gray-700 border-b pb-2 mb-3">Behavior & Welfare</h3>
-                                <div className="space-y-2">
-                                    <p className="text-sm"><span className="font-medium">Temperament:</span> {animal.temperament || '—'}</p>
-                                    <p className="text-sm"><span className="font-medium">Handling Tolerance:</span> {animal.handlingTolerance || '—'}</p>
-                                    <p className="text-sm"><span className="font-medium">Social Structure:</span> {animal.socialStructure || '—'}</p>
+                        <div className="space-y-6">
+                            {(animal.temperament || animal.handlingTolerance || animal.socialStructure || animal.activityCycle) && (
+                                <div className="bg-gray-50 p-4 rounded-lg border border-gray-200 space-y-4">
+                                    <h3 className="text-lg font-semibold text-gray-700">Behavior & Welfare</h3>
+                                    {animal.temperament && <div><strong>Temperament:</strong> <p className="text-sm mt-1">{animal.temperament}</p></div>}
+                                    {animal.handlingTolerance && <div><strong>Handling Tolerance:</strong> <p className="text-sm mt-1">{animal.handlingTolerance}</p></div>}
+                                    {animal.socialStructure && <div><strong>Social Structure:</strong> <p className="text-sm mt-1">{animal.socialStructure}</p></div>}
+                                    {animal.activityCycle && <div><strong>Activity Cycle:</strong> <p className="text-sm mt-1">{animal.activityCycle}</p></div>}
                                 </div>
-                            </div>
-                            {/* Activity Cycle Section */}
-                            <div className="bg-gray-50 p-4 rounded-lg border border-gray-200">
-                                <h3 className="text-lg font-semibold text-gray-700 border-b pb-2 mb-3">Activity Cycle</h3>
-                                <p className="text-sm text-gray-700">{animal.activityCycle || '—'}</p>
-                            </div>
+                            )}
                         </div>
                     )}
 
                     {/* Tab 10: Records */}
                     {detailViewTab === 10 && (
-                        <div className="space-y-4">
-                            {/* Current Owner Section */}
-                            <div className="bg-gray-50 p-4 rounded-lg border border-gray-200">
-                                <h3 className="text-lg font-semibold text-gray-700 border-b pb-2 mb-3">Current Owner</h3>
-                                <p className="text-gray-700">{animal.currentOwnerName || animal.currentOwnerId || '—'}</p>
-                            </div>
-                            {/* Remarks & Notes Section */}
-                            <div className="bg-gray-50 p-4 rounded-lg border border-gray-200">
-                                <h3 className="text-lg font-semibold text-gray-700 border-b pb-2 mb-3">Remarks & Notes</h3>
-                                <p className="text-gray-700 whitespace-pre-wrap text-sm">{animal.remarks || '—'}</p>
-                            </div>
-                            {/* End of Life Section */}
-                            <div className="bg-gray-50 p-4 rounded-lg border border-gray-200">
-                                <h3 className="text-lg font-semibold text-gray-700 border-b pb-2 mb-3">End of Life</h3>
-                                <div className="space-y-2">
-                                    <p className="text-sm"><span className="font-medium">Deceased Date:</span> {animal.deceasedDate ? new Date(animal.deceasedDate).toLocaleDateString() : '—'}</p>
-                                    <p className="text-sm"><span className="font-medium">Cause of Death:</span> {animal.causeOfDeath || '—'}</p>
+                        <div className="space-y-6">
+                            {animal.remarks && (
+                                <div className="bg-gray-50 p-4 rounded-lg border border-gray-200">
+                                    <h3 className="text-lg font-semibold text-gray-700 mb-3">Remarks / Notes</h3>
+                                    <p className="text-sm">{animal.remarks}</p>
                                 </div>
-                            </div>
+                            )}
+                        </div>
+                    )}
+
+                    {/* Tab 11: End of Life */}
+                    {detailViewTab === 11 && (
+                        <div className="space-y-6">
+                            {(animal.deceasedDate || animal.causeOfDeath || animal.insurance || animal.legalStatus) && (
+                                <div className="bg-gray-50 p-4 rounded-lg border border-gray-200 space-y-4">
+                                    <h3 className="text-lg font-semibold text-gray-700">End of Life & Legal</h3>
+                                    {animal.deceasedDate && <div><strong>Deceased Date:</strong> <p className="text-sm mt-1">{new Date(animal.deceasedDate).toLocaleDateString()}</p></div>}
+                                    {animal.causeOfDeath && <div><strong>Cause of Death:</strong> <p className="text-sm mt-1">{animal.causeOfDeath}</p></div>}
+                                    {animal.necropsyResults && <div><strong>Necropsy Results:</strong> <p className="text-sm mt-1">{animal.necropsyResults}</p></div>}
+                                    {animal.insurance && <div><strong>Insurance:</strong> <p className="text-sm mt-1">{animal.insurance}</p></div>}
+                                    {animal.legalStatus && <div><strong>Legal Status:</strong> <p className="text-sm mt-1">{animal.legalStatus}</p></div>}
+                                </div>
+                            )}
                         </div>
                     )}
                 </div>
