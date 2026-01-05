@@ -3161,19 +3161,6 @@ const ViewOnlyAnimalDetail = ({ animal, onClose, API_BASE_URL, onViewProfile, au
                         </div>
                     )}
                 </div>
-                            {(animal.deceasedDate || animal.causeOfDeath || animal.insurance || animal.legalStatus) && (
-                                <div className="bg-gray-50 p-4 rounded-lg border border-gray-200 space-y-4">
-                                    <h3 className="text-lg font-semibold text-gray-700">End of Life & Legal</h3>
-                                    {animal.deceasedDate && <div><strong>Deceased Date:</strong> <p className="text-sm mt-1">{new Date(animal.deceasedDate).toLocaleDateString()}</p></div>}
-                                    {animal.causeOfDeath && <div><strong>Cause of Death:</strong> <p className="text-sm mt-1">{animal.causeOfDeath}</p></div>}
-                                    {animal.necropsyResults && <div><strong>Necropsy Results:</strong> <p className="text-sm mt-1">{animal.necropsyResults}</p></div>}
-                                    {animal.insurance && <div><strong>Insurance:</strong> <p className="text-sm mt-1">{animal.insurance}</p></div>}
-                                    {animal.legalStatus && <div><strong>Legal Status:</strong> <p className="text-sm mt-1">{animal.legalStatus}</p></div>}
-                                </div>
-                            )}
-                        </div>
-                    )}
-                </div>
 
                 {/* Pedigree Chart Modal */}
                 {showPedigree && (
