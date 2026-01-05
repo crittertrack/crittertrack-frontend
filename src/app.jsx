@@ -8425,6 +8425,7 @@ const AnimalForm = ({
                                             <div>
                                                 <label className="block text-sm font-medium text-gray-700 mb-2">Last Mating Date <span className="text-xs text-gray-500 font-normal">(Sire)</span></label>
                                                 <input type="date" name="lastMatingDate" value={formData.lastMatingDate} onChange={handleChange} 
+                                                    max={new Date().toISOString().split('T')[0]}
                                                     className="block w-full p-2 border border-blue-200 rounded-md shadow-sm focus:ring-primary focus:border-primary" />
                                             </div>
                                             
@@ -8443,6 +8444,7 @@ const AnimalForm = ({
                                             <div>
                                                 <label className="block text-sm font-medium text-gray-700 mb-2">Last Pregnancy Date <span className="text-xs text-gray-500 font-normal">(Dam)</span></label>
                                                 <input type="date" name="lastPregnancyDate" value={formData.lastPregnancyDate || ''} onChange={handleChange} 
+                                                    max={new Date().toISOString().split('T')[0]}
                                                     className="block w-full p-2 border border-blue-200 rounded-md shadow-sm focus:ring-primary focus:border-primary" />
                                             </div>
                                             
