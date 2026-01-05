@@ -2696,7 +2696,7 @@ const ViewOnlyAnimalDetail = ({ animal, onClose, API_BASE_URL, onViewProfile, au
                     {detailViewTab === 7 && (
                         <div className="space-y-4">
                             {/* Preventive Care */}
-                            {animal.sectionPrivacy?.health !== false && (animal.vaccinations || animal.dewormingRecords || animal.parasiteControl) && (
+                            {(animal.vaccinations || animal.dewormingRecords || animal.parasiteControl) && (
                                 <div className="bg-gray-50 p-4 rounded-lg border border-gray-200">
                                     <h3 className="text-lg font-semibold text-gray-700 border-b pb-2 mb-3">Preventive Care</h3>
                                     <div className="space-y-3">
@@ -2753,7 +2753,7 @@ const ViewOnlyAnimalDetail = ({ animal, onClose, API_BASE_URL, onViewProfile, au
                             )}
                             
                             {/* Procedures & Diagnostics */}
-                            {animal.sectionPrivacy?.health !== false && (animal.medicalProcedures || animal.labResults) && (
+                            {(animal.medicalProcedures || animal.labResults) && (
                                 <div className="bg-gray-50 p-4 rounded-lg border border-gray-200">
                                     <h3 className="text-lg font-semibold text-gray-700 border-b pb-2 mb-3">Procedures & Diagnostics</h3>
                                     <div className="space-y-3">
@@ -2794,7 +2794,7 @@ const ViewOnlyAnimalDetail = ({ animal, onClose, API_BASE_URL, onViewProfile, au
                             )}
                             
                             {/* Medical Conditions & Ongoing Care */}
-                            {animal.sectionPrivacy?.health !== false && (animal.medicalConditions || animal.allergies || animal.medications) && (
+                            {(animal.medicalConditions || animal.allergies || animal.medications) && (
                                 <div className="bg-gray-50 p-4 rounded-lg border border-gray-200">
                                     <h3 className="text-lg font-semibold text-gray-700 border-b pb-2 mb-3">Medical Conditions & Ongoing Care</h3>
                                     <div className="space-y-3">
@@ -2851,7 +2851,7 @@ const ViewOnlyAnimalDetail = ({ animal, onClose, API_BASE_URL, onViewProfile, au
                             )}
                             
                             {/* Veterinary Care */}
-                            {animal.sectionPrivacy?.health !== false && (animal.vetVisits || animal.primaryVet) && (
+                            {(animal.vetVisits || animal.primaryVet) && (
                                 <div className="bg-gray-50 p-4 rounded-lg border border-gray-200">
                                     <h3 className="text-lg font-semibold text-gray-700 border-b pb-2 mb-3">Veterinary Care</h3>
                                     <div className="space-y-3">
