@@ -90,6 +90,46 @@ const getCountryName = (countryCode) => {
 
 const IDLE_TIMEOUT_MS = 15 * 60 * 1000; // 15 minutes in milliseconds
 
+// Helper function to parse and format array data for display
+const formatArrayDisplay = (data) => {
+    if (!data) return '—';
+    if (typeof data === 'string') {
+        try {
+            const parsed = JSON.parse(data);
+            if (!Array.isArray(parsed) || parsed.length === 0) return '—';
+            return parsed.map((item, index) => {
+                if (typeof item === 'object') {
+                    // Format as bullet points with key info
+                    const keys = Object.keys(item).filter(k => item[k]);
+                    const desc = keys.slice(0, 3).map(k => {
+                        const val = item[k];
+                        return `${k}: ${val}`;
+                    }).join(', ');
+                    return `• ${desc}`;
+                }
+                return `• ${item}`;
+            }).join('\n');
+        } catch (e) {
+            return data; // Return as-is if not JSON
+        }
+    }
+    if (Array.isArray(data)) {
+        if (data.length === 0) return '—';
+        return data.map((item, index) => {
+            if (typeof item === 'object') {
+                const keys = Object.keys(item).filter(k => item[k]);
+                const desc = keys.slice(0, 3).map(k => {
+                    const val = item[k];
+                    return `${k}: ${val}`;
+                }).join(', ');
+                return `• ${desc}`;
+            }
+            return `• ${item}`;
+        }).join('\n');
+    }
+    return String(data);
+};
+
 const ModalMessage = ({ title, message, onClose }) => (
   <div className="fixed inset-0 bg-gray-600 bg-opacity-75 flex items-center justify-center p-4 z-50">
     <div className="bg-white rounded-xl shadow-2xl p-6 w-full max-w-sm">
@@ -2120,8 +2160,8 @@ const PrivateAnimalDetail = ({ animal, onClose, onEdit, API_BASE_URL, authToken,
                                                 axios.put(`${API_BASE_URL}/animals/${animal.id_public}`, { isDisplay: newIsDisplay }, {
                                                     headers: { Authorization: `Bearer ${authToken}` }
                                                 }).then(() => {
-                                                    // Reload animal data after successful update
-                                                    window.location.reload();
+                                                    // Close modal and parent will refetch
+                                                    onClose();
                                                 }).catch(err => {
                                                     console.error('Failed to update isDisplay:', err);
                                                 });
@@ -4116,7 +4156,7 @@ const ViewOnlyAnimalDetail = ({ animal, onClose, API_BASE_URL, onViewProfile, au
                             {/* 2nd Section: Procedures & Diagnostics */}
                             <div className="bg-gray-50 p-4 rounded-lg border border-gray-200 space-y-4">
                                 <h3 className="text-lg font-semibold text-gray-700">Procedures & Diagnostics</h3>
-                                {animal.medicalProcedures && <div><strong className="text-sm">Medical Procedures:</strong> <p className="text-sm mt-1">{animal.medicalProcedures}</p></div>}
+                                {animal.medicalProcedures && <div><strong className="text-sm">Medical Procedures:</strong> <p className="text-sm mt-1 whitespace-pre-wrap">{formatArrayDisplay(animal.medicalProcedures)}</p></div>}
                                 {animal.laboratoryResults && <div><strong className="text-sm">Laboratory Results:</strong> <p className="text-sm mt-1">{animal.laboratoryResults}</p></div>}
                                 {!animal.medicalProcedures && !animal.laboratoryResults && <p className="text-sm text-gray-600">—</p>}
                             </div>
@@ -9660,10 +9700,10 @@ const AnimalForm = ({
                                     </div>
                                     
                                     <div className="md:col-span-2">
-                                        <label className="block text-sm font-medium text-gray-700 mb-2">Fertility & Genetics Notes</label>
+                                        <label className="block text-sm font-medium text-gray-700 mb-2">Stud Fertility Notes</label>
                                         <textarea name="fertilityNotes" value={formData.fertilityNotes} onChange={handleChange} 
                                             className="block w-full p-2 border border-gray-300 rounded-md shadow-sm focus:ring-primary focus:border-primary" 
-                                            placeholder="e.g., Any genetic concerns, fertility issues, or special breeding notes"
+                                            placeholder="e.g., Any genetic concerns, fertility issues, or special breeding notes for sire role"
                                             rows="3" />
                                     </div>
                                 </div>
@@ -9701,10 +9741,10 @@ const AnimalForm = ({
                                     </div>
                                     
                                     <div className="md:col-span-2">
-                                        <label className="block text-sm font-medium text-gray-700 mb-2">Fertility & Genetics Notes</label>
-                                        <textarea name="damFertilityNotes" value={formData.damFertilityNotes || formData.fertilityNotes} onChange={(e) => handleChange({target: {name: 'damFertilityNotes', value: e.target.value}})} 
+                                        <label className="block text-sm font-medium text-gray-700 mb-2">Dam Fertility Notes</label>
+                                        <textarea name="damFertilityNotes" value={formData.damFertilityNotes || ''} onChange={handleChange} 
                                             className="block w-full p-2 border border-gray-300 rounded-md shadow-sm focus:ring-primary focus:border-primary" 
-                                            placeholder="e.g., Any genetic concerns, fertility issues, or special breeding notes"
+                                            placeholder="e.g., Any genetic concerns, fertility issues, or special breeding notes for dam role"
                                             rows="3" />
                                     </div>
                                 </div>
