@@ -2005,7 +2005,7 @@ const PublicProfileView = ({ profile, onBack, onViewAnimal, API_BASE_URL, onStar
 // ==================== PRIVATE ANIMAL DETAIL (OWNER VIEW) ====================
 // Shows ALL data for animal owners viewing their own animals (ignores privacy toggles)
 // Accessed from: MY ANIMALS LIST
-const PrivateAnimalDetail = ({ animal, onClose, onEdit, API_BASE_URL, authToken, setShowImageModal, setEnlargedImageUrl, toggleSectionPrivacy, onUpdateAnimal }) => {
+const PrivateAnimalDetail = ({ animal, onClose, onEdit, API_BASE_URL, authToken, setShowImageModal, setEnlargedImageUrl, toggleSectionPrivacy, onUpdateAnimal, onHideAnimal, showModalMessage }) => {
     const [breederInfo, setBreederInfo] = useState(null);
     const [showPedigree, setShowPedigree] = useState(false);
     const [detailViewTab, setDetailViewTab] = useState(1);
@@ -2073,6 +2073,21 @@ const PrivateAnimalDetail = ({ animal, onClose, onEdit, API_BASE_URL, authToken,
                                 >
                                     <Edit size={16} />
                                     Edit
+                                </button>
+                            )}
+                            {onHideAnimal && (
+                                <button
+                                    onClick={() => {
+                                        if (window.confirm(`Hide ${animal.name || 'this animal'}? You can restore it anytime from the hidden animals section.`)) {
+                                            onHideAnimal(animal.id_public);
+                                            onClose();
+                                        }
+                                    }}
+                                    className="px-3 py-1.5 bg-gray-200 hover:bg-gray-300 text-gray-700 font-semibold rounded-lg transition flex items-center gap-2"
+                                    title="Hide this animal - move to hidden section"
+                                >
+                                    <Eye size={16} />
+                                    Hide
                                 </button>
                             )}
                             <button onClick={onClose} className="text-gray-500 hover:text-gray-800">
@@ -15489,6 +15504,19 @@ const App = () => {
         }
     };
 
+    const handleHideAnimal = async (id_public) => {
+        try {
+            await axios.post(`${API_BASE_URL}/animals/${id_public}/hide`, {}, {
+                headers: { Authorization: `Bearer ${authToken}` }
+            });
+            showModalMessage('Success', 'Animal hidden successfully. You can restore it anytime from the hidden animals section.');
+            fetchHiddenAnimals();
+        } catch (error) {
+            console.error('Failed to hide animal:', error);
+            showModalMessage('Error', error.response?.data?.message || 'Failed to hide animal');
+        }
+    };
+
     const handleRestoreViewOnlyAnimal = async (id_public) => {
         try {
             await axios.post(`${API_BASE_URL}/animals/${id_public}/restore`, {}, {
@@ -16837,6 +16865,8 @@ const App = () => {
                                         setEnlargedImageUrl={setEnlargedImageUrl}
                                         toggleSectionPrivacy={toggleSectionPrivacy}
                                         onUpdateAnimal={setAnimalToView}
+                                        onHideAnimal={handleHideAnimal}
+                                        showModalMessage={showModalMessage}
                                     />
                                 );
                             } else {
