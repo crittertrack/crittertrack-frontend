@@ -3920,15 +3920,7 @@ const ViewOnlyAnimalDetail = ({ animal, onClose, API_BASE_URL, onViewProfile, au
                             )}
 
                             {/* Current Owner Section */}
-                            {!sectionPrivacy.currentOwner && animal.currentOwner && (
-                                <div className="bg-gray-50 p-4 rounded-lg border border-gray-200">
-                                    <h3 className="text-lg font-semibold text-gray-700 border-b pb-2 mb-3">Current Owner</h3>
-                                    <p className="text-gray-700">{animal.currentOwner}</p>
-                                </div>
-                            )}
-
-                            {/* Current Owner Section */}
-                            {!sectionPrivacy.currentOwner && animal.currentOwner && (
+                            {showCurrentOwner && animal.currentOwner && (
                                 <div className="bg-gray-50 p-4 rounded-lg border border-gray-200">
                                     <h3 className="text-lg font-semibold text-gray-700 border-b pb-2 mb-3">Current Owner</h3>
                                     <p className="text-gray-700">{animal.currentOwner}</p>
