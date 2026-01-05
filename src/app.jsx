@@ -3945,10 +3945,12 @@ const ViewOnlyAnimalDetail = ({ animal, onClose, API_BASE_URL, onViewProfile, au
                                 </div>
                             </div>
                             {/* Genetic Code Display Section */}
-                            <div className="bg-gray-50 p-4 rounded-lg border border-gray-200">
-                                <h3 className="text-lg font-semibold text-gray-700 border-b pb-2 mb-3">Genetic Code</h3>
-                                <p className="text-gray-700 font-mono text-sm break-all">{animal.geneticCode || '—'}</p>
-                            </div>
+                            {showGeneticCode && (
+                                <div className="bg-gray-50 p-4 rounded-lg border border-gray-200">
+                                    <h3 className="text-lg font-semibold text-gray-700 border-b pb-2 mb-3">Genetic Code</h3>
+                                    <p className="text-gray-700 font-mono text-sm break-all">{animal.geneticCode || '—'}</p>
+                                </div>
+                            )}
                             {/* Medical Information Section */}
                             {(animal.allergies || animal.medications || animal.medicalConditions) && (showPreventiveCare || showVeteriniaryCare) && (
                                 <div className="bg-gray-50 p-4 rounded-lg border border-gray-200">
