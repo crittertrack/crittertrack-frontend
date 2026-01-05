@@ -2961,6 +2961,17 @@ const ViewOnlyPrivateAnimalDetail = ({ animal, onClose, API_BASE_URL, authToken,
                                             </div>
                                         )}
 
+                                        {/* Sold / Transferred Badge - Show when viewing animal I transferred away */}
+                                        {animal.breederId_public && animal.ownerId_public && animal.breederId_public !== animal.ownerId_public && (
+                                            <div className="bg-purple-50 border border-purple-200 rounded-lg p-3 flex items-center gap-2">
+                                                <span className="text-lg">✅</span>
+                                                <div>
+                                                    <p className="text-sm font-semibold text-gray-700">Sold / Transferred</p>
+                                                    <p className="text-sm text-gray-600">This animal is now owned by someone else</p>
+                                                </div>
+                                            </div>
+                                        )}
+
                                         {/* For Stud Badge */}
                                         {animal.availableForBreeding && (
                                             <div className="bg-blue-50 border border-blue-200 rounded-lg p-3 flex items-center gap-2">
@@ -10723,7 +10734,7 @@ const AnimalForm = ({
                                     ? `Return ${animalToEdit.name} to ${animalToEdit.breederName || 'the original breeder'}? This will remove the animal from your account.`
                                     : `Are you sure you want to delete ${animalToEdit.name}? This action cannot be undone.`;
                                 if(window.confirm(confirmMessage)) { 
-                                    onDelete(animalToEdit.id_public); 
+                                    onDelete(animalToEdit.id_public, animalToEdit); 
                                 } 
                             }} 
                             className="bg-red-500 hover:bg-red-600 text-white font-semibold py-2 px-4 rounded-lg transition duration-150 shadow-md flex items-center space-x-2"
@@ -15268,14 +15279,31 @@ const App = () => {
         }
     };
 
-        const handleDeleteAnimal = async (id_public) => {
+    const handleDeleteAnimal = async (id_public, animalData = null) => {
         try {
-            await axios.delete(`${API_BASE_URL}/animals/${id_public}`);
-            navigate('/');
-            showModalMessage('Success', `Animal with ID ${id_public} has been successfully deleted.`);
+            // Check if this is a RETURN (transferred animal being returned to breeder)
+            // vs a DELETE (original owner deleting their own animal)
+            const isReturn = animalData && 
+                            animalData.breederId_public && 
+                            animalData.breederId_public !== userProfile?.id_public && 
+                            animalData.ownerId_public === userProfile?.id_public;
+            
+            if (isReturn) {
+                // Return the animal: change ownership back to breeder, remove from current owner
+                await axios.post(`${API_BASE_URL}/animals/${id_public}/return`, {}, {
+                    headers: { Authorization: `Bearer ${authToken}` }
+                });
+                navigate('/');
+                showModalMessage('Success', `Animal has been returned to ${animalData.breederName || 'the breeder'}.`);
+            } else {
+                // Delete the animal permanently
+                await axios.delete(`${API_BASE_URL}/animals/${id_public}`);
+                navigate('/');
+                showModalMessage('Success', `Animal with ID ${id_public} has been successfully deleted.`);
+            }
         } catch (error) {
-            console.error('Failed to delete animal:', error);
-            showModalMessage('Error', `Failed to delete animal: ${error.response?.data?.message || error.message}`);
+            console.error('Failed to process animal action:', error);
+            showModalMessage('Error', `Failed to process animal action: ${error.response?.data?.message || error.message}`);
         }
     };
 
