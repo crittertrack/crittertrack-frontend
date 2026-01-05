@@ -2384,17 +2384,27 @@ const PrivateAnimalDetail = ({ animal, onClose, onEdit, API_BASE_URL, authToken,
                     {/* Tab 4: Identification */}
                     {detailViewTab === 4 && (
                         <div className="space-y-6">
+                            {/* 1st Section: Identification Numbers */}
                             <div className="bg-gray-50 p-4 rounded-lg border border-gray-200 space-y-4">
-                                <h3 className="text-lg font-semibold text-gray-700">Identification</h3>
+                                <h3 className="text-lg font-semibold text-gray-700">Identification Numbers</h3>
                                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm">
-                                    <div><span className="text-gray-600">CritterTrack ID:</span> <strong>{animal.id_public}</strong></div>
-                                    <div><span className="text-gray-600">Breeder ID:</span> <strong>{animal.breederyId || '—'}</strong></div>
-                                    <div><span className="text-gray-600">Microchip:</span> <strong>{animal.microchipNumber || '—'}</strong></div>
-                                    <div><span className="text-gray-600">Registration ID:</span> <strong>{animal.pedigreeRegistrationId || '—'}</strong></div>
+                                    <div><span className="text-gray-600">Identification:</span> <strong>{animal.id_public || '—'}</strong></div>
+                                    <div><span className="text-gray-600">Microchip Number:</span> <strong>{animal.microchipNumber || '—'}</strong></div>
+                                    <div><span className="text-gray-600">Pedigree Registration ID:</span> <strong>{animal.pedigreeRegistrationId || '—'}</strong></div>
+                                </div>
+                            </div>
+
+                            {/* 2nd Section: Classification */}
+                            <div className="bg-gray-50 p-4 rounded-lg border border-gray-200 space-y-4">
+                                <h3 className="text-lg font-semibold text-gray-700">Classification</h3>
+                                <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm">
+                                    <div><span className="text-gray-600">Species:</span> <strong>{animal.species || '—'}</strong></div>
                                     <div><span className="text-gray-600">Breed:</span> <strong>{animal.breed || '—'}</strong></div>
                                     <div><span className="text-gray-600">Strain:</span> <strong>{animal.strain || '—'}</strong></div>
                                 </div>
                             </div>
+
+                            {/* 3rd Section: Tags */}
                             <div className="bg-gray-50 p-4 rounded-lg border border-gray-200 space-y-4">
                                 <h3 className="text-lg font-semibold text-gray-700">Tags</h3>
                                 {animal.tags && animal.tags.length > 0 ? (
