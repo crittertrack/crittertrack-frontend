@@ -8071,7 +8071,7 @@ const AnimalForm = ({
 
                         {/* Genetic Code */}
                         <div className="bg-gray-50 p-4 rounded-lg border border-gray-200 space-y-4">
-                            <h3 className="text-lg font-semibold text-gray-700">Genetic Code</h3>
+                            <h3 className="text-lg font-semibold text-gray-700 mb-4">Genetic Code</h3>
                             <GeneticCodeBuilder
                                 species={formData.species}
                                 gender={formData.gender}
@@ -9280,7 +9280,7 @@ const AnimalForm = ({
                                                     placeholder="e.g., Ongoing treatment" className="mt-1 block w-full p-2 text-sm border border-gray-300 rounded-md shadow-sm focus:ring-primary focus:border-primary" />
                                             </div>
                                         </div>
-                                        <button type="button" onClick={addMedicalCondition} className="w-full px-4 py-2 bg-blue-500 text-white rounded-md hover:bg-blue-600 text-sm font-medium">
+                                        <button type="button" onClick={addMedicalCondition} className="w-full px-4 py-2 bg-primary hover:bg-primary/90 text-black rounded-lg text-sm font-medium">
                                             Add Medical Condition
                                         </button>
                                     </div>
@@ -9316,7 +9316,7 @@ const AnimalForm = ({
                                                     placeholder="e.g., Severe reaction" className="mt-1 block w-full p-2 text-sm border border-gray-300 rounded-md shadow-sm focus:ring-primary focus:border-primary" />
                                             </div>
                                         </div>
-                                        <button type="button" onClick={addAllergy} className="w-full px-4 py-2 bg-blue-500 text-white rounded-md hover:bg-blue-600 text-sm font-medium">
+                                        <button type="button" onClick={addAllergy} className="w-full px-4 py-2 bg-primary hover:bg-primary/90 text-black rounded-lg text-sm font-medium">
                                             Add Allergy
                                         </button>
                                     </div>
@@ -9352,7 +9352,7 @@ const AnimalForm = ({
                                                     placeholder="e.g., Dosage, frequency" className="mt-1 block w-full p-2 text-sm border border-gray-300 rounded-md shadow-sm focus:ring-primary focus:border-primary" />
                                             </div>
                                         </div>
-                                        <button type="button" onClick={addMedication} className="w-full px-4 py-2 bg-blue-500 text-white rounded-md hover:bg-blue-600 text-sm font-medium">
+                                        <button type="button" onClick={addMedication} className="w-full px-4 py-2 bg-primary hover:bg-primary/90 text-black rounded-lg text-sm font-medium">
                                             Add Medication
                                         </button>
                                     </div>
@@ -9399,7 +9399,7 @@ const AnimalForm = ({
                                                     placeholder="e.g., Vaccines given, Diagnosis" className="mt-1 block w-full p-2 text-sm border border-gray-300 rounded-md shadow-sm focus:ring-primary focus:border-primary" />
                                             </div>
                                         </div>
-                                        <button type="button" onClick={addVetVisit} className="w-full px-4 py-2 bg-blue-500 text-white rounded-md hover:bg-blue-600 text-sm font-medium">
+                                        <button type="button" onClick={addVetVisit} className="w-full px-4 py-2 bg-primary hover:bg-primary/90 text-black rounded-lg text-sm font-medium">
                                             Add Veterinary Visit
                                         </button>
                                     </div>
@@ -9433,7 +9433,7 @@ const AnimalForm = ({
                 {/* Tab 8: Husbandry */}
                 {activeTab === 8 && (
                     <div className="space-y-6">
-                        {/* Nutrition */}
+                        {/* 1st Section: Nutrition */}
                         <div className="bg-gray-50 p-4 rounded-lg border border-gray-200 space-y-4">
                             <h3 className="text-lg font-semibold text-gray-700">Nutrition</h3>
                             <div className="space-y-4">
@@ -9458,11 +9458,11 @@ const AnimalForm = ({
                                         placeholder="e.g., Vitamin D, calcium powder" />
                                 </div>
                             </div>
+                        </div>
 
-                            {/* Husbandry Sub-section */}
-                            <div data-tutorial-target="husbandry-details-section">
-                                <h4 className="text-sm font-semibold text-gray-700 border-b pb-2">Husbandry</h4>
-                            </div>
+                        {/* 2nd Section: Husbandry */}
+                        <div className="bg-gray-50 p-4 rounded-lg border border-gray-200 space-y-4" data-tutorial-target="husbandry-details-section">
+                            <h3 className="text-lg font-semibold text-gray-700">Husbandry</h3>
                             <div className="space-y-4">
                                 <div>
                                     <label className="block text-sm font-medium text-gray-700 mb-2">Housing Type</label>
@@ -9487,20 +9487,9 @@ const AnimalForm = ({
                             </div>
                         </div>
 
-                        {/* Environment */}
+                        {/* 3rd Section: Environment */}
                         <div className="bg-gray-50 p-4 rounded-lg border border-gray-200 space-y-4" data-tutorial-target="environment-section">
-                            <div className="flex justify-between items-center border-b pb-2">
-                                <h3 className="text-lg font-semibold text-gray-700">Environment</h3>
-                                <button
-                                    type="button"
-                                    onClick={() => toggleSectionPrivacy('environment')}
-                                    className={`px-3 py-1 rounded-full text-xs font-medium transition ${
-                                        sectionPrivacy[animalToEdit?.id_public]?.environment ? 'bg-blue-100 text-blue-800' : 'bg-gray-100 text-gray-800'
-                                    }`}
-                                >
-                                    {sectionPrivacy[animalToEdit?.id_public]?.environment ? '🌍 Public' : '🔒 Private'}
-                                </button>
-                            </div>
+                            <h3 className="text-lg font-semibold text-gray-700">Environment</h3>
                             <div className="space-y-4">
                                 <div>
                                     <label className="block text-sm font-medium text-gray-700 mb-2">Temperature Range</label>
@@ -9607,19 +9596,7 @@ const AnimalForm = ({
                 {activeTab === 10 && (
                     <div className="space-y-6">
                         <div className="bg-gray-50 p-4 rounded-lg border border-gray-200" data-tutorial-target="remarks-section">
-                            <div className="flex justify-between items-center border-b pb-2 mb-4">
-                                <h3 className="text-lg font-semibold text-gray-700">Remarks & Notes</h3>
-                                <button
-                                    type="button"
-                                    onClick={() => toggleSectionPrivacy('remarks')}
-                                    className={`px-3 py-1 rounded-full text-xs font-medium transition ${
-                                        sectionPrivacy[animalToEdit?.id_public]?.remarks ? 'bg-blue-100 text-blue-800' : 'bg-gray-100 text-gray-800'
-                                    }`}
-                                >
-                                    {sectionPrivacy[animalToEdit?.id_public]?.remarks ? '🌍 Public' : '🔒 Private'}
-                                </button>
-                            </div>
-                            <label className="block text-sm font-medium text-gray-700 mb-2">Remarks / Notes</label>
+                            <h3 className="text-lg font-semibold text-gray-700 border-b pb-2 mb-4">Remarks & Notes</h3>
                             <textarea name="remarks" value={formData.remarks} onChange={handleChange} rows="5"
                                 className="block w-full p-2 border border-gray-300 rounded-md shadow-sm focus:ring-primary focus:border-primary" 
                                 placeholder="General notes, observations, and records..." />
