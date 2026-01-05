@@ -2128,7 +2128,7 @@ const PrivateAnimalDetail = ({ animal, onClose, onEdit, API_BASE_URL, authToken,
                                         </h2>
 
                                         {/* For Sale Badge */}
-                                        {animal.isForSale ? (
+                                        {animal.isForSale && (
                                             <div className="bg-green-50 border border-green-200 rounded-lg p-3 flex items-center gap-2">
                                                 <span className="text-lg">🏷️</span>
                                                 <div>
@@ -2138,18 +2138,10 @@ const PrivateAnimalDetail = ({ animal, onClose, onEdit, API_BASE_URL, authToken,
                                                     </p>
                                                 </div>
                                             </div>
-                                        ) : (
-                                            <div className="bg-gray-50 border border-gray-200 rounded-lg p-3 flex items-center gap-2">
-                                                <span className="text-lg">🏷️</span>
-                                                <div>
-                                                    <p className="text-sm font-semibold text-gray-700">For Sale</p>
-                                                    <p className="text-sm text-gray-600">Not for sale</p>
-                                                </div>
-                                            </div>
                                         )}
 
                                         {/* For Stud Badge */}
-                                        {animal.availableForBreeding ? (
+                                        {animal.availableForBreeding && (
                                             <div className="bg-blue-50 border border-blue-200 rounded-lg p-3 flex items-center gap-2">
                                                 <span className="text-lg">🫘</span>
                                                 <div>
@@ -2157,14 +2149,6 @@ const PrivateAnimalDetail = ({ animal, onClose, onEdit, API_BASE_URL, authToken,
                                                     <p className="text-sm text-gray-600">
                                                         {animal.studFeeCurrency === 'Negotiable' || !animal.studFeeAmount ? 'Negotiable' : `${animal.studFeeCurrency === 'USD' ? '$' : animal.studFeeCurrency === 'EUR' ? '€' : animal.studFeeCurrency === 'GBP' ? '£' : animal.studFeeCurrency === 'CAD' ? 'C$' : animal.studFeeCurrency === 'AUD' ? 'A$' : animal.studFeeCurrency === 'JPY' ? '¥' : animal.studFeeCurrency}${animal.studFeeAmount ? ` ${animal.studFeeAmount}` : ''}`}
                                                     </p>
-                                                </div>
-                                            </div>
-                                        ) : (
-                                            <div className="bg-gray-50 border border-gray-200 rounded-lg p-3 flex items-center gap-2">
-                                                <span className="text-lg">🫘</span>
-                                                <div>
-                                                    <p className="text-sm font-semibold text-gray-700">Available for Stud</p>
-                                                    <p className="text-sm text-gray-600">Not available</p>
                                                 </div>
                                             </div>
                                         )}
@@ -2236,26 +2220,55 @@ const PrivateAnimalDetail = ({ animal, onClose, onEdit, API_BASE_URL, authToken,
                             {/* Breeder Section */}
                             <div className="bg-gray-50 p-4 rounded-lg border border-gray-200">
                                 <h3 className="text-lg font-semibold text-gray-700 border-b pb-2 mb-3">Breeder</h3>
+                                <p className="text-gray-700">
+                                    {breederInfo ? (() => {
+                                        const showPersonal = breederInfo.showPersonalName ?? false;
+                                        const showBreeder = breederInfo.showBreederName ?? false;
+                                        if (showPersonal && showBreeder && breederInfo.personalName && breederInfo.breederName) {
+                                            return `${breederInfo.personalName} (${breederInfo.breederName})`;
+                                        } else if (showBreeder && breederInfo.breederName) {
+                                            return breederInfo.breederName;
+                                        } else if (showPersonal && breederInfo.personalName) {
+                                            return breederInfo.personalName;
+                                        } else {
+                                            return 'Unknown Breeder';
+                                        }
+                                    })() : (animal.breederId_public ? <span className="font-mono text-accent">{animal.breederId_public}</span> : '—')}
+                                </p>
+                            </div>
+
+                            {/* Identification Numbers Section */}
+                            <div className="bg-gray-50 p-4 rounded-lg border border-gray-200">
+                                <h3 className="text-lg font-semibold text-gray-700 border-b pb-2 mb-3">Identification Numbers</h3>
                                 <div className="space-y-2">
-                                    <p className="text-sm text-gray-700">
-                                        <span className="font-semibold">Breeder ID:</span> {animal.breederyId || '—'}
-                                    </p>
-                                    <p className="text-sm text-gray-700">
-                                        <span className="font-semibold">Breeder Name:</span>{' '}
-                                        {breederInfo ? (() => {
-                                            const showPersonal = breederInfo.showPersonalName ?? false;
-                                            const showBreeder = breederInfo.showBreederName ?? false;
-                                            if (showPersonal && showBreeder && breederInfo.personalName && breederInfo.breederName) {
-                                                return `${breederInfo.personalName} (${breederInfo.breederName})`;
-                                            } else if (showBreeder && breederInfo.breederName) {
-                                                return breederInfo.breederName;
-                                            } else if (showPersonal && breederInfo.personalName) {
-                                                return breederInfo.personalName;
-                                            } else {
-                                                return 'Unknown Breeder';
-                                            }
-                                        })() : '—'}
-                                    </p>
+                                    <p className="text-sm"><span className="font-medium">Identification:</span> {animal.breederyId || '—'}</p>
+                                    <p className="text-sm"><span className="font-medium">Microchip:</span> {animal.microchipNumber || '—'}</p>
+                                    <p className="text-sm"><span className="font-medium">Pedigree Reg ID:</span> {animal.pedigreeRegistrationId || '—'}</p>
+                                </div>
+                            </div>
+
+                            {/* Genetic Code Display Section */}
+                            <div className="bg-gray-50 p-4 rounded-lg border border-gray-200">
+                                <h3 className="text-lg font-semibold text-gray-700 border-b pb-2 mb-3">Genetic Code</h3>
+                                <p className="text-gray-700 font-mono text-sm break-all">{animal.geneticCode || '—'}</p>
+                            </div>
+
+                            {/* Parents Section */}
+                            <div className="bg-gray-50 p-4 rounded-lg border border-gray-200">
+                                <h3 className="text-lg font-semibold text-gray-700 border-b pb-2 mb-4">Parents</h3>
+                                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                                    <ViewOnlyParentCard 
+                                        parentId={animal.fatherId_public || animal.sireId_public} 
+                                        parentType="Sire"
+                                        API_BASE_URL={API_BASE_URL}
+                                        onViewAnimal={() => {}}
+                                    />
+                                    <ViewOnlyParentCard 
+                                        parentId={animal.motherId_public || animal.damId_public} 
+                                        parentType="Dam"
+                                        API_BASE_URL={API_BASE_URL}
+                                        onViewAnimal={() => {}}
+                                    />
                                 </div>
                             </div>
                         </div>
