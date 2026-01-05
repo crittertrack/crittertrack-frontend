@@ -10711,10 +10711,16 @@ const AnimalForm = ({
                             type="button"
                             data-tutorial-target="delete-animal-btn"
                             onClick={() => { 
-                                // Check if this animal was transferred TO the current user (not back to original owner)
-                                const isTransferredToMe = animalToEdit.originalOwnerId && userProfile && animalToEdit.originalOwnerId !== userProfile.userId_backend;
-                                const confirmMessage = isTransferredToMe 
-                                    ? `Return ${animalToEdit.name} to the original owner? This will remove the animal from your account.`
+                                // Ownership logic:
+                                // - If I created it and still own it → Can delete it
+                                // - If I created it but transferred it away → Someone else owns it (I'd be in ViewOnly)
+                                // - If it was transferred TO me → I own it but can only return it (not delete)
+                                
+                                // Check if this animal was transferred TO the current user
+                                const iWasTransferredThisAnimal = animalToEdit.breederId_public && animalToEdit.breederId_public !== userProfile?.id_public && animalToEdit.ownerId_public === userProfile?.id_public;
+                                
+                                const confirmMessage = iWasTransferredThisAnimal 
+                                    ? `Return ${animalToEdit.name} to ${animalToEdit.breederName || 'the original breeder'}? This will remove the animal from your account.`
                                     : `Are you sure you want to delete ${animalToEdit.name}? This action cannot be undone.`;
                                 if(window.confirm(confirmMessage)) { 
                                     onDelete(animalToEdit.id_public); 
@@ -10722,8 +10728,14 @@ const AnimalForm = ({
                             }} 
                             className="bg-red-500 hover:bg-red-600 text-white font-semibold py-2 px-4 rounded-lg transition duration-150 shadow-md flex items-center space-x-2"
                         > 
-                            {animalToEdit.originalOwnerId && userProfile && animalToEdit.originalOwnerId !== userProfile.userId_backend ? <RotateCcw size={18} /> : <Trash2 size={18} />}
-                            <span>{animalToEdit.originalOwnerId && userProfile && animalToEdit.originalOwnerId !== userProfile.userId_backend ? 'Return Animal' : 'Delete'}</span> 
+                            {(() => {
+                                const iWasTransferredThisAnimal = animalToEdit.breederId_public && animalToEdit.breederId_public !== userProfile?.id_public && animalToEdit.ownerId_public === userProfile?.id_public;
+                                return iWasTransferredThisAnimal ? <RotateCcw size={18} /> : <Trash2 size={18} />;
+                            })()}
+                            <span>{(() => {
+                                const iWasTransferredThisAnimal = animalToEdit.breederId_public && animalToEdit.breederId_public !== userProfile?.id_public && animalToEdit.ownerId_public === userProfile?.id_public;
+                                return iWasTransferredThisAnimal ? 'Return Animal' : 'Delete';
+                            })()}</span> 
                         </button>
                     )}
                 </div>
@@ -16610,25 +16622,16 @@ const App = () => {
                     } />
                     <Route path="/view-animal" element={
                         animalToView && (() => {
-                            // Simple ownership check: 
-                            // If I own the animal (ownerId_public matches my ID) → Full edit access
-                            // Otherwise → Read-only access (I transferred it away)
-                            const isViewOnlyForCurrentUser = animalToView.ownerId_public !== userProfile?.id_public;
+                            // Ownership logic:
+                            // 1. If I'm the current owner (ownerId_public === my ID) → PrivateAnimalDetail (full edit, but can return if transferred to me)
+                            // 2. If I'm the creator but no longer the owner (breederId_public === my ID but ownerId_public !== my ID) → ViewOnlyPrivateAnimalDetail (read-only, I transferred it away)
+                            // 3. Otherwise → ViewOnlyPrivateAnimalDetail (someone else owns it)
                             
-                            if (isViewOnlyForCurrentUser) {
-                                // Show read-only version for animals I no longer own
-                                return (
-                                    <ViewOnlyPrivateAnimalDetail
-                                        animal={animalToView}
-                                        onClose={() => navigate('/')}
-                                        API_BASE_URL={API_BASE_URL}
-                                        authToken={authToken}
-                                        setShowImageModal={setShowImageModal}
-                                        setEnlargedImageUrl={setEnlargedImageUrl}
-                                    />
-                                );
-                            } else {
-                                // Show full edit version for animals I own
+                            const iCurrentlyOwn = animalToView.ownerId_public === userProfile?.id_public;
+                            const iCreatedItButTransferred = animalToView.breederId_public === userProfile?.id_public && animalToView.ownerId_public !== userProfile?.id_public;
+                            
+                            if (iCurrentlyOwn) {
+                                // I own it - full edit access (with return button instead of delete if transferred to me)
                                 return (
                                     <PrivateAnimalDetail
                                         animal={animalToView}
@@ -16640,6 +16643,18 @@ const App = () => {
                                         setEnlargedImageUrl={setEnlargedImageUrl}
                                         toggleSectionPrivacy={toggleSectionPrivacy}
                                         onUpdateAnimal={setAnimalToView}
+                                    />
+                                );
+                            } else {
+                                // Someone else owns it - read-only (or I created it but transferred it away)
+                                return (
+                                    <ViewOnlyPrivateAnimalDetail
+                                        animal={animalToView}
+                                        onClose={() => navigate('/')}
+                                        API_BASE_URL={API_BASE_URL}
+                                        authToken={authToken}
+                                        setShowImageModal={setShowImageModal}
+                                        setEnlargedImageUrl={setEnlargedImageUrl}
                                     />
                                 );
                             }
