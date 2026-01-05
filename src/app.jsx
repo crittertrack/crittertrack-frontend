@@ -14243,10 +14243,9 @@ const App = () => {
     }, []);
 
     // Toggle section privacy and save to animal
-    const toggleSectionPrivacy = useCallback(async (sectionName) => {
-        if (!animalToEdit) return;
+    const toggleSectionPrivacy = useCallback(async (animalId, sectionName) => {
+        if (!animalId || !sectionName) return;
         
-        const animalId = animalToEdit.id_public;
         const currentPrivacy = sectionPrivacy[animalId] || {};
         const newPrivacy = {
             ...currentPrivacy,
@@ -14275,7 +14274,7 @@ const App = () => {
             }));
             showModalMessage('Error', 'Failed to save privacy settings');
         }
-    }, [animalToEdit, sectionPrivacy, authToken, API_BASE_URL, showModalMessage]);
+    }, [sectionPrivacy, authToken, API_BASE_URL, showModalMessage]);
 
     const handleLogout = useCallback((expired = false) => {
         setAuthToken(null);
