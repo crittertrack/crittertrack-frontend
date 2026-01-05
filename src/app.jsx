@@ -16615,7 +16615,7 @@ const App = () => {
                             const isViewOnlyForCurrentUser = animalToView.status === 'sold' || 
                                                             animalToView.status === 'transferred' || 
                                                             animalToView.status === 'purchased' ||
-                                                            (animalToView.isViewOnly === true) ||
+                                                            (animalToView.isViewOnly === true && animalToView.ownerId_public !== userProfile?.id_public) ||
                                                             (animalToView.currentOwner && animalToView.currentOwner !== userProfile?.id_public);
                             
                             if (isViewOnlyForCurrentUser) {
