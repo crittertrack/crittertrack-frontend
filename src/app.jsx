@@ -2608,7 +2608,23 @@ const PrivateAnimalDetail = ({ animal, onClose, onEdit, API_BASE_URL, authToken,
                             <div className="bg-gray-50 p-4 rounded-lg border border-gray-200 space-y-4">
                                 <h3 className="text-lg font-semibold text-gray-700">Procedures & Diagnostics</h3>
                                 <div className="space-y-3 text-sm">
-                                    <div><span className="text-gray-600">Medical Procedures:</span> <strong>{animal.medicalProcedures || '—'}</strong></div>
+                                    <div><span className="text-gray-600">Medical Procedures:</span> <strong>{animal.medicalProcedures && (
+                                    <div>
+                                        <strong className="text-sm">Medical Procedures:</strong>
+                                        <ul className="text-sm mt-1 list-disc list-inside space-y-1">
+                                            {(() => {
+                                                const data = animal.medicalProcedures;
+                                                const parsed = typeof data === 'string' ? (() => { try { return JSON.parse(data); } catch { return []; } })() : Array.isArray(data) ? data : [];
+                                                return parsed.map((proc, idx) => (
+                                                    <li key={idx} className="text-gray-700">
+                                                        {proc.name} {proc.date && `(${new Date(proc.date).toLocaleDateString()})`}
+                                                        {proc.notes && <span className="text-gray-600"> - {proc.notes}</span>}
+                                                    </li>
+                                                ));
+                                            })()}
+                                        </ul>
+                                    </div>
+                                )}</strong></div>
                                     <div><span className="text-gray-600">Laboratory Results:</span> <strong>{animal.laboratoryResults || '—'}</strong></div>
                                 </div>
                             </div>
@@ -2633,7 +2649,23 @@ const PrivateAnimalDetail = ({ animal, onClose, onEdit, API_BASE_URL, authToken,
                                 <h3 className="text-lg font-semibold text-gray-700">Veterinary Care</h3>
                                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm">
                                     <div><span className="text-gray-600">Primary Veterinarian:</span> <strong>{animal.primaryVet || '—'}</strong></div>
-                                    <div><span className="text-gray-600">Veterinary Visits:</span> <strong>{animal.vetVisits || '—'}</strong></div>
+                                    <div><span className="text-gray-600">Veterinary Visits:</span> <strong>{animal.vetVisits && (
+                                    <div>
+                                        <strong className="text-sm">Veterinary Visits:</strong>
+                                        <ul className="text-sm mt-1 list-disc list-inside space-y-1">
+                                            {(() => {
+                                                const data = animal.vetVisits;
+                                                const parsed = typeof data === 'string' ? (() => { try { return JSON.parse(data); } catch { return []; } })() : Array.isArray(data) ? data : [];
+                                                return parsed.map((visit, idx) => (
+                                                    <li key={idx} className="text-gray-700">
+                                                        {visit.reason} {visit.date && `(${new Date(visit.date).toLocaleDateString()})`}
+                                                        {visit.notes && <span className="text-gray-600"> - {visit.notes}</span>}
+                                                    </li>
+                                                ));
+                                            })()}
+                                        </ul>
+                                    </div>
+                                )}</strong></div>
                                 </div>
                             </div>
                         </div>
@@ -3319,7 +3351,23 @@ const ViewOnlyPrivateAnimalDetail = ({ animal, onClose, API_BASE_URL, authToken,
                             <div className="bg-gray-50 p-4 rounded-lg border border-gray-200 space-y-4">
                                 <h3 className="text-lg font-semibold text-gray-700">Procedures & Diagnostics</h3>
                                 <div className="space-y-3 text-sm">
-                                    <div><span className="text-gray-600">Medical Procedures:</span> <strong>{animal.medicalProcedures || '—'}</strong></div>
+                                    <div><span className="text-gray-600">Medical Procedures:</span> <strong>{animal.medicalProcedures && (
+                                    <div>
+                                        <strong className="text-sm">Medical Procedures:</strong>
+                                        <ul className="text-sm mt-1 list-disc list-inside space-y-1">
+                                            {(() => {
+                                                const data = animal.medicalProcedures;
+                                                const parsed = typeof data === 'string' ? (() => { try { return JSON.parse(data); } catch { return []; } })() : Array.isArray(data) ? data : [];
+                                                return parsed.map((proc, idx) => (
+                                                    <li key={idx} className="text-gray-700">
+                                                        {proc.name} {proc.date && `(${new Date(proc.date).toLocaleDateString()})`}
+                                                        {proc.notes && <span className="text-gray-600"> - {proc.notes}</span>}
+                                                    </li>
+                                                ));
+                                            })()}
+                                        </ul>
+                                    </div>
+                                )}</strong></div>
                                     <div><span className="text-gray-600">Laboratory Results:</span> <strong>{animal.laboratoryResults || '—'}</strong></div>
                                 </div>
                             </div>
@@ -3344,7 +3392,23 @@ const ViewOnlyPrivateAnimalDetail = ({ animal, onClose, API_BASE_URL, authToken,
                                 <h3 className="text-lg font-semibold text-gray-700">Veterinary Care</h3>
                                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm">
                                     <div><span className="text-gray-600">Primary Veterinarian:</span> <strong>{animal.primaryVet || '—'}</strong></div>
-                                    <div><span className="text-gray-600">Veterinary Visits:</span> <strong>{animal.vetVisits || '—'}</strong></div>
+                                    <div><span className="text-gray-600">Veterinary Visits:</span> <strong>{animal.vetVisits && (
+                                    <div>
+                                        <strong className="text-sm">Veterinary Visits:</strong>
+                                        <ul className="text-sm mt-1 list-disc list-inside space-y-1">
+                                            {(() => {
+                                                const data = animal.vetVisits;
+                                                const parsed = typeof data === 'string' ? (() => { try { return JSON.parse(data); } catch { return []; } })() : Array.isArray(data) ? data : [];
+                                                return parsed.map((visit, idx) => (
+                                                    <li key={idx} className="text-gray-700">
+                                                        {visit.reason} {visit.date && `(${new Date(visit.date).toLocaleDateString()})`}
+                                                        {visit.notes && <span className="text-gray-600"> - {visit.notes}</span>}
+                                                    </li>
+                                                ));
+                                            })()}
+                                        </ul>
+                                    </div>
+                                )}</strong></div>
                                 </div>
                             </div>
                         </div>
@@ -4167,7 +4231,23 @@ const ViewOnlyAnimalDetail = ({ animal, onClose, API_BASE_URL, onViewProfile, au
                             {/* 2nd Section: Procedures & Diagnostics */}
                             <div className="bg-gray-50 p-4 rounded-lg border border-gray-200 space-y-4">
                                 <h3 className="text-lg font-semibold text-gray-700">Procedures & Diagnostics</h3>
-                                {animal.medicalProcedures && <div><strong className="text-sm">Medical Procedures:</strong> <p className="text-sm mt-1 whitespace-pre-wrap">{formatArrayDisplay(animal.medicalProcedures)}</p></div>}
+                                {animal.medicalProcedures && (
+                                    <div>
+                                        <strong className="text-sm">Medical Procedures:</strong>
+                                        <ul className="text-sm mt-1 list-disc list-inside space-y-1">
+                                            {(() => {
+                                                const data = animal.medicalProcedures;
+                                                const parsed = typeof data === 'string' ? (() => { try { return JSON.parse(data); } catch { return []; } })() : Array.isArray(data) ? data : [];
+                                                return parsed.map((proc, idx) => (
+                                                    <li key={idx} className="text-gray-700">
+                                                        {proc.name} {proc.date && `(${new Date(proc.date).toLocaleDateString()})`}
+                                                        {proc.notes && <span className="text-gray-600"> - {proc.notes}</span>}
+                                                    </li>
+                                                ));
+                                            })()}
+                                        </ul>
+                                    </div>
+                                )}
                                 {animal.laboratoryResults && <div><strong className="text-sm">Laboratory Results:</strong> <p className="text-sm mt-1">{animal.laboratoryResults}</p></div>}
                                 {!animal.medicalProcedures && !animal.laboratoryResults && <p className="text-sm text-gray-600">—</p>}
                             </div>
@@ -4230,7 +4310,23 @@ const ViewOnlyAnimalDetail = ({ animal, onClose, API_BASE_URL, onViewProfile, au
                             <div className="bg-gray-50 p-4 rounded-lg border border-gray-200 space-y-4">
                                 <h3 className="text-lg font-semibold text-gray-700">Veterinary Care</h3>
                                 {animal.primaryVet && <div><strong className="text-sm">Primary Veterinarian:</strong> <p className="text-sm mt-1">{animal.primaryVet}</p></div>}
-                                {animal.vetVisits && <div><strong className="text-sm">Veterinary Visits:</strong> <p className="text-sm mt-1">{animal.vetVisits}</p></div>}
+                                {animal.vetVisits && (
+                                    <div>
+                                        <strong className="text-sm">Veterinary Visits:</strong>
+                                        <ul className="text-sm mt-1 list-disc list-inside space-y-1">
+                                            {(() => {
+                                                const data = animal.vetVisits;
+                                                const parsed = typeof data === 'string' ? (() => { try { return JSON.parse(data); } catch { return []; } })() : Array.isArray(data) ? data : [];
+                                                return parsed.map((visit, idx) => (
+                                                    <li key={idx} className="text-gray-700">
+                                                        {visit.reason} {visit.date && `(${new Date(visit.date).toLocaleDateString()})`}
+                                                        {visit.notes && <span className="text-gray-600"> - {visit.notes}</span>}
+                                                    </li>
+                                                ));
+                                            })()}
+                                        </ul>
+                                    </div>
+                                )}
                                 {!animal.primaryVet && !animal.vetVisits && <p className="text-sm text-gray-600">—</p>}
                             </div>
                         </div>
@@ -18767,4 +18863,6 @@ const AppWithTutorial = () => {
 };
 
 export default AppRouter;
+
+
 
