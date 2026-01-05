@@ -2304,14 +2304,46 @@ const PrivateAnimalDetail = ({ animal, onClose, onEdit, API_BASE_URL, authToken,
                     {/* Tab 2: Status & Privacy */}
                     {detailViewTab === 2 && (
                         <div className="space-y-6">
+                            {/* 1st Section: Ownership */}
                             <div className="bg-gray-50 p-4 rounded-lg border border-gray-200 space-y-4">
-                                <h3 className="text-lg font-semibold text-gray-700">Ownership & Privacy</h3>
-                                <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm">
-                                    <div><span className="text-gray-600">Currently Owned:</span> <strong>{animal.isOwned ? 'Yes' : 'No'}</strong></div>
-                                    <div><span className="text-gray-600">Public Profile:</span> <strong>{animal.isDisplay ? 'Yes (Public)' : 'No (Private)'}</strong></div>
-                                    <div><span className="text-gray-600">Current Owner:</span> <strong>{animal.currentOwner || '—'}</strong></div>
-                                    <div><span className="text-gray-600">For Sale:</span> <strong>{animal.isForSale ? `${animal.salePriceCurrency || ''} ${animal.salePriceAmount || 'Negotiable'}`.trim() : 'No'}</strong></div>
-                                    <div><span className="text-gray-600">For Stud:</span> <strong>{animal.availableForBreeding ? `${animal.studFeeCurrency || ''} ${animal.studFeeAmount || 'Negotiable'}`.trim() : 'No'}</strong></div>
+                                <h3 className="text-lg font-semibold text-gray-700">Ownership</h3>
+                                <div className="space-y-3 text-sm">
+                                    <div className="flex items-center gap-2">
+                                        <span className="text-gray-600">Currently Owned:</span>
+                                        <strong>{animal.isOwned ? '✓ Yes' : '✗ No'}</strong>
+                                    </div>
+                                    <div>
+                                        <span className="text-gray-600 block mb-1">Breeder:</span>
+                                        <strong>{breederInfo ? `${breederInfo.breederName || breederInfo.personalName || 'Unknown'}` : (animal.breederId_public || '—')}</strong>
+                                    </div>
+                                </div>
+                            </div>
+
+                            {/* 2nd Section: Current Owner */}
+                            <div className="bg-gray-50 p-4 rounded-lg border border-gray-200 space-y-4">
+                                <h3 className="text-lg font-semibold text-gray-700">Current Owner</h3>
+                                <div className="text-sm">
+                                    <span className="text-gray-600">Owner Name:</span>
+                                    <strong className="block mt-1">{animal.currentOwner || '—'}</strong>
+                                </div>
+                            </div>
+
+                            {/* 3rd Section: Availability for Sale or Stud */}
+                            <div className="bg-gray-50 p-4 rounded-lg border border-gray-200 space-y-4">
+                                <h3 className="text-lg font-semibold text-gray-700">Availability for Sale or Stud</h3>
+                                <div className="space-y-3 text-sm">
+                                    <div>
+                                        <span className="text-gray-600">For Sale:</span>
+                                        <strong className="block mt-1">
+                                            {animal.isForSale ? `✓ Yes - ${animal.salePriceCurrency || ''} ${animal.salePriceAmount || 'Negotiable'}`.trim() : '✗ No'}
+                                        </strong>
+                                    </div>
+                                    <div>
+                                        <span className="text-gray-600">For Stud:</span>
+                                        <strong className="block mt-1">
+                                            {animal.availableForBreeding ? `✓ Yes - ${animal.studFeeCurrency || ''} ${animal.studFeeAmount || 'Negotiable'}`.trim() : '✗ No'}
+                                        </strong>
+                                    </div>
                                 </div>
                             </div>
                         </div>
