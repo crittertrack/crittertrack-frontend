@@ -2533,29 +2533,23 @@ const ViewOnlyAnimalDetail = ({ animal, onClose, API_BASE_URL, onViewProfile, au
                     {/* Tab 6: Breeding */}
                     {detailViewTab === 6 && (
                         <div className="space-y-4">
-                            {/* Always show reproductive status section if not private */}
-                            {animal.sectionPrivacy?.reproductive !== false && (
-                                <div className="bg-gray-50 p-4 rounded-lg border border-gray-200">
-                                    <h3 className="text-lg font-semibold text-gray-700 border-b pb-2 mb-3">Reproductive Status</h3>
-                                    <div className="space-y-2">
-                                        <p className="text-sm"><span className="font-medium">Neutered/Spayed:</span> {animal.isNeutered ? 'Yes' : 'No'}</p>
-                                        {animal.isInfertile && <p className="text-sm"><span className="font-medium">Infertile:</span> Yes</p>}
-                                        {animal.isInMating && <p className="text-sm"><span className="font-medium">In Mating:</span> Yes</p>}
-                                        {animal.isPregnant && <p className="text-sm"><span className="font-medium">Pregnant:</span> Yes</p>}
-                                        {animal.isNursing && <p className="text-sm"><span className="font-medium">Nursing:</span> Yes</p>}
-                                        {!animal.isNeutered && !animal.isInfertile && !animal.isInMating && !animal.isPregnant && !animal.isNursing && (
-                                            <p className="text-sm text-gray-500 italic">No special reproductive status</p>
-                                        )}
-                                    </div>
+                            {/* Reproductive Status - Always visible */}
+                            <div className="bg-gray-50 p-4 rounded-lg border border-gray-200">
+                                <h3 className="text-lg font-semibold text-gray-700 border-b pb-2 mb-3">Reproductive Status</h3>
+                                <div className="space-y-2">
+                                    <p className="text-sm"><span className="font-medium">Neutered/Spayed:</span> {animal.isNeutered ? 'Yes' : 'No'}</p>
+                                    {animal.isInfertile && <p className="text-sm"><span className="font-medium">Infertile:</span> Yes</p>}
+                                    {animal.isInMating && <p className="text-sm"><span className="font-medium">In Mating:</span> Yes</p>}
+                                    {animal.isPregnant && <p className="text-sm"><span className="font-medium">Pregnant:</span> Yes</p>}
+                                    {animal.isNursing && <p className="text-sm"><span className="font-medium">Nursing:</span> Yes</p>}
+                                    {!animal.isNeutered && !animal.isInfertile && !animal.isInMating && !animal.isPregnant && !animal.isNursing && (
+                                        <p className="text-sm text-gray-500 italic">No special reproductive status</p>
+                                    )}
                                 </div>
-                            )}
+                            </div>
                             
                             {/* Estrus/Cycle Section */}
-                            {animal.sectionPrivacy?.reproductive !== false && (
-                                animal.heatStatus || 
-                                animal.lastHeatDate || 
-                                animal.ovulationDate
-                            ) && (
+                            {(animal.heatStatus || animal.lastHeatDate || animal.ovulationDate) && (
                                 <div className="bg-gray-50 p-4 rounded-lg border border-gray-200">
                                     <h3 className="text-lg font-semibold text-gray-700 border-b pb-2 mb-3">Estrus/Cycle</h3>
                                     <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
@@ -2579,7 +2573,7 @@ const ViewOnlyAnimalDetail = ({ animal, onClose, API_BASE_URL, onViewProfile, au
                             )}
                             
                             {/* Mating Section */}
-                            {animal.sectionPrivacy?.reproductive !== false && animal.matingDates && (
+                            {animal.matingDates && (
                                 <div className="bg-gray-50 p-4 rounded-lg border border-gray-200">
                                     <h3 className="text-lg font-semibold text-gray-700 border-b pb-2 mb-3">Mating</h3>
                                     <p className="text-sm">
@@ -2588,15 +2582,13 @@ const ViewOnlyAnimalDetail = ({ animal, onClose, API_BASE_URL, onViewProfile, au
                                 </div>
                             )}
                             
-                            {/* Breeding History Section - Only shows if breeding history data exists */}
-                            {animal.sectionPrivacy?.reproductive !== false && (
-                                animal.lastMatingDate || 
+                            {/* Breeding History Section */}
+                            {(animal.lastMatingDate || 
                                 (animal.successfulMatings !== null && animal.successfulMatings !== undefined) || 
                                 animal.lastPregnancyDate || 
                                 animal.litterCount || 
                                 (animal.offspringCount !== null && animal.offspringCount !== undefined) || 
-                                animal.breedingRole
-                            ) && (
+                                animal.breedingRole) && (
                                 <div className="bg-blue-50 p-4 rounded-lg border border-blue-200">
                                     <h3 className="text-lg font-semibold text-gray-700 border-b pb-2 mb-3 flex items-center">
                                         <span className="text-blue-600 mr-2">📋</span>
@@ -2639,20 +2631,18 @@ const ViewOnlyAnimalDetail = ({ animal, onClose, API_BASE_URL, onViewProfile, au
                             )}
                             
                             {/* Stud/Dam Information */}
-                            {animal.sectionPrivacy?.reproductive !== false && (
-                                animal.isStudAnimal || 
+                            {(animal.isStudAnimal || 
                                 animal.isDamAnimal || 
                                 animal.availableForBreeding || 
-                                animal.studFeeAmount || 
-                                animal.fertilityStatus || 
+                                (animal.studFeeAmount !== null && animal.studFeeAmount !== undefined) || 
+                                (animal.fertilityStatus && animal.fertilityStatus !== 'Unknown') || 
                                 animal.fertilityNotes || 
-                                animal.damFertilityStatus || 
-                                animal.damFertilityNotes
-                            ) && (
+                                (animal.damFertilityStatus && animal.damFertilityStatus !== 'Unknown') || 
+                                animal.damFertilityNotes) && (
                                 <div className="bg-gray-50 p-4 rounded-lg border border-gray-200">
                                     <h3 className="text-lg font-semibold text-gray-700 border-b pb-2 mb-3">Breeding Availability</h3>
                                     <div className="space-y-3">
-                                        {(animal.isStudAnimal || animal.availableForBreeding || animal.studFeeAmount || animal.fertilityStatus || animal.fertilityNotes) && (
+                                        {(animal.isStudAnimal || animal.availableForBreeding || (animal.studFeeAmount !== null && animal.studFeeAmount !== undefined) || (animal.fertilityStatus && animal.fertilityStatus !== 'Unknown') || animal.fertilityNotes) && (
                                             <div>
                                                 <p className="text-sm font-medium text-gray-700 mb-2">Stud Information</p>
                                                 <div className="space-y-1 ml-3">
@@ -2661,7 +2651,7 @@ const ViewOnlyAnimalDetail = ({ animal, onClose, API_BASE_URL, onViewProfile, au
                                                             <span className="font-medium">Available for Breeding:</span> Yes
                                                         </p>
                                                     )}
-                                                    {animal.studFeeAmount !== null && animal.studFeeAmount !== undefined && (
+                                                    {(animal.studFeeAmount !== null && animal.studFeeAmount !== undefined) && (
                                                         <p className="text-sm">
                                                             <span className="font-medium">Stud Fee:</span> {animal.studFeeCurrency || 'USD'} {animal.studFeeAmount}
                                                         </p>
@@ -2679,7 +2669,7 @@ const ViewOnlyAnimalDetail = ({ animal, onClose, API_BASE_URL, onViewProfile, au
                                                 </div>
                                             </div>
                                         )}
-                                        {(animal.isDamAnimal || animal.damFertilityStatus || animal.damFertilityNotes) && (
+                                        {(animal.isDamAnimal || (animal.damFertilityStatus && animal.damFertilityStatus !== 'Unknown') || animal.damFertilityNotes) && (
                                             <div>
                                                 <p className="text-sm font-medium text-gray-700 mb-2">Dam Information</p>
                                                 <div className="space-y-1 ml-3">
