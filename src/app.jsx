@@ -2550,6 +2550,44 @@ const ViewOnlyAnimalDetail = ({ animal, onClose, API_BASE_URL, onViewProfile, au
                                 </div>
                             )}
                             
+                            {/* Estrus/Cycle Section */}
+                            {animal.sectionPrivacy?.reproductive !== false && (
+                                animal.heatStatus || 
+                                animal.lastHeatDate || 
+                                animal.ovulationDate
+                            ) && (
+                                <div className="bg-gray-50 p-4 rounded-lg border border-gray-200">
+                                    <h3 className="text-lg font-semibold text-gray-700 border-b pb-2 mb-3">Estrus/Cycle</h3>
+                                    <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+                                        {animal.heatStatus && (
+                                            <p className="text-sm">
+                                                <span className="font-medium">Heat Status:</span> {animal.heatStatus}
+                                            </p>
+                                        )}
+                                        {animal.lastHeatDate && (
+                                            <p className="text-sm">
+                                                <span className="font-medium">Last Heat Date:</span> {new Date(animal.lastHeatDate).toLocaleDateString()}
+                                            </p>
+                                        )}
+                                        {animal.ovulationDate && (
+                                            <p className="text-sm">
+                                                <span className="font-medium">Ovulation Date:</span> {new Date(animal.ovulationDate).toLocaleDateString()}
+                                            </p>
+                                        )}
+                                    </div>
+                                </div>
+                            )}
+                            
+                            {/* Mating Section */}
+                            {animal.sectionPrivacy?.reproductive !== false && animal.matingDates && (
+                                <div className="bg-gray-50 p-4 rounded-lg border border-gray-200">
+                                    <h3 className="text-lg font-semibold text-gray-700 border-b pb-2 mb-3">Mating</h3>
+                                    <p className="text-sm">
+                                        <span className="font-medium">Mating Date:</span> {new Date(animal.matingDates).toLocaleDateString()}
+                                    </p>
+                                </div>
+                            )}
+                            
                             {/* Breeding History Section - Only shows if breeding history data exists */}
                             {animal.sectionPrivacy?.reproductive !== false && (
                                 animal.lastMatingDate || 
