@@ -1956,6 +1956,7 @@ const PrivateAnimalDetail = ({ animal, onClose, onEdit, API_BASE_URL, authToken,
     const [breederInfo, setBreederInfo] = useState(null);
     const [showPedigree, setShowPedigree] = useState(false);
     const [detailViewTab, setDetailViewTab] = useState(1);
+    const [showAllDetailTabs, setShowAllDetailTabs] = useState(false);
     
     // Helper function to parse health records from JSON strings
     const parseHealthRecords = (data) => {
@@ -2029,8 +2030,8 @@ const PrivateAnimalDetail = ({ animal, onClose, onEdit, API_BASE_URL, authToken,
                 </div>
 
                 {/* Tabs - ALL 11 TABS */}
-                <div className="bg-white border-b border-gray-300">
-                    <div className="flex overflow-x-auto">
+                <div className="bg-white border-b border-gray-300 px-6 pt-4">
+                    <div className="flex flex-wrap gap-1 pb-px" style={{ maxHeight: showAllDetailTabs ? 'none' : '70px', overflow: 'hidden' }}>
                         {[
                             { id: 1, label: 'Overview', icon: '📋' },
                             { id: 2, label: 'Status & Privacy', icon: '🔒' },
@@ -2046,17 +2047,27 @@ const PrivateAnimalDetail = ({ animal, onClose, onEdit, API_BASE_URL, authToken,
                         ].map(tab => (
                             <button
                                 key={tab.id}
+                                type="button"
                                 onClick={() => setDetailViewTab(tab.id)}
-                                className={`px-4 py-3 text-sm font-medium whitespace-nowrap transition ${
-                                    detailViewTab === tab.id
-                                        ? 'border-b-2 border-primary text-primary'
-                                        : 'text-gray-600 hover:text-gray-800'
+                                className={`flex-shrink-0 px-2 sm:px-3 py-2 text-xs sm:text-sm font-medium rounded border transition-colors ${
+                                    detailViewTab === tab.id 
+                                        ? 'bg-primary text-black border-gray-400' 
+                                        : 'bg-gray-50 text-gray-600 hover:text-gray-800 border-gray-300'
                                 }`}
+                                title={tab.label}
                             >
-                                <span className="mr-1">{tab.icon}</span>{tab.label}
+                                <span className="mr-1">{tab.icon}</span>
+                                <span className="hidden lg:inline">{tab.label}</span>
                             </button>
                         ))}
                     </div>
+                    <button
+                        type="button"
+                        onClick={() => setShowAllDetailTabs(!showAllDetailTabs)}
+                        className="text-xs text-primary hover:text-primary/80 py-1 font-medium"
+                    >
+                        {showAllDetailTabs ? '▲ Show Less' : '▼ Show All Tabs'}
+                    </button>
                 </div>
 
                 {/* Tab Content */}
@@ -2067,11 +2078,9 @@ const PrivateAnimalDetail = ({ animal, onClose, onEdit, API_BASE_URL, authToken,
                             <div className="bg-white border-2 border-gray-300 rounded-lg overflow-hidden">
                                 <div className="flex flex-col md:flex-row relative">
                                     <div className="w-full md:w-1/3 p-4 sm:p-6 flex flex-col items-center justify-center relative min-h-60 md:min-h-80">
-                                        {animal.birthDate && (
-                                            <div className="absolute top-2 left-2 text-xs text-gray-600 bg-white/80 px-2 py-0.5 rounded">
-                                                {new Date(animal.birthDate).toLocaleDateString()}
-                                            </div>
-                                        )}
+                                        <div className="absolute top-2 left-2 text-xs text-gray-600 bg-white/80 px-2 py-0.5 rounded">
+                                            {animal.birthDate ? new Date(animal.birthDate).toLocaleDateString() : '—'}
+                                        </div>
                                         <div className="absolute top-2 right-2">
                                             {animal.gender === 'Male' ? <Mars size={20} strokeWidth={2.5} className="text-blue-600" /> : animal.gender === 'Female' ? <Venus size={20} strokeWidth={2.5} className="text-pink-600" /> : animal.gender === 'Intersex' ? <VenusAndMars size={20} strokeWidth={2.5} className="text-purple-500" /> : <Circle size={20} strokeWidth={2.5} className="text-gray-500" />}
                                         </div>
@@ -2111,38 +2120,32 @@ const PrivateAnimalDetail = ({ animal, onClose, onEdit, API_BASE_URL, authToken,
                                             {animal.suffix && ` ${animal.suffix}`}
                                         </h2>
                                         <p className="text-sm text-gray-600"><strong>CritterTrack ID:</strong> {animal.id_public}</p>
-                                        {animal.breederyId && <p className="text-sm text-gray-600"><strong>Breeder ID:</strong> {animal.breederyId}</p>}
-                                        
-                                        {breederInfo && (
-                                            <p className="text-sm text-gray-600">
-                                                <strong>Breeder:</strong>{' '}
-                                                {(() => {
-                                                    const showPersonal = breederInfo.showPersonalName ?? false;
-                                                    const showBreeder = breederInfo.showBreederName ?? false;
-                                                    if (showPersonal && showBreeder && breederInfo.personalName && breederInfo.breederName) {
-                                                        return `${breederInfo.personalName} (${breederInfo.breederName})`;
-                                                    } else if (showBreeder && breederInfo.breederName) {
-                                                        return breederInfo.breederName;
-                                                    } else if (showPersonal && breederInfo.personalName) {
-                                                        return breederInfo.personalName;
-                                                    } else {
-                                                        return 'Unknown Breeder';
-                                                    }
-                                                })()}
-                                            </p>
-                                        )}
-                                        
-                                        {animal.color && <p className="text-sm text-gray-600"><strong>Color:</strong> {animal.color}</p>}
-                                        {animal.coat && <p className="text-sm text-gray-600"><strong>Coat:</strong> {animal.coat}</p>}
-                                        {animal.coatPattern && <p className="text-sm text-gray-600"><strong>Pattern:</strong> {animal.coatPattern}</p>}
-                                        {animal.earset && <p className="text-sm text-gray-600"><strong>Earset:</strong> {animal.earset}</p>}
-                                        {animal.geneticCode && <p className="text-sm text-gray-600"><strong>Genetic Code:</strong> <code className="bg-gray-100 px-1 rounded">{animal.geneticCode}</code></p>}
-                                        {animal.remarks && (
-                                            <div className="text-sm text-gray-600">
-                                                <strong>Remarks:</strong>
-                                                <p className="mt-1 text-gray-700 whitespace-pre-wrap">{animal.remarks}</p>
-                                            </div>
-                                        )}
+                                        <p className="text-sm text-gray-600"><strong>Breeder ID:</strong> {animal.breederyId || '—'}</p>
+                                        <p className="text-sm text-gray-600">
+                                            <strong>Breeder:</strong>{' '}
+                                            {breederInfo ? (() => {
+                                                const showPersonal = breederInfo.showPersonalName ?? false;
+                                                const showBreeder = breederInfo.showBreederName ?? false;
+                                                if (showPersonal && showBreeder && breederInfo.personalName && breederInfo.breederName) {
+                                                    return `${breederInfo.personalName} (${breederInfo.breederName})`;
+                                                } else if (showBreeder && breederInfo.breederName) {
+                                                    return breederInfo.breederName;
+                                                } else if (showPersonal && breederInfo.personalName) {
+                                                    return breederInfo.personalName;
+                                                } else {
+                                                    return 'Unknown Breeder';
+                                                }
+                                            })() : '—'}
+                                        </p>
+                                        <p className="text-sm text-gray-600"><strong>Color:</strong> {animal.color || '—'}</p>
+                                        <p className="text-sm text-gray-600"><strong>Coat:</strong> {animal.coat || '—'}</p>
+                                        <p className="text-sm text-gray-600"><strong>Pattern:</strong> {animal.coatPattern || '—'}</p>
+                                        <p className="text-sm text-gray-600"><strong>Earset:</strong> {animal.earset || '—'}</p>
+                                        <p className="text-sm text-gray-600"><strong>Genetic Code:</strong> {animal.geneticCode ? <code className="bg-gray-100 px-1 rounded">{animal.geneticCode}</code> : '—'}</p>
+                                        <div className="text-sm text-gray-600">
+                                            <strong>Remarks:</strong>
+                                            <p className="mt-1 text-gray-700 whitespace-pre-wrap">{animal.remarks || '—'}</p>
+                                        </div>
                                     </div>
                                 </div>
                             </div>
@@ -2156,13 +2159,9 @@ const PrivateAnimalDetail = ({ animal, onClose, onEdit, API_BASE_URL, authToken,
                             <div className="bg-gray-50 p-4 rounded-lg space-y-3">
                                 <p><strong>Currently Owned:</strong> {animal.isOwned ? 'Yes' : 'No'}</p>
                                 <p><strong>Public Profile:</strong> {animal.isDisplay ? 'Yes (Public)' : 'No (Private)'}</p>
-                                <p><strong>Current Owner:</strong> {animal.currentOwner || 'Not specified'}</p>
-                                {animal.isForSale && (
-                                    <p><strong>For Sale:</strong> {animal.salePriceCurrency} {animal.salePriceAmount || 'Negotiable'}</p>
-                                )}
-                                {animal.availableForBreeding && (
-                                    <p><strong>For Stud:</strong> {animal.studFeeCurrency} {animal.studFeeAmount || 'Negotiable'}</p>
-                                )}
+                                <p><strong>Current Owner:</strong> {animal.currentOwner || '—'}</p>
+                                <p><strong>For Sale:</strong> {animal.isForSale ? `${animal.salePriceCurrency || ''} ${animal.salePriceAmount || 'Negotiable'}`.trim() : 'No'}</p>
+                                <p><strong>For Stud:</strong> {animal.availableForBreeding ? `${animal.studFeeCurrency || ''} ${animal.studFeeAmount || 'Negotiable'}`.trim() : 'No'}</p>
                             </div>
                         </div>
                     )}
@@ -2170,18 +2169,32 @@ const PrivateAnimalDetail = ({ animal, onClose, onEdit, API_BASE_URL, authToken,
                     {/* Tab 3: Physical */}
                     {detailViewTab === 3 && (
                         <div className="space-y-4">
-                            <h3 className="text-lg font-semibold text-gray-700 border-b pb-2">Physical Characteristics</h3>
-                            <div className="bg-gray-50 p-4 rounded-lg space-y-2">
-                                {animal.color && <p><strong>Color:</strong> {animal.color}</p>}
-                                {animal.coat && <p><strong>Coat:</strong> {animal.coat}</p>}
-                                {animal.coatPattern && <p><strong>Pattern:</strong> {animal.coatPattern}</p>}
-                                {animal.earset && <p><strong>Earset:</strong> {animal.earset}</p>}
-                                {animal.geneticCode && <p><strong>Genetic Code:</strong> <code className="bg-gray-100 px-2 py-1 rounded">{animal.geneticCode}</code></p>}
-                                {animal.lifeStage && <p><strong>Life Stage:</strong> {animal.lifeStage}</p>}
-                                {animal.bodyWeight && <p><strong>Weight:</strong> {animal.bodyWeight}</p>}
-                                {animal.bodyLength && <p><strong>Length:</strong> {animal.bodyLength}</p>}
-                                {animal.heightAtWithers && <p><strong>Height:</strong> {animal.heightAtWithers}</p>}
-                                {animal.bodyConditionScore && <p><strong>Body Condition:</strong> {animal.bodyConditionScore}</p>}
+                            {/* Appearance Section */}
+                            <div className="bg-gray-50 p-4 rounded-lg border border-gray-200">
+                                <h3 className="text-lg font-semibold text-gray-700 border-b pb-2 mb-3">Appearance</h3>
+                                <div className="space-y-2">
+                                    <p className="text-sm"><span className="font-medium">Color:</span> {animal.color || '—'}</p>
+                                    <p className="text-sm"><span className="font-medium">Coat Pattern:</span> {animal.coatPattern || '—'}</p>
+                                    <p className="text-sm"><span className="font-medium">Coat Type:</span> {animal.coat || '—'}</p>
+                                    <p className="text-sm"><span className="font-medium">Earset:</span> {animal.earset || '—'}</p>
+                                </div>
+                            </div>
+                            <div className="bg-gray-50 p-4 rounded-lg border border-gray-200">
+                                <h3 className="text-lg font-semibold text-gray-700 border-b pb-2 mb-3">Genetic Code</h3>
+                                <p className="text-gray-700 font-mono text-sm break-all">{animal.geneticCode || '—'}</p>
+                            </div>
+                            <div className="bg-gray-50 p-4 rounded-lg border border-gray-200">
+                                <h3 className="text-lg font-semibold text-gray-700 border-b pb-2 mb-3">Life Stage</h3>
+                                <p className="text-gray-700">{animal.lifeStage || '—'}</p>
+                            </div>
+                            <div className="bg-gray-50 p-4 rounded-lg border border-gray-200">
+                                <h3 className="text-lg font-semibold text-gray-700 border-b pb-2 mb-3">Measurements</h3>
+                                <div className="space-y-2">
+                                    <p className="text-sm"><span className="font-medium">Weight:</span> {animal.bodyWeight || '—'}</p>
+                                    <p className="text-sm"><span className="font-medium">Length:</span> {animal.bodyLength || '—'}</p>
+                                    <p className="text-sm"><span className="font-medium">Height:</span> {animal.heightAtWithers || '—'}</p>
+                                    <p className="text-sm"><span className="font-medium">Body Condition:</span> {animal.bodyConditionScore || '—'}</p>
+                                </div>
                             </div>
                         </div>
                     )}
@@ -2189,26 +2202,28 @@ const PrivateAnimalDetail = ({ animal, onClose, onEdit, API_BASE_URL, authToken,
                     {/* Tab 4: Identification */}
                     {detailViewTab === 4 && (
                         <div className="space-y-4">
-                            <h3 className="text-lg font-semibold text-gray-700 border-b pb-2">Identification</h3>
-                            <div className="bg-gray-50 p-4 rounded-lg space-y-2">
-                                <p><strong>CritterTrack ID:</strong> {animal.id_public}</p>
-                                {animal.breederyId && <p><strong>Breeder ID:</strong> {animal.breederyId}</p>}
-                                {animal.microchipNumber && <p><strong>Microchip:</strong> {animal.microchipNumber}</p>}
-                                {animal.pedigreeRegistrationId && <p><strong>Registration ID:</strong> {animal.pedigreeRegistrationId}</p>}
-                                {animal.breed && <p><strong>Breed:</strong> {animal.breed}</p>}
-                                {animal.strain && <p><strong>Strain:</strong> {animal.strain}</p>}
-                                {animal.tags && animal.tags.length > 0 && (
-                                    <div>
-                                        <strong>Tags:</strong>
-                                        <div className="flex flex-wrap gap-2 mt-2">
-                                            {animal.tags.map((tag, idx) => (
-                                                <span key={idx} className="bg-blue-100 text-blue-800 px-2 py-1 rounded text-sm">
-                                                    {tag}
-                                                </span>
-                                            ))}
-                                        </div>
+                            <div className="bg-gray-50 p-4 rounded-lg border border-gray-200">
+                                <h3 className="text-lg font-semibold text-gray-700 border-b pb-2 mb-3">Identification</h3>
+                                <div className="space-y-2">
+                                    <p className="text-sm"><span className="font-medium">CritterTrack ID:</span> {animal.id_public}</p>
+                                    <p className="text-sm"><span className="font-medium">Breeder ID:</span> {animal.breederyId || '—'}</p>
+                                    <p className="text-sm"><span className="font-medium">Microchip:</span> {animal.microchipNumber || '—'}</p>
+                                    <p className="text-sm"><span className="font-medium">Registration ID:</span> {animal.pedigreeRegistrationId || '—'}</p>
+                                    <p className="text-sm"><span className="font-medium">Breed:</span> {animal.breed || '—'}</p>
+                                    <p className="text-sm"><span className="font-medium">Strain:</span> {animal.strain || '—'}</p>
+                                </div>
+                            </div>
+                            <div className="bg-gray-50 p-4 rounded-lg border border-gray-200">
+                                <h3 className="text-lg font-semibold text-gray-700 border-b pb-2 mb-3">Tags</h3>
+                                {animal.tags && animal.tags.length > 0 ? (
+                                    <div className="flex flex-wrap gap-2">
+                                        {animal.tags.map((tag, idx) => (
+                                            <span key={idx} className="bg-blue-100 text-blue-800 px-2 py-1 rounded text-sm">
+                                                {tag}
+                                            </span>
+                                        ))}
                                     </div>
-                                )}
+                                ) : <p className="text-gray-700">—</p>}
                             </div>
                         </div>
                     )}
@@ -2218,15 +2233,13 @@ const PrivateAnimalDetail = ({ animal, onClose, onEdit, API_BASE_URL, authToken,
                         <div className="space-y-4">
                             <div className="flex justify-between items-center border-b pb-2">
                                 <h3 className="text-lg font-semibold text-gray-700">Lineage</h3>
-                                {(animal.fatherId_public || animal.sireId_public || animal.motherId_public || animal.damId_public) && (
-                                    <button
-                                        onClick={() => setShowPedigree(true)}
-                                        data-tutorial-target="pedigree-btn"
-                                        className="px-3 py-1 bg-primary hover:bg-primary/90 text-black font-semibold rounded-lg transition text-sm"
-                                    >
-                                        View Pedigree Chart
-                                    </button>
-                                )}
+                                <button
+                                    onClick={() => setShowPedigree(true)}
+                                    data-tutorial-target="pedigree-btn"
+                                    className="px-3 py-1 bg-primary hover:bg-primary/90 text-black font-semibold rounded-lg transition text-sm"
+                                >
+                                    View Pedigree Chart
+                                </button>
                             </div>
                             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                                 <ViewOnlyParentCard 
@@ -2243,24 +2256,27 @@ const PrivateAnimalDetail = ({ animal, onClose, onEdit, API_BASE_URL, authToken,
                                 />
                             </div>
                             <OffspringSection animalId={animal.id_public} API_BASE_URL={API_BASE_URL} authToken={authToken} onViewAnimal={() => {}} />
-                            {animal.origin && <p className="text-sm text-gray-600 mt-4"><strong>Origin:</strong> {animal.origin}</p>}
+                            <p className="text-sm text-gray-600 mt-4"><strong>Origin:</strong> {animal.origin || '—'}</p>
                         </div>
                     )}
 
                     {/* Tab 6: Breeding */}
                     {detailViewTab === 6 && (
                         <div className="space-y-4">
-                            <h3 className="text-lg font-semibold text-gray-700 border-b pb-2">Breeding Information</h3>
-                            <div className="bg-gray-50 p-4 rounded-lg space-y-2">
-                                <p><strong>Neutered/Infertile:</strong> {animal.isNeutered ? 'Yes' : 'No'} / {animal.isInfertile ? 'Yes' : 'No'}</p>
-                                {animal.isPregnant && <p className="text-pink-600"><strong>Currently Pregnant:</strong> Yes</p>}
-                                {animal.isNursing && <p className="text-pink-600"><strong>Currently Nursing:</strong> Yes</p>}
-                                {animal.isInMating && <p className="text-blue-600"><strong>Currently In Mating:</strong> Yes</p>}
-                                {animal.fertilityStatus && <p><strong>Fertility Status:</strong> {animal.fertilityStatus}</p>}
-                                {animal.successfulMatings && <p><strong>Successful Matings:</strong> {animal.successfulMatings}</p>}
-                                {animal.offspringCount && <p><strong>Offspring Count:</strong> {animal.offspringCount}</p>}
-                                {animal.litterCount && <p><strong>Litter Count:</strong> {animal.litterCount}</p>}
-                                {animal.fertilityNotes && <p><strong>Fertility Notes:</strong> {animal.fertilityNotes}</p>}
+                            <div className="bg-gray-50 p-4 rounded-lg border border-gray-200">
+                                <h3 className="text-lg font-semibold text-gray-700 border-b pb-2 mb-3">Breeding Information</h3>
+                                <div className="space-y-2">
+                                    <p className="text-sm"><span className="font-medium">Neutered:</span> {animal.isNeutered ? 'Yes' : 'No'}</p>
+                                    <p className="text-sm"><span className="font-medium">Infertile:</span> {animal.isInfertile ? 'Yes' : 'No'}</p>
+                                    <p className="text-sm"><span className="font-medium">Currently Pregnant:</span> {animal.isPregnant ? 'Yes' : 'No'}</p>
+                                    <p className="text-sm"><span className="font-medium">Currently Nursing:</span> {animal.isNursing ? 'Yes' : 'No'}</p>
+                                    <p className="text-sm"><span className="font-medium">Currently In Mating:</span> {animal.isInMating ? 'Yes' : 'No'}</p>
+                                    <p className="text-sm"><span className="font-medium">Fertility Status:</span> {animal.fertilityStatus || '—'}</p>
+                                    <p className="text-sm"><span className="font-medium">Successful Matings:</span> {animal.successfulMatings || '—'}</p>
+                                    <p className="text-sm"><span className="font-medium">Offspring Count:</span> {animal.offspringCount || '—'}</p>
+                                    <p className="text-sm"><span className="font-medium">Litter Count:</span> {animal.litterCount || '—'}</p>
+                                    <p className="text-sm"><span className="font-medium">Fertility Notes:</span> {animal.fertilityNotes || '—'}</p>
+                                </div>
                             </div>
                         </div>
                     )}
@@ -2268,18 +2284,18 @@ const PrivateAnimalDetail = ({ animal, onClose, onEdit, API_BASE_URL, authToken,
                     {/* Tab 7: Health */}
                     {detailViewTab === 7 && (
                         <div className="space-y-4">
-                            <h3 className="text-lg font-semibold text-gray-700 border-b pb-2">Health & Medical</h3>
-                            <div className="bg-gray-50 p-4 rounded-lg space-y-3">
-                                {animal.medicalConditions && (
+                            <div className="bg-gray-50 p-4 rounded-lg border border-gray-200">
+                                <h3 className="text-lg font-semibold text-gray-700 border-b pb-2 mb-3">Health & Medical</h3>
+                                <div className="space-y-3">
                                     <div>
-                                        <strong>Medical Conditions:</strong>
-                                        <p className="mt-1 whitespace-pre-wrap">{animal.medicalConditions}</p>
+                                        <p className="text-sm font-medium">Medical Conditions:</p>
+                                        <p className="text-sm text-gray-700 mt-1 whitespace-pre-wrap">{animal.medicalConditions || '—'}</p>
                                     </div>
-                                )}
-                                {animal.allergies && <p><strong>Allergies:</strong> {animal.allergies}</p>}
-                                {animal.medications && <p><strong>Medications:</strong> {animal.medications}</p>}
-                                {animal.primaryVet && <p><strong>Primary Vet:</strong> {animal.primaryVet}</p>}
-                                {animal.vaccinations && <p><strong>Vaccinations:</strong> {animal.vaccinations}</p>}
+                                    <p className="text-sm"><span className="font-medium">Allergies:</span> {animal.allergies || '—'}</p>
+                                    <p className="text-sm"><span className="font-medium">Medications:</span> {animal.medications || '—'}</p>
+                                    <p className="text-sm"><span className="font-medium">Primary Vet:</span> {animal.primaryVet || '—'}</p>
+                                    <p className="text-sm"><span className="font-medium">Vaccinations:</span> {animal.vaccinations || '—'}</p>
+                                </div>
                             </div>
                         </div>
                     )}
@@ -2287,15 +2303,17 @@ const PrivateAnimalDetail = ({ animal, onClose, onEdit, API_BASE_URL, authToken,
                     {/* Tab 8: Husbandry */}
                     {detailViewTab === 8 && (
                         <div className="space-y-4">
-                            <h3 className="text-lg font-semibold text-gray-700 border-b pb-2">Husbandry & Care</h3>
-                            <div className="bg-gray-50 p-4 rounded-lg space-y-2">
-                                {animal.dietType && <p><strong>Diet:</strong> {animal.dietType}</p>}
-                                {animal.feedingSchedule && <p><strong>Feeding Schedule:</strong> {animal.feedingSchedule}</p>}
-                                {animal.housingType && <p><strong>Housing:</strong> {animal.housingType}</p>}
-                                {animal.bedding && <p><strong>Bedding:</strong> {animal.bedding}</p>}
-                                {animal.temperatureRange && <p><strong>Temperature:</strong> {animal.temperatureRange}</p>}
-                                {animal.humidity && <p><strong>Humidity:</strong> {animal.humidity}</p>}
-                                {animal.enrichment && <p><strong>Enrichment:</strong> {animal.enrichment}</p>}
+                            <div className="bg-gray-50 p-4 rounded-lg border border-gray-200">
+                                <h3 className="text-lg font-semibold text-gray-700 border-b pb-2 mb-3">Husbandry & Care</h3>
+                                <div className="space-y-2">
+                                    <p className="text-sm"><span className="font-medium">Diet:</span> {animal.dietType || '—'}</p>
+                                    <p className="text-sm"><span className="font-medium">Feeding Schedule:</span> {animal.feedingSchedule || '—'}</p>
+                                    <p className="text-sm"><span className="font-medium">Housing:</span> {animal.housingType || '—'}</p>
+                                    <p className="text-sm"><span className="font-medium">Bedding:</span> {animal.bedding || '—'}</p>
+                                    <p className="text-sm"><span className="font-medium">Temperature:</span> {animal.temperatureRange || '—'}</p>
+                                    <p className="text-sm"><span className="font-medium">Humidity:</span> {animal.humidity || '—'}</p>
+                                    <p className="text-sm"><span className="font-medium">Enrichment:</span> {animal.enrichment || '—'}</p>
+                                </div>
                             </div>
                         </div>
                     )}
@@ -2303,12 +2321,14 @@ const PrivateAnimalDetail = ({ animal, onClose, onEdit, API_BASE_URL, authToken,
                     {/* Tab 9: Behavior */}
                     {detailViewTab === 9 && (
                         <div className="space-y-4">
-                            <h3 className="text-lg font-semibold text-gray-700 border-b pb-2">Behavior & Temperament</h3>
-                            <div className="bg-gray-50 p-4 rounded-lg space-y-2">
-                                {animal.temperament && <p><strong>Temperament:</strong> {animal.temperament}</p>}
-                                {animal.handlingTolerance && <p><strong>Handling Tolerance:</strong> {animal.handlingTolerance}</p>}
-                                {animal.socialStructure && <p><strong>Social Structure:</strong> {animal.socialStructure}</p>}
-                                {animal.activityCycle && <p><strong>Activity Cycle:</strong> {animal.activityCycle}</p>}
+                            <div className="bg-gray-50 p-4 rounded-lg border border-gray-200">
+                                <h3 className="text-lg font-semibold text-gray-700 border-b pb-2 mb-3">Behavior & Temperament</h3>
+                                <div className="space-y-2">
+                                    <p className="text-sm"><span className="font-medium">Temperament:</span> {animal.temperament || '—'}</p>
+                                    <p className="text-sm"><span className="font-medium">Handling Tolerance:</span> {animal.handlingTolerance || '—'}</p>
+                                    <p className="text-sm"><span className="font-medium">Social Structure:</span> {animal.socialStructure || '—'}</p>
+                                    <p className="text-sm"><span className="font-medium">Activity Cycle:</span> {animal.activityCycle || '—'}</p>
+                                </div>
                             </div>
                         </div>
                     )}
@@ -2316,14 +2336,9 @@ const PrivateAnimalDetail = ({ animal, onClose, onEdit, API_BASE_URL, authToken,
                     {/* Tab 10: Records */}
                     {detailViewTab === 10 && (
                         <div className="space-y-4">
-                            <h3 className="text-lg font-semibold text-gray-700 border-b pb-2">Records & Notes</h3>
-                            <div className="bg-gray-50 p-4 rounded-lg space-y-3">
-                                {animal.remarks && (
-                                    <div>
-                                        <strong>Remarks:</strong>
-                                        <p className="mt-1 whitespace-pre-wrap">{animal.remarks}</p>
-                                    </div>
-                                )}
+                            <div className="bg-gray-50 p-4 rounded-lg border border-gray-200">
+                                <h3 className="text-lg font-semibold text-gray-700 border-b pb-2 mb-3">Remarks & Notes</h3>
+                                <p className="text-sm text-gray-700 whitespace-pre-wrap">{animal.remarks || '—'}</p>
                             </div>
                         </div>
                     )}
@@ -2331,13 +2346,15 @@ const PrivateAnimalDetail = ({ animal, onClose, onEdit, API_BASE_URL, authToken,
                     {/* Tab 11: End of Life */}
                     {detailViewTab === 11 && (
                         <div className="space-y-4">
-                            <h3 className="text-lg font-semibold text-gray-700 border-b pb-2">End of Life</h3>
-                            <div className="bg-gray-50 p-4 rounded-lg space-y-2">
-                                {animal.deceasedDate && <p><strong>Deceased Date:</strong> {new Date(animal.deceasedDate).toLocaleDateString()}</p>}
-                                {animal.causeOfDeath && <p><strong>Cause of Death:</strong> {animal.causeOfDeath}</p>}
-                                {animal.necropsyResults && <p><strong>Necropsy Results:</strong> {animal.necropsyResults}</p>}
-                                {animal.insurance && <p><strong>Insurance:</strong> {animal.insurance}</p>}
-                                {animal.legalStatus && <p><strong>Legal Status:</strong> {animal.legalStatus}</p>}
+                            <div className="bg-gray-50 p-4 rounded-lg border border-gray-200">
+                                <h3 className="text-lg font-semibold text-gray-700 border-b pb-2 mb-3">End of Life</h3>
+                                <div className="space-y-2">
+                                    <p className="text-sm"><span className="font-medium">Deceased Date:</span> {animal.deceasedDate ? new Date(animal.deceasedDate).toLocaleDateString() : '—'}</p>
+                                    <p className="text-sm"><span className="font-medium">Cause of Death:</span> {animal.causeOfDeath || '—'}</p>
+                                    <p className="text-sm"><span className="font-medium">Necropsy Results:</span> {animal.necropsyResults || '—'}</p>
+                                    <p className="text-sm"><span className="font-medium">Insurance:</span> {animal.insurance || '—'}</p>
+                                    <p className="text-sm"><span className="font-medium">Legal Status:</span> {animal.legalStatus || '—'}</p>
+                                </div>
                             </div>
                         </div>
                     )}
