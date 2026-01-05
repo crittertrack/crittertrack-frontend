@@ -8772,7 +8772,18 @@ const AnimalForm = ({
 
                         {/* Genetic Code */}
                         <div className="bg-gray-50 p-4 rounded-lg border border-gray-200 space-y-4">
-                            <h3 className="text-lg font-semibold text-gray-700 mb-4">Genetic Code</h3>
+                            <div className="flex justify-between items-center mb-4">
+                                <h3 className="text-lg font-semibold text-gray-700">Genetic Code</h3>
+                                <label className="flex items-center gap-2 text-sm">
+                                    <input 
+                                        type="checkbox" 
+                                        checked={sectionPrivacy[animalToEdit?.id_public]?.geneticCode ?? true}
+                                        onChange={() => toggleSectionPrivacy(animalToEdit?.id_public, 'geneticCode')}
+                                        className="w-4 h-4 rounded"
+                                    />
+                                    <span className="text-gray-600">Public</span>
+                                </label>
+                            </div>
                             <GeneticCodeBuilder
                                 species={formData.species}
                                 gender={formData.gender}
@@ -8784,7 +8795,18 @@ const AnimalForm = ({
 
                         {/* Life Stage */}
                         <div className="bg-gray-50 p-4 rounded-lg border border-gray-200 space-y-4">
-                            <h3 className="text-lg font-semibold text-gray-700">Life Stage</h3>
+                            <div className="flex justify-between items-center mb-4">
+                                <h3 className="text-lg font-semibold text-gray-700">Life Stage</h3>
+                                <label className="flex items-center gap-2 text-sm">
+                                    <input 
+                                        type="checkbox" 
+                                        checked={sectionPrivacy[animalToEdit?.id_public]?.lifeStage ?? true}
+                                        onChange={() => toggleSectionPrivacy(animalToEdit?.id_public, 'lifeStage')}
+                                        className="w-4 h-4 rounded"
+                                    />
+                                    <span className="text-gray-600">Public</span>
+                                </label>
+                            </div>
                             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                                 <div>
                                     <select name="lifeStage" value={formData.lifeStage} onChange={handleChange} 
@@ -8803,7 +8825,32 @@ const AnimalForm = ({
 
                         {/* Measurements & Growth Tracking */}
                         <div data-tutorial-target="measurements-growth-section" className="bg-gray-50 p-4 rounded-lg border border-gray-200 space-y-4">
-                            <h3 className="text-lg font-semibold text-gray-700 border-b pb-2">Measurements & Growth Tracking</h3>
+                            <div className="flex justify-between items-center mb-4">
+                                <div>
+                                    <h3 className="text-lg font-semibold text-gray-700">Measurements & Growth Tracking</h3>
+                                    <p className="text-xs text-gray-600 mt-1">Current measurements & growth history</p>
+                                </div>
+                                <div className="flex gap-4">
+                                    <label className="flex items-center gap-2 text-sm">
+                                        <input 
+                                            type="checkbox" 
+                                            checked={sectionPrivacy[animalToEdit?.id_public]?.currentMeasurements ?? true}
+                                            onChange={() => toggleSectionPrivacy(animalToEdit?.id_public, 'currentMeasurements')}
+                                            className="w-4 h-4 rounded"
+                                        />
+                                        <span className="text-gray-600">Measurements</span>
+                                    </label>
+                                    <label className="flex items-center gap-2 text-sm">
+                                        <input 
+                                            type="checkbox" 
+                                            checked={sectionPrivacy[animalToEdit?.id_public]?.growthHistory ?? true}
+                                            onChange={() => toggleSectionPrivacy(animalToEdit?.id_public, 'growthHistory')}
+                                            className="w-4 h-4 rounded"
+                                        />
+                                        <span className="text-gray-600">Growth History</span>
+                                    </label>
+                                </div>
+                            </div>
                             
                             {/* Current Measurement Display */}
                             {growthRecords.length > 0 && (() => {
@@ -9353,7 +9400,18 @@ const AnimalForm = ({
 
                         {/* Origin Section */}
                         <div className="bg-gray-50 p-4 rounded-lg border border-gray-200 space-y-4">
-                            <h3 className="text-lg font-semibold text-gray-700">Origin</h3>
+                            <div className="flex justify-between items-center mb-4">
+                                <h3 className="text-lg font-semibold text-gray-700">Origin</h3>
+                                <label className="flex items-center gap-2 text-sm">
+                                    <input 
+                                        type="checkbox" 
+                                        checked={sectionPrivacy[animalToEdit?.id_public]?.origin ?? true}
+                                        onChange={() => toggleSectionPrivacy(animalToEdit?.id_public, 'origin')}
+                                        className="w-4 h-4 rounded"
+                                    />
+                                    <span className="text-gray-600">Public</span>
+                                </label>
+                            </div>
                             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                                 <div data-tutorial-target="origin-select">
                                     <select name="origin" value={formData.origin} onChange={handleChange} 
@@ -9503,7 +9561,18 @@ const AnimalForm = ({
                         {/* Estrus/Cycle - Only for females when not neutered */}
                         {(formData.gender === 'Female' || formData.gender === 'Intersex' || formData.gender === 'Unknown') && !formData.isNeutered && (
                             <div className="bg-gray-50 p-4 rounded-lg border border-gray-200 space-y-4" data-tutorial-target="estrus-cycle-section">
-                                <h3 className="text-lg font-semibold text-gray-700 border-b pb-2">Estrus/Cycle</h3>
+                                <div className="flex justify-between items-center mb-4">
+                                    <h3 className="text-lg font-semibold text-gray-700">Estrus/Cycle</h3>
+                                    <label className="flex items-center gap-2 text-sm">
+                                        <input 
+                                            type="checkbox" 
+                                            checked={sectionPrivacy[animalToEdit?.id_public]?.estrusCycle ?? true}
+                                            onChange={() => toggleSectionPrivacy(animalToEdit?.id_public, 'estrusCycle')}
+                                            className="w-4 h-4 rounded"
+                                        />
+                                        <span className="text-gray-600">Public</span>
+                                    </label>
+                                </div>
                                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                                     <div>
                                         <label className="block text-sm font-medium text-gray-700 mb-2">Heat Status</label>
@@ -9535,7 +9604,18 @@ const AnimalForm = ({
                         {/* Mating - Hidden when neutered/spayed */}
                         {!formData.isNeutered && !formData.isInfertile && (formData.gender === 'Female' || formData.gender === 'Intersex' || formData.gender === 'Unknown' || formData.gender === 'Male') && (
                             <div className="bg-gray-50 p-4 rounded-lg border border-gray-200 space-y-4">
-                                <h3 className="text-lg font-semibold text-gray-700 border-b pb-2">Mating {formData.isNeutered && <span className="text-xs font-normal text-gray-500">(History)</span>}</h3>
+                                <div className="flex justify-between items-center mb-4">
+                                    <h3 className="text-lg font-semibold text-gray-700">Mating {formData.isNeutered && <span className="text-xs font-normal text-gray-500">(History)</span>}</h3>
+                                    <label className="flex items-center gap-2 text-sm">
+                                        <input 
+                                            type="checkbox" 
+                                            checked={sectionPrivacy[animalToEdit?.id_public]?.mating ?? true}
+                                            onChange={() => toggleSectionPrivacy(animalToEdit?.id_public, 'mating')}
+                                            className="w-4 h-4 rounded"
+                                        />
+                                        <span className="text-gray-600">Public</span>
+                                    </label>
+                                </div>
                                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                                     <div className="md:col-span-2">
                                         <label className="block text-sm font-medium text-gray-700 mb-2">Mating Date</label>
@@ -9553,9 +9633,20 @@ const AnimalForm = ({
                         {!formData.isNeutered && !formData.isInfertile && (formData.gender === 'Male' || formData.gender === 'Intersex' || formData.gender === 'Unknown') && (
                             <div className="bg-gray-50 p-4 rounded-lg border border-gray-200 space-y-4" data-tutorial-target="stud-info-section">
                                 <div className="flex items-start justify-between">
-                                    <h3 className="text-lg font-semibold text-gray-700 border-b pb-2 flex-1">Stud Information <span className="text-xs font-normal text-gray-500">(Active Status)</span></h3>
-                                    {formData.gender === 'Unknown' && <span className="text-xs bg-blue-100 text-blue-700 px-2 py-1 rounded ml-2 whitespace-nowrap">Sperm Fertility</span>}
-                                    {formData.gender === 'Intersex' && <span className="text-xs bg-purple-100 text-purple-700 px-2 py-1 rounded ml-2 whitespace-nowrap">Sire Role</span>}
+                                    <div className="flex-1">
+                                        <h3 className="text-lg font-semibold text-gray-700">Stud Information <span className="text-xs font-normal text-gray-500">(Active Status)</span></h3>
+                                        {formData.gender === 'Unknown' && <span className="text-xs bg-blue-100 text-blue-700 px-2 py-1 rounded mt-1 inline-block">Sperm Fertility</span>}
+                                        {formData.gender === 'Intersex' && <span className="text-xs bg-purple-100 text-purple-700 px-2 py-1 rounded mt-1 inline-block">Sire Role</span>}
+                                    </div>
+                                    <label className="flex items-center gap-2 text-sm">
+                                        <input 
+                                            type="checkbox" 
+                                            checked={sectionPrivacy[animalToEdit?.id_public]?.studInformation ?? true}
+                                            onChange={() => toggleSectionPrivacy(animalToEdit?.id_public, 'studInformation')}
+                                            className="w-4 h-4 rounded"
+                                        />
+                                        <span className="text-gray-600">Public</span>
+                                    </label>
                                 </div>
                                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                                     <div>
@@ -9583,9 +9674,20 @@ const AnimalForm = ({
                         {!formData.isNeutered && !formData.isInfertile && (formData.gender === 'Female' || formData.gender === 'Intersex' || formData.gender === 'Unknown') && (
                             <div className="bg-gray-50 p-4 rounded-lg border border-gray-200 space-y-4" data-tutorial-target="dam-info-section">
                                 <div className="flex items-start justify-between">
-                                    <h3 className="text-lg font-semibold text-gray-700 border-b pb-2 flex-1">Dam Information <span className="text-xs font-normal text-gray-500">(Active Status)</span></h3>
-                                    {formData.gender === 'Unknown' && <span className="text-xs bg-pink-100 text-pink-700 px-2 py-1 rounded ml-2 whitespace-nowrap">Egg Fertility</span>}
-                                    {formData.gender === 'Intersex' && <span className="text-xs bg-purple-100 text-purple-700 px-2 py-1 rounded ml-2 whitespace-nowrap">Dam Role</span>}
+                                    <div className="flex-1">
+                                        <h3 className="text-lg font-semibold text-gray-700">Dam Information <span className="text-xs font-normal text-gray-500">(Active Status)</span></h3>
+                                        {formData.gender === 'Unknown' && <span className="text-xs bg-pink-100 text-pink-700 px-2 py-1 rounded mt-1 inline-block">Egg Fertility</span>}
+                                        {formData.gender === 'Intersex' && <span className="text-xs bg-purple-100 text-purple-700 px-2 py-1 rounded mt-1 inline-block">Dam Role</span>}
+                                    </div>
+                                    <label className="flex items-center gap-2 text-sm">
+                                        <input 
+                                            type="checkbox" 
+                                            checked={sectionPrivacy[animalToEdit?.id_public]?.damInformation ?? true}
+                                            onChange={() => toggleSectionPrivacy(animalToEdit?.id_public, 'damInformation')}
+                                            className="w-4 h-4 rounded"
+                                        />
+                                        <span className="text-gray-600">Public</span>
+                                    </label>
                                 </div>
                                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                                     <div>
@@ -9699,7 +9801,18 @@ const AnimalForm = ({
                     <div className="space-y-6">
                         {/* Preventive Care */}
                         <div className="bg-gray-50 p-4 rounded-lg border border-gray-200 space-y-6">
-                            <h3 className="text-lg font-semibold text-gray-700">Preventive Care</h3>
+                            <div className="flex justify-between items-center mb-4">
+                                <h3 className="text-lg font-semibold text-gray-700">Preventive Care</h3>
+                                <label className="flex items-center gap-2 text-sm">
+                                    <input 
+                                        type="checkbox" 
+                                        checked={sectionPrivacy[animalToEdit?.id_public]?.preventiveCare ?? true}
+                                        onChange={() => toggleSectionPrivacy(animalToEdit?.id_public, 'preventiveCare')}
+                                        className="w-4 h-4 rounded"
+                                    />
+                                    <span className="text-gray-600">Public</span>
+                                </label>
+                            </div>
                             
                             {/* Vaccinations */}
                             <div className="space-y-3">
@@ -9827,7 +9940,18 @@ const AnimalForm = ({
 
                         {/* Procedures & Diagnostics */}
                         <div className="bg-gray-50 p-4 rounded-lg border border-gray-200 space-y-6" data-tutorial-target="procedures-section">
-                            <h3 className="text-lg font-semibold text-gray-700 border-b pb-2">Procedures & Diagnostics</h3>
+                            <div className="flex justify-between items-center mb-4">
+                                <h3 className="text-lg font-semibold text-gray-700">Procedures & Diagnostics</h3>
+                                <label className="flex items-center gap-2 text-sm">
+                                    <input 
+                                        type="checkbox" 
+                                        checked={sectionPrivacy[animalToEdit?.id_public]?.proceduresAndDiagnostics ?? true}
+                                        onChange={() => toggleSectionPrivacy(animalToEdit?.id_public, 'proceduresAndDiagnostics')}
+                                        className="w-4 h-4 rounded"
+                                    />
+                                    <span className="text-gray-600">Public</span>
+                                </label>
+                            </div>
                             
                             {/* Medical Procedures */}
                             <div className="space-y-3">
@@ -9919,7 +10043,18 @@ const AnimalForm = ({
 
                         {/* Active Medical Records */}
                         <div className="bg-gray-50 p-4 rounded-lg border border-gray-200 space-y-4" data-tutorial-target="medical-history-section">
-                            <h3 className="text-lg font-semibold text-gray-700 border-b pb-2">Active Medical Records</h3>
+                            <div className="flex justify-between items-center mb-4">
+                                <h3 className="text-lg font-semibold text-gray-700">Active Medical Records</h3>
+                                <label className="flex items-center gap-2 text-sm">
+                                    <input 
+                                        type="checkbox" 
+                                        checked={sectionPrivacy[animalToEdit?.id_public]?.activeMedicalRecords ?? true}
+                                        onChange={() => toggleSectionPrivacy(animalToEdit?.id_public, 'activeMedicalRecords')}
+                                        className="w-4 h-4 rounded"
+                                    />
+                                    <span className="text-gray-600">Public</span>
+                                </label>
+                            </div>
                             <div className="space-y-4">
                                 {/* Medical Conditions */}
                                 <div className="space-y-3">
@@ -10033,7 +10168,18 @@ const AnimalForm = ({
 
                         {/* Veterinary Care */}
                         <div className="bg-gray-50 p-4 rounded-lg border border-gray-200 space-y-4" data-tutorial-target="vet-care-section">
-                            <h3 className="text-lg font-semibold text-gray-700 border-b pb-2">Veterinary Care</h3>
+                            <div className="flex justify-between items-center mb-4">
+                                <h3 className="text-lg font-semibold text-gray-700">Veterinary Care</h3>
+                                <label className="flex items-center gap-2 text-sm">
+                                    <input 
+                                        type="checkbox" 
+                                        checked={sectionPrivacy[animalToEdit?.id_public]?.veterinaryCare ?? true}
+                                        onChange={() => toggleSectionPrivacy(animalToEdit?.id_public, 'veterinaryCare')}
+                                        className="w-4 h-4 rounded"
+                                    />
+                                    <span className="text-gray-600">Public</span>
+                                </label>
+                            </div>
                             <div className="space-y-4">
                                 {/* Veterinary Visits */}
                                 <div className="space-y-3">
@@ -10092,7 +10238,18 @@ const AnimalForm = ({
                     <div className="space-y-6">
                         {/* 1st Section: Nutrition */}
                         <div className="bg-gray-50 p-4 rounded-lg border border-gray-200 space-y-4">
-                            <h3 className="text-lg font-semibold text-gray-700">Nutrition</h3>
+                            <div className="flex justify-between items-center mb-4">
+                                <h3 className="text-lg font-semibold text-gray-700">Nutrition</h3>
+                                <label className="flex items-center gap-2 text-sm">
+                                    <input 
+                                        type="checkbox" 
+                                        checked={sectionPrivacy[animalToEdit?.id_public]?.nutrition ?? true}
+                                        onChange={() => toggleSectionPrivacy(animalToEdit?.id_public, 'nutrition')}
+                                        className="w-4 h-4 rounded"
+                                    />
+                                    <span className="text-gray-600">Public</span>
+                                </label>
+                            </div>
                             <div className="space-y-4">
                                 <div>
                                     <label className="block text-sm font-medium text-gray-700 mb-2">Diet Type</label>
@@ -10119,7 +10276,18 @@ const AnimalForm = ({
 
                         {/* 2nd Section: Husbandry */}
                         <div className="bg-gray-50 p-4 rounded-lg border border-gray-200 space-y-4" data-tutorial-target="husbandry-details-section">
-                            <h3 className="text-lg font-semibold text-gray-700">Husbandry</h3>
+                            <div className="flex justify-between items-center mb-4">
+                                <h3 className="text-lg font-semibold text-gray-700">Husbandry</h3>
+                                <label className="flex items-center gap-2 text-sm">
+                                    <input 
+                                        type="checkbox" 
+                                        checked={sectionPrivacy[animalToEdit?.id_public]?.husbandry ?? true}
+                                        onChange={() => toggleSectionPrivacy(animalToEdit?.id_public, 'husbandry')}
+                                        className="w-4 h-4 rounded"
+                                    />
+                                    <span className="text-gray-600">Public</span>
+                                </label>
+                            </div>
                             <div className="space-y-4">
                                 <div>
                                     <label className="block text-sm font-medium text-gray-700 mb-2">Housing Type</label>
@@ -10146,7 +10314,18 @@ const AnimalForm = ({
 
                         {/* 3rd Section: Environment */}
                         <div className="bg-gray-50 p-4 rounded-lg border border-gray-200 space-y-4" data-tutorial-target="environment-section">
-                            <h3 className="text-lg font-semibold text-gray-700">Environment</h3>
+                            <div className="flex justify-between items-center mb-4">
+                                <h3 className="text-lg font-semibold text-gray-700">Environment</h3>
+                                <label className="flex items-center gap-2 text-sm">
+                                    <input 
+                                        type="checkbox" 
+                                        checked={sectionPrivacy[animalToEdit?.id_public]?.environment ?? true}
+                                        onChange={() => toggleSectionPrivacy(animalToEdit?.id_public, 'environment')}
+                                        className="w-4 h-4 rounded"
+                                    />
+                                    <span className="text-gray-600">Public</span>
+                                </label>
+                            </div>
                             <div className="space-y-4">
                                 <div>
                                     <label className="block text-sm font-medium text-gray-700 mb-2">Temperature Range</label>
@@ -10185,7 +10364,18 @@ const AnimalForm = ({
                     <div className="space-y-6">
                         {/* Behavior */}
                         <div className="bg-gray-50 p-4 rounded-lg border border-gray-200 space-y-4">
-                            <h3 className="text-lg font-semibold text-gray-700 border-b pb-2">Behavior</h3>
+                            <div className="flex justify-between items-center mb-4">
+                                <h3 className="text-lg font-semibold text-gray-700">Behavior</h3>
+                                <label className="flex items-center gap-2 text-sm">
+                                    <input 
+                                        type="checkbox" 
+                                        checked={sectionPrivacy[animalToEdit?.id_public]?.behavior ?? true}
+                                        onChange={() => toggleSectionPrivacy(animalToEdit?.id_public, 'behavior')}
+                                        className="w-4 h-4 rounded"
+                                    />
+                                    <span className="text-gray-600">Public</span>
+                                </label>
+                            </div>
                             <div className="space-y-4" data-tutorial-target="behavior-items-section">
                                 <div>
                                     <label className="block text-sm font-medium text-gray-700 mb-2">Temperament</label>
@@ -10212,7 +10402,18 @@ const AnimalForm = ({
 
                         {/* Activity */}
                         <div className="bg-gray-50 p-4 rounded-lg border border-gray-200 space-y-4">
-                            <h3 className="text-lg font-semibold text-gray-700 border-b pb-2">Activity</h3>
+                            <div className="flex justify-between items-center mb-4">
+                                <h3 className="text-lg font-semibold text-gray-700">Activity</h3>
+                                <label className="flex items-center gap-2 text-sm">
+                                    <input 
+                                        type="checkbox" 
+                                        checked={sectionPrivacy[animalToEdit?.id_public]?.activity ?? true}
+                                        onChange={() => toggleSectionPrivacy(animalToEdit?.id_public, 'activity')}
+                                        className="w-4 h-4 rounded"
+                                    />
+                                    <span className="text-gray-600">Public</span>
+                                </label>
+                            </div>
                             <div>
                                 <label className="block text-sm font-medium text-gray-700 mb-2">Activity Cycle</label>
                                 <select name="activityCycle" value={formData.activityCycle} onChange={handleChange} data-tutorial-target="activity-pattern-select"
@@ -10231,7 +10432,18 @@ const AnimalForm = ({
                 {activeTab === 10 && (
                     <div className="space-y-6">
                         <div className="bg-gray-50 p-4 rounded-lg border border-gray-200" data-tutorial-target="remarks-section">
-                            <h3 className="text-lg font-semibold text-gray-700 border-b pb-2 mb-4">Remarks & Notes</h3>
+                            <div className="flex justify-between items-center mb-4">
+                                <h3 className="text-lg font-semibold text-gray-700">Remarks & Notes</h3>
+                                <label className="flex items-center gap-2 text-sm">
+                                    <input 
+                                        type="checkbox" 
+                                        checked={sectionPrivacy[animalToEdit?.id_public]?.remarks ?? true}
+                                        onChange={() => toggleSectionPrivacy(animalToEdit?.id_public, 'remarks')}
+                                        className="w-4 h-4 rounded"
+                                    />
+                                    <span className="text-gray-600">Public</span>
+                                </label>
+                            </div>
                             <textarea name="remarks" value={formData.remarks} onChange={handleChange} rows="5"
                                 className="block w-full p-2 border border-gray-300 rounded-md shadow-sm focus:ring-primary focus:border-primary" 
                                 placeholder="General notes, observations, and records..." />
@@ -10245,7 +10457,18 @@ const AnimalForm = ({
                     <div className="space-y-6">
                         {/* End of Life */}
                         <div className="bg-gray-50 p-4 rounded-lg border border-gray-200 space-y-4">
-                            <h3 className="text-lg font-semibold text-gray-700 border-b pb-2">End of Life</h3>
+                            <div className="flex justify-between items-center mb-4">
+                                <h3 className="text-lg font-semibold text-gray-700">End of Life</h3>
+                                <label className="flex items-center gap-2 text-sm">
+                                    <input 
+                                        type="checkbox" 
+                                        checked={sectionPrivacy[animalToEdit?.id_public]?.endOfLife ?? true}
+                                        onChange={() => toggleSectionPrivacy(animalToEdit?.id_public, 'endOfLife')}
+                                        className="w-4 h-4 rounded"
+                                    />
+                                    <span className="text-gray-600">Public</span>
+                                </label>
+                            </div>
                             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                                 <div>
                                     <label className="block text-sm font-medium text-gray-700 mb-2">Date of Death</label>
@@ -10272,7 +10495,18 @@ const AnimalForm = ({
 
                         {/* Legal / Administrative */}
                         <div className="bg-gray-50 p-4 rounded-lg border border-gray-200 space-y-4" data-tutorial-target="legal-admin-section">
-                            <h3 className="text-lg font-semibold text-gray-700 border-b pb-2">Legal / Administrative</h3>
+                            <div className="flex justify-between items-center mb-4">
+                                <h3 className="text-lg font-semibold text-gray-700">Legal / Administrative</h3>
+                                <label className="flex items-center gap-2 text-sm">
+                                    <input 
+                                        type="checkbox" 
+                                        checked={sectionPrivacy[animalToEdit?.id_public]?.legalAdministrative ?? true}
+                                        onChange={() => toggleSectionPrivacy(animalToEdit?.id_public, 'legalAdministrative')}
+                                        className="w-4 h-4 rounded"
+                                    />
+                                    <span className="text-gray-600">Public</span>
+                                </label>
+                            </div>
                             <div className="space-y-4">
                                 <div>
                                     <label className="block text-sm font-medium text-gray-700 mb-2">Insurance</label>
