@@ -291,14 +291,14 @@ const GETTING_STARTED_LESSONS = [
       {
         stepNumber: 5,
         title: 'Public Profile Visibility',
-        content: 'This checkbox controls whether your animal appears on your public profile. When checked, other CritterTrack users can see this animal\'s information (subject to other privacy toggles). When unchecked, the animal is only visible to you.',
+        content: 'This toggle controls whether your animal appears on your public profile. Click the button to toggle between Public (🌍) and Private (🔒). When public, other CritterTrack users can see this animal\'s information (subject to section privacy toggles). When private, the animal is only visible to you.',
         highlightElement: '[data-tutorial-target="visibility-section"]',
         actionType: 'click',
         tips: [
-          'Checked = appears on your public profile',
-          'Unchecked = private to you only',
-          'Other specific sections also have privacy toggles',
-          'Individual toggles override this setting'
+          'Public = appears on your public profile',
+          'Private = only visible to you',
+          'Toggle button at top right of Overview tab',
+          'Toggling instantly updates the setting'
         ]
       },
       {
@@ -782,20 +782,9 @@ const GETTING_STARTED_LESSONS = [
           'Affects breeding decisions'
         ]
       },
+
       {
         stepNumber: 6,
-        title: 'Can Sire / Can Bear',
-        content: 'These checkboxes indicate breeding capability. For unknown gender animals like this one, you see both "Can Sire" and "Can Bear". For male animals, "Stud Animal" appears. For female animals, "Breeding Dam" appears. For this tutorial, please check both boxes to see the full breeding features.',
-        highlightElement: '[data-tutorial-target="can-sire-bear-section"]',
-        actionType: 'checkMultiple',
-        tips: [
-          'For tutorial: check both boxes',
-          'Male animals: "Stud Animal" checkbox',
-          'Female animals: "Breeding Dam" checkbox'
-        ]
-      },
-      {
-        stepNumber: 7,
         title: 'Stud Information',
         content: 'If your animal is a stud (breeding male), track his fertility status and genetics information here. To make him available for breeding in the showcase, go to the Status & Privacy tab and enable "Available for Stud" with a fee.',
         highlightElement: '[data-tutorial-target="stud-info-section"]',
@@ -807,7 +796,7 @@ const GETTING_STARTED_LESSONS = [
         ]
       },
       {
-        stepNumber: 8,
+        stepNumber: 7,
         title: 'Dam Information',
         content: 'If your animal is a dam (breeding female), fill in her fertility status and any genetics or fertility-related notes about her.',
         highlightElement: '[data-tutorial-target="dam-info-section"]',
@@ -818,7 +807,7 @@ const GETTING_STARTED_LESSONS = [
         ]
       },
       {
-        stepNumber: 9,
+        stepNumber: 8,
         title: 'Breeding History',
         content: 'This section lets you record a brief summary of your animal\'s reproductive events. First select if this animal was a Sire, Dam, or Both. Then fill in mating dates, successful matings count, total offspring produced, total litters, and date of last pregnancy.',
         highlightElement: '[data-tutorial-target="breeding-history-section"]',
@@ -829,7 +818,7 @@ const GETTING_STARTED_LESSONS = [
         ]
       },
       {
-        stepNumber: 10,
+        stepNumber: 9,
         title: 'Move to Health Tab',
         content: 'Let\'s continue to the Health tab to track medical information. Click the "Health" tab.',
         highlightElement: '[data-tutorial-target="health-tab"]',
