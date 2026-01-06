@@ -142,24 +142,32 @@
 
 .refresh-btn,
 .export-btn {
-    display: flex;
+    display: inline-flex;
     align-items: center;
+    justify-content: center;
     gap: 8px;
     padding: 10px 16px;
     background: #ffffff;
-    border: 1px solid #e5e7eb;
+    border: 1px solid #d1d5db;
     color: #374151;
     border-radius: 8px;
     font-size: 14px;
     font-weight: 500;
     cursor: pointer;
     transition: all 0.2s;
+    white-space: nowrap;
+    min-width: fit-content;
+}
+
+.refresh-btn svg,
+.export-btn svg {
+    flex-shrink: 0;
 }
 
 .refresh-btn:hover,
 .export-btn:hover {
     background: #f3f4f6;
-    border-color: #d1d5db;
+    border-color: #9ca3af;
 }
 
 .refresh-btn:disabled,
@@ -175,6 +183,7 @@
 
 .export-btn:hover:not(:disabled) {
     background: #f0fdf4;
+    border-color: #15803d;
 }
 
 .log-count {
