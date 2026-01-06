@@ -14160,6 +14160,21 @@ const NotificationPanel = ({ authToken, API_BASE_URL, onClose, showModalMessage,
         }
     };
 
+    const handleApprove = async (notificationId) => {
+        setProcessing(notificationId);
+        try {
+            await axios.post(`${API_BASE_URL}/notifications/${notificationId}/approve`, {}, {
+                headers: { Authorization: `Bearer ${authToken}` }
+            });
+            fetchNotifications();
+            if (onNotificationChange) onNotificationChange();
+        } catch (error) {
+            console.error('Error acknowledging notification:', error);
+        } finally {
+            setProcessing(null);
+        }
+    };
+
     const pendingNotifications = notifications.filter(n => n.status === 'pending');
     const otherNotifications = notifications.filter(n => n.status !== 'pending');
 
