@@ -11813,24 +11813,6 @@ const ProfileView = ({ userProfile, showModalMessage, fetchUserProfile, authToke
                             {(userProfile.showEmailPublic ?? false) ? 'Public' : 'Private'}
                         </span>
                     </div>
-                    
-                    <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-2 py-2">
-                        <span className="text-sm sm:text-base text-gray-800 truncate">Genetic Code on Public Animals</span>
-                        <span className={`px-3 py-1 text-xs font-semibold rounded-full whitespace-nowrap ${ 
-                            (userProfile.showGeneticCodePublic ?? false) ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800'
-                        }`}>
-                            {(userProfile.showGeneticCodePublic ?? false) ? 'Public' : 'Private'}
-                        </span>
-                    </div>
-                    
-                    <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-2 py-2">
-                        <span className="text-sm sm:text-base text-gray-800 truncate">Remarks/Notes on Public Animals</span>
-                        <span className={`px-3 py-1 text-xs font-semibold rounded-full whitespace-nowrap ${ 
-                            (userProfile.showRemarksPublic ?? false) ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800'
-                        }`}>
-                            {(userProfile.showRemarksPublic ?? false) ? 'Public' : 'Private'}
-                        </span>
-                    </div>
                 </div>
 
                 <div className="p-4 bg-gray-50 rounded-lg border border-gray-200 overflow-x-hidden" data-tutorial-target="personal-id-section">
