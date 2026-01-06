@@ -19041,6 +19041,26 @@ const PublicProfilePage = () => {
                 console.log('[MOD ACTION LIFT_SUSPENSION] Success:', response.data);
                 showModalMessage('Suspension Lifted', 'User account has been reactivated and can now log in.');
             }
+            else if (flagData.action === 'lift-ban') {
+                // Lift ban from user
+                const userId = flagData.context?.type === 'profile' 
+                    ? flagData.context?.userId 
+                    : flagData.context?.ownerId;
+                
+                console.log('[MOD ACTION LIFT_BAN] Lifting ban for user:', { userId, reason: flagData.reason });
+                
+                const response = await axios.post(
+                    `${API_BASE_URL}/moderation/users/${userId}/status`,
+                    {
+                        status: 'active',
+                        reason: flagData.reason
+                    },
+                    { headers: { Authorization: `Bearer ${authToken}` } }
+                );
+
+                console.log('[MOD ACTION LIFT_BAN] Success:', response.data);
+                showModalMessage('Ban Lifted', 'User account has been unbanned and can now log in.');
+            }
         } catch (error) {
             console.error('[MOD ACTION] ERROR OCCURRED:', {
                 message: error.message,
