@@ -10,6 +10,7 @@ import AuditLogViewer from './moderation/AuditLogViewer';
 import CommunicationTab from './admin/CommunicationTab';
 import SystemSettingsTab from './admin/SystemSettingsTab';
 import ModChatTab from './admin/ModChatTab';
+import AnimalManagementPanel from './admin/AnimalManagementPanel';
 
 // Error Boundary Component
 class ErrorBoundary extends React.Component {
@@ -489,13 +490,14 @@ const EnhancedAdminPanel = ({ isOpen, onClose, authToken, API_BASE_URL, userRole
                             </div>
                         )}
 
-                        {/* Animal Management - DISABLED: Component deleted */}
+                        {/* Animal Management */}
                         {activeSection === 'animals' && (
                             <div className="p-8">
-                                <h3 className="text-2xl font-bold text-gray-800 mb-4">Animal Management</h3>
-                                <div className="bg-yellow-50 border border-yellow-200 rounded-lg p-6">
-                                    <p className="text-yellow-800">This feature is currently being rebuilt.</p>
-                                </div>
+                                <AnimalManagementPanel 
+                                    API_BASE_URL={API_BASE_URL}
+                                    authToken={authToken}
+                                    userRole={localStorage.getItem('userRole')}
+                                />
                             </div>
                         )}
 
