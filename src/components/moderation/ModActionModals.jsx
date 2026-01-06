@@ -358,10 +358,21 @@ export const SuspendUserModal = ({ isOpen, onClose, onSubmit, context }) => {
         { label: 'Custom (days)', days: null }
     ];
 
+    // Reset state when modal opens
+    useEffect(() => {
+        if (isOpen) {
+            setReason('');
+            setDuration('1 Day');
+            setCustomDuration('');
+        }
+    }, [isOpen]);
+
     if (!isOpen) return null;
 
     const handleSubmit = () => {
         let finalDuration;
+        
+        console.log('[SUSPEND MODAL] Selected duration:', duration);
         
         if (duration === 'Custom (days)') {
             const customNum = parseFloat(customDuration);
@@ -374,7 +385,10 @@ export const SuspendUserModal = ({ isOpen, onClose, onSubmit, context }) => {
             // Find the selected duration option
             const selected = durationOptions.find(opt => opt.label === duration);
             finalDuration = selected ? selected.days : 1;
+            console.log('[SUSPEND MODAL] Found duration option:', selected);
         }
+        
+        console.log('[SUSPEND MODAL] Final duration (days):', finalDuration);
         
         onSubmit({
             action: 'suspend',
