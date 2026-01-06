@@ -49,7 +49,7 @@ const AuditLogViewer = () => {
     const fetchLogs = async () => {
         try {
             setLoading(true);
-            const token = localStorage.getItem('token');
+            const token = localStorage.getItem('authToken');
             
             const params = new URLSearchParams({
                 page: page.toString(),
