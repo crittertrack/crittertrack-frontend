@@ -15040,7 +15040,7 @@ const App = () => {
         pollUserStatus();
 
         return () => clearInterval(statusPollInterval);
-    }, [authToken, API_BASE_URL, handleLogout, showModalMessage]);
+    }, [authToken, API_BASE_URL, handleLogout, showModalMessage, setSuspensionInfo, setSuspensionTimeRemaining, setSuspensionLiftedNotification]);
 
     useEffect(() => {
         if (authToken && !hasCompletedOnboarding && !tutorialLoading && userProfile) {
