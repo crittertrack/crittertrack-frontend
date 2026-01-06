@@ -161,16 +161,16 @@
     white-space: nowrap;
 }
 
-.user-id .role-icon {
+.user-name .role-icon {
     margin-left: 6px;
     vertical-align: middle;
 }
 
-.user-id .role-icon.admin {
+.user-name .role-icon.admin {
     color: #dc2626;
 }
 
-.user-id .role-icon.moderator {
+.user-name .role-icon.moderator {
     color: #1d4ed8;
 }
 
