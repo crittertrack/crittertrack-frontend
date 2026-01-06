@@ -1,7 +1,7 @@
 import React, { useEffect, useMemo, useState } from 'react';
 import { 
     AlertCircle, RefreshCw, Search, Filter, Clock, CheckCircle, 
-    XCircle, Loader2, Flag, Calendar, Tag, Eye
+    Loader2, Flag, Calendar, Tag, Eye
 } from 'lucide-react';
 import './ModOversightPanel.css';
 
@@ -16,15 +16,13 @@ const STATUS_FILTERS = [
     { value: 'all', label: 'All Statuses' },
     { value: 'pending', label: 'Pending' },
     { value: 'reviewed', label: 'In Review' },
-    { value: 'resolved', label: 'Resolved' },
-    { value: 'dismissed', label: 'Dismissed' }
+    { value: 'resolved', label: 'Resolved' }
 ];
 
 const STATUS_BADGE_COLORS = {
     pending: '#ff6f00',
     reviewed: '#1976d2',
-    resolved: '#388e3c',
-    dismissed: '#666'
+    resolved: '#388e3c'
 };
 
 const CATEGORY_BADGE_COLORS = {
@@ -302,8 +300,7 @@ export default function ModOversightPanel({
         total: reports.length,
         pending: reports.filter(r => r.status === 'pending').length,
         reviewed: reports.filter(r => r.status === 'reviewed').length,
-        resolved: reports.filter(r => r.status === 'resolved').length,
-        dismissed: reports.filter(r => r.status === 'dismissed').length
+        resolved: reports.filter(r => r.status === 'resolved' || r.status === 'dismissed').length
     }), [reports]);
 
     // Filter reports by search term
@@ -400,8 +397,7 @@ export default function ModOversightPanel({
         const statusConfig = {
             pending: { icon: Clock, color: 'yellow', label: 'Pending' },
             reviewed: { icon: Eye, color: 'blue', label: 'In Review' },
-            resolved: { icon: CheckCircle, color: 'green', label: 'Resolved' },
-            dismissed: { icon: XCircle, color: 'gray', label: 'Dismissed' }
+            resolved: { icon: CheckCircle, color: 'green', label: 'Resolved' }
         };
         
         const config = statusConfig[status] || statusConfig.pending;
@@ -849,8 +845,7 @@ export default function ModOversightPanel({
                                             const statusColors = {
                                                 pending: { bg: '#fff3e0', border: '#ff6f00', text: '#e65100' },
                                                 reviewed: { bg: '#e3f2fd', border: '#1976d2', text: '#0d47a1' },
-                                                resolved: { bg: '#e8f5e9', border: '#388e3c', text: '#1b5e20' },
-                                                dismissed: { bg: '#f5f5f5', border: '#666', text: '#333' }
+                                                resolved: { bg: '#e8f5e9', border: '#388e3c', text: '#1b5e20' }
                                             };
                                             const colors = statusColors[status.value] || statusColors.dismissed;
                                             
