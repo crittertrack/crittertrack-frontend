@@ -329,9 +329,6 @@
     font-size: 13px;
     white-space: nowrap;
 }
-    max-height: 200px;
-    overflow-y: auto;
-}
 
 .no-details {
     color: #666;
