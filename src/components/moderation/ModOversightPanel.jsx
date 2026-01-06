@@ -1,19 +1,23 @@
 import React, { useEffect, useMemo, useState } from 'react';
-import { AlertCircle } from 'lucide-react';
+import { 
+    AlertCircle, RefreshCw, Search, Filter, Clock, CheckCircle, 
+    XCircle, Loader2, Flag, Calendar, Tag, Eye
+} from 'lucide-react';
 import './ModOversightPanel.css';
 
 const REPORT_TYPES = [
+    { value: 'all', label: 'All Types' },
     { value: 'profile', label: 'Profiles' },
     { value: 'animal', label: 'Animals' },
     { value: 'message', label: 'Messages' }
 ];
 
 const STATUS_FILTERS = [
+    { value: 'all', label: 'All Statuses' },
     { value: 'pending', label: 'Pending' },
     { value: 'reviewed', label: 'In Review' },
     { value: 'resolved', label: 'Resolved' },
-    { value: 'dismissed', label: 'Dismissed' },
-    { value: 'all', label: 'All' }
+    { value: 'dismissed', label: 'Dismissed' }
 ];
 
 const STATUS_BADGE_COLORS = {
@@ -221,10 +225,11 @@ export default function ModOversightPanel({
     const [selectedReport, setSelectedReport] = useState(null);
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState('');
-    const [statusFilter, setStatusFilter] = useState('pending');
-    const [reportType, setReportType] = useState('profile');
+    const [statusFilter, setStatusFilter] = useState('all');
+    const [reportType, setReportType] = useState('all');
     const [adminNotes, setAdminNotes] = useState('');
     const [actionLoading, setActionLoading] = useState(false);
+    const [searchTerm, setSearchTerm] = useState('');
 
     const baseUrl = useMemo(() => API_BASE_URL || '/api', [API_BASE_URL]);
 
@@ -246,9 +251,13 @@ export default function ModOversightPanel({
 
         try {
             const params = new URLSearchParams({
-                type: reportType,
-                limit: '50'
+                limit: '100'
             });
+
+            // If "all" types, don't send type param - fetch all types
+            if (reportType !== 'all') {
+                params.append('type', reportType);
+            }
 
             if (statusFilter !== 'all') {
                 params.append('status', statusFilter);
@@ -288,14 +297,56 @@ export default function ModOversightPanel({
         }
     };
 
+    // Calculate stats
+    const stats = useMemo(() => ({
+        total: reports.length,
+        pending: reports.filter(r => r.status === 'pending').length,
+        reviewed: reports.filter(r => r.status === 'reviewed').length,
+        resolved: reports.filter(r => r.status === 'resolved').length,
+        dismissed: reports.filter(r => r.status === 'dismissed').length
+    }), [reports]);
+
+    // Filter reports by search term
+    const filteredReports = useMemo(() => {
+        if (!searchTerm.trim()) return reports;
+        const search = searchTerm.toLowerCase();
+        return reports.filter(report => {
+            const reasonMeta = parseReason(report.reason);
+            const subjectTitle = getSubjectTitle(report).toLowerCase();
+            const owner = getSubjectOwner(report).toLowerCase();
+            const reporter = formatReporter(report).toLowerCase();
+            const category = reasonMeta.categoryLabel.toLowerCase();
+            const description = (reasonMeta.description || '').toLowerCase();
+            
+            return subjectTitle.includes(search) ||
+                   owner.includes(search) ||
+                   reporter.includes(search) ||
+                   category.includes(search) ||
+                   description.includes(search);
+        });
+    }, [reports, searchTerm]);
+
     const handleUpdateStatus = async (nextStatus) => {
         if (!selectedReport || !nextStatus) return;
         setActionLoading(true);
         setError('');
 
         try {
+            // Determine the actual report type from the report itself
+            let actualType = reportType;
+            if (reportType === 'all') {
+                // Infer type from the report content
+                if (selectedReport.reportedAnimalId) {
+                    actualType = 'animal';
+                } else if (selectedReport.messageId || selectedReport.conversationMessages?.length > 0) {
+                    actualType = 'message';
+                } else {
+                    actualType = 'profile';
+                }
+            }
+
             const response = await fetch(
-                `${baseUrl}/moderation/reports/${reportType}/${selectedReport._id}/status`,
+                `${baseUrl}/moderation/reports/${actualType}/${selectedReport._id}/status`,
                 {
                     method: 'POST',
                     headers: {
@@ -344,6 +395,26 @@ export default function ModOversightPanel({
 
     const containerClass = embedded ? 'mod-panel-embedded' : 'mod-panel';
 
+    // Status badge component
+    const StatusBadge = ({ status }) => {
+        const statusConfig = {
+            pending: { icon: Clock, color: 'yellow', label: 'Pending' },
+            reviewed: { icon: Eye, color: 'blue', label: 'In Review' },
+            resolved: { icon: CheckCircle, color: 'green', label: 'Resolved' },
+            dismissed: { icon: XCircle, color: 'gray', label: 'Dismissed' }
+        };
+        
+        const config = statusConfig[status] || statusConfig.pending;
+        const Icon = config.icon;
+        
+        return (
+            <span className={`report-status-badge report-status-${config.color}`}>
+                <Icon size={14} />
+                {config.label}
+            </span>
+        );
+    };
+
     return (
         <div className={containerClass}>
             {!embedded && (
@@ -360,53 +431,110 @@ export default function ModOversightPanel({
             )}
 
             <div className="mod-panel-content">
-                    {/* Filter tabs */}
-                    <div className="mod-filter-tabs">
-                        {REPORT_TYPES.map((type) => (
-                            <button
-                                key={type.value}
-                                className={`mod-filter-tab ${reportType === type.value ? 'active' : ''}`}
-                                onClick={() => {
-                                    setReportType(type.value);
-                                    setSelectedReport(null);
-                                }}
-                            >
-                                {type.label}
-                            </button>
-                        ))}
+                {/* Header with title and refresh */}
+                <div className="reports-header">
+                    <div className="reports-title">
+                        <Flag size={28} />
+                        <div>
+                            <h2>User Reports</h2>
+                            <p>Review and manage user-submitted reports</p>
+                        </div>
                     </div>
-                    <div className="mod-filter-tabs secondary">
-                        {STATUS_FILTERS.map((status) => (
-                            <button
-                                key={status.value}
-                                className={`mod-filter-tab ${statusFilter === status.value ? 'active' : ''}`}
-                                onClick={() => setStatusFilter(status.value)}
-                            >
-                                {status.label}
-                            </button>
-                        ))}
+                    <button 
+                        className="reports-refresh-btn"
+                        onClick={fetchReports}
+                        disabled={loading}
+                    >
+                        <RefreshCw size={18} className={loading ? 'spin' : ''} />
+                        Refresh
+                    </button>
+                </div>
+
+                {/* Stats Cards */}
+                <div className="reports-stats-grid">
+                    <div className="reports-stat-card">
+                        <div className="reports-stat-value">{stats.total}</div>
+                        <div className="reports-stat-label">Total Reports</div>
                     </div>
+                    <div className="reports-stat-card reports-stat-yellow">
+                        <div className="reports-stat-value">{stats.pending}</div>
+                        <div className="reports-stat-label">Pending</div>
+                    </div>
+                    <div className="reports-stat-card reports-stat-blue">
+                        <div className="reports-stat-value">{stats.reviewed}</div>
+                        <div className="reports-stat-label">In Review</div>
+                    </div>
+                    <div className="reports-stat-card reports-stat-green">
+                        <div className="reports-stat-value">{stats.resolved}</div>
+                        <div className="reports-stat-label">Resolved</div>
+                    </div>
+                </div>
 
-                    {/* Reports list or detail view */}
-                    {selectedReport ? (
-                        <div className="mod-detail-view">
-                            <button 
-                                className="mod-back-button"
-                                onClick={() => {
-                                    setSelectedReport(null);
-                                    setAdminNotes('');
-                                }}
-                            >
-                                ← Back to Reports
-                            </button>
+                {/* Filters */}
+                <div className="reports-filters">
+                    <div className="reports-search-box">
+                        <Search size={18} />
+                        <input
+                            type="text"
+                            placeholder="Search reports..."
+                            value={searchTerm}
+                            onChange={(e) => setSearchTerm(e.target.value)}
+                        />
+                    </div>
+                    <div className="reports-filter-group">
+                        <Filter size={18} />
+                        <select 
+                            value={statusFilter}
+                            onChange={(e) => setStatusFilter(e.target.value)}
+                        >
+                            {STATUS_FILTERS.map(s => (
+                                <option key={s.value} value={s.value}>{s.label}</option>
+                            ))}
+                        </select>
+                    </div>
+                    <div className="reports-filter-group">
+                        <Tag size={18} />
+                        <select 
+                            value={reportType}
+                            onChange={(e) => {
+                                setReportType(e.target.value);
+                                setSelectedReport(null);
+                            }}
+                        >
+                            {REPORT_TYPES.map(t => (
+                                <option key={t.value} value={t.value}>{t.label}</option>
+                            ))}
+                        </select>
+                    </div>
+                </div>
 
-                            <div className="mod-report-detail">
-                                <h4>{getSubjectTitle(selectedReport)}</h4>
+                {error && (
+                    <div className="reports-error-banner">
+                        <AlertCircle size={18} />
+                        {error}
+                    </div>
+                )}
 
-                                <div className="mod-detail-section">
-                                    <strong>Status:</strong>
-                                    <span 
-                                        className="mod-badge"
+                {/* Reports list or detail view */}
+                {selectedReport ? (
+                    <div className="mod-detail-view">
+                        <button 
+                            className="mod-back-button"
+                            onClick={() => {
+                                setSelectedReport(null);
+                                setAdminNotes('');
+                            }}
+                        >
+                            ← Back to Reports
+                        </button>
+
+                        <div className="mod-report-detail">
+                            <h4>{getSubjectTitle(selectedReport)}</h4>
+
+                            <div className="mod-detail-section">
+                                <strong>Status:</strong>
+                                <span 
+                                    className="mod-badge"
                                         style={{ backgroundColor: getStatusBadgeColor(selectedReport.status) }}
                                     >
                                         {selectedReport.status.replace('_', ' ').toUpperCase()}
@@ -751,67 +879,69 @@ export default function ModOversightPanel({
                             </div>
                         </div>
                     ) : (
-                        <div className="mod-list-view">
-                            {error && (
-                                <div className="mod-error">
-                                    <AlertCircle size={16} />
-                                    {error}
-                                </div>
-                            )}
-
+                        <div className="reports-list">
                             {loading ? (
-                                <div className="mod-loading">Loading reports...</div>
-                            ) : reports.length === 0 ? (
-                                <div className="mod-empty">No reports found</div>
+                                <div className="reports-loading">
+                                    <Loader2 className="spin" size={32} />
+                                    <p>Loading reports...</p>
+                                </div>
+                            ) : filteredReports.length === 0 ? (
+                                <div className="reports-empty-state">
+                                    <Flag size={48} />
+                                    <h3>No reports found</h3>
+                                    <p>
+                                        {searchTerm || statusFilter !== 'all' || reportType !== 'all'
+                                            ? 'Try adjusting your filters'
+                                            : 'No user reports have been submitted yet'}
+                                    </p>
+                                </div>
                             ) : (
-                                <div className="mod-reports-list">
-                                    {reports.map((report) => {
-                                        const reasonMeta = parseReason(report.reason);
-                                        return (
-                                            <div 
-                                                key={report._id}
-                                                className="mod-report-item"
-                                                onClick={() => handleSelectReport(report)}
-                                            >
-                                                <div className="mod-report-header">
-                                                    <span className="mod-report-title">
-                                                        {getSubjectTitle(report)}
-                                                    </span>
-                                                    <span 
-                                                        className="mod-status-badge"
-                                                        style={{ backgroundColor: getStatusBadgeColor(report.status) }}
+                                filteredReports.map((report) => {
+                                    const reasonMeta = parseReason(report.reason);
+                                    return (
+                                        <div 
+                                            key={report._id}
+                                            className="report-card"
+                                            onClick={() => handleSelectReport(report)}
+                                        >
+                                            <div className="report-card-header">
+                                                <div className="report-card-meta">
+                                                    <span className="report-category-tag"
+                                                        style={{ backgroundColor: getCategoryBadgeColor(reasonMeta.categoryLabel), color: '#fff' }}
                                                     >
-                                                        {report.status.replace('_', ' ').toUpperCase()}
-                                                    </span>
-                                                </div>
-                                                <div className="mod-report-meta">
-                                                    <span className="mod-report-category">
                                                         {reasonMeta.categoryLabel}
                                                     </span>
-                                                    <span className="mod-report-field">
-                                                        {reasonMeta.fieldLabel || 'General'}
-                                                    </span>
+                                                    <StatusBadge status={report.status} />
                                                 </div>
-                                                <p className="mod-report-snippet">
+                                                <span className="report-card-date">
+                                                    <Calendar size={14} />
+                                                    {new Date(report.createdAt).toLocaleDateString()}
+                                                </span>
+                                            </div>
+                                            <div className="report-card-body">
+                                                <h4 className="report-card-title">{getSubjectTitle(report)}</h4>
+                                                <p className="report-card-description">
                                                     {reasonMeta.description || 'No additional context provided.'}
                                                 </p>
                                             </div>
-                                        );
-                                    })}
-                                </div>
+                                            <div className="report-card-footer">
+                                                <div className="report-card-info">
+                                                    <span className="report-owner">
+                                                        <strong>Reported:</strong> {getSubjectOwner(report)}
+                                                    </span>
+                                                </div>
+                                                <div className="report-card-info">
+                                                    <span className="report-reporter">
+                                                        <strong>By:</strong> {formatReporter(report)}
+                                                    </span>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    );
+                                })
                             )}
                         </div>
                     )}
-
-                    {/* Footer */}
-                    <div className="mod-panel-footer">
-                        <button 
-                            className="mod-signout-btn"
-                            onClick={onClose}
-                        >
-                            Sign Out of Moderation
-                        </button>
-                    </div>
                 </div>
         </div>
     );

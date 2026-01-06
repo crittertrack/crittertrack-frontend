@@ -452,3 +452,368 @@
 .mod-detail-view::-webkit-scrollbar-thumb:hover {
     background: #b0b0b0;
 }
+
+/* ========== New BugReports-style Layout ========== */
+
+.reports-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    margin-bottom: 24px;
+    padding: 0 24px;
+    padding-top: 24px;
+}
+
+.reports-title {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+}
+
+.reports-title svg {
+    color: #dc2626;
+}
+
+.reports-title h2 {
+    font-size: 1.75rem;
+    font-weight: 700;
+    color: #1f2937;
+    margin: 0;
+}
+
+.reports-title p {
+    color: #6b7280;
+    margin: 4px 0 0;
+    font-size: 0.875rem;
+}
+
+.reports-refresh-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    padding: 10px 16px;
+    background: #fff;
+    border: 2px solid #e5e7eb;
+    border-radius: 8px;
+    font-weight: 600;
+    color: #374151;
+    cursor: pointer;
+    transition: all 0.2s;
+}
+
+.reports-refresh-btn:hover {
+    border-color: #dc2626;
+    color: #dc2626;
+}
+
+.reports-refresh-btn:disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
+}
+
+/* Stats Grid */
+.reports-stats-grid {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 16px;
+    margin-bottom: 24px;
+    padding: 0 24px;
+}
+
+.reports-stat-card {
+    background: #fff;
+    border: 2px solid #e5e7eb;
+    border-radius: 12px;
+    padding: 20px;
+    text-align: center;
+}
+
+.reports-stat-value {
+    font-size: 2rem;
+    font-weight: 700;
+    color: #1f2937;
+}
+
+.reports-stat-label {
+    font-size: 0.875rem;
+    color: #6b7280;
+    margin-top: 4px;
+}
+
+.reports-stat-yellow {
+    background: #fefce8;
+    border-color: #fde047;
+}
+
+.reports-stat-yellow .reports-stat-value {
+    color: #ca8a04;
+}
+
+.reports-stat-blue {
+    background: #eff6ff;
+    border-color: #93c5fd;
+}
+
+.reports-stat-blue .reports-stat-value {
+    color: #2563eb;
+}
+
+.reports-stat-green {
+    background: #f0fdf4;
+    border-color: #86efac;
+}
+
+.reports-stat-green .reports-stat-value {
+    color: #16a34a;
+}
+
+/* Filters */
+.reports-filters {
+    display: flex;
+    gap: 12px;
+    margin-bottom: 24px;
+    flex-wrap: wrap;
+    padding: 0 24px;
+}
+
+.reports-search-box {
+    flex: 1;
+    min-width: 250px;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    background: #fff;
+    border: 1px solid #e5e7eb;
+    border-radius: 8px;
+    padding: 0 12px;
+}
+
+.reports-search-box input {
+    flex: 1;
+    border: none;
+    outline: none;
+    padding: 12px 0;
+    font-size: 0.9375rem;
+}
+
+.reports-search-box svg {
+    color: #9ca3af;
+}
+
+.reports-filter-group {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    background: #fff;
+    border: 1px solid #e5e7eb;
+    border-radius: 8px;
+    padding: 0 12px;
+}
+
+.reports-filter-group svg {
+    color: #9ca3af;
+}
+
+.reports-filter-group select {
+    border: none;
+    outline: none;
+    padding: 12px 0;
+    font-size: 0.9375rem;
+    background: transparent;
+    cursor: pointer;
+}
+
+/* Error Banner */
+.reports-error-banner {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    background: #fef2f2;
+    border: 1px solid #fecaca;
+    color: #dc2626;
+    padding: 12px 16px;
+    border-radius: 8px;
+    margin: 0 24px 16px;
+}
+
+/* Reports List */
+.reports-list {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    padding: 0 24px 24px;
+    overflow-y: auto;
+    flex: 1;
+}
+
+.reports-loading {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 12px;
+    padding: 60px 20px;
+    color: #6b7280;
+}
+
+.reports-empty-state {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: 60px 20px;
+    background: #fff;
+    border: 2px dashed #e5e7eb;
+    border-radius: 12px;
+    text-align: center;
+}
+
+.reports-empty-state svg {
+    color: #d1d5db;
+    margin-bottom: 16px;
+}
+
+.reports-empty-state h3 {
+    color: #374151;
+    margin: 0 0 8px;
+    font-size: 1.125rem;
+}
+
+.reports-empty-state p {
+    color: #6b7280;
+    margin: 0;
+    font-size: 0.875rem;
+}
+
+/* Report Card */
+.report-card {
+    background: #fff;
+    border: 1px solid #e5e7eb;
+    border-radius: 12px;
+    padding: 20px;
+    cursor: pointer;
+    transition: all 0.2s;
+}
+
+.report-card:hover {
+    border-color: #dc2626;
+    box-shadow: 0 4px 12px rgba(220, 38, 38, 0.1);
+}
+
+.report-card-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 12px;
+}
+
+.report-card-meta {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.report-category-tag {
+    padding: 4px 10px;
+    border-radius: 6px;
+    font-size: 0.8125rem;
+    font-weight: 600;
+}
+
+.report-status-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    padding: 4px 10px;
+    border-radius: 6px;
+    font-size: 0.8125rem;
+    font-weight: 600;
+}
+
+.report-status-yellow {
+    background: #fef9c3;
+    color: #ca8a04;
+}
+
+.report-status-blue {
+    background: #dbeafe;
+    color: #2563eb;
+}
+
+.report-status-green {
+    background: #dcfce7;
+    color: #16a34a;
+}
+
+.report-status-gray {
+    background: #f3f4f6;
+    color: #6b7280;
+}
+
+.report-card-date {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    color: #6b7280;
+    font-size: 0.875rem;
+}
+
+.report-card-body {
+    margin-bottom: 12px;
+}
+
+.report-card-title {
+    font-size: 1rem;
+    font-weight: 600;
+    color: #1f2937;
+    margin: 0 0 8px;
+}
+
+.report-card-description {
+    color: #4b5563;
+    line-height: 1.6;
+    margin: 0;
+    font-size: 0.875rem;
+}
+
+.report-card-footer {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+    padding-top: 12px;
+    border-top: 1px solid #f3f4f6;
+}
+
+.report-card-info {
+    font-size: 0.8125rem;
+    color: #6b7280;
+}
+
+.report-card-info strong {
+    color: #374151;
+}
+
+/* Spinning animation for refresh */
+@keyframes spin {
+    from { transform: rotate(0deg); }
+    to { transform: rotate(360deg); }
+}
+
+.spin {
+    animation: spin 1s linear infinite;
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+    .reports-stats-grid {
+        grid-template-columns: repeat(2, 1fr);
+    }
+    
+    .reports-filters {
+        flex-direction: column;
+    }
+    
+    .reports-search-box {
+        min-width: 100%;
+    }
+}
