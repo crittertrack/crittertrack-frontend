@@ -31,7 +31,7 @@ const UserManagementPanel = () => {
     const fetchUsers = async () => {
         try {
             setLoading(true);
-            const token = localStorage.getItem('token');
+            const token = localStorage.getItem('authToken');
             const response = await axios.get(`${API_URL}/admin/users/moderation-overview`, {
                 headers: { Authorization: `Bearer ${token}` }
             });
@@ -49,7 +49,7 @@ const UserManagementPanel = () => {
         if (!window.confirm('Are you sure you want to lift this suspension?')) return;
 
         try {
-            const token = localStorage.getItem('token');
+            const token = localStorage.getItem('authToken');
             await axios.post(
                 `${API_URL}/moderation/lift-suspension`,
                 { userId },
@@ -65,7 +65,7 @@ const UserManagementPanel = () => {
         if (!window.confirm('Are you sure you want to lift this ban?')) return;
 
         try {
-            const token = localStorage.getItem('token');
+            const token = localStorage.getItem('authToken');
             await axios.post(
                 `${API_URL}/moderation/lift-ban`,
                 { userId },
