@@ -14186,9 +14186,21 @@ const NotificationPanel = ({ authToken, API_BASE_URL, onClose, showModalMessage,
                                 <div>
                                     <h4 className="font-bold text-gray-700 mb-2">Pending Requests</h4>
                                     {pendingNotifications.map(notification => (
-                                        <div key={notification._id} className={`border rounded-lg p-4 mb-2 ${!notification.read ? 'bg-primary/20 border-primary' : 'bg-white'}`}>
+                                        <div key={notification._id} className={`border rounded-lg p-4 mb-2 ${
+                                            notification.type === 'content_edited' 
+                                                ? 'bg-orange-100 border-orange-400' 
+                                                : !notification.read ? 'bg-primary/20 border-primary' : 'bg-white'
+                                        }`}>
+                                            {/* Moderation Notice Header */}
+                                            {notification.type === 'content_edited' && (
+                                                <div className="flex items-center text-orange-700 font-semibold mb-2">
+                                                    <span className="mr-2">⚠️</span>
+                                                    <span>Moderation Notice</span>
+                                                </div>
+                                            )}
                                             <div className="flex items-start space-x-3 mb-2">
-                                                {/* Animal Thumbnail */}
+                                                {/* Animal Thumbnail - hide for content_edited */}
+                                                {notification.type !== 'content_edited' && (
                                                 <div 
                                                     className="flex-shrink-0 w-16 h-16 bg-gray-200 rounded-md overflow-hidden cursor-pointer hover:opacity-80 transition-opacity"
                                                     onClick={() => {
@@ -14210,6 +14222,7 @@ const NotificationPanel = ({ authToken, API_BASE_URL, onClose, showModalMessage,
                                                         </div>
                                                     )}
                                                 </div>
+                                                )}
                                                 {/* Notification Message */}
                                                 <div className="flex-1">
                                                     <p className="text-sm text-gray-700">{notification.message}</p>
@@ -14301,12 +14314,24 @@ const NotificationPanel = ({ authToken, API_BASE_URL, onClose, showModalMessage,
                                                         </button>
                                                     </>
                                                 )}
+                                                {/* Content Edited - Acknowledge button */}
+                                                {notification.type === 'content_edited' && (
+                                                    <button
+                                                        onClick={() => handleApprove(notification._id)}
+                                                        disabled={processing === notification._id}
+                                                        className="flex items-center space-x-1 bg-orange-500 hover:bg-orange-600 text-white px-3 py-1 rounded text-sm disabled:opacity-50"
+                                                    >
+                                                        <CheckCircle size={14} />
+                                                        <span>Acknowledge</span>
+                                                    </button>
+                                                )}
                                                 {/* Delete button for other notifications */}
                                                 {notification.type !== 'link_request' && 
                                                  notification.type !== 'breeder_request' &&
                                                  notification.type !== 'parent_request' &&
                                                  notification.type !== 'transfer_request' && 
-                                                 notification.type !== 'view_only_offer' && (
+                                                 notification.type !== 'view_only_offer' &&
+                                                 notification.type !== 'content_edited' && (
                                                     <button
                                                         onClick={() => handleDelete(notification._id)}
                                                         className="flex items-center space-x-1 bg-gray-500 hover:bg-gray-600 text-white px-3 py-1 rounded text-sm"
@@ -14325,27 +14350,15 @@ const NotificationPanel = ({ authToken, API_BASE_URL, onClose, showModalMessage,
                                 <div>
                                     <h4 className="font-bold text-gray-700 mb-2">History</h4>
                                     {otherNotifications.map(notification => (
-                                        <div key={notification._id} className={`border rounded-lg p-4 mb-2 ${
-                                            notification.type === 'content_edited' ? 'bg-orange-50 border-orange-300' : 'bg-gray-50'
-                                        }`}>
+                                        <div key={notification._id} className="border rounded-lg p-4 mb-2 bg-gray-50">
                                             <div className="flex justify-between items-start">
                                                 <div className="flex-grow">
-                                                    {notification.type === 'content_edited' && (
-                                                        <p className="text-xs font-semibold text-orange-600 mb-1 flex items-center">
-                                                            ⚠️ Moderation Notice
-                                                        </p>
-                                                    )}
                                                     <p className="text-sm text-gray-700 mb-1">{notification.message}</p>
                                                     <p className="text-xs text-gray-500">
-                                                        {new Date(notification.createdAt).toLocaleString()}
-                                                        {notification.type !== 'content_edited' && (
-                                                            <>
-                                                                {' • '}
-                                                                <span className={`ml-1 ${notification.status === 'approved' ? 'text-green-600' : 'text-red-600'}`}>
-                                                                    {notification.status}
-                                                                </span>
-                                                            </>
-                                                        )}
+                                                        {new Date(notification.createdAt).toLocaleString()} • 
+                                                        <span className={`ml-1 ${notification.status === 'approved' ? 'text-green-600' : 'text-red-600'}`}>
+                                                            {notification.status}
+                                                        </span>
                                                     </p>
                                                 </div>
                                                 <button
