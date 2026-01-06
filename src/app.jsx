@@ -13675,7 +13675,7 @@ const MessagesView = ({ authToken, API_BASE_URL, onClose, showModalMessage, sele
                     createdAt: msg.createdAt
                 }));
             
-            await axios.post(`${API_BASE_URL}/messages/report`, {
+            await axios.post(`${API_BASE_URL}/reports/message`, {
                 conversationUserId: selectedConversation.otherUserId,
                 reportedUserId: selectedConversation.otherUserId,
                 reason: reason.trim(),
@@ -13697,7 +13697,7 @@ const MessagesView = ({ authToken, API_BASE_URL, onClose, showModalMessage, sele
             return;
         }
         try {
-            await axios.post(`${API_BASE_URL}/messages/report`, {
+            await axios.post(`${API_BASE_URL}/reports/message`, {
                 messageId: messageId,
                 reportedUserId: selectedConversation.otherUserId,
                 reason: reason.trim()

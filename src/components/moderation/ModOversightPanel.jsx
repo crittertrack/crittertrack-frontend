@@ -74,14 +74,24 @@ const getSubjectTitle = (report = {}) => {
         return `Animal · ${animal.name || animal.id_public || 'Unknown'}`;
     }
 
-    if (report.reportedUserId) {
+    if (report.reportedUserId && !report.messageId && !report.conversationMessages?.length) {
         const user = report.reportedUserId;
         const name = user.personalName || user.breederName || user.email;
         return `Profile · ${name || user.id_public || 'Unknown'}`;
     }
 
+    if (report.conversationMessages?.length > 0) {
+        return `Conversation · ${report.conversationMessages.length} messages`;
+    }
+
     if (report.messageId) {
         return 'Direct Message';
+    }
+
+    if (report.reportedUserId) {
+        const user = report.reportedUserId;
+        const name = user.personalName || user.breederName || user.email;
+        return `Profile · ${name || user.id_public || 'Unknown'}`;
     }
 
     return 'Report';
@@ -387,6 +397,55 @@ export default function ModOversightPanel({
                                                     <span>{getContentOwnerDetails(selectedReport).email}</span>
                                                 </div>
                                             )}
+                                        </div>
+                                    </div>
+                                )}
+
+                                {/* Message Content Section - for message reports */}
+                                {reportType === 'message' && selectedReport.messageId && (
+                                    <div className="mod-detail-section">
+                                        <strong>Reported Message:</strong>
+                                        <div className="mod-message-content" style={{ 
+                                            backgroundColor: '#f5f5f5', 
+                                            padding: '12px', 
+                                            borderRadius: '8px', 
+                                            marginTop: '8px',
+                                            border: '1px solid #e0e0e0'
+                                        }}>
+                                            <p style={{ margin: 0, whiteSpace: 'pre-wrap' }}>
+                                                {selectedReport.messageId?.message || 'Message content unavailable'}
+                                            </p>
+                                            <p style={{ margin: '8px 0 0', fontSize: '12px', color: '#666' }}>
+                                                Sent: {selectedReport.messageId?.createdAt ? new Date(selectedReport.messageId.createdAt).toLocaleString() : 'Unknown'}
+                                            </p>
+                                        </div>
+                                    </div>
+                                )}
+
+                                {/* Conversation Messages Section - for conversation reports */}
+                                {reportType === 'message' && selectedReport.conversationMessages?.length > 0 && (
+                                    <div className="mod-detail-section">
+                                        <strong>Conversation Messages (Last 24 Hours):</strong>
+                                        <div style={{ marginTop: '8px', maxHeight: '300px', overflowY: 'auto' }}>
+                                            {selectedReport.conversationMessages.map((msg, index) => (
+                                                <div key={index} className="mod-message-content" style={{ 
+                                                    backgroundColor: msg.senderId?.toString() === selectedReport.reportedUserId?._id?.toString() ? '#ffebee' : '#e3f2fd', 
+                                                    padding: '10px', 
+                                                    borderRadius: '8px', 
+                                                    marginBottom: '8px',
+                                                    border: '1px solid #e0e0e0'
+                                                }}>
+                                                    <p style={{ margin: 0, fontSize: '11px', color: '#666', fontWeight: 'bold' }}>
+                                                        {msg.senderId?.toString() === selectedReport.reportedUserId?._id?.toString() ? '⚠️ Reported User' : 'Reporter'}
+                                                    </p>
+                                                    <p style={{ margin: '4px 0', whiteSpace: 'pre-wrap' }}>
+                                                        {msg.message}
+                                                    </p>
+                                                    <p style={{ margin: '4px 0 0', fontSize: '11px', color: '#888' }}>
+                                                        {msg.createdAt ? new Date(msg.createdAt).toLocaleString() : 'Unknown time'}
+                                                    </p>
+                                                </div>
+                                            ))}
                                         </div>
                                     </div>
                                 )}
