@@ -11890,6 +11890,7 @@ const AuthView = ({ onLoginSuccess, showModalMessage, isRegister, setIsRegister,
     const [suspensionInfo, setSuspensionInfo] = useState(null);
     const [suspensionTimeRemaining, setSuspensionTimeRemaining] = useState(null);
     const [banInfo, setBanInfo] = useState(null);
+    const [suspensionLiftedNotification, setSuspensionLiftedNotification] = useState(null);
 
     // Restore verification state from localStorage on mount
     useEffect(() => {
@@ -11994,6 +11995,30 @@ const AuthView = ({ onLoginSuccess, showModalMessage, isRegister, setIsRegister,
         
         return () => clearInterval(interval);
     }, [suspensionInfo]);
+
+    // Check for and manage suspension lift notification
+    useEffect(() => {
+        const suspensionLiftedData = localStorage.getItem('suspensionLiftedNotification');
+        
+        if (suspensionLiftedData) {
+            try {
+                const { expiresAt } = JSON.parse(suspensionLiftedData);
+                const now = new Date().getTime();
+                
+                if (now < expiresAt) {
+                    // Notification is still valid (within 24 hours)
+                    setSuspensionLiftedNotification(true);
+                } else {
+                    // Notification has expired
+                    localStorage.removeItem('suspensionLiftedNotification');
+                    setSuspensionLiftedNotification(null);
+                }
+            } catch (error) {
+                console.error('Error parsing suspension lift notification:', error);
+                localStorage.removeItem('suspensionLiftedNotification');
+            }
+        }
+    }, []);
 
     const handleSubmit = async (e) => {
         e.preventDefault();
@@ -12419,6 +12444,21 @@ const AuthView = ({ onLoginSuccess, showModalMessage, isRegister, setIsRegister,
             ) : (
                 // Step 1: Registration/Login Form
                 <form onSubmit={handleSubmit} className="space-y-4">
+                    
+                    {suspensionLiftedNotification && (
+                        <div className="bg-green-100 border-l-4 border-green-500 p-4 rounded">
+                            <div className="flex items-start">
+                                <div className="flex-shrink-0">
+                                    <CheckCircle className="h-5 w-5 text-green-500" />
+                                </div>
+                                <div className="ml-3 w-full">
+                                    <p className="text-sm font-bold text-green-900">Good News! 🎉</p>
+                                    <p className="text-sm text-green-800 mt-2">Your suspension has been lifted. You can now log in to your account.</p>
+                                    <p className="text-xs text-green-600 mt-2">This message will disappear in 24 hours.</p>
+                                </div>
+                            </div>
+                        </div>
+                    )}
                     
                     {suspensionInfo && (
                         <div className="bg-red-100 border-l-4 border-red-500 p-4 rounded">
@@ -14754,6 +14794,15 @@ const App = () => {
                 );
 
                 console.log('[MOD ACTION LIFT_SUSPENSION] Success:', response.data);
+                
+                // If the response indicates suspension was lifted, store notification for the user
+                if (response.data.suspensionLifted) {
+                    console.log('[MOD ACTION LIFT_SUSPENSION] Setting notification for user');
+                    // Note: This notification is stored in a shared location. In a real app, 
+                    // this should be sent to the user's device via websocket/notification system
+                    // For now, it will appear when the user logs back in
+                }
+                
                 showModalMessage('Suspension Lifted', 'User account has been reactivated and can now log in.');
             }
             else if (flagData.action === 'lift-ban') {
@@ -14931,6 +14980,15 @@ const App = () => {
                     headers: { Authorization: `Bearer ${authToken}` }
                 });
                 const data = response.data;
+                
+                // Check if suspension was recently lifted (within 24 hours)
+                if (data.suspensionLifted && !suspensionLiftedNotification) {
+                    console.log('[AUTH] Suspension has been lifted for user');
+                    // Store notification with 24-hour expiry
+                    const expiresAt = new Date().getTime() + (24 * 60 * 60 * 1000);
+                    localStorage.setItem('suspensionLiftedNotification', JSON.stringify({ expiresAt }));
+                    setSuspensionLiftedNotification(true);
+                }
                 
                 // Check if user status has changed to suspended or banned
                 if (data.accountStatus === 'suspended' || data.accountStatus === 'banned') {
