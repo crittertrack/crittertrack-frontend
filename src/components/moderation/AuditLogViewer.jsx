@@ -35,15 +35,13 @@ const ACTION_TYPES = [
     { value: 'admin_login', label: 'Admin Login' },
     { value: 'moderator_login', label: 'Moderator Login' },
     { value: 'user_warned', label: 'User Warned' },
+    { value: 'warning_lifted', label: 'Warning Lifted' },
     { value: 'user_suspended', label: 'User Suspended' },
     { value: 'suspension_lifted', label: 'Suspension Lifted' },
     { value: 'user_banned', label: 'User Banned' },
     { value: 'ban_lifted', label: 'Ban Lifted' },
-    { value: 'profile_flagged', label: 'Profile Flagged' },
-    { value: 'profile_unflagged', label: 'Profile Unflagged' },
-    { value: 'animal_flagged', label: 'Animal Flagged' },
-    { value: 'animal_unflagged', label: 'Animal Unflagged' },
-    { value: 'report_reviewed', label: 'Report Reviewed' },
+    { value: 'content_edited', label: 'Content Edited' },
+    { value: 'report_created', label: 'Report Created' },
     { value: 'report_resolved', label: 'Report Resolved' },
     { value: 'report_dismissed', label: 'Report Dismissed' }
 ];
