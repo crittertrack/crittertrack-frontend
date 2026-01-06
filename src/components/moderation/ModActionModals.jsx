@@ -372,10 +372,14 @@ export const SuspendUserModal = ({ isOpen, onClose, onSubmit, context }) => {
     const handleSubmit = () => {
         let finalDuration;
         
-        console.log('[SUSPEND MODAL] Selected duration:', duration);
+        console.log('[SUSPEND MODAL] ========== SUBMIT CALLED ==========');
+        console.log('[SUSPEND MODAL] Selected duration STATE:', duration);
+        console.log('[SUSPEND MODAL] Available options:', durationOptions);
+        console.log('[SUSPEND MODAL] Reason:', reason);
         
         if (duration === 'Custom (days)') {
             const customNum = parseFloat(customDuration);
+            console.log('[SUSPEND MODAL] Custom mode - parsed value:', customNum);
             if (!customNum || customNum <= 0) {
                 alert('Please enter a valid number of days');
                 return;
@@ -383,19 +387,24 @@ export const SuspendUserModal = ({ isOpen, onClose, onSubmit, context }) => {
             finalDuration = customNum;
         } else {
             // Find the selected duration option
+            console.log('[SUSPEND MODAL] Looking for option with label:', duration);
             const selected = durationOptions.find(opt => opt.label === duration);
-            finalDuration = selected ? selected.days : 1;
             console.log('[SUSPEND MODAL] Found duration option:', selected);
+            finalDuration = selected ? selected.days : 1;
+            console.log('[SUSPEND MODAL] Using days value:', finalDuration);
         }
         
-        console.log('[SUSPEND MODAL] Final duration (days):', finalDuration);
+        console.log('[SUSPEND MODAL] FINAL duration to send (durationDays):', finalDuration);
         
-        onSubmit({
+        const submitData = {
             action: 'suspend',
             reason,
             durationDays: finalDuration,
             context
-        });
+        };
+        console.log('[SUSPEND MODAL] Submitting data:', submitData);
+        
+        onSubmit(submitData);
         setReason('');
         setDuration('1 Day');
         setCustomDuration('');
