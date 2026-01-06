@@ -233,7 +233,7 @@ const UserManagementPanel = () => {
                         onChange={(e) => setStatusFilter(e.target.value)}
                     >
                         <option value="all">All Status</option>
-                        <option value="active">Active</option>
+                        <option value="active">Normal</option>
                         <option value="warned">Warned</option>
                         <option value="suspended">Suspended</option>
                         <option value="banned">Banned</option>
@@ -272,7 +272,7 @@ const UserManagementPanel = () => {
 
                                 <td className="status-cell">
                                     <span className={`status-text status-${user.accountStatus || 'active'}`}>
-                                        {(user.accountStatus || 'active').toUpperCase()}
+                                        {(user.accountStatus || 'active') === 'active' ? 'NORMAL' : (user.accountStatus || 'active').toUpperCase()}
                                     </span>
                                     {user.suspensionExpiry && new Date(user.suspensionExpiry) > new Date() && (
                                         <div className="status-detail">
@@ -606,7 +606,7 @@ const UserHistoryModal = ({ user, onClose, onLiftWarning, onRefresh }) => {
                     <h4>{localUser.personalName || localUser.breederName || 'Unknown User'}</h4>
                     <p>{localUser.email} · {localUser.id_public}</p>
                     <span className={`status-text status-${localUser.accountStatus || 'active'}`} style={{ marginTop: '8px', display: 'inline-block' }}>
-                        {(localUser.accountStatus || 'active').toUpperCase()}
+                        {(localUser.accountStatus || 'active') === 'active' ? 'NORMAL' : (localUser.accountStatus || 'active').toUpperCase()}
                     </span>
                 </div>
 
