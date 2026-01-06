@@ -12365,7 +12365,7 @@ const AuthView = ({ onLoginSuccess, showModalMessage, isRegister, setIsRegister,
                                         </p>
                                     )}
                                     <p className="text-xs text-red-600 mt-2">
-                                        <a href={`mailto:support@crittertrack.app?subject=Suspension Appeal&body=I would like to appeal my account suspension.%0D%0A%0D%0AReason for suspension: ${encodeURIComponent(suspensionInfo.reason)}%0D%0A%0D%0AMy appeal:`} className="underline hover:text-red-800">
+                                        <a href={`mailto:CrittertrackOwner@gmail.com?subject=Suspension Appeal&body=I would like to appeal my account suspension.%0D%0A%0D%0AReason for suspension: ${encodeURIComponent(suspensionInfo.reason)}%0D%0A%0D%0AMy appeal:`} className="underline hover:text-red-800">
                                             Submit an appeal
                                         </a>
                                     </p>
@@ -12391,7 +12391,7 @@ const AuthView = ({ onLoginSuccess, showModalMessage, isRegister, setIsRegister,
                                             : 'This account has been permanently banned from accessing the platform.'}
                                     </p>
                                     <p className="text-xs text-red-200 mt-2">
-                                        <a href={`mailto:support@crittertrack.app?subject=${banInfo.type === 'ip-ban' ? 'IP Ban' : 'Ban'} Appeal&body=I would like to appeal my account ban.%0D%0A%0D%0AReason for ban: ${encodeURIComponent(banInfo.reason)}%0D%0A%0D%0AMy appeal:`} className="underline hover:text-red-100">
+                                        <a href={`mailto:CrittertrackOwner@gmail.com?subject=${banInfo.type === 'ip-ban' ? 'IP Ban' : 'Ban'} Appeal&body=I would like to appeal my account ban.%0D%0A%0D%0AReason for ban: ${encodeURIComponent(banInfo.reason)}%0D%0A%0D%0AMy appeal:`} className="underline hover:text-red-100">
                                             Submit an appeal
                                         </a>
                                     </p>
