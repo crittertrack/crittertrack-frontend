@@ -14984,6 +14984,11 @@ const App = () => {
                 // Check if suspension was recently lifted (within 24 hours)
                 if (data.suspensionLifted && !suspensionLiftedNotification) {
                     console.log('[AUTH] Suspension has been lifted for user');
+                    // Clear the suspension info from state and localStorage
+                    setSuspensionInfo(null);
+                    setSuspensionTimeRemaining(null);
+                    localStorage.removeItem('suspensionEndTime');
+                    localStorage.removeItem('suspensionReason');
                     // Store notification with 24-hour expiry
                     const expiresAt = new Date().getTime() + (24 * 60 * 60 * 1000);
                     localStorage.setItem('suspensionLiftedNotification', JSON.stringify({ expiresAt }));
