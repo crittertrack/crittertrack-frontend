@@ -2005,7 +2005,7 @@ const PublicProfileView = ({ profile, onBack, onViewAnimal, API_BASE_URL, onStar
 // ==================== PRIVATE ANIMAL DETAIL (OWNER VIEW) ====================
 // Shows ALL data for animal owners viewing their own animals (ignores privacy toggles)
 // Accessed from: MY ANIMALS LIST
-const PrivateAnimalDetail = ({ animal, onClose, onEdit, API_BASE_URL, authToken, setShowImageModal, setEnlargedImageUrl, toggleSectionPrivacy, onUpdateAnimal, onHideAnimal, showModalMessage, onTransfer }) => {
+const PrivateAnimalDetail = ({ animal, onClose, onEdit, API_BASE_URL, authToken, setShowImageModal, setEnlargedImageUrl, toggleSectionPrivacy, onUpdateAnimal, onHideAnimal, showModalMessage, onTransfer, onViewAnimal }) => {
     const [breederInfo, setBreederInfo] = useState(null);
     const [showPedigree, setShowPedigree] = useState(false);
     const [detailViewTab, setDetailViewTab] = useState(1);
@@ -2355,13 +2355,13 @@ const PrivateAnimalDetail = ({ animal, onClose, onEdit, API_BASE_URL, authToken,
                                         parentId={animal.fatherId_public || animal.sireId_public} 
                                         parentType="Sire"
                                         API_BASE_URL={API_BASE_URL}
-                                        onViewAnimal={() => {}}
+                                        onViewAnimal={onViewAnimal}
                                     />
                                     <ViewOnlyParentCard 
                                         parentId={animal.motherId_public || animal.damId_public} 
                                         parentType="Dam"
                                         API_BASE_URL={API_BASE_URL}
-                                        onViewAnimal={() => {}}
+                                        onViewAnimal={onViewAnimal}
                                     />
                                 </div>
                             </div>
@@ -2507,13 +2507,13 @@ const PrivateAnimalDetail = ({ animal, onClose, onEdit, API_BASE_URL, authToken,
                                         parentId={animal.fatherId_public || animal.sireId_public} 
                                         parentType="Sire"
                                         API_BASE_URL={API_BASE_URL}
-                                        onViewAnimal={() => {}}
+                                        onViewAnimal={onViewAnimal}
                                     />
                                     <ViewOnlyParentCard 
                                         parentId={animal.motherId_public || animal.damId_public} 
                                         parentType="Dam"
                                         API_BASE_URL={API_BASE_URL}
-                                        onViewAnimal={() => {}}
+                                        onViewAnimal={onViewAnimal}
                                     />
                                 </div>
                             </div>
@@ -2531,7 +2531,7 @@ const PrivateAnimalDetail = ({ animal, onClose, onEdit, API_BASE_URL, authToken,
                             </div>
 
                             {/* Offspring Section */}
-                            <OffspringSection animalId={animal.id_public} API_BASE_URL={API_BASE_URL} authToken={authToken} onViewAnimal={() => {}} />
+                            <OffspringSection animalId={animal.id_public} API_BASE_URL={API_BASE_URL} authToken={authToken} onViewAnimal={onViewAnimal} />
                         </div>
                     )}
 
@@ -2799,7 +2799,7 @@ const PrivateAnimalDetail = ({ animal, onClose, onEdit, API_BASE_URL, authToken,
 // ==================== VIEW-ONLY PRIVATE ANIMAL DETAIL (SOLD/TRANSFERRED) ====================
 // Identical to PrivateAnimalDetail but without edit/delete and privacy controls
 // Used for animals you have view-only access to (sold, transferred, purchased)
-const ViewOnlyPrivateAnimalDetail = ({ animal, onClose, API_BASE_URL, authToken, setShowImageModal, setEnlargedImageUrl, onHideAnimal, showModalMessage }) => {
+const ViewOnlyPrivateAnimalDetail = ({ animal, onClose, API_BASE_URL, authToken, setShowImageModal, setEnlargedImageUrl, onHideAnimal, showModalMessage, onViewAnimal }) => {
     const [breederInfo, setBreederInfo] = useState(null);
     const [showPedigree, setShowPedigree] = useState(false);
     const [detailViewTab, setDetailViewTab] = useState(1);
@@ -3118,13 +3118,13 @@ const ViewOnlyPrivateAnimalDetail = ({ animal, onClose, API_BASE_URL, authToken,
                                         parentId={animal.fatherId_public || animal.sireId_public} 
                                         parentType="Sire"
                                         API_BASE_URL={API_BASE_URL}
-                                        onViewAnimal={() => {}}
+                                        onViewAnimal={onViewAnimal}
                                     />
                                     <ViewOnlyParentCard 
                                         parentId={animal.motherId_public || animal.damId_public} 
                                         parentType="Dam"
                                         API_BASE_URL={API_BASE_URL}
-                                        onViewAnimal={() => {}}
+                                        onViewAnimal={onViewAnimal}
                                     />
                                 </div>
                             </div>
@@ -3270,13 +3270,13 @@ const ViewOnlyPrivateAnimalDetail = ({ animal, onClose, API_BASE_URL, authToken,
                                         parentId={animal.fatherId_public || animal.sireId_public} 
                                         parentType="Sire"
                                         API_BASE_URL={API_BASE_URL}
-                                        onViewAnimal={() => {}}
+                                        onViewAnimal={onViewAnimal}
                                     />
                                     <ViewOnlyParentCard 
                                         parentId={animal.motherId_public || animal.damId_public} 
                                         parentType="Dam"
                                         API_BASE_URL={API_BASE_URL}
-                                        onViewAnimal={() => {}}
+                                        onViewAnimal={onViewAnimal}
                                     />
                                 </div>
                             </div>
@@ -3294,7 +3294,7 @@ const ViewOnlyPrivateAnimalDetail = ({ animal, onClose, API_BASE_URL, authToken,
                             </div>
 
                             {/* Offspring Section */}
-                            <OffspringSection animalId={animal.id_public} API_BASE_URL={API_BASE_URL} authToken={authToken} onViewAnimal={() => {}} />
+                            <OffspringSection animalId={animal.id_public} API_BASE_URL={API_BASE_URL} authToken={authToken} onViewAnimal={onViewAnimal} />
                         </div>
                     )}
 
@@ -17072,6 +17072,7 @@ const App = () => {
                                             setTransferAnimal(animal);
                                             setShowTransferModal(true);
                                         }}
+                                        onViewAnimal={handleViewAnimal}
                                     />
                                 );
                             } else {
@@ -17086,6 +17087,7 @@ const App = () => {
                                         setEnlargedImageUrl={setEnlargedImageUrl}
                                         onHideAnimal={handleHideAnimal}
                                         showModalMessage={showModalMessage}
+                                        onViewAnimal={handleViewAnimal}
                                     />
                                 );
                             }
