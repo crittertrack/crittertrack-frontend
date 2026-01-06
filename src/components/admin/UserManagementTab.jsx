@@ -189,19 +189,19 @@ export default function UserManagementTab({ API_BASE_URL, authToken }) {
             (user.username && user.username.toLowerCase().includes(searchTerm.toLowerCase()));
 
         const matchesRole = filterRole === 'all' || user.role === filterRole;
-        const matchesStatus = filterStatus === 'all' || (user.accountStatus || 'active') === filterStatus;
+        const matchesStatus = filterStatus === 'all' || (user.accountStatus || 'normal') === filterStatus;
 
         return matchesSearch && matchesRole && matchesStatus;
     });
 
     const getStatusBadge = (status) => {
         const colors = {
-            active: '#4caf50',
+            normal: '#4caf50',
             suspended: '#ff9800',
             banned: '#f44336'
         };
         return {
-            backgroundColor: colors[status] || colors.active,
+            backgroundColor: colors[status] || colors.normal,
             color: 'white',
             padding: '4px 12px',
             borderRadius: '12px',
@@ -239,8 +239,8 @@ export default function UserManagementTab({ API_BASE_URL, authToken }) {
                 <div className="user-detail-header">
                     <h3>{selectedUser.email}</h3>
                     <div className="user-badges">
-                        <span style={getStatusBadge(selectedUser.accountStatus || 'active')}>
-                            {(selectedUser.accountStatus || 'active') === 'active' ? 'normal' : selectedUser.accountStatus}
+                        <span style={getStatusBadge(selectedUser.accountStatus || 'normal')}>
+                            {(selectedUser.accountStatus || 'normal') === 'normal' ? 'normal' : selectedUser.accountStatus}
                         </span>
                         <span style={getRoleBadge(selectedUser.role)}>
                             {selectedUser.role}
@@ -284,10 +284,10 @@ export default function UserManagementTab({ API_BASE_URL, authToken }) {
                         
                         <select 
                             onChange={(e) => handleChangeStatus(selectedUser._id, e.target.value)}
-                            value={selectedUser.accountStatus || 'active'}
+                            value={selectedUser.accountStatus || 'normal'}
                         >
                             <option value="" disabled>Change Status...</option>
-                            <option value="active">Activate</option>
+                            <option value="normal">Activate</option>
                             <option value="suspended">Suspend</option>
                             <option value="banned">Ban</option>
                         </select>
@@ -360,7 +360,7 @@ export default function UserManagementTab({ API_BASE_URL, authToken }) {
 
                 <select value={filterStatus} onChange={(e) => setFilterStatus(e.target.value)}>
                     <option value="all">All Statuses</option>
-                    <option value="active">Active</option>
+                    <option value="normal">Normal</option>
                     <option value="suspended">Suspended</option>
                     <option value="banned">Banned</option>
                 </select>
@@ -394,8 +394,8 @@ export default function UserManagementTab({ API_BASE_URL, authToken }) {
                                         </span>
                                     </td>
                                     <td>
-                                        <span style={getStatusBadge(user.accountStatus || 'active')}>
-                                            {(user.accountStatus || 'active') === 'active' ? 'normal' : user.accountStatus}
+                                        <span style={getStatusBadge(user.accountStatus || 'normal')}>
+                                            {(user.accountStatus || 'normal') === 'normal' ? 'normal' : user.accountStatus}
                                         </span>
                                     </td>
                                     <td>{user.warningCount || 0}</td>

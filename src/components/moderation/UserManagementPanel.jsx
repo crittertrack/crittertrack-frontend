@@ -105,7 +105,7 @@ const UserManagementPanel = () => {
             const token = localStorage.getItem('authToken');
             await axios.post(
                 `${API_URL}/moderation/users/${userId}/status`,
-                { status: 'active', reason: 'Suspension lifted by moderator' },
+                { status: 'normal', reason: 'Suspension lifted by moderator' },
                 { headers: { Authorization: `Bearer ${token}` } }
             );
             await fetchUsers();
@@ -120,7 +120,7 @@ const UserManagementPanel = () => {
             const token = localStorage.getItem('authToken');
             await axios.post(
                 `${API_URL}/moderation/users/${userId}/status`,
-                { status: 'active', reason: 'Ban lifted by moderator' },
+                { status: 'normal', reason: 'Ban lifted by moderator' },
                 { headers: { Authorization: `Bearer ${token}` } }
             );
             await fetchUsers();
@@ -233,7 +233,7 @@ const UserManagementPanel = () => {
                         onChange={(e) => setStatusFilter(e.target.value)}
                     >
                         <option value="all">All Status</option>
-                        <option value="active">Normal</option>
+                        <option value="normal">Normal</option>
                         <option value="warned">Warned</option>
                         <option value="suspended">Suspended</option>
                         <option value="banned">Banned</option>
@@ -271,8 +271,8 @@ const UserManagementPanel = () => {
                                 <td className="user-email">{user.email}</td>
 
                                 <td className="status-cell">
-                                    <span className={`status-text status-${user.accountStatus || 'active'}`}>
-                                        {(user.accountStatus || 'active') === 'active' ? 'NORMAL' : (user.accountStatus || 'active').toUpperCase()}
+                                    <span className={`status-text status-${user.accountStatus || 'normal'}`}>
+                                        {(user.accountStatus || 'normal') === 'normal' ? 'NORMAL' : (user.accountStatus || 'normal').toUpperCase()}
                                     </span>
                                     {user.suspensionExpiry && new Date(user.suspensionExpiry) > new Date() && (
                                         <div className="status-detail">
@@ -605,8 +605,8 @@ const UserHistoryModal = ({ user, onClose, onLiftWarning, onRefresh }) => {
                 <div className="user-info-section">
                     <h4>{localUser.personalName || localUser.breederName || 'Unknown User'}</h4>
                     <p>{localUser.email} · {localUser.id_public}</p>
-                    <span className={`status-text status-${localUser.accountStatus || 'active'}`} style={{ marginTop: '8px', display: 'inline-block' }}>
-                        {(localUser.accountStatus || 'active') === 'active' ? 'NORMAL' : (localUser.accountStatus || 'active').toUpperCase()}
+                    <span className={`status-text status-${localUser.accountStatus || 'normal'}`} style={{ marginTop: '8px', display: 'inline-block' }}>
+                        {(localUser.accountStatus || 'normal') === 'normal' ? 'NORMAL' : (localUser.accountStatus || 'normal').toUpperCase()}}
                     </span>
                 </div>
 
