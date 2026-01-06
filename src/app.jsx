@@ -14769,23 +14769,32 @@ const App = () => {
             }
             else if (flagData.action === 'lift-suspension') {
                 // Lift suspension from user
+                console.log('[MOD ACTION LIFT_SUSPENSION] Full flagData:', flagData);
+                console.log('[MOD ACTION LIFT_SUSPENSION] Context:', flagData.context);
+                
                 const userId = flagData.context?.type === 'profile' 
                     ? flagData.context?.userId 
                     : flagData.context?.ownerId;
                 
+                // Also try id_public as fallback
+                const userIdPublic = flagData.context?.id;
+                
                 console.log('[MOD ACTION LIFT_SUSPENSION] Lifting suspension for user:', { 
                     userId, 
+                    userIdPublic,
                     reason: flagData.reason,
-                    context: flagData.context,
-                    fullFlagData: flagData
+                    contextType: flagData.context?.type
                 });
                 
-                if (!userId) {
+                // Use userId if available, otherwise try id_public
+                const finalUserId = userId || userIdPublic;
+                
+                if (!finalUserId) {
                     throw new Error('User ID not found in context');
                 }
                 
                 const response = await axios.post(
-                    `${API_BASE_URL}/moderation/users/${userId}/status`,
+                    `${API_BASE_URL}/moderation/users/${finalUserId}/status`,
                     {
                         status: 'active',
                         reason: flagData.reason
@@ -14807,18 +14816,32 @@ const App = () => {
             }
             else if (flagData.action === 'lift-ban') {
                 // Lift ban from user
+                console.log('[MOD ACTION LIFT_BAN] Full flagData:', flagData);
+                console.log('[MOD ACTION LIFT_BAN] Context:', flagData.context);
+                
                 const userId = flagData.context?.type === 'profile' 
                     ? flagData.context?.userId 
                     : flagData.context?.ownerId;
                 
-                console.log('[MOD ACTION LIFT_BAN] Lifting ban for user:', { userId, reason: flagData.reason });
+                // Also try id_public as fallback
+                const userIdPublic = flagData.context?.id;
                 
-                if (!userId) {
+                console.log('[MOD ACTION LIFT_BAN] Lifting ban for user:', { 
+                    userId, 
+                    userIdPublic,
+                    reason: flagData.reason,
+                    contextType: flagData.context?.type
+                });
+                
+                // Use userId if available, otherwise try id_public
+                const finalUserId = userId || userIdPublic;
+                
+                if (!finalUserId) {
                     throw new Error('User ID not found in context');
                 }
                 
                 const response = await axios.post(
-                    `${API_BASE_URL}/moderation/users/${userId}/status`,
+                    `${API_BASE_URL}/moderation/users/${finalUserId}/status`,
                     {
                         status: 'active',
                         reason: flagData.reason
