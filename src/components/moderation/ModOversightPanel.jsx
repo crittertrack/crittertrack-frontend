@@ -242,9 +242,10 @@ export default function ModOversightPanel({
                 throw new Error(data.message || data.error || 'Failed to update report');
             }
 
-            setReports((prev) => prev.map((report) => (report._id === data.report._id ? data.report : report)));
-            setSelectedReport(data.report);
-            setAdminNotes(data.report?.adminNotes || '');
+            // Refresh the list and close the report detail view
+            await fetchReports();
+            setSelectedReport(null);
+            setAdminNotes('');
             if (onActionTaken) onActionTaken();
         } catch (err) {
             setError(err.message);
@@ -464,17 +465,35 @@ export default function ModOversightPanel({
                                 <div className="mod-actions">
                                     <h5>Update Status</h5>
                                     <div className="mod-action-grid">
-                                        {STATUS_FILTERS.filter((status) => status.value !== 'all').map((status) => (
-                                            <button
-                                                key={status.value}
-                                                type="button"
-                                                className={`mod-action-btn ${selectedReport.status === status.value ? 'active' : ''}`}
-                                                onClick={() => handleUpdateStatus(status.value)}
-                                                disabled={actionLoading || selectedReport.status === status.value}
-                                            >
-                                                {status.label}
-                                            </button>
-                                        ))}
+                                        {STATUS_FILTERS.filter((status) => status.value !== 'all').map((status) => {
+                                            const isActive = selectedReport.status === status.value;
+                                            const statusColors = {
+                                                pending: { bg: '#fff3e0', border: '#ff6f00', text: '#e65100' },
+                                                reviewed: { bg: '#e3f2fd', border: '#1976d2', text: '#0d47a1' },
+                                                resolved: { bg: '#e8f5e9', border: '#388e3c', text: '#1b5e20' },
+                                                dismissed: { bg: '#f5f5f5', border: '#666', text: '#333' }
+                                            };
+                                            const colors = statusColors[status.value] || statusColors.dismissed;
+                                            
+                                            return (
+                                                <button
+                                                    key={status.value}
+                                                    type="button"
+                                                    className="mod-action-btn"
+                                                    style={isActive ? {
+                                                        backgroundColor: colors.bg,
+                                                        borderColor: colors.border,
+                                                        color: colors.text,
+                                                        fontWeight: 'bold',
+                                                        boxShadow: `0 0 0 2px ${colors.border}`
+                                                    } : {}}
+                                                    onClick={() => handleUpdateStatus(status.value)}
+                                                    disabled={actionLoading}
+                                                >
+                                                    {isActive && '● '}{status.label}
+                                                </button>
+                                            );
+                                        })}
                                     </div>
                                     {actionLoading && <div className="mod-loading">Applying update...</div>}
                                 </div>

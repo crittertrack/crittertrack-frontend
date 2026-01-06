@@ -409,7 +409,7 @@ const EnhancedAdminPanel = ({ isOpen, onClose, authToken, API_BASE_URL, userRole
                         <nav className="p-4 space-y-2">
                             {[
                                 { id: 'dashboard', label: 'Dashboard', icon: BarChart3 },
-                                { id: 'moderation', label: 'Moderation Tools', icon: AlertTriangle },
+                                { id: 'moderation', label: 'Reports', icon: AlertTriangle },
                                 { id: 'user-management', label: 'User Management', icon: Users },
                                 { id: 'audit-logs', label: 'Audit Logs', icon: FileText },
                                 { id: 'reports', label: 'Reports & Analytics', icon: BarChart3 },
