@@ -89,22 +89,26 @@ export const EditContentModal = ({ isOpen, onClose, onSubmit, context }) => {
     const getEditableFields = () => {
         if (context?.type === 'profile') {
             return [
-                { value: 'breederName', label: 'Breeder Name' },
-                { value: 'profileImage', label: 'Profile Image (clear to remove)' },
-                { value: 'bio', label: 'Profile Bio' },
-                { value: 'websiteUrl', label: 'Website URL' }
+                { value: 'personalName', label: 'Personal Name (edit only - required)', clearable: false },
+                { value: 'breederName', label: 'Breeder Name', clearable: true },
+                { value: 'profileImage', label: 'Profile Image', clearable: true },
+                { value: 'bio', label: 'Profile Bio', clearable: true },
+                { value: 'websiteUrl', label: 'Website URL', clearable: true },
+                { value: 'country', label: 'Country/Location', clearable: true }
             ];
         }
         if (context?.type === 'animal') {
             return [
-                { value: 'name', label: 'Animal Name' },
-                { value: 'description', label: 'Description' },
-                { value: 'notes', label: 'Notes' },
-                { value: 'marking_description', label: 'Marking Description' }
+                { value: 'name', label: 'Animal Name', clearable: false },
+                { value: 'description', label: 'Description', clearable: true },
+                { value: 'notes', label: 'Notes', clearable: true },
+                { value: 'marking_description', label: 'Marking Description', clearable: true }
             ];
         }
         return [];
     };
+
+    const selectedFieldInfo = getEditableFields().find(f => f.value === selectedField);
 
     const addFieldEdit = () => {
         if (selectedField) {
@@ -167,14 +171,25 @@ export const EditContentModal = ({ isOpen, onClose, onSubmit, context }) => {
 
                     {selectedField && (
                         <div className="form-group">
-                            <label>New Value (leave empty to clear field)</label>
+                            <label>
+                                New Value 
+                                {selectedFieldInfo?.clearable 
+                                    ? ' (leave empty to clear field)' 
+                                    : ' (required - cannot be empty)'}
+                            </label>
                             <input
                                 type="text"
                                 value={newValue}
                                 onChange={(e) => setNewValue(e.target.value)}
-                                placeholder="Enter new value or leave empty to clear"
+                                placeholder={selectedFieldInfo?.clearable 
+                                    ? "Enter new value or leave empty to clear" 
+                                    : "Enter new value (required)"}
                             />
-                            <button onClick={addFieldEdit} className="btn-add-field">
+                            <button 
+                                onClick={addFieldEdit} 
+                                className="btn-add-field"
+                                disabled={!selectedFieldInfo?.clearable && !newValue.trim()}
+                            >
                                 Add Field Edit
                             </button>
                         </div>

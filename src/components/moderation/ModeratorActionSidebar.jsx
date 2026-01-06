@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Shield, AlertTriangle, Eye, MessageSquare, Ban, UserX, Edit3, TrendingDown, Check } from 'lucide-react';
+import { Shield, AlertTriangle, Eye, MessageSquare, Ban, UserX, Edit3, TrendingDown, Check, ImageOff } from 'lucide-react';
 import './ModeratorActionSidebar.css';
 import { 
     FlagContentModal, 
@@ -155,6 +155,28 @@ export default function ModeratorActionSidebar({
                             <Check size={16} />
                             <span>Lift Ban</span>
                         </button>
+
+                        {/* Remove Profile Image - only show for profiles */}
+                        {currentContext?.type === 'profile' && (
+                            <button 
+                                className="mod-quick-btn remove-image"
+                                onClick={() => {
+                                    if (window.confirm('Remove this user\'s profile image? This action will be logged.')) {
+                                        handleModalSubmit({
+                                            action: 'edit',
+                                            reason: 'Profile image removed by moderator',
+                                            fieldEdits: { profileImage: '' },
+                                            context: currentContext
+                                        });
+                                    }
+                                }}
+                                title="Remove user's profile image"
+                                style={{ backgroundColor: '#ff5722', borderColor: '#e64a19' }}
+                            >
+                                <ImageOff size={16} />
+                                <span>Remove Profile Image</span>
+                            </button>
+                        )}
                     </div>
 
                     {/* Link to full report queue */}
