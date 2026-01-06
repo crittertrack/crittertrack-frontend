@@ -3,7 +3,7 @@ import {
     X, Users, Settings, BarChart3, Mail, Shield, AlertTriangle, Lock,
     Loader2, Save, Plus, Trash2, Edit, Eye, Search, Download, Upload,
     ChevronDown, ChevronRight, CheckCircle, Clock, Flag, MessageSquare, FileText,
-    Bug, Dna
+    Bug, Dna, PawPrint, Wrench
 } from 'lucide-react';
 import ModOversightPanel from './moderation/ModOversightPanel';
 import UserManagementPanel from './moderation/UserManagementPanel';
@@ -14,6 +14,8 @@ import ModChatTab from './admin/ModChatTab';
 import AnimalManagementPanel from './admin/AnimalManagementPanel';
 import BugReportsTab from './admin/BugReportsTab';
 import FeedbackTab from './admin/FeedbackTab';
+import SpeciesManagementTab from './admin/SpeciesManagementTab';
+import GeneticsBuilderTab from './admin/GeneticsBuilderTab';
 
 // Error Boundary Component
 class ErrorBoundary extends React.Component {
@@ -419,6 +421,8 @@ const EnhancedAdminPanel = ({ isOpen, onClose, authToken, API_BASE_URL, userRole
                                 { id: 'mod-chat', label: 'Mod Team Chat', icon: MessageSquare },
                                 { id: 'bug-reports', label: 'Bug Reports', icon: Bug },
                                 { id: 'feedback', label: 'Calculator Feedback', icon: Dna },
+                                { id: 'species-management', label: 'Species Management', icon: PawPrint, requiredRole: 'admin' },
+                                { id: 'genetics-builder', label: 'Genetics Builder', icon: Wrench, requiredRole: 'admin' },
                                 { id: 'reports', label: 'Reports & Analytics', icon: BarChart3 },
                                 { id: 'communication', label: 'Communication', icon: Mail },
                                 // Admin-only features
@@ -561,6 +565,26 @@ const EnhancedAdminPanel = ({ isOpen, onClose, authToken, API_BASE_URL, userRole
                         {activeSection === 'feedback' && (
                             <div className="p-8">
                                 <FeedbackTab
+                                    API_BASE_URL={API_BASE_URL}
+                                    authToken={authToken}
+                                />
+                            </div>
+                        )}
+
+                        {/* Species Management */}
+                        {activeSection === 'species-management' && (
+                            <div className="p-8">
+                                <SpeciesManagementTab
+                                    API_BASE_URL={API_BASE_URL}
+                                    authToken={authToken}
+                                />
+                            </div>
+                        )}
+
+                        {/* Genetics Builder */}
+                        {activeSection === 'genetics-builder' && (
+                            <div className="p-8">
+                                <GeneticsBuilderTab
                                     API_BASE_URL={API_BASE_URL}
                                     authToken={authToken}
                                 />

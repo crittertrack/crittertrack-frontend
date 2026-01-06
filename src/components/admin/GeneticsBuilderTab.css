@@ -1,0 +1,742 @@
+.genetics-builder-tab {
+    max-width: 1200px;
+    margin: 0 auto;
+}
+
+.genetics-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    margin-bottom: 24px;
+    flex-wrap: wrap;
+    gap: 16px;
+}
+
+.genetics-title {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+}
+
+.genetics-title svg {
+    color: #ec4899;
+}
+
+.genetics-title h2 {
+    font-size: 1.75rem;
+    font-weight: 700;
+    color: #1f2937;
+    margin: 0;
+}
+
+.genetics-title p {
+    color: #6b7280;
+    margin: 4px 0 0;
+    font-size: 0.875rem;
+}
+
+/* Buttons */
+.genetics-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    padding: 10px 16px;
+    border-radius: 8px;
+    font-weight: 600;
+    font-size: 0.9375rem;
+    cursor: pointer;
+    border: none;
+    transition: all 0.2s;
+}
+
+.genetics-btn:disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
+}
+
+.genetics-btn-primary {
+    background: #ec4899;
+    color: #fff;
+}
+
+.genetics-btn-primary:hover:not(:disabled) {
+    background: #db2777;
+}
+
+.genetics-btn-secondary {
+    background: #fff;
+    color: #374151;
+    border: 2px solid #e5e7eb;
+}
+
+.genetics-btn-secondary:hover:not(:disabled) {
+    border-color: #ec4899;
+    color: #ec4899;
+}
+
+.genetics-btn-success {
+    background: #10b981;
+    color: #fff;
+}
+
+.genetics-btn-success:hover:not(:disabled) {
+    background: #059669;
+}
+
+.genetics-btn-small {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    padding: 6px 10px;
+    border-radius: 6px;
+    font-weight: 500;
+    font-size: 0.8125rem;
+    cursor: pointer;
+    border: 1px solid #e5e7eb;
+    background: #fff;
+    color: #374151;
+    transition: all 0.2s;
+}
+
+.genetics-btn-small:hover {
+    border-color: #ec4899;
+    color: #ec4899;
+}
+
+.genetics-btn-small.primary {
+    background: #ec4899;
+    color: #fff;
+    border-color: #ec4899;
+}
+
+.genetics-btn-small.primary:hover {
+    background: #db2777;
+}
+
+/* Stats Grid */
+.genetics-stats-grid {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 16px;
+    margin-bottom: 24px;
+}
+
+.genetics-stat-card {
+    background: #fff;
+    border: 1px solid #e5e7eb;
+    border-radius: 12px;
+    padding: 20px;
+    text-align: center;
+}
+
+.genetics-stat-value {
+    font-size: 2rem;
+    font-weight: 700;
+    color: #1f2937;
+}
+
+.genetics-stat-label {
+    font-size: 0.875rem;
+    color: #6b7280;
+    margin-top: 4px;
+}
+
+.genetics-stat-green .genetics-stat-value { color: #10b981; }
+.genetics-stat-yellow .genetics-stat-value { color: #f59e0b; }
+.genetics-stat-purple .genetics-stat-value { color: #8b5cf6; }
+
+/* Species Selector */
+.genetics-species-selector {
+    background: #fff;
+    border: 1px solid #e5e7eb;
+    border-radius: 12px;
+    padding: 20px;
+    margin-bottom: 24px;
+}
+
+.genetics-species-selector label {
+    display: block;
+    font-weight: 600;
+    color: #374151;
+    margin-bottom: 8px;
+}
+
+.genetics-species-selector select {
+    width: 100%;
+    max-width: 400px;
+    padding: 12px 16px;
+    border: 1px solid #e5e7eb;
+    border-radius: 8px;
+    font-size: 0.9375rem;
+    background: #fff;
+    cursor: pointer;
+}
+
+.genetics-species-selector select:focus {
+    outline: none;
+    border-color: #ec4899;
+}
+
+/* Error Banner */
+.genetics-error-banner {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    background: #fef2f2;
+    border: 1px solid #fecaca;
+    color: #dc2626;
+    padding: 12px 16px;
+    border-radius: 8px;
+    margin-bottom: 16px;
+}
+
+/* Loading */
+.genetics-loading {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: 60px 20px;
+    gap: 16px;
+    color: #6b7280;
+}
+
+/* Editor */
+.genetics-editor {
+    background: #fff;
+    border: 1px solid #e5e7eb;
+    border-radius: 12px;
+    overflow: hidden;
+}
+
+.genetics-no-data {
+    text-align: center;
+    padding: 60px 20px;
+}
+
+.genetics-no-data svg {
+    color: #d1d5db;
+    margin-bottom: 16px;
+}
+
+.genetics-no-data h3 {
+    font-size: 1.25rem;
+    color: #374151;
+    margin: 0 0 8px;
+}
+
+.genetics-no-data p {
+    color: #6b7280;
+    margin: 0 0 20px;
+}
+
+/* Editor Header */
+.genetics-editor-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 20px 24px;
+    border-bottom: 1px solid #e5e7eb;
+    background: #f9fafb;
+    flex-wrap: wrap;
+    gap: 16px;
+}
+
+.genetics-editor-info h3 {
+    font-size: 1.25rem;
+    font-weight: 600;
+    margin: 0 0 8px;
+    color: #1f2937;
+}
+
+.genetics-editor-badges {
+    display: flex;
+    gap: 8px;
+    flex-wrap: wrap;
+}
+
+.genetics-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    font-size: 0.75rem;
+    font-weight: 600;
+    padding: 4px 10px;
+    border-radius: 6px;
+}
+
+.genetics-badge-published {
+    background: #dcfce7;
+    color: #16a34a;
+}
+
+.genetics-badge-draft {
+    background: #fef9c3;
+    color: #ca8a04;
+}
+
+.genetics-badge-unsaved {
+    background: #fee2e2;
+    color: #dc2626;
+}
+
+.genetics-editor-actions {
+    display: flex;
+    gap: 10px;
+    flex-wrap: wrap;
+}
+
+.genetics-published-notice {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    background: #eff6ff;
+    border-bottom: 1px solid #bfdbfe;
+    color: #2563eb;
+    padding: 12px 24px;
+    font-size: 0.875rem;
+}
+
+/* Sections */
+.genetics-section {
+    padding: 24px;
+    border-bottom: 1px solid #e5e7eb;
+}
+
+.genetics-section:last-child {
+    border-bottom: none;
+}
+
+.genetics-section h4 {
+    font-size: 1rem;
+    font-weight: 600;
+    color: #1f2937;
+    margin: 0 0 16px;
+}
+
+.genetics-empty-section {
+    background: #f9fafb;
+    border: 1px dashed #d1d5db;
+    border-radius: 8px;
+    padding: 24px;
+    text-align: center;
+}
+
+.genetics-empty-section p {
+    color: #6b7280;
+    margin: 0;
+}
+
+.genetics-section textarea {
+    width: 100%;
+    padding: 12px;
+    border: 1px solid #e5e7eb;
+    border-radius: 8px;
+    font-size: 0.9375rem;
+    resize: vertical;
+    font-family: inherit;
+}
+
+.genetics-section textarea:focus {
+    outline: none;
+    border-color: #ec4899;
+}
+
+.genetics-section textarea:disabled {
+    background: #f3f4f6;
+    color: #9ca3af;
+}
+
+/* Gene Cards */
+.genetics-genes-list {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+}
+
+.genetics-gene-card {
+    border: 1px solid #e5e7eb;
+    border-radius: 10px;
+    overflow: hidden;
+    transition: all 0.2s;
+}
+
+.genetics-gene-card:hover {
+    border-color: #ec4899;
+}
+
+.genetics-gene-card.expanded {
+    border-color: #ec4899;
+    box-shadow: 0 4px 12px rgba(236, 72, 153, 0.1);
+}
+
+.genetics-gene-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 16px 20px;
+    background: #fdf2f8;
+    cursor: pointer;
+}
+
+.genetics-gene-info {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+}
+
+.genetics-gene-symbol {
+    font-family: 'Monaco', 'Consolas', monospace;
+    font-size: 1.25rem;
+    font-weight: 700;
+    color: #ec4899;
+    background: #fff;
+    padding: 4px 12px;
+    border-radius: 6px;
+    border: 1px solid #fbcfe8;
+}
+
+.genetics-gene-name {
+    font-weight: 600;
+    color: #1f2937;
+}
+
+.genetics-gene-count {
+    font-size: 0.75rem;
+    color: #6b7280;
+    background: #fff;
+    padding: 2px 8px;
+    border-radius: 4px;
+}
+
+.genetics-gene-actions {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    color: #9ca3af;
+}
+
+.genetics-gene-action-btn {
+    padding: 6px;
+    border: none;
+    background: none;
+    color: #9ca3af;
+    cursor: pointer;
+    border-radius: 4px;
+    transition: all 0.2s;
+}
+
+.genetics-gene-action-btn:hover {
+    color: #374151;
+    background: #fff;
+}
+
+.genetics-gene-action-btn.delete:hover {
+    color: #dc2626;
+}
+
+.genetics-gene-body {
+    padding: 20px;
+    background: #fff;
+}
+
+.genetics-gene-description {
+    color: #6b7280;
+    font-size: 0.875rem;
+    margin: 0 0 16px;
+    padding: 12px;
+    background: #f9fafb;
+    border-radius: 6px;
+}
+
+/* Alleles Section */
+.genetics-alleles-section {
+    border: 1px solid #e5e7eb;
+    border-radius: 8px;
+    overflow: hidden;
+}
+
+.genetics-alleles-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 12px 16px;
+    background: #f9fafb;
+    border-bottom: 1px solid #e5e7eb;
+}
+
+.genetics-alleles-header h5 {
+    font-size: 0.875rem;
+    font-weight: 600;
+    color: #374151;
+    margin: 0;
+}
+
+.genetics-alleles-table {
+    padding: 12px 16px;
+}
+
+.genetics-alleles-table-header {
+    display: grid;
+    grid-template-columns: 1fr 1fr 1fr 80px 40px;
+    gap: 12px;
+    font-size: 0.75rem;
+    font-weight: 600;
+    color: #6b7280;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    padding-bottom: 8px;
+    border-bottom: 1px solid #e5e7eb;
+    margin-bottom: 8px;
+}
+
+.genetics-allele-row {
+    display: grid;
+    grid-template-columns: 1fr 1fr 1fr 80px 40px;
+    gap: 12px;
+    align-items: center;
+    padding: 8px 0;
+    font-size: 0.875rem;
+    border-bottom: 1px solid #f3f4f6;
+}
+
+.genetics-allele-row:last-child {
+    border-bottom: none;
+}
+
+.allele-notation {
+    font-family: 'Monaco', 'Consolas', monospace;
+    font-weight: 600;
+    color: #ec4899;
+}
+
+.allele-dominance {
+    font-size: 0.75rem;
+    color: #6b7280;
+    text-transform: capitalize;
+}
+
+.allele-delete-btn {
+    padding: 4px;
+    border: none;
+    background: none;
+    color: #9ca3af;
+    cursor: pointer;
+    border-radius: 4px;
+}
+
+.allele-delete-btn:hover {
+    color: #dc2626;
+    background: #fef2f2;
+}
+
+.genetics-no-alleles {
+    padding: 16px;
+    text-align: center;
+    color: #9ca3af;
+    font-size: 0.875rem;
+}
+
+/* Allele Form */
+.genetics-allele-form {
+    padding: 12px 16px;
+    background: #fdf2f8;
+    border-bottom: 1px solid #fbcfe8;
+}
+
+.genetics-allele-form-row {
+    display: flex;
+    gap: 10px;
+    flex-wrap: wrap;
+    margin-bottom: 10px;
+}
+
+.genetics-allele-form-row input,
+.genetics-allele-form-row select {
+    flex: 1;
+    min-width: 120px;
+    padding: 8px 12px;
+    border: 1px solid #e5e7eb;
+    border-radius: 6px;
+    font-size: 0.875rem;
+}
+
+.genetics-allele-form-row input:focus,
+.genetics-allele-form-row select:focus {
+    outline: none;
+    border-color: #ec4899;
+}
+
+.genetics-lethal-checkbox {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    font-size: 0.875rem;
+    color: #dc2626;
+    white-space: nowrap;
+}
+
+.genetics-lethal-checkbox input {
+    min-width: auto;
+    flex: 0;
+    width: 16px;
+    height: 16px;
+}
+
+.genetics-allele-form-actions {
+    display: flex;
+    justify-content: flex-end;
+    gap: 8px;
+}
+
+/* Modal */
+.genetics-modal-overlay {
+    position: fixed;
+    inset: 0;
+    background: rgba(0, 0, 0, 0.5);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 100;
+    padding: 20px;
+}
+
+.genetics-modal {
+    background: #fff;
+    border-radius: 16px;
+    width: 100%;
+    max-width: 500px;
+    max-height: 90vh;
+    overflow: hidden;
+    display: flex;
+    flex-direction: column;
+}
+
+.genetics-modal-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 20px 24px;
+    border-bottom: 1px solid #e5e7eb;
+}
+
+.genetics-modal-header h3 {
+    font-size: 1.25rem;
+    font-weight: 600;
+    margin: 0;
+    color: #1f2937;
+}
+
+.genetics-modal-header button {
+    padding: 4px;
+    border: none;
+    background: none;
+    color: #6b7280;
+    cursor: pointer;
+    border-radius: 4px;
+}
+
+.genetics-modal-header button:hover {
+    color: #1f2937;
+    background: #f3f4f6;
+}
+
+.genetics-modal-body {
+    padding: 24px;
+    overflow-y: auto;
+    flex: 1;
+}
+
+.genetics-modal-footer {
+    display: flex;
+    justify-content: flex-end;
+    gap: 12px;
+    padding: 16px 24px;
+    border-top: 1px solid #e5e7eb;
+    background: #f9fafb;
+}
+
+/* Form Groups */
+.genetics-form-group {
+    margin-bottom: 16px;
+}
+
+.genetics-form-group label {
+    display: block;
+    font-weight: 500;
+    color: #374151;
+    margin-bottom: 6px;
+    font-size: 0.9375rem;
+}
+
+.genetics-form-group input,
+.genetics-form-group textarea {
+    width: 100%;
+    padding: 10px 12px;
+    border: 1px solid #e5e7eb;
+    border-radius: 8px;
+    font-size: 0.9375rem;
+    font-family: inherit;
+}
+
+.genetics-form-group input:focus,
+.genetics-form-group textarea:focus {
+    outline: none;
+    border-color: #ec4899;
+}
+
+.form-help {
+    display: block;
+    font-size: 0.75rem;
+    color: #9ca3af;
+    margin-top: 4px;
+}
+
+.genetics-checkbox-label {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 0.9375rem;
+    color: #374151;
+    cursor: pointer;
+}
+
+.genetics-checkbox-label input {
+    width: 18px;
+    height: 18px;
+    cursor: pointer;
+}
+
+/* Animations */
+.spin {
+    animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+    from { transform: rotate(0deg); }
+    to { transform: rotate(360deg); }
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+    .genetics-stats-grid {
+        grid-template-columns: repeat(2, 1fr);
+    }
+    
+    .genetics-editor-header {
+        flex-direction: column;
+        align-items: flex-start;
+    }
+    
+    .genetics-alleles-table-header,
+    .genetics-allele-row {
+        grid-template-columns: 1fr 1fr;
+    }
+    
+    .genetics-alleles-table-header span:nth-child(3),
+    .genetics-alleles-table-header span:nth-child(4),
+    .genetics-allele-row span:nth-child(3),
+    .genetics-allele-row span:nth-child(4) {
+        display: none;
+    }
+}
