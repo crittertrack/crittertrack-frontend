@@ -33,7 +33,7 @@ export default function ModChatTab({ API_BASE_URL, authToken, currentUserId }) {
         setError('');
 
         try {
-            const response = await fetch(`${API_BASE_URL}/api/admin/mod-chat?limit=50`, {
+            const response = await fetch(`${API_BASE_URL}/admin/mod-chat?limit=50`, {
                 headers: {
                     'Authorization': `Bearer ${authToken}`
                 }
@@ -78,7 +78,7 @@ export default function ModChatTab({ API_BASE_URL, authToken, currentUserId }) {
         setError('');
 
         try {
-            const response = await fetch(`${API_BASE_URL}/api/admin/mod-chat`, {
+            const response = await fetch(`${API_BASE_URL}/admin/mod-chat`, {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
@@ -114,7 +114,7 @@ export default function ModChatTab({ API_BASE_URL, authToken, currentUserId }) {
         if (!window.confirm('Delete this message?')) return;
 
         try {
-            const response = await fetch(`${API_BASE_URL}/api/admin/mod-chat/${messageId}`, {
+            const response = await fetch(`${API_BASE_URL}/admin/mod-chat/${messageId}`, {
                 method: 'DELETE',
                 headers: {
                     'Authorization': `Bearer ${authToken}`
