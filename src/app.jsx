@@ -11970,15 +11970,21 @@ const AuthView = ({ onLoginSuccess, showModalMessage, isRegister, setIsRegister,
             } else {
                 const days = Math.floor(timeLeft / (1000 * 60 * 60 * 24));
                 const hours = Math.floor((timeLeft % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
-                const minutes = Math.floor((timeLeft % (1000 * 60 * 60)) / (1000 * 60));
                 
-                // Build time string - only show non-zero units
+                // Format end date as dd/mm/yyyy
+                const endDate = new Date(suspensionInfo.endTime);
+                const day = String(endDate.getDate()).padStart(2, '0');
+                const month = String(endDate.getMonth() + 1).padStart(2, '0');
+                const year = endDate.getFullYear();
+                const endDateStr = `${day}/${month}/${year}`;
+                
+                // Build time string - only show days/hours
                 const timeParts = [];
                 if (days > 0) timeParts.push(`${days}d`);
-                if (hours > 0 || days > 0) timeParts.push(`${hours}h`); // Show hours if days exist
-                timeParts.push(`${minutes}m`); // Always show minutes
+                if (hours > 0 || days > 0) timeParts.push(`${hours}h`);
                 
-                setSuspensionTimeRemaining(timeParts.join(' '));
+                const timeRemaining = timeParts.length > 0 ? timeParts.join(' ') : '< 1h';
+                setSuspensionTimeRemaining(`${timeRemaining} | Expires: ${endDateStr}`);
             }
         };
         
