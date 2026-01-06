@@ -12068,15 +12068,21 @@ const AuthView = ({ onLoginSuccess, showModalMessage, isRegister, setIsRegister,
                         // Parse suspension message and extract expiry time
                         console.log('[LOGIN] User account suspended:', message);
                         
-                        // Try to extract the actual expiry timestamp from the message
-                        const timestampMatch = message.match(/ExpiryTimestamp:\s*(\d+)/);
+                        // Check if suspension end time already exists in localStorage
+                        const existingEndTime = localStorage.getItem('suspensionEndTime');
                         let suspensionEndTime;
                         
+                        // Try to extract the actual expiry timestamp from the message (source of truth)
+                        const timestampMatch = message.match(/ExpiryTimestamp:\s*(\d+)/);
+                        
                         if (timestampMatch) {
-                            // Use the actual expiry timestamp from the backend
+                            // Always use the server's ExpiryTimestamp - it's the source of truth
                             suspensionEndTime = parseInt(timestampMatch[1]);
+                        } else if (existingEndTime) {
+                            // No timestamp in message but we have one stored - keep using it (don't reset timer on retry)
+                            suspensionEndTime = parseInt(existingEndTime);
                         } else {
-                            // Fallback: Extract hours and minutes from message
+                            // Last resort: Calculate from hours and minutes
                             // Handle both "Expires in X hour(s) Y minute(s)" and "Expires in X hour(s)" and "Expires in X minute(s)"
                             const hoursMatch = message.match(/(\d+)\s+hour/);
                             const minutesMatch = message.match(/(\d+)\s+minute/);
@@ -12090,9 +12096,11 @@ const AuthView = ({ onLoginSuccess, showModalMessage, isRegister, setIsRegister,
                         const reasonMatch = message.match(/^Account suspended:\s*(.+?)\s+Expires in/);
                         const suspensionReason = reasonMatch ? reasonMatch[1] : 'Your account has been suspended.';
                         
-                        // Store suspension info for display on login screen
-                        localStorage.setItem('suspensionEndTime', suspensionEndTime.toString());
-                        localStorage.setItem('suspensionReason', suspensionReason);
+                        // Store suspension info for display on login screen (only update if it changed)
+                        if (!existingEndTime || suspensionEndTime !== parseInt(existingEndTime)) {
+                            localStorage.setItem('suspensionEndTime', suspensionEndTime.toString());
+                            localStorage.setItem('suspensionReason', suspensionReason);
+                        }
                         
                         // Trigger re-render of suspension banner
                         setSuspensionInfo({
