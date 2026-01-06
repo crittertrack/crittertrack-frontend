@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { 
-    Shield, AlertTriangle, Eye, Search, Filter, X, Ban, Clock, CheckCircle
+    Shield, AlertTriangle, Eye, Search, Filter, X, Ban, Clock, CheckCircle, UserCog
 } from 'lucide-react';
 import axios from 'axios';
 import './UserManagementPanel.css';
@@ -17,10 +17,24 @@ const UserManagementPanel = () => {
     const [showHistoryModal, setShowHistoryModal] = useState(false);
     const [showActionModal, setShowActionModal] = useState(false);
     const [actionType, setActionType] = useState(null);
+    const [currentUserRole, setCurrentUserRole] = useState('user');
 
     useEffect(() => {
         fetchUsers();
+        fetchCurrentUserRole();
     }, []);
+
+    const fetchCurrentUserRole = async () => {
+        try {
+            const token = localStorage.getItem('authToken');
+            const response = await axios.get(`${API_URL}/moderation/me`, {
+                headers: { Authorization: `Bearer ${token}` }
+            });
+            setCurrentUserRole(response.data?.role || 'user');
+        } catch (err) {
+            console.error('Error fetching current user role:', err);
+        }
+    };
 
     const fetchUsers = async () => {
         try {
@@ -127,6 +141,21 @@ const UserManagementPanel = () => {
             return { success: true };
         } catch (err) {
             return { success: false, error: err.response?.data?.message || 'Failed to lift warning' };
+        }
+    };
+
+    const handleChangeRole = async (userId, newRole) => {
+        try {
+            const token = localStorage.getItem('authToken');
+            await axios.patch(
+                `${API_URL}/admin/users/${userId}/role`,
+                { role: newRole },
+                { headers: { Authorization: `Bearer ${token}` } }
+            );
+            await fetchUsers();
+            return { success: true };
+        } catch (err) {
+            return { success: false, error: err.response?.data?.error || 'Failed to change role' };
         }
     };
 
@@ -318,6 +347,16 @@ const UserManagementPanel = () => {
                                             <CheckCircle size={14} />
                                         </button>
                                     )}
+                                    
+                                    {currentUserRole === 'admin' && (
+                                        <button
+                                            className="action-btn role-btn"
+                                            onClick={() => openActionModal(user, 'role')}
+                                            title="Change role"
+                                        >
+                                            <UserCog size={14} />
+                                        </button>
+                                    )}
                                 </td>
                             </tr>
                         ))}
@@ -355,23 +394,25 @@ const UserManagementPanel = () => {
                     onWarn={handleWarnUser}
                     onSuspend={handleSuspendUser}
                     onBan={handleBanUser}
+                    onChangeRole={handleChangeRole}
                 />
             )}
         </div>
     );
 };
 
-// Modal for performing moderation actions (warn, suspend, ban)
-const ModerationActionModal = ({ user, actionType, onClose, onWarn, onSuspend, onBan }) => {
+// Modal for performing moderation actions (warn, suspend, ban, role change)
+const ModerationActionModal = ({ user, actionType, onClose, onWarn, onSuspend, onBan, onChangeRole }) => {
     const [reason, setReason] = useState('');
     const [category, setCategory] = useState('general');
     const [duration, setDuration] = useState('7');
     const [ipBan, setIpBan] = useState(false);
+    const [newRole, setNewRole] = useState(user.role || 'user');
     const [submitting, setSubmitting] = useState(false);
     const [error, setError] = useState('');
 
     const handleSubmit = async () => {
-        if (!reason.trim()) {
+        if (actionType !== 'role' && !reason.trim()) {
             setError('Please provide a reason');
             return;
         }
@@ -386,6 +427,13 @@ const ModerationActionModal = ({ user, actionType, onClose, onWarn, onSuspend, o
             result = await onSuspend(user._id, reason, duration);
         } else if (actionType === 'ban') {
             result = await onBan(user._id, reason, ipBan);
+        } else if (actionType === 'role') {
+            if (newRole === user.role) {
+                setError('Please select a different role');
+                setSubmitting(false);
+                return;
+            }
+            result = await onChangeRole(user._id, newRole);
         }
 
         setSubmitting(false);
@@ -400,7 +448,8 @@ const ModerationActionModal = ({ user, actionType, onClose, onWarn, onSuspend, o
     const titles = {
         warn: 'Issue Warning',
         suspend: 'Suspend User',
-        ban: 'Ban User'
+        ban: 'Ban User',
+        role: 'Change User Role'
     };
 
     const categories = [
@@ -425,9 +474,30 @@ const ModerationActionModal = ({ user, actionType, onClose, onWarn, onSuspend, o
                     <div className="target-user">
                         <strong>{user.personalName || user.breederName || 'Unknown'}</strong>
                         <span className="user-id">{user.id_public}</span>
+                        {actionType === 'role' && (
+                            <span className={`current-role role-badge ${user.role}`}>
+                                Current: {user.role}
+                            </span>
+                        )}
                     </div>
 
                     {error && <div className="modal-error">{error}</div>}
+
+                    {actionType === 'role' && (
+                        <div className="form-group">
+                            <label>New Role</label>
+                            <select value={newRole} onChange={(e) => setNewRole(e.target.value)}>
+                                <option value="user">User</option>
+                                <option value="moderator">Moderator</option>
+                                <option value="admin">Admin</option>
+                            </select>
+                            <p className="form-hint">
+                                {newRole === 'moderator' && 'Moderators can review reports, warn users, and manage content.'}
+                                {newRole === 'admin' && 'Admins have full access including role management and system settings.'}
+                                {newRole === 'user' && 'Regular user with no moderation privileges.'}
+                            </p>
+                        </div>
+                    )}
 
                     {actionType === 'warn' && (
                         <div className="form-group">
@@ -467,15 +537,17 @@ const ModerationActionModal = ({ user, actionType, onClose, onWarn, onSuspend, o
                         </div>
                     )}
 
-                    <div className="form-group">
-                        <label>Reason *</label>
-                        <textarea
-                            value={reason}
-                            onChange={(e) => setReason(e.target.value)}
-                            placeholder="Explain the reason for this action..."
-                            rows={4}
-                        />
-                    </div>
+                    {actionType !== 'role' && (
+                        <div className="form-group">
+                            <label>Reason *</label>
+                            <textarea
+                                value={reason}
+                                onChange={(e) => setReason(e.target.value)}
+                                placeholder="Explain the reason for this action..."
+                                rows={4}
+                            />
+                        </div>
+                    )}
                 </div>
 
                 <div className="modal-footer">
