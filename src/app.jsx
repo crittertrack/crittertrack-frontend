@@ -14982,17 +14982,20 @@ const App = () => {
                 const data = response.data;
                 
                 // Check if suspension was recently lifted (within 24 hours)
-                if (data.suspensionLifted && !suspensionLiftedNotification) {
-                    console.log('[AUTH] Suspension has been lifted for user');
-                    // Clear the suspension info from state and localStorage
-                    setSuspensionInfo(null);
-                    setSuspensionTimeRemaining(null);
-                    localStorage.removeItem('suspensionEndTime');
-                    localStorage.removeItem('suspensionReason');
-                    // Store notification with 24-hour expiry
-                    const expiresAt = new Date().getTime() + (24 * 60 * 60 * 1000);
-                    localStorage.setItem('suspensionLiftedNotification', JSON.stringify({ expiresAt }));
-                    setSuspensionLiftedNotification(true);
+                if (data.suspensionLifted) {
+                    const savedNotification = localStorage.getItem('suspensionLiftedNotification');
+                    if (!savedNotification) {
+                        console.log('[AUTH] Suspension has been lifted for user');
+                        // Clear the suspension info from state and localStorage
+                        setSuspensionInfo(null);
+                        setSuspensionTimeRemaining(null);
+                        localStorage.removeItem('suspensionEndTime');
+                        localStorage.removeItem('suspensionReason');
+                        // Store notification with 24-hour expiry
+                        const expiresAt = new Date().getTime() + (24 * 60 * 60 * 1000);
+                        localStorage.setItem('suspensionLiftedNotification', JSON.stringify({ expiresAt }));
+                        setSuspensionLiftedNotification(true);
+                    }
                 }
                 
                 // Check if user status has changed to suspended or banned
@@ -15037,7 +15040,7 @@ const App = () => {
         pollUserStatus();
 
         return () => clearInterval(statusPollInterval);
-    }, [authToken, API_BASE_URL, handleLogout, showModalMessage, suspensionLiftedNotification, setSuspensionInfo, setSuspensionTimeRemaining, setSuspensionLiftedNotification]);
+    }, [authToken, API_BASE_URL, handleLogout, showModalMessage]);
 
     useEffect(() => {
         if (authToken && !hasCompletedOnboarding && !tutorialLoading && userProfile) {
