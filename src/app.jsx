@@ -15271,8 +15271,14 @@ const App = () => {
                     const targetProfile = res.data;
                     setSelectedConversation({
                         otherUserId: targetProfile.userId_backend || messageUserId,
-                        otherUserName: targetProfile.personalName || targetProfile.breederName || 'User',
-                        otherUserAvatar: targetProfile.profileImage
+                        otherUser: {
+                            id_public: targetProfile.id_public || messageUserId,
+                            personalName: targetProfile.personalName,
+                            breederName: targetProfile.breederName,
+                            showPersonalName: targetProfile.showPersonalName,
+                            showBreederName: targetProfile.showBreederName,
+                            profileImage: targetProfile.profileImage
+                        }
                     });
                     setShowMessages(true);
                 })
