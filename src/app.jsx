@@ -12092,14 +12092,24 @@ const AuthView = ({ onLoginSuccess, showModalMessage, isRegister, setIsRegister,
                                 suspensionEndTime = parseInt(existingEndTime);
                             } else {
                                 // PRIORITY 4: Last resort - calculate from hours/minutes
-                                // This should rarely happen if backend is working correctly
                                 console.log('[LOGIN] Calculating from hours/minutes (fallback)');
                                 const hoursMatch = message.match(/(\d+)\s+hour/);
                                 const minutesMatch = message.match(/(\d+)\s+minute/);
                                 const hoursRemaining = hoursMatch ? parseInt(hoursMatch[1]) : 0;
                                 const minutesRemaining = minutesMatch ? parseInt(minutesMatch[1]) : 0;
+                                
+                                console.log('[LOGIN] Parsed hours:', hoursRemaining, 'minutes:', minutesRemaining);
+                                
                                 const totalMilliseconds = (hoursRemaining * 60 * 60 * 1000) + (minutesRemaining * 60 * 1000);
-                                suspensionEndTime = new Date().getTime() + (totalMilliseconds || 24 * 60 * 60 * 1000);
+                                console.log('[LOGIN] Total milliseconds:', totalMilliseconds);
+                                
+                                if (totalMilliseconds > 0) {
+                                    suspensionEndTime = new Date().getTime() + totalMilliseconds;
+                                    console.log('[LOGIN] Calculated end time:', suspensionEndTime);
+                                } else {
+                                    console.error('[LOGIN] Could not extract suspension duration from message, defaulting to 24 hours');
+                                    suspensionEndTime = new Date().getTime() + (24 * 60 * 60 * 1000);
+                                }
                             }
                         }
                         
