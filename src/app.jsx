@@ -15254,6 +15254,35 @@ const App = () => {
         return () => clearInterval(interval);
     }, [authToken, fetchUserProfile]);
 
+    // Handle ?message= query param to open messages with a specific user
+    useEffect(() => {
+        if (!authToken || !userProfile) return;
+        
+        const params = new URLSearchParams(window.location.search);
+        const messageUserId = params.get('message');
+        
+        if (messageUserId) {
+            // Clear the query param from URL
+            window.history.replaceState({}, '', window.location.pathname);
+            
+            // Fetch the user's profile to get their name
+            axios.get(`${API_BASE_URL}/public/profile/${messageUserId}`)
+                .then(res => {
+                    const targetProfile = res.data;
+                    setSelectedConversation({
+                        otherUserId: targetProfile.userId_backend || messageUserId,
+                        otherUserName: targetProfile.personalName || targetProfile.breederName || 'User',
+                        otherUserAvatar: targetProfile.profileImage
+                    });
+                    setShowMessages(true);
+                })
+                .catch(err => {
+                    console.error('Failed to load user for messaging:', err);
+                    showModalMessage('Error', 'Could not start conversation with this user.');
+                });
+        }
+    }, [authToken, userProfile, showModalMessage]);
+
     // Fetch animals for genetics calculator when needed
     useEffect(() => {
         const fetchAnimalsForCalculator = async () => {
@@ -15263,6 +15292,7 @@ const App = () => {
                         headers: { Authorization: `Bearer ${authToken}` }
                     });
                     setMyAnimalsForCalculator(response.data || []);
+
                 } catch (error) {
                     console.error('Failed to fetch animals for calculator:', error);
                     setMyAnimalsForCalculator([]);
@@ -19161,6 +19191,10 @@ const PublicProfilePage = () => {
                 API_BASE_URL={API_BASE_URL}
                 authToken={authToken}
                 setModCurrentContext={setModCurrentContext}
+                onStartMessage={authToken ? () => {
+                    // Navigate to dashboard with message param to open conversation
+                    navigate(`/?message=${profile.id_public}`);
+                } : null}
             />
             
             {/* Moderator Action Sidebar - Shows if user is authenticated moderator */}
