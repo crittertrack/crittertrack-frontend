@@ -238,7 +238,7 @@ const AuditLogViewer = () => {
                                     <th>Action</th>
                                     <th>Moderator</th>
                                     <th>Target</th>
-                                    <th>IP Address</th>
+                                    <th>Reason</th>
                                     <th>Details</th>
                                 </tr>
                             </thead>
@@ -290,33 +290,25 @@ const AuditLogViewer = () => {
                                                         {log.targetAnimalId.id_public}
                                                     </div>
                                                 </>
-                                            ) : log.reportId ? (
-                                                <div className="target-name">
-                                                    Report #{log.reportId.slice(-6)}
-                                                </div>
+                                            ) : log.targetName ? (
+                                                <div className="target-name">{log.targetName}</div>
                                             ) : (
                                                 <span className="no-target">N/A</span>
                                             )}
                                         </td>
-                                        <td className="ip-cell">
-                                            {log.ipAddress || 'N/A'}
+                                        <td className="reason-cell">
+                                            {log.reason || log.details?.reason || '—'}
                                         </td>
                                         <td className="details-cell">
                                             {(() => {
-                                                const formattedLines = formatDetails(log.details);
-                                                if (formattedLines) {
-                                                    return (
-                                                        <details>
-                                                            <summary>View Details</summary>
-                                                            <div className="details-content formatted">
-                                                                {formattedLines.map((line, i) => (
-                                                                    <div key={i}>{line}</div>
-                                                                ))}
-                                                            </div>
-                                                        </details>
-                                                    );
-                                                }
-                                                return <span className="no-details">—</span>;
+                                                const details = log.details || {};
+                                                const parts = [];
+                                                if (details.newStatus) parts.push(details.newStatus);
+                                                if (details.durationDays) parts.push(`${details.durationDays} days`);
+                                                if (details.warningCategory) parts.push(details.warningCategory);
+                                                if (details.warningCount) parts.push(`Warning #${details.warningCount}`);
+                                                if (details.resolution) parts.push(details.resolution);
+                                                return parts.length > 0 ? parts.join(' • ') : '—';
                                             })()}
                                         </td>
                                     </tr>

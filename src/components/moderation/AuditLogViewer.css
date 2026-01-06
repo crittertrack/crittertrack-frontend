@@ -290,7 +290,7 @@
 
 .moderator-cell,
 .target-cell {
-    min-width: 150px;
+    min-width: 140px;
 }
 
 .moderator-name,
@@ -312,42 +312,18 @@
     font-style: italic;
 }
 
-.ip-cell {
-    color: #999;
-    font-family: 'Courier New', monospace;
+.reason-cell {
+    color: #ccc;
     font-size: 13px;
-    min-width: 140px;
+    max-width: 250px;
+    word-wrap: break-word;
 }
 
 .details-cell {
-    max-width: 300px;
-}
-
-.details-cell details {
-    cursor: pointer;
-}
-
-.details-cell summary {
-    color: #2196f3;
+    color: #999;
     font-size: 13px;
-    user-select: none;
-    padding: 4px 0;
+    max-width: 200px;
 }
-
-.details-cell summary:hover {
-    color: #42a5f5;
-}
-
-.details-content {
-    margin-top: 8px;
-    background: #2a2a2a;
-    border: 1px solid #404040;
-    border-radius: 6px;
-    padding: 12px;
-    color: #ccc;
-    font-size: 12px;
-    white-space: pre-wrap;
-    word-wrap: break-word;
     max-height: 200px;
     overflow-y: auto;
 }
