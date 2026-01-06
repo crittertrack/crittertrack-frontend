@@ -124,17 +124,6 @@ export const EditContentModal = ({ isOpen, onClose, onSubmit, context }) => {
                 { value: 'microchipNumber', label: 'Microchip Number', clearable: true },
                 { value: 'pedigreeRegistrationId', label: 'Pedigree Registration ID', clearable: true },
                 
-                // Health/Medical
-                { value: 'medicalConditions', label: 'Medical Conditions', clearable: true },
-                { value: 'allergies', label: 'Allergies', clearable: true },
-                { value: 'medications', label: 'Medications', clearable: true },
-                { value: 'medicalProcedures', label: 'Medical Procedures', clearable: true },
-                { value: 'vaccinations', label: 'Vaccinations', clearable: true },
-                { value: 'dewormingRecords', label: 'Deworming Records', clearable: true },
-                { value: 'labResults', label: 'Lab Results', clearable: true },
-                { value: 'vetVisits', label: 'Vet Visits', clearable: true },
-                { value: 'primaryVet', label: 'Primary Vet', clearable: true },
-                
                 // Breeding/Fertility
                 { value: 'fertilityNotes', label: 'Fertility Notes', clearable: true },
                 { value: 'damFertilityNotes', label: 'Dam Fertility Notes', clearable: true },
