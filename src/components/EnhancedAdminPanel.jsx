@@ -1,15 +1,15 @@
 import React, { useState, useEffect } from 'react';
 import {
-    X, Users, Settings, BarChart3, Mail, Shield, Lock, AlertTriangle,
+    X, Users, Settings, BarChart3, Mail, Shield, AlertTriangle, Lock,
     Loader2, Save, Plus, Trash2, Edit, Eye, Search, Download, Upload,
     ChevronDown, ChevronRight, CheckCircle, Clock, Flag, MessageSquare, FileText
 } from 'lucide-react';
 import ModOversightPanel from './moderation/ModOversightPanel';
 import UserManagementPanel from './moderation/UserManagementPanel';
 import AuditLogViewer from './moderation/AuditLogViewer';
-import AuditLogTab from './admin/AuditLogTab';
 import CommunicationTab from './admin/CommunicationTab';
 import SystemSettingsTab from './admin/SystemSettingsTab';
+import ModChatTab from './admin/ModChatTab';
 
 // Error Boundary Component
 class ErrorBoundary extends React.Component {
@@ -410,12 +410,12 @@ const EnhancedAdminPanel = ({ isOpen, onClose, authToken, API_BASE_URL, userRole
                                 { id: 'dashboard', label: 'Dashboard', icon: BarChart3 },
                                 { id: 'moderation', label: 'Reports', icon: AlertTriangle },
                                 { id: 'user-management', label: 'User Management', icon: Users },
-                                { id: 'animals', label: 'Animal Management', icon: Shield, requiredRole: 'admin' },
+                                { id: 'animals', label: 'Animal Management', icon: Shield },
                                 { id: 'audit-logs', label: 'Audit Logs', icon: FileText },
+                                { id: 'mod-chat', label: 'Mod Team Chat', icon: MessageSquare },
                                 { id: 'reports', label: 'Reports & Analytics', icon: BarChart3 },
                                 { id: 'communication', label: 'Communication', icon: Mail },
                                 // Admin-only features
-                                { id: 'data-audit', label: 'Data Integrity', icon: Lock, requiredRole: 'admin' },
                                 { id: 'system-settings', label: 'System Settings', icon: Settings, requiredRole: 'admin' }
                             ].map(section => {
                                 const Icon = section.icon;
@@ -530,16 +530,6 @@ const EnhancedAdminPanel = ({ isOpen, onClose, authToken, API_BASE_URL, userRole
                             </div>
                         )}
 
-                        {/* Data Audit */}
-                        {activeSection === 'data-audit' && (
-                            <div className="p-8">
-                                <AuditLogTab
-                                    API_BASE_URL={API_BASE_URL}
-                                    authToken={authToken}
-                                />
-                            </div>
-                        )}
-
                         {/* System Settings */}
                         {activeSection === 'system-settings' && (
                             <div className="p-8">
@@ -557,6 +547,17 @@ const EnhancedAdminPanel = ({ isOpen, onClose, authToken, API_BASE_URL, userRole
                                 <div className="bg-yellow-50 border border-yellow-200 rounded-lg p-6">
                                     <p className="text-yellow-800">This feature is currently being rebuilt.</p>
                                 </div>
+                            </div>
+                        )}
+
+                        {/* Mod Team Chat */}
+                        {activeSection === 'mod-chat' && (
+                            <div className="p-8">
+                                <ModChatTab
+                                    API_BASE_URL={API_BASE_URL}
+                                    authToken={authToken}
+                                    currentUserId={userId}
+                                />
                             </div>
                         )}
 

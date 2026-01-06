@@ -39,6 +39,11 @@ export default function CommunicationTab({ API_BASE_URL, authToken }) {
                 }
             });
 
+            const contentType = response.headers.get('content-type');
+            if (!contentType || !contentType.includes('application/json')) {
+                throw new Error('Broadcast history endpoint not available');
+            }
+
             const data = await response.json();
 
             if (!response.ok) {
@@ -89,6 +94,11 @@ export default function CommunicationTab({ API_BASE_URL, authToken }) {
                 body: JSON.stringify(payload)
             });
 
+            const contentType = response.headers.get('content-type');
+            if (!contentType || !contentType.includes('application/json')) {
+                throw new Error('Broadcast endpoint not available');
+            }
+
             const data = await response.json();
 
             if (!response.ok) {
@@ -136,6 +146,11 @@ export default function CommunicationTab({ API_BASE_URL, authToken }) {
                     message: directMessage
                 })
             });
+
+            const contentType = response.headers.get('content-type');
+            if (!contentType || !contentType.includes('application/json')) {
+                throw new Error('Direct message endpoint not available');
+            }
 
             const data = await response.json();
 
