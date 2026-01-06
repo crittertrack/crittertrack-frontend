@@ -11972,7 +11972,13 @@ const AuthView = ({ onLoginSuccess, showModalMessage, isRegister, setIsRegister,
                 const hours = Math.floor((timeLeft % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
                 const minutes = Math.floor((timeLeft % (1000 * 60 * 60)) / (1000 * 60));
                 
-                setSuspensionTimeRemaining(`${days}d ${hours}h ${minutes}m`);
+                // Build time string - only show non-zero units
+                const timeParts = [];
+                if (days > 0) timeParts.push(`${days}d`);
+                if (hours > 0 || days > 0) timeParts.push(`${hours}h`); // Show hours if days exist
+                timeParts.push(`${minutes}m`); // Always show minutes
+                
+                setSuspensionTimeRemaining(timeParts.join(' '));
             }
         };
         
@@ -12070,10 +12076,14 @@ const AuthView = ({ onLoginSuccess, showModalMessage, isRegister, setIsRegister,
                             // Use the actual expiry timestamp from the backend
                             suspensionEndTime = parseInt(timestampMatch[1]);
                         } else {
-                            // Fallback: Extract hours remaining from message (e.g., "Expires in 48 hour(s)")
+                            // Fallback: Extract hours and minutes from message
+                            // Handle both "Expires in X hour(s) Y minute(s)" and "Expires in X hour(s)" and "Expires in X minute(s)"
                             const hoursMatch = message.match(/(\d+)\s+hour/);
-                            const hoursRemaining = hoursMatch ? parseInt(hoursMatch[1]) : 24;
-                            suspensionEndTime = new Date().getTime() + (hoursRemaining * 60 * 60 * 1000);
+                            const minutesMatch = message.match(/(\d+)\s+minute/);
+                            const hoursRemaining = hoursMatch ? parseInt(hoursMatch[1]) : 0;
+                            const minutesRemaining = minutesMatch ? parseInt(minutesMatch[1]) : 0;
+                            const totalMilliseconds = (hoursRemaining * 60 * 60 * 1000) + (minutesRemaining * 60 * 1000);
+                            suspensionEndTime = new Date().getTime() + (totalMilliseconds || 24 * 60 * 60 * 1000); // Default to 24 hours if nothing found
                         }
                         
                         // Extract reason (everything before "Expires in")
