@@ -99,11 +99,53 @@ export const EditContentModal = ({ isOpen, onClose, onSubmit, context }) => {
         }
         if (context?.type === 'animal') {
             return [
-                { value: 'name', label: 'Animal Name', clearable: false },
-                { value: 'imageUrl', label: 'Animal Image', clearable: true, removeOnly: true },
-                { value: 'description', label: 'Description', clearable: true },
-                { value: 'notes', label: 'Notes', clearable: true },
-                { value: 'marking_description', label: 'Marking Description', clearable: true }
+                // Basic Info
+                { value: 'name', label: 'Animal Name (required)', clearable: false },
+                { value: 'prefix', label: 'Prefix', clearable: true },
+                { value: 'suffix', label: 'Suffix', clearable: true },
+                { value: 'breederyId', label: 'Breedery ID', clearable: true },
+                
+                // Images
+                { value: 'imageUrl', label: 'Main Image', clearable: true, removeOnly: true },
+                { value: 'photoUrl', label: 'Secondary Photo', clearable: true, removeOnly: true },
+                
+                // Description/Notes
+                { value: 'remarks', label: 'Remarks/Notes', clearable: true },
+                { value: 'geneticCode', label: 'Genetic Code', clearable: true },
+                
+                // Physical Info
+                { value: 'color', label: 'Color', clearable: true },
+                { value: 'coat', label: 'Coat', clearable: true },
+                { value: 'coatPattern', label: 'Coat Pattern', clearable: true },
+                { value: 'earset', label: 'Earset', clearable: true },
+                { value: 'breed', label: 'Breed', clearable: true },
+                { value: 'strain', label: 'Strain', clearable: true },
+                
+                // Identification
+                { value: 'microchipNumber', label: 'Microchip Number', clearable: true },
+                { value: 'pedigreeRegistrationId', label: 'Pedigree Registration ID', clearable: true },
+                
+                // Health/Medical
+                { value: 'medicalConditions', label: 'Medical Conditions', clearable: true },
+                { value: 'allergies', label: 'Allergies', clearable: true },
+                { value: 'medications', label: 'Medications', clearable: true },
+                { value: 'medicalProcedures', label: 'Medical Procedures', clearable: true },
+                { value: 'vaccinations', label: 'Vaccinations', clearable: true },
+                { value: 'dewormingRecords', label: 'Deworming Records', clearable: true },
+                { value: 'labResults', label: 'Lab Results', clearable: true },
+                { value: 'vetVisits', label: 'Vet Visits', clearable: true },
+                { value: 'primaryVet', label: 'Primary Vet', clearable: true },
+                
+                // Breeding/Fertility
+                { value: 'fertilityNotes', label: 'Fertility Notes', clearable: true },
+                { value: 'damFertilityNotes', label: 'Dam Fertility Notes', clearable: true },
+                
+                // Behavior
+                { value: 'temperament', label: 'Temperament', clearable: true },
+                
+                // End of Life
+                { value: 'causeOfDeath', label: 'Cause of Death', clearable: true },
+                { value: 'necropsyResults', label: 'Necropsy Results', clearable: true }
             ];
         }
         return [];
