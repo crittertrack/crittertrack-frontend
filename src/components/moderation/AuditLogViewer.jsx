@@ -32,9 +32,7 @@ const formatDetails = (details) => {
 
 const ACTION_TYPES = [
     { value: 'all', label: 'All Actions' },
-    // Login & Access
-    { value: 'admin_login', label: 'Admin Login' },
-    { value: 'moderator_login', label: 'Moderator Login' },
+    // Panel Access (via 2FA)
     { value: 'admin_panel_access', label: 'Admin Panel Access' },
     { value: 'moderator_panel_access', label: 'Moderator Panel Access' },
     // User Actions
@@ -44,20 +42,16 @@ const ACTION_TYPES = [
     { value: 'suspension_lifted', label: 'Suspension Lifted' },
     { value: 'user_banned', label: 'User Banned' },
     { value: 'ban_lifted', label: 'Ban Lifted' },
-    { value: 'user_activated', label: 'User Activated' },
-    { value: 'user_status_updated', label: 'User Status Updated' },
     { value: 'user_role_changed', label: 'User Role Changed' },
     // Content Actions
     { value: 'content_edited', label: 'Content Edited' },
     { value: 'content_hidden', label: 'Content Hidden' },
-    { value: 'profile_hidden', label: 'Profile Hidden' },
     { value: 'profile_image_removed', label: 'Profile Image Removed' },
     { value: 'animal_image_removed', label: 'Animal Image Removed' },
     { value: 'animal_deleted', label: 'Animal Deleted' },
     // Reports
     { value: 'report_created', label: 'Report Created' },
     { value: 'report_resolved', label: 'Report Resolved' },
-    { value: 'report_status_updated', label: 'Report Status Updated' },
     { value: 'report_dismissed', label: 'Report Dismissed' },
     // Communication
     { value: 'broadcast_sent', label: 'Broadcast Sent' },
