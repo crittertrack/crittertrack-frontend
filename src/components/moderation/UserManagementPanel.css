@@ -265,23 +265,24 @@
 
 /* Actions Cell */
 .actions-cell {
-    min-width: 140px;
+    min-width: 180px;
+    white-space: nowrap;
 }
 
 .action-btn {
     display: inline-flex;
     align-items: center;
-    gap: 4px;
-    padding: 5px 10px;
+    justify-content: center;
+    width: 28px;
+    height: 28px;
+    padding: 0;
     border: 1px solid #444;
     background: transparent;
-    color: #999;
+    color: #888;
     border-radius: 4px;
-    font-size: 12px;
     cursor: pointer;
     transition: all 0.2s;
-    margin-right: 6px;
-    margin-bottom: 4px;
+    margin-right: 4px;
 }
 
 .action-btn:hover {
@@ -293,6 +294,21 @@
 .action-btn.history-btn:hover {
     border-color: #64b5f6;
     color: #64b5f6;
+}
+
+.action-btn.warn-btn:hover {
+    border-color: #ffb74d;
+    color: #ffb74d;
+}
+
+.action-btn.suspend-btn:hover {
+    border-color: #ff8a65;
+    color: #ff8a65;
+}
+
+.action-btn.ban-btn:hover {
+    border-color: #e57373;
+    color: #e57373;
 }
 
 .action-btn.lift-btn {
@@ -513,6 +529,206 @@
 .btn-secondary:hover {
     background: #404040;
     border-color: #666;
+}
+
+/* Action Modal */
+.action-modal {
+    max-width: 500px;
+}
+
+.modal-body {
+    padding: 20px 24px;
+}
+
+.target-user {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 12px;
+    background: #2a2a2a;
+    border-radius: 8px;
+    margin-bottom: 16px;
+}
+
+.target-user strong {
+    color: #fff;
+}
+
+.target-user .user-id {
+    color: #888;
+    font-family: monospace;
+    font-size: 12px;
+}
+
+.modal-error {
+    padding: 10px 12px;
+    background: rgba(244, 67, 54, 0.1);
+    border: 1px solid #f44336;
+    border-radius: 6px;
+    color: #f44336;
+    font-size: 13px;
+    margin-bottom: 16px;
+}
+
+.form-group {
+    margin-bottom: 16px;
+}
+
+.form-group label {
+    display: block;
+    color: #ccc;
+    font-size: 13px;
+    margin-bottom: 6px;
+}
+
+.form-group select,
+.form-group textarea {
+    width: 100%;
+    padding: 10px 12px;
+    background: #2a2a2a;
+    border: 1px solid #444;
+    border-radius: 6px;
+    color: #fff;
+    font-size: 14px;
+    resize: vertical;
+}
+
+.form-group select:focus,
+.form-group textarea:focus {
+    outline: none;
+    border-color: #666;
+}
+
+.checkbox-group label {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    cursor: pointer;
+}
+
+.checkbox-group input[type="checkbox"] {
+    width: 16px;
+    height: 16px;
+    accent-color: #2196f3;
+}
+
+.btn-primary {
+    padding: 10px 20px;
+    border: none;
+    border-radius: 8px;
+    cursor: pointer;
+    font-size: 14px;
+    font-weight: 500;
+    transition: all 0.2s;
+}
+
+.btn-primary.btn-warn {
+    background: #ff9800;
+    color: #000;
+}
+
+.btn-primary.btn-warn:hover {
+    background: #ffa726;
+}
+
+.btn-primary.btn-suspend {
+    background: #ff5722;
+    color: #fff;
+}
+
+.btn-primary.btn-suspend:hover {
+    background: #ff7043;
+}
+
+.btn-primary.btn-ban {
+    background: #f44336;
+    color: #fff;
+}
+
+.btn-primary.btn-ban:hover {
+    background: #ef5350;
+}
+
+.btn-primary:disabled,
+.btn-secondary:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+}
+
+/* History modal updates */
+.item-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 8px;
+}
+
+.warning-category {
+    font-size: 11px;
+    font-weight: 600;
+    text-transform: uppercase;
+    color: #ffb74d;
+    background: rgba(255, 183, 77, 0.1);
+    padding: 2px 8px;
+    border-radius: 4px;
+}
+
+.lifted-badge {
+    font-size: 10px;
+    font-weight: 600;
+    color: #81c784;
+    background: rgba(129, 199, 132, 0.1);
+    padding: 2px 8px;
+    border-radius: 4px;
+}
+
+.lift-warning-btn {
+    display: flex;
+    align-items: center;
+    gap: 4px;
+    padding: 4px 8px;
+    background: transparent;
+    border: 1px solid #666;
+    border-radius: 4px;
+    color: #999;
+    font-size: 11px;
+    cursor: pointer;
+    transition: all 0.2s;
+}
+
+.lift-warning-btn:hover {
+    border-color: #e57373;
+    color: #e57373;
+    background: rgba(229, 115, 115, 0.1);
+}
+
+.history-item.lifted {
+    opacity: 0.5;
+}
+
+.no-items {
+    color: #666;
+    font-style: italic;
+    font-size: 13px;
+    padding: 12px;
+}
+
+.report-status {
+    font-size: 11px;
+    font-weight: 600;
+    text-transform: uppercase;
+}
+
+.report-status.status-pending {
+    color: #ff9800;
+}
+
+.report-status.status-resolved {
+    color: #4caf50;
+}
+
+.report-status.status-dismissed {
+    color: #666;
 }
 
 /* Responsive */
