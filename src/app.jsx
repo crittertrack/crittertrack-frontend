@@ -13664,10 +13664,22 @@ const MessagesView = ({ authToken, API_BASE_URL, onClose, showModalMessage, sele
             return;
         }
         try {
+            // Get messages from the last 24 hours
+            const twentyFourHoursAgo = Date.now() - (24 * 60 * 60 * 1000);
+            const recentMessages = messages
+                .filter(msg => new Date(msg.createdAt).getTime() > twentyFourHoursAgo)
+                .map(msg => ({
+                    messageId: msg._id,
+                    senderId: msg.senderId,
+                    message: msg.message,
+                    createdAt: msg.createdAt
+                }));
+            
             await axios.post(`${API_BASE_URL}/messages/report`, {
                 conversationUserId: selectedConversation.otherUserId,
                 reportedUserId: selectedConversation.otherUserId,
-                reason: reason.trim()
+                reason: reason.trim(),
+                recentMessages: recentMessages
             }, {
                 headers: { Authorization: `Bearer ${authToken}` }
             });
