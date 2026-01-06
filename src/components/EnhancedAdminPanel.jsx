@@ -7,7 +7,6 @@ import {
 import ModOversightPanel from './moderation/ModOversightPanel';
 import UserManagementPanel from './moderation/UserManagementPanel';
 import AuditLogViewer from './moderation/AuditLogViewer';
-import UserManagementTab from './admin/UserManagementTab';
 import AuditLogTab from './admin/AuditLogTab';
 import CommunicationTab from './admin/CommunicationTab';
 import SystemSettingsTab from './admin/SystemSettingsTab';
@@ -411,12 +410,11 @@ const EnhancedAdminPanel = ({ isOpen, onClose, authToken, API_BASE_URL, userRole
                                 { id: 'dashboard', label: 'Dashboard', icon: BarChart3 },
                                 { id: 'moderation', label: 'Reports', icon: AlertTriangle },
                                 { id: 'user-management', label: 'User Management', icon: Users },
+                                { id: 'animals', label: 'Animal Management', icon: Shield, requiredRole: 'admin' },
                                 { id: 'audit-logs', label: 'Audit Logs', icon: FileText },
                                 { id: 'reports', label: 'Reports & Analytics', icon: BarChart3 },
                                 { id: 'communication', label: 'Communication', icon: Mail },
                                 // Admin-only features
-                                { id: 'users', label: 'Admin Users', icon: Users, requiredRole: 'admin' },
-                                { id: 'animals', label: 'Animal Records', icon: Shield, requiredRole: 'admin' },
                                 { id: 'data-audit', label: 'Data Integrity', icon: Lock, requiredRole: 'admin' },
                                 { id: 'system-settings', label: 'System Settings', icon: Settings, requiredRole: 'admin' }
                             ].map(section => {
@@ -491,20 +489,10 @@ const EnhancedAdminPanel = ({ isOpen, onClose, authToken, API_BASE_URL, userRole
                             </div>
                         )}
 
-                        {/* User Management */}
-                        {activeSection === 'users' && (
-                            <div className="p-8">
-                                <UserManagementTab 
-                                    API_BASE_URL={API_BASE_URL}
-                                    authToken={authToken}
-                                />
-                            </div>
-                        )}
-
                         {/* Animal Management - DISABLED: Component deleted */}
                         {activeSection === 'animals' && (
                             <div className="p-8">
-                                <h3 className="text-2xl font-bold text-gray-800 mb-4">Animal Records</h3>
+                                <h3 className="text-2xl font-bold text-gray-800 mb-4">Animal Management</h3>
                                 <div className="bg-yellow-50 border border-yellow-200 rounded-lg p-6">
                                     <p className="text-yellow-800">This feature is currently being rebuilt.</p>
                                 </div>
