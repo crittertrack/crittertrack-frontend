@@ -12383,16 +12383,17 @@ const AuthView = ({ onLoginSuccess, showModalMessage, isRegister, setIsRegister,
                                 <div className="flex-shrink-0">
                                     <AlertCircle className="h-5 w-5 text-red-500" />
                                 </div>
-                                <div className="ml-3">
-                                    <p className="text-sm font-medium text-red-800">Account Suspended</p>
-                                    <p className="text-sm text-red-700 mt-1">{suspensionInfo.reason}</p>
+                                <div className="ml-3 w-full">
+                                    <p className="text-sm font-bold text-red-900">Account Suspended</p>
+                                    <p className="text-sm text-red-800 mt-2 font-semibold">Reason:</p>
+                                    <p className="text-sm text-red-700 mt-1 bg-red-50 p-2 rounded border border-red-200">{suspensionInfo.reason}</p>
                                     {suspensionTimeRemaining && (
-                                        <p className="text-sm text-red-700 mt-2 font-semibold">
-                                            Time remaining: <span className="text-lg">{suspensionTimeRemaining}</span>
+                                        <p className="text-sm text-red-700 mt-3 font-semibold">
+                                            Time remaining: <span className="text-lg text-red-900">{suspensionTimeRemaining}</span>
                                         </p>
                                     )}
-                                    <p className="text-xs text-red-600 mt-2">
-                                        <a href={`mailto:CrittertrackOwner@gmail.com?subject=Suspension Appeal&body=I would like to appeal my account suspension.%0D%0A%0D%0AReason for suspension: ${encodeURIComponent(suspensionInfo.reason)}%0D%0A%0D%0AMy appeal:`} className="underline hover:text-red-800">
+                                    <p className="text-xs text-red-600 mt-3">
+                                        <a href={`mailto:CrittertrackOwner@gmail.com?subject=Suspension Appeal&body=I would like to appeal my account suspension.%0D%0A%0D%0AReason for suspension: ${encodeURIComponent(suspensionInfo.reason)}%0D%0A%0D%0AMy appeal:`} className="underline hover:text-red-800 font-semibold">
                                             Submit an appeal
                                         </a>
                                     </p>
