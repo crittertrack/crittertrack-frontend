@@ -345,13 +345,55 @@ export const WarnUserModal = ({ isOpen, onClose, onSubmit, context, currentWarni
 // Suspend User Modal
 export const SuspendUserModal = ({ isOpen, onClose, onSubmit, context }) => {
     const [reason, setReason] = useState('');
-    const [duration, setDuration] = useState('7');
+    const [duration, setDuration] = useState('1');
     const [customDuration, setCustomDuration] = useState('');
+    const [customUnit, setCustomUnit] = useState('hours');
+
+    // Define suspension duration options (stored as days for backend compatibility)
+    const durationOptions = [
+        { label: '30 Minutes', days: 0.0208333 },      // 30 minutes / 1440 minutes per day
+        { label: '1 Hour', days: 0.041666666 },        // 1 hour / 24 hours per day
+        { label: '12 Hours', days: 0.5 },              // 12 hours / 24 hours per day
+        { label: '1 Day', days: 1 },
+        { label: '3 Days', days: 3 },
+        { label: '7 Days', days: 7 },
+        { label: '14 Days', days: 14 },
+        { label: '1 Month', days: 30 },
+        { label: 'Custom', days: null }
+    ];
 
     if (!isOpen) return null;
 
     const handleSubmit = () => {
-        const finalDuration = duration === 'custom' ? parseInt(customDuration, 10) : parseInt(duration, 10);
+        let finalDuration;
+        
+        if (duration === 'custom') {
+            const customNum = parseFloat(customDuration);
+            if (!customNum || customNum <= 0) {
+                alert('Please enter a valid custom duration');
+                return;
+            }
+            
+            // Convert custom duration to days based on unit
+            switch (customUnit) {
+                case 'minutes':
+                    finalDuration = customNum / 1440; // 1440 minutes per day
+                    break;
+                case 'hours':
+                    finalDuration = customNum / 24;   // 24 hours per day
+                    break;
+                case 'days':
+                    finalDuration = customNum;
+                    break;
+                default:
+                    finalDuration = customNum;
+            }
+        } else {
+            // Find the selected duration option
+            const selected = durationOptions.find(opt => opt.label === duration);
+            finalDuration = selected ? selected.days : 1;
+        }
+        
         onSubmit({
             action: 'suspend',
             reason,
@@ -359,8 +401,9 @@ export const SuspendUserModal = ({ isOpen, onClose, onSubmit, context }) => {
             context
         });
         setReason('');
-        setDuration('7');
+        setDuration('1');
         setCustomDuration('');
+        setCustomUnit('hours');
         onClose();
     };
 
@@ -388,27 +431,37 @@ export const SuspendUserModal = ({ isOpen, onClose, onSubmit, context }) => {
                     <div className="form-group">
                         <label>Suspension Duration</label>
                         <select value={duration} onChange={(e) => setDuration(e.target.value)}>
-                            <option value="0.0208">30 Minutes (Testing)</option>
-                            <option value="1">1 Day</option>
-                            <option value="3">3 Days</option>
-                            <option value="7">7 Days</option>
-                            <option value="14">14 Days</option>
-                            <option value="30">30 Days</option>
-                            <option value="custom">Custom</option>
+                            {durationOptions.map((opt) => (
+                                <option key={opt.label} value={opt.label}>
+                                    {opt.label}
+                                </option>
+                            ))}
                         </select>
                     </div>
 
-                    {duration === 'custom' && (
+                    {duration === 'Custom' && (
                         <div className="form-group">
-                            <label>Custom Duration (days)</label>
-                            <input
-                                type="number"
-                                min="1"
-                                max="365"
-                                value={customDuration}
-                                onChange={(e) => setCustomDuration(e.target.value)}
-                                placeholder="Enter number of days"
-                            />
+                            <div style={{ display: 'flex', gap: '10px' }}>
+                                <div style={{ flex: 1 }}>
+                                    <label>Duration</label>
+                                    <input
+                                        type="number"
+                                        min="1"
+                                        step="0.5"
+                                        value={customDuration}
+                                        onChange={(e) => setCustomDuration(e.target.value)}
+                                        placeholder="Enter number"
+                                    />
+                                </div>
+                                <div style={{ flex: 1 }}>
+                                    <label>Unit</label>
+                                    <select value={customUnit} onChange={(e) => setCustomUnit(e.target.value)}>
+                                        <option value="minutes">Minutes</option>
+                                        <option value="hours">Hours</option>
+                                        <option value="days">Days</option>
+                                    </select>
+                                </div>
+                            </div>
                         </div>
                     )}
 
@@ -427,7 +480,7 @@ export const SuspendUserModal = ({ isOpen, onClose, onSubmit, context }) => {
                     <button onClick={onClose} className="btn-cancel">Cancel</button>
                     <button 
                         onClick={handleSubmit} 
-                        disabled={!reason.trim() || (duration === 'custom' && !customDuration)} 
+                        disabled={!reason.trim() || (duration === 'Custom' && !customDuration)} 
                         className="btn-submit btn-suspend"
                     >
                         Suspend User
