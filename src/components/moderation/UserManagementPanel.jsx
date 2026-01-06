@@ -262,10 +262,10 @@ const UserManagementPanel = () => {
                         {filteredUsers.map(user => (
                             <tr key={user._id}>
                                 <td className="user-id">
+                                    {user.id_public}
                                     {user.role !== 'user' && (
                                         <Shield size={14} className={`role-icon ${user.role}`} />
                                     )}
-                                    {user.id_public}
                                 </td>
                                 <td className="user-name">{user.personalName || user.breederName || 'No Name'}</td>
                                 <td className="user-email">{user.email}</td>
