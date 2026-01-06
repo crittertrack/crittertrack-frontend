@@ -35,7 +35,7 @@ const UserManagementPanel = () => {
             const response = await axios.get(`${API_URL}/admin/users/moderation-overview`, {
                 headers: { Authorization: `Bearer ${token}` }
             });
-            setUsers(response.data);
+            setUsers(Array.isArray(response.data) ? response.data : []);
             setError('');
         } catch (err) {
             setError(err.response?.data?.error || 'Failed to load users');

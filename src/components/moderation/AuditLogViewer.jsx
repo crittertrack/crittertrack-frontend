@@ -68,8 +68,9 @@ const AuditLogViewer = () => {
                 { headers: { Authorization: `Bearer ${token}` } }
             );
 
-            setLogs(response.data.logs || response.data);
-            setTotalLogs(response.data.total || response.data.length);
+            const logsData = response.data?.logs || response.data;
+            setLogs(Array.isArray(logsData) ? logsData : []);
+            setTotalLogs(response.data?.total || (Array.isArray(logsData) ? logsData.length : 0));
             setError('');
         } catch (err) {
             setError(err.response?.data?.error || 'Failed to load audit logs');
