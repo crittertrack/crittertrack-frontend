@@ -99,7 +99,16 @@ const getSubjectTitle = (report = {}) => {
 
 const getSubjectOwner = (report = {}) => {
     if (report.reportedAnimalId) {
-        return report.reportedAnimalId.ownerId || 'Unknown owner';
+        const owner = report.reportedAnimalId.ownerId;
+        if (owner && typeof owner === 'object') {
+            const name = owner.personalName || owner.breederName;
+            const ctu = owner.id_public;
+            if (name && ctu) return `${name} (${ctu})`;
+            if (ctu) return ctu;
+            if (name) return name;
+            return owner.email || 'Unknown owner';
+        }
+        return 'Unknown owner';
     }
 
     if (report.reportedUserId) {
@@ -124,6 +133,15 @@ const getSubjectOwner = (report = {}) => {
 };
 
 const getContentOwnerDetails = (report = {}) => {
+    if (report.reportedAnimalId?.ownerId && typeof report.reportedAnimalId.ownerId === 'object') {
+        const owner = report.reportedAnimalId.ownerId;
+        return {
+            personalName: owner.personalName || null,
+            breederName: owner.breederName || null,
+            ctu: owner.id_public || null,
+            email: owner.email || null
+        };
+    }
     if (report.reportedUserId) {
         const user = report.reportedUserId;
         return {
@@ -131,6 +149,23 @@ const getContentOwnerDetails = (report = {}) => {
             breederName: user.breederName || null,
             ctu: user.id_public || null,
             email: user.email || null
+        };
+    }
+    return null;
+};
+
+const getAnimalDetails = (report = {}) => {
+    if (report.reportedAnimalId) {
+        const animal = report.reportedAnimalId;
+        return {
+            name: animal.name || null,
+            id_public: animal.id_public || null,
+            species: animal.species || null,
+            gender: animal.gender || null,
+            variety: animal.variety || null,
+            status: animal.status || null,
+            dateOfBirth: animal.dateOfBirth || null,
+            image: animal.images?.[0] || null
         };
     }
     return null;
@@ -398,6 +433,72 @@ export default function ModOversightPanel({
                                                     <span>{getContentOwnerDetails(selectedReport).email}</span>
                                                 </div>
                                             )}
+                                        </div>
+                                    </div>
+                                )}
+
+                                {/* Animal Details Section - for animal reports */}
+                                {reportType === 'animal' && getAnimalDetails(selectedReport) && (
+                                    <div className="mod-detail-section">
+                                        <strong>Reported Animal:</strong>
+                                        <div style={{ 
+                                            backgroundColor: '#f5f5f5', 
+                                            padding: '12px', 
+                                            borderRadius: '8px', 
+                                            marginTop: '8px',
+                                            border: '1px solid #e0e0e0',
+                                            display: 'flex',
+                                            gap: '16px',
+                                            alignItems: 'flex-start'
+                                        }}>
+                                            {getAnimalDetails(selectedReport).image && (
+                                                <img 
+                                                    src={getAnimalDetails(selectedReport).image} 
+                                                    alt={getAnimalDetails(selectedReport).name || 'Animal'} 
+                                                    style={{ 
+                                                        width: '80px', 
+                                                        height: '80px', 
+                                                        objectFit: 'cover', 
+                                                        borderRadius: '8px',
+                                                        flexShrink: 0
+                                                    }} 
+                                                />
+                                            )}
+                                            <div style={{ flex: 1 }}>
+                                                <p style={{ margin: 0, fontWeight: 'bold', fontSize: '16px' }}>
+                                                    {getAnimalDetails(selectedReport).name || 'Unnamed'}
+                                                </p>
+                                                <p style={{ margin: '4px 0', fontSize: '13px', color: '#666' }}>
+                                                    ID: <span style={{ fontFamily: 'monospace' }}>{getAnimalDetails(selectedReport).id_public || 'N/A'}</span>
+                                                </p>
+                                                <div style={{ display: 'flex', gap: '12px', flexWrap: 'wrap', marginTop: '8px' }}>
+                                                    {getAnimalDetails(selectedReport).species && (
+                                                        <span style={{ fontSize: '12px', padding: '2px 8px', backgroundColor: '#e3f2fd', borderRadius: '4px' }}>
+                                                            {getAnimalDetails(selectedReport).species}
+                                                        </span>
+                                                    )}
+                                                    {getAnimalDetails(selectedReport).gender && (
+                                                        <span style={{ fontSize: '12px', padding: '2px 8px', backgroundColor: getAnimalDetails(selectedReport).gender === 'Male' ? '#e3f2fd' : '#fce4ec', borderRadius: '4px' }}>
+                                                            {getAnimalDetails(selectedReport).gender}
+                                                        </span>
+                                                    )}
+                                                    {getAnimalDetails(selectedReport).variety && (
+                                                        <span style={{ fontSize: '12px', padding: '2px 8px', backgroundColor: '#f3e5f5', borderRadius: '4px' }}>
+                                                            {getAnimalDetails(selectedReport).variety}
+                                                        </span>
+                                                    )}
+                                                    {getAnimalDetails(selectedReport).status && (
+                                                        <span style={{ fontSize: '12px', padding: '2px 8px', backgroundColor: '#fff3e0', borderRadius: '4px' }}>
+                                                            {getAnimalDetails(selectedReport).status}
+                                                        </span>
+                                                    )}
+                                                </div>
+                                                {getAnimalDetails(selectedReport).dateOfBirth && (
+                                                    <p style={{ margin: '8px 0 0', fontSize: '12px', color: '#666' }}>
+                                                        Born: {new Date(getAnimalDetails(selectedReport).dateOfBirth).toLocaleDateString()}
+                                                    </p>
+                                                )}
+                                            </div>
                                         </div>
                                     </div>
                                 )}
