@@ -239,7 +239,9 @@ const AuditLogViewer = () => {
                                     <th>Moderator</th>
                                     <th>Target</th>
                                     <th>Reason</th>
-                                    <th>Details</th>
+                                    <th>Duration</th>
+                                    <th>Category</th>
+                                    <th>Warning #</th>
                                 </tr>
                             </thead>
                             <tbody>
@@ -293,23 +295,20 @@ const AuditLogViewer = () => {
                                             ) : log.targetName ? (
                                                 <div className="target-name">{log.targetName}</div>
                                             ) : (
-                                                <span className="no-target">N/A</span>
+                                                <span className="na-cell">N/A</span>
                                             )}
                                         </td>
                                         <td className="reason-cell">
-                                            {log.reason || log.details?.reason || '—'}
+                                            {log.reason || log.details?.reason || <span className="na-cell">N/A</span>}
                                         </td>
-                                        <td className="details-cell">
-                                            {(() => {
-                                                const details = log.details || {};
-                                                const parts = [];
-                                                if (details.durationDays) parts.push(`${details.durationDays} days`);
-                                                if (details.warningCategory) parts.push(details.warningCategory);
-                                                if (details.warningCount) parts.push(`Warning #${details.warningCount}`);
-                                                if (details.resolution) parts.push(details.resolution);
-                                                if (details.previousStatus) parts.push(`was: ${details.previousStatus}`);
-                                                return parts.length > 0 ? parts.join(' • ') : '—';
-                                            })()}
+                                        <td className="duration-cell">
+                                            {log.details?.durationDays ? `${log.details.durationDays} days` : <span className="na-cell">N/A</span>}
+                                        </td>
+                                        <td className="category-cell">
+                                            {log.details?.warningCategory || log.details?.resolution || <span className="na-cell">N/A</span>}
+                                        </td>
+                                        <td className="warning-cell">
+                                            {log.details?.warningCount || <span className="na-cell">N/A</span>}
                                         </td>
                                     </tr>
                                 ))}

@@ -290,7 +290,7 @@
 
 .moderator-cell,
 .target-cell {
-    min-width: 140px;
+    min-width: 120px;
 }
 
 .moderator-name,
@@ -306,23 +306,28 @@
     font-size: 11px;
 }
 
-.system-action,
-.no-target {
+.system-action {
     color: #666;
     font-style: italic;
+}
+
+.na-cell {
+    color: #555;
 }
 
 .reason-cell {
     color: #ccc;
     font-size: 13px;
-    max-width: 250px;
+    max-width: 200px;
     word-wrap: break-word;
 }
 
-.details-cell {
-    color: #999;
+.duration-cell,
+.category-cell,
+.warning-cell {
+    color: #ccc;
     font-size: 13px;
-    max-width: 200px;
+    white-space: nowrap;
 }
     max-height: 200px;
     overflow-y: auto;
