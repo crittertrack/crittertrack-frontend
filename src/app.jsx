@@ -13656,27 +13656,43 @@ const MessagesView = ({ authToken, API_BASE_URL, onClose, showModalMessage, sele
         }
     };
 
-    const handleReportUser = async () => {
-        const reason = window.prompt('Why are you reporting this user? (max 1000 characters)');
+    const handleReportConversation = async () => {
+        const reason = window.prompt('Why are you reporting this conversation? (max 1000 characters)');
         if (!reason) return;
         if (reason.length > 1000) {
             showModalMessage && showModalMessage('Error', 'Report reason too long');
             return;
         }
         try {
-            const lastMsg = messages[messages.length - 1];
-            if (!lastMsg) {
-                showModalMessage && showModalMessage('Error', 'No message to report');
-                return;
-            }
             await axios.post(`${API_BASE_URL}/messages/report`, {
-                messageId: lastMsg._id,
+                conversationUserId: selectedConversation.otherUserId,
                 reportedUserId: selectedConversation.otherUserId,
                 reason: reason.trim()
             }, {
                 headers: { Authorization: `Bearer ${authToken}` }
             });
             showModalMessage && showModalMessage('Success', 'Report submitted to support team');
+        } catch (error) {
+            showModalMessage && showModalMessage('Error', 'Failed to submit report');
+        }
+    };
+
+    const handleReportMessage = async (messageId, messageContent) => {
+        const reason = window.prompt(`Why are you reporting this message?\n\n"${messageContent.substring(0, 100)}${messageContent.length > 100 ? '...' : ''}"\n\n(max 1000 characters)`);
+        if (!reason) return;
+        if (reason.length > 1000) {
+            showModalMessage && showModalMessage('Error', 'Report reason too long');
+            return;
+        }
+        try {
+            await axios.post(`${API_BASE_URL}/messages/report`, {
+                messageId: messageId,
+                reportedUserId: selectedConversation.otherUserId,
+                reason: reason.trim()
+            }, {
+                headers: { Authorization: `Bearer ${authToken}` }
+            });
+            showModalMessage && showModalMessage('Success', 'Message reported to support team');
         } catch (error) {
             showModalMessage && showModalMessage('Error', 'Failed to submit report');
         }
@@ -13803,9 +13819,9 @@ const MessagesView = ({ authToken, API_BASE_URL, onClose, showModalMessage, sele
                                                 <Ban size={18} />
                                             </button>
                                             <button
-                                                onClick={handleReportUser}
+                                                onClick={handleReportConversation}
                                                 className="p-2 text-gray-600 hover:bg-orange-100 hover:text-orange-600 rounded-lg transition"
-                                                title="Report user"
+                                                title="Report conversation"
                                             >
                                                 <Flag size={18} />
                                             </button>
@@ -13841,13 +13857,21 @@ const MessagesView = ({ authToken, API_BASE_URL, onClose, showModalMessage, sele
                                                             <p className={`text-xs ${isSentByMe ? 'text-blue-100' : 'text-gray-500'}`}>
                                                                 {formatTime(msg.createdAt)}
                                                             </p>
-                                                            {isSentByMe && (
+                                                            {isSentByMe ? (
                                                                 <button
                                                                     onClick={() => handleDeleteMessage(msg._id)}
                                                                     className="opacity-0 group-hover:opacity-100 transition p-1 hover:bg-white hover:bg-opacity-20 rounded"
                                                                     title="Delete message"
                                                                 >
                                                                     <Trash2 size={14} />
+                                                                </button>
+                                                            ) : (
+                                                                <button
+                                                                    onClick={() => handleReportMessage(msg._id, msg.message)}
+                                                                    className="opacity-0 group-hover:opacity-100 transition p-1 hover:bg-gray-300 rounded"
+                                                                    title="Report message"
+                                                                >
+                                                                    <Flag size={14} />
                                                                 </button>
                                                             )}
                                                         </div>
