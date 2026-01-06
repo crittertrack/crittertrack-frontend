@@ -14986,15 +14986,14 @@ const App = () => {
                     const savedNotification = localStorage.getItem('suspensionLiftedNotification');
                     if (!savedNotification) {
                         console.log('[AUTH] Suspension has been lifted for user');
-                        // Clear the suspension info from state and localStorage
-                        setSuspensionInfo(null);
-                        setSuspensionTimeRemaining(null);
+                        // Clear the suspension info from localStorage
                         localStorage.removeItem('suspensionEndTime');
                         localStorage.removeItem('suspensionReason');
                         // Store notification with 24-hour expiry
                         const expiresAt = new Date().getTime() + (24 * 60 * 60 * 1000);
                         localStorage.setItem('suspensionLiftedNotification', JSON.stringify({ expiresAt }));
-                        setSuspensionLiftedNotification(true);
+                        // Force a page reload to update the UI
+                        window.location.reload();
                     }
                 }
                 
@@ -15040,7 +15039,7 @@ const App = () => {
         pollUserStatus();
 
         return () => clearInterval(statusPollInterval);
-    }, [authToken, API_BASE_URL, handleLogout, showModalMessage, setSuspensionInfo, setSuspensionTimeRemaining, setSuspensionLiftedNotification]);
+    }, [authToken, API_BASE_URL, handleLogout, showModalMessage]);
 
     useEffect(() => {
         if (authToken && !hasCompletedOnboarding && !tutorialLoading && userProfile) {
