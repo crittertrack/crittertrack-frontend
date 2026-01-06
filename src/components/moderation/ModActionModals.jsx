@@ -89,11 +89,9 @@ export const EditContentModal = ({ isOpen, onClose, onSubmit, context }) => {
     const getEditableFields = () => {
         if (context?.type === 'profile') {
             return [
-                { value: 'personalName', label: 'Personal Name' },
                 { value: 'breederName', label: 'Breeder Name' },
                 { value: 'profileImage', label: 'Profile Image (clear to remove)' },
-                { value: 'profileBio', label: 'Profile Bio' },
-                { value: 'location', label: 'Location' },
+                { value: 'bio', label: 'Profile Bio' },
                 { value: 'websiteUrl', label: 'Website URL' }
             ];
         }
