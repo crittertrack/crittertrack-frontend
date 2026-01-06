@@ -139,7 +139,10 @@ const getContentOwnerDetails = (report = {}) => {
             personalName: owner.personalName || null,
             breederName: owner.breederName || null,
             ctu: owner.id_public || null,
-            email: owner.email || null
+            email: owner.email || null,
+            profileImage: owner.profileImage || null,
+            bio: null,
+            websiteUrl: null
         };
     }
     if (report.reportedUserId) {
@@ -148,7 +151,10 @@ const getContentOwnerDetails = (report = {}) => {
             personalName: user.personalName || null,
             breederName: user.breederName || null,
             ctu: user.id_public || null,
-            email: user.email || null
+            email: user.email || null,
+            profileImage: user.profileImage || null,
+            bio: user.bio || null,
+            websiteUrl: user.websiteUrl || null
         };
     }
     return null;
@@ -408,31 +414,63 @@ export default function ModOversightPanel({
                                 {getContentOwnerDetails(selectedReport) && (
                                     <div className="mod-detail-section">
                                         <strong>Content Owner Details:</strong>
-                                        <div className="mod-content-details">
-                                            {getContentOwnerDetails(selectedReport).personalName && (
-                                                <div className="mod-detail-item">
-                                                    <span className="mod-detail-label">Personal Name:</span>
-                                                    <span>{getContentOwnerDetails(selectedReport).personalName}</span>
-                                                </div>
+                                        <div className="mod-content-details" style={{ display: 'flex', gap: '16px', marginTop: '8px' }}>
+                                            {getContentOwnerDetails(selectedReport).profileImage && (
+                                                <img 
+                                                    src={getContentOwnerDetails(selectedReport).profileImage} 
+                                                    alt="Profile" 
+                                                    style={{ 
+                                                        width: '80px', 
+                                                        height: '80px', 
+                                                        objectFit: 'cover', 
+                                                        borderRadius: '8px',
+                                                        flexShrink: 0,
+                                                        border: '1px solid #e0e0e0'
+                                                    }} 
+                                                />
                                             )}
-                                            {getContentOwnerDetails(selectedReport).breederName && (
-                                                <div className="mod-detail-item">
-                                                    <span className="mod-detail-label">Breeder Name:</span>
-                                                    <span>{getContentOwnerDetails(selectedReport).breederName}</span>
-                                                </div>
-                                            )}
-                                            {getContentOwnerDetails(selectedReport).ctu && (
-                                                <div className="mod-detail-item">
-                                                    <span className="mod-detail-label">CTU:</span>
-                                                    <span>{getContentOwnerDetails(selectedReport).ctu}</span>
-                                                </div>
-                                            )}
-                                            {getContentOwnerDetails(selectedReport).email && (
-                                                <div className="mod-detail-item">
-                                                    <span className="mod-detail-label">Email:</span>
-                                                    <span>{getContentOwnerDetails(selectedReport).email}</span>
-                                                </div>
-                                            )}
+                                            <div style={{ flex: 1 }}>
+                                                {getContentOwnerDetails(selectedReport).personalName && (
+                                                    <div className="mod-detail-item">
+                                                        <span className="mod-detail-label">Personal Name:</span>
+                                                        <span>{getContentOwnerDetails(selectedReport).personalName}</span>
+                                                    </div>
+                                                )}
+                                                {getContentOwnerDetails(selectedReport).breederName && (
+                                                    <div className="mod-detail-item">
+                                                        <span className="mod-detail-label">Breeder Name:</span>
+                                                        <span>{getContentOwnerDetails(selectedReport).breederName}</span>
+                                                    </div>
+                                                )}
+                                                {getContentOwnerDetails(selectedReport).ctu && (
+                                                    <div className="mod-detail-item">
+                                                        <span className="mod-detail-label">CTU:</span>
+                                                        <span>{getContentOwnerDetails(selectedReport).ctu}</span>
+                                                    </div>
+                                                )}
+                                                {getContentOwnerDetails(selectedReport).email && (
+                                                    <div className="mod-detail-item">
+                                                        <span className="mod-detail-label">Email:</span>
+                                                        <span>{getContentOwnerDetails(selectedReport).email}</span>
+                                                    </div>
+                                                )}
+                                                {getContentOwnerDetails(selectedReport).websiteUrl && (
+                                                    <div className="mod-detail-item">
+                                                        <span className="mod-detail-label">Website:</span>
+                                                        <a href={getContentOwnerDetails(selectedReport).websiteUrl} target="_blank" rel="noopener noreferrer" style={{ color: '#1976d2' }}>
+                                                            {getContentOwnerDetails(selectedReport).websiteUrl}
+                                                        </a>
+                                                    </div>
+                                                )}
+                                                {getContentOwnerDetails(selectedReport).bio && (
+                                                    <div className="mod-detail-item" style={{ marginTop: '8px' }}>
+                                                        <span className="mod-detail-label">Bio:</span>
+                                                        <p style={{ margin: '4px 0 0', padding: '8px', backgroundColor: '#f5f5f5', borderRadius: '4px', whiteSpace: 'pre-wrap', fontSize: '13px' }}>
+                                                            {getContentOwnerDetails(selectedReport).bio}
+                                                        </p>
+                                                    </div>
+                                                )}
+                                            </div>
                                         </div>
                                     </div>
                                 )}
