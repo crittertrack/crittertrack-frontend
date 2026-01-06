@@ -8,6 +8,28 @@ import './AuditLogViewer.css';
 
 const API_URL = process.env.REACT_APP_API_URL || '/api';
 
+// Helper to format details into readable text
+const formatDetails = (details) => {
+    if (!details || typeof details !== 'object') return null;
+    
+    const lines = [];
+    
+    // Common fields to display nicely
+    if (details.reason) lines.push(`Reason: ${details.reason}`);
+    if (details.newStatus) lines.push(`New Status: ${details.newStatus}`);
+    if (details.previousStatus) lines.push(`Previous Status: ${details.previousStatus}`);
+    if (details.durationDays) lines.push(`Duration: ${details.durationDays} days`);
+    if (details.warningCategory) lines.push(`Category: ${details.warningCategory}`);
+    if (details.warningCount) lines.push(`Warning Count: ${details.warningCount}`);
+    if (details.fieldName) lines.push(`Field: ${details.fieldName}`);
+    if (details.oldValue) lines.push(`Old Value: ${details.oldValue}`);
+    if (details.newValue) lines.push(`New Value: ${details.newValue}`);
+    if (details.reportType) lines.push(`Report Type: ${details.reportType}`);
+    if (details.resolution) lines.push(`Resolution: ${details.resolution}`);
+    
+    return lines.length > 0 ? lines : null;
+};
+
 const ACTION_TYPES = [
     { value: 'all', label: 'All Actions' },
     { value: 'admin_login', label: 'Admin Login' },
@@ -280,19 +302,22 @@ const AuditLogViewer = () => {
                                             {log.ipAddress || 'N/A'}
                                         </td>
                                         <td className="details-cell">
-                                            {log.details ? (
-                                                <details>
-                                                    <summary>View Details</summary>
-                                                    <pre className="details-content">
-                                                        {typeof log.details === 'string' 
-                                                            ? log.details 
-                                                            : JSON.stringify(log.details, null, 2)
-                                                        }
-                                                    </pre>
-                                                </details>
-                                            ) : (
-                                                <span className="no-details">—</span>
-                                            )}
+                                            {(() => {
+                                                const formattedLines = formatDetails(log.details);
+                                                if (formattedLines) {
+                                                    return (
+                                                        <details>
+                                                            <summary>View Details</summary>
+                                                            <div className="details-content formatted">
+                                                                {formattedLines.map((line, i) => (
+                                                                    <div key={i}>{line}</div>
+                                                                ))}
+                                                            </div>
+                                                        </details>
+                                                    );
+                                                }
+                                                return <span className="no-details">—</span>;
+                                            })()}
                                         </td>
                                     </tr>
                                 ))}
