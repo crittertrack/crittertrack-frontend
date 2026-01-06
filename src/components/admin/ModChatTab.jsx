@@ -41,7 +41,9 @@ export default function ModChatTab({ API_BASE_URL, authToken, currentUserId }) {
 
             const contentType = response.headers.get('content-type');
             if (!contentType || !contentType.includes('application/json')) {
-                throw new Error('Mod chat endpoint not available');
+                // Silently fail if endpoint not available yet
+                if (!silent) setLoading(false);
+                return;
             }
 
             const data = await response.json();
@@ -87,7 +89,9 @@ export default function ModChatTab({ API_BASE_URL, authToken, currentUserId }) {
 
             const contentType = response.headers.get('content-type');
             if (!contentType || !contentType.includes('application/json')) {
-                throw new Error('Mod chat endpoint not available');
+                // Silently fail if endpoint not available yet
+                setSending(false);
+                return;
             }
 
             const data = await response.json();
@@ -119,7 +123,8 @@ export default function ModChatTab({ API_BASE_URL, authToken, currentUserId }) {
 
             const contentType = response.headers.get('content-type');
             if (!contentType || !contentType.includes('application/json')) {
-                throw new Error('Mod chat endpoint not available');
+                // Silently fail if endpoint not available yet
+                return;
             }
 
             const data = await response.json();
