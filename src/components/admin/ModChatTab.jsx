@@ -89,12 +89,11 @@ export default function ModChatTab({ API_BASE_URL, authToken, currentUserId }) {
 
             const contentType = response.headers.get('content-type');
             if (!contentType || !contentType.includes('application/json')) {
-                // Silently fail if endpoint not available yet
-                setSending(false);
-                return;
+                throw new Error(`Endpoint returned non-JSON (status: ${response.status})`);
             }
 
             const data = await response.json();
+            console.log('Mod chat response:', data);
 
             if (!response.ok) {
                 throw new Error(data.error || 'Failed to send message');
@@ -104,6 +103,7 @@ export default function ModChatTab({ API_BASE_URL, authToken, currentUserId }) {
             setNewMessage('');
             setTimeout(() => scrollToBottom(), 100);
         } catch (err) {
+            console.error('Mod chat error:', err);
             setError(err.message);
         } finally {
             setSending(false);
