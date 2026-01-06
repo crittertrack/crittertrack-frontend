@@ -12103,9 +12103,35 @@ const AuthView = ({ onLoginSuccess, showModalMessage, isRegister, setIsRegister,
                             }
                         }
                         
-                        // Extract reason (everything before "Expires in")
-                        const reasonMatch = message.match(/^Account suspended:\s*(.+?)\s+Expires in/);
-                        const suspensionReason = reasonMatch ? reasonMatch[1] : 'Your account has been suspended.';
+                        // Extract reason - try multiple patterns to be robust
+                        let suspensionReason = 'Your account has been suspended.';
+                        
+                        // Try pattern 1: Extract everything between "Account suspended:" and "Expires in"
+                        const reasonMatch1 = message.match(/Account suspended:\s*(.+?)\s+Expires in/i);
+                        if (reasonMatch1) {
+                            suspensionReason = reasonMatch1[1].trim();
+                        } else {
+                            // Try pattern 2: Extract everything after "Account suspended:" until we hit "ExpiryTimestamp"
+                            const reasonMatch2 = message.match(/Account suspended:\s*(.+?)\s+ExpiryTimestamp/i);
+                            if (reasonMatch2) {
+                                suspensionReason = reasonMatch2[1].trim();
+                            } else {
+                                // Try pattern 3: Extract everything after "Account suspended:" (greedy, in case Expires in isn't there)
+                                const reasonMatch3 = message.match(/Account suspended:\s*(.+)/i);
+                                if (reasonMatch3) {
+                                    let text = reasonMatch3[1];
+                                    // Remove ExpiryTimestamp if it exists
+                                    text = text.replace(/\s*ExpiryTimestamp:.+$/i, '').trim();
+                                    // Remove Expires in... if it exists
+                                    text = text.replace(/\s*Expires in.+$/i, '').trim();
+                                    if (text) {
+                                        suspensionReason = text;
+                                    }
+                                }
+                            }
+                        }
+                        
+                        console.log('[LOGIN] Extracted suspension reason:', suspensionReason);
                         
                         // Store suspension info for display on login screen (always update with server timestamp)
                         localStorage.setItem('suspensionEndTime', suspensionEndTime.toString());
