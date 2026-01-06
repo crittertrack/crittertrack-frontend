@@ -2009,7 +2009,6 @@ const PrivateAnimalDetail = ({ animal, onClose, onEdit, API_BASE_URL, authToken,
     const [breederInfo, setBreederInfo] = useState(null);
     const [showPedigree, setShowPedigree] = useState(false);
     const [detailViewTab, setDetailViewTab] = useState(1);
-    const [showAllDetailTabs, setShowAllDetailTabs] = useState(false);
     
     // Helper function to parse health records from JSON strings
     const parseHealthRecords = (data) => {
@@ -2094,10 +2093,7 @@ const PrivateAnimalDetail = ({ animal, onClose, onEdit, API_BASE_URL, authToken,
 
                 {/* Tabs - ALL 11 TABS */}
                 <div className="bg-white border-b border-gray-300 px-6 pt-4">
-                    <div 
-                        className="flex flex-wrap gap-1 pb-px transition-all duration-300 overflow-hidden" 
-                        style={{ maxHeight: showAllDetailTabs ? '500px' : '80px' }}
-                    >
+                    <div className="flex flex-wrap gap-1 pb-4">
                         {[
                             { id: 1, label: 'Overview', icon: '📋' },
                             { id: 2, label: 'Status & Privacy', icon: '🔒' },
@@ -2127,13 +2123,6 @@ const PrivateAnimalDetail = ({ animal, onClose, onEdit, API_BASE_URL, authToken,
                             </button>
                         ))}
                     </div>
-                    <button
-                        type="button"
-                        onClick={() => setShowAllDetailTabs(!showAllDetailTabs)}
-                        className="text-xs text-primary hover:text-primary/80 py-1 font-medium transition-transform inline-block"
-                    >
-                        {showAllDetailTabs ? '▲ Show Less' : '▼ Show All Tabs'}
-                    </button>
                 </div>
 
                 {/* Tab Content */}
@@ -2797,7 +2786,6 @@ const ViewOnlyPrivateAnimalDetail = ({ animal, onClose, API_BASE_URL, authToken,
     const [breederInfo, setBreederInfo] = useState(null);
     const [showPedigree, setShowPedigree] = useState(false);
     const [detailViewTab, setDetailViewTab] = useState(1);
-    const [showAllDetailTabs, setShowAllDetailTabs] = useState(false);
     
     // Helper function to parse health records from JSON strings
     const parseHealthRecords = (data) => {
@@ -2877,10 +2865,7 @@ const ViewOnlyPrivateAnimalDetail = ({ animal, onClose, API_BASE_URL, authToken,
 
                 {/* Tabs - ALL 11 TABS (same as PrivateAnimalDetail) */}
                 <div className="bg-white border-b border-gray-300 px-6 pt-4">
-                    <div 
-                        className="flex flex-wrap gap-1 pb-px transition-all duration-300 overflow-hidden" 
-                        style={{ maxHeight: showAllDetailTabs ? '500px' : '80px' }}
-                    >
+                    <div className="flex flex-wrap gap-1 pb-4">
                         {[
                             { id: 1, label: 'Overview', icon: '📋' },
                             { id: 2, label: 'Status & Privacy', icon: '🔒' },
@@ -2910,13 +2895,6 @@ const ViewOnlyPrivateAnimalDetail = ({ animal, onClose, API_BASE_URL, authToken,
                             </button>
                         ))}
                     </div>
-                    <button
-                        type="button"
-                        onClick={() => setShowAllDetailTabs(!showAllDetailTabs)}
-                        className="text-xs text-primary hover:text-primary/80 py-1 font-medium transition-transform inline-block"
-                    >
-                        {showAllDetailTabs ? '▲ Show Less' : '▼ Show All Tabs'}
-                    </button>
                 </div>
 
                 {/* Tab Content - COPY OF PRIVATE DETAIL (no edit/delete/privacy toggle in Tab 1) */}
