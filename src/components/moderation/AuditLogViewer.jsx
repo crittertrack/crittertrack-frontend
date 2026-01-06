@@ -303,11 +303,11 @@ const AuditLogViewer = () => {
                                             {(() => {
                                                 const details = log.details || {};
                                                 const parts = [];
-                                                if (details.newStatus) parts.push(details.newStatus);
                                                 if (details.durationDays) parts.push(`${details.durationDays} days`);
                                                 if (details.warningCategory) parts.push(details.warningCategory);
                                                 if (details.warningCount) parts.push(`Warning #${details.warningCount}`);
                                                 if (details.resolution) parts.push(details.resolution);
+                                                if (details.previousStatus) parts.push(`was: ${details.previousStatus}`);
                                                 return parts.length > 0 ? parts.join(' • ') : '—';
                                             })()}
                                         </td>
