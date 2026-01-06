@@ -1,19 +1,11 @@
 import React, { useState, useEffect } from 'react';
 import { 
-    Shield, ShieldOff, AlertTriangle, Clock, Ban, UserX, 
-    Eye, EyeOff, CheckCircle, XCircle, Search, Filter 
+    Shield, AlertTriangle, Eye, Search, Filter 
 } from 'lucide-react';
 import axios from 'axios';
 import './UserManagementPanel.css';
 
 const API_URL = process.env.REACT_APP_API_URL || '/api';
-
-const STATUS_COLORS = {
-    active: '#4caf50',
-    warned: '#ff9800',
-    suspended: '#f44336',
-    banned: '#000000'
-};
 
 const UserManagementPanel = () => {
     const [users, setUsers] = useState([]);
@@ -178,153 +170,72 @@ const UserManagementPanel = () => {
                                     <div className="user-name">
                                         {user.personalName || user.breederName || 'No Name'}
                                     </div>
-                                    <div className="user-details">
+                                    <div className="user-meta">
                                         <span className="user-ctu">{user.id_public}</span>
-                                        {user.role === 'admin' && (
-                                            <span className="role-badge admin">Admin</span>
-                                        )}
-                                        {user.role === 'moderator' && (
-                                            <span className="role-badge moderator">Mod</span>
+                                        {user.role !== 'user' && (
+                                            <span className={`role-badge ${user.role}`}>{user.role}</span>
                                         )}
                                     </div>
                                     <div className="user-email">{user.email}</div>
                                 </td>
 
-                                <td>
-                                    <div 
-                                        className="status-badge"
-                                        style={{ 
-                                            backgroundColor: STATUS_COLORS[user.accountStatus] || '#666' 
-                                        }}
-                                    >
-                                        {user.accountStatus === 'active' && <CheckCircle size={14} />}
-                                        {user.accountStatus === 'warned' && <AlertTriangle size={14} />}
-                                        {user.accountStatus === 'suspended' && <Clock size={14} />}
-                                        {user.accountStatus === 'banned' && <Ban size={14} />}
-                                        {user.accountStatus}
-                                    </div>
-
+                                <td className="status-cell">
+                                    <span className={`status-text status-${user.accountStatus || 'active'}`}>
+                                        {(user.accountStatus || 'active').toUpperCase()}
+                                    </span>
                                     {user.suspensionExpiry && new Date(user.suspensionExpiry) > new Date() && (
-                                        <div className="expiry-info">
+                                        <div className="status-detail">
                                             Until {formatDate(user.suspensionExpiry)}
                                         </div>
                                     )}
-
-                                    {user.accountStatus === 'banned' && user.banReason && (
-                                        <div className="ban-reason">
-                                            {user.banReason}
-                                        </div>
-                                    )}
                                 </td>
 
-                                <td>
-                                    {user.warnings && user.warnings.length > 0 ? (
-                                        <div className="warnings-cell">
-                                            <span className="warning-count">
-                                                {user.warnings.length} warning{user.warnings.length !== 1 ? 's' : ''}
-                                            </span>
-                                            {user.warnings.slice(0, 2).map((warning, idx) => (
-                                                <div key={idx} className="warning-item">
-                                                    <div className="warning-reason">{warning.reason}</div>
-                                                    <div className="warning-date">
-                                                        {formatDate(warning.date)}
-                                                    </div>
-                                                </div>
-                                            ))}
-                                            {user.warnings.length > 2 && (
-                                                <button 
-                                                    className="view-more-btn"
-                                                    onClick={() => {
-                                                        setSelectedUser(user);
-                                                        setShowHistoryModal(true);
-                                                    }}
-                                                >
-                                                    +{user.warnings.length - 2} more
-                                                </button>
-                                            )}
-                                        </div>
-                                    ) : (
-                                        <span className="no-data">None</span>
-                                    )}
+                                <td className="data-cell">
+                                    {user.warningCount > 0 ? user.warningCount : 'None'}
                                 </td>
 
-                                <td>
-                                    <div className="reports-cell">
-                                        {user.reportCounts?.total > 0 ? (
-                                            <>
-                                                <div className="report-count">
-                                                    {user.reportCounts.total} total
-                                                </div>
-                                                <div className="report-breakdown">
-                                                    {user.reportCounts.pending > 0 && (
-                                                        <span className="pending-reports">
-                                                            {user.reportCounts.pending} pending
-                                                        </span>
-                                                    )}
-                                                </div>
-                                            </>
-                                        ) : (
-                                            <span className="no-data">None</span>
-                                        )}
-                                    </div>
+                                <td className="data-cell">
+                                    {user.reportCount > 0 ? user.reportCount : 'None'}
                                 </td>
 
-                                <td>
+                                <td className="data-cell">
                                     {user.moderationHistory && user.moderationHistory.length > 0 ? (
-                                        <div className="last-action-cell">
-                                            <div className="action-type">
-                                                {user.moderationHistory[0].action.replace(/_/g, ' ')}
-                                            </div>
-                                            <div className="action-date">
-                                                {formatDate(user.moderationHistory[0].timestamp)}
-                                            </div>
-                                            <div className="action-by">
-                                                By {user.moderationHistory[0].moderatorId?.personalName || 
-                                                    user.moderationHistory[0].moderatorId?.breederName || 
-                                                    'Unknown'}
-                                            </div>
+                                        <div className="last-action">
+                                            <div>{user.moderationHistory[0].action.replace(/_/g, ' ')}</div>
+                                            <div className="action-date">{formatDate(user.moderationHistory[0].timestamp)}</div>
                                         </div>
                                     ) : (
-                                        <span className="no-data">None</span>
+                                        'None'
                                     )}
                                 </td>
 
                                 <td className="actions-cell">
-                                    <div className="action-buttons">
+                                    <button
+                                        className="action-btn history-btn"
+                                        onClick={() => {
+                                            setSelectedUser(user);
+                                            setShowHistoryModal(true);
+                                        }}
+                                    >
+                                        <Eye size={14} />
+                                        History
+                                    </button>
+                                    {user.accountStatus === 'suspended' && (
                                         <button
-                                            className="action-btn view-history"
-                                            onClick={() => {
-                                                setSelectedUser(user);
-                                                setShowHistoryModal(true);
-                                            }}
-                                            title="View full moderation history"
+                                            className="action-btn lift-btn"
+                                            onClick={() => handleLiftSuspension(user._id)}
                                         >
-                                            <Eye size={16} />
-                                            History
+                                            Lift
                                         </button>
-
-                                        {user.accountStatus === 'suspended' && (
-                                            <button
-                                                className="action-btn lift-suspension"
-                                                onClick={() => handleLiftSuspension(user._id)}
-                                                title="Lift suspension"
-                                            >
-                                                <CheckCircle size={16} />
-                                                Lift
-                                            </button>
-                                        )}
-
-                                        {user.accountStatus === 'banned' && (
-                                            <button
-                                                className="action-btn lift-ban"
-                                                onClick={() => handleLiftBan(user._id)}
-                                                title="Lift ban"
-                                            >
-                                                <CheckCircle size={16} />
-                                                Unban
-                                            </button>
-                                        )}
-                                    </div>
+                                    )}
+                                    {user.accountStatus === 'banned' && (
+                                        <button
+                                            className="action-btn lift-btn"
+                                            onClick={() => handleLiftBan(user._id)}
+                                        >
+                                            Unban
+                                        </button>
+                                    )}
                                 </td>
                             </tr>
                         ))}
@@ -374,16 +285,9 @@ const UserHistoryModal = ({ user, onClose }) => {
                 <div className="user-info-section">
                     <h4>{user.personalName || user.breederName || 'Unknown User'}</h4>
                     <p>{user.email} · {user.id_public}</p>
-                    <div 
-                        className="status-badge"
-                        style={{ 
-                            backgroundColor: STATUS_COLORS[user.accountStatus] || '#666',
-                            display: 'inline-flex',
-                            marginTop: '8px'
-                        }}
-                    >
-                        {user.accountStatus}
-                    </div>
+                    <span className={`status-text status-${user.accountStatus || 'active'}`} style={{ marginTop: '8px', display: 'inline-block' }}>
+                        {(user.accountStatus || 'active').toUpperCase()}
+                    </span>
                 </div>
 
                 {user.warnings && user.warnings.length > 0 && (

@@ -164,224 +164,144 @@
 
 /* User Info Cell */
 .user-info-cell {
-    min-width: 250px;
+    min-width: 220px;
 }
 
 .user-name {
     font-weight: 600;
     color: #fff;
-    margin-bottom: 4px;
+    font-size: 14px;
+    margin-bottom: 2px;
 }
 
-.user-details {
+.user-meta {
     display: flex;
     align-items: center;
     gap: 8px;
-    margin-bottom: 4px;
+    margin-bottom: 2px;
 }
 
 .user-ctu {
-    color: #999;
-    font-size: 13px;
+    color: #888;
+    font-size: 12px;
+    font-family: monospace;
 }
 
 .role-badge {
-    padding: 2px 8px;
-    border-radius: 4px;
-    font-size: 11px;
+    padding: 1px 6px;
+    border-radius: 3px;
+    font-size: 10px;
     font-weight: 600;
     text-transform: uppercase;
-    letter-spacing: 0.5px;
+    background: #444;
+    color: #ccc;
 }
 
 .role-badge.admin {
-    background: #f44336;
-    color: #fff;
+    background: #444;
+    color: #ff8a80;
 }
 
 .role-badge.moderator {
-    background: #2196f3;
-    color: #fff;
+    background: #444;
+    color: #82b1ff;
 }
 
 .user-email {
     color: #666;
-    font-size: 12px;
-}
-
-/* Status Badge */
-.status-badge {
-    display: inline-flex;
-    align-items: center;
-    gap: 6px;
-    padding: 6px 12px;
-    border-radius: 6px;
-    font-size: 13px;
-    font-weight: 600;
-    color: #fff;
-    text-transform: capitalize;
-}
-
-.expiry-info {
-    margin-top: 8px;
-    font-size: 12px;
-    color: #999;
-}
-
-.ban-reason {
-    margin-top: 8px;
-    font-size: 12px;
-    color: #f44336;
-    font-style: italic;
-}
-
-/* Warnings Cell */
-.warnings-cell {
-    max-width: 300px;
-}
-
-.warning-count {
-    display: block;
-    font-weight: 600;
-    color: #ff9800;
-    margin-bottom: 8px;
-}
-
-.warning-item {
-    background: rgba(255, 152, 0, 0.1);
-    border-left: 3px solid #ff9800;
-    padding: 8px;
-    margin-bottom: 6px;
-    border-radius: 4px;
-}
-
-.warning-reason {
-    color: #fff;
-    font-size: 13px;
-    margin-bottom: 4px;
-}
-
-.warning-date {
-    color: #999;
     font-size: 11px;
 }
 
-.view-more-btn {
-    background: none;
-    border: 1px solid #666;
-    color: #999;
-    padding: 4px 8px;
-    border-radius: 4px;
+/* Status Cell */
+.status-cell {
+    min-width: 100px;
+}
+
+.status-text {
+    font-size: 12px;
+    font-weight: 600;
+    letter-spacing: 0.5px;
+}
+
+.status-text.status-active {
+    color: #81c784;
+}
+
+.status-text.status-warned {
+    color: #ffb74d;
+}
+
+.status-text.status-suspended {
+    color: #ff8a65;
+}
+
+.status-text.status-banned {
+    color: #e57373;
+}
+
+.status-detail {
     font-size: 11px;
-    cursor: pointer;
-    transition: all 0.2s;
+    color: #888;
+    margin-top: 2px;
 }
 
-.view-more-btn:hover {
-    border-color: #999;
-    color: #fff;
-}
-
-/* Reports Cell */
-.reports-cell {
-    min-width: 120px;
-}
-
-.report-count {
-    font-weight: 600;
-    color: #fff;
-    margin-bottom: 4px;
-}
-
-.report-breakdown {
-    font-size: 12px;
-}
-
-.pending-reports {
-    color: #ff9800;
-    font-weight: 600;
-}
-
-/* Last Action Cell */
-.last-action-cell {
-    min-width: 180px;
-}
-
-.action-type {
-    font-weight: 600;
-    color: #2196f3;
-    text-transform: capitalize;
-    display: block;
-    margin-bottom: 4px;
-}
-
-.action-date {
+/* Data Cells */
+.data-cell {
     color: #999;
-    font-size: 12px;
-    margin-bottom: 4px;
+    font-size: 13px;
+    min-width: 80px;
 }
 
-.action-by {
+.last-action {
+    font-size: 12px;
+    text-transform: capitalize;
+}
+
+.last-action .action-date {
     color: #666;
     font-size: 11px;
+    margin-top: 2px;
 }
 
 /* Actions Cell */
 .actions-cell {
-    min-width: 160px;
-}
-
-.action-buttons {
-    display: flex;
-    flex-direction: column;
-    gap: 6px;
+    min-width: 140px;
 }
 
 .action-btn {
-    display: flex;
+    display: inline-flex;
     align-items: center;
-    gap: 6px;
-    padding: 6px 12px;
-    border: 1px solid #404040;
-    background: #2a2a2a;
-    color: #fff;
-    border-radius: 6px;
-    font-size: 13px;
+    gap: 4px;
+    padding: 5px 10px;
+    border: 1px solid #444;
+    background: transparent;
+    color: #999;
+    border-radius: 4px;
+    font-size: 12px;
     cursor: pointer;
     transition: all 0.2s;
-    white-space: nowrap;
+    margin-right: 6px;
+    margin-bottom: 4px;
 }
 
 .action-btn:hover {
     background: #333;
+    color: #fff;
     border-color: #555;
 }
 
-.action-btn.view-history {
-    border-color: #2196f3;
-    color: #2196f3;
+.action-btn.history-btn:hover {
+    border-color: #64b5f6;
+    color: #64b5f6;
 }
 
-.action-btn.view-history:hover {
-    background: rgba(33, 150, 243, 0.1);
+.action-btn.lift-btn {
+    border-color: #81c784;
+    color: #81c784;
 }
 
-.action-btn.lift-suspension {
-    border-color: #4caf50;
-    color: #4caf50;
-}
-
-.action-btn.lift-suspension:hover {
-    background: rgba(76, 175, 80, 0.1);
-}
-
-.action-btn.lift-ban {
-    border-color: #ff9800;
-    color: #ff9800;
-}
-
-.action-btn.lift-ban:hover {
-    background: rgba(255, 152, 0, 0.1);
+.action-btn.lift-btn:hover {
+    background: rgba(129, 199, 132, 0.1);
 }
 
 .no-data {
