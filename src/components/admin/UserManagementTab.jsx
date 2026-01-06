@@ -240,7 +240,7 @@ export default function UserManagementTab({ API_BASE_URL, authToken }) {
                     <h3>{selectedUser.email}</h3>
                     <div className="user-badges">
                         <span style={getStatusBadge(selectedUser.accountStatus || 'active')}>
-                            {selectedUser.accountStatus || 'active'}
+                            {(selectedUser.accountStatus || 'active') === 'active' ? 'normal' : selectedUser.accountStatus}
                         </span>
                         <span style={getRoleBadge(selectedUser.role)}>
                             {selectedUser.role}
@@ -395,7 +395,7 @@ export default function UserManagementTab({ API_BASE_URL, authToken }) {
                                     </td>
                                     <td>
                                         <span style={getStatusBadge(user.accountStatus || 'active')}>
-                                            {user.accountStatus || 'active'}
+                                            {(user.accountStatus || 'active') === 'active' ? 'normal' : user.accountStatus}
                                         </span>
                                     </td>
                                     <td>{user.warningCount || 0}</td>
