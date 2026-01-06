@@ -255,6 +255,10 @@
 .actions-cell {
     min-width: 200px;
     white-space: nowrap;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px;
+    align-items: center;
 }
 
 .action-btn {
@@ -270,7 +274,7 @@
     border-radius: 6px;
     cursor: pointer;
     transition: all 0.15s;
-    margin-right: 6px;
+    flex-shrink: 0;
 }
 
 .action-btn:hover {
