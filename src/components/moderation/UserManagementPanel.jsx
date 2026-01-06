@@ -261,10 +261,9 @@ const UserManagementPanel = () => {
                             <tr key={user._id}>
                                 <td className="user-info-cell">
                                     <div className="user-name">
-                                        {user.personalName || user.breederName || 'No Name'}
-                                    </div>
-                                    <div className="user-meta">
                                         <span className="user-ctu">{user.id_public}</span>
+                                        <span className="user-separator">-</span>
+                                        <span>{user.personalName || user.breederName || 'No Name'}</span>
                                         {user.role !== 'user' && (
                                             <span className={`role-badge ${user.role}`}>{user.role}</span>
                                         )}

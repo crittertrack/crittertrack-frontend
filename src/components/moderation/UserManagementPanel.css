@@ -168,23 +168,23 @@
 }
 
 .user-name {
+    display: flex;
+    align-items: center;
+    gap: 6px;
     font-weight: 600;
     color: #fff;
     font-size: 14px;
     margin-bottom: 2px;
 }
 
-.user-meta {
-    display: flex;
-    align-items: center;
-    gap: 8px;
-    margin-bottom: 2px;
+.user-ctu {
+    color: #64b5f6;
+    font-size: 13px;
+    font-family: monospace;
 }
 
-.user-ctu {
-    color: #888;
-    font-size: 12px;
-    font-family: monospace;
+.user-separator {
+    color: #666;
 }
 
 .role-badge {
