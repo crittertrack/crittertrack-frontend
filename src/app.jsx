@@ -12072,35 +12072,44 @@ const AuthView = ({ onLoginSuccess, showModalMessage, isRegister, setIsRegister,
                         const existingEndTime = localStorage.getItem('suspensionEndTime');
                         let suspensionEndTime;
                         
-                        // Try to extract the actual expiry timestamp from the message (source of truth)
-                        const timestampMatch = message.match(/ExpiryTimestamp:\s*(\d+)/);
+                        // PRIORITY 1: Use structured expiryTimestamp from response (most accurate, directly from server)
+                        const responseTimestamp = error.response?.data?.expiryTimestamp;
                         
-                        if (timestampMatch) {
-                            // Always use the server's ExpiryTimestamp - it's the source of truth
-                            suspensionEndTime = parseInt(timestampMatch[1]);
-                        } else if (existingEndTime) {
-                            // No timestamp in message but we have one stored - keep using it (don't reset timer on retry)
-                            suspensionEndTime = parseInt(existingEndTime);
+                        if (responseTimestamp) {
+                            // Use the structured expiryTimestamp from response data - it's the source of truth
+                            console.log('[LOGIN] Using server expiryTimestamp:', responseTimestamp);
+                            suspensionEndTime = responseTimestamp;
                         } else {
-                            // Last resort: Calculate from hours and minutes
-                            // Handle both "Expires in X hour(s) Y minute(s)" and "Expires in X hour(s)" and "Expires in X minute(s)"
-                            const hoursMatch = message.match(/(\d+)\s+hour/);
-                            const minutesMatch = message.match(/(\d+)\s+minute/);
-                            const hoursRemaining = hoursMatch ? parseInt(hoursMatch[1]) : 0;
-                            const minutesRemaining = minutesMatch ? parseInt(minutesMatch[1]) : 0;
-                            const totalMilliseconds = (hoursRemaining * 60 * 60 * 1000) + (minutesRemaining * 60 * 1000);
-                            suspensionEndTime = new Date().getTime() + (totalMilliseconds || 24 * 60 * 60 * 1000); // Default to 24 hours if nothing found
+                            // PRIORITY 2: Try to extract from message string (fallback)
+                            const timestampMatch = message.match(/ExpiryTimestamp:\s*(\d+)/);
+                            
+                            if (timestampMatch) {
+                                console.log('[LOGIN] Using expiryTimestamp from message');
+                                suspensionEndTime = parseInt(timestampMatch[1]);
+                            } else if (existingEndTime) {
+                                // PRIORITY 3: Use existing stored time (don't reset timer on retry)
+                                console.log('[LOGIN] Using stored suspension end time');
+                                suspensionEndTime = parseInt(existingEndTime);
+                            } else {
+                                // PRIORITY 4: Last resort - calculate from hours/minutes
+                                // This should rarely happen if backend is working correctly
+                                console.log('[LOGIN] Calculating from hours/minutes (fallback)');
+                                const hoursMatch = message.match(/(\d+)\s+hour/);
+                                const minutesMatch = message.match(/(\d+)\s+minute/);
+                                const hoursRemaining = hoursMatch ? parseInt(hoursMatch[1]) : 0;
+                                const minutesRemaining = minutesMatch ? parseInt(minutesMatch[1]) : 0;
+                                const totalMilliseconds = (hoursRemaining * 60 * 60 * 1000) + (minutesRemaining * 60 * 1000);
+                                suspensionEndTime = new Date().getTime() + (totalMilliseconds || 24 * 60 * 60 * 1000);
+                            }
                         }
                         
                         // Extract reason (everything before "Expires in")
                         const reasonMatch = message.match(/^Account suspended:\s*(.+?)\s+Expires in/);
                         const suspensionReason = reasonMatch ? reasonMatch[1] : 'Your account has been suspended.';
                         
-                        // Store suspension info for display on login screen (only update if it changed)
-                        if (!existingEndTime || suspensionEndTime !== parseInt(existingEndTime)) {
-                            localStorage.setItem('suspensionEndTime', suspensionEndTime.toString());
-                            localStorage.setItem('suspensionReason', suspensionReason);
-                        }
+                        // Store suspension info for display on login screen (always update with server timestamp)
+                        localStorage.setItem('suspensionEndTime', suspensionEndTime.toString());
+                        localStorage.setItem('suspensionReason', suspensionReason);
                         
                         // Trigger re-render of suspension banner
                         setSuspensionInfo({
