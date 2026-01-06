@@ -14214,6 +14214,12 @@ const NotificationPanel = ({ authToken, API_BASE_URL, onClose, showModalMessage,
                                                 </div>
                                             )}
                                             <div className="flex items-start space-x-3 mb-2">
+                                                {/* Moderation Icon for content_edited */}
+                                                {notification.type === 'content_edited' && (
+                                                    <div className="flex-shrink-0 w-16 h-16 bg-orange-200 rounded-md overflow-hidden flex items-center justify-center">
+                                                        <Shield size={32} className="text-orange-600" />
+                                                    </div>
+                                                )}
                                                 {/* Animal Thumbnail - hide for content_edited */}
                                                 {notification.type !== 'content_edited' && (
                                                 <div 
