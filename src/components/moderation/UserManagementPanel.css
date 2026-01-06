@@ -154,40 +154,34 @@
 }
 
 /* CTU ID Cell */
-.ctu-cell {
-    display: flex;
-    align-items: center;
-    gap: 6px;
+.user-id {
+    font-family: monospace;
+    font-weight: 600;
+    color: #6366f1;
     white-space: nowrap;
 }
 
-.role-icon {
-    flex-shrink: 0;
+.user-id .role-icon {
+    margin-right: 6px;
+    vertical-align: middle;
 }
 
-.role-icon.role-admin {
+.user-id .role-icon.admin {
     color: #dc2626;
 }
 
-.role-icon.role-moderator {
+.user-id .role-icon.moderator {
     color: #1d4ed8;
 }
 
-.user-ctu {
-    color: #6366f1;
-    font-size: 13px;
-    font-family: monospace;
-    font-weight: 600;
-}
-
 /* Name Cell */
-.name-cell {
+.user-name {
     font-weight: 500;
     color: #1f2937;
 }
 
 /* Email Cell */
-.email-cell {
+.user-email {
     color: #6b7280;
     font-size: 13px;
 }

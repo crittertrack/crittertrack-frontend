@@ -249,7 +249,9 @@ const UserManagementPanel = () => {
                 <table className="users-table">
                     <thead>
                         <tr>
-                            <th>User Info</th>
+                            <th>ID</th>
+                            <th>Name</th>
+                            <th>Email</th>
                             <th>Status</th>
                             <th>Warnings</th>
                             <th>Reports</th>
@@ -259,17 +261,14 @@ const UserManagementPanel = () => {
                     <tbody>
                         {filteredUsers.map(user => (
                             <tr key={user._id}>
-                                <td className="user-info-cell">
-                                    <div className="user-name">
-                                        <span className="user-ctu">{user.id_public}</span>
-                                        <span className="user-separator">-</span>
-                                        <span>{user.personalName || user.breederName || 'No Name'}</span>
-                                        {user.role !== 'user' && (
-                                            <span className={`role-badge ${user.role}`}>{user.role}</span>
-                                        )}
-                                    </div>
-                                    <div className="user-email">{user.email}</div>
+                                <td className="user-id">
+                                    {user.role !== 'user' && (
+                                        <Shield size={14} className={`role-icon ${user.role}`} />
+                                    )}
+                                    {user.id_public}
                                 </td>
+                                <td className="user-name">{user.personalName || user.breederName || 'No Name'}</td>
+                                <td className="user-email">{user.email}</td>
 
                                 <td className="status-cell">
                                     <span className={`status-text status-${user.accountStatus || 'active'}`}>
