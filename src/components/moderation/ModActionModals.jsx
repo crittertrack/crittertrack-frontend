@@ -91,7 +91,7 @@ export const EditContentModal = ({ isOpen, onClose, onSubmit, context }) => {
             return [
                 { value: 'personalName', label: 'Personal Name (edit only - required)', clearable: false },
                 { value: 'breederName', label: 'Breeder Name', clearable: true },
-                { value: 'profileImage', label: 'Profile Image', clearable: true },
+                { value: 'profileImage', label: 'Profile Image', clearable: true, removeOnly: true },
                 { value: 'bio', label: 'Profile Bio', clearable: true },
                 { value: 'websiteUrl', label: 'Website URL', clearable: true },
                 { value: 'country', label: 'Country/Location', clearable: true }
@@ -100,6 +100,7 @@ export const EditContentModal = ({ isOpen, onClose, onSubmit, context }) => {
         if (context?.type === 'animal') {
             return [
                 { value: 'name', label: 'Animal Name', clearable: false },
+                { value: 'imageUrl', label: 'Animal Image', clearable: true, removeOnly: true },
                 { value: 'description', label: 'Description', clearable: true },
                 { value: 'notes', label: 'Notes', clearable: true },
                 { value: 'marking_description', label: 'Marking Description', clearable: true }
@@ -171,27 +172,44 @@ export const EditContentModal = ({ isOpen, onClose, onSubmit, context }) => {
 
                     {selectedField && (
                         <div className="form-group">
-                            <label>
-                                New Value 
-                                {selectedFieldInfo?.clearable 
-                                    ? ' (leave empty to clear field)' 
-                                    : ' (required - cannot be empty)'}
-                            </label>
-                            <input
-                                type="text"
-                                value={newValue}
-                                onChange={(e) => setNewValue(e.target.value)}
-                                placeholder={selectedFieldInfo?.clearable 
-                                    ? "Enter new value or leave empty to clear" 
-                                    : "Enter new value (required)"}
-                            />
-                            <button 
-                                onClick={addFieldEdit} 
-                                className="btn-add-field"
-                                disabled={!selectedFieldInfo?.clearable && !newValue.trim()}
-                            >
-                                Add Field Edit
-                            </button>
+                            {selectedFieldInfo?.removeOnly ? (
+                                /* For image fields - just show a Remove button */
+                                <button 
+                                    onClick={() => {
+                                        setFieldEdits({ ...fieldEdits, [selectedField]: '' });
+                                        setSelectedField('');
+                                    }} 
+                                    className="btn-add-field"
+                                    style={{ backgroundColor: '#ef4444', borderColor: '#dc2626' }}
+                                >
+                                    Remove {selectedFieldInfo.label}
+                                </button>
+                            ) : (
+                                /* For text fields - show input */
+                                <>
+                                    <label>
+                                        New Value 
+                                        {selectedFieldInfo?.clearable 
+                                            ? ' (leave empty to clear field)' 
+                                            : ' (required - cannot be empty)'}
+                                    </label>
+                                    <input
+                                        type="text"
+                                        value={newValue}
+                                        onChange={(e) => setNewValue(e.target.value)}
+                                        placeholder={selectedFieldInfo?.clearable 
+                                            ? "Enter new value or leave empty to clear" 
+                                            : "Enter new value (required)"}
+                                    />
+                                    <button 
+                                        onClick={addFieldEdit} 
+                                        className="btn-add-field"
+                                        disabled={!selectedFieldInfo?.clearable && !newValue.trim()}
+                                    >
+                                        Add Field Edit
+                                    </button>
+                                </>
+                            )}
                         </div>
                     )}
 
