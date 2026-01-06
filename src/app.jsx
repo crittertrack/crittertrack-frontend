@@ -2005,7 +2005,7 @@ const PublicProfileView = ({ profile, onBack, onViewAnimal, API_BASE_URL, onStar
 // ==================== PRIVATE ANIMAL DETAIL (OWNER VIEW) ====================
 // Shows ALL data for animal owners viewing their own animals (ignores privacy toggles)
 // Accessed from: MY ANIMALS LIST
-const PrivateAnimalDetail = ({ animal, onClose, onEdit, API_BASE_URL, authToken, setShowImageModal, setEnlargedImageUrl, toggleSectionPrivacy, onUpdateAnimal, onHideAnimal, showModalMessage }) => {
+const PrivateAnimalDetail = ({ animal, onClose, onEdit, API_BASE_URL, authToken, setShowImageModal, setEnlargedImageUrl, toggleSectionPrivacy, onUpdateAnimal, onHideAnimal, showModalMessage, onTransfer }) => {
     const [breederInfo, setBreederInfo] = useState(null);
     const [showPedigree, setShowPedigree] = useState(false);
     const [detailViewTab, setDetailViewTab] = useState(1);
@@ -2073,6 +2073,16 @@ const PrivateAnimalDetail = ({ animal, onClose, onEdit, API_BASE_URL, authToken,
                                 >
                                     <Edit size={16} />
                                     Edit
+                                </button>
+                            )}
+                            {onTransfer && (
+                                <button
+                                    onClick={() => onTransfer(animal)}
+                                    className="px-3 py-1.5 bg-blue-100 hover:bg-blue-200 text-blue-700 font-semibold rounded-lg transition flex items-center gap-2"
+                                    title="Transfer this animal"
+                                >
+                                    <ArrowLeftRight size={16} />
+                                    Transfer
                                 </button>
                             )}
                             <button onClick={onClose} className="text-gray-500 hover:text-gray-800">
@@ -16861,6 +16871,10 @@ const App = () => {
                                         onUpdateAnimal={setAnimalToView}
                                         onHideAnimal={handleHideAnimal}
                                         showModalMessage={showModalMessage}
+                                        onTransfer={(animal) => {
+                                            setTransferAnimal(animal);
+                                            setShowTransferModal(true);
+                                        }}
                                     />
                                 );
                             } else {
