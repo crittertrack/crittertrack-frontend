@@ -2,7 +2,8 @@ import React, { useState, useEffect } from 'react';
 import {
     X, Users, Settings, BarChart3, Mail, Shield, AlertTriangle, Lock,
     Loader2, Save, Plus, Trash2, Edit, Eye, Search, Download, Upload,
-    ChevronDown, ChevronRight, CheckCircle, Clock, Flag, MessageSquare, FileText
+    ChevronDown, ChevronRight, CheckCircle, Clock, Flag, MessageSquare, FileText,
+    Bug, Dna
 } from 'lucide-react';
 import ModOversightPanel from './moderation/ModOversightPanel';
 import UserManagementPanel from './moderation/UserManagementPanel';
@@ -11,6 +12,8 @@ import CommunicationTab from './admin/CommunicationTab';
 import SystemSettingsTab from './admin/SystemSettingsTab';
 import ModChatTab from './admin/ModChatTab';
 import AnimalManagementPanel from './admin/AnimalManagementPanel';
+import BugReportsTab from './admin/BugReportsTab';
+import FeedbackTab from './admin/FeedbackTab';
 
 // Error Boundary Component
 class ErrorBoundary extends React.Component {
@@ -414,6 +417,8 @@ const EnhancedAdminPanel = ({ isOpen, onClose, authToken, API_BASE_URL, userRole
                                 { id: 'animals', label: 'Animal Management', icon: Shield },
                                 { id: 'audit-logs', label: 'Audit Logs', icon: FileText },
                                 { id: 'mod-chat', label: 'Mod Team Chat', icon: MessageSquare },
+                                { id: 'bug-reports', label: 'Bug Reports', icon: Bug },
+                                { id: 'feedback', label: 'Calculator Feedback', icon: Dna },
                                 { id: 'reports', label: 'Reports & Analytics', icon: BarChart3 },
                                 { id: 'communication', label: 'Communication', icon: Mail },
                                 // Admin-only features
@@ -536,6 +541,26 @@ const EnhancedAdminPanel = ({ isOpen, onClose, authToken, API_BASE_URL, userRole
                         {activeSection === 'system-settings' && (
                             <div className="p-8">
                                 <SystemSettingsTab
+                                    API_BASE_URL={API_BASE_URL}
+                                    authToken={authToken}
+                                />
+                            </div>
+                        )}
+
+                        {/* Bug Reports */}
+                        {activeSection === 'bug-reports' && (
+                            <div className="p-8">
+                                <BugReportsTab
+                                    API_BASE_URL={API_BASE_URL}
+                                    authToken={authToken}
+                                />
+                            </div>
+                        )}
+
+                        {/* Calculator Feedback */}
+                        {activeSection === 'feedback' && (
+                            <div className="p-8">
+                                <FeedbackTab
                                     API_BASE_URL={API_BASE_URL}
                                     authToken={authToken}
                                 />
