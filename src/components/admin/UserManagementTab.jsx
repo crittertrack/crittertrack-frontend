@@ -41,7 +41,9 @@ export default function UserManagementTab({ API_BASE_URL, authToken }) {
             }
 
             const data = await response.json();
-            setUsers(data);
+            console.log('UserManagementTab: fetched users data:', data);
+            // Ensure data is an array before setting
+            setUsers(Array.isArray(data) ? data : []);
         } catch (err) {
             setError(err.message);
             console.error('Error fetching users:', err);
