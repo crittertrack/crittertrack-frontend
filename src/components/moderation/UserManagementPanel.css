@@ -153,19 +153,24 @@
     background: #f9fafb;
 }
 
-/* User Info Cell */
-.user-info-cell {
-    min-width: 220px;
-}
-
-.user-name {
+/* CTU ID Cell */
+.ctu-cell {
     display: flex;
     align-items: center;
     gap: 6px;
-    font-weight: 600;
-    color: #1f2937;
-    font-size: 14px;
-    margin-bottom: 2px;
+    white-space: nowrap;
+}
+
+.role-icon {
+    flex-shrink: 0;
+}
+
+.role-icon.role-admin {
+    color: #dc2626;
+}
+
+.role-icon.role-moderator {
+    color: #1d4ed8;
 }
 
 .user-ctu {
@@ -175,34 +180,16 @@
     font-weight: 600;
 }
 
-.user-separator {
-    color: #9ca3af;
+/* Name Cell */
+.name-cell {
+    font-weight: 500;
+    color: #1f2937;
 }
 
-.role-badge {
-    display: inline-block;
-    padding: 2px 8px;
-    border-radius: 12px;
-    font-size: 11px;
-    font-weight: 600;
-    text-transform: uppercase;
-    background: #f3f4f6;
+/* Email Cell */
+.email-cell {
     color: #6b7280;
-}
-
-.role-badge.admin {
-    background: #fef2f2;
-    color: #dc2626;
-}
-
-.role-badge.moderator {
-    background: #dbeafe;
-    color: #1d4ed8;
-}
-
-.user-email {
-    color: #9ca3af;
-    font-size: 12px;
+    font-size: 13px;
 }
 
 /* Status Cell */
