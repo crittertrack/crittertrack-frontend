@@ -14325,15 +14325,27 @@ const NotificationPanel = ({ authToken, API_BASE_URL, onClose, showModalMessage,
                                 <div>
                                     <h4 className="font-bold text-gray-700 mb-2">History</h4>
                                     {otherNotifications.map(notification => (
-                                        <div key={notification._id} className="border rounded-lg p-4 mb-2 bg-gray-50">
+                                        <div key={notification._id} className={`border rounded-lg p-4 mb-2 ${
+                                            notification.type === 'content_edited' ? 'bg-orange-50 border-orange-300' : 'bg-gray-50'
+                                        }`}>
                                             <div className="flex justify-between items-start">
                                                 <div className="flex-grow">
+                                                    {notification.type === 'content_edited' && (
+                                                        <p className="text-xs font-semibold text-orange-600 mb-1 flex items-center">
+                                                            ⚠️ Moderation Notice
+                                                        </p>
+                                                    )}
                                                     <p className="text-sm text-gray-700 mb-1">{notification.message}</p>
                                                     <p className="text-xs text-gray-500">
-                                                        {new Date(notification.createdAt).toLocaleString()} • 
-                                                        <span className={`ml-1 ${notification.status === 'approved' ? 'text-green-600' : 'text-red-600'}`}>
-                                                            {notification.status}
-                                                        </span>
+                                                        {new Date(notification.createdAt).toLocaleString()}
+                                                        {notification.type !== 'content_edited' && (
+                                                            <>
+                                                                {' • '}
+                                                                <span className={`ml-1 ${notification.status === 'approved' ? 'text-green-600' : 'text-red-600'}`}>
+                                                                    {notification.status}
+                                                                </span>
+                                                            </>
+                                                        )}
                                                     </p>
                                                 </div>
                                                 <button
