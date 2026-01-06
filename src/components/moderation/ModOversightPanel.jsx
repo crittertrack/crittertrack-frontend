@@ -164,14 +164,46 @@ const getAnimalDetails = (report = {}) => {
     if (report.reportedAnimalId) {
         const animal = report.reportedAnimalId;
         return {
+            // Basic Info
             name: animal.name || null,
             id_public: animal.id_public || null,
+            prefix: animal.prefix || null,
+            suffix: animal.suffix || null,
+            breederyId: animal.breederyId || null,
             species: animal.species || null,
             gender: animal.gender || null,
-            variety: animal.variety || null,
             status: animal.status || null,
-            dateOfBirth: animal.dateOfBirth || null,
-            image: animal.images?.[0] || null
+            birthDate: animal.birthDate || null,
+            
+            // Image
+            imageUrl: animal.imageUrl || null,
+            
+            // Description/Notes
+            remarks: animal.remarks || null,
+            geneticCode: animal.geneticCode || null,
+            
+            // Physical Info
+            color: animal.color || null,
+            coat: animal.coat || null,
+            coatPattern: animal.coatPattern || null,
+            earset: animal.earset || null,
+            breed: animal.breed || null,
+            strain: animal.strain || null,
+            
+            // Identification
+            microchipNumber: animal.microchipNumber || null,
+            pedigreeRegistrationId: animal.pedigreeRegistrationId || null,
+            
+            // Breeding/Fertility
+            fertilityNotes: animal.fertilityNotes || null,
+            damFertilityNotes: animal.damFertilityNotes || null,
+            
+            // Behavior
+            temperament: animal.temperament || null,
+            
+            // End of Life
+            causeOfDeath: animal.causeOfDeath || null,
+            necropsyResults: animal.necropsyResults || null
         };
     }
     return null;
@@ -476,7 +508,9 @@ export default function ModOversightPanel({
                                 )}
 
                                 {/* Animal Details Section - for animal reports */}
-                                {reportType === 'animal' && getAnimalDetails(selectedReport) && (
+                                {reportType === 'animal' && getAnimalDetails(selectedReport) && (() => {
+                                    const animal = getAnimalDetails(selectedReport);
+                                    return (
                                     <div className="mod-detail-section">
                                         <strong>Reported Animal:</strong>
                                         <div style={{ 
@@ -484,62 +518,140 @@ export default function ModOversightPanel({
                                             padding: '12px', 
                                             borderRadius: '8px', 
                                             marginTop: '8px',
-                                            border: '1px solid #e0e0e0',
-                                            display: 'flex',
-                                            gap: '16px',
-                                            alignItems: 'flex-start'
+                                            border: '1px solid #e0e0e0'
                                         }}>
-                                            {getAnimalDetails(selectedReport).image && (
-                                                <img 
-                                                    src={getAnimalDetails(selectedReport).image} 
-                                                    alt={getAnimalDetails(selectedReport).name || 'Animal'} 
-                                                    style={{ 
-                                                        width: '80px', 
-                                                        height: '80px', 
-                                                        objectFit: 'cover', 
-                                                        borderRadius: '8px',
-                                                        flexShrink: 0
-                                                    }} 
-                                                />
-                                            )}
-                                            <div style={{ flex: 1 }}>
-                                                <p style={{ margin: 0, fontWeight: 'bold', fontSize: '16px' }}>
-                                                    {getAnimalDetails(selectedReport).name || 'Unnamed'}
-                                                </p>
-                                                <p style={{ margin: '4px 0', fontSize: '13px', color: '#666' }}>
-                                                    ID: <span style={{ fontFamily: 'monospace' }}>{getAnimalDetails(selectedReport).id_public || 'N/A'}</span>
-                                                </p>
-                                                <div style={{ display: 'flex', gap: '12px', flexWrap: 'wrap', marginTop: '8px' }}>
-                                                    {getAnimalDetails(selectedReport).species && (
-                                                        <span style={{ fontSize: '12px', padding: '2px 8px', backgroundColor: '#e3f2fd', borderRadius: '4px' }}>
-                                                            {getAnimalDetails(selectedReport).species}
-                                                        </span>
-                                                    )}
-                                                    {getAnimalDetails(selectedReport).gender && (
-                                                        <span style={{ fontSize: '12px', padding: '2px 8px', backgroundColor: getAnimalDetails(selectedReport).gender === 'Male' ? '#e3f2fd' : '#fce4ec', borderRadius: '4px' }}>
-                                                            {getAnimalDetails(selectedReport).gender}
-                                                        </span>
-                                                    )}
-                                                    {getAnimalDetails(selectedReport).variety && (
-                                                        <span style={{ fontSize: '12px', padding: '2px 8px', backgroundColor: '#f3e5f5', borderRadius: '4px' }}>
-                                                            {getAnimalDetails(selectedReport).variety}
-                                                        </span>
-                                                    )}
-                                                    {getAnimalDetails(selectedReport).status && (
-                                                        <span style={{ fontSize: '12px', padding: '2px 8px', backgroundColor: '#fff3e0', borderRadius: '4px' }}>
-                                                            {getAnimalDetails(selectedReport).status}
-                                                        </span>
-                                                    )}
-                                                </div>
-                                                {getAnimalDetails(selectedReport).dateOfBirth && (
-                                                    <p style={{ margin: '8px 0 0', fontSize: '12px', color: '#666' }}>
-                                                        Born: {new Date(getAnimalDetails(selectedReport).dateOfBirth).toLocaleDateString()}
+                                            {/* Header with image and basic info */}
+                                            <div style={{ display: 'flex', gap: '16px', alignItems: 'flex-start', marginBottom: '12px' }}>
+                                                {animal.imageUrl && (
+                                                    <img 
+                                                        src={animal.imageUrl} 
+                                                        alt={animal.name || 'Animal'} 
+                                                        style={{ 
+                                                            width: '80px', 
+                                                            height: '80px', 
+                                                            objectFit: 'cover', 
+                                                            borderRadius: '8px',
+                                                            flexShrink: 0
+                                                        }} 
+                                                    />
+                                                )}
+                                                <div style={{ flex: 1 }}>
+                                                    <p style={{ margin: 0, fontWeight: 'bold', fontSize: '16px' }}>
+                                                        {animal.prefix && <span style={{ color: '#666' }}>{animal.prefix} </span>}
+                                                        {animal.name || 'Unnamed'}
+                                                        {animal.suffix && <span style={{ color: '#666' }}> {animal.suffix}</span>}
                                                     </p>
+                                                    <p style={{ margin: '4px 0', fontSize: '13px', color: '#666' }}>
+                                                        ID: <span style={{ fontFamily: 'monospace' }}>{animal.id_public || 'N/A'}</span>
+                                                        {animal.breederyId && <span> · Breedery: {animal.breederyId}</span>}
+                                                    </p>
+                                                    <div style={{ display: 'flex', gap: '8px', flexWrap: 'wrap', marginTop: '8px' }}>
+                                                        {animal.species && (
+                                                            <span style={{ fontSize: '12px', padding: '2px 8px', backgroundColor: '#e3f2fd', borderRadius: '4px' }}>
+                                                                {animal.species}
+                                                            </span>
+                                                        )}
+                                                        {animal.gender && (
+                                                            <span style={{ fontSize: '12px', padding: '2px 8px', backgroundColor: animal.gender === 'Male' ? '#e3f2fd' : '#fce4ec', borderRadius: '4px' }}>
+                                                                {animal.gender}
+                                                            </span>
+                                                        )}
+                                                        {animal.status && (
+                                                            <span style={{ fontSize: '12px', padding: '2px 8px', backgroundColor: '#fff3e0', borderRadius: '4px' }}>
+                                                                {animal.status}
+                                                            </span>
+                                                        )}
+                                                    </div>
+                                                </div>
+                                            </div>
+
+                                            {/* Detailed fields in a grid */}
+                                            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(2, 1fr)', gap: '8px', fontSize: '13px' }}>
+                                                {animal.birthDate && (
+                                                    <div><strong>Birth Date:</strong> {new Date(animal.birthDate).toLocaleDateString()}</div>
+                                                )}
+                                                {animal.breed && (
+                                                    <div><strong>Breed:</strong> {animal.breed}</div>
+                                                )}
+                                                {animal.strain && (
+                                                    <div><strong>Strain:</strong> {animal.strain}</div>
+                                                )}
+                                                {animal.color && (
+                                                    <div><strong>Color:</strong> {animal.color}</div>
+                                                )}
+                                                {animal.coat && (
+                                                    <div><strong>Coat:</strong> {animal.coat}</div>
+                                                )}
+                                                {animal.coatPattern && (
+                                                    <div><strong>Coat Pattern:</strong> {animal.coatPattern}</div>
+                                                )}
+                                                {animal.earset && (
+                                                    <div><strong>Earset:</strong> {animal.earset}</div>
+                                                )}
+                                                {animal.microchipNumber && (
+                                                    <div><strong>Microchip:</strong> {animal.microchipNumber}</div>
+                                                )}
+                                                {animal.pedigreeRegistrationId && (
+                                                    <div><strong>Pedigree ID:</strong> {animal.pedigreeRegistrationId}</div>
+                                                )}
+                                                {animal.temperament && (
+                                                    <div><strong>Temperament:</strong> {animal.temperament}</div>
                                                 )}
                                             </div>
+
+                                            {/* Long text fields */}
+                                            {animal.geneticCode && (
+                                                <div style={{ marginTop: '8px', fontSize: '13px' }}>
+                                                    <strong>Genetic Code:</strong>
+                                                    <div style={{ backgroundColor: '#fff', padding: '8px', borderRadius: '4px', marginTop: '4px', fontFamily: 'monospace', fontSize: '12px' }}>
+                                                        {animal.geneticCode}
+                                                    </div>
+                                                </div>
+                                            )}
+                                            {animal.remarks && (
+                                                <div style={{ marginTop: '8px', fontSize: '13px' }}>
+                                                    <strong>Remarks:</strong>
+                                                    <div style={{ backgroundColor: '#fff', padding: '8px', borderRadius: '4px', marginTop: '4px', whiteSpace: 'pre-wrap' }}>
+                                                        {animal.remarks}
+                                                    </div>
+                                                </div>
+                                            )}
+                                            {animal.fertilityNotes && (
+                                                <div style={{ marginTop: '8px', fontSize: '13px' }}>
+                                                    <strong>Fertility Notes:</strong>
+                                                    <div style={{ backgroundColor: '#fff', padding: '8px', borderRadius: '4px', marginTop: '4px' }}>
+                                                        {animal.fertilityNotes}
+                                                    </div>
+                                                </div>
+                                            )}
+                                            {animal.damFertilityNotes && (
+                                                <div style={{ marginTop: '8px', fontSize: '13px' }}>
+                                                    <strong>Dam Fertility Notes:</strong>
+                                                    <div style={{ backgroundColor: '#fff', padding: '8px', borderRadius: '4px', marginTop: '4px' }}>
+                                                        {animal.damFertilityNotes}
+                                                    </div>
+                                                </div>
+                                            )}
+                                            {animal.causeOfDeath && (
+                                                <div style={{ marginTop: '8px', fontSize: '13px' }}>
+                                                    <strong>Cause of Death:</strong>
+                                                    <div style={{ backgroundColor: '#fff', padding: '8px', borderRadius: '4px', marginTop: '4px' }}>
+                                                        {animal.causeOfDeath}
+                                                    </div>
+                                                </div>
+                                            )}
+                                            {animal.necropsyResults && (
+                                                <div style={{ marginTop: '8px', fontSize: '13px' }}>
+                                                    <strong>Necropsy Results:</strong>
+                                                    <div style={{ backgroundColor: '#fff', padding: '8px', borderRadius: '4px', marginTop: '4px' }}>
+                                                        {animal.necropsyResults}
+                                                    </div>
+                                                </div>
+                                            )}
                                         </div>
                                     </div>
-                                )}
+                                    );
+                                })()}
 
                                 {/* Message Content Section - for message reports */}
                                 {reportType === 'message' && selectedReport.messageId && (
