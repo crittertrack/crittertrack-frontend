@@ -14686,7 +14686,8 @@ const App = () => {
                     category: flagData.category,
                     description: `Moderator flag: ${flagData.reason}`,
                     reportedContentId: flagData.context?.id,
-                    reportedUserId: userId
+                    reportedUserId: userId,
+                    isModeratorReport: true
                 };
 
                 console.log('[MOD ACTION FLAG] Submitting flag:', { reportType, reportData });
@@ -19022,7 +19023,8 @@ const PublicProfilePage = () => {
                     category: flagData.category,
                     description: `Moderator flag: ${flagData.reason}`,
                     reportedContentId: flagData.context?.id,
-                    reportedUserId: userId
+                    reportedUserId: userId,
+                    isModeratorReport: true
                 };
 
                 console.log('[MOD ACTION FLAG] Submitting flag:', { reportType, reportData });

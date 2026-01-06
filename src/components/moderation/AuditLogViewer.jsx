@@ -41,7 +41,7 @@ const ACTION_TYPES = [
     { value: 'user_banned', label: 'User Banned' },
     { value: 'ban_lifted', label: 'Ban Lifted' },
     { value: 'content_edited', label: 'Content Edited' },
-    { value: 'mod_report_created', label: 'Mod Report Created' },
+    { value: 'report_created', label: 'Report Created' },
     { value: 'report_resolved', label: 'Report Resolved' },
     { value: 'report_dismissed', label: 'Report Dismissed' }
 ];
