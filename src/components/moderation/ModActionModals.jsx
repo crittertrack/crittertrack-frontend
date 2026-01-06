@@ -94,7 +94,7 @@ export const EditContentModal = ({ isOpen, onClose, onSubmit, context }) => {
                 { value: 'profileImage', label: 'Profile Image', clearable: true, removeOnly: true },
                 { value: 'bio', label: 'Profile Bio', clearable: true },
                 { value: 'websiteUrl', label: 'Website URL', clearable: true },
-                { value: 'country', label: 'Country/Location', clearable: true }
+                { value: 'country', label: 'Country', clearable: true, removeOnly: true, removeLabel: 'Clear Country' }
             ];
         }
         if (context?.type === 'animal') {
@@ -173,7 +173,7 @@ export const EditContentModal = ({ isOpen, onClose, onSubmit, context }) => {
                     {selectedField && (
                         <div className="form-group">
                             {selectedFieldInfo?.removeOnly ? (
-                                /* For image fields - just show a Remove button */
+                                /* For image/country fields - just show a Remove/Clear button */
                                 <button 
                                     onClick={() => {
                                         setFieldEdits({ ...fieldEdits, [selectedField]: '' });
@@ -182,7 +182,7 @@ export const EditContentModal = ({ isOpen, onClose, onSubmit, context }) => {
                                     className="btn-add-field"
                                     style={{ backgroundColor: '#ef4444', borderColor: '#dc2626' }}
                                 >
-                                    Remove {selectedFieldInfo.label}
+                                    {selectedFieldInfo.removeLabel || `Remove ${selectedFieldInfo.label}`}
                                 </button>
                             ) : (
                                 /* For text fields - show input */
