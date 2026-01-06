@@ -2009,6 +2009,7 @@ const PrivateAnimalDetail = ({ animal, onClose, onEdit, API_BASE_URL, authToken,
     const [breederInfo, setBreederInfo] = useState(null);
     const [showPedigree, setShowPedigree] = useState(false);
     const [detailViewTab, setDetailViewTab] = useState(1);
+    const [copySuccess, setCopySuccess] = useState(false);
     
     // Helper function to parse health records from JSON strings
     const parseHealthRecords = (data) => {
@@ -2022,6 +2023,14 @@ const PrivateAnimalDetail = ({ animal, onClose, onEdit, API_BASE_URL, authToken,
             }
         }
         return Array.isArray(data) ? data : [];
+    };
+    
+    const handleShare = () => {
+        const url = `${window.location.origin}/animal/${animal.id_public}`;
+        navigator.clipboard.writeText(url).then(() => {
+            setCopySuccess(true);
+            setTimeout(() => setCopySuccess(false), 2000);
+        });
     };
     
     // Fetch breeder info when component mounts or animal changes
@@ -2064,6 +2073,14 @@ const PrivateAnimalDetail = ({ animal, onClose, onEdit, API_BASE_URL, authToken,
                             <span className="text-xs bg-green-100 text-green-800 px-2 py-1 rounded font-medium">
                                 👁️ OWNER VIEW - All Data Visible
                             </span>
+                            <button
+                                onClick={handleShare}
+                                className="px-3 py-1.5 bg-primary hover:bg-primary/90 text-black font-semibold rounded-lg transition flex items-center gap-2"
+                                title="Copy public link to clipboard"
+                            >
+                                <Link size={16} />
+                                {copySuccess ? 'Link Copied!' : 'Share'}
+                            </button>
                             {onEdit && (
                                 <button
                                     onClick={() => onEdit(animal)}
@@ -2786,6 +2803,7 @@ const ViewOnlyPrivateAnimalDetail = ({ animal, onClose, API_BASE_URL, authToken,
     const [breederInfo, setBreederInfo] = useState(null);
     const [showPedigree, setShowPedigree] = useState(false);
     const [detailViewTab, setDetailViewTab] = useState(1);
+    const [copySuccess, setCopySuccess] = useState(false);
     
     // Helper function to parse health records from JSON strings
     const parseHealthRecords = (data) => {
@@ -2799,6 +2817,14 @@ const ViewOnlyPrivateAnimalDetail = ({ animal, onClose, API_BASE_URL, authToken,
             }
         }
         return Array.isArray(data) ? data : [];
+    };
+    
+    const handleShare = () => {
+        const url = `${window.location.origin}/animal/${animal.id_public}`;
+        navigator.clipboard.writeText(url).then(() => {
+            setCopySuccess(true);
+            setTimeout(() => setCopySuccess(false), 2000);
+        });
     };
     
     // Fetch breeder info when component mounts or animal changes
@@ -18413,6 +18439,28 @@ const App = () => {
     );
 };
 
+// ==================== PRIVATE ANIMAL SCREEN ====================
+// Shown when trying to view a private animal that doesn't have public access
+const PrivateAnimalScreen = ({ onBack }) => {
+    return (
+        <div className="min-h-screen bg-page-bg flex flex-col items-center justify-center p-6">
+            <div className="bg-white rounded-xl shadow-lg p-8 max-w-md text-center">
+                <Lock size={64} className="text-gray-500 mx-auto mb-4" />
+                <h1 className="text-2xl font-bold text-gray-800 mb-2">This Animal is Private</h1>
+                <p className="text-gray-600 mb-6">
+                    This animal doesn't have a public profile available. The owner has not shared this animal publicly.
+                </p>
+                <button
+                    onClick={onBack}
+                    className="w-full px-4 py-2 bg-primary text-black font-semibold rounded-lg hover:bg-primary/90 transition"
+                >
+                    Go Back
+                </button>
+            </div>
+        </div>
+    );
+};
+
 // Public Animal Page Component
 const PublicAnimalPage = () => {
     const { animalId } = useParams();
@@ -18421,6 +18469,7 @@ const PublicAnimalPage = () => {
     const [animal, setAnimal] = useState(null);
     const [loading, setLoading] = useState(true);
     const [notFound, setNotFound] = useState(false);
+    const [isPrivate, setIsPrivate] = useState(false);
     const [modCurrentContext, setModCurrentContext] = useState(null);
     const [showImageModal, setShowImageModal] = useState(false);
     const [enlargedImageUrl, setEnlargedImageUrl] = useState(null);
@@ -18432,11 +18481,34 @@ const PublicAnimalPage = () => {
     useEffect(() => {
         const fetchAnimal = async () => {
             try {
+                // First try to fetch from public animals
                 const response = await axios.get(`${API_BASE_URL}/public/global/animals?id_public=${animalId}`);
-                setAnimal(response.data?.[0] || null);
-                if (!response.data?.[0]) {
-                    setNotFound(true);
+                if (response.data?.[0]) {
+                    setAnimal(response.data[0]);
+                    setLoading(false);
+                    return;
                 }
+                
+                // If not found in public, try to fetch from private to determine if it's private or truly not found
+                if (authToken) {
+                    try {
+                        const privateResponse = await axios.get(
+                            `${API_BASE_URL}/animals/${animalId}`,
+                            { headers: { Authorization: `Bearer ${authToken}` } }
+                        );
+                        if (privateResponse.data) {
+                            // Animal exists but is private
+                            setIsPrivate(true);
+                            setLoading(false);
+                            return;
+                        }
+                    } catch (error) {
+                        // Not found in private either, it's truly not found
+                    }
+                }
+                
+                // Truly not found
+                setNotFound(true);
                 setLoading(false);
             } catch (error) {
                 console.error('Animal not found or not public:', error);
@@ -18451,6 +18523,23 @@ const PublicAnimalPage = () => {
         return (
             <div className="min-h-screen bg-page-bg flex items-center justify-center p-6">
                 <Loader2 className="animate-spin text-primary" size={48} />
+            </div>
+        );
+    }
+
+    if (isPrivate) {
+        return (
+            <div className="min-h-screen bg-page-bg flex flex-col items-center p-6">
+                <header className="w-full max-w-4xl bg-white p-4 rounded-xl shadow-lg mb-6 flex justify-between items-center">
+                    <CustomAppLogo size="w-10 h-10" />
+                    <button
+                        onClick={() => navigate('/')}
+                        className="px-3 py-2 bg-gray-200 hover:bg-gray-300 text-gray-700 font-semibold rounded-lg transition"
+                    >
+                        Home
+                    </button>
+                </header>
+                <PrivateAnimalScreen onBack={() => navigate('/')} />
             </div>
         );
     }
