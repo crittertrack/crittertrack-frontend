@@ -3,7 +3,7 @@ import {
     X, Users, Settings, BarChart3, Mail, Shield, AlertTriangle, Lock,
     Loader2, Save, Plus, Trash2, Edit, Eye, Search, Download, Upload,
     ChevronDown, ChevronRight, ChevronLeft, CheckCircle, Clock, Flag, MessageSquare, FileText,
-    Bug, Dna, PawPrint, Wrench, Database, PanelLeftClose, PanelLeft
+    Bug, Dna, PawPrint, Wrench, Database, PanelLeftClose, PanelLeft, LogOut
 } from 'lucide-react';
 import ModOversightPanel from './moderation/ModOversightPanel';
 import UserManagementPanel from './moderation/UserManagementPanel';
@@ -401,13 +401,25 @@ const EnhancedAdminPanel = ({ isOpen, onClose, authToken, API_BASE_URL, userRole
                         <p className="text-sm text-red-100 mt-1 capitalize">Role: {userRole}</p>
                     </div>
                 </div>
-                <button
-                    onClick={onClose}
-                    className="p-2 hover:bg-white/20 rounded-lg transition text-lg"
-                    title="Close"
-                >
-                    <X size={28} />
-                </button>
+                <div className="flex items-center gap-4">
+                    <button
+                        onClick={() => {
+                            localStorage.removeItem('moderationAuthenticated');
+                            onClose();
+                        }}
+                        className="flex items-center gap-2 px-4 py-2 bg-white/10 hover:bg-white/20 rounded-lg transition"
+                    >
+                        <LogOut size={20} />
+                        <span className="font-medium">Sign Out</span>
+                    </button>
+                    <button
+                        onClick={onClose}
+                        className="p-2 hover:bg-white/20 rounded-lg transition text-lg"
+                        title="Close"
+                    >
+                        <X size={28} />
+                    </button>
+                </div>
             </div>
                 {/* Main Content */}
                 <div className="flex flex-1 overflow-hidden">
