@@ -14848,6 +14848,63 @@ const App = () => {
         };
     }, [authToken, userProfile, maintenanceMode, API_BASE_URL, showModalMessage, handleLogout]);
 
+    // Poll for user account status changes (suspension/ban)
+    useEffect(() => {
+        if (!authToken) {
+            return;
+        }
+
+        const pollUserStatus = async () => {
+            try {
+                const response = await axios.get(`${API_BASE_URL}/auth/status`, {
+                    headers: { Authorization: `Bearer ${authToken}` }
+                });
+                const data = response.data;
+                
+                // Check if user status has changed to suspended or banned
+                if (data.accountStatus === 'suspended' || data.accountStatus === 'banned') {
+                    console.log('[AUTH] User account status changed:', data.accountStatus);
+                    
+                    // Logout user and show message
+                    handleLogout();
+                    
+                    const title = data.accountStatus === 'suspended' ? 'Account Suspended' : 'Account Banned';
+                    const message = data.accountStatus === 'suspended' 
+                        ? (data.suspensionReason || 'Your account has been suspended.')
+                        : (data.banReason || 'Your account has been banned.');
+                    
+                    showModalMessage(title, message);
+                }
+            } catch (error) {
+                // If we get a 403 with forceLogout flag, handle it
+                if (error.response?.status === 403 && error.response?.data?.forceLogout) {
+                    const accountStatus = error.response?.data?.accountStatus;
+                    const message = error.response?.data?.message || 'Your account status has changed.';
+                    
+                    console.log('[AUTH] Force logout on status check:', { accountStatus, message });
+                    handleLogout();
+                    showModalMessage(
+                        accountStatus === 'suspended' ? 'Account Suspended' : 'Account Status Changed',
+                        message
+                    );
+                } else if (error.response?.status === 401) {
+                    // Token expired or invalid
+                    console.log('[AUTH] Token validation failed during status check');
+                    handleLogout();
+                }
+                // Other errors are non-critical (network, server errors) - don't logout
+            }
+        };
+
+        // Poll every 30 seconds for user status changes
+        const statusPollInterval = setInterval(pollUserStatus, 30000);
+        
+        // Also check immediately on mount
+        pollUserStatus();
+
+        return () => clearInterval(statusPollInterval);
+    }, [authToken, API_BASE_URL, handleLogout, showModalMessage]);
+
     useEffect(() => {
         if (authToken && !hasCompletedOnboarding && !tutorialLoading && userProfile) {
             // Show the initial welcome tutorial
