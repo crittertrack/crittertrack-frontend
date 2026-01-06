@@ -15375,7 +15375,7 @@ const App = () => {
         let currentAnimal = animal;
         if (authToken) {
             try {
-                const response = await axios.get(`${API_BASE_URL}/animals/${animal.id_public}`, {
+                const response = await axios.get(`${API_BASE_URL}/animals/any/${animal.id_public}`, {
                     headers: { Authorization: `Bearer ${authToken}` }
                 });
                 currentAnimal = response.data;
