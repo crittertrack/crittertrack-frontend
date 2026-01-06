@@ -14220,8 +14220,8 @@ const NotificationPanel = ({ authToken, API_BASE_URL, onClose, showModalMessage,
                                                             className="w-full h-full object-cover"
                                                         />
                                                     ) : (
-                                                        <div className="w-full h-full flex items-center justify-center bg-gray-300 text-gray-600 font-bold text-lg">
-                                                            {notification.animalName?.charAt(0) || '?'}
+                                                        <div className="w-full h-full flex items-center justify-center bg-gradient-to-br from-indigo-100 to-purple-100 text-indigo-500">
+                                                            <AlertCircle size={28} />
                                                         </div>
                                                     )}
                                                 </div>
