@@ -15971,7 +15971,7 @@ const App = () => {
                     )}
 
                     {/* Moderator Action Sidebar - Shows when viewing animals in mod mode */}
-                    {inModeratorMode && !showModReportQueue && localStorage.getItem('moderationAuthenticated') === 'true' && (
+                    {inModeratorMode && !showModReportQueue && !showAdminPanel && localStorage.getItem('moderationAuthenticated') === 'true' && (
                         <ModeratorActionSidebar
                             isActive={true}
                             onOpenReportQueue={() => setShowModReportQueue(true)}
@@ -16820,7 +16820,7 @@ const App = () => {
             )}
 
             {/* Moderator Action Sidebar - Shows while browsing in moderator mode */}
-            {inModeratorMode && !showModReportQueue && localStorage.getItem('moderationAuthenticated') === 'true' && (
+            {inModeratorMode && !showModReportQueue && !showAdminPanel && localStorage.getItem('moderationAuthenticated') === 'true' && (
                 <ModeratorActionSidebar
                     isActive={true}
                     onOpenReportQueue={() => setShowModReportQueue(true)}
