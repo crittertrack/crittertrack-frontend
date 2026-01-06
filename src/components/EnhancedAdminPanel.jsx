@@ -3,7 +3,7 @@ import {
     X, Users, Settings, BarChart3, Mail, Shield, AlertTriangle, Lock,
     Loader2, Save, Plus, Trash2, Edit, Eye, Search, Download, Upload,
     ChevronDown, ChevronRight, CheckCircle, Clock, Flag, MessageSquare, FileText,
-    Bug, Dna, PawPrint, Wrench
+    Bug, Dna, PawPrint, Wrench, Database
 } from 'lucide-react';
 import ModOversightPanel from './moderation/ModOversightPanel';
 import UserManagementPanel from './moderation/UserManagementPanel';
@@ -16,6 +16,7 @@ import BugReportsTab from './admin/BugReportsTab';
 import FeedbackTab from './admin/FeedbackTab';
 import SpeciesManagementTab from './admin/SpeciesManagementTab';
 import GeneticsBuilderTab from './admin/GeneticsBuilderTab';
+import BackupManagementTab from './admin/BackupManagementTab';
 
 // Error Boundary Component
 class ErrorBoundary extends React.Component {
@@ -423,6 +424,7 @@ const EnhancedAdminPanel = ({ isOpen, onClose, authToken, API_BASE_URL, userRole
                                 { id: 'feedback', label: 'Calculator Feedback', icon: Dna },
                                 { id: 'species-management', label: 'Species Management', icon: PawPrint, requiredRole: 'admin' },
                                 { id: 'genetics-builder', label: 'Genetics Builder', icon: Wrench, requiredRole: 'admin' },
+                                { id: 'backup-management', label: 'Backup Management', icon: Database, requiredRole: 'admin' },
                                 { id: 'reports', label: 'Reports & Analytics', icon: BarChart3 },
                                 { id: 'communication', label: 'Communication', icon: Mail },
                                 // Admin-only features
@@ -585,6 +587,16 @@ const EnhancedAdminPanel = ({ isOpen, onClose, authToken, API_BASE_URL, userRole
                         {activeSection === 'genetics-builder' && (
                             <div className="p-8">
                                 <GeneticsBuilderTab
+                                    API_BASE_URL={API_BASE_URL}
+                                    authToken={authToken}
+                                />
+                            </div>
+                        )}
+
+                        {/* Backup Management */}
+                        {activeSection === 'backup-management' && (
+                            <div className="p-8">
+                                <BackupManagementTab
                                     API_BASE_URL={API_BASE_URL}
                                     authToken={authToken}
                                 />
