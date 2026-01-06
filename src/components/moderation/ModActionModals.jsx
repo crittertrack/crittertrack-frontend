@@ -91,6 +91,7 @@ export const EditContentModal = ({ isOpen, onClose, onSubmit, context }) => {
             return [
                 { value: 'personalName', label: 'Personal Name' },
                 { value: 'breederName', label: 'Breeder Name' },
+                { value: 'profileImage', label: 'Profile Image (clear to remove)' },
                 { value: 'profileBio', label: 'Profile Bio' },
                 { value: 'location', label: 'Location' },
                 { value: 'websiteUrl', label: 'Website URL' }
