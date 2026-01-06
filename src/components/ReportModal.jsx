@@ -23,7 +23,6 @@ const FIELD_OPTIONS = {
         { value: 'animal_name', label: 'Animal Name' },
         { value: 'animal_color', label: 'Color/Genetics' },
         { value: 'animal_image', label: 'Image' },
-        { value: 'animal_description', label: 'Description' },
         { value: 'animal_remarks', label: 'Remarks' },
         { value: 'other', label: 'Other' }
     ],
