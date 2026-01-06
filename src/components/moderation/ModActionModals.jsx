@@ -106,8 +106,7 @@ export const EditContentModal = ({ isOpen, onClose, onSubmit, context }) => {
                 { value: 'breederyId', label: 'Breedery ID', clearable: true },
                 
                 // Images
-                { value: 'imageUrl', label: 'Main Image', clearable: true, removeOnly: true },
-                { value: 'photoUrl', label: 'Secondary Photo', clearable: true, removeOnly: true },
+                { value: 'imageUrl', label: 'Animal Image', clearable: true, removeOnly: true },
                 
                 // Description/Notes
                 { value: 'remarks', label: 'Remarks/Notes', clearable: true },
