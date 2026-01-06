@@ -277,6 +277,7 @@ const AuditLogViewer = () => {
                                                     <div className="target-name">
                                                         {log.targetUserId.personalName || 
                                                          log.targetUserId.breederName || 
+                                                         log.targetName ||
                                                          'Unknown'}
                                                     </div>
                                                     <div className="target-id">
