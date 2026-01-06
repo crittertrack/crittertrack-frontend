@@ -2,8 +2,8 @@ import React, { useState, useEffect } from 'react';
 import {
     X, Users, Settings, BarChart3, Mail, Shield, AlertTriangle, Lock,
     Loader2, Save, Plus, Trash2, Edit, Eye, Search, Download, Upload,
-    ChevronDown, ChevronRight, CheckCircle, Clock, Flag, MessageSquare, FileText,
-    Bug, Dna, PawPrint, Wrench, Database
+    ChevronDown, ChevronRight, ChevronLeft, CheckCircle, Clock, Flag, MessageSquare, FileText,
+    Bug, Dna, PawPrint, Wrench, Database, PanelLeftClose, PanelLeft
 } from 'lucide-react';
 import ModOversightPanel from './moderation/ModOversightPanel';
 import UserManagementPanel from './moderation/UserManagementPanel';
@@ -68,6 +68,7 @@ class ErrorBoundary extends React.Component {
 
 const EnhancedAdminPanel = ({ isOpen, onClose, authToken, API_BASE_URL, userRole, userEmail, userId, username, skipAuthentication = false }) => {
     const [activeSection, setActiveSection] = useState('dashboard');
+    const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
     const [adminPassword, setAdminPassword] = useState('');
     const [isAuthenticated, setIsAuthenticated] = useState(skipAuthentication);
     const [showPasswordPrompt, setShowPasswordPrompt] = useState(!skipAuthentication);
@@ -411,8 +412,22 @@ const EnhancedAdminPanel = ({ isOpen, onClose, authToken, API_BASE_URL, userRole
                 {/* Main Content */}
                 <div className="flex flex-1 overflow-hidden">
                     {/* Sidebar Navigation */}
-                    <div className="w-64 bg-gray-50 border-r border-gray-200 overflow-y-auto">
-                        <nav className="p-4 space-y-2">
+                    <div 
+                        className={`bg-gray-50 border-r border-gray-200 overflow-y-auto transition-all duration-300 flex flex-col ${
+                            sidebarCollapsed ? 'w-16' : 'w-72'
+                        }`}
+                    >
+                        {/* Collapse Toggle Button */}
+                        <div className={`p-2 border-b border-gray-200 flex ${sidebarCollapsed ? 'justify-center' : 'justify-end'}`}>
+                            <button
+                                onClick={() => setSidebarCollapsed(!sidebarCollapsed)}
+                                className="p-2 hover:bg-gray-200 rounded-lg transition text-gray-500 hover:text-gray-700"
+                                title={sidebarCollapsed ? 'Expand sidebar' : 'Collapse sidebar'}
+                            >
+                                {sidebarCollapsed ? <PanelLeft size={20} /> : <PanelLeftClose size={20} />}
+                            </button>
+                        </div>
+                        <nav className="p-2 space-y-1 flex-1">
                             {[
                                 { id: 'dashboard', label: 'Dashboard', icon: BarChart3 },
                                 { id: 'moderation', label: 'Reports', icon: AlertTriangle },
@@ -427,7 +442,6 @@ const EnhancedAdminPanel = ({ isOpen, onClose, authToken, API_BASE_URL, userRole
                                 { id: 'backup-management', label: 'Backup Management', icon: Database, requiredRole: 'admin' },
                                 { id: 'reports', label: 'Reports & Analytics', icon: BarChart3 },
                                 { id: 'communication', label: 'Communication', icon: Mail },
-                                // Admin-only features
                                 { id: 'system-settings', label: 'System Settings', icon: Settings, requiredRole: 'admin' }
                             ].map(section => {
                                 const Icon = section.icon;
@@ -438,14 +452,17 @@ const EnhancedAdminPanel = ({ isOpen, onClose, authToken, API_BASE_URL, userRole
                                     <button
                                         key={section.id}
                                         onClick={() => setActiveSection(section.id)}
-                                        className={`w-full flex items-center gap-3 px-4 py-3 rounded-lg transition ${
+                                        title={sidebarCollapsed ? section.label : undefined}
+                                        className={`w-full flex items-center gap-3 px-3 py-2.5 rounded-lg transition whitespace-nowrap ${
                                             activeSection === section.id
                                                 ? 'bg-red-600 text-white'
                                                 : 'text-gray-700 hover:bg-gray-100'
-                                        }`}
+                                        } ${sidebarCollapsed ? 'justify-center' : ''}`}
                                     >
-                                        <Icon size={20} />
-                                        <span className="font-medium">{section.label}</span>
+                                        <Icon size={20} className="flex-shrink-0" />
+                                        {!sidebarCollapsed && (
+                                            <span className="font-medium text-left text-sm">{section.label}</span>
+                                        )}
                                     </button>
                                 );
                             })}
