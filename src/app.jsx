@@ -15280,9 +15280,14 @@ const App = () => {
             delete axios.defaults.headers.common['Authorization'];
             localStorage.removeItem('authToken');
             setUserProfile(null);
-            navigate('/');
+            // Only redirect to home if not on a public route
+            const publicRoutes = ['donation', 'genetics-calculator', 'breeder', 'animal'];
+            const currentPath = location.pathname.split('/')[1] || '';
+            if (!publicRoutes.includes(currentPath)) {
+                navigate('/');
+            }
         }
-    }, [authToken, navigate]);
+    }, [authToken, navigate, location.pathname]);
 
     const fetchUserProfile = useCallback(async (token) => {
         try {
