@@ -16180,6 +16180,7 @@ const App = () => {
                         </p>
                         
                         <button
+                            type="button"
                             onClick={() => navigate('/donation')}
                             className="w-full bg-gradient-to-r from-pink-500 to-red-500 hover:from-pink-600 hover:to-red-600 text-white font-semibold py-3 px-4 rounded-lg shadow-md transition flex items-center justify-center gap-2"
                         >
