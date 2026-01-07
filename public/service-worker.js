@@ -32,6 +32,11 @@ self.addEventListener('fetch', (event) => {
   const { request } = event;
   const url = new URL(request.url);
   
+  // Skip non-GET requests (POST, PUT, DELETE, etc.) - they can't be cached
+  if (request.method !== 'GET') {
+    return;
+  }
+  
   // Skip API requests - always go to network
   if (url.pathname.includes('/api/')) {
     event.respondWith(
