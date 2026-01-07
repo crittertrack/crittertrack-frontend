@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useCallback, useRef, useMemo } from 'react';
-import { useParams, useNavigate, useLocation, Routes, Route } from 'react-router-dom';
+import { useParams, useNavigate, useLocation, Routes, Route, Link as RouterLink } from 'react-router-dom';
 import axios from 'axios';
 import { LogOut, Cat, UserPlus, LogIn, ChevronLeft, ChevronDown, ChevronRight, Trash2, Edit, Save, PlusCircle, Plus, ArrowLeft, Loader2, RefreshCw, User, Users, ClipboardList, BookOpen, Settings, Mail, Globe, Bean, Milk, Search, X, Mars, Venus, Eye, EyeOff, Home, Heart, HeartOff, HeartHandshake, Bell, XCircle, CheckCircle, Download, FileText, Link, AlertCircle, Check, DollarSign, Archive, ArrowLeftRight, RotateCcw, Info, Hourglass, MessageSquare, Ban, Flag, Scissors, VenusAndMars, Circle, Shield, Lock } from 'lucide-react';
 import jsPDF from 'jspdf';
@@ -16179,14 +16179,13 @@ const App = () => {
                             no matter the size, makes a difference!
                         </p>
                         
-                        <button
-                            type="button"
-                            onClick={() => navigate('/donation')}
+                        <RouterLink
+                            to="/donation"
                             className="w-full bg-gradient-to-r from-pink-500 to-red-500 hover:from-pink-600 hover:to-red-600 text-white font-semibold py-3 px-4 rounded-lg shadow-md transition flex items-center justify-center gap-2"
                         >
                             <Heart size={18} className="fill-current" />
                             Learn More & Donate
-                        </button>
+                        </RouterLink>
                     </div>
                     
                     {/* MIDDLE: Auth Form */}
