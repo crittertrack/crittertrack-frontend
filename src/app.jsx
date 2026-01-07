@@ -16271,7 +16271,7 @@ const App = () => {
             <div className="fixed top-4 left-4 z-[60]">
                 <button
                     onClick={() => {
-                        navigate('/');
+                        navigate('/donation');
                         if (!hasSeenDonationHighlight) {
                             setHasSeenDonationHighlight(true);
                             localStorage.setItem('hasSeenDonationHighlight', 'true');
