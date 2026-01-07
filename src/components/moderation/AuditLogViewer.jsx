@@ -263,7 +263,7 @@ const AuditLogViewer = () => {
                                 {logs.map(log => (
                                     <tr key={log._id}>
                                         <td className="timestamp-cell">
-                                            {formatDate(log.timestamp)}
+                                            {formatDate(log.createdAt)}
                                         </td>
                                         <td className="action-cell">
                                             <span className={`action-badge action-${log.action.replace(/_/g, '-')}`}>
