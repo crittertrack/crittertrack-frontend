@@ -14039,8 +14039,8 @@ const BroadcastBanner = ({ authToken, API_BASE_URL }) => {
             }
         };
         fetchBroadcasts();
-        // Refresh every 2 minutes
-        const interval = setInterval(fetchBroadcasts, 120000);
+        // Refresh every 15 seconds for real-time updates
+        const interval = setInterval(fetchBroadcasts, 15000);
         return () => clearInterval(interval);
     }, [authToken, API_BASE_URL, dismissedIds]);
 
@@ -14153,8 +14153,8 @@ const UrgentBroadcastPopup = ({ authToken, API_BASE_URL }) => {
             }
         };
         fetchUrgentBroadcasts();
-        // Check every minute for new urgent broadcasts
-        const interval = setInterval(fetchUrgentBroadcasts, 60000);
+        // Check every 15 seconds for urgent broadcasts
+        const interval = setInterval(fetchUrgentBroadcasts, 15000);
         return () => clearInterval(interval);
     }, [authToken, API_BASE_URL, acknowledgedIds]);
 
