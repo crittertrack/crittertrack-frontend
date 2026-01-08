@@ -14318,8 +14318,16 @@ const NotificationPanel = ({ authToken, API_BASE_URL, onClose, showModalMessage,
         }
     };
 
-    const pendingNotifications = notifications.filter(n => n.status === 'pending');
-    const otherNotifications = notifications.filter(n => n.status !== 'pending');
+    const pendingNotifications = notifications.filter(n => 
+        n.status === 'pending' && 
+        n.type !== 'broadcast' && 
+        n.type !== 'announcement'
+    );
+    const otherNotifications = notifications.filter(n => 
+        n.status !== 'pending' && 
+        n.type !== 'broadcast' && 
+        n.type !== 'announcement'
+    );
 
     return (
         <div className="fixed inset-0 bg-gray-600 bg-opacity-75 flex items-center justify-center p-4 z-50">
