@@ -101,7 +101,7 @@ const AuditLogViewer = () => {
             if (filters.searchTerm) params.append('search', filters.searchTerm);
 
             const response = await axios.get(
-                `${API_URL}/admin/audit-logs?${params.toString()}`,
+                `${API_URL}/moderation/audit-logs?${params.toString()}`,
                 { headers: { Authorization: `Bearer ${token}` } }
             );
 
