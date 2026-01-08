@@ -12,6 +12,10 @@ export default function CommunicationTab({ API_BASE_URL, authToken }) {
     const [message, setMessage] = useState('');
     const [recipientType, setRecipientType] = useState('all');
     const [country, setCountry] = useState('');
+    const [broadcastType, setBroadcastType] = useState('info');
+    const [scheduleEnabled, setScheduleEnabled] = useState(false);
+    const [scheduledDate, setScheduledDate] = useState('');
+    const [scheduledTime, setScheduledTime] = useState('');
 
     // History state
     const [broadcasts, setBroadcasts] = useState([]);
@@ -71,21 +75,32 @@ export default function CommunicationTab({ API_BASE_URL, authToken }) {
             return;
         }
 
+        // Validate scheduled time if enabled
+        let scheduledFor = null;
+        if (scheduleEnabled) {
+            if (!scheduledDate || !scheduledTime) {
+                setError('Please select both date and time for scheduling');
+                setLoading(false);
+                return;
+            }
+            scheduledFor = new Date(`${scheduledDate}T${scheduledTime}`);
+            if (scheduledFor <= new Date()) {
+                setError('Scheduled time must be in the future');
+                setLoading(false);
+                return;
+            }
+        }
+
         try {
+            // Use moderation endpoint which supports scheduling and emails
             const payload = {
-                subject,
+                title: subject,
                 message,
-                recipientType
+                type: broadcastType,
+                ...(scheduledFor && { scheduledFor: scheduledFor.toISOString() })
             };
 
-            if (recipientType === 'country') {
-                if (!country) {
-                    throw new Error('Country is required for country-specific broadcasts');
-                }
-                payload.country = country;
-            }
-
-            const response = await fetch(`${API_BASE_URL}/api/admin/broadcast`, {
+            const response = await fetch(`${API_BASE_URL}/moderation/broadcast`, {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
@@ -105,11 +120,19 @@ export default function CommunicationTab({ API_BASE_URL, authToken }) {
                 throw new Error(data.error || 'Failed to send broadcast');
             }
 
-            setSuccess(`Broadcast sent successfully to ${data.recipientCount} users!`);
+            if (scheduledFor) {
+                setSuccess(`Broadcast scheduled for ${scheduledFor.toLocaleString()} - will be sent to ${data.recipientCount} users`);
+            } else {
+                setSuccess(`Broadcast sent successfully to ${data.recipientCount} users!`);
+            }
+            
+            // Reset form
             setSubject('');
             setMessage('');
-            setRecipientType('all');
-            setCountry('');
+            setBroadcastType('info');
+            setScheduleEnabled(false);
+            setScheduledDate('');
+            setScheduledTime('');
 
             // Refresh history
             if (activeView === 'history') {
@@ -212,39 +235,26 @@ export default function CommunicationTab({ API_BASE_URL, authToken }) {
                 <div className="broadcast-view">
                     <div className="info-card">
                         <h4>Send Announcement</h4>
-                        <p>Broadcast messages are sent as in-app notifications to selected users.</p>
+                        <p>Broadcast messages are sent as in-app notifications and emails to all active users.</p>
                     </div>
 
                     <form onSubmit={handleSendBroadcast} className="broadcast-form">
                         <div className="form-group">
-                            <label>Recipients *</label>
+                            <label>Broadcast Type *</label>
                             <select
-                                value={recipientType}
-                                onChange={(e) => setRecipientType(e.target.value)}
+                                value={broadcastType}
+                                onChange={(e) => setBroadcastType(e.target.value)}
                                 disabled={loading}
                             >
-                                <option value="all">All Users</option>
-                                <option value="active">Active Users (Last 30 Days)</option>
-                                <option value="moderators">Moderators & Admins</option>
-                                <option value="country">Specific Country</option>
+                                <option value="info">ℹ️ Info - General information</option>
+                                <option value="announcement">📢 Announcement - Important news</option>
+                                <option value="warning">⚠️ Warning - Action may be required</option>
+                                <option value="alert">🚨 Alert - Urgent message</option>
                             </select>
                         </div>
 
-                        {recipientType === 'country' && (
-                            <div className="form-group">
-                                <label>Country *</label>
-                                <input
-                                    type="text"
-                                    value={country}
-                                    onChange={(e) => setCountry(e.target.value)}
-                                    placeholder="e.g., United States"
-                                    disabled={loading}
-                                />
-                            </div>
-                        )}
-
                         <div className="form-group">
-                            <label>Subject *</label>
+                            <label>Subject / Title *</label>
                             <input
                                 type="text"
                                 value={subject}
@@ -269,8 +279,48 @@ export default function CommunicationTab({ API_BASE_URL, authToken }) {
                             <span className="char-count">{message.length}/1000</span>
                         </div>
 
+                        <div className="form-group schedule-toggle">
+                            <label className="checkbox-label">
+                                <input
+                                    type="checkbox"
+                                    checked={scheduleEnabled}
+                                    onChange={(e) => setScheduleEnabled(e.target.checked)}
+                                    disabled={loading}
+                                />
+                                <span>📅 Schedule for later</span>
+                            </label>
+                        </div>
+
+                        {scheduleEnabled && (
+                            <div className="schedule-fields">
+                                <div className="form-group">
+                                    <label>Date *</label>
+                                    <input
+                                        type="date"
+                                        value={scheduledDate}
+                                        onChange={(e) => setScheduledDate(e.target.value)}
+                                        min={new Date().toISOString().split('T')[0]}
+                                        disabled={loading}
+                                    />
+                                </div>
+                                <div className="form-group">
+                                    <label>Time *</label>
+                                    <input
+                                        type="time"
+                                        value={scheduledTime}
+                                        onChange={(e) => setScheduledTime(e.target.value)}
+                                        disabled={loading}
+                                    />
+                                </div>
+                                <p className="schedule-note">
+                                    ⏰ Broadcast will be sent automatically at the scheduled time.
+                                    The cron job checks every minute.
+                                </p>
+                            </div>
+                        )}
+
                         <button type="submit" className="btn-send" disabled={loading}>
-                            {loading ? 'Sending...' : '📢 Send Broadcast'}
+                            {loading ? 'Sending...' : scheduleEnabled ? '📅 Schedule Broadcast' : '📢 Send Now'}
                         </button>
                     </form>
                 </div>
