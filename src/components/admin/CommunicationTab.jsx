@@ -381,15 +381,15 @@ export default function CommunicationTab({ API_BASE_URL, authToken }) {
 
                     <form onSubmit={handleSendDirectMessage} className="direct-message-form">
                         <div className="form-group">
-                            <label>User ID * (MongoDB ObjectId)</label>
+                            <label>User CTUID *</label>
                             <input
                                 type="text"
                                 value={targetUserId}
-                                onChange={(e) => setTargetUserId(e.target.value)}
-                                placeholder="e.g., 507f1f77bcf86cd799439011"
+                                onChange={(e) => setTargetUserId(e.target.value.toUpperCase())}
+                                placeholder="e.g., CT-A1B2C3"
                                 disabled={loading}
                             />
-                            <small>Find User ID in the User Management tab</small>
+                            <small>The user's public CTUID (found in User Management tab)</small>
                         </div>
 
                         <div className="form-group">
