@@ -345,7 +345,7 @@ export default function CommunicationTab({ API_BASE_URL, authToken }) {
                             {broadcasts.map((broadcast, idx) => (
                                 <div key={idx} className="broadcast-card">
                                     <div className="broadcast-header">
-                                        <strong>{broadcast.details?.subject || 'Broadcast'}</strong>
+                                        <strong>{broadcast.details?.title || 'Broadcast'}</strong>
                                         <span className="broadcast-date">
                                             {new Date(broadcast.createdAt).toLocaleString()}
                                         </span>
@@ -353,7 +353,10 @@ export default function CommunicationTab({ API_BASE_URL, authToken }) {
                                     <div className="broadcast-meta">
                                         <span>By: {broadcast.moderatorEmail}</span>
                                         <span>Recipients: {broadcast.details?.recipientCount || 0}</span>
-                                        <span>Type: {broadcast.details?.recipientType || 'unknown'}</span>
+                                        <span>Type: {broadcast.details?.type || 'info'}</span>
+                                        {broadcast.details?.scheduled && (
+                                            <span>Scheduled: {new Date(broadcast.details.scheduledFor).toLocaleString()}</span>
+                                        )}
                                     </div>
                                 </div>
                             ))}
