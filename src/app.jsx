@@ -14053,35 +14053,68 @@ const BroadcastBanner = ({ authToken, API_BASE_URL }) => {
 
     if (broadcasts.length === 0) return null;
 
+    // Style configurations for different broadcast types
+    const getStyles = (broadcastType) => {
+        if (broadcastType === 'announcement') {
+            // Announcement: Purple/violet - more prominent
+            return {
+                bg: 'bg-purple-50',
+                border: 'border-purple-500',
+                icon: 'text-purple-500',
+                title: 'text-purple-800',
+                text: 'text-purple-700',
+                subtitle: 'text-purple-500',
+                dismissBtn: 'text-purple-400 hover:text-purple-600',
+                emoji: '📣',
+                label: 'Announcement'
+            };
+        }
+        // Info: Blue - standard informational
+        return {
+            bg: 'bg-blue-50',
+            border: 'border-blue-400',
+            icon: 'text-blue-400',
+            title: 'text-blue-800',
+            text: 'text-blue-700',
+            subtitle: 'text-blue-500',
+            dismissBtn: 'text-blue-400 hover:text-blue-600',
+            emoji: 'ℹ️',
+            label: 'Info'
+        };
+    };
+
     return (
         <div className="w-full flex justify-center">
             <div className="w-full max-w-4xl px-6">
-                {broadcasts.map(broadcast => (
-                    <div key={broadcast._id} className="bg-blue-50 border-l-4 border-blue-500 p-4 rounded-lg shadow-md mb-3">
-                        <div className="flex items-start">
-                            <div className="flex-shrink-0">
-                                <Info className="h-6 w-6 text-blue-500" />
-                            </div>
-                            <div className="ml-3 flex-1">
-                                <div className="flex justify-between items-start">
-                                    <h3 className="text-lg font-bold text-blue-800">
-                                        📢 {broadcast.title || 'System Announcement'}
-                                    </h3>
-                                    <button 
-                                        onClick={() => handleDismiss(broadcast._id)}
-                                        className="text-blue-400 hover:text-blue-600 ml-2"
-                                    >
-                                        <X size={20} />
-                                    </button>
+                {broadcasts.map(broadcast => {
+                    const styles = getStyles(broadcast.broadcastType);
+                    return (
+                        <div key={broadcast._id} className={`${styles.bg} border-l-4 ${styles.border} p-4 rounded-lg shadow-md mb-3`}>
+                            <div className="flex items-start">
+                                <div className="flex-shrink-0">
+                                    <Info className={`h-6 w-6 ${styles.icon}`} />
                                 </div>
-                                <p className="mt-2 text-blue-700 text-sm">{broadcast.message}</p>
-                                <p className="mt-2 text-blue-500 text-xs">
-                                    {new Date(broadcast.createdAt).toLocaleString()}
-                                </p>
+                                <div className="ml-3 flex-1">
+                                    <div className="flex justify-between items-start">
+                                        <h3 className={`text-lg font-bold ${styles.title}`}>
+                                            {styles.emoji} {broadcast.title || `System ${styles.label}`}
+                                        </h3>
+                                        <button 
+                                            onClick={() => handleDismiss(broadcast._id)}
+                                            className={`${styles.dismissBtn} ml-2`}
+                                        >
+                                            <X size={20} />
+                                        </button>
+                                    </div>
+                                    <p className={`mt-2 ${styles.text} text-sm`}>{broadcast.message}</p>
+                                    <p className={`mt-2 ${styles.subtitle} text-xs`}>
+                                        {new Date(broadcast.createdAt).toLocaleString()}
+                                    </p>
+                                </div>
                             </div>
                         </div>
-                    </div>
-                ))}
+                    );
+                })}
             </div>
         </div>
     );
