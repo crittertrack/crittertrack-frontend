@@ -26,7 +26,7 @@ const BugReportsTab = ({ API_BASE_URL, authToken }) => {
         setLoading(true);
         setError(null);
         try {
-            const url = `${API_BASE_URL}/api/bug-reports/admin`;
+            const url = `${API_BASE_URL}/bug-reports/admin`;
             console.log('[BugReportsTab] Fetching from:', url);
             
             const response = await fetch(url, {
@@ -62,7 +62,7 @@ const BugReportsTab = ({ API_BASE_URL, authToken }) => {
     const updateStatus = async (reportId, newStatus) => {
         setUpdating(true);
         try {
-            const response = await fetch(`${API_BASE_URL}/api/bug-reports/${reportId}/status`, {
+            const response = await fetch(`${API_BASE_URL}/bug-reports/${reportId}/status`, {
                 method: 'PATCH',
                 headers: {
                     'Content-Type': 'application/json',
