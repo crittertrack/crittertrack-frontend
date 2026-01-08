@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useCallback, useRef, useMemo } from 'react';
 import { useParams, useNavigate, useLocation, Routes, Route, Link as RouterLink } from 'react-router-dom';
 import axios from 'axios';
-import { LogOut, Cat, UserPlus, LogIn, ChevronLeft, ChevronDown, ChevronRight, Trash2, Edit, Save, PlusCircle, Plus, ArrowLeft, Loader2, RefreshCw, User, Users, ClipboardList, BookOpen, Settings, Mail, Globe, Bean, Milk, Search, X, Mars, Venus, Eye, EyeOff, Home, Heart, HeartOff, HeartHandshake, Bell, XCircle, CheckCircle, Download, FileText, Link, AlertCircle, Check, DollarSign, Archive, ArrowLeftRight, RotateCcw, Info, Hourglass, MessageSquare, Ban, Flag, Scissors, VenusAndMars, Circle, Shield, Lock } from 'lucide-react';
+import { LogOut, Cat, UserPlus, LogIn, ChevronLeft, ChevronDown, ChevronRight, Trash2, Edit, Save, PlusCircle, Plus, ArrowLeft, Loader2, RefreshCw, User, Users, ClipboardList, BookOpen, Settings, Mail, Globe, Bean, Milk, Search, X, Mars, Venus, Eye, EyeOff, Home, Heart, HeartOff, HeartHandshake, Bell, XCircle, CheckCircle, Download, FileText, Link, AlertCircle, Check, DollarSign, Archive, ArrowLeftRight, RotateCcw, Info, Hourglass, MessageSquare, Ban, Flag, Scissors, VenusAndMars, Circle, Shield, Lock, AlertTriangle } from 'lucide-react';
 import jsPDF from 'jspdf';
 import html2canvas from 'html2canvas';
 import 'flag-icons/css/flag-icons.min.css';
@@ -14008,6 +14008,167 @@ const WarningBanner = ({ authToken, API_BASE_URL, userProfile }) => {
     );
 };
 
+// System Broadcast Banner Component (for info/announcements - shows in banner area)
+const BroadcastBanner = ({ authToken, API_BASE_URL }) => {
+    const [broadcasts, setBroadcasts] = useState([]);
+    const [dismissedIds, setDismissedIds] = useState(() => {
+        const saved = localStorage.getItem('dismissedBroadcasts');
+        return saved ? JSON.parse(saved) : [];
+    });
+
+    useEffect(() => {
+        const fetchBroadcasts = async () => {
+            if (!authToken) return;
+            try {
+                const response = await axios.get(`${API_BASE_URL}/notifications`, {
+                    headers: { Authorization: `Bearer ${authToken}` }
+                });
+                // Filter for broadcast/announcement types that are info or announcement type
+                const broadcastNotifications = (response.data || []).filter(n => 
+                    (n.type === 'broadcast' || n.type === 'announcement') &&
+                    (n.broadcastType === 'info' || n.broadcastType === 'announcement') &&
+                    !dismissedIds.includes(n._id)
+                );
+                setBroadcasts(broadcastNotifications);
+            } catch (error) {
+                console.error('Failed to fetch broadcasts:', error);
+            }
+        };
+        fetchBroadcasts();
+        // Refresh every 2 minutes
+        const interval = setInterval(fetchBroadcasts, 120000);
+        return () => clearInterval(interval);
+    }, [authToken, API_BASE_URL, dismissedIds]);
+
+    const handleDismiss = (id) => {
+        const newDismissed = [...dismissedIds, id];
+        setDismissedIds(newDismissed);
+        localStorage.setItem('dismissedBroadcasts', JSON.stringify(newDismissed));
+        setBroadcasts(prev => prev.filter(b => b._id !== id));
+    };
+
+    if (broadcasts.length === 0) return null;
+
+    return (
+        <div className="w-full flex justify-center">
+            <div className="w-full max-w-4xl px-6">
+                {broadcasts.map(broadcast => (
+                    <div key={broadcast._id} className="bg-blue-50 border-l-4 border-blue-500 p-4 rounded-lg shadow-md mb-3">
+                        <div className="flex items-start">
+                            <div className="flex-shrink-0">
+                                <Info className="h-6 w-6 text-blue-500" />
+                            </div>
+                            <div className="ml-3 flex-1">
+                                <div className="flex justify-between items-start">
+                                    <h3 className="text-lg font-bold text-blue-800">
+                                        📢 {broadcast.title || 'System Announcement'}
+                                    </h3>
+                                    <button 
+                                        onClick={() => handleDismiss(broadcast._id)}
+                                        className="text-blue-400 hover:text-blue-600 ml-2"
+                                    >
+                                        <X size={20} />
+                                    </button>
+                                </div>
+                                <p className="mt-2 text-blue-700 text-sm">{broadcast.message}</p>
+                                <p className="mt-2 text-blue-500 text-xs">
+                                    {new Date(broadcast.createdAt).toLocaleString()}
+                                </p>
+                            </div>
+                        </div>
+                    </div>
+                ))}
+            </div>
+        </div>
+    );
+};
+
+// Urgent Broadcast Popup Component (for warning/alert types - shows as modal popup)
+const UrgentBroadcastPopup = ({ authToken, API_BASE_URL }) => {
+    const [urgentBroadcast, setUrgentBroadcast] = useState(null);
+    const [acknowledgedIds, setAcknowledgedIds] = useState(() => {
+        const saved = localStorage.getItem('acknowledgedUrgentBroadcasts');
+        return saved ? JSON.parse(saved) : [];
+    });
+
+    useEffect(() => {
+        const fetchUrgentBroadcasts = async () => {
+            if (!authToken) return;
+            try {
+                const response = await axios.get(`${API_BASE_URL}/notifications`, {
+                    headers: { Authorization: `Bearer ${authToken}` }
+                });
+                // Filter for urgent broadcast types (warning/alert)
+                const urgentNotifications = (response.data || []).filter(n => 
+                    (n.type === 'broadcast' || n.type === 'announcement') &&
+                    (n.broadcastType === 'warning' || n.broadcastType === 'alert') &&
+                    !acknowledgedIds.includes(n._id)
+                );
+                // Show the most recent one
+                if (urgentNotifications.length > 0) {
+                    setUrgentBroadcast(urgentNotifications[0]);
+                }
+            } catch (error) {
+                console.error('Failed to fetch urgent broadcasts:', error);
+            }
+        };
+        fetchUrgentBroadcasts();
+        // Check every minute for new urgent broadcasts
+        const interval = setInterval(fetchUrgentBroadcasts, 60000);
+        return () => clearInterval(interval);
+    }, [authToken, API_BASE_URL, acknowledgedIds]);
+
+    const handleAcknowledge = () => {
+        if (urgentBroadcast) {
+            const newAcknowledged = [...acknowledgedIds, urgentBroadcast._id];
+            setAcknowledgedIds(newAcknowledged);
+            localStorage.setItem('acknowledgedUrgentBroadcasts', JSON.stringify(newAcknowledged));
+            setUrgentBroadcast(null);
+        }
+    };
+
+    if (!urgentBroadcast) return null;
+
+    const isAlert = urgentBroadcast.broadcastType === 'alert';
+    const bgColor = isAlert ? 'bg-red-50' : 'bg-orange-50';
+    const borderColor = isAlert ? 'border-red-500' : 'border-orange-500';
+    const textColor = isAlert ? 'text-red-800' : 'text-orange-800';
+    const iconColor = isAlert ? 'text-red-500' : 'text-orange-500';
+    const btnColor = isAlert ? 'bg-red-600 hover:bg-red-700' : 'bg-orange-600 hover:bg-orange-700';
+
+    return (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-[9999]">
+            <div className={`${bgColor} border-2 ${borderColor} rounded-xl shadow-2xl max-w-lg w-full p-6 animate-pulse-once`}>
+                <div className="flex items-start">
+                    <div className="flex-shrink-0">
+                        <AlertTriangle className={`h-8 w-8 ${iconColor}`} />
+                    </div>
+                    <div className="ml-4 flex-1">
+                        <h3 className={`text-xl font-bold ${textColor}`}>
+                            {isAlert ? '🚨 URGENT ALERT' : '⚠️ Important Notice'}
+                        </h3>
+                        <h4 className={`text-lg font-semibold ${textColor} mt-2`}>
+                            {urgentBroadcast.title || 'System Message'}
+                        </h4>
+                        <p className={`mt-3 ${textColor} text-sm leading-relaxed`}>
+                            {urgentBroadcast.message}
+                        </p>
+                        <p className={`mt-3 text-xs ${iconColor}`}>
+                            {new Date(urgentBroadcast.createdAt).toLocaleString()}
+                        </p>
+                        <button
+                            onClick={handleAcknowledge}
+                            className={`mt-4 w-full ${btnColor} text-white font-semibold py-3 px-4 rounded-lg transition-colors`}
+                        >
+                            I Understand
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    );
+};
+
 // Notification Panel Component
 const NotificationPanel = ({ authToken, API_BASE_URL, onClose, showModalMessage, onNotificationChange, onViewAnimal }) => {
     const [notifications, setNotifications] = useState([]);
@@ -16640,6 +16801,12 @@ const App = () => {
 
             {/* Moderator Warning Banner */}
             <WarningBanner authToken={authToken} API_BASE_URL={API_BASE_URL} userProfile={userProfile} />
+            
+            {/* System Broadcast Banner (info/announcements) */}
+            <BroadcastBanner authToken={authToken} API_BASE_URL={API_BASE_URL} />
+            
+            {/* Urgent Broadcast Popup (warning/alert) */}
+            <UrgentBroadcastPopup authToken={authToken} API_BASE_URL={API_BASE_URL} />
 
             {showNotifications && (
                 <NotificationPanel
