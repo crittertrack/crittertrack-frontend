@@ -14023,12 +14023,16 @@ const BroadcastBanner = ({ authToken, API_BASE_URL }) => {
                 const response = await axios.get(`${API_BASE_URL}/notifications`, {
                     headers: { Authorization: `Bearer ${authToken}` }
                 });
-                // Filter for broadcast/announcement types that are info or announcement type
-                const broadcastNotifications = (response.data || []).filter(n => 
-                    (n.type === 'broadcast' || n.type === 'announcement') &&
-                    (n.broadcastType === 'info' || n.broadcastType === 'announcement') &&
-                    !dismissedIds.includes(n._id)
-                );
+                console.log('[BroadcastBanner] All notifications:', response.data);
+                // Filter for broadcast/announcement types that are NOT warning/alert (show info, announcement, or undefined)
+                const broadcastNotifications = (response.data || []).filter(n => {
+                    const isBroadcastType = n.type === 'broadcast' || n.type === 'announcement';
+                    const isNotUrgent = n.broadcastType !== 'warning' && n.broadcastType !== 'alert';
+                    const isNotDismissed = !dismissedIds.includes(n._id);
+                    console.log('[BroadcastBanner] Checking:', n._id, { isBroadcastType, isNotUrgent, isNotDismissed, type: n.type, broadcastType: n.broadcastType });
+                    return isBroadcastType && isNotUrgent && isNotDismissed;
+                });
+                console.log('[BroadcastBanner] Filtered broadcasts:', broadcastNotifications);
                 setBroadcasts(broadcastNotifications);
             } catch (error) {
                 console.error('Failed to fetch broadcasts:', error);
@@ -14098,15 +14102,18 @@ const UrgentBroadcastPopup = ({ authToken, API_BASE_URL }) => {
                 const response = await axios.get(`${API_BASE_URL}/notifications`, {
                     headers: { Authorization: `Bearer ${authToken}` }
                 });
-                // Filter for urgent broadcast types (warning/alert)
-                const urgentNotifications = (response.data || []).filter(n => 
-                    (n.type === 'broadcast' || n.type === 'announcement') &&
-                    (n.broadcastType === 'warning' || n.broadcastType === 'alert') &&
-                    !acknowledgedIds.includes(n._id)
-                );
+                // Filter for urgent broadcast types (warning/alert) - these MUST have explicit broadcastType
+                const urgentNotifications = (response.data || []).filter(n => {
+                    const isBroadcastType = n.type === 'broadcast' || n.type === 'announcement';
+                    const isUrgent = n.broadcastType === 'warning' || n.broadcastType === 'alert';
+                    const isNotAcknowledged = !acknowledgedIds.includes(n._id);
+                    return isBroadcastType && isUrgent && isNotAcknowledged;
+                });
                 // Show the most recent one
                 if (urgentNotifications.length > 0) {
                     setUrgentBroadcast(urgentNotifications[0]);
+                } else {
+                    setUrgentBroadcast(null);
                 }
             } catch (error) {
                 console.error('Failed to fetch urgent broadcasts:', error);
