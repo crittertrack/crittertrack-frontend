@@ -37,7 +37,7 @@ export default function CommunicationTab({ API_BASE_URL, authToken }) {
         setError('');
 
         try {
-            const response = await fetch(`${API_BASE_URL}/api/admin/broadcast-history?limit=20`, {
+            const response = await fetch(`${API_BASE_URL}/moderation/broadcasts?limit=20`, {
                 headers: {
                     'Authorization': `Bearer ${authToken}`
                 }
