@@ -19,23 +19,33 @@ const BugReportsTab = ({ API_BASE_URL, authToken }) => {
 
     // Fetch bug reports
     const fetchReports = async () => {
+        console.log('[BugReportsTab] fetchReports called');
+        console.log('[BugReportsTab] API_BASE_URL:', API_BASE_URL);
+        console.log('[BugReportsTab] authToken:', authToken ? 'present' : 'missing');
+        
         setLoading(true);
         setError(null);
         try {
-            const response = await fetch(`${API_BASE_URL}/api/bug-reports/admin`, {
+            const url = `${API_BASE_URL}/api/bug-reports/admin`;
+            console.log('[BugReportsTab] Fetching from:', url);
+            
+            const response = await fetch(url, {
                 headers: {
                     'Authorization': `Bearer ${authToken}`
                 }
             });
+            
+            console.log('[BugReportsTab] Response status:', response.status);
             
             if (!response.ok) {
                 throw new Error('Failed to fetch bug reports');
             }
             
             const data = await response.json();
+            console.log('[BugReportsTab] Received reports:', data.length);
             setReports(data);
         } catch (err) {
-            console.error('Error fetching bug reports:', err);
+            console.error('[BugReportsTab] Error fetching bug reports:', err);
             setError(err.message);
         } finally {
             setLoading(false);
