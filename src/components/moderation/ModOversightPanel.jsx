@@ -1120,7 +1120,7 @@ export default function ModOversightPanel({
                                 )}
 
                                 {/* Animal Details Section - for animal reports */}
-                                {reportType === 'animal' && getAnimalDetails(selectedReport) && (() => {
+                                {getAnimalDetails(selectedReport) && (() => {
                                     const animal = getAnimalDetails(selectedReport);
                                     return (
                                     <div className="mod-detail-section">
