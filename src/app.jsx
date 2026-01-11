@@ -13388,10 +13388,10 @@ const AnimalList = ({ authToken, showModalMessage, onEditAnimal, onViewAnimal, f
                     </div>
                 </div>
 
-                {/* Line 2: Gender icons (left) + Visibility filters (right) */}
-                <div className="flex flex-wrap justify-between items-center gap-2">
-                    <div className="flex gap-1 sm:gap-2 items-center" data-tutorial-target="gender-filter">
-                        <span className='text-xs sm:text-sm font-medium text-gray-700 whitespace-nowrap'>Gender:</span>
+                {/* Line 2: Gender icons (left half centered) + Visibility filters (right half centered) */}
+                <div className="grid grid-cols-2 gap-2">
+                    <div className="flex justify-center items-center" data-tutorial-target="gender-filter">
+                        <span className='text-xs sm:text-sm font-medium text-gray-700 whitespace-nowrap mr-1 sm:mr-2'>Gender:</span>
                         {GENDER_OPTIONS.map(gender => {
                             const isSelected = selectedGenders.includes(gender);
                             let Icon, bgColor;
@@ -13429,8 +13429,8 @@ const AnimalList = ({ authToken, showModalMessage, onEditAnimal, onViewAnimal, f
                         })}
                     </div>
 
-                    <div className="flex gap-1 sm:gap-2 items-center" data-tutorial-target="visibility-filter">
-                        <span className='text-xs sm:text-sm font-medium text-gray-700 whitespace-nowrap'>Visibility:</span>
+                    <div className="flex justify-center items-center" data-tutorial-target="visibility-filter">
+                        <span className='text-xs sm:text-sm font-medium text-gray-700 whitespace-nowrap mr-1 sm:mr-2'>Visibility:</span>
                         {['All', 'Public', 'Private'].map(option => {
                             const value = option === 'All' ? '' : option.toLowerCase();
                             const isSelected = publicFilter === value;
