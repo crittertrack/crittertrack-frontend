@@ -31,14 +31,7 @@ const AnalyticsTab = ({ API_BASE_URL, authToken }) => {
             const headers = { Authorization: `Bearer ${authToken}` };
             const queryParam = `?range=${dateRange}`;
 
-            const [
-                overviewRes,
-                actionsRes,
-                breakdownRes,
-                activityRes,
-                heatmapRes,
-                resolutionRes
-            ] = await Promise.all([
+            const [overviewRes, actionsRes, breakdownRes, activityRes, heatmapRes, resolutionRes] = await Promise.all([
                 fetch(`${API_BASE_URL}/api/moderation/analytics/overview${queryParam}`, { headers }),
                 fetch(`${API_BASE_URL}/api/moderation/analytics/moderation-actions${queryParam}`, { headers }),
                 fetch(`${API_BASE_URL}/api/moderation/analytics/reports-breakdown${queryParam}`, { headers }),
@@ -46,6 +39,23 @@ const AnalyticsTab = ({ API_BASE_URL, authToken }) => {
                 fetch(`${API_BASE_URL}/api/moderation/analytics/activity-heatmap${queryParam}`, { headers }),
                 fetch(`${API_BASE_URL}/api/moderation/analytics/resolution-time${queryParam}`, { headers })
             ]);
+
+            // Check for HTTP errors
+            const responses = [
+                { name: 'overview', res: overviewRes },
+                { name: 'actions', res: actionsRes },
+                { name: 'breakdown', res: breakdownRes },
+                { name: 'activity', res: activityRes },
+                { name: 'heatmap', res: heatmapRes },
+                { name: 'resolution', res: resolutionRes }
+            ];
+            for (const { name, res } of responses) {
+                if (!res.ok) {
+                    const errorData = await res.json().catch(() => ({}));
+                    console.error(`Analytics ${name} endpoint failed:`, res.status, errorData);
+                    throw new Error(errorData.error || errorData.message || `${name} endpoint failed: HTTP ${res.status}`);
+                }
+            }
 
             const [overviewData, actionsData, breakdownData, activityData, heatmapData, resolutionData] = 
                 await Promise.all([
@@ -65,7 +75,7 @@ const AnalyticsTab = ({ API_BASE_URL, authToken }) => {
             setResolutionTime(resolutionData);
         } catch (err) {
             console.error('Failed to fetch analytics:', err);
-            setError('Failed to load analytics data');
+            setError(err.message || 'Failed to load analytics data');
         } finally {
             setLoading(false);
         }
