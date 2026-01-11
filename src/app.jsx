@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useCallback, useRef, useMemo } from 'react';
 import { useParams, useNavigate, useLocation, Routes, Route, Link as RouterLink } from 'react-router-dom';
 import axios from 'axios';
-import { LogOut, Cat, UserPlus, LogIn, ChevronLeft, ChevronDown, ChevronRight, Trash2, Edit, Save, PlusCircle, Plus, ArrowLeft, Loader2, RefreshCw, User, Users, ClipboardList, BookOpen, Settings, Mail, Globe, Bean, Milk, Search, X, Mars, Venus, Eye, EyeOff, Home, Heart, HeartOff, HeartHandshake, Bell, XCircle, CheckCircle, Download, FileText, Link, AlertCircle, Check, DollarSign, Archive, ArrowLeftRight, RotateCcw, Info, Hourglass, MessageSquare, Ban, Flag, Scissors, VenusAndMars, Circle, Shield, Lock, AlertTriangle } from 'lucide-react';
+import { LogOut, Cat, UserPlus, LogIn, ChevronLeft, ChevronDown, ChevronRight, Trash2, Edit, Save, PlusCircle, Plus, ArrowLeft, Loader2, RefreshCw, User, Users, ClipboardList, BookOpen, Settings, Mail, Globe, Bean, Milk, Search, X, Mars, Venus, Eye, EyeOff, Home, Heart, HeartOff, HeartHandshake, Bell, XCircle, CheckCircle, Download, FileText, Link, AlertCircle, Check, DollarSign, Archive, ArrowLeftRight, RotateCcw, Info, Hourglass, MessageSquare, Ban, Flag, Scissors, VenusAndMars, Circle, Shield, Lock, AlertTriangle, ShoppingBag } from 'lucide-react';
 import jsPDF from 'jspdf';
 import html2canvas from 'html2canvas';
 import 'flag-icons/css/flag-icons.min.css';
@@ -24,6 +24,7 @@ import ReportButton from './components/ReportButton';
 import ModerationAuthModal from './components/moderation/ModerationAuthModal';
 import ModOversightPanel from './components/moderation/ModOversightPanel';
 import ModeratorActionSidebar from './components/moderation/ModeratorActionSidebar';
+import Marketplace from './components/Marketplace';
 
 // const API_BASE_URL = 'http://localhost:5000/api'; // Local development
 // const API_BASE_URL = 'https://crittertrack-pedigree-production.up.railway.app/api'; // Direct Railway (for testing)
@@ -16776,6 +16777,10 @@ const App = () => {
                             <ClipboardList size={18} className="mb-1" />
                             <span>Animals</span>
                         </button>
+                        <button onClick={() => navigate('/marketplace')} className={`px-4 py-2 text-xs font-medium rounded-lg transition duration-150 flex flex-col items-center ${currentView === 'marketplace' ? 'bg-primary text-black shadow-md' : 'text-gray-600 hover:bg-gray-100'}`}>
+                            <ShoppingBag size={18} className="mb-1" />
+                            <span>Shop</span>
+                        </button>
                         <button onClick={() => navigate('/litters')} data-tutorial-target="litters-btn" className={`px-4 py-2 text-xs font-medium rounded-lg transition duration-150 flex flex-col items-center ${currentView === 'litters' ? 'bg-primary text-black shadow-md' : 'text-gray-600 hover:bg-gray-100'}`}>
                             <BookOpen size={18} className="mb-1" />
                             <span>Litters</span>
@@ -16934,6 +16939,10 @@ const App = () => {
                         <button onClick={() => navigate('/')} className={`flex-1 px-2 py-2 text-xs font-medium rounded-lg transition duration-150 ${currentView === 'list' ? 'bg-primary text-black shadow-md' : 'text-gray-600 hover:bg-gray-100'}`}>
                             <ClipboardList size={16} className="inline mb-0.5" />
                             <span className="block">Animals</span>
+                        </button>
+                        <button onClick={() => navigate('/marketplace')} className={`flex-1 px-2 py-2 text-xs font-medium rounded-lg transition duration-150 ${currentView === 'marketplace' ? 'bg-primary text-black shadow-md' : 'text-gray-600 hover:bg-gray-100'}`}>
+                            <ShoppingBag size={16} className="inline mb-0.5" />
+                            <span className="block">Shop</span>
                         </button>
                         <button onClick={() => navigate('/litters')} data-tutorial-target="litters-btn" className={`flex-1 px-2 py-2 text-xs font-medium rounded-lg transition duration-150 ${currentView === 'litters' ? 'bg-primary text-black shadow-md' : 'text-gray-600 hover:bg-gray-100'}`}>
                             <BookOpen size={16} className="inline mb-0.5" />
@@ -17391,6 +17400,19 @@ const App = () => {
                         />
                     } />
                     <Route path="/donation" element={<DonationView onBack={() => navigate('/')} />} />
+                    <Route path="/marketplace" element={
+                        <Marketplace 
+                            authToken={authToken}
+                            onViewAnimal={(animalId) => {
+                                // Navigate to public animal page
+                                window.location.href = `/animal/${animalId}`;
+                            }}
+                            onViewProfile={(userId) => {
+                                // Navigate to public profile page
+                                window.location.href = `/user/${userId}`;
+                            }}
+                        />
+                    } />
                     <Route path="/profile" element={<ProfileView userProfile={userProfile} showModalMessage={showModalMessage} fetchUserProfile={fetchUserProfile} authToken={authToken} onProfileUpdated={setUserProfile} onProfileEditButtonClicked={setProfileEditButtonClicked} />} />
                     <Route path="/litters" element={
                         <LitterManagement
