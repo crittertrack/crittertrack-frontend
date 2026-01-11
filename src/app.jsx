@@ -2158,7 +2158,7 @@ const PrivateAnimalDetail = ({ animal, onClose, onEdit, API_BASE_URL, authToken,
 
                 {/* Tabs - ALL 11 TABS */}
                 <div className="bg-white border-b border-gray-300 px-2 sm:px-6 pt-2 sm:pt-4">
-                    <div className="flex flex-wrap gap-0.5 sm:gap-1 pb-2 sm:pb-4">
+                    <div className="flex flex-wrap gap-1 sm:gap-1 pb-2 sm:pb-4">
                         {[
                             { id: 1, label: 'Overview', icon: '📋' },
                             { id: 2, label: 'Status & Privacy', icon: '🔒' },
@@ -2176,7 +2176,7 @@ const PrivateAnimalDetail = ({ animal, onClose, onEdit, API_BASE_URL, authToken,
                                 key={tab.id}
                                 type="button"
                                 onClick={() => setDetailViewTab(tab.id)}
-                                className={`flex-shrink-0 px-1.5 sm:px-3 py-1 sm:py-2 text-[10px] sm:text-sm font-medium rounded border transition-colors ${
+                                className={`flex-shrink-0 px-2.5 sm:px-3 py-2 sm:py-2 text-base sm:text-sm font-medium rounded border transition-colors ${
                                     detailViewTab === tab.id 
                                         ? 'bg-primary text-black border-gray-400' 
                                         : 'bg-gray-50 text-gray-600 hover:text-gray-800 border-gray-300'
