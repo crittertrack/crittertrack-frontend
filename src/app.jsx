@@ -7668,6 +7668,12 @@ const AnimalForm = ({
             insurance: animalToEdit.insurance || '',
             legalStatus: animalToEdit.legalStatus || '',
             ownershipHistory: animalToEdit.ownershipHistory || [],
+            // Show tab fields
+            showTitles: animalToEdit.showTitles || '',
+            showRatings: animalToEdit.showRatings || '',
+            judgeComments: animalToEdit.judgeComments || '',
+            workingTitles: animalToEdit.workingTitles || '',
+            performanceScores: animalToEdit.performanceScores || '',
         } : {
             species: species, 
             breederyId: '',
@@ -7760,6 +7766,12 @@ const AnimalForm = ({
             insurance: '',
             legalStatus: '',
             ownershipHistory: [],
+            // Show tab fields
+            showTitles: '',
+            showRatings: '',
+            judgeComments: '',
+            workingTitles: '',
+            performanceScores: '',
         }
     );
     // Growth tracking state
@@ -8822,7 +8834,8 @@ const AnimalForm = ({
                             { id: 8, label: 'Husbandry', icon: '🏠' },
                             { id: 9, label: 'Behavior', icon: '🧠' },
                             { id: 10, label: 'Records', icon: '📝' },
-                            { id: 11, label: 'End of Life', icon: '🕊️' }
+                            { id: 11, label: 'End of Life', icon: '🕊️' },
+                            { id: 12, label: 'Show', icon: '🏆' }
                         ].map(tab => (
                             <button
                                 key={tab.id}
@@ -10949,6 +10962,78 @@ const AnimalForm = ({
                                     <textarea name="legalStatus" value={formData.legalStatus} onChange={handleChange} rows="2"
                                         className="block w-full p-2 border border-gray-300 rounded-md shadow-sm focus:ring-primary focus:border-primary" 
                                         placeholder="e.g., Ownership documents, permits, registration" />
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                )}
+
+                {/* Tab 12: Show */}
+                {activeTab === 12 && (
+                    <div className="space-y-6">
+                        {/* Show Titles & Ratings */}
+                        <div className="bg-gray-50 p-4 rounded-lg border border-gray-200 space-y-4">
+                            <div className="flex justify-between items-center mb-4">
+                                <h3 className="text-lg font-semibold text-gray-700">Show Titles & Ratings</h3>
+                                {animalToEdit && (
+                                    <button
+                                        type="button"
+                                        onClick={() => toggleSectionPrivacy(animalToEdit?.id_public, 'showTab')}
+                                        className="px-3 py-1.5 text-xs font-medium rounded-lg transition cursor-pointer"
+                                        style={{
+                                            backgroundColor: sectionPrivacy[animalToEdit?.id_public]?.showTab ? '#dbeafe' : '#f3f4f6',
+                                            color: sectionPrivacy[animalToEdit?.id_public]?.showTab ? '#1e40af' : '#374151'
+                                        }}
+                                        title="Toggle public visibility"
+                                    >
+                                        <span>{sectionPrivacy[animalToEdit?.id_public]?.showTab ? '🌍 Public' : '🔒 Private'}</span>
+                                    </button>
+                                )}
+                            </div>
+                            <div className="space-y-4">
+                                <div>
+                                    <label className="block text-sm font-medium text-gray-700 mb-2">Show Titles</label>
+                                    <textarea name="showTitles" value={formData.showTitles || ''} onChange={handleChange} rows="3"
+                                        className="block w-full p-2 border border-gray-300 rounded-md shadow-sm focus:ring-primary focus:border-primary" 
+                                        placeholder="e.g., Champion (CH), Grand Champion (GCH), Best in Show" />
+                                    <p className="text-xs text-gray-500 mt-1">List official show titles earned</p>
+                                </div>
+                                
+                                <div>
+                                    <label className="block text-sm font-medium text-gray-700 mb-2">Show Ratings</label>
+                                    <textarea name="showRatings" value={formData.showRatings || ''} onChange={handleChange} rows="3"
+                                        className="block w-full p-2 border border-gray-300 rounded-md shadow-sm focus:ring-primary focus:border-primary" 
+                                        placeholder="e.g., Excellent, Very Good, ratings from shows" />
+                                    <p className="text-xs text-gray-500 mt-1">Ratings and scores from shows or competitions</p>
+                                </div>
+                                
+                                <div>
+                                    <label className="block text-sm font-medium text-gray-700 mb-2">Judge Comments</label>
+                                    <textarea name="judgeComments" value={formData.judgeComments || ''} onChange={handleChange} rows="4"
+                                        className="block w-full p-2 border border-gray-300 rounded-md shadow-sm focus:ring-primary focus:border-primary" 
+                                        placeholder="Notable comments from judges at shows or competitions" />
+                                </div>
+                            </div>
+                        </div>
+
+                        {/* Working & Performance */}
+                        <div className="bg-gray-50 p-4 rounded-lg border border-gray-200 space-y-4">
+                            <h3 className="text-lg font-semibold text-gray-700 border-b pb-2">Working & Performance</h3>
+                            <div className="space-y-4">
+                                <div>
+                                    <label className="block text-sm font-medium text-gray-700 mb-2">Working Titles</label>
+                                    <textarea name="workingTitles" value={formData.workingTitles || ''} onChange={handleChange} rows="3"
+                                        className="block w-full p-2 border border-gray-300 rounded-md shadow-sm focus:ring-primary focus:border-primary" 
+                                        placeholder="e.g., CGC (Canine Good Citizen), TKN (Trick Dog Novice), HT (Herding Tested)" />
+                                    <p className="text-xs text-gray-500 mt-1">Working, obedience, agility, or performance titles</p>
+                                </div>
+                                
+                                <div>
+                                    <label className="block text-sm font-medium text-gray-700 mb-2">Performance Scores</label>
+                                    <textarea name="performanceScores" value={formData.performanceScores || ''} onChange={handleChange} rows="3"
+                                        className="block w-full p-2 border border-gray-300 rounded-md shadow-sm focus:ring-primary focus:border-primary" 
+                                        placeholder="e.g., Agility Q scores, obedience scores, rally scores" />
+                                    <p className="text-xs text-gray-500 mt-1">Scores from performance events and trials</p>
                                 </div>
                             </div>
                         </div>
