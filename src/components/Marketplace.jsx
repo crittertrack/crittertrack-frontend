@@ -763,7 +763,7 @@ const AnimalCard = ({ animal, onViewAnimal, onViewProfile, onContactOwner, isOwn
                     {!isOwnListing && (
                         <button
                             onClick={onContactOwner}
-                            className="py-2 px-3 bg-accent text-white rounded-lg hover:bg-accent/90 transition flex items-center gap-1"
+                            className="py-2 px-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition flex items-center gap-1"
                             title={isLoggedIn ? "Contact seller" : "Log in to contact seller"}
                         >
                             <MessageSquare size={16} />
