@@ -16631,7 +16631,7 @@ const App = () => {
                 <div className="hidden lg:block absolute top-20 right-4 z-[60] w-48">
                     <div 
                         key={currentAvailableIndex}
-                        onClick={() => setViewingPublicAnimal(availableAnimals[currentAvailableIndex])}
+                        onClick={() => navigate('/marketplace')}
                         className="bg-white rounded-xl shadow-lg overflow-hidden cursor-pointer hover:shadow-xl transition-all hover:scale-[1.02] animate-fadeInScale"
                         style={{
                             animation: 'fadeInScale 0.5s ease-in-out'
@@ -16702,9 +16702,6 @@ const App = () => {
                             <div className="mt-2 flex items-center justify-between">
                                 <span className="text-xs text-gray-500">
                                     {availableAnimals[currentAvailableIndex].gender}
-                                </span>
-                                <span className="text-xs text-accent font-medium">
-                                    Click to view →
                                 </span>
                             </div>
                         </div>
