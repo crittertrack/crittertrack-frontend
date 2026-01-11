@@ -428,77 +428,82 @@ const BudgetingTab = ({ authToken, API_BASE_URL, showModalMessage, preSelectedAn
     }
 
     return (
-        <div className="w-full max-w-6xl mx-auto p-4">
+        <div className="w-full max-w-6xl mx-auto p-2 sm:p-4">
             {/* Header */}
-            <div className="bg-white rounded-xl shadow-lg p-6 mb-6">
-                <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-4 mb-4">
-                    <h1 className="text-2xl font-bold text-gray-800 flex items-center gap-2">
-                        <DollarSign size={28} className="text-green-600" />
+            <div className="bg-white rounded-xl shadow-lg p-3 sm:p-6 mb-4 sm:mb-6">
+                <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-3 sm:gap-4 mb-3 sm:mb-4">
+                    <h1 className="text-xl sm:text-2xl font-bold text-gray-800 flex items-center gap-2">
+                        <DollarSign className="w-5 h-5 sm:w-7 sm:h-7 text-green-600" />
                         Budget Tracker
                     </h1>
                     <div className="flex flex-wrap gap-2">
                         <button
                             onClick={exportToCSV}
-                            className="flex items-center gap-2 px-4 py-2 bg-gray-600 hover:bg-gray-700 text-white rounded-lg transition"
+                            className="flex items-center gap-1 sm:gap-2 px-2 sm:px-4 py-1.5 sm:py-2 bg-gray-600 hover:bg-gray-700 text-white rounded-lg transition text-xs sm:text-base"
                             disabled={filteredTransactions.length === 0}
                         >
-                            <Download size={18} />
-                            Export
+                            <Download className="w-4 h-4 sm:w-[18px] sm:h-[18px]" />
+                            <span className="hidden sm:inline">Export</span>
                         </button>
                         <button
                             onClick={handleAddTransaction}
                             data-tutorial-target="add-transaction-btn"
-                            className="flex items-center gap-2 px-4 py-2 bg-primary hover:bg-primary/90 text-black font-semibold rounded-lg transition"
+                            className="flex items-center gap-1 sm:gap-2 px-2 sm:px-4 py-1.5 sm:py-2 bg-primary hover:bg-primary/90 text-black font-semibold rounded-lg transition text-xs sm:text-base"
                         >
-                            <Plus size={18} />
-                            Add Transaction
+                            <Plus className="w-4 h-4 sm:w-[18px] sm:h-[18px]" />
+                            <span className="hidden sm:inline">Add Transaction</span>
+                            <span className="sm:hidden">Add</span>
                         </button>
                     </div>
                 </div>
 
                 {/* Statistics Cards */}
-                <div className="grid grid-cols-1 md:grid-cols-4 gap-4" data-tutorial-target="budget-overview">
-                    <div className="bg-green-50 border-2 border-green-300 rounded-lg p-4">
-                        <div className="text-green-600 text-sm font-medium mb-1 flex items-center gap-1">
-                            <TrendingUp size={16} />
-                            Total Sales
+                <div className="grid grid-cols-2 md:grid-cols-4 gap-2 sm:gap-4" data-tutorial-target="budget-overview">
+                    <div className="bg-green-50 border-2 border-green-300 rounded-lg p-2 sm:p-4">
+                        <div className="text-green-600 text-xs sm:text-sm font-medium mb-0.5 sm:mb-1 flex items-center gap-1">
+                            <TrendingUp className="w-3.5 h-3.5 sm:w-4 sm:h-4" />
+                            <span className="hidden sm:inline">Total Sales</span>
+                            <span className="sm:hidden">Sales</span>
                         </div>
-                        <div className="text-2xl font-bold text-green-700">
+                        <div className="text-lg sm:text-2xl font-bold text-green-700">
                             {getCurrencySymbol()}{stats.totalSales.toFixed(2)}
                         </div>
-                        <div className="text-xs text-green-600 mt-1">
-                            {stats.salesCount} transaction{stats.salesCount !== 1 ? 's' : ''}
+                        <div className="text-[10px] sm:text-xs text-green-600 mt-0.5 sm:mt-1">
+                            {stats.salesCount} <span className="hidden sm:inline">transaction{stats.salesCount !== 1 ? 's' : ''}</span>
                         </div>
                     </div>
 
-                    <div className="bg-red-50 border-2 border-red-300 rounded-lg p-4">
-                        <div className="text-red-600 text-sm font-medium mb-1 flex items-center gap-1">
-                            <TrendingDown size={16} />
-                            Total Purchases
+                    <div className="bg-red-50 border-2 border-red-300 rounded-lg p-2 sm:p-4">
+                        <div className="text-red-600 text-xs sm:text-sm font-medium mb-0.5 sm:mb-1 flex items-center gap-1">
+                            <TrendingDown className="w-3.5 h-3.5 sm:w-4 sm:h-4" />
+                            <span className="hidden sm:inline">Total Purchases</span>
+                            <span className="sm:hidden">Purch.</span>
                         </div>
-                        <div className="text-2xl font-bold text-red-700">
+                        <div className="text-lg sm:text-2xl font-bold text-red-700">
                             {getCurrencySymbol()}{stats.totalPurchases.toFixed(2)}
                         </div>
-                        <div className="text-xs text-red-600 mt-1">
-                            {stats.purchasesCount} transaction{stats.purchasesCount !== 1 ? 's' : ''}
+                        <div className="text-[10px] sm:text-xs text-red-600 mt-0.5 sm:mt-1">
+                            {stats.purchasesCount} <span className="hidden sm:inline">transaction{stats.purchasesCount !== 1 ? 's' : ''}</span>
                         </div>
                     </div>
 
-                    <div className={`${netProfit >= 0 ? 'bg-blue-50 border-blue-300' : 'bg-orange-50 border-orange-300'} border-2 rounded-lg p-4`}>
-                        <div className={`${netProfit >= 0 ? 'text-blue-600' : 'text-orange-600'} text-sm font-medium mb-1`}>
-                            Net Profit/Loss
+                    <div className={`${netProfit >= 0 ? 'bg-blue-50 border-blue-300' : 'bg-orange-50 border-orange-300'} border-2 rounded-lg p-2 sm:p-4`}>
+                        <div className={`${netProfit >= 0 ? 'text-blue-600' : 'text-orange-600'} text-xs sm:text-sm font-medium mb-0.5 sm:mb-1`}>
+                            <span className="hidden sm:inline">Net Profit/Loss</span>
+                            <span className="sm:hidden">Net</span>
                         </div>
-                        <div className={`text-2xl font-bold ${netProfit >= 0 ? 'text-blue-700' : 'text-orange-700'}`}>
+                        <div className={`text-lg sm:text-2xl font-bold ${netProfit >= 0 ? 'text-blue-700' : 'text-orange-700'}`}>
                             {netProfit >= 0 ? '+' : ''}{getCurrencySymbol()}{Math.abs(netProfit).toFixed(2)}
                         </div>
-                        <div className={`text-xs ${netProfit >= 0 ? 'text-blue-600' : 'text-orange-600'} mt-1`}>
-                            {filteredTransactions.length} total transaction{filteredTransactions.length !== 1 ? 's' : ''}
+                        <div className={`text-[10px] sm:text-xs ${netProfit >= 0 ? 'text-blue-600' : 'text-orange-600'} mt-0.5 sm:mt-1`}>
+                            {filteredTransactions.length} total
                         </div>
                     </div>
 
-                    <div className="bg-purple-50 border-2 border-purple-300 rounded-lg p-4">
-                        <div className="text-purple-600 text-sm font-medium mb-1 flex items-center gap-1">
-                            Average Sale
+                    <div className="bg-purple-50 border-2 border-purple-300 rounded-lg p-2 sm:p-4">
+                        <div className="text-purple-600 text-xs sm:text-sm font-medium mb-0.5 sm:mb-1 flex items-center gap-1">
+                            <span className="hidden sm:inline">Average Sale</span>
+                            <span className="sm:hidden">Avg</span>
                             <div className="relative group">
                                 <Info size={14} className="text-purple-400 cursor-help" />
                                 <div className="absolute bottom-full left-1/2 transform -translate-x-1/2 mb-2 px-3 py-2 bg-gray-800 text-white text-xs rounded-lg opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none whitespace-nowrap z-10">
@@ -518,40 +523,40 @@ const BudgetingTab = ({ authToken, API_BASE_URL, showModalMessage, preSelectedAn
             </div>
 
             {/* Filters */}
-            <div className="bg-white rounded-xl shadow-lg p-4 mb-6">
-                <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
-                    <div className="relative">
-                        <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400" size={18} />
+            <div className="bg-white rounded-xl shadow-lg p-2 sm:p-4 mb-4 sm:mb-6">
+                <div className="grid grid-cols-2 md:grid-cols-4 gap-2 sm:gap-4">
+                    <div className="relative col-span-2 md:col-span-1">
+                        <Search className="absolute left-2 sm:left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-4 h-4 sm:w-[18px] sm:h-[18px]" />
                         <input
                             type="text"
-                            placeholder="Search transactions..."
+                            placeholder="Search..."
                             value={searchTerm}
                             onChange={(e) => setSearchTerm(e.target.value)}
-                            className="w-full pl-10 pr-3 py-2 border border-gray-300 rounded-lg focus:ring-primary focus:border-primary"
+                            className="w-full pl-8 sm:pl-10 pr-2 sm:pr-3 py-1.5 sm:py-2 text-sm border border-gray-300 rounded-lg focus:ring-primary focus:border-primary"
                         />
                     </div>
 
                     <div className="relative">
-                        <Filter className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400" size={18} />
+                        <Filter className="absolute left-2 sm:left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-4 h-4 sm:w-[18px] sm:h-[18px]" />
                         <select
                             value={filterType}
                             onChange={(e) => setFilterType(e.target.value)}
-                            className="w-full pl-10 pr-3 py-2 border border-gray-300 rounded-lg focus:ring-primary focus:border-primary"
+                            className="w-full pl-8 sm:pl-10 pr-2 sm:pr-3 py-1.5 sm:py-2 text-sm border border-gray-300 rounded-lg focus:ring-primary focus:border-primary"
                         >
                             <option value="all">All Types</option>
-                            <option value="animal-sale">Animal Sales</option>
-                            <option value="animal-purchase">Animal Purchases</option>
+                            <option value="animal-sale">Sales</option>
+                            <option value="animal-purchase">Purchases</option>
                             <option value="expense">Expenses</option>
                             <option value="income">Income</option>
                         </select>
                     </div>
 
                     <div className="relative">
-                        <Calendar className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400" size={18} />
+                        <Calendar className="absolute left-2 sm:left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-4 h-4 sm:w-[18px] sm:h-[18px]" />
                         <select
                             value={filterYear}
                             onChange={(e) => setFilterYear(e.target.value)}
-                            className="w-full pl-10 pr-3 py-2 border border-gray-300 rounded-lg focus:ring-primary focus:border-primary"
+                            className="w-full pl-8 sm:pl-10 pr-2 sm:pr-3 py-1.5 sm:py-2 text-sm border border-gray-300 rounded-lg focus:ring-primary focus:border-primary"
                         >
                             <option value="all">All Years</option>
                             {availableYears.map(year => (
@@ -561,16 +566,16 @@ const BudgetingTab = ({ authToken, API_BASE_URL, showModalMessage, preSelectedAn
                     </div>
 
                     <div className="relative">
-                        <DollarSign className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400" size={18} />
+                        <DollarSign className="absolute left-2 sm:left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-4 h-4 sm:w-[18px] sm:h-[18px]" />
                         <select
                             value={currency}
                             onChange={(e) => handleCurrencyChange(e.target.value)}
-                            className="w-full pl-10 pr-3 py-2 border border-gray-300 rounded-lg focus:ring-primary focus:border-primary"
+                            className="w-full pl-8 sm:pl-10 pr-2 sm:pr-3 py-1.5 sm:py-2 text-sm border border-gray-300 rounded-lg focus:ring-primary focus:border-primary"
                             title="Select Currency"
                         >
                             {currencyOptions.map(curr => (
                                 <option key={curr.code} value={curr.code}>
-                                    {curr.symbol} {curr.code} - {curr.name}
+                                    {curr.symbol} {curr.code}
                                 </option>
                             ))}
                         </select>
@@ -581,18 +586,18 @@ const BudgetingTab = ({ authToken, API_BASE_URL, showModalMessage, preSelectedAn
             {/* Transactions List */}
             <div className="bg-white rounded-xl shadow-lg overflow-hidden">
                 {filteredTransactions.length === 0 ? (
-                    <div className="text-center py-12 text-gray-500">
-                        <DollarSign size={48} className="mx-auto mb-4 text-gray-300" />
-                        <p className="text-lg font-medium">No transactions yet</p>
-                        <p className="text-sm mt-2">Start tracking your animal sales and purchases</p>
+                    <div className="text-center py-8 sm:py-12 text-gray-500">
+                        <DollarSign className="w-10 h-10 sm:w-12 sm:h-12 mx-auto mb-3 sm:mb-4 text-gray-300" />
+                        <p className="text-base sm:text-lg font-medium">No transactions yet</p>
+                        <p className="text-xs sm:text-sm mt-1 sm:mt-2">Start tracking your sales and purchases</p>
                     </div>
                 ) : (
                     <div className="overflow-x-auto">
-                        <table className="w-full">
+                        <table className="w-full text-xs sm:text-sm">
                             <thead className="bg-gray-50 border-b border-gray-200">
                                 <tr>
-                                    <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">Date</th>
-                                    <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">Type</th>
+                                    <th className="px-2 sm:px-4 py-2 sm:py-3 text-left text-[10px] sm:text-xs font-medium text-gray-500 uppercase">Date</th>
+                                    <th className="px-2 sm:px-4 py-2 sm:py-3 text-left text-[10px] sm:text-xs font-medium text-gray-500 uppercase">Type</th>
                                     <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">Animal</th>
                                     <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">Price</th>
                                     <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">Contact</th>

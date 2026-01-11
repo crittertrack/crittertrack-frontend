@@ -1772,36 +1772,38 @@ const MouseGeneticsCalculator = ({ API_BASE_URL, authToken, myAnimals = [] }) =>
           </div>
         </div>
       ) : (
-        <div className="w-full max-w-6xl mx-auto bg-white rounded-xl shadow-lg p-6">
-          <div className="flex justify-between items-center mb-6">
-            <h1 className="text-2xl font-bold text-gray-800">Mouse Genetics Calculator</h1>
+        <div className="w-full max-w-6xl mx-auto bg-white rounded-xl shadow-lg p-3 sm:p-6">
+          <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-2 sm:gap-0 mb-4 sm:mb-6">
+            <h1 className="text-xl sm:text-2xl font-bold text-gray-800">Mouse Genetics Calculator</h1>
             <button
               onClick={() => setShowExamples(true)}
-              className="flex items-center gap-2 px-4 py-2 bg-primary text-black border-2 border-black rounded-lg hover:bg-primary-dark transition"
+              className="flex items-center gap-1 sm:gap-2 px-3 sm:px-4 py-1.5 sm:py-2 bg-primary text-black border-2 border-black rounded-lg hover:bg-primary-dark transition text-sm sm:text-base self-start sm:self-auto"
             >
-              <Book size={18} />
-              View Examples
+              <Book className="w-4 h-4 sm:w-[18px] sm:h-[18px]" />
+              <span className="hidden sm:inline">View Examples</span>
+              <span className="sm:hidden">Examples</span>
             </button>
           </div>
 
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-6" data-tutorial-target="parent-selectors">
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-3 sm:gap-6" data-tutorial-target="parent-selectors">
         {/* Sire/Father */}
-        <div className="bg-blue-50 rounded-lg p-4 border-2 border-blue-300">
-          <div className="flex justify-between items-center mb-4">
-            <h2 className="text-xl font-semibold text-blue-800">Sire/Father</h2>
+        <div className="bg-blue-50 rounded-lg p-3 sm:p-4 border-2 border-blue-300">
+          <div className="flex justify-between items-center mb-2 sm:mb-4">
+            <h2 className="text-lg sm:text-xl font-semibold text-blue-800">Sire/Father</h2>
             {authToken && myAnimals.length > 0 && (
               <button
                 onClick={() => openAnimalSelector('parent1')}
                 data-tutorial-target="select-animal-btn"
-                className="flex items-center gap-1 px-3 py-1 bg-blue-600 hover:bg-blue-700 text-white text-sm rounded-lg transition"
+                className="flex items-center gap-1 px-2 sm:px-3 py-1 bg-blue-600 hover:bg-blue-700 text-white text-xs sm:text-sm rounded-lg transition"
                 title="Select from your animals"
               >
-                <User size={14} />
-                Select Animal
+                <User className="w-3 h-3 sm:w-3.5 sm:h-3.5" />
+                <span className="hidden sm:inline">Select Animal</span>
+                <span className="sm:hidden">Select</span>
               </button>
             )}
           </div>
-          <div className="grid grid-cols-2 gap-3">
+          <div className="grid grid-cols-2 gap-2 sm:gap-3">
             {Object.entries(GENE_LOCI).map(([locus, data]) => {
               // For Sire/Father, filter out Mobr combinations (males can't carry Mobr)
               const validCombinations = data.maleCombinations || data.combinations;
@@ -1823,17 +1825,17 @@ const MouseGeneticsCalculator = ({ API_BASE_URL, authToken, myAnimals = [] }) =>
               );
             })}
           </div>
-          <div className="mt-4 p-3 bg-white rounded-lg border-2 border-blue-500">
-            <p className={`text-lg font-semibold ${parent1Result.phenotype.includes('LETHAL') ? 'text-red-600' : 'text-blue-800'} mb-2`}>
-              <span className="text-sm font-medium text-gray-700">Phenotype: </span>
+          <div className="mt-3 sm:mt-4 p-2 sm:p-3 bg-white rounded-lg border-2 border-blue-500">
+            <p className={`text-base sm:text-lg font-semibold ${parent1Result.phenotype.includes('LETHAL') ? 'text-red-600' : 'text-blue-800'} mb-1 sm:mb-2`}>
+              <span className="text-xs sm:text-sm font-medium text-gray-700">Phenotype: </span>
               {parent1Result.phenotype}
             </p>
             {parent1Result.notes && parent1Result.notes.length > 0 && (
-              <p className="text-sm text-orange-600 italic mb-2">
+              <p className="text-xs sm:text-sm text-orange-600 italic mb-1 sm:mb-2">
                 Note: {parent1Result.notes.join('; ')}
               </p>
             )}
-            <p className="text-sm text-gray-700">
+            <p className="text-xs sm:text-sm text-gray-700">
               <span className="font-medium">Genotype: </span>
               {Object.entries(parent1)
                 .filter(([_, value]) => value && value !== '')
@@ -1841,13 +1843,13 @@ const MouseGeneticsCalculator = ({ API_BASE_URL, authToken, myAnimals = [] }) =>
                 .join(', ') || ''}
             </p>
             {parent1Result.carriers && parent1Result.carriers.length > 0 && (
-              <p className="text-sm text-gray-700 mt-1">
-                <span className="font-medium">Carried genes: </span>
+              <p className="text-xs sm:text-sm text-gray-700 mt-1">
+                <span className="font-medium">Carried: </span>
                 {parent1Result.carriers.join(', ')}
               </p>
             )}
             {parent1Result.hidden && parent1Result.hidden.length > 0 && (
-              <p className="text-sm text-gray-700 mt-1">
+              <p className="text-xs sm:text-sm text-gray-700 mt-1">
                 <span className="font-medium">Hidden: </span>
                 {parent1Result.hidden.join(', ')}
               </p>
@@ -1856,27 +1858,28 @@ const MouseGeneticsCalculator = ({ API_BASE_URL, authToken, myAnimals = [] }) =>
         </div>
 
         {/* Dam/Mother */}
-        <div className="bg-pink-50 rounded-lg p-4 border-2 border-pink-300">
-          <div className="flex justify-between items-center mb-4">
-            <h2 className="text-xl font-semibold text-pink-800">Dam/Mother</h2>
+        <div className="bg-pink-50 rounded-lg p-3 sm:p-4 border-2 border-pink-300">
+          <div className="flex justify-between items-center mb-2 sm:mb-4">
+            <h2 className="text-lg sm:text-xl font-semibold text-pink-800">Dam/Mother</h2>
             {authToken && myAnimals.length > 0 && (
               <button
                 onClick={() => openAnimalSelector('parent2')}
-                className="flex items-center gap-1 px-3 py-1 bg-pink-600 hover:bg-pink-700 text-white text-sm rounded-lg transition"
+                className="flex items-center gap-1 px-2 sm:px-3 py-1 bg-pink-600 hover:bg-pink-700 text-white text-xs sm:text-sm rounded-lg transition"
                 title="Select from your animals"
               >
-                <User size={14} />
-                Select Animal
+                <User className="w-3 h-3 sm:w-3.5 sm:h-3.5" />
+                <span className="hidden sm:inline">Select Animal</span>
+                <span className="sm:hidden">Select</span>
               </button>
             )}
           </div>
-          <div className="grid grid-cols-2 gap-3">
+          <div className="grid grid-cols-2 gap-2 sm:gap-3">
             {Object.entries(GENE_LOCI).map(([locus, data]) => (
               <div key={locus}>
                 <select
                   value={parent2[locus]}
                   onChange={(e) => updateParent2(locus, e.target.value)}
-                  className="w-full px-2 py-1 text-sm border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-pink-500"
+                  className="w-full px-2 py-1 text-xs sm:text-sm border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-pink-500"
                 >
                   <option value="">{locus} - {data.name}</option>
                   {data.combinations.map((combo) => (
@@ -1888,17 +1891,17 @@ const MouseGeneticsCalculator = ({ API_BASE_URL, authToken, myAnimals = [] }) =>
               </div>
             ))}
           </div>
-          <div className="mt-4 p-3 bg-white rounded-lg border-2 border-pink-500">
-            <p className={`text-lg font-semibold ${parent2Result.phenotype.includes('LETHAL') ? 'text-red-600' : 'text-pink-800'} mb-2`}>
-              <span className="text-sm font-medium text-gray-700">Phenotype: </span>
+          <div className="mt-3 sm:mt-4 p-2 sm:p-3 bg-white rounded-lg border-2 border-pink-500">
+            <p className={`text-base sm:text-lg font-semibold ${parent2Result.phenotype.includes('LETHAL') ? 'text-red-600' : 'text-pink-800'} mb-1 sm:mb-2`}>
+              <span className="text-xs sm:text-sm font-medium text-gray-700">Phenotype: </span>
               {parent2Result.phenotype}
             </p>
             {parent2Result.notes && parent2Result.notes.length > 0 && (
-              <p className="text-sm text-orange-600 italic mb-2">
+              <p className="text-xs sm:text-sm text-orange-600 italic mb-1 sm:mb-2">
                 Note: {parent2Result.notes.join('; ')}
               </p>
             )}
-            <p className="text-sm text-gray-700">
+            <p className="text-xs sm:text-sm text-gray-700">
               <span className="font-medium">Genotype: </span>
               {Object.entries(parent2)
                 .filter(([_, value]) => value && value !== '')
@@ -1906,13 +1909,13 @@ const MouseGeneticsCalculator = ({ API_BASE_URL, authToken, myAnimals = [] }) =>
                 .join(', ') || ''}
             </p>
             {parent2Result.carriers && parent2Result.carriers.length > 0 && (
-              <p className="text-sm text-gray-700 mt-1">
-                <span className="font-medium">Carried genes: </span>
+              <p className="text-xs sm:text-sm text-gray-700 mt-1">
+                <span className="font-medium">Carried: </span>
                 {parent2Result.carriers.join(', ')}
               </p>
             )}
             {parent2Result.hidden && parent2Result.hidden.length > 0 && (
-              <p className="text-sm text-gray-700 mt-1">
+              <p className="text-xs sm:text-sm text-gray-700 mt-1">
                 <span className="font-medium">Hidden: </span>
                 {parent2Result.hidden.join(', ')}
               </p>

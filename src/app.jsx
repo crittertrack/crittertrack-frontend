@@ -5867,19 +5867,19 @@ const LitterManagement = ({ authToken, API_BASE_URL, userProfile, showModalMessa
     }
 
     return (
-        <div className="w-full max-w-6xl bg-white p-6 rounded-xl shadow-lg">
-            <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-3 mb-6">
-                <h2 className="text-3xl font-bold text-gray-800 flex items-center">
-                    <BookOpen size={24} className="mr-3 text-primary-dark" />
+        <div className="w-full max-w-6xl bg-white p-3 sm:p-6 rounded-xl shadow-lg">
+            <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-2 sm:gap-3 mb-4 sm:mb-6">
+                <h2 className="text-xl sm:text-3xl font-bold text-gray-800 flex items-center">
+                    <BookOpen className="w-5 h-5 sm:w-6 sm:h-6 mr-2 sm:mr-3 text-primary-dark" />
                     Litter Management
                 </h2>
                 <div className="flex gap-2">
                     <button
                         onClick={handleRecalculateOffspringCounts}
-                        className="bg-primary hover:bg-primary/90 text-black font-semibold py-2 px-3 rounded-lg flex items-center"
+                        className="bg-primary hover:bg-primary/90 text-black font-semibold py-1.5 sm:py-2 px-2 sm:px-3 rounded-lg flex items-center"
                         title="Recalculate offspring counts for all litters"
                     >
-                        <RefreshCw size={20} />
+                        <RefreshCw className="w-4 h-4 sm:w-5 sm:h-5" />
                     </button>
                     <button
                         onClick={() => {
@@ -5910,17 +5910,18 @@ const LitterManagement = ({ authToken, API_BASE_URL, userProfile, showModalMessa
                             setShowAddForm(!showAddForm);
                         }}
                         data-tutorial-target="new-litter-btn"
-                        className="bg-primary hover:bg-primary/90 text-black font-semibold py-2 px-4 rounded-lg flex items-center gap-2"
+                        className="bg-primary hover:bg-primary/90 text-black font-semibold py-1.5 sm:py-2 px-3 sm:px-4 rounded-lg flex items-center gap-1 sm:gap-2 text-sm sm:text-base"
                     >
-                        {showAddForm ? <X size={20} /> : <Plus size={20} />}
-                        {showAddForm ? 'Cancel' : 'New Litter'}
+                        {showAddForm ? <X className="w-4 h-4 sm:w-5 sm:h-5" /> : <Plus className="w-4 h-4 sm:w-5 sm:h-5" />}
+                        <span className="hidden sm:inline">{showAddForm ? 'Cancel' : 'New Litter'}</span>
+                        <span className="sm:hidden">{showAddForm ? '' : 'New'}</span>
                     </button>
                 </div>
             </div>
 
             {showAddForm && (
-                <form onSubmit={editingLitter ? handleUpdateLitter : handleSubmit} className="bg-gray-50 p-6 rounded-lg mb-6 border-2 border-gray-200">
-                    <h3 className="text-xl font-bold text-gray-800 mb-4">{editingLitter ? 'Edit Litter' : 'Create New Litter'}</h3>
+                <form onSubmit={editingLitter ? handleUpdateLitter : handleSubmit} className="bg-gray-50 p-3 sm:p-6 rounded-lg mb-4 sm:mb-6 border-2 border-gray-200">
+                    <h3 className="text-lg sm:text-xl font-bold text-gray-800 mb-3 sm:mb-4">{editingLitter ? 'Edit Litter' : 'Create New Litter'}</h3>
                     
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
                         {/* Litter Name */}
@@ -6180,21 +6181,21 @@ const LitterManagement = ({ authToken, API_BASE_URL, userProfile, showModalMessa
             <div className="space-y-4">
                 {/* Search Bar */}
                 {litters.length > 0 && (
-                    <div className="bg-gray-50 p-4 rounded-lg border-2 border-gray-200 space-y-3">
+                    <div className="bg-gray-50 p-2 sm:p-4 rounded-lg border-2 border-gray-200 space-y-2 sm:space-y-3">
                         <div className="relative">
-                            <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400" size={20} />
+                            <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-4 h-4 sm:w-5 sm:h-5" />
                             <input
                                 type="text"
-                                placeholder="Search by litter name, sire name/ID, or dam name/ID..."
+                                placeholder="Search litters..."
                                 value={searchQuery}
                                 onChange={(e) => setSearchQuery(e.target.value)}
-                                className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent"
+                                className="w-full pl-9 sm:pl-10 pr-3 sm:pr-4 py-1.5 sm:py-2 text-sm sm:text-base border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent"
                             />
                         </div>
                         
                         {/* Species filter */}
                         <div className="flex gap-2 items-center pt-2 border-t border-gray-200">
-                            <label htmlFor="litter-species-filter" className='text-sm font-medium text-gray-700 whitespace-nowrap'>Species:</label>
+                            <label htmlFor="litter-species-filter" className='text-xs sm:text-sm font-medium text-gray-700 whitespace-nowrap'>Species:</label>
                             <select
                                 id="litter-species-filter"
                                 value={speciesFilter}
@@ -6236,28 +6237,28 @@ const LitterManagement = ({ authToken, API_BASE_URL, userProfile, showModalMessa
                             <div key={litter._id} className="border-2 border-gray-200 rounded-lg bg-white hover:shadow-md transition" data-tutorial-target="litter-card">
                                 {/* Compact Header - Always Visible */}
                                 <div 
-                                    className="p-3 cursor-pointer flex items-center justify-between hover:bg-gray-50"
+                                    className="p-2 sm:p-3 cursor-pointer flex items-center justify-between hover:bg-gray-50"
                                     onClick={() => setExpandedLitter(isExpanded ? null : litter._id)}
                                 >
-                                    <div className="flex-1 grid grid-cols-1 md:grid-cols-5 gap-2 items-center">
+                                    <div className="flex-1 grid grid-cols-2 sm:grid-cols-3 md:grid-cols-5 gap-1 sm:gap-2 items-center">
                                         <div>
-                                            <p className="font-bold text-gray-800">
-                                                {litter.breedingPairCodeName || 'Unnamed Litter'}
+                                            <p className="font-bold text-gray-800 text-sm sm:text-base truncate">
+                                                {litter.breedingPairCodeName || 'Unnamed'}
                                             </p>
-                                            <p className="text-xs text-gray-500">
+                                            <p className="text-[10px] sm:text-xs text-gray-500">
                                                 {new Date(litter.birthDate).toLocaleDateString()}
                                             </p>
                                         </div>
-                                        <div className="text-sm">
-                                            <span className="text-gray-600">Sire:</span> {sire ? `${sire.prefix ? sire.prefix + ' ' : ''}${sire.name}${sire.suffix ? ' ' + sire.suffix : ''}` : `${litter.sireId_public}`}
+                                        <div className="text-xs sm:text-sm truncate">
+                                            <span className="text-gray-600">S:</span> {sire ? sire.name : `${litter.sireId_public}`}
                                         </div>
-                                        <div className="text-sm">
-                                            <span className="text-gray-600">Dam:</span> {dam ? `${dam.prefix ? dam.prefix + ' ' : ''}${dam.name}${dam.suffix ? ' ' + dam.suffix : ''}` : `${litter.damId_public}`}
+                                        <div className="text-xs sm:text-sm truncate hidden sm:block">
+                                            <span className="text-gray-600">D:</span> {dam ? dam.name : `${litter.damId_public}`}
                                         </div>
-                                        <div className="text-sm font-semibold text-gray-700">
-                                            {litter.numberBorn} offspring
+                                        <div className="text-xs sm:text-sm font-semibold text-gray-700">
+                                            {litter.numberBorn} <span className="hidden sm:inline">offspring</span>
                                         </div>
-                                        <div className="text-sm">
+                                        <div className="text-xs sm:text-sm hidden md:block">
                                             <span className="text-gray-600">COI:</span> {litter.inbreedingCoefficient != null ? `${litter.inbreedingCoefficient.toFixed(2)}%` : 'N/A'}
                                         </div>
                                     </div>
@@ -6269,35 +6270,35 @@ const LitterManagement = ({ authToken, API_BASE_URL, userProfile, showModalMessa
 
                                 {/* Expanded Details */}
                                 {isExpanded && (
-                                    <div className="border-t-2 border-gray-200 p-4 bg-gray-50">
-                                        <div className="flex justify-end gap-2 mb-4">
+                                    <div className="border-t-2 border-gray-200 p-2 sm:p-4 bg-gray-50">
+                                        <div className="flex flex-wrap justify-end gap-1 sm:gap-2 mb-3 sm:mb-4">
                                             <button
                                                 onClick={(e) => {
                                                     e.stopPropagation();
                                                     handleEditLitter(litter);
                                                 }}
-                                                className="flex items-center gap-1 bg-blue-500 hover:bg-blue-600 text-white font-semibold px-3 py-2 rounded-lg text-sm"
+                                                className="flex items-center gap-1 bg-blue-500 hover:bg-blue-600 text-white font-semibold px-2 sm:px-3 py-1 sm:py-2 rounded-lg text-xs sm:text-sm"
                                             >
-                                                <Edit size={16} />
-                                                Edit
+                                                <Edit className="w-3.5 h-3.5 sm:w-4 sm:h-4" />
+                                                <span className="hidden sm:inline">Edit</span>
                                             </button>
                                             <button
                                                 onClick={() => handleLinkAnimals(litter)}
                                                 data-tutorial-target="link-animals-btn"
-                                                className="flex items-center gap-1 bg-primary hover:bg-primary/90 text-black font-semibold px-3 py-2 rounded-lg text-sm"
+                                                className="flex items-center gap-1 bg-primary hover:bg-primary/90 text-black font-semibold px-2 sm:px-3 py-1 sm:py-2 rounded-lg text-xs sm:text-sm"
                                             >
-                                                <Link size={16} />
-                                                Link Animals
+                                                <Link className="w-3.5 h-3.5 sm:w-4 sm:h-4" />
+                                                <span className="hidden sm:inline">Link</span>
                                             </button>
                                             <button
                                                 onClick={(e) => {
                                                     e.stopPropagation();
                                                     handleDeleteLitter(litter._id);
                                                 }}
-                                                className="flex items-center gap-1 bg-red-500 hover:bg-red-600 text-white font-semibold px-3 py-2 rounded-lg text-sm"
+                                                className="flex items-center gap-1 bg-red-500 hover:bg-red-600 text-white font-semibold px-2 sm:px-3 py-1 sm:py-2 rounded-lg text-xs sm:text-sm"
                                             >
-                                                <Trash2 size={16} />
-                                                Delete Litter
+                                                <Trash2 className="w-3.5 h-3.5 sm:w-4 sm:h-4" />
+                                                <span className="hidden sm:inline">Delete</span>
                                             </button>
                                         </div>
 
@@ -11741,62 +11742,62 @@ const ProfileView = ({ userProfile, showModalMessage, fetchUserProfile, authToke
     }
 
     return (
-        <div className="w-full max-w-4xl bg-white p-6 rounded-xl shadow-lg">
-            <div className="flex justify-between items-center mb-6">
-                <h2 className="text-3xl font-bold text-gray-800 flex items-center">
-                    <Settings size={24} className="mr-3 text-primary-dark" />
+        <div className="w-full max-w-4xl bg-white p-3 sm:p-6 rounded-xl shadow-lg">
+            <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-2 sm:gap-0 mb-4 sm:mb-6">
+                <h2 className="text-xl sm:text-3xl font-bold text-gray-800 flex items-center">
+                    <Settings className="w-5 h-5 sm:w-6 sm:h-6 mr-2 sm:mr-3 text-primary-dark" />
                     Profile Settings
                 </h2>
                 <button
                     onClick={handleShare}
-                    className="px-3 py-1.5 bg-primary hover:bg-primary/90 text-black font-semibold rounded-lg transition flex items-center gap-2"
+                    className="px-2 sm:px-3 py-1 sm:py-1.5 bg-primary hover:bg-primary/90 text-black font-semibold rounded-lg transition flex items-center gap-1 sm:gap-2 text-sm sm:text-base self-start sm:self-auto"
                 >
-                    <Link size={16} />
-                    {copySuccess ? 'Link Copied!' : 'Share Profile'}
+                    <Link className="w-4 h-4 sm:w-4 sm:h-4" />
+                    {copySuccess ? 'Copied!' : 'Share'}
                 </button>
             </div>
-            <div className="space-y-4 overflow-x-hidden">
+            <div className="space-y-3 sm:space-y-4 overflow-x-hidden">
                 
-                <div className="p-4 bg-gray-50 rounded-lg border border-gray-200 overflow-x-hidden">
-                    <p className="text-lg font-semibold text-gray-700 mb-3">Public Visibility Status</p>
+                <div className="p-3 sm:p-4 bg-gray-50 rounded-lg border border-gray-200 overflow-x-hidden">
+                    <p className="text-base sm:text-lg font-semibold text-gray-700 mb-2 sm:mb-3">Public Visibility Status</p>
                     
-                    <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-2 py-2">
-                        <span className="text-sm sm:text-base text-gray-800 truncate">Personal Name ({userProfile.personalName})</span>
-                        <span className={`px-3 py-1 text-xs font-semibold rounded-full whitespace-nowrap ${ 
+                    <div className="flex justify-between items-center gap-2 py-1.5 sm:py-2">
+                        <span className="text-xs sm:text-sm text-gray-800 truncate flex-1">Personal Name</span>
+                        <span className={`px-2 sm:px-3 py-0.5 sm:py-1 text-[10px] sm:text-xs font-semibold rounded-full whitespace-nowrap ${ 
                             (userProfile.showPersonalName ?? true) ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800'
                         }`}>
                             {(userProfile.showPersonalName ?? true) ? 'Public' : 'Private'}
                         </span>
                     </div>
 
-                    <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-2 py-2">
-                        <span className="text-sm sm:text-base text-gray-800 truncate">Breeder Name ({userProfile.breederName || 'N/A'})</span>
-                        <span className={`px-3 py-1 text-xs font-semibold rounded-full whitespace-nowrap ${ 
+                    <div className="flex justify-between items-center gap-2 py-1.5 sm:py-2">
+                        <span className="text-xs sm:text-sm text-gray-800 truncate flex-1">Breeder Name</span>
+                        <span className={`px-2 sm:px-3 py-0.5 sm:py-1 text-[10px] sm:text-xs font-semibold rounded-full whitespace-nowrap ${ 
                             (userProfile.showBreederName ?? false) ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800'
                         }`}>
                             {(userProfile.showBreederName ?? false) ? 'Public' : 'Private'}
                         </span>
                     </div>
 
-                    <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-2 py-2">
-                        <span className="text-sm sm:text-base text-gray-800 truncate">Website URL ({userProfile.websiteURL || 'N/A'})</span>
-                        <span className={`px-3 py-1 text-xs font-semibold rounded-full whitespace-nowrap ${ 
+                    <div className="flex justify-between items-center gap-2 py-1.5 sm:py-2">
+                        <span className="text-xs sm:text-sm text-gray-800 truncate flex-1">Website URL</span>
+                        <span className={`px-2 sm:px-3 py-0.5 sm:py-1 text-[10px] sm:text-xs font-semibold rounded-full whitespace-nowrap ${ 
                             (userProfile.showWebsiteURL ?? false) ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800'
                         }`}>
                             {(userProfile.showWebsiteURL ?? false) ? 'Public' : 'Private'}
                         </span>
                     </div>
 
-                    <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-2 py-2">
-                        <span className="text-sm sm:text-base text-gray-800 truncate">Bio ({userProfile.bio ? userProfile.bio.substring(0, 30) + (userProfile.bio.length > 30 ? '...' : '') : 'N/A'})</span>
-                        <span className={`px-3 py-1 text-xs font-semibold rounded-full whitespace-nowrap ${ 
+                    <div className="flex justify-between items-center gap-2 py-1.5 sm:py-2">
+                        <span className="text-xs sm:text-sm text-gray-800 truncate flex-1">Bio</span>
+                        <span className={`px-2 sm:px-3 py-0.5 sm:py-1 text-[10px] sm:text-xs font-semibold rounded-full whitespace-nowrap ${ 
                             (userProfile.showBio ?? true) ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800'
                         }`}>
                             {(userProfile.showBio ?? true) ? 'Public' : 'Private'}
                         </span>
                     </div>
 
-                    <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-2 py-2">
+                    <div className="flex justify-between items-center gap-2 py-1.5 sm:py-2">
                         <span className="text-sm sm:text-base text-gray-800 truncate">Messages</span>
                         <span className={`px-3 py-1 text-xs font-semibold rounded-full whitespace-nowrap ${
                             (userProfile.allowMessages === true) ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800'
@@ -13133,7 +13134,7 @@ const AnimalList = ({ authToken, showModalMessage, onEditAnimal, onViewAnimal, f
             <div className="w-full flex justify-center">
                 <div
                     onClick={handleClick}
-                    className={`relative bg-white rounded-xl shadow-sm w-44 h-56 flex flex-col items-center overflow-hidden cursor-pointer hover:shadow-md transition border-2 pt-3 ${
+                    className={`relative bg-white rounded-lg sm:rounded-xl shadow-sm w-full max-w-[110px] sm:max-w-[140px] md:max-w-[176px] h-40 sm:h-48 md:h-56 flex flex-col items-center overflow-hidden cursor-pointer hover:shadow-md transition border-2 pt-2 sm:pt-3 ${
                         isSelected ? 'border-red-500' : animal.isViewOnly ? 'border-gray-400 bg-gray-50' : 'border-gray-300'
                     }`}
                 >
@@ -13147,73 +13148,73 @@ const AnimalList = ({ authToken, showModalMessage, onEditAnimal, onViewAnimal, f
                             />
                         </div>
                     )}
-                    {/* Birthdate top-left - only show if not in selection mode */}
+                    {/* Birthdate top-left - only show if not in selection mode, hidden on mobile */}
                     {birth && !isSelectable && (
-                        <div className="absolute top-2 left-2 text-xs text-gray-600 bg-white/80 px-2 py-0.5 rounded">
+                        <div className="absolute top-1 sm:top-2 left-1 sm:left-2 text-[10px] sm:text-xs text-gray-600 bg-white/80 px-1 sm:px-2 py-0.5 rounded hidden sm:block">
                             {birth}
                         </div>
                     )}
 
                     {/* Gender badge top-right */}
                     {animal.gender && (
-                        <div className={`absolute top-2 right-2`} title={animal.gender}>
-                            {animal.gender === 'Male' ? <Mars size={16} strokeWidth={2.5} className="text-primary" /> : animal.gender === 'Female' ? <Venus size={16} strokeWidth={2.5} className="text-accent" /> : animal.gender === 'Intersex' ? <VenusAndMars size={16} strokeWidth={2.5} className="text-purple-500" /> : <Circle size={16} strokeWidth={2.5} className="text-gray-500" />}
+                        <div className={`absolute top-1 sm:top-2 right-1 sm:right-2`} title={animal.gender}>
+                            {animal.gender === 'Male' ? <Mars className="w-3 h-3 sm:w-4 sm:h-4" strokeWidth={2.5} style={{color: 'var(--color-primary, #9ED4E0)'}} /> : animal.gender === 'Female' ? <Venus className="w-3 h-3 sm:w-4 sm:h-4" strokeWidth={2.5} style={{color: 'var(--color-accent, #D27096)'}} /> : animal.gender === 'Intersex' ? <VenusAndMars className="w-3 h-3 sm:w-4 sm:h-4" strokeWidth={2.5} className="text-purple-500" /> : <Circle className="w-3 h-3 sm:w-4 sm:h-4" strokeWidth={2.5} className="text-gray-500" />}
                         </div>
                     )}
 
                     {/* Centered profile image */}
-                    <div className="flex items-center justify-center w-full px-2 mt-1 h-28">
+                    <div className="flex items-center justify-center w-full px-1 sm:px-2 mt-0.5 sm:mt-1 h-16 sm:h-20 md:h-28">
                         {imgSrc ? (
-                            <img src={imgSrc} alt={animal.name} className="max-w-24 max-h-24 w-auto h-auto object-contain rounded-md" />
+                            <img src={imgSrc} alt={animal.name} className="max-w-14 max-h-14 sm:max-w-20 sm:max-h-20 md:max-w-24 md:max-h-24 w-auto h-auto object-contain rounded-md" />
                         ) : (
-                            <div className="w-24 h-24 bg-gray-100 rounded-md flex items-center justify-center text-gray-400">
-                                <Cat size={36} />
+                            <div className="w-14 h-14 sm:w-20 sm:h-20 md:w-24 md:h-24 bg-gray-100 rounded-md flex items-center justify-center text-gray-400">
+                                <Cat className="w-6 h-6 sm:w-8 sm:h-8 md:w-9 md:h-9" />
                             </div>
                         )}
                     </div>
                     
                     {/* Icon row */}
-                    <div className="w-full flex justify-center items-center space-x-2 py-1">
+                    <div className="w-full flex justify-center items-center space-x-1 sm:space-x-2 py-0.5 sm:py-1">
                         {animal.isOwned ? (
-                            <Heart size={14} className="text-black" />
+                            <Heart className="w-3 h-3 sm:w-3.5 sm:h-3.5 text-black" />
                         ) : (
-                            <HeartOff size={14} className="text-black" />
+                            <HeartOff className="w-3 h-3 sm:w-3.5 sm:h-3.5 text-black" />
                         )}
                         {animal.showOnPublicProfile ? (
-                            <Eye size={14} className="text-black" />
+                            <Eye className="w-3 h-3 sm:w-3.5 sm:h-3.5 text-black" />
                         ) : (
-                            <EyeOff size={14} className="text-black" />
+                            <EyeOff className="w-3 h-3 sm:w-3.5 sm:h-3.5 text-black" />
                         )}
-                        {animal.isInMating && <Hourglass size={14} className="text-black" />}
-                        {animal.isPregnant && <Bean size={14} className="text-black" />}
-                        {animal.isNursing && <Milk size={14} className="text-black" />}
+                        {animal.isInMating && <Hourglass className="w-3 h-3 sm:w-3.5 sm:h-3.5 text-black" />}
+                        {animal.isPregnant && <Bean className="w-3 h-3 sm:w-3.5 sm:h-3.5 text-black" />}
+                        {animal.isNursing && <Milk className="w-3 h-3 sm:w-3.5 sm:h-3.5 text-black" />}
                     </div>
                     
                     {/* Prefix / Name under image */}
-                    <div className="w-full text-center px-2 pb-1">
-                        <div className="text-sm font-semibold text-gray-800 line-clamp-2">{animal.prefix ? `${animal.prefix} ` : ''}{animal.name}{animal.suffix ? ` ${animal.suffix}` : ''}</div>
+                    <div className="w-full text-center px-1 sm:px-2 pb-0.5 sm:pb-1">
+                        <div className="text-[11px] sm:text-xs md:text-sm font-semibold text-gray-800 line-clamp-2 leading-tight">{animal.prefix ? `${animal.prefix} ` : ''}{animal.name}{animal.suffix ? ` ${animal.suffix}` : ''}</div>
                     </div>
 
                     {/* Edit is available when viewing full card; remove inline edit icon from dashboard cards */}
 
                     {/* ID bottom-right */}
-                    <div className="w-full px-2 pb-2 flex justify-between items-center">
+                    <div className="w-full px-1 sm:px-2 pb-1 sm:pb-2 flex justify-between items-center">
                         {/* Transfer icon bottom-left */}
                         {(animal.soldStatus || animal.isViewOnly) && (
                             <div className="text-black" title="Transferred Animal">
-                                <ArrowLeftRight size={14} strokeWidth={2.5} />
+                                <ArrowLeftRight className="w-3 h-3 sm:w-3.5 sm:h-3.5" strokeWidth={2.5} />
                             </div>
                         )}
                         {/* Spacer if no transfer icon */}
                         {!(animal.soldStatus || animal.isViewOnly) && <div></div>}
-                        <div className="text-xs text-gray-500">{animal.id_public}</div>
+                        <div className="text-[9px] sm:text-[10px] md:text-xs text-gray-500">{animal.id_public}</div>
                     </div>
                     
                     {/* Status bar at bottom */}
-                    <div className={`w-full py-1 text-center border-t border-gray-300 mt-auto ${
+                    <div className={`w-full py-0.5 sm:py-1 text-center border-t border-gray-300 mt-auto ${
                         animal.isViewOnly ? 'bg-orange-100' : 'bg-gray-100'
                     }`}>
-                        <div className={`text-xs font-medium ${
+                        <div className={`text-[10px] sm:text-xs font-medium ${
                             animal.isViewOnly ? 'text-orange-800' : 'text-gray-700'
                         }`}>{animal.isViewOnly ? 'Sold' : (animal.status || 'Unknown')}</div>
                     </div>
@@ -13250,16 +13251,16 @@ const AnimalList = ({ authToken, showModalMessage, onEditAnimal, onViewAnimal, f
                 </div>
             </h2>
 
-            <div className="mb-6 p-4 border rounded-lg bg-gray-50 space-y-3">
+            <div className="mb-4 sm:mb-6 p-2 sm:p-4 border rounded-lg bg-gray-50 space-y-2 sm:space-y-3">
                 {/* Search and Add buttons - Stack on mobile */}
                 <div className="flex flex-col sm:flex-row gap-2 sm:gap-3">
                     <input
                         type="text"
-                        placeholder="Search by Animal Name..."
+                        placeholder="Search by name..."
                         value={searchInput}
                         onChange={handleSearchInputChange}
                         onKeyPress={(e) => { if (e.key === 'Enter') triggerSearch(); }}
-                        className="flex-grow p-2 border border-gray-300 rounded-lg shadow-sm focus:ring-primary focus:border-primary transition"
+                        className="flex-grow p-2 text-sm border border-gray-300 rounded-lg shadow-sm focus:ring-primary focus:border-primary transition"
                         disabled={loading}
                         data-tutorial-target="my-animals-search"
                     />
@@ -13267,28 +13268,28 @@ const AnimalList = ({ authToken, showModalMessage, onEditAnimal, onViewAnimal, f
                         <button
                             onClick={triggerSearch}
                             disabled={loading}
-                            className="flex-1 sm:flex-none bg-primary hover:bg-primary/90 text-black font-semibold py-2 px-4 rounded-lg transition duration-150 shadow-md flex items-center justify-center space-x-1"
+                            className="flex-1 sm:flex-none bg-primary hover:bg-primary/90 text-black font-semibold py-2 px-3 sm:px-4 rounded-lg transition duration-150 shadow-md flex items-center justify-center space-x-1 text-sm"
                             title="Search"
                         >
-                            <Search size={18} />
-                            <span>Search</span>
+                            <Search size={16} />
+                            <span className="hidden sm:inline">Search</span>
                         </button>
                         <button 
                             onClick={() => navigate('/select-species')} 
-                            className="flex-1 sm:flex-none bg-accent hover:bg-accent/90 text-white font-semibold py-2 px-4 rounded-lg transition duration-150 shadow-md flex items-center justify-center space-x-1 whitespace-nowrap"
+                            className="flex-1 sm:flex-none bg-accent hover:bg-accent/90 text-white font-semibold py-2 px-3 sm:px-4 rounded-lg transition duration-150 shadow-md flex items-center justify-center space-x-1 whitespace-nowrap text-sm"
                             data-tutorial-target="add-animal-btn"
                         >
-                            <PlusCircle size={18} /> <span>Add Animal</span>
+                            <PlusCircle size={16} /> <span className="hidden sm:inline">Add Animal</span><span className="sm:hidden">Add</span>
                         </button>
                     </div>
                 </div>
 
-                {/* Species dropdown, Gender icons, and Status dropdown - all in one row */}
-                <div className="flex flex-col sm:flex-row gap-3 pt-2 border-t border-gray-200 justify-between">
-                    <div className="flex gap-3 items-center flex-wrap">
-                        {/* Species dropdown */}
-                        <div className="flex gap-2 items-center" data-tutorial-target="species-filter">
-                            <span className='text-sm font-medium text-gray-700 whitespace-nowrap'>Species:</span>
+                {/* Species dropdown, Gender icons, and Status dropdown - collapsible on mobile */}
+                <div className="flex flex-col gap-2 sm:gap-3 pt-2 border-t border-gray-200">
+                    {/* First row: Species and Status dropdowns */}
+                    <div className="flex gap-2 sm:gap-3 items-center justify-between">
+                        <div className="flex gap-1 sm:gap-2 items-center flex-1" data-tutorial-target="species-filter">
+                            <span className='text-xs sm:text-sm font-medium text-gray-700 whitespace-nowrap'>Species:</span>
                             <select 
                                 value={selectedSpecies.length === speciesNames.length ? '' : selectedSpecies[0] || ''}
                                 onChange={(e) => {
@@ -13299,115 +13300,115 @@ const AnimalList = ({ authToken, showModalMessage, onEditAnimal, onViewAnimal, f
                                         setSelectedSpecies([value]);
                                     }
                                 }}
-                                className="p-2 border border-gray-300 rounded-lg shadow-sm focus:ring-primary focus:border-primary transition min-w-[150px]"
+                                className="p-1.5 sm:p-2 text-xs sm:text-sm border border-gray-300 rounded-lg shadow-sm focus:ring-primary focus:border-primary transition flex-1 min-w-0"
                             >
-                                <option value="">All Species</option>
+                                <option value="">All</option>
                                 {speciesNames.map(species => (
                                     <option key={species} value={species}>{getSpeciesDisplayName(species)}</option>
                                 ))}
                             </select>
                         </div>
                         
-                        {/* Gender filter with icons */}
-                        <div className="flex gap-2 items-center" data-tutorial-target="gender-filter">
-                            <span className='text-sm font-medium text-gray-700 whitespace-nowrap'>Gender:</span>
-                            {GENDER_OPTIONS.map(gender => {
-                                const isSelected = selectedGenders.includes(gender);
-                                let Icon, bgColor;
-                                
-                                switch(gender) {
-                                    case 'Male':
-                                        Icon = Mars;
-                                        bgColor = isSelected ? 'bg-primary' : 'bg-gray-300 hover:bg-gray-400';
-                                        break;
-                                    case 'Female':
-                                        Icon = Venus;
-                                        bgColor = isSelected ? 'bg-pink-400' : 'bg-gray-300 hover:bg-gray-400';
-                                        break;
-                                    case 'Intersex':
-                                        Icon = VenusAndMars;
-                                        bgColor = isSelected ? 'bg-purple-400' : 'bg-gray-300 hover:bg-gray-400';
-                                        break;
-                                    case 'Unknown':
-                                        Icon = Circle;
-                                        bgColor = isSelected ? 'bg-teal-400' : 'bg-gray-300 hover:bg-gray-400';
-                                        break;
-                                    default:
-                                        Icon = Circle;
-                                        bgColor = 'bg-gray-300 hover:bg-gray-400';
-                                }
-                                
-                                return (
-                                    <button key={gender} onClick={() => toggleGender(gender)}
-                                        className={`p-2 rounded-lg transition duration-150 shadow-sm ${bgColor}`}
-                                        title={gender}
-                                    >
-                                        <Icon size={18} className="text-black" />
-                                    </button>
-                                );
-                            })}
+                        <div className="flex gap-1 sm:gap-2 items-center flex-1" data-tutorial-target="status-filter">
+                            <span className='text-xs sm:text-sm font-medium text-gray-700 whitespace-nowrap'>Status:</span>
+                            <select value={statusFilter} onChange={handleStatusFilterChange} 
+                                className="p-1.5 sm:p-2 text-xs sm:text-sm border border-gray-300 rounded-lg shadow-sm focus:ring-primary focus:border-primary transition flex-1 min-w-0"
+                            >
+                                <option value="">All</option>
+                                {STATUS_OPTIONS.map(status => (
+                                    <option key={status} value={status}>{status}</option>
+                                ))}
+                            </select>
                         </div>
                     </div>
                     
-                    {/* Status dropdown on right */}
-                    <div className="flex gap-2 items-center" data-tutorial-target="status-filter">
-                        <span className='text-sm font-medium text-gray-700 whitespace-nowrap'>Status:</span>
-                        <select value={statusFilter} onChange={handleStatusFilterChange} 
-                            className="p-2 border border-gray-300 rounded-lg shadow-sm focus:ring-primary focus:border-primary transition min-w-[150px]"
-                        >
-                            <option value="">All</option>
-                            {STATUS_OPTIONS.map(status => (
-                                <option key={status} value={status}>{status}</option>
-                            ))}
-                        </select>
+                    {/* Second row: Gender icons */}
+                    <div className="flex gap-1 sm:gap-2 items-center" data-tutorial-target="gender-filter">
+                        <span className='text-xs sm:text-sm font-medium text-gray-700 whitespace-nowrap'>Gender:</span>
+                        {GENDER_OPTIONS.map(gender => {
+                            const isSelected = selectedGenders.includes(gender);
+                            let Icon, bgColor;
+                            
+                            switch(gender) {
+                                case 'Male':
+                                    Icon = Mars;
+                                    bgColor = isSelected ? 'bg-primary' : 'bg-gray-300 hover:bg-gray-400';
+                                    break;
+                                case 'Female':
+                                    Icon = Venus;
+                                    bgColor = isSelected ? 'bg-pink-400' : 'bg-gray-300 hover:bg-gray-400';
+                                    break;
+                                case 'Intersex':
+                                    Icon = VenusAndMars;
+                                    bgColor = isSelected ? 'bg-purple-400' : 'bg-gray-300 hover:bg-gray-400';
+                                    break;
+                                case 'Unknown':
+                                    Icon = Circle;
+                                    bgColor = isSelected ? 'bg-teal-400' : 'bg-gray-300 hover:bg-gray-400';
+                                    break;
+                                default:
+                                    Icon = Circle;
+                                    bgColor = 'bg-gray-300 hover:bg-gray-400';
+                            }
+                            
+                            return (
+                                <button key={gender} onClick={() => toggleGender(gender)}
+                                    className={`p-1.5 sm:p-2 rounded-lg transition duration-150 shadow-sm ${bgColor}`}
+                                    title={gender}
+                                >
+                                    <Icon className="w-4 h-4 sm:w-[18px] sm:h-[18px] text-black" />
+                                </button>
+                            );
+                        })}
                     </div>
                 </div>
                 
-                {/* Ownership/Special filters on left, Visibility filter on right */}
-                <div className="flex flex-col sm:flex-row gap-3 pt-2 border-t border-gray-200 justify-between">
-                    <div className="flex flex-wrap items-center gap-2" data-tutorial-target="collection-filters">
-                        <span className='text-sm font-medium text-gray-700 whitespace-nowrap'>Show:</span>
+                {/* Ownership/Special filters - scrollable on mobile */}
+                <div className="flex flex-col gap-2 pt-2 border-t border-gray-200">
+                    <div className="flex items-center gap-1 sm:gap-2 overflow-x-auto pb-1 -mx-2 px-2 sm:mx-0 sm:px-0 sm:flex-wrap" data-tutorial-target="collection-filters">
+                        <span className='text-xs sm:text-sm font-medium text-gray-700 whitespace-nowrap flex-shrink-0'>Show:</span>
                         
                         <button onClick={() => setOwnedFilterActive(prev => !prev)}
-                            className={`px-3 py-1.5 text-sm font-semibold rounded-lg transition duration-150 shadow-sm flex items-center gap-1.5 ${ 
+                            className={`px-2 sm:px-3 py-1 sm:py-1.5 text-xs sm:text-sm font-semibold rounded-lg transition duration-150 shadow-sm flex items-center gap-1 flex-shrink-0 ${ 
                                 ownedFilterActive ? 'bg-primary text-black' : 'bg-gray-200 text-gray-700 hover:bg-gray-300'
                             }`}
                         >
-                            {ownedFilterActive ? <Heart size={16} /> : <HeartHandshake size={16} />}
-                            <span>{ownedFilterActive ? 'My Animals' : 'All Animals'}</span>
+                            {ownedFilterActive ? <Heart className="w-3.5 h-3.5 sm:w-4 sm:h-4" /> : <HeartHandshake className="w-3.5 h-3.5 sm:w-4 sm:h-4" />}
+                            <span className="hidden sm:inline">{ownedFilterActive ? 'My Animals' : 'All Animals'}</span>
+                            <span className="sm:hidden">{ownedFilterActive ? 'Mine' : 'All'}</span>
                         </button>
 
                         <button onClick={handleFilterMating}
-                            className={`px-3 py-1.5 text-sm font-semibold rounded-lg transition duration-150 shadow-sm flex items-center space-x-1 ${ 
+                            className={`px-2 sm:px-3 py-1 sm:py-1.5 text-xs sm:text-sm font-semibold rounded-lg transition duration-150 shadow-sm flex items-center gap-1 flex-shrink-0 ${ 
                                 statusFilterMating ? 'bg-accent text-white' : 'bg-gray-200 text-gray-700 hover:bg-gray-300'
                             }`}
                         >
-                            <Hourglass size={16} /> <span>Mating</span>
+                            <Hourglass className="w-3.5 h-3.5 sm:w-4 sm:h-4" />
                         </button>
                         <button onClick={handleFilterPregnant}
-                            className={`px-3 py-1.5 text-sm font-semibold rounded-lg transition duration-150 shadow-sm flex items-center space-x-1 ${ 
+                            className={`px-2 sm:px-3 py-1 sm:py-1.5 text-xs sm:text-sm font-semibold rounded-lg transition duration-150 shadow-sm flex items-center gap-1 flex-shrink-0 ${ 
                                 statusFilterPregnant ? 'bg-accent text-white' : 'bg-gray-200 text-gray-700 hover:bg-gray-300'
                             }`}
                         >
-                            <Bean size={16} /> <span>Pregnant</span>
+                            <Bean className="w-3.5 h-3.5 sm:w-4 sm:h-4" />
                         </button>
                         <button onClick={handleFilterNursing}
-                            className={`px-3 py-1.5 text-sm font-semibold rounded-lg transition duration-150 shadow-sm flex items-center space-x-1 ${ 
+                            className={`px-2 sm:px-3 py-1 sm:py-1.5 text-xs sm:text-sm font-semibold rounded-lg transition duration-150 shadow-sm flex items-center gap-1 flex-shrink-0 ${ 
                                 statusFilterNursing ? 'bg-accent text-white' : 'bg-gray-200 text-gray-700 hover:bg-gray-300'
                             }`}
                         >
-                            <Milk size={16} /> <span>Nursing</span>
+                            <Milk className="w-3.5 h-3.5 sm:w-4 sm:h-4" />
                         </button>
                     </div>
 
-                    <div className="flex gap-2 items-center" data-tutorial-target="visibility-filter">
-                        <span className='text-sm font-medium text-gray-700 whitespace-nowrap'>Visibility:</span>
+                    <div className="flex gap-1 sm:gap-2 items-center mt-2 sm:mt-0" data-tutorial-target="visibility-filter">
+                        <span className='text-xs sm:text-sm font-medium text-gray-700 whitespace-nowrap'>Visibility:</span>
                         {['All', 'Public', 'Private'].map(option => {
                             const value = option === 'All' ? '' : option.toLowerCase();
                             const isSelected = publicFilter === value;
                             return (
                                 <button key={option} onClick={() => setPublicFilter(value)}
-                                    className={`px-3 py-1.5 text-sm font-semibold rounded-lg transition duration-150 shadow-sm ${ 
+                                    className={`px-2 sm:px-3 py-1 sm:py-1.5 text-xs sm:text-sm font-semibold rounded-lg transition duration-150 shadow-sm ${ 
                                         isSelected ? 'bg-primary text-black' : 'bg-gray-200 text-gray-700 hover:bg-gray-300'
                                     }`}
                                 >
@@ -13428,33 +13429,37 @@ const AnimalList = ({ authToken, showModalMessage, onEditAnimal, onViewAnimal, f
                     <p className="text-gray-500">Try adjusting your filters or add a new animal!</p>
                 </div>
             ) : (
-                <div className="space-y-4">
+                <div className="space-y-3 sm:space-y-4">
                     {speciesNames.map(species => {
                         const isBulkMode = bulkDeleteMode[species] || false;
                         const selected = selectedAnimals[species] || [];
                         
                         return (
                         <div key={species} className="border border-gray-200 rounded-xl overflow-hidden shadow-sm">
-                            <div className="flex items-center justify-between bg-gray-100 p-4 border-b">
-                                <h3 className="text-lg font-bold text-gray-700">
+                            <div className="flex items-center justify-between bg-gray-100 px-2 py-2 sm:p-4 border-b">
+                                <h3 className="text-sm sm:text-lg font-bold text-gray-700">
                                     {getSpeciesDisplayName(species)} ({groupedAnimals[species].length})
                                 </h3>
-                                <div className="flex items-center gap-2">
+                                <div className="flex items-center gap-1 sm:gap-2">
                                     {isBulkMode && (
                                         <>
-                                            <span className="text-sm text-gray-600">
+                                            <span className="text-xs sm:text-sm text-gray-600 hidden sm:inline">
                                                 {selected.length} selected
+                                            </span>
+                                            <span className="text-xs text-gray-600 sm:hidden">
+                                                {selected.length}
                                             </span>
                                             <button
                                                 onClick={() => handleBulkDelete(species)}
                                                 disabled={selected.length === 0}
-                                                className="px-3 py-1 bg-red-500 hover:bg-red-600 text-white text-sm font-semibold rounded-lg transition disabled:opacity-50 disabled:cursor-not-allowed"
+                                                className="px-2 sm:px-3 py-1 bg-red-500 hover:bg-red-600 text-white text-xs sm:text-sm font-semibold rounded-lg transition disabled:opacity-50 disabled:cursor-not-allowed"
                                             >
-                                                Delete Selected
+                                                <span className="hidden sm:inline">Delete Selected</span>
+                                                <span className="sm:hidden">Delete</span>
                                             </button>
                                             <button
                                                 onClick={() => toggleBulkDeleteMode(species)}
-                                                className="px-3 py-1 bg-gray-300 hover:bg-gray-400 text-gray-800 text-sm font-semibold rounded-lg transition"
+                                                className="px-2 sm:px-3 py-1 bg-gray-300 hover:bg-gray-400 text-gray-800 text-xs sm:text-sm font-semibold rounded-lg transition"
                                             >
                                                 Cancel
                                             </button>
@@ -13464,15 +13469,15 @@ const AnimalList = ({ authToken, showModalMessage, onEditAnimal, onViewAnimal, f
                                         <button
                                             onClick={() => toggleBulkDeleteMode(species)}
                                             data-tutorial-target="bulk-delete-btn"
-                                            className="p-2 hover:bg-gray-200 rounded-lg transition"
+                                            className="p-1.5 sm:p-2 hover:bg-gray-200 rounded-lg transition"
                                             title="Delete Multiple"
                                         >
-                                            <Trash2 size={18} className="text-red-500" />
+                                            <Trash2 className="w-4 h-4 sm:w-[18px] sm:h-[18px] text-red-500" />
                                         </button>
                                     )}
                                 </div>
                             </div>
-                            <div className="p-4 grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-4">
+                            <div className="p-1.5 sm:p-4 grid grid-cols-3 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-1.5 sm:gap-4">
                                 {groupedAnimals[species].map(animal => (
                                     <AnimalCard 
                                         key={animal.id_public} 
@@ -13707,16 +13712,16 @@ const MessagesView = ({ authToken, API_BASE_URL, onClose, showModalMessage, sele
     };
 
     return (
-        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
-            <div className="bg-white rounded-xl shadow-2xl w-full max-w-4xl h-[600px] flex flex-col">
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-2 sm:p-4">
+            <div className="bg-white rounded-xl shadow-2xl w-full max-w-4xl h-[85vh] sm:h-[600px] flex flex-col">
                 {/* Header */}
-                <div className="flex justify-between items-center p-4 border-b">
-                    <h2 className="text-xl font-bold text-gray-800 flex items-center gap-2">
-                        <MessageSquare size={24} className="text-blue-500" />
+                <div className="flex justify-between items-center p-2 sm:p-4 border-b">
+                    <h2 className="text-lg sm:text-xl font-bold text-gray-800 flex items-center gap-1 sm:gap-2">
+                        <MessageSquare className="w-5 h-5 sm:w-6 sm:h-6 text-blue-500" />
                         Messages
                     </h2>
-                    <button onClick={onClose} className="text-gray-500 hover:text-gray-700 transition">
-                        <X size={24} />
+                    <button onClick={onClose} className="text-gray-500 hover:text-gray-700 transition p-1">
+                        <X className="w-5 h-5 sm:w-6 sm:h-6" />
                     </button>
                 </div>
 
@@ -13725,24 +13730,24 @@ const MessagesView = ({ authToken, API_BASE_URL, onClose, showModalMessage, sele
                     <div className={`${selectedConversation ? 'hidden sm:flex' : 'flex'} sm:w-1/3 w-full border-r overflow-y-auto flex-col`}>
                         {loading ? (
                             <div className="flex items-center justify-center h-full">
-                                <Loader2 className="animate-spin text-gray-400" size={32} />
+                                <Loader2 className="animate-spin text-gray-400 w-6 h-6 sm:w-8 sm:h-8" />
                             </div>
                         ) : conversations.length === 0 ? (
-                            <div className="p-4 text-center text-gray-500">
-                                <MessageSquare size={48} className="mx-auto mb-2 text-gray-300" />
-                                <p>No conversations yet</p>
+                            <div className="p-3 sm:p-4 text-center text-gray-500">
+                                <MessageSquare className="w-10 h-10 sm:w-12 sm:h-12 mx-auto mb-2 text-gray-300" />
+                                <p className="text-sm sm:text-base">No conversations yet</p>
                             </div>
                         ) : (
                             conversations.map(conv => (
                                 <div
                                     key={conv.conversationId}
                                     onClick={() => setSelectedConversation(conv)}
-                                    className={`p-4 border-b cursor-pointer hover:bg-gray-50 transition ${
+                                    className={`p-2 sm:p-4 border-b cursor-pointer hover:bg-gray-50 transition ${
                                         selectedConversation?.conversationId === conv.conversationId ? 'bg-blue-50' : ''
                                     }`}
                                 >
-                                    <div className="flex items-center gap-3">
-                                        <div className="w-10 h-10 bg-gray-200 rounded-full overflow-hidden flex-shrink-0">
+                                    <div className="flex items-center gap-2 sm:gap-3">
+                                        <div className="w-8 h-8 sm:w-10 sm:h-10 bg-gray-200 rounded-full overflow-hidden flex-shrink-0">
                                             {conv.otherUser?.profileImage ? (
                                                 <img src={conv.otherUser.profileImage} alt="" className="w-full h-full object-cover" />
                                             ) : (
