@@ -18,7 +18,7 @@ export default function SystemSettingsTab({ API_BASE_URL, authToken }) {
         setError('');
 
         try {
-            const response = await fetch(`${API_BASE_URL}/api/admin/system-settings/all`, {
+            const response = await fetch(`${API_BASE_URL}/admin/system-settings/all`, {
                 headers: {
                     'Authorization': `Bearer ${authToken}`,
                     'Content-Type': 'application/json'
@@ -38,8 +38,8 @@ export default function SystemSettingsTab({ API_BASE_URL, authToken }) {
             }
 
             const data = await response.json();
-            setSettings(data.settings || {});
-            setMaintenanceMessage(data.settings?.maintenance_message?.value || '');
+            setSettings(data || {});
+            setMaintenanceMessage(data?.maintenance_message?.value || '');
         } catch (err) {
             setError(err.message);
             console.error('Error fetching settings:', err);
@@ -54,7 +54,7 @@ export default function SystemSettingsTab({ API_BASE_URL, authToken }) {
         setSuccess('');
 
         try {
-            const response = await fetch(`${API_BASE_URL}/api/admin/system-settings/${key}`, {
+            const response = await fetch(`${API_BASE_URL}/admin/system-settings/${key}`, {
                 method: 'PUT',
                 headers: {
                     'Content-Type': 'application/json',
