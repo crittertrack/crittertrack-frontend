@@ -695,7 +695,7 @@ export default function ModOversightPanel({
     };
 
     const handleDeleteNote = async (noteId) => {
-        if (!confirm('Delete this note?')) return;
+        if (!window.confirm('Delete this note?')) return;
         
         setNoteLoading(true);
         try {
