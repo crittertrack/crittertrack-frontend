@@ -17,6 +17,7 @@ import FeedbackTab from './admin/FeedbackTab';
 import SpeciesManagementTab from './admin/SpeciesManagementTab';
 import GeneticsBuilderTab from './admin/GeneticsBuilderTab';
 import BackupManagementTab from './admin/BackupManagementTab';
+import AnalyticsTab from './admin/AnalyticsTab';
 
 // Error Boundary Component
 class ErrorBoundary extends React.Component {
@@ -452,7 +453,7 @@ const EnhancedAdminPanel = ({ isOpen, onClose, authToken, API_BASE_URL, userRole
                                 { id: 'species-management', label: 'Species Management', icon: PawPrint, requiredRole: 'admin' },
                                 { id: 'genetics-builder', label: 'Genetics Builder', icon: Wrench, requiredRole: 'admin' },
                                 { id: 'backup-management', label: 'Backup Management', icon: Database, requiredRole: 'admin' },
-                                { id: 'reports', label: 'Reports & Analytics', icon: BarChart3 },
+                                { id: 'reports', label: 'Analytics', icon: BarChart3 },
                                 { id: 'communication', label: 'Communication', icon: Mail },
                                 { id: 'system-settings', label: 'System Settings', icon: Settings, requiredRole: 'admin' }
                             ].map(section => {
@@ -637,10 +638,10 @@ const EnhancedAdminPanel = ({ isOpen, onClose, authToken, API_BASE_URL, userRole
                         {/* Reports - DISABLED: Component deleted */}
                         {activeSection === 'reports' && (
                             <div className="p-8">
-                                <h3 className="text-2xl font-bold text-gray-800 mb-4">Reports & Analytics</h3>
-                                <div className="bg-yellow-50 border border-yellow-200 rounded-lg p-6">
-                                    <p className="text-yellow-800">This feature is currently being rebuilt.</p>
-                                </div>
+                                <AnalyticsTab
+                                    API_BASE_URL={API_BASE_URL}
+                                    authToken={authToken}
+                                />
                             </div>
                         )}
 
