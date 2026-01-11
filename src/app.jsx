@@ -2058,11 +2058,59 @@ const PrivateAnimalDetail = ({ animal, onClose, onEdit, API_BASE_URL, authToken,
     if (!animal) return null;
 
     return (
-        <div className="fixed inset-0 bg-accent/10 flex items-center justify-center p-4 z-50 overflow-y-auto">
-            <div className="bg-primary rounded-xl shadow-2xl w-full max-w-5xl max-h-[90vh] overflow-y-auto">
+        <div className="fixed inset-0 bg-accent/10 flex items-center justify-center p-2 sm:p-4 z-50 overflow-y-auto">
+            <div className="bg-primary rounded-xl shadow-2xl w-full max-w-5xl max-h-[95vh] sm:max-h-[90vh] overflow-y-auto">
                 {/* Header */}
-                <div className="bg-white rounded-t-lg p-4 border-b border-gray-300">
-                    <div className="flex justify-between items-center">
+                <div className="bg-white rounded-t-lg p-2 sm:p-4 border-b border-gray-300">
+                    {/* Mobile layout: stacked */}
+                    <div className="sm:hidden">
+                        <div className="flex justify-between items-center mb-2">
+                            <button 
+                                onClick={onClose} 
+                                className="flex items-center text-gray-600 hover:text-gray-800 transition text-sm"
+                            >
+                                <ArrowLeft size={16} className="mr-1" /> Back
+                            </button>
+                            <span className="text-[10px] bg-green-100 text-green-800 px-1.5 py-0.5 rounded font-medium">
+                                👁️ OWNER
+                            </span>
+                            <button onClick={onClose} className="text-gray-500 hover:text-gray-800">
+                                <X size={24} />
+                            </button>
+                        </div>
+                        <div className="flex justify-center gap-1.5 flex-wrap">
+                            <button
+                                onClick={handleShare}
+                                className="px-2 py-1 bg-primary hover:bg-primary/90 text-black font-semibold rounded-lg transition flex items-center gap-1 text-xs"
+                                title="Copy public link"
+                            >
+                                <Link size={14} />
+                                Share
+                            </button>
+                            {onEdit && (
+                                <button
+                                    onClick={() => onEdit(animal)}
+                                    className="px-2 py-1 bg-primary hover:bg-primary/90 text-black font-semibold rounded-lg transition flex items-center gap-1 text-xs"
+                                >
+                                    <Edit size={14} />
+                                    Edit
+                                </button>
+                            )}
+                            {onTransfer && (
+                                <button
+                                    onClick={() => onTransfer(animal)}
+                                    className="px-2 py-1 bg-blue-100 hover:bg-blue-200 text-blue-700 font-semibold rounded-lg transition flex items-center gap-1 text-xs"
+                                    title="Transfer"
+                                >
+                                    <ArrowLeftRight size={14} />
+                                    Transfer
+                                </button>
+                            )}
+                        </div>
+                    </div>
+                    
+                    {/* Desktop layout: single row */}
+                    <div className="hidden sm:flex justify-between items-center">
                         <button 
                             onClick={onClose} 
                             className="flex items-center text-gray-600 hover:text-gray-800 transition"
@@ -2109,8 +2157,8 @@ const PrivateAnimalDetail = ({ animal, onClose, onEdit, API_BASE_URL, authToken,
                 </div>
 
                 {/* Tabs - ALL 11 TABS */}
-                <div className="bg-white border-b border-gray-300 px-6 pt-4">
-                    <div className="flex flex-wrap gap-1 pb-4">
+                <div className="bg-white border-b border-gray-300 px-2 sm:px-6 pt-2 sm:pt-4">
+                    <div className="flex flex-wrap gap-0.5 sm:gap-1 pb-2 sm:pb-4">
                         {[
                             { id: 1, label: 'Overview', icon: '📋' },
                             { id: 2, label: 'Status & Privacy', icon: '🔒' },
@@ -2128,14 +2176,14 @@ const PrivateAnimalDetail = ({ animal, onClose, onEdit, API_BASE_URL, authToken,
                                 key={tab.id}
                                 type="button"
                                 onClick={() => setDetailViewTab(tab.id)}
-                                className={`flex-shrink-0 px-2 sm:px-3 py-2 text-xs sm:text-sm font-medium rounded border transition-colors ${
+                                className={`flex-shrink-0 px-1.5 sm:px-3 py-1 sm:py-2 text-[10px] sm:text-sm font-medium rounded border transition-colors ${
                                     detailViewTab === tab.id 
                                         ? 'bg-primary text-black border-gray-400' 
                                         : 'bg-gray-50 text-gray-600 hover:text-gray-800 border-gray-300'
                                 }`}
                                 title={tab.label}
                             >
-                                <span className="mr-1">{tab.icon}</span>
+                                <span className="sm:mr-1">{tab.icon}</span>
                                 <span className="hidden lg:inline">{tab.label}</span>
                             </button>
                         ))}
@@ -2143,7 +2191,7 @@ const PrivateAnimalDetail = ({ animal, onClose, onEdit, API_BASE_URL, authToken,
                 </div>
 
                 {/* Tab Content */}
-                <div className="bg-white border border-t-0 border-gray-300 rounded-b-lg p-6 overflow-y-auto max-h-[calc(90vh-180px)]">
+                <div className="bg-white border border-t-0 border-gray-300 rounded-b-lg p-3 sm:p-6 overflow-y-auto max-h-[calc(95vh-160px)] sm:max-h-[calc(90vh-180px)]">
                     {/* Tab 1: Overview */}
                     {detailViewTab === 1 && (
                         <div className="space-y-4">
