@@ -2,7 +2,7 @@ import React, { useEffect, useMemo, useState } from 'react';
 import { 
     AlertCircle, RefreshCw, Search, Filter, Clock, CheckCircle, 
     Loader2, Flag, Calendar, Tag, Eye, ChevronUp, ChevronDown,
-    UserCheck, Users, Briefcase
+    UserCheck, Users, Briefcase, Edit2, Trash2, Send, MessageSquare
 } from 'lucide-react';
 import './ModOversightPanel.css';
 
@@ -248,7 +248,11 @@ export default function ModOversightPanel({
     const [datePreset, setDatePreset] = useState('all');
     const [assignmentFilter, setAssignmentFilter] = useState('all');
     const [sortConfig, setSortConfig] = useState({ key: 'createdAt', direction: 'desc' });
-    const [adminNotes, setAdminNotes] = useState('');
+    const [adminNotes, setAdminNotes] = useState(''); // Legacy single note
+    const [newNoteText, setNewNoteText] = useState(''); // For new discussion note
+    const [editingNoteId, setEditingNoteId] = useState(null);
+    const [editNoteText, setEditNoteText] = useState('');
+    const [noteLoading, setNoteLoading] = useState(false);
     const [actionLoading, setActionLoading] = useState(false);
     const [searchTerm, setSearchTerm] = useState('');
     
@@ -610,6 +614,126 @@ export default function ModOversightPanel({
     const handleSelectReport = (report) => {
         setSelectedReport(report);
         setAdminNotes(report?.adminNotes || '');
+        setNewNoteText('');
+        setEditingNoteId(null);
+    };
+
+    // Discussion note functions
+    const handleAddNote = async () => {
+        if (!newNoteText.trim() || !selectedReport) return;
+        
+        setNoteLoading(true);
+        try {
+            const reportType = selectedReport.messageId || selectedReport.conversationMessages ? 'message' :
+                              selectedReport.reportedAnimalId ? 'animal' : 'profile';
+            
+            const response = await fetch(
+                `${baseUrl}/moderation/reports/${reportType}/${selectedReport._id}/notes`,
+                {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': `Bearer ${authToken}`
+                    },
+                    body: JSON.stringify({ text: newNoteText.trim() })
+                }
+            );
+
+            const data = await response.json();
+            if (!response.ok) throw new Error(data.message || 'Failed to add note');
+
+            // Update the selected report with new notes
+            setSelectedReport(prev => ({
+                ...prev,
+                discussionNotes: data.discussionNotes
+            }));
+            setNewNoteText('');
+            
+            // Also refresh the main list
+            await fetchReports();
+        } catch (err) {
+            setError(err.message);
+        } finally {
+            setNoteLoading(false);
+        }
+    };
+
+    const handleEditNote = async (noteId) => {
+        if (!editNoteText.trim() || !selectedReport) return;
+        
+        setNoteLoading(true);
+        try {
+            const reportType = selectedReport.messageId || selectedReport.conversationMessages ? 'message' :
+                              selectedReport.reportedAnimalId ? 'animal' : 'profile';
+            
+            const response = await fetch(
+                `${baseUrl}/moderation/reports/${reportType}/${selectedReport._id}/notes/${noteId}`,
+                {
+                    method: 'PATCH',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': `Bearer ${authToken}`
+                    },
+                    body: JSON.stringify({ text: editNoteText.trim() })
+                }
+            );
+
+            const data = await response.json();
+            if (!response.ok) throw new Error(data.message || 'Failed to edit note');
+
+            setSelectedReport(prev => ({
+                ...prev,
+                discussionNotes: data.discussionNotes
+            }));
+            setEditingNoteId(null);
+            setEditNoteText('');
+        } catch (err) {
+            setError(err.message);
+        } finally {
+            setNoteLoading(false);
+        }
+    };
+
+    const handleDeleteNote = async (noteId) => {
+        if (!confirm('Delete this note?')) return;
+        
+        setNoteLoading(true);
+        try {
+            const reportType = selectedReport.messageId || selectedReport.conversationMessages ? 'message' :
+                              selectedReport.reportedAnimalId ? 'animal' : 'profile';
+            
+            const response = await fetch(
+                `${baseUrl}/moderation/reports/${reportType}/${selectedReport._id}/notes/${noteId}`,
+                {
+                    method: 'DELETE',
+                    headers: {
+                        'Authorization': `Bearer ${authToken}`
+                    }
+                }
+            );
+
+            const data = await response.json();
+            if (!response.ok) throw new Error(data.message || 'Failed to delete note');
+
+            setSelectedReport(prev => ({
+                ...prev,
+                discussionNotes: data.discussionNotes
+            }));
+        } catch (err) {
+            setError(err.message);
+        } finally {
+            setNoteLoading(false);
+        }
+    };
+
+    const startEditNote = (note) => {
+        setEditingNoteId(note._id);
+        setEditNoteText(note.text);
+    };
+
+    const cancelEditNote = () => {
+        setEditingNoteId(null);
+        setEditNoteText('');
     };
 
     const parsedSelectedReason = useMemo(
@@ -1190,15 +1314,110 @@ export default function ModOversightPanel({
                                     </div>
                                 )}
 
-                                <div className="mod-detail-section">
-                                    <strong>Moderator Notes:</strong>
-                                    <textarea
-                                        className="mod-notes-textarea"
-                                        value={adminNotes}
-                                        onChange={(e) => setAdminNotes(e.target.value)}
-                                        placeholder="Add context for your fellow moderators..."
-                                        rows={4}
-                                    />
+                                {/* Discussion Thread */}
+                                <div className="mod-detail-section discussion-section">
+                                    <div className="discussion-header">
+                                        <MessageSquare size={18} />
+                                        <strong>Moderator Discussion</strong>
+                                        <span className="note-count">
+                                            {selectedReport.discussionNotes?.length || 0} note{(selectedReport.discussionNotes?.length || 0) !== 1 ? 's' : ''}
+                                        </span>
+                                    </div>
+
+                                    {/* Legacy adminNotes migration notice */}
+                                    {selectedReport.adminNotes && !selectedReport.discussionNotes?.length && (
+                                        <div className="legacy-note">
+                                            <p className="legacy-note-label">Legacy Note:</p>
+                                            <p className="legacy-note-text">{selectedReport.adminNotes}</p>
+                                        </div>
+                                    )}
+
+                                    {/* Discussion Notes Thread */}
+                                    <div className="discussion-thread">
+                                        {selectedReport.discussionNotes?.length > 0 ? (
+                                            selectedReport.discussionNotes.map((note) => (
+                                                <div key={note._id} className={`discussion-note ${note.authorId === currentUserId ? 'own-note' : ''}`}>
+                                                    <div className="note-header">
+                                                        <span className="note-author">{note.authorName}</span>
+                                                        <span className="note-date">
+                                                            {new Date(note.createdAt).toLocaleString()}
+                                                            {note.editedAt && <span className="edited-badge"> (edited)</span>}
+                                                        </span>
+                                                    </div>
+                                                    
+                                                    {editingNoteId === note._id ? (
+                                                        <div className="note-edit-form">
+                                                            <textarea
+                                                                value={editNoteText}
+                                                                onChange={(e) => setEditNoteText(e.target.value)}
+                                                                rows={3}
+                                                                maxLength={2000}
+                                                            />
+                                                            <div className="note-edit-actions">
+                                                                <button 
+                                                                    className="note-btn save-btn"
+                                                                    onClick={() => handleEditNote(note._id)}
+                                                                    disabled={noteLoading || !editNoteText.trim()}
+                                                                >
+                                                                    Save
+                                                                </button>
+                                                                <button 
+                                                                    className="note-btn cancel-btn"
+                                                                    onClick={cancelEditNote}
+                                                                    disabled={noteLoading}
+                                                                >
+                                                                    Cancel
+                                                                </button>
+                                                            </div>
+                                                        </div>
+                                                    ) : (
+                                                        <>
+                                                            <p className="note-text">{note.text}</p>
+                                                            {note.authorId === currentUserId && (
+                                                                <div className="note-actions">
+                                                                    <button 
+                                                                        className="note-action-btn"
+                                                                        onClick={() => startEditNote(note)}
+                                                                        title="Edit note"
+                                                                    >
+                                                                        <Edit2 size={14} />
+                                                                    </button>
+                                                                    <button 
+                                                                        className="note-action-btn delete-btn"
+                                                                        onClick={() => handleDeleteNote(note._id)}
+                                                                        title="Delete note"
+                                                                    >
+                                                                        <Trash2 size={14} />
+                                                                    </button>
+                                                                </div>
+                                                            )}
+                                                        </>
+                                                    )}
+                                                </div>
+                                            ))
+                                        ) : !selectedReport.adminNotes && (
+                                            <p className="no-notes">No discussion notes yet. Add one below.</p>
+                                        )}
+                                    </div>
+
+                                    {/* Add New Note */}
+                                    <div className="add-note-form">
+                                        <textarea
+                                            value={newNoteText}
+                                            onChange={(e) => setNewNoteText(e.target.value)}
+                                            placeholder="Add a note for your fellow moderators..."
+                                            rows={3}
+                                            maxLength={2000}
+                                        />
+                                        <button 
+                                            className="add-note-btn"
+                                            onClick={handleAddNote}
+                                            disabled={noteLoading || !newNoteText.trim()}
+                                        >
+                                            <Send size={16} />
+                                            {noteLoading ? 'Posting...' : 'Post Note'}
+                                        </button>
+                                    </div>
                                 </div>
 
                                 <div className="mod-actions">
