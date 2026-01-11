@@ -31,6 +31,12 @@ const AnalyticsTab = ({ API_BASE_URL, authToken }) => {
             const headers = { Authorization: `Bearer ${authToken}` };
             const queryParam = `?range=${dateRange}`;
 
+            console.log('[AnalyticsTab] Fetching analytics with:', {
+                API_BASE_URL,
+                authToken: authToken ? `${authToken.substring(0, 20)}...` : 'null',
+                dateRange
+            });
+
             const [overviewRes, actionsRes, breakdownRes, activityRes, heatmapRes, resolutionRes] = await Promise.all([
                 fetch(`${API_BASE_URL}/api/moderation/analytics/overview${queryParam}`, { headers }),
                 fetch(`${API_BASE_URL}/api/moderation/analytics/moderation-actions${queryParam}`, { headers }),
