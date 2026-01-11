@@ -482,7 +482,7 @@ const EnhancedAdminPanel = ({ isOpen, onClose, authToken, API_BASE_URL, userRole
                     </div>
 
                     {/* Content Area */}
-                    <div className="flex-1 overflow-y-auto">
+                    <div className={`flex-1 ${activeSection === 'moderation' ? 'overflow-hidden flex flex-col' : 'overflow-y-auto'}`}>
                         {/* Dashboard */}
                         {activeSection === 'dashboard' && (
                             <div className="p-8">
@@ -543,19 +543,21 @@ const EnhancedAdminPanel = ({ isOpen, onClose, authToken, API_BASE_URL, userRole
 
                         {/* Moderation Tools */}
                         {activeSection === 'moderation' && (
-                            <ModOversightPanel
-                                isOpen={true}
-                                onClose={() => setActiveSection('dashboard')}
-                                API_BASE_URL={API_BASE_URL}
-                                authToken={authToken}
-                                embedded={true}
-                                onActionTaken={() => {
-                                    // Refresh dashboard stats after action
-                                    if (isAuthenticated) {
-                                        fetchDashboardStats();
-                                    }
-                                }}
-                            />
+                            <div className="h-full flex flex-col">
+                                <ModOversightPanel
+                                    isOpen={true}
+                                    onClose={() => setActiveSection('dashboard')}
+                                    API_BASE_URL={API_BASE_URL}
+                                    authToken={authToken}
+                                    embedded={true}
+                                    onActionTaken={() => {
+                                        // Refresh dashboard stats after action
+                                        if (isAuthenticated) {
+                                            fetchDashboardStats();
+                                        }
+                                    }}
+                                />
+                            </div>
                         )}
 
                         {/* User Management Panel */}
