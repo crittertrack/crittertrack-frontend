@@ -16962,8 +16962,10 @@ const App = () => {
             {/* Moderator Warning Banner */}
             <WarningBanner authToken={authToken} API_BASE_URL={API_BASE_URL} userProfile={userProfile} />
             
-            {/* System Broadcast Banner (info/announcements) */}
-            <BroadcastBanner authToken={authToken} API_BASE_URL={API_BASE_URL} />
+            {/* System Broadcast Banner (info/announcements) - only on dashboard */}
+            {(currentView === 'list' || currentView === '') && (
+                <BroadcastBanner authToken={authToken} API_BASE_URL={API_BASE_URL} />
+            )}
             
             {/* Urgent Broadcast Popup (warning/alert) */}
             <UrgentBroadcastPopup authToken={authToken} API_BASE_URL={API_BASE_URL} />
