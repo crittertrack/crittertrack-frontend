@@ -9018,8 +9018,8 @@ const AnimalForm = ({
                                     onClick={() => toggleSectionPrivacy(animalToEdit?.id_public, 'currentOwner')}
                                     className="px-3 py-1.5 text-xs font-medium rounded-lg transition cursor-pointer"
                                     style={{
-                                        backgroundColor: sectionPrivacy[animalToEdit?.id_public].currentOwner ? '#dbeafe' : '#f3f4f6',
-                                        color: sectionPrivacy[animalToEdit?.id_public].currentOwner ? '#1e40af' : '#374151'
+                                        backgroundColor: sectionPrivacy[animalToEdit?.id_public]?.currentOwner ? '#dbeafe' : '#f3f4f6',
+                                        color: sectionPrivacy[animalToEdit?.id_public]?.currentOwner ? '#1e40af' : '#374151'
                                     }}
                                     title="Toggle public visibility"
                                 >
@@ -9146,8 +9146,8 @@ const AnimalForm = ({
                                     onClick={() => toggleSectionPrivacy(animalToEdit?.id_public, 'geneticCode')}
                                     className="px-3 py-1.5 text-xs font-medium rounded-lg transition cursor-pointer"
                                     style={{
-                                        backgroundColor: sectionPrivacy[animalToEdit?.id_public].geneticCode ? '#dbeafe' : '#f3f4f6',
-                                        color: sectionPrivacy[animalToEdit?.id_public].geneticCode ? '#1e40af' : '#374151'
+                                        backgroundColor: sectionPrivacy[animalToEdit?.id_public]?.geneticCode ? '#dbeafe' : '#f3f4f6',
+                                        color: sectionPrivacy[animalToEdit?.id_public]?.geneticCode ? '#1e40af' : '#374151'
                                     }}
                                     title="Toggle public visibility"
                                 >
@@ -9171,8 +9171,8 @@ const AnimalForm = ({
                                     onClick={() => toggleSectionPrivacy(animalToEdit?.id_public, 'lifeStage')}
                                     className="px-3 py-1.5 text-xs font-medium rounded-lg transition cursor-pointer"
                                     style={{
-                                        backgroundColor: sectionPrivacy[animalToEdit?.id_public].lifeStage ? '#dbeafe' : '#f3f4f6',
-                                        color: sectionPrivacy[animalToEdit?.id_public].lifeStage ? '#1e40af' : '#374151'
+                                        backgroundColor: sectionPrivacy[animalToEdit?.id_public]?.lifeStage ? '#dbeafe' : '#f3f4f6',
+                                        color: sectionPrivacy[animalToEdit?.id_public]?.lifeStage ? '#1e40af' : '#374151'
                                     }}
                                     title="Toggle public visibility"
                                 >
@@ -9209,8 +9209,8 @@ const AnimalForm = ({
                                             onClick={() => toggleSectionPrivacy(animalToEdit?.id_public, 'currentMeasurements')}
                                             className="px-3 py-1.5 text-xs font-medium rounded-lg transition cursor-pointer"
                                             style={{
-                                                backgroundColor: sectionPrivacy[animalToEdit?.id_public].currentMeasurements ? '#dbeafe' : '#f3f4f6',
-                                                color: sectionPrivacy[animalToEdit?.id_public].currentMeasurements ? '#1e40af' : '#374151'
+                                                backgroundColor: sectionPrivacy[animalToEdit?.id_public]?.currentMeasurements ? '#dbeafe' : '#f3f4f6',
+                                                color: sectionPrivacy[animalToEdit?.id_public]?.currentMeasurements ? '#1e40af' : '#374151'
                                             }}
                                             title="Toggle public visibility"
                                         >
@@ -9223,8 +9223,8 @@ const AnimalForm = ({
                                             onClick={() => toggleSectionPrivacy(animalToEdit?.id_public, 'growthHistory')}
                                             className="px-3 py-1.5 text-xs font-medium rounded-lg transition cursor-pointer"
                                             style={{
-                                                backgroundColor: sectionPrivacy[animalToEdit?.id_public].growthHistory ? '#dbeafe' : '#f3f4f6',
-                                                color: sectionPrivacy[animalToEdit?.id_public].growthHistory ? '#1e40af' : '#374151'
+                                                backgroundColor: sectionPrivacy[animalToEdit?.id_public]?.growthHistory ? '#dbeafe' : '#f3f4f6',
+                                                color: sectionPrivacy[animalToEdit?.id_public]?.growthHistory ? '#1e40af' : '#374151'
                                             }}
                                             title="Toggle public visibility"
                                         >
@@ -9788,8 +9788,8 @@ const AnimalForm = ({
                                     onClick={() => toggleSectionPrivacy(animalToEdit?.id_public, 'origin')}
                                     className="px-3 py-1.5 text-xs font-medium rounded-lg transition cursor-pointer"
                                     style={{
-                                        backgroundColor: sectionPrivacy[animalToEdit?.id_public].origin ? '#dbeafe' : '#f3f4f6',
-                                        color: sectionPrivacy[animalToEdit?.id_public].origin ? '#1e40af' : '#374151'
+                                        backgroundColor: sectionPrivacy[animalToEdit?.id_public]?.origin ? '#dbeafe' : '#f3f4f6',
+                                        color: sectionPrivacy[animalToEdit?.id_public]?.origin ? '#1e40af' : '#374151'
                                     }}
                                     title="Toggle public visibility"
                                 >
@@ -9951,8 +9951,8 @@ const AnimalForm = ({
                                         onClick={() => toggleSectionPrivacy(animalToEdit?.id_public, 'estrusCycle')}
                                         className="px-3 py-1.5 text-xs font-medium rounded-lg transition cursor-pointer"
                                         style={{
-                                            backgroundColor: sectionPrivacy[animalToEdit?.id_public].estrusCycle ? '#dbeafe' : '#f3f4f6',
-                                            color: sectionPrivacy[animalToEdit?.id_public].estrusCycle ? '#1e40af' : '#374151'
+                                            backgroundColor: sectionPrivacy[animalToEdit?.id_public]?.estrusCycle ? '#dbeafe' : '#f3f4f6',
+                                            color: sectionPrivacy[animalToEdit?.id_public]?.estrusCycle ? '#1e40af' : '#374151'
                                         }}
                                         title="Toggle public visibility"
                                     >
@@ -9996,8 +9996,8 @@ const AnimalForm = ({
                                         onClick={() => toggleSectionPrivacy(animalToEdit?.id_public, 'mating')}
                                         className="px-3 py-1.5 text-xs font-medium rounded-lg transition cursor-pointer"
                                         style={{
-                                            backgroundColor: sectionPrivacy[animalToEdit?.id_public].mating ? '#dbeafe' : '#f3f4f6',
-                                            color: sectionPrivacy[animalToEdit?.id_public].mating ? '#1e40af' : '#374151'
+                                            backgroundColor: sectionPrivacy[animalToEdit?.id_public]?.mating ? '#dbeafe' : '#f3f4f6',
+                                            color: sectionPrivacy[animalToEdit?.id_public]?.mating ? '#1e40af' : '#374151'
                                         }}
                                         title="Toggle public visibility"
                                     >
@@ -10030,8 +10030,8 @@ const AnimalForm = ({
                                         onClick={() => toggleSectionPrivacy(animalToEdit?.id_public, 'studInformation')}
                                         className="px-3 py-1.5 text-xs font-medium rounded-lg transition cursor-pointer"
                                         style={{
-                                            backgroundColor: sectionPrivacy[animalToEdit?.id_public].studInformation ? '#dbeafe' : '#f3f4f6',
-                                            color: sectionPrivacy[animalToEdit?.id_public].studInformation ? '#1e40af' : '#374151'
+                                            backgroundColor: sectionPrivacy[animalToEdit?.id_public]?.studInformation ? '#dbeafe' : '#f3f4f6',
+                                            color: sectionPrivacy[animalToEdit?.id_public]?.studInformation ? '#1e40af' : '#374151'
                                         }}
                                         title="Toggle public visibility"
                                     >
@@ -10073,8 +10073,8 @@ const AnimalForm = ({
                                         onClick={() => toggleSectionPrivacy(animalToEdit?.id_public, 'damInformation')}
                                         className="px-3 py-1.5 text-xs font-medium rounded-lg transition cursor-pointer"
                                         style={{
-                                            backgroundColor: sectionPrivacy[animalToEdit?.id_public].damInformation ? '#dbeafe' : '#f3f4f6',
-                                            color: sectionPrivacy[animalToEdit?.id_public].damInformation ? '#1e40af' : '#374151'
+                                            backgroundColor: sectionPrivacy[animalToEdit?.id_public]?.damInformation ? '#dbeafe' : '#f3f4f6',
+                                            color: sectionPrivacy[animalToEdit?.id_public]?.damInformation ? '#1e40af' : '#374151'
                                         }}
                                         title="Toggle public visibility"
                                     >
@@ -10111,8 +10111,8 @@ const AnimalForm = ({
                                     onClick={() => toggleSectionPrivacy(animalToEdit?.id_public, 'breedingHistory')}
                                     className="px-3 py-1.5 text-xs font-medium rounded-lg transition cursor-pointer"
                                     style={{
-                                        backgroundColor: sectionPrivacy[animalToEdit?.id_public].breedingHistory ? '#dbeafe' : '#f3f4f6',
-                                        color: sectionPrivacy[animalToEdit?.id_public].breedingHistory ? '#1e40af' : '#374151'
+                                        backgroundColor: sectionPrivacy[animalToEdit?.id_public]?.breedingHistory ? '#dbeafe' : '#f3f4f6',
+                                        color: sectionPrivacy[animalToEdit?.id_public]?.breedingHistory ? '#1e40af' : '#374151'
                                     }}
                                     title="Toggle public visibility"
                                 >
@@ -10212,8 +10212,8 @@ const AnimalForm = ({
                                     onClick={() => toggleSectionPrivacy(animalToEdit?.id_public, 'preventiveCare')}
                                     className="px-3 py-1.5 text-xs font-medium rounded-lg transition cursor-pointer"
                                     style={{
-                                        backgroundColor: sectionPrivacy[animalToEdit?.id_public].preventiveCare ? '#dbeafe' : '#f3f4f6',
-                                        color: sectionPrivacy[animalToEdit?.id_public].preventiveCare ? '#1e40af' : '#374151'
+                                        backgroundColor: sectionPrivacy[animalToEdit?.id_public]?.preventiveCare ? '#dbeafe' : '#f3f4f6',
+                                        color: sectionPrivacy[animalToEdit?.id_public]?.preventiveCare ? '#1e40af' : '#374151'
                                     }}
                                     title="Toggle public visibility"
                                 >
@@ -10353,8 +10353,8 @@ const AnimalForm = ({
                                     onClick={() => toggleSectionPrivacy(animalToEdit?.id_public, 'proceduresAndDiagnostics')}
                                     className="px-3 py-1.5 text-xs font-medium rounded-lg transition cursor-pointer"
                                     style={{
-                                        backgroundColor: sectionPrivacy[animalToEdit?.id_public].proceduresAndDiagnostics ? '#dbeafe' : '#f3f4f6',
-                                        color: sectionPrivacy[animalToEdit?.id_public].proceduresAndDiagnostics ? '#1e40af' : '#374151'
+                                        backgroundColor: sectionPrivacy[animalToEdit?.id_public]?.proceduresAndDiagnostics ? '#dbeafe' : '#f3f4f6',
+                                        color: sectionPrivacy[animalToEdit?.id_public]?.proceduresAndDiagnostics ? '#1e40af' : '#374151'
                                     }}
                                     title="Toggle public visibility"
                                 >
@@ -10458,8 +10458,8 @@ const AnimalForm = ({
                                     onClick={() => toggleSectionPrivacy(animalToEdit?.id_public, 'activeMedicalRecords')}
                                     className="px-3 py-1.5 text-xs font-medium rounded-lg transition cursor-pointer"
                                     style={{
-                                        backgroundColor: sectionPrivacy[animalToEdit?.id_public].activeMedicalRecords ? '#dbeafe' : '#f3f4f6',
-                                        color: sectionPrivacy[animalToEdit?.id_public].activeMedicalRecords ? '#1e40af' : '#374151'
+                                        backgroundColor: sectionPrivacy[animalToEdit?.id_public]?.activeMedicalRecords ? '#dbeafe' : '#f3f4f6',
+                                        color: sectionPrivacy[animalToEdit?.id_public]?.activeMedicalRecords ? '#1e40af' : '#374151'
                                     }}
                                     title="Toggle public visibility"
                                 >
@@ -10585,8 +10585,8 @@ const AnimalForm = ({
                                     onClick={() => toggleSectionPrivacy(animalToEdit?.id_public, 'veterinaryCare')}
                                     className="px-3 py-1.5 text-xs font-medium rounded-lg transition cursor-pointer"
                                     style={{
-                                        backgroundColor: sectionPrivacy[animalToEdit?.id_public].veterinaryCare ? '#dbeafe' : '#f3f4f6',
-                                        color: sectionPrivacy[animalToEdit?.id_public].veterinaryCare ? '#1e40af' : '#374151'
+                                        backgroundColor: sectionPrivacy[animalToEdit?.id_public]?.veterinaryCare ? '#dbeafe' : '#f3f4f6',
+                                        color: sectionPrivacy[animalToEdit?.id_public]?.veterinaryCare ? '#1e40af' : '#374151'
                                     }}
                                     title="Toggle public visibility"
                                 >
@@ -10657,8 +10657,8 @@ const AnimalForm = ({
                                     onClick={() => toggleSectionPrivacy(animalToEdit?.id_public, 'nutrition')}
                                     className="px-3 py-1.5 text-xs font-medium rounded-lg transition cursor-pointer"
                                     style={{
-                                        backgroundColor: sectionPrivacy[animalToEdit?.id_public].nutrition ? '#dbeafe' : '#f3f4f6',
-                                        color: sectionPrivacy[animalToEdit?.id_public].nutrition ? '#1e40af' : '#374151'
+                                        backgroundColor: sectionPrivacy[animalToEdit?.id_public]?.nutrition ? '#dbeafe' : '#f3f4f6',
+                                        color: sectionPrivacy[animalToEdit?.id_public]?.nutrition ? '#1e40af' : '#374151'
                                     }}
                                     title="Toggle public visibility"
                                 >
@@ -10697,8 +10697,8 @@ const AnimalForm = ({
                                     onClick={() => toggleSectionPrivacy(animalToEdit?.id_public, 'husbandry')}
                                     className="px-3 py-1.5 text-xs font-medium rounded-lg transition cursor-pointer"
                                     style={{
-                                        backgroundColor: sectionPrivacy[animalToEdit?.id_public].husbandry ? '#dbeafe' : '#f3f4f6',
-                                        color: sectionPrivacy[animalToEdit?.id_public].husbandry ? '#1e40af' : '#374151'
+                                        backgroundColor: sectionPrivacy[animalToEdit?.id_public]?.husbandry ? '#dbeafe' : '#f3f4f6',
+                                        color: sectionPrivacy[animalToEdit?.id_public]?.husbandry ? '#1e40af' : '#374151'
                                     }}
                                     title="Toggle public visibility"
                                 >
@@ -10737,8 +10737,8 @@ const AnimalForm = ({
                                     onClick={() => toggleSectionPrivacy(animalToEdit?.id_public, 'environment')}
                                     className="px-3 py-1.5 text-xs font-medium rounded-lg transition cursor-pointer"
                                     style={{
-                                        backgroundColor: sectionPrivacy[animalToEdit?.id_public].environment ? '#dbeafe' : '#f3f4f6',
-                                        color: sectionPrivacy[animalToEdit?.id_public].environment ? '#1e40af' : '#374151'
+                                        backgroundColor: sectionPrivacy[animalToEdit?.id_public]?.environment ? '#dbeafe' : '#f3f4f6',
+                                        color: sectionPrivacy[animalToEdit?.id_public]?.environment ? '#1e40af' : '#374151'
                                     }}
                                     title="Toggle public visibility"
                                 >
@@ -10789,8 +10789,8 @@ const AnimalForm = ({
                                     onClick={() => toggleSectionPrivacy(animalToEdit?.id_public, 'behavior')}
                                     className="px-3 py-1.5 text-xs font-medium rounded-lg transition cursor-pointer"
                                     style={{
-                                        backgroundColor: sectionPrivacy[animalToEdit?.id_public].behavior ? '#dbeafe' : '#f3f4f6',
-                                        color: sectionPrivacy[animalToEdit?.id_public].behavior ? '#1e40af' : '#374151'
+                                        backgroundColor: sectionPrivacy[animalToEdit?.id_public]?.behavior ? '#dbeafe' : '#f3f4f6',
+                                        color: sectionPrivacy[animalToEdit?.id_public]?.behavior ? '#1e40af' : '#374151'
                                     }}
                                     title="Toggle public visibility"
                                 >
@@ -10829,8 +10829,8 @@ const AnimalForm = ({
                                     onClick={() => toggleSectionPrivacy(animalToEdit?.id_public, 'activity')}
                                     className="px-3 py-1.5 text-xs font-medium rounded-lg transition cursor-pointer"
                                     style={{
-                                        backgroundColor: sectionPrivacy[animalToEdit?.id_public].activity ? '#dbeafe' : '#f3f4f6',
-                                        color: sectionPrivacy[animalToEdit?.id_public].activity ? '#1e40af' : '#374151'
+                                        backgroundColor: sectionPrivacy[animalToEdit?.id_public]?.activity ? '#dbeafe' : '#f3f4f6',
+                                        color: sectionPrivacy[animalToEdit?.id_public]?.activity ? '#1e40af' : '#374151'
                                     }}
                                     title="Toggle public visibility"
                                 >
@@ -10861,8 +10861,8 @@ const AnimalForm = ({
                                     onClick={() => toggleSectionPrivacy(animalToEdit?.id_public, 'remarks')}
                                     className="px-3 py-1.5 text-xs font-medium rounded-lg transition cursor-pointer"
                                     style={{
-                                        backgroundColor: sectionPrivacy[animalToEdit?.id_public].remarks ? '#dbeafe' : '#f3f4f6',
-                                        color: sectionPrivacy[animalToEdit?.id_public].remarks ? '#1e40af' : '#374151'
+                                        backgroundColor: sectionPrivacy[animalToEdit?.id_public]?.remarks ? '#dbeafe' : '#f3f4f6',
+                                        color: sectionPrivacy[animalToEdit?.id_public]?.remarks ? '#1e40af' : '#374151'
                                     }}
                                     title="Toggle public visibility"
                                 >
@@ -10888,8 +10888,8 @@ const AnimalForm = ({
                                     onClick={() => toggleSectionPrivacy(animalToEdit?.id_public, 'endOfLife')}
                                     className="px-3 py-1.5 text-xs font-medium rounded-lg transition cursor-pointer"
                                     style={{
-                                        backgroundColor: sectionPrivacy[animalToEdit?.id_public].endOfLife ? '#dbeafe' : '#f3f4f6',
-                                        color: sectionPrivacy[animalToEdit?.id_public].endOfLife ? '#1e40af' : '#374151'
+                                        backgroundColor: sectionPrivacy[animalToEdit?.id_public]?.endOfLife ? '#dbeafe' : '#f3f4f6',
+                                        color: sectionPrivacy[animalToEdit?.id_public]?.endOfLife ? '#1e40af' : '#374151'
                                     }}
                                     title="Toggle public visibility"
                                 >
@@ -10928,8 +10928,8 @@ const AnimalForm = ({
                                     onClick={() => toggleSectionPrivacy(animalToEdit?.id_public, 'legalAdministrative')}
                                     className="px-3 py-1.5 text-xs font-medium rounded-lg transition cursor-pointer"
                                     style={{
-                                        backgroundColor: sectionPrivacy[animalToEdit?.id_public].legalAdministrative ? '#dbeafe' : '#f3f4f6',
-                                        color: sectionPrivacy[animalToEdit?.id_public].legalAdministrative ? '#1e40af' : '#374151'
+                                        backgroundColor: sectionPrivacy[animalToEdit?.id_public]?.legalAdministrative ? '#dbeafe' : '#f3f4f6',
+                                        color: sectionPrivacy[animalToEdit?.id_public]?.legalAdministrative ? '#1e40af' : '#374151'
                                     }}
                                     title="Toggle public visibility"
                                 >
