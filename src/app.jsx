@@ -15860,7 +15860,7 @@ const App = () => {
         const fetchCommunityUsers = async () => {
             try {
                 const [newestResponse, activeResponse] = await Promise.all([
-                    axios.get(`${API_BASE_URL}/public/users/newest?limit=5`),
+                    axios.get(`${API_BASE_URL}/public/users/newest?limit=10`),
                     axios.get(`${API_BASE_URL}/public/users/active?minutes=15`)
                 ]);
                 let newest = newestResponse.data || [];
@@ -15875,12 +15875,29 @@ const App = () => {
                 newest = newest.filter(hasVisibleName);
                 active = active.filter(hasVisibleName);
                 
-                // Remove duplicates: filter out active users who are already in newest
-                const newestIds = new Set(newest.map(u => u.id_public));
-                const uniqueActive = active.filter(u => !newestIds.has(u.id_public));
+                // Combine: active first (most recently active), then newest, removing duplicates
+                const seenIds = new Set();
+                const combined = [];
                 
-                setNewestUsers(newest);
-                setActiveUsers(uniqueActive);
+                // Add active users first (priority)
+                for (const user of active) {
+                    if (!seenIds.has(user.id_public) && combined.length < 5) {
+                        seenIds.add(user.id_public);
+                        combined.push({ ...user, isActive: true });
+                    }
+                }
+                
+                // Fill remaining slots with newest users
+                for (const user of newest) {
+                    if (!seenIds.has(user.id_public) && combined.length < 5) {
+                        seenIds.add(user.id_public);
+                        combined.push({ ...user, isActive: false });
+                    }
+                }
+                
+                // Split back into categories for display styling
+                setNewestUsers(combined.filter(u => !u.isActive));
+                setActiveUsers(combined.filter(u => u.isActive));
             } catch (error) {
                 console.error('Error fetching community users:', error);
             }
