@@ -13352,45 +13352,44 @@ const AnimalList = ({ authToken, showModalMessage, onEditAnimal, onViewAnimal, f
                     </div>
                 </div>
 
-                {/* Species dropdown, Gender icons, and Status dropdown - collapsible on mobile */}
-                <div className="flex flex-col gap-2 sm:gap-3 pt-2 border-t border-gray-200">
-                    {/* First row: Species and Status dropdowns */}
-                    <div className="flex gap-2 sm:gap-3 items-center justify-between">
-                        <div className="flex gap-1 sm:gap-2 items-center flex-1" data-tutorial-target="species-filter">
-                            <span className='text-xs sm:text-sm font-medium text-gray-700 whitespace-nowrap'>Species:</span>
-                            <select 
-                                value={selectedSpecies.length === speciesNames.length ? '' : selectedSpecies[0] || ''}
-                                onChange={(e) => {
-                                    const value = e.target.value;
-                                    if (value === '') {
-                                        setSelectedSpecies([...speciesNames]);
-                                    } else {
-                                        setSelectedSpecies([value]);
-                                    }
-                                }}
-                                className="p-1.5 sm:p-2 text-xs sm:text-sm border border-gray-300 rounded-lg shadow-sm focus:ring-primary focus:border-primary transition flex-1 min-w-0"
-                            >
-                                <option value="">All</option>
-                                {speciesNames.map(species => (
-                                    <option key={species} value={species}>{getSpeciesDisplayName(species)}</option>
-                                ))}
-                            </select>
-                        </div>
-                        
-                        <div className="flex gap-1 sm:gap-2 items-center flex-1" data-tutorial-target="status-filter">
-                            <span className='text-xs sm:text-sm font-medium text-gray-700 whitespace-nowrap'>Status:</span>
-                            <select value={statusFilter} onChange={handleStatusFilterChange} 
-                                className="p-1.5 sm:p-2 text-xs sm:text-sm border border-gray-300 rounded-lg shadow-sm focus:ring-primary focus:border-primary transition flex-1 min-w-0"
-                            >
-                                <option value="">All</option>
-                                {STATUS_OPTIONS.map(status => (
-                                    <option key={status} value={status}>{status}</option>
-                                ))}
-                            </select>
-                        </div>
+                {/* Filters - All in one row on desktop, wrapping on mobile */}
+                <div className="flex flex-wrap gap-x-4 gap-y-2 items-center pt-2 border-t border-gray-200">
+                    {/* Species dropdown */}
+                    <div className="flex gap-1 sm:gap-2 items-center" data-tutorial-target="species-filter">
+                        <span className='text-xs sm:text-sm font-medium text-gray-700 whitespace-nowrap'>Species:</span>
+                        <select 
+                            value={selectedSpecies.length === speciesNames.length ? '' : selectedSpecies[0] || ''}
+                            onChange={(e) => {
+                                const value = e.target.value;
+                                if (value === '') {
+                                    setSelectedSpecies([...speciesNames]);
+                                } else {
+                                    setSelectedSpecies([value]);
+                                }
+                            }}
+                            className="p-1.5 sm:p-2 text-xs sm:text-sm border border-gray-300 rounded-lg shadow-sm focus:ring-primary focus:border-primary transition min-w-[100px] sm:min-w-[140px]"
+                        >
+                            <option value="">All</option>
+                            {speciesNames.map(species => (
+                                <option key={species} value={species}>{getSpeciesDisplayName(species)}</option>
+                            ))}
+                        </select>
                     </div>
                     
-                    {/* Second row: Gender icons */}
+                    {/* Status dropdown */}
+                    <div className="flex gap-1 sm:gap-2 items-center" data-tutorial-target="status-filter">
+                        <span className='text-xs sm:text-sm font-medium text-gray-700 whitespace-nowrap'>Status:</span>
+                        <select value={statusFilter} onChange={handleStatusFilterChange} 
+                            className="p-1.5 sm:p-2 text-xs sm:text-sm border border-gray-300 rounded-lg shadow-sm focus:ring-primary focus:border-primary transition min-w-[100px] sm:min-w-[140px]"
+                        >
+                            <option value="">All</option>
+                            {STATUS_OPTIONS.map(status => (
+                                <option key={status} value={status}>{status}</option>
+                            ))}
+                        </select>
+                    </div>
+
+                    {/* Gender icons */}
                     <div className="flex gap-1 sm:gap-2 items-center" data-tutorial-target="gender-filter">
                         <span className='text-xs sm:text-sm font-medium text-gray-700 whitespace-nowrap'>Gender:</span>
                         {GENDER_OPTIONS.map(gender => {
@@ -13429,47 +13428,49 @@ const AnimalList = ({ authToken, showModalMessage, onEditAnimal, onViewAnimal, f
                             );
                         })}
                     </div>
-                </div>
-                
-                {/* Ownership/Special filters - scrollable on mobile */}
-                <div className="flex flex-col gap-2 pt-2 border-t border-gray-200">
-                    <div className="flex items-center gap-1 sm:gap-2 overflow-x-auto pb-1 -mx-2 px-2 sm:mx-0 sm:px-0 sm:flex-wrap" data-tutorial-target="collection-filters">
-                        <span className='text-xs sm:text-sm font-medium text-gray-700 whitespace-nowrap flex-shrink-0'>Show:</span>
+                    
+                    {/* Show filters */}
+                    <div className="flex items-center gap-1 sm:gap-2" data-tutorial-target="collection-filters">
+                        <span className='text-xs sm:text-sm font-medium text-gray-700 whitespace-nowrap'>Show:</span>
                         
                         <button onClick={() => setOwnedFilterActive(prev => !prev)}
-                            className={`px-2 sm:px-3 py-1 sm:py-1.5 text-xs sm:text-sm font-semibold rounded-lg transition duration-150 shadow-sm flex items-center gap-1 flex-shrink-0 ${ 
+                            className={`px-2 sm:px-3 py-1 sm:py-1.5 text-xs sm:text-sm font-semibold rounded-lg transition duration-150 shadow-sm flex items-center gap-1 ${ 
                                 ownedFilterActive ? 'bg-primary text-black' : 'bg-gray-200 text-gray-700 hover:bg-gray-300'
                             }`}
+                            title={ownedFilterActive ? 'Showing only your animals' : 'Showing all animals'}
                         >
                             {ownedFilterActive ? <Heart className="w-3.5 h-3.5 sm:w-4 sm:h-4" /> : <HeartHandshake className="w-3.5 h-3.5 sm:w-4 sm:h-4" />}
-                            <span className="hidden sm:inline">{ownedFilterActive ? 'My Animals' : 'All Animals'}</span>
-                            <span className="sm:hidden">{ownedFilterActive ? 'Mine' : 'All'}</span>
+                            <span className="hidden sm:inline">{ownedFilterActive ? 'My Animals' : 'All'}</span>
                         </button>
 
                         <button onClick={handleFilterMating}
-                            className={`px-2 sm:px-3 py-1 sm:py-1.5 text-xs sm:text-sm font-semibold rounded-lg transition duration-150 shadow-sm flex items-center gap-1 flex-shrink-0 ${ 
+                            className={`p-1.5 sm:p-2 rounded-lg transition duration-150 shadow-sm ${ 
                                 statusFilterMating ? 'bg-accent text-white' : 'bg-gray-200 text-gray-700 hover:bg-gray-300'
                             }`}
+                            title="Mating"
                         >
                             <Hourglass className="w-3.5 h-3.5 sm:w-4 sm:h-4" />
                         </button>
                         <button onClick={handleFilterPregnant}
-                            className={`px-2 sm:px-3 py-1 sm:py-1.5 text-xs sm:text-sm font-semibold rounded-lg transition duration-150 shadow-sm flex items-center gap-1 flex-shrink-0 ${ 
+                            className={`p-1.5 sm:p-2 rounded-lg transition duration-150 shadow-sm ${ 
                                 statusFilterPregnant ? 'bg-accent text-white' : 'bg-gray-200 text-gray-700 hover:bg-gray-300'
                             }`}
+                            title="Pregnant"
                         >
                             <Bean className="w-3.5 h-3.5 sm:w-4 sm:h-4" />
                         </button>
                         <button onClick={handleFilterNursing}
-                            className={`px-2 sm:px-3 py-1 sm:py-1.5 text-xs sm:text-sm font-semibold rounded-lg transition duration-150 shadow-sm flex items-center gap-1 flex-shrink-0 ${ 
+                            className={`p-1.5 sm:p-2 rounded-lg transition duration-150 shadow-sm ${ 
                                 statusFilterNursing ? 'bg-accent text-white' : 'bg-gray-200 text-gray-700 hover:bg-gray-300'
                             }`}
+                            title="Nursing"
                         >
                             <Milk className="w-3.5 h-3.5 sm:w-4 sm:h-4" />
                         </button>
                     </div>
 
-                    <div className="flex gap-1 sm:gap-2 items-center mt-2 sm:mt-0" data-tutorial-target="visibility-filter">
+                    {/* Visibility filter */}
+                    <div className="flex gap-1 sm:gap-2 items-center" data-tutorial-target="visibility-filter">
                         <span className='text-xs sm:text-sm font-medium text-gray-700 whitespace-nowrap'>Visibility:</span>
                         {['All', 'Public', 'Private'].map(option => {
                             const value = option === 'All' ? '' : option.toLowerCase();
