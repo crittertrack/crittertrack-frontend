@@ -15870,6 +15870,11 @@ const App = () => {
                 newest = newest.filter(u => u.id_public && u.accountStatus !== 'banned');
                 active = active.filter(u => u.id_public && u.accountStatus !== 'banned');
                 
+                // Filter out anonymous users (those who don't have a visible name)
+                const hasVisibleName = (u) => (u.showBreederName && u.breederName) || (u.showPersonalName && u.personalName);
+                newest = newest.filter(hasVisibleName);
+                active = active.filter(hasVisibleName);
+                
                 // Remove duplicates: filter out active users who are already in newest
                 const newestIds = new Set(newest.map(u => u.id_public));
                 const uniqueActive = active.filter(u => !newestIds.has(u.id_public));
