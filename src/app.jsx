@@ -7563,6 +7563,7 @@ const AnimalForm = ({
     showModalMessage, 
     API_BASE_URL,          // Ensure these are passed from the parent component (App)
     userProfile,           // Current user profile for default breeder
+    speciesConfigs,        // Field replacements per species
     X, 
     Search, 
     Loader2, 
@@ -7573,6 +7574,33 @@ const AnimalForm = ({
     sectionPrivacy,
     toggleSectionPrivacy
 }) => {
+    
+    // Default field labels - can be overridden by species config
+    const defaultFieldLabels = {
+        breederyId: 'Breeder ID / Registry Code',
+        strain: 'Strain',
+        heatStatus: 'Heat Status',
+        earset: 'Ear Set',
+        housingType: 'Housing Type',
+        noise: 'Noise Level',
+        bedding: 'Bedding Type',
+        geneticCode: 'Genetic Code'
+    };
+    
+    // Get field label - uses species config override if available
+    const getFieldLabel = (fieldName, defaultLabel) => {
+        const config = speciesConfigs?.[formData.species];
+        if (config?.fieldReplacements?.[fieldName]) {
+            return config.fieldReplacements[fieldName];
+        }
+        return defaultLabel || defaultFieldLabels[fieldName] || fieldName;
+    };
+    
+    // Check if a field is hidden for the current species
+    const isFieldHidden = (fieldName) => {
+        const config = speciesConfigs?.[formData.species];
+        return config?.hiddenFields?.includes(fieldName) || false;
+    };
     
     // Initial state setup (using the passed props for options)
     const [formData, setFormData] = useState(
@@ -9252,9 +9280,9 @@ const AnimalForm = ({
                                         placeholder="e.g., Solid, Hooded, Brindle" />
                                 </div>
                                 
-                                {(formData.species === 'Rat' || formData.species === 'Fancy Rat') && (
+                                {!isFieldHidden('earset') && (formData.species === 'Rat' || formData.species === 'Fancy Rat') && (
                                     <div>
-                                        <label className="block text-sm font-medium text-gray-700">Earset</label>
+                                        <label className="block text-sm font-medium text-gray-700">{getFieldLabel('earset', 'Earset')}</label>
                                         <input type="text" name="earset" value={formData.earset} onChange={handleChange} 
                                             className="mt-1 block w-full p-2 border border-gray-300 rounded-md shadow-sm focus:ring-primary focus:border-primary" 
                                             placeholder="e.g., Standard, Dumbo" />
@@ -9264,29 +9292,31 @@ const AnimalForm = ({
                         </div>
 
                         {/* Genetic Code */}
-                        <div className="bg-gray-50 p-4 rounded-lg border border-gray-200 space-y-4">
-                            <div className="flex justify-between items-center mb-4">
-                                <h3 className="text-lg font-semibold text-gray-700">Genetic Code</h3>
-                                <button
-                                    onClick={() => toggleSectionPrivacy(animalToEdit?.id_public, 'geneticCode')}
-                                    className="px-3 py-1.5 text-xs font-medium rounded-lg transition cursor-pointer"
-                                    style={{
-                                        backgroundColor: sectionPrivacy[animalToEdit?.id_public]?.geneticCode ? '#dbeafe' : '#f3f4f6',
-                                        color: sectionPrivacy[animalToEdit?.id_public]?.geneticCode ? '#1e40af' : '#374151'
-                                    }}
-                                    title="Toggle public visibility"
-                                >
-                                    <span>{sectionPrivacy[animalToEdit?.id_public]?.geneticCode ? '🌍 Public' : '🔒 Private'}</span>
-                                </button>
+                        {!isFieldHidden('geneticCode') && (
+                            <div className="bg-gray-50 p-4 rounded-lg border border-gray-200 space-y-4">
+                                <div className="flex justify-between items-center mb-4">
+                                    <h3 className="text-lg font-semibold text-gray-700">{getFieldLabel('geneticCode', 'Genetic Code')}</h3>
+                                    <button
+                                        onClick={() => toggleSectionPrivacy(animalToEdit?.id_public, 'geneticCode')}
+                                        className="px-3 py-1.5 text-xs font-medium rounded-lg transition cursor-pointer"
+                                        style={{
+                                            backgroundColor: sectionPrivacy[animalToEdit?.id_public]?.geneticCode ? '#dbeafe' : '#f3f4f6',
+                                            color: sectionPrivacy[animalToEdit?.id_public]?.geneticCode ? '#1e40af' : '#374151'
+                                        }}
+                                        title="Toggle public visibility"
+                                    >
+                                        <span>{sectionPrivacy[animalToEdit?.id_public]?.geneticCode ? '🌍 Public' : '🔒 Private'}</span>
+                                    </button>
+                                </div>
+                                <GeneticCodeBuilder
+                                    species={formData.species}
+                                    gender={formData.gender}
+                                    value={formData.geneticCode}
+                                    onChange={(value) => setFormData(prev => ({ ...prev, geneticCode: value }))}
+                                    onOpenCommunityForm={() => setShowCommunityGeneticsModal(true)}
+                                />
                             </div>
-                            <GeneticCodeBuilder
-                                species={formData.species}
-                                gender={formData.gender}
-                                value={formData.geneticCode}
-                                onChange={(value) => setFormData(prev => ({ ...prev, geneticCode: value }))}
-                                onOpenCommunityForm={() => setShowCommunityGeneticsModal(true)}
-                            />
-                        </div>
+                        )}
 
                         {/* Life Stage */}
                         <div className="bg-gray-50 p-4 rounded-lg border border-gray-200 space-y-4">
@@ -9795,10 +9825,10 @@ const AnimalForm = ({
                             <h3 className="text-lg font-semibold text-gray-700 border-b pb-2">Identification Numbers</h3>
                             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                                 <div data-tutorial-target="identification-breeder-id">
-                                    <label className="block text-sm font-medium text-gray-700">Identification</label>
+                                    <label className="block text-sm font-medium text-gray-700">{getFieldLabel('breederyId', 'Identification')}</label>
                                     <input type="text" name="breederyId" value={formData.breederyId} onChange={handleChange} 
                                         className="mt-1 block w-full p-2 border border-gray-300 rounded-md shadow-sm focus:ring-primary focus:border-primary" 
-                                        placeholder="Breeder ID or Registry Code" />
+                                        placeholder={getFieldLabel('breederyId', 'Breeder ID or Registry Code')} />
                                 </div>
                                 
                                 <div data-tutorial-target="microchip-input">
@@ -9833,13 +9863,15 @@ const AnimalForm = ({
                                         className="mt-1 block w-full p-2 border border-gray-300 rounded-md shadow-sm focus:ring-primary focus:border-primary" />
                                 </div>
                                 
-                                <div className="md:col-span-2">
-                                    <label className="block text-sm font-medium text-gray-700">Strain <span className="text-xs text-gray-500">(rodents)</span></label>
-                                    <input type="text" name="strain" value={formData.strain} onChange={handleChange} 
-                                        data-tutorial-target="strain-input"
-                                        className="mt-1 block w-full p-2 border border-gray-300 rounded-md shadow-sm focus:ring-primary focus:border-primary" 
-                                        placeholder="e.g., C57BL/6, Wistar, Syrian" />
-                                </div>
+                                {!isFieldHidden('strain') && (
+                                    <div className="md:col-span-2">
+                                        <label className="block text-sm font-medium text-gray-700">{getFieldLabel('strain', 'Strain')} {!speciesConfigs?.[formData.species]?.fieldReplacements?.strain && <span className="text-xs text-gray-500">(rodents)</span>}</label>
+                                        <input type="text" name="strain" value={formData.strain} onChange={handleChange} 
+                                            data-tutorial-target="strain-input"
+                                            className="mt-1 block w-full p-2 border border-gray-300 rounded-md shadow-sm focus:ring-primary focus:border-primary" 
+                                            placeholder={getFieldLabel('strain', 'e.g., C57BL/6, Wistar, Syrian')} />
+                                    </div>
+                                )}
                             </div>
                         </div>
                         
@@ -10210,7 +10242,7 @@ const AnimalForm = ({
                                 </div>
                                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                                     <div>
-                                        <label className="block text-sm font-medium text-gray-700 mb-2">Heat Status</label>
+                                        <label className="block text-sm font-medium text-gray-700 mb-2">{getFieldLabel('heatStatus', 'Heat Status')}</label>
                                         <select name="heatStatus" value={formData.heatStatus} onChange={handleChange}
                                             className="block w-full p-2 border border-gray-300 rounded-md shadow-sm focus:ring-primary focus:border-primary">
                                             <option value="">Select status...</option>
@@ -11083,19 +11115,23 @@ const AnimalForm = ({
                                 </button>
                             </div>
                             <div className="space-y-4">
-                                <div>
-                                    <label className="block text-sm font-medium text-gray-700 mb-2">Housing Type</label>
-                                    <input type="text" name="housingType" value={formData.housingType} onChange={handleChange} 
-                                        className="block w-full p-2 border border-gray-300 rounded-md shadow-sm focus:ring-primary focus:border-primary" 
-                                        placeholder="e.g., Wire cage, glass aquarium, multi-level enclosure" />
-                                </div>
+                                {!isFieldHidden('housingType') && (
+                                    <div>
+                                        <label className="block text-sm font-medium text-gray-700 mb-2">{getFieldLabel('housingType', 'Housing Type')}</label>
+                                        <input type="text" name="housingType" value={formData.housingType} onChange={handleChange} 
+                                            className="block w-full p-2 border border-gray-300 rounded-md shadow-sm focus:ring-primary focus:border-primary" 
+                                            placeholder="e.g., Wire cage, glass aquarium, multi-level enclosure" />
+                                    </div>
+                                )}
                                 
-                                <div>
-                                    <label className="block text-sm font-medium text-gray-700 mb-2">Bedding / Substrate</label>
-                                    <input type="text" name="bedding" value={formData.bedding} onChange={handleChange} 
-                                        className="block w-full p-2 border border-gray-300 rounded-md shadow-sm focus:ring-primary focus:border-primary" 
-                                        placeholder="e.g., Aspen shavings, paper bedding, fleece liners" />
-                                </div>
+                                {!isFieldHidden('bedding') && (
+                                    <div>
+                                        <label className="block text-sm font-medium text-gray-700 mb-2">{getFieldLabel('bedding', 'Bedding / Substrate')}</label>
+                                        <input type="text" name="bedding" value={formData.bedding} onChange={handleChange} 
+                                            className="block w-full p-2 border border-gray-300 rounded-md shadow-sm focus:ring-primary focus:border-primary" 
+                                            placeholder="e.g., Aspen shavings, paper bedding, fleece liners" />
+                                    </div>
+                                )}
                                 
                                 <div>
                                     <label className="block text-sm font-medium text-gray-700 mb-2">Enrichment Items</label>
@@ -11144,12 +11180,14 @@ const AnimalForm = ({
                                         placeholder="e.g., 12:12 hour cycle, LED lights, UVB" />
                                 </div>
 
-                                <div>
-                                    <label className="block text-sm font-medium text-gray-700 mb-2">Noise Level</label>
-                                    <input type="text" name="noise" value={formData.noise} onChange={handleChange} 
-                                        className="block w-full p-2 border border-gray-300 rounded-md shadow-sm focus:ring-primary focus:border-primary" 
-                                        placeholder="e.g., Quiet, moderate, high" />
-                                </div>
+                                {!isFieldHidden('noise') && (
+                                    <div>
+                                        <label className="block text-sm font-medium text-gray-700 mb-2">{getFieldLabel('noise', 'Noise Level')}</label>
+                                        <input type="text" name="noise" value={formData.noise} onChange={handleChange} 
+                                            className="block w-full p-2 border border-gray-300 rounded-md shadow-sm focus:ring-primary focus:border-primary" 
+                                            placeholder="e.g., Quiet, moderate, high" />
+                                    </div>
+                                )}
                             </div>
                         </div>
 
@@ -15355,6 +15393,7 @@ const App = () => {
     const [animalToEdit, setAnimalToEdit] = useState(null);
     const [speciesToAdd, setSpeciesToAdd] = useState(null); 
     const [speciesOptions, setSpeciesOptions] = useState([]); 
+    const [speciesConfigs, setSpeciesConfigs] = useState({}); // Field replacements per species
     const [speciesSearchTerm, setSpeciesSearchTerm] = useState('');
     const [speciesCategoryFilter, setSpeciesCategoryFilter] = useState('All');
     const [showModal, setShowModal] = useState(false);
@@ -16484,12 +16523,16 @@ const App = () => {
         }
     }, [authToken, hasSeenDonationHighlight]);
 	
-    // Fetch global species list
+    // Fetch global species list and configs
     useEffect(() => {
-        const fetchSpecies = async () => {
+        const fetchSpeciesAndConfigs = async () => {
             try {
-                const response = await axios.get(`${API_BASE_URL}/species`);
-                setSpeciesOptions(response.data);
+                const [speciesResponse, configsResponse] = await Promise.all([
+                    axios.get(`${API_BASE_URL}/species`),
+                    axios.get(`${API_BASE_URL}/species/configs`)
+                ]);
+                setSpeciesOptions(speciesResponse.data);
+                setSpeciesConfigs(configsResponse.data || {});
             } catch (error) {
                 console.error('Failed to fetch species:', error);
                 // Fallback to defaults if API fails
@@ -16502,9 +16545,10 @@ const App = () => {
                     { name: 'Syrian Hamster', category: 'Rodent', isDefault: true },
                     { name: 'Guinea Pig', category: 'Rodent', isDefault: true }
                 ]);
+                setSpeciesConfigs({});
             }
         };
-        fetchSpecies();
+        fetchSpeciesAndConfigs();
     }, [API_BASE_URL]);
 	
     // Fetch community users (newest + active)
@@ -18149,6 +18193,7 @@ const App = () => {
                                 showModalMessage={showModalMessage}
                                 API_BASE_URL={API_BASE_URL}
                                 userProfile={userProfile}
+                                speciesConfigs={speciesConfigs}
                                 X={X}
                                 Search={Search}
                                 Loader2={Loader2}
@@ -18179,6 +18224,7 @@ const App = () => {
                                 showModalMessage={showModalMessage}
                                 API_BASE_URL={API_BASE_URL}
                                 userProfile={userProfile}
+                                speciesConfigs={speciesConfigs}
                                 X={X}
                                 Search={Search}
                                 Loader2={Loader2}
