@@ -556,6 +556,75 @@
     to { transform: rotate(360deg); }
 }
 
+/* Schedule Info Section */
+.schedule-info-section {
+    margin-bottom: 24px;
+}
+
+.schedule-card {
+    background: linear-gradient(135deg, #f0fdf4 0%, #ecfdf5 100%);
+    border: 1px solid #bbf7d0;
+    border-radius: 12px;
+    padding: 20px;
+}
+
+.schedule-header {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin-bottom: 16px;
+    color: #166534;
+}
+
+.schedule-header h4 {
+    margin: 0;
+    font-size: 1rem;
+    font-weight: 600;
+}
+
+.schedule-details {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: 12px;
+    margin-bottom: 16px;
+}
+
+.schedule-item {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+}
+
+.schedule-label {
+    font-size: 0.75rem;
+    font-weight: 500;
+    color: #6b7280;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+.schedule-value {
+    font-size: 0.95rem;
+    font-weight: 600;
+    color: #1f2937;
+}
+
+.schedule-note {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 0.85rem;
+    color: #6b7280;
+    margin: 0;
+    padding-top: 12px;
+    border-top: 1px solid #d1fae5;
+}
+
+.schedule-note svg {
+    color: #f59e0b;
+    flex-shrink: 0;
+}
+
 /* Responsive */
 @media (max-width: 768px) {
     .backup-header {
@@ -589,5 +658,9 @@
     .backup-meta {
         flex-direction: column;
         gap: 4px;
+    }
+
+    .schedule-details {
+        grid-template-columns: 1fr 1fr;
     }
 }

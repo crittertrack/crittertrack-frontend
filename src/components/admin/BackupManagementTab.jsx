@@ -12,6 +12,7 @@ const BackupManagementTab = ({ authToken }) => {
     const [backups, setBackups] = useState([]);
     const [currentStats, setCurrentStats] = useState(null);
     const [lastAutoBackup, setLastAutoBackup] = useState(null);
+    const [schedule, setSchedule] = useState(null);
     const [loading, setLoading] = useState(true);
     const [creating, setCreating] = useState(false);
     const [restoring, setRestoring] = useState(null);
@@ -42,6 +43,7 @@ const BackupManagementTab = ({ authToken }) => {
             setBackups(data.backups || []);
             setCurrentStats(data.currentStats);
             setLastAutoBackup(data.lastAutoBackup);
+            setSchedule(data.schedule);
         } catch (err) {
             setError(err.message);
         } finally {
@@ -256,6 +258,44 @@ const BackupManagementTab = ({ authToken }) => {
                     </div>
                 </div>
             </div>
+
+            {/* Auto Backup Schedule Info */}
+            {schedule && (
+                <div className="schedule-info-section">
+                    <div className="schedule-card">
+                        <div className="schedule-header">
+                            <Clock size={20} />
+                            <h4>Automatic Backup Schedule</h4>
+                        </div>
+                        <div className="schedule-details">
+                            <div className="schedule-item">
+                                <span className="schedule-label">Schedule:</span>
+                                <span className="schedule-value">Daily at 3:00 AM UTC</span>
+                            </div>
+                            <div className="schedule-item">
+                                <span className="schedule-label">Status:</span>
+                                <span className={`status-badge ${schedule.isRunning ? 'success' : 'warning'}`}>
+                                    {schedule.isRunning ? '✓ Active' : '○ Inactive'}
+                                </span>
+                            </div>
+                            <div className="schedule-item">
+                                <span className="schedule-label">Last Run:</span>
+                                <span className="schedule-value">
+                                    {schedule.lastAutoBackup ? formatDate(schedule.lastAutoBackup) : 'Never'}
+                                </span>
+                            </div>
+                            <div className="schedule-item">
+                                <span className="schedule-label">Timezone:</span>
+                                <span className="schedule-value">{schedule.timezone || 'UTC'}</span>
+                            </div>
+                        </div>
+                        <p className="schedule-note">
+                            <AlertTriangle size={14} />
+                            Auto backups run daily and keep the last 30 backups. Older backups are automatically removed.
+                        </p>
+                    </div>
+                </div>
+            )}
 
             {/* Current Database Stats */}
             {currentStats && (
