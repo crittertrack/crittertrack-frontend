@@ -16903,20 +16903,20 @@ const App = () => {
                     </div>
                 </div>
 
-                {/* Mobile: Two row layout */}
+                {/* Mobile: Three row layout */}
                 <div className="md:hidden overflow-x-hidden">
                     {/* First row: Logo and action buttons */}
                     <div className="flex justify-between items-center mb-3 gap-2">
                         <CustomAppLogo size="w-8 h-8" className="flex-shrink-0" />
                         
-                        <div className="flex items-center space-x-1.5 flex-shrink-0">
+                        <div className="flex items-center space-x-2 flex-shrink-0">
                             <button 
                                 onClick={() => setShowUserSearchModal(true)} 
-                                className="flex items-center justify-center bg-gray-100 hover:bg-gray-200 text-gray-600 p-1.5 rounded-lg transition duration-150 shadow-sm"
+                                className="flex items-center justify-center bg-gray-100 hover:bg-gray-200 text-gray-600 p-2 rounded-lg transition duration-150 shadow-sm"
                                 title="Search"
                                 data-tutorial-target="global-search-btn"
                             >
-                                <Search size={16} />
+                                <Search size={18} />
                             </button>
 
                             <button
@@ -16926,10 +16926,10 @@ const App = () => {
                                     fetchNotificationCount();
                                 }}
                                 data-tutorial-target="notification-bell"
-                                className="relative flex items-center justify-center bg-gray-100 hover:bg-gray-200 text-gray-600 p-1.5 rounded-lg transition duration-150 shadow-sm"
+                                className="relative flex items-center justify-center bg-gray-100 hover:bg-gray-200 text-gray-600 p-2 rounded-lg transition duration-150 shadow-sm"
                                 title="Notifications"
                             >
-                                <Bell size={16} />
+                                <Bell size={18} />
                                 {notificationCount > 0 && (
                                     <span className="absolute -top-1 -right-1 bg-purple-600 text-white text-xs rounded-full w-4 h-4 flex items-center justify-center font-bold text-[10px]">
                                         {notificationCount > 9 ? '9+' : notificationCount}
@@ -16940,10 +16940,10 @@ const App = () => {
                             <button
                                 onClick={() => setShowMessages(true)}
                                 data-tutorial-target="messages-btn"
-                                className="relative flex items-center justify-center bg-gray-100 hover:bg-gray-200 text-gray-600 p-1.5 rounded-lg transition duration-150 shadow-sm"
+                                className="relative flex items-center justify-center bg-gray-100 hover:bg-gray-200 text-gray-600 p-2 rounded-lg transition duration-150 shadow-sm"
                                 title="Messages"
                             >
-                                <MessageSquare size={16} />
+                                <MessageSquare size={18} />
                                 {unreadMessageCount > 0 && (
                                     <span className="absolute -top-1 -right-1 bg-purple-600 text-white text-xs rounded-full w-4 h-4 flex items-center justify-center font-bold text-[10px]">
                                         {unreadMessageCount > 9 ? '9+' : unreadMessageCount}
@@ -16954,42 +16954,46 @@ const App = () => {
                             <button 
                                 onClick={() => handleLogout(false)} 
                                 title="Log Out"
-                                className="bg-accent hover:bg-accent/80 text-white font-semibold p-1.5 rounded-lg transition duration-150 shadow-md"
+                                className="bg-accent hover:bg-accent/80 text-white font-semibold p-2 rounded-lg transition duration-150 shadow-md"
                             >
-                                <LogOut size={16} />
+                                <LogOut size={18} />
                             </button>
                         </div>
                     </div>
 
-                    {/* Second row: Navigation - scrollable on very small screens */}
-                    <nav className="flex justify-between gap-0.5 overflow-x-auto">
-                        <button onClick={() => navigate('/')} className={`flex-1 min-w-0 px-1 py-1.5 text-[10px] font-medium rounded-lg transition duration-150 ${currentView === 'list' ? 'bg-primary text-black shadow-md' : 'text-gray-600 hover:bg-gray-100'}`}>
-                            <ClipboardList size={14} className="mx-auto mb-0.5" />
-                            <span className="block truncate">Animals</span>
+                    {/* Second row: Navigation row 1 (4 buttons) */}
+                    <nav className="grid grid-cols-4 gap-1 mb-1">
+                        <button onClick={() => navigate('/')} className={`px-2 py-2 text-xs font-medium rounded-lg transition duration-150 flex flex-col items-center ${currentView === 'list' ? 'bg-primary text-black shadow-md' : 'text-gray-600 hover:bg-gray-100'}`}>
+                            <ClipboardList size={18} className="mb-0.5" />
+                            <span>Animals</span>
                         </button>
-                        <button onClick={() => navigate('/litters')} data-tutorial-target="litters-btn" className={`flex-1 min-w-0 px-1 py-1.5 text-[10px] font-medium rounded-lg transition duration-150 ${currentView === 'litters' ? 'bg-primary text-black shadow-md' : 'text-gray-600 hover:bg-gray-100'}`}>
-                            <BookOpen size={14} className="mx-auto mb-0.5" />
-                            <span className="block truncate">Litters</span>
+                        <button onClick={() => navigate('/litters')} data-tutorial-target="litters-btn" className={`px-2 py-2 text-xs font-medium rounded-lg transition duration-150 flex flex-col items-center ${currentView === 'litters' ? 'bg-primary text-black shadow-md' : 'text-gray-600 hover:bg-gray-100'}`}>
+                            <BookOpen size={18} className="mb-0.5" />
+                            <span>Litters</span>
                         </button>
-                        <button onClick={() => navigate('/budget')} data-tutorial-target="budget-btn" className={`flex-1 min-w-0 px-1 py-1.5 text-[10px] font-medium rounded-lg transition duration-150 ${currentView === 'budget' ? 'bg-primary text-black shadow-md' : 'text-gray-600 hover:bg-gray-100'}`}>
-                            <DollarSign size={14} className="mx-auto mb-0.5" />
-                            <span className="block truncate">Budget</span>
+                        <button onClick={() => navigate('/budget')} data-tutorial-target="budget-btn" className={`px-2 py-2 text-xs font-medium rounded-lg transition duration-150 flex flex-col items-center ${currentView === 'budget' ? 'bg-primary text-black shadow-md' : 'text-gray-600 hover:bg-gray-100'}`}>
+                            <DollarSign size={18} className="mb-0.5" />
+                            <span>Budget</span>
                         </button>
-                        <button onClick={() => navigate('/marketplace')} className={`flex-1 min-w-0 px-1 py-1.5 text-[10px] font-medium rounded-lg transition duration-150 ${currentView === 'marketplace' ? 'bg-primary text-black shadow-md' : 'text-gray-600 hover:bg-gray-100'}`}>
-                            <ShoppingBag size={14} className="mx-auto mb-0.5" />
-                            <span className="block truncate">Shop</span>
+                        <button onClick={() => navigate('/marketplace')} className={`px-2 py-2 text-xs font-medium rounded-lg transition duration-150 flex flex-col items-center ${currentView === 'marketplace' ? 'bg-primary text-black shadow-md' : 'text-gray-600 hover:bg-gray-100'}`}>
+                            <ShoppingBag size={18} className="mb-0.5" />
+                            <span>Shop</span>
                         </button>
-                        <button onClick={() => navigate('/genetics-calculator')} data-tutorial-target="genetics-btn" className={`flex-1 min-w-0 px-1 py-1.5 text-[10px] font-medium rounded-lg transition duration-150 ${currentView === 'genetics-calculator' ? 'bg-primary text-black shadow-md' : 'text-gray-600 hover:bg-gray-100'}`}>
-                            <Cat size={14} className="mx-auto mb-0.5" />
-                            <span className="block truncate">Genetics</span>
+                    </nav>
+
+                    {/* Third row: Navigation row 2 (3 buttons) */}
+                    <nav className="grid grid-cols-3 gap-1">
+                        <button onClick={() => navigate('/genetics-calculator')} data-tutorial-target="genetics-btn" className={`px-2 py-2 text-xs font-medium rounded-lg transition duration-150 flex flex-col items-center ${currentView === 'genetics-calculator' ? 'bg-primary text-black shadow-md' : 'text-gray-600 hover:bg-gray-100'}`}>
+                            <Cat size={18} className="mb-0.5" />
+                            <span>Genetics</span>
                         </button>
-                        <button onClick={() => navigate('/profile')} data-tutorial-target="profile-btn" className={`flex-1 min-w-0 px-1 py-1.5 text-[10px] font-medium rounded-lg transition duration-150 ${currentView === 'profile' ? 'bg-primary text-black shadow-md' : 'text-gray-600 hover:bg-gray-100'}`}>
-                            <User size={14} className="mx-auto mb-0.5" />
-                            <span className="block truncate">Profile</span>
+                        <button onClick={() => navigate('/profile')} data-tutorial-target="profile-btn" className={`px-2 py-2 text-xs font-medium rounded-lg transition duration-150 flex flex-col items-center ${currentView === 'profile' ? 'bg-primary text-black shadow-md' : 'text-gray-600 hover:bg-gray-100'}`}>
+                            <User size={18} className="mb-0.5" />
+                            <span>Profile</span>
                         </button>
-                        <button onClick={() => setShowInfoTab(true)} className={`flex-1 min-w-0 px-1 py-1.5 text-[10px] font-medium rounded-lg transition duration-150 text-gray-600 hover:bg-gray-100`}>
-                            <BookOpen size={14} className="mx-auto mb-0.5" />
-                            <span className="block truncate">Help</span>
+                        <button onClick={() => setShowInfoTab(true)} className={`px-2 py-2 text-xs font-medium rounded-lg transition duration-150 flex flex-col items-center text-gray-600 hover:bg-gray-100`}>
+                            <BookOpen size={18} className="mb-0.5" />
+                            <span>Help</span>
                         </button>
                     </nav>
                 </div>
