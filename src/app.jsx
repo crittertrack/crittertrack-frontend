@@ -17400,6 +17400,8 @@ const App = () => {
                     <Route path="/marketplace" element={
                         <Marketplace 
                             authToken={authToken}
+                            userProfile={userProfile}
+                            showModalMessage={showModalMessage}
                             onViewAnimal={(animalId) => {
                                 // Navigate to public animal page
                                 window.location.href = `/animal/${animalId}`;
@@ -17407,6 +17409,10 @@ const App = () => {
                             onViewProfile={(userId) => {
                                 // Navigate to public profile page
                                 window.location.href = `/user/${userId}`;
+                            }}
+                            onStartConversation={(conversationData) => {
+                                setSelectedConversation(conversationData);
+                                setShowMessages(true);
                             }}
                         />
                     } />

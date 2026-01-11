@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useCallback } from 'react';
-import { Search, X, Filter, ChevronLeft, ChevronRight, DollarSign, Heart, Mail, MapPin, Loader2, ShoppingBag, Tag } from 'lucide-react';
+import { Search, X, Filter, ChevronLeft, ChevronRight, DollarSign, Heart, Mail, MapPin, Loader2, ShoppingBag, Tag, MessageSquare, Send } from 'lucide-react';
 import axios from 'axios';
 
 const API_BASE_URL = '/api';
@@ -35,10 +35,16 @@ const getCountryName = (countryCode) => {
     return countryNames[countryCode] || countryCode;
 };
 
-const Marketplace = ({ onViewAnimal, onViewProfile, authToken }) => {
+const Marketplace = ({ onViewAnimal, onViewProfile, authToken, userProfile, onStartConversation, showModalMessage }) => {
     const [animals, setAnimals] = useState([]);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState(null);
+    
+    // Inquiry modal state
+    const [showInquiryModal, setShowInquiryModal] = useState(false);
+    const [inquiryAnimal, setInquiryAnimal] = useState(null);
+    const [inquiryMessage, setInquiryMessage] = useState('');
+    const [sendingInquiry, setSendingInquiry] = useState(false);
     
     // Filters
     const [listingType, setListingType] = useState('all'); // 'all', 'sale', 'stud'
@@ -132,6 +138,88 @@ const Marketplace = ({ onViewAnimal, onViewProfile, authToken }) => {
     };
 
     const hasActiveFilters = searchQuery || selectedSpecies || selectedGender || listingType !== 'all';
+
+    // Handle opening inquiry modal
+    const handleOpenInquiry = (animal) => {
+        if (!authToken) {
+            showModalMessage?.('Login Required', 'Please log in to contact sellers.');
+            return;
+        }
+        if (!userProfile) {
+            showModalMessage?.('Profile Required', 'Please complete your profile before contacting sellers.');
+            return;
+        }
+        // Check if trying to message own animal
+        if (animal.ownerInfo?.id_public === userProfile?.id_public) {
+            showModalMessage?.('Info', 'This is your own listing.');
+            return;
+        }
+        
+        // Pre-fill message with animal info
+        const listingType = animal.isForSale ? 'for sale' : 'for stud';
+        const defaultMessage = `Hi! I'm interested in your ${animal.species || 'animal'} "${animal.name}" (${animal.id_public}) that you have listed ${listingType}. Could you please provide more information?`;
+        
+        setInquiryAnimal(animal);
+        setInquiryMessage(defaultMessage);
+        setShowInquiryModal(true);
+    };
+
+    // Handle sending inquiry
+    const handleSendInquiry = async () => {
+        if (!inquiryAnimal || !inquiryMessage.trim()) return;
+        
+        setSendingInquiry(true);
+        try {
+            // Get the owner's backend user ID
+            const ownerResponse = await axios.get(`${API_BASE_URL}/public/profile/${inquiryAnimal.ownerInfo.id_public}`);
+            const ownerBackendId = ownerResponse.data.userId_backend;
+            
+            if (!ownerBackendId) {
+                throw new Error('Could not find seller information');
+            }
+
+            // Check if owner allows messages
+            if (ownerResponse.data.allowMessages === false) {
+                showModalMessage?.('Cannot Send', 'This seller has disabled messages.');
+                setShowInquiryModal(false);
+                return;
+            }
+
+            // Send the message
+            await axios.post(`${API_BASE_URL}/messages/send`, {
+                receiverId: ownerBackendId,
+                message: inquiryMessage.trim()
+            }, {
+                headers: { Authorization: `Bearer ${authToken}` }
+            });
+
+            showModalMessage?.('Success', 'Your inquiry has been sent! Check your messages for a reply.');
+            setShowInquiryModal(false);
+            setInquiryAnimal(null);
+            setInquiryMessage('');
+            
+            // Optionally open the messages panel
+            if (onStartConversation) {
+                onStartConversation({
+                    otherUserId: ownerBackendId,
+                    otherUser: {
+                        id_public: ownerResponse.data.id_public,
+                        personalName: ownerResponse.data.personalName,
+                        breederName: ownerResponse.data.breederName,
+                        showPersonalName: ownerResponse.data.showPersonalName,
+                        showBreederName: ownerResponse.data.showBreederName,
+                        profileImage: ownerResponse.data.profileImage
+                    }
+                });
+            }
+        } catch (err) {
+            console.error('Failed to send inquiry:', err);
+            const errorMsg = err.response?.data?.error || err.message || 'Failed to send inquiry';
+            showModalMessage?.('Error', errorMsg);
+        } finally {
+            setSendingInquiry(false);
+        }
+    };
 
     return (
         <div className="max-w-4xl mx-auto px-4 py-6">
@@ -321,6 +409,9 @@ const Marketplace = ({ onViewAnimal, onViewProfile, authToken }) => {
                             animal={animal}
                             onViewAnimal={onViewAnimal}
                             onViewProfile={onViewProfile}
+                            onContactOwner={() => handleOpenInquiry(animal)}
+                            isOwnListing={animal.ownerInfo?.id_public === userProfile?.id_public}
+                            isLoggedIn={!!authToken}
                         />
                     ))}
                 </div>
@@ -374,12 +465,130 @@ const Marketplace = ({ onViewAnimal, onViewProfile, authToken }) => {
                     </button>
                 </div>
             )}
+
+            {/* Inquiry Modal */}
+            {showInquiryModal && inquiryAnimal && (
+                <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
+                    <div className="bg-white rounded-xl shadow-2xl max-w-lg w-full max-h-[90vh] overflow-y-auto">
+                        {/* Modal Header */}
+                        <div className="p-4 border-b flex justify-between items-center">
+                            <h3 className="text-lg font-bold text-gray-800 flex items-center gap-2">
+                                <MessageSquare className="text-accent" size={20} />
+                                Contact Seller
+                            </h3>
+                            <button 
+                                onClick={() => {
+                                    setShowInquiryModal(false);
+                                    setInquiryAnimal(null);
+                                    setInquiryMessage('');
+                                }}
+                                className="text-gray-500 hover:text-gray-700 transition"
+                            >
+                                <X size={24} />
+                            </button>
+                        </div>
+
+                        {/* Animal Info */}
+                        <div className="p-4 bg-gray-50 border-b">
+                            <div className="flex gap-3">
+                                {(inquiryAnimal.imageUrl || inquiryAnimal.photoUrl) ? (
+                                    <img 
+                                        src={inquiryAnimal.imageUrl || inquiryAnimal.photoUrl} 
+                                        alt={inquiryAnimal.name}
+                                        className="w-16 h-16 rounded-lg object-cover"
+                                    />
+                                ) : (
+                                    <div className="w-16 h-16 rounded-lg bg-gray-200 flex items-center justify-center">
+                                        <ShoppingBag className="text-gray-400" size={24} />
+                                    </div>
+                                )}
+                                <div className="flex-1">
+                                    <h4 className="font-semibold text-gray-800">{inquiryAnimal.name}</h4>
+                                    <p className="text-sm text-gray-600">{inquiryAnimal.species} • {inquiryAnimal.id_public}</p>
+                                    <div className="flex gap-2 mt-1">
+                                        {inquiryAnimal.isForSale && (
+                                            <span className="text-xs bg-green-100 text-green-700 px-2 py-0.5 rounded-full">
+                                                For Sale
+                                            </span>
+                                        )}
+                                        {inquiryAnimal.availableForBreeding && (
+                                            <span className="text-xs bg-purple-100 text-purple-700 px-2 py-0.5 rounded-full">
+                                                For Stud
+                                            </span>
+                                        )}
+                                    </div>
+                                </div>
+                            </div>
+                            {inquiryAnimal.ownerInfo && (
+                                <div className="mt-3 pt-3 border-t border-gray-200 text-sm text-gray-600">
+                                    <span className="font-medium">Seller:</span> {inquiryAnimal.ownerInfo.displayName}
+                                    {inquiryAnimal.ownerInfo.country && (
+                                        <span className="ml-2 text-gray-500">
+                                            <MapPin size={12} className="inline mr-1" />
+                                            {getCountryName(inquiryAnimal.ownerInfo.country)}
+                                        </span>
+                                    )}
+                                </div>
+                            )}
+                        </div>
+
+                        {/* Message Input */}
+                        <div className="p-4">
+                            <label className="block text-sm font-medium text-gray-700 mb-2">
+                                Your Message
+                            </label>
+                            <textarea
+                                value={inquiryMessage}
+                                onChange={(e) => setInquiryMessage(e.target.value)}
+                                placeholder="Write your message to the seller..."
+                                className="w-full p-3 border rounded-lg focus:ring-2 focus:ring-accent focus:border-accent resize-none"
+                                rows={5}
+                                maxLength={1000}
+                            />
+                            <div className="text-right text-xs text-gray-500 mt-1">
+                                {inquiryMessage.length}/1000
+                            </div>
+                        </div>
+
+                        {/* Actions */}
+                        <div className="p-4 border-t flex gap-3">
+                            <button
+                                onClick={() => {
+                                    setShowInquiryModal(false);
+                                    setInquiryAnimal(null);
+                                    setInquiryMessage('');
+                                }}
+                                className="flex-1 py-2 px-4 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 transition font-medium"
+                            >
+                                Cancel
+                            </button>
+                            <button
+                                onClick={handleSendInquiry}
+                                disabled={sendingInquiry || !inquiryMessage.trim()}
+                                className="flex-1 py-2 px-4 bg-accent text-white rounded-lg hover:bg-accent/90 transition font-medium disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
+                            >
+                                {sendingInquiry ? (
+                                    <>
+                                        <Loader2 className="animate-spin" size={18} />
+                                        Sending...
+                                    </>
+                                ) : (
+                                    <>
+                                        <Send size={18} />
+                                        Send Inquiry
+                                    </>
+                                )}
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            )}
         </div>
     );
 };
 
 // Animal Card Component
-const AnimalCard = ({ animal, onViewAnimal, onViewProfile }) => {
+const AnimalCard = ({ animal, onViewAnimal, onViewProfile, onContactOwner, isOwnListing, isLoggedIn }) => {
     const isForSale = animal.isForSale;
     const isForStud = animal.availableForBreeding;
     
@@ -522,6 +731,11 @@ const AnimalCard = ({ animal, onViewAnimal, onViewProfile }) => {
                             <span className="font-medium truncate">
                                 {animal.ownerInfo.displayName}
                             </span>
+                            {isOwnListing && (
+                                <span className="ml-auto text-xs bg-blue-100 text-blue-700 px-2 py-0.5 rounded-full">
+                                    Your listing
+                                </span>
+                            )}
                         </div>
                         {animal.ownerInfo.country && (
                             <div className="flex items-center gap-2 text-xs text-gray-500 mt-1 ml-8">
@@ -532,13 +746,24 @@ const AnimalCard = ({ animal, onViewAnimal, onViewProfile }) => {
                     </div>
                 )}
                 
-                {/* View Button */}
-                <button
-                    onClick={() => onViewAnimal && onViewAnimal(animal.id_public)}
-                    className="w-full mt-3 py-2 bg-accent text-white rounded-lg hover:bg-accent/90 transition font-medium"
-                >
-                    View Details
-                </button>
+                {/* Action Buttons */}
+                <div className="flex gap-2 mt-3">
+                    <button
+                        onClick={() => onViewAnimal && onViewAnimal(animal.id_public)}
+                        className="flex-1 py-2 bg-accent text-white rounded-lg hover:bg-accent/90 transition font-medium text-sm"
+                    >
+                        View Details
+                    </button>
+                    {!isOwnListing && (
+                        <button
+                            onClick={onContactOwner}
+                            className="py-2 px-3 bg-green-600 text-white rounded-lg hover:bg-green-700 transition flex items-center gap-1"
+                            title={isLoggedIn ? "Contact seller" : "Log in to contact seller"}
+                        >
+                            <MessageSquare size={16} />
+                        </button>
+                    )}
+                </div>
             </div>
         </div>
     );
