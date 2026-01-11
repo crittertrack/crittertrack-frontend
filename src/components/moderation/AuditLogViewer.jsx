@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { 
     FileText, Filter, Search, Calendar, User, Shield, 
-    Activity, Download, RefreshCw 
+    Activity, Download, RefreshCw, ChevronUp, ChevronDown, Clock, Save, Trash2
 } from 'lucide-react';
 import axios from 'axios';
 import './AuditLogViewer.css';
@@ -60,8 +60,46 @@ const ACTION_TYPES = [
     { value: 'backup_created', label: 'Backup Created' },
     { value: 'backup_deleted', label: 'Backup Deleted' },
     { value: 'backup_restored', label: 'Backup Restored' },
-    { value: 'setting_changed', label: 'Setting Changed' }
+    { value: 'setting_changed', label: 'Setting Changed' },
+    // Failed Actions
+    { value: '_failed', label: '⚠️ Failed Actions Only' }
 ];
+
+// Quick date filter presets
+const DATE_PRESETS = [
+    { value: 'all', label: 'All Time' },
+    { value: 'today', label: 'Today' },
+    { value: '7days', label: 'Last 7 Days' },
+    { value: '30days', label: 'Last 30 Days' },
+    { value: '90days', label: 'Last 90 Days' },
+    { value: 'custom', label: 'Custom Range' }
+];
+
+// Calculate date range from preset
+const getDateRangeFromPreset = (preset) => {
+    const now = new Date();
+    const today = new Date(now.getFullYear(), now.getMonth(), now.getDate());
+    
+    switch (preset) {
+        case 'today':
+            return { startDate: today.toISOString().split('T')[0], endDate: '' };
+        case '7days':
+            const week = new Date(today);
+            week.setDate(week.getDate() - 7);
+            return { startDate: week.toISOString().split('T')[0], endDate: '' };
+        case '30days':
+            const month = new Date(today);
+            month.setDate(month.getDate() - 30);
+            return { startDate: month.toISOString().split('T')[0], endDate: '' };
+        case '90days':
+            const quarter = new Date(today);
+            quarter.setDate(quarter.getDate() - 90);
+            return { startDate: quarter.toISOString().split('T')[0], endDate: '' };
+        case 'all':
+        default:
+            return { startDate: '', endDate: '' };
+    }
+};
 
 const AuditLogViewer = () => {
     const [logs, setLogs] = useState([]);
@@ -73,15 +111,26 @@ const AuditLogViewer = () => {
         targetUser: '',
         startDate: '',
         endDate: '',
-        searchTerm: ''
+        searchTerm: '',
+        datePreset: 'all'
+    });
+    const [sortConfig, setSortConfig] = useState({
+        key: 'createdAt',
+        direction: 'desc'
     });
     const [page, setPage] = useState(1);
     const [totalLogs, setTotalLogs] = useState(0);
+    const [savedPresets, setSavedPresets] = useState(() => {
+        const saved = localStorage.getItem('auditLogPresets');
+        return saved ? JSON.parse(saved) : [];
+    });
+    const [presetName, setPresetName] = useState('');
+    const [showPresetInput, setShowPresetInput] = useState(false);
     const logsPerPage = 50;
 
     useEffect(() => {
         fetchLogs();
-    }, [page, filters]);
+    }, [page, filters, sortConfig]);
 
     const fetchLogs = async () => {
         try {
@@ -90,10 +139,19 @@ const AuditLogViewer = () => {
             
             const params = new URLSearchParams({
                 page: page.toString(),
-                limit: logsPerPage.toString()
+                limit: logsPerPage.toString(),
+                sortBy: sortConfig.key,
+                sortOrder: sortConfig.direction
             });
 
-            if (filters.action !== 'all') params.append('action', filters.action);
+            if (filters.action !== 'all') {
+                // Special handling for "failed actions only" filter
+                if (filters.action === '_failed') {
+                    params.append('failedOnly', 'true');
+                } else {
+                    params.append('action', filters.action);
+                }
+            }
             if (filters.moderator) params.append('moderator', filters.moderator);
             if (filters.targetUser) params.append('targetUser', filters.targetUser);
             if (filters.startDate) params.append('startDate', filters.startDate);
@@ -120,6 +178,70 @@ const AuditLogViewer = () => {
     const handleFilterChange = (key, value) => {
         setFilters(prev => ({ ...prev, [key]: value }));
         setPage(1); // Reset to first page when filters change
+    };
+
+    const handleDatePresetChange = (preset) => {
+        const dateRange = getDateRangeFromPreset(preset);
+        setFilters(prev => ({
+            ...prev,
+            datePreset: preset,
+            startDate: dateRange.startDate,
+            endDate: dateRange.endDate
+        }));
+        setPage(1);
+    };
+
+    const handleSort = (key) => {
+        setSortConfig(prev => ({
+            key,
+            direction: prev.key === key && prev.direction === 'desc' ? 'asc' : 'desc'
+        }));
+        setPage(1);
+    };
+
+    const getSortIcon = (key) => {
+        if (sortConfig.key !== key) return null;
+        return sortConfig.direction === 'asc' ? 
+            <ChevronUp size={14} className="sort-icon" /> : 
+            <ChevronDown size={14} className="sort-icon" />;
+    };
+
+    const savePreset = () => {
+        if (!presetName.trim()) return;
+        const newPreset = {
+            id: Date.now(),
+            name: presetName,
+            filters: { ...filters }
+        };
+        const updated = [...savedPresets, newPreset];
+        setSavedPresets(updated);
+        localStorage.setItem('auditLogPresets', JSON.stringify(updated));
+        setPresetName('');
+        setShowPresetInput(false);
+    };
+
+    const loadPreset = (preset) => {
+        setFilters(preset.filters);
+        setPage(1);
+    };
+
+    const deletePreset = (presetId) => {
+        const updated = savedPresets.filter(p => p.id !== presetId);
+        setSavedPresets(updated);
+        localStorage.setItem('auditLogPresets', JSON.stringify(updated));
+    };
+
+    const clearFilters = () => {
+        setFilters({
+            action: 'all',
+            moderator: '',
+            targetUser: '',
+            startDate: '',
+            endDate: '',
+            searchTerm: '',
+            datePreset: 'all'
+        });
+        setPage(1);
     };
 
     const handleRefresh = () => {
@@ -198,22 +320,38 @@ const AuditLogViewer = () => {
                         </select>
                     </div>
 
-                    <div className="filter-group">
-                        <Calendar size={16} />
-                        <input
-                            type="date"
-                            value={filters.startDate}
-                            onChange={(e) => handleFilterChange('startDate', e.target.value)}
-                            placeholder="Start Date"
-                        />
-                        <span className="date-separator">to</span>
-                        <input
-                            type="date"
-                            value={filters.endDate}
-                            onChange={(e) => handleFilterChange('endDate', e.target.value)}
-                            placeholder="End Date"
-                        />
+                    <div className="filter-group date-preset-group">
+                        <Clock size={16} />
+                        <select
+                            value={filters.datePreset}
+                            onChange={(e) => handleDatePresetChange(e.target.value)}
+                        >
+                            {DATE_PRESETS.map(preset => (
+                                <option key={preset.value} value={preset.value}>
+                                    {preset.label}
+                                </option>
+                            ))}
+                        </select>
                     </div>
+
+                    {filters.datePreset === 'custom' && (
+                        <div className="filter-group">
+                            <Calendar size={16} />
+                            <input
+                                type="date"
+                                value={filters.startDate}
+                                onChange={(e) => handleFilterChange('startDate', e.target.value)}
+                                placeholder="Start Date"
+                            />
+                            <span className="date-separator">to</span>
+                            <input
+                                type="date"
+                                value={filters.endDate}
+                                onChange={(e) => handleFilterChange('endDate', e.target.value)}
+                                placeholder="End Date"
+                            />
+                        </div>
+                    )}
 
                     <div className="search-group">
                         <Search size={16} />
@@ -235,9 +373,51 @@ const AuditLogViewer = () => {
                         <Download size={16} />
                         Export CSV
                     </button>
+                    <button className="clear-btn" onClick={clearFilters}>
+                        Clear Filters
+                    </button>
                     <div className="log-count">
                         {totalLogs} total log{totalLogs !== 1 ? 's' : ''}
                     </div>
+                </div>
+
+                {/* Saved Presets */}
+                <div className="presets-row">
+                    <div className="presets-label">
+                        <Save size={14} />
+                        <span>Saved Filters:</span>
+                    </div>
+                    {savedPresets.map(preset => (
+                        <div key={preset.id} className="preset-chip">
+                            <button onClick={() => loadPreset(preset)} className="preset-name">
+                                {preset.name}
+                            </button>
+                            <button onClick={() => deletePreset(preset.id)} className="preset-delete">
+                                <Trash2 size={12} />
+                            </button>
+                        </div>
+                    ))}
+                    {showPresetInput ? (
+                        <div className="preset-input-group">
+                            <input
+                                type="text"
+                                value={presetName}
+                                onChange={(e) => setPresetName(e.target.value)}
+                                placeholder="Preset name..."
+                                onKeyDown={(e) => e.key === 'Enter' && savePreset()}
+                            />
+                            <button onClick={savePreset} className="save-preset-btn">Save</button>
+                            <button onClick={() => setShowPresetInput(false)} className="cancel-preset-btn">×</button>
+                        </div>
+                    ) : (
+                        <button 
+                            className="add-preset-btn" 
+                            onClick={() => setShowPresetInput(true)}
+                            title="Save current filters as preset"
+                        >
+                            + Save Current
+                        </button>
+                    )}
                 </div>
             </div>
 
@@ -249,8 +429,12 @@ const AuditLogViewer = () => {
                         <table className="logs-table">
                             <thead>
                                 <tr>
-                                    <th>Timestamp</th>
-                                    <th>Action</th>
+                                    <th className="sortable" onClick={() => handleSort('createdAt')}>
+                                        Timestamp {getSortIcon('createdAt')}
+                                    </th>
+                                    <th className="sortable" onClick={() => handleSort('action')}>
+                                        Action {getSortIcon('action')}
+                                    </th>
                                     <th>Moderator</th>
                                     <th>Target</th>
                                     <th>Reason</th>

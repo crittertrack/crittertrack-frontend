@@ -1,8 +1,10 @@
 import React, { useState, useEffect } from 'react';
 import { 
-    Shield, AlertTriangle, Eye, Search, Filter, X, Ban, Clock, CheckCircle, UserCog
+    Shield, AlertTriangle, Eye, Search, Filter, X, Ban, Clock, CheckCircle, UserCog, RefreshCw,
+    ChevronUp, ChevronDown, Users
 } from 'lucide-react';
 import axios from 'axios';
+import { parseApiError, withRetry } from '../../utils/errorHandler';
 import './UserManagementPanel.css';
 
 const API_URL = process.env.REACT_APP_API_URL || '/api';
@@ -13,6 +15,8 @@ const UserManagementPanel = () => {
     const [error, setError] = useState('');
     const [searchTerm, setSearchTerm] = useState('');
     const [statusFilter, setStatusFilter] = useState('all');
+    const [roleFilter, setRoleFilter] = useState('all');
+    const [sortConfig, setSortConfig] = useState({ key: 'createdAt', direction: 'desc' });
     const [selectedUser, setSelectedUser] = useState(null);
     const [showHistoryModal, setShowHistoryModal] = useState(false);
     const [showActionModal, setShowActionModal] = useState(false);
@@ -57,45 +61,69 @@ const UserManagementPanel = () => {
     const handleWarnUser = async (userId, reason, category) => {
         try {
             const token = localStorage.getItem('authToken');
-            await axios.post(
-                `${API_URL}/moderation/users/${userId}/warn`,
-                { reason, category },
-                { headers: { Authorization: `Bearer ${token}` } }
-            );
+            await withRetry(async () => {
+                await axios.post(
+                    `${API_URL}/moderation/users/${userId}/warn`,
+                    { reason, category },
+                    { headers: { Authorization: `Bearer ${token}` } }
+                );
+            });
             await fetchUsers();
             return { success: true };
         } catch (err) {
-            return { success: false, error: err.response?.data?.message || 'Failed to warn user' };
+            const errorInfo = parseApiError(err);
+            return { 
+                success: false, 
+                error: errorInfo.message,
+                isRetryable: errorInfo.isRetryable,
+                errorCode: errorInfo.errorCode
+            };
         }
     };
 
     const handleSuspendUser = async (userId, reason, durationDays) => {
         try {
             const token = localStorage.getItem('authToken');
-            await axios.post(
-                `${API_URL}/moderation/users/${userId}/status`,
-                { status: 'suspended', reason, durationDays: parseInt(durationDays) },
-                { headers: { Authorization: `Bearer ${token}` } }
-            );
+            await withRetry(async () => {
+                await axios.post(
+                    `${API_URL}/moderation/users/${userId}/status`,
+                    { status: 'suspended', reason, durationDays: parseInt(durationDays) },
+                    { headers: { Authorization: `Bearer ${token}` } }
+                );
+            });
             await fetchUsers();
             return { success: true };
         } catch (err) {
-            return { success: false, error: err.response?.data?.message || 'Failed to suspend user' };
+            const errorInfo = parseApiError(err);
+            return { 
+                success: false, 
+                error: errorInfo.message,
+                isRetryable: errorInfo.isRetryable,
+                errorCode: errorInfo.errorCode
+            };
         }
     };
 
     const handleBanUser = async (userId, reason, ipBan = false) => {
         try {
             const token = localStorage.getItem('authToken');
-            await axios.post(
-                `${API_URL}/moderation/users/${userId}/status`,
-                { status: 'banned', reason, ipBan },
-                { headers: { Authorization: `Bearer ${token}` } }
-            );
+            await withRetry(async () => {
+                await axios.post(
+                    `${API_URL}/moderation/users/${userId}/status`,
+                    { status: 'banned', reason, ipBan },
+                    { headers: { Authorization: `Bearer ${token}` } }
+                );
+            });
             await fetchUsers();
             return { success: true };
         } catch (err) {
-            return { success: false, error: err.response?.data?.message || 'Failed to ban user' };
+            const errorInfo = parseApiError(err);
+            return { 
+                success: false, 
+                error: errorInfo.message,
+                isRetryable: errorInfo.isRetryable,
+                errorCode: errorInfo.errorCode
+            };
         }
     };
 
@@ -170,17 +198,62 @@ const UserManagementPanel = () => {
         });
     };
 
-    const filteredUsers = users.filter(user => {
-        const matchesSearch = !searchTerm || 
-            user.personalName?.toLowerCase().includes(searchTerm.toLowerCase()) ||
-            user.breederName?.toLowerCase().includes(searchTerm.toLowerCase()) ||
-            user.email?.toLowerCase().includes(searchTerm.toLowerCase()) ||
-            user.id_public?.toLowerCase().includes(searchTerm.toLowerCase());
-        
-        const matchesStatus = statusFilter === 'all' || user.accountStatus === statusFilter;
-        
-        return matchesSearch && matchesStatus;
-    });
+    const handleSort = (key) => {
+        setSortConfig(prev => ({
+            key,
+            direction: prev.key === key && prev.direction === 'desc' ? 'asc' : 'desc'
+        }));
+    };
+
+    const getSortIcon = (key) => {
+        if (sortConfig.key !== key) return null;
+        return sortConfig.direction === 'asc' ? 
+            <ChevronUp size={14} className="sort-icon" /> : 
+            <ChevronDown size={14} className="sort-icon" />;
+    };
+
+    const filteredUsers = users
+        .filter(user => {
+            const matchesSearch = !searchTerm || 
+                user.personalName?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+                user.breederName?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+                user.email?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+                user.id_public?.toLowerCase().includes(searchTerm.toLowerCase());
+            
+            const matchesStatus = statusFilter === 'all' || user.accountStatus === statusFilter;
+            const matchesRole = roleFilter === 'all' || user.role === roleFilter;
+            
+            return matchesSearch && matchesStatus && matchesRole;
+        })
+        .sort((a, b) => {
+            const { key, direction } = sortConfig;
+            let aVal = a[key];
+            let bVal = b[key];
+            
+            // Handle null/undefined
+            if (aVal == null) aVal = '';
+            if (bVal == null) bVal = '';
+            
+            // Handle dates
+            if (key === 'createdAt' || key === 'lastLoginDate') {
+                aVal = new Date(aVal || 0).getTime();
+                bVal = new Date(bVal || 0).getTime();
+            }
+            
+            // Handle numbers
+            if (key === 'warningCount') {
+                aVal = Number(aVal) || 0;
+                bVal = Number(bVal) || 0;
+            }
+            
+            // Handle strings (case-insensitive)
+            if (typeof aVal === 'string') aVal = aVal.toLowerCase();
+            if (typeof bVal === 'string') bVal = bVal.toLowerCase();
+            
+            if (aVal < bVal) return direction === 'asc' ? -1 : 1;
+            if (aVal > bVal) return direction === 'asc' ? 1 : -1;
+            return 0;
+        });
 
     const openActionModal = (user, type) => {
         setSelectedUser(user);
@@ -240,7 +313,21 @@ const UserManagementPanel = () => {
                     </select>
                 </div>
 
+                <div className="role-filters">
+                    <Users size={18} />
+                    <select 
+                        value={roleFilter} 
+                        onChange={(e) => setRoleFilter(e.target.value)}
+                    >
+                        <option value="all">All Roles</option>
+                        <option value="user">Users</option>
+                        <option value="moderator">Moderators</option>
+                        <option value="admin">Admins</option>
+                    </select>
+                </div>
+
                 <div className="user-count">
+                    <Users size={16} />
                     {filteredUsers.length} user{filteredUsers.length !== 1 ? 's' : ''}
                 </div>
             </div>
@@ -249,11 +336,21 @@ const UserManagementPanel = () => {
                 <table className="users-table">
                     <thead>
                         <tr>
-                            <th>ID</th>
-                            <th>Name</th>
-                            <th>Email</th>
-                            <th>Status</th>
-                            <th>Warnings</th>
+                            <th className="sortable" onClick={() => handleSort('id_public')}>
+                                ID {getSortIcon('id_public')}
+                            </th>
+                            <th className="sortable" onClick={() => handleSort('personalName')}>
+                                Name {getSortIcon('personalName')}
+                            </th>
+                            <th className="sortable" onClick={() => handleSort('email')}>
+                                Email {getSortIcon('email')}
+                            </th>
+                            <th className="sortable" onClick={() => handleSort('accountStatus')}>
+                                Status {getSortIcon('accountStatus')}
+                            </th>
+                            <th className="sortable" onClick={() => handleSort('warningCount')}>
+                                Warnings {getSortIcon('warningCount')}
+                            </th>
                             <th>Reports</th>
                             <th>Actions</th>
                         </tr>
@@ -408,15 +505,22 @@ const ModerationActionModal = ({ user, actionType, onClose, onWarn, onSuspend, o
     const [newRole, setNewRole] = useState(user.role || 'user');
     const [submitting, setSubmitting] = useState(false);
     const [error, setError] = useState('');
+    const [isRetryable, setIsRetryable] = useState(false);
+    const [lastAction, setLastAction] = useState(null);
 
     const handleSubmit = async () => {
         if (actionType !== 'role' && !reason.trim()) {
             setError('Please provide a reason');
+            setIsRetryable(false);
             return;
         }
 
         setSubmitting(true);
         setError('');
+        setIsRetryable(false);
+
+        // Store action params for potential retry
+        setLastAction({ userId: user._id, reason, category, duration, ipBan, newRole });
 
         let result;
         if (actionType === 'warn') {
@@ -440,6 +544,13 @@ const ModerationActionModal = ({ user, actionType, onClose, onWarn, onSuspend, o
             onClose();
         } else {
             setError(result.error);
+            setIsRetryable(result.isRetryable || false);
+        }
+    };
+
+    const handleRetry = () => {
+        if (lastAction) {
+            handleSubmit();
         }
     };
 
@@ -479,7 +590,21 @@ const ModerationActionModal = ({ user, actionType, onClose, onWarn, onSuspend, o
                         )}
                     </div>
 
-                    {error && <div className="modal-error">{error}</div>}
+                    {error && (
+                        <div className="modal-error">
+                            <span>{error}</span>
+                            {isRetryable && (
+                                <button 
+                                    className="retry-btn" 
+                                    onClick={handleRetry}
+                                    disabled={submitting}
+                                    title="Try again"
+                                >
+                                    <RefreshCw size={14} /> Retry
+                                </button>
+                            )}
+                        </div>
+                    )}
 
                     {actionType === 'role' && (
                         <div className="form-group">

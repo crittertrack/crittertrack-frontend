@@ -623,6 +623,33 @@
     cursor: pointer;
 }
 
+.reports-count {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    color: #6b7280;
+    font-size: 0.875rem;
+    margin-left: auto;
+    white-space: nowrap;
+}
+
+/* Sortable Headers */
+.sortable-header {
+    cursor: pointer;
+    user-select: none;
+    display: flex;
+    align-items: center;
+    gap: 4px;
+}
+
+.sortable-header:hover {
+    color: #2563eb;
+}
+
+.sort-icon {
+    color: #2563eb;
+}
+
 /* Error Banner */
 .reports-error-banner {
     display: flex;
@@ -803,6 +830,236 @@
     animation: spin 1s linear infinite;
 }
 
+/* Report Assignment Styles */
+.report-assignment-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    padding: 2px 8px;
+    border-radius: 12px;
+    font-size: 11px;
+    font-weight: 500;
+    background: #e8eaf6;
+    color: #3949ab;
+}
+
+.report-assignment-badge.assigned-to-me {
+    background: #e8f5e9;
+    color: #2e7d32;
+}
+
+.report-card.has-assignment {
+    border-left: 3px solid #3949ab;
+}
+
+/* Status badge purple color */
+.report-status-badge.report-status-purple {
+    background-color: #f3e5f5;
+    color: #7b1fa2;
+}
+
+.report-status-badge.report-status-gray {
+    background-color: #f5f5f5;
+    color: #757575;
+}
+
+/* Stats card purple */
+.reports-stat-card.reports-stat-purple {
+    border-top-color: #9c27b0;
+}
+
+.reports-stat-card.reports-stat-purple .reports-stat-value {
+    color: #9c27b0;
+}
+
+/* Workload Section */
+.workload-section {
+    padding: 0 24px 16px;
+}
+
+.workload-toggle-btn {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    background: #f5f5f5;
+    border: 1px solid #e0e0e0;
+    padding: 8px 16px;
+    border-radius: 8px;
+    cursor: pointer;
+    font-size: 14px;
+    color: #333;
+    transition: all 0.2s;
+}
+
+.workload-toggle-btn:hover {
+    background: #e8e8e8;
+}
+
+.unassigned-badge {
+    background: #ff6f00;
+    color: white;
+    padding: 2px 8px;
+    border-radius: 10px;
+    font-size: 12px;
+    font-weight: 500;
+    margin-left: 4px;
+}
+
+.workload-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+    gap: 12px;
+    margin-top: 12px;
+}
+
+.workload-card {
+    background: white;
+    border: 1px solid #e0e0e0;
+    border-radius: 8px;
+    padding: 12px;
+}
+
+.workload-mod-name {
+    font-weight: 600;
+    color: #333;
+    margin-bottom: 2px;
+}
+
+.workload-mod-role {
+    font-size: 12px;
+    color: #666;
+    text-transform: capitalize;
+    margin-bottom: 8px;
+}
+
+.workload-counts {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    font-size: 12px;
+    color: #666;
+}
+
+.workload-counts strong {
+    color: #333;
+    width: 100%;
+    margin-top: 4px;
+    padding-top: 4px;
+    border-top: 1px solid #eee;
+}
+
+/* Assignment Section in Detail View */
+.mod-assignment-section {
+    background: #f8f9fa;
+    padding: 12px;
+    border-radius: 8px;
+    margin: 8px 0;
+}
+
+.assignment-controls {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 12px;
+    margin-top: 8px;
+}
+
+.current-assignment {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    flex: 1;
+}
+
+.assigned-to-text {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    color: #333;
+    font-weight: 500;
+}
+
+.you-badge {
+    background: #e8f5e9;
+    color: #2e7d32;
+    padding: 2px 8px;
+    border-radius: 10px;
+    font-size: 11px;
+    margin-left: 4px;
+}
+
+.no-assignment {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    flex: 1;
+}
+
+.unassigned-text {
+    color: #666;
+    font-style: italic;
+}
+
+.claim-btn {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    background: #1976d2;
+    color: white;
+    border: none;
+    padding: 8px 16px;
+    border-radius: 6px;
+    cursor: pointer;
+    font-size: 13px;
+    font-weight: 500;
+    transition: background 0.2s;
+}
+
+.claim-btn:hover:not(:disabled) {
+    background: #1565c0;
+}
+
+.claim-btn:disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
+}
+
+.unassign-btn {
+    background: #f5f5f5;
+    border: 1px solid #ddd;
+    padding: 6px 12px;
+    border-radius: 4px;
+    cursor: pointer;
+    font-size: 12px;
+    color: #666;
+    transition: all 0.2s;
+}
+
+.unassign-btn:hover:not(:disabled) {
+    background: #e8e8e8;
+    color: #333;
+}
+
+.unassign-btn:disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
+}
+
+.assign-dropdown select {
+    padding: 8px 12px;
+    border: 1px solid #ddd;
+    border-radius: 6px;
+    font-size: 13px;
+    background: white;
+    cursor: pointer;
+    min-width: 180px;
+}
+
+.assign-dropdown select:disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
+}
+
 /* Responsive */
 @media (max-width: 768px) {
     .reports-stats-grid {
@@ -815,5 +1072,20 @@
     
     .reports-search-box {
         min-width: 100%;
+    }
+    
+    .workload-grid {
+        grid-template-columns: 1fr;
+    }
+    
+    .assignment-controls {
+        flex-direction: column;
+        align-items: stretch;
+    }
+    
+    .current-assignment,
+    .no-assignment {
+        flex-direction: column;
+        align-items: flex-start;
     }
 }

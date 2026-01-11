@@ -16856,6 +16856,22 @@ const App = () => {
             {/* Urgent Broadcast Popup (warning/alert) */}
             <UrgentBroadcastPopup authToken={authToken} API_BASE_URL={API_BASE_URL} />
 
+            {/* Beta Feedback Button - Temporary prominent feedback access for beta users */}
+            {!inModeratorMode && (
+                <button
+                    onClick={() => setShowBugReportModal(true)}
+                    className="fixed left-0 top-1/2 -translate-y-1/2 z-40 bg-gradient-to-r from-purple-600 to-indigo-600 hover:from-purple-700 hover:to-indigo-700 text-white px-2 py-4 rounded-r-lg shadow-lg transition-all duration-200 hover:px-3 group"
+                    style={{ writingMode: 'vertical-rl', textOrientation: 'mixed' }}
+                    title="Share feedback or report issues"
+                >
+                    <span className="flex items-center gap-2 text-sm font-medium">
+                        <MessageSquare size={16} className="rotate-90" />
+                        <span>Beta Feedback</span>
+                        <AlertCircle size={14} className="rotate-90 opacity-70" />
+                    </span>
+                </button>
+            )}
+
             {showNotifications && (
                 <NotificationPanel
                     authToken={authToken}

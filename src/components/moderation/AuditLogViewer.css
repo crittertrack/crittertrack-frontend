@@ -192,6 +192,141 @@
     font-size: 14px;
 }
 
+/* Clear Filters Button */
+.clear-btn {
+    display: inline-flex;
+    align-items: center;
+    padding: 10px 16px;
+    background: #ffffff;
+    border: 1px solid #e5e7eb;
+    color: #6b7280;
+    border-radius: 8px;
+    font-size: 14px;
+    cursor: pointer;
+    transition: all 0.2s;
+}
+
+.clear-btn:hover {
+    background: #f9fafb;
+    color: #374151;
+}
+
+/* Presets Row */
+.presets-row {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    margin-top: 16px;
+    padding-top: 16px;
+    border-top: 1px solid #e5e7eb;
+    flex-wrap: wrap;
+}
+
+.presets-label {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    color: #6b7280;
+    font-size: 13px;
+    font-weight: 500;
+}
+
+.preset-chip {
+    display: inline-flex;
+    align-items: center;
+    background: #eff6ff;
+    border: 1px solid #bfdbfe;
+    border-radius: 20px;
+    overflow: hidden;
+}
+
+.preset-name {
+    padding: 6px 10px;
+    background: none;
+    border: none;
+    color: #1d4ed8;
+    font-size: 13px;
+    cursor: pointer;
+    transition: background 0.2s;
+}
+
+.preset-name:hover {
+    background: #dbeafe;
+}
+
+.preset-delete {
+    padding: 6px 8px;
+    background: none;
+    border: none;
+    border-left: 1px solid #bfdbfe;
+    color: #6b7280;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    transition: all 0.2s;
+}
+
+.preset-delete:hover {
+    background: #fecaca;
+    color: #dc2626;
+}
+
+.preset-input-group {
+    display: flex;
+    align-items: center;
+    gap: 4px;
+}
+
+.preset-input-group input {
+    padding: 6px 10px;
+    border: 1px solid #d1d5db;
+    border-radius: 6px;
+    font-size: 13px;
+    width: 120px;
+}
+
+.save-preset-btn {
+    padding: 6px 12px;
+    background: #2563eb;
+    border: none;
+    border-radius: 6px;
+    color: white;
+    font-size: 13px;
+    cursor: pointer;
+}
+
+.save-preset-btn:hover {
+    background: #1d4ed8;
+}
+
+.cancel-preset-btn {
+    padding: 6px 10px;
+    background: none;
+    border: 1px solid #d1d5db;
+    border-radius: 6px;
+    color: #6b7280;
+    font-size: 16px;
+    cursor: pointer;
+    line-height: 1;
+}
+
+.add-preset-btn {
+    padding: 6px 12px;
+    background: #f3f4f6;
+    border: 1px dashed #d1d5db;
+    border-radius: 20px;
+    color: #6b7280;
+    font-size: 13px;
+    cursor: pointer;
+    transition: all 0.2s;
+}
+
+.add-preset-btn:hover {
+    background: #e5e7eb;
+    border-color: #9ca3af;
+    color: #374151;
+}
+
 /* Logs Table */
 .logs-table-container {
     background: #ffffff;
@@ -220,6 +355,23 @@
     font-size: 13px;
     text-transform: uppercase;
     letter-spacing: 0.5px;
+}
+
+.logs-table th.sortable {
+    cursor: pointer;
+    user-select: none;
+    transition: background-color 0.2s;
+}
+
+.logs-table th.sortable:hover {
+    background: #f3f4f6;
+}
+
+.logs-table th .sort-icon {
+    display: inline-block;
+    margin-left: 4px;
+    vertical-align: middle;
+    color: #2563eb;
 }
 
 .logs-table tbody tr {
