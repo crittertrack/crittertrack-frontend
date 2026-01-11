@@ -698,8 +698,7 @@ const AnimalCard = ({ animal, onViewAnimal, onViewProfile, onContactOwner, isOwn
                 {/* Price */}
                 <div className="flex flex-col gap-1 mb-3">
                     {isForSale && (
-                        <div className="flex items-center gap-2 text-yellow-600">
-                            <DollarSign size={16} />
+                        <div className="flex items-center text-yellow-600">
                             <span className="font-medium">
                                 {formatPrice(animal.salePriceAmount, animal.salePriceCurrency)}
                             </span>
