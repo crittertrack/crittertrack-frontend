@@ -16,9 +16,10 @@ const REPORT_TYPES = [
 const STATUS_FILTERS = [
     { value: 'all', label: 'All Statuses' },
     { value: 'pending', label: 'Pending' },
-    { value: 'in_progress', label: 'In Progress' },
     { value: 'reviewed', label: 'Reviewed' },
-    { value: 'resolved', label: 'Resolved' }
+    { value: 'in_progress', label: 'In Progress' },
+    { value: 'resolved', label: 'Resolved' },
+    { value: 'dismissed', label: 'Dismissed' }
 ];
 
 const ASSIGNMENT_FILTERS = [
