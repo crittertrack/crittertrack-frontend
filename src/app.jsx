@@ -14175,12 +14175,11 @@ const BroadcastBanner = ({ authToken, API_BASE_URL }) => {
     };
 
     return (
-        <div className="w-full flex justify-center">
-            <div className="w-full max-w-5xl px-6">
-                {broadcasts.map(broadcast => {
-                    const styles = getStyles(broadcast.broadcastType);
-                    return (
-                        <div key={broadcast._id} className={`${styles.bg} border-l-4 ${styles.border} p-4 rounded-lg shadow-md mb-3`}>
+        <div className="w-full max-w-5xl mx-auto">
+            {broadcasts.map(broadcast => {
+                const styles = getStyles(broadcast.broadcastType);
+                return (
+                    <div key={broadcast._id} className={`${styles.bg} border-l-4 ${styles.border} p-4 rounded-lg shadow-md mb-3`}>
                             <div className="flex items-start">
                                 <div className="flex-shrink-0">
                                     <Info className={`h-6 w-6 ${styles.icon}`} />
@@ -14206,7 +14205,6 @@ const BroadcastBanner = ({ authToken, API_BASE_URL }) => {
                         </div>
                     );
                 })}
-            </div>
         </div>
     );
 };
