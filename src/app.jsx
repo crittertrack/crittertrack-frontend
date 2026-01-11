@@ -6297,8 +6297,8 @@ const LitterManagement = ({ authToken, API_BASE_URL, userProfile, showModalMessa
                                             <span className="text-xs font-semibold text-gray-700 ml-2">{litter.numberBorn} pups</span>
                                         </div>
                                         <div className="flex gap-3 text-xs text-gray-600">
-                                            <span><span className="font-medium">S:</span> {sire ? sire.name : litter.sireId_public}</span>
-                                            <span><span className="font-medium">D:</span> {dam ? dam.name : litter.damId_public}</span>
+                                            <span><span className="font-medium">S:</span> {sire ? `${sire.prefix ? `${sire.prefix} ` : ''}${sire.name}${sire.suffix ? ` ${sire.suffix}` : ''}` : litter.sireId_public}</span>
+                                            <span><span className="font-medium">D:</span> {dam ? `${dam.prefix ? `${dam.prefix} ` : ''}${dam.name}${dam.suffix ? ` ${dam.suffix}` : ''}` : litter.damId_public}</span>
                                         </div>
                                         <p className="text-[10px] text-gray-500 mt-0.5">
                                             {new Date(litter.birthDate).toLocaleDateString()}
@@ -6316,10 +6316,10 @@ const LitterManagement = ({ authToken, API_BASE_URL, userProfile, showModalMessa
                                             </p>
                                         </div>
                                         <div className="text-sm truncate">
-                                            <span className="text-gray-600">Sire:</span> {sire ? sire.name : litter.sireId_public}
+                                            <span className="text-gray-600">Sire:</span> {sire ? `${sire.prefix ? `${sire.prefix} ` : ''}${sire.name}${sire.suffix ? ` ${sire.suffix}` : ''}` : litter.sireId_public}
                                         </div>
                                         <div className="text-sm truncate">
-                                            <span className="text-gray-600">Dam:</span> {dam ? dam.name : litter.damId_public}
+                                            <span className="text-gray-600">Dam:</span> {dam ? `${dam.prefix ? `${dam.prefix} ` : ''}${dam.name}${dam.suffix ? ` ${dam.suffix}` : ''}` : litter.damId_public}
                                         </div>
                                         <div className="text-sm font-semibold text-gray-700">
                                             {litter.numberBorn} offspring
