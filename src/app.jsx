@@ -6240,31 +6240,49 @@ const LitterManagement = ({ authToken, API_BASE_URL, userProfile, showModalMessa
                                     className="p-2 sm:p-3 cursor-pointer flex items-center justify-between hover:bg-gray-50"
                                     onClick={() => setExpandedLitter(isExpanded ? null : litter._id)}
                                 >
-                                    <div className="flex-1 grid grid-cols-2 sm:grid-cols-3 md:grid-cols-5 gap-1 sm:gap-2 items-center">
-                                        <div>
-                                            <p className="font-bold text-gray-800 text-sm sm:text-base truncate">
-                                                {litter.breedingPairCodeName || 'Unnamed'}
+                                    {/* Mobile layout: stacked info */}
+                                    <div className="flex-1 sm:hidden">
+                                        <div className="flex justify-between items-start mb-1">
+                                            <p className="font-bold text-gray-800 text-sm truncate flex-1">
+                                                {litter.breedingPairCodeName || 'Unnamed Litter'}
                                             </p>
-                                            <p className="text-[10px] sm:text-xs text-gray-500">
+                                            <span className="text-xs font-semibold text-gray-700 ml-2">{litter.numberBorn} pups</span>
+                                        </div>
+                                        <div className="flex gap-3 text-xs text-gray-600">
+                                            <span><span className="font-medium">S:</span> {sire ? sire.name : litter.sireId_public}</span>
+                                            <span><span className="font-medium">D:</span> {dam ? dam.name : litter.damId_public}</span>
+                                        </div>
+                                        <p className="text-[10px] text-gray-500 mt-0.5">
+                                            {new Date(litter.birthDate).toLocaleDateString()}
+                                        </p>
+                                    </div>
+                                    
+                                    {/* Desktop layout: grid */}
+                                    <div className="hidden sm:grid flex-1 grid-cols-3 md:grid-cols-5 gap-2 items-center">
+                                        <div>
+                                            <p className="font-bold text-gray-800 text-base truncate">
+                                                {litter.breedingPairCodeName || 'Unnamed Litter'}
+                                            </p>
+                                            <p className="text-xs text-gray-500">
                                                 {new Date(litter.birthDate).toLocaleDateString()}
                                             </p>
                                         </div>
-                                        <div className="text-xs sm:text-sm truncate">
-                                            <span className="text-gray-600">S:</span> {sire ? sire.name : `${litter.sireId_public}`}
+                                        <div className="text-sm truncate">
+                                            <span className="text-gray-600">Sire:</span> {sire ? sire.name : litter.sireId_public}
                                         </div>
-                                        <div className="text-xs sm:text-sm truncate hidden sm:block">
-                                            <span className="text-gray-600">D:</span> {dam ? dam.name : `${litter.damId_public}`}
+                                        <div className="text-sm truncate">
+                                            <span className="text-gray-600">Dam:</span> {dam ? dam.name : litter.damId_public}
                                         </div>
-                                        <div className="text-xs sm:text-sm font-semibold text-gray-700">
-                                            {litter.numberBorn} <span className="hidden sm:inline">offspring</span>
+                                        <div className="text-sm font-semibold text-gray-700">
+                                            {litter.numberBorn} offspring
                                         </div>
-                                        <div className="text-xs sm:text-sm hidden md:block">
+                                        <div className="text-sm hidden md:block">
                                             <span className="text-gray-600">COI:</span> {litter.inbreedingCoefficient != null ? `${litter.inbreedingCoefficient.toFixed(2)}%` : 'N/A'}
                                         </div>
                                     </div>
                                     <ChevronLeft 
                                         size={20} 
-                                        className={`text-gray-400 transition-transform ${isExpanded ? '-rotate-90' : 'rotate-180'}`}
+                                        className={`text-gray-400 transition-transform flex-shrink-0 ml-2 ${isExpanded ? '-rotate-90' : 'rotate-180'}`}
                                     />
                                 </div>
 
