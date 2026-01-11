@@ -7066,7 +7066,7 @@ const SpeciesSelector = ({ speciesOptions, onSelectSpecies, onManageSpecies, sea
     });
     
     return (
-        <div className="w-full max-w-4xl bg-white p-6 rounded-xl shadow-lg" data-tutorial-target="species-selector">
+        <div className="w-full max-w-5xl bg-white p-6 rounded-xl shadow-lg" data-tutorial-target="species-selector">
             <h2 className="text-3xl font-bold text-gray-800 mb-6 flex items-center">
                 <Cat size={24} className="mr-3 text-primary-dark" />
                 Select Species for New Animal
@@ -11316,7 +11316,7 @@ const ProfileEditForm = ({ userProfile, showModalMessage, onSaveSuccess, onCance
     };
 
     return (
-        <div className="w-full max-w-4xl bg-white p-6 rounded-xl shadow-lg">
+        <div className="w-full max-w-5xl bg-white p-6 rounded-xl shadow-lg">
             <div className="flex justify-between items-center mb-6 border-b pb-4">
                 <h2 className="text-3xl font-bold text-gray-800 flex items-center">
                     <Settings size={24} className="mr-3 text-primary-dark" />
@@ -11809,7 +11809,7 @@ const ProfileView = ({ userProfile, showModalMessage, fetchUserProfile, authToke
     }
 
     return (
-        <div className="w-full max-w-4xl bg-white p-3 sm:p-6 rounded-xl shadow-lg">
+        <div className="w-full max-w-5xl bg-white p-3 sm:p-6 rounded-xl shadow-lg">
             <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-2 sm:gap-0 mb-4 sm:mb-6">
                 <h2 className="text-xl sm:text-3xl font-bold text-gray-800 flex items-center">
                     <Settings className="w-5 h-5 sm:w-6 sm:h-6 mr-2 sm:mr-3 text-primary-dark" />
@@ -13292,7 +13292,7 @@ const AnimalList = ({ authToken, showModalMessage, onEditAnimal, onViewAnimal, f
     };
 
     return (
-        <div className="w-full max-w-4xl bg-white p-6 rounded-xl shadow-lg">
+        <div className="w-full max-w-5xl bg-white p-6 rounded-xl shadow-lg">
             <h2 className="text-3xl font-bold text-gray-800 mb-6 flex items-center justify-between">
                 <div className='flex items-center'>
                     <ClipboardList size={24} className="mr-3 text-primary-dark" />
@@ -13799,7 +13799,7 @@ const MessagesView = ({ authToken, API_BASE_URL, onClose, showModalMessage, sele
 
     return (
         <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-2 sm:p-4">
-            <div className="bg-white rounded-xl shadow-2xl w-full max-w-4xl h-[85vh] sm:h-[600px] flex flex-col">
+            <div className="bg-white rounded-xl shadow-2xl w-full max-w-5xl h-[85vh] sm:h-[600px] flex flex-col">
                 {/* Header */}
                 <div className="flex justify-between items-center p-2 sm:p-4 border-b">
                     <h2 className="text-lg sm:text-xl font-bold text-gray-800 flex items-center gap-1 sm:gap-2">
@@ -14063,7 +14063,7 @@ const WarningBanner = ({ authToken, API_BASE_URL, userProfile }) => {
 
     return (
         <div className="w-full flex justify-center">
-            <div className="w-full max-w-4xl px-6">
+            <div className="w-full max-w-5xl px-6">
                 <div className="bg-yellow-50 border-l-4 border-yellow-400 p-4 rounded-lg shadow-md mb-3">
                     <div className="flex items-start">
                         <div className="flex-shrink-0">
@@ -14176,7 +14176,7 @@ const BroadcastBanner = ({ authToken, API_BASE_URL }) => {
 
     return (
         <div className="w-full flex justify-center">
-            <div className="w-full max-w-4xl px-6">
+            <div className="w-full max-w-5xl px-6">
                 {broadcasts.map(broadcast => {
                     const styles = getStyles(broadcast.broadcastType);
                     return (
@@ -16302,7 +16302,7 @@ const App = () => {
                         />
                     )}
                     
-                    <header className="w-full max-w-4xl bg-white p-4 rounded-xl shadow-lg mb-6 flex justify-between items-center">
+                    <header className="w-full max-w-5xl bg-white p-4 rounded-xl shadow-lg mb-6 flex justify-between items-center">
                         <CustomAppLogo size="w-10 h-10" />
                         <div className="flex items-center space-x-3">
                             <button 
@@ -16368,7 +16368,7 @@ const App = () => {
                 <div className="min-h-screen bg-page-bg flex flex-col items-center p-6 font-sans">
                     {showModal && <ModalMessage title={modalMessage.title} message={modalMessage.message} onClose={() => setShowModal(false)} />}
                     
-                    <header className="w-full max-w-4xl bg-white p-4 rounded-xl shadow-lg mb-6 flex justify-between items-center">
+                    <header className="w-full max-w-5xl bg-white p-4 rounded-xl shadow-lg mb-6 flex justify-between items-center">
                         <CustomAppLogo size="w-10 h-10" />
                         <div className="flex items-center space-x-3">
                             <button 
@@ -16436,7 +16436,7 @@ const App = () => {
                 {showModal && <ModalMessage title={modalMessage.title} message={modalMessage.message} onClose={() => setShowModal(false)} />}
                 
                 {/* Public navigation header */}
-                <header className="w-full max-w-4xl bg-white p-4 rounded-xl shadow-lg mb-6 flex justify-between items-center">
+                <header className="w-full max-w-5xl bg-white p-4 rounded-xl shadow-lg mb-6 flex justify-between items-center">
                     <CustomAppLogo size="w-10 h-10" />
                     <div className="flex items-center space-x-3">
                         <button 
@@ -16767,7 +16767,7 @@ const App = () => {
                 />
             )}
             
-            <header className="w-full bg-white p-4 rounded-xl shadow-lg mb-6 max-w-4xl">
+            <header className="w-full bg-white p-4 rounded-xl shadow-lg mb-6 max-w-5xl">
                 {/* Desktop: Single row layout */}
                 <div className="hidden md:flex justify-between items-center">
                     <CustomAppLogo size="w-10 h-10" />
@@ -17294,7 +17294,7 @@ const App = () => {
 
             {/* Profile Card and Community Activity - shown only on list view */}
             {currentView === 'list' && (
-                <div className="w-full max-w-4xl mb-6 flex flex-col sm:flex-row gap-4">
+                <div className="w-full max-w-5xl mb-6 flex flex-col sm:flex-row gap-4">
                     {/* Profile Card - Hidden on mobile */}
                     {currentView !== 'profile' && userProfile && <div className="hidden sm:block"><UserProfileCard userProfile={userProfile} /></div>}
                     
@@ -17377,7 +17377,7 @@ const App = () => {
                 </div>
             )}
 
-            <main className="w-full flex-grow max-w-4xl">
+            <main className="w-full flex-grow max-w-5xl">
                 <Routes>
                     <Route path="/" element={
                         <AnimalList 
@@ -17616,7 +17616,7 @@ const App = () => {
                                 };
                                 return (
                                     <>
-                                    <div className="w-full max-w-4xl mx-auto">
+                                    <div className="w-full max-w-5xl mx-auto">
                                         <div className="bg-white border border-gray-300 rounded-t-lg p-6 mb-0">
                                             <div className="flex items-start justify-between mb-0">
                                                 <button onClick={() => navigate('/')} className="flex items-center text-gray-600 hover:text-gray-800 font-medium">
@@ -18804,7 +18804,7 @@ const App = () => {
                         )
                     } />
                     <Route path="/hidden-animals" element={
-                        <div className="w-full max-w-4xl bg-white p-6 rounded-xl shadow-lg">
+                        <div className="w-full max-w-5xl bg-white p-6 rounded-xl shadow-lg">
                             <div className="flex items-start justify-between mb-6">
                                 <button onClick={() => navigate('/')} className="flex items-center text-gray-600 hover:text-gray-800 font-medium">
                                     <ArrowLeft size={20} className="mr-2" />
@@ -18867,7 +18867,7 @@ const App = () => {
                 </Routes>
             </main>
 
-            <footer className="w-full mt-6 text-center text-sm pt-4 border-t border-gray-200 max-w-4xl">
+            <footer className="w-full mt-6 text-center text-sm pt-4 border-t border-gray-200 max-w-5xl">
                 <div className="flex flex-col sm:flex-row items-center justify-center gap-2 sm:gap-4 mb-2">
                     <button
                         onClick={() => setShowBugReportModal(true)}
@@ -19221,7 +19221,7 @@ const PublicAnimalPage = () => {
     if (isPrivate) {
         return (
             <div className="min-h-screen bg-page-bg flex flex-col items-center p-6">
-                <header className="w-full max-w-4xl bg-white p-4 rounded-xl shadow-lg mb-6 flex justify-between items-center">
+                <header className="w-full max-w-5xl bg-white p-4 rounded-xl shadow-lg mb-6 flex justify-between items-center">
                     <CustomAppLogo size="w-10 h-10" />
                     <button
                         onClick={() => navigate('/')}
@@ -19257,7 +19257,7 @@ const PublicAnimalPage = () => {
 
     return (
         <div className="min-h-screen bg-page-bg flex flex-col items-center p-6">
-            <header className="w-full max-w-4xl bg-white p-4 rounded-xl shadow-lg mb-6 flex justify-between items-center">
+            <header className="w-full max-w-5xl bg-white p-4 rounded-xl shadow-lg mb-6 flex justify-between items-center">
                 <CustomAppLogo size="w-10 h-10" />
                 <button
                     onClick={() => navigate('/')}
@@ -19619,7 +19619,7 @@ const PublicProfilePage = () => {
 
     return (
         <div className="min-h-screen bg-page-bg flex flex-col items-center p-6">
-            <header className="w-full max-w-4xl bg-white p-4 rounded-xl shadow-lg mb-6 flex justify-between items-center">
+            <header className="w-full max-w-5xl bg-white p-4 rounded-xl shadow-lg mb-6 flex justify-between items-center">
                 <CustomAppLogo size="w-10 h-10" />
                 <button
                     onClick={() => navigate('/')}
