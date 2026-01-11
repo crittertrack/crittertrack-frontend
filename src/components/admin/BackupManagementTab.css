@@ -620,9 +620,30 @@
     border-top: 1px solid #d1fae5;
 }
 
+.schedule-note.error {
+    color: #dc2626;
+    background: #fef2f2;
+    padding: 12px;
+    border-radius: 6px;
+    border-top: none;
+    margin-top: 8px;
+}
+
 .schedule-note svg {
-    color: #f59e0b;
     flex-shrink: 0;
+}
+
+.schedule-note:not(.error) svg {
+    color: #22c55e;
+}
+
+.schedule-note.error svg {
+    color: #dc2626;
+}
+
+.status-badge.error {
+    background: #fef2f2;
+    color: #dc2626;
 }
 
 /* Responsive */

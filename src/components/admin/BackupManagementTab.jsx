@@ -269,6 +269,12 @@ const BackupManagementTab = ({ authToken }) => {
                         </div>
                         <div className="schedule-details">
                             <div className="schedule-item">
+                                <span className="schedule-label">Storage:</span>
+                                <span className={`status-badge ${schedule.r2Configured ? 'success' : 'error'}`}>
+                                    {schedule.r2Configured ? '☁️ R2 Cloud Storage' : '⚠️ Not Configured'}
+                                </span>
+                            </div>
+                            <div className="schedule-item">
                                 <span className="schedule-label">Schedule:</span>
                                 <span className="schedule-value">Daily at 3:00 AM UTC</span>
                             </div>
@@ -285,14 +291,26 @@ const BackupManagementTab = ({ authToken }) => {
                                 </span>
                             </div>
                             <div className="schedule-item">
+                                <span className="schedule-label">Saved Backups:</span>
+                                <span className="schedule-value">{schedule.backupCount || 0} / 30</span>
+                            </div>
+                            <div className="schedule-item">
                                 <span className="schedule-label">Timezone:</span>
                                 <span className="schedule-value">{schedule.timezone || 'UTC'}</span>
                             </div>
                         </div>
-                        <p className="schedule-note">
-                            <AlertTriangle size={14} />
-                            Auto backups run daily and keep the last 30 backups. Older backups are automatically removed.
-                        </p>
+                        {!schedule.r2Configured && (
+                            <p className="schedule-note error">
+                                <AlertTriangle size={14} />
+                                R2 storage not configured! Backups will NOT be saved. Contact administrator.
+                            </p>
+                        )}
+                        {schedule.r2Configured && (
+                            <p className="schedule-note">
+                                <CheckCircle size={14} />
+                                Backups are stored in Cloudflare R2 cloud storage and persist across deployments.
+                            </p>
+                        )}
                     </div>
                 </div>
             )}
