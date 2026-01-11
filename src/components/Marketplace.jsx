@@ -1,6 +1,7 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import { Search, X, Filter, ChevronLeft, ChevronRight, DollarSign, Heart, Mail, MapPin, Loader2, ShoppingBag, Tag, MessageSquare, Send } from 'lucide-react';
 import axios from 'axios';
+import 'flag-icons/css/flag-icons.min.css';
 
 const API_BASE_URL = '/api';
 
@@ -18,6 +19,12 @@ const formatPrice = (amount, currency) => {
     if (!amount) return 'Contact for price';
     const symbol = currencySymbols[currency] || currency + ' ';
     return `${symbol}${amount.toLocaleString()}`;
+};
+
+// Helper function to get flag class from country code (for flag-icons library)
+const getCountryFlag = (countryCode) => {
+    if (!countryCode || countryCode.length !== 2) return '';
+    return `fi fi-${countryCode.toLowerCase()}`;
 };
 
 // Get country name from code
@@ -248,7 +255,7 @@ const Marketplace = ({ onViewAnimal, onViewProfile, authToken, userProfile, onSt
                     onClick={() => setListingType('sale')}
                     className={`flex-1 py-2 px-4 rounded-lg font-medium transition flex items-center justify-center gap-2 ${
                         listingType === 'sale' 
-                            ? 'bg-green-600 text-white' 
+                            ? 'bg-yellow-500 text-white' 
                             : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
                     }`}
                 >
@@ -507,7 +514,7 @@ const Marketplace = ({ onViewAnimal, onViewProfile, authToken, userProfile, onSt
                                     <p className="text-sm text-gray-600">{inquiryAnimal.species} • {inquiryAnimal.id_public}</p>
                                     <div className="flex gap-2 mt-1">
                                         {inquiryAnimal.isForSale && (
-                                            <span className="text-xs bg-green-100 text-green-700 px-2 py-0.5 rounded-full">
+                                            <span className="text-xs bg-yellow-100 text-yellow-700 px-2 py-0.5 rounded-full">
                                                 For Sale
                                             </span>
                                         )}
@@ -639,7 +646,7 @@ const AnimalCard = ({ animal, onViewAnimal, onViewProfile, onContactOwner, isOwn
                 {/* Listing Type Badges */}
                 <div className="absolute top-2 left-2 flex gap-1">
                     {isForSale && (
-                        <span className="bg-green-600 text-white text-xs font-medium px-2 py-1 rounded-full flex items-center gap-1">
+                        <span className="bg-yellow-500 text-white text-xs font-medium px-2 py-1 rounded-full flex items-center gap-1">
                             <Tag size={12} />
                             For Sale
                         </span>
@@ -691,7 +698,7 @@ const AnimalCard = ({ animal, onViewAnimal, onViewProfile, onContactOwner, isOwn
                 {/* Price */}
                 <div className="flex flex-col gap-1 mb-3">
                     {isForSale && (
-                        <div className="flex items-center gap-2 text-green-700">
+                        <div className="flex items-center gap-2 text-yellow-600">
                             <DollarSign size={16} />
                             <span className="font-medium">
                                 {formatPrice(animal.salePriceAmount, animal.salePriceCurrency)}
@@ -739,7 +746,7 @@ const AnimalCard = ({ animal, onViewAnimal, onViewProfile, onContactOwner, isOwn
                         </div>
                         {animal.ownerInfo.country && (
                             <div className="flex items-center gap-2 text-xs text-gray-500 mt-1 ml-8">
-                                <MapPin size={12} />
+                                <span className={`${getCountryFlag(animal.ownerInfo.country)} inline-block h-3 w-4`}></span>
                                 <span>{getCountryName(animal.ownerInfo.country)}</span>
                             </div>
                         )}
@@ -757,7 +764,7 @@ const AnimalCard = ({ animal, onViewAnimal, onViewProfile, onContactOwner, isOwn
                     {!isOwnListing && (
                         <button
                             onClick={onContactOwner}
-                            className="py-2 px-3 bg-green-600 text-white rounded-lg hover:bg-green-700 transition flex items-center gap-1"
+                            className="py-2 px-3 bg-accent text-white rounded-lg hover:bg-accent/90 transition flex items-center gap-1"
                             title={isLoggedIn ? "Contact seller" : "Log in to contact seller"}
                         >
                             <MessageSquare size={16} />
