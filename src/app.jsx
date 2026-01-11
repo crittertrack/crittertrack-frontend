@@ -1784,30 +1784,30 @@ const PublicProfileView = ({ profile, onBack, onViewAnimal, API_BASE_URL, onStar
             </div>
 
             {/* Profile Header */}
-            <div className="flex items-center space-x-4 mb-6 pb-6 border-b">
+            <div className="flex flex-col sm:flex-row sm:items-center gap-4 mb-6 pb-6 border-b">
                 {profile.profileImage ? (
-                    <img src={profile.profileImage} alt={displayName} className="w-24 h-24 rounded-lg object-cover shadow-md" />
+                    <img src={profile.profileImage} alt={displayName} className="w-24 h-24 rounded-lg object-cover shadow-md flex-shrink-0" />
                 ) : (
-                    <div className="w-24 h-24 bg-gray-200 rounded-lg flex items-center justify-center shadow-md">
+                    <div className="w-24 h-24 bg-gray-200 rounded-lg flex items-center justify-center shadow-md flex-shrink-0">
                         <User size={48} className="text-gray-400" />
                     </div>
                 )}
-                <div>
-                    <h2 className="text-3xl font-bold text-gray-900">{displayName}</h2>
+                <div className="min-w-0 flex-1">
+                    <h2 className="text-2xl sm:text-3xl font-bold text-gray-900 break-words">{displayName}</h2>
                     <p className="text-gray-600">Public ID: <span className="font-mono text-accent">{freshProfile?.id_public || profile.id_public}</span></p>
                     <p className="text-sm text-gray-500 mt-1">Member since {memberSince}</p>
                     
                     {/* Country - Show if available */}
                     {(freshProfile?.country || profile.country) && (
                         <p className="text-sm text-gray-600 mt-1 flex items-center gap-2">
-                            <span className={`${getCountryFlag(freshProfile?.country || profile.country)} inline-block h-5 w-7`}></span>
+                            <span className={`${getCountryFlag(freshProfile?.country || profile.country)} inline-block h-5 w-7 flex-shrink-0`}></span>
                             <span>{getCountryName(freshProfile?.country || profile.country)}</span>
                         </p>
                     )}
                     
                     {/* Bio - Show if available and public */}
                     {(freshProfile?.showBio ?? profile.showBio ?? true) && (freshProfile?.bio || profile.bio) && (
-                        <p className="text-sm text-gray-700 mt-3 p-3 bg-gray-50 rounded-lg border border-gray-200">
+                        <p className="text-sm text-gray-700 mt-3 p-3 bg-gray-50 rounded-lg border border-gray-200 whitespace-pre-wrap break-words">
                             {freshProfile?.bio || profile.bio}
                         </p>
                     )}
@@ -1824,9 +1824,9 @@ const PublicProfileView = ({ profile, onBack, onViewAnimal, API_BASE_URL, onStar
                     
                     {/* Website - Show if public */}
                     {(freshProfile?.showWebsiteURL ?? profile.showWebsiteURL) && (freshProfile?.websiteURL || profile.websiteURL) && (
-                        <p className="text-sm text-gray-700 mt-2 flex items-center gap-2">
-                            <Globe size={16} className="text-accent" />
-                            <a href={freshProfile?.websiteURL || profile.websiteURL} target="_blank" rel="noopener noreferrer" className="hover:text-accent transition underline">
+                        <p className="text-sm text-gray-700 mt-2 flex items-start gap-2 break-all">
+                            <Globe size={16} className="text-accent flex-shrink-0 mt-0.5" />
+                            <a href={freshProfile?.websiteURL || profile.websiteURL} target="_blank" rel="noopener noreferrer" className="hover:text-accent transition underline break-all">
                                 {freshProfile?.websiteURL || profile.websiteURL}
                             </a>
                         </p>
