@@ -93,14 +93,14 @@ export default function SystemSettingsTab({ API_BASE_URL, authToken }) {
         const currentlyEnabled = settings?.maintenance_mode?.value === true;
 
         try {
-            const response = await fetch(`${API_BASE_URL}/api/admin/maintenance/toggle`, {
+            const response = await fetch(`${API_BASE_URL}/admin/maintenance/toggle`, {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
                     'Authorization': `Bearer ${authToken}`
                 },
                 body: JSON.stringify({
-                    enable: !currentlyEnabled,
+                    enabled: !currentlyEnabled,
                     message: maintenanceMessage || 'Site is under maintenance. Please check back soon.'
                 })
             });
@@ -198,76 +198,6 @@ export default function SystemSettingsTab({ API_BASE_URL, authToken }) {
             </section>
 
             {/* Feature Toggles */}
-            <section className="settings-section">
-                <h4>✨ Features</h4>
-                <div className="settings-grid">
-                    <ToggleSetting
-                        label="Litter Tracking"
-                        description="Allow users to create and manage litter records"
-                        settingKey="feature_litter_tracking"
-                        value={settings?.feature_litter_tracking?.value}
-                        onToggle={handleToggle}
-                        disabled={saving}
-                    />
-                    <ToggleSetting
-                        label="Genetic Analysis"
-                        description="Enable genetic prediction and analysis features"
-                        settingKey="feature_genetic_analysis"
-                        value={settings?.feature_genetic_analysis?.value}
-                        onToggle={handleToggle}
-                        disabled={saving}
-                    />
-                    <ToggleSetting
-                        label="User Messaging"
-                        description="Allow users to send messages to each other"
-                        settingKey="feature_messaging"
-                        value={settings?.feature_messaging?.value}
-                        onToggle={handleToggle}
-                        disabled={saving}
-                    />
-                    <ToggleSetting
-                        label="Public Profiles"
-                        description="Allow users to have public profiles visible to others"
-                        settingKey="feature_public_profiles"
-                        value={settings?.feature_public_profiles?.value}
-                        onToggle={handleToggle}
-                        disabled={saving}
-                    />
-                </div>
-            </section>
-
-            {/* Security Settings */}
-            <section className="settings-section">
-                <h4>🔒 Security</h4>
-                <div className="settings-grid">
-                    <ToggleSetting
-                        label="Require Email Verification"
-                        description="Force users to verify their email before accessing features"
-                        settingKey="security_require_email_verification"
-                        value={settings?.security_require_email_verification?.value}
-                        onToggle={handleToggle}
-                        disabled={saving}
-                    />
-                    <ToggleSetting
-                        label="Require 2FA for Moderators"
-                        description="Require two-factor authentication for moderator and admin accounts"
-                        settingKey="security_require_2fa_moderators"
-                        value={settings?.security_require_2fa_moderators?.value}
-                        onToggle={handleToggle}
-                        disabled={saving}
-                    />
-                    <ToggleSetting
-                        label="IP Logging"
-                        description="Log IP addresses for security and moderation purposes"
-                        settingKey="security_log_ips"
-                        value={settings?.security_log_ips?.value}
-                        onToggle={handleToggle}
-                        disabled={saving}
-                    />
-                </div>
-            </section>
-
-            {/* Content Moderation */}
             <section className="settings-section">
                 <h4>🛡️ Content Moderation</h4>
                 <div className="settings-grid">

@@ -15327,8 +15327,10 @@ const App = () => {
 
     // Poll for maintenance mode and urgent notifications
     useEffect(() => {
-        if (!authToken || userProfile?.id_public === 'CTU1') {
-            return; // Don't need to check if admin or not logged in
+        // Skip maintenance check for admins/moderators - they should always have access
+        const isStaff = ['admin', 'moderator'].includes(userProfile?.role);
+        if (!authToken || isStaff) {
+            return; // Don't need to check if staff or not logged in
         }
 
         const pollForUpdates = async () => {
