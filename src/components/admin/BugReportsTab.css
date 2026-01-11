@@ -60,29 +60,29 @@
 /* Stats Grid */
 .bug-stats-grid {
     display: grid;
-    grid-template-columns: repeat(4, 1fr);
-    gap: 16px;
+    grid-template-columns: repeat(5, 1fr);
+    gap: 12px;
     margin-bottom: 24px;
 }
 
 .bug-stat-card {
     background: #fff;
     border: 1px solid #e5e7eb;
-    border-radius: 12px;
-    padding: 20px;
+    border-radius: 10px;
+    padding: 12px 8px;
     text-align: center;
 }
 
 .bug-stat-value {
-    font-size: 2rem;
+    font-size: 1.5rem;
     font-weight: 700;
     color: #1f2937;
 }
 
 .bug-stat-label {
-    font-size: 0.875rem;
+    font-size: 0.75rem;
     color: #6b7280;
-    margin-top: 4px;
+    margin-top: 2px;
 }
 
 .bug-stat-yellow {
@@ -110,6 +110,15 @@
 
 .bug-stat-green .bug-stat-value {
     color: #16a34a;
+}
+
+.bug-stat-gray {
+    background: #f9fafb;
+    border-color: #d1d5db;
+}
+
+.bug-stat-gray .bug-stat-value {
+    color: #6b7280;
 }
 
 /* Filters */

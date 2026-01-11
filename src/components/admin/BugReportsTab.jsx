@@ -132,7 +132,8 @@ const BugReportsTab = ({ API_BASE_URL, authToken }) => {
         total: reports.length,
         pending: reports.filter(r => r.status === 'pending').length,
         inProgress: reports.filter(r => r.status === 'in-progress').length,
-        resolved: reports.filter(r => r.status === 'resolved').length
+        resolved: reports.filter(r => r.status === 'resolved').length,
+        dismissed: reports.filter(r => r.status === 'dismissed').length
     };
 
     if (loading && reports.length === 0) {
@@ -168,7 +169,7 @@ const BugReportsTab = ({ API_BASE_URL, authToken }) => {
             <div className="bug-stats-grid">
                 <div className="bug-stat-card">
                     <div className="bug-stat-value">{stats.total}</div>
-                    <div className="bug-stat-label">Total Reports</div>
+                    <div className="bug-stat-label">Total</div>
                 </div>
                 <div className="bug-stat-card bug-stat-yellow">
                     <div className="bug-stat-value">{stats.pending}</div>
@@ -181,6 +182,10 @@ const BugReportsTab = ({ API_BASE_URL, authToken }) => {
                 <div className="bug-stat-card bug-stat-green">
                     <div className="bug-stat-value">{stats.resolved}</div>
                     <div className="bug-stat-label">Resolved</div>
+                </div>
+                <div className="bug-stat-card bug-stat-gray">
+                    <div className="bug-stat-value">{stats.dismissed}</div>
+                    <div className="bug-stat-label">Dismissed</div>
                 </div>
             </div>
 

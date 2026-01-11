@@ -512,8 +512,8 @@
 /* Stats Grid */
 .reports-stats-grid {
     display: grid;
-    grid-template-columns: repeat(4, 1fr);
-    gap: 16px;
+    grid-template-columns: repeat(6, 1fr);
+    gap: 12px;
     margin-bottom: 24px;
     padding: 0 24px;
 }
@@ -521,21 +521,21 @@
 .reports-stat-card {
     background: #fff;
     border: 2px solid #e5e7eb;
-    border-radius: 12px;
-    padding: 20px;
+    border-radius: 10px;
+    padding: 12px 8px;
     text-align: center;
 }
 
 .reports-stat-value {
-    font-size: 2rem;
+    font-size: 1.5rem;
     font-weight: 700;
     color: #1f2937;
 }
 
 .reports-stat-label {
-    font-size: 0.875rem;
+    font-size: 0.75rem;
     color: #6b7280;
-    margin-top: 4px;
+    margin-top: 2px;
 }
 
 .reports-stat-yellow {
@@ -563,6 +563,24 @@
 
 .reports-stat-green .reports-stat-value {
     color: #16a34a;
+}
+
+.reports-stat-purple {
+    background: #faf5ff;
+    border-color: #d8b4fe;
+}
+
+.reports-stat-purple .reports-stat-value {
+    color: #9333ea;
+}
+
+.reports-stat-gray {
+    background: #f9fafb;
+    border-color: #d1d5db;
+}
+
+.reports-stat-gray .reports-stat-value {
+    color: #6b7280;
 }
 
 /* Filters */

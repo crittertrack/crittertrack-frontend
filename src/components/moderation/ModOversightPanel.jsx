@@ -469,7 +469,8 @@ export default function ModOversightPanel({
         pending: reports.filter(r => r.status === 'pending').length,
         inProgress: reports.filter(r => r.status === 'in_progress').length,
         reviewed: reports.filter(r => r.status === 'reviewed').length,
-        resolved: reports.filter(r => r.status === 'resolved' || r.status === 'dismissed').length
+        resolved: reports.filter(r => r.status === 'resolved').length,
+        dismissed: reports.filter(r => r.status === 'dismissed').length
     }), [reports]);
 
     // Filter reports by search term, date, and sort
@@ -694,7 +695,7 @@ export default function ModOversightPanel({
                 <div className="reports-stats-grid">
                     <div className="reports-stat-card">
                         <div className="reports-stat-value">{stats.total}</div>
-                        <div className="reports-stat-label">Total Reports</div>
+                        <div className="reports-stat-label">Total</div>
                     </div>
                     <div className="reports-stat-card reports-stat-yellow">
                         <div className="reports-stat-value">{stats.pending}</div>
@@ -711,6 +712,10 @@ export default function ModOversightPanel({
                     <div className="reports-stat-card reports-stat-green">
                         <div className="reports-stat-value">{stats.resolved}</div>
                         <div className="reports-stat-label">Resolved</div>
+                    </div>
+                    <div className="reports-stat-card reports-stat-gray">
+                        <div className="reports-stat-value">{stats.dismissed}</div>
+                        <div className="reports-stat-label">Dismissed</div>
                     </div>
                 </div>
 
