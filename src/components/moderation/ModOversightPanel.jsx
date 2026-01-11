@@ -701,13 +701,13 @@ export default function ModOversightPanel({
                         <div className="reports-stat-value">{stats.pending}</div>
                         <div className="reports-stat-label">Pending</div>
                     </div>
-                    <div className="reports-stat-card reports-stat-purple">
-                        <div className="reports-stat-value">{stats.inProgress}</div>
-                        <div className="reports-stat-label">In Progress</div>
-                    </div>
                     <div className="reports-stat-card reports-stat-blue">
                         <div className="reports-stat-value">{stats.reviewed}</div>
                         <div className="reports-stat-label">Reviewed</div>
+                    </div>
+                    <div className="reports-stat-card reports-stat-purple">
+                        <div className="reports-stat-value">{stats.inProgress}</div>
+                        <div className="reports-stat-label">In Progress</div>
                     </div>
                     <div className="reports-stat-card reports-stat-green">
                         <div className="reports-stat-value">{stats.resolved}</div>
