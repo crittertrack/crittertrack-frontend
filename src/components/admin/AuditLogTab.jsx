@@ -34,7 +34,7 @@ export default function AuditLogTab({ API_BASE_URL, authToken }) {
             if (filterStartDate) params.append('startDate', filterStartDate);
             if (filterEndDate) params.append('endDate', filterEndDate);
 
-            const response = await fetch(`${API_BASE_URL}/api/admin/audit-logs/list?${params}`, {
+            const response = await fetch(`${API_BASE_URL}/admin/audit-logs/list?${params}`, {
                 headers: {
                     'Authorization': `Bearer ${authToken}`,
                     'Content-Type': 'application/json'

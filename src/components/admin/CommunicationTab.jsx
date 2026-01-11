@@ -158,7 +158,7 @@ export default function CommunicationTab({ API_BASE_URL, authToken }) {
         }
 
         try {
-            const response = await fetch(`${API_BASE_URL}/api/admin/message-user`, {
+            const response = await fetch(`${API_BASE_URL}/admin/message-user`, {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',

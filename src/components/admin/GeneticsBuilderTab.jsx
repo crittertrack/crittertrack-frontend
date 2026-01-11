@@ -42,7 +42,7 @@ const GeneticsBuilderTab = ({ API_BASE_URL, authToken }) => {
     // Fetch species list
     const fetchSpecies = async () => {
         try {
-            const response = await fetch(`${API_BASE_URL}/api/admin/species`, {
+            const response = await fetch(`${API_BASE_URL}/admin/species`, {
                 headers: { 'Authorization': `Bearer ${authToken}` }
             });
             if (response.ok) {
@@ -58,7 +58,7 @@ const GeneticsBuilderTab = ({ API_BASE_URL, authToken }) => {
     const fetchGeneticsData = async () => {
         setLoading(true);
         try {
-            const response = await fetch(`${API_BASE_URL}/api/admin/genetics`, {
+            const response = await fetch(`${API_BASE_URL}/admin/genetics`, {
                 headers: { 'Authorization': `Bearer ${authToken}` }
             });
             if (response.ok) {
@@ -82,7 +82,7 @@ const GeneticsBuilderTab = ({ API_BASE_URL, authToken }) => {
         
         try {
             const response = await fetch(
-                `${API_BASE_URL}/api/admin/genetics/${encodeURIComponent(speciesName)}?draft=${getDraft}`,
+                `${API_BASE_URL}/admin/genetics/${encodeURIComponent(speciesName)}?draft=${getDraft}`,
                 { headers: { 'Authorization': `Bearer ${authToken}` } }
             );
             
@@ -120,7 +120,7 @@ const GeneticsBuilderTab = ({ API_BASE_URL, authToken }) => {
         
         setSaving(true);
         try {
-            const response = await fetch(`${API_BASE_URL}/api/admin/genetics`, {
+            const response = await fetch(`${API_BASE_URL}/admin/genetics`, {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
@@ -161,7 +161,7 @@ const GeneticsBuilderTab = ({ API_BASE_URL, authToken }) => {
         
         setSaving(true);
         try {
-            const response = await fetch(`${API_BASE_URL}/api/admin/genetics/${currentData._id}`, {
+            const response = await fetch(`${API_BASE_URL}/admin/genetics/${currentData._id}`, {
                 method: 'PUT',
                 headers: {
                     'Content-Type': 'application/json',
@@ -196,7 +196,7 @@ const GeneticsBuilderTab = ({ API_BASE_URL, authToken }) => {
         
         setSaving(true);
         try {
-            const response = await fetch(`${API_BASE_URL}/api/admin/genetics/${currentData._id}/publish`, {
+            const response = await fetch(`${API_BASE_URL}/admin/genetics/${currentData._id}/publish`, {
                 method: 'POST',
                 headers: { 'Authorization': `Bearer ${authToken}` }
             });
@@ -232,7 +232,7 @@ const GeneticsBuilderTab = ({ API_BASE_URL, authToken }) => {
         
         setSaving(true);
         try {
-            const response = await fetch(`${API_BASE_URL}/api/admin/genetics/${currentData._id}/genes`, {
+            const response = await fetch(`${API_BASE_URL}/admin/genetics/${currentData._id}/genes`, {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
@@ -264,7 +264,7 @@ const GeneticsBuilderTab = ({ API_BASE_URL, authToken }) => {
         setSaving(true);
         try {
             const response = await fetch(
-                `${API_BASE_URL}/api/admin/genetics/${currentData._id}/genes/${geneIndex}?isMarking=${isMarking}`,
+                `${API_BASE_URL}/admin/genetics/${currentData._id}/genes/${geneIndex}?isMarking=${isMarking}`,
                 {
                     method: 'DELETE',
                     headers: { 'Authorization': `Bearer ${authToken}` }

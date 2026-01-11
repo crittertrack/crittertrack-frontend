@@ -42,7 +42,7 @@ const SpeciesManagementTab = ({ API_BASE_URL, authToken }) => {
         setLoading(true);
         setError(null);
         try {
-            const response = await fetch(`${API_BASE_URL}/api/admin/species`, {
+            const response = await fetch(`${API_BASE_URL}/admin/species`, {
                 headers: { 'Authorization': `Bearer ${authToken}` }
             });
             
@@ -71,7 +71,7 @@ const SpeciesManagementTab = ({ API_BASE_URL, authToken }) => {
         
         setSaving(true);
         try {
-            const response = await fetch(`${API_BASE_URL}/api/admin/species`, {
+            const response = await fetch(`${API_BASE_URL}/admin/species`, {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
@@ -105,7 +105,7 @@ const SpeciesManagementTab = ({ API_BASE_URL, authToken }) => {
         if (!window.confirm(`Delete "${speciesName}"? This cannot be undone.`)) return;
         
         try {
-            const response = await fetch(`${API_BASE_URL}/api/admin/species/${speciesId}`, {
+            const response = await fetch(`${API_BASE_URL}/admin/species/${speciesId}`, {
                 method: 'DELETE',
                 headers: { 'Authorization': `Bearer ${authToken}` }
             });
@@ -126,7 +126,7 @@ const SpeciesManagementTab = ({ API_BASE_URL, authToken }) => {
         setSelectedSpecies(speciesItem);
         
         try {
-            const response = await fetch(`${API_BASE_URL}/api/admin/species-config/${encodeURIComponent(speciesItem.name)}`, {
+            const response = await fetch(`${API_BASE_URL}/admin/species-config/${encodeURIComponent(speciesItem.name)}`, {
                 headers: { 'Authorization': `Bearer ${authToken}` }
             });
             
@@ -152,7 +152,7 @@ const SpeciesManagementTab = ({ API_BASE_URL, authToken }) => {
         
         setSaving(true);
         try {
-            const response = await fetch(`${API_BASE_URL}/api/admin/species-config/${encodeURIComponent(selectedSpecies.name)}`, {
+            const response = await fetch(`${API_BASE_URL}/admin/species-config/${encodeURIComponent(selectedSpecies.name)}`, {
                 method: 'PUT',
                 headers: {
                     'Content-Type': 'application/json',

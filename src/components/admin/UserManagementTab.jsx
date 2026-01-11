@@ -21,7 +21,7 @@ export default function UserManagementTab({ API_BASE_URL, authToken }) {
         setError('');
         
         try {
-            const response = await fetch(`${API_BASE_URL}/api/admin/users`, {
+            const response = await fetch(`${API_BASE_URL}/admin/users`, {
                 headers: {
                     'Authorization': `Bearer ${authToken}`,
                     'Content-Type': 'application/json'
@@ -54,7 +54,7 @@ export default function UserManagementTab({ API_BASE_URL, authToken }) {
 
     const fetchUserSummary = async (userId) => {
         try {
-            const response = await fetch(`${API_BASE_URL}/api/admin/users/${userId}/summary`, {
+            const response = await fetch(`${API_BASE_URL}/admin/users/${userId}/summary`, {
                 headers: {
                     'Authorization': `Bearer ${authToken}`
                 }
@@ -71,7 +71,7 @@ export default function UserManagementTab({ API_BASE_URL, authToken }) {
 
     const fetchModerationHistory = async (userId) => {
         try {
-            const response = await fetch(`${API_BASE_URL}/api/admin/users/${userId}/moderation-history`, {
+            const response = await fetch(`${API_BASE_URL}/admin/users/${userId}/moderation-history`, {
                 headers: {
                     'Authorization': `Bearer ${authToken}`
                 }
@@ -101,7 +101,7 @@ export default function UserManagementTab({ API_BASE_URL, authToken }) {
         }
 
         try {
-            const response = await fetch(`${API_BASE_URL}/api/admin/users/${userId}/status`, {
+            const response = await fetch(`${API_BASE_URL}/admin/users/${userId}/status`, {
                 method: 'PATCH',
                 headers: {
                     'Content-Type': 'application/json',
@@ -130,7 +130,7 @@ export default function UserManagementTab({ API_BASE_URL, authToken }) {
         if (!window.confirm(`Change user role to: ${newRole}?`)) return;
 
         try {
-            const response = await fetch(`${API_BASE_URL}/api/admin/users/${userId}/role`, {
+            const response = await fetch(`${API_BASE_URL}/admin/users/${userId}/role`, {
                 method: 'PATCH',
                 headers: {
                     'Content-Type': 'application/json',
@@ -157,7 +157,7 @@ export default function UserManagementTab({ API_BASE_URL, authToken }) {
         if (!reason) return;
 
         try {
-            const response = await fetch(`${API_BASE_URL}/api/admin/users/${userId}/warn`, {
+            const response = await fetch(`${API_BASE_URL}/admin/users/${userId}/warn`, {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
