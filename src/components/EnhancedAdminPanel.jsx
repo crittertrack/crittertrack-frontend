@@ -67,9 +67,118 @@ class ErrorBoundary extends React.Component {
     }
 }
 
+// Collapsible Section Component for Sidebar
+const CollapsibleSection = ({ 
+    title, 
+    icon: SectionIcon, 
+    isExpanded, 
+    onToggle, 
+    sidebarCollapsed, 
+    items, 
+    activeSection, 
+    setActiveSection,
+    userRole 
+}) => {
+    // Filter items based on role
+    const accessibleItems = items.filter(item => !item.requiredRole || userRole === item.requiredRole);
+    
+    // Check if any item in this section is active
+    const hasActiveItem = accessibleItems.some(item => item.id === activeSection);
+
+    if (accessibleItems.length === 0) return null;
+
+    // When sidebar is collapsed, show only icons in a vertical list on hover
+    if (sidebarCollapsed) {
+        return (
+            <div className="relative group">
+                <button
+                    onClick={onToggle}
+                    title={title}
+                    className={`w-full flex items-center justify-center px-3 py-2.5 rounded-lg transition ${
+                        hasActiveItem ? 'bg-red-100 text-red-600' : 'text-gray-500 hover:bg-gray-100'
+                    }`}
+                >
+                    <SectionIcon size={20} />
+                </button>
+                {/* Tooltip with items on hover */}
+                <div className="absolute left-full top-0 ml-2 hidden group-hover:block z-50">
+                    <div className="bg-white rounded-lg shadow-lg border border-gray-200 py-2 min-w-48">
+                        <div className="px-3 py-1 text-xs font-semibold text-gray-500 uppercase tracking-wider border-b border-gray-100 mb-1">
+                            {title}
+                        </div>
+                        {accessibleItems.map(item => {
+                            const Icon = item.icon;
+                            return (
+                                <button
+                                    key={item.id}
+                                    onClick={() => setActiveSection(item.id)}
+                                    className={`w-full flex items-center gap-2 px-3 py-2 text-sm transition ${
+                                        activeSection === item.id
+                                            ? 'bg-red-50 text-red-600'
+                                            : 'text-gray-700 hover:bg-gray-50'
+                                    }`}
+                                >
+                                    <Icon size={16} />
+                                    <span>{item.label}</span>
+                                </button>
+                            );
+                        })}
+                    </div>
+                </div>
+            </div>
+        );
+    }
+
+    return (
+        <div className="space-y-0.5">
+            {/* Section Header */}
+            <button
+                onClick={onToggle}
+                className={`w-full flex items-center justify-between px-3 py-2 rounded-lg transition ${
+                    hasActiveItem ? 'bg-red-50 text-red-700' : 'text-gray-500 hover:bg-gray-50'
+                }`}
+            >
+                <div className="flex items-center gap-2">
+                    <SectionIcon size={16} />
+                    <span className="text-xs font-semibold uppercase tracking-wider">{title}</span>
+                </div>
+                {isExpanded ? <ChevronDown size={14} /> : <ChevronRight size={14} />}
+            </button>
+            
+            {/* Section Items */}
+            {isExpanded && (
+                <div className="ml-2 pl-2 border-l-2 border-gray-200 space-y-0.5">
+                    {accessibleItems.map(item => {
+                        const Icon = item.icon;
+                        return (
+                            <button
+                                key={item.id}
+                                onClick={() => setActiveSection(item.id)}
+                                className={`w-full flex items-center gap-3 px-3 py-2 rounded-lg transition whitespace-nowrap ${
+                                    activeSection === item.id
+                                        ? 'bg-red-600 text-white'
+                                        : 'text-gray-700 hover:bg-gray-100'
+                                }`}
+                            >
+                                <Icon size={18} className="flex-shrink-0" />
+                                <span className="font-medium text-left text-sm">{item.label}</span>
+                            </button>
+                        );
+                    })}
+                </div>
+            )}
+        </div>
+    );
+};
+
 const EnhancedAdminPanel = ({ isOpen, onClose, authToken, API_BASE_URL, userRole, userEmail, userId, username, skipAuthentication = false }) => {
     const [activeSection, setActiveSection] = useState('dashboard');
     const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
+    const [expandedSections, setExpandedSections] = useState({
+        moderation: true,
+        admin: true,
+        configuration: true
+    });
     const [adminPassword, setAdminPassword] = useState('');
     const [isAuthenticated, setIsAuthenticated] = useState(skipAuthentication);
     const [showPasswordPrompt, setShowPasswordPrompt] = useState(!skipAuthentication);
@@ -440,45 +549,75 @@ const EnhancedAdminPanel = ({ isOpen, onClose, authToken, API_BASE_URL, userRole
                                 {sidebarCollapsed ? <PanelLeft size={20} /> : <PanelLeftClose size={20} />}
                             </button>
                         </div>
-                        <nav className="p-2 space-y-1 flex-1">
-                            {[
-                                { id: 'dashboard', label: 'Dashboard', icon: BarChart3 },
-                                { id: 'moderation', label: 'Reports', icon: AlertTriangle },
-                                { id: 'user-management', label: 'User Management', icon: Users },
-                                { id: 'animals', label: 'Animal Management', icon: Shield },
-                                { id: 'audit-logs', label: 'Audit Logs', icon: FileText },
-                                { id: 'mod-chat', label: 'Mod Team Chat', icon: MessageSquare },
-                                { id: 'bug-reports', label: 'Bug Reports', icon: Bug },
-                                { id: 'feedback', label: 'Calculator Feedback', icon: Dna },
-                                { id: 'species-management', label: 'Species Management', icon: PawPrint, requiredRole: 'admin' },
-                                { id: 'genetics-builder', label: 'Genetics Builder', icon: Wrench, requiredRole: 'admin' },
-                                { id: 'backup-management', label: 'Backup Management', icon: Database, requiredRole: 'admin' },
-                                { id: 'reports', label: 'Analytics', icon: BarChart3 },
-                                { id: 'communication', label: 'Communication', icon: Mail },
-                                { id: 'system-settings', label: 'System Settings', icon: Settings, requiredRole: 'admin' }
-                            ].map(section => {
-                                const Icon = section.icon;
-                                const hasAccess = !section.requiredRole || userRole === section.requiredRole;
-                                if (!hasAccess) return null;
+                        <nav className="p-2 space-y-1 flex-1 overflow-y-auto">
+                            {/* Dashboard - standalone */}
+                            <button
+                                onClick={() => setActiveSection('dashboard')}
+                                title={sidebarCollapsed ? 'Dashboard' : undefined}
+                                className={`w-full flex items-center gap-3 px-3 py-2.5 rounded-lg transition whitespace-nowrap ${
+                                    activeSection === 'dashboard'
+                                        ? 'bg-red-600 text-white'
+                                        : 'text-gray-700 hover:bg-gray-100'
+                                } ${sidebarCollapsed ? 'justify-center' : ''}`}
+                            >
+                                <BarChart3 size={20} className="flex-shrink-0" />
+                                {!sidebarCollapsed && <span className="font-medium text-left text-sm">Dashboard</span>}
+                            </button>
 
-                                return (
-                                    <button
-                                        key={section.id}
-                                        onClick={() => setActiveSection(section.id)}
-                                        title={sidebarCollapsed ? section.label : undefined}
-                                        className={`w-full flex items-center gap-3 px-3 py-2.5 rounded-lg transition whitespace-nowrap ${
-                                            activeSection === section.id
-                                                ? 'bg-red-600 text-white'
-                                                : 'text-gray-700 hover:bg-gray-100'
-                                        } ${sidebarCollapsed ? 'justify-center' : ''}`}
-                                    >
-                                        <Icon size={20} className="flex-shrink-0" />
-                                        {!sidebarCollapsed && (
-                                            <span className="font-medium text-left text-sm">{section.label}</span>
-                                        )}
-                                    </button>
-                                );
-                            })}
+                            {/* Moderation Section */}
+                            <CollapsibleSection
+                                title="Moderation"
+                                icon={Shield}
+                                isExpanded={expandedSections.moderation}
+                                onToggle={() => setExpandedSections(prev => ({ ...prev, moderation: !prev.moderation }))}
+                                sidebarCollapsed={sidebarCollapsed}
+                                items={[
+                                    { id: 'mod-chat', label: 'Mod Team Chat', icon: MessageSquare },
+                                    { id: 'moderation', label: 'Reports', icon: AlertTriangle },
+                                    { id: 'user-management', label: 'User Management', icon: Users },
+                                    { id: 'animals', label: 'Animal Management', icon: Shield },
+                                    { id: 'communication', label: 'Communication', icon: Mail }
+                                ]}
+                                activeSection={activeSection}
+                                setActiveSection={setActiveSection}
+                                userRole={userRole}
+                            />
+
+                            {/* Admin Section */}
+                            <CollapsibleSection
+                                title="Admin"
+                                icon={Lock}
+                                isExpanded={expandedSections.admin}
+                                onToggle={() => setExpandedSections(prev => ({ ...prev, admin: !prev.admin }))}
+                                sidebarCollapsed={sidebarCollapsed}
+                                items={[
+                                    { id: 'audit-logs', label: 'Audit Logs', icon: FileText },
+                                    { id: 'bug-reports', label: 'Bug Reports', icon: Bug },
+                                    { id: 'backup-management', label: 'Backup Management', icon: Database, requiredRole: 'admin' },
+                                    { id: 'reports', label: 'Analytics', icon: BarChart3 }
+                                ]}
+                                activeSection={activeSection}
+                                setActiveSection={setActiveSection}
+                                userRole={userRole}
+                            />
+
+                            {/* Configuration Section */}
+                            <CollapsibleSection
+                                title="Configuration"
+                                icon={Settings}
+                                isExpanded={expandedSections.configuration}
+                                onToggle={() => setExpandedSections(prev => ({ ...prev, configuration: !prev.configuration }))}
+                                sidebarCollapsed={sidebarCollapsed}
+                                items={[
+                                    { id: 'species-management', label: 'Species Management', icon: PawPrint, requiredRole: 'admin' },
+                                    { id: 'feedback', label: 'Calculator Feedback', icon: Dna },
+                                    { id: 'genetics-builder', label: 'Genetics Builder', icon: Wrench, requiredRole: 'admin' },
+                                    { id: 'system-settings', label: 'System Settings', icon: Settings, requiredRole: 'admin' }
+                                ]}
+                                activeSection={activeSection}
+                                setActiveSection={setActiveSection}
+                                userRole={userRole}
+                            />
                         </nav>
                     </div>
 
