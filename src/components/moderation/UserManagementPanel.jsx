@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { 
     Shield, AlertTriangle, Eye, Search, Filter, X, Ban, Clock, CheckCircle, UserCog, RefreshCw,
-    ChevronUp, ChevronDown, Users
+    ChevronUp, ChevronDown, Users, Calendar, MessageSquare, PawPrint, Activity, LogIn
 } from 'lucide-react';
 import axios from 'axios';
 import { parseApiError, withRetry } from '../../utils/errorHandler';
@@ -198,6 +198,23 @@ const UserManagementPanel = () => {
         });
     };
 
+    const formatRelativeTime = (date) => {
+        if (!date) return 'Never';
+        const now = new Date();
+        const then = new Date(date);
+        const diffMs = now - then;
+        const diffMins = Math.floor(diffMs / 60000);
+        const diffHours = Math.floor(diffMs / 3600000);
+        const diffDays = Math.floor(diffMs / 86400000);
+        
+        if (diffMins < 1) return 'Just now';
+        if (diffMins < 60) return `${diffMins}m ago`;
+        if (diffHours < 24) return `${diffHours}h ago`;
+        if (diffDays < 7) return `${diffDays}d ago`;
+        if (diffDays < 30) return `${Math.floor(diffDays / 7)}w ago`;
+        return formatDate(date).split(',')[0]; // Just date
+    };
+
     const handleSort = (key) => {
         setSortConfig(prev => ({
             key,
@@ -351,7 +368,9 @@ const UserManagementPanel = () => {
                             <th className="sortable" onClick={() => handleSort('warningCount')}>
                                 Warnings {getSortIcon('warningCount')}
                             </th>
-                            <th>Reports</th>
+                            <th className="sortable" onClick={() => handleSort('last_login')}>
+                                Last Login {getSortIcon('last_login')}
+                            </th>
                             <th>Actions</th>
                         </tr>
                     </thead>
@@ -382,8 +401,14 @@ const UserManagementPanel = () => {
                                     {user.warningCount > 0 ? user.warningCount : 'None'}
                                 </td>
 
-                                <td className="data-cell">
-                                    {user.reportCount > 0 ? user.reportCount : 'None'}
+                                <td className="data-cell last-login-cell">
+                                    {user.last_login ? (
+                                        <span title={formatDate(user.last_login)}>
+                                            {formatRelativeTime(user.last_login)}
+                                        </span>
+                                    ) : (
+                                        <span className="never-logged">Never</span>
+                                    )}
                                 </td>
 
                                 <td className="actions-cell">
@@ -693,6 +718,7 @@ const ModerationActionModal = ({ user, actionType, onClose, onWarn, onSuspend, o
 // Modal for viewing user history with ability to lift warnings
 const UserHistoryModal = ({ user, onClose, onLiftWarning, onRefresh }) => {
     const [localUser, setLocalUser] = useState(user);
+    const [activeTab, setActiveTab] = useState('timeline');
     
     const formatDate = (date) => {
         if (!date) return 'N/A';
@@ -703,6 +729,23 @@ const UserHistoryModal = ({ user, onClose, onLiftWarning, onRefresh }) => {
             hour: '2-digit',
             minute: '2-digit'
         });
+    };
+
+    const formatRelativeTime = (date) => {
+        if (!date) return 'Never';
+        const now = new Date();
+        const then = new Date(date);
+        const diffMs = now - then;
+        const diffMins = Math.floor(diffMs / 60000);
+        const diffHours = Math.floor(diffMs / 3600000);
+        const diffDays = Math.floor(diffMs / 86400000);
+        
+        if (diffMins < 1) return 'Just now';
+        if (diffMins < 60) return `${diffMins}m ago`;
+        if (diffHours < 24) return `${diffHours}h ago`;
+        if (diffDays < 7) return `${diffDays}d ago`;
+        if (diffDays < 30) return `${Math.floor(diffDays / 7)}w ago`;
+        return formatDate(date).split(',')[0];
     };
 
     const handleLiftWarning = async (index) => {
@@ -719,104 +762,250 @@ const UserHistoryModal = ({ user, onClose, onLiftWarning, onRefresh }) => {
         }
     };
 
+    // Build unified timeline from all events
+    const buildTimeline = () => {
+        const events = [];
+        
+        // Add account creation
+        if (localUser.creationDate) {
+            events.push({
+                type: 'account_created',
+                date: new Date(localUser.creationDate),
+                icon: 'user',
+                title: 'Account Created',
+                color: 'blue'
+            });
+        }
+
+        // Add warnings
+        (localUser.warnings || []).forEach((warning, idx) => {
+            events.push({
+                type: 'warning',
+                date: new Date(warning.date),
+                icon: 'warning',
+                title: warning.isLifted ? 'Warning (Lifted)' : 'Warning Issued',
+                subtitle: warning.category || 'General',
+                description: warning.reason,
+                color: warning.isLifted ? 'gray' : 'yellow',
+                warningIndex: idx,
+                isLifted: warning.isLifted
+            });
+        });
+
+        // Add moderation actions
+        (localUser.moderationHistory || []).forEach(action => {
+            const actionLabels = {
+                user_warned: 'Warning Issued',
+                user_suspended: 'Account Suspended',
+                user_banned: 'Account Banned',
+                user_activated: 'Account Activated',
+                warning_lifted: 'Warning Lifted',
+                suspension_lifted: 'Suspension Lifted',
+                ban_lifted: 'Ban Lifted'
+            };
+            events.push({
+                type: 'moderation',
+                date: new Date(action.timestamp),
+                icon: 'shield',
+                title: actionLabels[action.action] || action.action.replace(/_/g, ' '),
+                subtitle: `By ${action.moderatorEmail || 'Unknown'}`,
+                description: action.reason || action.details?.reason,
+                color: action.action.includes('banned') ? 'red' : 
+                       action.action.includes('suspended') ? 'orange' : 
+                       action.action.includes('lifted') ? 'green' : 'purple'
+            });
+        });
+
+        // Add reports
+        (localUser.recentReports || []).forEach(report => {
+            events.push({
+                type: 'report',
+                date: new Date(report.createdAt),
+                icon: 'flag',
+                title: 'Report Filed',
+                subtitle: report.category || 'Unknown',
+                description: report.reason,
+                status: report.status,
+                color: report.status === 'resolved' ? 'green' : 
+                       report.status === 'dismissed' ? 'gray' : 'red'
+            });
+        });
+
+        // Sort by date descending
+        return events.sort((a, b) => b.date - a.date);
+    };
+
+    const timeline = buildTimeline();
+
+    const getTimelineIcon = (event) => {
+        switch (event.icon) {
+            case 'warning': return <AlertTriangle size={16} />;
+            case 'shield': return <Shield size={16} />;
+            case 'flag': return <AlertTriangle size={16} />;
+            case 'user': return <Users size={16} />;
+            default: return <Activity size={16} />;
+        }
+    };
+
     return (
         <div className="modal-overlay" onClick={onClose}>
             <div className="modal-content history-modal" onClick={(e) => e.stopPropagation()}>
                 <div className="modal-header">
-                    <h3>User History</h3>
+                    <h3>User History & Timeline</h3>
                     <button className="close-btn" onClick={onClose}>×</button>
                 </div>
 
+                {/* User Info Section with Metrics */}
                 <div className="user-info-section">
-                    <h4>{localUser.personalName || localUser.breederName || 'Unknown User'}</h4>
-                    <p>{localUser.email} · {localUser.id_public}</p>
-                    <span className={`status-text status-${localUser.accountStatus || 'normal'}`} style={{ marginTop: '8px', display: 'inline-block' }}>
-                        {(localUser.accountStatus || 'normal') === 'normal' ? 'NORMAL' : (localUser.accountStatus || 'normal').toUpperCase()}}
-                    </span>
-                </div>
-
-                {/* Warnings Section */}
-                <div className="history-section">
-                    <h4>
-                        <AlertTriangle size={18} />
-                        Warnings ({localUser.warnings?.filter(w => !w.isLifted).length || 0} active)
-                    </h4>
-                    {localUser.warnings && localUser.warnings.length > 0 ? (
-                        localUser.warnings.map((warning, idx) => (
-                            <div key={idx} className={`history-item warning-item ${warning.isLifted ? 'lifted' : ''}`}>
-                                <div className="item-header">
-                                    <span className="warning-category">{warning.category || 'General'}</span>
-                                    {warning.isLifted ? (
-                                        <span className="lifted-badge">LIFTED</span>
-                                    ) : (
-                                        <button 
-                                            className="lift-warning-btn"
-                                            onClick={() => handleLiftWarning(idx)}
-                                            title="Lift this warning"
-                                        >
-                                            <X size={14} />
-                                            Lift
-                                        </button>
-                                    )}
-                                </div>
-                                <div className="history-reason">{warning.reason}</div>
-                                <div className="history-date">{formatDate(warning.date)}</div>
-                            </div>
-                        ))
-                    ) : (
-                        <div className="no-items">No warnings on record</div>
+                    <div className="user-info-header">
+                        <div>
+                            <h4>{localUser.personalName || localUser.breederName || 'Unknown User'}</h4>
+                            <p>{localUser.email} · {localUser.id_public}</p>
+                            <span className={`status-badge status-${localUser.accountStatus || 'normal'}`}>
+                                {(localUser.accountStatus || 'normal').toUpperCase()}
+                            </span>
+                        </div>
+                    </div>
+                    
+                    {/* Metrics Grid */}
+                    <div className="user-metrics-grid">
+                        <div className="metric-card">
+                            <PawPrint size={18} />
+                            <div className="metric-value">{localUser.metrics?.animalCount || 0}</div>
+                            <div className="metric-label">Animals</div>
+                        </div>
+                        <div className="metric-card">
+                            <MessageSquare size={18} />
+                            <div className="metric-value">{localUser.metrics?.messageCount || 0}</div>
+                            <div className="metric-label">Messages</div>
+                        </div>
+                        <div className="metric-card">
+                            <AlertTriangle size={18} />
+                            <div className="metric-value">{localUser.warnings?.filter(w => !w.isLifted).length || 0}</div>
+                            <div className="metric-label">Warnings</div>
+                        </div>
+                        <div className="metric-card">
+                            <LogIn size={18} />
+                            <div className="metric-value">{formatRelativeTime(localUser.last_login)}</div>
+                            <div className="metric-label">Last Login</div>
+                        </div>
+                    </div>
+                    
+                    {localUser.last_login_ip && (
+                        <div className="last-login-ip">
+                            Last IP: <code>{localUser.last_login_ip}</code>
+                        </div>
                     )}
                 </div>
 
-                {/* Moderation History Section */}
-                {localUser.moderationHistory && localUser.moderationHistory.length > 0 && (
-                    <div className="history-section">
-                        <h4>
-                            <Shield size={18} />
-                            Moderation Actions ({localUser.moderationHistory.length})
-                        </h4>
-                        {localUser.moderationHistory.map((action, idx) => (
-                            <div key={idx} className="history-item action-item">
-                                <div className="item-header">
-                                    <span className="action-type">
-                                        {action.action.replace(/_/g, ' ')}
-                                    </span>
-                                    <span className="history-date">
-                                        {formatDate(action.timestamp)}
-                                    </span>
-                                </div>
-                                <div className="action-moderator">
-                                    By {action.moderatorId?.personalName || 
-                                        action.moderatorId?.breederName || 
-                                        'Unknown'}
-                                </div>
-                                {action.details?.reason && (
-                                    <div className="history-reason">{action.details.reason}</div>
-                                )}
+                {/* Tabs */}
+                <div className="history-tabs">
+                    <button 
+                        className={`tab-btn ${activeTab === 'timeline' ? 'active' : ''}`}
+                        onClick={() => setActiveTab('timeline')}
+                    >
+                        <Activity size={16} /> Timeline
+                    </button>
+                    <button 
+                        className={`tab-btn ${activeTab === 'warnings' ? 'active' : ''}`}
+                        onClick={() => setActiveTab('warnings')}
+                    >
+                        <AlertTriangle size={16} /> Warnings ({localUser.warnings?.length || 0})
+                    </button>
+                    <button 
+                        className={`tab-btn ${activeTab === 'reports' ? 'active' : ''}`}
+                        onClick={() => setActiveTab('reports')}
+                    >
+                        <Shield size={16} /> Reports ({localUser.recentReports?.length || 0})
+                    </button>
+                </div>
+
+                {/* Timeline Tab */}
+                {activeTab === 'timeline' && (
+                    <div className="timeline-container">
+                        {timeline.length > 0 ? (
+                            <div className="timeline">
+                                {timeline.map((event, idx) => (
+                                    <div key={idx} className={`timeline-item timeline-${event.color}`}>
+                                        <div className="timeline-marker">
+                                            {getTimelineIcon(event)}
+                                        </div>
+                                        <div className="timeline-content">
+                                            <div className="timeline-header">
+                                                <span className="timeline-title">{event.title}</span>
+                                                <span className="timeline-date">{formatRelativeTime(event.date)}</span>
+                                            </div>
+                                            {event.subtitle && (
+                                                <div className="timeline-subtitle">{event.subtitle}</div>
+                                            )}
+                                            {event.description && (
+                                                <div className="timeline-description">{event.description}</div>
+                                            )}
+                                            {event.status && (
+                                                <span className={`timeline-status status-${event.status}`}>
+                                                    {event.status}
+                                                </span>
+                                            )}
+                                        </div>
+                                    </div>
+                                ))}
                             </div>
-                        ))}
+                        ) : (
+                            <div className="no-items">No activity recorded</div>
+                        )}
                     </div>
                 )}
 
-                {/* Recent Reports Section */}
-                {localUser.recentReports && localUser.recentReports.length > 0 && (
+                {/* Warnings Tab */}
+                {activeTab === 'warnings' && (
                     <div className="history-section">
-                        <h4>
-                            <AlertTriangle size={18} />
-                            Reports Against User ({localUser.reportCounts?.total || localUser.recentReports.length})
-                        </h4>
-                        {localUser.recentReports.slice(0, 5).map((report, idx) => (
-                            <div key={idx} className="history-item report-item">
-                                <div className="item-header">
-                                    <span className="report-type">{report.category}</span>
-                                    <span className={`report-status status-${report.status}`}>
-                                        {report.status}
-                                    </span>
+                        {localUser.warnings && localUser.warnings.length > 0 ? (
+                            localUser.warnings.map((warning, idx) => (
+                                <div key={idx} className={`history-item warning-item ${warning.isLifted ? 'lifted' : ''}`}>
+                                    <div className="item-header">
+                                        <span className="warning-category">{warning.category || 'General'}</span>
+                                        {warning.isLifted ? (
+                                            <span className="lifted-badge">LIFTED</span>
+                                        ) : (
+                                            <button 
+                                                className="lift-warning-btn"
+                                                onClick={() => handleLiftWarning(idx)}
+                                                title="Lift this warning"
+                                            >
+                                                <X size={14} />
+                                                Lift
+                                            </button>
+                                        )}
+                                    </div>
+                                    <div className="history-reason">{warning.reason}</div>
+                                    <div className="history-date">{formatDate(warning.date)}</div>
                                 </div>
-                                <div className="history-reason">{report.reason}</div>
-                                <div className="history-date">{formatDate(report.createdAt)}</div>
-                            </div>
-                        ))}
+                            ))
+                        ) : (
+                            <div className="no-items">No warnings on record</div>
+                        )}
+                    </div>
+                )}
+
+                {/* Reports Tab */}
+                {activeTab === 'reports' && (
+                    <div className="history-section">
+                        {localUser.recentReports && localUser.recentReports.length > 0 ? (
+                            localUser.recentReports.map((report, idx) => (
+                                <div key={idx} className="history-item report-item">
+                                    <div className="item-header">
+                                        <span className="report-type">{report.category}</span>
+                                        <span className={`report-status status-${report.status}`}>
+                                            {report.status}
+                                        </span>
+                                    </div>
+                                    <div className="history-reason">{report.reason}</div>
+                                    <div className="history-date">{formatDate(report.createdAt)}</div>
+                                </div>
+                            ))
+                        ) : (
+                            <div className="no-items">No reports on record</div>
+                        )}
                     </div>
                 )}
 
