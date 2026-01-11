@@ -2059,10 +2059,10 @@ const PrivateAnimalDetail = ({ animal, onClose, onEdit, API_BASE_URL, authToken,
     if (!animal) return null;
 
     return (
-        <div className="fixed inset-0 bg-accent/10 flex items-center justify-center p-2 sm:p-4 z-50 overflow-y-auto">
-            <div className="bg-primary rounded-xl shadow-2xl w-full max-w-5xl max-h-[95vh] sm:max-h-[90vh] overflow-y-auto">
+        <div className="fixed inset-0 bg-accent/10 flex items-center justify-center p-2 sm:p-4 z-[70] overflow-y-auto">
+            <div className="bg-primary rounded-xl shadow-2xl w-full max-w-5xl max-h-[95vh] sm:max-h-[90vh] overflow-y-auto overflow-x-hidden">
                 {/* Header */}
-                <div className="bg-white rounded-t-lg p-2 sm:p-4 border-b border-gray-300">
+                <div className="bg-white rounded-t-lg p-2 sm:p-4 border-b border-gray-300 mt-12 sm:mt-0">
                     {/* Mobile layout: stacked */}
                     <div className="sm:hidden">
                         <div className="flex justify-between items-center mb-2">
@@ -2901,11 +2901,40 @@ const ViewOnlyPrivateAnimalDetail = ({ animal, onClose, API_BASE_URL, authToken,
     if (!animal) return null;
 
     return (
-        <div className="fixed inset-0 bg-accent/10 flex items-center justify-center p-4 z-50 overflow-y-auto">
-            <div className="bg-primary rounded-xl shadow-2xl w-full max-w-5xl max-h-[90vh] overflow-y-auto">
+        <div className="fixed inset-0 bg-accent/10 flex items-center justify-center p-2 sm:p-4 z-[70] overflow-y-auto">
+            <div className="bg-primary rounded-xl shadow-2xl w-full max-w-5xl max-h-[95vh] sm:max-h-[90vh] overflow-y-auto overflow-x-hidden">
                 {/* Header */}
-                <div className="bg-white rounded-t-lg p-4 border-b border-gray-300">
-                    <div className="flex justify-between items-center">
+                <div className="bg-white rounded-t-lg p-2 sm:p-4 border-b border-gray-300 mt-12 sm:mt-0">
+                    {/* Mobile layout: stacked */}
+                    <div className="sm:hidden">
+                        <div className="flex justify-between items-center mb-2">
+                            <button 
+                                onClick={onClose} 
+                                className="flex items-center text-gray-600 hover:text-gray-800 transition text-sm"
+                            >
+                                <ArrowLeft size={16} className="mr-1" /> Back
+                            </button>
+                            <span className="text-[10px] bg-orange-100 text-orange-800 px-1.5 py-0.5 rounded font-medium">
+                                📋 VIEW-ONLY
+                            </span>
+                            <button onClick={onClose} className="text-gray-500 hover:text-gray-800">
+                                <X size={24} />
+                            </button>
+                        </div>
+                        <div className="flex justify-center gap-1.5 flex-wrap">
+                            <button
+                                onClick={handleShare}
+                                className="px-2 py-1 bg-primary hover:bg-primary/90 text-black font-semibold rounded-lg transition flex items-center gap-1 text-xs"
+                                title="Copy public link"
+                            >
+                                <Link size={14} />
+                                Share
+                            </button>
+                        </div>
+                    </div>
+                    
+                    {/* Desktop layout: single row */}
+                    <div className="hidden sm:flex justify-between items-center">
                         <button 
                             onClick={onClose} 
                             className="flex items-center text-gray-600 hover:text-gray-800 transition"
