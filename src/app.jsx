@@ -2988,7 +2988,6 @@ const PrivateAnimalDetail = ({ animal, onClose, onEdit, API_BASE_URL, authToken,
                             )}
                         </div>
                     )}
-                </div>
 
                 {/* Pedigree Chart Modal */}
                 {showPedigree && (
@@ -3939,7 +3938,6 @@ const ViewOnlyPrivateAnimalDetail = ({ animal, onClose, API_BASE_URL, authToken,
                             )}
                         </div>
                     )}
-                </div>
 
                 {/* Pedigree Chart Modal */}
                 {showPedigree && (
@@ -5086,7 +5084,6 @@ const ViewOnlyAnimalDetail = ({ animal, onClose, API_BASE_URL, onViewProfile, au
                             )}
                         </div>
                     )}
-                </div>
 
                 {/* Pedigree Chart Modal */}
                 {showPedigree && (
@@ -19970,8 +19967,6 @@ const App = () => {
                             </div>
                         </div>
                     )}
-                                            </div>
-                                        )}
 
                                         {/* Tab 7: Health */}
                                         {detailViewTab === 7 && (
@@ -20212,11 +20207,6 @@ const App = () => {
                             )}
                         </div>
                     )}
-                                            </div>
-                                        )}
-
-                                        </div>
-                                    </div>
 
                                     {/* Pedigree Chart Modal */}
                                     {showPedigreeChart && animalToView && (
@@ -20227,12 +20217,14 @@ const App = () => {
                                             authToken={authToken}
                                         />
                                     )}
-                                    </>
-                                );
-                            })()
-                        )
-                    } />
-                    <Route path="/hidden-animals" element={
+                                        </div>
+                                    </div>
+                                </>
+                            );
+                        })()
+                    )
+                } />
+                <Route path="/hidden-animals" element={
                         <div className="w-full max-w-5xl bg-white p-6 rounded-xl shadow-lg">
                             <div className="flex items-start justify-between mb-6">
                                 <button onClick={() => navigate('/')} className="flex items-center text-gray-600 hover:text-gray-800 font-medium">
