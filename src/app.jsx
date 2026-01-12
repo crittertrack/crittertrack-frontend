@@ -10985,6 +10985,71 @@ const AnimalForm = ({
                                         </div>
                                     )}
                                 </div>
+                                
+                                {/* Health Clearances & Screening - Dog/Cat */}
+                                {(formData.species === 'Dog' || formData.species === 'Cat') && (
+                                    <div className="space-y-3 border-t border-gray-200 pt-4">
+                                        <h4 className="text-sm font-semibold text-gray-700">Health Clearances & Screening</h4>
+                                        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                                            <div>
+                                                <label className="block text-xs font-medium text-gray-700">Spay/Neuter Date</label>
+                                                <input type="date" name="spayNeuterDate" value={formData.spayNeuterDate || ''} onChange={handleChange} 
+                                                    className="mt-1 block w-full p-2 border border-gray-300 rounded-md shadow-sm focus:ring-primary focus:border-primary" />
+                                            </div>
+                                            <div>
+                                                <label className="block text-xs font-medium text-gray-700">Heartworm Status</label>
+                                                <select name="heartwormStatus" value={formData.heartwormStatus || ''} onChange={handleChange} 
+                                                    className="mt-1 block w-full p-2 border border-gray-300 rounded-md shadow-sm focus:ring-primary focus:border-primary">
+                                                    <option value="">Select...</option>
+                                                    <option value="Negative">Negative</option>
+                                                    <option value="Positive">Positive</option>
+                                                    <option value="On Prevention">On Prevention</option>
+                                                    <option value="Unknown">Unknown</option>
+                                                </select>
+                                            </div>
+                                        </div>
+                                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                            <div>
+                                                <label className="block text-xs font-medium text-gray-700">Hip/Elbow Scores</label>
+                                                <input type="text" name="hipElbowScores" value={formData.hipElbowScores || ''} onChange={handleChange} 
+                                                    className="mt-1 block w-full p-2 border border-gray-300 rounded-md shadow-sm focus:ring-primary focus:border-primary" 
+                                                    placeholder="e.g., OFA Good, PennHIP 0.32" />
+                                            </div>
+                                            <div>
+                                                <label className="block text-xs font-medium text-gray-700">Eye Clearance</label>
+                                                <input type="text" name="eyeClearance" value={formData.eyeClearance || ''} onChange={handleChange} 
+                                                    className="mt-1 block w-full p-2 border border-gray-300 rounded-md shadow-sm focus:ring-primary focus:border-primary" 
+                                                    placeholder="e.g., CAER Clear 2024" />
+                                            </div>
+                                            <div>
+                                                <label className="block text-xs font-medium text-gray-700">Cardiac Clearance</label>
+                                                <input type="text" name="cardiacClearance" value={formData.cardiacClearance || ''} onChange={handleChange} 
+                                                    className="mt-1 block w-full p-2 border border-gray-300 rounded-md shadow-sm focus:ring-primary focus:border-primary" 
+                                                    placeholder="e.g., OFA Cardiac Normal" />
+                                            </div>
+                                            <div>
+                                                <label className="block text-xs font-medium text-gray-700">Dental Records</label>
+                                                <input type="text" name="dentalRecords" value={formData.dentalRecords || ''} onChange={handleChange} 
+                                                    className="mt-1 block w-full p-2 border border-gray-300 rounded-md shadow-sm focus:ring-primary focus:border-primary" 
+                                                    placeholder="e.g., Last cleaning 01/2024" />
+                                            </div>
+                                        </div>
+                                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                            <div>
+                                                <label className="block text-xs font-medium text-gray-700">Genetic Test Results</label>
+                                                <textarea name="geneticTestResults" value={formData.geneticTestResults || ''} onChange={handleChange} rows="2"
+                                                    className="mt-1 block w-full p-2 border border-gray-300 rounded-md shadow-sm focus:ring-primary focus:border-primary" 
+                                                    placeholder="e.g., Embark: Clear for DM, vWD, DCM" />
+                                            </div>
+                                            <div>
+                                                <label className="block text-xs font-medium text-gray-700">Chronic Conditions</label>
+                                                <textarea name="chronicConditions" value={formData.chronicConditions || ''} onChange={handleChange} rows="2"
+                                                    className="mt-1 block w-full p-2 border border-gray-300 rounded-md shadow-sm focus:ring-primary focus:border-primary" 
+                                                    placeholder="e.g., Allergies, arthritis, epilepsy" />
+                                            </div>
+                                        </div>
+                                    </div>
+                                )}
                             </div>
                         </div>
 
@@ -11053,76 +11118,7 @@ const AnimalForm = ({
                                         placeholder="e.g., Dr. Smith, ABC Veterinary Clinic" />
                                 </div>
 
-                                {/* Dog/Cat Health Details - integrated */}
-                                {(formData.species === 'Dog' || formData.species === 'Cat') && (
-                                    <>
-                                        <h4 className="text-md font-medium text-gray-600 border-t pt-3 mt-3">Health Clearances & Screening</h4>
-                                        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                                            <div>
-                                                <label className="block text-sm font-medium text-gray-700">Spay/Neuter Date</label>
-                                                <input type="date" name="spayNeuterDate" value={formData.spayNeuterDate || ''} onChange={handleChange} 
-                                                    className="mt-1 block w-full p-2 border border-gray-300 rounded-md shadow-sm focus:ring-primary focus:border-primary" />
-                                            </div>
-                                            <div>
-                                                <label className="block text-sm font-medium text-gray-700">Heartworm Status</label>
-                                                <select name="heartwormStatus" value={formData.heartwormStatus || ''} onChange={handleChange} 
-                                                    className="mt-1 block w-full p-2 border border-gray-300 rounded-md shadow-sm focus:ring-primary focus:border-primary">
-                                                    <option value="">Select...</option>
-                                                    <option value="Negative">Negative</option>
-                                                    <option value="Positive">Positive</option>
-                                                    <option value="On Prevention">On Prevention</option>
-                                                    <option value="Unknown">Unknown</option>
-                                                </select>
-                                            </div>
-                                            <div>
-                                                <label className="block text-sm font-medium text-gray-700">Parasite Prevention</label>
-                                                <input type="text" name="parasitePreventionSchedule" value={formData.parasitePreventionSchedule || ''} onChange={handleChange} 
-                                                    className="mt-1 block w-full p-2 border border-gray-300 rounded-md shadow-sm focus:ring-primary focus:border-primary" 
-                                                    placeholder="e.g., Monthly heartgard + flea/tick" />
-                                            </div>
-                                        </div>
-                                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                                            <div>
-                                                <label className="block text-sm font-medium text-gray-700">Hip/Elbow Scores</label>
-                                                <input type="text" name="hipElbowScores" value={formData.hipElbowScores || ''} onChange={handleChange} 
-                                                    className="mt-1 block w-full p-2 border border-gray-300 rounded-md shadow-sm focus:ring-primary focus:border-primary" 
-                                                    placeholder="e.g., OFA Good, PennHIP 0.32" />
-                                            </div>
-                                            <div>
-                                                <label className="block text-sm font-medium text-gray-700">Eye Clearance</label>
-                                                <input type="text" name="eyeClearance" value={formData.eyeClearance || ''} onChange={handleChange} 
-                                                    className="mt-1 block w-full p-2 border border-gray-300 rounded-md shadow-sm focus:ring-primary focus:border-primary" 
-                                                    placeholder="e.g., CAER Clear 2024" />
-                                            </div>
-                                            <div>
-                                                <label className="block text-sm font-medium text-gray-700">Cardiac Clearance</label>
-                                                <input type="text" name="cardiacClearance" value={formData.cardiacClearance || ''} onChange={handleChange} 
-                                                    className="mt-1 block w-full p-2 border border-gray-300 rounded-md shadow-sm focus:ring-primary focus:border-primary" 
-                                                    placeholder="e.g., OFA Cardiac Normal" />
-                                            </div>
-                                            <div>
-                                                <label className="block text-sm font-medium text-gray-700">Dental Records</label>
-                                                <input type="text" name="dentalRecords" value={formData.dentalRecords || ''} onChange={handleChange} 
-                                                    className="mt-1 block w-full p-2 border border-gray-300 rounded-md shadow-sm focus:ring-primary focus:border-primary" 
-                                                    placeholder="e.g., Last cleaning 01/2024" />
-                                            </div>
-                                        </div>
-                                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                                            <div>
-                                                <label className="block text-sm font-medium text-gray-700">Genetic Test Results</label>
-                                                <textarea name="geneticTestResults" value={formData.geneticTestResults || ''} onChange={handleChange} rows="2"
-                                                    className="mt-1 block w-full p-2 border border-gray-300 rounded-md shadow-sm focus:ring-primary focus:border-primary" 
-                                                    placeholder="e.g., Embark: Clear for DM, vWD, DCM" />
-                                            </div>
-                                            <div>
-                                                <label className="block text-sm font-medium text-gray-700">Chronic Conditions</label>
-                                                <textarea name="chronicConditions" value={formData.chronicConditions || ''} onChange={handleChange} rows="2"
-                                                    className="mt-1 block w-full p-2 border border-gray-300 rounded-md shadow-sm focus:ring-primary focus:border-primary" 
-                                                    placeholder="e.g., Allergies, arthritis, epilepsy" />
-                                            </div>
-                                        </div>
-                                    </>
-                                )}
+
                             </div>
                         </div>
                     </div>
