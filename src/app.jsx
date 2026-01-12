@@ -11657,27 +11657,29 @@ const AnimalForm = ({
                             </div>
                         </div>
 
-                        {/* Working & Performance */}
-                        <div className="bg-gray-50 p-4 rounded-lg border border-gray-200 space-y-4">
-                            <h3 className="text-lg font-semibold text-gray-700 border-b pb-2">Working & Performance</h3>
-                            <div className="space-y-4">
-                                <div>
-                                    <label className="block text-sm font-medium text-gray-700 mb-2">Working Titles</label>
-                                    <textarea name="workingTitles" value={formData.workingTitles || ''} onChange={handleChange} rows="3"
-                                        className="block w-full p-2 border border-gray-300 rounded-md shadow-sm focus:ring-primary focus:border-primary" 
-                                        placeholder="e.g., CGC (Canine Good Citizen), TKN (Trick Dog Novice), HT (Herding Tested)" />
-                                    <p className="text-xs text-gray-500 mt-1">Working, obedience, agility, or performance titles</p>
-                                </div>
-                                
-                                <div>
-                                    <label className="block text-sm font-medium text-gray-700 mb-2">Performance Scores</label>
-                                    <textarea name="performanceScores" value={formData.performanceScores || ''} onChange={handleChange} rows="3"
-                                        className="block w-full p-2 border border-gray-300 rounded-md shadow-sm focus:ring-primary focus:border-primary" 
-                                        placeholder="e.g., Agility Q scores, obedience scores, rally scores" />
-                                    <p className="text-xs text-gray-500 mt-1">Scores from performance events and trials</p>
+                        {/* Working & Performance - Dog only */}
+                        {formData.species === 'Dog' && (
+                            <div className="bg-gray-50 p-4 rounded-lg border border-gray-200 space-y-4">
+                                <h3 className="text-lg font-semibold text-gray-700 border-b pb-2">Working & Performance</h3>
+                                <div className="space-y-4">
+                                    <div>
+                                        <label className="block text-sm font-medium text-gray-700 mb-2">Working Titles</label>
+                                        <textarea name="workingTitles" value={formData.workingTitles || ''} onChange={handleChange} rows="3"
+                                            className="block w-full p-2 border border-gray-300 rounded-md shadow-sm focus:ring-primary focus:border-primary" 
+                                            placeholder="e.g., CGC (Canine Good Citizen), TKN (Trick Dog Novice), HT (Herding Tested)" />
+                                        <p className="text-xs text-gray-500 mt-1">Working, obedience, agility, or performance titles</p>
+                                    </div>
+                                    
+                                    <div>
+                                        <label className="block text-sm font-medium text-gray-700 mb-2">Performance Scores</label>
+                                        <textarea name="performanceScores" value={formData.performanceScores || ''} onChange={handleChange} rows="3"
+                                            className="block w-full p-2 border border-gray-300 rounded-md shadow-sm focus:ring-primary focus:border-primary" 
+                                            placeholder="e.g., Agility Q scores, obedience scores, rally scores" />
+                                        <p className="text-xs text-gray-500 mt-1">Scores from performance events and trials</p>
+                                    </div>
                                 </div>
                             </div>
-                        </div>
+                        )}
                     </div>
                 )}
                 
