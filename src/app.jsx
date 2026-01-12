@@ -9290,67 +9290,7 @@ const AnimalForm = ({
                                 )}
                             </div>
 
-                            {/* Dog/Cat Conformation Measurements - integrated into Appearance */}
-                            {(formData.species === 'Dog' || formData.species === 'Cat') && (
-                                <>
-                                    <h4 className="text-md font-medium text-gray-600 border-t pt-3 mt-3">Conformation Measurements</h4>
-                                    <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                                        <div>
-                                            <label className="block text-sm font-medium text-gray-700">Height at Withers</label>
-                                            <input type="text" name="heightAtWithers" value={formData.heightAtWithers || ''} onChange={handleChange} 
-                                                className="mt-1 block w-full p-2 border border-gray-300 rounded-md shadow-sm focus:ring-primary focus:border-primary" 
-                                                placeholder="e.g., 24 inches" />
-                                        </div>
-                                        <div>
-                                            <label className="block text-sm font-medium text-gray-700">Body Length</label>
-                                            <input type="text" name="bodyLength" value={formData.bodyLength || ''} onChange={handleChange} 
-                                                className="mt-1 block w-full p-2 border border-gray-300 rounded-md shadow-sm focus:ring-primary focus:border-primary" 
-                                                placeholder="e.g., 28 inches" />
-                                        </div>
-                                        <div>
-                                            <label className="block text-sm font-medium text-gray-700">Chest Girth</label>
-                                            <input type="text" name="chestGirth" value={formData.chestGirth || ''} onChange={handleChange} 
-                                                className="mt-1 block w-full p-2 border border-gray-300 rounded-md shadow-sm focus:ring-primary focus:border-primary" 
-                                                placeholder="e.g., 32 inches" />
-                                        </div>
-                                        <div>
-                                            <label className="block text-sm font-medium text-gray-700">Adult Weight</label>
-                                            <input type="text" name="adultWeight" value={formData.adultWeight || ''} onChange={handleChange} 
-                                                className="mt-1 block w-full p-2 border border-gray-300 rounded-md shadow-sm focus:ring-primary focus:border-primary" 
-                                                placeholder="e.g., 65 lbs" />
-                                        </div>
-                                        <div>
-                                            <label className="block text-sm font-medium text-gray-700">Body Condition Score</label>
-                                            <select name="bodyConditionScore" value={formData.bodyConditionScore || ''} onChange={handleChange} 
-                                                className="mt-1 block w-full p-2 border border-gray-300 rounded-md shadow-sm focus:ring-primary focus:border-primary">
-                                                <option value="">Select BCS</option>
-                                                {formData.species === 'Dog' ? (
-                                                    <>
-                                                        <option value="1">1 - Emaciated</option>
-                                                        <option value="2">2 - Very Thin</option>
-                                                        <option value="3">3 - Thin</option>
-                                                        <option value="4">4 - Underweight</option>
-                                                        <option value="5">5 - Ideal</option>
-                                                        <option value="6">6 - Overweight</option>
-                                                        <option value="7">7 - Heavy</option>
-                                                        <option value="8">8 - Obese</option>
-                                                        <option value="9">9 - Severely Obese</option>
-                                                    </>
-                                                ) : (
-                                                    <>
-                                                        <option value="1">1 - Emaciated</option>
-                                                        <option value="2">2 - Lean</option>
-                                                        <option value="3">3 - Ideal</option>
-                                                        <option value="4">4 - Overweight</option>
-                                                        <option value="5">5 - Obese</option>
-                                                    </>
-                                                )}
-                                            </select>
-                                            <p className="text-xs text-gray-500 mt-1">{formData.species === 'Dog' ? '1-9 scale (5 = ideal)' : '1-5 scale (3 = ideal)'}</p>
-                                        </div>
-                                    </div>
-                                </>
-                            )}
+
                         </div>
 
                         {/* Genetic Code */}
@@ -9456,19 +9396,26 @@ const AnimalForm = ({
                                 const sorted = [...growthRecords].sort((a, b) => new Date(b.date) - new Date(a.date));
                                 const mostRecentWeight = sorted[0];
                                 const mostRecentLength = sorted.find(r => r.length);
+                                const mostRecentHeight = sorted.find(r => r.height);
                                 
                                 return (
                                     <div data-tutorial-target="current-measurements-growth-chart" className="bg-blue-50 p-3 rounded-lg border border-blue-200">
                                         <h4 className="text-sm font-semibold text-gray-700 mb-2">Current Measurements</h4>
-                                        <div className="grid grid-cols-2 md:grid-cols-4 gap-3 text-sm">
+                                        <div className="grid grid-cols-2 md:grid-cols-5 gap-3 text-sm">
                                             <div>
                                                 <span className="text-xs text-gray-600">Weight:</span>
                                                 <p className="font-medium">{mostRecentWeight.weight} {measurementUnits.weight}</p>
                                             </div>
                                             {mostRecentLength && mostRecentLength.length && (
                                                 <div>
-                                                    <span className="text-xs text-gray-600">Length:</span>
+                                                    <span className="text-xs text-gray-600">Body Length:</span>
                                                     <p className="font-medium">{mostRecentLength.length} {measurementUnits.length}</p>
+                                                </div>
+                                            )}
+                                            {mostRecentHeight && mostRecentHeight.height && (
+                                                <div>
+                                                    <span className="text-xs text-gray-600">Height:</span>
+                                                    <p className="font-medium">{mostRecentHeight.height} {measurementUnits.length}</p>
                                                 </div>
                                             )}
                                             {mostRecentWeight.bcs && (
@@ -9486,13 +9433,16 @@ const AnimalForm = ({
                                 );
                             })()}
 
-                            {/* Growth Curve Charts - Weight and Length */}
+                            {/* Growth Curve Charts - Weight, Length, and Height */}
                             {growthRecords.length > 1 && (() => {
                                 const sorted = [...growthRecords].sort((a, b) => new Date(a.date) - new Date(b.date));
                                 const weights = sorted.map(r => parseFloat(r.weight) || 0).filter(w => w > 0);
                                 const lengths = sorted
                                     .filter(record => record.length && !isNaN(parseFloat(record.length)))
                                     .map(record => parseFloat(record.length));
+                                const heights = sorted
+                                    .filter(record => record.height && !isNaN(parseFloat(record.height)))
+                                    .map(record => parseFloat(record.height));
                                 
                                 if (weights.length < 2) return null;
                                 
@@ -9522,12 +9472,25 @@ const AnimalForm = ({
                                     lengthRange = lengthChartMax - lengthChartMin;
                                 }
                                 
+                                // Height chart setup
+                                const hasHeightData = heights.length >= 2;
+                                let minHeight, maxHeight, heightRange, heightChartMin, heightChartMax;
+                                if (hasHeightData) {
+                                    minHeight = Math.min(...heights);
+                                    maxHeight = Math.max(...heights);
+                                    const heightPadding = (maxHeight - minHeight) * 0.1 || 1;
+                                    heightChartMin = Math.max(0, minHeight - heightPadding);
+                                    heightChartMax = maxHeight + heightPadding;
+                                    heightRange = heightChartMax - heightChartMin;
+                                }
+                                
                                 // Create points for weight
                                 const weightPoints = sorted.map((record, idx) => ({
                                     x: margin.left + (idx / (sorted.length - 1)) * graphWidth,
                                     y: margin.top + graphHeight - ((parseFloat(record.weight) - weightChartMin) / weightRange) * graphHeight,
                                     weight: record.weight,
                                     length: record.length,
+                                    height: record.height,
                                     bcs: record.bcs,
                                     notes: record.notes,
                                     date: record.date
@@ -9539,6 +9502,19 @@ const AnimalForm = ({
                                     y: margin.top + graphHeight - ((parseFloat(record.length) - lengthChartMin) / lengthRange) * graphHeight,
                                     weight: record.weight,
                                     length: record.length,
+                                    height: record.height,
+                                    bcs: record.bcs,
+                                    notes: record.notes,
+                                    date: record.date
+                                })) : [];
+                                
+                                // Create points for height
+                                const heightPoints = hasHeightData ? sorted.filter(r => r.height).map((record, idx) => ({
+                                    x: margin.left + (sorted.indexOf(record) / (sorted.length - 1)) * graphWidth,
+                                    y: margin.top + graphHeight - ((parseFloat(record.height) - heightChartMin) / heightRange) * graphHeight,
+                                    weight: record.weight,
+                                    length: record.length,
+                                    height: record.height,
                                     bcs: record.bcs,
                                     notes: record.notes,
                                     date: record.date
@@ -9546,6 +9522,7 @@ const AnimalForm = ({
                                 
                                 const weightPathData = weightPoints.map((p, i) => `${i === 0 ? 'M' : 'L'} ${p.x} ${p.y}`).join(' ');
                                 const lengthPathData = lengthPoints.map((p, i) => `${i === 0 ? 'M' : 'L'} ${p.x} ${p.y}`).join(' ');
+                                const heightPathData = heightPoints.map((p, i) => `${i === 0 ? 'M' : 'L'} ${p.x} ${p.y}`).join(' ');
                                 
                                 const getBCSDescription = (bcsValue) => {
                                     const bcsMap = {
@@ -9654,9 +9631,21 @@ const AnimalForm = ({
                                             <div className="bg-white p-4 rounded-lg border border-gray-200">
                                                 <h4 className="text-sm font-semibold text-gray-700 mb-3 flex items-center gap-2">
                                                     <span className="inline-block w-3 h-1 bg-orange-500 rounded"></span>
-                                                    Length Growth Curve
+                                                    Body Length Growth Curve
                                                 </h4>
                                                 {renderChart(lengthPoints, 'Length', '#ff8c42', lengthPathData, lengthChartMin, lengthChartMax)}
+                                                <p className="text-xs text-gray-500 mt-2">Hover over points to see detailed measurements and notes.</p>
+                                            </div>
+                                        )}
+                                        
+                                        {/* Height at Withers Chart */}
+                                        {hasHeightData && (
+                                            <div className="bg-white p-4 rounded-lg border border-gray-200">
+                                                <h4 className="text-sm font-semibold text-gray-700 mb-3 flex items-center gap-2">
+                                                    <span className="inline-block w-3 h-1 bg-purple-500 rounded"></span>
+                                                    Height at Withers Growth Curve
+                                                </h4>
+                                                {renderChart(heightPoints, 'Height', '#9333ea', heightPathData, heightChartMin, heightChartMax)}
                                                 <p className="text-xs text-gray-500 mt-2">Hover over points to see detailed measurements and notes.</p>
                                             </div>
                                         )}
@@ -9705,8 +9694,8 @@ const AnimalForm = ({
                                 <div className="bg-white p-3 rounded-lg border border-gray-300 space-y-3">
                                     <p className="text-xs font-medium text-gray-600">Add New Measurement</p>
                                     
-                                    {/* Row 1: Date, Weight, Length */}
-                                    <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
+                                    {/* Row 1: Date, Weight, Body Length, Height */}
+                                    <div className="grid grid-cols-1 md:grid-cols-4 gap-3">
                                         <div>
                                             <label className="block text-xs font-medium text-gray-700">Date</label>
                                             <input 
@@ -9728,13 +9717,24 @@ const AnimalForm = ({
                                             />
                                         </div>
                                         <div>
-                                            <label className="block text-xs font-medium text-gray-700">Length ({measurementUnits.length}) - optional</label>
+                                            <label className="block text-xs font-medium text-gray-700">Body Length ({measurementUnits.length}) - optional</label>
                                             <input 
                                                 type="number" 
                                                 step="0.1"
                                                 value={newMeasurement.length}
                                                 onChange={(e) => setNewMeasurement({...newMeasurement, length: e.target.value})}
                                                 placeholder={`e.g., ${measurementUnits.length === 'cm' ? '20' : measurementUnits.length === 'm' ? '0.2' : measurementUnits.length === 'in' ? '8' : '0.66'}`}
+                                                className="mt-1 block w-full p-2 text-sm border border-gray-300 rounded-md shadow-sm focus:ring-primary focus:border-primary" 
+                                            />
+                                        </div>
+                                        <div>
+                                            <label className="block text-xs font-medium text-gray-700">Height at Withers ({measurementUnits.length}) - optional</label>
+                                            <input 
+                                                type="number" 
+                                                step="0.1"
+                                                value={newMeasurement.height}
+                                                onChange={(e) => setNewMeasurement({...newMeasurement, height: e.target.value})}
+                                                placeholder={`e.g., ${measurementUnits.length === 'cm' ? '25' : measurementUnits.length === 'm' ? '0.25' : measurementUnits.length === 'in' ? '10' : '0.83'}`}
                                                 className="mt-1 block w-full p-2 text-sm border border-gray-300 rounded-md shadow-sm focus:ring-primary focus:border-primary" 
                                             />
                                         </div>
@@ -9749,11 +9749,35 @@ const AnimalForm = ({
                                                 onChange={(e) => setNewMeasurement({...newMeasurement, bcs: e.target.value})}
                                                 className="mt-1 block w-full p-2 text-sm border border-gray-300 rounded-md shadow-sm focus:ring-primary focus:border-primary">
                                                 <option value="">Select BCS</option>
-                                                <option value="1">1 - Emaciated</option>
-                                                <option value="2">2 - Thin</option>
-                                                <option value="3">3 - Ideal</option>
-                                                <option value="4">4 - Overweight</option>
-                                                <option value="5">5 - Obese</option>
+                                                {formData.species === 'Dog' ? (
+                                                    <>
+                                                        <option value="1">1 - Emaciated</option>
+                                                        <option value="2">2 - Very Thin</option>
+                                                        <option value="3">3 - Thin</option>
+                                                        <option value="4">4 - Underweight</option>
+                                                        <option value="5">5 - Ideal</option>
+                                                        <option value="6">6 - Overweight</option>
+                                                        <option value="7">7 - Heavy</option>
+                                                        <option value="8">8 - Obese</option>
+                                                        <option value="9">9 - Severely Obese</option>
+                                                    </>
+                                                ) : formData.species === 'Cat' ? (
+                                                    <>
+                                                        <option value="1">1 - Emaciated</option>
+                                                        <option value="2">2 - Lean</option>
+                                                        <option value="3">3 - Ideal</option>
+                                                        <option value="4">4 - Overweight</option>
+                                                        <option value="5">5 - Obese</option>
+                                                    </>
+                                                ) : (
+                                                    <>
+                                                        <option value="1">1 - Emaciated</option>
+                                                        <option value="2">2 - Thin</option>
+                                                        <option value="3">3 - Ideal</option>
+                                                        <option value="4">4 - Overweight</option>
+                                                        <option value="5">5 - Obese</option>
+                                                    </>
+                                                )}
                                             </select>
                                         </div>
                                         <div>
@@ -9787,7 +9811,10 @@ const AnimalForm = ({
                                                     <span className="font-medium">{record.date}</span>
                                                     <span>{record.weight} {measurementUnits.weight}</span>
                                                     {record.length && (
-                                                        <span>{record.length} {measurementUnits.length}</span>
+                                                        <span>L: {record.length} {measurementUnits.length}</span>
+                                                    )}
+                                                    {record.height && (
+                                                        <span>H: {record.height} {measurementUnits.length}</span>
                                                     )}
                                                     {record.bcs && (
                                                         <>
