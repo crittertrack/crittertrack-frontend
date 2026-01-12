@@ -9289,6 +9289,68 @@ const AnimalForm = ({
                                     </div>
                                 )}
                             </div>
+
+                            {/* Dog/Cat Conformation Measurements - integrated into Appearance */}
+                            {(formData.species === 'Dog' || formData.species === 'Cat') && (
+                                <>
+                                    <h4 className="text-md font-medium text-gray-600 border-t pt-3 mt-3">Conformation Measurements</h4>
+                                    <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                                        <div>
+                                            <label className="block text-sm font-medium text-gray-700">Height at Withers</label>
+                                            <input type="text" name="heightAtWithers" value={formData.heightAtWithers || ''} onChange={handleChange} 
+                                                className="mt-1 block w-full p-2 border border-gray-300 rounded-md shadow-sm focus:ring-primary focus:border-primary" 
+                                                placeholder="e.g., 24 inches" />
+                                        </div>
+                                        <div>
+                                            <label className="block text-sm font-medium text-gray-700">Body Length</label>
+                                            <input type="text" name="bodyLength" value={formData.bodyLength || ''} onChange={handleChange} 
+                                                className="mt-1 block w-full p-2 border border-gray-300 rounded-md shadow-sm focus:ring-primary focus:border-primary" 
+                                                placeholder="e.g., 28 inches" />
+                                        </div>
+                                        <div>
+                                            <label className="block text-sm font-medium text-gray-700">Chest Girth</label>
+                                            <input type="text" name="chestGirth" value={formData.chestGirth || ''} onChange={handleChange} 
+                                                className="mt-1 block w-full p-2 border border-gray-300 rounded-md shadow-sm focus:ring-primary focus:border-primary" 
+                                                placeholder="e.g., 32 inches" />
+                                        </div>
+                                        <div>
+                                            <label className="block text-sm font-medium text-gray-700">Adult Weight</label>
+                                            <input type="text" name="adultWeight" value={formData.adultWeight || ''} onChange={handleChange} 
+                                                className="mt-1 block w-full p-2 border border-gray-300 rounded-md shadow-sm focus:ring-primary focus:border-primary" 
+                                                placeholder="e.g., 65 lbs" />
+                                        </div>
+                                        <div>
+                                            <label className="block text-sm font-medium text-gray-700">Body Condition Score</label>
+                                            <select name="bodyConditionScore" value={formData.bodyConditionScore || ''} onChange={handleChange} 
+                                                className="mt-1 block w-full p-2 border border-gray-300 rounded-md shadow-sm focus:ring-primary focus:border-primary">
+                                                <option value="">Select BCS</option>
+                                                {formData.species === 'Dog' ? (
+                                                    <>
+                                                        <option value="1">1 - Emaciated</option>
+                                                        <option value="2">2 - Very Thin</option>
+                                                        <option value="3">3 - Thin</option>
+                                                        <option value="4">4 - Underweight</option>
+                                                        <option value="5">5 - Ideal</option>
+                                                        <option value="6">6 - Overweight</option>
+                                                        <option value="7">7 - Heavy</option>
+                                                        <option value="8">8 - Obese</option>
+                                                        <option value="9">9 - Severely Obese</option>
+                                                    </>
+                                                ) : (
+                                                    <>
+                                                        <option value="1">1 - Emaciated</option>
+                                                        <option value="2">2 - Lean</option>
+                                                        <option value="3">3 - Ideal</option>
+                                                        <option value="4">4 - Overweight</option>
+                                                        <option value="5">5 - Obese</option>
+                                                    </>
+                                                )}
+                                            </select>
+                                            <p className="text-xs text-gray-500 mt-1">{formData.species === 'Dog' ? '1-9 scale (5 = ideal)' : '1-5 scale (3 = ideal)'}</p>
+                                        </div>
+                                    </div>
+                                </>
+                            )}
                         </div>
 
                         {/* Genetic Code */}
@@ -9752,68 +9814,6 @@ const AnimalForm = ({
                             </div>
                         </div>
 
-                        {/* Dog/Cat Physical Measurements */}
-                        {(formData.species === 'Dog' || formData.species === 'Cat') && (
-                            <div className="bg-amber-50 p-4 rounded-lg border border-amber-200 space-y-4">
-                                <h3 className="text-lg font-semibold text-gray-700 border-b border-amber-200 pb-2">🐕 Physical Measurements (Dog/Cat)</h3>
-                                <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                                    <div>
-                                        <label className="block text-sm font-medium text-gray-700">Height at Withers</label>
-                                        <input type="text" name="heightAtWithers" value={formData.heightAtWithers || ''} onChange={handleChange} 
-                                            className="mt-1 block w-full p-2 border border-gray-300 rounded-md shadow-sm focus:ring-primary focus:border-primary" 
-                                            placeholder="e.g., 24 inches" />
-                                    </div>
-                                    <div>
-                                        <label className="block text-sm font-medium text-gray-700">Body Length</label>
-                                        <input type="text" name="bodyLength" value={formData.bodyLength || ''} onChange={handleChange} 
-                                            className="mt-1 block w-full p-2 border border-gray-300 rounded-md shadow-sm focus:ring-primary focus:border-primary" 
-                                            placeholder="e.g., 28 inches" />
-                                    </div>
-                                    <div>
-                                        <label className="block text-sm font-medium text-gray-700">Chest Girth</label>
-                                        <input type="text" name="chestGirth" value={formData.chestGirth || ''} onChange={handleChange} 
-                                            className="mt-1 block w-full p-2 border border-gray-300 rounded-md shadow-sm focus:ring-primary focus:border-primary" 
-                                            placeholder="e.g., 32 inches" />
-                                    </div>
-                                    <div>
-                                        <label className="block text-sm font-medium text-gray-700">Adult Weight</label>
-                                        <input type="text" name="adultWeight" value={formData.adultWeight || ''} onChange={handleChange} 
-                                            className="mt-1 block w-full p-2 border border-gray-300 rounded-md shadow-sm focus:ring-primary focus:border-primary" 
-                                            placeholder="e.g., 65 lbs" />
-                                    </div>
-                                    <div>
-                                        <label className="block text-sm font-medium text-gray-700">Body Condition Score</label>
-                                        <select name="bodyConditionScore" value={formData.bodyConditionScore || ''} onChange={handleChange} 
-                                            className="mt-1 block w-full p-2 border border-gray-300 rounded-md shadow-sm focus:ring-primary focus:border-primary">
-                                            <option value="">Select BCS</option>
-                                            {formData.species === 'Dog' ? (
-                                                <>
-                                                    <option value="1">1 - Emaciated</option>
-                                                    <option value="2">2 - Very Thin</option>
-                                                    <option value="3">3 - Thin</option>
-                                                    <option value="4">4 - Underweight</option>
-                                                    <option value="5">5 - Ideal</option>
-                                                    <option value="6">6 - Overweight</option>
-                                                    <option value="7">7 - Heavy</option>
-                                                    <option value="8">8 - Obese</option>
-                                                    <option value="9">9 - Severely Obese</option>
-                                                </>
-                                            ) : (
-                                                <>
-                                                    <option value="1">1 - Emaciated</option>
-                                                    <option value="2">2 - Lean</option>
-                                                    <option value="3">3 - Ideal</option>
-                                                    <option value="4">4 - Overweight</option>
-                                                    <option value="5">5 - Obese</option>
-                                                </>
-                                            )}
-                                        </select>
-                                        <p className="text-xs text-gray-500 mt-1">{formData.species === 'Dog' ? '1-9 scale (5 = ideal)' : '1-5 scale (3 = ideal)'}</p>
-                                    </div>
-                                </div>
-                            </div>
-                        )}
-
                     </div>
                 )}
                 
@@ -9842,7 +9842,71 @@ const AnimalForm = ({
                                     <input type="text" name="pedigreeRegistrationId" value={formData.pedigreeRegistrationId} onChange={handleChange} 
                                         className="mt-1 block w-full p-2 border border-gray-300 rounded-md shadow-sm focus:ring-primary focus:border-primary" />
                                 </div>
+
+                                {/* Dog/Cat Licensing - integrated */}
+                                {(formData.species === 'Dog' || formData.species === 'Cat') && (
+                                    <>
+                                        <div>
+                                            <label className="block text-sm font-medium text-gray-700">License Number</label>
+                                            <input type="text" name="licenseNumber" value={formData.licenseNumber || ''} onChange={handleChange} 
+                                                className="mt-1 block w-full p-2 border border-gray-300 rounded-md shadow-sm focus:ring-primary focus:border-primary" 
+                                                placeholder="City/County license #" />
+                                        </div>
+                                        <div>
+                                            <label className="block text-sm font-medium text-gray-700">License Jurisdiction</label>
+                                            <input type="text" name="licenseJurisdiction" value={formData.licenseJurisdiction || ''} onChange={handleChange} 
+                                                className="mt-1 block w-full p-2 border border-gray-300 rounded-md shadow-sm focus:ring-primary focus:border-primary" 
+                                                placeholder="e.g., Los Angeles County" />
+                                        </div>
+                                        <div>
+                                            <label className="block text-sm font-medium text-gray-700">Rabies Tag Number</label>
+                                            <input type="text" name="rabiesTagNumber" value={formData.rabiesTagNumber || ''} onChange={handleChange} 
+                                                className="mt-1 block w-full p-2 border border-gray-300 rounded-md shadow-sm focus:ring-primary focus:border-primary" />
+                                        </div>
+                                        <div>
+                                            <label className="block text-sm font-medium text-gray-700">Tattoo ID</label>
+                                            <input type="text" name="tattooId" value={formData.tattooId || ''} onChange={handleChange} 
+                                                className="mt-1 block w-full p-2 border border-gray-300 rounded-md shadow-sm focus:ring-primary focus:border-primary" />
+                                        </div>
+                                    </>
+                                )}
                             </div>
+
+                            {/* Dog/Cat Registry Numbers - integrated */}
+                            {(formData.species === 'Dog' || formData.species === 'Cat') && (
+                                <>
+                                    <h4 className="text-md font-medium text-gray-600 border-t pt-3 mt-3">Registry Numbers</h4>
+                                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                        {formData.species === 'Dog' && (
+                                            <>
+                                                <div>
+                                                    <label className="block text-sm font-medium text-gray-700">AKC Registration #</label>
+                                                    <input type="text" name="akcRegistrationNumber" value={formData.akcRegistrationNumber || ''} onChange={handleChange} 
+                                                        className="mt-1 block w-full p-2 border border-gray-300 rounded-md shadow-sm focus:ring-primary focus:border-primary" />
+                                                </div>
+                                                <div>
+                                                    <label className="block text-sm font-medium text-gray-700">FCI Registration #</label>
+                                                    <input type="text" name="fciRegistrationNumber" value={formData.fciRegistrationNumber || ''} onChange={handleChange} 
+                                                        className="mt-1 block w-full p-2 border border-gray-300 rounded-md shadow-sm focus:ring-primary focus:border-primary" />
+                                                </div>
+                                            </>
+                                        )}
+                                        {formData.species === 'Cat' && (
+                                            <div>
+                                                <label className="block text-sm font-medium text-gray-700">CFA Registration #</label>
+                                                <input type="text" name="cfaRegistrationNumber" value={formData.cfaRegistrationNumber || ''} onChange={handleChange} 
+                                                    className="mt-1 block w-full p-2 border border-gray-300 rounded-md shadow-sm focus:ring-primary focus:border-primary" />
+                                            </div>
+                                        )}
+                                        <div className={formData.species === 'Cat' ? '' : 'md:col-span-2'}>
+                                            <label className="block text-sm font-medium text-gray-700">Working Registry IDs</label>
+                                            <input type="text" name="workingRegistryIds" value={formData.workingRegistryIds || ''} onChange={handleChange} 
+                                                className="mt-1 block w-full p-2 border border-gray-300 rounded-md shadow-sm focus:ring-primary focus:border-primary" 
+                                                placeholder="Herding, Hunting, Service registrations" />
+                                        </div>
+                                    </div>
+                                </>
+                            )}
                         </div>
                         
                         {/* Classification */}
@@ -9909,68 +9973,6 @@ const AnimalForm = ({
                                 </div>
                             )}
                         </div>
-
-                        {/* Dog/Cat Specific Registration */}
-                        {(formData.species === 'Dog' || formData.species === 'Cat') && (
-                            <div className="bg-amber-50 p-4 rounded-lg border border-amber-200 space-y-4">
-                                <h3 className="text-lg font-semibold text-gray-700 border-b border-amber-200 pb-2">🐕 Dog/Cat Registration & Licensing</h3>
-                                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                                    <div>
-                                        <label className="block text-sm font-medium text-gray-700">License Number</label>
-                                        <input type="text" name="licenseNumber" value={formData.licenseNumber || ''} onChange={handleChange} 
-                                            className="mt-1 block w-full p-2 border border-gray-300 rounded-md shadow-sm focus:ring-primary focus:border-primary" 
-                                            placeholder="City/County license #" />
-                                    </div>
-                                    <div>
-                                        <label className="block text-sm font-medium text-gray-700">License Jurisdiction</label>
-                                        <input type="text" name="licenseJurisdiction" value={formData.licenseJurisdiction || ''} onChange={handleChange} 
-                                            className="mt-1 block w-full p-2 border border-gray-300 rounded-md shadow-sm focus:ring-primary focus:border-primary" 
-                                            placeholder="e.g., Los Angeles County" />
-                                    </div>
-                                    <div>
-                                        <label className="block text-sm font-medium text-gray-700">Rabies Tag Number</label>
-                                        <input type="text" name="rabiesTagNumber" value={formData.rabiesTagNumber || ''} onChange={handleChange} 
-                                            className="mt-1 block w-full p-2 border border-gray-300 rounded-md shadow-sm focus:ring-primary focus:border-primary" />
-                                    </div>
-                                    <div>
-                                        <label className="block text-sm font-medium text-gray-700">Tattoo ID</label>
-                                        <input type="text" name="tattooId" value={formData.tattooId || ''} onChange={handleChange} 
-                                            className="mt-1 block w-full p-2 border border-gray-300 rounded-md shadow-sm focus:ring-primary focus:border-primary" />
-                                    </div>
-                                </div>
-                                
-                                <h4 className="text-md font-semibold text-gray-700 pt-2">Registry Numbers</h4>
-                                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                                    {formData.species === 'Dog' && (
-                                        <>
-                                            <div>
-                                                <label className="block text-sm font-medium text-gray-700">AKC Registration #</label>
-                                                <input type="text" name="akcRegistrationNumber" value={formData.akcRegistrationNumber || ''} onChange={handleChange} 
-                                                    className="mt-1 block w-full p-2 border border-gray-300 rounded-md shadow-sm focus:ring-primary focus:border-primary" />
-                                            </div>
-                                            <div>
-                                                <label className="block text-sm font-medium text-gray-700">FCI Registration #</label>
-                                                <input type="text" name="fciRegistrationNumber" value={formData.fciRegistrationNumber || ''} onChange={handleChange} 
-                                                    className="mt-1 block w-full p-2 border border-gray-300 rounded-md shadow-sm focus:ring-primary focus:border-primary" />
-                                            </div>
-                                        </>
-                                    )}
-                                    {formData.species === 'Cat' && (
-                                        <div>
-                                            <label className="block text-sm font-medium text-gray-700">CFA Registration #</label>
-                                            <input type="text" name="cfaRegistrationNumber" value={formData.cfaRegistrationNumber || ''} onChange={handleChange} 
-                                                className="mt-1 block w-full p-2 border border-gray-300 rounded-md shadow-sm focus:ring-primary focus:border-primary" />
-                                        </div>
-                                    )}
-                                    <div className={formData.species === 'Cat' ? '' : 'md:col-span-2'}>
-                                        <label className="block text-sm font-medium text-gray-700">Working Registry IDs</label>
-                                        <input type="text" name="workingRegistryIds" value={formData.workingRegistryIds || ''} onChange={handleChange} 
-                                            className="mt-1 block w-full p-2 border border-gray-300 rounded-md shadow-sm focus:ring-primary focus:border-primary" 
-                                            placeholder="Herding, Hunting, Service registrations" />
-                                    </div>
-                                </div>
-                            </div>
-                        )}
                     </div>
                 )}
                 
@@ -10478,64 +10480,64 @@ const AnimalForm = ({
                                             placeholder="Total number of offspring" min="0" />
                                     </div>
                                 </div>
-                            </div>
 
-                        {/* Dog/Cat Specific Reproduction */}
-                        {(formData.species === 'Dog' || formData.species === 'Cat') && (
-                            <div className="bg-amber-50 p-4 rounded-lg border border-amber-200 space-y-4">
-                                <h3 className="text-lg font-semibold text-gray-700 border-b border-amber-200 pb-2">🐕 Dog/Cat Reproduction Details</h3>
-                                <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                                    <div>
-                                        <label className="block text-sm font-medium text-gray-700">Estrus Cycle Length (days)</label>
-                                        <input type="number" name="estrusCycleLength" value={formData.estrusCycleLength || ''} onChange={handleChange} 
-                                            className="mt-1 block w-full p-2 border border-gray-300 rounded-md shadow-sm focus:ring-primary focus:border-primary" 
-                                            placeholder={formData.species === 'Dog' ? '~21 days' : '~14-21 days'} />
-                                    </div>
-                                    <div>
-                                        <label className="block text-sm font-medium text-gray-700">Gestation Length (days)</label>
-                                        <input type="number" name="gestationLength" value={formData.gestationLength || ''} onChange={handleChange} 
-                                            className="mt-1 block w-full p-2 border border-gray-300 rounded-md shadow-sm focus:ring-primary focus:border-primary" 
-                                            placeholder={formData.species === 'Dog' ? '~63 days' : '~65 days'} />
-                                    </div>
-                                    <div>
-                                        <label className="block text-sm font-medium text-gray-700">Delivery Method</label>
-                                        <select name="deliveryMethod" value={formData.deliveryMethod || ''} onChange={handleChange} 
-                                            className="mt-1 block w-full p-2 border border-gray-300 rounded-md shadow-sm focus:ring-primary focus:border-primary">
-                                            <option value="">Select...</option>
-                                            <option value="Natural">Natural</option>
-                                            <option value="C-Section">C-Section</option>
-                                            <option value="Assisted">Assisted</option>
-                                        </select>
-                                    </div>
-                                    <div>
-                                        <label className="block text-sm font-medium text-gray-700">{formData.species === 'Dog' ? 'Whelping Date' : 'Queening Date'}</label>
-                                        <input type="date" name={formData.species === 'Dog' ? 'whelpingDate' : 'queeningDate'} 
-                                            value={formData.species === 'Dog' ? (formData.whelpingDate || '') : (formData.queeningDate || '')} 
-                                            onChange={handleChange} 
-                                            className="mt-1 block w-full p-2 border border-gray-300 rounded-md shadow-sm focus:ring-primary focus:border-primary" />
-                                    </div>
-                                    <div className="flex items-center space-x-2 pt-6">
-                                        <input type="checkbox" name="artificialInseminationUsed" checked={formData.artificialInseminationUsed || false} onChange={handleChange} 
-                                            className="form-checkbox h-5 w-5 text-primary rounded focus:ring-primary" />
-                                        <span className="text-sm font-medium text-gray-700">AI Used</span>
-                                    </div>
-                                </div>
-                                <div className="grid grid-cols-1 md:grid-cols-2 gap-4 pt-2">
-                                    <div>
-                                        <label className="block text-sm font-medium text-gray-700">Reproductive Complications</label>
-                                        <textarea name="reproductiveComplications" value={formData.reproductiveComplications || ''} onChange={handleChange} rows="2"
-                                            className="mt-1 block w-full p-2 border border-gray-300 rounded-md shadow-sm focus:ring-primary focus:border-primary" 
-                                            placeholder="Any complications during breeding/delivery" />
-                                    </div>
-                                    <div>
-                                        <label className="block text-sm font-medium text-gray-700">Reproductive Clearances</label>
-                                        <textarea name="reproductiveClearances" value={formData.reproductiveClearances || ''} onChange={handleChange} rows="2"
-                                            className="mt-1 block w-full p-2 border border-gray-300 rounded-md shadow-sm focus:ring-primary focus:border-primary" 
-                                            placeholder="Brucellosis test, progesterone timing, etc." />
-                                    </div>
-                                </div>
+                                {/* Dog/Cat Reproduction Details - integrated */}
+                                {(formData.species === 'Dog' || formData.species === 'Cat') && (
+                                    <>
+                                        <h4 className="text-md font-medium text-gray-600 border-t pt-3 mt-3">Reproductive Details</h4>
+                                        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                                            <div>
+                                                <label className="block text-sm font-medium text-gray-700">Estrus Cycle Length (days)</label>
+                                                <input type="number" name="estrusCycleLength" value={formData.estrusCycleLength || ''} onChange={handleChange} 
+                                                    className="mt-1 block w-full p-2 border border-gray-300 rounded-md shadow-sm focus:ring-primary focus:border-primary" 
+                                                    placeholder={formData.species === 'Dog' ? '~21 days' : '~14-21 days'} />
+                                            </div>
+                                            <div>
+                                                <label className="block text-sm font-medium text-gray-700">Gestation Length (days)</label>
+                                                <input type="number" name="gestationLength" value={formData.gestationLength || ''} onChange={handleChange} 
+                                                    className="mt-1 block w-full p-2 border border-gray-300 rounded-md shadow-sm focus:ring-primary focus:border-primary" 
+                                                    placeholder={formData.species === 'Dog' ? '~63 days' : '~65 days'} />
+                                            </div>
+                                            <div>
+                                                <label className="block text-sm font-medium text-gray-700">Delivery Method</label>
+                                                <select name="deliveryMethod" value={formData.deliveryMethod || ''} onChange={handleChange} 
+                                                    className="mt-1 block w-full p-2 border border-gray-300 rounded-md shadow-sm focus:ring-primary focus:border-primary">
+                                                    <option value="">Select...</option>
+                                                    <option value="Natural">Natural</option>
+                                                    <option value="C-Section">C-Section</option>
+                                                    <option value="Assisted">Assisted</option>
+                                                </select>
+                                            </div>
+                                            <div>
+                                                <label className="block text-sm font-medium text-gray-700">{formData.species === 'Dog' ? 'Whelping Date' : 'Queening Date'}</label>
+                                                <input type="date" name={formData.species === 'Dog' ? 'whelpingDate' : 'queeningDate'} 
+                                                    value={formData.species === 'Dog' ? (formData.whelpingDate || '') : (formData.queeningDate || '')} 
+                                                    onChange={handleChange} 
+                                                    className="mt-1 block w-full p-2 border border-gray-300 rounded-md shadow-sm focus:ring-primary focus:border-primary" />
+                                            </div>
+                                            <div className="flex items-center space-x-2 pt-6">
+                                                <input type="checkbox" name="artificialInseminationUsed" checked={formData.artificialInseminationUsed || false} onChange={handleChange} 
+                                                    className="form-checkbox h-5 w-5 text-primary rounded focus:ring-primary" />
+                                                <span className="text-sm font-medium text-gray-700">AI Used</span>
+                                            </div>
+                                        </div>
+                                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4 pt-2">
+                                            <div>
+                                                <label className="block text-sm font-medium text-gray-700">Reproductive Complications</label>
+                                                <textarea name="reproductiveComplications" value={formData.reproductiveComplications || ''} onChange={handleChange} rows="2"
+                                                    className="mt-1 block w-full p-2 border border-gray-300 rounded-md shadow-sm focus:ring-primary focus:border-primary" 
+                                                    placeholder="Any complications during breeding/delivery" />
+                                            </div>
+                                            <div>
+                                                <label className="block text-sm font-medium text-gray-700">Reproductive Clearances</label>
+                                                <textarea name="reproductiveClearances" value={formData.reproductiveClearances || ''} onChange={handleChange} rows="2"
+                                                    className="mt-1 block w-full p-2 border border-gray-300 rounded-md shadow-sm focus:ring-primary focus:border-primary" 
+                                                    placeholder="Brucellosis test, progesterone timing, etc." />
+                                            </div>
+                                        </div>
+                                    </>
+                                )}
                             </div>
-                        )}
                     </div>
                 )}
 
@@ -10979,79 +10981,79 @@ const AnimalForm = ({
                                         className="block w-full p-2 border border-gray-300 rounded-md shadow-sm focus:ring-primary focus:border-primary" 
                                         placeholder="e.g., Dr. Smith, ABC Veterinary Clinic" />
                                 </div>
+
+                                {/* Dog/Cat Health Details - integrated */}
+                                {(formData.species === 'Dog' || formData.species === 'Cat') && (
+                                    <>
+                                        <h4 className="text-md font-medium text-gray-600 border-t pt-3 mt-3">Health Clearances & Screening</h4>
+                                        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                                            <div>
+                                                <label className="block text-sm font-medium text-gray-700">Spay/Neuter Date</label>
+                                                <input type="date" name="spayNeuterDate" value={formData.spayNeuterDate || ''} onChange={handleChange} 
+                                                    className="mt-1 block w-full p-2 border border-gray-300 rounded-md shadow-sm focus:ring-primary focus:border-primary" />
+                                            </div>
+                                            <div>
+                                                <label className="block text-sm font-medium text-gray-700">Heartworm Status</label>
+                                                <select name="heartwormStatus" value={formData.heartwormStatus || ''} onChange={handleChange} 
+                                                    className="mt-1 block w-full p-2 border border-gray-300 rounded-md shadow-sm focus:ring-primary focus:border-primary">
+                                                    <option value="">Select...</option>
+                                                    <option value="Negative">Negative</option>
+                                                    <option value="Positive">Positive</option>
+                                                    <option value="On Prevention">On Prevention</option>
+                                                    <option value="Unknown">Unknown</option>
+                                                </select>
+                                            </div>
+                                            <div>
+                                                <label className="block text-sm font-medium text-gray-700">Parasite Prevention</label>
+                                                <input type="text" name="parasitePreventionSchedule" value={formData.parasitePreventionSchedule || ''} onChange={handleChange} 
+                                                    className="mt-1 block w-full p-2 border border-gray-300 rounded-md shadow-sm focus:ring-primary focus:border-primary" 
+                                                    placeholder="e.g., Monthly heartgard + flea/tick" />
+                                            </div>
+                                        </div>
+                                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                            <div>
+                                                <label className="block text-sm font-medium text-gray-700">Hip/Elbow Scores</label>
+                                                <input type="text" name="hipElbowScores" value={formData.hipElbowScores || ''} onChange={handleChange} 
+                                                    className="mt-1 block w-full p-2 border border-gray-300 rounded-md shadow-sm focus:ring-primary focus:border-primary" 
+                                                    placeholder="e.g., OFA Good, PennHIP 0.32" />
+                                            </div>
+                                            <div>
+                                                <label className="block text-sm font-medium text-gray-700">Eye Clearance</label>
+                                                <input type="text" name="eyeClearance" value={formData.eyeClearance || ''} onChange={handleChange} 
+                                                    className="mt-1 block w-full p-2 border border-gray-300 rounded-md shadow-sm focus:ring-primary focus:border-primary" 
+                                                    placeholder="e.g., CAER Clear 2024" />
+                                            </div>
+                                            <div>
+                                                <label className="block text-sm font-medium text-gray-700">Cardiac Clearance</label>
+                                                <input type="text" name="cardiacClearance" value={formData.cardiacClearance || ''} onChange={handleChange} 
+                                                    className="mt-1 block w-full p-2 border border-gray-300 rounded-md shadow-sm focus:ring-primary focus:border-primary" 
+                                                    placeholder="e.g., OFA Cardiac Normal" />
+                                            </div>
+                                            <div>
+                                                <label className="block text-sm font-medium text-gray-700">Dental Records</label>
+                                                <input type="text" name="dentalRecords" value={formData.dentalRecords || ''} onChange={handleChange} 
+                                                    className="mt-1 block w-full p-2 border border-gray-300 rounded-md shadow-sm focus:ring-primary focus:border-primary" 
+                                                    placeholder="e.g., Last cleaning 01/2024" />
+                                            </div>
+                                        </div>
+                                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                            <div>
+                                                <label className="block text-sm font-medium text-gray-700">Genetic Test Results</label>
+                                                <textarea name="geneticTestResults" value={formData.geneticTestResults || ''} onChange={handleChange} rows="2"
+                                                    className="mt-1 block w-full p-2 border border-gray-300 rounded-md shadow-sm focus:ring-primary focus:border-primary" 
+                                                    placeholder="e.g., Embark: Clear for DM, vWD, DCM" />
+                                            </div>
+                                            <div>
+                                                <label className="block text-sm font-medium text-gray-700">Chronic Conditions</label>
+                                                <textarea name="chronicConditions" value={formData.chronicConditions || ''} onChange={handleChange} rows="2"
+                                                    className="mt-1 block w-full p-2 border border-gray-300 rounded-md shadow-sm focus:ring-primary focus:border-primary" 
+                                                    placeholder="e.g., Allergies, arthritis, epilepsy" />
+                                            </div>
+                                        </div>
+                                    </>
+                                )}
                             </div>
                         </div>
-
-                        {/* Dog/Cat Specific Health Fields */}
-                        {(formData.species === 'Dog' || formData.species === 'Cat') && (
-                            <div className="bg-emerald-50 p-4 rounded-lg border border-emerald-200 space-y-4">
-                                <h3 className="text-lg font-semibold text-gray-700 border-b border-emerald-200 pb-2">🏥 Dog/Cat Health Records</h3>
-                                <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                                    <div>
-                                        <label className="block text-sm font-medium text-gray-700">Spay/Neuter Date</label>
-                                        <input type="date" name="spayNeuterDate" value={formData.spayNeuterDate || ''} onChange={handleChange} 
-                                            className="mt-1 block w-full p-2 border border-gray-300 rounded-md shadow-sm focus:ring-primary focus:border-primary" />
-                                    </div>
-                                    <div>
-                                        <label className="block text-sm font-medium text-gray-700">Heartworm Status</label>
-                                        <select name="heartwormStatus" value={formData.heartwormStatus || ''} onChange={handleChange} 
-                                            className="mt-1 block w-full p-2 border border-gray-300 rounded-md shadow-sm focus:ring-primary focus:border-primary">
-                                            <option value="">Select...</option>
-                                            <option value="Negative">Negative</option>
-                                            <option value="Positive">Positive</option>
-                                            <option value="On Prevention">On Prevention</option>
-                                            <option value="Unknown">Unknown</option>
-                                        </select>
-                                    </div>
-                                    <div>
-                                        <label className="block text-sm font-medium text-gray-700">Parasite Prevention Schedule</label>
-                                        <input type="text" name="parasitePreventionSchedule" value={formData.parasitePreventionSchedule || ''} onChange={handleChange} 
-                                            className="mt-1 block w-full p-2 border border-gray-300 rounded-md shadow-sm focus:ring-primary focus:border-primary" 
-                                            placeholder="e.g., Monthly heartgard + flea/tick" />
-                                    </div>
-                                </div>
-                                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                                    <div>
-                                        <label className="block text-sm font-medium text-gray-700">Hip/Elbow Scores</label>
-                                        <input type="text" name="hipElbowScores" value={formData.hipElbowScores || ''} onChange={handleChange} 
-                                            className="mt-1 block w-full p-2 border border-gray-300 rounded-md shadow-sm focus:ring-primary focus:border-primary" 
-                                            placeholder="e.g., OFA Good, PennHIP 0.32" />
-                                    </div>
-                                    <div>
-                                        <label className="block text-sm font-medium text-gray-700">Eye Clearance</label>
-                                        <input type="text" name="eyeClearance" value={formData.eyeClearance || ''} onChange={handleChange} 
-                                            className="mt-1 block w-full p-2 border border-gray-300 rounded-md shadow-sm focus:ring-primary focus:border-primary" 
-                                            placeholder="e.g., CAER Clear 2024" />
-                                    </div>
-                                    <div>
-                                        <label className="block text-sm font-medium text-gray-700">Cardiac Clearance</label>
-                                        <input type="text" name="cardiacClearance" value={formData.cardiacClearance || ''} onChange={handleChange} 
-                                            className="mt-1 block w-full p-2 border border-gray-300 rounded-md shadow-sm focus:ring-primary focus:border-primary" 
-                                            placeholder="e.g., OFA Cardiac Normal" />
-                                    </div>
-                                    <div>
-                                        <label className="block text-sm font-medium text-gray-700">Dental Records</label>
-                                        <input type="text" name="dentalRecords" value={formData.dentalRecords || ''} onChange={handleChange} 
-                                            className="mt-1 block w-full p-2 border border-gray-300 rounded-md shadow-sm focus:ring-primary focus:border-primary" 
-                                            placeholder="e.g., Last cleaning 01/2024, extractions" />
-                                    </div>
-                                </div>
-                                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                                    <div>
-                                        <label className="block text-sm font-medium text-gray-700">Genetic Test Results</label>
-                                        <textarea name="geneticTestResults" value={formData.geneticTestResults || ''} onChange={handleChange} rows="2"
-                                            className="mt-1 block w-full p-2 border border-gray-300 rounded-md shadow-sm focus:ring-primary focus:border-primary" 
-                                            placeholder="e.g., Embark: Clear for DM, vWD, DCM" />
-                                    </div>
-                                    <div>
-                                        <label className="block text-sm font-medium text-gray-700">Chronic Conditions</label>
-                                        <textarea name="chronicConditions" value={formData.chronicConditions || ''} onChange={handleChange} rows="2"
-                                            className="mt-1 block w-full p-2 border border-gray-300 rounded-md shadow-sm focus:ring-primary focus:border-primary" 
-                                            placeholder="e.g., Allergies, arthritis, epilepsy" />
-                                    </div>
-                                </div>
-                            </div>
-                        )}
                     </div>
                 )}
 
@@ -11188,78 +11190,78 @@ const AnimalForm = ({
                                             placeholder="e.g., Quiet, moderate, high" />
                                     </div>
                                 )}
+
+                                {/* Dog/Cat Care Details - integrated */}
+                                {(formData.species === 'Dog' || formData.species === 'Cat') && (
+                                    <>
+                                        <h4 className="text-md font-medium text-gray-600 border-t pt-3 mt-3">Exercise & Grooming</h4>
+                                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                            <div>
+                                                <label className="block text-sm font-medium text-gray-700">Exercise Requirements</label>
+                                                <select name="exerciseRequirements" value={formData.exerciseRequirements || ''} onChange={handleChange} 
+                                                    className="mt-1 block w-full p-2 border border-gray-300 rounded-md shadow-sm focus:ring-primary focus:border-primary">
+                                                    <option value="">Select...</option>
+                                                    <option value="Low">Low</option>
+                                                    <option value="Moderate">Moderate</option>
+                                                    <option value="High">High</option>
+                                                    <option value="Very High">Very High</option>
+                                                </select>
+                                            </div>
+                                            <div>
+                                                <label className="block text-sm font-medium text-gray-700">Daily Exercise (minutes)</label>
+                                                <input type="number" name="dailyExerciseMinutes" value={formData.dailyExerciseMinutes || ''} onChange={handleChange} 
+                                                    className="mt-1 block w-full p-2 border border-gray-300 rounded-md shadow-sm focus:ring-primary focus:border-primary" 
+                                                    placeholder="e.g., 60" />
+                                            </div>
+                                            <div>
+                                                <label className="block text-sm font-medium text-gray-700">Grooming Needs</label>
+                                                <select name="groomingNeeds" value={formData.groomingNeeds || ''} onChange={handleChange} 
+                                                    className="mt-1 block w-full p-2 border border-gray-300 rounded-md shadow-sm focus:ring-primary focus:border-primary">
+                                                    <option value="">Select...</option>
+                                                    <option value="Low">Low - minimal brushing</option>
+                                                    <option value="Moderate">Moderate - weekly grooming</option>
+                                                    <option value="High">High - daily brushing</option>
+                                                    <option value="Professional">Professional - regular groomer</option>
+                                                </select>
+                                            </div>
+                                            <div>
+                                                <label className="block text-sm font-medium text-gray-700">Shedding Level</label>
+                                                <select name="sheddingLevel" value={formData.sheddingLevel || ''} onChange={handleChange} 
+                                                    className="mt-1 block w-full p-2 border border-gray-300 rounded-md shadow-sm focus:ring-primary focus:border-primary">
+                                                    <option value="">Select...</option>
+                                                    <option value="None">None - hypoallergenic</option>
+                                                    <option value="Low">Low</option>
+                                                    <option value="Moderate">Moderate</option>
+                                                    <option value="Heavy">Heavy</option>
+                                                    <option value="Seasonal">Seasonal blowouts</option>
+                                                </select>
+                                            </div>
+                                        </div>
+                                        <div className="flex flex-wrap gap-6 pt-2">
+                                            <div className="flex items-center space-x-2">
+                                                <input type="checkbox" name="crateTrained" checked={formData.crateTrained || false} onChange={handleChange} 
+                                                    className="form-checkbox h-5 w-5 text-primary rounded focus:ring-primary" />
+                                                <span className="text-sm font-medium text-gray-700">Crate Trained</span>
+                                            </div>
+                                            {formData.species === 'Cat' && (
+                                                <div className="flex items-center space-x-2">
+                                                    <input type="checkbox" name="litterTrained" checked={formData.litterTrained || false} onChange={handleChange} 
+                                                        className="form-checkbox h-5 w-5 text-primary rounded focus:ring-primary" />
+                                                    <span className="text-sm font-medium text-gray-700">Litter Trained</span>
+                                                </div>
+                                            )}
+                                            {formData.species === 'Dog' && (
+                                                <div className="flex items-center space-x-2">
+                                                    <input type="checkbox" name="leashTrained" checked={formData.leashTrained || false} onChange={handleChange} 
+                                                        className="form-checkbox h-5 w-5 text-primary rounded focus:ring-primary" />
+                                                    <span className="text-sm font-medium text-gray-700">Leash Trained</span>
+                                                </div>
+                                            )}
+                                        </div>
+                                    </>
+                                )}
                             </div>
                         </div>
-
-                        {/* Dog/Cat Specific Husbandry */}
-                        {(formData.species === 'Dog' || formData.species === 'Cat') && (
-                            <div className="bg-teal-50 p-4 rounded-lg border border-teal-200 space-y-4">
-                                <h3 className="text-lg font-semibold text-gray-700 border-b border-teal-200 pb-2">🏠 Dog/Cat Care & Housing</h3>
-                                <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                                    <div>
-                                        <label className="block text-sm font-medium text-gray-700">Exercise Requirements</label>
-                                        <select name="exerciseRequirements" value={formData.exerciseRequirements || ''} onChange={handleChange} 
-                                            className="mt-1 block w-full p-2 border border-gray-300 rounded-md shadow-sm focus:ring-primary focus:border-primary">
-                                            <option value="">Select...</option>
-                                            <option value="Low">Low</option>
-                                            <option value="Moderate">Moderate</option>
-                                            <option value="High">High</option>
-                                            <option value="Very High">Very High</option>
-                                        </select>
-                                    </div>
-                                    <div>
-                                        <label className="block text-sm font-medium text-gray-700">Daily Exercise (minutes)</label>
-                                        <input type="number" name="dailyExerciseMinutes" value={formData.dailyExerciseMinutes || ''} onChange={handleChange} 
-                                            className="mt-1 block w-full p-2 border border-gray-300 rounded-md shadow-sm focus:ring-primary focus:border-primary" 
-                                            placeholder="e.g., 60" />
-                                    </div>
-                                    <div>
-                                        <label className="block text-sm font-medium text-gray-700">Grooming Needs</label>
-                                        <select name="groomingNeeds" value={formData.groomingNeeds || ''} onChange={handleChange} 
-                                            className="mt-1 block w-full p-2 border border-gray-300 rounded-md shadow-sm focus:ring-primary focus:border-primary">
-                                            <option value="">Select...</option>
-                                            <option value="Low">Low - minimal brushing</option>
-                                            <option value="Moderate">Moderate - weekly grooming</option>
-                                            <option value="High">High - daily brushing</option>
-                                            <option value="Professional">Professional - regular groomer</option>
-                                        </select>
-                                    </div>
-                                    <div>
-                                        <label className="block text-sm font-medium text-gray-700">Shedding Level</label>
-                                        <select name="sheddingLevel" value={formData.sheddingLevel || ''} onChange={handleChange} 
-                                            className="mt-1 block w-full p-2 border border-gray-300 rounded-md shadow-sm focus:ring-primary focus:border-primary">
-                                            <option value="">Select...</option>
-                                            <option value="None">None - hypoallergenic</option>
-                                            <option value="Low">Low</option>
-                                            <option value="Moderate">Moderate</option>
-                                            <option value="Heavy">Heavy</option>
-                                            <option value="Seasonal">Seasonal blowouts</option>
-                                        </select>
-                                    </div>
-                                </div>
-                                <div className="flex flex-wrap gap-6 pt-2">
-                                    <div className="flex items-center space-x-2">
-                                        <input type="checkbox" name="crateTrained" checked={formData.crateTrained || false} onChange={handleChange} 
-                                            className="form-checkbox h-5 w-5 text-primary rounded focus:ring-primary" />
-                                        <span className="text-sm font-medium text-gray-700">Crate Trained</span>
-                                    </div>
-                                    {formData.species === 'Cat' && (
-                                        <div className="flex items-center space-x-2">
-                                            <input type="checkbox" name="litterTrained" checked={formData.litterTrained || false} onChange={handleChange} 
-                                                className="form-checkbox h-5 w-5 text-primary rounded focus:ring-primary" />
-                                            <span className="text-sm font-medium text-gray-700">Litter Trained</span>
-                                        </div>
-                                    )}
-                                    {formData.species === 'Dog' && (
-                                        <div className="flex items-center space-x-2">
-                                            <input type="checkbox" name="leashTrained" checked={formData.leashTrained || false} onChange={handleChange} 
-                                                className="form-checkbox h-5 w-5 text-primary rounded focus:ring-primary" />
-                                            <span className="text-sm font-medium text-gray-700">Leash Trained</span>
-                                        </div>
-                                    )}
-                                </div>
-                            </div>
-                        )}
                     </div>
                 )}
 
@@ -11332,68 +11334,68 @@ const AnimalForm = ({
                                     <option value="Crepuscular">Crepuscular (Active dawn/dusk)</option>
                                 </select>
                             </div>
-                        </div>
 
-                        {/* Dog/Cat Specific Training & Behavior */}
-                        {(formData.species === 'Dog' || formData.species === 'Cat') && (
-                            <div className="bg-violet-50 p-4 rounded-lg border border-violet-200 space-y-4">
-                                <h3 className="text-lg font-semibold text-gray-700 border-b border-violet-200 pb-2">🎓 Training & Behavior</h3>
-                                <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                                    <div>
-                                        <label className="block text-sm font-medium text-gray-700">Training Level</label>
-                                        <select name="trainingLevel" value={formData.trainingLevel || ''} onChange={handleChange} 
-                                            className="mt-1 block w-full p-2 border border-gray-300 rounded-md shadow-sm focus:ring-primary focus:border-primary">
-                                            <option value="">Select...</option>
-                                            <option value="None">None</option>
-                                            <option value="Basic">Basic obedience</option>
-                                            <option value="Intermediate">Intermediate</option>
-                                            <option value="Advanced">Advanced</option>
-                                            <option value="Competition">Competition level</option>
-                                        </select>
+                            {/* Dog/Cat Training & Behavior - Integrated */}
+                            {(formData.species === 'Dog' || formData.species === 'Cat') && (
+                                <>
+                                    <h4 className="text-md font-semibold text-gray-600 mt-4 pt-4 border-t border-gray-200">🎓 Training & Working</h4>
+                                    <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                                        <div>
+                                            <label className="block text-sm font-medium text-gray-700">Training Level</label>
+                                            <select name="trainingLevel" value={formData.trainingLevel || ''} onChange={handleChange} 
+                                                className="mt-1 block w-full p-2 border border-gray-300 rounded-md shadow-sm focus:ring-primary focus:border-primary">
+                                                <option value="">Select...</option>
+                                                <option value="None">None</option>
+                                                <option value="Basic">Basic obedience</option>
+                                                <option value="Intermediate">Intermediate</option>
+                                                <option value="Advanced">Advanced</option>
+                                                <option value="Competition">Competition level</option>
+                                            </select>
+                                        </div>
+                                        <div>
+                                            <label className="block text-sm font-medium text-gray-700">Training Disciplines</label>
+                                            <input type="text" name="trainingDisciplines" value={formData.trainingDisciplines || ''} onChange={handleChange} 
+                                                className="mt-1 block w-full p-2 border border-gray-300 rounded-md shadow-sm focus:ring-primary focus:border-primary" 
+                                                placeholder="e.g., Agility, Rally, Herding, Nosework" />
+                                        </div>
+                                        <div>
+                                            <label className="block text-sm font-medium text-gray-700">Working Role</label>
+                                            <input type="text" name="workingRole" value={formData.workingRole || ''} onChange={handleChange} 
+                                                className="mt-1 block w-full p-2 border border-gray-300 rounded-md shadow-sm focus:ring-primary focus:border-primary" 
+                                                placeholder="e.g., Service Dog, Therapy, SAR" />
+                                        </div>
                                     </div>
-                                    <div>
-                                        <label className="block text-sm font-medium text-gray-700">Training Disciplines</label>
-                                        <input type="text" name="trainingDisciplines" value={formData.trainingDisciplines || ''} onChange={handleChange} 
-                                            className="mt-1 block w-full p-2 border border-gray-300 rounded-md shadow-sm focus:ring-primary focus:border-primary" 
-                                            placeholder="e.g., Agility, Rally, Herding, Nosework" />
+                                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                        <div>
+                                            <label className="block text-sm font-medium text-gray-700">Certifications</label>
+                                            <textarea name="certifications" value={formData.certifications || ''} onChange={handleChange} rows="2"
+                                                className="mt-1 block w-full p-2 border border-gray-300 rounded-md shadow-sm focus:ring-primary focus:border-primary" 
+                                                placeholder="e.g., CGC, TDI, AKC titles" />
+                                        </div>
+                                        <div>
+                                            <label className="block text-sm font-medium text-gray-700">Behavioral Issues</label>
+                                            <textarea name="behavioralIssues" value={formData.behavioralIssues || ''} onChange={handleChange} rows="2"
+                                                className="mt-1 block w-full p-2 border border-gray-300 rounded-md shadow-sm focus:ring-primary focus:border-primary" 
+                                                placeholder="e.g., Resource guarding, separation anxiety" />
+                                        </div>
                                     </div>
-                                    <div>
-                                        <label className="block text-sm font-medium text-gray-700">Working Role</label>
-                                        <input type="text" name="workingRole" value={formData.workingRole || ''} onChange={handleChange} 
-                                            className="mt-1 block w-full p-2 border border-gray-300 rounded-md shadow-sm focus:ring-primary focus:border-primary" 
-                                            placeholder="e.g., Service Dog, Therapy, SAR" />
+                                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                        <div>
+                                            <label className="block text-sm font-medium text-gray-700">Bite History</label>
+                                            <textarea name="biteHistory" value={formData.biteHistory || ''} onChange={handleChange} rows="2"
+                                                className="mt-1 block w-full p-2 border border-gray-300 rounded-md shadow-sm focus:ring-primary focus:border-primary" 
+                                                placeholder="Any bite incidents, context, and outcome" />
+                                        </div>
+                                        <div>
+                                            <label className="block text-sm font-medium text-gray-700">Reactivity Notes</label>
+                                            <textarea name="reactivityNotes" value={formData.reactivityNotes || ''} onChange={handleChange} rows="2"
+                                                className="mt-1 block w-full p-2 border border-gray-300 rounded-md shadow-sm focus:ring-primary focus:border-primary" 
+                                                placeholder="Triggers, thresholds, management strategies" />
+                                        </div>
                                     </div>
-                                </div>
-                                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                                    <div>
-                                        <label className="block text-sm font-medium text-gray-700">Certifications</label>
-                                        <textarea name="certifications" value={formData.certifications || ''} onChange={handleChange} rows="2"
-                                            className="mt-1 block w-full p-2 border border-gray-300 rounded-md shadow-sm focus:ring-primary focus:border-primary" 
-                                            placeholder="e.g., CGC, TDI, AKC titles" />
-                                    </div>
-                                    <div>
-                                        <label className="block text-sm font-medium text-gray-700">Behavioral Issues</label>
-                                        <textarea name="behavioralIssues" value={formData.behavioralIssues || ''} onChange={handleChange} rows="2"
-                                            className="mt-1 block w-full p-2 border border-gray-300 rounded-md shadow-sm focus:ring-primary focus:border-primary" 
-                                            placeholder="e.g., Resource guarding, separation anxiety" />
-                                    </div>
-                                </div>
-                                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                                    <div>
-                                        <label className="block text-sm font-medium text-gray-700">Bite History</label>
-                                        <textarea name="biteHistory" value={formData.biteHistory || ''} onChange={handleChange} rows="2"
-                                            className="mt-1 block w-full p-2 border border-gray-300 rounded-md shadow-sm focus:ring-primary focus:border-primary" 
-                                            placeholder="Any bite incidents, context, and outcome" />
-                                    </div>
-                                    <div>
-                                        <label className="block text-sm font-medium text-gray-700">Reactivity Notes</label>
-                                        <textarea name="reactivityNotes" value={formData.reactivityNotes || ''} onChange={handleChange} rows="2"
-                                            className="mt-1 block w-full p-2 border border-gray-300 rounded-md shadow-sm focus:ring-primary focus:border-primary" 
-                                            placeholder="Triggers, thresholds, management strategies" />
-                                    </div>
-                                </div>
-                            </div>
-                        )}
+                                </>
+                            )}
+                        </div>
                     </div>
                 )}
 
@@ -11497,46 +11499,46 @@ const AnimalForm = ({
                                         placeholder="e.g., Ownership documents, permits, registration" />
                                 </div>
                             </div>
-                        </div>
 
-                        {/* Dog/Cat Specific Legal & Ownership */}
-                        {(formData.species === 'Dog' || formData.species === 'Cat') && (
-                            <div className="bg-slate-50 p-4 rounded-lg border border-slate-300 space-y-4">
-                                <h3 className="text-lg font-semibold text-gray-700 border-b border-slate-300 pb-2">📋 Ownership & Legal Details</h3>
-                                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                                    <div>
-                                        <label className="block text-sm font-medium text-gray-700">Co-Ownership</label>
-                                        <textarea name="coOwnership" value={formData.coOwnership || ''} onChange={handleChange} rows="2"
-                                            className="mt-1 block w-full p-2 border border-gray-300 rounded-md shadow-sm focus:ring-primary focus:border-primary" 
-                                            placeholder="Co-owner name, terms, breeding rights" />
+                            {/* Dog/Cat Ownership & Legal Details - Integrated */}
+                            {(formData.species === 'Dog' || formData.species === 'Cat') && (
+                                <>
+                                    <h4 className="text-md font-semibold text-gray-600 mt-4 pt-4 border-t border-gray-200">📋 Ownership Details</h4>
+                                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                        <div>
+                                            <label className="block text-sm font-medium text-gray-700">Co-Ownership</label>
+                                            <textarea name="coOwnership" value={formData.coOwnership || ''} onChange={handleChange} rows="2"
+                                                className="mt-1 block w-full p-2 border border-gray-300 rounded-md shadow-sm focus:ring-primary focus:border-primary" 
+                                                placeholder="Co-owner name, terms, breeding rights" />
+                                        </div>
+                                        <div>
+                                            <label className="block text-sm font-medium text-gray-700">Transfer History</label>
+                                            <textarea name="transferHistory" value={formData.transferHistory || ''} onChange={handleChange} rows="2"
+                                                className="mt-1 block w-full p-2 border border-gray-300 rounded-md shadow-sm focus:ring-primary focus:border-primary" 
+                                                placeholder="Previous owners, dates, circumstances" />
+                                        </div>
+                                        <div>
+                                            <label className="block text-sm font-medium text-gray-700">Breeding Restrictions</label>
+                                            <textarea name="breedingRestrictions" value={formData.breedingRestrictions || ''} onChange={handleChange} rows="2"
+                                                className="mt-1 block w-full p-2 border border-gray-300 rounded-md shadow-sm focus:ring-primary focus:border-primary" 
+                                                placeholder="Limited registration, spay/neuter contract" />
+                                        </div>
+                                        <div>
+                                            <label className="block text-sm font-medium text-gray-700">Export Restrictions</label>
+                                            <textarea name="exportRestrictions" value={formData.exportRestrictions || ''} onChange={handleChange} rows="2"
+                                                className="mt-1 block w-full p-2 border border-gray-300 rounded-md shadow-sm focus:ring-primary focus:border-primary" 
+                                                placeholder="Country restrictions, registry limitations" />
+                                        </div>
                                     </div>
                                     <div>
-                                        <label className="block text-sm font-medium text-gray-700">Transfer History</label>
-                                        <textarea name="transferHistory" value={formData.transferHistory || ''} onChange={handleChange} rows="2"
+                                        <label className="block text-sm font-medium text-gray-700">End of Life Care Notes</label>
+                                        <textarea name="endOfLifeCareNotes" value={formData.endOfLifeCareNotes || ''} onChange={handleChange} rows="2"
                                             className="mt-1 block w-full p-2 border border-gray-300 rounded-md shadow-sm focus:ring-primary focus:border-primary" 
-                                            placeholder="Previous owners, dates, circumstances" />
+                                            placeholder="Wishes for cremation, burial, memorial" />
                                     </div>
-                                    <div>
-                                        <label className="block text-sm font-medium text-gray-700">Breeding Restrictions</label>
-                                        <textarea name="breedingRestrictions" value={formData.breedingRestrictions || ''} onChange={handleChange} rows="2"
-                                            className="mt-1 block w-full p-2 border border-gray-300 rounded-md shadow-sm focus:ring-primary focus:border-primary" 
-                                            placeholder="Limited registration, spay/neuter contract" />
-                                    </div>
-                                    <div>
-                                        <label className="block text-sm font-medium text-gray-700">Export Restrictions</label>
-                                        <textarea name="exportRestrictions" value={formData.exportRestrictions || ''} onChange={handleChange} rows="2"
-                                            className="mt-1 block w-full p-2 border border-gray-300 rounded-md shadow-sm focus:ring-primary focus:border-primary" 
-                                            placeholder="Country restrictions, registry limitations" />
-                                    </div>
-                                </div>
-                                <div>
-                                    <label className="block text-sm font-medium text-gray-700">End of Life Care Notes</label>
-                                    <textarea name="endOfLifeCareNotes" value={formData.endOfLifeCareNotes || ''} onChange={handleChange} rows="2"
-                                        className="mt-1 block w-full p-2 border border-gray-300 rounded-md shadow-sm focus:ring-primary focus:border-primary" 
-                                        placeholder="Wishes for cremation, burial, memorial" />
-                                </div>
-                            </div>
-                        )}
+                                </>
+                            )}
+                        </div>
                     </div>
                 )}
 
