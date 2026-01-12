@@ -2376,7 +2376,7 @@ const PrivateAnimalDetail = ({ animal, onClose, onEdit, API_BASE_URL, authToken,
                                         } else {
                                             return 'Unknown Breeder';
                                         }
-                                    })() : (animal.breederId_public ? <span className="font-mono text-accent">{animal.breederId_public}</span> : '—')}
+                                    })() : ((animal.manualBreederName || animal.breederId_public) ? <span className="font-mono text-accent">{animal.manualBreederName || animal.breederId_public}</span> : '—')}
                                 </p>
                             </div>
 
@@ -2430,7 +2430,7 @@ const PrivateAnimalDetail = ({ animal, onClose, onEdit, API_BASE_URL, authToken,
                                     </div>
                                     <div>
                                         <span className="text-gray-600 block mb-1">Breeder:</span>
-                                        <strong>{breederInfo ? `${breederInfo.breederName || breederInfo.personalName || 'Unknown'}` : (animal.breederId_public || '—')}</strong>
+                                        <strong>{breederInfo ? `${breederInfo.breederName || breederInfo.personalName || 'Unknown'}` : (animal.manualBreederName || animal.breederId_public || '—')}</strong>
                                     </div>
                                 </div>
                             </div>
@@ -2438,9 +2438,17 @@ const PrivateAnimalDetail = ({ animal, onClose, onEdit, API_BASE_URL, authToken,
                             {/* 2nd Section: Current Owner */}
                             <div className="bg-gray-50 p-4 rounded-lg border border-gray-200 space-y-4">
                                 <h3 className="text-lg font-semibold text-gray-700">Current Owner</h3>
-                                <div className="text-sm">
-                                    <span className="text-gray-600">Owner Name:</span>
-                                    <strong className="block mt-1">{animal.currentOwner || '—'}</strong>
+                                <div className="text-sm space-y-2">
+                                    <div>
+                                        <span className="text-gray-600">Owner Name:</span>
+                                        <strong className="block mt-1">{animal.currentOwner || '—'}</strong>
+                                    </div>
+                                    {(animal.species === 'Dog' || animal.species === 'Cat') && animal.coOwnership && (
+                                        <div>
+                                            <span className="text-gray-600">Co-Ownership:</span>
+                                            <strong className="block mt-1 whitespace-pre-wrap">{animal.coOwnership}</strong>
+                                        </div>
+                                    )}
                                 </div>
                             </div>
 
@@ -3168,7 +3176,7 @@ const ViewOnlyPrivateAnimalDetail = ({ animal, onClose, API_BASE_URL, authToken,
                                         } else {
                                             return 'Unknown Breeder';
                                         }
-                                    })() : (animal.breederId_public ? <span className="font-mono text-accent">{animal.breederId_public}</span> : '—')}
+                                    })() : ((animal.manualBreederName || animal.breederId_public) ? <span className="font-mono text-accent">{animal.manualBreederName || animal.breederId_public}</span> : '—')}
                                 </p>
                             </div>
 
@@ -3222,7 +3230,7 @@ const ViewOnlyPrivateAnimalDetail = ({ animal, onClose, API_BASE_URL, authToken,
                                     </div>
                                     <div>
                                         <span className="text-gray-600 block mb-1">Breeder:</span>
-                                        <strong>{breederInfo ? `${breederInfo.breederName || breederInfo.personalName || 'Unknown'}` : (animal.breederId_public || '—')}</strong>
+                                        <strong>{breederInfo ? `${breederInfo.breederName || breederInfo.personalName || 'Unknown'}` : (animal.manualBreederName || animal.breederId_public || '—')}</strong>
                                     </div>
                                 </div>
                             </div>
@@ -3230,9 +3238,17 @@ const ViewOnlyPrivateAnimalDetail = ({ animal, onClose, API_BASE_URL, authToken,
                             {/* 2nd Section: Current Owner */}
                             <div className="bg-gray-50 p-4 rounded-lg border border-gray-200 space-y-4">
                                 <h3 className="text-lg font-semibold text-gray-700">Current Owner</h3>
-                                <div className="text-sm">
-                                    <span className="text-gray-600">Owner Name:</span>
-                                    <strong className="block mt-1">{animal.currentOwner || '—'}</strong>
+                                <div className="text-sm space-y-2">
+                                    <div>
+                                        <span className="text-gray-600">Owner Name:</span>
+                                        <strong className="block mt-1">{animal.currentOwner || '—'}</strong>
+                                    </div>
+                                    {(animal.species === 'Dog' || animal.species === 'Cat') && animal.coOwnership && (
+                                        <div>
+                                            <span className="text-gray-600">Co-Ownership:</span>
+                                            <strong className="block mt-1 whitespace-pre-wrap">{animal.coOwnership}</strong>
+                                        </div>
+                                    )}
                                 </div>
                             </div>
 
@@ -4001,6 +4017,9 @@ const ViewOnlyAnimalDetail = ({ animal, onClose, API_BASE_URL, onViewProfile, au
                                 <div className="bg-gray-50 p-4 rounded-lg border border-gray-200">
                                     <h3 className="text-lg font-semibold text-gray-700 border-b pb-2 mb-3">Current Owner</h3>
                                     <p className="text-gray-700">{animal.currentOwner}</p>
+                                    {(animal.species === 'Dog' || animal.species === 'Cat') && animal.coOwnership && (
+                                        <p className="text-gray-700 mt-2"><span className="text-gray-600">Co-Ownership:</span> {animal.coOwnership}</p>
+                                    )}
                                 </div>
                             )}
 
@@ -4575,6 +4594,9 @@ const ViewOnlyAnimalDetail = ({ animal, onClose, API_BASE_URL, onViewProfile, au
                                 <div className="bg-gray-50 p-4 rounded-lg border border-gray-200">
                                     <h3 className="text-lg font-semibold text-gray-700 border-b pb-2 mb-3">Current Owner</h3>
                                     <p className="text-gray-700">{animal.currentOwner || '—'}</p>
+                                    {(animal.species === 'Dog' || animal.species === 'Cat') && animal.coOwnership && (
+                                        <p className="text-gray-700 mt-2"><span className="text-gray-600">Co-Ownership:</span> {animal.coOwnership}</p>
+                                    )}
                                 </div>
                             )}
                             
