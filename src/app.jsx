@@ -11594,7 +11594,7 @@ const AnimalForm = ({
                             {/* Dog/Cat Ownership & Legal Details - Integrated */}
                             {(formData.species === 'Dog' || formData.species === 'Cat') && (
                                 <>
-                                    <h4 className="text-md font-semibold text-gray-600 mt-4 pt-4 border-t border-gray-200">📋 Legal & Restrictions</h4>
+                                    <h4 className="text-md font-semibold text-gray-600 mt-4 pt-4 border-t border-gray-200">Restrictions</h4>
                                     <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                                         <div>
                                             <label className="block text-sm font-medium text-gray-700">Breeding Restrictions</label>
