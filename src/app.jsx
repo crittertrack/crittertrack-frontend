@@ -10306,12 +10306,12 @@ const AnimalForm = ({
                                             placeholder="e.g., 2025-01-15" />
                                     </div>
                                     
-                                    {/* AI Used - Dog/Cat */}
+                                    {/* Artificial Insemination - Dog/Cat */}
                                     {(formData.species === 'Dog' || formData.species === 'Cat') && (
                                         <div className="md:col-span-2 flex items-center space-x-2 pt-2">
                                             <input type="checkbox" name="artificialInseminationUsed" checked={formData.artificialInseminationUsed || false} onChange={handleChange} 
                                                 className="form-checkbox h-5 w-5 text-primary rounded focus:ring-primary" />
-                                            <span className="text-sm font-medium text-gray-700">Artificial Insemination Used</span>
+                                            <span className="text-sm font-medium text-gray-700">Artificial Insemination (AI) Used</span>
                                         </div>
                                     )}
                                 </div>
