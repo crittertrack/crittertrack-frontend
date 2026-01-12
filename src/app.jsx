@@ -2962,6 +2962,32 @@ const PrivateAnimalDetail = ({ animal, onClose, onEdit, API_BASE_URL, authToken,
                             )}
                         </div>
                     )}
+
+                    {/* Tab 12: Show */}
+                    {detailViewTab === 12 && (
+                        <div className="space-y-6">
+                            {/* Show Titles & Ratings */}
+                            <div className="bg-gray-50 p-4 rounded-lg border border-gray-200 space-y-4">
+                                <h3 className="text-lg font-semibold text-gray-700">Show Titles & Ratings</h3>
+                                <div className="space-y-3 text-sm">
+                                    <div><span className="text-gray-600">Titles:</span> <strong>{animal.showTitles || '—'}</strong></div>
+                                    <div><span className="text-gray-600">Ratings:</span> <strong>{animal.showRatings || '—'}</strong></div>
+                                    <div><span className="text-gray-600">Judge Comments:</span> <p className="text-gray-700 mt-1 whitespace-pre-wrap">{animal.judgeComments || '—'}</p></div>
+                                </div>
+                            </div>
+
+                            {/* Working Titles & Performance - Dog only */}
+                            {animal.species === 'Dog' && (
+                                <div className="bg-gray-50 p-4 rounded-lg border border-gray-200 space-y-4">
+                                    <h3 className="text-lg font-semibold text-gray-700">Working & Performance</h3>
+                                    <div className="space-y-3 text-sm">
+                                        <div><span className="text-gray-600">Working Titles:</span> <strong>{animal.workingTitles || '—'}</strong></div>
+                                        <div><span className="text-gray-600">Performance Scores:</span> <strong>{animal.performanceScores || '—'}</strong></div>
+                                    </div>
+                                </div>
+                            )}
+                        </div>
+                    )}
                 </div>
 
                 {/* Pedigree Chart Modal */}
@@ -3887,6 +3913,32 @@ const ViewOnlyPrivateAnimalDetail = ({ animal, onClose, API_BASE_URL, authToken,
                             )}
                         </div>
                     )}
+
+                    {/* Tab 12: Show */}
+                    {detailViewTab === 12 && (
+                        <div className="space-y-6">
+                            {/* Show Titles & Ratings */}
+                            <div className="bg-gray-50 p-4 rounded-lg border border-gray-200 space-y-4">
+                                <h3 className="text-lg font-semibold text-gray-700">Show Titles & Ratings</h3>
+                                <div className="space-y-3 text-sm">
+                                    <div><span className="text-gray-600">Titles:</span> <strong>{animal.showTitles || '—'}</strong></div>
+                                    <div><span className="text-gray-600">Ratings:</span> <strong>{animal.showRatings || '—'}</strong></div>
+                                    <div><span className="text-gray-600">Judge Comments:</span> <p className="text-gray-700 mt-1 whitespace-pre-wrap">{animal.judgeComments || '—'}</p></div>
+                                </div>
+                            </div>
+
+                            {/* Working Titles & Performance - Dog only */}
+                            {animal.species === 'Dog' && (
+                                <div className="bg-gray-50 p-4 rounded-lg border border-gray-200 space-y-4">
+                                    <h3 className="text-lg font-semibold text-gray-700">Working & Performance</h3>
+                                    <div className="space-y-3 text-sm">
+                                        <div><span className="text-gray-600">Working Titles:</span> <strong>{animal.workingTitles || '—'}</strong></div>
+                                        <div><span className="text-gray-600">Performance Scores:</span> <strong>{animal.performanceScores || '—'}</strong></div>
+                                    </div>
+                                </div>
+                            )}
+                        </div>
+                    )}
                 </div>
 
                 {/* Pedigree Chart Modal */}
@@ -4069,7 +4121,8 @@ const ViewOnlyAnimalDetail = ({ animal, onClose, API_BASE_URL, onViewProfile, au
                             { id: 7, label: 'Health', icon: '🏥' },
                             { id: 8, label: 'Husbandry', icon: '🏠' },
                             { id: 9, label: 'Behavior', icon: '🧠' },
-                            { id: 10, label: 'Records', icon: '📝' } // Combined Records + End of Life
+                            { id: 10, label: 'Records', icon: '📝' }, // Combined Records + End of Life
+                            { id: 11, label: 'Show', icon: '🏆' }
                         ].map(tab => (
                             <button
                                 key={tab.id}
@@ -4996,6 +5049,39 @@ const ViewOnlyAnimalDetail = ({ animal, onClose, API_BASE_URL, onViewProfile, au
                             {!showRemarks && !animal.deceasedDate && !animal.causeOfDeath && !animal.necropsyResults && !animal.insurance && !animal.legalStatus && (
                                 <div className="bg-gray-50 p-4 rounded-lg border border-gray-200 text-center text-gray-500">
                                     <p>No records or end-of-life information available</p>
+                                </div>
+                            )}
+                        </div>
+                    )}
+
+                    {/* Tab 11: Show */}
+                    {detailViewTab === 11 && (
+                        <div className="space-y-6">
+                            {/* Show Titles & Ratings */}
+                            <div className="bg-gray-50 p-4 rounded-lg border border-gray-200 space-y-4">
+                                <h3 className="text-lg font-semibold text-gray-700">Show Titles & Ratings</h3>
+                                <div className="space-y-3 text-sm">
+                                    {animal.showTitles && <div><span className="text-gray-600">Titles:</span> <strong>{animal.showTitles}</strong></div>}
+                                    {animal.showRatings && <div><span className="text-gray-600">Ratings:</span> <strong>{animal.showRatings}</strong></div>}
+                                    {animal.judgeComments && <div><span className="text-gray-600">Judge Comments:</span> <p className="text-gray-700 mt-1 whitespace-pre-wrap">{animal.judgeComments}</p></div>}
+                                </div>
+                            </div>
+
+                            {/* Working Titles & Performance - Dog only */}
+                            {animal.species === 'Dog' && (animal.workingTitles || animal.performanceScores) && (
+                                <div className="bg-gray-50 p-4 rounded-lg border border-gray-200 space-y-4">
+                                    <h3 className="text-lg font-semibold text-gray-700">Working & Performance</h3>
+                                    <div className="space-y-3 text-sm">
+                                        {animal.workingTitles && <div><span className="text-gray-600">Working Titles:</span> <strong>{animal.workingTitles}</strong></div>}
+                                        {animal.performanceScores && <div><span className="text-gray-600">Performance Scores:</span> <strong>{animal.performanceScores}</strong></div>}
+                                    </div>
+                                </div>
+                            )}
+
+                            {/* Show message if no data */}
+                            {!animal.showTitles && !animal.showRatings && !animal.judgeComments && !(animal.species === 'Dog' && (animal.workingTitles || animal.performanceScores)) && (
+                                <div className="bg-gray-50 p-4 rounded-lg border border-gray-200 text-center text-gray-500">
+                                    <p>No show information available</p>
                                 </div>
                             )}
                         </div>
@@ -18871,14 +18957,12 @@ const App = () => {
                                                         { id: 6, label: 'Breeding', icon: '🫘' },
                                                         { id: 7, label: 'Health', icon: '🏥' },
                                                         { id: 8, label: 'Husbandry', icon: '🏠' },
-                                                        { id: 9, label: 'Behavior', icon: '🧠' },
-                                                        { id: 10, label: 'Records', icon: '📝' },
-                                                        { id: 11, label: 'End of Life', icon: '🕊️' }
+                                                        { id: 9, label: 'Show', icon: '🏆' }
                                                     ].map(tab => (
                                                         <button
                                                             key={tab.id}
                                                             onClick={() => setDetailViewTab(tab.id)}
-                                                            data-tutorial-target={tab.id === 2 ? 'status-privacy-tab' : tab.id === 3 ? 'physical-tab' : tab.id === 4 ? 'identification-tab' : tab.id === 5 ? 'lineage-tab' : tab.id === 6 ? 'breeding-tab' : tab.id === 7 ? 'health-tab' : tab.id === 8 ? 'husbandry-tab' : tab.id === 9 ? 'behavior-tab' : tab.id === 10 ? 'records-tab' : tab.id === 11 ? 'end-of-life-tab' : undefined}
+                                                            data-tutorial-target={tab.id === 2 ? 'status-privacy-tab' : tab.id === 3 ? 'physical-tab' : tab.id === 4 ? 'identification-tab' : tab.id === 5 ? 'lineage-tab' : tab.id === 6 ? 'breeding-tab' : tab.id === 7 ? 'health-tab' : tab.id === 8 ? 'husbandry-tab' : tab.id === 9 ? 'show-tab' : undefined}
                                                             className={`px-3 py-1.5 text-xs sm:text-sm font-medium rounded transition-colors ${
                                                                 detailViewTab === tab.id 
                                                                     ? 'bg-primary text-black' 
@@ -20068,11 +20152,11 @@ const App = () => {
                             <div className="bg-gray-50 p-4 rounded-lg border border-gray-200 space-y-4">
                                 <h3 className="text-lg font-semibold text-gray-700">Information</h3>
                                 <div className="space-y-3 text-sm">
-                                    <div><span className="text-gray-600">Deceased Date:</span> <strong>{animal.deceasedDate ? new Date(animal.deceasedDate).toLocaleDateString() : '—'}</strong></div>
-                                    <div><span className="text-gray-600">Cause of Death:</span> <strong>{animal.causeOfDeath || '—'}</strong></div>
-                                    <div><span className="text-gray-600">Necropsy Results:</span> <strong>{animal.necropsyResults || '—'}</strong></div>
-                                    {(animal.species === 'Dog' || animal.species === 'Cat') && animal.endOfLifeCareNotes && (
-                                        <div><span className="text-gray-600">End of Life Care Notes:</span> <p className="text-gray-700 mt-1 whitespace-pre-wrap">{animal.endOfLifeCareNotes}</p></div>
+                                    <div><span className="text-gray-600">Deceased Date:</span> <strong>{animalToView.deceasedDate ? new Date(animalToView.deceasedDate).toLocaleDateString() : '—'}</strong></div>
+                                    <div><span className="text-gray-600">Cause of Death:</span> <strong>{animalToView.causeOfDeath || '—'}</strong></div>
+                                    <div><span className="text-gray-600">Necropsy Results:</span> <strong>{animalToView.necropsyResults || '—'}</strong></div>
+                                    {(animalToView.species === 'Dog' || animalToView.species === 'Cat') && animalToView.endOfLifeCareNotes && (
+                                        <div><span className="text-gray-600">End of Life Care Notes:</span> <p className="text-gray-700 mt-1 whitespace-pre-wrap">{animalToView.endOfLifeCareNotes}</p></div>
                                     )}
                                 </div>
                             </div>
@@ -20081,22 +20165,48 @@ const App = () => {
                             <div className="bg-gray-50 p-4 rounded-lg border border-gray-200 space-y-4">
                                 <h3 className="text-lg font-semibold text-gray-700">Legal/Administrative</h3>
                                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm">
-                                    <div><span className="text-gray-600">Insurance:</span> <strong>{animal.insurance || '—'}</strong></div>
-                                    <div><span className="text-gray-600">Legal Status:</span> <strong>{animal.legalStatus || '—'}</strong></div>
+                                    <div><span className="text-gray-600">Insurance:</span> <strong>{animalToView.insurance || '—'}</strong></div>
+                                    <div><span className="text-gray-600">Legal Status:</span> <strong>{animalToView.legalStatus || '—'}</strong></div>
                                 </div>
                             </div>
 
                             {/* 3rd Section: Restrictions (Dog/Cat only) */}
-                            {(animal.species === 'Dog' || animal.species === 'Cat') && (animal.breedingRestrictions || animal.exportRestrictions) && (
+                            {(animalToView.species === 'Dog' || animalToView.species === 'Cat') && (animalToView.breedingRestrictions || animalToView.exportRestrictions) && (
                                 <div className="bg-gray-50 p-4 rounded-lg border border-gray-200 space-y-4">
                                     <h3 className="text-lg font-semibold text-gray-700">Restrictions</h3>
                                     <div className="space-y-3 text-sm">
-                                        {animal.breedingRestrictions && (
-                                            <div><span className="text-gray-600">Breeding Restrictions:</span> <p className="text-gray-700 mt-1 whitespace-pre-wrap">{animal.breedingRestrictions}</p></div>
+                                        {animalToView.breedingRestrictions && (
+                                            <div><span className="text-gray-600">Breeding Restrictions:</span> <p className="text-gray-700 mt-1 whitespace-pre-wrap">{animalToView.breedingRestrictions}</p></div>
                                         )}
-                                        {animal.exportRestrictions && (
-                                            <div><span className="text-gray-600">Export Restrictions:</span> <p className="text-gray-700 mt-1 whitespace-pre-wrap">{animal.exportRestrictions}</p></div>
+                                        {animalToView.exportRestrictions && (
+                                            <div><span className="text-gray-600">Export Restrictions:</span> <p className="text-gray-700 mt-1 whitespace-pre-wrap">{animalToView.exportRestrictions}</p></div>
                                         )}
+                                    </div>
+                                </div>
+                            )}
+                        </div>
+                    )}
+
+                    {/* Tab 12: Show */}
+                    {detailViewTab === 12 && (
+                        <div className="space-y-6">
+                            {/* Show Titles & Ratings */}
+                            <div className="bg-gray-50 p-4 rounded-lg border border-gray-200 space-y-4">
+                                <h3 className="text-lg font-semibold text-gray-700">Show Titles & Ratings</h3>
+                                <div className="space-y-3 text-sm">
+                                    <div><span className="text-gray-600">Titles:</span> <strong>{animalToView.showTitles || '—'}</strong></div>
+                                    <div><span className="text-gray-600">Ratings:</span> <strong>{animalToView.showRatings || '—'}</strong></div>
+                                    <div><span className="text-gray-600">Judge Comments:</span> <p className="text-gray-700 mt-1 whitespace-pre-wrap">{animalToView.judgeComments || '—'}</p></div>
+                                </div>
+                            </div>
+
+                            {/* Working Titles & Performance - Dog only */}
+                            {animalToView.species === 'Dog' && (
+                                <div className="bg-gray-50 p-4 rounded-lg border border-gray-200 space-y-4">
+                                    <h3 className="text-lg font-semibold text-gray-700">Working & Performance</h3>
+                                    <div className="space-y-3 text-sm">
+                                        <div><span className="text-gray-600">Working Titles:</span> <strong>{animalToView.workingTitles || '—'}</strong></div>
+                                        <div><span className="text-gray-600">Performance Scores:</span> <strong>{animalToView.performanceScores || '—'}</strong></div>
                                     </div>
                                 </div>
                             )}
