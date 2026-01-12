@@ -9111,7 +9111,7 @@ const AnimalForm = ({
                     <div className="space-y-6">
                         {/* Ownership */}
                         <div data-tutorial-target="ownership-section" className="bg-gray-50 p-4 rounded-lg border border-gray-200 space-y-4">
-                            <h3 className="text-lg font-semibold text-gray-700 border-b pb-2">Ownership</h3>
+                            <h3 className="text-lg font-semibold text-gray-700 border-b pb-2">Animal Status</h3>
                             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                                 <label className="flex items-center space-x-2 cursor-pointer p-3 border rounded-lg bg-white hover:bg-gray-50 transition">
                                     <input type="checkbox" name="isOwned" checked={formData.isOwned} onChange={handleChange} 
@@ -9161,16 +9161,6 @@ const AnimalForm = ({
                                     </div>
                                 </div>
                             </div>
-
-                            {/* Dog/Cat Co-ownership */}
-                            {(formData.species === 'Dog' || formData.species === 'Cat') && (
-                                <div>
-                                    <label className="block text-sm font-medium text-gray-700 mb-2">Co-Ownership</label>
-                                    <textarea name="coOwnership" value={formData.coOwnership || ''} onChange={handleChange} rows="2"
-                                        className="block w-full p-2 border border-gray-300 rounded-md shadow-sm focus:ring-primary focus:border-primary" 
-                                        placeholder="Co-owner name, terms, breeding rights" />
-                                </div>
-                            )}
                         </div>
                         
                         {/* Current Owner */}
@@ -9201,6 +9191,16 @@ const AnimalForm = ({
                                 />
                                 <p className="text-xs text-gray-500 mt-1">Records owner changes in ownership history.</p>
                             </div>
+
+                            {/* Dog/Cat Co-ownership */}
+                            {(formData.species === 'Dog' || formData.species === 'Cat') && (
+                                <div>
+                                    <label className="block text-sm font-medium text-gray-700 mb-2">Co-Ownership</label>
+                                    <textarea name="coOwnership" value={formData.coOwnership || ''} onChange={handleChange} rows="2"
+                                        className="block w-full p-2 border border-gray-300 rounded-md shadow-sm focus:ring-primary focus:border-primary" 
+                                        placeholder="Co-owner name, terms, breeding rights" />
+                                </div>
+                            )}
                         </div>
                         
                         {/* Availability for Sale/Stud */}
