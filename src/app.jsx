@@ -9711,8 +9711,8 @@ const AnimalForm = ({
                                 <div className="bg-white p-3 rounded-lg border border-gray-300 space-y-3">
                                     <p className="text-xs font-medium text-gray-600">Add New Measurement</p>
                                     
-                                    {/* Row 1: Date, Weight, Body Length, Height */}
-                                    <div className="grid grid-cols-1 md:grid-cols-4 gap-3">
+                                    {/* Row 1: Date, Weight, Body Length, Height at Withers (Dog/Cat only) */}
+                                    <div className={`grid gap-3 ${(formData.species === 'Dog' || formData.species === 'Cat') ? 'grid-cols-1 md:grid-cols-4' : 'grid-cols-1 md:grid-cols-3'}`}>
                                         <div>
                                             <label className="block text-xs font-medium text-gray-700">Date</label>
                                             <input 
@@ -9744,32 +9744,36 @@ const AnimalForm = ({
                                                 className="mt-1 block w-full p-2 text-sm border border-gray-300 rounded-md shadow-sm focus:ring-primary focus:border-primary" 
                                             />
                                         </div>
-                                        <div>
-                                            <label className="block text-xs font-medium text-gray-700">Height at Withers ({measurementUnits.length}) - optional</label>
-                                            <input 
-                                                type="number" 
-                                                step="0.1"
-                                                value={newMeasurement.height}
-                                                onChange={(e) => setNewMeasurement({...newMeasurement, height: e.target.value})}
-                                                placeholder={`e.g., ${measurementUnits.length === 'cm' ? '25' : measurementUnits.length === 'm' ? '0.25' : measurementUnits.length === 'in' ? '10' : '0.83'}`}
-                                                className="mt-1 block w-full p-2 text-sm border border-gray-300 rounded-md shadow-sm focus:ring-primary focus:border-primary" 
-                                            />
-                                        </div>
+                                        {(formData.species === 'Dog' || formData.species === 'Cat') && (
+                                            <div>
+                                                <label className="block text-xs font-medium text-gray-700">Height at Withers ({measurementUnits.length}) - optional</label>
+                                                <input 
+                                                    type="number" 
+                                                    step="0.1"
+                                                    value={newMeasurement.height}
+                                                    onChange={(e) => setNewMeasurement({...newMeasurement, height: e.target.value})}
+                                                    placeholder={`e.g., ${measurementUnits.length === 'cm' ? '25' : measurementUnits.length === 'm' ? '0.25' : measurementUnits.length === 'in' ? '10' : '0.83'}`}
+                                                    className="mt-1 block w-full p-2 text-sm border border-gray-300 rounded-md shadow-sm focus:ring-primary focus:border-primary" 
+                                                />
+                                            </div>
+                                        )}
                                     </div>
                                     
-                                    {/* Row 2: Chest Girth, BCS, Notes */}
-                                    <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
-                                        <div>
-                                            <label className="block text-xs font-medium text-gray-700">Chest Girth ({measurementUnits.length}) - optional</label>
-                                            <input 
-                                                type="number" 
-                                                step="0.1"
-                                                value={newMeasurement.chestGirth}
-                                                onChange={(e) => setNewMeasurement({...newMeasurement, chestGirth: e.target.value})}
-                                                placeholder={`e.g., ${measurementUnits.length === 'cm' ? '30' : measurementUnits.length === 'm' ? '0.3' : measurementUnits.length === 'in' ? '12' : '1'}`}
-                                                className="mt-1 block w-full p-2 text-sm border border-gray-300 rounded-md shadow-sm focus:ring-primary focus:border-primary" 
-                                            />
-                                        </div>
+                                    {/* Row 2: Chest Girth (Dog/Cat only), BCS, Notes */}
+                                    <div className={`grid gap-3 ${(formData.species === 'Dog' || formData.species === 'Cat') ? 'grid-cols-1 md:grid-cols-3' : 'grid-cols-1 md:grid-cols-2'}`}>
+                                        {(formData.species === 'Dog' || formData.species === 'Cat') && (
+                                            <div>
+                                                <label className="block text-xs font-medium text-gray-700">Chest Girth ({measurementUnits.length}) - optional</label>
+                                                <input 
+                                                    type="number" 
+                                                    step="0.1"
+                                                    value={newMeasurement.chestGirth}
+                                                    onChange={(e) => setNewMeasurement({...newMeasurement, chestGirth: e.target.value})}
+                                                    placeholder={`e.g., ${measurementUnits.length === 'cm' ? '30' : measurementUnits.length === 'm' ? '0.3' : measurementUnits.length === 'in' ? '12' : '1'}`}
+                                                    className="mt-1 block w-full p-2 text-sm border border-gray-300 rounded-md shadow-sm focus:ring-primary focus:border-primary" 
+                                                />
+                                            </div>
+                                        )}
                                         <div>
                                             <label className="block text-xs font-medium text-gray-700">Body Condition Score - optional</label>
                                             <select 
