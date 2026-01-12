@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { 
     PawPrint, RefreshCw, Search, Plus, Trash2, X, 
-    AlertCircle, Loader2, Tag, Eye, Database
+    AlertCircle, Loader2, Tag, Edit2, Save, Database
 } from 'lucide-react';
 import './SpeciesManagementTab.css';
 
@@ -17,12 +17,13 @@ const SpeciesManagementTab = ({ API_BASE_URL, authToken }) => {
     
     // Modal states
     const [showAddModal, setShowAddModal] = useState(false);
-    const [showDetailModal, setShowDetailModal] = useState(false);
+    const [showEditModal, setShowEditModal] = useState(false);
     const [selectedSpecies, setSelectedSpecies] = useState(null);
     const [saving, setSaving] = useState(false);
     
     // Form states
     const [newSpecies, setNewSpecies] = useState({ name: '', latinName: '', category: 'Rodent', isDefault: false });
+    const [editForm, setEditForm] = useState({ name: '', latinName: '', category: '', isDefault: false });
 
     // Fetch species
     const fetchSpecies = async () => {
@@ -108,10 +109,54 @@ const SpeciesManagementTab = ({ API_BASE_URL, authToken }) => {
         }
     };
 
-    // Open detail modal (view-only info about species)
-    const openDetailModal = (speciesItem) => {
+    // Open edit modal
+    const openEditModal = (speciesItem) => {
         setSelectedSpecies(speciesItem);
-        setShowDetailModal(true);
+        setEditForm({
+            name: speciesItem.name || '',
+            latinName: speciesItem.latinName || '',
+            category: speciesItem.category || 'Other',
+            isDefault: speciesItem.isDefault || false
+        });
+        setShowEditModal(true);
+    };
+
+    // Save species edits
+    const handleSaveSpecies = async () => {
+        if (!selectedSpecies || !editForm.name.trim()) {
+            alert('Species name is required');
+            return;
+        }
+        
+        setSaving(true);
+        try {
+            const response = await fetch(`${API_BASE_URL}/admin/species/${selectedSpecies._id}`, {
+                method: 'PATCH',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Authorization': `Bearer ${authToken}`
+                },
+                body: JSON.stringify({
+                    name: editForm.name.trim(),
+                    latinName: editForm.latinName?.trim() || null,
+                    category: editForm.category,
+                    isDefault: editForm.isDefault
+                })
+            });
+            
+            if (!response.ok) {
+                const err = await response.json();
+                throw new Error(err.error || 'Failed to update species');
+            }
+            
+            await fetchSpecies();
+            setShowEditModal(false);
+            setSelectedSpecies(null);
+        } catch (err) {
+            alert(err.message);
+        } finally {
+            setSaving(false);
+        }
     };
 
     // Filter species
@@ -251,10 +296,10 @@ const SpeciesManagementTab = ({ API_BASE_URL, authToken }) => {
                                 <div className="species-card-actions">
                                     <button 
                                         className="species-action-btn"
-                                        onClick={() => openDetailModal(s)}
-                                        title="View details"
+                                        onClick={() => openEditModal(s)}
+                                        title="Edit species"
                                     >
-                                        <Eye size={18} />
+                                        <Edit2 size={18} />
                                     </button>
                                     <button 
                                         className="species-action-btn species-action-delete"
@@ -331,43 +376,68 @@ const SpeciesManagementTab = ({ API_BASE_URL, authToken }) => {
                 </div>
             )}
 
-            {/* Detail Modal (for viewing species info) */}
-            {showDetailModal && selectedSpecies && (
-                <div className="species-modal-overlay" onClick={() => setShowDetailModal(false)}>
+            {/* Edit Modal */}
+            {showEditModal && selectedSpecies && (
+                <div className="species-modal-overlay" onClick={() => setShowEditModal(false)}>
                     <div className="species-modal" onClick={e => e.stopPropagation()}>
                         <div className="species-modal-header">
-                            <h3>Species Details</h3>
-                            <button onClick={() => setShowDetailModal(false)}><X size={20} /></button>
+                            <h3>Edit Species</h3>
+                            <button onClick={() => setShowEditModal(false)}><X size={20} /></button>
                         </div>
                         <div className="species-modal-body">
-                            <div className="species-detail-row">
-                                <label>Species Name</label>
-                                <span>{selectedSpecies.name}</span>
+                            <div className="species-form-group">
+                                <label>Species Name *</label>
+                                <input
+                                    type="text"
+                                    value={editForm.name}
+                                    onChange={(e) => setEditForm(prev => ({ ...prev, name: e.target.value }))}
+                                    placeholder="e.g., Guinea Pig"
+                                />
                             </div>
-                            <div className="species-detail-row">
+                            <div className="species-form-group">
                                 <label>Latin Name</label>
-                                <span>{selectedSpecies.latinName || 'Not specified'}</span>
+                                <input
+                                    type="text"
+                                    value={editForm.latinName}
+                                    onChange={(e) => setEditForm(prev => ({ ...prev, latinName: e.target.value }))}
+                                    placeholder="e.g., Cavia porcellus"
+                                />
                             </div>
-                            <div className="species-detail-row">
-                                <label>Category</label>
-                                <span>{selectedSpecies.category}</span>
+                            <div className="species-form-group">
+                                <label>Category *</label>
+                                <select
+                                    value={editForm.category}
+                                    onChange={(e) => setEditForm(prev => ({ ...prev, category: e.target.value }))}
+                                >
+                                    {CATEGORIES.map(cat => (
+                                        <option key={cat} value={cat}>{cat}</option>
+                                    ))}
+                                </select>
                             </div>
-                            <div className="species-detail-row">
-                                <label>Type</label>
-                                <span>{selectedSpecies.isDefault ? 'Default Species' : 'User Created'}</span>
+                            <label className="species-checkbox-label">
+                                <input
+                                    type="checkbox"
+                                    checked={editForm.isDefault}
+                                    onChange={(e) => setEditForm(prev => ({ ...prev, isDefault: e.target.checked }))}
+                                />
+                                Mark as default species
+                            </label>
+                            <div className="species-info-row">
+                                <span className="species-info-label">Animals using this species:</span>
+                                <span className="species-info-value">{selectedSpecies.animalCount || 0}</span>
                             </div>
-                            <div className="species-detail-row">
-                                <label>Animals Using</label>
-                                <span>{selectedSpecies.animalCount || 0} animals</span>
-                            </div>
-                            <div className="species-detail-row">
-                                <label>Created</label>
-                                <span>{selectedSpecies.createdAt ? new Date(selectedSpecies.createdAt).toLocaleDateString() : 'Unknown'}</span>
+                            <div className="species-info-row">
+                                <span className="species-info-label">Created:</span>
+                                <span className="species-info-value">{selectedSpecies.createdAt ? new Date(selectedSpecies.createdAt).toLocaleDateString() : 'Unknown'}</span>
                             </div>
                         </div>
                         <div className="species-modal-footer">
-                            <button className="species-btn species-btn-secondary" onClick={() => setShowDetailModal(false)}>
-                                Close
+                            <button className="species-btn species-btn-secondary" onClick={() => setShowEditModal(false)}>
+                                Cancel
+                            </button>
+                            <button className="species-btn species-btn-primary" onClick={handleSaveSpecies} disabled={saving}>
+                                {saving ? <Loader2 size={16} className="spin" /> : <Save size={16} />}
+                                Save Changes
                             </button>
                         </div>
                     </div>

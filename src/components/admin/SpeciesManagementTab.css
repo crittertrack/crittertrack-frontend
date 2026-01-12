@@ -616,6 +616,31 @@
 
 .species-detail-row span {
     color: #6b7280;
+}
+
+/* Info rows in edit modal */
+.species-info-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 8px 0;
+    margin-top: 8px;
+    border-top: 1px solid #e5e7eb;
+}
+
+.species-info-row:first-of-type {
+    margin-top: 16px;
+}
+
+.species-info-label {
+    font-size: 0.875rem;
+    color: #6b7280;
+}
+
+.species-info-value {
+    font-size: 0.875rem;
+    font-weight: 500;
+    color: #374151;
 }    
     .config-arrow {
         display: none;
