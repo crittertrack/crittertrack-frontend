@@ -79,6 +79,15 @@
     color: #059669;
 }
 
+.species-btn-danger {
+    background: #dc2626;
+    color: #fff;
+}
+
+.species-btn-danger:hover:not(:disabled) {
+    background: #b91c1c;
+}
+
 /* Stats Grid */
 .species-stats-grid {
     display: grid;
@@ -641,8 +650,31 @@
     font-size: 0.875rem;
     font-weight: 500;
     color: #374151;
-}    
-    .config-arrow {
-        display: none;
-    }
+}
+
+/* Delete warning */
+.species-delete-warning {
+    display: flex;
+    align-items: flex-start;
+    gap: 12px;
+    background: #fef2f2;
+    border: 1px solid #fecaca;
+    border-radius: 8px;
+    padding: 16px;
+    margin-bottom: 16px;
+}
+
+.species-delete-warning svg {
+    color: #dc2626;
+    flex-shrink: 0;
+    margin-top: 2px;
+}
+
+.species-delete-warning p {
+    margin: 0 0 8px;
+    color: #374151;
+}
+
+.species-delete-warning p:last-child {
+    margin-bottom: 0;
 }

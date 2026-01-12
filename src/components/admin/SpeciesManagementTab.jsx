@@ -18,12 +18,14 @@ const SpeciesManagementTab = ({ API_BASE_URL, authToken }) => {
     // Modal states
     const [showAddModal, setShowAddModal] = useState(false);
     const [showEditModal, setShowEditModal] = useState(false);
+    const [showDeleteModal, setShowDeleteModal] = useState(false);
     const [selectedSpecies, setSelectedSpecies] = useState(null);
     const [saving, setSaving] = useState(false);
     
     // Form states
     const [newSpecies, setNewSpecies] = useState({ name: '', latinName: '', category: 'Rodent', isDefault: false });
     const [editForm, setEditForm] = useState({ name: '', latinName: '', category: '', isDefault: false });
+    const [replacementSpecies, setReplacementSpecies] = useState('');
 
     // Fetch species
     const fetchSpecies = async () => {
@@ -83,17 +85,30 @@ const SpeciesManagementTab = ({ API_BASE_URL, authToken }) => {
         }
     };
 
-    // Delete species
-    const handleDeleteSpecies = async (speciesId, speciesName, animalCount) => {
-        if (animalCount > 0) {
-            alert(`Cannot delete: ${animalCount} animals are using this species`);
+    // Open delete confirmation modal
+    const openDeleteModal = (speciesItem) => {
+        setSelectedSpecies(speciesItem);
+        setReplacementSpecies('');
+        setShowDeleteModal(true);
+    };
+
+    // Delete species with optional replacement
+    const handleDeleteSpecies = async () => {
+        if (!selectedSpecies) return;
+        
+        // If species has animals and no replacement selected, show error
+        if (selectedSpecies.animalCount > 0 && !replacementSpecies) {
+            alert('Please select a replacement species for the animals');
             return;
         }
         
-        if (!window.confirm(`Delete "${speciesName}"? This cannot be undone.`)) return;
-        
+        setSaving(true);
         try {
-            const response = await fetch(`${API_BASE_URL}/admin/species/${speciesId}`, {
+            const url = selectedSpecies.animalCount > 0 && replacementSpecies
+                ? `${API_BASE_URL}/admin/species/${selectedSpecies._id}?replacementSpecies=${encodeURIComponent(replacementSpecies)}`
+                : `${API_BASE_URL}/admin/species/${selectedSpecies._id}`;
+            
+            const response = await fetch(url, {
                 method: 'DELETE',
                 headers: { 'Authorization': `Bearer ${authToken}` }
             });
@@ -103,9 +118,18 @@ const SpeciesManagementTab = ({ API_BASE_URL, authToken }) => {
                 throw new Error(err.error || 'Failed to delete');
             }
             
+            const result = await response.json();
+            if (result.animalsMigrated > 0) {
+                alert(`Successfully deleted "${selectedSpecies.name}" and migrated ${result.animalsMigrated} animals to "${result.migratedTo}"`);
+            }
+            
             await fetchSpecies();
+            setShowDeleteModal(false);
+            setSelectedSpecies(null);
         } catch (err) {
             alert(err.message);
+        } finally {
+            setSaving(false);
         }
     };
 
@@ -303,9 +327,8 @@ const SpeciesManagementTab = ({ API_BASE_URL, authToken }) => {
                                     </button>
                                     <button 
                                         className="species-action-btn species-action-delete"
-                                        onClick={() => handleDeleteSpecies(s._id, s.name, s.animalCount)}
+                                        onClick={() => openDeleteModal(s)}
                                         title="Delete species"
-                                        disabled={s.animalCount > 0 || s.isDefault}
                                     >
                                         <Trash2 size={18} />
                                     </button>
@@ -438,6 +461,66 @@ const SpeciesManagementTab = ({ API_BASE_URL, authToken }) => {
                             <button className="species-btn species-btn-primary" onClick={handleSaveSpecies} disabled={saving}>
                                 {saving ? <Loader2 size={16} className="spin" /> : <Save size={16} />}
                                 Save Changes
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            )}
+
+            {/* Delete Confirmation Modal */}
+            {showDeleteModal && selectedSpecies && (
+                <div className="species-modal-overlay" onClick={() => setShowDeleteModal(false)}>
+                    <div className="species-modal" onClick={e => e.stopPropagation()}>
+                        <div className="species-modal-header">
+                            <h3>Delete Species</h3>
+                            <button onClick={() => setShowDeleteModal(false)}><X size={20} /></button>
+                        </div>
+                        <div className="species-modal-body">
+                            <div className="species-delete-warning">
+                                <AlertCircle size={24} />
+                                <div>
+                                    <p><strong>Are you sure you want to delete "{selectedSpecies.name}"?</strong></p>
+                                    {selectedSpecies.animalCount > 0 && (
+                                        <p>This species is currently used by <strong>{selectedSpecies.animalCount} animal(s)</strong>. You must select a replacement species to migrate them to.</p>
+                                    )}
+                                    {selectedSpecies.animalCount === 0 && (
+                                        <p>This action cannot be undone.</p>
+                                    )}
+                                </div>
+                            </div>
+                            
+                            {selectedSpecies.animalCount > 0 && (
+                                <div className="species-form-group">
+                                    <label>Replacement Species *</label>
+                                    <select
+                                        value={replacementSpecies}
+                                        onChange={(e) => setReplacementSpecies(e.target.value)}
+                                        required
+                                    >
+                                        <option value="">-- Select a replacement species --</option>
+                                        {species
+                                            .filter(s => s._id !== selectedSpecies._id)
+                                            .map(s => (
+                                                <option key={s._id} value={s.name}>
+                                                    {s.name} {s.latinName ? `(${s.latinName})` : ''} - {s.category}
+                                                </option>
+                                            ))
+                                        }
+                                    </select>
+                                </div>
+                            )}
+                        </div>
+                        <div className="species-modal-footer">
+                            <button className="species-btn species-btn-secondary" onClick={() => setShowDeleteModal(false)}>
+                                Cancel
+                            </button>
+                            <button 
+                                className="species-btn species-btn-danger" 
+                                onClick={handleDeleteSpecies} 
+                                disabled={saving || (selectedSpecies.animalCount > 0 && !replacementSpecies)}
+                            >
+                                {saving ? <Loader2 size={16} className="spin" /> : <Trash2 size={16} />}
+                                Delete Species
                             </button>
                         </div>
                     </div>
