@@ -1,18 +1,11 @@
 import React, { useState, useEffect } from 'react';
 import { 
-    PawPrint, RefreshCw, Search, Plus, Edit2, Trash2, Save, X, 
-    AlertCircle, CheckCircle, Loader2, Settings, ChevronDown, ChevronUp,
-    Tag, Hash, FileText, Eye, EyeOff, Database
+    PawPrint, RefreshCw, Search, Plus, Trash2, X, 
+    AlertCircle, Loader2, Tag, Eye, Database
 } from 'lucide-react';
 import './SpeciesManagementTab.css';
 
 const CATEGORIES = ['Rodent', 'Reptile', 'Bird', 'Fish', 'Amphibian', 'Mammal', 'Invertebrate', 'Other'];
-
-const DEFAULT_FIELDS = [
-    'Coat Color', 'Eye Color', 'Ear Type', 'Markings', 'Pattern',
-    'Scale Type', 'Feather Color', 'Fin Type', 'Size', 'Weight',
-    'Date of Birth', 'Breeder', 'Notes', 'Genetic Code'
-];
 
 const SpeciesManagementTab = ({ API_BASE_URL, authToken }) => {
     const [species, setSpecies] = useState([]);
@@ -24,18 +17,12 @@ const SpeciesManagementTab = ({ API_BASE_URL, authToken }) => {
     
     // Modal states
     const [showAddModal, setShowAddModal] = useState(false);
-    const [showConfigModal, setShowConfigModal] = useState(false);
+    const [showDetailModal, setShowDetailModal] = useState(false);
     const [selectedSpecies, setSelectedSpecies] = useState(null);
     const [saving, setSaving] = useState(false);
     
     // Form states
     const [newSpecies, setNewSpecies] = useState({ name: '', latinName: '', category: 'Rodent', isDefault: false });
-    const [speciesConfig, setSpeciesConfig] = useState({
-        fieldReplacements: {},
-        customFields: [],
-        hiddenFields: [],
-        adminNotes: ''
-    });
 
     // Fetch species
     const fetchSpecies = async () => {
@@ -121,78 +108,10 @@ const SpeciesManagementTab = ({ API_BASE_URL, authToken }) => {
         }
     };
 
-    // Open config modal
-    const openConfigModal = async (speciesItem) => {
+    // Open detail modal (view-only info about species)
+    const openDetailModal = (speciesItem) => {
         setSelectedSpecies(speciesItem);
-        
-        try {
-            const response = await fetch(`${API_BASE_URL}/admin/species-config/${encodeURIComponent(speciesItem.name)}`, {
-                headers: { 'Authorization': `Bearer ${authToken}` }
-            });
-            
-            if (response.ok) {
-                const config = await response.json();
-                setSpeciesConfig({
-                    fieldReplacements: config.fieldReplacements || {},
-                    customFields: config.customFields || [],
-                    hiddenFields: config.hiddenFields || [],
-                    adminNotes: config.adminNotes || ''
-                });
-            }
-        } catch (err) {
-            console.error('Error fetching config:', err);
-        }
-        
-        setShowConfigModal(true);
-    };
-
-    // Save species config
-    const handleSaveConfig = async () => {
-        if (!selectedSpecies) return;
-        
-        setSaving(true);
-        try {
-            const response = await fetch(`${API_BASE_URL}/admin/species-config/${encodeURIComponent(selectedSpecies.name)}`, {
-                method: 'PUT',
-                headers: {
-                    'Content-Type': 'application/json',
-                    'Authorization': `Bearer ${authToken}`
-                },
-                body: JSON.stringify(speciesConfig)
-            });
-            
-            if (!response.ok) throw new Error('Failed to save config');
-            
-            await fetchSpecies();
-            setShowConfigModal(false);
-        } catch (err) {
-            alert(err.message);
-        } finally {
-            setSaving(false);
-        }
-    };
-
-    // Update field replacement
-    const updateFieldReplacement = (originalField, newLabel) => {
-        setSpeciesConfig(prev => {
-            const updated = { ...prev.fieldReplacements };
-            if (newLabel.trim()) {
-                updated[originalField] = newLabel.trim();
-            } else {
-                delete updated[originalField];
-            }
-            return { ...prev, fieldReplacements: updated };
-        });
-    };
-
-    // Toggle hidden field
-    const toggleHiddenField = (field) => {
-        setSpeciesConfig(prev => {
-            const hidden = prev.hiddenFields.includes(field)
-                ? prev.hiddenFields.filter(f => f !== field)
-                : [...prev.hiddenFields, field];
-            return { ...prev, hiddenFields: hidden };
-        });
+        setShowDetailModal(true);
     };
 
     // Filter species
@@ -208,8 +127,7 @@ const SpeciesManagementTab = ({ API_BASE_URL, authToken }) => {
     const stats = {
         total: species.length,
         defaults: species.filter(s => s.isDefault).length,
-        userCreated: species.filter(s => !s.isDefault).length,
-        withConfig: species.filter(s => s.hasConfig).length
+        userCreated: species.filter(s => !s.isDefault).length
     };
 
     if (loading && species.length === 0) {
@@ -228,7 +146,7 @@ const SpeciesManagementTab = ({ API_BASE_URL, authToken }) => {
                     <PawPrint size={28} />
                     <div>
                         <h2>Species Management</h2>
-                        <p>Manage species, field labels, and custom configurations</p>
+                        <p>View and manage species available in the system</p>
                     </div>
                 </div>
                 <div className="species-header-actions">
@@ -264,13 +182,6 @@ const SpeciesManagementTab = ({ API_BASE_URL, authToken }) => {
                     <div>
                         <div className="species-stat-value">{stats.userCreated}</div>
                         <div className="species-stat-label">User Created</div>
-                    </div>
-                </div>
-                <div className="species-stat-card species-stat-purple">
-                    <Settings size={24} />
-                    <div>
-                        <div className="species-stat-value">{stats.withConfig}</div>
-                        <div className="species-stat-label">With Custom Config</div>
                     </div>
                 </div>
             </div>
@@ -329,7 +240,7 @@ const SpeciesManagementTab = ({ API_BASE_URL, authToken }) => {
                                     <div className="species-name-row">
                                         <h3>{s.name}</h3>
                                         {s.isDefault && <span className="species-badge species-badge-default">Default</span>}
-                                        {s.hasConfig && <span className="species-badge species-badge-config">Configured</span>}
+                                        {!s.isDefault && <span className="species-badge species-badge-user">User Added</span>}
                                     </div>
                                     {s.latinName && <p className="species-latin">{s.latinName}</p>}
                                     <div className="species-meta">
@@ -340,36 +251,21 @@ const SpeciesManagementTab = ({ API_BASE_URL, authToken }) => {
                                 <div className="species-card-actions">
                                     <button 
                                         className="species-action-btn"
-                                        onClick={() => openConfigModal(s)}
-                                        title="Configure fields"
+                                        onClick={() => openDetailModal(s)}
+                                        title="View details"
                                     >
-                                        <Settings size={18} />
+                                        <Eye size={18} />
                                     </button>
                                     <button 
                                         className="species-action-btn species-action-delete"
                                         onClick={() => handleDeleteSpecies(s._id, s.name, s.animalCount)}
                                         title="Delete species"
-                                        disabled={s.animalCount > 0}
+                                        disabled={s.animalCount > 0 || s.isDefault}
                                     >
                                         <Trash2 size={18} />
                                     </button>
                                 </div>
                             </div>
-                            {s.config && Object.keys(s.config.fieldReplacements || {}).length > 0 && (
-                                <div className="species-config-preview">
-                                    <span className="config-preview-label">Field replacements:</span>
-                                    {Object.entries(s.config.fieldReplacements).slice(0, 3).map(([orig, repl]) => (
-                                        <span key={orig} className="config-preview-item">
-                                            {orig} → {repl}
-                                        </span>
-                                    ))}
-                                    {Object.keys(s.config.fieldReplacements).length > 3 && (
-                                        <span className="config-preview-more">
-                                            +{Object.keys(s.config.fieldReplacements).length - 3} more
-                                        </span>
-                                    )}
-                                </div>
-                            )}
                         </div>
                     ))
                 )}
@@ -435,61 +331,43 @@ const SpeciesManagementTab = ({ API_BASE_URL, authToken }) => {
                 </div>
             )}
 
-            {/* Config Modal */}
-            {showConfigModal && selectedSpecies && (
-                <div className="species-modal-overlay" onClick={() => setShowConfigModal(false)}>
-                    <div className="species-modal species-modal-large" onClick={e => e.stopPropagation()}>
+            {/* Detail Modal (for viewing species info) */}
+            {showDetailModal && selectedSpecies && (
+                <div className="species-modal-overlay" onClick={() => setShowDetailModal(false)}>
+                    <div className="species-modal" onClick={e => e.stopPropagation()}>
                         <div className="species-modal-header">
-                            <h3>Configure: {selectedSpecies.name}</h3>
-                            <button onClick={() => setShowConfigModal(false)}><X size={20} /></button>
+                            <h3>Species Details</h3>
+                            <button onClick={() => setShowDetailModal(false)}><X size={20} /></button>
                         </div>
                         <div className="species-modal-body">
-                            <div className="config-section">
-                                <h4>Field Label Replacements</h4>
-                                <p className="config-help">Customize field labels for this species. Leave empty to use default.</p>
-                                <div className="config-fields-grid">
-                                    {DEFAULT_FIELDS.map(field => (
-                                        <div key={field} className="config-field-row">
-                                            <div className="config-field-original">
-                                                <span>{field}</span>
-                                                <button
-                                                    className={`config-visibility-btn ${speciesConfig.hiddenFields.includes(field) ? 'hidden' : ''}`}
-                                                    onClick={() => toggleHiddenField(field)}
-                                                    title={speciesConfig.hiddenFields.includes(field) ? 'Show field' : 'Hide field'}
-                                                >
-                                                    {speciesConfig.hiddenFields.includes(field) ? <EyeOff size={14} /> : <Eye size={14} />}
-                                                </button>
-                                            </div>
-                                            <span className="config-arrow">→</span>
-                                            <input
-                                                type="text"
-                                                placeholder={field}
-                                                value={speciesConfig.fieldReplacements[field] || ''}
-                                                onChange={(e) => updateFieldReplacement(field, e.target.value)}
-                                                disabled={speciesConfig.hiddenFields.includes(field)}
-                                            />
-                                        </div>
-                                    ))}
-                                </div>
+                            <div className="species-detail-row">
+                                <label>Species Name</label>
+                                <span>{selectedSpecies.name}</span>
                             </div>
-
-                            <div className="config-section">
-                                <h4>Admin Notes</h4>
-                                <textarea
-                                    value={speciesConfig.adminNotes}
-                                    onChange={(e) => setSpeciesConfig(prev => ({ ...prev, adminNotes: e.target.value }))}
-                                    placeholder="Internal notes about this species configuration..."
-                                    rows={3}
-                                />
+                            <div className="species-detail-row">
+                                <label>Latin Name</label>
+                                <span>{selectedSpecies.latinName || 'Not specified'}</span>
+                            </div>
+                            <div className="species-detail-row">
+                                <label>Category</label>
+                                <span>{selectedSpecies.category}</span>
+                            </div>
+                            <div className="species-detail-row">
+                                <label>Type</label>
+                                <span>{selectedSpecies.isDefault ? 'Default Species' : 'User Created'}</span>
+                            </div>
+                            <div className="species-detail-row">
+                                <label>Animals Using</label>
+                                <span>{selectedSpecies.animalCount || 0} animals</span>
+                            </div>
+                            <div className="species-detail-row">
+                                <label>Created</label>
+                                <span>{selectedSpecies.createdAt ? new Date(selectedSpecies.createdAt).toLocaleDateString() : 'Unknown'}</span>
                             </div>
                         </div>
                         <div className="species-modal-footer">
-                            <button className="species-btn species-btn-secondary" onClick={() => setShowConfigModal(false)}>
-                                Cancel
-                            </button>
-                            <button className="species-btn species-btn-primary" onClick={handleSaveConfig} disabled={saving}>
-                                {saving ? <Loader2 size={16} className="spin" /> : <Save size={16} />}
-                                Save Configuration
+                            <button className="species-btn species-btn-secondary" onClick={() => setShowDetailModal(false)}>
+                                Close
                             </button>
                         </div>
                     </div>

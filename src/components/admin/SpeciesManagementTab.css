@@ -82,7 +82,7 @@
 /* Stats Grid */
 .species-stats-grid {
     display: grid;
-    grid-template-columns: repeat(4, 1fr);
+    grid-template-columns: repeat(3, 1fr);
     gap: 16px;
     margin-bottom: 24px;
 }
@@ -245,6 +245,11 @@
 .species-badge-default {
     background: #dbeafe;
     color: #2563eb;
+}
+
+.species-badge-user {
+    background: #fef3c7;
+    color: #d97706;
 }
 
 .species-badge-config {
@@ -589,7 +594,29 @@
         grid-template-columns: 1fr;
         gap: 4px;
     }
-    
+}
+
+/* Detail Modal Rows */
+.species-detail-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 12px 0;
+    border-bottom: 1px solid #e5e7eb;
+}
+
+.species-detail-row:last-child {
+    border-bottom: none;
+}
+
+.species-detail-row label {
+    font-weight: 600;
+    color: #374151;
+}
+
+.species-detail-row span {
+    color: #6b7280;
+}    
     .config-arrow {
         display: none;
     }
