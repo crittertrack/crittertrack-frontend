@@ -9111,54 +9111,62 @@ const AnimalForm = ({
                     <div className="space-y-6">
                         {/* Ownership */}
                         <div data-tutorial-target="ownership-section" className="bg-gray-50 p-4 rounded-lg border border-gray-200 space-y-4">
-                            <h3 className="text-lg font-semibold text-gray-700 border-b pb-2">Creator & Breeder</h3>
-                            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                                <label className="flex items-center space-x-2 cursor-pointer p-3 border rounded-lg bg-white hover:bg-gray-50 transition">
-                                    <input type="checkbox" name="isOwned" checked={formData.isOwned} onChange={handleChange} 
-                                        className="form-checkbox h-5 w-5 text-primary rounded focus:ring-primary" />
-                                    <span className="text-sm font-medium text-gray-700">Currently Owned by Me</span>
-                                </label>
-                            </div>
+                            <h3 className="text-lg font-semibold text-gray-700 border-b pb-2">Breeder</h3>
                             
-                            <div>
-                                <label className='block text-sm font-medium text-gray-700 mb-2'>Breeder</label>
-                                <div 
-                                    onClick={() => !loading && setModalTarget('breeder')}
-                                    className="flex flex-col items-start p-3 border border-gray-300 rounded-lg bg-white cursor-pointer hover:border-primary transition"
-                                >
-                                    <div className="flex items-center space-x-2 w-full">
-                                        {formData.breederId_public && breederInfo ? (
-                                            <span className="text-gray-800">
-                                                {(() => {
-                                                    const showPersonal = breederInfo.showPersonalName ?? false;
-                                                    const showBreeder = breederInfo.showBreederName ?? false;
-                                                    if (showPersonal && showBreeder && breederInfo.personalName && breederInfo.breederName) {
-                                                        return `${breederInfo.personalName} (${breederInfo.breederName})`;
-                                                    } else if (showBreeder && breederInfo.breederName) {
-                                                        return breederInfo.breederName;
-                                                    } else if (showPersonal && breederInfo.personalName) {
-                                                        return breederInfo.personalName;
-                                                    } else {
-                                                        return 'Unknown Breeder';
-                                                    }
-                                                })()}
-                                            </span>
-                                        ) : (
-                                            <span className="text-gray-400">
-                                                {formData.breederId_public ? 'Loading...' : 'Click to Select Breeder'}
-                                            </span>
-                                        )}
-                                        {formData.breederId_public && (
-                                            <button
-                                                type="button"
-                                                onClick={(e) => { e.stopPropagation(); clearBreederSelection(); }}
-                                                title="Clear breeder selection"
-                                                className="text-sm text-red-500 hover:text-red-700 p-1 rounded"
-                                            >
-                                                <X size={14} />
-                                            </button>
-                                        )}
+                            <div className="space-y-3">
+                                <div>
+                                    <label className='block text-sm font-medium text-gray-700 mb-2'>Breeder (User)</label>
+                                    <div 
+                                        onClick={() => !loading && setModalTarget('breeder')}
+                                        className="flex flex-col items-start p-3 border border-gray-300 rounded-lg bg-white cursor-pointer hover:border-primary transition"
+                                    >
+                                        <div className="flex items-center space-x-2 w-full">
+                                            {formData.breederId_public && breederInfo ? (
+                                                <span className="text-gray-800">
+                                                    {(() => {
+                                                        const showPersonal = breederInfo.showPersonalName ?? false;
+                                                        const showBreeder = breederInfo.showBreederName ?? false;
+                                                        if (showPersonal && showBreeder && breederInfo.personalName && breederInfo.breederName) {
+                                                            return `${breederInfo.personalName} (${breederInfo.breederName})`;
+                                                        } else if (showBreeder && breederInfo.breederName) {
+                                                            return breederInfo.breederName;
+                                                        } else if (showPersonal && breederInfo.personalName) {
+                                                            return breederInfo.personalName;
+                                                        } else {
+                                                            return 'Unknown Breeder';
+                                                        }
+                                                    })()}
+                                                </span>
+                                            ) : (
+                                                <span className="text-gray-400">
+                                                    {formData.breederId_public ? 'Loading...' : 'Click to Select Breeder'}
+                                                </span>
+                                            )}
+                                            {formData.breederId_public && (
+                                                <button
+                                                    type="button"
+                                                    onClick={(e) => { e.stopPropagation(); clearBreederSelection(); }}
+                                                    title="Clear breeder selection"
+                                                    className="text-sm text-red-500 hover:text-red-700 p-1 rounded"
+                                                >
+                                                    <X size={14} />
+                                                </button>
+                                            )}
+                                        </div>
                                     </div>
+                                </div>
+
+                                <div>
+                                    <label className='block text-sm font-medium text-gray-700 mb-2'>Breeder (Manual Name)</label>
+                                    <input 
+                                        type="text" 
+                                        name="manualBreederName" 
+                                        value={formData.manualBreederName || ''} 
+                                        onChange={handleChange}
+                                        placeholder="Enter breeder name (if not a registered user)"
+                                        className="block w-full p-2 border border-gray-300 rounded-md shadow-sm focus:ring-primary focus:border-primary" 
+                                    />
+                                    <p className="text-xs text-gray-500 mt-1">Use this if the breeder is not a registered user on the platform.</p>
                                 </div>
                             </div>
                         </div>
@@ -9178,6 +9186,13 @@ const AnimalForm = ({
                                 >
                                     <span>{sectionPrivacy[animalToEdit?.id_public]?.currentOwner ? '🌍 Public' : '🔒 Private'}</span>
                                 </button>
+                            </div>
+                            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                <label className="flex items-center space-x-2 cursor-pointer p-3 border rounded-lg bg-white hover:bg-gray-50 transition">
+                                    <input type="checkbox" name="isOwned" checked={formData.isOwned} onChange={handleChange} 
+                                        className="form-checkbox h-5 w-5 text-primary rounded focus:ring-primary" />
+                                    <span className="text-sm font-medium text-gray-700">Currently Owned by Me</span>
+                                </label>
                             </div>
                             <div>
                                 <label className='block text-sm font-medium text-gray-700 mb-2'>Owner Name</label>
