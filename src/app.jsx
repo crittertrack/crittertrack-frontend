@@ -19838,73 +19838,73 @@ const App = () => {
                             <div className="bg-gray-50 p-4 rounded-lg border border-gray-200 space-y-4">
                                 <h3 className="text-lg font-semibold text-gray-700">Reproductive Status</h3>
                                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm">
-                                    <div><span className="text-gray-600">Neutered/Spayed:</span> <strong>{animal.isNeutered ? '✓ Yes' : '✗ No'}</strong></div>
-                                    <div><span className="text-gray-600">Infertile:</span> <strong>{animal.isInfertile ? '✓ Yes' : '✗ No'}</strong></div>
-                                    {!animal.isNeutered && !animal.isInfertile && (
-                                        <div><span className="text-gray-600">In Mating:</span> <strong>{animal.isInMating ? '✓ Yes' : '✗ No'}</strong></div>
+                                    <div><span className="text-gray-600">Neutered/Spayed:</span> <strong>{animalToView.isNeutered ? '✓ Yes' : '✗ No'}</strong></div>
+                                    <div><span className="text-gray-600">Infertile:</span> <strong>{animalToView.isInfertile ? '✓ Yes' : '✗ No'}</strong></div>
+                                    {!animalToView.isNeutered && !animalToView.isInfertile && (
+                                        <div><span className="text-gray-600">In Mating:</span> <strong>{animalToView.isInMating ? '✓ Yes' : '✗ No'}</strong></div>
                                     )}
-                                    {(animal.gender === 'Female' || animal.gender === 'Intersex' || animal.gender === 'Unknown') && !animal.isNeutered && (
+                                    {(animalToView.gender === 'Female' || animalToView.gender === 'Intersex' || animalToView.gender === 'Unknown') && !animalToView.isNeutered && (
                                         <>
-                                            <div><span className="text-gray-600">Pregnant:</span> <strong>{animal.isPregnant ? '✓ Yes' : '✗ No'}</strong></div>
-                                            <div><span className="text-gray-600">Nursing:</span> <strong>{animal.isNursing ? '✓ Yes' : '✗ No'}</strong></div>
+                                            <div><span className="text-gray-600">Pregnant:</span> <strong>{animalToView.isPregnant ? '✓ Yes' : '✗ No'}</strong></div>
+                                            <div><span className="text-gray-600">Nursing:</span> <strong>{animalToView.isNursing ? '✓ Yes' : '✗ No'}</strong></div>
                                         </>
                                     )}
-                                    {animal.gender === 'Male' && !animal.isNeutered && !animal.isInfertile && (
-                                        <div><span className="text-gray-600">Stud Animal:</span> <strong>{animal.isStudAnimal ? '✓ Yes' : '✗ No'}</strong></div>
+                                    {animalToView.gender === 'Male' && !animalToView.isNeutered && !animalToView.isInfertile && (
+                                        <div><span className="text-gray-600">Stud Animal:</span> <strong>{animalToView.isStudAnimal ? '✓ Yes' : '✗ No'}</strong></div>
                                     )}
-                                    {animal.gender === 'Female' && !animal.isNeutered && !animal.isInfertile && (
-                                        <div><span className="text-gray-600">Breeding Dam:</span> <strong>{animal.isDamAnimal ? '✓ Yes' : '✗ No'}</strong></div>
+                                    {animalToView.gender === 'Female' && !animalToView.isNeutered && !animalToView.isInfertile && (
+                                        <div><span className="text-gray-600">Breeding Dam:</span> <strong>{animalToView.isDamAnimal ? '✓ Yes' : '✗ No'}</strong></div>
                                     )}
                                 </div>
                             </div>
 
                             {/* 2nd Section: Estrus/Cycle (Female/Intersex/Unknown only) */}
-                            {(animal.gender === 'Female' || animal.gender === 'Intersex' || animal.gender === 'Unknown') && !animal.isNeutered && (
+                            {(animalToView.gender === 'Female' || animalToView.gender === 'Intersex' || animalToView.gender === 'Unknown') && !animalToView.isNeutered && (
                                 <div className="bg-gray-50 p-4 rounded-lg border border-gray-200 space-y-4">
                                     <h3 className="text-lg font-semibold text-gray-700">Estrus/Cycle</h3>
                                     <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm">
-                                        <div><span className="text-gray-600">Heat Status:</span> <strong>{animal.heatStatus || '—'}</strong></div>
-                                        <div><span className="text-gray-600">Last Heat Date:</span> <strong>{animal.lastHeatDate ? new Date(animal.lastHeatDate).toLocaleDateString() : '—'}</strong></div>
-                                        <div><span className="text-gray-600">Ovulation Date:</span> <strong>{animal.ovulationDate ? new Date(animal.ovulationDate).toLocaleDateString() : '—'}</strong></div>
-                                        {(animal.species === 'Dog' || animal.species === 'Cat') && (
-                                            <div><span className="text-gray-600">Estrus Cycle Length:</span> <strong>{animal.estrusCycleLength ? `${animal.estrusCycleLength} days` : '—'}</strong></div>
+                                        <div><span className="text-gray-600">Heat Status:</span> <strong>{animalToView.heatStatus || '—'}</strong></div>
+                                        <div><span className="text-gray-600">Last Heat Date:</span> <strong>{animalToView.lastHeatDate ? new Date(animalToView.lastHeatDate).toLocaleDateString() : '—'}</strong></div>
+                                        <div><span className="text-gray-600">Ovulation Date:</span> <strong>{animalToView.ovulationDate ? new Date(animalToView.ovulationDate).toLocaleDateString() : '—'}</strong></div>
+                                        {(animalToView.species === 'Dog' || animalToView.species === 'Cat') && (
+                                            <div><span className="text-gray-600">Estrus Cycle Length:</span> <strong>{animalToView.estrusCycleLength ? `${animalToView.estrusCycleLength} days` : '—'}</strong></div>
                                         )}
                                     </div>
                                 </div>
                             )}
 
                             {/* 3rd Section: Mating */}
-                            {!animal.isNeutered && !animal.isInfertile && (
+                            {!animalToView.isNeutered && !animalToView.isInfertile && (
                                 <div className="bg-gray-50 p-4 rounded-lg border border-gray-200 space-y-4">
                                     <h3 className="text-lg font-semibold text-gray-700">Mating</h3>
                                     <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm">
-                                        <div><span className="text-gray-600">Mating Date:</span> <strong>{formatDateDisplay(animal.matingDates)}</strong></div>
-                                        <div><span className="text-gray-600">Expected Due Date:</span> <strong>{formatDateDisplay(animal.expectedDueDate)}</strong></div>
-                                        {(animal.species === 'Dog' || animal.species === 'Cat') && (
-                                            <div><span className="text-gray-600">Artificial Insemination:</span> <strong>{animal.artificialInseminationUsed ? '✓ Yes' : '✗ No'}</strong></div>
+                                        <div><span className="text-gray-600">Mating Date:</span> <strong>{formatDateDisplay(animalToView.matingDates)}</strong></div>
+                                        <div><span className="text-gray-600">Expected Due Date:</span> <strong>{formatDateDisplay(animalToView.expectedDueDate)}</strong></div>
+                                        {(animalToView.species === 'Dog' || animalToView.species === 'Cat') && (
+                                            <div><span className="text-gray-600">Artificial Insemination:</span> <strong>{animalToView.artificialInseminationUsed ? '✓ Yes' : '✗ No'}</strong></div>
                                         )}
                                     </div>
                                 </div>
                             )}
 
                             {/* 4th Section: Stud Information */}
-                            {!animal.isNeutered && !animal.isInfertile && (animal.gender === 'Male' || animal.gender === 'Intersex' || animal.gender === 'Unknown') && (
+                            {!animalToView.isNeutered && !animalToView.isInfertile && (animalToView.gender === 'Male' || animalToView.gender === 'Intersex' || animalToView.gender === 'Unknown') && (
                                 <div className="bg-gray-50 p-4 rounded-lg border border-gray-200 space-y-4">
                                     <h3 className="text-lg font-semibold text-gray-700">Stud Information</h3>
                                     <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm">
-                                        <div><span className="text-gray-600">Fertility Status:</span> <strong>{animal.fertilityStatus || '—'}</strong></div>
-                                        <div><span className="text-gray-600">Successful Matings:</span> <strong>{animal.successfulMatings || '—'}</strong></div>
+                                        <div><span className="text-gray-600">Fertility Status:</span> <strong>{animalToView.fertilityStatus || '—'}</strong></div>
+                                        <div><span className="text-gray-600">Successful Matings:</span> <strong>{animalToView.successfulMatings || '—'}</strong></div>
                                     </div>
-                                    {animal.fertilityNotes && (
-                                        <div className="text-sm"><span className="text-gray-600">Notes:</span> <p className="text-gray-700 mt-1 whitespace-pre-wrap">{animal.fertilityNotes}</p></div>
+                                    {animalToView.fertilityNotes && (
+                                        <div className="text-sm"><span className="text-gray-600">Notes:</span> <p className="text-gray-700 mt-1 whitespace-pre-wrap">{animalToView.fertilityNotes}</p></div>
                                     )}
-                                    {(animal.species === 'Dog' || animal.species === 'Cat') && (
+                                    {(animalToView.species === 'Dog' || animalToView.species === 'Cat') && (
                                         <>
-                                            {animal.reproductiveClearances && (
-                                                <div className="text-sm"><span className="text-gray-600">Reproductive Clearances:</span> <p className="text-gray-700 mt-1 whitespace-pre-wrap">{animal.reproductiveClearances}</p></div>
+                                            {animalToView.reproductiveClearances && (
+                                                <div className="text-sm"><span className="text-gray-600">Reproductive Clearances:</span> <p className="text-gray-700 mt-1 whitespace-pre-wrap">{animalToView.reproductiveClearances}</p></div>
                                             )}
-                                            {animal.reproductiveComplications && (
-                                                <div className="text-sm"><span className="text-gray-600">Reproductive Complications:</span> <p className="text-gray-700 mt-1 whitespace-pre-wrap">{animal.reproductiveComplications}</p></div>
+                                            {animalToView.reproductiveComplications && (
+                                                <div className="text-sm"><span className="text-gray-600">Reproductive Complications:</span> <p className="text-gray-700 mt-1 whitespace-pre-wrap">{animalToView.reproductiveComplications}</p></div>
                                             )}
                                         </>
                                     )}
@@ -19912,34 +19912,34 @@ const App = () => {
                             )}
 
                             {/* 5th Section: Dam Information */}
-                            {!animal.isNeutered && !animal.isInfertile && (animal.gender === 'Female' || animal.gender === 'Intersex' || animal.gender === 'Unknown') && (
+                            {!animalToView.isNeutered && !animalToView.isInfertile && (animalToView.gender === 'Female' || animalToView.gender === 'Intersex' || animalToView.gender === 'Unknown') && (
                                 <div className="bg-gray-50 p-4 rounded-lg border border-gray-200 space-y-4">
                                     <h3 className="text-lg font-semibold text-gray-700">Dam Information</h3>
                                     <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm">
-                                        <div><span className="text-gray-600">Dam Fertility Status:</span> <strong>{animal.damFertilityStatus || animal.fertilityStatus || '—'}</strong></div>
-                                        {(animal.species === 'Dog' || animal.species === 'Cat') && (
+                                        <div><span className="text-gray-600">Dam Fertility Status:</span> <strong>{animalToView.damFertilityStatus || animalToView.fertilityStatus || '—'}</strong></div>
+                                        {(animalToView.species === 'Dog' || animalToView.species === 'Cat') && (
                                             <>
-                                                <div><span className="text-gray-600">Gestation Length:</span> <strong>{animal.gestationLength ? `${animal.gestationLength} days` : '—'}</strong></div>
-                                                <div><span className="text-gray-600">Delivery Method:</span> <strong>{animal.deliveryMethod || '—'}</strong></div>
-                                                {animal.species === 'Dog' && animal.whelpingDate && (
-                                                    <div><span className="text-gray-600">Whelping Date:</span> <strong>{new Date(animal.whelpingDate).toLocaleDateString()}</strong></div>
+                                                <div><span className="text-gray-600">Gestation Length:</span> <strong>{animalToView.gestationLength ? `${animalToView.gestationLength} days` : '—'}</strong></div>
+                                                <div><span className="text-gray-600">Delivery Method:</span> <strong>{animalToView.deliveryMethod || '—'}</strong></div>
+                                                {animalToView.species === 'Dog' && animalToView.whelpingDate && (
+                                                    <div><span className="text-gray-600">Whelping Date:</span> <strong>{new Date(animalToView.whelpingDate).toLocaleDateString()}</strong></div>
                                                 )}
-                                                {animal.species === 'Cat' && animal.queeningDate && (
-                                                    <div><span className="text-gray-600">Queening Date:</span> <strong>{new Date(animal.queeningDate).toLocaleDateString()}</strong></div>
+                                                {animalToView.species === 'Cat' && animalToView.queeningDate && (
+                                                    <div><span className="text-gray-600">Queening Date:</span> <strong>{new Date(animalToView.queeningDate).toLocaleDateString()}</strong></div>
                                                 )}
                                             </>
                                         )}
                                     </div>
-                                    {animal.damFertilityNotes && (
-                                        <div className="text-sm"><span className="text-gray-600">Notes:</span> <p className="text-gray-700 mt-1 whitespace-pre-wrap">{animal.damFertilityNotes}</p></div>
+                                    {animalToView.damFertilityNotes && (
+                                        <div className="text-sm"><span className="text-gray-600">Notes:</span> <p className="text-gray-700 mt-1 whitespace-pre-wrap">{animalToView.damFertilityNotes}</p></div>
                                     )}
-                                    {(animal.species === 'Dog' || animal.species === 'Cat') && (
+                                    {(animalToView.species === 'Dog' || animalToView.species === 'Cat') && (
                                         <>
-                                            {animal.reproductiveClearances && (
-                                                <div className="text-sm"><span className="text-gray-600">Reproductive Clearances:</span> <p className="text-gray-700 mt-1 whitespace-pre-wrap">{animal.reproductiveClearances}</p></div>
+                                            {animalToView.reproductiveClearances && (
+                                                <div className="text-sm"><span className="text-gray-600">Reproductive Clearances:</span> <p className="text-gray-700 mt-1 whitespace-pre-wrap">{animalToView.reproductiveClearances}</p></div>
                                             )}
-                                            {animal.reproductiveComplications && (
-                                                <div className="text-sm"><span className="text-gray-600">Reproductive Complications:</span> <p className="text-gray-700 mt-1 whitespace-pre-wrap">{animal.reproductiveComplications}</p></div>
+                                            {animalToView.reproductiveComplications && (
+                                                <div className="text-sm"><span className="text-gray-600">Reproductive Complications:</span> <p className="text-gray-700 mt-1 whitespace-pre-wrap">{animalToView.reproductiveComplications}</p></div>
                                             )}
                                         </>
                                     )}
@@ -19950,19 +19950,19 @@ const App = () => {
                             <div className="bg-blue-50 p-4 rounded-lg border border-blue-200 space-y-4">
                                 <h3 className="text-lg font-semibold text-gray-700 flex items-center"><span className="text-blue-600 mr-2">📋</span>Breeding History</h3>
                                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm">
-                                    {(animal.gender === 'Male' || animal.gender === 'Intersex' || animal.gender === 'Unknown') && (
+                                    {(animalToView.gender === 'Male' || animalToView.gender === 'Intersex' || animalToView.gender === 'Unknown') && (
                                         <>
-                                            <div><span className="text-gray-600">Last Mating Date:</span> <strong>{animal.lastMatingDate ? new Date(animal.lastMatingDate).toLocaleDateString() : '—'}</strong></div>
-                                            <div><span className="text-gray-600">Successful Matings:</span> <strong>{animal.successfulMatings || '—'}</strong></div>
+                                            <div><span className="text-gray-600">Last Mating Date:</span> <strong>{animalToView.lastMatingDate ? new Date(animalToView.lastMatingDate).toLocaleDateString() : '—'}</strong></div>
+                                            <div><span className="text-gray-600">Successful Matings:</span> <strong>{animalToView.successfulMatings || '—'}</strong></div>
                                         </>
                                     )}
-                                    {(animal.gender === 'Female' || animal.gender === 'Intersex' || animal.gender === 'Unknown') && (
+                                    {(animalToView.gender === 'Female' || animalToView.gender === 'Intersex' || animalToView.gender === 'Unknown') && (
                                         <>
-                                            <div><span className="text-gray-600">Last Pregnancy Date:</span> <strong>{animal.lastPregnancyDate ? new Date(animal.lastPregnancyDate).toLocaleDateString() : '—'}</strong></div>
-                                            <div><span className="text-gray-600">Litter Count:</span> <strong>{animal.litterCount || '—'}</strong></div>
+                                            <div><span className="text-gray-600">Last Pregnancy Date:</span> <strong>{animalToView.lastPregnancyDate ? new Date(animalToView.lastPregnancyDate).toLocaleDateString() : '—'}</strong></div>
+                                            <div><span className="text-gray-600">Litter Count:</span> <strong>{animalToView.litterCount || '—'}</strong></div>
                                         </>
                                     )}
-                                    <div><span className="text-gray-600">Total Offspring:</span> <strong>{animal.offspringCount || '—'}</strong></div>
+                                    <div><span className="text-gray-600">Total Offspring:</span> <strong>{animalToView.offspringCount || '—'}</strong></div>
                                 </div>
                             </div>
                         </div>
