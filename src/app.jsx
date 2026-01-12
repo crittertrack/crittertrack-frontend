@@ -2590,9 +2590,7 @@ const PrivateAnimalDetail = ({ animal, onClose, onEdit, API_BASE_URL, authToken,
                             {/* Offspring Section */}
                             <OffspringSection animalId={animal.id_public} API_BASE_URL={API_BASE_URL} authToken={authToken} onViewAnimal={onViewAnimal} />
                         </div>
-                    )}
-
-                    {/* Tab 6: Breeding */}
+                    )}                    {/* Tab 6: Breeding */}
                     {detailViewTab === 6 && (
                         <div className="space-y-6">
                             {/* 1st Section: Reproductive Status */}
@@ -2601,9 +2599,21 @@ const PrivateAnimalDetail = ({ animal, onClose, onEdit, API_BASE_URL, authToken,
                                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm">
                                     <div><span className="text-gray-600">Neutered/Spayed:</span> <strong>{animal.isNeutered ? '✓ Yes' : '✗ No'}</strong></div>
                                     <div><span className="text-gray-600">Infertile:</span> <strong>{animal.isInfertile ? '✓ Yes' : '✗ No'}</strong></div>
-                                    <div><span className="text-gray-600">In Mating:</span> <strong>{animal.isInMating ? '✓ Yes' : '✗ No'}</strong></div>
-                                    <div><span className="text-gray-600">Pregnant:</span> <strong>{animal.isPregnant ? '✓ Yes' : '✗ No'}</strong></div>
-                                    <div><span className="text-gray-600">Nursing:</span> <strong>{animal.isNursing ? '✓ Yes' : '✗ No'}</strong></div>
+                                    {!animal.isNeutered && !animal.isInfertile && (
+                                        <div><span className="text-gray-600">In Mating:</span> <strong>{animal.isInMating ? '✓ Yes' : '✗ No'}</strong></div>
+                                    )}
+                                    {(animal.gender === 'Female' || animal.gender === 'Intersex' || animal.gender === 'Unknown') && !animal.isNeutered && (
+                                        <>
+                                            <div><span className="text-gray-600">Pregnant:</span> <strong>{animal.isPregnant ? '✓ Yes' : '✗ No'}</strong></div>
+                                            <div><span className="text-gray-600">Nursing:</span> <strong>{animal.isNursing ? '✓ Yes' : '✗ No'}</strong></div>
+                                        </>
+                                    )}
+                                    {animal.gender === 'Male' && !animal.isNeutered && !animal.isInfertile && (
+                                        <div><span className="text-gray-600">Stud Animal:</span> <strong>{animal.isStudAnimal ? '✓ Yes' : '✗ No'}</strong></div>
+                                    )}
+                                    {animal.gender === 'Female' && !animal.isNeutered && !animal.isInfertile && (
+                                        <div><span className="text-gray-600">Breeding Dam:</span> <strong>{animal.isDamAnimal ? '✓ Yes' : '✗ No'}</strong></div>
+                                    )}
                                 </div>
                             </div>
 
@@ -2612,11 +2622,110 @@ const PrivateAnimalDetail = ({ animal, onClose, onEdit, API_BASE_URL, authToken,
                                 <div className="bg-gray-50 p-4 rounded-lg border border-gray-200 space-y-4">
                                     <h3 className="text-lg font-semibold text-gray-700">Estrus/Cycle</h3>
                                     <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm">
-                                        <div><span className="text-gray-600">Estrus Cycle:</span> <strong>{animal.estrusCycle || '—'}</strong></div>
-                                        <div><span className="text-gray-600">Last Estrus:</span> <strong>{animal.lastEstrus ? new Date(animal.lastEstrus).toLocaleDateString() : '—'}</strong></div>
+                                        <div><span className="text-gray-600">Heat Status:</span> <strong>{animal.heatStatus || '—'}</strong></div>
+                                        <div><span className="text-gray-600">Last Heat Date:</span> <strong>{animal.lastHeatDate ? new Date(animal.lastHeatDate).toLocaleDateString() : '—'}</strong></div>
+                                        <div><span className="text-gray-600">Ovulation Date:</span> <strong>{animal.ovulationDate ? new Date(animal.ovulationDate).toLocaleDateString() : '—'}</strong></div>
+                                        {(animal.species === 'Dog' || animal.species === 'Cat') && (
+                                            <div><span className="text-gray-600">Estrus Cycle Length:</span> <strong>{animal.estrusCycleLength ? `${animal.estrusCycleLength} days` : '—'}</strong></div>
+                                        )}
                                     </div>
                                 </div>
                             )}
+
+                            {/* 3rd Section: Mating */}
+                            {!animal.isNeutered && !animal.isInfertile && (
+                                <div className="bg-gray-50 p-4 rounded-lg border border-gray-200 space-y-4">
+                                    <h3 className="text-lg font-semibold text-gray-700">Mating</h3>
+                                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm">
+                                        <div><span className="text-gray-600">Mating Date:</span> <strong>{formatDateDisplay(animal.matingDates)}</strong></div>
+                                        <div><span className="text-gray-600">Expected Due Date:</span> <strong>{formatDateDisplay(animal.expectedDueDate)}</strong></div>
+                                        {(animal.species === 'Dog' || animal.species === 'Cat') && (
+                                            <div><span className="text-gray-600">Artificial Insemination:</span> <strong>{animal.artificialInseminationUsed ? '✓ Yes' : '✗ No'}</strong></div>
+                                        )}
+                                    </div>
+                                </div>
+                            )}
+
+                            {/* 4th Section: Stud Information */}
+                            {!animal.isNeutered && !animal.isInfertile && (animal.gender === 'Male' || animal.gender === 'Intersex' || animal.gender === 'Unknown') && (
+                                <div className="bg-gray-50 p-4 rounded-lg border border-gray-200 space-y-4">
+                                    <h3 className="text-lg font-semibold text-gray-700">Stud Information</h3>
+                                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm">
+                                        <div><span className="text-gray-600">Fertility Status:</span> <strong>{animal.fertilityStatus || '—'}</strong></div>
+                                        <div><span className="text-gray-600">Successful Matings:</span> <strong>{animal.successfulMatings || '—'}</strong></div>
+                                    </div>
+                                    {animal.fertilityNotes && (
+                                        <div className="text-sm"><span className="text-gray-600">Notes:</span> <p className="text-gray-700 mt-1 whitespace-pre-wrap">{animal.fertilityNotes}</p></div>
+                                    )}
+                                    {(animal.species === 'Dog' || animal.species === 'Cat') && (
+                                        <>
+                                            {animal.reproductiveClearances && (
+                                                <div className="text-sm"><span className="text-gray-600">Reproductive Clearances:</span> <p className="text-gray-700 mt-1 whitespace-pre-wrap">{animal.reproductiveClearances}</p></div>
+                                            )}
+                                            {animal.reproductiveComplications && (
+                                                <div className="text-sm"><span className="text-gray-600">Reproductive Complications:</span> <p className="text-gray-700 mt-1 whitespace-pre-wrap">{animal.reproductiveComplications}</p></div>
+                                            )}
+                                        </>
+                                    )}
+                                </div>
+                            )}
+
+                            {/* 5th Section: Dam Information */}
+                            {!animal.isNeutered && !animal.isInfertile && (animal.gender === 'Female' || animal.gender === 'Intersex' || animal.gender === 'Unknown') && (
+                                <div className="bg-gray-50 p-4 rounded-lg border border-gray-200 space-y-4">
+                                    <h3 className="text-lg font-semibold text-gray-700">Dam Information</h3>
+                                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm">
+                                        <div><span className="text-gray-600">Dam Fertility Status:</span> <strong>{animal.damFertilityStatus || animal.fertilityStatus || '—'}</strong></div>
+                                        {(animal.species === 'Dog' || animal.species === 'Cat') && (
+                                            <>
+                                                <div><span className="text-gray-600">Gestation Length:</span> <strong>{animal.gestationLength ? `${animal.gestationLength} days` : '—'}</strong></div>
+                                                <div><span className="text-gray-600">Delivery Method:</span> <strong>{animal.deliveryMethod || '—'}</strong></div>
+                                                {animal.species === 'Dog' && animal.whelpingDate && (
+                                                    <div><span className="text-gray-600">Whelping Date:</span> <strong>{new Date(animal.whelpingDate).toLocaleDateString()}</strong></div>
+                                                )}
+                                                {animal.species === 'Cat' && animal.queeningDate && (
+                                                    <div><span className="text-gray-600">Queening Date:</span> <strong>{new Date(animal.queeningDate).toLocaleDateString()}</strong></div>
+                                                )}
+                                            </>
+                                        )}
+                                    </div>
+                                    {animal.damFertilityNotes && (
+                                        <div className="text-sm"><span className="text-gray-600">Notes:</span> <p className="text-gray-700 mt-1 whitespace-pre-wrap">{animal.damFertilityNotes}</p></div>
+                                    )}
+                                    {(animal.species === 'Dog' || animal.species === 'Cat') && (
+                                        <>
+                                            {animal.reproductiveClearances && (
+                                                <div className="text-sm"><span className="text-gray-600">Reproductive Clearances:</span> <p className="text-gray-700 mt-1 whitespace-pre-wrap">{animal.reproductiveClearances}</p></div>
+                                            )}
+                                            {animal.reproductiveComplications && (
+                                                <div className="text-sm"><span className="text-gray-600">Reproductive Complications:</span> <p className="text-gray-700 mt-1 whitespace-pre-wrap">{animal.reproductiveComplications}</p></div>
+                                            )}
+                                        </>
+                                    )}
+                                </div>
+                            )}
+
+                            {/* 6th Section: Breeding History */}
+                            <div className="bg-blue-50 p-4 rounded-lg border border-blue-200 space-y-4">
+                                <h3 className="text-lg font-semibold text-gray-700 flex items-center"><span className="text-blue-600 mr-2">📋</span>Breeding History</h3>
+                                <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm">
+                                    {(animal.gender === 'Male' || animal.gender === 'Intersex' || animal.gender === 'Unknown') && (
+                                        <>
+                                            <div><span className="text-gray-600">Last Mating Date:</span> <strong>{animal.lastMatingDate ? new Date(animal.lastMatingDate).toLocaleDateString() : '—'}</strong></div>
+                                            <div><span className="text-gray-600">Successful Matings:</span> <strong>{animal.successfulMatings || '—'}</strong></div>
+                                        </>
+                                    )}
+                                    {(animal.gender === 'Female' || animal.gender === 'Intersex' || animal.gender === 'Unknown') && (
+                                        <>
+                                            <div><span className="text-gray-600">Last Pregnancy Date:</span> <strong>{animal.lastPregnancyDate ? new Date(animal.lastPregnancyDate).toLocaleDateString() : '—'}</strong></div>
+                                            <div><span className="text-gray-600">Litter Count:</span> <strong>{animal.litterCount || '—'}</strong></div>
+                                        </>
+                                    )}
+                                    <div><span className="text-gray-600">Total Offspring:</span> <strong>{animal.offspringCount || '—'}</strong></div>
+                                </div>
+                            </div>
+                        </div>
+                    )}
 
                             {/* 3rd Section: Mating */}
                             <div className="bg-gray-50 p-4 rounded-lg border border-gray-200 space-y-4">
@@ -2812,9 +2921,7 @@ const PrivateAnimalDetail = ({ animal, onClose, onEdit, API_BASE_URL, authToken,
                                 <p className="text-sm text-gray-700 whitespace-pre-wrap">{animal.remarks || '—'}</p>
                             </div>
                         </div>
-                    )}
-
-                    {/* Tab 11: End of Life */}
+                    )}                    {/* Tab 11: End of Life */}
                     {detailViewTab === 11 && (
                         <div className="space-y-6">
                             {/* 1st Section: Information */}
@@ -2824,6 +2931,9 @@ const PrivateAnimalDetail = ({ animal, onClose, onEdit, API_BASE_URL, authToken,
                                     <div><span className="text-gray-600">Deceased Date:</span> <strong>{animal.deceasedDate ? new Date(animal.deceasedDate).toLocaleDateString() : '—'}</strong></div>
                                     <div><span className="text-gray-600">Cause of Death:</span> <strong>{animal.causeOfDeath || '—'}</strong></div>
                                     <div><span className="text-gray-600">Necropsy Results:</span> <strong>{animal.necropsyResults || '—'}</strong></div>
+                                    {(animal.species === 'Dog' || animal.species === 'Cat') && animal.endOfLifeCareNotes && (
+                                        <div><span className="text-gray-600">End of Life Care Notes:</span> <p className="text-gray-700 mt-1 whitespace-pre-wrap">{animal.endOfLifeCareNotes}</p></div>
+                                    )}
                                 </div>
                             </div>
 
@@ -2835,6 +2945,21 @@ const PrivateAnimalDetail = ({ animal, onClose, onEdit, API_BASE_URL, authToken,
                                     <div><span className="text-gray-600">Legal Status:</span> <strong>{animal.legalStatus || '—'}</strong></div>
                                 </div>
                             </div>
+
+                            {/* 3rd Section: Restrictions (Dog/Cat only) */}
+                            {(animal.species === 'Dog' || animal.species === 'Cat') && (animal.breedingRestrictions || animal.exportRestrictions) && (
+                                <div className="bg-gray-50 p-4 rounded-lg border border-gray-200 space-y-4">
+                                    <h3 className="text-lg font-semibold text-gray-700">Restrictions</h3>
+                                    <div className="space-y-3 text-sm">
+                                        {animal.breedingRestrictions && (
+                                            <div><span className="text-gray-600">Breeding Restrictions:</span> <p className="text-gray-700 mt-1 whitespace-pre-wrap">{animal.breedingRestrictions}</p></div>
+                                        )}
+                                        {animal.exportRestrictions && (
+                                            <div><span className="text-gray-600">Export Restrictions:</span> <p className="text-gray-700 mt-1 whitespace-pre-wrap">{animal.exportRestrictions}</p></div>
+                                        )}
+                                    </div>
+                                </div>
+                            )}
                         </div>
                     )}
                 </div>
@@ -3390,9 +3515,7 @@ const ViewOnlyPrivateAnimalDetail = ({ animal, onClose, API_BASE_URL, authToken,
                             {/* Offspring Section */}
                             <OffspringSection animalId={animal.id_public} API_BASE_URL={API_BASE_URL} authToken={authToken} onViewAnimal={onViewAnimal} />
                         </div>
-                    )}
-
-                    {/* Tab 6: Breeding */}
+                    )}                    {/* Tab 6: Breeding */}
                     {detailViewTab === 6 && (
                         <div className="space-y-6">
                             {/* 1st Section: Reproductive Status */}
@@ -3401,9 +3524,21 @@ const ViewOnlyPrivateAnimalDetail = ({ animal, onClose, API_BASE_URL, authToken,
                                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm">
                                     <div><span className="text-gray-600">Neutered/Spayed:</span> <strong>{animal.isNeutered ? '✓ Yes' : '✗ No'}</strong></div>
                                     <div><span className="text-gray-600">Infertile:</span> <strong>{animal.isInfertile ? '✓ Yes' : '✗ No'}</strong></div>
-                                    <div><span className="text-gray-600">In Mating:</span> <strong>{animal.isInMating ? '✓ Yes' : '✗ No'}</strong></div>
-                                    <div><span className="text-gray-600">Pregnant:</span> <strong>{animal.isPregnant ? '✓ Yes' : '✗ No'}</strong></div>
-                                    <div><span className="text-gray-600">Nursing:</span> <strong>{animal.isNursing ? '✓ Yes' : '✗ No'}</strong></div>
+                                    {!animal.isNeutered && !animal.isInfertile && (
+                                        <div><span className="text-gray-600">In Mating:</span> <strong>{animal.isInMating ? '✓ Yes' : '✗ No'}</strong></div>
+                                    )}
+                                    {(animal.gender === 'Female' || animal.gender === 'Intersex' || animal.gender === 'Unknown') && !animal.isNeutered && (
+                                        <>
+                                            <div><span className="text-gray-600">Pregnant:</span> <strong>{animal.isPregnant ? '✓ Yes' : '✗ No'}</strong></div>
+                                            <div><span className="text-gray-600">Nursing:</span> <strong>{animal.isNursing ? '✓ Yes' : '✗ No'}</strong></div>
+                                        </>
+                                    )}
+                                    {animal.gender === 'Male' && !animal.isNeutered && !animal.isInfertile && (
+                                        <div><span className="text-gray-600">Stud Animal:</span> <strong>{animal.isStudAnimal ? '✓ Yes' : '✗ No'}</strong></div>
+                                    )}
+                                    {animal.gender === 'Female' && !animal.isNeutered && !animal.isInfertile && (
+                                        <div><span className="text-gray-600">Breeding Dam:</span> <strong>{animal.isDamAnimal ? '✓ Yes' : '✗ No'}</strong></div>
+                                    )}
                                 </div>
                             </div>
 
@@ -3412,11 +3547,110 @@ const ViewOnlyPrivateAnimalDetail = ({ animal, onClose, API_BASE_URL, authToken,
                                 <div className="bg-gray-50 p-4 rounded-lg border border-gray-200 space-y-4">
                                     <h3 className="text-lg font-semibold text-gray-700">Estrus/Cycle</h3>
                                     <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm">
-                                        <div><span className="text-gray-600">Estrus Cycle:</span> <strong>{animal.estrusCycle || '—'}</strong></div>
-                                        <div><span className="text-gray-600">Last Estrus:</span> <strong>{animal.lastEstrus ? new Date(animal.lastEstrus).toLocaleDateString() : '—'}</strong></div>
+                                        <div><span className="text-gray-600">Heat Status:</span> <strong>{animal.heatStatus || '—'}</strong></div>
+                                        <div><span className="text-gray-600">Last Heat Date:</span> <strong>{animal.lastHeatDate ? new Date(animal.lastHeatDate).toLocaleDateString() : '—'}</strong></div>
+                                        <div><span className="text-gray-600">Ovulation Date:</span> <strong>{animal.ovulationDate ? new Date(animal.ovulationDate).toLocaleDateString() : '—'}</strong></div>
+                                        {(animal.species === 'Dog' || animal.species === 'Cat') && (
+                                            <div><span className="text-gray-600">Estrus Cycle Length:</span> <strong>{animal.estrusCycleLength ? `${animal.estrusCycleLength} days` : '—'}</strong></div>
+                                        )}
                                     </div>
                                 </div>
                             )}
+
+                            {/* 3rd Section: Mating */}
+                            {!animal.isNeutered && !animal.isInfertile && (
+                                <div className="bg-gray-50 p-4 rounded-lg border border-gray-200 space-y-4">
+                                    <h3 className="text-lg font-semibold text-gray-700">Mating</h3>
+                                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm">
+                                        <div><span className="text-gray-600">Mating Date:</span> <strong>{formatDateDisplay(animal.matingDates)}</strong></div>
+                                        <div><span className="text-gray-600">Expected Due Date:</span> <strong>{formatDateDisplay(animal.expectedDueDate)}</strong></div>
+                                        {(animal.species === 'Dog' || animal.species === 'Cat') && (
+                                            <div><span className="text-gray-600">Artificial Insemination:</span> <strong>{animal.artificialInseminationUsed ? '✓ Yes' : '✗ No'}</strong></div>
+                                        )}
+                                    </div>
+                                </div>
+                            )}
+
+                            {/* 4th Section: Stud Information */}
+                            {!animal.isNeutered && !animal.isInfertile && (animal.gender === 'Male' || animal.gender === 'Intersex' || animal.gender === 'Unknown') && (
+                                <div className="bg-gray-50 p-4 rounded-lg border border-gray-200 space-y-4">
+                                    <h3 className="text-lg font-semibold text-gray-700">Stud Information</h3>
+                                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm">
+                                        <div><span className="text-gray-600">Fertility Status:</span> <strong>{animal.fertilityStatus || '—'}</strong></div>
+                                        <div><span className="text-gray-600">Successful Matings:</span> <strong>{animal.successfulMatings || '—'}</strong></div>
+                                    </div>
+                                    {animal.fertilityNotes && (
+                                        <div className="text-sm"><span className="text-gray-600">Notes:</span> <p className="text-gray-700 mt-1 whitespace-pre-wrap">{animal.fertilityNotes}</p></div>
+                                    )}
+                                    {(animal.species === 'Dog' || animal.species === 'Cat') && (
+                                        <>
+                                            {animal.reproductiveClearances && (
+                                                <div className="text-sm"><span className="text-gray-600">Reproductive Clearances:</span> <p className="text-gray-700 mt-1 whitespace-pre-wrap">{animal.reproductiveClearances}</p></div>
+                                            )}
+                                            {animal.reproductiveComplications && (
+                                                <div className="text-sm"><span className="text-gray-600">Reproductive Complications:</span> <p className="text-gray-700 mt-1 whitespace-pre-wrap">{animal.reproductiveComplications}</p></div>
+                                            )}
+                                        </>
+                                    )}
+                                </div>
+                            )}
+
+                            {/* 5th Section: Dam Information */}
+                            {!animal.isNeutered && !animal.isInfertile && (animal.gender === 'Female' || animal.gender === 'Intersex' || animal.gender === 'Unknown') && (
+                                <div className="bg-gray-50 p-4 rounded-lg border border-gray-200 space-y-4">
+                                    <h3 className="text-lg font-semibold text-gray-700">Dam Information</h3>
+                                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm">
+                                        <div><span className="text-gray-600">Dam Fertility Status:</span> <strong>{animal.damFertilityStatus || animal.fertilityStatus || '—'}</strong></div>
+                                        {(animal.species === 'Dog' || animal.species === 'Cat') && (
+                                            <>
+                                                <div><span className="text-gray-600">Gestation Length:</span> <strong>{animal.gestationLength ? `${animal.gestationLength} days` : '—'}</strong></div>
+                                                <div><span className="text-gray-600">Delivery Method:</span> <strong>{animal.deliveryMethod || '—'}</strong></div>
+                                                {animal.species === 'Dog' && animal.whelpingDate && (
+                                                    <div><span className="text-gray-600">Whelping Date:</span> <strong>{new Date(animal.whelpingDate).toLocaleDateString()}</strong></div>
+                                                )}
+                                                {animal.species === 'Cat' && animal.queeningDate && (
+                                                    <div><span className="text-gray-600">Queening Date:</span> <strong>{new Date(animal.queeningDate).toLocaleDateString()}</strong></div>
+                                                )}
+                                            </>
+                                        )}
+                                    </div>
+                                    {animal.damFertilityNotes && (
+                                        <div className="text-sm"><span className="text-gray-600">Notes:</span> <p className="text-gray-700 mt-1 whitespace-pre-wrap">{animal.damFertilityNotes}</p></div>
+                                    )}
+                                    {(animal.species === 'Dog' || animal.species === 'Cat') && (
+                                        <>
+                                            {animal.reproductiveClearances && (
+                                                <div className="text-sm"><span className="text-gray-600">Reproductive Clearances:</span> <p className="text-gray-700 mt-1 whitespace-pre-wrap">{animal.reproductiveClearances}</p></div>
+                                            )}
+                                            {animal.reproductiveComplications && (
+                                                <div className="text-sm"><span className="text-gray-600">Reproductive Complications:</span> <p className="text-gray-700 mt-1 whitespace-pre-wrap">{animal.reproductiveComplications}</p></div>
+                                            )}
+                                        </>
+                                    )}
+                                </div>
+                            )}
+
+                            {/* 6th Section: Breeding History */}
+                            <div className="bg-blue-50 p-4 rounded-lg border border-blue-200 space-y-4">
+                                <h3 className="text-lg font-semibold text-gray-700 flex items-center"><span className="text-blue-600 mr-2">📋</span>Breeding History</h3>
+                                <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm">
+                                    {(animal.gender === 'Male' || animal.gender === 'Intersex' || animal.gender === 'Unknown') && (
+                                        <>
+                                            <div><span className="text-gray-600">Last Mating Date:</span> <strong>{animal.lastMatingDate ? new Date(animal.lastMatingDate).toLocaleDateString() : '—'}</strong></div>
+                                            <div><span className="text-gray-600">Successful Matings:</span> <strong>{animal.successfulMatings || '—'}</strong></div>
+                                        </>
+                                    )}
+                                    {(animal.gender === 'Female' || animal.gender === 'Intersex' || animal.gender === 'Unknown') && (
+                                        <>
+                                            <div><span className="text-gray-600">Last Pregnancy Date:</span> <strong>{animal.lastPregnancyDate ? new Date(animal.lastPregnancyDate).toLocaleDateString() : '—'}</strong></div>
+                                            <div><span className="text-gray-600">Litter Count:</span> <strong>{animal.litterCount || '—'}</strong></div>
+                                        </>
+                                    )}
+                                    <div><span className="text-gray-600">Total Offspring:</span> <strong>{animal.offspringCount || '—'}</strong></div>
+                                </div>
+                            </div>
+                        </div>
+                    )}
 
                             {/* 3rd Section: Mating */}
                             <div className="bg-gray-50 p-4 rounded-lg border border-gray-200 space-y-4">
@@ -3612,9 +3846,7 @@ const ViewOnlyPrivateAnimalDetail = ({ animal, onClose, API_BASE_URL, authToken,
                                 <p className="text-sm text-gray-700 whitespace-pre-wrap">{animal.remarks || '—'}</p>
                             </div>
                         </div>
-                    )}
-
-                    {/* Tab 11: End of Life */}
+                    )}                    {/* Tab 11: End of Life */}
                     {detailViewTab === 11 && (
                         <div className="space-y-6">
                             {/* 1st Section: Information */}
@@ -3624,6 +3856,9 @@ const ViewOnlyPrivateAnimalDetail = ({ animal, onClose, API_BASE_URL, authToken,
                                     <div><span className="text-gray-600">Deceased Date:</span> <strong>{animal.deceasedDate ? new Date(animal.deceasedDate).toLocaleDateString() : '—'}</strong></div>
                                     <div><span className="text-gray-600">Cause of Death:</span> <strong>{animal.causeOfDeath || '—'}</strong></div>
                                     <div><span className="text-gray-600">Necropsy Results:</span> <strong>{animal.necropsyResults || '—'}</strong></div>
+                                    {(animal.species === 'Dog' || animal.species === 'Cat') && animal.endOfLifeCareNotes && (
+                                        <div><span className="text-gray-600">End of Life Care Notes:</span> <p className="text-gray-700 mt-1 whitespace-pre-wrap">{animal.endOfLifeCareNotes}</p></div>
+                                    )}
                                 </div>
                             </div>
 
@@ -3635,6 +3870,21 @@ const ViewOnlyPrivateAnimalDetail = ({ animal, onClose, API_BASE_URL, authToken,
                                     <div><span className="text-gray-600">Legal Status:</span> <strong>{animal.legalStatus || '—'}</strong></div>
                                 </div>
                             </div>
+
+                            {/* 3rd Section: Restrictions (Dog/Cat only) */}
+                            {(animal.species === 'Dog' || animal.species === 'Cat') && (animal.breedingRestrictions || animal.exportRestrictions) && (
+                                <div className="bg-gray-50 p-4 rounded-lg border border-gray-200 space-y-4">
+                                    <h3 className="text-lg font-semibold text-gray-700">Restrictions</h3>
+                                    <div className="space-y-3 text-sm">
+                                        {animal.breedingRestrictions && (
+                                            <div><span className="text-gray-600">Breeding Restrictions:</span> <p className="text-gray-700 mt-1 whitespace-pre-wrap">{animal.breedingRestrictions}</p></div>
+                                        )}
+                                        {animal.exportRestrictions && (
+                                            <div><span className="text-gray-600">Export Restrictions:</span> <p className="text-gray-700 mt-1 whitespace-pre-wrap">{animal.exportRestrictions}</p></div>
+                                        )}
+                                    </div>
+                                </div>
+                            )}
                         </div>
                     )}
                 </div>
@@ -4270,9 +4520,7 @@ const ViewOnlyAnimalDetail = ({ animal, onClose, API_BASE_URL, onViewProfile, au
                                 }}
                             />
                         </div>
-                    )}
-
-                    {/* Tab 6: Breeding */}
+                    )}                    {/* Tab 6: Breeding */}
                     {detailViewTab === 6 && (
                         <div className="space-y-6">
                             {/* 1st Section: Reproductive Status */}
@@ -4281,26 +4529,133 @@ const ViewOnlyAnimalDetail = ({ animal, onClose, API_BASE_URL, onViewProfile, au
                                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm">
                                     <div><span className="text-gray-600">Neutered/Spayed:</span> <strong>{animal.isNeutered ? '✓ Yes' : '✗ No'}</strong></div>
                                     <div><span className="text-gray-600">Infertile:</span> <strong>{animal.isInfertile ? '✓ Yes' : '✗ No'}</strong></div>
-                                    {!animal.isNeutered && (
+                                    {!animal.isNeutered && !animal.isInfertile && (
+                                        <div><span className="text-gray-600">In Mating:</span> <strong>{animal.isInMating ? '✓ Yes' : '✗ No'}</strong></div>
+                                    )}
+                                    {(animal.gender === 'Female' || animal.gender === 'Intersex' || animal.gender === 'Unknown') && !animal.isNeutered && (
                                         <>
-                                            <div><span className="text-gray-600">In Mating:</span> <strong>{animal.inMating ? '✓ Yes' : '✗ No'}</strong></div>
                                             <div><span className="text-gray-600">Pregnant:</span> <strong>{animal.isPregnant ? '✓ Yes' : '✗ No'}</strong></div>
                                             <div><span className="text-gray-600">Nursing:</span> <strong>{animal.isNursing ? '✓ Yes' : '✗ No'}</strong></div>
                                         </>
                                     )}
+                                    {animal.gender === 'Male' && !animal.isNeutered && !animal.isInfertile && (
+                                        <div><span className="text-gray-600">Stud Animal:</span> <strong>{animal.isStudAnimal ? '✓ Yes' : '✗ No'}</strong></div>
+                                    )}
+                                    {animal.gender === 'Female' && !animal.isNeutered && !animal.isInfertile && (
+                                        <div><span className="text-gray-600">Breeding Dam:</span> <strong>{animal.isDamAnimal ? '✓ Yes' : '✗ No'}</strong></div>
+                                    )}
                                 </div>
                             </div>
 
-                            {/* 2nd Section: Estrus/Cycle (Female only) */}
-                            {showEstrusCycle && (animal.gender === 'Female' || animal.gender === 'Intersex' || animal.gender === 'Unknown') && (
+                            {/* 2nd Section: Estrus/Cycle (Female/Intersex/Unknown only) */}
+                            {(animal.gender === 'Female' || animal.gender === 'Intersex' || animal.gender === 'Unknown') && !animal.isNeutered && (
                                 <div className="bg-gray-50 p-4 rounded-lg border border-gray-200 space-y-4">
                                     <h3 className="text-lg font-semibold text-gray-700">Estrus/Cycle</h3>
                                     <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm">
                                         <div><span className="text-gray-600">Heat Status:</span> <strong>{animal.heatStatus || '—'}</strong></div>
                                         <div><span className="text-gray-600">Last Heat Date:</span> <strong>{animal.lastHeatDate ? new Date(animal.lastHeatDate).toLocaleDateString() : '—'}</strong></div>
+                                        <div><span className="text-gray-600">Ovulation Date:</span> <strong>{animal.ovulationDate ? new Date(animal.ovulationDate).toLocaleDateString() : '—'}</strong></div>
+                                        {(animal.species === 'Dog' || animal.species === 'Cat') && (
+                                            <div><span className="text-gray-600">Estrus Cycle Length:</span> <strong>{animal.estrusCycleLength ? `${animal.estrusCycleLength} days` : '—'}</strong></div>
+                                        )}
                                     </div>
                                 </div>
                             )}
+
+                            {/* 3rd Section: Mating */}
+                            {!animal.isNeutered && !animal.isInfertile && (
+                                <div className="bg-gray-50 p-4 rounded-lg border border-gray-200 space-y-4">
+                                    <h3 className="text-lg font-semibold text-gray-700">Mating</h3>
+                                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm">
+                                        <div><span className="text-gray-600">Mating Date:</span> <strong>{formatDateDisplay(animal.matingDates)}</strong></div>
+                                        <div><span className="text-gray-600">Expected Due Date:</span> <strong>{formatDateDisplay(animal.expectedDueDate)}</strong></div>
+                                        {(animal.species === 'Dog' || animal.species === 'Cat') && (
+                                            <div><span className="text-gray-600">Artificial Insemination:</span> <strong>{animal.artificialInseminationUsed ? '✓ Yes' : '✗ No'}</strong></div>
+                                        )}
+                                    </div>
+                                </div>
+                            )}
+
+                            {/* 4th Section: Stud Information */}
+                            {!animal.isNeutered && !animal.isInfertile && (animal.gender === 'Male' || animal.gender === 'Intersex' || animal.gender === 'Unknown') && (
+                                <div className="bg-gray-50 p-4 rounded-lg border border-gray-200 space-y-4">
+                                    <h3 className="text-lg font-semibold text-gray-700">Stud Information</h3>
+                                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm">
+                                        <div><span className="text-gray-600">Fertility Status:</span> <strong>{animal.fertilityStatus || '—'}</strong></div>
+                                        <div><span className="text-gray-600">Successful Matings:</span> <strong>{animal.successfulMatings || '—'}</strong></div>
+                                    </div>
+                                    {animal.fertilityNotes && (
+                                        <div className="text-sm"><span className="text-gray-600">Notes:</span> <p className="text-gray-700 mt-1 whitespace-pre-wrap">{animal.fertilityNotes}</p></div>
+                                    )}
+                                    {(animal.species === 'Dog' || animal.species === 'Cat') && (
+                                        <>
+                                            {animal.reproductiveClearances && (
+                                                <div className="text-sm"><span className="text-gray-600">Reproductive Clearances:</span> <p className="text-gray-700 mt-1 whitespace-pre-wrap">{animal.reproductiveClearances}</p></div>
+                                            )}
+                                            {animal.reproductiveComplications && (
+                                                <div className="text-sm"><span className="text-gray-600">Reproductive Complications:</span> <p className="text-gray-700 mt-1 whitespace-pre-wrap">{animal.reproductiveComplications}</p></div>
+                                            )}
+                                        </>
+                                    )}
+                                </div>
+                            )}
+
+                            {/* 5th Section: Dam Information */}
+                            {!animal.isNeutered && !animal.isInfertile && (animal.gender === 'Female' || animal.gender === 'Intersex' || animal.gender === 'Unknown') && (
+                                <div className="bg-gray-50 p-4 rounded-lg border border-gray-200 space-y-4">
+                                    <h3 className="text-lg font-semibold text-gray-700">Dam Information</h3>
+                                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm">
+                                        <div><span className="text-gray-600">Dam Fertility Status:</span> <strong>{animal.damFertilityStatus || animal.fertilityStatus || '—'}</strong></div>
+                                        {(animal.species === 'Dog' || animal.species === 'Cat') && (
+                                            <>
+                                                <div><span className="text-gray-600">Gestation Length:</span> <strong>{animal.gestationLength ? `${animal.gestationLength} days` : '—'}</strong></div>
+                                                <div><span className="text-gray-600">Delivery Method:</span> <strong>{animal.deliveryMethod || '—'}</strong></div>
+                                                {animal.species === 'Dog' && animal.whelpingDate && (
+                                                    <div><span className="text-gray-600">Whelping Date:</span> <strong>{new Date(animal.whelpingDate).toLocaleDateString()}</strong></div>
+                                                )}
+                                                {animal.species === 'Cat' && animal.queeningDate && (
+                                                    <div><span className="text-gray-600">Queening Date:</span> <strong>{new Date(animal.queeningDate).toLocaleDateString()}</strong></div>
+                                                )}
+                                            </>
+                                        )}
+                                    </div>
+                                    {animal.damFertilityNotes && (
+                                        <div className="text-sm"><span className="text-gray-600">Notes:</span> <p className="text-gray-700 mt-1 whitespace-pre-wrap">{animal.damFertilityNotes}</p></div>
+                                    )}
+                                    {(animal.species === 'Dog' || animal.species === 'Cat') && (
+                                        <>
+                                            {animal.reproductiveClearances && (
+                                                <div className="text-sm"><span className="text-gray-600">Reproductive Clearances:</span> <p className="text-gray-700 mt-1 whitespace-pre-wrap">{animal.reproductiveClearances}</p></div>
+                                            )}
+                                            {animal.reproductiveComplications && (
+                                                <div className="text-sm"><span className="text-gray-600">Reproductive Complications:</span> <p className="text-gray-700 mt-1 whitespace-pre-wrap">{animal.reproductiveComplications}</p></div>
+                                            )}
+                                        </>
+                                    )}
+                                </div>
+                            )}
+
+                            {/* 6th Section: Breeding History */}
+                            <div className="bg-blue-50 p-4 rounded-lg border border-blue-200 space-y-4">
+                                <h3 className="text-lg font-semibold text-gray-700 flex items-center"><span className="text-blue-600 mr-2">📋</span>Breeding History</h3>
+                                <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm">
+                                    {(animal.gender === 'Male' || animal.gender === 'Intersex' || animal.gender === 'Unknown') && (
+                                        <>
+                                            <div><span className="text-gray-600">Last Mating Date:</span> <strong>{animal.lastMatingDate ? new Date(animal.lastMatingDate).toLocaleDateString() : '—'}</strong></div>
+                                            <div><span className="text-gray-600">Successful Matings:</span> <strong>{animal.successfulMatings || '—'}</strong></div>
+                                        </>
+                                    )}
+                                    {(animal.gender === 'Female' || animal.gender === 'Intersex' || animal.gender === 'Unknown') && (
+                                        <>
+                                            <div><span className="text-gray-600">Last Pregnancy Date:</span> <strong>{animal.lastPregnancyDate ? new Date(animal.lastPregnancyDate).toLocaleDateString() : '—'}</strong></div>
+                                            <div><span className="text-gray-600">Litter Count:</span> <strong>{animal.litterCount || '—'}</strong></div>
+                                        </>
+                                    )}
+                                    <div><span className="text-gray-600">Total Offspring:</span> <strong>{animal.offspringCount || '—'}</strong></div>
+                                </div>
+                            </div>
+                        </div>
+                    )}
 
                             {/* 3rd Section: Mating */}
                             {showMating && (
@@ -19395,26 +19750,142 @@ const App = () => {
                                                     onViewAnimal={handleViewAnimal}
                                                 />
                                             </div>
-                                        )}
+                                        )}                    {/* Tab 6: Breeding */}
+                    {detailViewTab === 6 && (
+                        <div className="space-y-6">
+                            {/* 1st Section: Reproductive Status */}
+                            <div className="bg-gray-50 p-4 rounded-lg border border-gray-200 space-y-4">
+                                <h3 className="text-lg font-semibold text-gray-700">Reproductive Status</h3>
+                                <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm">
+                                    <div><span className="text-gray-600">Neutered/Spayed:</span> <strong>{animal.isNeutered ? '✓ Yes' : '✗ No'}</strong></div>
+                                    <div><span className="text-gray-600">Infertile:</span> <strong>{animal.isInfertile ? '✓ Yes' : '✗ No'}</strong></div>
+                                    {!animal.isNeutered && !animal.isInfertile && (
+                                        <div><span className="text-gray-600">In Mating:</span> <strong>{animal.isInMating ? '✓ Yes' : '✗ No'}</strong></div>
+                                    )}
+                                    {(animal.gender === 'Female' || animal.gender === 'Intersex' || animal.gender === 'Unknown') && !animal.isNeutered && (
+                                        <>
+                                            <div><span className="text-gray-600">Pregnant:</span> <strong>{animal.isPregnant ? '✓ Yes' : '✗ No'}</strong></div>
+                                            <div><span className="text-gray-600">Nursing:</span> <strong>{animal.isNursing ? '✓ Yes' : '✗ No'}</strong></div>
+                                        </>
+                                    )}
+                                    {animal.gender === 'Male' && !animal.isNeutered && !animal.isInfertile && (
+                                        <div><span className="text-gray-600">Stud Animal:</span> <strong>{animal.isStudAnimal ? '✓ Yes' : '✗ No'}</strong></div>
+                                    )}
+                                    {animal.gender === 'Female' && !animal.isNeutered && !animal.isInfertile && (
+                                        <div><span className="text-gray-600">Breeding Dam:</span> <strong>{animal.isDamAnimal ? '✓ Yes' : '✗ No'}</strong></div>
+                                    )}
+                                </div>
+                            </div>
 
-                                        {/* Tab 6: Breeding */}
-                                        {detailViewTab === 6 && (
-                                            <div className="space-y-6">
-                                                {(animalToView.isNeutered || animalToView.heatStatus || animalToView.isPregnant || animalToView.isNursing || animalToView.matingDates) && (
-                                                    <div className="bg-gray-50 p-4 rounded-lg border border-gray-200 space-y-4">
-                                                        <h3 className="text-lg font-semibold text-gray-700">Reproductive Status</h3>
-                                                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm">
-                                                            <div><span className="text-gray-600">Neutered/Spayed:</span> <strong>{animalToView.isNeutered ? 'Yes' : 'No'}</strong></div>
-                                                            <div><span className="text-gray-600">Heat Status:</span> <strong>{animalToView.heatStatus || '—'}</strong></div>
-                                                            <div><span className="text-gray-600">Last Heat Date:</span> <strong>{animalToView.lastHeatDate ? new Date(animalToView.lastHeatDate).toLocaleDateString() : '—'}</strong></div>
-                                                            <div><span className="text-gray-600">Mating Dates:</span> <strong>{formatDateDisplay(animalToView.matingDates)}</strong></div>
-                                                            <div><span className="text-gray-600">Expected Due Date:</span> <strong>{animalToView.expectedDueDate ? new Date(animalToView.expectedDueDate).toLocaleDateString() : '—'}</strong></div>
-                                                            <div><span className="text-gray-600">Litter Count:</span> <strong>{animalToView.litterCount || '—'}</strong></div>
-                                                            <div><span className="text-gray-600">Nursing Start Date:</span> <strong>{animalToView.nursingStartDate ? new Date(animalToView.nursingStartDate).toLocaleDateString() : '—'}</strong></div>
-                                                            <div><span className="text-gray-600">Weaning Date:</span> <strong>{animalToView.weaningDate ? new Date(animalToView.weaningDate).toLocaleDateString() : '—'}</strong></div>
-                                                        </div>
-                                                    </div>
+                            {/* 2nd Section: Estrus/Cycle (Female/Intersex/Unknown only) */}
+                            {(animal.gender === 'Female' || animal.gender === 'Intersex' || animal.gender === 'Unknown') && !animal.isNeutered && (
+                                <div className="bg-gray-50 p-4 rounded-lg border border-gray-200 space-y-4">
+                                    <h3 className="text-lg font-semibold text-gray-700">Estrus/Cycle</h3>
+                                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm">
+                                        <div><span className="text-gray-600">Heat Status:</span> <strong>{animal.heatStatus || '—'}</strong></div>
+                                        <div><span className="text-gray-600">Last Heat Date:</span> <strong>{animal.lastHeatDate ? new Date(animal.lastHeatDate).toLocaleDateString() : '—'}</strong></div>
+                                        <div><span className="text-gray-600">Ovulation Date:</span> <strong>{animal.ovulationDate ? new Date(animal.ovulationDate).toLocaleDateString() : '—'}</strong></div>
+                                        {(animal.species === 'Dog' || animal.species === 'Cat') && (
+                                            <div><span className="text-gray-600">Estrus Cycle Length:</span> <strong>{animal.estrusCycleLength ? `${animal.estrusCycleLength} days` : '—'}</strong></div>
+                                        )}
+                                    </div>
+                                </div>
+                            )}
+
+                            {/* 3rd Section: Mating */}
+                            {!animal.isNeutered && !animal.isInfertile && (
+                                <div className="bg-gray-50 p-4 rounded-lg border border-gray-200 space-y-4">
+                                    <h3 className="text-lg font-semibold text-gray-700">Mating</h3>
+                                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm">
+                                        <div><span className="text-gray-600">Mating Date:</span> <strong>{formatDateDisplay(animal.matingDates)}</strong></div>
+                                        <div><span className="text-gray-600">Expected Due Date:</span> <strong>{formatDateDisplay(animal.expectedDueDate)}</strong></div>
+                                        {(animal.species === 'Dog' || animal.species === 'Cat') && (
+                                            <div><span className="text-gray-600">Artificial Insemination:</span> <strong>{animal.artificialInseminationUsed ? '✓ Yes' : '✗ No'}</strong></div>
+                                        )}
+                                    </div>
+                                </div>
+                            )}
+
+                            {/* 4th Section: Stud Information */}
+                            {!animal.isNeutered && !animal.isInfertile && (animal.gender === 'Male' || animal.gender === 'Intersex' || animal.gender === 'Unknown') && (
+                                <div className="bg-gray-50 p-4 rounded-lg border border-gray-200 space-y-4">
+                                    <h3 className="text-lg font-semibold text-gray-700">Stud Information</h3>
+                                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm">
+                                        <div><span className="text-gray-600">Fertility Status:</span> <strong>{animal.fertilityStatus || '—'}</strong></div>
+                                        <div><span className="text-gray-600">Successful Matings:</span> <strong>{animal.successfulMatings || '—'}</strong></div>
+                                    </div>
+                                    {animal.fertilityNotes && (
+                                        <div className="text-sm"><span className="text-gray-600">Notes:</span> <p className="text-gray-700 mt-1 whitespace-pre-wrap">{animal.fertilityNotes}</p></div>
+                                    )}
+                                    {(animal.species === 'Dog' || animal.species === 'Cat') && (
+                                        <>
+                                            {animal.reproductiveClearances && (
+                                                <div className="text-sm"><span className="text-gray-600">Reproductive Clearances:</span> <p className="text-gray-700 mt-1 whitespace-pre-wrap">{animal.reproductiveClearances}</p></div>
+                                            )}
+                                            {animal.reproductiveComplications && (
+                                                <div className="text-sm"><span className="text-gray-600">Reproductive Complications:</span> <p className="text-gray-700 mt-1 whitespace-pre-wrap">{animal.reproductiveComplications}</p></div>
+                                            )}
+                                        </>
+                                    )}
+                                </div>
+                            )}
+
+                            {/* 5th Section: Dam Information */}
+                            {!animal.isNeutered && !animal.isInfertile && (animal.gender === 'Female' || animal.gender === 'Intersex' || animal.gender === 'Unknown') && (
+                                <div className="bg-gray-50 p-4 rounded-lg border border-gray-200 space-y-4">
+                                    <h3 className="text-lg font-semibold text-gray-700">Dam Information</h3>
+                                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm">
+                                        <div><span className="text-gray-600">Dam Fertility Status:</span> <strong>{animal.damFertilityStatus || animal.fertilityStatus || '—'}</strong></div>
+                                        {(animal.species === 'Dog' || animal.species === 'Cat') && (
+                                            <>
+                                                <div><span className="text-gray-600">Gestation Length:</span> <strong>{animal.gestationLength ? `${animal.gestationLength} days` : '—'}</strong></div>
+                                                <div><span className="text-gray-600">Delivery Method:</span> <strong>{animal.deliveryMethod || '—'}</strong></div>
+                                                {animal.species === 'Dog' && animal.whelpingDate && (
+                                                    <div><span className="text-gray-600">Whelping Date:</span> <strong>{new Date(animal.whelpingDate).toLocaleDateString()}</strong></div>
                                                 )}
+                                                {animal.species === 'Cat' && animal.queeningDate && (
+                                                    <div><span className="text-gray-600">Queening Date:</span> <strong>{new Date(animal.queeningDate).toLocaleDateString()}</strong></div>
+                                                )}
+                                            </>
+                                        )}
+                                    </div>
+                                    {animal.damFertilityNotes && (
+                                        <div className="text-sm"><span className="text-gray-600">Notes:</span> <p className="text-gray-700 mt-1 whitespace-pre-wrap">{animal.damFertilityNotes}</p></div>
+                                    )}
+                                    {(animal.species === 'Dog' || animal.species === 'Cat') && (
+                                        <>
+                                            {animal.reproductiveClearances && (
+                                                <div className="text-sm"><span className="text-gray-600">Reproductive Clearances:</span> <p className="text-gray-700 mt-1 whitespace-pre-wrap">{animal.reproductiveClearances}</p></div>
+                                            )}
+                                            {animal.reproductiveComplications && (
+                                                <div className="text-sm"><span className="text-gray-600">Reproductive Complications:</span> <p className="text-gray-700 mt-1 whitespace-pre-wrap">{animal.reproductiveComplications}</p></div>
+                                            )}
+                                        </>
+                                    )}
+                                </div>
+                            )}
+
+                            {/* 6th Section: Breeding History */}
+                            <div className="bg-blue-50 p-4 rounded-lg border border-blue-200 space-y-4">
+                                <h3 className="text-lg font-semibold text-gray-700 flex items-center"><span className="text-blue-600 mr-2">📋</span>Breeding History</h3>
+                                <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm">
+                                    {(animal.gender === 'Male' || animal.gender === 'Intersex' || animal.gender === 'Unknown') && (
+                                        <>
+                                            <div><span className="text-gray-600">Last Mating Date:</span> <strong>{animal.lastMatingDate ? new Date(animal.lastMatingDate).toLocaleDateString() : '—'}</strong></div>
+                                            <div><span className="text-gray-600">Successful Matings:</span> <strong>{animal.successfulMatings || '—'}</strong></div>
+                                        </>
+                                    )}
+                                    {(animal.gender === 'Female' || animal.gender === 'Intersex' || animal.gender === 'Unknown') && (
+                                        <>
+                                            <div><span className="text-gray-600">Last Pregnancy Date:</span> <strong>{animal.lastPregnancyDate ? new Date(animal.lastPregnancyDate).toLocaleDateString() : '—'}</strong></div>
+                                            <div><span className="text-gray-600">Litter Count:</span> <strong>{animal.litterCount || '—'}</strong></div>
+                                        </>
+                                    )}
+                                    <div><span className="text-gray-600">Total Offspring:</span> <strong>{animal.offspringCount || '—'}</strong></div>
+                                </div>
+                            </div>
+                        </div>
+                    )}
                                             </div>
                                         )}
 
@@ -19590,21 +20061,47 @@ const App = () => {
                                                     </div>
                                                 )}
                                             </div>
-                                        )}
+                                        )}                    {/* Tab 11: End of Life */}
+                    {detailViewTab === 11 && (
+                        <div className="space-y-6">
+                            {/* 1st Section: Information */}
+                            <div className="bg-gray-50 p-4 rounded-lg border border-gray-200 space-y-4">
+                                <h3 className="text-lg font-semibold text-gray-700">Information</h3>
+                                <div className="space-y-3 text-sm">
+                                    <div><span className="text-gray-600">Deceased Date:</span> <strong>{animal.deceasedDate ? new Date(animal.deceasedDate).toLocaleDateString() : '—'}</strong></div>
+                                    <div><span className="text-gray-600">Cause of Death:</span> <strong>{animal.causeOfDeath || '—'}</strong></div>
+                                    <div><span className="text-gray-600">Necropsy Results:</span> <strong>{animal.necropsyResults || '—'}</strong></div>
+                                    {(animal.species === 'Dog' || animal.species === 'Cat') && animal.endOfLifeCareNotes && (
+                                        <div><span className="text-gray-600">End of Life Care Notes:</span> <p className="text-gray-700 mt-1 whitespace-pre-wrap">{animal.endOfLifeCareNotes}</p></div>
+                                    )}
+                                </div>
+                            </div>
 
-                                        {/* Tab 11: End of Life */}
-                                        {detailViewTab === 11 && (
-                                            <div className="space-y-6">
-                                                {(animalToView.deceasedDate || animalToView.causeOfDeath || animalToView.insurance || animalToView.legalStatus) && (
-                                                    <div className="bg-gray-50 p-4 rounded-lg border border-gray-200 space-y-4">
-                                                        <h3 className="text-lg font-semibold text-gray-700">End of Life & Legal</h3>
-                                                        {animalToView.deceasedDate && <div><strong>Deceased Date:</strong> <p className="text-sm mt-1">{new Date(animalToView.deceasedDate).toLocaleDateString()}</p></div>}
-                                                        {animalToView.causeOfDeath && <div><strong>Cause of Death:</strong> <p className="text-sm mt-1">{animalToView.causeOfDeath}</p></div>}
-                                                        {animalToView.necropsyResults && <div><strong>Necropsy Results:</strong> <p className="text-sm mt-1">{animalToView.necropsyResults}</p></div>}
-                                                        {animalToView.insurance && <div><strong>Insurance:</strong> <p className="text-sm mt-1">{animalToView.insurance}</p></div>}
-                                                        {animalToView.legalStatus && <div><strong>Legal Status:</strong> <p className="text-sm mt-1">{animalToView.legalStatus}</p></div>}
-                                                    </div>
-                                                )}
+                            {/* 2nd Section: Legal/Administrative */}
+                            <div className="bg-gray-50 p-4 rounded-lg border border-gray-200 space-y-4">
+                                <h3 className="text-lg font-semibold text-gray-700">Legal/Administrative</h3>
+                                <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm">
+                                    <div><span className="text-gray-600">Insurance:</span> <strong>{animal.insurance || '—'}</strong></div>
+                                    <div><span className="text-gray-600">Legal Status:</span> <strong>{animal.legalStatus || '—'}</strong></div>
+                                </div>
+                            </div>
+
+                            {/* 3rd Section: Restrictions (Dog/Cat only) */}
+                            {(animal.species === 'Dog' || animal.species === 'Cat') && (animal.breedingRestrictions || animal.exportRestrictions) && (
+                                <div className="bg-gray-50 p-4 rounded-lg border border-gray-200 space-y-4">
+                                    <h3 className="text-lg font-semibold text-gray-700">Restrictions</h3>
+                                    <div className="space-y-3 text-sm">
+                                        {animal.breedingRestrictions && (
+                                            <div><span className="text-gray-600">Breeding Restrictions:</span> <p className="text-gray-700 mt-1 whitespace-pre-wrap">{animal.breedingRestrictions}</p></div>
+                                        )}
+                                        {animal.exportRestrictions && (
+                                            <div><span className="text-gray-600">Export Restrictions:</span> <p className="text-gray-700 mt-1 whitespace-pre-wrap">{animal.exportRestrictions}</p></div>
+                                        )}
+                                    </div>
+                                </div>
+                            )}
+                        </div>
+                    )}
                                             </div>
                                         )}
 
