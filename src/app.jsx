@@ -9162,22 +9162,14 @@ const AnimalForm = ({
                                 </div>
                             </div>
 
-                            {/* Dog/Cat Co-ownership & Transfer History */}
+                            {/* Dog/Cat Co-ownership */}
                             {(formData.species === 'Dog' || formData.species === 'Cat') && (
-                                <>
-                                    <div>
-                                        <label className="block text-sm font-medium text-gray-700 mb-2">Co-Ownership</label>
-                                        <textarea name="coOwnership" value={formData.coOwnership || ''} onChange={handleChange} rows="2"
-                                            className="block w-full p-2 border border-gray-300 rounded-md shadow-sm focus:ring-primary focus:border-primary" 
-                                            placeholder="Co-owner name, terms, breeding rights" />
-                                    </div>
-                                    <div>
-                                        <label className="block text-sm font-medium text-gray-700 mb-2">Transfer History</label>
-                                        <textarea name="transferHistory" value={formData.transferHistory || ''} onChange={handleChange} rows="2"
-                                            className="block w-full p-2 border border-gray-300 rounded-md shadow-sm focus:ring-primary focus:border-primary" 
-                                            placeholder="Previous owners, dates, circumstances" />
-                                    </div>
-                                </>
+                                <div>
+                                    <label className="block text-sm font-medium text-gray-700 mb-2">Co-Ownership</label>
+                                    <textarea name="coOwnership" value={formData.coOwnership || ''} onChange={handleChange} rows="2"
+                                        className="block w-full p-2 border border-gray-300 rounded-md shadow-sm focus:ring-primary focus:border-primary" 
+                                        placeholder="Co-owner name, terms, breeding rights" />
+                                </div>
                             )}
                         </div>
                         
