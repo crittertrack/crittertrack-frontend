@@ -9397,11 +9397,12 @@ const AnimalForm = ({
                                 const mostRecentWeight = sorted[0];
                                 const mostRecentLength = sorted.find(r => r.length);
                                 const mostRecentHeight = sorted.find(r => r.height);
+                                const mostRecentGirth = sorted.find(r => r.chestGirth);
                                 
                                 return (
                                     <div data-tutorial-target="current-measurements-growth-chart" className="bg-blue-50 p-3 rounded-lg border border-blue-200">
                                         <h4 className="text-sm font-semibold text-gray-700 mb-2">Current Measurements</h4>
-                                        <div className="grid grid-cols-2 md:grid-cols-5 gap-3 text-sm">
+                                        <div className="grid grid-cols-2 md:grid-cols-6 gap-3 text-sm">
                                             <div>
                                                 <span className="text-xs text-gray-600">Weight:</span>
                                                 <p className="font-medium">{mostRecentWeight.weight} {measurementUnits.weight}</p>
@@ -9416,6 +9417,12 @@ const AnimalForm = ({
                                                 <div>
                                                     <span className="text-xs text-gray-600">Height:</span>
                                                     <p className="font-medium">{mostRecentHeight.height} {measurementUnits.length}</p>
+                                                </div>
+                                            )}
+                                            {mostRecentGirth && mostRecentGirth.chestGirth && (
+                                                <div>
+                                                    <span className="text-xs text-gray-600">Chest Girth:</span>
+                                                    <p className="font-medium">{mostRecentGirth.chestGirth} {measurementUnits.length}</p>
                                                 </div>
                                             )}
                                             {mostRecentWeight.bcs && (
@@ -9740,8 +9747,19 @@ const AnimalForm = ({
                                         </div>
                                     </div>
                                     
-                                    {/* Row 2: BCS, Notes */}
-                                    <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+                                    {/* Row 2: Chest Girth, BCS, Notes */}
+                                    <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
+                                        <div>
+                                            <label className="block text-xs font-medium text-gray-700">Chest Girth ({measurementUnits.length}) - optional</label>
+                                            <input 
+                                                type="number" 
+                                                step="0.1"
+                                                value={newMeasurement.chestGirth}
+                                                onChange={(e) => setNewMeasurement({...newMeasurement, chestGirth: e.target.value})}
+                                                placeholder={`e.g., ${measurementUnits.length === 'cm' ? '30' : measurementUnits.length === 'm' ? '0.3' : measurementUnits.length === 'in' ? '12' : '1'}`}
+                                                className="mt-1 block w-full p-2 text-sm border border-gray-300 rounded-md shadow-sm focus:ring-primary focus:border-primary" 
+                                            />
+                                        </div>
                                         <div>
                                             <label className="block text-xs font-medium text-gray-700">Body Condition Score - optional</label>
                                             <select 
@@ -9807,7 +9825,7 @@ const AnimalForm = ({
                                     <div className="space-y-2 bg-gray-50 p-3 rounded-lg border border-gray-200 max-h-64 overflow-y-auto">
                                         {growthRecords.map((record) => (
                                             <div key={record.id} className="flex items-center justify-between p-2 bg-white rounded border border-gray-100 text-sm">
-                                                <div className="flex gap-4 text-gray-700 flex-1">
+                                                <div className="flex gap-4 text-gray-700 flex-1 flex-wrap">
                                                     <span className="font-medium">{record.date}</span>
                                                     <span>{record.weight} {measurementUnits.weight}</span>
                                                     {record.length && (
@@ -9815,6 +9833,9 @@ const AnimalForm = ({
                                                     )}
                                                     {record.height && (
                                                         <span>H: {record.height} {measurementUnits.length}</span>
+                                                    )}
+                                                    {record.chestGirth && (
+                                                        <span>G: {record.chestGirth} {measurementUnits.length}</span>
                                                     )}
                                                     {record.bcs && (
                                                         <>
