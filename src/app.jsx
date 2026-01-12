@@ -10266,6 +10266,16 @@ const AnimalForm = ({
                                         <input type="date" name="ovulationDate" value={formData.ovulationDate} onChange={handleChange}
                                             className="block w-full p-2 border border-gray-300 rounded-md shadow-sm focus:ring-primary focus:border-primary" />
                                     </div>
+                                    
+                                    {/* Dog/Cat Estrus Cycle Length */}
+                                    {(formData.species === 'Dog' || formData.species === 'Cat') && (
+                                        <div>
+                                            <label className="block text-sm font-medium text-gray-700 mb-2">Estrus Cycle Length (days)</label>
+                                            <input type="number" name="estrusCycleLength" value={formData.estrusCycleLength || ''} onChange={handleChange} 
+                                                className="block w-full p-2 border border-gray-300 rounded-md shadow-sm focus:ring-primary focus:border-primary" 
+                                                placeholder={formData.species === 'Dog' ? '~21 days' : '~14-21 days'} />
+                                        </div>
+                                    )}
                                 </div>
                             </div>
                         )}
@@ -10295,6 +10305,15 @@ const AnimalForm = ({
                                             className={`block w-full p-2 border rounded-md shadow-sm focus:ring-primary focus:border-primary ${formData.isNeutered ? 'bg-gray-100 border-gray-200' : 'border-gray-300'}`}
                                             placeholder="e.g., 2025-01-15" />
                                     </div>
+                                    
+                                    {/* AI Used - Dog/Cat */}
+                                    {(formData.species === 'Dog' || formData.species === 'Cat') && (
+                                        <div className="md:col-span-2 flex items-center space-x-2 pt-2">
+                                            <input type="checkbox" name="artificialInseminationUsed" checked={formData.artificialInseminationUsed || false} onChange={handleChange} 
+                                                className="form-checkbox h-5 w-5 text-primary rounded focus:ring-primary" />
+                                            <span className="text-sm font-medium text-gray-700">Artificial Insemination Used</span>
+                                        </div>
+                                    )}
                                 </div>
                             </div>
                         )}
@@ -10339,6 +10358,16 @@ const AnimalForm = ({
                                             placeholder="e.g., Any genetic concerns, fertility issues, or special breeding notes for sire role"
                                             rows="3" />
                                     </div>
+                                    
+                                    {/* Reproductive Clearances - Dog/Cat */}
+                                    {(formData.species === 'Dog' || formData.species === 'Cat') && (
+                                        <div className="md:col-span-2">
+                                            <label className="block text-sm font-medium text-gray-700 mb-2">Reproductive Clearances</label>
+                                            <textarea name="reproductiveClearances" value={formData.reproductiveClearances || ''} onChange={handleChange} rows="2"
+                                                className="block w-full p-2 border border-gray-300 rounded-md shadow-sm focus:ring-primary focus:border-primary" 
+                                                placeholder="Brucellosis test, progesterone timing, etc." />
+                                        </div>
+                                    )}
                                 </div>
                             </div>
                         )}
@@ -10382,6 +10411,41 @@ const AnimalForm = ({
                                             placeholder="e.g., Any genetic concerns, fertility issues, or special breeding notes for dam role"
                                             rows="3" />
                                     </div>
+                                    
+                                    {/* Dog/Cat Pregnancy & Delivery Details */}
+                                    {(formData.species === 'Dog' || formData.species === 'Cat') && (
+                                        <>
+                                            <div>
+                                                <label className="block text-sm font-medium text-gray-700 mb-2">Gestation Length (days)</label>
+                                                <input type="number" name="gestationLength" value={formData.gestationLength || ''} onChange={handleChange} 
+                                                    className="block w-full p-2 border border-gray-300 rounded-md shadow-sm focus:ring-primary focus:border-primary" 
+                                                    placeholder={formData.species === 'Dog' ? '~63 days' : '~65 days'} />
+                                            </div>
+                                            <div>
+                                                <label className="block text-sm font-medium text-gray-700 mb-2">Delivery Method</label>
+                                                <select name="deliveryMethod" value={formData.deliveryMethod || ''} onChange={handleChange} 
+                                                    className="block w-full p-2 border border-gray-300 rounded-md shadow-sm focus:ring-primary focus:border-primary">
+                                                    <option value="">Select...</option>
+                                                    <option value="Natural">Natural</option>
+                                                    <option value="C-Section">C-Section</option>
+                                                    <option value="Assisted">Assisted</option>
+                                                </select>
+                                            </div>
+                                            <div>
+                                                <label className="block text-sm font-medium text-gray-700 mb-2">{formData.species === 'Dog' ? 'Whelping Date' : 'Queening Date'}</label>
+                                                <input type="date" name={formData.species === 'Dog' ? 'whelpingDate' : 'queeningDate'} 
+                                                    value={formData.species === 'Dog' ? (formData.whelpingDate || '') : (formData.queeningDate || '')} 
+                                                    onChange={handleChange} 
+                                                    className="block w-full p-2 border border-gray-300 rounded-md shadow-sm focus:ring-primary focus:border-primary" />
+                                            </div>
+                                            <div className="md:col-span-2">
+                                                <label className="block text-sm font-medium text-gray-700 mb-2">Reproductive Complications</label>
+                                                <textarea name="reproductiveComplications" value={formData.reproductiveComplications || ''} onChange={handleChange} rows="2"
+                                                    className="block w-full p-2 border border-gray-300 rounded-md shadow-sm focus:ring-primary focus:border-primary" 
+                                                    placeholder="Any complications during breeding/delivery" />
+                                            </div>
+                                        </>
+                                    )}
                                 </div>
                             </div>
                         )}
@@ -10481,62 +10545,7 @@ const AnimalForm = ({
                                     </div>
                                 </div>
 
-                                {/* Dog/Cat Reproduction Details - integrated */}
-                                {(formData.species === 'Dog' || formData.species === 'Cat') && (
-                                    <>
-                                        <h4 className="text-md font-medium text-gray-600 border-t pt-3 mt-3">Reproductive Details</h4>
-                                        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                                            <div>
-                                                <label className="block text-sm font-medium text-gray-700">Estrus Cycle Length (days)</label>
-                                                <input type="number" name="estrusCycleLength" value={formData.estrusCycleLength || ''} onChange={handleChange} 
-                                                    className="mt-1 block w-full p-2 border border-gray-300 rounded-md shadow-sm focus:ring-primary focus:border-primary" 
-                                                    placeholder={formData.species === 'Dog' ? '~21 days' : '~14-21 days'} />
-                                            </div>
-                                            <div>
-                                                <label className="block text-sm font-medium text-gray-700">Gestation Length (days)</label>
-                                                <input type="number" name="gestationLength" value={formData.gestationLength || ''} onChange={handleChange} 
-                                                    className="mt-1 block w-full p-2 border border-gray-300 rounded-md shadow-sm focus:ring-primary focus:border-primary" 
-                                                    placeholder={formData.species === 'Dog' ? '~63 days' : '~65 days'} />
-                                            </div>
-                                            <div>
-                                                <label className="block text-sm font-medium text-gray-700">Delivery Method</label>
-                                                <select name="deliveryMethod" value={formData.deliveryMethod || ''} onChange={handleChange} 
-                                                    className="mt-1 block w-full p-2 border border-gray-300 rounded-md shadow-sm focus:ring-primary focus:border-primary">
-                                                    <option value="">Select...</option>
-                                                    <option value="Natural">Natural</option>
-                                                    <option value="C-Section">C-Section</option>
-                                                    <option value="Assisted">Assisted</option>
-                                                </select>
-                                            </div>
-                                            <div>
-                                                <label className="block text-sm font-medium text-gray-700">{formData.species === 'Dog' ? 'Whelping Date' : 'Queening Date'}</label>
-                                                <input type="date" name={formData.species === 'Dog' ? 'whelpingDate' : 'queeningDate'} 
-                                                    value={formData.species === 'Dog' ? (formData.whelpingDate || '') : (formData.queeningDate || '')} 
-                                                    onChange={handleChange} 
-                                                    className="mt-1 block w-full p-2 border border-gray-300 rounded-md shadow-sm focus:ring-primary focus:border-primary" />
-                                            </div>
-                                            <div className="flex items-center space-x-2 pt-6">
-                                                <input type="checkbox" name="artificialInseminationUsed" checked={formData.artificialInseminationUsed || false} onChange={handleChange} 
-                                                    className="form-checkbox h-5 w-5 text-primary rounded focus:ring-primary" />
-                                                <span className="text-sm font-medium text-gray-700">AI Used</span>
-                                            </div>
-                                        </div>
-                                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4 pt-2">
-                                            <div>
-                                                <label className="block text-sm font-medium text-gray-700">Reproductive Complications</label>
-                                                <textarea name="reproductiveComplications" value={formData.reproductiveComplications || ''} onChange={handleChange} rows="2"
-                                                    className="mt-1 block w-full p-2 border border-gray-300 rounded-md shadow-sm focus:ring-primary focus:border-primary" 
-                                                    placeholder="Any complications during breeding/delivery" />
-                                            </div>
-                                            <div>
-                                                <label className="block text-sm font-medium text-gray-700">Reproductive Clearances</label>
-                                                <textarea name="reproductiveClearances" value={formData.reproductiveClearances || ''} onChange={handleChange} rows="2"
-                                                    className="mt-1 block w-full p-2 border border-gray-300 rounded-md shadow-sm focus:ring-primary focus:border-primary" 
-                                                    placeholder="Brucellosis test, progesterone timing, etc." />
-                                            </div>
-                                        </div>
-                                    </>
-                                )}
+
                             </div>
                     </div>
                 )}
