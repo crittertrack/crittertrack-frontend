@@ -9161,6 +9161,24 @@ const AnimalForm = ({
                                     </div>
                                 </div>
                             </div>
+
+                            {/* Dog/Cat Co-ownership & Transfer History */}
+                            {(formData.species === 'Dog' || formData.species === 'Cat') && (
+                                <>
+                                    <div>
+                                        <label className="block text-sm font-medium text-gray-700 mb-2">Co-Ownership</label>
+                                        <textarea name="coOwnership" value={formData.coOwnership || ''} onChange={handleChange} rows="2"
+                                            className="block w-full p-2 border border-gray-300 rounded-md shadow-sm focus:ring-primary focus:border-primary" 
+                                            placeholder="Co-owner name, terms, breeding rights" />
+                                    </div>
+                                    <div>
+                                        <label className="block text-sm font-medium text-gray-700 mb-2">Transfer History</label>
+                                        <textarea name="transferHistory" value={formData.transferHistory || ''} onChange={handleChange} rows="2"
+                                            className="block w-full p-2 border border-gray-300 rounded-md shadow-sm focus:ring-primary focus:border-primary" 
+                                            placeholder="Previous owners, dates, circumstances" />
+                                    </div>
+                                </>
+                            )}
                         </div>
                         
                         {/* Current Owner */}
@@ -11532,6 +11550,16 @@ const AnimalForm = ({
                                         className="block w-full p-2 border border-gray-300 rounded-md shadow-sm focus:ring-primary focus:border-primary" 
                                         placeholder="Post-mortem examination findings..." />
                                 </div>
+
+                                {/* Dog/Cat End of Life Care Notes */}
+                                {(formData.species === 'Dog' || formData.species === 'Cat') && (
+                                    <div className="md:col-span-2">
+                                        <label className="block text-sm font-medium text-gray-700 mb-2">End of Life Care Notes</label>
+                                        <textarea name="endOfLifeCareNotes" value={formData.endOfLifeCareNotes || ''} onChange={handleChange} rows="2"
+                                            className="block w-full p-2 border border-gray-300 rounded-md shadow-sm focus:ring-primary focus:border-primary" 
+                                            placeholder="Wishes for cremation, burial, memorial" />
+                                    </div>
+                                )}
                             </div>
                         </div>
 
@@ -11570,20 +11598,8 @@ const AnimalForm = ({
                             {/* Dog/Cat Ownership & Legal Details - Integrated */}
                             {(formData.species === 'Dog' || formData.species === 'Cat') && (
                                 <>
-                                    <h4 className="text-md font-semibold text-gray-600 mt-4 pt-4 border-t border-gray-200">📋 Ownership Details</h4>
+                                    <h4 className="text-md font-semibold text-gray-600 mt-4 pt-4 border-t border-gray-200">📋 Legal & Restrictions</h4>
                                     <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                                        <div>
-                                            <label className="block text-sm font-medium text-gray-700">Co-Ownership</label>
-                                            <textarea name="coOwnership" value={formData.coOwnership || ''} onChange={handleChange} rows="2"
-                                                className="mt-1 block w-full p-2 border border-gray-300 rounded-md shadow-sm focus:ring-primary focus:border-primary" 
-                                                placeholder="Co-owner name, terms, breeding rights" />
-                                        </div>
-                                        <div>
-                                            <label className="block text-sm font-medium text-gray-700">Transfer History</label>
-                                            <textarea name="transferHistory" value={formData.transferHistory || ''} onChange={handleChange} rows="2"
-                                                className="mt-1 block w-full p-2 border border-gray-300 rounded-md shadow-sm focus:ring-primary focus:border-primary" 
-                                                placeholder="Previous owners, dates, circumstances" />
-                                        </div>
                                         <div>
                                             <label className="block text-sm font-medium text-gray-700">Breeding Restrictions</label>
                                             <textarea name="breedingRestrictions" value={formData.breedingRestrictions || ''} onChange={handleChange} rows="2"
@@ -11596,12 +11612,6 @@ const AnimalForm = ({
                                                 className="mt-1 block w-full p-2 border border-gray-300 rounded-md shadow-sm focus:ring-primary focus:border-primary" 
                                                 placeholder="Country restrictions, registry limitations" />
                                         </div>
-                                    </div>
-                                    <div>
-                                        <label className="block text-sm font-medium text-gray-700">End of Life Care Notes</label>
-                                        <textarea name="endOfLifeCareNotes" value={formData.endOfLifeCareNotes || ''} onChange={handleChange} rows="2"
-                                            className="mt-1 block w-full p-2 border border-gray-300 rounded-md shadow-sm focus:ring-primary focus:border-primary" 
-                                            placeholder="Wishes for cremation, burial, memorial" />
                                     </div>
                                 </>
                             )}
