@@ -8188,7 +8188,7 @@ const AnimalForm = ({
             
             // Handle breeder selection differently
             if (modalTarget === 'breeder') {
-                setFormData(prev => ({ ...prev, breederId_public: id }));
+                setFormData(prev => ({ ...prev, breederId_public: id, manualBreederName: '' }));
                 if (idOrAnimal && typeof idOrAnimal === 'object') {
                     // User object from search
                     const user = idOrAnimal;
@@ -8314,7 +8314,7 @@ const AnimalForm = ({
 
     // Clear breeder selection
     const clearBreederSelection = () => {
-        setFormData(prev => ({ ...prev, breederId_public: null }));
+        setFormData(prev => ({ ...prev, breederId_public: null, manualBreederName: '' }));
         setBreederInfo(null);
     };
 
@@ -9162,7 +9162,12 @@ const AnimalForm = ({
                                         type="text" 
                                         name="manualBreederName" 
                                         value={formData.manualBreederName || ''} 
-                                        onChange={handleChange}
+                                        onChange={(e) => {
+                                            handleChange(e);
+                                            if (e.target.value.trim() && formData.breederId_public) {
+                                                clearBreederSelection();
+                                            }
+                                        }}
                                         placeholder="Enter breeder name (if not a registered user)"
                                         className="block w-full p-2 border border-gray-300 rounded-md shadow-sm focus:ring-primary focus:border-primary" 
                                     />
