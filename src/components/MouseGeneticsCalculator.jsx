@@ -950,13 +950,12 @@ const calculatePhenotype = (genotype, originalGenotype = null) => {
     carriers.push('Fuzz');
   }
 
-  // Texture - only show if coat genes were explicitly selected
-  if (coatGenesSelected) {
-    const hasLonghair = genotype.Go === 'go/go';
-    const hasAstrex = genotype.Re === 'Re/re' || genotype.Re === 're/Re' || genotype.Re === 'Re/Re';
-    
-    // Check for Texel (longhair + astrex combination)
-    const isTexel = hasLonghair && hasAstrex;
+  // Texture - always show coat genes if they affect phenotype
+  const hasLonghair = genotype.Go === 'go/go';
+  const hasAstrex = genotype.Re === 'Re/re' || genotype.Re === 're/Re' || genotype.Re === 'Re/Re';
+  
+  // Check for Texel (longhair + astrex combination)
+  const isTexel = hasLonghair && hasAstrex;
     
     if (isTexel) {
       texture = 'Texel';
@@ -985,14 +984,7 @@ const calculatePhenotype = (genotype, originalGenotype = null) => {
     if (genotype.Nu === 'Nu/Nu' || genotype.Nu === 'Nu/nu') {
       texture = 'Dominant Hairless';
     }
-  }
 
-  // Combine results
-  let result = '';
-  
-  // Only include color if color genes were selected
-  if (colorGenesSelected && color) {
-    result = color;
   }
   
   // Apply Umbrous after color but before markings
