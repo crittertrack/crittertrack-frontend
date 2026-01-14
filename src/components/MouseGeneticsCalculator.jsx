@@ -193,6 +193,16 @@ const calculatePhenotype = (genotype, originalGenotype = null) => {
         colorName = 'Blue Stone';
       } else if (colorName === 'Sepia') {
         colorName = 'Blue Sepia';
+      } else if (colorName === 'Bone') {
+        colorName = 'Blue Bone';
+      } else if (colorName === 'Beige') {
+        colorName = 'Blue Beige';
+      } else if (colorName === 'Colorpoint Beige') {
+        colorName = 'Blue Colorpoint Beige';
+      } else if (colorName === 'Mock Chocolate') {
+        colorName = 'Blue Mock Chocolate';
+      } else if (colorName === 'Chinchilla') {
+        colorName = 'Blue Chinchilla';
       } else if (colorName.includes('Chocolate')) {
         colorName = colorName.replace('Chocolate', 'Lilac');
       } else if (colorName.includes('Cinnamon') && !colorName.includes('Argente')) {
