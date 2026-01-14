@@ -33,19 +33,38 @@ const BackupManagementTab = ({ authToken }) => {
             setLoading(true);
             setError(null);
             
+            console.log('Fetching backups from:', `${API_BASE_URL}/admin/backups`);
+            
             const response = await fetch(`${API_BASE_URL}/admin/backups`, {
                 headers: { Authorization: `Bearer ${authToken}` }
             });
 
-            if (!response.ok) throw new Error('Failed to fetch backups');
+            console.log('Backup fetch response status:', response.status);
+
+            if (!response.ok) {
+                const errorData = await response.json().catch(() => ({}));
+                console.error('Backup fetch failed:', errorData);
+                
+                // Provide helpful error messages based on status code
+                let errorMessage = errorData.error || errorData.message || `Failed to fetch backups (${response.status})`;
+                if (response.status === 403) {
+                    errorMessage = 'Access denied. Admin privileges required.';
+                } else if (response.status === 401) {
+                    errorMessage = 'Authentication failed. Please log in again.';
+                }
+                
+                throw new Error(errorMessage);
+            }
 
             const data = await response.json();
+            console.log('Backup data received:', data);
             setBackups(data.backups || []);
             setCurrentStats(data.currentStats);
             setLastAutoBackup(data.lastAutoBackup);
             setSchedule(data.schedule);
         } catch (err) {
-            setError(err.message);
+            console.error('Backup fetch error:', err);
+            setError(err.message || 'Failed to fetch backups');
         } finally {
             setLoading(false);
         }
@@ -68,7 +87,10 @@ const BackupManagementTab = ({ authToken }) => {
                 })
             });
 
-            if (!response.ok) throw new Error('Failed to create backup');
+            if (!response.ok) {
+                const errorData = await response.json().catch(() => ({}));
+                throw new Error(errorData.error || errorData.message || `Failed to create backup (${response.status})`);
+            }
 
             const data = await response.json();
             setSuccess(`Backup created successfully: ${data.backup?.id}`);
@@ -78,7 +100,8 @@ const BackupManagementTab = ({ authToken }) => {
 
             setTimeout(() => setSuccess(null), 5000);
         } catch (err) {
-            setError(err.message);
+            console.error('Create backup error:', err);
+            setError(err.message || 'Failed to create backup');
         } finally {
             setCreating(false);
         }
@@ -90,7 +113,10 @@ const BackupManagementTab = ({ authToken }) => {
                 headers: { Authorization: `Bearer ${authToken}` }
             });
 
-            if (!response.ok) throw new Error('Failed to download backup');
+            if (!response.ok) {
+                const errorData = await response.json().catch(() => ({}));
+                throw new Error(errorData.error || errorData.message || `Failed to download backup (${response.status})`);
+            }
 
             const blob = await response.blob();
             const url = window.URL.createObjectURL(blob);
@@ -102,7 +128,8 @@ const BackupManagementTab = ({ authToken }) => {
             window.URL.revokeObjectURL(url);
             document.body.removeChild(a);
         } catch (err) {
-            setError(err.message);
+            console.error('Download backup error:', err);
+            setError(err.message || 'Failed to download backup');
         }
     };
 
@@ -115,13 +142,17 @@ const BackupManagementTab = ({ authToken }) => {
                 headers: { Authorization: `Bearer ${authToken}` }
             });
 
-            if (!response.ok) throw new Error('Failed to delete backup');
+            if (!response.ok) {
+                const errorData = await response.json().catch(() => ({}));
+                throw new Error(errorData.error || errorData.message || `Failed to delete backup (${response.status})`);
+            }
 
             setSuccess('Backup deleted successfully');
             fetchBackups();
             setTimeout(() => setSuccess(null), 3000);
         } catch (err) {
-            setError(err.message);
+            console.error('Delete backup error:', err);
+            setError(err.message || 'Failed to delete backup');
         }
     };
 
@@ -142,7 +173,10 @@ const BackupManagementTab = ({ authToken }) => {
                 })
             });
 
-            if (!response.ok) throw new Error('Failed to restore backup');
+            if (!response.ok) {
+                const errorData = await response.json().catch(() => ({}));
+                throw new Error(errorData.error || errorData.message || `Failed to restore backup (${response.status})`);
+            }
 
             const data = await response.json();
             setSuccess(`Restore completed! Restored: ${data.restored?.map(r => `${r.collection} (${r.count})`).join(', ')}`);
@@ -152,7 +186,8 @@ const BackupManagementTab = ({ authToken }) => {
 
             setTimeout(() => setSuccess(null), 10000);
         } catch (err) {
-            setError(err.message);
+            console.error('Restore backup error:', err);
+            setError(err.message || 'Failed to restore backup');
         } finally {
             setRestoring(null);
         }
