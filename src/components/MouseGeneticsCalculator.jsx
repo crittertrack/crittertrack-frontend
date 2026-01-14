@@ -787,12 +787,15 @@ const calculatePhenotype = (genotype, originalGenotype = null) => {
     }
   } else if (isBlackPattern) {
     pattern = 'Self';
-    if (genotype.P === 'p/p') {
-      color = isBrown ? 'Champagne' : 'Dove';
-    } else if (isExtremeBlackPattern) {
-      color = isBrown ? 'Chocolate' : 'Extreme Black';
-    } else {
-      color = isBrown ? 'Chocolate' : 'Black';
+    // Only set color if not already set by C-locus special colors
+    if (!color) {
+      if (genotype.P === 'p/p') {
+        color = isBrown ? 'Champagne' : 'Dove';
+      } else if (isExtremeBlackPattern) {
+        color = isBrown ? 'Chocolate' : 'Extreme Black';
+      } else {
+        color = isBrown ? 'Chocolate' : 'Black';
+      }
     }
   }
 
