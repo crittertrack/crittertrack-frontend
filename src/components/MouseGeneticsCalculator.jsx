@@ -218,15 +218,15 @@ const calculatePhenotype = (genotype, originalGenotype = null) => {
     
     let result = phenotype;
     
-    // Check if Splashed is in phenotype and Pied should be added -> convert to Tricolor
+    // Note: Tricolor (Pied + Splashed) is now handled at the end of calculatePhenotype
+    // after texture is added, so we don't handle it here
+    
+    // Add Pied only if not handling Tricolor
     const hasSplashed = result.includes('Splashed');
     const shouldAddPied = genotype.S === 's/s' && !result.includes('Pied') && !result.includes('Tricolor');
     
-    if (hasSplashed && shouldAddPied) {
-      // Replace "Splashed" with "Tricolor"
-      result = result.replace('Splashed', 'Tricolor');
-    } else if (shouldAddPied) {
-      // Add Pied if no Splashed
+    if (shouldAddPied && !hasSplashed) {
+      // Only add Pied here if there's no Splashed (Tricolor case handled later)
       result += ' Pied';
     }
     
@@ -1023,6 +1023,24 @@ const calculatePhenotype = (genotype, originalGenotype = null) => {
   }
   if (texture) {
     result += (result ? ' ' : '') + texture;
+  }
+
+  // Handle Tricolor (Pied + Splashed) replacement AFTER all parts are assembled
+  const hasSplashed = result.includes('Splashed');
+  const shouldAddPied = genotype.S === 's/s' && !result.includes('Pied') && !result.includes('Tricolor');
+  
+  if (hasSplashed && shouldAddPied) {
+    // Replace "Splashed" with "Tricolor" in the final phenotype
+    result = result.replace('Splashed', 'Tricolor');
+  } else if (shouldAddPied && !hasSplashed) {
+    // Add Pied at the end if no Splashed (after color but before coats would be ideal, but this works)
+    // Find where to insert - after color/markings but before texture
+    if (texture && result.includes(texture)) {
+      // Insert before texture
+      result = result.replace(texture, `Pied ${texture}`);
+    } else {
+      result += ' Pied';
+    }
   }
 
   return { phenotype: result || 'Unknown', carriers, hidden, notes };
