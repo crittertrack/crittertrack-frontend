@@ -283,10 +283,7 @@ const calculatePhenotype = (genotype, originalGenotype = null) => {
       return { phenotype: 'Albino', carriers, hidden, notes: [] };
     }
     
-    // If Spl is present with eligible C-dilutes, use Splashed
-    if (hasSpl && !excludedCForSpl.includes(genotype.C)) {
-      return { phenotype: addMarkingsIfNeeded(applyDilution('Agouti Splashed Fox')), carriers, hidden, notes: [] };
-    }
+    // Splashed is handled in normal flow later
     
     if (isCCombo('ch/c', 'c/ch')) {
       return { phenotype: addMarkingsIfNeeded(applyDilution('Agouti Himalayan Fox')), carriers, hidden, notes: [] };
@@ -326,10 +323,7 @@ const calculatePhenotype = (genotype, originalGenotype = null) => {
       return { phenotype: 'Albino', carriers, hidden, notes: [] };
     }
     
-    // If Spl is present with eligible C-dilutes, use Splashed
-    if (hasSpl && !excludedCForSpl.includes(genotype.C)) {
-      return { phenotype: addMarkingsIfNeeded(applyDilution('Agouti Splashed')), carriers, hidden, notes: [] };
-    }
+    // Splashed is handled in normal flow later
     
     if (isCCombo('ch/c', 'c/ch')) {
       return { phenotype: addMarkingsIfNeeded(applyDilution('Agouti Himalayan')), carriers, hidden, notes: [] };
@@ -369,14 +363,7 @@ const calculatePhenotype = (genotype, originalGenotype = null) => {
       return { phenotype: 'Albino', carriers, hidden, notes: [] };
     }
     
-    // If Spl is present with eligible C-dilutes, use Splashed
-    if (hasSpl && !excludedCForSpl.includes(genotype.C)) {
-      return { phenotype: addMarkingsIfNeeded(applyDilution('Black Splashed Fox')), carriers, hidden, notes: [] };
-    }
-    
-    if (isCCombo('ch/c', 'c/ch')) {
-      return { phenotype: addMarkingsIfNeeded(applyDilution('Himalayan Fox')), carriers, hidden, notes: [] };
-    }
+    // Splashed is handled in normal flow later
     if (isCCombo('ch/ch')) {
       return { phenotype: addMarkingsIfNeeded(applyDilution('Siamese Fox')), carriers, hidden, notes: [] };
     }
@@ -411,12 +398,9 @@ const calculatePhenotype = (genotype, originalGenotype = null) => {
     if (genotype.C === 'c/c') {
       return { phenotype: 'Albino', carriers, hidden, notes: [] };
     }
-    
-    // If Spl is present with eligible C-dilutes, use Splashed
-    if (hasSpl && !excludedCForSpl.includes(genotype.C)) {
-      return { phenotype: addMarkingsIfNeeded(applyDilution('Black Splashed')), carriers, hidden, notes: [] };
-    }
-    
+
+    // Splashed is handled in normal flow later
+
     if (isCCombo('ch/c', 'c/ch')) {
       return { phenotype: addMarkingsIfNeeded(applyDilution('Himalayan')), carriers, hidden, notes: [] };
     }
@@ -470,10 +454,7 @@ const calculatePhenotype = (genotype, originalGenotype = null) => {
     if (genotype.C && !excludedCLocus.includes(genotype.C)) {
       const isTanVariant = genotype.A === 'Ay/at' || genotype.A === 'at/Ay';
       
-      // If Spl is present, use Splashed instead of C-dilute names
-      if (hasSpl) {
-        return { phenotype: addMarkingsIfNeeded(isTanVariant ? 'Dominant Red Splashed Fox' : 'Dominant Red Splashed'), carriers, hidden, notes: [] };
-      }
+      // Splashed is handled in normal flow later
       
       const baseName = 'Dominant Red';
       const suffix = isTanVariant ? ' Fox' : '';
@@ -593,10 +574,7 @@ const calculatePhenotype = (genotype, originalGenotype = null) => {
     if (genotype.C && !excludedCLocus.includes(genotype.C)) {
       const isTanVariant = genotype.A === 'Avy/at' || genotype.A === 'at/Avy';
       
-      // If Spl is present, use Splashed instead of Snowtiger
-      if (hasSpl) {
-        return { phenotype: addMarkingsIfNeeded(isTanVariant ? 'Brindle Splashed Fox' : 'Brindle Splashed'), carriers, hidden, notes: [] };
-      }
+      // Splashed is handled in normal flow later
       
       return { phenotype: addMarkingsIfNeeded(isTanVariant ? 'Snowtiger Fox' : 'Snowtiger'), carriers, hidden, notes: [] };
     }
