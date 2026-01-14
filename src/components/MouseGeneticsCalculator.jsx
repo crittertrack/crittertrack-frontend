@@ -959,11 +959,9 @@ const calculatePhenotype = (genotype, originalGenotype = null) => {
 
   // ALWAYS check for coat gene carriers, even if not explicitly selected
   // Carriers show what's hidden, regardless of whether we're displaying the trait
+  // Note: Astrex (Re) and Nude (Nu) are dominant - no carrier state
   if (genotype.Go === 'Go/go' || genotype.Go === 'go/Go') {
     carriers.push('Longhair');
-  }
-  if (genotype.Re === 're/Re' || genotype.Re === 'Re/re') {
-    carriers.push('Astrex');
   }
   if (genotype.Sa === 'Sa/sa' || genotype.Sa === 'sa/Sa') {
     carriers.push('Satin');
