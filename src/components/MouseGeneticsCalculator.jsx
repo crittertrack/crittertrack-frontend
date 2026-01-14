@@ -1009,13 +1009,15 @@ const calculatePhenotype = (genotype, originalGenotype = null) => {
   }
 
   // Handle Tricolor (Pied + Splashed) replacement AFTER all parts are assembled
+  // Only forms Tricolor if Splashed is VISIBLE (in result, not hidden)
   const hasSplashed = result.includes('Splashed');
   const shouldAddPied = genotype.S === 's/s' && !result.includes('Pied') && !result.includes('Tricolor');
   
   if (hasSplashed && shouldAddPied) {
-    // Replace "Splashed" with "Tricolor" in the final phenotype
+    // Replace "Splashed" with "Tricolor" (Pied + visible Splashed)
     result = result.replace('Splashed', 'Tricolor');
   } else if (shouldAddPied && !hasSplashed) {
+    // Just add Pied if Splashed is hidden or not present
     // Add Pied at the end if no Splashed (after color but before coats would be ideal, but this works)
     // Find where to insert - after color/markings but before texture
     if (texture && result.includes(texture)) {
