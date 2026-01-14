@@ -985,6 +985,12 @@ const calculatePhenotype = (genotype, originalGenotype = null) => {
       texture = 'Dominant Hairless';
     }
 
+  // Combine results
+  let result = '';
+  
+  // Only include color if color genes were selected
+  if (colorGenesSelected && color) {
+    result = color;
   }
   
   // Apply Umbrous after color but before markings
