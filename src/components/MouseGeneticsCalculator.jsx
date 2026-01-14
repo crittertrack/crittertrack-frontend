@@ -402,31 +402,24 @@ const calculatePhenotype = (genotype, originalGenotype = null) => {
     // Splashed is handled in normal flow later
 
     if (isCCombo('ch/c', 'c/ch')) {
-      return { phenotype: addMarkingsIfNeeded(applyDilution('Himalayan')), carriers, hidden, notes: [] };
+      color = applyDilution('Himalayan');
+    } else if (isCCombo('ch/ch')) {
+      color = applyDilution('Siamese');
     }
-    if (isCCombo('ch/ch')) {
-      return { phenotype: addMarkingsIfNeeded(applyDilution('Siamese')), carriers, hidden, notes: [] };
-    }
-    if (isCCombo('ce/c', 'c/ce')) {
-      return { phenotype: addMarkingsIfNeeded(applyDilution('Bone')), carriers, hidden, notes: [] };
-    }
-    if (isCCombo('ce/ch', 'ch/ce')) {
-      return { phenotype: addMarkingsIfNeeded(applyDilution('Colorpoint Beige')), carriers, hidden, notes: [] };
-    }
-    if (isCCombo('ce/ce')) {
-      return { phenotype: addMarkingsIfNeeded(applyDilution('Beige')), carriers, hidden, notes: [] };
-    }
-    if (isCCombo('cch/c', 'c/cch')) {
-      return { phenotype: addMarkingsIfNeeded(applyDilution('Stone')), carriers, hidden, notes: [] };
-    }
-    if (isCCombo('cch/ch', 'ch/cch')) {
-      return { phenotype: addMarkingsIfNeeded(applyDilution('Burmese')), carriers, hidden, notes: [] };
-    }
-    if (isCCombo('cch/ce', 'ce/cch')) {
-      return { phenotype: addMarkingsIfNeeded(applyDilution('Mock Chocolate')), carriers, hidden, notes: [] };
-    }
-    if (genotype.C === 'cch/cch') {
-      return { phenotype: addMarkingsIfNeeded(applyDilution('Sepia')), carriers, hidden, notes: [] };
+    else if (isCCombo('ce/c', 'c/ce')) {
+      color = applyDilution('Bone');
+    } else if (isCCombo('ce/ch', 'ch/ce')) {
+      color = applyDilution('Colorpoint Beige');
+    } else if (isCCombo('ce/ce')) {
+      color = applyDilution('Beige');
+    } else if (isCCombo('cch/c', 'c/cch')) {
+      color = applyDilution('Stone');
+    } else if (isCCombo('cch/ch', 'ch/cch')) {
+      color = applyDilution('Burmese');
+    } else if (isCCombo('cch/ce', 'ce/cch')) {
+      color = applyDilution('Mock Chocolate');
+    } else if (genotype.C === 'cch/cch') {
+      color = applyDilution('Sepia');
     }
   }
 
