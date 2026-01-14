@@ -836,7 +836,7 @@ const calculatePhenotype = (genotype, originalGenotype = null) => {
 
   // C-locus modifications
   // Check if Spl is present to replace C-dilute names with 'Splashed'
-  const hasSpl = genotype.Spl && genotype.Spl.includes('Spl/');
+  const hasSpl = genotype.Spl && (genotype.Spl.includes('Spl/') || genotype.Spl.includes('/Spl'));
   const excludedCForSpl = ['C/C', 'c/c', 'C/c', 'C/ce', 'C/ch', 'C/cch'];
   const shouldUseSplashed = hasSpl && genotype.C && !excludedCForSpl.includes(genotype.C);
   
@@ -907,7 +907,7 @@ const calculatePhenotype = (genotype, originalGenotype = null) => {
   }
 
   // Splashed - only visible with double C-dilutes (not C/-)
-  if (genotype.Spl && genotype.Spl.includes('Spl/')) {
+  if (genotype.Spl && (genotype.Spl.includes('Spl/') || genotype.Spl.includes('/Spl'))) {
     if (shouldUseSplashed) {
       markings.push('Splashed');
     } else if (genotype.C !== 'c/c') {
