@@ -964,13 +964,7 @@ const calculatePhenotype = (genotype, originalGenotype = null) => {
       texture = 'Astrex';
     }
 
-    // Only show hair length if coat genes were explicitly selected AND not Texel
-    if (genotype.Go === 'Go/Go') {
-      markings.push('Shorthair');
-    } else if (genotype.Go === 'go/go' && !isTexel) {
-      // Don't add Longhair if it's Texel (Longhair + Astrex)
-      markings.push('Longhair');
-    }
+    // Don't show Longhair/Shorthair separately - only Texel (which is already handled above)
     
     if (genotype.Sa === 'sa/sa') {
       texture = texture ? `${texture} Satin` : 'Satin';
