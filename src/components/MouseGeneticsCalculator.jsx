@@ -957,6 +957,24 @@ const calculatePhenotype = (genotype, originalGenotype = null) => {
     markings.push('xbrindle');
   }
 
+  // ALWAYS check for coat gene carriers, even if not explicitly selected
+  // Carriers show what's hidden, regardless of whether we're displaying the trait
+  if (genotype.Go === 'Go/go' || genotype.Go === 'go/Go') {
+    carriers.push('Longhair');
+  }
+  if (genotype.Re === 're/Re' || genotype.Re === 'Re/re') {
+    carriers.push('Astrex');
+  }
+  if (genotype.Sa === 'Sa/sa' || genotype.Sa === 'sa/Sa') {
+    carriers.push('Satin');
+  }
+  if (genotype.Rst === 'Rst/rst' || genotype.Rst === 'rst/Rst') {
+    carriers.push('Rosette');
+  }
+  if (genotype.Fz === 'Fz/fz' || genotype.Fz === 'fz/Fz') {
+    carriers.push('Fuzz');
+  }
+
   // Texture - only show if coat genes were explicitly selected
   if (coatGenesSelected) {
     const hasLonghair = genotype.Go === 'go/go';
@@ -969,8 +987,6 @@ const calculatePhenotype = (genotype, originalGenotype = null) => {
       texture = 'Texel';
     } else if (hasAstrex) {
       texture = 'Astrex';
-    } else if (genotype.Re === 're/Re' || genotype.Re === 'Re/re') {
-      carriers.push('Astrex');
     }
 
     // Only show hair length if coat genes were explicitly selected AND not Texel
@@ -979,26 +995,18 @@ const calculatePhenotype = (genotype, originalGenotype = null) => {
     } else if (genotype.Go === 'go/go' && !isTexel) {
       // Don't add Longhair if it's Texel (Longhair + Astrex)
       markings.push('Longhair');
-    } else if (genotype.Go === 'Go/go' || genotype.Go === 'go/Go') {
-      carriers.push('Longhair');
     }
     
     if (genotype.Sa === 'sa/sa') {
       texture = texture ? `${texture} Satin` : 'Satin';
-    } else if (genotype.Sa === 'Sa/sa' || genotype.Sa === 'sa/Sa') {
-      carriers.push('Satin');
     }
     
     if (genotype.Rst === 'rst/rst') {
       texture = texture ? `${texture} Rosette` : 'Rosette';
-    } else if (genotype.Rst === 'Rst/rst' || genotype.Rst === 'rst/Rst') {
-      carriers.push('Rosette');
     }
     
     if (genotype.Fz === 'fz/fz') {
       texture = texture ? `${texture} Fuzz` : 'Fuzz';
-    } else if (genotype.Fz === 'Fz/fz' || genotype.Fz === 'fz/Fz') {
-      carriers.push('Fuzz');
     }
     
     if (genotype.Nu === 'Nu/Nu' || genotype.Nu === 'Nu/nu') {
