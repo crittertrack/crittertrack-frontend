@@ -944,6 +944,8 @@ const calculatePhenotype = (genotype, originalGenotype = null) => {
   } else if (genotype.Rn === 'Rn/rn' || genotype.Rn === 'rn/Rn') {
     carriers.push('Roan');
   }
+  
+  console.log('Roan check:', { Rn: genotype.Rn, hasRoan: genotype.Rn === 'rn/rn', markings });
 
   // Silvered (Si) - recessive trait
   if (genotype.Si === 'si/si') {
