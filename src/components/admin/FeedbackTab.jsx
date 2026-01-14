@@ -21,7 +21,7 @@ const FeedbackTab = ({ API_BASE_URL, authToken }) => {
         setLoading(true);
         setError(null);
         try {
-            const response = await fetch(`${API_BASE_URL}/genetics-feedback/admin`, {
+            const response = await fetch(`${API_BASE_URL}/api/genetics-feedback/admin`, {
                 headers: {
                     'Authorization': `Bearer ${authToken}`
                 }
@@ -51,7 +51,7 @@ const FeedbackTab = ({ API_BASE_URL, authToken }) => {
     const updateStatus = async (feedbackId, newStatus) => {
         setUpdating(true);
         try {
-            const response = await fetch(`${API_BASE_URL}/genetics-feedback/${feedbackId}/status`, {
+            const response = await fetch(`${API_BASE_URL}/api/genetics-feedback/${feedbackId}/status`, {
                 method: 'PATCH',
                 headers: {
                     'Content-Type': 'application/json',

@@ -1162,7 +1162,7 @@ const MouseGeneticsCalculator = ({ API_BASE_URL, authToken, myAnimals = [] }) =>
         .map(([locus, alleles]) => `${locus}: ${alleles}`)
         .join(', ');
 
-      const response = await fetch(`${API_BASE_URL}/genetics-feedback`, {
+      const response = await fetch(`${API_BASE_URL}/api/genetics-feedback`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
