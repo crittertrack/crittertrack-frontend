@@ -964,7 +964,12 @@ const calculatePhenotype = (genotype, originalGenotype = null) => {
       texture = 'Astrex';
     }
 
-    // Don't show Longhair/Shorthair separately - only Texel (which is already handled above)
+    // Show hair length (unless it's part of Texel combination)
+    if (genotype.Go === 'Go/Go') {
+      texture = texture ? `Longhair ${texture}` : 'Longhair';
+    } else if (genotype.Go === 'go/go' && !isTexel) {
+      texture = texture ? `Longhair ${texture}` : 'Longhair';
+    }
     
     if (genotype.Sa === 'sa/sa') {
       texture = texture ? `${texture} Satin` : 'Satin';
