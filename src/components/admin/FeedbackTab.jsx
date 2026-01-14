@@ -233,9 +233,9 @@ const FeedbackTab = ({ API_BASE_URL, authToken }) => {
                 ) : (
                     filteredFeedback.map(item => (
                         <div 
-                            key={item.id} 
-                            className={`feedback-card ${selectedFeedback?.id === item.id ? 'selected' : ''}`}
-                            onClick={() => setSelectedFeedback(selectedFeedback?.id === item.id ? null : item)}
+                            key={item._id} 
+                            className={`feedback-card ${selectedFeedback?._id === item._id ? 'selected' : ''}`}
+                            onClick={() => setSelectedFeedback(selectedFeedback?._id === item._id ? null : item)}
                         >
                             <div className="feedback-card-header">
                                 <div className="feedback-meta">
@@ -283,7 +283,7 @@ const FeedbackTab = ({ API_BASE_URL, authToken }) => {
                             </div>
 
                             {/* Expanded Details */}
-                            {selectedFeedback?.id === item.id && (
+                            {selectedFeedback?._id === item._id && (
                                 <div className="feedback-expanded">
                                     <div className="feedback-divider"></div>
                                     
@@ -317,7 +317,7 @@ const FeedbackTab = ({ API_BASE_URL, authToken }) => {
                                             className="feedback-action-btn feedback-btn-review"
                                             onClick={(e) => {
                                                 e.stopPropagation();
-                                                updateStatus(item.id, 'reviewed');
+                                                updateStatus(item._id, 'reviewed');
                                             }}
                                             disabled={updating || item.status === 'reviewed'}
                                         >
@@ -328,7 +328,7 @@ const FeedbackTab = ({ API_BASE_URL, authToken }) => {
                                             className="feedback-action-btn feedback-btn-resolve"
                                             onClick={(e) => {
                                                 e.stopPropagation();
-                                                updateStatus(item.id, 'resolved');
+                                                updateStatus(item._id, 'resolved');
                                             }}
                                             disabled={updating || item.status === 'resolved'}
                                         >
@@ -339,7 +339,7 @@ const FeedbackTab = ({ API_BASE_URL, authToken }) => {
                                             className="feedback-action-btn feedback-btn-dismiss"
                                             onClick={(e) => {
                                                 e.stopPropagation();
-                                                updateStatus(item.id, 'dismissed');
+                                                updateStatus(item._id, 'dismissed');
                                             }}
                                             disabled={updating || item.status === 'dismissed'}
                                         >
