@@ -965,9 +965,8 @@ const calculatePhenotype = (genotype, originalGenotype = null) => {
     }
 
     // Show hair length (unless it's part of Texel combination)
-    if (genotype.Go === 'Go/Go') {
-      texture = texture ? `Longhair ${texture}` : 'Longhair';
-    } else if (genotype.Go === 'go/go' && !isTexel) {
+    // go/go = Longhair (recessive), Go/Go or Go/go = Shorthair (dominant)
+    if (genotype.Go === 'go/go' && !isTexel) {
       texture = texture ? `Longhair ${texture}` : 'Longhair';
     }
     
