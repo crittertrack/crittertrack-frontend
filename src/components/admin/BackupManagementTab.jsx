@@ -33,9 +33,9 @@ const BackupManagementTab = ({ authToken }) => {
             setLoading(true);
             setError(null);
             
-            console.log('Fetching backups from:', `${API_BASE_URL}/admin/backups`);
+            console.log('Fetching backups from:', `${API_BASE_URL}/api/admin/backups`);
             
-            const response = await fetch(`${API_BASE_URL}/admin/backups`, {
+            const response = await fetch(`${API_BASE_URL}/api/admin/backups`, {
                 headers: { Authorization: `Bearer ${authToken}` }
             });
 
@@ -75,7 +75,7 @@ const BackupManagementTab = ({ authToken }) => {
             setCreating(true);
             setError(null);
 
-            const response = await fetch(`${API_BASE_URL}/admin/trigger-backup`, {
+            const response = await fetch(`${API_BASE_URL}/api/admin/trigger-backup`, {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
@@ -109,7 +109,7 @@ const BackupManagementTab = ({ authToken }) => {
 
     const downloadBackup = async (backupId) => {
         try {
-            const response = await fetch(`${API_BASE_URL}/admin/backups/${backupId}/download`, {
+            const response = await fetch(`${API_BASE_URL}/api/admin/backups/${backupId}/download`, {
                 headers: { Authorization: `Bearer ${authToken}` }
             });
 
@@ -137,7 +137,7 @@ const BackupManagementTab = ({ authToken }) => {
         if (!window.confirm(`Delete backup "${backupId}"? This cannot be undone.`)) return;
 
         try {
-            const response = await fetch(`${API_BASE_URL}/admin/backups/${backupId}`, {
+            const response = await fetch(`${API_BASE_URL}/api/admin/backups/${backupId}`, {
                 method: 'DELETE',
                 headers: { Authorization: `Bearer ${authToken}` }
             });
@@ -161,7 +161,7 @@ const BackupManagementTab = ({ authToken }) => {
             setRestoring(backupId);
             setError(null);
 
-            const response = await fetch(`${API_BASE_URL}/admin/restore-backup/${backupId}`, {
+            const response = await fetch(`${API_BASE_URL}/api/admin/restore-backup/${backupId}`, {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
