@@ -438,14 +438,13 @@ const calculatePhenotype = (genotype, originalGenotype = null) => {
     return { phenotype: 'Albino', carriers, hidden, notes: [] };
   }
 
-  // Recessive red/yellow (old section - should be removed, using e/e section below)
-  if (genotype.E === 'e/e') {
+  // Recessive red/yellow - only set if not already set by C-locus
+  if (genotype.E === 'e/e' && !color) {
     if (genotype.P === 'p/p') {
       color = 'Recessive Fawn';
     } else {
       color = 'Recessive Red';
     }
-    return { phenotype: addMarkingsIfNeeded(color), carriers, hidden, notes: [] };
   }
 
   // Dominant yellow/red (Ay)
@@ -774,26 +773,32 @@ const calculatePhenotype = (genotype, originalGenotype = null) => {
   
   if (isAgoutiPattern) {
     pattern = 'Agouti';
-    // Check for A/at (agouti tan)
-    if (genotype.A === 'A/at') {
-      if (genotype.P === 'p/p') {
-        color = 'Argente Tan';
+    // Only set color if not already set by C-locus special colors
+    if (!color) {
+      // Check for A/at (agouti tan)
+      if (genotype.A === 'A/at') {
+        if (genotype.P === 'p/p') {
+          color = 'Argente Tan';
+        } else {
+          color = isBrown ? 'Cinnamon Tan' : 'Agouti Tan';
+        }
       } else {
-        color = isBrown ? 'Cinnamon Tan' : 'Agouti Tan';
-      }
-    } else {
-      if (genotype.P === 'p/p') {
-        color = isBrown ? 'Cinnamon Argente' : 'Argente';
-      } else {
-        color = isBrown ? 'Cinnamon' : 'Agouti';
+        if (genotype.P === 'p/p') {
+          color = isBrown ? 'Cinnamon Argente' : 'Argente';
+        } else {
+          color = isBrown ? 'Cinnamon' : 'Agouti';
+        }
       }
     }
   } else if (isTanPattern) {
     pattern = 'Tan';
-    if (genotype.P === 'p/p') {
-      color = isBrown ? 'Champagne Tan' : 'Dove Tan';
-    } else {
-      color = isBrown ? 'Chocolate Tan' : 'Black Tan';
+    // Only set color if not already set by C-locus special colors
+    if (!color) {
+      if (genotype.P === 'p/p') {
+        color = isBrown ? 'Champagne Tan' : 'Dove Tan';
+      } else {
+        color = isBrown ? 'Chocolate Tan' : 'Black Tan';
+      }
     }
   } else if (isBlackPattern) {
     pattern = 'Self';
