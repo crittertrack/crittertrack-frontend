@@ -840,12 +840,10 @@ const calculatePhenotype = (genotype, originalGenotype = null) => {
   const excludedCForSpl = ['C/C', 'c/c', 'C/c', 'C/ce', 'C/ch', 'C/cch'];
   const shouldUseSplashed = hasSpl && genotype.C && !excludedCForSpl.includes(genotype.C);
   
+  // Don't add Splashed to color name here - add it to markings instead
+  // This allows it to properly combine with Pied -> Tricolor
   if (shouldUseSplashed) {
-    // Extract the base pattern (Agouti, Tan, Self, etc.) from color
-    let baseName = '';
-    if (color.includes('Agouti')) baseName = 'Agouti ';
-    else if (color.includes('Tan')) baseName = color.includes('Cinnamon Tan') ? 'Cinnamon ' : color.includes('Chocolate Tan') ? 'Chocolate ' : color.includes('Black Tan') ? 'Black ' : '';
-    color = `${baseName}Splashed`;
+    // Splashed will be added to markings later
   } else if (genotype.C !== 'c/c') {
     // Normal C-locus modifications (skip if albino)
     if (genotype.C === 'cch/cch' || genotype.C?.includes('cch/') || genotype.C?.includes('/cch')) {
@@ -908,10 +906,11 @@ const calculatePhenotype = (genotype, originalGenotype = null) => {
     notes.push('Possibly lethal depending on line');
   }
 
-  // Splashed - now incorporated into color name when C-dilutes are present
-  // Only add to hidden if Spl is present but no C-dilutes
+  // Splashed - only visible with double C-dilutes (not C/-)
   if (genotype.Spl && genotype.Spl.includes('Spl/')) {
-    if (!shouldUseSplashed && genotype.C !== 'c/c') {
+    if (shouldUseSplashed) {
+      markings.push('Splashed');
+    } else if (genotype.C !== 'c/c') {
       hidden.push('Splashed');
     }
   }
