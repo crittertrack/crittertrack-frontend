@@ -21,21 +21,36 @@ const FeedbackTab = ({ API_BASE_URL, authToken }) => {
         setLoading(true);
         setError(null);
         try {
+            console.log('Fetching feedback from:', `${API_BASE_URL}/api/genetics-feedback/admin`);
+            
             const response = await fetch(`${API_BASE_URL}/api/genetics-feedback/admin`, {
                 headers: {
                     'Authorization': `Bearer ${authToken}`
                 }
             });
             
+            console.log('Feedback fetch response status:', response.status);
+            
             if (!response.ok) {
-                throw new Error('Failed to fetch feedback');
+                const errorData = await response.json().catch(() => ({}));
+                console.error('Feedback fetch failed:', errorData);
+                
+                let errorMessage = errorData.error || errorData.message || `Failed to fetch feedback (${response.status})`;
+                if (response.status === 403) {
+                    errorMessage = 'Access denied. Admin or moderator privileges required.';
+                } else if (response.status === 401) {
+                    errorMessage = 'Authentication failed. Please log in again.';
+                }
+                
+                throw new Error(errorMessage);
             }
             
             const data = await response.json();
+            console.log('Feedback data received:', data);
             setFeedback(data);
         } catch (err) {
             console.error('Error fetching feedback:', err);
-            setError(err.message);
+            setError(err.message || 'Failed to fetch feedback');
         } finally {
             setLoading(false);
         }
