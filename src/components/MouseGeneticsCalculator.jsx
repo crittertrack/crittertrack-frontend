@@ -944,8 +944,6 @@ const calculatePhenotype = (genotype, originalGenotype = null) => {
   } else if (genotype.Rn === 'Rn/rn' || genotype.Rn === 'rn/Rn') {
     carriers.push('Roan');
   }
-  
-  console.log('Roan check:', { Rn: genotype.Rn, hasRoan: genotype.Rn === 'rn/rn', markings });
 
   // Silvered (Si) - recessive trait
   if (genotype.Si === 'si/si') {
@@ -1232,9 +1230,12 @@ const MouseGeneticsCalculator = ({ API_BASE_URL, authToken, myAnimals = [] }) =>
 
   // Function to apply defaults to genotype
   const applyDefaults = (genotype) => {
-    // Color/pattern genes - only apply defaults if NONE are selected
-    const colorGenes = ['A', 'B', 'C', 'D', 'E', 'P', 'S', 'W', 'Spl', 'Rn', 'Si', 'Mobr', 'U'];
-    const hasAnyColorGene = colorGenes.some(gene => genotype[gene] && genotype[gene] !== '');
+    // Base color genes - only apply defaults if NONE are selected
+    const baseGenes = ['A', 'B', 'C', 'D', 'E', 'P'];
+    const hasAnyBaseGene = baseGenes.some(gene => genotype[gene] && genotype[gene] !== '');
+    
+    // Marking add-on genes - always apply individually, never as a group
+    const markingGenes = ['S', 'W', 'Spl', 'Rn', 'Si', 'Mobr', 'U'];
     
     // Coat/texture genes - only apply defaults if NONE are selected
     const coatGenes = ['Go', 'Re', 'Sa', 'Rst', 'Fz', 'Nu'];
@@ -1264,11 +1265,16 @@ const MouseGeneticsCalculator = ({ API_BASE_URL, authToken, myAnimals = [] }) =>
     
     const filled = {};
     for (const locus in defaults) {
-      // If this is a color gene and any color gene is selected, only use selected values
-      if (colorGenes.includes(locus) && hasAnyColorGene) {
+      // If this is a base gene and any base gene is selected, only use selected values
+      if (baseGenes.includes(locus) && hasAnyBaseGene) {
         filled[locus] = genotype[locus] || defaults[locus];
       }
-      // If this is a coat gene and any coat gene is selected, skip defaults entirely
+      // Marking genes - ALWAYS use the actual value if present, otherwise default
+      // (They add individually, not as a group)
+      else if (markingGenes.includes(locus)) {
+        filled[locus] = genotype[locus] || defaults[locus];
+      }
+      // If this is a coat gene and any coat gene is selected, use selected values
       else if (coatGenes.includes(locus) && hasAnyCoatGene) {
         filled[locus] = genotype[locus] || defaults[locus];
       }
