@@ -1301,7 +1301,7 @@ const MouseGeneticsCalculator = ({ API_BASE_URL, authToken, myAnimals = [] }) =>
           
           // Check for recessive carriers
           if (locus === 'A' && (alleles === 'A/a' || alleles === 'a/A')) {
-            possibleCarriers.add('Agouti (tan markings)');
+            possibleCarriers.add('Agouti');
           }
           if (locus === 'B' && (alleles === 'B/b' || alleles === 'b/B')) {
             possibleCarriers.add('Chocolate');
@@ -1311,7 +1311,7 @@ const MouseGeneticsCalculator = ({ API_BASE_URL, authToken, myAnimals = [] }) =>
               possibleCarriers.add('Albino');
             }
             if (alleles.includes('C/ch') || alleles.includes('ch/C')) {
-              possibleCarriers.add('Himalayan');
+              possibleCarriers.add('Siamese');
             }
             if (alleles.includes('C/ce') || alleles.includes('ce/C')) {
               possibleCarriers.add('Beige');
@@ -1321,28 +1321,44 @@ const MouseGeneticsCalculator = ({ API_BASE_URL, authToken, myAnimals = [] }) =>
             }
           }
           if (locus === 'D' && (alleles === 'D/d' || alleles === 'd/D')) {
-            possibleCarriers.add('Blue (dilute)');
+            possibleCarriers.add('Blue');
           }
           if (locus === 'E' && (alleles === 'E/e' || alleles === 'e/E')) {
             possibleCarriers.add('Recessive Red');
           }
           if (locus === 'P' && (alleles === 'P/p' || alleles === 'p/P')) {
-            possibleCarriers.add('Pink-eye');
+            possibleCarriers.add('Pink-eye Dilution');
           }
           if (locus === 'S' && (alleles === 'S/s' || alleles === 's/S')) {
-            possibleCarriers.add('Pied (white markings)');
+            possibleCarriers.add('Pied');
           }
           if (locus === 'Rn' && (alleles === 'Rn/rn' || alleles === 'rn/Rn')) {
-            possibleCarriers.add('Rex (curly coat)');
+            possibleCarriers.add('Roan');
           }
-          if (locus === 're' && (alleles === 're/re+' || alleles === 're+/re')) {
-            possibleCarriers.add('Recessive Rex');
-          }
-          if (locus === 'go' && (alleles === 'go/go+' || alleles === 'go+/go')) {
-            possibleCarriers.add('Shorthair');
+          if (locus === 'go' && (alleles === 'Go/go' || alleles === 'go/Go')) {
+            possibleCarriers.add('Longhair');
           }
           if (locus === 'Sa' && (alleles === 'Sa/sa' || alleles === 'sa/Sa')) {
-            possibleCarriers.add('Satin (shine)');
+            possibleCarriers.add('Satin');
+          }
+          if (locus === 'Spl' && (alleles === 'Spl/spl' || alleles === 'spl/Spl')) {
+            // Only show Splashed as carrier if it can't be expressed in phenotype
+            const hasSpl = true; // We know it has Spl from the condition above
+            const excludedCForSpl = ['C/C', 'c/c', 'C/c', 'C/ce', 'C/ch', 'C/cch'];
+            const shouldUseSplashed = hasSpl && genotype.C && !excludedCForSpl.includes(genotype.C);
+            
+            if (!shouldUseSplashed && genotype.C !== 'c/c') {
+              possibleCarriers.add('Splashed');
+            }
+          }
+          if (locus === 'Si' && (alleles === 'Si/si' || alleles === 'si/Si')) {
+            possibleCarriers.add('Silvered');
+          }
+          if (locus === 'Rst' && (alleles === 'Rst/rst' || alleles === 'rst/Rst')) {
+            possibleCarriers.add('Rosette');
+          }
+          if (locus === 'Fz' && (alleles === 'Fz/fz' || alleles === 'fz/Fz')) {
+            possibleCarriers.add('Fuzz');
           }
         }
       });
