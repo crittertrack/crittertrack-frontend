@@ -2076,7 +2076,7 @@ const MouseGeneticsCalculator = ({ API_BASE_URL, authToken, myAnimals = [] }) =>
             <div className="flex gap-2">
               <button
                 onClick={resetCalculator}
-                className="flex items-center gap-1 sm:gap-2 px-3 sm:px-4 py-1.5 sm:py-2 bg-gray-100 text-gray-700 border-2 border-gray-300 rounded-lg hover:bg-gray-200 transition text-sm sm:text-base"
+                className="flex items-center gap-1 sm:gap-2 px-3 sm:px-4 py-1.5 sm:py-2 bg-red-100 text-red-700 border-2 border-red-300 rounded-lg hover:bg-red-200 transition text-sm sm:text-base"
                 title="Reset calculator to empty state"
               >
                 <X className="w-4 h-4 sm:w-[18px] sm:h-[18px]" />
