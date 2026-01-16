@@ -1078,6 +1078,7 @@ const calculatePhenotype = (genotype, originalGenotype = null) => {
 
   // Splashed - only visible with double C-dilutes (not C/-)
   if (genotype.Spl && (genotype.Spl.includes('Spl/') || genotype.Spl.includes('/Spl'))) {
+    console.log('SPLASHED DEBUG: shouldUseSplashed=', shouldUseSplashed, 'C=', genotype.C, 'Spl=', genotype.Spl);
     if (shouldUseSplashed) {
       markings.push('Splashed');
     } else if (genotype.C !== 'c/c') {
@@ -1131,6 +1132,11 @@ const calculatePhenotype = (genotype, originalGenotype = null) => {
   // Check for special combinations first
   const isTexel = hasLonghair && hasAstrex;
   
+  // Temporary debug for deployment
+  if (hasLonghair && hasAstrex) {
+    console.log('TEXEL DEBUG: longhair=', hasLonghair, 'astrex=', hasAstrex, 'Go=', genotype.Go, 'Re=', genotype.Re);
+  }
+  
   // Build texture additively
   let textureComponents = [];
   
@@ -1163,6 +1169,7 @@ const calculatePhenotype = (genotype, originalGenotype = null) => {
   
   if (textureComponents.length > 0) {
     texture = textureComponents.join(' ');
+    console.log('TEXTURE DEBUG: components=', textureComponents, 'final=', texture);
   }
 
   // Combine results
