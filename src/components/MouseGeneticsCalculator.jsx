@@ -1144,6 +1144,7 @@ const calculatePhenotype = (genotype, originalGenotype = null) => {
     if (hasSatin) textureComponents.push('Satin');
     if (hasRosette) textureComponents.push('Rosette');
     if (hasFuzz) textureComponents.push('Fuzz');
+    console.log('Texel detected, components:', textureComponents);
   } else {
     // Build normally - add hair length only if no Astrex (Astrex overrides length)
     if (!hasAstrex) {
@@ -1164,6 +1165,8 @@ const calculatePhenotype = (genotype, originalGenotype = null) => {
   if (textureComponents.length > 0) {
     texture = textureComponents.join(' ');
   }
+  
+  console.log('Final texture:', texture);
 
   // Combine results
   let result = '';
