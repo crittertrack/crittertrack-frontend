@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import { X, Book, User, Search } from 'lucide-react';
 
 // Define all gene loci with their possible allele combinations
@@ -174,21 +174,11 @@ const calculatePhenotype = (genotype, originalGenotype = null) => {
     }
   });
 
-  // Track if coat genes were explicitly selected (not defaulted)
-  const coatGenesSelected = originalGenotype && 
-    ['Go', 'Re', 'Sa', 'Rst', 'Fz', 'Nu'].some(gene => originalGenotype[gene] && originalGenotype[gene] !== '');
-
   // Helper function to apply dilutions to a color name
   const applyDilution = (colorName) => {
     // C-locus special colors use "point" suffix system
     const cLocusSpecialColors = ['Siamese', 'Himalayan', 'Burmese', 'Colorpoint', 'Sepia', 'Stone', 'Mock Chocolate', 'Beige', 'Bone'];
     const isCLocusSpecial = cLocusSpecialColors.some(special => colorName.includes(special));
-    
-    // Check if this is a Fox variant (contains "Fox")
-    const isFoxVariant = colorName.includes(' Fox');
-    
-    // Check if this is an Agouti variant (starts with "Agouti " or "Silver Agouti")
-    const isAgoutiVariant = colorName.startsWith('Agouti ') || colorName === 'Silver Agouti';
     
     if (genotype.D === 'd/d') {
       if (isCLocusSpecial) {
@@ -370,7 +360,6 @@ const calculatePhenotype = (genotype, originalGenotype = null) => {
   if (genotype.A === 'Ay/Ay (lethal)') return { phenotype: 'LETHAL: Homozygous Dominant Red', carriers: [], hidden: [], notes: [] };
 
   let color = '';
-  let pattern = '';
   let texture = '';
   let markings = [];
   let carriers = [];
@@ -400,9 +389,6 @@ const calculatePhenotype = (genotype, originalGenotype = null) => {
 
   // Special handling for agouti tan (A/at) with C-locus combinations
   if (isAgoutiTan && genotype.C !== 'C/C') {
-    const hasSpl = genotype.Spl && genotype.Spl.includes('Spl/');
-    const excludedCForSpl = ['C/C', 'c/c', 'C/c', 'c/C', 'C/ce', 'ce/C', 'C/ch', 'ch/C', 'C/cch', 'cch/C'];
-    
     if (genotype.C === 'c/c') {
       return { phenotype: 'Albino', carriers, hidden, notes: [] };
     }
@@ -440,8 +426,6 @@ const calculatePhenotype = (genotype, originalGenotype = null) => {
 
   // Special handling for agouti variants with C-locus combinations
   if (isAgoutiVariant && genotype.C !== 'C/C') {
-    const hasSpl = genotype.Spl && genotype.Spl.includes('Spl/');
-    const excludedCForSpl = ['C/C', 'c/c', 'C/c', 'c/C', 'C/ce', 'ce/C', 'C/ch', 'ch/C', 'C/cch', 'cch/C'];
     
     if (genotype.C === 'c/c') {
       return { phenotype: 'Albino', carriers, hidden, notes: [] };
@@ -480,8 +464,6 @@ const calculatePhenotype = (genotype, originalGenotype = null) => {
 
   // Special handling for tan/fox variants with C-locus combinations
   if (isTanVariant && genotype.C !== 'C/C') {
-    const hasSpl = genotype.Spl && genotype.Spl.includes('Spl/');
-    const excludedCForSpl = ['C/C', 'c/c', 'C/c', 'c/C', 'C/ce', 'ce/C', 'C/ch', 'ch/C', 'C/cch', 'cch/C'];
     
     if (genotype.C === 'c/c') {
       return { phenotype: 'Albino', carriers, hidden, notes: [] };
@@ -516,8 +498,6 @@ const calculatePhenotype = (genotype, originalGenotype = null) => {
 
   // Special handling for self black variants with C-locus combinations
   if (isSelfBlackVariant && genotype.C !== 'C/C') {
-    const hasSpl = genotype.Spl && genotype.Spl.includes('Spl/');
-    const excludedCForSpl = ['C/C', 'c/c', 'C/c', 'c/C', 'C/ce', 'ce/C', 'C/ch', 'ch/C', 'C/cch', 'cch/C'];
     
     if (genotype.C === 'c/c') {
       return { phenotype: 'Albino', carriers, hidden, notes: [] };
@@ -563,8 +543,6 @@ const calculatePhenotype = (genotype, originalGenotype = null) => {
 
   // Dominant yellow/red (Ay)
   if (genotype.A && (genotype.A.startsWith('Ay/'))) {
-    const hasSpl = genotype.Spl && genotype.Spl.includes('Spl/');
-    
     // Determine modifiers early (used throughout this block)
     const isTanVariant = genotype.A === 'Ay/at' || genotype.A === 'at/Ay';
     const isBrown = genotype.B === 'b/b';
@@ -580,7 +558,6 @@ const calculatePhenotype = (genotype, originalGenotype = null) => {
       const suffix = isTanVariant ? ' Fox' : '';
       
       // Eye White variations: ch (Pink Eye White) or ce (Black Eye White)
-      const underlyingColorBase = isTanVariant ? 'point' : '';
       
       if (isCCombo('ch/c', 'c/ch')) {
         const underlyingColor = applyDilution('Himalayan');
@@ -691,8 +668,6 @@ const calculatePhenotype = (genotype, originalGenotype = null) => {
 
   // Viable yellow (brindle - Avy)
   if (genotype.A && genotype.A.startsWith('Avy/')) {
-    const hasSpl = genotype.Spl && genotype.Spl.includes('Spl/');
-    
     // Handle C/- carriers separately
     if (genotype.C === 'C/c') {
       carriers.push('Albino');
@@ -776,7 +751,6 @@ const calculatePhenotype = (genotype, originalGenotype = null) => {
     const isBrown = genotype.B === 'b/b';
     const isDilute = genotype.D === 'd/d';
     const isAgouti = genotype.A === 'Avy/A' || genotype.A === 'A/Avy';
-    const isAvyAvy = genotype.A === 'Avy/Avy';
     const isPinkEye = genotype.P === 'p/p';
     
     // Handle brown + dilute + pink-eye combination
@@ -818,7 +792,6 @@ const calculatePhenotype = (genotype, originalGenotype = null) => {
   const isTanPattern = isTanVariant && !isAgoutiPattern;
   const isBlackPattern = isSelfBlackVariant;
   const isExtremeBlackPattern = genotype.A === 'ae/ae';
-  const isExtremeTanPattern = genotype.A === 'at/ae' || genotype.A === 'ae/at';
 
   // Check if any color/pattern genes were explicitly selected (not defaulted)
   const colorGenesSelected = originalGenotype && (
@@ -957,7 +930,6 @@ const calculatePhenotype = (genotype, originalGenotype = null) => {
   if (genotype.B === 'B/b' || genotype.B === 'b/B') carriers.push('Chocolate');
   
   if (isAgoutiPattern) {
-    pattern = 'Agouti';
     // Only set color if not already set by C-locus special colors
     if (!color) {
       // Check for A/at (agouti tan)
@@ -976,7 +948,6 @@ const calculatePhenotype = (genotype, originalGenotype = null) => {
       }
     }
   } else if (isTanPattern) {
-    pattern = 'Tan';
     // Only set color if not already set by C-locus special colors
     if (!color) {
       if (genotype.P === 'p/p') {
@@ -986,7 +957,6 @@ const calculatePhenotype = (genotype, originalGenotype = null) => {
       }
     }
   } else if (isBlackPattern) {
-    pattern = 'Self';
     // Only set color if not already set by C-locus special colors
     if (!color) {
       if (genotype.P === 'p/p') {
@@ -1047,10 +1017,10 @@ const calculatePhenotype = (genotype, originalGenotype = null) => {
         color = `Chinchilla ${color}`;
       }
     }
-    if (genotype.C === 'ch/ch' || (genotype.C?.includes('ch/') || genotype.C?.includes('/ch')) && !genotype.C.includes('C/ch') && !genotype.C.includes('ch/C') && !genotype.C.includes('cch/ch') && !genotype.C.includes('ch/cch')) {
+    if (genotype.C === 'ch/ch' || ((genotype.C?.includes('ch/') || genotype.C?.includes('/ch')) && !genotype.C.includes('C/ch') && !genotype.C.includes('ch/C') && !genotype.C.includes('cch/ch') && !genotype.C.includes('ch/cch'))) {
       color = `Himalayan ${color}`;
     }
-    if (genotype.C === 'ce/ce' || (genotype.C?.includes('ce/') || genotype.C?.includes('/ce')) && !genotype.C.includes('C/ce') && !genotype.C.includes('ce/C')) {
+    if (genotype.C === 'ce/ce' || ((genotype.C?.includes('ce/') || genotype.C?.includes('/ce')) && !genotype.C.includes('C/ce') && !genotype.C.includes('ce/C'))) {
       color = `Beige ${color}`;
     }
   }
@@ -1498,11 +1468,6 @@ const MouseGeneticsCalculator = ({ API_BASE_URL, authToken, myAnimals = [] }) =>
       alert('Additional color loci are needed for full phenotype calculation. Please select A-locus along with other color genes (B, C, D, E, P) for complete results.');
       return;
     }
-    
-    // Check if any coat genes were selected by either parent
-    const coatGenesSelected = ['Go', 'Re', 'Sa', 'Rst', 'Fz', 'Nu'].some(gene => 
-      (parent1[gene] && parent1[gene] !== '') || (parent2[gene] && parent2[gene] !== '')
-    );
     
     // Create selectedGenotype that includes ALL genes selected by either parent
     const selectedGenotype = {};
