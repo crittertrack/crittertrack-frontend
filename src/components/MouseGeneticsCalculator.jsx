@@ -161,7 +161,6 @@ const GENE_LOCI = {
 
 // Calculate phenotype from genotype
 const calculatePhenotype = (genotype, originalGenotype = null) => {
-  console.log('calculatePhenotype called with:', genotype);
   // Parse allele combinations
   const parsed = {};
   Object.keys(GENE_LOCI).forEach(locus => {
@@ -1129,10 +1128,6 @@ const calculatePhenotype = (genotype, originalGenotype = null) => {
   const hasFuzz = genotype.Fz === 'fz/fz';
   const hasDominantHairless = genotype.Nu === 'Nu/Nu' || genotype.Nu === 'Nu/nu';
   
-  // Debug the Texel detection
-  console.log('Texel Debug - Go:', genotype.Go, 'Re:', genotype.Re);
-  console.log('Texel Debug - hasLonghair:', hasLonghair, 'hasAstrex:', hasAstrex);
-  
   // Check for special combinations first
   const isTexel = hasLonghair && hasAstrex;
   
@@ -1149,7 +1144,6 @@ const calculatePhenotype = (genotype, originalGenotype = null) => {
     if (hasSatin) textureComponents.push('Satin');
     if (hasRosette) textureComponents.push('Rosette');
     if (hasFuzz) textureComponents.push('Fuzz');
-    console.log('Texel detected, components:', textureComponents);
   } else {
     // Build normally - add hair length only if no Astrex (Astrex overrides length)
     if (!hasAstrex) {
@@ -1170,8 +1164,6 @@ const calculatePhenotype = (genotype, originalGenotype = null) => {
   if (textureComponents.length > 0) {
     texture = textureComponents.join(' ');
   }
-  
-  console.log('Final texture:', texture);
 
   // Combine results
   let result = '';
@@ -1701,7 +1693,6 @@ const MouseGeneticsCalculator = ({ API_BASE_URL, authToken, myAnimals = [] }) =>
   };
 
   const parent1Result = hasAnySelection(parent1) ? calculatePhenotype(applyDefaults(parent1), parent1) : { phenotype: '', carriers: [], hidden: [] };
-  console.log('Parent1 after applyDefaults:', hasAnySelection(parent1) ? applyDefaults(parent1) : 'no selection');
   const parent2Result = hasAnySelection(parent2) ? calculatePhenotype(applyDefaults(parent2), parent2) : { phenotype: '', carriers: [], hidden: [] };
 
   // Mapping of phenotype names to their defining loci (can be array for multiple)
