@@ -195,7 +195,7 @@ const GeneticCodeBuilder = ({ species, gender, value, onChange, onOpenCommunityF
                           )}
                           {result.carriers && result.carriers.length > 0 && (
                             <div>
-                              <div className="text-sm font-medium text-blue-900">Carriers:</div>
+                              <div className="text-sm font-medium text-blue-900">Carries:</div>
                               <div className="text-sm text-blue-700">
                                 {result.carriers.join(', ')}
                               </div>
