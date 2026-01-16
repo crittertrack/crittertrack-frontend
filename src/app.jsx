@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useCallback, useRef, useMemo } from 'react';
 import { useParams, useNavigate, useLocation, Routes, Route, Link as RouterLink } from 'react-router-dom';
 import axios from 'axios';
-import { LogOut, Cat, UserPlus, LogIn, ChevronLeft, ChevronDown, ChevronRight, Trash2, Edit, Save, PlusCircle, Plus, ArrowLeft, Loader2, RefreshCw, User, Users, ClipboardList, BookOpen, Settings, Mail, Globe, Bean, Milk, Search, X, Mars, Venus, Eye, EyeOff, Home, Heart, HeartOff, HeartHandshake, Bell, XCircle, CheckCircle, Download, FileText, Link, AlertCircle, Check, DollarSign, Archive, ArrowLeftRight, RotateCcw, Info, Hourglass, MessageSquare, Ban, Flag, Scissors, VenusAndMars, Circle, Shield, Lock, AlertTriangle, ShoppingBag } from 'lucide-react';
+import { LogOut, Cat, UserPlus, LogIn, ChevronLeft, Trash2, Edit, Save, PlusCircle, Plus, ArrowLeft, Loader2, RefreshCw, User, Users, ClipboardList, BookOpen, Settings, Mail, Globe, Bean, Milk, Search, X, Mars, Venus, Eye, EyeOff, Heart, HeartOff, HeartHandshake, Bell, XCircle, CheckCircle, Download, FileText, Link, AlertCircle, DollarSign, Archive, ArrowLeftRight, RotateCcw, Info, Hourglass, MessageSquare, Ban, Flag, Scissors, VenusAndMars, Circle, Shield, Lock, AlertTriangle, ShoppingBag } from 'lucide-react';
 import jsPDF from 'jspdf';
 import html2canvas from 'html2canvas';
 import 'flag-icons/css/flag-icons.min.css';
@@ -12,11 +12,9 @@ import TermsOfService from './components/TermsOfService';
 import PrivacyPolicy from './components/PrivacyPolicy';
 import InstallPWA from './components/InstallPWA';
 import AdminPanel from './components/EnhancedAdminPanel';
-import UrgentNotificationModal from './components/UrgentNotificationModal';
 import MaintenanceMode from './MaintenanceMode';
-import MaintenanceModeBanner from './components/MaintenanceModeBanner';
 import { TutorialProvider, useTutorial } from './contexts/TutorialContext';
-import { InitialTutorialModal, TutorialOverlay, TutorialHighlight } from './components/TutorialOverlay';
+import { TutorialOverlay, TutorialHighlight } from './components/TutorialOverlay';
 import { TUTORIAL_LESSONS } from './data/tutorialLessonsNew';
 import InfoTab from './components/InfoTab';
 import WelcomeBanner from './components/WelcomeBanner';
@@ -90,46 +88,6 @@ const getCountryName = (countryCode) => {
 };
 
 const IDLE_TIMEOUT_MS = 15 * 60 * 1000; // 15 minutes in milliseconds
-
-// Helper function to parse and format array data for display
-const formatArrayDisplay = (data) => {
-    if (!data) return '—';
-    if (typeof data === 'string') {
-        try {
-            const parsed = JSON.parse(data);
-            if (!Array.isArray(parsed) || parsed.length === 0) return '—';
-            return parsed.map((item, index) => {
-                if (typeof item === 'object') {
-                    // Format as bullet points with key info
-                    const keys = Object.keys(item).filter(k => item[k]);
-                    const desc = keys.slice(0, 3).map(k => {
-                        const val = item[k];
-                        return `${k}: ${val}`;
-                    }).join(', ');
-                    return `• ${desc}`;
-                }
-                return `• ${item}`;
-            }).join('\n');
-        } catch (e) {
-            return data; // Return as-is if not JSON
-        }
-    }
-    if (Array.isArray(data)) {
-        if (data.length === 0) return '—';
-        return data.map((item, index) => {
-            if (typeof item === 'object') {
-                const keys = Object.keys(item).filter(k => item[k]);
-                const desc = keys.slice(0, 3).map(k => {
-                    const val = item[k];
-                    return `${k}: ${val}`;
-                }).join(', ');
-                return `• ${desc}`;
-            }
-            return `• ${item}`;
-        }).join('\n');
-    }
-    return String(data);
-};
 
 // Helper function to format date strings for display
 const formatDateDisplay = (dateString) => {
@@ -729,39 +687,9 @@ const PedigreeChart = ({ animalId, animalData, onClose, API_BASE_URL, authToken 
         );
     };
 
-    // Render card for great-great-grandparents (smallest, no image)
-    const renderGreatGreatGrandparentCard = (animal) => {
-        if (!animal) {
-            return (
-                <div className="border border-gray-300 rounded px-1 py-0.5 bg-gray-50 flex items-center justify-center h-full">
-                    <span className="text-xs text-gray-400">Unknown</span>
-                </div>
-            );
-        }
-        
-        const colorCoat = [animal.color, animal.coat].filter(Boolean).join(' / ') || 'N/A';
-        
-        return (
-            <div className="border border-gray-200 rounded px-1 py-0.5 bg-white h-full flex flex-col justify-center">
-                {/* Name */}
-                <div className="font-semibold text-xs text-gray-800 leading-tight line-clamp-2">
-                    {animal.prefix && `${animal.prefix} `}{animal.name}{animal.suffix && ` ${animal.suffix}`}
-                </div>
-                
-                {/* Color/Coat */}
-                <div className="text-xs text-gray-600 truncate leading-tight">
-                    {colorCoat}
-                </div>
-            </div>
-        );
-    };
-
     const renderPedigreeTree = (animal) => {
         if (!animal) return null;
 
-        // Generation 0 (subject)
-        const subject = animal;
-        
         // Generation 1 (parents)
         const father = animal.father;
         const mother = animal.mother;
@@ -1231,7 +1159,7 @@ const ParentSearchModal = ({
                         />
                         <button
                             onClick={handleSearch}
-                            disabled={(scope === 'local' || scope === 'both') && loadingLocal || (scope === 'global' || scope === 'both') && loadingGlobal || searchTerm.trim().length < 1}
+                            disabled={((scope === 'local' || scope === 'both') && loadingLocal) || ((scope === 'global' || scope === 'both') && loadingGlobal) || searchTerm.trim().length < 1}
                             className="bg-primary hover:bg-primary/90 text-black font-semibold py-2 px-4 rounded-lg transition duration-150 flex items-center disabled:opacity-50"
                         >
                             { (loadingLocal || loadingGlobal) ? <Loader2 className="animate-spin" size={20} /> : <Search size={20} /> }
@@ -1666,7 +1594,7 @@ const PublicProfileView = ({ profile, onBack, onViewAnimal, API_BASE_URL, onStar
             }
         };
         fetchProfile();
-    }, [profile?.id_public, API_BASE_URL]);
+    }, [profile?.id_public, profile, API_BASE_URL]);
     
     const handleShare = () => {
         const url = `${window.location.origin}/user/${(freshProfile?.id_public || profile.id_public)}`;
@@ -2011,20 +1939,6 @@ const PrivateAnimalDetail = ({ animal, onClose, onEdit, API_BASE_URL, authToken,
     const [showPedigree, setShowPedigree] = useState(false);
     const [detailViewTab, setDetailViewTab] = useState(1);
     const [copySuccess, setCopySuccess] = useState(false);
-    
-    // Helper function to parse health records from JSON strings
-    const parseHealthRecords = (data) => {
-        if (!data) return [];
-        if (typeof data === 'string') {
-            try {
-                return JSON.parse(data);
-            } catch (e) {
-                console.error('Failed to parse health records:', e);
-                return [];
-            }
-        }
-        return Array.isArray(data) ? data : [];
-    };
     
     const handleShare = () => {
         const url = `${window.location.origin}/animal/${animal.id_public}`;
@@ -3010,29 +2924,6 @@ const ViewOnlyPrivateAnimalDetail = ({ animal, onClose, API_BASE_URL, authToken,
     const [breederInfo, setBreederInfo] = useState(null);
     const [showPedigree, setShowPedigree] = useState(false);
     const [detailViewTab, setDetailViewTab] = useState(1);
-    const [copySuccess, setCopySuccess] = useState(false);
-    
-    // Helper function to parse health records from JSON strings
-    const parseHealthRecords = (data) => {
-        if (!data) return [];
-        if (typeof data === 'string') {
-            try {
-                return JSON.parse(data);
-            } catch (e) {
-                console.error('Failed to parse health records:', e);
-                return [];
-            }
-        }
-        return Array.isArray(data) ? data : [];
-    };
-    
-    const handleShare = () => {
-        const url = `${window.location.origin}/animal/${animal.id_public}`;
-        navigator.clipboard.writeText(url).then(() => {
-            setCopySuccess(true);
-            setTimeout(() => setCopySuccess(false), 2000);
-        });
-    };
     
     // Fetch breeder info when component mounts or animal changes
     React.useEffect(() => {
@@ -3080,14 +2971,7 @@ const ViewOnlyPrivateAnimalDetail = ({ animal, onClose, API_BASE_URL, authToken,
                             </button>
                         </div>
                         <div className="flex justify-center gap-1.5 flex-wrap">
-                            <button
-                                onClick={handleShare}
-                                className="px-2 py-1 bg-primary hover:bg-primary/90 text-black font-semibold rounded-lg transition flex items-center gap-1 text-xs"
-                                title="Copy public link"
-                            >
-                                <Link size={14} />
-                                Share
-                            </button>
+                            {/* No share button in view-only mode */}
                         </div>
                     </div>
                     
@@ -4031,9 +3915,6 @@ const ViewOnlyAnimalDetail = ({ animal, onClose, API_BASE_URL, onViewProfile, au
     
     if (!animal) return null;
 
-    const imgSrc = animal.imageUrl || animal.photoUrl || null;
-    const birthDate = animal.birthDate ? new Date(animal.birthDate).toLocaleDateString() : 'Unknown';
-
     // Only show remarks and genetic code if section privacy allows AND data exists
     // sectionPrivacy: true = public (show), false = private (hide), undefined = public by default
     const showRemarks = animal.remarks && (sectionPrivacy.remarks !== false);
@@ -4044,7 +3925,6 @@ const ViewOnlyAnimalDetail = ({ animal, onClose, API_BASE_URL, onViewProfile, au
     const showCurrentMeasurements = sectionPrivacy.currentMeasurements !== false;
     const showGrowthHistory = sectionPrivacy.growthHistory !== false;
     const showOrigin = sectionPrivacy.origin !== false;
-    const showEstrusCycle = sectionPrivacy.estrusCycle !== false;
     const showMating = sectionPrivacy.mating !== false;
     const showStudInformation = sectionPrivacy.studInformation !== false;
     const showDamInformation = sectionPrivacy.damInformation !== false;
@@ -5474,10 +5354,11 @@ const LitterManagement = ({ authToken, API_BASE_URL, userProfile, showModalMessa
         males: 0,
         females: 0
     });
-    const [sireSearch, setSireSearch] = useState('');
-    const [damSearch, setDamSearch] = useState('');
-    const [sireSpeciesFilter, setSireSpeciesFilter] = useState('');
-    const [damSpeciesFilter, setDamSpeciesFilter] = useState('');
+    // Search filters for parent selection (UI not yet implemented)
+    // const [sireSearch, setSireSearch] = useState('');
+    // const [damSearch, setDamSearch] = useState('');
+    // const [sireSpeciesFilter, setSireSpeciesFilter] = useState('');
+    // const [damSpeciesFilter, setDamSpeciesFilter] = useState('');
     const [linkingAnimals, setLinkingAnimals] = useState(false);
     const [availableToLink, setAvailableToLink] = useState({ litter: null, animals: [] });
     const [expandedLitter, setExpandedLitter] = useState(null);
@@ -5485,7 +5366,10 @@ const LitterManagement = ({ authToken, API_BASE_URL, userProfile, showModalMessa
     const [modalTarget, setModalTarget] = useState(null);
     const [searchQuery, setSearchQuery] = useState('');
     const [speciesFilter, setSpeciesFilter] = useState('');
+    // COI calculation state (feature in development - UI display pending)
+    // eslint-disable-next-line no-unused-vars
     const [predictedCOI, setPredictedCOI] = useState(null);
+    // eslint-disable-next-line no-unused-vars
     const [calculatingCOI, setCalculatingCOI] = useState(false);
     const [addingOffspring, setAddingOffspring] = useState(null);
     const [newOffspringData, setNewOffspringData] = useState({
@@ -5511,7 +5395,7 @@ const LitterManagement = ({ authToken, API_BASE_URL, userProfile, showModalMessa
             }
         };
         loadData();
-    }, []);
+    }, []); // eslint-disable-line react-hooks/exhaustive-deps
 
     // Update parent ref with current form data for tutorial tracking
     useEffect(() => {
@@ -5945,10 +5829,10 @@ const LitterManagement = ({ authToken, API_BASE_URL, userProfile, showModalMessa
                 linkedOffspringIds: []
             });
             setCreateOffspringCounts({ males: 0, females: 0 });
-            setSireSearch('');
-            setDamSearch('');
-            setSireSpeciesFilter('');
-            setDamSpeciesFilter('');
+            // setSireSearch('');
+            // setDamSearch('');
+            // setSireSpeciesFilter('');
+            // setDamSpeciesFilter('');
             setPredictedCOI(null);
             fetchLitters();
             fetchMyAnimals();
@@ -6145,7 +6029,9 @@ const LitterManagement = ({ authToken, API_BASE_URL, userProfile, showModalMessa
 
         try {
             // Get parent details
+            // eslint-disable-next-line no-unused-vars
             const sire = myAnimals.find(a => a.id_public === formData.sireId_public);
+            // eslint-disable-next-line no-unused-vars  
             const dam = myAnimals.find(a => a.id_public === formData.damId_public);
 
             // Create offspring animals if requested
@@ -6238,10 +6124,10 @@ const LitterManagement = ({ authToken, API_BASE_URL, userProfile, showModalMessa
                 linkedOffspringIds: []
             });
             setCreateOffspringCounts({ males: 0, females: 0 });
-            setSireSearch('');
-            setDamSearch('');
-            setSireSpeciesFilter('');
-            setDamSpeciesFilter('');
+            // setSireSearch('');
+            // setDamSearch('');
+            // setSireSpeciesFilter('');
+            // setDamSpeciesFilter('');
             setPredictedCOI(null);
             fetchLitters();
             fetchMyAnimals();
@@ -6335,30 +6221,10 @@ const LitterManagement = ({ authToken, API_BASE_URL, userProfile, showModalMessa
     const maleAnimals = myAnimals.filter(a => a.gender === 'Male');
     const femaleAnimals = myAnimals.filter(a => a.gender === 'Female');
     
-    // Filter male animals by search and species
-    const filteredMaleAnimals = maleAnimals.filter(animal => {
-        const matchesSearch = !sireSearch || 
-            animal.name.toLowerCase().includes(sireSearch.toLowerCase()) ||
-            animal.id_public.toString().includes(sireSearch) ||
-            (animal.prefix && animal.prefix.toLowerCase().includes(sireSearch.toLowerCase())) ||
-            (animal.suffix && animal.suffix.toLowerCase().includes(sireSearch.toLowerCase()));
-        const matchesSpecies = !sireSpeciesFilter || animal.species === sireSpeciesFilter;
-        return matchesSearch && matchesSpecies;
-    });
+    // Filtered animals are handled directly in the render sections below
     
-    // Filter female animals by search and species
-    const filteredFemaleAnimals = femaleAnimals.filter(animal => {
-        const matchesSearch = !damSearch || 
-            animal.name.toLowerCase().includes(damSearch.toLowerCase()) ||
-            animal.id_public.toString().includes(damSearch) ||
-            (animal.prefix && animal.prefix.toLowerCase().includes(damSearch.toLowerCase())) ||
-            (animal.suffix && animal.suffix.toLowerCase().includes(damSearch.toLowerCase()));
-        const matchesSpecies = !damSpeciesFilter || animal.species === damSpeciesFilter;
-        return matchesSearch && matchesSpecies;
-    });
-    
-    // Get unique species from all animals
-    const allSpecies = [...new Set(myAnimals.map(a => a.species).filter(Boolean))].sort();
+    // Get unique species from all animals (currently for debugging)
+    // const allSpecies = [...new Set(myAnimals.map(a => a.species).filter(Boolean))].sort();
     
     console.log('[LitterManagement] Male animals:', maleAnimals.length);
     console.log('[LitterManagement] Female animals:', femaleAnimals.length);
@@ -6423,10 +6289,10 @@ const LitterManagement = ({ authToken, API_BASE_URL, userProfile, showModalMessa
                         onClick={() => {
                             if (showAddForm) {
                                 // Clear search filters and editing state when closing form
-                                setSireSearch('');
-                                setDamSearch('');
-                                setSireSpeciesFilter('');
-                                setDamSpeciesFilter('');
+                                // setSireSearch('');
+                                // setDamSearch('');
+                                // setSireSpeciesFilter('');
+                                // setDamSpeciesFilter('');
                                 setEditingLitter(null);
                                 setPredictedCOI(null);
                                 setFormData({
@@ -7278,8 +7144,8 @@ const SpeciesManager = ({ speciesOptions, setSpeciesOptions, onCancel, showModal
     
     const categories = ['Rodent', 'Mammal', 'Reptile', 'Bird', 'Amphibian', 'Fish', 'Invertebrate', 'Other'];
     
-    const customSpecies = speciesOptions.filter(s => !s.isDefault);
-    const defaultSpecies = speciesOptions.filter(s => s.isDefault);
+    // const customSpecies = speciesOptions.filter(s => !s.isDefault);
+    // const defaultSpecies = speciesOptions.filter(s => s.isDefault);
     
     // Filter species by category and search
     const filteredSpecies = speciesOptions.filter(s => {
@@ -8162,12 +8028,12 @@ const AnimalForm = ({
             judgeComments: animalToEdit.judgeComments || '',
             workingTitles: animalToEdit.workingTitles || '',
             performanceScores: animalToEdit.performanceScores || '',
-            // Dog/Cat specific - Physical measurements
-            heightAtWithers: animalToEdit.heightAtWithers || '',
-            bodyLength: animalToEdit.bodyLength || '',
+            // Dog/Cat specific - Physical measurements (duplicate entries removed)
+            // heightAtWithers: animalToEdit.heightAtWithers || '', // Already defined above
+            // bodyLength: animalToEdit.bodyLength || '', // Already defined above
             chestGirth: animalToEdit.chestGirth || '',
             adultWeight: animalToEdit.adultWeight || '',
-            bodyConditionScore: animalToEdit.bodyConditionScore || '',
+            // bodyConditionScore: animalToEdit.bodyConditionScore || '', // Already defined above
             // Dog/Cat specific - Identification
             licenseNumber: animalToEdit.licenseNumber || '',
             licenseJurisdiction: animalToEdit.licenseJurisdiction || '',
@@ -8316,12 +8182,12 @@ const AnimalForm = ({
             judgeComments: '',
             workingTitles: '',
             performanceScores: '',
-            // Dog/Cat specific - Physical measurements
-            heightAtWithers: '',
-            bodyLength: '',
+            // Dog/Cat specific - Physical measurements (duplicate entries removed)
+            // heightAtWithers: '', // Already defined above
+            // bodyLength: '', // Already defined above  
             chestGirth: '',
             adultWeight: '',
-            bodyConditionScore: '',
+            // bodyConditionScore: '', // Already defined above
             // Dog/Cat specific - Identification
             licenseNumber: '',
             licenseJurisdiction: '',
