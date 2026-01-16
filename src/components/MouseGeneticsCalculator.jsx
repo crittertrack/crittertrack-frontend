@@ -1133,6 +1133,17 @@ const calculatePhenotype = (genotype, originalGenotype = null) => {
     // go/go = Longhair (recessive), Go/Go or Go/go = Shorthair (dominant)
     if (genotype.Go === 'go/go' && !isTexel) {
       texture = texture ? `Longhair ${texture}` : 'Longhair';
+    } else if ((genotype.Go === 'Go/Go' || genotype.Go === 'Go/go') && !isTexel && !hasAstrex) {
+      // Only show "Shorthair" if no other dominant coat texture is present
+      if (!genotype.Sa || genotype.Sa === 'Sa/Sa') { // Not satin
+        if (!genotype.Rst || genotype.Rst === 'Rst/Rst') { // Not rosette
+          if (!genotype.Fz || genotype.Fz === 'Fz/Fz') { // Not fuzz
+            if (!genotype.Nu || genotype.Nu === 'nu/nu') { // Not dominant hairless
+              texture = texture ? `Shorthair ${texture}` : 'Shorthair';
+            }
+          }
+        }
+      }
     }
     
     if (genotype.Sa === 'sa/sa') {
