@@ -316,6 +316,68 @@ const calculatePhenotype = (genotype, originalGenotype = null) => {
     return colorName;
   };
 
+  // Helper function to generate beginner-friendly carrier explanations
+  const generateCarrierExplanation = (genotypes) => {
+    const possibleCarriers = new Set();
+    
+    genotypes.forEach(genotype => {
+      Object.entries(genotype).forEach(([locus, alleles]) => {
+        // Check for heterozygous combinations that indicate carriers
+        if (alleles.includes('/')) {
+          const [allele1, allele2] = alleles.split('/');
+          
+          // Check for recessive carriers
+          if (locus === 'A' && (alleles === 'A/a' || alleles === 'a/A')) {
+            possibleCarriers.add('Agouti (tan markings)');
+          }
+          if (locus === 'B' && (alleles === 'B/b' || alleles === 'b/B')) {
+            possibleCarriers.add('Chocolate');
+          }
+          if (locus === 'C') {
+            if (alleles.includes('C/c') || alleles.includes('c/C')) {
+              possibleCarriers.add('Albino');
+            }
+            if (alleles.includes('C/ch') || alleles.includes('ch/C')) {
+              possibleCarriers.add('Himalayan');
+            }
+            if (alleles.includes('C/ce') || alleles.includes('ce/C')) {
+              possibleCarriers.add('Beige');
+            }
+            if (alleles.includes('C/cch') || alleles.includes('cch/C')) {
+              possibleCarriers.add('Chinchilla');
+            }
+          }
+          if (locus === 'D' && (alleles === 'D/d' || alleles === 'd/D')) {
+            possibleCarriers.add('Blue (dilute)');
+          }
+          if (locus === 'E' && (alleles === 'E/e' || alleles === 'e/E')) {
+            possibleCarriers.add('Recessive Red');
+          }
+          if (locus === 'P' && (alleles === 'P/p' || alleles === 'p/P')) {
+            possibleCarriers.add('Pink-eye');
+          }
+          if (locus === 'S' && (alleles === 'S/s' || alleles === 's/S')) {
+            possibleCarriers.add('Pied (white markings)');
+          }
+          if (locus === 'Rn' && (alleles === 'Rn/rn' || alleles === 'rn/Rn')) {
+            possibleCarriers.add('Rex (curly coat)');
+          }
+          if (locus === 're' && (alleles === 're/re+' || alleles === 're+/re')) {
+            possibleCarriers.add('Recessive Rex');
+          }
+          if (locus === 'go' && (alleles === 'go/go+' || alleles === 'go+/go')) {
+            possibleCarriers.add('Shorthair');
+          }
+          if (locus === 'Sa' && (alleles === 'Sa/sa' || alleles === 'sa/Sa')) {
+            possibleCarriers.add('Satin (shine)');
+          }
+        }
+      });
+    });
+    
+    return Array.from(possibleCarriers).sort();
+  };
+
   // Helper function to check C-locus combinations in both directions
   const isCCombo = (combo1, combo2 = null) => {
     if (!combo2) {
@@ -2196,6 +2258,28 @@ const MouseGeneticsCalculator = ({ API_BASE_URL, authToken, myAnimals = [] }) =>
                     
                     {expandedPhenotypes[idx] && (
                       <div className="mt-3 pt-3 border-t border-purple-100">
+                        {/* Carrier explanation for beginners */}
+                        <div className="mb-4 p-3 bg-blue-50 border border-blue-200 rounded-lg">
+                          <h4 className="font-semibold text-blue-800 mb-2">Possible Carriers:</h4>
+                          {(() => {
+                            const carriers = generateCarrierExplanation(result.genotypes);
+                            return carriers.length > 0 ? (
+                              <div className="text-sm text-blue-700">
+                                <p className="mb-2">Some offspring may carry hidden genes for:</p>
+                                <div className="flex flex-wrap gap-1">
+                                  {carriers.map((carrier, cIdx) => (
+                                    <span key={cIdx} className="bg-blue-100 px-2 py-1 rounded text-xs">
+                                      {carrier}
+                                    </span>
+                                  ))}
+                                </div>
+                              </div>
+                            ) : (
+                              <p className="text-sm text-blue-700">No recessive carriers in this combination</p>
+                            );
+                          })()}
+                        </div>
+                        
                         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-2">
                           {result.genotypes.map((genotype, gIdx) => (
                             <div key={gIdx} className="text-sm text-gray-700 bg-purple-50 px-3 py-2 rounded">
