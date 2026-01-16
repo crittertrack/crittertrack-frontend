@@ -658,12 +658,16 @@ const calculatePhenotype = (genotype, originalGenotype = null) => {
     return { phenotype: addMarkingsIfNeeded(color), carriers, hidden, notes: [] };
   }
 
-  // Recessive red (e/e)
+  // Recessive red (e/e) - but still process all other traits
   if (genotype.E === 'e/e') {
+    let baseColor = 'Recessive Red';
     if (genotype.A && genotype.A.includes('at')) {
-      return { phenotype: addMarkingsIfNeeded('Recessive Red Tan'), carriers, hidden, notes: [] };
+      baseColor = 'Recessive Red Tan';
     }
-    return { phenotype: addMarkingsIfNeeded('Recessive Red'), carriers, hidden, notes: [] };
+    
+    // Process all markings and coat textures for recessive red
+    // Continue processing instead of returning early
+    color = baseColor;
   }
 
   // Viable yellow (brindle - Avy)
