@@ -1144,14 +1144,16 @@ const calculatePhenotype = (genotype, originalGenotype = null) => {
     if (hasRosette) textureComponents.push('Rosette');
     if (hasFuzz) textureComponents.push('Fuzz');
   } else {
-    // Build normally - start with hair length
-    if (hasLonghair) {
-      textureComponents.push('Longhair');
-    } else {
-      textureComponents.push('Shorthair');
+    // Build normally - add hair length only if no Astrex (Astrex overrides length)
+    if (!hasAstrex) {
+      if (hasLonghair) {
+        textureComponents.push('Longhair');
+      } else {
+        textureComponents.push('Shorthair');
+      }
     }
     
-    // Add other coat modifiers
+    // Add coat modifiers
     if (hasAstrex) textureComponents.push('Astrex');
     if (hasSatin) textureComponents.push('Satin');
     if (hasRosette) textureComponents.push('Rosette');
