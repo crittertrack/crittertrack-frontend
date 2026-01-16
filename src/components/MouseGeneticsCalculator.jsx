@@ -1129,6 +1129,10 @@ const calculatePhenotype = (genotype, originalGenotype = null) => {
   const hasFuzz = genotype.Fz === 'fz/fz';
   const hasDominantHairless = genotype.Nu === 'Nu/Nu' || genotype.Nu === 'Nu/nu';
   
+  // Debug the Texel detection
+  console.log('Texel Debug - Go:', genotype.Go, 'Re:', genotype.Re);
+  console.log('Texel Debug - hasLonghair:', hasLonghair, 'hasAstrex:', hasAstrex);
+  
   // Check for special combinations first
   const isTexel = hasLonghair && hasAstrex;
   
