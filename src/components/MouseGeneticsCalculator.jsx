@@ -301,8 +301,8 @@ const calculatePhenotype = (genotype, originalGenotype = null) => {
       if (colorName === 'Bone Fox') return 'Chocolate Bone Fox';
       if (colorName === 'Agouti Bone') return 'Chocolate Agouti Bone';
       if (colorName === 'Agouti Bone Fox') return 'Chocolate Agouti Bone Fox';
-    } else if (isCLocusSpecial && genotype.B === 'B/B' && genotype.D === 'D/D') {
-      // B/B + D/D = Sealpoint for Siamese/Himalayan, base name for others
+    } else if (isCLocusSpecial && (genotype.B !== 'b/b') && (genotype.D !== 'd/d')) {
+      // No dilutions (B/B or B/b + D/D or D/d) = Sealpoint for Siamese/Himalayan, base name for others
       if (colorName === 'Siamese') return 'Sealpoint Siamese';
       if (colorName === 'Siamese Fox') return 'Sealpoint Siamese Fox';
       if (colorName === 'Agouti Siamese') return 'Sealpoint Agouti Siamese';
