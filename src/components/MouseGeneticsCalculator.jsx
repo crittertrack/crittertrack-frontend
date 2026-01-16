@@ -1021,7 +1021,7 @@ const calculatePhenotype = (genotype, originalGenotype = null) => {
         color = `Chinchilla ${color}`;
       }
     }
-    if (genotype.C === 'ch/ch' || ((genotype.C?.includes('ch/') || genotype.C?.includes('/ch')) && !genotype.C.includes('C/ch') && !genotype.C.includes('ch/C') && !genotype.C.includes('cch/ch') && !genotype.C.includes('ch/cch'))) {
+    if (genotype.C === 'ch/c' || genotype.C === 'c/ch') {
       color = `Himalayan ${color}`;
     }
     if (genotype.C === 'ce/ce' || ((genotype.C?.includes('ce/') || genotype.C?.includes('/ce')) && !genotype.C.includes('C/ce') && !genotype.C.includes('ce/C'))) {
