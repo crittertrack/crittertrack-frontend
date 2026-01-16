@@ -1007,6 +1007,7 @@ const calculatePhenotype = (genotype, originalGenotype = null) => {
   // C-locus modifications
   // Check if Spl is present to replace C-dilute names with 'Splashed'
   const hasSpl = genotype.Spl && (genotype.Spl.includes('Spl/') || genotype.Spl.includes('/Spl'));
+  // Splashed is only excluded with full color (C/C), albino (c/c), or dominant + recessive combinations
   const excludedCForSpl = ['C/C', 'c/c', 'C/c', 'C/ce', 'C/ch', 'C/cch'];
   const shouldUseSplashed = hasSpl && genotype.C && !excludedCForSpl.includes(genotype.C);
   
