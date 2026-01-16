@@ -1366,6 +1366,22 @@ const MouseGeneticsCalculator = ({ API_BASE_URL, authToken, myAnimals = [] }) =>
     
     return Array.from(possibleCarriers).sort();
   };
+
+  // Reset calculator to default state
+  const resetCalculator = () => {
+    setParent1(defaultGenotype);
+    setParent2(defaultGenotype);
+    setActiveTab('self');
+    setOffspringResults(null);
+    setExpandedPhenotypes({});
+    setFeedbackGenotype(null);
+    setFeedbackMessage('');
+    setShowFeedbackModal(false);
+    setShowAnimalSelector(false);
+    setSelectingForParent(null);
+    setAnimalSearch('');
+  };
+
   const [animalSearch, setAnimalSearch] = useState('');
 
   const updateParent1 = (locus, value) => {
@@ -2057,14 +2073,25 @@ const MouseGeneticsCalculator = ({ API_BASE_URL, authToken, myAnimals = [] }) =>
         <div className="w-full max-w-6xl mx-auto bg-white rounded-xl shadow-lg p-3 sm:p-6">
           <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-2 sm:gap-0 mb-4 sm:mb-6">
             <h1 className="text-xl sm:text-2xl font-bold text-gray-800">Mouse Genetics Calculator</h1>
-            <button
-              onClick={() => setShowExamples(true)}
-              className="flex items-center gap-1 sm:gap-2 px-3 sm:px-4 py-1.5 sm:py-2 bg-primary text-black border-2 border-black rounded-lg hover:bg-primary-dark transition text-sm sm:text-base self-start sm:self-auto"
-            >
-              <Book className="w-4 h-4 sm:w-[18px] sm:h-[18px]" />
-              <span className="hidden sm:inline">View Examples</span>
-              <span className="sm:hidden">Examples</span>
-            </button>
+            <div className="flex gap-2">
+              <button
+                onClick={() => setShowExamples(true)}
+                className="flex items-center gap-1 sm:gap-2 px-3 sm:px-4 py-1.5 sm:py-2 bg-primary text-black border-2 border-black rounded-lg hover:bg-primary-dark transition text-sm sm:text-base"
+              >
+                <Book className="w-4 h-4 sm:w-[18px] sm:h-[18px]" />
+                <span className="hidden sm:inline">View Examples</span>
+                <span className="sm:hidden">Examples</span>
+              </button>
+              <button
+                onClick={resetCalculator}
+                className="flex items-center gap-1 sm:gap-2 px-3 sm:px-4 py-1.5 sm:py-2 bg-gray-100 text-gray-700 border-2 border-gray-300 rounded-lg hover:bg-gray-200 transition text-sm sm:text-base"
+                title="Reset calculator to empty state"
+              >
+                <X className="w-4 h-4 sm:w-[18px] sm:h-[18px]" />
+                <span className="hidden sm:inline">Reset</span>
+                <span className="sm:hidden">Reset</span>
+              </button>
+            </div>
           </div>
 
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-3 sm:gap-6" data-tutorial-target="parent-selectors">
