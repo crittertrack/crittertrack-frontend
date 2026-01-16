@@ -1122,6 +1122,7 @@ const calculatePhenotype = (genotype, originalGenotype = null) => {
   }
 
   // Texture - Build coat traits additively
+  console.log('TEXTURE START DEBUG: Go=', genotype.Go, 'Re=', genotype.Re, 'full genotype=', genotype);
   const hasLonghair = genotype.Go === 'go/go';
   const hasAstrex = genotype.Re === 'Re/re' || genotype.Re === 're/Re' || genotype.Re === 'Re/Re';
   const hasSatin = genotype.Sa === 'sa/sa';
