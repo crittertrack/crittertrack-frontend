@@ -1,9 +1,8 @@
 import React, { useState } from 'react';
 import { ChevronDown, ChevronUp, Info, HelpCircle } from 'lucide-react';
+import { calculatePhenotype, GENE_LOCI } from './MouseGeneticsCalculator';
 
-// Import GENE_LOCI from MouseGeneticsCalculator
-// For now, duplicating it here - could be moved to a shared constants file later
-const GENE_LOCI = {
+const GENE_LOCI_LOCAL = {
   A: {
     name: 'Agouti',
     combinations: [
@@ -328,11 +327,42 @@ const GeneticCodeBuilder = ({ species, gender, value, onChange, onOpenCommunityF
               <div className="flex-1 overflow-y-auto p-6">{mode === 'visual' ? (
                 <div className="space-y-4">
                   {/* Preview of generated code */}
-                  <div className="bg-blue-50 p-4 rounded-lg border border-blue-200">
-                    <div className="text-sm font-medium text-blue-900 mb-2">Generated Genetic Code:</div>
-                    <div className="font-mono text-lg text-blue-800">
-                      {buildGeneticCode(genotype) || 'Select genes below...'}
-                    </div>
+                  <div className="bg-blue-50 p-4 rounded-lg border border-blue-200 space-y-3">
+                    {(() => {
+                      const geneticCode = buildGeneticCode(genotype);
+                      const result = geneticCode ? calculatePhenotype(genotype, genotype) : { phenotype: '', carriers: [], hidden: [], notes: [] };
+                      return (
+                        <>
+                          {result.phenotype && (
+                            <div>
+                              <div className="text-sm font-medium text-blue-900">Phenotype:</div>
+                              <div className="text-base font-semibold text-blue-800">
+                                {result.phenotype}
+                              </div>
+                            </div>
+                          )}
+                          {result.carriers && result.carriers.length > 0 && (
+                            <div>
+                              <div className="text-sm font-medium text-blue-900">Carriers:</div>
+                              <div className="text-sm text-blue-700">
+                                {result.carriers.join(', ')}
+                              </div>
+                            </div>
+                          )}
+                          <div>
+                            <div className="text-sm font-medium text-blue-900">Genotype:</div>
+                            <div className="font-mono text-base text-blue-800">
+                              {geneticCode || 'Select genes below...'}
+                            </div>
+                          </div>
+                          {result.notes && result.notes.length > 0 && (
+                            <div className="text-xs text-orange-600 italic">
+                              Note: {result.notes.join('; ')}
+                            </div>
+                          )}
+                        </>
+                      );
+                    })()}
                   </div>
                   
                   {/* Basic Genes */}

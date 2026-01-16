@@ -180,27 +180,94 @@ const calculatePhenotype = (genotype, originalGenotype = null) => {
 
   // Helper function to apply dilutions to a color name
   const applyDilution = (colorName) => {
+    // C-locus special colors use "point" suffix system
+    const cLocusSpecialColors = ['Siamese', 'Himalayan', 'Burmese', 'Colorpoint', 'Sepia', 'Stone', 'Mock Chocolate', 'Beige', 'Bone'];
+    const isCLocusSpecial = cLocusSpecialColors.some(special => colorName.includes(special));
+    
+    // Check if this is a Fox variant (contains "Fox")
+    const isFoxVariant = colorName.includes(' Fox');
+    
+    // Check if this is an Agouti variant (starts with "Agouti " or "Silver Agouti")
+    const isAgoutiVariant = colorName.startsWith('Agouti ') || colorName === 'Silver Agouti';
+    
     if (genotype.D === 'd/d') {
-      if (colorName.includes('Black') && !colorName.includes('Blue')) {
+      if (isCLocusSpecial) {
+        // C-locus special colors: use "Bluepoint" prefix for d/d
+        if (genotype.B === 'b/b') {
+          // d/d + b/b = Lilacpoint
+          if (colorName === 'Siamese') return 'Lilacpoint Siamese';
+          if (colorName === 'Siamese Fox') return 'Lilacpoint Siamese Fox';
+          if (colorName === 'Agouti Siamese') return 'Lilacpoint Agouti Siamese';
+          if (colorName === 'Agouti Siamese Fox') return 'Lilacpoint Agouti Siamese Fox';
+          if (colorName === 'Himalayan') return 'Lilacpoint Himalayan';
+          if (colorName === 'Himalayan Fox') return 'Lilacpoint Himalayan Fox';
+          if (colorName === 'Agouti Himalayan') return 'Lilacpoint Agouti Himalayan';
+          if (colorName === 'Agouti Himalayan Fox') return 'Lilacpoint Agouti Himalayan Fox';
+          if (colorName === 'Burmese') return 'Lilac Burmese';
+          if (colorName === 'Burmese Fox') return 'Lilac Burmese Fox';
+          if (colorName === 'Agouti Burmese') return 'Lilac Agouti Burmese';
+          if (colorName === 'Agouti Burmese Fox') return 'Lilac Agouti Burmese Fox';
+          if (colorName === 'Colorpoint Beige') return 'Colorpoint Lilac';
+          if (colorName === 'Colorpoint Beige Fox') return 'Colorpoint Lilac Fox';
+          if (colorName === 'Agouti Colorpoint Beige') return 'Colorpoint Lilac Agouti';
+          if (colorName === 'Agouti Colorpoint Beige Fox') return 'Colorpoint Lilac Agouti Fox';
+          if (colorName === 'Sepia') return 'Lilac Sepia';
+          if (colorName === 'Sepia Fox') return 'Lilac Sepia Fox';
+          if (colorName === 'Stone') return 'Lilac Stone';
+          if (colorName === 'Stone Fox') return 'Lilac Stone Fox';
+          if (colorName === 'Agouti Stone') return 'Lilac Agouti Stone';
+          if (colorName === 'Agouti Stone Fox') return 'Lilac Agouti Stone Fox';
+          if (colorName === 'Mock Chocolate') return 'Lilac Mock Chocolate';
+          if (colorName === 'Mock Chocolate Fox') return 'Lilac Mock Chocolate Fox';
+          if (colorName === 'Agouti Mock Chocolate') return 'Lilac Agouti Mock Chocolate';
+          if (colorName === 'Agouti Mock Chocolate Fox') return 'Lilac Agouti Mock Chocolate Fox';
+          if (colorName === 'Beige') return 'Lilac Beige';
+          if (colorName === 'Beige Fox') return 'Lilac Beige Fox';
+          if (colorName === 'Agouti Beige') return 'Lilac Agouti Beige';
+          if (colorName === 'Agouti Beige Fox') return 'Lilac Agouti Beige Fox';
+          if (colorName === 'Bone') return 'Lilac Bone';
+          if (colorName === 'Bone Fox') return 'Lilac Bone Fox';
+          if (colorName === 'Agouti Bone') return 'Lilac Agouti Bone';
+          if (colorName === 'Agouti Bone Fox') return 'Lilac Agouti Bone Fox';
+        } else {
+          // d/d only = Bluepoint
+          if (colorName === 'Siamese') return 'Bluepoint Siamese';
+          if (colorName === 'Siamese Fox') return 'Bluepoint Siamese Fox';
+          if (colorName === 'Agouti Siamese') return 'Bluepoint Agouti Siamese';
+          if (colorName === 'Agouti Siamese Fox') return 'Bluepoint Agouti Siamese Fox';
+          if (colorName === 'Himalayan') return 'Bluepoint Himalayan';
+          if (colorName === 'Himalayan Fox') return 'Bluepoint Himalayan Fox';
+          if (colorName === 'Agouti Himalayan') return 'Bluepoint Agouti Himalayan';
+          if (colorName === 'Agouti Himalayan Fox') return 'Bluepoint Agouti Himalayan Fox';
+          if (colorName === 'Burmese') return 'Blue Burmese';
+          if (colorName === 'Burmese Fox') return 'Blue Burmese Fox';
+          if (colorName === 'Agouti Burmese') return 'Blue Agouti Burmese';
+          if (colorName === 'Agouti Burmese Fox') return 'Blue Agouti Burmese Fox';
+          if (colorName === 'Colorpoint Beige') return 'Colorpoint Blue';
+          if (colorName === 'Colorpoint Beige Fox') return 'Colorpoint Blue Fox';
+          if (colorName === 'Agouti Colorpoint Beige') return 'Colorpoint Blue Agouti';
+          if (colorName === 'Agouti Colorpoint Beige Fox') return 'Colorpoint Blue Agouti Fox';
+          if (colorName === 'Sepia') return 'Blue Sepia';
+          if (colorName === 'Sepia Fox') return 'Blue Sepia Fox';
+          if (colorName === 'Stone') return 'Blue Stone';
+          if (colorName === 'Stone Fox') return 'Blue Stone Fox';
+          if (colorName === 'Agouti Stone') return 'Blue Agouti Stone';
+          if (colorName === 'Agouti Stone Fox') return 'Blue Agouti Stone Fox';
+          if (colorName === 'Mock Chocolate') return 'Blue Mock Chocolate';
+          if (colorName === 'Mock Chocolate Fox') return 'Blue Mock Chocolate Fox';
+          if (colorName === 'Agouti Mock Chocolate') return 'Blue Agouti Mock Chocolate';
+          if (colorName === 'Agouti Mock Chocolate Fox') return 'Blue Agouti Mock Chocolate Fox';
+          if (colorName === 'Beige') return 'Blue Beige';
+          if (colorName === 'Beige Fox') return 'Blue Beige Fox';
+          if (colorName === 'Agouti Beige') return 'Blue Agouti Beige';
+          if (colorName === 'Agouti Beige Fox') return 'Blue Agouti Beige Fox';
+          if (colorName === 'Bone') return 'Blue Bone';
+          if (colorName === 'Bone Fox') return 'Blue Bone Fox';
+          if (colorName === 'Agouti Bone') return 'Blue Agouti Bone';
+          if (colorName === 'Agouti Bone Fox') return 'Blue Agouti Bone Fox';
+        }
+      } else if (colorName.includes('Black') && !colorName.includes('Blue')) {
         colorName = colorName.replace('Black', 'Blue');
-      } else if (colorName === 'Siamese') {
-        colorName = 'Blue Siamese';
-      } else if (colorName === 'Himalayan') {
-        colorName = 'Blue Himalayan';
-      } else if (colorName === 'Burmese') {
-        colorName = 'Blue Burmese';
-      } else if (colorName === 'Stone') {
-        colorName = 'Blue Stone';
-      } else if (colorName === 'Sepia') {
-        colorName = 'Blue Sepia';
-      } else if (colorName === 'Bone') {
-        colorName = 'Blue Bone';
-      } else if (colorName === 'Beige') {
-        colorName = 'Blue Beige';
-      } else if (colorName === 'Colorpoint Beige') {
-        colorName = 'Blue Colorpoint Beige';
-      } else if (colorName === 'Mock Chocolate') {
-        colorName = 'Blue Mock Chocolate';
       } else if (colorName === 'Chinchilla') {
         colorName = 'Blue Chinchilla';
       } else if (colorName.includes('Chocolate')) {
@@ -208,6 +275,53 @@ const calculatePhenotype = (genotype, originalGenotype = null) => {
       } else if (colorName.includes('Cinnamon') && !colorName.includes('Argente')) {
         colorName = colorName.replace('Cinnamon', 'Cinnamon Argente');
       }
+    } else if (genotype.B === 'b/b' && isCLocusSpecial) {
+      // b/b (no d/d) = Chocolatepoint for Siamese/Himalayan, Chocolate prefix for others
+      if (colorName === 'Siamese') return 'Chocolatepoint Siamese';
+      if (colorName === 'Siamese Fox') return 'Chocolatepoint Siamese Fox';
+      if (colorName === 'Agouti Siamese') return 'Chocolatepoint Agouti Siamese';
+      if (colorName === 'Agouti Siamese Fox') return 'Chocolatepoint Agouti Siamese Fox';
+      if (colorName === 'Himalayan') return 'Chocolatepoint Himalayan';
+      if (colorName === 'Himalayan Fox') return 'Chocolatepoint Himalayan Fox';
+      if (colorName === 'Agouti Himalayan') return 'Chocolatepoint Agouti Himalayan';
+      if (colorName === 'Agouti Himalayan Fox') return 'Chocolatepoint Agouti Himalayan Fox';
+      if (colorName === 'Burmese') return 'Chocolate Burmese';
+      if (colorName === 'Burmese Fox') return 'Chocolate Burmese Fox';
+      if (colorName === 'Agouti Burmese') return 'Chocolate Agouti Burmese';
+      if (colorName === 'Agouti Burmese Fox') return 'Chocolate Agouti Burmese Fox';
+      if (colorName === 'Colorpoint Beige') return 'Colorpoint Chocolate';
+      if (colorName === 'Colorpoint Beige Fox') return 'Colorpoint Chocolate Fox';
+      if (colorName === 'Agouti Colorpoint Beige') return 'Colorpoint Chocolate Agouti';
+      if (colorName === 'Agouti Colorpoint Beige Fox') return 'Colorpoint Chocolate Agouti Fox';
+      if (colorName === 'Sepia') return 'Chocolate Sepia';
+      if (colorName === 'Sepia Fox') return 'Chocolate Sepia Fox';
+      if (colorName === 'Stone') return 'Chocolate Stone';
+      if (colorName === 'Stone Fox') return 'Chocolate Stone Fox';
+      if (colorName === 'Agouti Stone') return 'Chocolate Agouti Stone';
+      if (colorName === 'Agouti Stone Fox') return 'Chocolate Agouti Stone Fox';
+      if (colorName === 'Mock Chocolate') return 'Chocolate Mock Chocolate';
+      if (colorName === 'Mock Chocolate Fox') return 'Chocolate Mock Chocolate Fox';
+      if (colorName === 'Agouti Mock Chocolate') return 'Chocolate Agouti Mock Chocolate';
+      if (colorName === 'Agouti Mock Chocolate Fox') return 'Chocolate Agouti Mock Chocolate Fox';
+      if (colorName === 'Beige') return 'Chocolate Beige';
+      if (colorName === 'Beige Fox') return 'Chocolate Beige Fox';
+      if (colorName === 'Agouti Beige') return 'Chocolate Agouti Beige';
+      if (colorName === 'Agouti Beige Fox') return 'Chocolate Agouti Beige Fox';
+      if (colorName === 'Bone') return 'Chocolate Bone';
+      if (colorName === 'Bone Fox') return 'Chocolate Bone Fox';
+      if (colorName === 'Agouti Bone') return 'Chocolate Agouti Bone';
+      if (colorName === 'Agouti Bone Fox') return 'Chocolate Agouti Bone Fox';
+    } else if (isCLocusSpecial && genotype.B === 'B/B' && genotype.D === 'D/D') {
+      // B/B + D/D = Sealpoint for Siamese/Himalayan, base name for others
+      if (colorName === 'Siamese') return 'Sealpoint Siamese';
+      if (colorName === 'Siamese Fox') return 'Sealpoint Siamese Fox';
+      if (colorName === 'Agouti Siamese') return 'Sealpoint Agouti Siamese';
+      if (colorName === 'Agouti Siamese Fox') return 'Sealpoint Agouti Siamese Fox';
+      if (colorName === 'Himalayan') return 'Sealpoint Himalayan';
+      if (colorName === 'Himalayan Fox') return 'Sealpoint Himalayan Fox';
+      if (colorName === 'Agouti Himalayan') return 'Sealpoint Agouti Himalayan';
+      if (colorName === 'Agouti Himalayan Fox') return 'Sealpoint Agouti Himalayan Fox';
+      // Others keep their base names (Burmese, Sepia, Beige, etc.)
     }
     return colorName;
   };
@@ -461,19 +575,42 @@ const calculatePhenotype = (genotype, originalGenotype = null) => {
       const baseName = 'Dominant Red';
       const suffix = isTanVariant ? ' Fox' : '';
       
+      // Eye White variations: ch (Pink Eye White) or ce (Black Eye White)
+      const underlyingColorBase = isTanVariant ? 'point' : '';
+      
       if (isCCombo('ch/c', 'c/ch')) {
-        return { phenotype: addMarkingsIfNeeded(`${baseName} Himalayan${suffix}`), carriers, hidden, notes: [] };
+        const underlyingColor = applyDilution('Himalayan');
+        const pointSuffix = underlyingColor.includes('point') ? '' : 'point';
+        const noteText = isTanVariant 
+          ? `Underlying genotype: ${underlyingColor.replace('point ', pointSuffix)} Fox`
+          : `Underlying genotype: ${underlyingColor.replace('point ', pointSuffix)}`;
+        return { phenotype: addMarkingsIfNeeded('Pink Eye White'), carriers, hidden, notes: [noteText] };
       }
       if (isCCombo('ch/ch')) {
-        return { phenotype: addMarkingsIfNeeded(`${baseName} Siamese${suffix}`), carriers, hidden, notes: [] };
+        const underlyingColor = applyDilution('Siamese');
+        const pointSuffix = underlyingColor.includes('point') ? '' : 'point';
+        const noteText = isTanVariant
+          ? `Underlying genotype: ${underlyingColor.replace('point ', pointSuffix)} Fox`
+          : `Underlying genotype: ${underlyingColor.replace('point ', pointSuffix)}`;
+        return { phenotype: addMarkingsIfNeeded('Pink Eye White'), carriers, hidden, notes: [noteText] };
       }
       if (isCCombo('ce/c', 'c/ce')) {
-        return { phenotype: addMarkingsIfNeeded(`${baseName} Bone${suffix}`), carriers, hidden, notes: [] };
+        const underlyingColor = applyDilution('Bone');
+        const noteText = isTanVariant
+          ? `Underlying genotype: ${underlyingColor} Fox`
+          : `Underlying genotype: ${underlyingColor}`;
+        return { phenotype: addMarkingsIfNeeded('Black Eye White'), carriers, hidden, notes: [noteText] };
       }
       if (isCCombo('ce/ch', 'ch/ce')) {
-        return { phenotype: addMarkingsIfNeeded(`${baseName} Colorpoint Beige${suffix}`), carriers, hidden, notes: [] };
+        return { phenotype: addMarkingsIfNeeded(applyDilution(`Colorpoint Beige${suffix}`)), carriers, hidden, notes: [] };
       }
       if (isCCombo('ce/ce')) {
+        const underlyingColor = applyDilution('Beige');
+        const noteText = isTanVariant
+          ? `Underlying genotype: ${underlyingColor} Fox`
+          : `Underlying genotype: ${underlyingColor}`;
+        return { phenotype: addMarkingsIfNeeded('Black Eye White'), carriers, hidden, notes: [noteText] };
+      }
         return { phenotype: addMarkingsIfNeeded(`${baseName} Beige${suffix}`), carriers, hidden, notes: [] };
       }
       if (isCCombo('cch/c', 'c/cch')) {
@@ -575,10 +712,62 @@ const calculatePhenotype = (genotype, originalGenotype = null) => {
     const excludedCLocus = ['C/C', 'c/c', 'C/ch', 'C/ce', 'C/c', 'C/cch'];
     if (genotype.C && !excludedCLocus.includes(genotype.C)) {
       const isTanVariant = genotype.A === 'Avy/at' || genotype.A === 'at/Avy';
+      const isAgouti = genotype.A === 'Avy/A' || genotype.A === 'A/Avy';
+      
+      // Snowtiger with B/D/P dilutions
+      let snowtigerName = '';
+      const isBrown = genotype.B === 'b/b';
+      const isDilute = genotype.D === 'd/d';
+      const isPinkEye = genotype.P === 'p/p';
+      
+      // Apply B+D+P combinations first
+      if (isBrown && isDilute && isPinkEye) {
+        snowtigerName = 'Lavender';
+      } else if (isBrown && isDilute) {
+        snowtigerName = 'Lilac';
+      } else if (isDilute && isPinkEye) {
+        snowtigerName = 'Silver';
+      } else if (isBrown && isPinkEye) {
+        snowtigerName = 'Champagne';
+      } else if (isBrown) {
+        snowtigerName = 'Chocolate';
+      } else if (isDilute) {
+        snowtigerName = 'Blue';
+      } else if (isPinkEye) {
+        snowtigerName = 'Dove';
+      }
+      
+      // Build phenotype with Agouti prefix if needed
+      let phenotypeName = '';
+      if (isAgouti) {
+        if (snowtigerName === 'Lavender') {
+          phenotypeName = 'Lilac Argente Snowtiger';
+        } else if (snowtigerName === 'Lilac') {
+          phenotypeName = 'Lilac Agouti Snowtiger';
+        } else if (snowtigerName === 'Silver') {
+          phenotypeName = 'Blue Argente Snowtiger';
+        } else if (snowtigerName === 'Champagne') {
+          phenotypeName = 'Cinnamon Argente Snowtiger';
+        } else if (snowtigerName === 'Chocolate') {
+          phenotypeName = 'Cinnamon Snowtiger';
+        } else if (snowtigerName === 'Blue') {
+          phenotypeName = 'Blue Agouti Snowtiger';
+        } else if (snowtigerName === 'Dove') {
+          phenotypeName = 'Argente Snowtiger';
+        } else {
+          phenotypeName = 'Agouti Snowtiger';
+        }
+      } else {
+        phenotypeName = snowtigerName ? `${snowtigerName} Snowtiger` : 'Snowtiger';
+      }
+      
+      if (isTanVariant) {
+        phenotypeName += ' Fox';
+      }
       
       // Splashed is handled in normal flow later
       
-      return { phenotype: addMarkingsIfNeeded(isTanVariant ? 'Snowtiger Fox' : 'Snowtiger'), carriers, hidden, notes: [] };
+      return { phenotype: addMarkingsIfNeeded(phenotypeName), carriers, hidden, notes: [] };
     }
     
     // Track what Avy is paired with
@@ -1479,10 +1668,14 @@ const MouseGeneticsCalculator = ({ API_BASE_URL, authToken, myAnimals = [] }) =>
     'Bone': ['C'],
     'Blue Stone': ['C', 'D'],
     'Stone': ['C'],
-    'Himalayan': ['C'],
-    'Siamese': ['C'],
-    'Blue Siamese': ['C', 'D'],
-    'Chocolate Siamese': ['C', 'B'],
+    'Sealpoint Himalayan': ['C'],
+    'Bluepoint Himalayan': ['C', 'D'],
+    'Chocolatepoint Himalayan': ['C', 'B'],
+    'Lilacpoint Himalayan': ['C', 'B', 'D'],
+    'Sealpoint Siamese': ['C'],
+    'Bluepoint Siamese': ['C', 'D'],
+    'Chocolatepoint Siamese': ['C', 'B'],
+    'Lilacpoint Siamese': ['C', 'B', 'D'],
     'Burmese': ['C'],
     'Blue Burmese': ['C', 'D'],
     'Colorpoint Blue': ['C', 'D'],
@@ -1518,7 +1711,14 @@ const MouseGeneticsCalculator = ({ API_BASE_URL, authToken, myAnimals = [] }) =>
     'Colorpoint Beige Fox': ['A', 'C'],
     'Himalayan Fox': ['A', 'C'],
     'Mock Chocolate Fox': ['A', 'C'],
-    'Siamese Fox': ['A', 'C'],
+    'Sealpoint Siamese Fox': ['A', 'C'],
+    'Bluepoint Siamese Fox': ['A', 'C', 'D'],
+    'Chocolatepoint Siamese Fox': ['A', 'C', 'B'],
+    'Lilacpoint Siamese Fox': ['A', 'C', 'B', 'D'],
+    'Sealpoint Himalayan Fox': ['A', 'C'],
+    'Bluepoint Himalayan Fox': ['A', 'C', 'D'],
+    'Chocolatepoint Himalayan Fox': ['A', 'C', 'B'],
+    'Lilacpoint Himalayan Fox': ['A', 'C', 'B', 'D'],
     'Stone Fox': ['A', 'C'],
     'Blue Sepia Fox': ['A', 'C', 'D'],
     'Chocolate Sepia Fox': ['A', 'C', 'B'],
@@ -1527,6 +1727,30 @@ const MouseGeneticsCalculator = ({ API_BASE_URL, authToken, myAnimals = [] }) =>
     'Lavender Sepia Fox': ['A', 'P'],
     'Silver Sepia Fox': ['A', 'P'],
     'Champagne Sepia Fox': ['A', 'P'],
+    'Snowtiger': ['A', 'C'],
+    'Blue Snowtiger': ['A', 'C', 'D'],
+    'Chocolate Snowtiger': ['A', 'C', 'B'],
+    'Lilac Snowtiger': ['A', 'C', 'B', 'D'],
+    'Dove Snowtiger': ['A', 'C', 'P'],
+    'Silver Snowtiger': ['A', 'C', 'D', 'P'],
+    'Champagne Snowtiger': ['A', 'C', 'B', 'P'],
+    'Lavender Snowtiger': ['A', 'C', 'B', 'D', 'P'],
+    'Snowtiger Fox': ['A', 'C'],
+    'Blue Snowtiger Fox': ['A', 'C', 'D'],
+    'Chocolate Snowtiger Fox': ['A', 'C', 'B'],
+    'Lilac Snowtiger Fox': ['A', 'C', 'B', 'D'],
+    'Dove Snowtiger Fox': ['A', 'C', 'P'],
+    'Silver Snowtiger Fox': ['A', 'C', 'D', 'P'],
+    'Champagne Snowtiger Fox': ['A', 'C', 'B', 'P'],
+    'Lavender Snowtiger Fox': ['A', 'C', 'B', 'D', 'P'],
+    'Agouti Snowtiger': ['A', 'C'],
+    'Blue Agouti Snowtiger': ['A', 'C', 'D'],
+    'Cinnamon Snowtiger': ['A', 'C', 'B'],
+    'Lilac Agouti Snowtiger': ['A', 'C', 'B', 'D'],
+    'Argente Snowtiger': ['A', 'C', 'P'],
+    'Blue Argente Snowtiger': ['A', 'C', 'D', 'P'],
+    'Cinnamon Argente Snowtiger': ['A', 'C', 'B', 'P'],
+    'Lilac Argente Snowtiger': ['A', 'C', 'B', 'D', 'P'],
     'Pink Eye White': [],
     'Black Eye White': [],
     'Pied': ['S'],
@@ -1613,10 +1837,10 @@ const MouseGeneticsCalculator = ({ API_BASE_URL, authToken, myAnimals = [] }) =>
         { name: 'Bone', image: '/images/phenotypes/bone.png', genotype: { A: 'a/a', B: 'B/B', C: 'c/ce', D: 'D/D', E: 'E/E', P: 'P/P' } },
         { name: 'Blue Stone', image: '/images/phenotypes/bluestone.png', genotype: { A: 'a/a', B: 'B/B', C: 'c/cch', D: 'd/d', E: 'E/E', P: 'P/P' } },
         { name: 'Stone', image: '/images/phenotypes/stone.png', genotype: { A: 'a/a', B: 'B/B', C: 'c/cch', D: 'D/D', E: 'E/E', P: 'P/P' } },
-        { name: 'Himalayan', image: '/images/phenotypes/himalayan.png', genotype: { A: 'a/a', B: 'B/B', C: 'c/ch', D: 'D/D', E: 'E/E', P: 'P/P' } },
-        { name: 'Siamese', image: '/images/phenotypes/siamese.png', genotype: { A: 'a/a', B: 'B/B', C: 'ch/ch', D: 'D/D', E: 'E/E', P: 'P/P' } },
-        { name: 'Blue Siamese', image: '/images/phenotypes/bluesiamese.png', genotype: { A: 'a/a', B: 'B/B', C: 'ch/ch', D: 'd/d', E: 'E/E', P: 'P/P' } },
-        { name: 'Chocolate Siamese', image: '/images/phenotypes/chocsiamese.png', genotype: { A: 'a/a', B: 'b/b', C: 'ch/ch', D: 'D/D', E: 'E/E', P: 'P/P' } },
+        { name: 'Sealpoint Himalayan', image: '/images/phenotypes/himalayan.png', genotype: { A: 'a/a', B: 'B/B', C: 'c/ch', D: 'D/D', E: 'E/E', P: 'P/P' } },
+        { name: 'Sealpoint Siamese', image: '/images/phenotypes/siamese.png', genotype: { A: 'a/a', B: 'B/B', C: 'ch/ch', D: 'D/D', E: 'E/E', P: 'P/P' } },
+        { name: 'Bluepoint Siamese', image: '/images/phenotypes/bluesiamese.png', genotype: { A: 'a/a', B: 'B/B', C: 'ch/ch', D: 'd/d', E: 'E/E', P: 'P/P' } },
+        { name: 'Chocolatepoint Siamese', image: '/images/phenotypes/chocsiamese.png', genotype: { A: 'a/a', B: 'b/b', C: 'ch/ch', D: 'D/D', E: 'E/E', P: 'P/P' } },
         { name: 'Burmese', image: '/images/phenotypes/burmese.png', genotype: { A: 'a/a', B: 'B/B', C: 'ch/cch', D: 'D/D', E: 'E/E', P: 'P/P' } },
         { name: 'Blue Burmese', image: '/images/phenotypes/blueburmese.png', genotype: { A: 'a/a', B: 'B/B', C: 'ch/cch', D: 'd/d', E: 'E/E', P: 'P/P' } },
         { name: 'Colorpoint Blue', image: '/images/phenotypes/colorpointblue.png', genotype: { A: 'a/a', B: 'B/B', C: 'ce/ch', D: 'd/d', E: 'E/E', P: 'P/P' } },
@@ -1643,9 +1867,9 @@ const MouseGeneticsCalculator = ({ API_BASE_URL, authToken, myAnimals = [] }) =>
         { name: 'Chinchilla', image: '/images/phenotypes/chinchilla.png', genotype: { A: 'A/at', B: 'B/B', C: 'cch/cch', D: 'D/D', E: 'E/E', P: 'P/P' } },
         { name: 'Colorpoint Beige Fox', image: '/images/phenotypes/colorpointbeigefox.png', genotype: { A: 'at/a', B: 'B/B', C: 'ce/ch', D: 'D/D', E: 'E/E', P: 'P/P' } },
         { name: 'Cream Fox', image: '/images/phenotypes/creamfox.png', genotype: { A: 'Ay/at', B: 'B/B', C: 'cch/cch', D: 'D/D', E: 'E/E', P: 'P/P' } },
-        { name: 'Himalayan Fox', image: '/images/phenotypes/himalayanfox.png', genotype: { A: 'at/a', B: 'B/B', C: 'c/ch', D: 'D/D', E: 'E/E', P: 'P/P' } },
+        { name: 'Sealpoint Himalayan Fox', image: '/images/phenotypes/himalayanfox.png', genotype: { A: 'at/a', B: 'B/B', C: 'c/ch', D: 'D/D', E: 'E/E', P: 'P/P' } },
         { name: 'Mock Chocolate Fox', image: '/images/phenotypes/mockchocfox.png', genotype: { A: 'at/a', B: 'B/B', C: 'ce/cch', D: 'D/D', E: 'E/E', P: 'P/P' } },
-        { name: 'Siamese Fox', image: '/images/phenotypes/siamesefox.png', genotype: { A: 'at/a', B: 'B/B', C: 'ch/ch', D: 'D/D', E: 'E/E', P: 'P/P' } },
+        { name: 'Sealpoint Siamese Fox', image: '/images/phenotypes/siamesefox.png', genotype: { A: 'at/a', B: 'B/B', C: 'ch/ch', D: 'D/D', E: 'E/E', P: 'P/P' } },
         { name: 'Stone Fox', image: '/images/phenotypes/stonefox.png', genotype: { A: 'at/a', B: 'B/B', C: 'c/ce', D: 'D/D', E: 'E/E', P: 'P/P' } },
         { name: 'Blue Sepia Fox', image: '/images/phenotypes/bluesepiafox.png', genotype: { A: 'at/a', B: 'B/B', C: 'cch/cch', D: 'd/d', E: 'E/E', P: 'P/P' } },
         { name: 'Chocolate Sepia Fox', image: '/images/phenotypes/chocsepiafox.png', genotype: { A: 'at/a', B: 'b/b', C: 'cch/cch', D: 'D/D', E: 'E/E', P: 'P/P' } },
@@ -2216,4 +2440,5 @@ const MouseGeneticsCalculator = ({ API_BASE_URL, authToken, myAnimals = [] }) =>
 };
 
 export default MouseGeneticsCalculator;
+export { calculatePhenotype, GENE_LOCI };
 
