@@ -1307,16 +1307,16 @@ const MouseGeneticsCalculator = ({ API_BASE_URL, authToken, myAnimals = [] }) =>
             possibleCarriers.add('Chocolate');
           }
           if (locus === 'C') {
-            if (alleles.includes('C/c') || alleles.includes('c/C')) {
+            if (alleles === 'C/c' || alleles === 'c/C') {
               possibleCarriers.add('Albino');
             }
-            if (alleles.includes('C/ch') || alleles.includes('ch/C')) {
+            if (alleles === 'C/ch' || alleles === 'ch/C') {
               possibleCarriers.add('Siamese');
             }
-            if (alleles.includes('C/ce') || alleles.includes('ce/C')) {
+            if (alleles === 'C/ce' || alleles === 'ce/C') {
               possibleCarriers.add('Beige');
             }
-            if (alleles.includes('C/cch') || alleles.includes('cch/C')) {
+            if (alleles === 'C/cch' || alleles === 'cch/C') {
               possibleCarriers.add('Chinchilla');
             }
           }
