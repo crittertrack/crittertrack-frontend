@@ -1021,9 +1021,8 @@ const calculatePhenotype = (genotype, originalGenotype = null) => {
         color = `Chinchilla ${color}`;
       }
     }
-    if (genotype.C === 'ch/c' || genotype.C === 'c/ch') {
-      color = `Himalayan ${color}`;
-    }
+    // ch/c and ch/ch cases are already handled in the base color assignment above (lines 508-526)
+    // No need to add Himalayan prefix here as it's already set as the base color
     if (genotype.C === 'ce/ce' || ((genotype.C?.includes('ce/') || genotype.C?.includes('/ce')) && !genotype.C.includes('C/ce') && !genotype.C.includes('ce/C'))) {
       color = `Beige ${color}`;
     }
