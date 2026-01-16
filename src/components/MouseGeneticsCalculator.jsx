@@ -2075,14 +2075,6 @@ const MouseGeneticsCalculator = ({ API_BASE_URL, authToken, myAnimals = [] }) =>
             <h1 className="text-xl sm:text-2xl font-bold text-gray-800">Mouse Genetics Calculator</h1>
             <div className="flex gap-2">
               <button
-                onClick={() => setShowExamples(true)}
-                className="flex items-center gap-1 sm:gap-2 px-3 sm:px-4 py-1.5 sm:py-2 bg-primary text-black border-2 border-black rounded-lg hover:bg-primary-dark transition text-sm sm:text-base"
-              >
-                <Book className="w-4 h-4 sm:w-[18px] sm:h-[18px]" />
-                <span className="hidden sm:inline">View Examples</span>
-                <span className="sm:hidden">Examples</span>
-              </button>
-              <button
                 onClick={resetCalculator}
                 className="flex items-center gap-1 sm:gap-2 px-3 sm:px-4 py-1.5 sm:py-2 bg-gray-100 text-gray-700 border-2 border-gray-300 rounded-lg hover:bg-gray-200 transition text-sm sm:text-base"
                 title="Reset calculator to empty state"
@@ -2090,6 +2082,14 @@ const MouseGeneticsCalculator = ({ API_BASE_URL, authToken, myAnimals = [] }) =>
                 <X className="w-4 h-4 sm:w-[18px] sm:h-[18px]" />
                 <span className="hidden sm:inline">Reset</span>
                 <span className="sm:hidden">Reset</span>
+              </button>
+              <button
+                onClick={() => setShowExamples(true)}
+                className="flex items-center gap-1 sm:gap-2 px-3 sm:px-4 py-1.5 sm:py-2 bg-primary text-black border-2 border-black rounded-lg hover:bg-primary-dark transition text-sm sm:text-base"
+              >
+                <Book className="w-4 h-4 sm:w-[18px] sm:h-[18px]" />
+                <span className="hidden sm:inline">View Examples</span>
+                <span className="sm:hidden">Examples</span>
               </button>
             </div>
           </div>
