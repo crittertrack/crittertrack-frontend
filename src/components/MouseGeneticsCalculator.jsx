@@ -565,11 +565,15 @@ const calculatePhenotype = (genotype, originalGenotype = null) => {
   if (genotype.A && (genotype.A.startsWith('Ay/'))) {
     const hasSpl = genotype.Spl && genotype.Spl.includes('Spl/');
     
+    // Determine modifiers early (used throughout this block)
+    const isTanVariant = genotype.A === 'Ay/at' || genotype.A === 'at/Ay';
+    const isBrown = genotype.B === 'b/b';
+    const isDilute = genotype.D === 'd/d';
+    const isPinkEye = genotype.P === 'p/p';
+    
     // Check for C-locus dilutes (exclude C/C and c/c)
     const excludedCLocus = ['C/C', 'c/c', 'C/ch', 'ch/C', 'C/ce', 'ce/C', 'C/c', 'c/C', 'C/cch', 'cch/C'];
     if (genotype.C && !excludedCLocus.includes(genotype.C)) {
-      const isTanVariant = genotype.A === 'Ay/at' || genotype.A === 'at/Ay';
-      
       // Splashed is handled in normal flow later
       
       const baseName = 'Dominant Red';
@@ -611,8 +615,6 @@ const calculatePhenotype = (genotype, originalGenotype = null) => {
           : `Underlying genotype: ${underlyingColor}`;
         return { phenotype: addMarkingsIfNeeded('Black Eye White'), carriers, hidden, notes: [noteText] };
       }
-        return { phenotype: addMarkingsIfNeeded(`${baseName} Beige${suffix}`), carriers, hidden, notes: [] };
-      }
       if (isCCombo('cch/c', 'c/cch')) {
         return { phenotype: addMarkingsIfNeeded(`${baseName} Stone${suffix}`), carriers, hidden, notes: [] };
       }
@@ -632,12 +634,6 @@ const calculatePhenotype = (genotype, originalGenotype = null) => {
     else if (genotype.A === 'Ay/a' || genotype.A === 'a/Ay') carriers.push('Black');
     else if (genotype.A === 'Ay/A' || genotype.A === 'A/Ay') carriers.push('Agouti');
     else if (genotype.A === 'Ay/Avy' || genotype.A === 'Avy/Ay') carriers.push('Brindle');
-    
-    // Determine if it's tan variant
-    const isTanVariant = genotype.A === 'Ay/at' || genotype.A === 'at/Ay';
-    const isBrown = genotype.B === 'b/b';
-    const isDilute = genotype.D === 'd/d';
-    const isPinkEye = genotype.P === 'p/p';
     
     // Handle brown + dilute + pink-eye combination
     if (isBrown && isDilute && isPinkEye) {
