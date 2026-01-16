@@ -1078,7 +1078,6 @@ const calculatePhenotype = (genotype, originalGenotype = null) => {
 
   // Splashed - only visible with double C-dilutes (not C/-)
   if (genotype.Spl && (genotype.Spl.includes('Spl/') || genotype.Spl.includes('/Spl'))) {
-    console.log('SPLASHED DEBUG: shouldUseSplashed=', shouldUseSplashed, 'C=', genotype.C, 'Spl=', genotype.Spl);
     if (shouldUseSplashed) {
       markings.push('Splashed');
     } else if (genotype.C !== 'c/c') {
@@ -1122,7 +1121,6 @@ const calculatePhenotype = (genotype, originalGenotype = null) => {
   }
 
   // Texture - Build coat traits additively
-  console.log('TEXTURE START DEBUG: Go=', genotype.Go, 'Re=', genotype.Re, 'full genotype=', genotype);
   const hasLonghair = genotype.Go === 'go/go';
   const hasAstrex = genotype.Re === 'Re/re' || genotype.Re === 're/Re' || genotype.Re === 'Re/Re';
   const hasSatin = genotype.Sa === 'sa/sa';
@@ -1132,11 +1130,6 @@ const calculatePhenotype = (genotype, originalGenotype = null) => {
   
   // Check for special combinations first
   const isTexel = hasLonghair && hasAstrex;
-  
-  // Temporary debug for deployment
-  if (hasLonghair && hasAstrex) {
-    console.log('TEXEL DEBUG: longhair=', hasLonghair, 'astrex=', hasAstrex, 'Go=', genotype.Go, 'Re=', genotype.Re);
-  }
   
   // Build texture additively
   let textureComponents = [];
@@ -1170,7 +1163,6 @@ const calculatePhenotype = (genotype, originalGenotype = null) => {
   
   if (textureComponents.length > 0) {
     texture = textureComponents.join(' ');
-    console.log('TEXTURE DEBUG: components=', textureComponents, 'final=', texture);
   }
 
   // Combine results
@@ -1186,11 +1178,9 @@ const calculatePhenotype = (genotype, originalGenotype = null) => {
     result += (result ? ' ' : '') + 'Umbrous';
   }
   if (markings.length > 0) {
-    console.log('MARKINGS DEBUG: markings=', markings);
     result += (result ? ' ' : '') + markings.join(' ');
   }
   if (texture) {
-    console.log('FINAL RESULT DEBUG: adding texture=', texture, 'to result=', result);
     result += (result ? ' ' : '') + texture;
   }
 
@@ -1538,22 +1528,25 @@ const MouseGeneticsCalculator = ({ API_BASE_URL, authToken, myAnimals = [] }) =>
     
     const filled = {};
     for (const locus in defaults) {
+      const value = genotype[locus];
+      const hasValue = value !== undefined && value !== '';
+      
       // If this is a base gene and any base gene is selected, only use selected values
       if (baseGenes.includes(locus) && hasAnyBaseGene) {
-        filled[locus] = genotype[locus] || defaults[locus];
+        filled[locus] = hasValue ? value : defaults[locus];
       }
       // Marking genes - ALWAYS use the actual value if present, otherwise default
       // (They add individually, not as a group)
       else if (markingGenes.includes(locus)) {
-        filled[locus] = genotype[locus] || defaults[locus];
+        filled[locus] = hasValue ? value : defaults[locus];
       }
       // If this is a coat gene and any coat gene is selected, use selected values
       else if (coatGenes.includes(locus) && hasAnyCoatGene) {
-        filled[locus] = genotype[locus] || defaults[locus];
+        filled[locus] = hasValue ? value : defaults[locus];
       }
       // Otherwise use normal defaulting
       else {
-        filled[locus] = genotype[locus] || defaults[locus];
+        filled[locus] = hasValue ? value : defaults[locus];
       }
     }
     return filled;
@@ -1703,7 +1696,6 @@ const MouseGeneticsCalculator = ({ API_BASE_URL, authToken, myAnimals = [] }) =>
   };
 
   const parent1Result = hasAnySelection(parent1) ? calculatePhenotype(applyDefaults(parent1), parent1) : { phenotype: '', carriers: [], hidden: [] };
-  console.log('PARENT1 STATE DEBUG: before applyDefaults=', parent1, 'after applyDefaults=', hasAnySelection(parent1) ? applyDefaults(parent1) : 'no selection');
   const parent2Result = hasAnySelection(parent2) ? calculatePhenotype(applyDefaults(parent2), parent2) : { phenotype: '', carriers: [], hidden: [] };
 
   // Mapping of phenotype names to their defining loci (can be array for multiple)
