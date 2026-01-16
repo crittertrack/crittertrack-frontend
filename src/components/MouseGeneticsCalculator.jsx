@@ -161,6 +161,7 @@ const GENE_LOCI = {
 
 // Calculate phenotype from genotype
 const calculatePhenotype = (genotype, originalGenotype = null) => {
+  console.log('calculatePhenotype called with:', genotype);
   // Parse allele combinations
   const parsed = {};
   Object.keys(GENE_LOCI).forEach(locus => {
