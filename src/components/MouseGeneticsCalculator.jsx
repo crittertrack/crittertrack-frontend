@@ -1116,51 +1116,48 @@ const calculatePhenotype = (genotype, originalGenotype = null) => {
     carriers.push('Fuzz');
   }
 
-  // Texture - always show coat genes if they affect phenotype
+  // Texture - Build coat traits additively
   const hasLonghair = genotype.Go === 'go/go';
   const hasAstrex = genotype.Re === 'Re/re' || genotype.Re === 're/Re' || genotype.Re === 'Re/Re';
+  const hasSatin = genotype.Sa === 'sa/sa';
+  const hasRosette = genotype.Rst === 'rst/rst';
+  const hasFuzz = genotype.Fz === 'fz/fz';
+  const hasDominantHairless = genotype.Nu === 'Nu/Nu' || genotype.Nu === 'Nu/nu';
   
-  // Check for Texel (longhair + astrex combination)
+  // Check for special combinations first
   const isTexel = hasLonghair && hasAstrex;
-    
-    if (isTexel) {
-      texture = 'Texel';
-    } else if (hasAstrex) {
-      texture = 'Astrex';
-    }
-
-    // Show hair length (unless it's part of Texel combination)
-    // go/go = Longhair (recessive), Go/Go or Go/go = Shorthair (dominant)
-    if (genotype.Go === 'go/go' && !isTexel) {
-      texture = texture ? `Longhair ${texture}` : 'Longhair';
-    } else if ((genotype.Go === 'Go/Go' || genotype.Go === 'Go/go') && !isTexel && !hasAstrex) {
-      // Only show "Shorthair" if no other dominant coat texture is present
-      if (!genotype.Sa || genotype.Sa === 'Sa/Sa') { // Not satin
-        if (!genotype.Rst || genotype.Rst === 'Rst/Rst') { // Not rosette
-          if (!genotype.Fz || genotype.Fz === 'Fz/Fz') { // Not fuzz
-            if (!genotype.Nu || genotype.Nu === 'nu/nu') { // Not dominant hairless
-              texture = texture ? `Shorthair ${texture}` : 'Shorthair';
-            }
-          }
-        }
-      }
+  
+  // Build texture additively
+  let textureComponents = [];
+  
+  if (hasDominantHairless) {
+    // Dominant Hairless overrides everything
+    texture = 'Dominant Hairless';
+  } else if (isTexel) {
+    // Texel is special case: longhair + astrex combined name
+    textureComponents.push('Texel');
+    // Still add other modifiers
+    if (hasSatin) textureComponents.push('Satin');
+    if (hasRosette) textureComponents.push('Rosette');
+    if (hasFuzz) textureComponents.push('Fuzz');
+  } else {
+    // Build normally - start with hair length
+    if (hasLonghair) {
+      textureComponents.push('Longhair');
+    } else {
+      textureComponents.push('Shorthair');
     }
     
-    if (genotype.Sa === 'sa/sa') {
-      texture = texture ? `${texture} Satin` : 'Satin';
-    }
-    
-    if (genotype.Rst === 'rst/rst') {
-      texture = texture ? `${texture} Rosette` : 'Rosette';
-    }
-    
-    if (genotype.Fz === 'fz/fz') {
-      texture = texture ? `${texture} Fuzz` : 'Fuzz';
-    }
-    
-    if (genotype.Nu === 'Nu/Nu' || genotype.Nu === 'Nu/nu') {
-      texture = 'Dominant Hairless';
-    }
+    // Add other coat modifiers
+    if (hasAstrex) textureComponents.push('Astrex');
+    if (hasSatin) textureComponents.push('Satin');
+    if (hasRosette) textureComponents.push('Rosette');
+    if (hasFuzz) textureComponents.push('Fuzz');
+  }
+  
+  if (textureComponents.length > 0) {
+    texture = textureComponents.join(' ');
+  }
 
   // Combine results
   let result = '';
