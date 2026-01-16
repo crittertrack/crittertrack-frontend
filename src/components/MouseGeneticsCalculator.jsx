@@ -1185,9 +1185,11 @@ const calculatePhenotype = (genotype, originalGenotype = null) => {
     result += (result ? ' ' : '') + 'Umbrous';
   }
   if (markings.length > 0) {
+    console.log('MARKINGS DEBUG: markings=', markings);
     result += (result ? ' ' : '') + markings.join(' ');
   }
   if (texture) {
+    console.log('FINAL RESULT DEBUG: adding texture=', texture, 'to result=', result);
     result += (result ? ' ' : '') + texture;
   }
 
