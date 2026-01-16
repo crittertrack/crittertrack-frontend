@@ -1703,6 +1703,7 @@ const MouseGeneticsCalculator = ({ API_BASE_URL, authToken, myAnimals = [] }) =>
   };
 
   const parent1Result = hasAnySelection(parent1) ? calculatePhenotype(applyDefaults(parent1), parent1) : { phenotype: '', carriers: [], hidden: [] };
+  console.log('PARENT1 STATE DEBUG: before applyDefaults=', parent1, 'after applyDefaults=', hasAnySelection(parent1) ? applyDefaults(parent1) : 'no selection');
   const parent2Result = hasAnySelection(parent2) ? calculatePhenotype(applyDefaults(parent2), parent2) : { phenotype: '', carriers: [], hidden: [] };
 
   // Mapping of phenotype names to their defining loci (can be array for multiple)
