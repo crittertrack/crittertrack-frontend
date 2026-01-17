@@ -1347,7 +1347,8 @@ const MouseGeneticsCalculator = ({ API_BASE_URL, authToken, myAnimals = [] }) =>
           const [allele1, allele2] = alleles.split('/');
           
           // Check for recessive carriers
-          if (locus === 'A' && (alleles === 'A/a' || alleles === 'a/A')) {
+          // Agouti carrier only on Ay or Avy phenotypes (Dominant Red/Brindle carrying agouti)
+          if (locus === 'A' && (alleles === 'Ay/A' || alleles === 'A/Ay' || alleles === 'Avy/A' || alleles === 'A/Avy')) {
             possibleCarriers.add('Agouti');
           }
           if (locus === 'B' && (alleles === 'B/b' || alleles === 'b/B')) {
