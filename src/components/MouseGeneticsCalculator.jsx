@@ -1198,6 +1198,8 @@ const calculatePhenotype = (genotype, originalGenotype = null) => {
 };
 
 const MouseGeneticsCalculator = ({ API_BASE_URL, authToken, myAnimals = [] }) => {
+  // VERSION: 2025-01-17-TEXEL-FIX
+  console.log('MouseGeneticsCalculator loaded - Version: 2025-01-17-TEXEL-FIX');
   // Parse genetic code string to genotype object
   const parseGeneticCode = (codeString) => {
     if (!codeString) return {};
