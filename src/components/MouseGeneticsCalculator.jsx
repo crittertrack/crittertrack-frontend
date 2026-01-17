@@ -1390,6 +1390,7 @@ const MouseGeneticsCalculator = ({ API_BASE_URL, authToken, myAnimals = [] }) =>
   const [animalSearch, setAnimalSearch] = useState('');
 
   const updateParent1 = (locus, value) => {
+    console.log('updateParent1 called:', locus, '=', value);
     setParent1({ ...parent1, [locus]: value });
   };
 
