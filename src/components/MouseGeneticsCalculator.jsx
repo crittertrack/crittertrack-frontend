@@ -1496,6 +1496,7 @@ const MouseGeneticsCalculator = ({ API_BASE_URL, authToken, myAnimals = [] }) =>
 
   // Function to apply defaults to genotype
   const applyDefaults = (genotype) => {
+    console.log('applyDefaults INPUT:', genotype);
     // Base color genes - only apply defaults if NONE are selected
     const baseGenes = ['A', 'B', 'C', 'D', 'E', 'P'];
     const hasAnyBaseGene = baseGenes.some(gene => genotype[gene] && genotype[gene] !== '');
@@ -1552,6 +1553,7 @@ const MouseGeneticsCalculator = ({ API_BASE_URL, authToken, myAnimals = [] }) =>
         filled[locus] = hasValue ? value : defaults[locus];
       }
     }
+    console.log('applyDefaults OUTPUT:', filled);
     return filled;
   };
 
