@@ -1059,24 +1059,8 @@ const calculatePhenotype = (genotype, originalGenotype = null) => {
   // This allows it to properly combine with Pied -> Tricolor
   if (shouldUseSplashed) {
     // Splashed will be added to markings later
-  } else if (genotype.C !== 'c/c') {
-    // Normal C-locus modifications (skip if albino)
-    // Only add C-locus prefix if the color doesn't already have a C-locus special name
-    const hasSpecialCName = color.includes('Himalayan') || color.includes('Siamese') || 
-                           color.includes('Burmese') || color.includes('Colorpoint') || 
-                           color.includes('Sepia') || color.includes('Stone') || 
-                           color.includes('Mock Chocolate') || color.includes('Beige') || 
-                           color.includes('Bone') || color.includes('Chinchilla');
-    
-    if (!hasSpecialCName) {
-      // Add appropriate C-locus prefix for heterozygous combinations with C
-      if ((genotype.C?.includes('cch/') || genotype.C?.includes('/cch')) && !genotype.C.includes('C/cch') && !genotype.C.includes('cch/C')) {
-        color = `Chinchilla ${color}`;
-      } else if ((genotype.C?.includes('ce/') || genotype.C?.includes('/ce')) && !genotype.C.includes('C/ce') && !genotype.C.includes('ce/C')) {
-        color = `Beige ${color}`;
-      }
-    }
   }
+  
   // C-locus carriers
   if (genotype.C && (genotype.C.includes('C/') || genotype.C.includes('/C'))) {
     const alleles = genotype.C.split('/');
