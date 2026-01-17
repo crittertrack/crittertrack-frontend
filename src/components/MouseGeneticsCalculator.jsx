@@ -2293,7 +2293,12 @@ const MouseGeneticsCalculator = ({ API_BASE_URL, authToken, myAnimals = [] }) =>
           {/* Offspring Results */}
           {offspringResults && (
             <div className="mt-6 bg-purple-50 rounded-lg p-6 border-2 border-purple-300" data-tutorial-target="offspring-results">
-              <h2 className="text-xl font-semibold text-purple-800 mb-4">Possible Offspring Outcomes</h2>
+              <div className="flex justify-between items-center mb-4">
+                <h2 className="text-xl font-semibold text-purple-800">Possible Offspring Outcomes</h2>
+                <span className="text-sm font-medium text-purple-700 bg-purple-200 px-3 py-1 rounded-full">
+                  {offspringResults.reduce((total, result) => total + result.genotypes.length, 0)} genotypes
+                </span>
+              </div>
               <div className="space-y-3">
                 {offspringResults.map((result, idx) => {
                   // For offspring display: if phenotype is empty but has carriers, show carrier status
