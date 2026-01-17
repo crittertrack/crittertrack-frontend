@@ -1198,8 +1198,6 @@ const calculatePhenotype = (genotype, originalGenotype = null) => {
 };
 
 const MouseGeneticsCalculator = ({ API_BASE_URL, authToken, myAnimals = [] }) => {
-  // VERSION: 2025-01-17-TEXEL-FIX
-  console.log('MouseGeneticsCalculator loaded - Version: 2025-01-17-TEXEL-FIX');
   // Parse genetic code string to genotype object
   const parseGeneticCode = (codeString) => {
     if (!codeString) return {};
@@ -1390,7 +1388,6 @@ const MouseGeneticsCalculator = ({ API_BASE_URL, authToken, myAnimals = [] }) =>
   const [animalSearch, setAnimalSearch] = useState('');
 
   const updateParent1 = (locus, value) => {
-    console.log('updateParent1 called:', locus, '=', value);
     setParent1({ ...parent1, [locus]: value });
   };
 
@@ -1496,7 +1493,6 @@ const MouseGeneticsCalculator = ({ API_BASE_URL, authToken, myAnimals = [] }) =>
 
   // Function to apply defaults to genotype
   const applyDefaults = (genotype) => {
-    console.log('applyDefaults INPUT:', genotype);
     // Base color genes - only apply defaults if NONE are selected
     const baseGenes = ['A', 'B', 'C', 'D', 'E', 'P'];
     const hasAnyBaseGene = baseGenes.some(gene => genotype[gene] && genotype[gene] !== '');
@@ -1532,28 +1528,27 @@ const MouseGeneticsCalculator = ({ API_BASE_URL, authToken, myAnimals = [] }) =>
     
     const filled = {};
     for (const locus in defaults) {
-      const value = genotype[locus];
-      const hasValue = value !== undefined && value !== '';
+      // Check if user provided a value (not empty string, not undefined)
+      const userValue = genotype[locus];
+      const hasUserValue = userValue && userValue !== '';
       
-      // If this is a base gene and any base gene is selected, only use selected values
+      // If this is a base gene and any base gene is selected, only use non-empty values
       if (baseGenes.includes(locus) && hasAnyBaseGene) {
-        filled[locus] = hasValue ? value : defaults[locus];
+        filled[locus] = hasUserValue ? userValue : defaults[locus];
       }
       // Marking genes - ALWAYS use the actual value if present, otherwise default
-      // (They add individually, not as a group)
       else if (markingGenes.includes(locus)) {
-        filled[locus] = hasValue ? value : defaults[locus];
+        filled[locus] = hasUserValue ? userValue : defaults[locus];
       }
-      // If this is a coat gene and any coat gene is selected, use selected values
+      // If this is a coat gene and any coat gene is selected, use non-empty values
       else if (coatGenes.includes(locus) && hasAnyCoatGene) {
-        filled[locus] = hasValue ? value : defaults[locus];
+        filled[locus] = hasUserValue ? userValue : defaults[locus];
       }
       // Otherwise use normal defaulting
       else {
-        filled[locus] = hasValue ? value : defaults[locus];
+        filled[locus] = hasUserValue ? userValue : defaults[locus];
       }
     }
-    console.log('applyDefaults OUTPUT:', filled);
     return filled;
   };
 
