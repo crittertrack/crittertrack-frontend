@@ -1068,7 +1068,8 @@ const calculatePhenotype = (genotype, originalGenotype = null) => {
     }
     // ch/c and ch/ch cases are already handled in the base color assignment above (lines 508-526)
     // No need to add Himalayan prefix here as it's already set as the base color
-    if (genotype.C === 'ce/ce' || ((genotype.C?.includes('ce/') || genotype.C?.includes('/ce')) && !genotype.C.includes('C/ce') && !genotype.C.includes('ce/C'))) {
+    // Exclude ce/ch and ch/ce since "Colorpoint Beige" already has the correct name
+    if (genotype.C === 'ce/ce' || ((genotype.C?.includes('ce/') || genotype.C?.includes('/ce')) && !genotype.C.includes('C/ce') && !genotype.C.includes('ce/C') && !genotype.C.includes('ce/ch') && !genotype.C.includes('ch/ce'))) {
       color = `Beige ${color}`;
     }
   }
