@@ -1493,6 +1493,14 @@ const MouseGeneticsCalculator = ({ API_BASE_URL, authToken, myAnimals = [] }) =>
 
   // Function to apply defaults to genotype
   const applyDefaults = (genotype) => {
+    console.log('=== applyDefaults INPUT ===', {
+      A: genotype.A,
+      Go: genotype.Go,
+      Re: genotype.Re,
+      Spl: genotype.Spl,
+      S: genotype.S
+    });
+    
     // Base color genes - only apply defaults if NONE are selected
     const baseGenes = ['A', 'B', 'C', 'D', 'E', 'P'];
     const hasAnyBaseGene = baseGenes.some(gene => genotype[gene] && genotype[gene] !== '');
@@ -1503,6 +1511,8 @@ const MouseGeneticsCalculator = ({ API_BASE_URL, authToken, myAnimals = [] }) =>
     // Coat/texture genes - only apply defaults if NONE are selected
     const coatGenes = ['Go', 'Re', 'Sa', 'Rst', 'Fz', 'Nu'];
     const hasAnyCoatGene = coatGenes.some(gene => genotype[gene] && genotype[gene] !== '');
+    
+    console.log('=== hasAny checks ===', { hasAnyBaseGene, hasAnyCoatGene });
     
     const defaults = {
       A: 'A/A',      // Agouti (wild type)
@@ -1550,6 +1560,15 @@ const MouseGeneticsCalculator = ({ API_BASE_URL, authToken, myAnimals = [] }) =>
         filled[locus] = userMadeSelection ? userSelection : defaults[locus];
       }
     }
+    
+    console.log('=== applyDefaults OUTPUT ===', {
+      A: filled.A,
+      Go: filled.Go,
+      Re: filled.Re,
+      Spl: filled.Spl,
+      S: filled.S
+    });
+    
     return filled;
   };
 
