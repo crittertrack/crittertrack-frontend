@@ -1061,15 +1061,20 @@ const calculatePhenotype = (genotype, originalGenotype = null) => {
     // Splashed will be added to markings later
   } else if (genotype.C !== 'c/c') {
     // Normal C-locus modifications (skip if albino)
-    // Exclude cch/ch, cch/ce, cch/c since Burmese, Mock Chocolate, Stone already have correct names
-    if (genotype.C === 'cch/cch' || (genotype.C?.includes('cch/') || genotype.C?.includes('/cch')) && !genotype.C.includes('C/cch') && !genotype.C.includes('cch/C') && !genotype.C.includes('cch/ch') && !genotype.C.includes('ch/cch') && !genotype.C.includes('cch/ce') && !genotype.C.includes('ce/cch') && !genotype.C.includes('cch/c') && !genotype.C.includes('c/cch')) {
-      color = `Chinchilla ${color}`;
-    }
-    // ch/c and ch/ch cases are already handled in the base color assignment above (lines 508-526)
-    // No need to add Himalayan prefix here as it's already set as the base color
-    // Exclude ce/ch and ch/ce since "Colorpoint Beige" already has the correct name
-    if (genotype.C === 'ce/ce' || ((genotype.C?.includes('ce/') || genotype.C?.includes('/ce')) && !genotype.C.includes('C/ce') && !genotype.C.includes('ce/C') && !genotype.C.includes('ce/ch') && !genotype.C.includes('ch/ce'))) {
-      color = `Beige ${color}`;
+    // Only add C-locus prefix if the color doesn't already have a C-locus special name
+    const hasSpecialCName = color.includes('Himalayan') || color.includes('Siamese') || 
+                           color.includes('Burmese') || color.includes('Colorpoint') || 
+                           color.includes('Sepia') || color.includes('Stone') || 
+                           color.includes('Mock Chocolate') || color.includes('Beige') || 
+                           color.includes('Bone') || color.includes('Chinchilla');
+    
+    if (!hasSpecialCName) {
+      // Add appropriate C-locus prefix for heterozygous combinations with C
+      if ((genotype.C?.includes('cch/') || genotype.C?.includes('/cch')) && !genotype.C.includes('C/cch') && !genotype.C.includes('cch/C')) {
+        color = `Chinchilla ${color}`;
+      } else if ((genotype.C?.includes('ce/') || genotype.C?.includes('/ce')) && !genotype.C.includes('C/ce') && !genotype.C.includes('ce/C')) {
+        color = `Beige ${color}`;
+      }
     }
   }
   // C-locus carriers
