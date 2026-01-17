@@ -1528,25 +1528,26 @@ const MouseGeneticsCalculator = ({ API_BASE_URL, authToken, myAnimals = [] }) =>
     
     const filled = {};
     for (const locus in defaults) {
-      // Check if user provided a value (not empty string, not undefined)
-      const userValue = genotype[locus];
-      const hasUserValue = userValue && userValue !== '';
+      // Get the value from user's selection
+      const userSelection = genotype[locus];
+      // User has made a selection if value exists and is not empty string
+      const userMadeSelection = userSelection !== undefined && userSelection !== '';
       
       // If this is a base gene and any base gene is selected, only use non-empty values
       if (baseGenes.includes(locus) && hasAnyBaseGene) {
-        filled[locus] = hasUserValue ? userValue : defaults[locus];
+        filled[locus] = userMadeSelection ? userSelection : defaults[locus];
       }
       // Marking genes - ALWAYS use the actual value if present, otherwise default
       else if (markingGenes.includes(locus)) {
-        filled[locus] = hasUserValue ? userValue : defaults[locus];
+        filled[locus] = userMadeSelection ? userSelection : defaults[locus];
       }
       // If this is a coat gene and any coat gene is selected, use non-empty values
       else if (coatGenes.includes(locus) && hasAnyCoatGene) {
-        filled[locus] = hasUserValue ? userValue : defaults[locus];
+        filled[locus] = userMadeSelection ? userSelection : defaults[locus];
       }
       // Otherwise use normal defaulting
       else {
-        filled[locus] = hasUserValue ? userValue : defaults[locus];
+        filled[locus] = userMadeSelection ? userSelection : defaults[locus];
       }
     }
     return filled;
@@ -1695,8 +1696,8 @@ const MouseGeneticsCalculator = ({ API_BASE_URL, authToken, myAnimals = [] }) =>
     return Object.values(parent).some(value => value !== '');
   };
 
-  const parent1Result = hasAnySelection(parent1) ? calculatePhenotype(parent1, parent1) : { phenotype: '', carriers: [], hidden: [] };
-  const parent2Result = hasAnySelection(parent2) ? calculatePhenotype(parent2, parent2) : { phenotype: '', carriers: [], hidden: [] };
+  const parent1Result = hasAnySelection(parent1) ? calculatePhenotype(applyDefaults(parent1), parent1) : { phenotype: '', carriers: [], hidden: [] };
+  const parent2Result = hasAnySelection(parent2) ? calculatePhenotype(applyDefaults(parent2), parent2) : { phenotype: '', carriers: [], hidden: [] };
 
   // Mapping of phenotype names to their defining loci (can be array for multiple)
   // For genotypes array phenotypes, use genotype index as key: "PhenotypeName:0", "PhenotypeName:1"
