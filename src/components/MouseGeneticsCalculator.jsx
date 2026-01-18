@@ -1145,7 +1145,9 @@ const calculatePhenotype = (genotype, originalGenotype = null) => {
   }
   // Only add Satin as carrier if not already expressed in phenotype
   if ((genotype.Sa === 'Sa/sa' || genotype.Sa === 'sa/Sa')) {
-    // Will check after texture is built
+    // Satin is only expressed when sa/sa (homozygous), not when Sa/sa (heterozygous)
+    // So if Sa/sa, Satin is always a carrier (not expressed in phenotype)
+    carriers.push('Satin');
     var shouldAddSatinCarrier = true;
   }
   if (genotype.Rst === 'Rst/rst' || genotype.Rst === 'rst/Rst') {
