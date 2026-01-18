@@ -217,11 +217,11 @@ const GeneticCodeBuilder = ({ species, gender, value, onChange, onOpenCommunityF
                     })()}
                   </div>
                   
-                  {/* Basic Genes */}
+                  {/* All Genes (Color, Markings, Coat, etc.) */}
                   <div>
-                    <h3 className="text-lg font-semibold text-gray-800 mb-3">Basic Color Genes</h3>
+                    <h3 className="text-lg font-semibold text-gray-800 mb-3">All Genes</h3>
                     <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
-                      {['A', 'B', 'C', 'D', 'E', 'P'].map(locus => (
+                      {['A', 'B', 'C', 'D', 'E', 'P', 'S', 'W', 'Spl', 'Rn', 'Si', 'Mobr', 'U', 'Go', 'Re', 'Sa', 'Rst', 'Fz', 'Nu'].map(locus => (
                         <div key={locus} className="bg-white p-3 rounded border border-gray-200">
                           <label className="block text-sm font-semibold text-gray-700 mb-2">
                             {GENE_LOCI[locus].name} ({locus})
@@ -229,7 +229,7 @@ const GeneticCodeBuilder = ({ species, gender, value, onChange, onOpenCommunityF
                           <select
                             value={genotype[locus] || ''}
                             onChange={(e) => handleGeneChange(locus, e.target.value)}
-                            className="w-full p-2 border border-gray-300 rounded focus:ring-blue-500 focus:border-blue-500"
+                            className="w-full p-2 border border-gray-300 rounded focus:ring-accent focus:border-accent"
                           >
                             <option value="">-</option>
                             {getValidCombinations(locus).map(combo => (
@@ -239,40 +239,6 @@ const GeneticCodeBuilder = ({ species, gender, value, onChange, onOpenCommunityF
                         </div>
                       ))}
                     </div>
-                  </div>
-                  
-                  {/* Advanced Genes */}
-                  <div>
-                    <button
-                      type="button"
-                      onClick={() => setShowAdvanced(!showAdvanced)}
-                      className="flex items-center gap-2 text-lg font-semibold text-gray-800 hover:text-gray-600 mb-3"
-                    >
-                      {showAdvanced ? <ChevronUp size={20} /> : <ChevronDown size={20} />}
-                      Advanced Genes (Markings, Patterns & Coat)
-                    </button>
-                    
-                    {showAdvanced && (
-                      <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
-                        {['S', 'W', 'Spl', 'Rn', 'Si', 'Mobr', 'U', 'Go', 'Re', 'Sa', 'Rst', 'Fz', 'Nu'].map(locus => (
-                          <div key={locus} className="bg-white p-3 rounded border border-gray-200">
-                            <label className="block text-sm font-semibold text-gray-700 mb-2">
-                              {GENE_LOCI[locus].name} ({locus})
-                            </label>
-                            <select
-                              value={genotype[locus] || ''}
-                              onChange={(e) => handleGeneChange(locus, e.target.value)}
-                              className="w-full p-2 border border-gray-300 rounded focus:ring-accent focus:border-accent"
-                            >
-                              <option value="">-</option>
-                              {getValidCombinations(locus).map(combo => (
-                                <option key={combo} value={combo}>{combo}</option>
-                              ))}
-                            </select>
-                          </div>
-                        ))}
-                      </div>
-                    )}
                   </div>
                   
                   <div className="bg-blue-50 p-4 rounded text-sm text-blue-800">
