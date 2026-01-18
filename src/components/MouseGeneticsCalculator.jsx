@@ -1143,8 +1143,10 @@ const calculatePhenotype = (genotype, originalGenotype = null) => {
   if (genotype.Go === 'Go/go' || genotype.Go === 'go/Go') {
     carriers.push('Longhair');
   }
-  if (genotype.Sa === 'Sa/sa' || genotype.Sa === 'sa/Sa') {
-    carriers.push('Satin');
+  // Only add Satin as carrier if not already expressed in phenotype
+  if ((genotype.Sa === 'Sa/sa' || genotype.Sa === 'sa/Sa')) {
+    // Will check after texture is built
+    var shouldAddSatinCarrier = true;
   }
   if (genotype.Rst === 'Rst/rst' || genotype.Rst === 'rst/Rst') {
     carriers.push('Rosette');
@@ -1196,6 +1198,12 @@ const calculatePhenotype = (genotype, originalGenotype = null) => {
   
   if (textureComponents.length > 0) {
     texture = textureComponents.join(' ');
+  }
+  // After texture is built, only add Satin as carrier if not expressed
+  if (typeof shouldAddSatinCarrier !== 'undefined' && shouldAddSatinCarrier) {
+    if (!texture.includes('Satin')) {
+      carriers.push('Satin');
+    }
   }
 
   // Combine results
