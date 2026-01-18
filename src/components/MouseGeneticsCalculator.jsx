@@ -2231,6 +2231,13 @@ const MouseGeneticsCalculator = ({ API_BASE_URL, authToken, myAnimals = [] }) =>
               </button>
             )}
           </div>
+          {/* DEBUG: Log Sa locus and carriers for dam */}
+          {process.env.NODE_ENV !== 'production' && (
+            <div className="text-xs text-red-600 mb-2">
+              <div>DEBUG: Dam Sa locus: {parent2.Sa}</div>
+              <div>DEBUG: Dam carriers: {parent2Result.carriers && parent2Result.carriers.join(', ')}</div>
+            </div>
+          )}
           <div className="grid grid-cols-2 gap-2 sm:gap-3">
             {Object.entries(GENE_LOCI).map(([locus, data]) => (
               <div key={locus}>
