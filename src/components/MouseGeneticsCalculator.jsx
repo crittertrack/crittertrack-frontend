@@ -1512,6 +1512,11 @@ const MouseGeneticsCalculator = ({ API_BASE_URL, authToken, myAnimals = [] }) =>
     }
 
     const parsedGenotype = parseGeneticCode(animal.geneticCode);
+    // DEBUG: Log parsed Sa locus when selecting animal
+    if (process.env.NODE_ENV !== 'production') {
+      console.log('DEBUG: Animal geneticCode:', animal.geneticCode);
+      console.log('DEBUG: parsedGenotype.Sa:', parsedGenotype.Sa);
+    }
     
     if (Object.keys(parsedGenotype).length === 0) {
       alert('Could not parse genetic code for this animal.');
@@ -1520,8 +1525,18 @@ const MouseGeneticsCalculator = ({ API_BASE_URL, authToken, myAnimals = [] }) =>
 
     if (selectingForParent === 'parent1') {
       setParent1({ ...defaultGenotype, ...parsedGenotype });
+      if (process.env.NODE_ENV !== 'production') {
+        setTimeout(() => {
+          console.log('DEBUG: parent1.Sa after select:', parsedGenotype.Sa);
+        }, 100);
+      }
     } else if (selectingForParent === 'parent2') {
       setParent2({ ...defaultGenotype, ...parsedGenotype });
+      if (process.env.NODE_ENV !== 'production') {
+        setTimeout(() => {
+          console.log('DEBUG: parent2.Sa after select:', parsedGenotype.Sa);
+        }, 100);
+      }
     }
 
     closeAnimalSelector();
