@@ -1512,11 +1512,7 @@ const MouseGeneticsCalculator = ({ API_BASE_URL, authToken, myAnimals = [] }) =>
     }
 
     const parsedGenotype = parseGeneticCode(animal.geneticCode);
-    // DEBUG: Log parsed Sa locus when selecting animal
-    if (process.env.NODE_ENV !== 'production') {
-      console.log('DEBUG: Animal geneticCode:', animal.geneticCode);
-      console.log('DEBUG: parsedGenotype.Sa:', parsedGenotype.Sa);
-    }
+    window._lastParsedGenotype = parsedGenotype;
     
     if (Object.keys(parsedGenotype).length === 0) {
       alert('Could not parse genetic code for this animal.');
@@ -2246,13 +2242,14 @@ const MouseGeneticsCalculator = ({ API_BASE_URL, authToken, myAnimals = [] }) =>
               </button>
             )}
           </div>
-          {/* DEBUG: Log Sa locus and carriers for dam */}
-          {process.env.NODE_ENV !== 'production' && (
-            <div className="text-xs text-red-600 mb-2">
-              <div>DEBUG: Dam Sa locus: {parent2.Sa}</div>
-              <div>DEBUG: Dam carriers: {parent2Result.carriers && parent2Result.carriers.join(', ')}</div>
-            </div>
-          )}
+          {/* DEBUG: Always show Sa locus and carriers for dam, and parsedGenotype if available */}
+          <div className="text-xs text-red-600 mb-2">
+            <div>DEBUG: Dam Sa locus: {parent2.Sa}</div>
+            <div>DEBUG: Dam carriers: {parent2Result.carriers && parent2Result.carriers.join(', ')}</div>
+            {window._lastParsedGenotype && (
+              <div>DEBUG: Last parsedGenotype.Sa: {window._lastParsedGenotype.Sa}</div>
+            )}
+          </div>
           <div className="grid grid-cols-2 gap-2 sm:gap-3">
             {Object.entries(GENE_LOCI).map(([locus, data]) => (
               <div key={locus}>
