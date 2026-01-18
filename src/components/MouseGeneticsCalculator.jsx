@@ -453,6 +453,9 @@ const calculatePhenotype = (genotype, originalGenotype = null) => {
   else if (genotype.A === 'Ay/A' || genotype.A === 'A/Ay') {
     if (!carriers.includes('Agouti')) carriers.push('Agouti');
   }
+  else if (genotype.A === 'Ay/Avy' || genotype.A === 'Avy/Ay') {
+    if (!carriers.includes('Brindle')) carriers.push('Brindle');
+  }
   
   // Track what Avy is paired with
   if (genotype.A === 'Avy/ae' || genotype.A === 'ae/Avy') {
