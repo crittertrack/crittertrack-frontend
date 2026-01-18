@@ -1201,12 +1201,7 @@ const calculatePhenotype = (genotype, originalGenotype = null) => {
   if (textureComponents.length > 0) {
     texture = textureComponents.join(' ');
   }
-  // After texture is built, only add Satin as carrier if not expressed
-  if (typeof shouldAddSatinCarrier !== 'undefined' && shouldAddSatinCarrier) {
-    if (!texture.includes('Satin')) {
-      carriers.push('Satin');
-    }
-  }
+  // Note: Satin carrier is now added early in the carriers section, so we don't need to add it again here
 
   // Combine results
   let result = '';
