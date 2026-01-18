@@ -5366,6 +5366,7 @@ const LitterManagement = ({ authToken, API_BASE_URL, userProfile, showModalMessa
     const [modalTarget, setModalTarget] = useState(null);
     const [searchQuery, setSearchQuery] = useState('');
     const [speciesFilter, setSpeciesFilter] = useState('');
+    const [yearFilter, setYearFilter] = useState('');
     // COI calculation state (feature in development - UI display pending)
     // eslint-disable-next-line no-unused-vars
     const [predictedCOI, setPredictedCOI] = useState(null);
@@ -6220,6 +6221,19 @@ const LitterManagement = ({ authToken, API_BASE_URL, userProfile, showModalMessa
     
     const maleAnimals = myAnimals.filter(a => a.gender === 'Male');
     const femaleAnimals = myAnimals.filter(a => a.gender === 'Female');
+    const availableYears = useMemo(() => {
+        const years = litters
+            .map(litter => litter.birthDate || litter.pairingDate)
+            .filter(Boolean)
+            .map(dateStr => {
+                const parsedDate = new Date(dateStr);
+                return Number.isNaN(parsedDate.getTime()) ? null : parsedDate.getFullYear();
+            })
+            .filter(Boolean);
+        const uniqueYears = [...new Set(years)];
+        uniqueYears.sort((a, b) => b - a);
+        return uniqueYears;
+    }, [litters]);
     
     // Filtered animals are handled directly in the render sections below
     
@@ -6237,6 +6251,15 @@ const LitterManagement = ({ authToken, API_BASE_URL, userProfile, showModalMessa
         // Species filter
         if (speciesFilter) {
             if (sire?.species !== speciesFilter) return false;
+        }
+
+        // Year filter (birthDate fallback to pairingDate)
+        if (yearFilter) {
+            const referenceDate = litter.birthDate || litter.pairingDate;
+            if (!referenceDate) return false;
+            const parsedDate = new Date(referenceDate);
+            const litterYear = Number.isNaN(parsedDate.getTime()) ? null : parsedDate.getFullYear();
+            if (!litterYear || litterYear.toString() !== yearFilter) return false;
         }
         
         // Search filter
@@ -6598,21 +6621,40 @@ const LitterManagement = ({ authToken, API_BASE_URL, userProfile, showModalMessa
                         </div>
                         
                         {/* Species filter */}
-                        <div className="flex gap-2 items-center pt-2 border-t border-gray-200">
-                            <label htmlFor="litter-species-filter" className='text-xs sm:text-sm font-medium text-gray-700 whitespace-nowrap'>Species:</label>
-                            <select
-                                id="litter-species-filter"
-                                value={speciesFilter}
-                                onChange={(e) => setSpeciesFilter(e.target.value)}
-                                className="px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent text-sm"
-                            >
-                                <option value="">All Species</option>
-                                {DEFAULT_SPECIES_OPTIONS.map(species => (
-                                    <option key={species} value={species}>
-                                        {getSpeciesDisplayName(species)}
-                                    </option>
-                                ))}
-                            </select>
+                        <div className="flex flex-wrap gap-3 items-center pt-2 border-t border-gray-200">
+                            <div className="flex items-center gap-2">
+                                <label htmlFor="litter-species-filter" className='text-xs sm:text-sm font-medium text-gray-700 whitespace-nowrap'>Species:</label>
+                                <select
+                                    id="litter-species-filter"
+                                    value={speciesFilter}
+                                    onChange={(e) => setSpeciesFilter(e.target.value)}
+                                    className="px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent text-sm"
+                                >
+                                    <option value="">All Species</option>
+                                    {DEFAULT_SPECIES_OPTIONS.map(species => (
+                                        <option key={species} value={species}>
+                                            {getSpeciesDisplayName(species)}
+                                        </option>
+                                    ))}
+                                </select>
+                            </div>
+                            <div className="flex items-center gap-2">
+                                <label htmlFor="litter-year-filter" className='text-xs sm:text-sm font-medium text-gray-700 whitespace-nowrap'>Year:</label>
+                                <select
+                                    id="litter-year-filter"
+                                    value={yearFilter}
+                                    onChange={(e) => setYearFilter(e.target.value)}
+                                    className="px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent text-sm"
+                                    disabled={availableYears.length === 0}
+                                >
+                                    <option value="">All Years</option>
+                                    {availableYears.map(year => (
+                                        <option key={year} value={year.toString()}>
+                                            {year}
+                                        </option>
+                                    ))}
+                                </select>
+                            </div>
                         </div>
                     </div>
                 )}
