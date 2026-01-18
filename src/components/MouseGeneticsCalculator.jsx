@@ -676,18 +676,16 @@ const calculatePhenotype = (genotype, originalGenotype = null) => {
       
       if (isCCombo('ch/c', 'c/ch')) {
         const underlyingColor = applyDilution('Himalayan');
-        const pointSuffix = underlyingColor.includes('point') ? '' : 'point';
-        const noteText = isTanVariant 
-          ? `Underlying genotype: ${underlyingColor.replace('point ', pointSuffix)} Fox`
-          : `Underlying genotype: ${underlyingColor.replace('point ', pointSuffix)}`;
+        const noteText = isTanVariant
+          ? `Underlying genotype: ${underlyingColor} Fox`
+          : `Underlying genotype: ${underlyingColor}`;
         return { phenotype: addMarkingsAndTexture('Pink Eye White'), carriers, hidden, notes: [noteText] };
       }
       if (isCCombo('ch/ch')) {
         const underlyingColor = applyDilution('Siamese');
-        const pointSuffix = underlyingColor.includes('point') ? '' : 'point';
         const noteText = isTanVariant
-          ? `Underlying genotype: ${underlyingColor.replace('point ', pointSuffix)} Fox`
-          : `Underlying genotype: ${underlyingColor.replace('point ', pointSuffix)}`;
+          ? `Underlying genotype: ${underlyingColor} Fox`
+          : `Underlying genotype: ${underlyingColor}`;
         return { phenotype: addMarkingsAndTexture('Pink Eye White'), carriers, hidden, notes: [noteText] };
       }
       if (isCCombo('ce/c', 'c/ce')) {
@@ -2215,7 +2213,7 @@ const MouseGeneticsCalculator = ({ API_BASE_URL, authToken, myAnimals = [] }) =>
               {parent1Result.phenotype}
             </p>
             {parent1Result.notes && parent1Result.notes.length > 0 && (
-              <p className="text-xs sm:text-sm text-orange-600 italic mb-1 sm:mb-2">
+              <p className="text-xs sm:text-sm text-blue-700 italic mb-1 sm:mb-2">
                 Note: {parent1Result.notes.join('; ')}
               </p>
             )}
@@ -2289,7 +2287,7 @@ const MouseGeneticsCalculator = ({ API_BASE_URL, authToken, myAnimals = [] }) =>
               {parent2Result.phenotype}
             </p>
             {parent2Result.notes && parent2Result.notes.length > 0 && (
-              <p className="text-xs sm:text-sm text-orange-600 italic mb-1 sm:mb-2">
+              <p className="text-xs sm:text-sm text-blue-700 italic mb-1 sm:mb-2">
                 Note: {parent2Result.notes.join('; ')}
               </p>
             )}
@@ -2368,7 +2366,7 @@ const MouseGeneticsCalculator = ({ API_BASE_URL, authToken, myAnimals = [] }) =>
                           </span>
                         </div>
                         {result.notes && result.notes.length > 0 && (
-                          <p className="text-sm text-orange-600 italic mt-1">
+                          <p className="text-sm text-blue-700 italic mt-1">
                             Note: {result.notes.join('; ')}
                           </p>
                         )}
