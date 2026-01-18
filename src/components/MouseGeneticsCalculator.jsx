@@ -677,22 +677,22 @@ const calculatePhenotype = (genotype, originalGenotype = null) => {
       if (isCCombo('ch/c', 'c/ch')) {
         const underlyingColor = applyDilution('Himalayan');
         const noteText = isTanVariant
-          ? `Underlying genotype: ${underlyingColor} Fox`
-          : `Underlying genotype: ${underlyingColor}`;
+          ? `Underlying genotype: Dominant Red ${underlyingColor} Fox`
+          : `Underlying genotype: Dominant Red ${underlyingColor}`;
         return { phenotype: addMarkingsAndTexture('Pink Eye White'), carriers, hidden, notes: [noteText] };
       }
       if (isCCombo('ch/ch')) {
         const underlyingColor = applyDilution('Siamese');
         const noteText = isTanVariant
-          ? `Underlying genotype: ${underlyingColor} Fox`
-          : `Underlying genotype: ${underlyingColor}`;
+          ? `Underlying genotype: Dominant Red ${underlyingColor} Fox`
+          : `Underlying genotype: Dominant Red ${underlyingColor}`;
         return { phenotype: addMarkingsAndTexture('Pink Eye White'), carriers, hidden, notes: [noteText] };
       }
       if (isCCombo('ce/c', 'c/ce')) {
         const underlyingColor = applyDilution('Bone');
         const noteText = isTanVariant
-          ? `Underlying genotype: ${underlyingColor} Fox`
-          : `Underlying genotype: ${underlyingColor}`;
+          ? `Underlying genotype: Dominant Red ${underlyingColor} Fox`
+          : `Underlying genotype: Dominant Red ${underlyingColor}`;
         return { phenotype: addMarkingsAndTexture('Black Eye White'), carriers, hidden, notes: [noteText] };
       }
       if (isCCombo('ce/ch', 'ch/ce')) {
@@ -701,8 +701,8 @@ const calculatePhenotype = (genotype, originalGenotype = null) => {
       if (isCCombo('ce/ce')) {
         const underlyingColor = applyDilution('Beige');
         const noteText = isTanVariant
-          ? `Underlying genotype: ${underlyingColor} Fox`
-          : `Underlying genotype: ${underlyingColor}`;
+          ? `Underlying genotype: Dominant Red ${underlyingColor} Fox`
+          : `Underlying genotype: Dominant Red ${underlyingColor}`;
         return { phenotype: addMarkingsAndTexture('Black Eye White'), carriers, hidden, notes: [noteText] };
       }
       if (isCCombo('cch/c', 'c/cch')) {
