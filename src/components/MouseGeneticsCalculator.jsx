@@ -431,6 +431,77 @@ const calculatePhenotype = (genotype, originalGenotype = null) => {
   // Check if this is A/at (agouti tan)
   const isAgoutiTan = genotype.A === 'A/at' || genotype.A === 'at/A';
 
+  // Track ALL carriers EARLY (before any early returns for C-locus combinations)
+  // This ensures carriers show regardless of C-locus phenotype combinations
+  
+  // A-locus carriers
+  if (genotype.A === 'A/a' || genotype.A === 'a/A') carriers.push('Black');
+  else if (genotype.A === 'A/ae' || genotype.A === 'ae/A') carriers.push('Extreme Black');
+  else if (genotype.A === 'A/at' || genotype.A === 'at/A') {
+    // A/at is agouti tan (tan shows visually) - no carrier, it's expressed
+  }
+  else if (genotype.A === 'a/ae' || genotype.A === 'ae/a') carriers.push('Extreme Black');
+  else if (genotype.A === 'at/ae' || genotype.A === 'ae/at') carriers.push('Extreme Black');
+  
+  // Track what Ay is paired with
+  if (genotype.A === 'Ay/ae' || genotype.A === 'ae/Ay') {
+    if (!carriers.includes('Extreme Black')) carriers.push('Extreme Black');
+  }
+  else if (genotype.A === 'Ay/a' || genotype.A === 'a/Ay') {
+    if (!carriers.includes('Black')) carriers.push('Black');
+  }
+  else if (genotype.A === 'Ay/A' || genotype.A === 'A/Ay') {
+    if (!carriers.includes('Agouti')) carriers.push('Agouti');
+  }
+  
+  // Track what Avy is paired with
+  if (genotype.A === 'Avy/ae' || genotype.A === 'ae/Avy') {
+    if (!carriers.includes('Extreme Black')) carriers.push('Extreme Black');
+  }
+  else if (genotype.A === 'Avy/a' || genotype.A === 'a/Avy') {
+    if (!carriers.includes('Black')) carriers.push('Black');
+  }
+  else if (genotype.A === 'Avy/A' || genotype.A === 'A/Avy') {
+    if (!carriers.includes('Agouti')) carriers.push('Agouti');
+  }
+  
+  // B-locus carriers
+  if (genotype.B === 'B/b' || genotype.B === 'b/B') carriers.push('Chocolate');
+  
+  // C-locus carriers
+  if (genotype.C && (genotype.C.includes('C/') || genotype.C.includes('/C'))) {
+    const alleles = genotype.C.split('/');
+    const recessive = alleles[0] === 'C' ? alleles[1] : (alleles[1] === 'C' ? alleles[0] : null);
+    if (recessive === 'c') carriers.push('Albino');
+    else if (recessive === 'ch') carriers.push('Himalayan');
+    else if (recessive === 'ce') carriers.push('Beige');
+    else if (recessive === 'cch') carriers.push('Chinchilla');
+  }
+  
+  // D-locus carriers
+  if (genotype.D === 'D/d' || genotype.D === 'd/D') carriers.push('Blue');
+  
+  // E-locus carriers
+  if (genotype.E === 'E/e' || genotype.E === 'e/E') carriers.push('Recessive Red');
+  
+  // S-locus carriers (Pied)
+  if (genotype.S === 'S/s' || genotype.S === 's/S') carriers.push('Pied');
+  
+  // P-locus carriers (Pink-eye)
+  if (genotype.P === 'P/p' || genotype.P === 'p/P') carriers.push('Pink-eye');
+  
+  // Rn-locus carriers (Roan)
+  if (genotype.Rn === 'Rn/rn' || genotype.Rn === 'rn/Rn') carriers.push('Roan');
+  
+  // Si-locus carriers (Silvered)
+  if (genotype.Si === 'Si/si' || genotype.Si === 'si/Si') carriers.push('Silvered');
+  
+  // Coat gene carriers
+  if (genotype.Go === 'Go/go' || genotype.Go === 'go/Go') carriers.push('Longhair');
+  if (genotype.Sa === 'Sa/sa' || genotype.Sa === 'sa/Sa') carriers.push('Satin');
+  if (genotype.Rst === 'Rst/rst' || genotype.Rst === 'rst/Rst') carriers.push('Rosette');
+  if (genotype.Fz === 'Fz/fz' || genotype.Fz === 'fz/Fz') carriers.push('Fuzz');
+
   // Special handling for agouti tan (A/at) with C-locus combinations
   if (isAgoutiTan && genotype.C !== 'C/C') {
     if (genotype.C === 'c/c') {
@@ -964,18 +1035,8 @@ const calculatePhenotype = (genotype, originalGenotype = null) => {
     }
   }
 
-  // Track carriers for A-locus
-  if (genotype.A === 'A/a' || genotype.A === 'a/A') carriers.push('Black');
-  else if (genotype.A === 'A/ae' || genotype.A === 'ae/A') carriers.push('Extreme Black');
-  else if (genotype.A === 'A/at' || genotype.A === 'at/A') {
-    // A/at is agouti tan (tan shows visually)
-  }
-  else if (genotype.A === 'a/ae' || genotype.A === 'ae/a') carriers.push('Extreme Black');
-  else if (genotype.A === 'at/ae' || genotype.A === 'ae/at') carriers.push('Extreme Black');
-
-  // Brown/Black base
+  // Brown/Black base (for color determination, not carriers - those were added early)
   const isBrown = genotype.B === 'b/b';
-  if (genotype.B === 'B/b' || genotype.B === 'b/B') carriers.push('Chocolate');
   
   if (isAgoutiPattern) {
     // Only set color if not already set by C-locus special colors
@@ -1028,8 +1089,6 @@ const calculatePhenotype = (genotype, originalGenotype = null) => {
     else if (color === 'Cinnamon Tan') color = 'Cinnamon Argente Tan';
     else if (color === 'Black Tan') color = 'Blue Tan';
     else if (color === 'Chocolate Tan') color = 'Lilac Tan';
-  } else if (genotype.D === 'D/d' || genotype.D === 'd/D') {
-    carriers.push('Blue');
   }
 
   // Lavender (b/b + d/d + p/p combination)
@@ -1044,8 +1103,6 @@ const calculatePhenotype = (genotype, originalGenotype = null) => {
     if (!color.includes('Fawn') && !color.includes('Red') && !color.includes('Dove') && !color.includes('Argente') && !color.includes('Champagne')) {
       color = `Pink-Eyed ${color}`;
     }
-  } else if (genotype.P === 'P/p' || genotype.P === 'p/P') {
-    carriers.push('Pink-eye');
   }
 
   // C-locus modifications
@@ -1061,25 +1118,10 @@ const calculatePhenotype = (genotype, originalGenotype = null) => {
     // Splashed will be added to markings later
   }
   
-  // C-locus carriers
-  if (genotype.C && (genotype.C.includes('C/') || genotype.C.includes('/C'))) {
-    const alleles = genotype.C.split('/');
-    const recessive = alleles[0] === 'C' ? alleles[1] : (alleles[1] === 'C' ? alleles[0] : null);
-    if (recessive === 'c') carriers.push('Albino');
-    else if (recessive === 'ch') carriers.push('Himalayan');
-    else if (recessive === 'ce') carriers.push('Beige');
-    else if (recessive === 'cch') carriers.push('Chinchilla');
-  }
-
-  // E-locus carriers
-  if (genotype.E === 'E/e' || genotype.E === 'e/E') carriers.push('Recessive Red');
-
   // Markings
   // Don't add Pied if it's already in the color name (for Ay/Avy)
   if (genotype.S === 's/s' && !color.includes('Pied')) {
     markings.push('Pied');
-  } else if (genotype.S === 'S/s' || genotype.S === 's/S') {
-    carriers.push('Pied');
   }
 
   // W-locus markings with all combinations
@@ -1121,40 +1163,16 @@ const calculatePhenotype = (genotype, originalGenotype = null) => {
   // Roan (Rn) - recessive trait
   if (genotype.Rn === 'rn/rn') {
     markings.push('Roan');
-  } else if (genotype.Rn === 'Rn/rn' || genotype.Rn === 'rn/Rn') {
-    carriers.push('Roan');
   }
 
   // Silvered (Si) - recessive trait
   if (genotype.Si === 'si/si') {
     markings.push('Silvered');
-  } else if (genotype.Si === 'Si/si' || genotype.Si === 'si/Si') {
-    carriers.push('Silvered');
   }
 
   // Mobr - sex-linked to X chromosome, dominant (always shows if present)
   if (genotype.Mobr && genotype.Mobr.includes('Mobr/')) {
     markings.push('xbrindle');
-  }
-
-  // ALWAYS check for coat gene carriers, even if not explicitly selected
-  // Carriers show what's hidden, regardless of whether we're displaying the trait
-  // Note: Astrex (Re) and Nude (Nu) are dominant - no carrier state
-  if (genotype.Go === 'Go/go' || genotype.Go === 'go/Go') {
-    carriers.push('Longhair');
-  }
-  // Only add Satin as carrier if not already expressed in phenotype
-  if ((genotype.Sa === 'Sa/sa' || genotype.Sa === 'sa/Sa')) {
-    // Satin is only expressed when sa/sa (homozygous), not when Sa/sa (heterozygous)
-    // So if Sa/sa, Satin is always a carrier (not expressed in phenotype)
-    carriers.push('Satin');
-    var shouldAddSatinCarrier = true;
-  }
-  if (genotype.Rst === 'Rst/rst' || genotype.Rst === 'rst/Rst') {
-    carriers.push('Rosette');
-  }
-  if (genotype.Fz === 'Fz/fz' || genotype.Fz === 'fz/Fz') {
-    carriers.push('Fuzz');
   }
 
   // Texture - Build coat traits additively
