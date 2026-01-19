@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { 
     PawPrint, RefreshCw, Search, Plus, Trash2, X, 
-    AlertCircle, Loader2, Tag, Edit2, Save, Database
+    AlertCircle, Loader2, Tag, Edit2, Save, Database, User
 } from 'lucide-react';
 import './SpeciesManagementTab.css';
 
@@ -315,6 +315,14 @@ const SpeciesManagementTab = ({ API_BASE_URL, authToken }) => {
                                     <div className="species-meta">
                                         <span className="species-category">{s.category}</span>
                                         <span className="species-count">{s.animalCount} animals</span>
+                                        {s.createdBy && (
+                                            <span className="species-creator" title={`Created by ${s.createdBy.showBreederName && s.createdBy.breederName ? s.createdBy.breederName : s.createdBy.personalName}`}>
+                                                <User size={14} />
+                                                {s.createdBy.showBreederName && s.createdBy.breederName 
+                                                    ? s.createdBy.breederName 
+                                                    : s.createdBy.personalName}
+                                            </span>
+                                        )}
                                     </div>
                                 </div>
                                 <div className="species-card-actions">

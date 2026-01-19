@@ -278,12 +278,28 @@
     gap: 16px;
     font-size: 0.875rem;
     color: #6b7280;
+    flex-wrap: wrap;
+    align-items: center;
 }
 
 .species-category {
     background: #f3f4f6;
     padding: 2px 8px;
     border-radius: 4px;
+}
+
+.species-count {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+}
+
+.species-creator {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    color: #059669;
+    font-weight: 500;
 }
 
 .species-card-actions {
