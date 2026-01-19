@@ -83,6 +83,15 @@
     background: #059669;
 }
 
+.genetics-btn-accent {
+    background: #8b5cf6;
+    color: #fff;
+}
+
+.genetics-btn-accent:hover:not(:disabled) {
+    background: #7c3aed;
+}
+
 .genetics-btn-small {
     display: inline-flex;
     align-items: center;

@@ -5,6 +5,7 @@ import {
     Eye, EyeOff, Copy, Upload, Download, Play, Pause,
     GripVertical, AlertTriangle
 } from 'lucide-react';
+import { GENE_LOCI } from '../MouseGeneticsCalculator';
 import './GeneticsBuilderTab.css';
 
 const DOMINANCE_TYPES = [
@@ -213,6 +214,82 @@ const GeneticsBuilderTab = ({ API_BASE_URL, authToken }) => {
             }
         } catch (err) {
             alert('Error publishing: ' + err.message);
+        } finally {
+            setSaving(false);
+        }
+    };
+
+    // Import from Fancy Mouse Calculator
+    const importFromCalculator = async () => {
+        if (selectedSpecies !== 'Fancy Mouse') {
+            alert('This feature is only available for Fancy Mouse species');
+            return;
+        }
+        
+        if (!window.confirm('Import all genes and alleles from the Fancy Mouse Genetics Calculator? This will replace current data.')) {
+            return;
+        }
+        
+        setSaving(true);
+        try {
+            // Convert GENE_LOCI to database format
+            const colorGenes = [];
+            const markingGenes = [];
+            
+            // Define which genes are marking genes vs color genes
+            const markingGeneSymbols = ['S', 'W', 'Spl', 'Rn', 'Si', 'Mobr'];
+            const coatGeneSymbols = ['Go', 'Re', 'Sa', 'Rst', 'Fz', 'Nu', 'U'];
+            
+            let geneOrder = 0;
+            Object.entries(GENE_LOCI).forEach(([symbol, data]) => {
+                const alleles = data.combinations.map((notation, index) => ({
+                    notation,
+                    phenotype: null, // Could be enhanced later
+                    isLethal: notation.includes('lethal'),
+                    dominance: 'recessive', // Default
+                    order: index
+                }));
+                
+                const gene = {
+                    symbol,
+                    name: data.name,
+                    description: null,
+                    order: geneOrder++,
+                    alleles
+                };
+                
+                if (markingGeneSymbols.includes(symbol)) {
+                    markingGenes.push({
+                        symbol: gene.symbol,
+                        name: gene.name,
+                        alleles: gene.alleles.map(a => ({
+                            notation: a.notation,
+                            phenotype: a.phenotype,
+                            order: a.order
+                        }))
+                    });
+                } else if (!coatGeneSymbols.includes(symbol)) {
+                    // Color/pattern genes (A, B, C, D, E, P)
+                    colorGenes.push(gene);
+                } else {
+                    // Coat genes go into color genes for now
+                    colorGenes.push(gene);
+                }
+            });
+            
+            // Update current data
+            const updatedData = {
+                ...currentData,
+                genes: colorGenes,
+                markingGenes: markingGenes,
+                adminNotes: (currentData.adminNotes || '') + '\n\nImported from MouseGeneticsCalculator on ' + new Date().toISOString()
+            };
+            
+            setCurrentData(updatedData);
+            setHasChanges(true);
+            alert(`Successfully imported ${colorGenes.length} color genes and ${markingGenes.length} marking genes!`);
+        } catch (err) {
+            alert('Error importing: ' + err.message);
         } finally {
             setSaving(false);
         }
@@ -472,6 +549,17 @@ const GeneticsBuilderTab = ({ API_BASE_URL, authToken }) => {
                                         <Plus size={16} />
                                         Add Gene
                                     </button>
+                                    {selectedSpecies === 'Fancy Mouse' && (
+                                        <button 
+                                            className="genetics-btn genetics-btn-accent"
+                                            onClick={importFromCalculator}
+                                            disabled={saving || currentData.isPublished}
+                                            title="Import all genes from the Fancy Mouse Genetics Calculator"
+                                        >
+                                            <Download size={16} />
+                                            Import from Calculator
+                                        </button>
+                                    )}
                                     <button 
                                         className="genetics-btn genetics-btn-primary"
                                         onClick={saveGeneticsData}
