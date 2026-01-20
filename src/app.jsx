@@ -17574,7 +17574,7 @@ const App = () => {
                             onClick={() => navigate('/genetics-calculator')}
                             className="px-3 py-2 bg-primary hover:bg-primary-dark text-black font-semibold rounded-lg transition flex items-center"
                         >
-                            <Cat size={18} className="mr-1" /> Genetics
+                            <Cat size={18} className="mr-1" /> Calculator
                         </button>
                     </div>
                 </header>
