@@ -11,8 +11,7 @@ import './GeneticsBuilderTab.css';
 const DOMINANCE_TYPES = [
     { value: 'dominant', label: 'Dominant' },
     { value: 'recessive', label: 'Recessive' },
-    { value: 'codominant', label: 'Co-dominant' },
-    { value: 'incomplete', label: 'Incomplete Dominance' }
+    { value: 'codominant', label: 'Co-dominant' }
 ];
 
 const GeneticsBuilderTab = ({ API_BASE_URL, authToken }) => {
@@ -27,18 +26,32 @@ const GeneticsBuilderTab = ({ API_BASE_URL, authToken }) => {
     const [isDraft, setIsDraft] = useState(true);
     
     // Editor state
-    const [editingGene, setEditingGene] = useState(null);
     const [expandedGenes, setExpandedGenes] = useState(new Set());
     const [saving, setSaving] = useState(false);
     const [hasChanges, setHasChanges] = useState(false);
     
-    // New gene modal
+    // New locus modal
     const [showNewGeneModal, setShowNewGeneModal] = useState(false);
     const [newGene, setNewGene] = useState({ symbol: '', name: '', description: '', geneType: 'color' });
     
-    // New allele state
-    const [newAllele, setNewAllele] = useState({ notation: '', phenotype: '', isLethal: false, dominance: 'recessive' });
+    // Allele management
     const [addingAlleleToGene, setAddingAlleleToGene] = useState(null);
+    const [newAllele, setNewAllele] = useState({ 
+        symbol: '', 
+        name: '', 
+        phenotype: '', 
+        carrier: '', 
+        dominance: 'recessive' 
+    });
+    
+    // Combination management
+    const [addingCombinationToGene, setAddingCombinationToGene] = useState(null);
+    const [newCombination, setNewCombination] = useState({ 
+        notation: '', 
+        phenotype: '', 
+        carrier: '', 
+        isLethal: false 
+    });
 
     // Fetch species list
     const fetchSpecies = async () => {
@@ -228,63 +241,67 @@ const GeneticsBuilderTab = ({ API_BASE_URL, authToken }) => {
             return;
         }
         
-        if (!window.confirm('Import all genes and alleles from the Fancy Mouse Genetics Calculator? This will replace current data.')) {
+        if (!window.confirm('Import all loci and alleles from the Fancy Mouse Genetics Calculator? This will replace current data.')) {
             return;
         }
         
         setSaving(true);
         try {
-            // Convert GENE_LOCI to database format
+            // Convert GENE_LOCI to database format with proper allele/combination separation
             const colorGenes = [];
             const markingGenes = [];
             const coatGenes = [];
             
-            // Define which genes are marking genes vs color genes
+            // Define which loci are marking vs coat
             const markingGeneSymbols = ['S', 'W', 'Spl', 'Rn', 'Si', 'Mobr', 'U'];
             const coatGeneSymbols = ['Go', 'Re', 'Sa', 'Rst', 'Fz', 'Nu'];
             
             let geneOrder = 0;
             Object.entries(GENE_LOCI).forEach(([symbol, data]) => {
-                const alleles = data.combinations.map((notation, index) => ({
-                    notation,
-                    phenotype: null, // Could be enhanced later
-                    isLethal: notation.includes('lethal'),
-                    dominance: 'recessive', // Default
+                // Extract unique allele symbols from combinations
+                const alleleSymbols = new Set();
+                data.combinations.forEach(notation => {
+                    const [first, second] = notation.split('/');
+                    if (first) alleleSymbols.add(first);
+                    if (second) alleleSymbols.add(second);
+                });
+                
+                // Create alleles array
+                const alleles = Array.from(alleleSymbols).map((alleleSymbol, index) => ({
+                    symbol: alleleSymbol,
+                    name: null, // To be filled in by admin
+                    phenotype: null,
+                    carrier: null,
+                    dominance: 'recessive', // Default - admin can adjust
                     order: index
                 }));
                 
-                const gene = {
+                // Create combinations array
+                const combinations = data.combinations.map((notation, index) => ({
+                    notation,
+                    phenotype: null, // To be filled in by admin
+                    carrier: null, // To be filled in by admin
+                    isLethal: notation.toLowerCase().includes('lethal'),
+                    order: index
+                }));
+                
+                const locus = {
                     symbol,
                     name: data.name,
                     description: null,
                     order: geneOrder++,
-                    alleles
+                    alleles,
+                    combinations
                 };
                 
+                // Categorize the locus
                 if (markingGeneSymbols.includes(symbol)) {
-                    markingGenes.push({
-                        symbol: gene.symbol,
-                        name: gene.name,
-                        alleles: gene.alleles.map(a => ({
-                            notation: a.notation,
-                            phenotype: a.phenotype,
-                            order: a.order
-                        }))
-                    });
+                    markingGenes.push(locus);
                 } else if (coatGeneSymbols.includes(symbol)) {
-                    // Coat/texture genes
-                    coatGenes.push({
-                        symbol: gene.symbol,
-                        name: gene.name,
-                        alleles: gene.alleles.map(a => ({
-                            notation: a.notation,
-                            phenotype: a.phenotype,
-                            order: a.order
-                        }))
-                    });
+                    coatGenes.push(locus);
                 } else {
-                    // Color/pattern genes (A, B, C, D, E, P)
-                    colorGenes.push(gene);
+                    // Color genes (A, B, C, D, E, P)
+                    colorGenes.push(locus);
                 }
             });
             
@@ -299,7 +316,7 @@ const GeneticsBuilderTab = ({ API_BASE_URL, authToken }) => {
             
             setCurrentData(updatedData);
             setHasChanges(true);
-            alert(`Successfully imported ${colorGenes.length} color genes, ${markingGenes.length} marking genes, and ${coatGenes.length} coat genes!`);
+            alert(`Successfully imported ${colorGenes.length} color loci, ${markingGenes.length} marking loci, and ${coatGenes.length} coat loci!\n\nNext: Fill in allele names, dominance, phenotypes, and carrier info.`);
         } catch (err) {
             alert('Error importing: ' + err.message);
         } finally {
@@ -348,7 +365,7 @@ const GeneticsBuilderTab = ({ API_BASE_URL, authToken }) => {
 
     // Delete gene
     const handleDeleteGene = async (geneIndex, isMarking, isCoat, isOther) => {
-        if (!window.confirm('Delete this gene and all its alleles?')) return;
+        if (!window.confirm('Delete this locus and all its alleles/combinations?')) return;
         
         setSaving(true);
         try {
@@ -365,7 +382,7 @@ const GeneticsBuilderTab = ({ API_BASE_URL, authToken }) => {
                 setCurrentData(data);
                 setHasChanges(true);
             } else {
-                throw new Error('Failed to delete gene');
+                throw new Error('Failed to delete locus');
             }
         } catch (err) {
             alert('Error: ' + err.message);
@@ -374,39 +391,181 @@ const GeneticsBuilderTab = ({ API_BASE_URL, authToken }) => {
         }
     };
 
-    // Add allele to gene (local update)
-    const handleAddAllele = (geneIndex, isMarking, isCoat, isOther) => {
-        if (!newAllele.notation.trim()) {
-            alert('Notation is required (e.g., A/A, A/a, a/a)');
+    // Add allele to locus
+    const handleAddAllele = async (geneIndex, geneType) => {
+        if (!newAllele.symbol.trim()) {
+            alert('Allele symbol is required (e.g., A, a, at)');
             return;
         }
         
-        const updatedData = { ...currentData };
-        const geneArray = isOther ? updatedData.otherGenes : (isCoat ? updatedData.coatGenes : (isMarking ? updatedData.markingGenes : updatedData.genes));
-        
-        geneArray[geneIndex].alleles.push({
-            notation: newAllele.notation.trim(),
-            phenotype: newAllele.phenotype.trim() || null,
-            isLethal: newAllele.isLethal,
-            dominance: newAllele.dominance,
-            order: geneArray[geneIndex].alleles.length
-        });
-        
-        setCurrentData(updatedData);
-        setHasChanges(true);
-        setNewAllele({ notation: '', phenotype: '', isLethal: false, dominance: 'recessive' });
-        setAddingAlleleToGene(null);
+        setSaving(true);
+        try {
+            const response = await fetch(
+                `${API_BASE_URL}/admin/genetics/${currentData._id}/loci/${geneIndex}/alleles`,
+                {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': `Bearer ${authToken}`
+                    },
+                    body: JSON.stringify({
+                        symbol: newAllele.symbol.trim(),
+                        name: newAllele.name.trim() || null,
+                        phenotype: newAllele.phenotype.trim() || null,
+                        carrier: newAllele.carrier.trim() || null,
+                        dominance: newAllele.dominance,
+                        geneType
+                    })
+                }
+            );
+            
+            if (response.ok) {
+                const data = await response.json();
+                setCurrentData(data);
+                setHasChanges(true);
+                setNewAllele({ symbol: '', name: '', phenotype: '', carrier: '', dominance: 'recessive' });
+                setAddingAlleleToGene(null);
+            } else {
+                throw new Error('Failed to add allele');
+            }
+        } catch (err) {
+            alert('Error: ' + err.message);
+        } finally {
+            setSaving(false);
+        }
     };
 
-    // Remove allele (local update)
-    const handleRemoveAllele = (geneIndex, alleleIndex, isMarking, isCoat, isOther) => {
-        const updatedData = { ...currentData };
-        const geneArray = isOther ? updatedData.otherGenes : (isCoat ? updatedData.coatGenes : (isMarking ? updatedData.markingGenes : updatedData.genes));
+    // Remove allele from locus
+    const handleRemoveAllele = async (geneIndex, alleleIndex, geneType) => {
+        if (!window.confirm('Delete this allele? Combinations using it will still exist.')) return;
         
-        geneArray[geneIndex].alleles.splice(alleleIndex, 1);
+        setSaving(true);
+        try {
+            const response = await fetch(
+                `${API_BASE_URL}/admin/genetics/${currentData._id}/loci/${geneIndex}/alleles/${alleleIndex}?geneType=${geneType}`,
+                {
+                    method: 'DELETE',
+                    headers: { 'Authorization': `Bearer ${authToken}` }
+                }
+            );
+            
+            if (response.ok) {
+                const data = await response.json();
+                setCurrentData(data);
+                setHasChanges(true);
+            } else {
+                throw new Error('Failed to remove allele');
+            }
+        } catch (err) {
+            alert('Error: ' + err.message);
+        } finally {
+            setSaving(false);
+        }
+    };
+
+    // Add combination to locus
+    const handleAddCombination = async (geneIndex, geneType) => {
+        if (!newCombination.notation.trim()) {
+            alert('Combination notation is required (e.g., A/A, A/a, a/a)');
+            return;
+        }
         
-        setCurrentData(updatedData);
-        setHasChanges(true);
+        setSaving(true);
+        try {
+            const response = await fetch(
+                `${API_BASE_URL}/admin/genetics/${currentData._id}/loci/${geneIndex}/combinations`,
+                {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': `Bearer ${authToken}`
+                    },
+                    body: JSON.stringify({
+                        notation: newCombination.notation.trim(),
+                        phenotype: newCombination.phenotype.trim() || null,
+                        carrier: newCombination.carrier.trim() || null,
+                        isLethal: newCombination.isLethal,
+                        geneType
+                    })
+                }
+            );
+            
+            if (response.ok) {
+                const data = await response.json();
+                setCurrentData(data);
+                setHasChanges(true);
+                setNewCombination({ notation: '', phenotype: '', carrier: '', isLethal: false });
+                setAddingCombinationToGene(null);
+            } else {
+                throw new Error('Failed to add combination');
+            }
+        } catch (err) {
+            alert('Error: ' + err.message);
+        } finally {
+            setSaving(false);
+        }
+    };
+
+    // Remove combination from locus
+    const handleRemoveCombination = async (geneIndex, combinationIndex, geneType) => {
+        if (!window.confirm('Delete this combination?')) return;
+        
+        setSaving(true);
+        try {
+            const response = await fetch(
+                `${API_BASE_URL}/admin/genetics/${currentData._id}/loci/${geneIndex}/combinations/${combinationIndex}?geneType=${geneType}`,
+                {
+                    method: 'DELETE',
+                    headers: { 'Authorization': `Bearer ${authToken}` }
+                }
+            );
+            
+            if (response.ok) {
+                const data = await response.json();
+                setCurrentData(data);
+                setHasChanges(true);
+            } else {
+                throw new Error('Failed to remove combination');
+            }
+        } catch (err) {
+            alert('Error: ' + err.message);
+        } finally {
+            setSaving(false);
+        }
+    };
+
+    // Auto-generate all combinations for a locus
+    const handleGenerateCombinations = async (geneIndex, geneType) => {
+        if (!window.confirm('Auto-generate all possible combinations from existing alleles? This will replace current combinations.')) return;
+        
+        setSaving(true);
+        try {
+            const response = await fetch(
+                `${API_BASE_URL}/admin/genetics/${currentData._id}/loci/${geneIndex}/generate-combinations`,
+                {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': `Bearer ${authToken}`
+                    },
+                    body: JSON.stringify({ geneType })
+                }
+            );
+            
+            if (response.ok) {
+                const data = await response.json();
+                setCurrentData(data);
+                setHasChanges(true);
+                alert('Combinations generated! You can now edit phenotypes and carrier info.');
+            } else {
+                const error = await response.json();
+                throw new Error(error.error || 'Failed to generate combinations');
+            }
+        } catch (err) {
+            alert('Error: ' + err.message);
+        } finally {
+            setSaving(false);
+        }
     };
 
     // Toggle gene expansion
@@ -615,18 +774,30 @@ const GeneticsBuilderTab = ({ API_BASE_URL, authToken }) => {
                                                 key={`gene-${geneIndex}`}
                                                 gene={gene}
                                                 geneIndex={geneIndex}
-                                                isMarking={false}
+                                                geneType="color"
                                                 isExpanded={expandedGenes.has(`gene-${geneIndex}`)}
                                                 onToggleExpand={() => toggleGeneExpanded(`gene-${geneIndex}`)}
-                                                onDelete={() => handleDeleteGene(geneIndex, false)}
-                                                onAddAllele={() => setAddingAlleleToGene({ index: geneIndex, isMarking: false })}
-                                                onRemoveAllele={(alleleIndex) => handleRemoveAllele(geneIndex, alleleIndex, false)}
+                                                onDelete={() => handleDeleteGene(geneIndex, false, false, false)}
                                                 isEditable={!currentData.isPublished}
-                                                addingAllele={addingAlleleToGene?.index === geneIndex && !addingAlleleToGene?.isMarking}
+                                                addingAllele={addingAlleleToGene?.index === geneIndex && addingAlleleToGene?.type === 'color'}
                                                 newAllele={newAllele}
                                                 setNewAllele={setNewAllele}
-                                                onSaveAllele={() => handleAddAllele(geneIndex, false)}
-                                                onCancelAllele={() => setAddingAlleleToGene(null)}
+                                                onAddAllele={(action) => {
+                                                    if (action === 'open') setAddingAlleleToGene({ index: geneIndex, type: 'color' });
+                                                    else if (action === 'save') handleAddAllele(geneIndex, 'color');
+                                                }}
+                                                onCancelAddAllele={() => setAddingAlleleToGene(null)}
+                                                onRemoveAllele={(alleleIndex) => handleRemoveAllele(geneIndex, alleleIndex, 'color')}
+                                                addingCombination={addingCombinationToGene?.index === geneIndex && addingCombinationToGene?.type === 'color'}
+                                                newCombination={newCombination}
+                                                setNewCombination={setNewCombination}
+                                                onAddCombination={(action) => {
+                                                    if (action === 'open') setAddingCombinationToGene({ index: geneIndex, type: 'color' });
+                                                    else if (action === 'save') handleAddCombination(geneIndex, 'color');
+                                                }}
+                                                onCancelAddCombination={() => setAddingCombinationToGene(null)}
+                                                onRemoveCombination={(combinationIndex) => handleRemoveCombination(geneIndex, combinationIndex, 'color')}
+                                                onGenerateCombinations={() => handleGenerateCombinations(geneIndex, 'color')}
                                             />
                                         ))}
                                     </div>
@@ -647,18 +818,30 @@ const GeneticsBuilderTab = ({ API_BASE_URL, authToken }) => {
                                                 key={`marking-${geneIndex}`}
                                                 gene={gene}
                                                 geneIndex={geneIndex}
-                                                isMarking={true}
+                                                geneType="marking"
                                                 isExpanded={expandedGenes.has(`marking-${geneIndex}`)}
                                                 onToggleExpand={() => toggleGeneExpanded(`marking-${geneIndex}`)}
-                                                onDelete={() => handleDeleteGene(geneIndex, true)}
-                                                onAddAllele={() => setAddingAlleleToGene({ index: geneIndex, isMarking: true })}
-                                                onRemoveAllele={(alleleIndex) => handleRemoveAllele(geneIndex, alleleIndex, true)}
+                                                onDelete={() => handleDeleteGene(geneIndex, true, false, false)}
                                                 isEditable={!currentData.isPublished}
-                                                addingAllele={addingAlleleToGene?.index === geneIndex && addingAlleleToGene?.isMarking}
+                                                addingAllele={addingAlleleToGene?.index === geneIndex && addingAlleleToGene?.type === 'marking'}
                                                 newAllele={newAllele}
                                                 setNewAllele={setNewAllele}
-                                                onSaveAllele={() => handleAddAllele(geneIndex, true)}
-                                                onCancelAllele={() => setAddingAlleleToGene(null)}
+                                                onAddAllele={(action) => {
+                                                    if (action === 'open') setAddingAlleleToGene({ index: geneIndex, type: 'marking' });
+                                                    else if (action === 'save') handleAddAllele(geneIndex, 'marking');
+                                                }}
+                                                onCancelAddAllele={() => setAddingAlleleToGene(null)}
+                                                onRemoveAllele={(alleleIndex) => handleRemoveAllele(geneIndex, alleleIndex, 'marking')}
+                                                addingCombination={addingCombinationToGene?.index === geneIndex && addingCombinationToGene?.type === 'marking'}
+                                                newCombination={newCombination}
+                                                setNewCombination={setNewCombination}
+                                                onAddCombination={(action) => {
+                                                    if (action === 'open') setAddingCombinationToGene({ index: geneIndex, type: 'marking' });
+                                                    else if (action === 'save') handleAddCombination(geneIndex, 'marking');
+                                                }}
+                                                onCancelAddCombination={() => setAddingCombinationToGene(null)}
+                                                onRemoveCombination={(combinationIndex) => handleRemoveCombination(geneIndex, combinationIndex, 'marking')}
+                                                onGenerateCombinations={() => handleGenerateCombinations(geneIndex, 'marking')}
                                             />
                                         ))}
                                     </div>
@@ -679,19 +862,30 @@ const GeneticsBuilderTab = ({ API_BASE_URL, authToken }) => {
                                                 key={`coat-${geneIndex}`}
                                                 gene={gene}
                                                 geneIndex={geneIndex}
-                                                isMarking={true}
-                                                isCoat={true}
+                                                geneType="coat"
                                                 isExpanded={expandedGenes.has(`coat-${geneIndex}`)}
                                                 onToggleExpand={() => toggleGeneExpanded(`coat-${geneIndex}`)}
-                                                onDelete={() => handleDeleteGene(geneIndex, false, true)}
-                                                onAddAllele={() => setAddingAlleleToGene({ index: geneIndex, isCoat: true })}
-                                                onRemoveAllele={(alleleIndex) => handleRemoveAllele(geneIndex, alleleIndex, false, true)}
+                                                onDelete={() => handleDeleteGene(geneIndex, false, true, false)}
                                                 isEditable={!currentData.isPublished}
-                                                addingAllele={addingAlleleToGene?.index === geneIndex && addingAlleleToGene?.isCoat}
+                                                addingAllele={addingAlleleToGene?.index === geneIndex && addingAlleleToGene?.type === 'coat'}
                                                 newAllele={newAllele}
                                                 setNewAllele={setNewAllele}
-                                                onSaveAllele={() => handleAddAllele(geneIndex, false, true)}
-                                                onCancelAllele={() => setAddingAlleleToGene(null)}
+                                                onAddAllele={(action) => {
+                                                    if (action === 'open') setAddingAlleleToGene({ index: geneIndex, type: 'coat' });
+                                                    else if (action === 'save') handleAddAllele(geneIndex, 'coat');
+                                                }}
+                                                onCancelAddAllele={() => setAddingAlleleToGene(null)}
+                                                onRemoveAllele={(alleleIndex) => handleRemoveAllele(geneIndex, alleleIndex, 'coat')}
+                                                addingCombination={addingCombinationToGene?.index === geneIndex && addingCombinationToGene?.type === 'coat'}
+                                                newCombination={newCombination}
+                                                setNewCombination={setNewCombination}
+                                                onAddCombination={(action) => {
+                                                    if (action === 'open') setAddingCombinationToGene({ index: geneIndex, type: 'coat' });
+                                                    else if (action === 'save') handleAddCombination(geneIndex, 'coat');
+                                                }}
+                                                onCancelAddCombination={() => setAddingCombinationToGene(null)}
+                                                onRemoveCombination={(combinationIndex) => handleRemoveCombination(geneIndex, combinationIndex, 'coat')}
+                                                onGenerateCombinations={() => handleGenerateCombinations(geneIndex, 'coat')}
                                             />
                                         ))}
                                     </div>
@@ -712,20 +906,30 @@ const GeneticsBuilderTab = ({ API_BASE_URL, authToken }) => {
                                                 key={`other-${geneIndex}`}
                                                 gene={gene}
                                                 geneIndex={geneIndex}
-                                                isMarking={true}
-                                                isCoat={false}
-                                                isOther={true}
+                                                geneType="other"
                                                 isExpanded={expandedGenes.has(`other-${geneIndex}`)}
                                                 onToggleExpand={() => toggleGeneExpanded(`other-${geneIndex}`)}
                                                 onDelete={() => handleDeleteGene(geneIndex, false, false, true)}
-                                                onAddAllele={() => setAddingAlleleToGene({ index: geneIndex, isOther: true })}
-                                                onRemoveAllele={(alleleIndex) => handleRemoveAllele(geneIndex, alleleIndex, false, false, true)}
                                                 isEditable={!currentData.isPublished}
-                                                addingAllele={addingAlleleToGene?.index === geneIndex && addingAlleleToGene?.isOther}
+                                                addingAllele={addingAlleleToGene?.index === geneIndex && addingAlleleToGene?.type === 'other'}
                                                 newAllele={newAllele}
                                                 setNewAllele={setNewAllele}
-                                                onSaveAllele={() => handleAddAllele(geneIndex, false, false, true)}
-                                                onCancelAllele={() => setAddingAlleleToGene(null)}
+                                                onAddAllele={(action) => {
+                                                    if (action === 'open') setAddingAlleleToGene({ index: geneIndex, type: 'other' });
+                                                    else if (action === 'save') handleAddAllele(geneIndex, 'other');
+                                                }}
+                                                onCancelAddAllele={() => setAddingAlleleToGene(null)}
+                                                onRemoveAllele={(alleleIndex) => handleRemoveAllele(geneIndex, alleleIndex, 'other')}
+                                                addingCombination={addingCombinationToGene?.index === geneIndex && addingCombinationToGene?.type === 'other'}
+                                                newCombination={newCombination}
+                                                setNewCombination={setNewCombination}
+                                                onAddCombination={(action) => {
+                                                    if (action === 'open') setAddingCombinationToGene({ index: geneIndex, type: 'other' });
+                                                    else if (action === 'save') handleAddCombination(geneIndex, 'other');
+                                                }}
+                                                onCancelAddCombination={() => setAddingCombinationToGene(null)}
+                                                onRemoveCombination={(combinationIndex) => handleRemoveCombination(geneIndex, combinationIndex, 'other')}
+                                                onGenerateCombinations={() => handleGenerateCombinations(geneIndex, 'other')}
                                             />
                                         ))}
                                     </div>
@@ -820,9 +1024,13 @@ const GeneticsBuilderTab = ({ API_BASE_URL, authToken }) => {
 
 // Gene Card Component
 const GeneCard = ({ 
-    gene, geneIndex, isMarking, isExpanded, onToggleExpand, 
-    onDelete, onAddAllele, onRemoveAllele, isEditable,
-    addingAllele, newAllele, setNewAllele, onSaveAllele, onCancelAllele
+    gene, geneIndex, geneType, isExpanded, onToggleExpand, 
+    onDelete, isEditable,
+    // Allele management
+    addingAllele, newAllele, setNewAllele, onAddAllele, onCancelAddAllele, onRemoveAllele,
+    // Combination management
+    addingCombination, newCombination, setNewCombination, onAddCombination, onCancelAddCombination, onRemoveCombination,
+    onGenerateCombinations
 }) => {
     return (
         <div className={`genetics-gene-card ${isExpanded ? 'expanded' : ''}`}>
@@ -830,14 +1038,16 @@ const GeneCard = ({
                 <div className="genetics-gene-info">
                     <span className="genetics-gene-symbol">{gene.symbol}</span>
                     <span className="genetics-gene-name">{gene.name}</span>
-                    <span className="genetics-gene-count">{gene.alleles?.length || 0} alleles</span>
+                    <span className="genetics-gene-count">
+                        {gene.alleles?.length || 0} alleles, {gene.combinations?.length || 0} combinations
+                    </span>
                 </div>
                 <div className="genetics-gene-actions">
                     {isEditable && (
                         <button 
                             className="genetics-gene-action-btn delete"
                             onClick={(e) => { e.stopPropagation(); onDelete(); }}
-                            title="Delete gene"
+                            title="Delete locus"
                         >
                             <Trash2 size={16} />
                         </button>
@@ -852,13 +1062,14 @@ const GeneCard = ({
                         <p className="genetics-gene-description">{gene.description}</p>
                     )}
                     
+                    {/* ALLELES SECTION */}
                     <div className="genetics-alleles-section">
                         <div className="genetics-alleles-header">
-                            <h5>Allele Combinations</h5>
+                            <h5>Alleles ({gene.alleles?.length || 0})</h5>
                             {isEditable && (
                                 <button 
                                     className="genetics-btn-small"
-                                    onClick={onAddAllele}
+                                    onClick={() => onAddAllele('open')}
                                 >
                                     <Plus size={14} /> Add Allele
                                 </button>
@@ -870,15 +1081,28 @@ const GeneCard = ({
                                 <div className="genetics-allele-form-row">
                                     <input
                                         type="text"
-                                        value={newAllele.notation}
-                                        onChange={(e) => setNewAllele(prev => ({ ...prev, notation: e.target.value }))}
-                                        placeholder="Notation (e.g., A/A)"
+                                        value={newAllele.symbol}
+                                        onChange={(e) => setNewAllele(prev => ({ ...prev, symbol: e.target.value }))}
+                                        placeholder="Symbol (e.g., A, a, at)"
+                                        style={{ width: '100px' }}
+                                    />
+                                    <input
+                                        type="text"
+                                        value={newAllele.name}
+                                        onChange={(e) => setNewAllele(prev => ({ ...prev, name: e.target.value }))}
+                                        placeholder="Name (optional)"
                                     />
                                     <input
                                         type="text"
                                         value={newAllele.phenotype}
                                         onChange={(e) => setNewAllele(prev => ({ ...prev, phenotype: e.target.value }))}
-                                        placeholder="Phenotype"
+                                        placeholder="Phenotype (optional)"
+                                    />
+                                    <input
+                                        type="text"
+                                        value={newAllele.carrier}
+                                        onChange={(e) => setNewAllele(prev => ({ ...prev, carrier: e.target.value }))}
+                                        placeholder="Carrier (optional)"
                                     />
                                     <select
                                         value={newAllele.dominance}
@@ -888,18 +1112,10 @@ const GeneCard = ({
                                             <option key={d.value} value={d.value}>{d.label}</option>
                                         ))}
                                     </select>
-                                    <label className="genetics-lethal-checkbox">
-                                        <input
-                                            type="checkbox"
-                                            checked={newAllele.isLethal}
-                                            onChange={(e) => setNewAllele(prev => ({ ...prev, isLethal: e.target.checked }))}
-                                        />
-                                        Lethal
-                                    </label>
                                 </div>
                                 <div className="genetics-allele-form-actions">
-                                    <button className="genetics-btn-small" onClick={onCancelAllele}>Cancel</button>
-                                    <button className="genetics-btn-small primary" onClick={onSaveAllele}>Add</button>
+                                    <button className="genetics-btn-small" onClick={onCancelAddAllele}>Cancel</button>
+                                    <button className="genetics-btn-small primary" onClick={() => onAddAllele('save')}>Add</button>
                                 </div>
                             </div>
                         )}
@@ -907,18 +1123,20 @@ const GeneCard = ({
                         {gene.alleles?.length > 0 ? (
                             <div className="genetics-alleles-table">
                                 <div className="genetics-alleles-table-header">
-                                    <span>Notation</span>
+                                    <span>Symbol</span>
+                                    <span>Name</span>
                                     <span>Phenotype</span>
+                                    <span>Carrier</span>
                                     <span>Dominance</span>
-                                    <span>Lethal</span>
                                     {isEditable && <span></span>}
                                 </div>
                                 {gene.alleles.map((allele, alleleIndex) => (
                                     <div key={alleleIndex} className="genetics-allele-row">
-                                        <span className="allele-notation">{allele.notation}</span>
+                                        <span className="allele-notation">{allele.symbol}</span>
+                                        <span>{allele.name || '-'}</span>
                                         <span>{allele.phenotype || '-'}</span>
+                                        <span>{allele.carrier || '-'}</span>
                                         <span className="allele-dominance">{allele.dominance}</span>
-                                        <span>{allele.isLethal ? '⚠️ Yes' : 'No'}</span>
                                         {isEditable && (
                                             <button 
                                                 className="allele-delete-btn"
@@ -931,7 +1149,103 @@ const GeneCard = ({
                                 ))}
                             </div>
                         ) : (
-                            <p className="genetics-no-alleles">No alleles defined yet</p>
+                            <p className="genetics-no-alleles">No alleles defined yet. Add alleles first, then generate combinations.</p>
+                        )}
+                    </div>
+                    
+                    {/* COMBINATIONS SECTION */}
+                    <div className="genetics-combinations-section">
+                        <div className="genetics-combinations-header">
+                            <h5>Gene Combinations ({gene.combinations?.length || 0})</h5>
+                            {isEditable && (
+                                <div style={{ display: 'flex', gap: '8px' }}>
+                                    {gene.alleles?.length > 0 && (
+                                        <button 
+                                            className="genetics-btn-small accent"
+                                            onClick={onGenerateCombinations}
+                                            title="Auto-generate all possible combinations from alleles"
+                                        >
+                                            <RefreshCw size={14} /> Generate
+                                        </button>
+                                    )}
+                                    <button 
+                                        className="genetics-btn-small"
+                                        onClick={() => onAddCombination('open')}
+                                    >
+                                        <Plus size={14} /> Add
+                                    </button>
+                                </div>
+                            )}
+                        </div>
+                        
+                        {addingCombination && (
+                            <div className="genetics-combination-form">
+                                <div className="genetics-combination-form-row">
+                                    <input
+                                        type="text"
+                                        value={newCombination.notation}
+                                        onChange={(e) => setNewCombination(prev => ({ ...prev, notation: e.target.value }))}
+                                        placeholder="Notation (e.g., A/A, A/a)"
+                                        style={{ width: '120px' }}
+                                    />
+                                    <input
+                                        type="text"
+                                        value={newCombination.phenotype}
+                                        onChange={(e) => setNewCombination(prev => ({ ...prev, phenotype: e.target.value }))}
+                                        placeholder="Phenotype"
+                                    />
+                                    <input
+                                        type="text"
+                                        value={newCombination.carrier}
+                                        onChange={(e) => setNewCombination(prev => ({ ...prev, carrier: e.target.value }))}
+                                        placeholder="Carrier (optional)"
+                                    />
+                                    <label className="genetics-lethal-checkbox">
+                                        <input
+                                            type="checkbox"
+                                            checked={newCombination.isLethal}
+                                            onChange={(e) => setNewCombination(prev => ({ ...prev, isLethal: e.target.checked }))}
+                                        />
+                                        Lethal
+                                    </label>
+                                </div>
+                                <div className="genetics-combination-form-actions">
+                                    <button className="genetics-btn-small" onClick={onCancelAddCombination}>Cancel</button>
+                                    <button className="genetics-btn-small primary" onClick={() => onAddCombination('save')}>Add</button>
+                                </div>
+                            </div>
+                        )}
+                        
+                        {gene.combinations?.length > 0 ? (
+                            <div className="genetics-combinations-table">
+                                <div className="genetics-combinations-table-header">
+                                    <span>Notation</span>
+                                    <span>Phenotype</span>
+                                    <span>Carrier</span>
+                                    <span>Lethal</span>
+                                    {isEditable && <span></span>}
+                                </div>
+                                {gene.combinations.map((combination, combinationIndex) => (
+                                    <div key={combinationIndex} className="genetics-combination-row">
+                                        <span className="combination-notation">{combination.notation}</span>
+                                        <span>{combination.phenotype || '-'}</span>
+                                        <span>{combination.carrier || '-'}</span>
+                                        <span>{combination.isLethal ? '⚠️ Yes' : 'No'}</span>
+                                        {isEditable && (
+                                            <button 
+                                                className="combination-delete-btn"
+                                                onClick={() => onRemoveCombination(combinationIndex)}
+                                            >
+                                                <X size={14} />
+                                            </button>
+                                        )}
+                                    </div>
+                                ))}
+                            </div>
+                        ) : (
+                            <p className="genetics-no-combinations">
+                                No combinations defined. {gene.alleles?.length > 0 ? 'Click "Generate" to auto-create them.' : 'Add alleles first.'}
+                            </p>
                         )}
                     </div>
                 </div>
