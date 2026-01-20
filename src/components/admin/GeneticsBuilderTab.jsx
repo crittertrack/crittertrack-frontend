@@ -34,7 +34,7 @@ const GeneticsBuilderTab = ({ API_BASE_URL, authToken }) => {
     
     // New gene modal
     const [showNewGeneModal, setShowNewGeneModal] = useState(false);
-    const [newGene, setNewGene] = useState({ symbol: '', name: '', description: '', isMarking: false });
+    const [newGene, setNewGene] = useState({ symbol: '', name: '', description: '', geneType: 'color' });
     
     // New allele state
     const [newAllele, setNewAllele] = useState({ notation: '', phenotype: '', isLethal: false, dominance: 'recessive' });
@@ -171,6 +171,7 @@ const GeneticsBuilderTab = ({ API_BASE_URL, authToken }) => {
                 body: JSON.stringify({
                     genes: currentData.genes,
                     markingGenes: currentData.markingGenes,
+                    coatGenes: currentData.coatGenes,
                     phenotypeRules: currentData.phenotypeRules,
                     adminNotes: currentData.adminNotes
                 })
@@ -235,6 +236,7 @@ const GeneticsBuilderTab = ({ API_BASE_URL, authToken }) => {
             // Convert GENE_LOCI to database format
             const colorGenes = [];
             const markingGenes = [];
+            const coatGenes = [];
             
             // Define which genes are marking genes vs color genes
             const markingGeneSymbols = ['S', 'W', 'Spl', 'Rn', 'Si', 'Mobr'];
@@ -268,11 +270,19 @@ const GeneticsBuilderTab = ({ API_BASE_URL, authToken }) => {
                             order: a.order
                         }))
                     });
-                } else if (!coatGeneSymbols.includes(symbol)) {
-                    // Color/pattern genes (A, B, C, D, E, P)
-                    colorGenes.push(gene);
+                } else if (coatGeneSymbols.includes(symbol)) {
+                    // Coat/texture genes
+                    coatGenes.push({
+                        symbol: gene.symbol,
+                        name: gene.name,
+                        alleles: gene.alleles.map(a => ({
+                            notation: a.notation,
+                            phenotype: a.phenotype,
+                            order: a.order
+                        }))
+                    });
                 } else {
-                    // Coat genes go into color genes for now
+                    // Color/pattern genes (A, B, C, D, E, P)
                     colorGenes.push(gene);
                 }
             });
@@ -282,12 +292,13 @@ const GeneticsBuilderTab = ({ API_BASE_URL, authToken }) => {
                 ...currentData,
                 genes: colorGenes,
                 markingGenes: markingGenes,
+                coatGenes: coatGenes,
                 adminNotes: (currentData.adminNotes || '') + '\n\nImported from MouseGeneticsCalculator on ' + new Date().toISOString()
             };
             
             setCurrentData(updatedData);
             setHasChanges(true);
-            alert(`Successfully imported ${colorGenes.length} color genes and ${markingGenes.length} marking genes!`);
+            alert(`Successfully imported ${colorGenes.length} color genes, ${markingGenes.length} marking genes, and ${coatGenes.length} coat genes!`);
         } catch (err) {
             alert('Error importing: ' + err.message);
         } finally {
@@ -322,7 +333,7 @@ const GeneticsBuilderTab = ({ API_BASE_URL, authToken }) => {
                 const data = await response.json();
                 setCurrentData(data);
                 setShowNewGeneModal(false);
-                setNewGene({ symbol: '', name: '', description: '', isMarking: false });
+                setNewGene({ symbol: '', name: '', description: '', geneType: 'color' });
                 setHasChanges(true);
             } else {
                 throw new Error('Failed to add gene');
@@ -335,13 +346,13 @@ const GeneticsBuilderTab = ({ API_BASE_URL, authToken }) => {
     };
 
     // Delete gene
-    const handleDeleteGene = async (geneIndex, isMarking) => {
+    const handleDeleteGene = async (geneIndex, isMarking, isCoat) => {
         if (!window.confirm('Delete this gene and all its alleles?')) return;
         
         setSaving(true);
         try {
             const response = await fetch(
-                `${API_BASE_URL}/admin/genetics/${currentData._id}/genes/${geneIndex}?isMarking=${isMarking}`,
+                `${API_BASE_URL}/admin/genetics/${currentData._id}/genes/${geneIndex}?isMarking=${isMarking}&isCoat=${isCoat}`,
                 {
                     method: 'DELETE',
                     headers: { 'Authorization': `Bearer ${authToken}` }
@@ -363,14 +374,14 @@ const GeneticsBuilderTab = ({ API_BASE_URL, authToken }) => {
     };
 
     // Add allele to gene (local update)
-    const handleAddAllele = (geneIndex, isMarking) => {
+    const handleAddAllele = (geneIndex, isMarking, isCoat) => {
         if (!newAllele.notation.trim()) {
             alert('Notation is required (e.g., A/A, A/a, a/a)');
             return;
         }
         
         const updatedData = { ...currentData };
-        const geneArray = isMarking ? updatedData.markingGenes : updatedData.genes;
+        const geneArray = isCoat ? updatedData.coatGenes : (isMarking ? updatedData.markingGenes : updatedData.genes);
         
         geneArray[geneIndex].alleles.push({
             notation: newAllele.notation.trim(),
@@ -387,9 +398,9 @@ const GeneticsBuilderTab = ({ API_BASE_URL, authToken }) => {
     };
 
     // Remove allele (local update)
-    const handleRemoveAllele = (geneIndex, alleleIndex, isMarking) => {
+    const handleRemoveAllele = (geneIndex, alleleIndex, isMarking, isCoat) => {
         const updatedData = { ...currentData };
-        const geneArray = isMarking ? updatedData.markingGenes : updatedData.genes;
+        const geneArray = isCoat ? updatedData.coatGenes : (isMarking ? updatedData.markingGenes : updatedData.genes);
         
         geneArray[geneIndex].alleles.splice(alleleIndex, 1);
         
@@ -418,7 +429,7 @@ const GeneticsBuilderTab = ({ API_BASE_URL, authToken }) => {
         totalSpecies: geneticsData.length,
         published: geneticsData.filter(g => g.isPublished).length,
         drafts: geneticsData.filter(g => !g.isPublished).length,
-        totalGenes: geneticsData.reduce((acc, g) => acc + (g.genes?.length || 0) + (g.markingGenes?.length || 0), 0)
+        totalGenes: geneticsData.reduce((acc, g) => acc + (g.genes?.length || 0) + (g.markingGenes?.length || 0) + (g.coatGenes?.length || 0), 0)
     };
 
     if (loading && geneticsData.length === 0) {
@@ -653,6 +664,39 @@ const GeneticsBuilderTab = ({ API_BASE_URL, authToken }) => {
                                 )}
                             </div>
 
+                            {/* Coat/Texture Genes */}
+                            <div className="genetics-section">
+                                <h4>Coat/Texture Genes ({currentData.coatGenes?.length || 0})</h4>
+                                {currentData.coatGenes?.length === 0 ? (
+                                    <div className="genetics-empty-section">
+                                        <p>No coat/texture genes added yet.</p>
+                                    </div>
+                                ) : (
+                                    <div className="genetics-genes-list">
+                                        {currentData.coatGenes.map((gene, geneIndex) => (
+                                            <GeneCard 
+                                                key={`coat-${geneIndex}`}
+                                                gene={gene}
+                                                geneIndex={geneIndex}
+                                                isMarking={true}
+                                                isCoat={true}
+                                                isExpanded={expandedGenes.has(`coat-${geneIndex}`)}
+                                                onToggleExpand={() => toggleGeneExpanded(`coat-${geneIndex}`)}
+                                                onDelete={() => handleDeleteGene(geneIndex, false, true)}
+                                                onAddAllele={() => setAddingAlleleToGene({ index: geneIndex, isCoat: true })}
+                                                onRemoveAllele={(alleleIndex) => handleRemoveAllele(geneIndex, alleleIndex, false, true)}
+                                                isEditable={!currentData.isPublished}
+                                                addingAllele={addingAlleleToGene?.index === geneIndex && addingAlleleToGene?.isCoat}
+                                                newAllele={newAllele}
+                                                setNewAllele={setNewAllele}
+                                                onSaveAllele={() => handleAddAllele(geneIndex, false, true)}
+                                                onCancelAllele={() => setAddingAlleleToGene(null)}
+                                            />
+                                        ))}
+                                    </div>
+                                )}
+                            </div>
+
                             {/* Admin Notes */}
                             <div className="genetics-section">
                                 <h4>Admin Notes</h4>
@@ -710,14 +754,17 @@ const GeneticsBuilderTab = ({ API_BASE_URL, authToken }) => {
                                     rows={2}
                                 />
                             </div>
-                            <label className="genetics-checkbox-label">
-                                <input
-                                    type="checkbox"
-                                    checked={newGene.isMarking}
-                                    onChange={(e) => setNewGene(prev => ({ ...prev, isMarking: e.target.checked }))}
-                                />
-                                This is a marking gene (spots, patterns, etc.)
-                            </label>
+                            <div className="genetics-form-group">
+                                <label>Gene Type *</label>
+                                <select
+                                    value={newGene.geneType}
+                                    onChange={(e) => setNewGene(prev => ({ ...prev, geneType: e.target.value }))}
+                                >
+                                    <option value="color">Color/Pattern Gene</option>
+                                    <option value="marking">Marking Gene</option>
+                                    <option value="coat">Coat/Texture Gene</option>
+                                </select>
+                            </div>
                         </div>
                         <div className="genetics-modal-footer">
                             <button className="genetics-btn genetics-btn-secondary" onClick={() => setShowNewGeneModal(false)}>
