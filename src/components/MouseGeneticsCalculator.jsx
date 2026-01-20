@@ -2210,20 +2210,18 @@ const MouseGeneticsCalculator = ({ API_BASE_URL, authToken, myAnimals = [] }) =>
             <div className="flex flex-col sm:flex-row sm:items-center gap-2">
               <h1 className="text-xl sm:text-2xl font-bold text-gray-800">Genetics Calculator</h1>
               
-              {/* Species Selector */}
-              {availableSpecies.length > 0 && (
-                <select
-                  value={selectedSpecies}
-                  onChange={(e) => setSelectedSpecies(e.target.value)}
-                  className="px-3 py-1.5 border-2 border-gray-300 rounded-lg text-sm font-medium bg-white hover:border-primary focus:border-primary focus:outline-none transition"
-                  disabled={loadingGenetics}
-                >
-                  <option value="Fancy Mouse">Fancy Mouse</option>
-                  {availableSpecies.filter(s => s !== 'Fancy Mouse').map(species => (
-                    <option key={species} value={species}>{species}</option>
-                  ))}
-                </select>
-              )}
+              {/* Species Selector - Always show */}
+              <select
+                value={selectedSpecies}
+                onChange={(e) => setSelectedSpecies(e.target.value)}
+                className="px-3 py-1.5 border-2 border-gray-300 rounded-lg text-sm font-medium bg-white hover:border-primary focus:border-primary focus:outline-none transition"
+                disabled={loadingGenetics}
+              >
+                <option value="Fancy Mouse">Fancy Mouse</option>
+                {availableSpecies.filter(s => s !== 'Fancy Mouse').map(species => (
+                  <option key={species} value={species}>{species}</option>
+                ))}
+              </select>
               
               {loadingGenetics && (
                 <span className="text-sm text-gray-600">Loading...</span>
