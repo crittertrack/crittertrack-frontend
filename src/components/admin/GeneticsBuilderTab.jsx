@@ -509,6 +509,8 @@ const GeneticsBuilderTab = ({ API_BASE_URL, authToken }) => {
         
         setSaving(true);
         try {
+            console.log('Attempting to reorder alleles:', { geneIndex, alleleIndex, geneType, fromIndex: alleleIndex, toIndex: alleleIndex - 1 });
+            
             const response = await fetch(
                 `${API_BASE_URL}/admin/genetics/${currentData._id}/loci/${geneIndex}/alleles/reorder`,
                 {
@@ -529,10 +531,14 @@ const GeneticsBuilderTab = ({ API_BASE_URL, authToken }) => {
                 const data = await response.json();
                 setCurrentData(data);
                 setHasChanges(true);
+                console.log('Reorder successful');
             } else {
-                throw new Error('Failed to reorder alleles');
+                const errorData = await response.json();
+                console.error('Reorder failed:', response.status, errorData);
+                throw new Error(errorData.error || 'Failed to reorder alleles');
             }
         } catch (err) {
+            console.error('Reorder error:', err);
             alert('Error: ' + err.message);
         } finally {
             setSaving(false);
@@ -545,6 +551,8 @@ const GeneticsBuilderTab = ({ API_BASE_URL, authToken }) => {
         
         setSaving(true);
         try {
+            console.log('Attempting to reorder alleles:', { geneIndex, alleleIndex, geneType, fromIndex: alleleIndex, toIndex: alleleIndex + 1 });
+            
             const response = await fetch(
                 `${API_BASE_URL}/admin/genetics/${currentData._id}/loci/${geneIndex}/alleles/reorder`,
                 {
@@ -565,10 +573,14 @@ const GeneticsBuilderTab = ({ API_BASE_URL, authToken }) => {
                 const data = await response.json();
                 setCurrentData(data);
                 setHasChanges(true);
+                console.log('Reorder successful');
             } else {
-                throw new Error('Failed to reorder alleles');
+                const errorData = await response.json();
+                console.error('Reorder failed:', response.status, errorData);
+                throw new Error(errorData.error || 'Failed to reorder alleles');
             }
         } catch (err) {
+            console.error('Reorder error:', err);
             alert('Error: ' + err.message);
         } finally {
             setSaving(false);
