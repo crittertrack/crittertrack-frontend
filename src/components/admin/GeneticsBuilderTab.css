@@ -879,12 +879,18 @@
     }
 }
 
+/* Rank with Controls Layout */
+.rank-with-controls {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
 /* Allele Reordering Buttons */
 .genetics-reorder-buttons {
     display: flex;
     flex-direction: column;
     gap: 2px;
-    margin-right: 8px;
 }
 
 .genetics-reorder-btn {

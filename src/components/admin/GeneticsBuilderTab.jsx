@@ -1417,9 +1417,31 @@ const GeneCard = ({
                                                 <>
                                                     <div className="genetics-table-cell">
                                                         <label>Rank:</label>
-                                                        <span className="allele-rank">
-                                                            #{alleleIndex + 1} {alleleIndex === 0 ? '(Most Dominant)' : alleleIndex === (gene.alleles?.length - 1) ? '(Most Recessive)' : ''}
-                                                        </span>
+                                                        <div className="rank-with-controls">
+                                                            {isEditable && (
+                                                                <div className="genetics-reorder-buttons">
+                                                                    <button 
+                                                                        className="genetics-reorder-btn"
+                                                                        onClick={() => handleMoveAlleleUp(geneIndex, alleleIndex, geneType)}
+                                                                        disabled={alleleIndex === 0}
+                                                                        title="Move up (more dominant)"
+                                                                    >
+                                                                        <ChevronUp size={14} />
+                                                                    </button>
+                                                                    <button 
+                                                                        className="genetics-reorder-btn"
+                                                                        onClick={() => handleMoveAlleleDown(geneIndex, alleleIndex, geneType, gene.alleles?.length)}
+                                                                        disabled={alleleIndex === (gene.alleles?.length - 1)}
+                                                                        title="Move down (more recessive)"
+                                                                    >
+                                                                        <ChevronDown size={14} />
+                                                                    </button>
+                                                                </div>
+                                                            )}
+                                                            <span className="allele-rank">
+                                                                #{alleleIndex + 1} {alleleIndex === 0 ? '(Most Dominant)' : alleleIndex === (gene.alleles?.length - 1) ? '(Most Recessive)' : ''}
+                                                            </span>
+                                                        </div>
                                                     </div>
                                                     <div className="genetics-table-cell">
                                                         <label>Symbol:</label>
@@ -1439,24 +1461,6 @@ const GeneCard = ({
                                                     </div>
                                                     {isEditable && (
                                                         <div className="genetics-table-actions">
-                                                            <div className="genetics-reorder-buttons">
-                                                                <button 
-                                                                    className="genetics-reorder-btn"
-                                                                    onClick={() => handleMoveAlleleUp(geneIndex, alleleIndex, geneType)}
-                                                                    disabled={alleleIndex === 0}
-                                                                    title="Move up (more dominant)"
-                                                                >
-                                                                    <ChevronUp size={14} />
-                                                                </button>
-                                                                <button 
-                                                                    className="genetics-reorder-btn"
-                                                                    onClick={() => handleMoveAlleleDown(geneIndex, alleleIndex, geneType, gene.alleles?.length)}
-                                                                    disabled={alleleIndex === (gene.alleles?.length - 1)}
-                                                                    title="Move down (more recessive)"
-                                                                >
-                                                                    <ChevronDown size={14} />
-                                                                </button>
-                                                            </div>
                                                             <button 
                                                                 className="genetics-edit-btn"
                                                                 onClick={() => setEditingAllele({ 
