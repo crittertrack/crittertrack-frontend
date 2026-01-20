@@ -239,8 +239,8 @@ const GeneticsBuilderTab = ({ API_BASE_URL, authToken }) => {
             const coatGenes = [];
             
             // Define which genes are marking genes vs color genes
-            const markingGeneSymbols = ['S', 'W', 'Spl', 'Rn', 'Si', 'Mobr'];
-            const coatGeneSymbols = ['Go', 'Re', 'Sa', 'Rst', 'Fz', 'Nu', 'U'];
+            const markingGeneSymbols = ['S', 'W', 'Spl', 'Rn', 'Si', 'Mobr', 'U'];
+            const coatGeneSymbols = ['Go', 'Re', 'Sa', 'Rst', 'Fz', 'Nu'];
             
             let geneOrder = 0;
             Object.entries(GENE_LOCI).forEach(([symbol, data]) => {
