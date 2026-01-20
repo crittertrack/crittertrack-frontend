@@ -44,9 +44,7 @@ const GeneticsBuilderTab = ({ API_BASE_URL, authToken }) => {
         dominance: 'recessive' 
     });
     
-    // Allele reordering
-    const [draggedAllele, setDraggedAllele] = useState(null);
-    const [dropTarget, setDropTarget] = useState(null);
+    // Allele reordering (using up/down buttons)
     
     // Combination management
     const [addingCombinationToGene, setAddingCombinationToGene] = useState(null);
@@ -505,9 +503,9 @@ const GeneticsBuilderTab = ({ API_BASE_URL, authToken }) => {
         }
     };
 
-    // Reorder alleles within a locus based on drag and drop
-    const handleReorderAlleles = async (geneIndex, geneType, fromIndex, toIndex) => {
-        if (fromIndex === toIndex) return;
+    // Move allele up in dominance hierarchy (toward position 0 = most dominant)
+    const handleMoveAlleleUp = async (geneIndex, alleleIndex, geneType) => {
+        if (alleleIndex === 0) return; // Already at top
         
         setSaving(true);
         try {
@@ -520,8 +518,8 @@ const GeneticsBuilderTab = ({ API_BASE_URL, authToken }) => {
                         'Authorization': `Bearer ${authToken}`
                     },
                     body: JSON.stringify({
-                        fromIndex,
-                        toIndex,
+                        fromIndex: alleleIndex,
+                        toIndex: alleleIndex - 1,
                         geneType
                     })
                 }
@@ -541,38 +539,40 @@ const GeneticsBuilderTab = ({ API_BASE_URL, authToken }) => {
         }
     };
 
-    // Handle drag start
-    const handleDragStart = (e, geneIndex, alleleIndex) => {
-        setDraggedAllele({ geneIndex, alleleIndex });
-        e.dataTransfer.effectAllowed = 'move';
-    };
-
-    // Handle drag over
-    const handleDragOver = (e, geneIndex, alleleIndex) => {
-        e.preventDefault();
-        e.dataTransfer.dropEffect = 'move';
-        setDropTarget({ geneIndex, alleleIndex });
-    };
-
-    // Handle drop
-    const handleDrop = (e, geneIndex, alleleIndex, geneType) => {
-        e.preventDefault();
+    // Move allele down in dominance hierarchy (toward last position = most recessive)
+    const handleMoveAlleleDown = async (geneIndex, alleleIndex, geneType, totalAlleles) => {
+        if (alleleIndex === totalAlleles - 1) return; // Already at bottom
         
-        if (!draggedAllele || draggedAllele.geneIndex !== geneIndex) {
-            setDraggedAllele(null);
-            setDropTarget(null);
-            return;
+        setSaving(true);
+        try {
+            const response = await fetch(
+                `${API_BASE_URL}/admin/genetics/${currentData._id}/loci/${geneIndex}/alleles/reorder`,
+                {
+                    method: 'PUT',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': `Bearer ${authToken}`
+                    },
+                    body: JSON.stringify({
+                        fromIndex: alleleIndex,
+                        toIndex: alleleIndex + 1,
+                        geneType
+                    })
+                }
+            );
+            
+            if (response.ok) {
+                const data = await response.json();
+                setCurrentData(data);
+                setHasChanges(true);
+            } else {
+                throw new Error('Failed to reorder alleles');
+            }
+        } catch (err) {
+            alert('Error: ' + err.message);
+        } finally {
+            setSaving(false);
         }
-        
-        handleReorderAlleles(geneIndex, geneType, draggedAllele.alleleIndex, alleleIndex);
-        setDraggedAllele(null);
-        setDropTarget(null);
-    };
-
-    // Handle drag end
-    const handleDragEnd = () => {
-        setDraggedAllele(null);
-        setDropTarget(null);
     };
 
     // Generate combination notation from selected alleles based on dominance hierarchy
@@ -1010,15 +1010,9 @@ const GeneticsBuilderTab = ({ API_BASE_URL, authToken }) => {
                                                 editingCombination={editingCombination}
                                                 setEditingCombination={setEditingCombination}
                                                 onGenerateCombinations={() => handleGenerateCombinations(geneIndex, 'color')}
-                                                // Drag and drop props
-                                                draggedAllele={draggedAllele}
-                                                setDraggedAllele={setDraggedAllele}
-                                                dropTarget={dropTarget}
-                                                setDropTarget={setDropTarget}
-                                                handleDragStart={handleDragStart}
-                                                handleDragOver={handleDragOver}
-                                                handleDrop={handleDrop}
-                                                handleDragEnd={handleDragEnd}
+                                                // Allele reordering
+                                                handleMoveAlleleUp={handleMoveAlleleUp}
+                                                handleMoveAlleleDown={handleMoveAlleleDown}
                                             />
                                         ))}
                                     </div>
@@ -1068,15 +1062,9 @@ const GeneticsBuilderTab = ({ API_BASE_URL, authToken }) => {
                                                 editingCombination={editingCombination}
                                                 setEditingCombination={setEditingCombination}
                                                 onGenerateCombinations={() => handleGenerateCombinations(geneIndex, 'marking')}
-                                                // Drag and drop props
-                                                draggedAllele={draggedAllele}
-                                                setDraggedAllele={setDraggedAllele}
-                                                dropTarget={dropTarget}
-                                                setDropTarget={setDropTarget}
-                                                handleDragStart={handleDragStart}
-                                                handleDragOver={handleDragOver}
-                                                handleDrop={handleDrop}
-                                                handleDragEnd={handleDragEnd}
+                                                // Allele reordering
+                                                handleMoveAlleleUp={handleMoveAlleleUp}
+                                                handleMoveAlleleDown={handleMoveAlleleDown}
                                             />
                                         ))}
                                     </div>
@@ -1127,15 +1115,9 @@ const GeneticsBuilderTab = ({ API_BASE_URL, authToken }) => {
                                                 editingCombination={editingCombination}
                                                 setEditingCombination={setEditingCombination}
                                                 onGenerateCombinations={() => handleGenerateCombinations(geneIndex, 'coat')}
-                                                // Drag and drop props
-                                                draggedAllele={draggedAllele}
-                                                setDraggedAllele={setDraggedAllele}
-                                                dropTarget={dropTarget}
-                                                setDropTarget={setDropTarget}
-                                                handleDragStart={handleDragStart}
-                                                handleDragOver={handleDragOver}
-                                                handleDrop={handleDrop}
-                                                handleDragEnd={handleDragEnd}
+                                                // Allele reordering
+                                                handleMoveAlleleUp={handleMoveAlleleUp}
+                                                handleMoveAlleleDown={handleMoveAlleleDown}
                                             />
                                         ))}
                                     </div>
@@ -1186,15 +1168,9 @@ const GeneticsBuilderTab = ({ API_BASE_URL, authToken }) => {
                                                 editingCombination={editingCombination}
                                                 setEditingCombination={setEditingCombination}
                                                 onGenerateCombinations={() => handleGenerateCombinations(geneIndex, 'other')}
-                                                // Drag and drop props
-                                                draggedAllele={draggedAllele}
-                                                setDraggedAllele={setDraggedAllele}
-                                                dropTarget={dropTarget}
-                                                setDropTarget={setDropTarget}
-                                                handleDragStart={handleDragStart}
-                                                handleDragOver={handleDragOver}
-                                                handleDrop={handleDrop}
-                                                handleDragEnd={handleDragEnd}
+                                                // Allele reordering
+                                                handleMoveAlleleUp={handleMoveAlleleUp}
+                                                handleMoveAlleleDown={handleMoveAlleleDown}
                                             />
                                         ))}
                                     </div>
@@ -1298,9 +1274,8 @@ const GeneCard = ({
     addingCombination, newCombination, setNewCombination, onAddCombination, onCancelAddCombination, onRemoveCombination, onEditCombination,
     editingCombination, setEditingCombination,
     onGenerateCombinations,
-    // Drag and drop props
-    draggedAllele, setDraggedAllele, dropTarget, setDropTarget,
-    handleDragStart, handleDragOver, handleDrop, handleDragEnd
+    // Allele reordering
+    handleMoveAlleleUp, handleMoveAlleleDown
 }) => {
     return (
         <div className={`genetics-gene-card ${isExpanded ? 'expanded' : ''}`}>
@@ -1387,22 +1362,11 @@ const GeneCard = ({
                             <div className="genetics-responsive-table">
                                 {gene.alleles.map((allele, alleleIndex) => {
                                     const isEditing = editingAllele?.geneIndex === geneIndex && editingAllele?.alleleIndex === alleleIndex;
-                                    const isDragging = draggedAllele?.geneIndex === geneIndex && draggedAllele?.alleleIndex === alleleIndex;
-                                    const isDropTarget = dropTarget?.geneIndex === geneIndex && dropTarget?.alleleIndex === alleleIndex;
                                     
                                     return (
                                         <div 
                                             key={alleleIndex} 
-                                            className={`genetics-table-row ${
-                                                isDragging ? 'dragging' : ''
-                                            } ${
-                                                isDropTarget ? 'drop-target' : ''
-                                            }`}
-                                            draggable={isEditable && !isEditing}
-                                            onDragStart={(e) => handleDragStart(e, geneIndex, alleleIndex)}
-                                            onDragOver={(e) => handleDragOver(e, geneIndex, alleleIndex)}
-                                            onDrop={(e) => handleDrop(e, geneIndex, alleleIndex, geneType)}
-                                            onDragEnd={handleDragEnd}
+                                            className="genetics-table-row"
                                         >
                                             {isEditing ? (
                                                 <div className="genetics-edit-form">
@@ -1470,15 +1434,29 @@ const GeneCard = ({
                                                         <span>{allele.phenotype || '-'}</span>
                                                     </div>
                                                     <div className="genetics-table-cell">
-                                                        <label>Carrier:</label>
-                                                        <span>{allele.carrier || '-'}</span>
-                                                    </div>
-                                                    <div className="genetics-table-cell">
                                                         <label>Dominance:</label>
                                                         <span className="allele-dominance">{allele.dominance}</span>
                                                     </div>
                                                     {isEditable && (
                                                         <div className="genetics-table-actions">
+                                                            <div className="genetics-reorder-buttons">
+                                                                <button 
+                                                                    className="genetics-reorder-btn"
+                                                                    onClick={() => handleMoveAlleleUp(geneIndex, alleleIndex, geneType)}
+                                                                    disabled={alleleIndex === 0}
+                                                                    title="Move up (more dominant)"
+                                                                >
+                                                                    <ChevronUp size={14} />
+                                                                </button>
+                                                                <button 
+                                                                    className="genetics-reorder-btn"
+                                                                    onClick={() => handleMoveAlleleDown(geneIndex, alleleIndex, geneType, gene.alleles?.length)}
+                                                                    disabled={alleleIndex === (gene.alleles?.length - 1)}
+                                                                    title="Move down (more recessive)"
+                                                                >
+                                                                    <ChevronDown size={14} />
+                                                                </button>
+                                                            </div>
                                                             <button 
                                                                 className="genetics-edit-btn"
                                                                 onClick={() => setEditingAllele({ 

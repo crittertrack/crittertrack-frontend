@@ -879,28 +879,46 @@
     }
 }
 
-/* Drag and Drop Styles */
-.genetics-table-row[draggable="true"] {
-    cursor: move;
+/* Allele Reordering Buttons */
+.genetics-reorder-buttons {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+    margin-right: 8px;
+}
+
+.genetics-reorder-btn {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 24px;
+    height: 18px;
+    padding: 0;
+    border: 1px solid #e5e7eb;
+    border-radius: 4px;
+    background: #f9fafb;
+    color: #6b7280;
+    cursor: pointer;
     transition: all 0.2s ease;
 }
 
-.genetics-table-row[draggable="true"]:hover {
-    background-color: rgba(99, 102, 241, 0.05);
-    border-color: rgba(99, 102, 241, 0.2);
+.genetics-reorder-btn:hover:not(:disabled) {
+    background: #6366f1;
+    color: white;
+    border-color: #6366f1;
 }
 
-.genetics-table-row.dragging {
-    opacity: 0.6;
-    transform: scale(0.98);
-    z-index: 1000;
-    background-color: rgba(99, 102, 241, 0.1);
+.genetics-reorder-btn:disabled {
+    opacity: 0.3;
+    cursor: not-allowed;
+    background: #f3f4f6;
+    color: #9ca3af;
 }
 
-.genetics-table-row.drop-target {
-    background-color: rgba(34, 197, 94, 0.1);
-    border: 2px dashed #22c55e;
-    border-radius: 4px;
+.genetics-table-actions {
+    display: flex;
+    align-items: center;
+    gap: 4px;
 }
 
 .allele-rank {
@@ -964,11 +982,8 @@
         justify-content: center;
     }
     
-    .genetics-table-row[draggable="true"] {
-        cursor: grab;
-    }
-    
-    .genetics-table-row[draggable="true"]:active {
-        cursor: grabbing;
+    .genetics-reorder-buttons {
+        flex-direction: row;
+        gap: 4px;
     }
 }
