@@ -635,13 +635,13 @@ const GeneticsBuilderTab = ({ API_BASE_URL, authToken }) => {
                             {/* Marking Genes */}
                             <div className="genetics-section">
                                 <h4>Marking Genes ({currentData.markingGenes?.length || 0})</h4>
-                                {currentData.markingGenes?.length === 0 ? (
+                                {!currentData.markingGenes || currentData.markingGenes?.length === 0 ? (
                                     <div className="genetics-empty-section">
                                         <p>No marking genes added yet.</p>
                                     </div>
                                 ) : (
                                     <div className="genetics-genes-list">
-                                        {currentData.markingGenes.map((gene, geneIndex) => (
+                                        {currentData.markingGenes?.map((gene, geneIndex) => (
                                             <GeneCard 
                                                 key={`marking-${geneIndex}`}
                                                 gene={gene}
@@ -667,13 +667,13 @@ const GeneticsBuilderTab = ({ API_BASE_URL, authToken }) => {
                             {/* Coat/Texture Genes */}
                             <div className="genetics-section">
                                 <h4>Coat/Texture Genes ({currentData.coatGenes?.length || 0})</h4>
-                                {currentData.coatGenes?.length === 0 ? (
+                                {!currentData.coatGenes || currentData.coatGenes?.length === 0 ? (
                                     <div className="genetics-empty-section">
                                         <p>No coat/texture genes added yet.</p>
                                     </div>
                                 ) : (
                                     <div className="genetics-genes-list">
-                                        {currentData.coatGenes.map((gene, geneIndex) => (
+                                        {currentData.coatGenes?.map((gene, geneIndex) => (
                                             <GeneCard 
                                                 key={`coat-${geneIndex}`}
                                                 gene={gene}
