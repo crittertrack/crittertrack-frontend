@@ -1255,6 +1255,12 @@ const calculatePhenotype = (genotype, originalGenotype = null) => {
 };
 
 const MouseGeneticsCalculator = ({ API_BASE_URL, authToken, myAnimals = [] }) => {
+  // Species and genetics data states
+  const [selectedSpecies, setSelectedSpecies] = useState('Fancy Mouse');
+  const [availableSpecies, setAvailableSpecies] = useState([]);
+  const [geneLoci, setGeneLoci] = useState(GENE_LOCI); // Start with hardcoded Fancy Mouse data
+  const [loadingGenetics, setLoadingGenetics] = useState(false);
+
   // Parse genetic code string to genotype object
   const parseGeneticCode = (codeString) => {
     if (!codeString) return {};
@@ -1287,7 +1293,7 @@ const MouseGeneticsCalculator = ({ API_BASE_URL, authToken, myAnimals = [] }) =>
         // First, try to find an exact match (preserving case)
         const exactMatch = `${allele1}/${allele2}`;
         
-        for (const [locus, data] of Object.entries(GENE_LOCI)) {
+        for (const [locus, data] of Object.entries(geneLoci)) {
           if (data.combinations.includes(exactMatch)) {
             genotype[locus] = exactMatch;
             found = true;
@@ -1298,7 +1304,7 @@ const MouseGeneticsCalculator = ({ API_BASE_URL, authToken, myAnimals = [] }) =>
         // If no exact match, try the reverse order
         if (!found) {
           const reverseMatch = `${allele2}/${allele1}`;
-          for (const [locus, data] of Object.entries(GENE_LOCI)) {
+          for (const [locus, data] of Object.entries(geneLoci)) {
             if (data.combinations.includes(reverseMatch)) {
               genotype[locus] = reverseMatch;
               found = true;
@@ -1312,28 +1318,17 @@ const MouseGeneticsCalculator = ({ API_BASE_URL, authToken, myAnimals = [] }) =>
     return genotype;
   };
 
-  // Initialize with empty/default genotypes
-  const defaultGenotype = {
-    A: '',
-    B: '',
-    C: '',
-    D: '',
-    E: '',
-    P: '',
-    S: '',
-    W: '',
-    Spl: '',
-    Rn: '',
-    Si: '',
-    Mobr: '',
-    Go: '',
-    Re: '',
-    Sa: '',
-    Rst: '',
-    Fz: '',
-    Nu: '',
-    U: ''
+  // Create default genotype based on current geneLoci
+  const createDefaultGenotype = () => {
+    const defaults = {};
+    Object.keys(geneLoci).forEach(locus => {
+      defaults[locus] = '';
+    });
+    return defaults;
   };
+
+  // Initialize with empty/default genotypes
+  const defaultGenotype = createDefaultGenotype();
 
   const [parent1, setParent1] = useState(defaultGenotype);
   const [parent2, setParent2] = useState(defaultGenotype);
@@ -1348,6 +1343,67 @@ const MouseGeneticsCalculator = ({ API_BASE_URL, authToken, myAnimals = [] }) =>
   // Animal selector states
   const [showAnimalSelector, setShowAnimalSelector] = useState(false);
   const [selectingForParent, setSelectingForParent] = useState(null); // 'parent1' or 'parent2'
+
+  // Fetch available species with published genetics on mount
+  React.useEffect(() => {
+    const fetchAvailableSpecies = async () => {
+      try {
+        const response = await fetch(`${API_BASE_URL}/api/public/genetics/available`);
+        if (response.ok) {
+          const species = await response.json();
+          setAvailableSpecies(species);
+        }
+      } catch (error) {
+        console.error('Error fetching available species:', error);
+      }
+    };
+
+    fetchAvailableSpecies();
+  }, [API_BASE_URL]);
+
+  // Fetch genetics data when species changes
+  React.useEffect(() => {
+    const fetchGeneticsData = async () => {
+      // For Fancy Mouse, use hardcoded data (fast, reliable)
+      if (selectedSpecies === 'Fancy Mouse') {
+        setGeneLoci(GENE_LOCI);
+        const newDefaults = createDefaultGenotype();
+        setParent1(newDefaults);
+        setParent2(newDefaults);
+        setOffspringResults(null);
+        return;
+      }
+
+      // For other species, fetch from database
+      setLoadingGenetics(true);
+      try {
+        const response = await fetch(`${API_BASE_URL}/api/public/genetics/${encodeURIComponent(selectedSpecies)}`);
+        if (response.ok) {
+          const data = await response.json();
+          setGeneLoci(data.geneLoci);
+          
+          // Reset calculator with new gene structure
+          const newDefaults = {};
+          Object.keys(data.geneLoci).forEach(locus => {
+            newDefaults[locus] = '';
+          });
+          setParent1(newDefaults);
+          setParent2(newDefaults);
+          setOffspringResults(null);
+        } else {
+          console.error('Failed to fetch genetics data, falling back to Fancy Mouse');
+          setSelectedSpecies('Fancy Mouse');
+        }
+      } catch (error) {
+        console.error('Error fetching genetics data:', error);
+        setSelectedSpecies('Fancy Mouse'); // Fallback
+      } finally {
+        setLoadingGenetics(false);
+      }
+    };
+
+    fetchGeneticsData();
+  }, [selectedSpecies, API_BASE_URL]);
 
   // Helper function to generate beginner-friendly carrier explanations
   const generateCarrierExplanation = (genotypes) => {
@@ -1430,8 +1486,9 @@ const MouseGeneticsCalculator = ({ API_BASE_URL, authToken, myAnimals = [] }) =>
 
   // Reset calculator to default state
   const resetCalculator = () => {
-    setParent1(defaultGenotype);
-    setParent2(defaultGenotype);
+    const newDefaults = createDefaultGenotype();
+    setParent1(newDefaults);
+    setParent2(newDefaults);
     setActiveTab('self');
     setOffspringResults(null);
     setExpandedPhenotypes({});
@@ -1535,15 +1592,17 @@ const MouseGeneticsCalculator = ({ API_BASE_URL, authToken, myAnimals = [] }) =>
       return;
     }
 
+    const newDefaults = createDefaultGenotype();
+    
     if (selectingForParent === 'parent1') {
-      setParent1({ ...defaultGenotype, ...parsedGenotype });
+      setParent1({ ...newDefaults, ...parsedGenotype });
       if (process.env.NODE_ENV !== 'production') {
         setTimeout(() => {
           console.log('DEBUG: parent1.Sa after select:', parsedGenotype.Sa);
         }, 100);
       }
     } else if (selectingForParent === 'parent2') {
-      setParent2({ ...defaultGenotype, ...parsedGenotype });
+      setParent2({ ...newDefaults, ...parsedGenotype });
       if (process.env.NODE_ENV !== 'production') {
         setTimeout(() => {
           console.log('DEBUG: parent2.Sa after select:', parsedGenotype.Sa);
@@ -1629,7 +1688,7 @@ const MouseGeneticsCalculator = ({ API_BASE_URL, authToken, myAnimals = [] }) =>
     const p2 = applyDefaults(parent2);
     
     // Only calculate for loci where at least one parent has a selection
-    const selectedLoci = Object.keys(GENE_LOCI).filter(locus => 
+    const selectedLoci = Object.keys(geneLoci).filter(locus => 
       (parent1[locus] && parent1[locus] !== '') || (parent2[locus] && parent2[locus] !== '')
     );
     
@@ -1652,7 +1711,7 @@ const MouseGeneticsCalculator = ({ API_BASE_URL, authToken, myAnimals = [] }) =>
     
     // Create selectedGenotype that includes ALL genes selected by either parent
     const selectedGenotype = {};
-    Object.keys(GENE_LOCI).forEach(locus => {
+    Object.keys(geneLoci).forEach(locus => {
       if ((parent1[locus] && parent1[locus] !== '') || (parent2[locus] && parent2[locus] !== '')) {
         selectedGenotype[locus] = 'selected';
       }
@@ -2148,7 +2207,29 @@ const MouseGeneticsCalculator = ({ API_BASE_URL, authToken, myAnimals = [] }) =>
       ) : (
         <div className="w-full max-w-6xl mx-auto bg-white rounded-xl shadow-lg p-3 sm:p-6">
           <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-2 sm:gap-0 mb-4 sm:mb-6">
-            <h1 className="text-xl sm:text-2xl font-bold text-gray-800">Mouse Genetics Calculator</h1>
+            <div className="flex flex-col sm:flex-row sm:items-center gap-2">
+              <h1 className="text-xl sm:text-2xl font-bold text-gray-800">Genetics Calculator</h1>
+              
+              {/* Species Selector */}
+              {availableSpecies.length > 0 && (
+                <select
+                  value={selectedSpecies}
+                  onChange={(e) => setSelectedSpecies(e.target.value)}
+                  className="px-3 py-1.5 border-2 border-gray-300 rounded-lg text-sm font-medium bg-white hover:border-primary focus:border-primary focus:outline-none transition"
+                  disabled={loadingGenetics}
+                >
+                  <option value="Fancy Mouse">Fancy Mouse</option>
+                  {availableSpecies.filter(s => s !== 'Fancy Mouse').map(species => (
+                    <option key={species} value={species}>{species}</option>
+                  ))}
+                </select>
+              )}
+              
+              {loadingGenetics && (
+                <span className="text-sm text-gray-600">Loading...</span>
+              )}
+            </div>
+            
             <div className="flex gap-2">
               <button
                 onClick={resetCalculator}
@@ -2159,14 +2240,16 @@ const MouseGeneticsCalculator = ({ API_BASE_URL, authToken, myAnimals = [] }) =>
                 <span className="hidden sm:inline">Reset</span>
                 <span className="sm:hidden">Reset</span>
               </button>
-              <button
-                onClick={() => setShowExamples(true)}
-                className="flex items-center gap-1 sm:gap-2 px-3 sm:px-4 py-1.5 sm:py-2 bg-primary text-black border-2 border-black rounded-lg hover:bg-primary-dark transition text-sm sm:text-base"
-              >
-                <Book className="w-4 h-4 sm:w-[18px] sm:h-[18px]" />
-                <span className="hidden sm:inline">View Examples</span>
-                <span className="sm:hidden">Examples</span>
-              </button>
+              {selectedSpecies === 'Fancy Mouse' && (
+                <button
+                  onClick={() => setShowExamples(true)}
+                  className="flex items-center gap-1 sm:gap-2 px-3 sm:px-4 py-1.5 sm:py-2 bg-primary text-black border-2 border-black rounded-lg hover:bg-primary-dark transition text-sm sm:text-base"
+                >
+                  <Book className="w-4 h-4 sm:w-[18px] sm:h-[18px]" />
+                  <span className="hidden sm:inline">View Examples</span>
+                  <span className="sm:hidden">Examples</span>
+                </button>
+              )}
             </div>
           </div>
 
@@ -2189,7 +2272,7 @@ const MouseGeneticsCalculator = ({ API_BASE_URL, authToken, myAnimals = [] }) =>
             )}
           </div>
           <div className="grid grid-cols-2 gap-2 sm:gap-3">
-            {Object.entries(GENE_LOCI).map(([locus, data]) => {
+            {Object.entries(geneLoci).map(([locus, data]) => {
               // For Sire/Father, filter out Mobr combinations (males can't carry Mobr)
               const validCombinations = data.maleCombinations || data.combinations;
               return (
@@ -2259,7 +2342,7 @@ const MouseGeneticsCalculator = ({ API_BASE_URL, authToken, myAnimals = [] }) =>
             )}
           </div>
           <div className="grid grid-cols-2 gap-2 sm:gap-3">
-            {Object.entries(GENE_LOCI).map(([locus, data]) => (
+            {Object.entries(geneLoci).map(([locus, data]) => (
               <div key={locus}>
                 <select
                   value={parent2[locus]}
@@ -2538,8 +2621,8 @@ const MouseGeneticsCalculator = ({ API_BASE_URL, authToken, myAnimals = [] }) =>
                       if (selectingForParent === 'parent1' && animal.gender !== 'Male') return false;
                       if (selectingForParent === 'parent2' && animal.gender !== 'Female') return false;
                       
-                      // Filter by species (Fancy Mouse only)
-                      if (animal.species !== 'Fancy Mouse') return false;
+                      // Filter by selected species
+                      if (animal.species !== selectedSpecies) return false;
                       
                       // Filter by search
                       if (animalSearch) {
@@ -2608,10 +2691,10 @@ const MouseGeneticsCalculator = ({ API_BASE_URL, authToken, myAnimals = [] }) =>
                   
                   {myAnimals.filter(a => 
                     (selectingForParent === 'parent1' ? a.gender === 'Male' : a.gender === 'Female') &&
-                    a.species === 'Fancy Mouse'
+                    a.species === selectedSpecies
                   ).length === 0 && (
                     <div className="text-center py-8 text-gray-500">
-                      <p>No {selectingForParent === 'parent1' ? 'male' : 'female'} Fancy Mice found in your collection.</p>
+                      <p>No {selectingForParent === 'parent1' ? 'male' : 'female'} {selectedSpecies} found in your collection.</p>
                     </div>
                   )}
                 </div>
