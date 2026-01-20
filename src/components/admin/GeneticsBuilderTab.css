@@ -726,7 +726,131 @@
     to { transform: rotate(360deg); }
 }
 
-/* Responsive */
+/* Responsive Tables */
+.genetics-responsive-table {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    margin-top: 12px;
+}
+
+.genetics-table-row {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    padding: 12px;
+    background: #f9fafb;
+    border-radius: 8px;
+    border: 1px solid #e5e7eb;
+}
+
+.genetics-table-cell {
+    display: flex;
+    flex-direction: column;
+    min-width: 120px;
+    flex: 1;
+}
+
+.genetics-table-cell label {
+    font-size: 0.75rem;
+    color: #6b7280;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    margin-bottom: 2px;
+}
+
+.genetics-table-cell span {
+    font-size: 0.875rem;
+    color: #1f2937;
+    word-wrap: break-word;
+}
+
+.genetics-table-actions {
+    display: flex;
+    gap: 4px;
+    align-items: center;
+    margin-left: auto;
+}
+
+.genetics-edit-btn, .genetics-delete-btn {
+    padding: 4px;
+    border: none;
+    background: none;
+    cursor: pointer;
+    border-radius: 4px;
+    transition: all 0.2s;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.genetics-edit-btn {
+    color: #2563eb;
+}
+
+.genetics-edit-btn:hover {
+    background: #dbeafe;
+}
+
+.genetics-delete-btn {
+    color: #dc2626;
+}
+
+.genetics-delete-btn:hover {
+    background: #fee2e2;
+}
+
+/* Forms */
+.genetics-form-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+    gap: 12px;
+    align-items: start;
+}
+
+.genetics-form-actions {
+    display: flex;
+    gap: 8px;
+    justify-content: flex-end;
+    grid-column: 1 / -1;
+}
+
+.genetics-edit-form {
+    background: #f3f4f6;
+    border-radius: 8px;
+    padding: 16px;
+    border: 2px dashed #d1d5db;
+}
+
+.genetics-checkbox {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 0.875rem;
+    cursor: pointer;
+}
+
+.genetics-no-data {
+    color: #6b7280;
+    font-style: italic;
+    text-align: center;
+    padding: 24px;
+    background: #f9fafb;
+    border-radius: 8px;
+    border: 2px dashed #d1d5db;
+}
+
+.spin {
+    animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+    from { transform: rotate(0deg); }
+    to { transform: rotate(360deg); }
+}
+
+/* Mobile Responsive */
 @media (max-width: 768px) {
     .genetics-stats-grid {
         grid-template-columns: repeat(2, 1fr);
@@ -737,15 +861,36 @@
         align-items: flex-start;
     }
     
-    .genetics-alleles-table-header,
-    .genetics-allele-row {
-        grid-template-columns: 1fr 1fr;
+    .genetics-form-grid {
+        grid-template-columns: 1fr;
     }
     
-    .genetics-alleles-table-header span:nth-child(3),
-    .genetics-alleles-table-header span:nth-child(4),
-    .genetics-allele-row span:nth-child(3),
-    .genetics-allele-row span:nth-child(4) {
-        display: none;
+    .genetics-table-row {
+        flex-direction: column;
+    }
+    
+    .genetics-table-cell {
+        min-width: auto;
+    }
+    
+    .genetics-table-actions {
+        margin-left: 0;
+        justify-content: flex-start;
+    }
+}
+
+@media (max-width: 480px) {
+    .genetics-header {
+        flex-direction: column;
+    }
+    
+    .genetics-editor-actions {
+        flex-direction: column;
+        width: 100%;
+    }
+    
+    .genetics-btn {
+        width: 100%;
+        justify-content: center;
     }
 }
