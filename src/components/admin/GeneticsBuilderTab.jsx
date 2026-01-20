@@ -1010,6 +1010,15 @@ const GeneticsBuilderTab = ({ API_BASE_URL, authToken }) => {
                                                 editingCombination={editingCombination}
                                                 setEditingCombination={setEditingCombination}
                                                 onGenerateCombinations={() => handleGenerateCombinations(geneIndex, 'color')}
+                                                // Drag and drop props
+                                                draggedAllele={draggedAllele}
+                                                setDraggedAllele={setDraggedAllele}
+                                                dropTarget={dropTarget}
+                                                setDropTarget={setDropTarget}
+                                                handleDragStart={handleDragStart}
+                                                handleDragOver={handleDragOver}
+                                                handleDrop={handleDrop}
+                                                handleDragEnd={handleDragEnd}
                                             />
                                         ))}
                                     </div>
@@ -1059,6 +1068,15 @@ const GeneticsBuilderTab = ({ API_BASE_URL, authToken }) => {
                                                 editingCombination={editingCombination}
                                                 setEditingCombination={setEditingCombination}
                                                 onGenerateCombinations={() => handleGenerateCombinations(geneIndex, 'marking')}
+                                                // Drag and drop props
+                                                draggedAllele={draggedAllele}
+                                                setDraggedAllele={setDraggedAllele}
+                                                dropTarget={dropTarget}
+                                                setDropTarget={setDropTarget}
+                                                handleDragStart={handleDragStart}
+                                                handleDragOver={handleDragOver}
+                                                handleDrop={handleDrop}
+                                                handleDragEnd={handleDragEnd}
                                             />
                                         ))}
                                     </div>
@@ -1109,6 +1127,15 @@ const GeneticsBuilderTab = ({ API_BASE_URL, authToken }) => {
                                                 editingCombination={editingCombination}
                                                 setEditingCombination={setEditingCombination}
                                                 onGenerateCombinations={() => handleGenerateCombinations(geneIndex, 'coat')}
+                                                // Drag and drop props
+                                                draggedAllele={draggedAllele}
+                                                setDraggedAllele={setDraggedAllele}
+                                                dropTarget={dropTarget}
+                                                setDropTarget={setDropTarget}
+                                                handleDragStart={handleDragStart}
+                                                handleDragOver={handleDragOver}
+                                                handleDrop={handleDrop}
+                                                handleDragEnd={handleDragEnd}
                                             />
                                         ))}
                                     </div>
@@ -1159,6 +1186,15 @@ const GeneticsBuilderTab = ({ API_BASE_URL, authToken }) => {
                                                 editingCombination={editingCombination}
                                                 setEditingCombination={setEditingCombination}
                                                 onGenerateCombinations={() => handleGenerateCombinations(geneIndex, 'other')}
+                                                // Drag and drop props
+                                                draggedAllele={draggedAllele}
+                                                setDraggedAllele={setDraggedAllele}
+                                                dropTarget={dropTarget}
+                                                setDropTarget={setDropTarget}
+                                                handleDragStart={handleDragStart}
+                                                handleDragOver={handleDragOver}
+                                                handleDrop={handleDrop}
+                                                handleDragEnd={handleDragEnd}
                                             />
                                         ))}
                                     </div>
@@ -1261,7 +1297,10 @@ const GeneCard = ({
     // Combination management
     addingCombination, newCombination, setNewCombination, onAddCombination, onCancelAddCombination, onRemoveCombination, onEditCombination,
     editingCombination, setEditingCombination,
-    onGenerateCombinations
+    onGenerateCombinations,
+    // Drag and drop props
+    draggedAllele, setDraggedAllele, dropTarget, setDropTarget,
+    handleDragStart, handleDragOver, handleDrop, handleDragEnd
 }) => {
     return (
         <div className={`genetics-gene-card ${isExpanded ? 'expanded' : ''}`}>
