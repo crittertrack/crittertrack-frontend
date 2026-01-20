@@ -41,7 +41,6 @@ const GeneticsBuilderTab = ({ API_BASE_URL, authToken }) => {
         symbol: '', 
         name: '', 
         phenotype: '', 
-        carrier: '', 
         dominance: 'recessive' 
     });
     
@@ -414,7 +413,6 @@ const GeneticsBuilderTab = ({ API_BASE_URL, authToken }) => {
                         symbol: newAllele.symbol.trim(),
                         name: newAllele.name.trim() || null,
                         phenotype: newAllele.phenotype.trim() || null,
-                        carrier: newAllele.carrier.trim() || null,
                         dominance: newAllele.dominance,
                         geneType
                     })
@@ -425,7 +423,7 @@ const GeneticsBuilderTab = ({ API_BASE_URL, authToken }) => {
                 const data = await response.json();
                 setCurrentData(data);
                 setHasChanges(true);
-                setNewAllele({ symbol: '', name: '', phenotype: '', carrier: '', dominance: 'recessive' });
+                setNewAllele({ symbol: '', name: '', phenotype: '', dominance: 'recessive' });
                 setAddingAlleleToGene(null);
             } else {
                 throw new Error('Failed to add allele');
@@ -481,7 +479,6 @@ const GeneticsBuilderTab = ({ API_BASE_URL, authToken }) => {
                         symbol: alleleData.symbol.trim(),
                         name: alleleData.name.trim() || null,
                         phenotype: alleleData.phenotype.trim() || null,
-                        carrier: alleleData.carrier.trim() || null,
                         dominance: alleleData.dominance,
                         geneType
                     })
@@ -1199,12 +1196,6 @@ const GeneCard = ({
                                         onChange={(e) => setNewAllele(prev => ({ ...prev, phenotype: e.target.value }))}
                                         placeholder="Phenotype (optional)"
                                     />
-                                    <input
-                                        type="text"
-                                        value={newAllele.carrier}
-                                        onChange={(e) => setNewAllele(prev => ({ ...prev, carrier: e.target.value }))}
-                                        placeholder="Carrier (optional)"
-                                    />
                                     <select
                                         value={newAllele.dominance}
                                         onChange={(e) => setNewAllele(prev => ({ ...prev, dominance: e.target.value }))}
@@ -1248,12 +1239,6 @@ const GeneCard = ({
                                                             defaultValue={allele.phenotype || ''}
                                                             onBlur={(e) => setEditingAllele(prev => ({ ...prev, phenotype: e.target.value }))}
                                                             placeholder="Phenotype"
-                                                        />
-                                                        <input
-                                                            type="text"
-                                                            defaultValue={allele.carrier || ''}
-                                                            onBlur={(e) => setEditingAllele(prev => ({ ...prev, carrier: e.target.value }))}
-                                                            placeholder="Carrier"
                                                         />
                                                         <select
                                                             defaultValue={allele.dominance}
@@ -1311,7 +1296,6 @@ const GeneCard = ({
                                                                     symbol: allele.symbol,
                                                                     name: allele.name || '',
                                                                     phenotype: allele.phenotype || '',
-                                                                    carrier: allele.carrier || '',
                                                                     dominance: allele.dominance
                                                                 })}
                                                                 title="Edit allele"
