@@ -33,10 +33,6 @@ const GeneticsBuilderTab = ({ API_BASE_URL, authToken }) => {
     // New locus modal
     const [showNewGeneModal, setShowNewGeneModal] = useState(false);
     const [newGene, setNewGene] = useState({ symbol: '', name: '', description: '', geneType: 'color' });
-    
-    // Allele reordering
-    const [draggedAllele, setDraggedAllele] = useState(null);
-    const [dropTarget, setDropTarget] = useState(null);
 
     // Allele management
     const [addingAlleleToGene, setAddingAlleleToGene] = useState(null);
