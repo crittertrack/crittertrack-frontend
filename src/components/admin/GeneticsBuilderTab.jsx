@@ -34,6 +34,10 @@ const GeneticsBuilderTab = ({ API_BASE_URL, authToken }) => {
     const [showNewGeneModal, setShowNewGeneModal] = useState(false);
     const [newGene, setNewGene] = useState({ symbol: '', name: '', description: '', geneType: 'color' });
     
+    // Allele reordering
+    const [draggedAllele, setDraggedAllele] = useState(null);
+    const [dropTarget, setDropTarget] = useState(null);
+
     // Allele management
     const [addingAlleleToGene, setAddingAlleleToGene] = useState(null);
     const [editingAllele, setEditingAllele] = useState(null);
@@ -44,11 +48,16 @@ const GeneticsBuilderTab = ({ API_BASE_URL, authToken }) => {
         dominance: 'recessive' 
     });
     
+    // Allele reordering
+    const [draggedAllele, setDraggedAllele] = useState(null);
+    const [dropTarget, setDropTarget] = useState(null);
+    
     // Combination management
     const [addingCombinationToGene, setAddingCombinationToGene] = useState(null);
     const [editingCombination, setEditingCombination] = useState(null);
     const [newCombination, setNewCombination] = useState({ 
-        notation: '', 
+        allele1: '', 
+        allele2: '', 
         phenotype: '', 
         carrier: '', 
         isLethal: false 
@@ -500,12 +509,139 @@ const GeneticsBuilderTab = ({ API_BASE_URL, authToken }) => {
         }
     };
 
-    // Add combination to locus
-    const handleAddCombination = async (geneIndex, geneType) => {
-        if (!newCombination.notation.trim()) {
-            alert('Combination notation is required (e.g., A/A, A/a, a/a)');
+    // Reorder alleles within a locus based on drag and drop
+    const handleReorderAlleles = async (geneIndex, geneType, fromIndex, toIndex) => {
+        if (fromIndex === toIndex) return;
+        
+        setSaving(true);
+        try {
+            const response = await fetch(
+                `${API_BASE_URL}/admin/genetics/${currentData._id}/loci/${geneIndex}/alleles/reorder`,
+                {
+                    method: 'PUT',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': `Bearer ${authToken}`
+                    },
+                    body: JSON.stringify({
+                        fromIndex,
+                        toIndex,
+                        geneType
+                    })
+                }
+            );
+            
+            if (response.ok) {
+                const data = await response.json();
+                setCurrentData(data);
+                setHasChanges(true);
+            } else {
+                throw new Error('Failed to reorder alleles');
+            }
+        } catch (err) {
+            alert('Error: ' + err.message);
+        } finally {
+            setSaving(false);
+        }
+    };
+
+    // Handle drag start
+    const handleDragStart = (e, geneIndex, alleleIndex) => {
+        setDraggedAllele({ geneIndex, alleleIndex });
+        e.dataTransfer.effectAllowed = 'move';
+    };
+
+    // Handle drag over
+    const handleDragOver = (e, geneIndex, alleleIndex) => {
+        e.preventDefault();
+        e.dataTransfer.dropEffect = 'move';
+        setDropTarget({ geneIndex, alleleIndex });
+    };
+
+    // Handle drop
+    const handleDrop = (e, geneIndex, alleleIndex, geneType) => {
+        e.preventDefault();
+        
+        if (!draggedAllele || draggedAllele.geneIndex !== geneIndex) {
+            setDraggedAllele(null);
+            setDropTarget(null);
             return;
         }
+        
+        handleReorderAlleles(geneIndex, geneType, draggedAllele.alleleIndex, alleleIndex);
+        setDraggedAllele(null);
+        setDropTarget(null);
+    };
+
+    // Handle drag end
+    const handleDragEnd = () => {
+        setDraggedAllele(null);
+        setDropTarget(null);
+    };
+
+    // Generate combination notation from selected alleles based on dominance hierarchy
+    const generateCombinationNotation = (gene, allele1Symbol, allele2Symbol) => {
+        if (!allele1Symbol || !allele2Symbol) return '';
+        
+        const allele1Index = gene.alleles?.findIndex(a => a.symbol === allele1Symbol) ?? -1;
+        const allele2Index = gene.alleles?.findIndex(a => a.symbol === allele2Symbol) ?? -1;
+        
+        if (allele1Index === -1 || allele2Index === -1) return '';
+        
+        // Lower index = more dominant (earlier in list)
+        // Convention: write dominant allele first in heterozygotes
+        if (allele1Index < allele2Index) {
+            // allele1 is more dominant
+            return `${allele1Symbol}/${allele2Symbol}`;
+        } else if (allele2Index < allele1Index) {
+            // allele2 is more dominant  
+            return `${allele2Symbol}/${allele1Symbol}`;
+        } else {
+            // Same allele (homozygote)
+            return `${allele1Symbol}/${allele2Symbol}`;
+        }
+    };
+
+    // Suggest phenotype and carrier based on allele dominance
+    const suggestPhenotypeAndCarrier = (gene, allele1Symbol, allele2Symbol) => {
+        if (!allele1Symbol || !allele2Symbol) return { phenotype: '', carrier: '' };
+        
+        const allele1Index = gene.alleles?.findIndex(a => a.symbol === allele1Symbol) ?? -1;
+        const allele2Index = gene.alleles?.findIndex(a => a.symbol === allele2Symbol) ?? -1;
+        const allele1 = gene.alleles?.[allele1Index];
+        const allele2 = gene.alleles?.[allele2Index];
+        
+        if (!allele1 || !allele2) return { phenotype: '', carrier: '' };
+        
+        // If same allele (homozygote)
+        if (allele1Symbol === allele2Symbol) {
+            return {
+                phenotype: allele1.phenotype || allele1.name || allele1Symbol,
+                carrier: '' // No carrier in homozygotes
+            };
+        }
+        
+        // Heterozygote - determine which is dominant
+        const dominantAllele = allele1Index < allele2Index ? allele1 : allele2;
+        const recessiveAllele = allele1Index < allele2Index ? allele2 : allele1;
+        
+        return {
+            phenotype: dominantAllele.phenotype || dominantAllele.name || dominantAllele.symbol,
+            carrier: recessiveAllele.name || recessiveAllele.symbol
+        };
+    };
+
+    // Add combination to locus
+    const handleAddCombination = async (geneIndex, geneType) => {
+        if (!newCombination.allele1 || !newCombination.allele2) {
+            alert('Please select both alleles for the combination');
+            return;
+        }
+        
+        // Auto-generate notation and suggestions
+        const gene = currentData[geneType][geneIndex];
+        const notation = generateCombinationNotation(gene, newCombination.allele1, newCombination.allele2);
+        const suggestions = suggestPhenotypeAndCarrier(gene, newCombination.allele1, newCombination.allele2);
         
         setSaving(true);
         try {
@@ -518,9 +654,9 @@ const GeneticsBuilderTab = ({ API_BASE_URL, authToken }) => {
                         'Authorization': `Bearer ${authToken}`
                     },
                     body: JSON.stringify({
-                        notation: newCombination.notation.trim(),
-                        phenotype: newCombination.phenotype.trim() || null,
-                        carrier: newCombination.carrier.trim() || null,
+                        notation: notation,
+                        phenotype: newCombination.phenotype.trim() || suggestions.phenotype || null,
+                        carrier: newCombination.carrier.trim() || suggestions.carrier || null,
                         isLethal: newCombination.isLethal,
                         geneType
                     })
@@ -531,7 +667,7 @@ const GeneticsBuilderTab = ({ API_BASE_URL, authToken }) => {
                 const data = await response.json();
                 setCurrentData(data);
                 setHasChanges(true);
-                setNewCombination({ notation: '', phenotype: '', carrier: '', isLethal: false });
+                setNewCombination({ allele1: '', allele2: '', phenotype: '', carrier: '', isLethal: false });
                 setAddingCombinationToGene(null);
             } else {
                 throw new Error('Failed to add combination');
@@ -1216,9 +1352,23 @@ const GeneCard = ({
                             <div className="genetics-responsive-table">
                                 {gene.alleles.map((allele, alleleIndex) => {
                                     const isEditing = editingAllele?.geneIndex === geneIndex && editingAllele?.alleleIndex === alleleIndex;
+                                    const isDragging = draggedAllele?.geneIndex === geneIndex && draggedAllele?.alleleIndex === alleleIndex;
+                                    const isDropTarget = dropTarget?.geneIndex === geneIndex && dropTarget?.alleleIndex === alleleIndex;
                                     
                                     return (
-                                        <div key={alleleIndex} className="genetics-table-row">
+                                        <div 
+                                            key={alleleIndex} 
+                                            className={`genetics-table-row ${
+                                                isDragging ? 'dragging' : ''
+                                            } ${
+                                                isDropTarget ? 'drop-target' : ''
+                                            }`}
+                                            draggable={isEditable && !isEditing}
+                                            onDragStart={(e) => handleDragStart(e, geneIndex, alleleIndex)}
+                                            onDragOver={(e) => handleDragOver(e, geneIndex, alleleIndex)}
+                                            onDrop={(e) => handleDrop(e, geneIndex, alleleIndex, categoryKey)}
+                                            onDragEnd={handleDragEnd}
+                                        >
                                             {isEditing ? (
                                                 <div className="genetics-edit-form">
                                                     <div className="genetics-form-grid">
@@ -1266,6 +1416,12 @@ const GeneCard = ({
                                                 </div>
                                             ) : (
                                                 <>
+                                                    <div className="genetics-table-cell">
+                                                        <label>Rank:</label>
+                                                        <span className="allele-rank">
+                                                            #{alleleIndex + 1} {alleleIndex === 0 ? '(Most Dominant)' : alleleIndex === (gene.alleles?.length - 1) ? '(Most Recessive)' : ''}
+                                                        </span>
+                                                    </div>
                                                     <div className="genetics-table-cell">
                                                         <label>Symbol:</label>
                                                         <span className="allele-symbol">{allele.symbol}</span>
@@ -1350,12 +1506,34 @@ const GeneCard = ({
                         {addingCombination && (
                             <div className="genetics-combination-form">
                                 <div className="genetics-form-grid">
-                                    <input
-                                        type="text"
-                                        value={newCombination.notation}
-                                        onChange={(e) => setNewCombination(prev => ({ ...prev, notation: e.target.value }))}
-                                        placeholder="Notation (A/A, A/a)"
-                                    />
+                                    <div className="allele-selector">
+                                        <label>First Allele:</label>
+                                        <select
+                                            value={newCombination.allele1}
+                                            onChange={(e) => setNewCombination(prev => ({ ...prev, allele1: e.target.value }))}
+                                        >
+                                            <option value="">Select allele...</option>
+                                            {gene.alleles?.map((allele, index) => (
+                                                <option key={index} value={allele.symbol}>
+                                                    {allele.symbol} - {allele.name || 'Unnamed'}
+                                                </option>
+                                            ))}
+                                        </select>
+                                    </div>
+                                    <div className="allele-selector">
+                                        <label>Second Allele:</label>
+                                        <select
+                                            value={newCombination.allele2}
+                                            onChange={(e) => setNewCombination(prev => ({ ...prev, allele2: e.target.value }))}
+                                        >
+                                            <option value="">Select allele...</option>
+                                            {gene.alleles?.map((allele, index) => (
+                                                <option key={index} value={allele.symbol}>
+                                                    {allele.symbol} - {allele.name || 'Unnamed'}
+                                                </option>
+                                            ))}
+                                        </select>
+                                    </div>
                                     <input
                                         type="text"
                                         value={newCombination.phenotype}
