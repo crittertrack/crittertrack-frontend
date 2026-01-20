@@ -320,7 +320,7 @@ const GeneticsBuilderTab = ({ API_BASE_URL, authToken }) => {
             
             setCurrentData(updatedData);
             setHasChanges(true);
-            alert(`Successfully imported ${colorGenes.length} color loci, ${markingGenes.length} marking loci, and ${coatGenes.length} coat loci!\n\nNext: Fill in allele names, dominance, phenotypes, and carrier info.`);
+            alert(`Successfully imported ${colorGenes.length} color loci, ${markingGenes.length} marking loci, and ${coatGenes.length} coat loci!\n\nNext: Fill in allele names, dominance, and phenotypes.`);
         } catch (err) {
             alert('Error importing: ' + err.message);
         } finally {
