@@ -172,6 +172,7 @@ const GeneticsBuilderTab = ({ API_BASE_URL, authToken }) => {
                     genes: currentData.genes,
                     markingGenes: currentData.markingGenes,
                     coatGenes: currentData.coatGenes,
+                    otherGenes: currentData.otherGenes,
                     phenotypeRules: currentData.phenotypeRules,
                     adminNotes: currentData.adminNotes
                 })
@@ -346,13 +347,13 @@ const GeneticsBuilderTab = ({ API_BASE_URL, authToken }) => {
     };
 
     // Delete gene
-    const handleDeleteGene = async (geneIndex, isMarking, isCoat) => {
+    const handleDeleteGene = async (geneIndex, isMarking, isCoat, isOther) => {
         if (!window.confirm('Delete this gene and all its alleles?')) return;
         
         setSaving(true);
         try {
             const response = await fetch(
-                `${API_BASE_URL}/admin/genetics/${currentData._id}/genes/${geneIndex}?isMarking=${isMarking}&isCoat=${isCoat}`,
+                `${API_BASE_URL}/admin/genetics/${currentData._id}/genes/${geneIndex}?isMarking=${isMarking}&isCoat=${isCoat}&isOther=${isOther}`,
                 {
                     method: 'DELETE',
                     headers: { 'Authorization': `Bearer ${authToken}` }
@@ -374,14 +375,14 @@ const GeneticsBuilderTab = ({ API_BASE_URL, authToken }) => {
     };
 
     // Add allele to gene (local update)
-    const handleAddAllele = (geneIndex, isMarking, isCoat) => {
+    const handleAddAllele = (geneIndex, isMarking, isCoat, isOther) => {
         if (!newAllele.notation.trim()) {
             alert('Notation is required (e.g., A/A, A/a, a/a)');
             return;
         }
         
         const updatedData = { ...currentData };
-        const geneArray = isCoat ? updatedData.coatGenes : (isMarking ? updatedData.markingGenes : updatedData.genes);
+        const geneArray = isOther ? updatedData.otherGenes : (isCoat ? updatedData.coatGenes : (isMarking ? updatedData.markingGenes : updatedData.genes));
         
         geneArray[geneIndex].alleles.push({
             notation: newAllele.notation.trim(),
@@ -398,9 +399,9 @@ const GeneticsBuilderTab = ({ API_BASE_URL, authToken }) => {
     };
 
     // Remove allele (local update)
-    const handleRemoveAllele = (geneIndex, alleleIndex, isMarking, isCoat) => {
+    const handleRemoveAllele = (geneIndex, alleleIndex, isMarking, isCoat, isOther) => {
         const updatedData = { ...currentData };
-        const geneArray = isCoat ? updatedData.coatGenes : (isMarking ? updatedData.markingGenes : updatedData.genes);
+        const geneArray = isOther ? updatedData.otherGenes : (isCoat ? updatedData.coatGenes : (isMarking ? updatedData.markingGenes : updatedData.genes));
         
         geneArray[geneIndex].alleles.splice(alleleIndex, 1);
         
@@ -429,7 +430,7 @@ const GeneticsBuilderTab = ({ API_BASE_URL, authToken }) => {
         totalSpecies: geneticsData.length,
         published: geneticsData.filter(g => g.isPublished).length,
         drafts: geneticsData.filter(g => !g.isPublished).length,
-        totalGenes: geneticsData.reduce((acc, g) => acc + (g.genes?.length || 0) + (g.markingGenes?.length || 0) + (g.coatGenes?.length || 0), 0)
+        totalGenes: geneticsData.reduce((acc, g) => acc + (g.genes?.length || 0) + (g.markingGenes?.length || 0) + (g.coatGenes?.length || 0) + (g.otherGenes?.length || 0), 0)
     };
 
     if (loading && geneticsData.length === 0) {
@@ -602,7 +603,7 @@ const GeneticsBuilderTab = ({ API_BASE_URL, authToken }) => {
 
                             {/* Color/Pattern Genes */}
                             <div className="genetics-section">
-                                <h4>Color & Pattern Genes ({currentData.genes?.length || 0})</h4>
+                                <h4>Color Genes ({currentData.genes?.length || 0})</h4>
                                 {currentData.genes?.length === 0 ? (
                                     <div className="genetics-empty-section">
                                         <p>No genes added yet. Click "Add Gene" to start.</p>
@@ -634,10 +635,10 @@ const GeneticsBuilderTab = ({ API_BASE_URL, authToken }) => {
 
                             {/* Marking Genes */}
                             <div className="genetics-section">
-                                <h4>Marking Genes ({currentData.markingGenes?.length || 0})</h4>
+                                <h4>Markings and Patterns ({currentData.markingGenes?.length || 0})</h4>
                                 {!currentData.markingGenes || currentData.markingGenes?.length === 0 ? (
                                     <div className="genetics-empty-section">
-                                        <p>No marking genes added yet.</p>
+                                        <p>No markings and patterns added yet.</p>
                                     </div>
                                 ) : (
                                     <div className="genetics-genes-list">
@@ -690,6 +691,40 @@ const GeneticsBuilderTab = ({ API_BASE_URL, authToken }) => {
                                                 newAllele={newAllele}
                                                 setNewAllele={setNewAllele}
                                                 onSaveAllele={() => handleAddAllele(geneIndex, false, true)}
+                                                onCancelAllele={() => setAddingAlleleToGene(null)}
+                                            />
+                                        ))}
+                                    </div>
+                                )}
+                            </div>
+
+                            {/* Other Genes */}
+                            <div className="genetics-section">
+                                <h4>Other Genes ({currentData.otherGenes?.length || 0})</h4>
+                                {!currentData.otherGenes || currentData.otherGenes?.length === 0 ? (
+                                    <div className="genetics-empty-section">
+                                        <p>No other genes added yet (e.g., ear type, tail type).</p>
+                                    </div>
+                                ) : (
+                                    <div className="genetics-genes-list">
+                                        {currentData.otherGenes?.map((gene, geneIndex) => (
+                                            <GeneCard 
+                                                key={`other-${geneIndex}`}
+                                                gene={gene}
+                                                geneIndex={geneIndex}
+                                                isMarking={true}
+                                                isCoat={false}
+                                                isOther={true}
+                                                isExpanded={expandedGenes.has(`other-${geneIndex}`)}
+                                                onToggleExpand={() => toggleGeneExpanded(`other-${geneIndex}`)}
+                                                onDelete={() => handleDeleteGene(geneIndex, false, false, true)}
+                                                onAddAllele={() => setAddingAlleleToGene({ index: geneIndex, isOther: true })}
+                                                onRemoveAllele={(alleleIndex) => handleRemoveAllele(geneIndex, alleleIndex, false, false, true)}
+                                                isEditable={!currentData.isPublished}
+                                                addingAllele={addingAlleleToGene?.index === geneIndex && addingAlleleToGene?.isOther}
+                                                newAllele={newAllele}
+                                                setNewAllele={setNewAllele}
+                                                onSaveAllele={() => handleAddAllele(geneIndex, false, false, true)}
                                                 onCancelAllele={() => setAddingAlleleToGene(null)}
                                             />
                                         ))}
@@ -760,9 +795,10 @@ const GeneticsBuilderTab = ({ API_BASE_URL, authToken }) => {
                                     value={newGene.geneType}
                                     onChange={(e) => setNewGene(prev => ({ ...prev, geneType: e.target.value }))}
                                 >
-                                    <option value="color">Color/Pattern Gene</option>
-                                    <option value="marking">Marking Gene</option>
+                                    <option value="color">Color Gene</option>
+                                    <option value="marking">Markings and Patterns</option>
                                     <option value="coat">Coat/Texture Gene</option>
+                                    <option value="other">Other (ear type, tail type, etc.)</option>
                                 </select>
                             </div>
                         </div>
