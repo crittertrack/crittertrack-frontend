@@ -1362,7 +1362,7 @@ const GeneCard = ({
                                             draggable={isEditable && !isEditing}
                                             onDragStart={(e) => handleDragStart(e, geneIndex, alleleIndex)}
                                             onDragOver={(e) => handleDragOver(e, geneIndex, alleleIndex)}
-                                            onDrop={(e) => handleDrop(e, geneIndex, alleleIndex, categoryKey)}
+                                            onDrop={(e) => handleDrop(e, geneIndex, alleleIndex, geneType)}
                                             onDragEnd={handleDragEnd}
                                         >
                                             {isEditing ? (
