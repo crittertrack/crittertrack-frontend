@@ -17538,6 +17538,7 @@ const App = () => {
                     <MouseGeneticsCalculator
                         API_BASE_URL={API_BASE_URL}
                         authToken={null}
+                        userRole={null}
                     />
                 </div>
             );
@@ -18570,6 +18571,7 @@ const App = () => {
                             API_BASE_URL={API_BASE_URL}
                             authToken={authToken}
                             myAnimals={myAnimalsForCalculator}
+                            userRole={userProfile?.role}
                         />
                     } />
                     <Route path="/select-species" element={

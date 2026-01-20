@@ -1254,12 +1254,15 @@ const calculatePhenotype = (genotype, originalGenotype = null) => {
   return { phenotype: result || 'Unknown', carriers, hidden, notes };
 };
 
-const MouseGeneticsCalculator = ({ API_BASE_URL, authToken, myAnimals = [] }) => {
+const MouseGeneticsCalculator = ({ API_BASE_URL, authToken, myAnimals = [], userRole = null }) => {
   // Species and genetics data states
   const [selectedSpecies, setSelectedSpecies] = useState('Fancy Mouse');
   const [availableSpecies, setAvailableSpecies] = useState([]);
   const [geneLoci, setGeneLoci] = useState(GENE_LOCI); // Start with hardcoded Fancy Mouse data
   const [loadingGenetics, setLoadingGenetics] = useState(false);
+
+  // Check if user is admin or moderator
+  const isAdminOrMod = userRole === 'admin' || userRole === 'moderator';
 
   // Parse genetic code string to genotype object
   const parseGeneticCode = (codeString) => {
@@ -2210,7 +2213,7 @@ const MouseGeneticsCalculator = ({ API_BASE_URL, authToken, myAnimals = [] }) =>
             <div className="flex flex-col sm:flex-row sm:items-center gap-2">
               <h1 className="text-xl sm:text-2xl font-bold text-gray-800">Genetics Calculator</h1>
               
-              {/* Species Selector - Always show */}
+              {/* Species Selector - Only show other species to admins/mods */}
               <select
                 value={selectedSpecies}
                 onChange={(e) => setSelectedSpecies(e.target.value)}
@@ -2218,7 +2221,7 @@ const MouseGeneticsCalculator = ({ API_BASE_URL, authToken, myAnimals = [] }) =>
                 disabled={loadingGenetics}
               >
                 <option value="Fancy Mouse">Fancy Mouse</option>
-                {availableSpecies.filter(s => s !== 'Fancy Mouse').map(species => (
+                {isAdminOrMod && availableSpecies.filter(s => s !== 'Fancy Mouse').map(species => (
                   <option key={species} value={species}>{species}</option>
                 ))}
               </select>
