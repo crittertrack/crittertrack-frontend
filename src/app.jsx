@@ -400,7 +400,7 @@ const PedigreeChart = ({ animalId, animalData, onClose, API_BASE_URL, authToken 
         const GenderIcon = isMale ? Mars : Venus;
         
         return (
-            <div className={`border border-gray-700 rounded-lg p-2 ${bgColor} relative flex gap-3 items-center`} style={{height: window.innerWidth < 640 ? '100px' : '120px'}}>
+            <div className={`border border-gray-700 rounded-lg p-2 ${bgColor} relative flex gap-3 items-center`} style={{height: window.innerWidth < 640 ? '140px' : '160px'}}>
                 {/* Image */}
                 <div className="hide-for-pdf w-16 h-16 sm:w-20 sm:h-20 bg-gray-100 rounded-lg overflow-hidden flex items-center justify-center flex-shrink-0 border-2 border-gray-900">
                     {imgSrc ? (
@@ -901,62 +901,69 @@ const PedigreeChart = ({ animalId, animalData, onClose, API_BASE_URL, authToken 
 
                 {/* Pedigree Chart - Responsive on mobile, fixed aspect ratio for PDF */}
                 <div ref={pedigreeRef} className="bg-white p-1 sm:p-6 rounded-lg border-2 border-gray-300 relative w-full" style={{minHeight: window.innerWidth < 640 ? '320px' : '400px'}}>
-                    {/* Top Row: 3 columns - Main Animal | Species | Owner */}
-                    <div className="flex gap-0.5 sm:gap-2 mb-0.5 sm:mb-2 items-start">
-                        {/* Left: Main Animal */}
-                        <div className="w-1/3">
-                            {pedigreeData && renderMainAnimalCard(pedigreeData)}
-                        </div>
-                        
-                        {/* Middle: Species */}
-                        <div className="w-1/3 flex items-center justify-center">
-                            <div className="text-center">
-                                <h3 className="text-xs sm:text-lg font-bold text-gray-800">{pedigreeData?.species || 'Unknown Species'}</h3>
-                                {pedigreeData?.species && getSpeciesLatinName(pedigreeData.species) && (
-                                    <p className="text-xs sm:text-sm italic text-gray-600">{getSpeciesLatinName(pedigreeData.species)}</p>
-                                )}
+                    {/* Entire content scrollable horizontally on mobile */}
+                    <div className="overflow-x-auto overflow-y-visible sm:overflow-hidden" style={{minWidth: window.innerWidth < 640 ? '800px' : 'auto'}}>
+                        {/* Top Row: 4 columns - Main Animal | Species | Owner | Spacer */}
+                        <div className="flex gap-0.5 sm:gap-2 mb-0.5 sm:mb-2 items-start">
+                            {/* Left: Main Animal - Same width as parent cards */}
+                            <div className="w-1/4">
+                                {pedigreeData && renderMainAnimalCard(pedigreeData)}
                             </div>
-                        </div>
-                        
-                        {/* Right: Owner Profile */}
-                        <div className="w-1/3 flex items-center justify-end gap-0.5 sm:gap-3">
-                            <div className="text-right">
-                                {(() => {
-                                    const ownerInfo = getOwnerDisplayInfoTopRight();
-                                    return (
-                                        <>
-                                            {ownerInfo.lines.map((line, idx) => (
-                                                <div key={idx} className="text-xs sm:text-base font-semibold text-gray-800 leading-tight">{line}</div>
-                                            ))}
-                                            {ownerInfo.userId && (
-                                                <div className="text-xs text-gray-600 mt-1">{ownerInfo.userId}</div>
-                                            )}
-                                        </>
-                                    );
-                                })()}
+                            
+                            {/* Species */}
+                            <div className="w-1/4 flex items-center justify-center">
+                                <div className="text-center">
+                                    <h3 className="text-xs sm:text-lg font-bold text-gray-800">{pedigreeData?.species || 'Unknown Species'}</h3>
+                                    {pedigreeData?.species && getSpeciesLatinName(pedigreeData.species) && (
+                                        <p className="text-xs sm:text-sm italic text-gray-600">{getSpeciesLatinName(pedigreeData.species)}</p>
+                                    )}
+                                </div>
                             </div>
-                            <div className="hide-for-pdf w-6 h-6 sm:w-16 sm:h-16 bg-gray-200 rounded-lg overflow-hidden flex items-center justify-center">
-                                {(ownerProfile?.profileImage || ownerProfile?.profileImageUrl) ? (
-                                    <img src={ownerProfile.profileImage || ownerProfile.profileImageUrl} alt="Owner" className="w-full h-full object-cover" />
-                                ) : (
-                                    <User size={12} className="text-gray-400 sm:w-8 sm:h-8" />
-                                )}
+                            
+                            {/* Owner Profile */}
+                            <div className="w-1/4 flex items-center justify-end gap-0.5 sm:gap-3">
+                                <div className="text-right">
+                                    {(() => {
+                                        const ownerInfo = getOwnerDisplayInfoTopRight();
+                                        return (
+                                            <>
+                                                {ownerInfo.lines.map((line, idx) => (
+                                                    <div key={idx} className="text-xs sm:text-base font-semibold text-gray-800 leading-tight">{line}</div>
+                                                ))}
+                                                {ownerInfo.userId && (
+                                                    <div className="text-xs text-gray-600 mt-1">{ownerInfo.userId}</div>
+                                                )}
+                                            </>
+                                        );
+                                    })()}
+                                </div>
+                                <div className="hide-for-pdf w-6 h-6 sm:w-16 sm:h-16 bg-gray-200 rounded-lg overflow-hidden flex items-center justify-center">
+                                    {(ownerProfile?.profileImage || ownerProfile?.profileImageUrl) ? (
+                                        <img src={ownerProfile.profileImage || ownerProfile.profileImageUrl} alt="Owner" className="w-full h-full object-cover" />
+                                    ) : (
+                                        <User size={12} className="text-gray-400 sm:w-8 sm:h-8" />
+                                    )}
+                                </div>
                             </div>
+                            
+                            {/* Spacer column to balance layout */}
+                            <div className="w-1/4"></div>
                         </div>
-                    </div>
 
-                    {/* Pedigree Tree - Allow horizontal scroll on mobile if needed */}
-                    <div className="overflow-x-auto overflow-y-visible sm:overflow-hidden">
-                        {renderPedigreeTree(pedigreeData)}
-                    </div>
-
-                    {/* Footer */}
-                    <div className="absolute bottom-2 sm:bottom-6 left-2 sm:left-6 right-2 sm:right-6 pt-1 sm:pt-3 border-t-2 border-gray-300 flex justify-between items-center text-xs sm:text-sm text-gray-600">
+                        {/* Pedigree Tree */}
                         <div>
-                            {getOwnerDisplayInfoBottomLeft()}
+                            {renderPedigreeTree(pedigreeData)}
                         </div>
-                        <div>{new Date().toLocaleDateString()}</div>
+                        
+                        {/* Footer - Inside scrollable content */}
+                        <div className="mt-2 sm:mt-4 pt-1 sm:pt-3 border-t-2 border-gray-300 flex justify-between items-center text-xs sm:text-sm text-gray-600">
+                            <div>
+                                {getOwnerDisplayInfoBottomLeft()}
+                            </div>
+                            <div>{new Date().toLocaleDateString()}</div>
+                        </div>
                     </div>
+
                 </div>
                     </div>
                 </div>
