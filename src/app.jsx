@@ -179,14 +179,7 @@ const PedigreeChart = ({ animalId, animalData, onClose, API_BASE_URL, authToken 
     const [ownerProfile, setOwnerProfile] = useState(null);
     const [loading, setLoading] = useState(true);
     const [imagesLoaded, setImagesLoaded] = useState(false);
-    const [showImageModal, setShowImageModal] = useState(false);
-    const [enlargedImageUrl, setEnlargedImageUrl] = useState(null);
     const pedigreeRef = useRef(null);
-
-    const handleImageClick = (imageUrl) => {
-        setEnlargedImageUrl(imageUrl);
-        setShowImageModal(true);
-    };
 
     useEffect(() => {
         const fetchPedigreeData = async () => {
@@ -422,7 +415,7 @@ const PedigreeChart = ({ animalId, animalData, onClose, API_BASE_URL, authToken 
                 {/* Image */}
                 <div className="hide-for-pdf w-16 h-16 sm:w-20 sm:h-20 bg-gray-100 rounded-lg overflow-hidden flex items-center justify-center flex-shrink-0 border-2 border-gray-900">
                     {imgSrc ? (
-                        <AnimalImage src={imgSrc} alt={animal.name} className="w-full h-full object-cover" iconSize={window.innerWidth < 640 ? 24 : 32} onImageClick={handleImageClick} />
+                        <AnimalImage src={imgSrc} alt={animal.name} className="w-full h-full object-cover" iconSize={window.innerWidth < 640 ? 24 : 32} />
                     ) : (
                         <Cat size={window.innerWidth < 640 ? 24 : 32} className="text-gray-400" />
                     )}
@@ -516,7 +509,7 @@ const PedigreeChart = ({ animalId, animalData, onClose, API_BASE_URL, authToken 
                 {/* Image - 1/3 width */}
                 <div className="hide-for-pdf w-1/3 aspect-square bg-gray-100 rounded-lg border-2 border-gray-900 overflow-hidden flex items-center justify-center flex-shrink-0" style={{maxWidth: '60px', maxHeight: '60px'}}>
                     {imgSrc ? (
-                        <AnimalImage src={imgSrc} alt={animal.name} className="w-full h-full object-cover" iconSize={20} onImageClick={handleImageClick} />
+                        <AnimalImage src={imgSrc} alt={animal.name} className="w-full h-full object-cover" iconSize={20} />
                     ) : (
                         <Cat size={20} className="text-gray-400" />
                     )}
@@ -616,7 +609,7 @@ const PedigreeChart = ({ animalId, animalData, onClose, API_BASE_URL, authToken 
                 {/* Image - 1/3 width */}
                 <div className="hide-for-pdf w-1/3 aspect-square bg-gray-100 rounded-lg border-2 border-gray-900 overflow-hidden flex items-center justify-center flex-shrink-0" style={{maxWidth: '40px', maxHeight: '40px'}}>
                     {imgSrc ? (
-                        <AnimalImage src={imgSrc} alt={animal.name} className="w-full h-full object-cover" iconSize={16} onImageClick={handleImageClick} />
+                        <AnimalImage src={imgSrc} alt={animal.name} className="w-full h-full object-cover" iconSize={16} />
                     ) : (
                         <Cat size={16} className="text-gray-400" />
                     )}
@@ -713,7 +706,7 @@ const PedigreeChart = ({ animalId, animalData, onClose, API_BASE_URL, authToken 
                 {/* Image - 1/3 width */}
                 <div className="hide-for-pdf w-1/3 aspect-square bg-gray-100 rounded-lg border-2 border-gray-900 overflow-hidden flex items-center justify-center flex-shrink-0" style={{maxWidth: '28px', maxHeight: '28px'}}>
                     {imgSrc ? (
-                        <AnimalImage src={imgSrc} alt={animal.name} className="w-full h-full object-cover" iconSize={12} onImageClick={handleImageClick} />
+                        <AnimalImage src={imgSrc} alt={animal.name} className="w-full h-full object-cover" iconSize={12} />
                     ) : (
                         <Cat size={12} className="text-gray-400" />
                     )}
@@ -1015,56 +1008,6 @@ const PedigreeChart = ({ animalId, animalData, onClose, API_BASE_URL, authToken 
                     </div>
                 </div>
             </div>
-            
-            {/* Image Modal for enlarging/downloading images */}
-            {showImageModal && enlargedImageUrl && (
-                <div 
-                    style={{ zIndex: 999999 }}
-                    className="fixed inset-0 bg-black bg-opacity-90 flex items-center justify-center p-4"
-                    onClick={() => setShowImageModal(false)}
-                >
-                    <div className="relative max-w-7xl max-h-full flex flex-col items-center gap-4">
-                        <button
-                            onClick={(e) => {
-                                e.stopPropagation();
-                                setShowImageModal(false);
-                            }}
-                            className="self-end text-white hover:text-gray-300 transition"
-                        >
-                            <X size={32} />
-                        </button>
-                        <img 
-                            src={enlargedImageUrl} 
-                            alt="Enlarged view" 
-                            className="max-w-full max-h-[75vh] object-contain"
-                            onClick={(e) => e.stopPropagation()}
-                        />
-                        <button
-                            onClick={async (e) => {
-                                e.stopPropagation();
-                                try {
-                                    const response = await fetch(enlargedImageUrl);
-                                    const blob = await response.blob();
-                                    const url = window.URL.createObjectURL(blob);
-                                    const a = document.createElement('a');
-                                    a.href = url;
-                                    a.download = `crittertrack-animal-${Date.now()}.jpg`;
-                                    document.body.appendChild(a);
-                                    a.click();
-                                    document.body.removeChild(a);
-                                    window.URL.revokeObjectURL(url);
-                                } catch (error) {
-                                    console.error('Download failed:', error);
-                                }
-                            }}
-                            className="bg-blue-600 hover:bg-blue-700 text-white px-6 py-2 rounded-lg flex items-center gap-2 transition"
-                        >
-                            <Download size={20} />
-                            Download Image
-                        </button>
-                    </div>
-                </div>
-            )}
         </div>
     );
 };
