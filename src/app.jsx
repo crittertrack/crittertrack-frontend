@@ -673,11 +673,9 @@ const PedigreeChart = ({ animalId, animalData, onClose, API_BASE_URL, authToken 
         return (
             <div className={`border border-gray-700 rounded p-0.5 ${bgColor} relative h-full flex flex-col justify-start gap-1 py-1`}>
                 {/* Name */}
-                <div className="text-gray-900 leading-tight" style={{fontSize: '0.6rem', lineHeight: '1.2'}}>
+                <div className="text-gray-900 leading-tight line-clamp-2" style={{fontSize: '0.6rem', lineHeight: '1.2'}}>
                     <span className="font-semibold">Name: </span>
-                    <span className="line-clamp-2">
-                        {animal.prefix && `${animal.prefix} `}{animal.name}{animal.suffix && ` ${animal.suffix}`}
-                    </span>
+                    {animal.prefix && `${animal.prefix} `}{animal.name}{animal.suffix && ` ${animal.suffix}`}
                 </div>
                 
                 {/* Variety */}
