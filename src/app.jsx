@@ -137,7 +137,7 @@ const LoadingSpinner = () => (
 );
 
 // Reusable animal image component with error handling
-const AnimalImage = ({ src, alt = "Animal", className = "w-full h-full object-cover", iconSize = 24 }) => {
+const AnimalImage = ({ src, alt = "Animal", className = "w-full h-full object-cover", iconSize = 24, onImageClick = null }) => {
     const [imageError, setImageError] = useState(false);
     const [imageSrc, setImageSrc] = useState(src);
 
@@ -151,6 +151,12 @@ const AnimalImage = ({ src, alt = "Animal", className = "w-full h-full object-co
         setImageError(true);
     };
 
+    const handleImageClick = () => {
+        if (onImageClick && imageSrc && !imageError) {
+            onImageClick(imageSrc);
+        }
+    };
+
     if (!imageSrc || imageError) {
         return <Cat size={iconSize} className="text-gray-400" />;
     }
@@ -159,20 +165,28 @@ const AnimalImage = ({ src, alt = "Animal", className = "w-full h-full object-co
         <img 
             src={imageSrc} 
             alt={alt} 
-            className={className}
+            className={`${className} ${onImageClick ? 'cursor-pointer hover:opacity-80 transition-opacity' : ''}`}
             onError={handleError}
+            onClick={handleImageClick}
             loading="lazy"
         />
     );
 };
 
 // Pedigree Chart Component
-const PedigreeChart = ({ animalId, animalData, onClose, API_BASE_URL, authToken = null }) => {
+const PedigreeChart = ({ animalId, animalData, onClose, API_BASE_URL, authToken = null, onViewAnimal }) => {
     const [pedigreeData, setPedigreeData] = useState(null);
     const [ownerProfile, setOwnerProfile] = useState(null);
     const [loading, setLoading] = useState(true);
     const [imagesLoaded, setImagesLoaded] = useState(false);
+    const [showImageModal, setShowImageModal] = useState(false);
+    const [enlargedImageUrl, setEnlargedImageUrl] = useState(null);
     const pedigreeRef = useRef(null);
+
+    const handleImageClick = (imageUrl) => {
+        setEnlargedImageUrl(imageUrl);
+        setShowImageModal(true);
+    };
 
     useEffect(() => {
         const fetchPedigreeData = async () => {
@@ -400,11 +414,15 @@ const PedigreeChart = ({ animalId, animalData, onClose, API_BASE_URL, authToken 
         const GenderIcon = isMale ? Mars : Venus;
         
         return (
-            <div className={`border border-gray-700 rounded-lg p-2 ${bgColor} relative flex gap-3 items-center`} style={{height: window.innerWidth < 640 ? '180px' : '200px'}}>
+            <div 
+                className={`border border-gray-700 rounded-lg p-2 ${bgColor} relative flex gap-3 items-center cursor-pointer hover:opacity-80 transition`} 
+                style={{height: window.innerWidth < 640 ? '180px' : '200px'}}
+                onClick={() => onViewAnimal && onViewAnimal(animal)}
+            >
                 {/* Image */}
                 <div className="hide-for-pdf w-16 h-16 sm:w-20 sm:h-20 bg-gray-100 rounded-lg overflow-hidden flex items-center justify-center flex-shrink-0 border-2 border-gray-900">
                     {imgSrc ? (
-                        <AnimalImage src={imgSrc} alt={animal.name} className="w-full h-full object-cover" iconSize={window.innerWidth < 640 ? 24 : 32} />
+                        <AnimalImage src={imgSrc} alt={animal.name} className="w-full h-full object-cover" iconSize={window.innerWidth < 640 ? 24 : 32} onImageClick={handleImageClick} />
                     ) : (
                         <Cat size={window.innerWidth < 640 ? 24 : 32} className="text-gray-400" />
                     )}
@@ -491,11 +509,14 @@ const PedigreeChart = ({ animalId, animalData, onClose, API_BASE_URL, authToken 
         const colorCoat = [animal.color, animal.coat].filter(Boolean).join(' ') || 'N/A';
         
         return (
-            <div className={`border border-gray-700 rounded p-1.5 ${bgColor} relative flex gap-2 h-full items-center`}>
+            <div 
+                className={`border border-gray-700 rounded p-1.5 ${bgColor} relative flex gap-2 h-full items-center cursor-pointer hover:opacity-80 transition`}
+                onClick={() => onViewAnimal && onViewAnimal(animal)}
+            >
                 {/* Image - 1/3 width */}
                 <div className="hide-for-pdf w-1/3 aspect-square bg-gray-100 rounded-lg border-2 border-gray-900 overflow-hidden flex items-center justify-center flex-shrink-0" style={{maxWidth: '60px', maxHeight: '60px'}}>
                     {imgSrc ? (
-                        <AnimalImage src={imgSrc} alt={animal.name} className="w-full h-full object-cover" iconSize={20} />
+                        <AnimalImage src={imgSrc} alt={animal.name} className="w-full h-full object-cover" iconSize={20} onImageClick={handleImageClick} />
                     ) : (
                         <Cat size={20} className="text-gray-400" />
                     )}
@@ -588,11 +609,14 @@ const PedigreeChart = ({ animalId, animalData, onClose, API_BASE_URL, authToken 
         const colorCoat = [animal.color, animal.coat].filter(Boolean).join(' ') || 'N/A';
         
         return (
-            <div className={`border border-gray-700 rounded p-1 ${bgColor} relative flex gap-1.5 h-full items-center`}>
+            <div 
+                className={`border border-gray-700 rounded p-1 ${bgColor} relative flex gap-1.5 h-full items-center cursor-pointer hover:opacity-80 transition`}
+                onClick={() => onViewAnimal && onViewAnimal(animal)}
+            >
                 {/* Image - 1/3 width */}
                 <div className="hide-for-pdf w-1/3 aspect-square bg-gray-100 rounded-lg border-2 border-gray-900 overflow-hidden flex items-center justify-center flex-shrink-0" style={{maxWidth: '40px', maxHeight: '40px'}}>
                     {imgSrc ? (
-                        <AnimalImage src={imgSrc} alt={animal.name} className="w-full h-full object-cover" iconSize={16} />
+                        <AnimalImage src={imgSrc} alt={animal.name} className="w-full h-full object-cover" iconSize={16} onImageClick={handleImageClick} />
                     ) : (
                         <Cat size={16} className="text-gray-400" />
                     )}
@@ -689,7 +713,7 @@ const PedigreeChart = ({ animalId, animalData, onClose, API_BASE_URL, authToken 
                 {/* Image - 1/3 width */}
                 <div className="hide-for-pdf w-1/3 aspect-square bg-gray-100 rounded-lg border-2 border-gray-900 overflow-hidden flex items-center justify-center flex-shrink-0" style={{maxWidth: '28px', maxHeight: '28px'}}>
                     {imgSrc ? (
-                        <AnimalImage src={imgSrc} alt={animal.name} className="w-full h-full object-cover" iconSize={12} />
+                        <AnimalImage src={imgSrc} alt={animal.name} className="w-full h-full object-cover" iconSize={12} onImageClick={handleImageClick} />
                     ) : (
                         <Cat size={12} className="text-gray-400" />
                     )}
@@ -991,6 +1015,56 @@ const PedigreeChart = ({ animalId, animalData, onClose, API_BASE_URL, authToken 
                     </div>
                 </div>
             </div>
+            
+            {/* Image Modal for enlarging/downloading images */}
+            {showImageModal && enlargedImageUrl && (
+                <div 
+                    style={{ zIndex: 999999 }}
+                    className="fixed inset-0 bg-black bg-opacity-90 flex items-center justify-center p-4"
+                    onClick={() => setShowImageModal(false)}
+                >
+                    <div className="relative max-w-7xl max-h-full flex flex-col items-center gap-4">
+                        <button
+                            onClick={(e) => {
+                                e.stopPropagation();
+                                setShowImageModal(false);
+                            }}
+                            className="self-end text-white hover:text-gray-300 transition"
+                        >
+                            <X size={32} />
+                        </button>
+                        <img 
+                            src={enlargedImageUrl} 
+                            alt="Enlarged view" 
+                            className="max-w-full max-h-[75vh] object-contain"
+                            onClick={(e) => e.stopPropagation()}
+                        />
+                        <button
+                            onClick={async (e) => {
+                                e.stopPropagation();
+                                try {
+                                    const response = await fetch(enlargedImageUrl);
+                                    const blob = await response.blob();
+                                    const url = window.URL.createObjectURL(blob);
+                                    const a = document.createElement('a');
+                                    a.href = url;
+                                    a.download = `crittertrack-animal-${Date.now()}.jpg`;
+                                    document.body.appendChild(a);
+                                    a.click();
+                                    document.body.removeChild(a);
+                                    window.URL.revokeObjectURL(url);
+                                } catch (error) {
+                                    console.error('Download failed:', error);
+                                }
+                            }}
+                            className="bg-blue-600 hover:bg-blue-700 text-white px-6 py-2 rounded-lg flex items-center gap-2 transition"
+                        >
+                            <Download size={20} />
+                            Download Image
+                        </button>
+                    </div>
+                </div>
+            )}
         </div>
     );
 };
@@ -1053,6 +1127,18 @@ const ParentSearchModal = ({
     const [loadingGlobal, setLoadingGlobal] = useState(false);
     const [scope, setScope] = useState('both'); // 'local' | 'global' | 'both'
     
+    // Image modal state
+    const [showImageModal, setShowImageModal] = useState(false);
+    const [enlargedImageUrl, setEnlargedImageUrl] = useState('');
+    
+    // Image click handler
+    const handleImageClick = (imageUrl) => {
+        if (imageUrl) {
+            setEnlargedImageUrl(imageUrl);
+            setShowImageModal(true);
+        }
+    };
+    
     // Simple component to render a list item
     const SearchResultItem = ({ animal, isGlobal }) => {
         const imgSrc = animal.imageUrl || animal.photoUrl || null;
@@ -1064,7 +1150,7 @@ const ParentSearchModal = ({
             >
                 {/* Thumbnail */}
                 <div className="w-16 h-16 bg-gray-100 rounded-md overflow-hidden flex-shrink-0 flex items-center justify-center">
-                    <AnimalImage src={imgSrc} alt={animal.name} className="w-full h-full object-cover" iconSize={24} />
+                    <AnimalImage src={imgSrc} alt={animal.name} className="w-full h-full object-cover" iconSize={24} onImageClick={handleImageClick} />
                 </div>
                 
                 {/* Info */}
@@ -1320,12 +1406,13 @@ const LocalAnimalSearchModal = ({ title, currentId, onSelect, onClose, authToken
     };
 
     return (
-        <div className="fixed inset-0 bg-gray-600 bg-opacity-75 flex items-center justify-center p-4 z-50">
-            <div className="bg-white rounded-xl shadow-2xl p-6 w-full max-w-xl max-h-[90vh] flex flex-col">
-                <div className="flex justify-between items-center border-b pb-3 mb-4">
-                    <h3 className="text-xl font-bold text-gray-800">{title} Selector</h3>
-                    <button onClick={onClose} className="text-gray-500 hover:text-gray-800"><X size={24} /></button>
-                </div>
+        <>
+            <div className="fixed inset-0 bg-gray-600 bg-opacity-75 flex items-center justify-center p-4 z-50">
+                <div className="bg-white rounded-xl shadow-2xl p-6 w-full max-w-xl max-h-[90vh] flex flex-col">
+                    <div className="flex justify-between items-center border-b pb-3 mb-4">
+                        <h3 className="text-xl font-bold text-gray-800">{title} Selector</h3>
+                        <button onClick={onClose} className="text-gray-500 hover:text-gray-800"><X size={24} /></button>
+                    </div>
 
                 {/* Search Bar (Manual Search) */}
                 <div className="flex space-x-2 mb-4">
@@ -1370,6 +1457,7 @@ const LocalAnimalSearchModal = ({ title, currentId, onSelect, onClose, authToken
                 </div>
             </div>
         </div>
+        </>
     );
 };
 
@@ -1382,6 +1470,18 @@ const UserSearchModal = ({ onClose, showModalMessage, onSelectUser, API_BASE_URL
     const [animalResults, setAnimalResults] = useState([]);
     const [loading, setLoading] = useState(false);
     const [hasSearched, setHasSearched] = useState(false);
+    
+    // Image modal state
+    const [showImageModal, setShowImageModal] = useState(false);
+    const [enlargedImageUrl, setEnlargedImageUrl] = useState('');
+    
+    // Image click handler
+    const handleImageClick = (imageUrl) => {
+        if (imageUrl) {
+            setEnlargedImageUrl(imageUrl);
+            setShowImageModal(true);
+        }
+    };
 
     const handleSearch = async () => {
         if (!searchTerm || searchTerm.trim().length < 2) {
@@ -1498,7 +1598,7 @@ const UserSearchModal = ({ onClose, showModalMessage, onSelectUser, API_BASE_URL
         >
             <div className="flex items-start space-x-3">
                 <div className="w-12 h-12 bg-gray-200 rounded-lg overflow-hidden flex items-center justify-center">
-                    <AnimalImage src={animal.imageUrl || animal.photoUrl} alt={animal.name} className="w-full h-full object-cover" iconSize={24} />
+                    <AnimalImage src={animal.imageUrl || animal.photoUrl} alt={animal.name} className="w-full h-full object-cover" iconSize={24} onImageClick={handleImageClick} />
                 </div>
                 <div className="flex-grow">
                     <p className="text-lg font-semibold text-gray-800">
@@ -1516,10 +1616,11 @@ const UserSearchModal = ({ onClose, showModalMessage, onSelectUser, API_BASE_URL
     const results = searchType === 'users' ? userResults : animalResults;
 
     return (
-        <div className="fixed inset-0 bg-gray-600 bg-opacity-75 flex items-center justify-center p-4 z-50">
-            <div className="bg-white rounded-xl shadow-2xl p-6 w-full max-w-xl max-h-[90vh] flex flex-col">
-                <div className="flex justify-between items-center border-b pb-3 mb-4">
-                    <h3 className="text-xl font-bold text-gray-800">Global Search 🔎</h3>
+        <>
+            <div className="fixed inset-0 bg-gray-600 bg-opacity-75 flex items-center justify-center p-4 z-50">
+                <div className="bg-white rounded-xl shadow-2xl p-6 w-full max-w-xl max-h-[90vh] flex flex-col">
+                    <div className="flex justify-between items-center border-b pb-3 mb-4">
+                        <h3 className="text-xl font-bold text-gray-800">Global Search 🔎</h3>
                     <button onClick={onClose} className="text-gray-500 hover:text-gray-800"><X size={24} /></button>
                 </div>
 
@@ -1604,6 +1705,45 @@ const UserSearchModal = ({ onClose, showModalMessage, onSelectUser, API_BASE_URL
                 </div>
             </div>
         </div>
+        
+        {/* Image Modal */}
+        {showImageModal && (
+            <div style={{ zIndex: 999999 }} className="fixed inset-0 bg-black bg-opacity-75 flex items-center justify-center p-4" onClick={() => setShowImageModal(false)}>
+                <div className="relative max-w-4xl max-h-full">
+                    <img src={enlargedImageUrl} alt="Enlarged animal" className="max-w-full max-h-full object-contain" onClick={(e) => e.stopPropagation()} />
+                        <button 
+                            onClick={() => setShowImageModal(false)}
+                            className="absolute top-4 right-4 bg-white bg-opacity-80 hover:bg-opacity-100 text-black p-2 rounded-full transition"
+                        >
+                            <X size={24} />
+                        </button>
+                        <button 
+                            onClick={async (e) => {
+                                e.stopPropagation();
+                                try {
+                                    const response = await fetch(enlargedImageUrl);
+                                    const blob = await response.blob();
+                                    const url = window.URL.createObjectURL(blob);
+                                    const a = document.createElement('a');
+                                    a.href = url;
+                                    a.download = `crittertrack-animal-${Date.now()}.jpg`;
+                                    document.body.appendChild(a);
+                                    a.click();
+                                    document.body.removeChild(a);
+                                    window.URL.revokeObjectURL(url);
+                                } catch (error) {
+                                    console.error('Download failed:', error);
+                                }
+                            }}
+                            className="absolute bottom-4 right-4 bg-primary hover:bg-primary/90 text-black p-3 rounded-full transition flex items-center justify-center"
+                            title="Download Image"
+                        >
+                            📥
+                        </button>
+                    </div>
+                </div>
+            )}
+        </>
     );
 };
 
@@ -2026,7 +2166,7 @@ const PrivateAnimalDetail = ({ animal, onClose, onEdit, API_BASE_URL, authToken,
     if (!animal) return null;
 
     return (
-        <div className="fixed inset-0 bg-accent/10 flex items-center justify-center p-2 sm:p-4 z-[70] overflow-y-auto">
+        <div className="fixed inset-0 bg-accent/10 flex items-center justify-center p-2 sm:p-4 z-[40] overflow-y-auto">
             <div className="bg-primary rounded-xl shadow-2xl w-full max-w-5xl max-h-[95vh] sm:max-h-[90vh] overflow-y-auto overflow-x-hidden">
                 {/* Header */}
                 <div className="bg-white rounded-t-lg p-2 sm:p-4 border-b border-gray-300 mt-12 sm:mt-0">
@@ -2983,6 +3123,7 @@ const PrivateAnimalDetail = ({ animal, onClose, onEdit, API_BASE_URL, authToken,
                         API_BASE_URL={API_BASE_URL}
                         authToken={authToken}
                         onClose={() => setShowPedigree(false)}
+                        onViewAnimal={onViewAnimal}
                     />
                 )}
             </div>
@@ -3023,7 +3164,7 @@ const ViewOnlyPrivateAnimalDetail = ({ animal, onClose, API_BASE_URL, authToken,
     if (!animal) return null;
 
     return (
-        <div className="fixed inset-0 bg-accent/10 flex items-center justify-center p-2 sm:p-4 z-[70] overflow-y-auto">
+        <div className="fixed inset-0 bg-accent/10 flex items-center justify-center p-2 sm:p-4 z-[40] overflow-y-auto">
             <div className="bg-primary rounded-xl shadow-2xl w-full max-w-5xl max-h-[95vh] sm:max-h-[90vh] overflow-y-auto overflow-x-hidden">
                 {/* Header */}
                 <div className="bg-white rounded-t-lg p-2 sm:p-4 border-b border-gray-300 mt-12 sm:mt-0">
@@ -3921,6 +4062,7 @@ const ViewOnlyPrivateAnimalDetail = ({ animal, onClose, API_BASE_URL, authToken,
                         API_BASE_URL={API_BASE_URL}
                         authToken={authToken}
                         onClose={() => setShowPedigree(false)}
+                        onViewAnimal={onViewAnimal}
                     />
                 )}
             </div>
@@ -3931,7 +4073,7 @@ const ViewOnlyPrivateAnimalDetail = ({ animal, onClose, API_BASE_URL, authToken,
 // ==================== PUBLIC ANIMAL DETAIL (VIEW-ONLY FOR OTHERS) ====================
 // Respects privacy toggles - only shows public sections
 // Accessed from: Global search, user profiles, offspring links
-const ViewOnlyAnimalDetail = ({ animal, onClose, API_BASE_URL, onViewProfile, authToken, setModCurrentContext, setShowImageModal, setEnlargedImageUrl }) => {
+const ViewOnlyAnimalDetail = ({ animal, onClose, API_BASE_URL, onViewProfile, authToken, setModCurrentContext, setShowImageModal, setEnlargedImageUrl, onViewAnimal }) => {
     const [breederInfo, setBreederInfo] = useState(null);
     const [showPedigree, setShowPedigree] = useState(false);
     const [copySuccess, setCopySuccess] = useState(false);
@@ -5024,6 +5166,7 @@ const ViewOnlyAnimalDetail = ({ animal, onClose, API_BASE_URL, onViewProfile, au
                         onClose={() => setShowPedigree(false)}
                         API_BASE_URL={API_BASE_URL}
                         authToken={authToken}
+                        onViewAnimal={onViewAnimal}
                     />
                 )}
             </div>
@@ -15474,7 +15617,7 @@ const UrgentBroadcastPopup = ({ authToken, API_BASE_URL }) => {
     const btnColor = isAlert ? 'bg-red-600 hover:bg-red-700' : 'bg-orange-600 hover:bg-orange-700';
 
     return (
-        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-[9999]">
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-[99999]">
             <div className={`${bgColor} border-2 ${borderColor} rounded-xl shadow-2xl max-w-lg w-full p-6 animate-pulse-once`}>
                 <div className="flex items-start">
                     <div className="flex-shrink-0">
@@ -20179,6 +20322,7 @@ const App = () => {
                                             onClose={() => setShowPedigreeChart(false)}
                                             API_BASE_URL={API_BASE_URL}
                                             authToken={authToken}
+                                            onViewAnimal={handleViewAnimal}
                                         />
                                     )}
                                         </div>
@@ -20479,7 +20623,8 @@ const App = () => {
             {/* Image Modal */}
             {showImageModal && enlargedImageUrl && (
                 <div 
-                    className="fixed inset-0 bg-black bg-opacity-90 flex items-center justify-center z-50 p-4"
+                    style={{ zIndex: 999999 }}
+                    className="fixed inset-0 bg-black bg-opacity-90 flex items-center justify-center p-4"
                     onClick={() => setShowImageModal(false)}
                 >
                     <div className="relative max-w-7xl max-h-full flex flex-col items-center gap-4">
@@ -20498,15 +20643,29 @@ const App = () => {
                             className="max-w-full max-h-[75vh] object-contain"
                             onClick={(e) => e.stopPropagation()}
                         />
-                        <a
-                            href={enlargedImageUrl}
-                            download
+                        <button
+                            onClick={async (e) => {
+                                e.stopPropagation();
+                                try {
+                                    const response = await fetch(enlargedImageUrl);
+                                    const blob = await response.blob();
+                                    const url = window.URL.createObjectURL(blob);
+                                    const a = document.createElement('a');
+                                    a.href = url;
+                                    a.download = `crittertrack-animal-${Date.now()}.jpg`;
+                                    document.body.appendChild(a);
+                                    a.click();
+                                    document.body.removeChild(a);
+                                    window.URL.revokeObjectURL(url);
+                                } catch (error) {
+                                    console.error('Download failed:', error);
+                                }
+                            }}
                             className="bg-blue-600 hover:bg-blue-700 text-white px-6 py-2 rounded-lg flex items-center gap-2 transition"
-                            onClick={(e) => e.stopPropagation()}
                         >
                             <Download size={20} />
                             Download Image
-                        </a>
+                        </button>
                     </div>
                 </div>
             )}
@@ -20665,7 +20824,8 @@ const PublicAnimalPage = () => {
             {/* Image Modal */}
             {showImageModal && enlargedImageUrl && (
                 <div 
-                    className="fixed inset-0 bg-black bg-opacity-90 flex items-center justify-center z-50 p-4"
+                    style={{ zIndex: 999999 }}
+                    className="fixed inset-0 bg-black bg-opacity-90 flex items-center justify-center p-4"
                     onClick={() => setShowImageModal(false)}
                 >
                     <div className="relative max-w-7xl max-h-full flex flex-col items-center gap-4">
@@ -20684,15 +20844,29 @@ const PublicAnimalPage = () => {
                             className="max-w-full max-h-[75vh] object-contain"
                             onClick={(e) => e.stopPropagation()}
                         />
-                        <a
-                            href={enlargedImageUrl}
-                            download
+                        <button
+                            onClick={async (e) => {
+                                e.stopPropagation();
+                                try {
+                                    const response = await fetch(enlargedImageUrl);
+                                    const blob = await response.blob();
+                                    const url = window.URL.createObjectURL(blob);
+                                    const a = document.createElement('a');
+                                    a.href = url;
+                                    a.download = `crittertrack-animal-${Date.now()}.jpg`;
+                                    document.body.appendChild(a);
+                                    a.click();
+                                    document.body.removeChild(a);
+                                    window.URL.revokeObjectURL(url);
+                                } catch (error) {
+                                    console.error('Download failed:', error);
+                                }
+                            }}
                             className="bg-blue-600 hover:bg-blue-700 text-white px-6 py-2 rounded-lg flex items-center gap-2 transition"
-                            onClick={(e) => e.stopPropagation()}
                         >
                             <Download size={20} />
                             Download Image
-                        </a>
+                        </button>
                     </div>
                 </div>
             )}
