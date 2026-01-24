@@ -647,8 +647,15 @@ const PedigreeChart = ({ animalId, animalData, onClose, API_BASE_URL, authToken 
         
         if (!animal) {
             return (
-                <div className={`border border-gray-700 rounded p-1 ${bgColor} flex items-center justify-center h-full relative`}>
-                    <span className="text-xs text-gray-400">Unknown</span>
+                <div className={`border border-gray-700 rounded p-1 ${bgColor} flex gap-1 h-full items-center relative`}>
+                    {/* Image placeholder */}
+                    <div className="hide-for-pdf w-1/3 aspect-square bg-gray-100 rounded-lg border-2 border-gray-900 overflow-hidden flex items-center justify-center flex-shrink-0" style={{maxWidth: '24px', maxHeight: '24px'}}>
+                        <Cat size={10} className="text-gray-400" />
+                    </div>
+                    {/* Text */}
+                    <div className="flex-1 flex items-center justify-start">
+                        <span className="text-xs text-gray-400">Unknown</span>
+                    </div>
                     <div className="absolute top-0.5 right-0.5">
                         <GenderIcon size={12} className="text-gray-900" strokeWidth={2.5} />
                     </div>
@@ -658,9 +665,15 @@ const PedigreeChart = ({ animalId, animalData, onClose, API_BASE_URL, authToken 
         
         if (animal.isHidden) {
             return (
-                <div className={`border border-gray-700 rounded p-1 ${bgColor} flex flex-col items-center justify-center h-full relative`}>
-                    <EyeOff size={12} className="text-gray-500 mb-1" />
-                    <span className="text-xs text-gray-600 font-semibold">Hidden</span>
+                <div className={`border border-gray-700 rounded p-1 ${bgColor} flex gap-1 h-full items-center relative`}>
+                    {/* Icon placeholder */}
+                    <div className="hide-for-pdf w-1/3 aspect-square bg-gray-100 rounded-lg border-2 border-gray-900 overflow-hidden flex items-center justify-center flex-shrink-0" style={{maxWidth: '24px', maxHeight: '24px'}}>
+                        <EyeOff size={10} className="text-gray-500" />
+                    </div>
+                    {/* Text */}
+                    <div className="flex-1 flex items-center justify-start">
+                        <span className="text-xs text-gray-600 font-semibold">Hidden</span>
+                    </div>
                     <div className="absolute top-0.5 right-0.5">
                         <GenderIcon size={12} className="text-gray-900" strokeWidth={2.5} />
                     </div>
@@ -668,26 +681,39 @@ const PedigreeChart = ({ animalId, animalData, onClose, API_BASE_URL, authToken 
             );
         }
         
+        const imgSrc = animal.imageUrl || animal.photoUrl || null;
         const colorCoat = [animal.color, animal.coat].filter(Boolean).join(' ') || 'N/A';
         
         return (
-            <div className={`border border-gray-700 rounded p-0.5 ${bgColor} relative h-full flex flex-col justify-start gap-1 py-1`}>
-                {/* Name */}
-                <div className="text-gray-900 leading-tight line-clamp-2" style={{fontSize: '0.6rem', lineHeight: '1.2'}}>
-                    <span className="font-semibold">Name: </span>
-                    {animal.prefix && `${animal.prefix} `}{animal.name}{animal.suffix && ` ${animal.suffix}`}
+            <div className={`border border-gray-700 rounded p-0.5 ${bgColor} relative h-full flex gap-1 items-center`}>
+                {/* Image - 1/3 width */}
+                <div className="hide-for-pdf w-1/3 aspect-square bg-gray-100 rounded-lg border-2 border-gray-900 overflow-hidden flex items-center justify-center flex-shrink-0" style={{maxWidth: '28px', maxHeight: '28px'}}>
+                    {imgSrc ? (
+                        <AnimalImage src={imgSrc} alt={animal.name} className="w-full h-full object-cover" iconSize={12} />
+                    ) : (
+                        <Cat size={12} className="text-gray-400" />
+                    )}
                 </div>
                 
-                {/* Variety */}
-                <div className="text-gray-900 leading-tight" style={{fontSize: '0.6rem', lineHeight: '1.2'}}>
-                    <span className="font-semibold">Variety: </span>
-                    {colorCoat}
-                </div>
-                
-                {/* Breeder */}
-                <div className="text-gray-900 leading-tight" style={{fontSize: '0.6rem', lineHeight: '1.2'}}>
-                    <span className="font-semibold">Breeder: </span>
-                    {animal.breederName || 'N/A'}
+                {/* Info */}
+                <div className="flex-1 min-w-0 flex flex-col justify-start gap-0.5 py-0.5">
+                    {/* Name */}
+                    <div className="text-gray-900 leading-tight line-clamp-2" style={{fontSize: '0.6rem', lineHeight: '1.2'}}>
+                        <span className="font-semibold">Name: </span>
+                        {animal.prefix && `${animal.prefix} `}{animal.name}{animal.suffix && ` ${animal.suffix}`}
+                    </div>
+                    
+                    {/* Variety */}
+                    <div className="text-gray-900 leading-tight" style={{fontSize: '0.6rem', lineHeight: '1.2'}}>
+                        <span className="font-semibold">Variety: </span>
+                        {colorCoat}
+                    </div>
+                    
+                    {/* Breeder */}
+                    <div className="text-gray-900 leading-tight" style={{fontSize: '0.6rem', lineHeight: '1.2'}}>
+                        <span className="font-semibold">Breeder: </span>
+                        {animal.breederName || 'N/A'}
+                    </div>
                 </div>
                 
                 {/* Gender Icon - Top Right */}
@@ -696,7 +722,7 @@ const PedigreeChart = ({ animalId, animalData, onClose, API_BASE_URL, authToken 
                 </div>
                 
                 {/* CT ID - Bottom Right */}
-                <div className="absolute bottom-0.5 right-0.5 text-xs font-mono text-gray-700">
+                <div className="absolute bottom-0.5 right-0.5 text-xs font-mono text-gray-700" style={{fontSize: '0.55rem'}}>
                     {animal.id_public}
                 </div>
             </div>
