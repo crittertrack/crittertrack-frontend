@@ -218,8 +218,10 @@ const PedigreeChart = ({ animalId, animalData, onClose, API_BASE_URL, authToken 
                     
                     if (!animalInfo) return null;
 
-                    // Fetch breeder info for each animal
-                    if (animalInfo.breederId_public) {
+                    // Use manual breeder name if available, otherwise fetch breeder profile
+                    if (animalInfo.manualBreederName) {
+                        animalInfo.breederName = animalInfo.manualBreederName;
+                    } else if (animalInfo.breederId_public) {
                         try {
                             const breederResponse = await axios.get(
                                 `${API_BASE_URL}/public/profiles/search?query=${animalInfo.breederId_public}&limit=1`
@@ -333,6 +335,18 @@ const PedigreeChart = ({ animalId, animalData, onClose, API_BASE_URL, authToken 
         if (!pedigreeRef.current) return;
 
         try {
+            // Store original styles
+            const originalWidth = pedigreeRef.current.style.width;
+            const originalHeight = pedigreeRef.current.style.height;
+            const originalAspectRatio = pedigreeRef.current.style.aspectRatio;
+            const originalMinHeight = pedigreeRef.current.style.minHeight;
+
+            // Set fixed dimensions for PDF generation
+            pedigreeRef.current.style.width = '1123px';
+            pedigreeRef.current.style.height = '794px';
+            pedigreeRef.current.style.aspectRatio = 'unset';
+            pedigreeRef.current.style.minHeight = 'unset';
+
             // Hide all images before PDF generation
             const imageContainers = pedigreeRef.current.querySelectorAll('.hide-for-pdf');
             imageContainers.forEach(el => el.style.display = 'none');
@@ -348,7 +362,11 @@ const PedigreeChart = ({ animalId, animalData, onClose, API_BASE_URL, authToken 
                 windowHeight: 794
             });
 
-            // Restore images after PDF generation
+            // Restore original styles and elements
+            pedigreeRef.current.style.width = originalWidth;
+            pedigreeRef.current.style.height = originalHeight;
+            pedigreeRef.current.style.aspectRatio = originalAspectRatio;
+            pedigreeRef.current.style.minHeight = originalMinHeight;
             imageContainers.forEach(el => el.style.display = '');
 
             const imgData = canvas.toDataURL('image/png');
@@ -841,11 +859,11 @@ const PedigreeChart = ({ animalId, animalData, onClose, API_BASE_URL, authToken 
 
     return (
         <div className="fixed inset-0 bg-black bg-opacity-50 z-50 overflow-y-auto">
-            <div className="min-h-screen flex justify-center pt-8 pb-8">
-                <div className="bg-white rounded-xl shadow-2xl h-fit" style={{width: 'fit-content', maxWidth: '95vw'}}>
+            <div className="min-h-screen flex justify-center pt-4 pb-4 px-4">
+                <div className="bg-white rounded-xl shadow-2xl h-fit w-full max-w-[95vw]">
                     {/* Header */}
-                    <div className="flex justify-between items-center px-6 py-4 border-b border-gray-200 bg-gray-50 rounded-t-xl">
-                        <h2 className="text-2xl font-bold text-gray-800 flex items-center">
+                    <div className="flex justify-between items-center px-4 sm:px-6 py-4 border-b border-gray-200 bg-gray-50 rounded-t-xl">
+                        <h2 className="text-xl sm:text-2xl font-bold text-gray-800 flex items-center">
                             <FileText className="mr-2" size={24} />
                             Pedigree Chart
                         </h2>
@@ -854,7 +872,7 @@ const PedigreeChart = ({ animalId, animalData, onClose, API_BASE_URL, authToken 
                                 onClick={downloadPDF}
                                 disabled={!imagesLoaded}
                                 data-tutorial-target="download-pdf-btn"
-                                className={`flex items-center gap-2 px-4 py-2 font-semibold rounded-lg transition ${
+                                className={`flex items-center gap-2 px-3 sm:px-4 py-2 font-semibold rounded-lg transition text-sm sm:text-base ${
                                     imagesLoaded 
                                         ? 'bg-primary hover:bg-primary/90 text-black cursor-pointer' 
                                         : 'bg-gray-300 text-gray-500 cursor-not-allowed'
@@ -862,7 +880,8 @@ const PedigreeChart = ({ animalId, animalData, onClose, API_BASE_URL, authToken 
                                 title={!imagesLoaded ? 'Waiting for images to load...' : 'Download PDF'}
                             >
                                 <Download size={18} />
-                                {imagesLoaded ? 'Download PDF' : 'Loading...'}
+                                <span className="hidden sm:inline">{imagesLoaded ? 'Download PDF' : 'Loading...'}</span>
+                                <span className="sm:hidden">{imagesLoaded ? 'PDF' : '...'}</span>
                             </button>
                             <button
                                 onClick={onClose}
@@ -874,10 +893,10 @@ const PedigreeChart = ({ animalId, animalData, onClose, API_BASE_URL, authToken 
                     </div>
 
                     {/* Content */}
-                    <div className="p-6">
+                    <div className="p-3 sm:p-6">
 
-                {/* Pedigree Chart - A4 Landscape: 11.69" x 8.27" (1123px x 794px at 96dpi) */}
-                <div ref={pedigreeRef} className="bg-white p-6 rounded-lg border-2 border-gray-300 relative" style={{width: '1123px', height: '794px', maxWidth: '1123px', maxHeight: '794px'}}>
+                {/* Pedigree Chart - Responsive width but fixed for PDF download */}
+                <div ref={pedigreeRef} className="bg-white p-3 sm:p-6 rounded-lg border-2 border-gray-300 relative w-full overflow-hidden" style={{minHeight: '500px', aspectRatio: '1123/794'}}>
                     {/* Top Row: 3 columns - Main Animal | Species | Owner */}
                     <div className="flex gap-2 mb-2 items-start">
                         {/* Left: Main Animal */}
@@ -9112,6 +9131,7 @@ const AnimalForm = ({
             
             console.log('[DEBUG] Breeder field in payload:', {
                 breederId_public: payloadToSave.breederId_public,
+                manualBreederName: payloadToSave.manualBreederName,
                 ownerName: payloadToSave.ownerName
             });
 
