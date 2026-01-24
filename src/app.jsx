@@ -2076,6 +2076,11 @@ const PrivateAnimalDetail = ({ animal, onClose, onEdit, API_BASE_URL, authToken,
     const [detailViewTab, setDetailViewTab] = useState(1);
     const [copySuccess, setCopySuccess] = useState(false);
     
+    // Reset to overview tab when animal changes
+    React.useEffect(() => {
+        setDetailViewTab(1);
+    }, [animal.id_public]);
+    
     const handleShare = () => {
         const url = `${window.location.origin}/animal/${animal.id_public}`;
         navigator.clipboard.writeText(url).then(() => {
@@ -3081,6 +3086,11 @@ const ViewOnlyPrivateAnimalDetail = ({ animal, onClose, API_BASE_URL, authToken,
     const [breederInfo, setBreederInfo] = useState(null);
     const [showPedigree, setShowPedigree] = useState(false);
     const [detailViewTab, setDetailViewTab] = useState(1);
+    
+    // Reset to overview tab when animal changes
+    React.useEffect(() => {
+        setDetailViewTab(1);
+    }, [animal.id_public]);
     
     // Fetch breeder info when component mounts or animal changes
     React.useEffect(() => {
