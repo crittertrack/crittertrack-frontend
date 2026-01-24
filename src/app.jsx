@@ -7046,7 +7046,7 @@ const LitterManagement = ({ authToken, API_BASE_URL, userProfile, showModalMessa
 
                                         {/* Offspring Cards */}
                                         {offspringList.length > 0 && (
-                                            <div className="mb-4">
+                                            <div className="mb-4 w-full">
                                                 <div className="flex items-center justify-between mb-2">
                                                     <h4 className="text-sm font-bold text-gray-700">Offspring ({offspringList.length})</h4>
                                                     <div className="flex items-center gap-2">
@@ -7081,7 +7081,7 @@ const LitterManagement = ({ authToken, API_BASE_URL, userProfile, showModalMessa
                                                         )}
                                                     </div>
                                                 </div>
-                                                <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-3">
+                                                <div className="w-full grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-3">
                                                     {offspringList.map(animal => {
                                                         const isBulkMode = bulkDeleteMode[litter._id] || false;
                                                         const isSelected = (selectedOffspring[litter._id] || []).includes(animal.id_public);
