@@ -400,20 +400,20 @@ const PedigreeChart = ({ animalId, animalData, onClose, API_BASE_URL, authToken 
         const GenderIcon = isMale ? Mars : Venus;
         
         return (
-            <div className={`border border-gray-700 rounded-lg p-1 sm:p-2 ${bgColor} relative flex gap-2 sm:gap-3 items-center`} style={{height: window.innerWidth < 640 ? '80px' : '120px'}}>
+            <div className={`border border-gray-700 rounded-lg p-2 ${bgColor} relative flex gap-3 items-center`} style={{height: window.innerWidth < 640 ? '100px' : '120px'}}>
                 {/* Image */}
-                <div className="hide-for-pdf w-12 h-12 sm:w-20 sm:h-20 bg-gray-100 rounded-lg overflow-hidden flex items-center justify-center flex-shrink-0 border-2 border-gray-900">
+                <div className="hide-for-pdf w-16 h-16 sm:w-20 sm:h-20 bg-gray-100 rounded-lg overflow-hidden flex items-center justify-center flex-shrink-0 border-2 border-gray-900">
                     {imgSrc ? (
-                        <AnimalImage src={imgSrc} alt={animal.name} className="w-full h-full object-cover" iconSize={window.innerWidth < 640 ? 20 : 32} />
+                        <AnimalImage src={imgSrc} alt={animal.name} className="w-full h-full object-cover" iconSize={window.innerWidth < 640 ? 24 : 32} />
                     ) : (
-                        <Cat size={window.innerWidth < 640 ? 20 : 32} className="text-gray-400" />
+                        <Cat size={window.innerWidth < 640 ? 24 : 32} className="text-gray-400" />
                     )}
                 </div>
                 
                 {/* Info */}
-                <div className="flex-1 min-w-0 flex flex-col justify-start gap-1 sm:gap-2 py-1 sm:py-2">
+                <div className="flex-1 min-w-0 flex flex-col justify-start gap-2 py-2">
                     {/* Name */}
-                    <div className="text-xs sm:text-sm text-gray-900 leading-tight" style={{lineHeight: '1.1', fontSize: window.innerWidth < 640 ? '0.65rem' : '0.875rem'}}>
+                    <div className="text-sm text-gray-900 leading-tight" style={{lineHeight: '1.2'}}>
                         <span className="font-bold">Name: </span>
                         <span className="line-clamp-2">
                             {animal.prefix && `${animal.prefix} `}{animal.name}{animal.suffix && ` ${animal.suffix}`}
@@ -421,31 +421,31 @@ const PedigreeChart = ({ animalId, animalData, onClose, API_BASE_URL, authToken 
                     </div>
                     
                     {/* Variety */}
-                    <div className="text-xs text-gray-900 leading-tight" style={{lineHeight: '1.1', fontSize: window.innerWidth < 640 ? '0.6rem' : '0.75rem'}}>
+                    <div className="text-xs text-gray-900 leading-tight" style={{lineHeight: '1.2'}}>
                         <span className="font-semibold">Variety: </span>
                         {colorCoat}
                     </div>
                     
                     {/* Birth Date */}
-                    <div className="text-xs text-gray-900 leading-tight" style={{lineHeight: '1.1', fontSize: window.innerWidth < 640 ? '0.6rem' : '0.75rem'}}>
+                    <div className="text-xs text-gray-900 leading-tight" style={{lineHeight: '1.2'}}>
                         <span className="font-semibold">Birthdate: </span>
                         {animal.birthDate ? new Date(animal.birthDate).toLocaleDateString() : 'N/A'}
                     </div>
                     
                     {/* Breeder Info */}
-                    <div className="text-xs text-gray-900 leading-tight" style={{lineHeight: '1.1', fontSize: window.innerWidth < 640 ? '0.6rem' : '0.75rem'}}>
+                    <div className="text-xs text-gray-900 leading-tight" style={{lineHeight: '1.2'}}>
                         <span className="font-semibold">Breeder: </span>
                         {animal.breederName || 'N/A'}
                     </div>
                 </div>
                 
                 {/* Gender Icon - Top Right */}
-                <div className="absolute top-1 sm:top-2 right-1 sm:right-2">
-                    <GenderIcon size={window.innerWidth < 640 ? 16 : 24} className="text-gray-900" strokeWidth={2.5} />
+                <div className="absolute top-2 right-2">
+                    <GenderIcon size={24} className="text-gray-900" strokeWidth={2.5} />
                 </div>
                 
                 {/* CT ID - Bottom Right */}
-                <div className="absolute bottom-1 right-1 sm:right-2 text-xs font-mono text-gray-700" style={{fontSize: window.innerWidth < 640 ? '0.6rem' : '0.75rem'}}>
+                <div className="absolute bottom-1 right-2 text-xs font-mono text-gray-700">
                     {animal.id_public}
                 </div>
             </div>
@@ -502,9 +502,9 @@ const PedigreeChart = ({ animalId, animalData, onClose, API_BASE_URL, authToken 
                 </div>
                 
                 {/* Info */}
-                <div className="flex-1 min-w-0 flex flex-col justify-start gap-1 sm:gap-1.5 py-1">
+                <div className="flex-1 min-w-0 flex flex-col justify-start gap-1.5 py-1">
                     {/* Name */}
-                    <div className="text-xs sm:text-xs text-gray-900 leading-tight" style={{lineHeight: '1.1', fontSize: window.innerWidth < 640 ? '0.6rem' : '0.75rem'}}>
+                    <div className="text-xs text-gray-900 leading-tight" style={{lineHeight: '1.2'}}>
                         <span className="font-semibold">Name: </span>
                         <span className="line-clamp-2">
                             {animal.prefix && `${animal.prefix} `}{animal.name}{animal.suffix && ` ${animal.suffix}`}
@@ -512,31 +512,31 @@ const PedigreeChart = ({ animalId, animalData, onClose, API_BASE_URL, authToken 
                     </div>
                     
                     {/* Variety */}
-                    <div className="text-xs sm:text-xs text-gray-900 leading-tight" style={{lineHeight: '1.1', fontSize: window.innerWidth < 640 ? '0.6rem' : '0.75rem'}}>
+                    <div className="text-xs text-gray-900 leading-tight" style={{lineHeight: '1.2'}}>
                         <span className="font-semibold">Variety: </span>
                         {colorCoat}
                     </div>
                     
                     {/* Birth Date */}
-                    <div className="text-xs sm:text-xs text-gray-900 leading-tight" style={{lineHeight: '1.1', fontSize: window.innerWidth < 640 ? '0.6rem' : '0.75rem'}}>
+                    <div className="text-xs text-gray-900 leading-tight" style={{lineHeight: '1.2'}}>
                         <span className="font-semibold">Birthdate: </span>
                         {animal.birthDate ? new Date(animal.birthDate).toLocaleDateString() : 'N/A'}
                     </div>
                     
                     {/* Breeder */}
-                    <div className="text-xs sm:text-xs text-gray-900 leading-tight" style={{lineHeight: '1.1', fontSize: window.innerWidth < 640 ? '0.6rem' : '0.75rem'}}>
+                    <div className="text-xs text-gray-900 leading-tight" style={{lineHeight: '1.2'}}>
                         <span className="font-semibold">Breeder: </span>
                         {animal.breederName || 'N/A'}
                     </div>
                 </div>
                 
                 {/* Gender Icon - Top Right */}
-                <div className="absolute top-1 sm:top-2 right-1 sm:right-2">
-                    <GenderIcon size={window.innerWidth < 640 ? 16 : 20} className="text-gray-900" strokeWidth={2.5} />
+                <div className="absolute top-2 right-2">
+                    <GenderIcon size={20} className="text-gray-900" strokeWidth={2.5} />
                 </div>
                 
                 {/* CT ID - Bottom Right */}
-                <div className="absolute bottom-1 right-1 sm:right-2 text-xs font-mono text-gray-700" style={{fontSize: window.innerWidth < 640 ? '0.6rem' : '0.75rem'}}>
+                <div className="absolute bottom-1 right-2 text-xs font-mono text-gray-700">
                     {animal.id_public}
                 </div>
             </div>
@@ -728,17 +728,17 @@ const PedigreeChart = ({ animalId, animalData, onClose, API_BASE_URL, authToken 
         const mgmFather = maternalGrandmother?.father;
         const mgmMother = maternalGrandmother?.mother;
 
-        // Responsive heights - much smaller on mobile
+        // Responsive heights - reasonable mobile sizing
         const isMobile = window.innerWidth < 640; // sm breakpoint
-        const contentHeight = isMobile ? 280 : 526; // Reduced from 350 to 280
+        const contentHeight = isMobile ? 400 : 526; // More reasonable mobile height
         const parentHeight = contentHeight / 2;
         const grandparentHeight = contentHeight / 4;
         const greatGrandparentHeight = contentHeight / 8;
-        const gap = isMobile ? 0.5 : 2;
-        const gapClass = isMobile ? 'gap-0.5' : 'gap-2';
+        const gap = isMobile ? 1 : 2;
+        const gapClass = isMobile ? 'gap-1' : 'gap-2';
 
         return (
-            <div className={`flex ${gapClass} w-full`} style={{height: `${contentHeight}px`, minWidth: isMobile ? '500px' : 'auto'}}>
+            <div className={`flex ${gapClass} w-full`} style={{height: `${contentHeight}px`, minWidth: isMobile ? '600px' : 'auto'}}>
                     {/* Column 1: Parents (2 rows, each takes 1/2 height) */}
                     <div className={`w-1/3 flex flex-col ${gapClass}`}>
                         <div style={{height: `${parentHeight - (gap * 2)}px`}}>
@@ -897,7 +897,7 @@ const PedigreeChart = ({ animalId, animalData, onClose, API_BASE_URL, authToken 
                     </div>
 
                     {/* Content */}
-                    <div className="p-1 sm:p-6">
+                    <div className="p-1 sm:p-6" style={{paddingBottom: window.innerWidth < 640 ? '80px' : '1.5rem'}}>
 
                 {/* Pedigree Chart - Responsive on mobile, fixed aspect ratio for PDF */}
                 <div ref={pedigreeRef} className="bg-white p-1 sm:p-6 rounded-lg border-2 border-gray-300 relative w-full" style={{minHeight: window.innerWidth < 640 ? '320px' : '400px'}}>
