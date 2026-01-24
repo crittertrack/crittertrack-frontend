@@ -728,64 +728,67 @@ const PedigreeChart = ({ animalId, animalData, onClose, API_BASE_URL, authToken 
         const mgmFather = maternalGrandmother?.father;
         const mgmMother = maternalGrandmother?.mother;
 
-        // Calculate heights based on full height (794px - padding 48px - top section ~170px - footer ~50px - gaps = ~526px for content)
-        const contentHeight = 526;
-        const parentHeight = contentHeight / 2; // ~263px for each parent
-        const grandparentHeight = contentHeight / 4; // ~131.5px for each grandparent
-        const greatGrandparentHeight = contentHeight / 8; // ~65.75px for each great-grandparent
+        // Responsive heights - smaller on mobile
+        const isMobile = window.innerWidth < 640; // sm breakpoint
+        const contentHeight = isMobile ? 350 : 526;
+        const parentHeight = contentHeight / 2;
+        const grandparentHeight = contentHeight / 4;
+        const greatGrandparentHeight = contentHeight / 8;
+        const gap = isMobile ? 1 : 2;
+        const gapClass = isMobile ? 'gap-1' : 'gap-2';
 
         return (
-            <div className="flex gap-2 w-full" style={{height: `${contentHeight}px`}}>
+            <div className={`flex ${gapClass} w-full`} style={{height: `${contentHeight}px`, minWidth: isMobile ? '600px' : 'auto'}}>
                     {/* Column 1: Parents (2 rows, each takes 1/2 height) */}
-                    <div className="w-1/3 flex flex-col gap-2">
-                        <div style={{height: `${parentHeight - 4}px`}}>
+                    <div className={`w-1/3 flex flex-col ${gapClass}`}>
+                        <div style={{height: `${parentHeight - (gap * 2)}px`}}>
                             {renderParentCard(father, true)}
                         </div>
-                        <div style={{height: `${parentHeight - 4}px`}}>
+                        <div style={{height: `${parentHeight - (gap * 2)}px`}}>
                             {renderParentCard(mother, false)}
                         </div>
                     </div>
 
                     {/* Column 2: Grandparents (4 rows, each takes 1/4 height) */}
-                    <div className="w-1/3 flex flex-col gap-2">
-                        <div style={{height: `${grandparentHeight - 6}px`}}>
+                    <div className={`w-1/3 flex flex-col ${gapClass}`}>
+                        <div style={{height: `${grandparentHeight - (gap * 1.5)}px`}}>
                             {renderGrandparentCard(paternalGrandfather, true)}
                         </div>
-                        <div style={{height: `${grandparentHeight - 6}px`}}>
+                        <div style={{height: `${grandparentHeight - (gap * 1.5)}px`}}>
                             {renderGrandparentCard(paternalGrandmother, false)}
                         </div>
-                        <div style={{height: `${grandparentHeight - 6}px`}}>
+                        <div style={{height: `${grandparentHeight - (gap * 1.5)}px`}}>
                             {renderGrandparentCard(maternalGrandfather, true)}
                         </div>
-                        <div style={{height: `${grandparentHeight - 6}px`}}>
+                        <div style={{height: `${grandparentHeight - (gap * 1.5)}px`}}>
                             {renderGrandparentCard(maternalGrandmother, false)}
                         </div>
                     </div>
 
                     {/* Column 3: Great-Grandparents (8 rows, each takes 1/8 height) */}
-                    <div className="w-1/3 flex flex-col gap-2">
-                        <div style={{height: `${greatGrandparentHeight - 7}px`}}>
+                    <div className={`w-1/3 flex flex-col ${gapClass}`}>
+                        <div style={{height: `${greatGrandparentHeight - gap}px`}}>
                             {renderGreatGrandparentCard(pgfFather, true)}
                         </div>
-                        <div style={{height: `${greatGrandparentHeight - 7}px`}}>
+                        <div style={{height: `${greatGrandparentHeight - gap}px`}}>
                             {renderGreatGrandparentCard(pgfMother, false)}
                         </div>
-                        <div style={{height: `${greatGrandparentHeight - 7}px`}}>
+                        <div style={{height: `${greatGrandparentHeight - gap}px`}}>
                             {renderGreatGrandparentCard(pgmFather, true)}
                         </div>
-                        <div style={{height: `${greatGrandparentHeight - 7}px`}}>
+                        <div style={{height: `${greatGrandparentHeight - gap}px`}}>
                             {renderGreatGrandparentCard(pgmMother, false)}
                         </div>
-                        <div style={{height: `${greatGrandparentHeight - 7}px`}}>
+                        <div style={{height: `${greatGrandparentHeight - gap}px`}}>
                             {renderGreatGrandparentCard(mgfFather, true)}
                         </div>
-                        <div style={{height: `${greatGrandparentHeight - 7}px`}}>
+                        <div style={{height: `${greatGrandparentHeight - gap}px`}}>
                             {renderGreatGrandparentCard(mgfMother, false)}
                         </div>
-                        <div style={{height: `${greatGrandparentHeight - 7}px`}}>
+                        <div style={{height: `${greatGrandparentHeight - gap}px`}}>
                             {renderGreatGrandparentCard(mgmFather, true)}
                         </div>
-                        <div style={{height: `${greatGrandparentHeight - 7}px`}}>
+                        <div style={{height: `${greatGrandparentHeight - gap}px`}}>
                             {renderGreatGrandparentCard(mgmMother, false)}
                         </div>
                     </div>
@@ -859,46 +862,47 @@ const PedigreeChart = ({ animalId, animalData, onClose, API_BASE_URL, authToken 
 
     return (
         <div className="fixed inset-0 bg-black bg-opacity-50 z-50 overflow-y-auto">
-            <div className="min-h-screen flex justify-center pt-4 pb-4 px-4">
-                <div className="bg-white rounded-xl shadow-2xl h-fit w-full max-w-[95vw]">
+            <div className="min-h-screen flex justify-center pt-2 sm:pt-4 pb-2 sm:pb-4 px-2 sm:px-4">
+                <div className="bg-white rounded-xl shadow-2xl h-fit w-full max-w-[98vw] sm:max-w-[95vw]">
                     {/* Header */}
-                    <div className="flex justify-between items-center px-4 sm:px-6 py-4 border-b border-gray-200 bg-gray-50 rounded-t-xl">
-                        <h2 className="text-xl sm:text-2xl font-bold text-gray-800 flex items-center">
-                            <FileText className="mr-2" size={24} />
-                            Pedigree Chart
+                    <div className="flex justify-between items-center px-2 sm:px-6 py-2 sm:py-4 border-b border-gray-200 bg-gray-50 rounded-t-xl">
+                        <h2 className="text-lg sm:text-2xl font-bold text-gray-800 flex items-center">
+                            <FileText className="mr-1 sm:mr-2" size={18} />
+                            <span className="hidden sm:inline">Pedigree Chart</span>
+                            <span className="sm:hidden">Pedigree</span>
                         </h2>
-                        <div className="flex items-center gap-2">
+                        <div className="flex items-center gap-1 sm:gap-2">
                             <button
                                 onClick={downloadPDF}
                                 disabled={!imagesLoaded}
                                 data-tutorial-target="download-pdf-btn"
-                                className={`flex items-center gap-2 px-3 sm:px-4 py-2 font-semibold rounded-lg transition text-sm sm:text-base ${
+                                className={`flex items-center gap-1 sm:gap-2 px-2 sm:px-4 py-1.5 sm:py-2 font-semibold rounded-lg transition text-xs sm:text-base ${
                                     imagesLoaded 
                                         ? 'bg-primary hover:bg-primary/90 text-black cursor-pointer' 
                                         : 'bg-gray-300 text-gray-500 cursor-not-allowed'
                                 }`}
                                 title={!imagesLoaded ? 'Waiting for images to load...' : 'Download PDF'}
                             >
-                                <Download size={18} />
+                                <Download size={16} />
                                 <span className="hidden sm:inline">{imagesLoaded ? 'Download PDF' : 'Loading...'}</span>
                                 <span className="sm:hidden">{imagesLoaded ? 'PDF' : '...'}</span>
                             </button>
                             <button
                                 onClick={onClose}
-                                className="p-2 hover:bg-gray-100 rounded-lg transition"
+                                className="p-1.5 sm:p-2 hover:bg-gray-100 rounded-lg transition"
                             >
-                                <X size={24} />
+                                <X size={20} />
                             </button>
                         </div>
                     </div>
 
                     {/* Content */}
-                    <div className="p-3 sm:p-6">
+                    <div className="p-1 sm:p-6">
 
-                {/* Pedigree Chart - Responsive width but fixed for PDF download */}
-                <div ref={pedigreeRef} className="bg-white p-3 sm:p-6 rounded-lg border-2 border-gray-300 relative w-full overflow-hidden" style={{minHeight: '500px', aspectRatio: '1123/794'}}>
+                {/* Pedigree Chart - Responsive on mobile, fixed aspect ratio for PDF */}
+                <div ref={pedigreeRef} className="bg-white p-2 sm:p-6 rounded-lg border-2 border-gray-300 relative w-full" style={{minHeight: '400px'}}>
                     {/* Top Row: 3 columns - Main Animal | Species | Owner */}
-                    <div className="flex gap-2 mb-2 items-start">
+                    <div className="flex gap-1 sm:gap-2 mb-1 sm:mb-2 items-start">
                         {/* Left: Main Animal */}
                         <div className="w-1/3">
                             {pedigreeData && renderMainAnimalCard(pedigreeData)}
@@ -907,22 +911,22 @@ const PedigreeChart = ({ animalId, animalData, onClose, API_BASE_URL, authToken 
                         {/* Middle: Species */}
                         <div className="w-1/3 flex items-center justify-center">
                             <div className="text-center">
-                                <h3 className="text-lg font-bold text-gray-800">{pedigreeData?.species || 'Unknown Species'}</h3>
+                                <h3 className="text-sm sm:text-lg font-bold text-gray-800">{pedigreeData?.species || 'Unknown Species'}</h3>
                                 {pedigreeData?.species && getSpeciesLatinName(pedigreeData.species) && (
-                                    <p className="text-sm italic text-gray-600">{getSpeciesLatinName(pedigreeData.species)}</p>
+                                    <p className="text-xs sm:text-sm italic text-gray-600">{getSpeciesLatinName(pedigreeData.species)}</p>
                                 )}
                             </div>
                         </div>
                         
                         {/* Right: Owner Profile */}
-                        <div className="w-1/3 flex items-center justify-end gap-3">
+                        <div className="w-1/3 flex items-center justify-end gap-1 sm:gap-3">
                             <div className="text-right">
                                 {(() => {
                                     const ownerInfo = getOwnerDisplayInfoTopRight();
                                     return (
                                         <>
                                             {ownerInfo.lines.map((line, idx) => (
-                                                <div key={idx} className="text-base font-semibold text-gray-800 leading-tight">{line}</div>
+                                                <div key={idx} className="text-xs sm:text-base font-semibold text-gray-800 leading-tight">{line}</div>
                                             ))}
                                             {ownerInfo.userId && (
                                                 <div className="text-xs text-gray-600 mt-1">{ownerInfo.userId}</div>
@@ -931,23 +935,23 @@ const PedigreeChart = ({ animalId, animalData, onClose, API_BASE_URL, authToken 
                                     );
                                 })()}
                             </div>
-                            <div className="hide-for-pdf w-16 h-16 bg-gray-200 rounded-lg overflow-hidden flex items-center justify-center">
+                            <div className="hide-for-pdf w-8 h-8 sm:w-16 sm:h-16 bg-gray-200 rounded-lg overflow-hidden flex items-center justify-center">
                                 {(ownerProfile?.profileImage || ownerProfile?.profileImageUrl) ? (
                                     <img src={ownerProfile.profileImage || ownerProfile.profileImageUrl} alt="Owner" className="w-full h-full object-cover" />
                                 ) : (
-                                    <User size={32} className="text-gray-400" />
+                                    <User size={16} className="text-gray-400 sm:w-8 sm:h-8" />
                                 )}
                             </div>
                         </div>
                     </div>
 
-                    {/* Pedigree Tree */}
-                    <div className="overflow-hidden">
+                    {/* Pedigree Tree - Allow horizontal scroll on mobile if needed */}
+                    <div className="overflow-x-auto overflow-y-visible sm:overflow-hidden">
                         {renderPedigreeTree(pedigreeData)}
                     </div>
 
                     {/* Footer */}
-                    <div className="absolute bottom-6 left-6 right-6 pt-3 border-t-2 border-gray-300 flex justify-between items-center text-sm text-gray-600">
+                    <div className="absolute bottom-2 sm:bottom-6 left-2 sm:left-6 right-2 sm:right-6 pt-1 sm:pt-3 border-t-2 border-gray-300 flex justify-between items-center text-xs sm:text-sm text-gray-600">
                         <div>
                             {getOwnerDisplayInfoBottomLeft()}
                         </div>
@@ -2289,6 +2293,24 @@ const PrivateAnimalDetail = ({ animal, onClose, onEdit, API_BASE_URL, authToken,
                                                 <p className="mt-1 whitespace-pre-wrap">{animal.remarks}</p>
                                             </div>
                                         )}
+
+                                        {/* Tags - Bottom Right */}
+                                        {animal.tags && animal.tags.length > 0 && (
+                                            <div className="absolute bottom-4 right-4 text-sm">
+                                                <div className="flex flex-wrap gap-1 justify-end">
+                                                    {animal.tags.slice(0, 3).map((tag, idx) => (
+                                                        <span key={idx} className="bg-blue-100 text-blue-800 px-2 py-1 rounded text-xs font-medium">
+                                                            {tag}
+                                                        </span>
+                                                    ))}
+                                                    {animal.tags.length > 3 && (
+                                                        <span className="bg-gray-100 text-gray-600 px-2 py-1 rounded text-xs font-medium">
+                                                            +{animal.tags.length - 3}
+                                                        </span>
+                                                    )}
+                                                </div>
+                                            </div>
+                                        )}
                                     </div>
                                 </div>
                             </div>
@@ -3209,6 +3231,24 @@ const ViewOnlyPrivateAnimalDetail = ({ animal, onClose, API_BASE_URL, authToken,
                                             <div className="text-sm text-gray-700">
                                                 <span className="font-semibold">Remarks:</span>
                                                 <p className="mt-1 whitespace-pre-wrap">{animal.remarks}</p>
+                                            </div>
+                                        )}
+
+                                        {/* Tags - Bottom Right */}
+                                        {animal.tags && animal.tags.length > 0 && (
+                                            <div className="absolute bottom-4 right-4 text-sm">
+                                                <div className="flex flex-wrap gap-1 justify-end">
+                                                    {animal.tags.slice(0, 3).map((tag, idx) => (
+                                                        <span key={idx} className="bg-blue-100 text-blue-800 px-2 py-1 rounded text-xs font-medium">
+                                                            {tag}
+                                                        </span>
+                                                    ))}
+                                                    {animal.tags.length > 3 && (
+                                                        <span className="bg-gray-100 text-gray-600 px-2 py-1 rounded text-xs font-medium">
+                                                            +{animal.tags.length - 3}
+                                                        </span>
+                                                    )}
+                                                </div>
                                             </div>
                                         )}
                                     </div>
