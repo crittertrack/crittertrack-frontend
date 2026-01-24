@@ -29,7 +29,7 @@ import Marketplace from './components/Marketplace';
 const API_BASE_URL = '/api'; // Production via Vercel proxy - v2
 
 const GENDER_OPTIONS = ['Male', 'Female', 'Intersex', 'Unknown'];
-const STATUS_OPTIONS = ['Pet', 'Breeder', 'Available', 'Sold', 'Retired', 'Deceased', 'Rehomed', 'Unknown']; 
+const STATUS_OPTIONS = ['Pet', 'Breeder', 'Available', 'Booked', 'Sold', 'Retired', 'Deceased', 'Rehomed', 'Unknown']; 
 
 const DEFAULT_SPECIES_OPTIONS = ['Fancy Mouse', 'Fancy Rat', 'Russian Dwarf Hamster', 'Campbells Dwarf Hamster', 'Chinese Dwarf Hamster', 'Syrian Hamster', 'Guinea Pig'];
 
@@ -400,13 +400,13 @@ const PedigreeChart = ({ animalId, animalData, onClose, API_BASE_URL, authToken 
         const GenderIcon = isMale ? Mars : Venus;
         
         return (
-            <div className={`border border-gray-700 rounded-lg p-2 ${bgColor} relative flex gap-3 items-center`} style={{height: '160px'}}>
+            <div className={`border border-gray-700 rounded-lg p-2 ${bgColor} relative flex gap-3 items-center`} style={{height: '120px'}}>
                 {/* Image */}
-                <div className="hide-for-pdf w-32 h-32 bg-gray-100 rounded-lg overflow-hidden flex items-center justify-center flex-shrink-0 border-2 border-gray-900">
+                <div className="hide-for-pdf w-20 h-20 bg-gray-100 rounded-lg overflow-hidden flex items-center justify-center flex-shrink-0 border-2 border-gray-900">
                     {imgSrc ? (
-                        <AnimalImage src={imgSrc} alt={animal.name} className="w-full h-full object-cover" iconSize={48} />
+                        <AnimalImage src={imgSrc} alt={animal.name} className="w-full h-full object-cover" iconSize={32} />
                     ) : (
-                        <Cat size={48} className="text-gray-400" />
+                        <Cat size={32} className="text-gray-400" />
                     )}
                 </div>
                 
@@ -462,7 +462,7 @@ const PedigreeChart = ({ animalId, animalData, onClose, API_BASE_URL, authToken 
             return (
                 <div className={`border border-gray-700 rounded p-2 ${bgColor} relative h-full flex items-center justify-center`}>
                     <div className="text-center">
-                        <Cat size={32} className="hide-for-pdf text-gray-300 mx-auto mb-2" />
+                        <Cat size={20} className="hide-for-pdf text-gray-300 mx-auto mb-2" />
                         <div className="text-xs text-gray-400">Unknown</div>
                     </div>
                     <div className="absolute top-2 right-2">
@@ -476,7 +476,7 @@ const PedigreeChart = ({ animalId, animalData, onClose, API_BASE_URL, authToken 
             return (
                 <div className={`border border-gray-700 rounded p-2 ${bgColor} relative h-full flex items-center justify-center`}>
                     <div className="text-center">
-                        <EyeOff size={32} className="hide-for-pdf text-gray-500 mx-auto mb-2" />
+                        <EyeOff size={20} className="hide-for-pdf text-gray-500 mx-auto mb-2" />
                         <div className="text-xs text-gray-600 font-semibold">Hidden</div>
                         <div className="text-xs text-gray-500 mt-1">Private Profile</div>
                     </div>
@@ -493,11 +493,11 @@ const PedigreeChart = ({ animalId, animalData, onClose, API_BASE_URL, authToken 
         return (
             <div className={`border border-gray-700 rounded p-1.5 ${bgColor} relative flex gap-2 h-full items-center`}>
                 {/* Image - 1/3 width */}
-                <div className="hide-for-pdf w-1/3 aspect-square bg-gray-100 rounded-lg border-2 border-gray-900 overflow-hidden flex items-center justify-center flex-shrink-0">
+                <div className="hide-for-pdf w-1/3 aspect-square bg-gray-100 rounded-lg border-2 border-gray-900 overflow-hidden flex items-center justify-center flex-shrink-0" style={{maxWidth: '60px', maxHeight: '60px'}}>
                     {imgSrc ? (
-                        <AnimalImage src={imgSrc} alt={animal.name} className="w-full h-full object-cover" iconSize={28} />
+                        <AnimalImage src={imgSrc} alt={animal.name} className="w-full h-full object-cover" iconSize={20} />
                     ) : (
-                        <Cat size={28} className="text-gray-400" />
+                        <Cat size={20} className="text-gray-400" />
                     )}
                 </div>
                 
@@ -552,8 +552,8 @@ const PedigreeChart = ({ animalId, animalData, onClose, API_BASE_URL, authToken 
             return (
                 <div className={`border border-gray-700 rounded p-1.5 ${bgColor} flex gap-1.5 h-full items-center relative`}>
                     {/* Image placeholder - 1/3 width */}
-                    <div className="hide-for-pdf w-1/3 aspect-square bg-gray-100 rounded-lg border-2 border-gray-900 overflow-hidden flex items-center justify-center flex-shrink-0">
-                        <Cat size={20} className="text-gray-400" />
+                    <div className="hide-for-pdf w-1/3 aspect-square bg-gray-100 rounded-lg border-2 border-gray-900 overflow-hidden flex items-center justify-center flex-shrink-0" style={{maxWidth: '30px', maxHeight: '30px'}}>
+                        <Cat size={14} className="text-gray-400" />
                     </div>
                     {/* Text */}
                     <div className="flex-1 flex items-center justify-start">
@@ -570,8 +570,8 @@ const PedigreeChart = ({ animalId, animalData, onClose, API_BASE_URL, authToken 
             return (
                 <div className={`border border-gray-700 rounded p-1.5 ${bgColor} flex gap-1.5 h-full items-center relative`}>
                     {/* Icon placeholder - 1/3 width */}
-                    <div className="hide-for-pdf w-1/3 aspect-square bg-gray-100 rounded-lg border-2 border-gray-900 overflow-hidden flex items-center justify-center flex-shrink-0">
-                        <EyeOff size={20} className="text-gray-500" />
+                    <div className="hide-for-pdf w-1/3 aspect-square bg-gray-100 rounded-lg border-2 border-gray-900 overflow-hidden flex items-center justify-center flex-shrink-0" style={{maxWidth: '30px', maxHeight: '30px'}}>
+                        <EyeOff size={14} className="text-gray-500" />
                     </div>
                     {/* Text */}
                     <div className="flex-1 flex items-center justify-start">
@@ -590,11 +590,11 @@ const PedigreeChart = ({ animalId, animalData, onClose, API_BASE_URL, authToken 
         return (
             <div className={`border border-gray-700 rounded p-1 ${bgColor} relative flex gap-1.5 h-full items-center`}>
                 {/* Image - 1/3 width */}
-                <div className="hide-for-pdf w-1/3 aspect-square bg-gray-100 rounded-lg border-2 border-gray-900 overflow-hidden flex items-center justify-center flex-shrink-0">
+                <div className="hide-for-pdf w-1/3 aspect-square bg-gray-100 rounded-lg border-2 border-gray-900 overflow-hidden flex items-center justify-center flex-shrink-0" style={{maxWidth: '40px', maxHeight: '40px'}}>
                     {imgSrc ? (
-                        <AnimalImage src={imgSrc} alt={animal.name} className="w-full h-full object-cover" iconSize={20} />
+                        <AnimalImage src={imgSrc} alt={animal.name} className="w-full h-full object-cover" iconSize={16} />
                     ) : (
-                        <Cat size={20} className="text-gray-400" />
+                        <Cat size={16} className="text-gray-400" />
                     )}
                 </div>
                 
@@ -659,7 +659,7 @@ const PedigreeChart = ({ animalId, animalData, onClose, API_BASE_URL, authToken 
         if (animal.isHidden) {
             return (
                 <div className={`border border-gray-700 rounded p-1 ${bgColor} flex flex-col items-center justify-center h-full relative`}>
-                    <EyeOff size={16} className="text-gray-500 mb-1" />
+                    <EyeOff size={12} className="text-gray-500 mb-1" />
                     <span className="text-xs text-gray-600 font-semibold">Hidden</span>
                     <div className="absolute top-0.5 right-0.5">
                         <GenderIcon size={12} className="text-gray-900" strokeWidth={2.5} />

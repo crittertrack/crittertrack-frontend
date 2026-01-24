@@ -164,7 +164,8 @@ const Marketplace = ({ onViewAnimal, onViewProfile, authToken, userProfile, onSt
         
         // Pre-fill message with animal info
         const listingType = animal.isForSale ? 'for sale' : 'for stud';
-        const defaultMessage = `Hi! I'm interested in your ${animal.species || 'animal'} "${animal.name}" (${animal.id_public}) that you have listed ${listingType}. Could you please provide more information?`;
+        const animalDisplayName = `${animal.prefix ? animal.prefix + ' ' : ''}${animal.name}${animal.suffix ? ' ' + animal.suffix : ''}`;
+        const defaultMessage = `Hi! I'm interested in your ${animal.species || 'animal'} "${animalDisplayName}" (${animal.id_public}) that you have listed ${listingType}. Could you please provide more information?`;
         
         setInquiryAnimal(animal);
         setInquiryMessage(defaultMessage);
@@ -510,7 +511,7 @@ const Marketplace = ({ onViewAnimal, onViewProfile, authToken, userProfile, onSt
                                     </div>
                                 )}
                                 <div className="flex-1">
-                                    <h4 className="font-semibold text-gray-800">{inquiryAnimal.name}</h4>
+                                    <h4 className="font-semibold text-gray-800">{inquiryAnimal.prefix && `${inquiryAnimal.prefix} `}{inquiryAnimal.name}{inquiryAnimal.suffix && ` ${inquiryAnimal.suffix}`}</h4>
                                     <p className="text-sm text-gray-600">{inquiryAnimal.species} • {inquiryAnimal.id_public}</p>
                                     <div className="flex gap-2 mt-1">
                                         {inquiryAnimal.isForSale && (
@@ -681,7 +682,7 @@ const AnimalCard = ({ animal, onViewAnimal, onViewProfile, onContactOwner, isOwn
                         className="font-semibold text-gray-800 text-lg cursor-pointer hover:text-accent transition"
                         onClick={() => onViewAnimal && onViewAnimal(animal.id_public)}
                     >
-                        {animal.name}
+                        {animal.prefix && `${animal.prefix} `}{animal.name}{animal.suffix && ` ${animal.suffix}`}
                     </h3>
                     <span className="text-xs text-gray-500 font-mono">
                         {animal.id_public}
