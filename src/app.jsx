@@ -400,7 +400,7 @@ const PedigreeChart = ({ animalId, animalData, onClose, API_BASE_URL, authToken 
         const GenderIcon = isMale ? Mars : Venus;
         
         return (
-            <div className={`border border-gray-700 rounded-lg p-2 ${bgColor} relative flex gap-3 items-center`} style={{height: window.innerWidth < 640 ? '140px' : '160px'}}>
+            <div className={`border border-gray-700 rounded-lg p-2 ${bgColor} relative flex gap-3 items-center`} style={{height: window.innerWidth < 640 ? '180px' : '200px'}}>
                 {/* Image */}
                 <div className="hide-for-pdf w-16 h-16 sm:w-20 sm:h-20 bg-gray-100 rounded-lg overflow-hidden flex items-center justify-center flex-shrink-0 border-2 border-gray-900">
                     {imgSrc ? (
@@ -728,9 +728,9 @@ const PedigreeChart = ({ animalId, animalData, onClose, API_BASE_URL, authToken 
         const mgmFather = maternalGrandmother?.father;
         const mgmMother = maternalGrandmother?.mother;
 
-        // Responsive heights - reasonable mobile sizing
+        // Responsive heights - increased for better text fit
         const isMobile = window.innerWidth < 640; // sm breakpoint
-        const contentHeight = isMobile ? 400 : 526; // More reasonable mobile height
+        const contentHeight = isMobile ? 520 : 660; // Increased height for better text visibility
         const parentHeight = contentHeight / 2;
         const grandparentHeight = contentHeight / 4;
         const greatGrandparentHeight = contentHeight / 8;
@@ -904,15 +904,15 @@ const PedigreeChart = ({ animalId, animalData, onClose, API_BASE_URL, authToken 
                     {/* Entire content scrollable horizontally inside the white container */}
                     <div className="overflow-x-auto overflow-y-visible sm:overflow-hidden" style={{minWidth: 'auto'}}>
                         <div style={{minWidth: window.innerWidth < 640 ? '800px' : 'auto'}}>
-                            {/* Top Row: 4 columns - Main Animal | Species | Owner | Spacer */}
+                            {/* Top Row: 3 columns - Main Animal | Species | Owner */}
                             <div className="flex gap-0.5 sm:gap-2 mb-0.5 sm:mb-2 items-start">
                                 {/* Left: Main Animal - Same width as parent cards */}
-                                <div className="w-1/4">
+                                <div className="w-1/3">
                                     {pedigreeData && renderMainAnimalCard(pedigreeData)}
                                 </div>
                                 
                                 {/* Species */}
-                                <div className="w-1/4 flex items-center justify-center">
+                                <div className="w-1/3 flex items-center justify-center">
                                     <div className="text-center">
                                         <h3 className="text-xs sm:text-lg font-bold text-gray-800">{pedigreeData?.species || 'Unknown Species'}</h3>
                                         {pedigreeData?.species && getSpeciesLatinName(pedigreeData.species) && (
@@ -922,7 +922,7 @@ const PedigreeChart = ({ animalId, animalData, onClose, API_BASE_URL, authToken 
                                 </div>
                                 
                                 {/* Owner Profile */}
-                                <div className="w-1/4 flex items-center justify-end gap-0.5 sm:gap-3">
+                                <div className="w-1/3 flex items-center justify-end gap-0.5 sm:gap-3">
                                     <div className="text-right">
                                         {(() => {
                                             const ownerInfo = getOwnerDisplayInfoTopRight();
@@ -946,9 +946,6 @@ const PedigreeChart = ({ animalId, animalData, onClose, API_BASE_URL, authToken 
                                         )}
                                     </div>
                                 </div>
-                                
-                                {/* Spacer column to balance layout */}
-                                <div className="w-1/4"></div>
                             </div>
 
                             {/* Pedigree Tree */}
