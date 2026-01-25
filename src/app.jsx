@@ -6288,8 +6288,15 @@ const LitterManagement = ({ authToken, API_BASE_URL, userProfile, showModalMessa
     };
 
     const handleAddOffspringToLitter = (litter) => {
-        const sire = myAnimals.find(a => a.id_public === litter.sireId_public);
-        setAddingOffspring(litter);
+        // Get parent data from litter (includes transferred animals)
+        const sire = litter.sire || myAnimals.find(a => a.id_public === litter.sireId_public);
+        const dam = litter.dam || myAnimals.find(a => a.id_public === litter.damId_public);
+        
+        setAddingOffspring({
+            ...litter,
+            sire: sire,
+            dam: dam
+        });
         setNewOffspringData({
             name: '',
             gender: '',
@@ -6306,11 +6313,25 @@ const LitterManagement = ({ authToken, API_BASE_URL, userProfile, showModalMessa
         }
 
         try {
-            const sire = myAnimals.find(a => a.id_public === addingOffspring.sireId_public);
+            // Get species from stored parent data (works even if parents are transferred)
+            const sire = addingOffspring.sire;
+            const dam = addingOffspring.dam;
+            
+            if (!sire && !dam) {
+                showModalMessage('Error', 'Cannot determine species - parent information is missing');
+                return;
+            }
+            
+            const species = (sire && sire.species) || (dam && dam.species);
+            
+            if (!species) {
+                showModalMessage('Error', 'Cannot determine species from parent animals');
+                return;
+            }
             
             const animalData = {
                 name: newOffspringData.name,
-                species: sire.species,
+                species: species,
                 gender: newOffspringData.gender,
                 birthDate: addingOffspring.birthDate,
                 status: 'Pet',
