@@ -16023,6 +16023,26 @@ const App = () => {
         window.addEventListener('resize', handleResize);
         return () => window.removeEventListener('resize', handleResize);
     }, []);
+
+    // Fetch and display user count on login/register screen
+    useEffect(() => {
+        const fetchUserCount = async () => {
+            try {
+                const response = await fetch(`${API_BASE_URL}/admin/dashboard-stats`);
+                if (response.ok) {
+                    const data = await response.json();
+                    const count = data.totalUsers || 'many';
+                    const el = document.getElementById('user-count');
+                    if (el) el.textContent = count;
+                }
+            } catch (err) {
+                // fallback
+                const el = document.getElementById('user-count');
+                if (el) el.textContent = 'many';
+            }
+        };
+        fetchUserCount();
+    }, []);
     
     // Tutorial context hook
     const { hasSeenInitialTutorial, markInitialTutorialSeen, hasCompletedOnboarding, isLoading: tutorialLoading, markTutorialCompleted, completedTutorials, isTutorialCompleted, hasSeenWelcomeBanner, dismissWelcomeBanner } = useTutorial(); 
@@ -17930,25 +17950,6 @@ const App = () => {
             </div>
         );
     }
-// Fetch and display user count in the login/register screen
-useEffect(() => {
-    const fetchUserCount = async () => {
-        try {
-            const response = await fetch(`${API_BASE_URL}/admin/dashboard-stats`);
-            if (response.ok) {
-                const data = await response.json();
-                const count = data.totalUsers || 'many';
-                const el = document.getElementById('user-count');
-                if (el) el.textContent = count;
-            }
-        } catch (err) {
-            // fallback
-            const el = document.getElementById('user-count');
-            if (el) el.textContent = 'many';
-        }
-    };
-    fetchUserCount();
-}, []);
 
      return (
         <div className="min-h-screen bg-page-bg flex flex-col font-sans">
