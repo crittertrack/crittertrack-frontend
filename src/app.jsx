@@ -17862,8 +17862,15 @@ const App = () => {
                     
                     {/* RIGHT: Features Summary */}
                     <div className="bg-white p-6 rounded-xl shadow-lg">
+                        {/* User Count & Persuasive Message */}
+                        <div className="mb-6 p-4 rounded-lg bg-gradient-to-r from-blue-100 to-purple-100 flex items-center gap-4 shadow">
+                            <Users size={32} className="text-primary-dark" />
+                            <div>
+                                <div className="text-lg font-bold text-gray-800">Join <span id="user-count">...</span> registered breeders!</div>
+                                <div className="text-sm text-gray-700">Be part of a growing community. Register now and connect with passionate breeders worldwide!</div>
+                            </div>
+                        </div>
                         <h3 className="text-xl font-bold text-gray-800 mb-4">What's Included</h3>
-                        
                         <div className="space-y-3">
                             <div className="flex items-start gap-3">
                                 <div className="bg-primary/20 p-2 rounded-lg mt-0.5">
@@ -17923,6 +17930,25 @@ const App = () => {
             </div>
         );
     }
+// Fetch and display user count in the login/register screen
+useEffect(() => {
+    const fetchUserCount = async () => {
+        try {
+            const response = await fetch(`${API_BASE_URL}/admin/dashboard-stats`);
+            if (response.ok) {
+                const data = await response.json();
+                const count = data.totalUsers || 'many';
+                const el = document.getElementById('user-count');
+                if (el) el.textContent = count;
+            }
+        } catch (err) {
+            // fallback
+            const el = document.getElementById('user-count');
+            if (el) el.textContent = 'many';
+        }
+    };
+    fetchUserCount();
+}, []);
 
      return (
         <div className="min-h-screen bg-page-bg flex flex-col font-sans">
