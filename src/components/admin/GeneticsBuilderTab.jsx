@@ -811,27 +811,30 @@ const GeneticsBuilderTab = ({ API_BASE_URL, authToken }) => {
                 isLethal: Boolean(combinationData.isLethal),
                 geneType
             };
-            console.log('Editing combination:', { geneIndex, combinationIndex, geneType, payload });
+            const url = `${API_BASE_URL}/admin/genetics/${currentData._id}/loci/${geneIndex}/combinations/${combinationIndex}`;
+            console.log('Editing combination:', { geneIndex, combinationIndex, geneType, payload, url });
             
-            const response = await fetch(
-                `${API_BASE_URL}/admin/genetics/${currentData._id}/loci/${geneIndex}/combinations/${combinationIndex}`,
-                {
-                    method: 'PUT',
-                    headers: {
-                        'Content-Type': 'application/json',
-                        'Authorization': `Bearer ${authToken}`
-                    },
-                    body: JSON.stringify(payload)
-                }
-            );
+            const response = await fetch(url, {
+                method: 'PUT',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Authorization': `Bearer ${authToken}`
+                },
+                body: JSON.stringify(payload)
+            });
+            
+            console.log('API Response Status:', response.status, response.statusText);
             
             if (response.ok) {
                 const data = await response.json();
+                console.log('API Response Success:', data);
                 setCurrentData(data);
                 setHasChanges(true);
                 setEditingCombination(null);
             } else {
-                throw new Error('Failed to edit combination');
+                const errorData = await response.json();
+                console.log('API Response Error:', response.status, errorData);
+                throw new Error(errorData.error || 'Failed to edit combination');
             }
         } catch (err) {
             alert('Error: ' + err.message);
