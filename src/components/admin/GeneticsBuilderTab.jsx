@@ -425,6 +425,9 @@ const GeneticsBuilderTab = ({ API_BASE_URL, authToken }) => {
             if (response.ok) {
                 const data = await response.json();
                 console.log('Reorder successful, updated data:', data);
+                console.log('Genes before setCurrentData:', data.genes?.map(g => `${g.symbol}(idx)`));
+                console.log('Gene at index 2:', data.genes?.[2]?.symbol);
+                console.log('Gene at index 3:', data.genes?.[3]?.symbol);
                 setCurrentData(data);
                 setHasChanges(true);
             } else {
