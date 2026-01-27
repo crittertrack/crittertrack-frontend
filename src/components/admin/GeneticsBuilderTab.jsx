@@ -421,6 +421,7 @@ const GeneticsBuilderTab = ({ API_BASE_URL, authToken }) => {
                 }
             );
             
+            console.log('Request body sent:', { fromIndex: geneIndex, toIndex: geneIndex - 1, geneType });
             console.log('Response status:', response.status);
             if (response.ok) {
                 const data = await response.json();
