@@ -399,10 +399,14 @@ const GeneticsBuilderTab = ({ API_BASE_URL, authToken }) => {
     const handleMoveGeneUp = async (geneIndex, geneType) => {
         if (geneIndex === 0) return; // Already at top
         
+        console.log('handleMoveGeneUp called:', { geneIndex, geneType, geneticsId: currentData._id });
+        
         setSaving(true);
         try {
+            const url = `${API_BASE_URL}/admin/genetics/${currentData._id}/genes/reorder`;
+            console.log('Fetching URL:', url);
             const response = await fetch(
-                `${API_BASE_URL}/admin/genetics/${currentData._id}/genes/reorder`,
+                url,
                 {
                     method: 'PUT',
                     headers: {
@@ -417,12 +421,15 @@ const GeneticsBuilderTab = ({ API_BASE_URL, authToken }) => {
                 }
             );
             
+            console.log('Response status:', response.status);
             if (response.ok) {
                 const data = await response.json();
+                console.log('Reorder successful, updated data:', data);
                 setCurrentData(data);
                 setHasChanges(true);
             } else {
                 const errorData = await response.json();
+                console.error('Reorder failed:', response.status, errorData);
                 throw new Error(errorData.error || 'Failed to reorder genes');
             }
         } catch (err) {
