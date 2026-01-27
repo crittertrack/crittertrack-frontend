@@ -1403,7 +1403,11 @@ const GeneCard = ({
                         <>
                             <button 
                                 className="genetics-gene-action-btn reorder"
-                                onClick={(e) => { e.stopPropagation(); handleMoveGeneUp(geneIndex, geneType); }}
+                                onClick={(e) => { 
+                                    console.log('Up button clicked!', { geneIndex, geneType });
+                                    e.stopPropagation(); 
+                                    handleMoveGeneUp(geneIndex, geneType); 
+                                }}
                                 disabled={geneIndex === 0}
                                 title="Move up"
                             >
@@ -1411,7 +1415,11 @@ const GeneCard = ({
                             </button>
                             <button 
                                 className="genetics-gene-action-btn reorder"
-                                onClick={(e) => { e.stopPropagation(); handleMoveGeneDown(geneIndex, geneType, totalGenes); }}
+                                onClick={(e) => { 
+                                    console.log('Down button clicked!', { geneIndex, geneType, totalGenes });
+                                    e.stopPropagation(); 
+                                    handleMoveGeneDown(geneIndex, geneType, totalGenes); 
+                                }}
                                 disabled={geneIndex === totalGenes - 1}
                                 title="Move down"
                             >
