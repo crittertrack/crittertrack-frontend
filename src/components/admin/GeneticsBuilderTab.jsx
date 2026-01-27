@@ -804,6 +804,15 @@ const GeneticsBuilderTab = ({ API_BASE_URL, authToken }) => {
     const handleEditCombination = async (geneIndex, combinationIndex, geneType, combinationData) => {
         setSaving(true);
         try {
+            const payload = {
+                notation: combinationData.notation.trim(),
+                phenotype: combinationData.phenotype.trim() || null,
+                carrier: combinationData.carrier.trim() || null,
+                isLethal: Boolean(combinationData.isLethal),
+                geneType
+            };
+            console.log('Editing combination:', { geneIndex, combinationIndex, geneType, payload });
+            
             const response = await fetch(
                 `${API_BASE_URL}/admin/genetics/${currentData._id}/loci/${geneIndex}/combinations/${combinationIndex}`,
                 {
@@ -812,13 +821,7 @@ const GeneticsBuilderTab = ({ API_BASE_URL, authToken }) => {
                         'Content-Type': 'application/json',
                         'Authorization': `Bearer ${authToken}`
                     },
-                    body: JSON.stringify({
-                        notation: combinationData.notation.trim(),
-                        phenotype: combinationData.phenotype.trim() || null,
-                        carrier: combinationData.carrier.trim() || null,
-                        isLethal: combinationData.isLethal,
-                        geneType
-                    })
+                    body: JSON.stringify(payload)
                 }
             );
             
@@ -1753,7 +1756,7 @@ const GeneCard = ({
                                                         <label className="genetics-checkbox">
                                                             <input
                                                                 type="checkbox"
-                                                                checked={editingCombination?.isLethal ?? combination.isLethal}
+                                                                checked={Boolean(editingCombination?.isLethal)}
                                                                 onChange={(e) => setEditingCombination(prev => ({ ...prev, isLethal: e.target.checked }))}
                                                             />
                                                             Lethal
@@ -1802,7 +1805,7 @@ const GeneCard = ({
                                                                     notation: combination.notation,
                                                                     phenotype: combination.phenotype || '',
                                                                     carrier: combination.carrier || '',
-                                                                    isLethal: combination.isLethal
+                                                                    isLethal: combination.isLethal === true
                                                                 })}
                                                                 title="Edit combination"
                                                             >
