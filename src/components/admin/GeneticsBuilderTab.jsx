@@ -395,6 +395,80 @@ const GeneticsBuilderTab = ({ API_BASE_URL, authToken }) => {
         }
     };
 
+    // Move gene up in its category
+    const handleMoveGeneUp = async (geneIndex, geneType) => {
+        if (geneIndex === 0) return; // Already at top
+        
+        setSaving(true);
+        try {
+            const response = await fetch(
+                `${API_BASE_URL}/admin/genetics/${currentData._id}/genes/reorder`,
+                {
+                    method: 'PUT',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': `Bearer ${authToken}`
+                    },
+                    body: JSON.stringify({
+                        fromIndex: geneIndex,
+                        toIndex: geneIndex - 1,
+                        geneType
+                    })
+                }
+            );
+            
+            if (response.ok) {
+                const data = await response.json();
+                setCurrentData(data);
+                setHasChanges(true);
+            } else {
+                const errorData = await response.json();
+                throw new Error(errorData.error || 'Failed to reorder genes');
+            }
+        } catch (err) {
+            alert('Error: ' + err.message);
+        } finally {
+            setSaving(false);
+        }
+    };
+
+    // Move gene down in its category
+    const handleMoveGeneDown = async (geneIndex, geneType, totalGenes) => {
+        if (geneIndex === totalGenes - 1) return; // Already at bottom
+        
+        setSaving(true);
+        try {
+            const response = await fetch(
+                `${API_BASE_URL}/admin/genetics/${currentData._id}/genes/reorder`,
+                {
+                    method: 'PUT',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': `Bearer ${authToken}`
+                    },
+                    body: JSON.stringify({
+                        fromIndex: geneIndex,
+                        toIndex: geneIndex + 1,
+                        geneType
+                    })
+                }
+            );
+            
+            if (response.ok) {
+                const data = await response.json();
+                setCurrentData(data);
+                setHasChanges(true);
+            } else {
+                const errorData = await response.json();
+                throw new Error(errorData.error || 'Failed to reorder genes');
+            }
+        } catch (err) {
+            alert('Error: ' + err.message);
+        } finally {
+            setSaving(false);
+        }
+    };
+
     // Add allele to locus
     const handleAddAllele = async (geneIndex, geneType) => {
         if (!newAllele.symbol.trim()) {
@@ -1025,6 +1099,10 @@ const GeneticsBuilderTab = ({ API_BASE_URL, authToken }) => {
                                                 // Allele reordering
                                                 handleMoveAlleleUp={handleMoveAlleleUp}
                                                 handleMoveAlleleDown={handleMoveAlleleDown}
+                                                // Gene reordering
+                                                handleMoveGeneUp={handleMoveGeneUp}
+                                                handleMoveGeneDown={handleMoveGeneDown}
+                                                totalGenes={currentData.genes?.length || 0}
                                             />
                                         ))}
                                     </div>
@@ -1077,6 +1155,10 @@ const GeneticsBuilderTab = ({ API_BASE_URL, authToken }) => {
                                                 // Allele reordering
                                                 handleMoveAlleleUp={handleMoveAlleleUp}
                                                 handleMoveAlleleDown={handleMoveAlleleDown}
+                                                // Gene reordering
+                                                handleMoveGeneUp={handleMoveGeneUp}
+                                                handleMoveGeneDown={handleMoveGeneDown}
+                                                totalGenes={currentData.markingGenes?.length || 0}
                                             />
                                         ))}
                                     </div>
@@ -1130,6 +1212,10 @@ const GeneticsBuilderTab = ({ API_BASE_URL, authToken }) => {
                                                 // Allele reordering
                                                 handleMoveAlleleUp={handleMoveAlleleUp}
                                                 handleMoveAlleleDown={handleMoveAlleleDown}
+                                                // Gene reordering
+                                                handleMoveGeneUp={handleMoveGeneUp}
+                                                handleMoveGeneDown={handleMoveGeneDown}
+                                                totalGenes={currentData.coatGenes?.length || 0}
                                             />
                                         ))}
                                     </div>
@@ -1183,6 +1269,10 @@ const GeneticsBuilderTab = ({ API_BASE_URL, authToken }) => {
                                                 // Allele reordering
                                                 handleMoveAlleleUp={handleMoveAlleleUp}
                                                 handleMoveAlleleDown={handleMoveAlleleDown}
+                                                // Gene reordering
+                                                handleMoveGeneUp={handleMoveGeneUp}
+                                                handleMoveGeneDown={handleMoveGeneDown}
+                                                totalGenes={currentData.otherGenes?.length || 0}
                                             />
                                         ))}
                                     </div>
@@ -1287,7 +1377,9 @@ const GeneCard = ({
     editingCombination, setEditingCombination,
     onGenerateCombinations,
     // Allele reordering
-    handleMoveAlleleUp, handleMoveAlleleDown
+    handleMoveAlleleUp, handleMoveAlleleDown,
+    // Gene reordering
+    handleMoveGeneUp, handleMoveGeneDown, totalGenes
 }) => {
     return (
         <div className={`genetics-gene-card ${isExpanded ? 'expanded' : ''}`}>
@@ -1300,6 +1392,26 @@ const GeneCard = ({
                     </span>
                 </div>
                 <div className="genetics-gene-actions">
+                    {isEditable && (
+                        <>
+                            <button 
+                                className="genetics-gene-action-btn reorder"
+                                onClick={(e) => { e.stopPropagation(); handleMoveGeneUp(geneIndex, geneType); }}
+                                disabled={geneIndex === 0}
+                                title="Move up"
+                            >
+                                <ChevronUp size={16} />
+                            </button>
+                            <button 
+                                className="genetics-gene-action-btn reorder"
+                                onClick={(e) => { e.stopPropagation(); handleMoveGeneDown(geneIndex, geneType, totalGenes); }}
+                                disabled={geneIndex === totalGenes - 1}
+                                title="Move down"
+                            >
+                                <ChevronDown size={16} />
+                            </button>
+                        </>
+                    )}
                     {isEditable && (
                         <button 
                             className="genetics-gene-action-btn delete"
