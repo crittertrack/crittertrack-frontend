@@ -1734,26 +1734,26 @@ const GeneCard = ({
                                                     <div className="genetics-form-grid">
                                                         <input
                                                             type="text"
-                                                            defaultValue={combination.notation}
-                                                            onBlur={(e) => setEditingCombination(prev => ({ ...prev, notation: e.target.value }))}
+                                                            value={editingCombination?.notation ?? combination.notation}
+                                                            onChange={(e) => setEditingCombination(prev => ({ ...prev, notation: e.target.value }))}
                                                             placeholder="Notation"
                                                         />
                                                         <input
                                                             type="text"
-                                                            defaultValue={combination.phenotype || ''}
-                                                            onBlur={(e) => setEditingCombination(prev => ({ ...prev, phenotype: e.target.value }))}
+                                                            value={editingCombination?.phenotype ?? (combination.phenotype || '')}
+                                                            onChange={(e) => setEditingCombination(prev => ({ ...prev, phenotype: e.target.value }))}
                                                             placeholder="Phenotype"
                                                         />
                                                         <input
                                                             type="text"
-                                                            defaultValue={combination.carrier || ''}
-                                                            onBlur={(e) => setEditingCombination(prev => ({ ...prev, carrier: e.target.value }))}
+                                                            value={editingCombination?.carrier ?? (combination.carrier || '')}
+                                                            onChange={(e) => setEditingCombination(prev => ({ ...prev, carrier: e.target.value }))}
                                                             placeholder="Carrier"
                                                         />
                                                         <label className="genetics-checkbox">
                                                             <input
                                                                 type="checkbox"
-                                                                defaultChecked={combination.isLethal}
+                                                                checked={editingCombination?.isLethal ?? combination.isLethal}
                                                                 onChange={(e) => setEditingCombination(prev => ({ ...prev, isLethal: e.target.checked }))}
                                                             />
                                                             Lethal
