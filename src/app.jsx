@@ -2889,6 +2889,7 @@ const PrivateAnimalDetail = ({ animal, onClose, onEdit, API_BASE_URL, authToken,
                 )}
             </div>
         </div>
+    </div>
     );
 };
 
@@ -3766,8 +3767,8 @@ const ViewOnlyPrivateAnimalDetail = ({ animal, onClose, API_BASE_URL, authToken,
                 )}
             </div>
         </div>
-    );
-};
+    </div>
+    )
 
 // ==================== PUBLIC ANIMAL DETAIL (VIEW-ONLY FOR OTHERS) ====================
 // Respects privacy toggles - only shows public sections
@@ -20973,9 +20974,6 @@ const AppWithTutorial = () => {
         </TutorialProvider>
     );
 };
+}
 
 export default AppRouter;
-
-
-
-
