@@ -5452,12 +5452,20 @@ const LitterManagement = ({ authToken, API_BASE_URL, userProfile, showModalMessa
 
     const fetchMyAnimals = async () => {
         try {
-            const response = await axios.get(`${API_BASE_URL}/animals`, {
-                headers: { Authorization: `Bearer ${authToken}` }
-            });
-            const animalsData = response.data || [];
+            // Fetch both visible and hidden animals for litter management
+            const [visibleResponse, hiddenResponse] = await Promise.all([
+                axios.get(`${API_BASE_URL}/animals`, {
+                    headers: { Authorization: `Bearer ${authToken}` }
+                }),
+                axios.get(`${API_BASE_URL}/animals/hidden/list`, {
+                    headers: { Authorization: `Bearer ${authToken}` }
+                })
+            ]);
             
-            console.log('[fetchMyAnimals] Raw response:', animalsData.length, 'animals');
+            // Combine both lists
+            const animalsData = [...(visibleResponse.data || []), ...(hiddenResponse.data || [])];
+            
+            console.log('[fetchMyAnimals] Raw response:', animalsData.length, 'animals (including hidden)');
             
             // Debug: Log health records for animals that have them
             animalsData.forEach((animal, idx) => {
