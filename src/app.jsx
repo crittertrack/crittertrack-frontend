@@ -5462,8 +5462,11 @@ const LitterManagement = ({ authToken, API_BASE_URL, userProfile, showModalMessa
                 })
             ]);
             
+            // Mark hidden animals explicitly
+            const hiddenAnimals = (hiddenResponse.data || []).map(animal => ({ ...animal, isHidden: true }));
+            
             // Combine both lists
-            const animalsData = [...(visibleResponse.data || []), ...(hiddenResponse.data || [])];
+            const animalsData = [...(visibleResponse.data || []), ...hiddenAnimals];
             
             console.log('[fetchMyAnimals] Raw response:', animalsData.length, 'animals (including hidden)');
             
@@ -17292,7 +17295,9 @@ const App = () => {
             const response = await axios.get(`${API_BASE_URL}/animals/hidden/list`, {
                 headers: { Authorization: `Bearer ${authToken}` }
             });
-            setHiddenAnimals(response.data || []);
+            // Mark all fetched animals as hidden
+            const hiddenAnimalsData = (response.data || []).map(animal => ({ ...animal, isHidden: true }));
+            setHiddenAnimals(hiddenAnimalsData);
         } catch (error) {
             console.error('Failed to fetch hidden animals:', error);
             showModalMessage('Error', 'Failed to load hidden animals');
