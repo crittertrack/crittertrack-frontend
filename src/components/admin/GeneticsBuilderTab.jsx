@@ -395,6 +395,91 @@ const GeneticsBuilderTab = ({ API_BASE_URL, authToken }) => {
         }
     };
 
+    // Move gene up in its category
+    const handleMoveGeneUp = async (geneIndex, geneType) => {
+        if (geneIndex === 0) return; // Already at top
+        
+        console.log('handleMoveGeneUp called:', { geneIndex, geneType, geneticsId: currentData._id });
+        
+        setSaving(true);
+        try {
+            const url = `${API_BASE_URL}/admin/genetics/${currentData._id}/genes/reorder`;
+            console.log('Fetching URL:', url);
+            const response = await fetch(
+                url,
+                {
+                    method: 'PUT',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': `Bearer ${authToken}`
+                    },
+                    body: JSON.stringify({
+                        fromIndex: geneIndex,
+                        toIndex: geneIndex - 1,
+                        geneType
+                    })
+                }
+            );
+            
+            console.log('Request body sent:', { fromIndex: geneIndex, toIndex: geneIndex - 1, geneType });
+            console.log('Response status:', response.status);
+            if (response.ok) {
+                const data = await response.json();
+                console.log('Reorder successful, updated data:', data);
+                console.log('Genes before setCurrentData:', data.genes?.map(g => `${g.symbol}(idx)`));
+                console.log('Gene at index 2:', data.genes?.[2]?.symbol);
+                console.log('Gene at index 3:', data.genes?.[3]?.symbol);
+                setCurrentData(data);
+                setHasChanges(true);
+            } else {
+                const errorData = await response.json();
+                console.error('Reorder failed:', response.status, errorData);
+                throw new Error(errorData.error || 'Failed to reorder genes');
+            }
+        } catch (err) {
+            alert('Error: ' + err.message);
+        } finally {
+            setSaving(false);
+        }
+    };
+
+    // Move gene down in its category
+    const handleMoveGeneDown = async (geneIndex, geneType, totalGenes) => {
+        if (geneIndex === totalGenes - 1) return; // Already at bottom
+        
+        setSaving(true);
+        try {
+            const response = await fetch(
+                `${API_BASE_URL}/admin/genetics/${currentData._id}/genes/reorder`,
+                {
+                    method: 'PUT',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': `Bearer ${authToken}`
+                    },
+                    body: JSON.stringify({
+                        fromIndex: geneIndex,
+                        toIndex: geneIndex + 1,
+                        geneType
+                    })
+                }
+            );
+            
+            if (response.ok) {
+                const data = await response.json();
+                setCurrentData(data);
+                setHasChanges(true);
+            } else {
+                const errorData = await response.json();
+                throw new Error(errorData.error || 'Failed to reorder genes');
+            }
+        } catch (err) {
+            alert('Error: ' + err.message);
+        } finally {
+            setSaving(false);
+        }
+    };
+
     // Add allele to locus
     const handleAddAllele = async (geneIndex, geneType) => {
         if (!newAllele.symbol.trim()) {
@@ -719,31 +804,37 @@ const GeneticsBuilderTab = ({ API_BASE_URL, authToken }) => {
     const handleEditCombination = async (geneIndex, combinationIndex, geneType, combinationData) => {
         setSaving(true);
         try {
-            const response = await fetch(
-                `${API_BASE_URL}/admin/genetics/${currentData._id}/loci/${geneIndex}/combinations/${combinationIndex}`,
-                {
-                    method: 'PUT',
-                    headers: {
-                        'Content-Type': 'application/json',
-                        'Authorization': `Bearer ${authToken}`
-                    },
-                    body: JSON.stringify({
-                        notation: combinationData.notation.trim(),
-                        phenotype: combinationData.phenotype.trim() || null,
-                        carrier: combinationData.carrier.trim() || null,
-                        isLethal: combinationData.isLethal,
-                        geneType
-                    })
-                }
-            );
+            const payload = {
+                notation: combinationData.notation.trim(),
+                phenotype: combinationData.phenotype.trim() || null,
+                carrier: combinationData.carrier.trim() || null,
+                isLethal: Boolean(combinationData.isLethal),
+                geneType
+            };
+            const url = `${API_BASE_URL}/admin/genetics/${currentData._id}/loci/${geneIndex}/combinations/${combinationIndex}`;
+            console.log('Editing combination:', { geneIndex, combinationIndex, geneType, payload, url });
+            
+            const response = await fetch(url, {
+                method: 'PUT',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Authorization': `Bearer ${authToken}`
+                },
+                body: JSON.stringify(payload)
+            });
+            
+            console.log('API Response Status:', response.status, response.statusText);
             
             if (response.ok) {
                 const data = await response.json();
+                console.log('API Response Success:', data);
                 setCurrentData(data);
                 setHasChanges(true);
                 setEditingCombination(null);
             } else {
-                throw new Error('Failed to edit combination');
+                const errorData = await response.json();
+                console.log('API Response Error:', response.status, errorData);
+                throw new Error(errorData.error || 'Failed to edit combination');
             }
         } catch (err) {
             alert('Error: ' + err.message);
@@ -1025,6 +1116,10 @@ const GeneticsBuilderTab = ({ API_BASE_URL, authToken }) => {
                                                 // Allele reordering
                                                 handleMoveAlleleUp={handleMoveAlleleUp}
                                                 handleMoveAlleleDown={handleMoveAlleleDown}
+                                                // Gene reordering
+                                                handleMoveGeneUp={handleMoveGeneUp}
+                                                handleMoveGeneDown={handleMoveGeneDown}
+                                                totalGenes={currentData.genes?.length || 0}
                                             />
                                         ))}
                                     </div>
@@ -1077,6 +1172,10 @@ const GeneticsBuilderTab = ({ API_BASE_URL, authToken }) => {
                                                 // Allele reordering
                                                 handleMoveAlleleUp={handleMoveAlleleUp}
                                                 handleMoveAlleleDown={handleMoveAlleleDown}
+                                                // Gene reordering
+                                                handleMoveGeneUp={handleMoveGeneUp}
+                                                handleMoveGeneDown={handleMoveGeneDown}
+                                                totalGenes={currentData.markingGenes?.length || 0}
                                             />
                                         ))}
                                     </div>
@@ -1130,6 +1229,10 @@ const GeneticsBuilderTab = ({ API_BASE_URL, authToken }) => {
                                                 // Allele reordering
                                                 handleMoveAlleleUp={handleMoveAlleleUp}
                                                 handleMoveAlleleDown={handleMoveAlleleDown}
+                                                // Gene reordering
+                                                handleMoveGeneUp={handleMoveGeneUp}
+                                                handleMoveGeneDown={handleMoveGeneDown}
+                                                totalGenes={currentData.coatGenes?.length || 0}
                                             />
                                         ))}
                                     </div>
@@ -1183,6 +1286,10 @@ const GeneticsBuilderTab = ({ API_BASE_URL, authToken }) => {
                                                 // Allele reordering
                                                 handleMoveAlleleUp={handleMoveAlleleUp}
                                                 handleMoveAlleleDown={handleMoveAlleleDown}
+                                                // Gene reordering
+                                                handleMoveGeneUp={handleMoveGeneUp}
+                                                handleMoveGeneDown={handleMoveGeneDown}
+                                                totalGenes={currentData.otherGenes?.length || 0}
                                             />
                                         ))}
                                     </div>
@@ -1287,7 +1394,9 @@ const GeneCard = ({
     editingCombination, setEditingCombination,
     onGenerateCombinations,
     // Allele reordering
-    handleMoveAlleleUp, handleMoveAlleleDown
+    handleMoveAlleleUp, handleMoveAlleleDown,
+    // Gene reordering
+    handleMoveGeneUp, handleMoveGeneDown, totalGenes
 }) => {
     return (
         <div className={`genetics-gene-card ${isExpanded ? 'expanded' : ''}`}>
@@ -1300,6 +1409,34 @@ const GeneCard = ({
                     </span>
                 </div>
                 <div className="genetics-gene-actions">
+                    {isEditable && (
+                        <>
+                            <button 
+                                className="genetics-gene-action-btn reorder"
+                                onClick={(e) => { 
+                                    console.log('Up button clicked!', { geneIndex, geneType });
+                                    e.stopPropagation(); 
+                                    handleMoveGeneUp(geneIndex, geneType); 
+                                }}
+                                disabled={geneIndex === 0}
+                                title="Move up"
+                            >
+                                <ChevronUp size={16} />
+                            </button>
+                            <button 
+                                className="genetics-gene-action-btn reorder"
+                                onClick={(e) => { 
+                                    console.log('Down button clicked!', { geneIndex, geneType, totalGenes });
+                                    e.stopPropagation(); 
+                                    handleMoveGeneDown(geneIndex, geneType, totalGenes); 
+                                }}
+                                disabled={geneIndex === totalGenes - 1}
+                                title="Move down"
+                            >
+                                <ChevronDown size={16} />
+                            </button>
+                        </>
+                    )}
                     {isEditable && (
                         <button 
                             className="genetics-gene-action-btn delete"
@@ -1603,26 +1740,26 @@ const GeneCard = ({
                                                     <div className="genetics-form-grid">
                                                         <input
                                                             type="text"
-                                                            defaultValue={combination.notation}
-                                                            onBlur={(e) => setEditingCombination(prev => ({ ...prev, notation: e.target.value }))}
+                                                            value={editingCombination?.notation ?? combination.notation}
+                                                            onChange={(e) => setEditingCombination(prev => ({ ...prev, notation: e.target.value }))}
                                                             placeholder="Notation"
                                                         />
                                                         <input
                                                             type="text"
-                                                            defaultValue={combination.phenotype || ''}
-                                                            onBlur={(e) => setEditingCombination(prev => ({ ...prev, phenotype: e.target.value }))}
+                                                            value={editingCombination?.phenotype ?? (combination.phenotype || '')}
+                                                            onChange={(e) => setEditingCombination(prev => ({ ...prev, phenotype: e.target.value }))}
                                                             placeholder="Phenotype"
                                                         />
                                                         <input
                                                             type="text"
-                                                            defaultValue={combination.carrier || ''}
-                                                            onBlur={(e) => setEditingCombination(prev => ({ ...prev, carrier: e.target.value }))}
+                                                            value={editingCombination?.carrier ?? (combination.carrier || '')}
+                                                            onChange={(e) => setEditingCombination(prev => ({ ...prev, carrier: e.target.value }))}
                                                             placeholder="Carrier"
                                                         />
                                                         <label className="genetics-checkbox">
                                                             <input
                                                                 type="checkbox"
-                                                                defaultChecked={combination.isLethal}
+                                                                checked={Boolean(editingCombination?.isLethal)}
                                                                 onChange={(e) => setEditingCombination(prev => ({ ...prev, isLethal: e.target.checked }))}
                                                             />
                                                             Lethal
@@ -1671,7 +1808,7 @@ const GeneCard = ({
                                                                     notation: combination.notation,
                                                                     phenotype: combination.phenotype || '',
                                                                     carrier: combination.carrier || '',
-                                                                    isLethal: combination.isLethal
+                                                                    isLethal: combination.isLethal === true
                                                                 })}
                                                                 title="Edit combination"
                                                             >
