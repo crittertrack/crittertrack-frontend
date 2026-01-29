@@ -1953,7 +1953,7 @@ const PublicProfileView = ({ profile, onBack, onViewAnimal, API_BASE_URL, onStar
 // ==================== PRIVATE ANIMAL DETAIL (OWNER VIEW) ====================
 // Shows ALL data for animal owners viewing their own animals (ignores privacy toggles)
 // Accessed from: MY ANIMALS LIST
-const PrivateAnimalDetail = ({ animal, onClose, onEdit, API_BASE_URL, authToken, setShowImageModal, setEnlargedImageUrl, toggleSectionPrivacy, onUpdateAnimal, onHideAnimal, showModalMessage, onTransfer, onViewAnimal }) => {
+const PrivateAnimalDetail = ({ animal, onClose, onEdit, API_BASE_URL, authToken, setShowImageModal, setEnlargedImageUrl, toggleSectionPrivacy, onUpdateAnimal, onHideAnimal, showModalMessage, onTransfer, onViewAnimal, currentView }) => {
     const [breederInfo, setBreederInfo] = useState(null);
     const [showPedigree, setShowPedigree] = useState(false);
     const [detailViewTab, setDetailViewTab] = useState(1);
@@ -2896,7 +2896,7 @@ const PrivateAnimalDetail = ({ animal, onClose, onEdit, API_BASE_URL, authToken,
 // ==================== VIEW-ONLY PRIVATE ANIMAL DETAIL (SOLD/TRANSFERRED) ====================
 // Identical to PrivateAnimalDetail but without edit/delete and privacy controls
 // Used for animals you have view-only access to (sold, transferred, purchased)
-const ViewOnlyPrivateAnimalDetail = ({ animal, onClose, API_BASE_URL, authToken, setShowImageModal, setEnlargedImageUrl, onHideAnimal, showModalMessage, onViewAnimal }) => {
+const ViewOnlyPrivateAnimalDetail = ({ animal, onClose, API_BASE_URL, authToken, setShowImageModal, setEnlargedImageUrl, onHideAnimal, showModalMessage, onViewAnimal, currentView }) => {
     const [breederInfo, setBreederInfo] = useState(null);
     const [showPedigree, setShowPedigree] = useState(false);
     const [detailViewTab, setDetailViewTab] = useState(1);
@@ -2950,16 +2950,23 @@ const ViewOnlyPrivateAnimalDetail = ({ animal, onClose, API_BASE_URL, authToken,
                             {onHideAnimal && (
                                 <button
                                     onClick={() => {
-                                        if (window.confirm(`Hide ${animal.name || 'this animal'}? You can restore it anytime from the hidden animals section.`)) {
-                                            onHideAnimal(animal.id_public);
-                                            onClose();
+                                        if (currentView === 'hidden-animals') {
+                                            if (window.confirm(`Restore ${animal.name || 'this animal'}?`)) {
+                                                onHideAnimal(animal.id_public);
+                                                onClose();
+                                            }
+                                        } else {
+                                            if (window.confirm(`Hide ${animal.name || 'this animal'}? You can restore it anytime from the hidden animals section.`)) {
+                                                onHideAnimal(animal.id_public);
+                                                onClose();
+                                            }
                                         }
                                     }}
                                     className="px-2 py-1 bg-gray-200 hover:bg-gray-300 text-gray-700 text-xs font-semibold rounded-lg transition flex items-center gap-1"
-                                    title="Hide this animal - move to hidden section"
+                                    title={currentView === 'hidden-animals' ? 'Restore this animal' : 'Hide this animal - move to hidden section'}
                                 >
                                     <Eye size={14} />
-                                    Hide
+                                    {currentView === 'hidden-animals' ? 'Restore' : 'Hide'}
                                 </button>
                             )}
                         </div>
@@ -2980,16 +2987,23 @@ const ViewOnlyPrivateAnimalDetail = ({ animal, onClose, API_BASE_URL, authToken,
                             {onHideAnimal && (
                                 <button
                                     onClick={() => {
-                                        if (window.confirm(`Hide ${animal.name || 'this animal'}? You can restore it anytime from the hidden animals section.`)) {
-                                            onHideAnimal(animal.id_public);
-                                            onClose();
+                                        if (currentView === 'hidden-animals') {
+                                            if (window.confirm(`Restore ${animal.name || 'this animal'}?`)) {
+                                                onHideAnimal(animal.id_public);
+                                                onClose();
+                                            }
+                                        } else {
+                                            if (window.confirm(`Hide ${animal.name || 'this animal'}? You can restore it anytime from the hidden animals section.`)) {
+                                                onHideAnimal(animal.id_public);
+                                                onClose();
+                                            }
                                         }
                                     }}
                                     className="px-3 py-1.5 bg-gray-200 hover:bg-gray-300 text-gray-700 font-semibold rounded-lg transition flex items-center gap-2"
-                                    title="Hide this animal - move to hidden section"
+                                    title={currentView === 'hidden-animals' ? 'Restore this animal' : 'Hide this animal - move to hidden section'}
                                 >
                                     <Eye size={16} />
-                                    Hide
+                                    {currentView === 'hidden-animals' ? 'Restore' : 'Hide'}
                                 </button>
                             )}
                             <button onClick={onClose} className="text-gray-500 hover:text-gray-800">
@@ -17234,14 +17248,24 @@ const App = () => {
 
     const handleHideAnimal = async (id_public) => {
         try {
-            await axios.post(`${API_BASE_URL}/animals/${id_public}/hide`, {}, {
-                headers: { Authorization: `Bearer ${authToken}` }
-            });
-            showModalMessage('Success', 'Animal hidden successfully. You can restore it anytime from the hidden animals section.');
-            fetchHiddenAnimals();
+            if (currentView === 'hidden-animals') {
+                // Restore the animal
+                await axios.post(`${API_BASE_URL}/animals/${id_public}/restore`, {}, {
+                    headers: { Authorization: `Bearer ${authToken}` }
+                });
+                showModalMessage('Success', 'Animal restored successfully.');
+                fetchHiddenAnimals();
+            } else {
+                // Hide the animal
+                await axios.post(`${API_BASE_URL}/animals/${id_public}/hide`, {}, {
+                    headers: { Authorization: `Bearer ${authToken}` }
+                });
+                showModalMessage('Success', 'Animal hidden successfully. You can restore it anytime from the hidden animals section.');
+                fetchHiddenAnimals();
+            }
         } catch (error) {
-            console.error('Failed to hide animal:', error);
-            showModalMessage('Error', error.response?.data?.message || 'Failed to hide animal');
+            console.error('Failed to hide/restore animal:', error);
+            showModalMessage('Error', error.response?.data?.message || 'Failed to process animal');
         }
     };
 
@@ -18655,6 +18679,7 @@ const App = () => {
                                             setShowTransferModal(true);
                                         }}
                                         onViewAnimal={handleViewAnimal}
+                                        currentView={currentView}
                                     />
                                 );
                             } else {
@@ -18670,6 +18695,7 @@ const App = () => {
                                         onHideAnimal={handleHideAnimal}
                                         showModalMessage={showModalMessage}
                                         onViewAnimal={handleViewAnimal}
+                                        currentView={currentView}
                                     />
                                 );
                             }
