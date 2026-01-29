@@ -2950,7 +2950,7 @@ const ViewOnlyPrivateAnimalDetail = ({ animal, onClose, API_BASE_URL, authToken,
                             {onHideAnimal && (
                                 <button
                                     onClick={() => {
-                                        if (currentView === 'hidden-animals') {
+                                        if (animal.isHidden) {
                                             if (window.confirm(`Restore ${animal.name || 'this animal'}?`)) {
                                                 onHideAnimal(animal.id_public);
                                                 onClose();
@@ -2963,10 +2963,10 @@ const ViewOnlyPrivateAnimalDetail = ({ animal, onClose, API_BASE_URL, authToken,
                                         }
                                     }}
                                     className="px-2 py-1 bg-gray-200 hover:bg-gray-300 text-gray-700 text-xs font-semibold rounded-lg transition flex items-center gap-1"
-                                    title={currentView === 'hidden-animals' ? 'Restore this animal' : 'Hide this animal - move to hidden section'}
+                                    title={animal.isHidden ? 'Restore this animal' : 'Hide this animal - move to hidden section'}
                                 >
                                     <Eye size={14} />
-                                    {currentView === 'hidden-animals' ? 'Restore' : 'Hide'}
+                                    {animal.isHidden ? 'Restore' : 'Hide'}
                                 </button>
                             )}
                         </div>
@@ -2987,7 +2987,7 @@ const ViewOnlyPrivateAnimalDetail = ({ animal, onClose, API_BASE_URL, authToken,
                             {onHideAnimal && (
                                 <button
                                     onClick={() => {
-                                        if (currentView === 'hidden-animals') {
+                                        if (animal.isHidden) {
                                             if (window.confirm(`Restore ${animal.name || 'this animal'}?`)) {
                                                 onHideAnimal(animal.id_public);
                                                 onClose();
@@ -3000,10 +3000,10 @@ const ViewOnlyPrivateAnimalDetail = ({ animal, onClose, API_BASE_URL, authToken,
                                         }
                                     }}
                                     className="px-3 py-1.5 bg-gray-200 hover:bg-gray-300 text-gray-700 font-semibold rounded-lg transition flex items-center gap-2"
-                                    title={currentView === 'hidden-animals' ? 'Restore this animal' : 'Hide this animal - move to hidden section'}
+                                    title={animal.isHidden ? 'Restore this animal' : 'Hide this animal - move to hidden section'}
                                 >
                                     <Eye size={16} />
-                                    {currentView === 'hidden-animals' ? 'Restore' : 'Hide'}
+                                    {animal.isHidden ? 'Restore' : 'Hide'}
                                 </button>
                             )}
                             <button onClick={onClose} className="text-gray-500 hover:text-gray-800">
@@ -17248,7 +17248,19 @@ const App = () => {
 
     const handleHideAnimal = async (id_public) => {
         try {
-            if (currentView === 'hidden-animals') {
+            // Check if the animal is currently hidden by fetching it
+            const animalResponse = await axios.get(`${API_BASE_URL}/animals/${id_public}`, {
+                headers: { Authorization: `Bearer ${authToken}` }
+            }).catch(() => {
+                // If not found in regular animals, check hidden animals
+                return axios.get(`${API_BASE_URL}/animals/hidden/list`, {
+                    headers: { Authorization: `Bearer ${authToken}` }
+                }).then(res => ({ data: res.data.find(a => a.id_public === id_public) }));
+            });
+            
+            const isCurrentlyHidden = animalResponse.data?.isHidden || false;
+            
+            if (isCurrentlyHidden) {
                 // Restore the animal
                 await axios.post(`${API_BASE_URL}/animals/${id_public}/restore`, {}, {
                     headers: { Authorization: `Bearer ${authToken}` }
