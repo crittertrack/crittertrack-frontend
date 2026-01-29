@@ -1953,6 +1953,305 @@ const PublicProfileView = ({ profile, onBack, onViewAnimal, API_BASE_URL, onStar
 // ==================== PRIVATE ANIMAL DETAIL (OWNER VIEW) ====================
 // Shows ALL data for animal owners viewing their own animals (ignores privacy toggles)
 // Accessed from: MY ANIMALS LIST
+// View-Only Parent Card Component
+const ViewOnlyParentCard = ({ parentId, parentType, API_BASE_URL, onViewAnimal }) => {
+    const [parentData, setParentData] = useState(null);
+    const [loading, setLoading] = useState(false);
+    const [notFound, setNotFound] = useState(false);
+
+    React.useEffect(() => {
+        if (!parentId) {
+            setParentData(null);
+            setNotFound(false);
+            return;
+        }
+
+        const fetchParent = async () => {
+            setLoading(true);
+            setNotFound(false);
+            try {
+                // Try fetching from global public animals database
+                const publicResponse = await axios.get(`${API_BASE_URL}/public/global/animals?id_public=${parentId}`);
+                if (publicResponse.data && publicResponse.data.length > 0) {
+                    setParentData(publicResponse.data[0]);
+                } else {
+                    setNotFound(true);
+                    setParentData(null);
+                }
+            } catch (error) {
+                console.error(`Error fetching ${parentType}:`, error);
+                setNotFound(true);
+                setParentData(null);
+            } finally {
+                setLoading(false);
+            }
+        };
+
+        fetchParent();
+    }, [parentId, parentType, API_BASE_URL]);
+
+    if (!parentId || notFound) {
+        return (
+            <div className="border-2 border-dashed border-gray-300 rounded-lg p-4 text-center">
+                <p className="text-gray-500 text-sm">No {parentType.toLowerCase()} recorded</p>
+            </div>
+        );
+    }
+
+    if (loading) {
+        return (
+            <div className="border-2 border-gray-300 rounded-lg p-4 flex justify-center items-center">
+                <Loader2 size={24} className="animate-spin text-gray-400" />
+            </div>
+        );
+    }
+
+    if (!parentData) {
+        return (
+            <div className="border-2 border-dashed border-gray-300 rounded-lg p-4 text-center">
+                <p className="text-gray-500 text-sm">Loading {parentType.toLowerCase()} data...</p>
+            </div>
+        );
+    }
+
+    const imgSrc = parentData.imageUrl || parentData.photoUrl || null;
+
+    return (
+        <div 
+            className="border-2 border-gray-300 rounded-lg overflow-hidden cursor-pointer hover:shadow-md transition-shadow"
+            onClick={() => onViewAnimal && onViewAnimal(parentData)}
+        >
+            <div className="bg-gray-50 px-3 py-2 border-b border-gray-300">
+                <p className="text-xs font-semibold text-gray-600">{parentType}</p>
+            </div>
+            <div className="p-4">
+                <div className="flex items-start space-x-3">
+                    {imgSrc ? (
+                        <img src={imgSrc} alt={parentData.name} className="w-16 h-16 rounded-lg object-cover" />
+                    ) : (
+                        <div className="w-16 h-16 bg-gray-200 rounded-lg flex items-center justify-center">
+                            <Cat size={32} className="text-gray-400" />
+                        </div>
+                    )}
+                    <div className="flex-grow">
+                        <p className="font-semibold text-gray-800">
+                            {parentData.prefix && `${parentData.prefix} `}{parentData.name}
+                        </p>
+                        <p className="text-xs text-gray-600 font-mono">{parentData.id_public}</p>
+                        {parentData.status && (
+                            <p className="text-xs text-gray-500 mt-1">{parentData.status}</p>
+                        )}
+                    </div>
+                </div>
+            </div>
+        </div>
+    );
+};
+
+// Parent Mini Card Component for Offspring Section
+// (Removed duplicate declaration to fix redeclaration error)
+
+// Offspring Section Component - shows offspring grouped by litter
+const OffspringSection = ({ animalId, API_BASE_URL, authToken = null, onViewAnimal }) => {
+    const [offspring, setOffspring] = useState([]);
+    const [loading, setLoading] = useState(true);
+    const [currentAnimal, setCurrentAnimal] = useState(null);
+
+    useEffect(() => {
+        const fetchData = async () => {
+            if (!animalId) return;
+            
+            setLoading(true);
+            try {
+                const headers = authToken ? { Authorization: `Bearer ${authToken}` } : {};
+                
+                // Fetch offspring - only available for authenticated users
+                if (authToken) {
+                    const offspringEndpoint = `${API_BASE_URL}/animals/${animalId}/offspring`;
+                    const offspringResponse = await axios.get(offspringEndpoint, { headers });
+                    setOffspring(offspringResponse.data || []);
+                    
+                    // Fetch current animal to know which parent we are
+                    try {
+                        const animalResponse = await axios.get(
+                            `${API_BASE_URL}/animals/any/${animalId}`,
+                            { headers }
+                        );
+                        setCurrentAnimal(animalResponse.data);
+                    } catch (err) {
+                        console.error('Error fetching current animal:', err);
+                    }
+                } else {
+                    // For unauthenticated users, offspring data is not available via API
+                    // The backend doesn't expose a public offspring endpoint for privacy reasons
+                    setOffspring([]);
+                    
+                    // Still fetch the current animal for display
+                    try {
+                        const publicResponse = await axios.get(
+                            `${API_BASE_URL}/public/global/animals?id_public=${animalId}`
+                        );
+                        setCurrentAnimal(publicResponse.data?.[0] || null);
+                    } catch (err) {
+                        console.error('Error fetching current animal:', err);
+                    }
+                }
+            } catch (error) {
+                console.error('Error fetching offspring:', error);
+                setOffspring([]);
+            } finally {
+                setLoading(false);
+            }
+        };
+
+        fetchData();
+    }, [animalId, API_BASE_URL, authToken]);
+
+    return (
+        <div className="bg-white border-2 border-gray-300 rounded-lg p-6">
+            <h3 className="text-lg font-semibold text-gray-800 mb-4">Offspring</h3>
+            {loading ? (
+                <div className="flex justify-center py-8">
+                    <Loader2 size={24} className="animate-spin text-gray-400" />
+                </div>
+            ) : (!offspring || offspring.length === 0) ? (
+                <p className="text-gray-500 text-sm italic">Offspring are not public or no offspring recorded.</p>
+            ) : (
+                <div className="space-y-6">
+                    {offspring.map((litter, index) => (
+                    <div key={litter.litterId || index} className="border-2 border-gray-200 rounded-lg p-4">
+                        {/* Parent Cards at Top - Centered on desktop, stacked on mobile */}
+                        <div className="flex flex-col sm:flex-row items-center gap-3 mb-3 justify-center">
+                            {/* Father Card */}
+                            {(litter.sireId_public || litter.otherParentType === 'sire') && (
+                                <ParentMiniCard 
+                                    parent={litter.otherParentType === 'sire' ? litter.otherParent : currentAnimal}
+                                    label="Father"
+                                    onViewAnimal={onViewAnimal}
+                                />
+                            )}
+                            
+                            {/* Mother Card */}
+                            {(litter.damId_public || litter.otherParentType === 'dam') && (
+                                <ParentMiniCard 
+                                    parent={litter.otherParentType === 'dam' ? litter.otherParent : currentAnimal}
+                                    label="Mother"
+                                    onViewAnimal={onViewAnimal}
+                                />
+                            )}
+                        </div>
+
+                        {/* Litter Info - Centered */}
+                        <div className="flex justify-center mb-4">
+                            <div className="bg-gray-50 rounded-lg px-4 py-2 border border-gray-200 inline-block">
+                                {litter.litterName && (
+                                    <p className="text-sm font-semibold text-gray-800 text-center mb-1">
+                                        {litter.litterName}
+                                    </p>
+                                )}
+                                <div className="flex items-center gap-3 text-sm text-gray-600">
+                                    <span>Born: {new Date(litter.birthDate).toLocaleDateString()}</span>
+                                    {litter.numberBorn && (
+                                        <>
+                                            <span>•</span>
+                                            <span>{litter.numberBorn} born</span>
+                                        </>
+                                    )}
+                                </div>
+                            </div>
+                        </div>
+
+                        {/* Offspring Animals */}
+                        {litter.offspring && litter.offspring.length > 0 ? (
+                            <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-3">
+                                {litter.offspring.map((animal) => (
+                                    <div
+                                        key={animal.id_public}
+                                        onClick={() => onViewAnimal && onViewAnimal(animal)}
+                                        className="relative bg-white rounded-lg shadow-sm h-52 flex flex-col items-center overflow-hidden cursor-pointer hover:shadow-md transition border border-gray-300 pt-2"
+                                    >
+                                        {/* Birthdate top-left */}
+                                        {animal.birthDate && (
+                                            <div className="absolute top-1.5 left-1.5 text-xs text-gray-600 bg-white/80 px-1.5 py-0.5 rounded">
+                                                {new Date(animal.birthDate).toLocaleDateString()}
+                                            </div>
+                                        )}
+
+                                        {/* Gender badge top-right */}
+                                        {animal.gender && (
+                                            <div className="absolute top-1.5 right-1.5">
+                                                {animal.gender === 'Male' 
+                                                    ? <Mars size={14} strokeWidth={2.5} className="text-primary" /> 
+                                                    : <Venus size={14} strokeWidth={2.5} className="text-accent" />
+                                                }
+                                            </div>
+                                        )}
+
+                                        {/* Profile image */}
+                                        <div className="flex-1 flex items-center justify-center w-full px-2 mt-1">
+                                            {animal.imageUrl || animal.photoUrl ? (
+                                                <img 
+                                                    src={animal.imageUrl || animal.photoUrl} 
+                                                    alt={animal.name} 
+                                                    className="w-20 h-20 object-cover rounded-md" 
+                                                />
+                                            ) : (
+                                                <div className="w-20 h-20 bg-gray-100 rounded-md flex items-center justify-center text-gray-400">
+                                                    <Cat size={32} />
+                                                </div>
+                                            )}
+                                        </div>
+                                        
+                                        {/* Icon row - only show if authenticated (local view) */}
+                                        {authToken && (
+                                            <div className="w-full flex justify-center items-center space-x-2 py-1">
+                                                {animal.isOwned ? (
+                                                    <Heart size={12} className="text-black" />
+                                                ) : (
+                                                    <HeartOff size={12} className="text-black" />
+                                                )}
+                                                {/* Show Eye icon if showOnPublicProfile is true, or if the animal is from PublicAnimal collection (has no showOnPublicProfile field) */}
+                                                {(animal.showOnPublicProfile !== undefined ? animal.showOnPublicProfile : true) ? (
+                                                    <Eye size={12} className="text-black" />
+                                                ) : (
+                                                    <EyeOff size={12} className="text-black" />
+                                                )}
+                                                {animal.isInMating && <Hourglass size={12} className="text-black" />}
+                                                {animal.isPregnant && <Bean size={12} className="text-black" />}
+                                                {animal.isNursing && <Milk size={12} className="text-black" />}
+                                            </div>
+                                        )}
+                                        
+                                        {/* Name */}
+                                        <div className="w-full text-center px-2 pb-1">
+                                            <div className="text-sm font-semibold text-gray-800 truncate">
+                                                {animal.prefix ? `${animal.prefix} ` : ''}{animal.name}{animal.suffix ? ` ${animal.suffix}` : ''}
+                                            </div>
+                                        </div>
+
+                                        {/* ID bottom-right */}
+                                        <div className="w-full px-2 pb-2 flex justify-end">
+                                            <div className="text-xs text-gray-500">{animal.id_public}</div>
+                                        </div>
+                                        
+                                        {/* Status bar */}
+                                        <div className="w-full bg-gray-100 py-1 text-center border-t border-gray-300 mt-auto">
+                                            <div className="text-xs font-medium text-gray-700">{animal.status || 'Unknown'}</div>
+                                        </div>
+                                    </div>
+                                ))}
+                            </div>
+                        ) : (
+                            <p className="text-sm text-gray-500 italic">No offspring recorded in this litter.</p>
+                        )}
+                    </div>
+                ))}
+                </div>
+            )}
+        </div>
+    );
+};
+
 const PrivateAnimalDetail = ({ animal, onClose, onEdit, API_BASE_URL, authToken, setShowImageModal, setEnlargedImageUrl, toggleSectionPrivacy, onUpdateAnimal, onHideAnimal, showModalMessage, onTransfer, onViewAnimal }) => {
     const [breederInfo, setBreederInfo] = useState(null);
     const [showPedigree, setShowPedigree] = useState(false);
@@ -4876,25 +5175,7 @@ const ViewOnlyAnimalDetail = ({ animal, onClose, API_BASE_URL, onViewProfile, au
 );
 };
 
-// View-Only Parent Card Component
-const ViewOnlyParentCard = ({ parentId, parentType, API_BASE_URL, onViewAnimal }) => {
-    const [parentData, setParentData] = useState(null);
-    const [loading, setLoading] = useState(false);
-    const [notFound, setNotFound] = useState(false);
-
-    React.useEffect(() => {
-        if (!parentId) {
-            setParentData(null);
-            setNotFound(false);
-            return;
-        }
-
-        const fetchParent = async () => {
-            setLoading(true);
-            setNotFound(false);
-            try {
-                // Try fetching from global public animals database
-                const publicResponse = await axios.get(`${API_BASE_URL}/public/global/animals?id_public=${parentId}`);
+// Litter Management Component (moved down from later in file)
                 if (publicResponse.data && publicResponse.data.length > 0) {
                     setParentData(publicResponse.data[0]);
                 } else {
@@ -5026,265 +5307,6 @@ const ParentMiniCard = ({ parent, label, onViewAnimal }) => {
                 </div>
             </div>
         </div>
-    );
-};
-
-// Offspring Section Component - shows offspring grouped by litter
-const OffspringSection = ({ animalId, API_BASE_URL, authToken = null, onViewAnimal }) => {
-    const [offspring, setOffspring] = useState([]);
-    const [loading, setLoading] = useState(true);
-    const [currentAnimal, setCurrentAnimal] = useState(null);
-
-    useEffect(() => {
-        const fetchData = async () => {
-            if (!animalId) return;
-            
-            setLoading(true);
-            try {
-                const headers = authToken ? { Authorization: `Bearer ${authToken}` } : {};
-                
-                // Fetch offspring - only available for authenticated users
-                if (authToken) {
-                    const offspringEndpoint = `${API_BASE_URL}/animals/${animalId}/offspring`;
-                    const offspringResponse = await axios.get(offspringEndpoint, { headers });
-                    setOffspring(offspringResponse.data || []);
-                    
-                    // Fetch current animal to know which parent we are
-                    try {
-                        const animalResponse = await axios.get(
-                            `${API_BASE_URL}/animals/any/${animalId}`,
-                            { headers }
-                        );
-                        setCurrentAnimal(animalResponse.data);
-                    } catch (err) {
-                        console.error('Error fetching current animal:', err);
-                    }
-                } else {
-                    // For unauthenticated users, offspring data is not available via API
-                    // The backend doesn't expose a public offspring endpoint for privacy reasons
-                    setOffspring([]);
-                    
-                    // Still fetch the current animal for display
-                    try {
-                        const publicResponse = await axios.get(
-                            `${API_BASE_URL}/public/global/animals?id_public=${animalId}`
-                        );
-                        setCurrentAnimal(publicResponse.data?.[0] || null);
-                    } catch (err) {
-                        console.error('Error fetching current animal:', err);
-                    }
-                }
-            } catch (error) {
-                console.error('Error fetching offspring:', error);
-                setOffspring([]);
-            } finally {
-                setLoading(false);
-            }
-        };
-
-        fetchData();
-    }, [animalId, API_BASE_URL, authToken]);
-
-    return (
-        <div className="bg-white border-2 border-gray-300 rounded-lg p-6">
-            <h3 className="text-lg font-semibold text-gray-800 mb-4">Offspring</h3>
-            {loading ? (
-                <div className="flex justify-center py-8">
-                    <Loader2 size={24} className="animate-spin text-gray-400" />
-                </div>
-            ) : (!offspring || offspring.length === 0) ? (
-                <p className="text-gray-500 text-sm italic">Offspring are not public or no offspring recorded.</p>
-            ) : (
-                <div className="space-y-6">
-                    {offspring.map((litter, index) => (
-                    <div key={litter.litterId || index} className="border-2 border-gray-200 rounded-lg p-4">
-                        {/* Parent Cards at Top - Centered on desktop, stacked on mobile */}
-                        <div className="flex flex-col sm:flex-row items-center gap-3 mb-3 justify-center">
-                            {/* Father Card */}
-                            {(litter.sireId_public || litter.otherParentType === 'sire') && (
-                                <ParentMiniCard 
-                                    parent={litter.otherParentType === 'sire' ? litter.otherParent : currentAnimal}
-                                    label="Father"
-                                    onViewAnimal={onViewAnimal}
-                                />
-                            )}
-                            
-                            {/* Mother Card */}
-                            {(litter.damId_public || litter.otherParentType === 'dam') && (
-                                <ParentMiniCard 
-                                    parent={litter.otherParentType === 'dam' ? litter.otherParent : currentAnimal}
-                                    label="Mother"
-                                    onViewAnimal={onViewAnimal}
-                                />
-                            )}
-                        </div>
-
-                        {/* Litter Info - Centered */}
-                        <div className="flex justify-center mb-4">
-                            <div className="bg-gray-50 rounded-lg px-4 py-2 border border-gray-200 inline-block">
-                                {litter.litterName && (
-                                    <p className="text-sm font-semibold text-gray-800 text-center mb-1">
-                                        {litter.litterName}
-                                    </p>
-                                )}
-                                <div className="flex items-center gap-3 text-sm text-gray-600">
-                                    <span>Born: {new Date(litter.birthDate).toLocaleDateString()}</span>
-                                    {litter.numberBorn && (
-                                        <>
-                                            <span>•</span>
-                                            <span>{litter.numberBorn} born</span>
-                                        </>
-                                    )}
-                                </div>
-                            </div>
-                        </div>
-
-                        {/* Offspring Animals */}
-                        {litter.offspring && litter.offspring.length > 0 ? (
-                            <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-3">
-                                {litter.offspring.map((animal) => (
-                                    <div
-                                        key={animal.id_public}
-                                        onClick={() => onViewAnimal && onViewAnimal(animal)}
-                                        className="relative bg-white rounded-lg shadow-sm h-52 flex flex-col items-center overflow-hidden cursor-pointer hover:shadow-md transition border border-gray-300 pt-2"
-                                    >
-                                        {/* Birthdate top-left */}
-                                        {animal.birthDate && (
-                                            <div className="absolute top-1.5 left-1.5 text-xs text-gray-600 bg-white/80 px-1.5 py-0.5 rounded">
-                                                {new Date(animal.birthDate).toLocaleDateString()}
-                                            </div>
-                                        )}
-
-                                        {/* Gender badge top-right */}
-                                        {animal.gender && (
-                                            <div className="absolute top-1.5 right-1.5">
-                                                {animal.gender === 'Male' 
-                                                    ? <Mars size={14} strokeWidth={2.5} className="text-primary" /> 
-                                                    : <Venus size={14} strokeWidth={2.5} className="text-accent" />
-                                                }
-                                            </div>
-                                        )}
-
-                                        {/* Profile image */}
-                                        <div className="flex-1 flex items-center justify-center w-full px-2 mt-1">
-                                            {animal.imageUrl || animal.photoUrl ? (
-                                                <img 
-                                                    src={animal.imageUrl || animal.photoUrl} 
-                                                    alt={animal.name} 
-                                                    className="w-20 h-20 object-cover rounded-md" 
-                                                />
-                                            ) : (
-                                                <div className="w-20 h-20 bg-gray-100 rounded-md flex items-center justify-center text-gray-400">
-                                                    <Cat size={32} />
-                                                </div>
-                                            )}
-                                        </div>
-                                        
-                                        {/* Icon row - only show if authenticated (local view) */}
-                                        {authToken && (
-                                            <div className="w-full flex justify-center items-center space-x-2 py-1">
-                                                {animal.isOwned ? (
-                                                    <Heart size={12} className="text-black" />
-                                                ) : (
-                                                    <HeartOff size={12} className="text-black" />
-                                                )}
-                                                {/* Show Eye icon if showOnPublicProfile is true, or if the animal is from PublicAnimal collection (has no showOnPublicProfile field) */}
-                                                {(animal.showOnPublicProfile !== undefined ? animal.showOnPublicProfile : true) ? (
-                                                    <Eye size={12} className="text-black" />
-                                                ) : (
-                                                    <EyeOff size={12} className="text-black" />
-                                                )}
-                                                {animal.isInMating && <Hourglass size={12} className="text-black" />}
-                                                {animal.isPregnant && <Bean size={12} className="text-black" />}
-                                                {animal.isNursing && <Milk size={12} className="text-black" />}
-                                            </div>
-                                        )}
-                                        
-                                        {/* Name */}
-                                        <div className="w-full text-center px-2 pb-1">
-                                            <div className="text-sm font-semibold text-gray-800 truncate">
-                                                {animal.prefix ? `${animal.prefix} ` : ''}{animal.name}{animal.suffix ? ` ${animal.suffix}` : ''}
-                                            </div>
-                                        </div>
-
-                                        {/* ID bottom-right */}
-                                        <div className="w-full px-2 pb-2 flex justify-end">
-                                            <div className="text-xs text-gray-500">{animal.id_public}</div>
-                                        </div>
-                                        
-                                        {/* Status bar */}
-                                        <div className="w-full bg-gray-100 py-1 text-center border-t border-gray-300 mt-auto">
-                                            <div className="text-xs font-medium text-gray-700">{animal.status || 'Unknown'}</div>
-                                        </div>
-                                    </div>
-                                ))}
-                            </div>
-                        ) : (
-                            <p className="text-sm text-gray-500 italic">No offspring recorded in this litter.</p>
-                        )}
-                    </div>
-                ))}
-                </div>
-            )}
-        </div>
-    );
-};
-
-// Litter Management Component
-const LitterManagement = ({ authToken, API_BASE_URL, userProfile, showModalMessage, onViewAnimal, formDataRef, onFormOpenChange }) => {
-    const [litters, setLitters] = useState([]);
-    const [myAnimals, setMyAnimals] = useState([]);
-    const [loading, setLoading] = useState(true);
-    const [showAddForm, setShowAddForm] = useState(false);
-    const [formData, setFormData] = useState({
-        breedingPairCodeName: '',
-        sireId_public: '',
-        damId_public: '',
-        pairingDate: '',
-        birthDate: '',
-        maleCount: null,
-        femaleCount: null,
-        notes: '',
-        linkedOffspringIds: []
-    });
-    const [createOffspringCounts, setCreateOffspringCounts] = useState({
-        males: 0,
-        females: 0
-    });
-    // Search filters for parent selection (UI not yet implemented)
-    // const [sireSearch, setSireSearch] = useState('');
-    // const [damSearch, setDamSearch] = useState('');
-    // const [sireSpeciesFilter, setSireSpeciesFilter] = useState('');
-    // const [damSpeciesFilter, setDamSpeciesFilter] = useState('');
-    const [linkingAnimals, setLinkingAnimals] = useState(false);
-    const [availableToLink, setAvailableToLink] = useState({ litter: null, animals: [] });
-    const [expandedLitter, setExpandedLitter] = useState(null);
-    const [editingLitter, setEditingLitter] = useState(null);
-    const [modalTarget, setModalTarget] = useState(null);
-    const [searchQuery, setSearchQuery] = useState('');
-    const [speciesFilter, setSpeciesFilter] = useState('');
-    const [yearFilter, setYearFilter] = useState('');
-    // COI calculation state (feature in development - UI display pending)
-    // eslint-disable-next-line no-unused-vars
-    const [predictedCOI, setPredictedCOI] = useState(null);
-    // eslint-disable-next-line no-unused-vars
-    const [calculatingCOI, setCalculatingCOI] = useState(false);
-    const [addingOffspring, setAddingOffspring] = useState(null);
-    const [newOffspringData, setNewOffspringData] = useState({
-        name: '',
-        gender: '',
-        color: '',
-        coat: '',
-        remarks: ''
-    });
-    const [bulkDeleteMode, setBulkDeleteMode] = useState({});
-    const [selectedOffspring, setSelectedOffspring] = useState({});
-
-    useEffect(() => {
-        const loadData = async () => {
-            setLoading(true);
-            try {
-                // Fetch animals and litters - they return immediately after setting data
                 await Promise.all([fetchMyAnimals(), fetchLitters()]);
             } catch (error) {
                 console.error('Error loading data:', error);
