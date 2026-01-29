@@ -2947,7 +2947,21 @@ const ViewOnlyPrivateAnimalDetail = ({ animal, onClose, API_BASE_URL, authToken,
                             </button>
                         </div>
                         <div className="flex justify-center gap-1.5 flex-wrap">
-                            {/* No share button in view-only mode */}
+                            {onHideAnimal && (
+                                <button
+                                    onClick={() => {
+                                        if (window.confirm(`Hide ${animal.name || 'this animal'}? You can restore it anytime from the hidden animals section.`)) {
+                                            onHideAnimal(animal.id_public);
+                                            onClose();
+                                        }
+                                    }}
+                                    className="px-2 py-1 bg-gray-200 hover:bg-gray-300 text-gray-700 text-xs font-semibold rounded-lg transition flex items-center gap-1"
+                                    title="Hide this animal - move to hidden section"
+                                >
+                                    <Eye size={14} />
+                                    Hide
+                                </button>
+                            )}
                         </div>
                     </div>
                     
