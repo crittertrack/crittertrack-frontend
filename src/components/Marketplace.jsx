@@ -105,7 +105,12 @@ const Marketplace = ({ onViewAnimal, onViewProfile, authToken, userProfile, onSt
                 params.append('gender', selectedGender);
             }
 
-            const response = await axios.get(`${API_BASE_URL}/public/marketplace?${params.toString()}`);
+            const response = await axios.get(`${API_BASE_URL}/public/marketplace?${params.toString()}`, {
+                headers: {
+                    'Cache-Control': 'no-cache',
+                    'Pragma': 'no-cache'
+                }
+            });
             setAnimals(response.data.animals || []);
             setPagination(response.data.pagination || { page: 1, total: 0, totalPages: 0 });
         } catch (err) {
