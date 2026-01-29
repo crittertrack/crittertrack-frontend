@@ -3399,7 +3399,9 @@ const ViewOnlyPrivateAnimalDetail = ({ animal, onClose, API_BASE_URL, authToken,
                             {/* Offspring Section */}
                             <OffspringSection animalId={animal.id_public} API_BASE_URL={API_BASE_URL} authToken={authToken} onViewAnimal={onViewAnimal} />
                         </div>
-                    )}                    {/* Tab 6: Breeding */}
+                    )}
+
+                    {/* Tab 6: Breeding */}
                     {detailViewTab === 6 && (
                         <div className="space-y-6">
                             {/* 1st Section: Reproductive Status */}
@@ -4390,7 +4392,9 @@ const ViewOnlyAnimalDetail = ({ animal, onClose, API_BASE_URL, onViewProfile, au
                                 }}
                             />
                         </div>
-                    )}                    {/* Tab 6: Breeding */}
+                    )}
+
+                    {/* Tab 6: Breeding */}
                     {detailViewTab === 6 && (
                         <div className="space-y-6">
                             {/* 1st Section: Reproductive Status */}
@@ -19634,7 +19638,9 @@ const App = () => {
                                                     onViewAnimal={handleViewAnimal}
                                                 />
                                             </div>
-                                        )}                    {/* Tab 6: Breeding */}
+                                        )}
+
+                    {/* Tab 6: Breeding */}
                     {detailViewTab === 6 && (
                         <div className="space-y-6">
                             {/* 1st Section: Reproductive Status */}
