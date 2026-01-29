@@ -3747,8 +3747,7 @@ const ViewOnlyPrivateAnimalDetail = ({ animal, onClose, API_BASE_URL, authToken,
                                 </div>
                             </div>
                         </div>
-                    )}
-
+                    
                     {/* Tab 7: Health */}
                     {detailViewTab === 7 && (
                         <div className="space-y-6">
@@ -14539,7 +14538,15 @@ const AnimalList = ({ authToken, showModalMessage, onEditAnimal, onViewAnimal, f
                     {/* Gender badge top-right */}
                     {animal.gender && (
                         <div className={`absolute top-1 sm:top-2 right-1 sm:right-2`} title={animal.gender}>
-                            {animal.gender === 'Male' ? <Mars className="w-3 h-3 sm:w-4 sm:h-4" strokeWidth={2.5} style={{color: 'var(--color-primary, #9ED4E0)'}} /> : animal.gender === 'Female' ? <Venus className="w-3 h-3 sm:w-4 sm:h-4" strokeWidth={2.5} style={{color: 'var(--color-accent, #D27096)'}} /> : animal.gender === 'Intersex' ? <VenusAndMars className="w-3 h-3 sm:w-4 sm:h-4" strokeWidth={2.5} className="text-purple-500" /> : <Circle className="w-3 h-3 sm:w-4 sm:h-4" strokeWidth={2.5} className="text-gray-500" />}
+                            {animal.gender === 'Male' ? (
+                                <Mars className="w-3 h-3 sm:w-4 sm:h-4" strokeWidth={2.5} style={{color: 'var(--color-primary, #9ED4E0)'}} />
+                            ) : animal.gender === 'Female' ? (
+                                <Venus className="w-3 h-3 sm:w-4 sm:h-4" strokeWidth={2.5} style={{color: 'var(--color-accent, #D27096)'}} />
+                            ) : animal.gender === 'Intersex' ? (
+                                <VenusAndMars strokeWidth={2.5} className="w-3 h-3 sm:w-4 sm:h-4 text-purple-500" />
+                            ) : (
+                                <Circle strokeWidth={2.5} className="w-3 h-3 sm:w-4 sm:h-4 text-gray-500" />
+                            )}
                         </div>
                     )}
 
