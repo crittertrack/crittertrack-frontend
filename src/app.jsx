@@ -2047,7 +2047,7 @@ const PrivateAnimalDetail = ({ animal, onClose, onEdit, API_BASE_URL, authToken,
                             )}
                         </div>
                     </div>
-                    
+                 </div>   
                     {/* Desktop layout: single row */}
                     <div className="hidden sm:flex justify-between items-center">
                         <button 
@@ -2833,7 +2833,9 @@ const PrivateAnimalDetail = ({ animal, onClose, onEdit, API_BASE_URL, authToken,
                                 <p className="text-sm text-gray-700 whitespace-pre-wrap">{animal.remarks || '—'}</p>
                             </div>
                         </div>
-                    )}                    {/* Tab 11: End of Life */}
+                    )}
+
+                    {/* Tab 11: End of Life */}
                     {detailViewTab === 11 && (
                         <div className="space-y-6">
                             {/* 1st Section: Information */}
@@ -3771,7 +3773,9 @@ const ViewOnlyPrivateAnimalDetail = ({ animal, onClose, API_BASE_URL, authToken,
                                 <p className="text-sm text-gray-700 whitespace-pre-wrap">{animal.remarks || '—'}</p>
                             </div>
                         </div>
-                    )}                    {/* Tab 11: End of Life */}
+                    )}
+
+                    {/* Tab 11: End of Life */}
                     {detailViewTab === 11 && (
                         <div className="space-y-6">
                             {/* 1st Section: Information */}
@@ -20061,7 +20065,9 @@ const App = () => {
                                                     </div>
                                                 )}
                                             </div>
-                                        )}                    {/* Tab 11: End of Life */}
+                                        )}
+
+                    {/* Tab 11: End of Life */}
                     {detailViewTab === 11 && (
                         <div className="space-y-6">
                             {/* 1st Section: Information */}
