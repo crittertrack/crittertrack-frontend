@@ -2685,52 +2685,6 @@ const PrivateAnimalDetail = ({ animal, onClose, onEdit, API_BASE_URL, authToken,
                         </div>
                     )}
 
-                            {/* 3rd Section: Mating */}
-                            <div className="bg-gray-50 p-4 rounded-lg border border-gray-200 space-y-4">
-                                <h3 className="text-lg font-semibold text-gray-700">Mating</h3>
-                                <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm">
-                                    <div><span className="text-gray-600">Mating Dates:</span> <strong>{formatDateDisplay(animal.matingDates)}</strong></div>
-                                    <div><span className="text-gray-600">Expected Due Date:</span> <strong>{formatDateDisplay(animal.expectedDueDate)}</strong></div>
-                                </div>
-                            </div>
-
-                            {/* 4th Section: Stud/Dam Information */}
-                            {!animal.isNeutered && !animal.isInfertile && (
-                                <>
-                                    {(animal.gender === 'Male' || animal.gender === 'Intersex' || animal.gender === 'Unknown') && (
-                                        <div className="bg-gray-50 p-4 rounded-lg border border-gray-200 space-y-4">
-                                            <h3 className="text-lg font-semibold text-gray-700">Stud Information</h3>
-                                            <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm">
-                                                <div><span className="text-gray-600">Fertility Status:</span> <strong>{animal.fertilityStatus || '—'}</strong></div>
-                                                <div><span className="text-gray-600">Successful Matings:</span> <strong>{animal.successfulMatings || '—'}</strong></div>
-                                            </div>
-                                            {animal.fertilityNotes && (
-                                                <div><span className="text-gray-600 text-sm">Notes:</span> <p className="text-sm text-gray-700 mt-1">{animal.fertilityNotes}</p></div>
-                                            )}
-                                        </div>
-                                    )}
-                                    {(animal.gender === 'Female' || animal.gender === 'Intersex' || animal.gender === 'Unknown') && (
-                                        <div className="bg-gray-50 p-4 rounded-lg border border-gray-200 space-y-4">
-                                            <h3 className="text-lg font-semibold text-gray-700">Dam Information</h3>
-                                            <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm">
-                                                <div><span className="text-gray-600">Dam Fertility Status:</span> <strong>{animal.damFertilityStatus || animal.fertilityStatus || '—'}</strong></div>
-                                            </div>
-                                        </div>
-                                    )}
-                                </>
-                            )}
-
-                            {/* 5th Section: Breeding History */}
-                            <div className="bg-gray-50 p-4 rounded-lg border border-gray-200 space-y-4">
-                                <h3 className="text-lg font-semibold text-gray-700">Breeding History</h3>
-                                <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm">
-                                    <div><span className="text-gray-600">Offspring Count:</span> <strong>{animal.offspringCount || '—'}</strong></div>
-                                    <div><span className="text-gray-600">Litter Count:</span> <strong>{animal.litterCount || '—'}</strong></div>
-                                </div>
-                            </div>
-                        </div>
-                    )}
-
                     {/* Tab 7: Health */}
                     {detailViewTab === 7 && (
                         <div className="space-y-6">
@@ -5521,13 +5475,41 @@ const LitterManagement = ({ authToken, API_BASE_URL, userProfile, showModalMessa
             });
             const littersData = response.data || [];
             
+            // Fetch offspring data for each litter in parallel
+            const littersWithOffspring = await Promise.all(
+                littersData.map(async (litter) => {
+                    if (litter.offspringIds_public && litter.offspringIds_public.length > 0) {
+                        try {
+                            // Fetch all offspring animals for this litter
+                            const offspringPromises = litter.offspringIds_public.map(offspringId =>
+                                axios.get(`${API_BASE_URL}/animals/any/${offspringId}`, {
+                                    headers: { Authorization: `Bearer ${authToken}` }
+                                }).catch(err => {
+                                    console.log(`Could not fetch offspring ${offspringId}:`, err);
+                                    return null;
+                                })
+                            );
+                            const offspringResponses = await Promise.all(offspringPromises);
+                            const offspring = offspringResponses
+                                .filter(r => r && r.data)
+                                .map(r => r.data);
+                            return { ...litter, offspring };
+                        } catch (err) {
+                            console.log(`Error fetching offspring for litter ${litter._id}:`, err);
+                            return litter;
+                        }
+                    }
+                    return litter;
+                })
+            );
+            
             // Set litters immediately so UI can render
-            setLitters(littersData);
+            setLitters(littersWithOffspring);
             
             // Calculate COI for each litter in background
             Promise.resolve().then(async () => {
                 let needsUpdate = false;
-                for (const litter of littersData) {
+                for (const litter of littersWithOffspring) {
                     // Only calculate if COI is missing or null
                     if (litter.inbreedingCoefficient == null) {
                         try {
@@ -5558,7 +5540,7 @@ const LitterManagement = ({ authToken, API_BASE_URL, userProfile, showModalMessa
                 }
                 // Update state if any COI values were calculated
                 if (needsUpdate) {
-                    setLitters([...littersData]);
+                    setLitters([...littersWithOffspring]);
                 }
             });
         } catch (error) {
@@ -6699,9 +6681,13 @@ const LitterManagement = ({ authToken, API_BASE_URL, userProfile, showModalMessa
                         const sire = litter.sire || myAnimals.find(a => a.id_public === litter.sireId_public);
                         const dam = litter.dam || myAnimals.find(a => a.id_public === litter.damId_public);
                         const isExpanded = expandedLitter === litter._id;
-                        const offspringList = myAnimals.filter(a => 
-                            litter.offspringIds_public && litter.offspringIds_public.includes(a.id_public)
-                        );
+                        // Get offspring from litter's offspring array (if available) or fallback to filtering myAnimals
+                        // This ensures offspring appear even if they're hidden or have different status
+                        const offspringList = litter.offspring && litter.offspring.length > 0 
+                            ? litter.offspring 
+                            : myAnimals.filter(a => 
+                                litter.offspringIds_public && litter.offspringIds_public.includes(a.id_public)
+                            );
                         
                         return (
                             <div key={litter._id} className="border-2 border-gray-200 rounded-lg bg-white hover:shadow-md transition" data-tutorial-target="litter-card">
@@ -18818,11 +18804,11 @@ const App = () => {
                                                     <ArrowLeft size={20} className="mr-2" />
                                                     Back to Dashboard
                                                 </button>
-                                                <div className="flex flex-wrap items-center gap-2">
+                                            <div className="flex flex-col sm:flex-row sm:flex-wrap items-start sm:items-center gap-2">
                                                     <button
                                                         onClick={handleShareAnimal}
                                                         data-tutorial-target="share-animal-btn"
-                                                        className="px-3 py-2 bg-primary hover:bg-primary/90 text-black font-semibold rounded-lg transition flex items-center gap-2"
+                                                        className="px-3 py-2 bg-primary hover:bg-primary/90 text-black font-semibold rounded-lg transition flex items-center gap-2 w-full sm:w-auto text-sm sm:text-base"
                                                         title={copySuccessAnimal ? 'Link Copied!' : 'Share Link'}
                                                     >
                                                         <Link size={18} />
@@ -18833,7 +18819,7 @@ const App = () => {
                                                             <button 
                                                                 data-tutorial-target="edit-animal-btn"
                                                                 onClick={() => { setAnimalToEdit(animalToView); setSpeciesToAdd(animalToView.species); navigate('/edit-animal'); }} 
-                                                                className="bg-primary hover:bg-primary/90 text-black font-semibold py-2 px-4 rounded-lg"
+                                                                className="bg-primary hover:bg-primary/90 text-black font-semibold py-2 px-4 rounded-lg w-full sm:w-auto"
                                                             >
                                                                 Edit
                                                             </button>
@@ -18844,7 +18830,7 @@ const App = () => {
                                                                     navigate('/budget');
                                                                 }}
                                                                 data-tutorial-target="transfer-animal-btn"
-                                                                className="bg-accent hover:bg-accent/90 text-white font-semibold py-2 px-4 rounded-lg transition flex items-center gap-2"
+                                                                className="bg-accent hover:bg-accent/90 text-white font-semibold py-2 px-4 rounded-lg transition flex items-center gap-2 w-full sm:w-auto"
                                                             >
                                                                 <ArrowLeftRight size={16} />
                                                                 Transfer
@@ -18854,7 +18840,7 @@ const App = () => {
                                                     {animalToView.isViewOnly && (
                                                         <button
                                                             onClick={() => handleHideViewOnlyAnimal(animalToView.id_public)}
-                                                            className="px-3 py-1.5 bg-red-500 hover:bg-red-600 text-white font-semibold rounded-lg transition flex items-center gap-2"
+                                                            className="px-3 py-2 bg-red-500 hover:bg-red-600 text-white font-semibold rounded-lg transition flex items-center gap-2 w-full sm:w-auto"
                                                         >
                                                             <Archive size={16} />
                                                             Hide
