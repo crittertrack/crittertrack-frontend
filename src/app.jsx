@@ -2947,26 +2947,19 @@ const ViewOnlyPrivateAnimalDetail = ({ animal, onClose, API_BASE_URL, authToken,
                             </button>
                         </div>
                         <div className="flex justify-center gap-1.5 flex-wrap">
-                            {onHideAnimal && (
+                            {onHideAnimal && !animal.isHidden && (
                                 <button
                                     onClick={() => {
-                                        if (animal.isHidden) {
-                                            if (window.confirm(`Restore ${animal.name || 'this animal'}?`)) {
-                                                onHideAnimal(animal.id_public);
-                                                onClose();
-                                            }
-                                        } else {
-                                            if (window.confirm(`Hide ${animal.name || 'this animal'}? You can restore it anytime from the hidden animals section.`)) {
-                                                onHideAnimal(animal.id_public);
-                                                onClose();
-                                            }
+                                        if (window.confirm(`Hide ${animal.name || 'this animal'}? You can restore it anytime from the hidden animals section.`)) {
+                                            onHideAnimal(animal.id_public);
+                                            onClose();
                                         }
                                     }}
                                     className="px-2 py-1 bg-gray-200 hover:bg-gray-300 text-gray-700 text-xs font-semibold rounded-lg transition flex items-center gap-1"
-                                    title={animal.isHidden ? 'Restore this animal' : 'Hide this animal - move to hidden section'}
+                                    title="Hide this animal - move to hidden section"
                                 >
                                     <Eye size={14} />
-                                    {animal.isHidden ? 'Restore' : 'Hide'}
+                                    Hide
                                 </button>
                             )}
                         </div>
@@ -2984,26 +2977,19 @@ const ViewOnlyPrivateAnimalDetail = ({ animal, onClose, API_BASE_URL, authToken,
                             <span className="text-xs bg-orange-100 text-orange-800 px-2 py-1 rounded font-medium">
                                 📋 VIEW-ONLY - Read Only Access
                             </span>
-                            {onHideAnimal && (
+                            {onHideAnimal && !animal.isHidden && (
                                 <button
                                     onClick={() => {
-                                        if (animal.isHidden) {
-                                            if (window.confirm(`Restore ${animal.name || 'this animal'}?`)) {
-                                                onHideAnimal(animal.id_public);
-                                                onClose();
-                                            }
-                                        } else {
-                                            if (window.confirm(`Hide ${animal.name || 'this animal'}? You can restore it anytime from the hidden animals section.`)) {
-                                                onHideAnimal(animal.id_public);
-                                                onClose();
-                                            }
+                                        if (window.confirm(`Hide ${animal.name || 'this animal'}? You can restore it anytime from the hidden animals section.`)) {
+                                            onHideAnimal(animal.id_public);
+                                            onClose();
                                         }
                                     }}
                                     className="px-3 py-1.5 bg-gray-200 hover:bg-gray-300 text-gray-700 font-semibold rounded-lg transition flex items-center gap-2"
-                                    title={animal.isHidden ? 'Restore this animal' : 'Hide this animal - move to hidden section'}
+                                    title="Hide this animal - move to hidden section"
                                 >
                                     <Eye size={16} />
-                                    {animal.isHidden ? 'Restore' : 'Hide'}
+                                    Hide
                                 </button>
                             )}
                             <button onClick={onClose} className="text-gray-500 hover:text-gray-800">
