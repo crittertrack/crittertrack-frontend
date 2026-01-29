@@ -2049,7 +2049,62 @@ const ViewOnlyParentCard = ({ parentId, parentType, API_BASE_URL, onViewAnimal }
 };
 
 // Parent Mini Card Component for Offspring Section
-// (Removed duplicate declaration to fix redeclaration error)
+const ParentMiniCard = ({ parent, label, onViewAnimal }) => {
+    if (!parent) {
+        return (
+            <div className="flex items-center space-x-2 bg-gray-50 rounded-lg p-2 border border-gray-200" style={{ width: 'auto', minWidth: '180px' }}>
+                <div className="w-10 h-10 bg-gray-200 rounded-md flex items-center justify-center flex-shrink-0">
+                    <Cat size={20} className="text-gray-400" />
+                </div>
+                <div className="flex-grow">
+                    <p className="text-xs text-gray-500 italic">{label} unknown</p>
+                </div>
+            </div>
+        );
+    }
+
+    // Determine if the parent is clickable (owned by user or public)
+    const isClickable = !parent.isHidden;
+
+    return (
+        <div 
+            className={`flex items-center space-x-2 bg-gray-50 rounded-lg p-2 border border-gray-200 ${isClickable ? 'cursor-pointer hover:bg-gray-100' : 'opacity-75'} transition`}
+            style={{ width: 'auto', minWidth: '180px' }}
+            onClick={isClickable ? (() => onViewAnimal && onViewAnimal(parent)) : undefined}
+        >
+            <div className="w-10 h-10 bg-gray-200 rounded-md overflow-hidden flex items-center justify-center flex-shrink-0">
+                {parent.imageUrl || parent.photoUrl ? (
+                    <img 
+                        src={parent.imageUrl || parent.photoUrl} 
+                        alt={parent.name}
+                        className="w-full h-full object-cover"
+                    />
+                ) : (
+                    <Cat size={20} className="text-gray-400" />
+                )}
+            </div>
+            <div className="flex items-center space-x-1 flex-grow">
+                {parent.gender && (
+                    <div>
+                        {parent.gender === 'Male' 
+                            ? <Mars size={12} strokeWidth={2.5} className="text-primary" /> 
+                            : <Venus size={12} strokeWidth={2.5} className="text-accent" />
+                        }
+                    </div>
+                )}
+                <div className="flex-grow min-w-0">
+                    <p className="text-xs font-semibold text-gray-800 truncate">
+                        {parent.prefix && `${parent.prefix} `}
+                        {parent.name}
+                    </p>
+                    <p className="text-xs text-gray-600 font-mono">
+                        {parent.id_public}
+                    </p>
+                </div>
+            </div>
+        </div>
+    );
+};
 
 // Offspring Section Component - shows offspring grouped by litter
 const OffspringSection = ({ animalId, API_BASE_URL, authToken = null, onViewAnimal }) => {
