@@ -2317,9 +2317,10 @@ const PrivateAnimalDetail = ({ animal, onClose, onEdit, API_BASE_URL, authToken,
                             <div className="bg-gray-50 p-4 rounded-lg border border-gray-200">
                                 <h3 className="text-lg font-semibold text-gray-700 border-b pb-2 mb-3">Identification Numbers</h3>
                                 <div className="space-y-2">
-                                    <p className="text-sm"><span className="font-medium">Identification:</span> {animal.breederyId || '—'}</p>
-                                    <p className="text-sm"><span className="font-medium">Microchip:</span> {animal.microchipNumber || '—'}</p>
-                                    <p className="text-sm"><span className="font-medium">Pedigree Reg ID:</span> {animal.pedigreeRegistrationId || '—'}</p>
+                                    <div><span className="text-gray-600">CritterTrack ID:</span> <strong>{animal.id_public || '—'}</strong></div>
+                                    <div><span className="text-gray-600">Identification:</span> <strong>{animal.breederyId || '—'}</strong></div>
+                                    <div><span className="text-gray-600">Microchip Number:</span> <strong>{animal.microchipNumber || '—'}</strong></div>
+                                    <div><span className="text-gray-600">Pedigree Registration ID:</span> <strong>{animal.pedigreeRegistrationId || '—'}</strong></div>
                                 </div>
                             </div>
 
@@ -2445,7 +2446,8 @@ const PrivateAnimalDetail = ({ animal, onClose, onEdit, API_BASE_URL, authToken,
                             <div className="bg-gray-50 p-4 rounded-lg border border-gray-200 space-y-4">
                                 <h3 className="text-lg font-semibold text-gray-700">Identification Numbers</h3>
                                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm">
-                                    <div><span className="text-gray-600">Identification:</span> <strong>{animal.id_public || '—'}</strong></div>
+                                    <div><span className="text-gray-600">CritterTrack ID:</span> <strong>{animal.id_public || '—'}</strong></div>
+                                    <div><span className="text-gray-600">Identification:</span> <strong>{animal.breederyId || '—'}</strong></div>
                                     <div><span className="text-gray-600">Microchip Number:</span> <strong>{animal.microchipNumber || '—'}</strong></div>
                                     <div><span className="text-gray-600">Pedigree Registration ID:</span> <strong>{animal.pedigreeRegistrationId || '—'}</strong></div>
                                 </div>
@@ -3208,10 +3210,10 @@ const ViewOnlyPrivateAnimalDetail = ({ animal, onClose, API_BASE_URL, authToken,
                             <div className="bg-gray-50 p-4 rounded-lg border border-gray-200">
                                 <h3 className="text-lg font-semibold text-gray-700 border-b pb-2 mb-3">Identification Numbers</h3>
                                 <div className="space-y-2">
-                                    <p className="text-sm"><span className="font-medium">Identification:</span> {animal.breederyId || '—'}</p>
-                                    <p className="text-sm"><span className="font-medium">Microchip:</span> {animal.microchipNumber || '—'}</p>
-                                    <p className="text-sm"><span className="font-medium">Pedigree Reg ID:</span> {animal.pedigreeRegistrationId || '—'}</p>
-                                    <p className="text-sm"><span className="font-medium">CTC ID:</span> <span className="font-mono text-accent">{animal.id_public}</span></p>
+                                    <div><span className="text-gray-600">CritterTrack ID:</span> <strong>{animal.id_public || '—'}</strong></div>
+                                    <div><span className="text-gray-600">Identification:</span> <strong>{animal.breederyId || '—'}</strong></div>
+                                    <div><span className="text-gray-600">Microchip Number:</span> <strong>{animal.microchipNumber || '—'}</strong></div>
+                                    <div><span className="text-gray-600">Pedigree Registration ID:</span> <strong>{animal.pedigreeRegistrationId || '—'}</strong></div>
                                 </div>
                             </div>
 
@@ -3337,7 +3339,8 @@ const ViewOnlyPrivateAnimalDetail = ({ animal, onClose, API_BASE_URL, authToken,
                             <div className="bg-gray-50 p-4 rounded-lg border border-gray-200 space-y-4">
                                 <h3 className="text-lg font-semibold text-gray-700">Identification Numbers</h3>
                                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm">
-                                    <div><span className="text-gray-600">Identification:</span> <strong>{animal.id_public || '—'}</strong></div>
+                                    <div><span className="text-gray-600">CritterTrack ID:</span> <strong>{animal.id_public || '—'}</strong></div>
+                                    <div><span className="text-gray-600">Identification:</span> <strong>{animal.breederyId || '—'}</strong></div>
                                     <div><span className="text-gray-600">Microchip Number:</span> <strong>{animal.microchipNumber || '—'}</strong></div>
                                     <div><span className="text-gray-600">Pedigree Registration ID:</span> <strong>{animal.pedigreeRegistrationId || '—'}</strong></div>
                                 </div>
@@ -4154,10 +4157,10 @@ const ViewOnlyAnimalDetail = ({ animal, onClose, API_BASE_URL, onViewProfile, au
                             <div className="bg-gray-50 p-4 rounded-lg border border-gray-200">
                                 <h3 className="text-lg font-semibold text-gray-700 border-b pb-2 mb-3">Identification Numbers</h3>
                                 <div className="space-y-2">
-                                    <p className="text-sm"><span className="font-medium">Identification:</span> {animal.breederyId || '—'}</p>
-                                    <p className="text-sm"><span className="font-medium">Microchip:</span> {animal.microchipNumber || '—'}</p>
-                                    <p className="text-sm"><span className="font-medium">Pedigree Reg ID:</span> {animal.pedigreeRegistrationId || '—'}</p>
-                                    <p className="text-sm"><span className="font-medium">CTC ID:</span> <span className="font-mono text-accent">{animal.id_public}</span></p>
+                                    <div><span className="text-gray-600">CritterTrack ID:</span> <strong>{animal.id_public || '—'}</strong></div>
+                                    <div><span className="text-gray-600">Identification:</span> <strong>{animal.breederyId || '—'}</strong></div>
+                                    <div><span className="text-gray-600">Microchip Number:</span> <strong>{animal.microchipNumber || '—'}</strong></div>
+                                    <div><span className="text-gray-600">Pedigree Registration ID:</span> <strong>{animal.pedigreeRegistrationId || '—'}</strong></div>
                                 </div>
                             </div>
                             {/* Genetic Code Display Section */}
@@ -19017,13 +19020,13 @@ const App = () => {
                                                 </div>
 
                                                 {/* Identification Card */}
-                                                {(animalToView.microchipNumber || animalToView.registryCode || animalToView.breederyId || animalToView.pedigreeRegId) && (
+                                                {(animalToView.microchipNumber || animalToView.breederyId || animalToView.pedigreeRegId || animalToView.id_public) && (
                                                     <div className="bg-white border-2 border-gray-300 rounded-lg p-4">
                                                         <h4 className="font-semibold text-gray-700 mb-2">Identification</h4>
                                                         <div className="text-sm space-y-1">
-                                                            {animalToView.microchipNumber && <div><strong>Microchip:</strong> {animalToView.microchipNumber}</div>}
-                                                            {animalToView.registryCode && <div><strong>Registry:</strong> {animalToView.registryCode}</div>}
+                                                            {animalToView.id_public && <div><strong>CritterTrack ID:</strong> {animalToView.id_public}</div>}
                                                             {animalToView.breederyId && <div><strong>Identification:</strong> {animalToView.breederyId}</div>}
+                                                            {animalToView.microchipNumber && <div><strong>Microchip:</strong> {animalToView.microchipNumber}</div>}
                                                             {animalToView.pedigreeRegId && <div><strong>Pedigree Reg ID:</strong> {animalToView.pedigreeRegId}</div>}
                                                         </div>
                                                     </div>
@@ -19629,9 +19632,10 @@ const App = () => {
                                                 <div className="bg-gray-50 p-4 rounded-lg border border-gray-200 space-y-4">
                                                     <h3 className="text-lg font-semibold text-gray-700">Identification Numbers</h3>
                                                     <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm">
+                                                        <div><span className="text-gray-600">CritterTrack ID:</span> <strong>{animalToView.id_public || '—'}</strong></div>
                                                         <div><span className="text-gray-600">Identification:</span> <strong>{animalToView.breederyId || '—'}</strong></div>
-                                                        <div><span className="text-gray-600">Microchip:</span> <strong>{animalToView.microchipNumber || '—'}</strong></div>
-                                                        <div><span className="text-gray-600">Pedigree Reg ID:</span> <strong>{animalToView.pedigreeRegistrationId || '—'}</strong></div>
+                                                        <div><span className="text-gray-600">Microchip Number:</span> <strong>{animalToView.microchipNumber || '—'}</strong></div>
+                                                        <div><span className="text-gray-600">Pedigree Registration ID:</span> <strong>{animalToView.pedigreeRegistrationId || '—'}</strong></div>
                                                     </div>
                                                 </div>
                                                 <div className="bg-gray-50 p-4 rounded-lg border border-gray-200 space-y-4">
