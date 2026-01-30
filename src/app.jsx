@@ -701,17 +701,18 @@ const PedigreeChart = ({ animalId, animalData, onClose, API_BASE_URL, authToken 
                     <div className="text-gray-900 leading-tight" style={{fontSize: '0.65rem', lineHeight: '1.3'}}>
                         <span className="font-semibold">Name: </span>{animal.prefix && `${animal.prefix} `}{animal.name}{animal.suffix && ` ${animal.suffix}`}
                     </div>
-                
-                {/* Variety */}
-                <div className="text-gray-900 leading-tight" style={{fontSize: '0.65rem', lineHeight: '1.3'}}>
-                    <span className="font-semibold">Variety: </span>
-                    {colorCoat}
-                </div>
-                
-                {/* Breeder */}
-                <div className="text-gray-900 leading-tight" style={{fontSize: '0.65rem', lineHeight: '1.3'}}>
-                    <span className="font-semibold">Breeder: </span>
-                    {animal.breederName || 'N/A'}
+                    
+                    {/* Variety */}
+                    <div className="text-gray-900 leading-tight" style={{fontSize: '0.65rem', lineHeight: '1.3'}}>
+                        <span className="font-semibold">Variety: </span>
+                        {colorCoat}
+                    </div>
+                    
+                    {/* Breeder */}
+                    <div className="text-gray-900 leading-tight" style={{fontSize: '0.65rem', lineHeight: '1.3'}}>
+                        <span className="font-semibold">Breeder: </span>
+                        {animal.breederName || 'N/A'}
+                    </div>
                 </div>
                 
                 {/* Gender Icon - Top Right */}
