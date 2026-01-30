@@ -15837,8 +15837,8 @@ const App = () => {
     useEffect(() => {
         const fetchUserCount = async () => {
             try {
-                console.log('Fetching user count from:', `${API_BASE_URL}/api/public/users/count`);
-                const response = await fetch(`${API_BASE_URL}/api/public/users/count`);
+                console.log('Fetching user count from:', `${API_BASE_URL}/public/users/count`);
+                const response = await fetch(`${API_BASE_URL}/public/users/count`);
                 console.log('User count response status:', response.status);
                 if (response.ok) {
                     const data = await response.json();
