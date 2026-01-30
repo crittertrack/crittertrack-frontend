@@ -1021,7 +1021,7 @@ const ParentSearchModal = ({
     species         // Filter: Species of the animal being bred
 }) => {
     const [searchTerm, setSearchTerm] = useState('');
-        const [hasSearched, setHasSearched] = useState(false);
+    const [hasSearched, setHasSearched] = useState(false);
     const [localAnimals, setLocalAnimals] = useState([]);
     const [globalAnimals, setGlobalAnimals] = useState([]);
     const [loadingLocal, setLoadingLocal] = useState(false);
@@ -13479,6 +13479,19 @@ const AuthView = ({ onLoginSuccess, showModalMessage, isRegister, setIsRegister,
 
     return (
         <div className="max-w-md w-full bg-white p-8 rounded-xl shadow-2xl">
+            {!forgotPasswordStep && !verificationStep && (
+                <div className="mb-6 p-4 rounded-lg bg-gradient-to-r from-blue-100 to-purple-100 flex items-center gap-4 shadow">
+                    <Users size={32} className="text-primary-dark" />
+                    <div>
+                        <div className="text-lg font-bold text-gray-800">
+                            Join {window.userCount || '...'} registered breeders!
+                        </div>
+                        <div className="text-sm text-gray-700">
+                            {isRegister ? 'Be part of a growing community. Register now and connect with passionate breeders worldwide!' : 'Join thousands of breeders tracking their animals professionally'}
+                        </div>
+                    </div>
+                </div>
+            )}
             <h2 className="text-3xl font-extrabold text-gray-900 mb-6 text-center">
                 {forgotPasswordStep > 0 ? 'Reset Password' : (verificationStep ? 'Verify Your Email' : mainTitle)}
             </h2>
@@ -13672,16 +13685,6 @@ const AuthView = ({ onLoginSuccess, showModalMessage, isRegister, setIsRegister,
                                         </a>
                                     </p>
                                 </div>
-                            </div>
-                        </div>
-                    )}
-                    
-                    {isRegister && (
-                        <div className="mb-4 p-4 rounded-lg bg-gradient-to-r from-blue-100 to-purple-100 flex items-center gap-4 shadow">
-                            <Users size={32} className="text-primary-dark" />
-                            <div>
-                                <div className="text-lg font-bold text-gray-800">Join <span id="user-count">...</span> registered breeders!</div>
-                                <div className="text-sm text-gray-700">Be part of a growing community. Register now and connect with passionate breeders worldwide!</div>
                             </div>
                         </div>
                     )}
@@ -15831,21 +15834,20 @@ const App = () => {
     useEffect(() => {
         const fetchUserCount = async () => {
             try {
-                const response = await fetch(`${API_BASE_URL}/public/users/count`);
+                const response = await fetch(`${API_BASE_URL}/api/public/users/count`);
                 if (response.ok) {
                     const data = await response.json();
-                    const count = data.totalUsers || 'many';
+                    const count = data.count || 'many';
                     const el = document.getElementById('user-count');
-                    if (el) el.textContent = count;
+                    if (el) el.textContent = count.toLocaleString();
                 }
             } catch (err) {
-                // fallback
-                const el = document.getElementById('user-count');
-                if (el) el.textContent = 'many';
+                console.error('Failed to fetch user count:', err);
+                // Keep the "..." placeholder if fetch fails
             }
         };
         fetchUserCount();
-    }, []);
+    }, [API_BASE_URL]);
     
     // Tutorial context hook
     const { hasSeenInitialTutorial, markInitialTutorialSeen, hasCompletedOnboarding, isLoading: tutorialLoading, markTutorialCompleted, completedTutorials, isTutorialCompleted, hasSeenWelcomeBanner, dismissWelcomeBanner } = useTutorial(); 
