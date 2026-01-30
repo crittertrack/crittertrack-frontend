@@ -29,7 +29,7 @@ import Marketplace from './components/Marketplace';
 const API_BASE_URL = '/api'; // Production via Vercel proxy - v2
 
 const GENDER_OPTIONS = ['Male', 'Female', 'Intersex', 'Unknown'];
-const STATUS_OPTIONS = ['Pet', 'Breeder', 'Available', 'Sold', 'Retired', 'Deceased', 'Rehomed', 'Unknown']; 
+const STATUS_OPTIONS = ['Pet', 'Breeder', 'Available', 'Booked', 'Sold', 'Retired', 'Deceased', 'Rehomed', 'Unknown']; 
 
 const DEFAULT_SPECIES_OPTIONS = ['Fancy Mouse', 'Fancy Rat', 'Russian Dwarf Hamster', 'Campbells Dwarf Hamster', 'Chinese Dwarf Hamster', 'Syrian Hamster', 'Guinea Pig'];
 
@@ -9383,7 +9383,7 @@ const AnimalForm = ({
                                         <option value="Pet">Pet - Personal animal, not for breeding/sale</option>
                                         <option value="Breeder">Breeder - Active breeding animal</option>
                                         <option value="Available">Available - For sale (shown in public showcase)</option>
-                                        <option value="Sold">Sold - Sold to new owner</option>
+                                        <option value="Booked">Booked - Reserved/deposit received</option>
                                         <option value="Retired">Retired - No longer breeding</option>
                                         <option value="Deceased">Deceased - Animal has passed away</option>
                                         <option value="Rehomed">Rehomed - Given to new home</option>
