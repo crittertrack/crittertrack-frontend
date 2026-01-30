@@ -15843,7 +15843,7 @@ const App = () => {
                 if (response.ok) {
                     const data = await response.json();
                     console.log('User count data:', data);
-                    const count = data.count || 'many';
+                    const count = data.totalUsers || 'many';
                     const formattedCount = typeof count === 'number' ? count.toLocaleString() : count;
                     console.log('Setting user count to:', formattedCount);
                     setUserCount(formattedCount);
