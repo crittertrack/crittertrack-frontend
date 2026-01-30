@@ -13040,7 +13040,7 @@ const ProfileView = ({ userProfile, showModalMessage, fetchUserProfile, authToke
     );
 };
 
-const AuthView = ({ onLoginSuccess, showModalMessage, isRegister, setIsRegister, mainTitle, onShowTerms, onShowPrivacy }) => {
+const AuthView = ({ onLoginSuccess, showModalMessage, isRegister, setIsRegister, mainTitle, onShowTerms, onShowPrivacy, userCount }) => {
     const [email, setEmail] = useState('');
     const [password, setPassword] = useState('');
     const [confirmPassword, setConfirmPassword] = useState('');
@@ -13486,7 +13486,7 @@ const AuthView = ({ onLoginSuccess, showModalMessage, isRegister, setIsRegister,
                     <Users size={32} className="text-primary-dark" />
                     <div>
                         <div className="text-lg font-bold text-gray-800">
-                            Join {window.userCount || '...'} registered breeders!
+                            Join {userCount} registered breeders!
                         </div>
                         <div className="text-sm text-gray-700">
                             {isRegister ? 'Be part of a growing community. Register now and connect with passionate breeders worldwide!' : 'Join thousands of breeders tracking their animals professionally'}
@@ -15840,8 +15840,7 @@ const App = () => {
                 if (response.ok) {
                     const data = await response.json();
                     const count = data.count || 'many';
-                    const el = document.getElementById('user-count');
-                    if (el) el.textContent = count.toLocaleString();
+                    setUserCount(typeof count === 'number' ? count.toLocaleString() : count);
                 }
             } catch (err) {
                 console.error('Failed to fetch user count:', err);
@@ -15853,6 +15852,7 @@ const App = () => {
     
     // Tutorial context hook
     const { hasSeenInitialTutorial, markInitialTutorialSeen, hasCompletedOnboarding, isLoading: tutorialLoading, markTutorialCompleted, completedTutorials, isTutorialCompleted, hasSeenWelcomeBanner, dismissWelcomeBanner } = useTutorial(); 
+    const [userCount, setUserCount] = useState('...');
     const [animalToEdit, setAnimalToEdit] = useState(null);
     const [speciesToAdd, setSpeciesToAdd] = useState(null); 
     const [speciesOptions, setSpeciesOptions] = useState([]); 
@@ -17708,6 +17708,7 @@ const App = () => {
                             mainTitle={mainTitle}
                             onShowTerms={() => setShowTermsModal(true)}
                             onShowPrivacy={() => setShowPrivacyModal(true)}
+                            userCount={userCount}
                         />
                     </div>
                     
