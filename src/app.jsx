@@ -13489,7 +13489,7 @@ const AuthView = ({ onLoginSuccess, showModalMessage, isRegister, setIsRegister,
                             Join {userCount} registered breeders!
                         </div>
                         <div className="text-sm text-gray-700">
-                            {isRegister ? 'Be part of a growing community. Register now and connect with passionate breeders worldwide!' : 'Join thousands of breeders tracking their animals professionally'}
+                            Be part of a growing community. Register now and connect with passionate breeders worldwide!
                         </div>
                     </div>
                 </div>
