@@ -15821,6 +15821,7 @@ const App = () => {
     const [userProfile, setUserProfile] = useState(null);
     const [hasSkippedTutorialThisSession, setHasSkippedTutorialThisSession] = useState(false);
     const [isMobile, setIsMobile] = useState(window.innerWidth < 768);
+    const [userCount, setUserCount] = useState('...');
     
     // Derive currentView from URL path
     const currentView = location.pathname.split('/')[1] || 'list';
@@ -15852,7 +15853,6 @@ const App = () => {
     
     // Tutorial context hook
     const { hasSeenInitialTutorial, markInitialTutorialSeen, hasCompletedOnboarding, isLoading: tutorialLoading, markTutorialCompleted, completedTutorials, isTutorialCompleted, hasSeenWelcomeBanner, dismissWelcomeBanner } = useTutorial(); 
-    const [userCount, setUserCount] = useState('...');
     const [animalToEdit, setAnimalToEdit] = useState(null);
     const [speciesToAdd, setSpeciesToAdd] = useState(null); 
     const [speciesOptions, setSpeciesOptions] = useState([]); 
