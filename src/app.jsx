@@ -1958,6 +1958,11 @@ const PrivateAnimalDetail = ({ animal, onClose, onEdit, API_BASE_URL, authToken,
     const [showPedigree, setShowPedigree] = useState(false);
     const [detailViewTab, setDetailViewTab] = useState(1);
     const [copySuccess, setCopySuccess] = useState(false);
+
+    // Reset to overview tab when animal changes
+    React.useEffect(() => {
+        setDetailViewTab(1);
+    }, [animal.id_public]);
     
     const handleShare = () => {
         const url = `${window.location.origin}/animal/${animal.id_public}`;
@@ -2902,6 +2907,11 @@ const ViewOnlyPrivateAnimalDetail = ({ animal, onClose, API_BASE_URL, authToken,
     const [breederInfo, setBreederInfo] = useState(null);
     const [showPedigree, setShowPedigree] = useState(false);
     const [detailViewTab, setDetailViewTab] = useState(1);
+
+    // Reset to overview tab when animal changes
+    React.useEffect(() => {
+        setDetailViewTab(1);
+    }, [animal.id_public]);
     
     // Fetch breeder info when component mounts or animal changes
     React.useEffect(() => {
@@ -6062,8 +6072,15 @@ const LitterManagement = ({ authToken, API_BASE_URL, userProfile, showModalMessa
     };
 
     const handleAddOffspringToLitter = (litter) => {
-        const sire = myAnimals.find(a => a.id_public === litter.sireId_public);
-        setAddingOffspring(litter);
+        // Get parent data from litter (includes transferred animals)
+        const sire = litter.sire || myAnimals.find(a => a.id_public === litter.sireId_public);
+        const dam = litter.dam || myAnimals.find(a => a.id_public === litter.damId_public);
+        
+        setAddingOffspring({
+            ...litter,
+            sire: sire,
+            dam: dam
+        });
         setNewOffspringData({
             name: '',
             gender: '',
@@ -6080,11 +6097,25 @@ const LitterManagement = ({ authToken, API_BASE_URL, userProfile, showModalMessa
         }
 
         try {
-            const sire = myAnimals.find(a => a.id_public === addingOffspring.sireId_public);
+            // Get species from stored parent data (works even if parents are transferred)
+            const sire = addingOffspring.sire;
+            const dam = addingOffspring.dam;
+
+            if (!sire && !dam) {
+                showModalMessage('Error', 'Cannot determine species - parent information is missing');
+                return;
+            }
+
+            const species = (sire && sire.species) || (dam && dam.species);
+
+            if (!species) {
+                showModalMessage('Error', 'Cannot determine species from parent animals');
+                return;
+            }
             
             const animalData = {
                 name: newOffspringData.name,
-                species: sire.species,
+                species: species,
                 gender: newOffspringData.gender,
                 birthDate: addingOffspring.birthDate,
                 status: 'Pet',
@@ -13637,6 +13668,16 @@ const AuthView = ({ onLoginSuccess, showModalMessage, isRegister, setIsRegister,
                     )}
                     
                     {isRegister && (
+                        <div className="mb-4 p-4 rounded-lg bg-gradient-to-r from-blue-100 to-purple-100 flex items-center gap-4 shadow">
+                            <Users size={32} className="text-primary-dark" />
+                            <div>
+                                <div className="text-lg font-bold text-gray-800">Join <span id="user-count">...</span> registered breeders!</div>
+                                <div className="text-sm text-gray-700">Be part of a growing community. Register now and connect with passionate breeders worldwide!</div>
+                            </div>
+                        </div>
+                    )}
+                    
+                    {isRegister && (
                         <input type="text" placeholder="Your Personal Name *" value={personalName} onChange={(e) => setPersonalName(e.target.value)} required 
                             className="w-full p-3 border border-gray-300 rounded-lg focus:ring-primary focus:border-primary transition" />
                     )}
@@ -15775,6 +15816,26 @@ const App = () => {
         const handleResize = () => setIsMobile(window.innerWidth < 768);
         window.addEventListener('resize', handleResize);
         return () => window.removeEventListener('resize', handleResize);
+    }, []);
+    
+    // Fetch and display user count on login/register screen
+    useEffect(() => {
+        const fetchUserCount = async () => {
+            try {
+                const response = await fetch(`${API_BASE_URL}/public/users/count`);
+                if (response.ok) {
+                    const data = await response.json();
+                    const count = data.totalUsers || 'many';
+                    const el = document.getElementById('user-count');
+                    if (el) el.textContent = count;
+                }
+            } catch (err) {
+                // fallback
+                const el = document.getElementById('user-count');
+                if (el) el.textContent = 'many';
+            }
+        };
+        fetchUserCount();
     }, []);
     
     // Tutorial context hook
@@ -20377,7 +20438,7 @@ const App = () => {
             {/* Image Modal */}
             {showImageModal && enlargedImageUrl && (
                 <div 
-                    className="fixed inset-0 bg-black bg-opacity-90 flex items-center justify-center z-50 p-4"
+                    className="fixed inset-0 bg-black bg-opacity-90 flex items-center justify-center z-[80] p-4"
                     onClick={() => setShowImageModal(false)}
                 >
                     <div className="relative max-w-7xl max-h-full flex flex-col items-center gap-4">
@@ -20396,15 +20457,29 @@ const App = () => {
                             className="max-w-full max-h-[75vh] object-contain"
                             onClick={(e) => e.stopPropagation()}
                         />
-                        <a
-                            href={enlargedImageUrl}
-                            download
+                        <button
+                            onClick={async (e) => {
+                                e.stopPropagation();
+                                try {
+                                    const response = await fetch(enlargedImageUrl);
+                                    const blob = await response.blob();
+                                    const url = window.URL.createObjectURL(blob);
+                                    const a = document.createElement('a');
+                                    a.href = url;
+                                    a.download = `crittertrack-animal-${Date.now()}.jpg`;
+                                    document.body.appendChild(a);
+                                    a.click();
+                                    document.body.removeChild(a);
+                                    window.URL.revokeObjectURL(url);
+                                } catch (error) {
+                                    console.error('Download failed:', error);
+                                }
+                            }}
                             className="bg-blue-600 hover:bg-blue-700 text-white px-6 py-2 rounded-lg flex items-center gap-2 transition"
-                            onClick={(e) => e.stopPropagation()}
                         >
                             <Download size={20} />
                             Download Image
-                        </a>
+                        </button>
                     </div>
                 </div>
             )}
@@ -20563,7 +20638,7 @@ const PublicAnimalPage = () => {
             {/* Image Modal */}
             {showImageModal && enlargedImageUrl && (
                 <div 
-                    className="fixed inset-0 bg-black bg-opacity-90 flex items-center justify-center z-50 p-4"
+                    className="fixed inset-0 bg-black bg-opacity-90 flex items-center justify-center z-[80] p-4"
                     onClick={() => setShowImageModal(false)}
                 >
                     <div className="relative max-w-7xl max-h-full flex flex-col items-center gap-4">
@@ -20582,15 +20657,29 @@ const PublicAnimalPage = () => {
                             className="max-w-full max-h-[75vh] object-contain"
                             onClick={(e) => e.stopPropagation()}
                         />
-                        <a
-                            href={enlargedImageUrl}
-                            download
+                        <button
+                            onClick={async (e) => {
+                                e.stopPropagation();
+                                try {
+                                    const response = await fetch(enlargedImageUrl);
+                                    const blob = await response.blob();
+                                    const url = window.URL.createObjectURL(blob);
+                                    const a = document.createElement('a');
+                                    a.href = url;
+                                    a.download = `crittertrack-animal-${Date.now()}.jpg`;
+                                    document.body.appendChild(a);
+                                    a.click();
+                                    document.body.removeChild(a);
+                                    window.URL.revokeObjectURL(url);
+                                } catch (error) {
+                                    console.error('Download failed:', error);
+                                }
+                            }}
                             className="bg-blue-600 hover:bg-blue-700 text-white px-6 py-2 rounded-lg flex items-center gap-2 transition"
-                            onClick={(e) => e.stopPropagation()}
                         >
                             <Download size={20} />
                             Download Image
-                        </a>
+                        </button>
                     </div>
                 </div>
             )}
