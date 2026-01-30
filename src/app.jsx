@@ -2957,7 +2957,7 @@ const PrivateAnimalDetail = ({ animal, onClose, onEdit, API_BASE_URL, authToken,
 // ==================== VIEW-ONLY PRIVATE ANIMAL DETAIL (SOLD/TRANSFERRED) ====================
 // Identical to PrivateAnimalDetail but without edit/delete and privacy controls
 // Used for animals you have view-only access to (sold, transferred, purchased)
-const ViewOnlyPrivateAnimalDetail = ({ animal, onClose, API_BASE_URL, authToken, setShowImageModal, setEnlargedImageUrl, onHideAnimal, showModalMessage, onViewAnimal, currentView }) => {
+const ViewOnlyPrivateAnimalDetail = ({ animal, onClose, API_BASE_URL, authToken, setShowImageModal, setEnlargedImageUrl, onHideAnimal, showModalMessage, onViewAnimal, currentView, zIndex = 70 }) => {
     const [breederInfo, setBreederInfo] = useState(null);
     const [showPedigree, setShowPedigree] = useState(false);
     const [detailViewTab, setDetailViewTab] = useState(1);
