@@ -1007,6 +1007,8 @@ const PedigreeChart = ({ animalId, animalData, onClose, API_BASE_URL, authToken 
                 </div>
             )}
         </div>
+     </div>
+     </div>
     );
 };
 
