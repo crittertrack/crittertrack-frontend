@@ -15837,11 +15837,18 @@ const App = () => {
     useEffect(() => {
         const fetchUserCount = async () => {
             try {
+                console.log('Fetching user count from:', `${API_BASE_URL}/api/public/users/count`);
                 const response = await fetch(`${API_BASE_URL}/api/public/users/count`);
+                console.log('User count response status:', response.status);
                 if (response.ok) {
                     const data = await response.json();
+                    console.log('User count data:', data);
                     const count = data.count || 'many';
-                    setUserCount(typeof count === 'number' ? count.toLocaleString() : count);
+                    const formattedCount = typeof count === 'number' ? count.toLocaleString() : count;
+                    console.log('Setting user count to:', formattedCount);
+                    setUserCount(formattedCount);
+                } else {
+                    console.log('User count response not ok:', await response.text());
                 }
             } catch (err) {
                 console.error('Failed to fetch user count:', err);
