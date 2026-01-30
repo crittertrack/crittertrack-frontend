@@ -15927,6 +15927,7 @@ const App = () => {
     const [showUserSearchModal, setShowUserSearchModal] = useState(false);
     const [viewingPublicProfile, setViewingPublicProfile] = useState(null);
     const [viewingPublicAnimal, setViewingPublicAnimal] = useState(null);
+    const [stackedPublicAnimal, setStackedPublicAnimal] = useState(null); // For nested animal viewing from parents
     const [viewAnimalBreederInfo, setViewAnimalBreederInfo] = useState(null);
     const [animalToView, setAnimalToView] = useState(null);
     const [detailViewTab, setDetailViewTab] = useState(1); // Tab for detail view
@@ -17278,12 +17279,17 @@ const App = () => {
     // Set up global handler for viewing public animals from search modal
     useEffect(() => {
         window.handleViewPublicAnimal = (animal) => {
-            setViewingPublicAnimal(animal);
+            // If we're already viewing an animal, stack the new one on top
+            if (viewingPublicAnimal || animalToView) {
+                setStackedPublicAnimal(animal);
+            } else {
+                setViewingPublicAnimal(animal);
+            }
         };
         return () => {
             delete window.handleViewPublicAnimal;
         };
-    }, []);
+    }, [viewingPublicAnimal, animalToView]);
 
     const handleSaveAnimal = async (method, url, data) => {
         if (userProfile && !data.ownerId_public) {
@@ -17996,6 +18002,22 @@ const App = () => {
                     setShowImageModal={setShowImageModal}
                     setEnlargedImageUrl={setEnlargedImageUrl}
                 />
+            )}
+            
+            {/* Stacked Animal Detail - Higher z-index to appear above main detail */}
+            {stackedPublicAnimal && (
+                <div style={{zIndex: 60}}>
+                    <ViewOnlyAnimalDetail 
+                        animal={stackedPublicAnimal}
+                        onClose={() => setStackedPublicAnimal(null)}
+                        API_BASE_URL={API_BASE_URL}
+                        setModCurrentContext={setModCurrentContext}
+                        authToken={authToken}
+                        onViewProfile={(user) => navigate(`/user/${user.id_public}`)}
+                        setShowImageModal={setShowImageModal}
+                        setEnlargedImageUrl={setEnlargedImageUrl}
+                    />
+                </div>
             )}
             
             <header className="w-full bg-white p-3 sm:p-4 rounded-xl shadow-lg mb-6 max-w-5xl overflow-hidden">
