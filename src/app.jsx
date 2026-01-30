@@ -15856,7 +15856,7 @@ const App = () => {
             }
         };
         fetchUserCount();
-    }, [API_BASE_URL]);
+    }, [API_BASE_URL, setUserCount]);
     
     // Tutorial context hook
     const { hasSeenInitialTutorial, markInitialTutorialSeen, hasCompletedOnboarding, isLoading: tutorialLoading, markTutorialCompleted, completedTutorials, isTutorialCompleted, hasSeenWelcomeBanner, dismissWelcomeBanner } = useTutorial(); 
