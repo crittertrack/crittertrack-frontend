@@ -993,23 +993,20 @@ const PedigreeChart = ({ animalId, animalData, onClose, API_BASE_URL, authToken 
                     </div>
                 </div>
             </div>
+            
+            {/* Stacked Pedigree Modal - Higher z-index to appear above main pedigree */}
+            {stackedPedigree && (
+                <div className="fixed inset-0 z-[90]">
+                    <PedigreeChart
+                        animalId={stackedPedigree.id_public}
+                        animalData={stackedPedigree}
+                        onClose={() => setStackedPedigree(null)}
+                        API_BASE_URL={API_BASE_URL}
+                        authToken={authToken}
+                    />
+                </div>
+            )}
         </div>
-    </div>
-    </div>
-    
-    {/* Stacked Pedigree Modal - Higher z-index to appear above main pedigree */}
-    {stackedPedigree && (
-        <div className="fixed inset-0 z-[90]">
-            <PedigreeChart
-                animalId={stackedPedigree.id_public}
-                animalData={stackedPedigree}
-                onClose={() => setStackedPedigree(null)}
-                API_BASE_URL={API_BASE_URL}
-                authToken={authToken}
-            />
-        </div>
-    )}
-    </div>
     );
 };
 
