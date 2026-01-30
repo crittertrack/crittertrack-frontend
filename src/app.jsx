@@ -172,6 +172,7 @@ const PedigreeChart = ({ animalId, animalData, onClose, API_BASE_URL, authToken 
     const [ownerProfile, setOwnerProfile] = useState(null);
     const [loading, setLoading] = useState(true);
     const [imagesLoaded, setImagesLoaded] = useState(false);
+    const [stackedPedigree, setStackedPedigree] = useState(null); // For nested pedigree viewing
     const pedigreeRef = useRef(null);
 
     useEffect(() => {
@@ -453,7 +454,7 @@ const PedigreeChart = ({ animalId, animalData, onClose, API_BASE_URL, authToken 
     };
 
     // Render card for parents (medium with image)
-    const renderParentCard = (animal, isSire) => {
+    const renderParentCard = (animal, isSire, onClick = null) => {
         const bgColor = isSire ? 'bg-[#d4f1f5]' : 'bg-[#f8e8ee]';
         const GenderIcon = isSire ? Mars : Venus;
         
@@ -491,7 +492,10 @@ const PedigreeChart = ({ animalId, animalData, onClose, API_BASE_URL, authToken 
         const colorCoat = [animal.color, animal.coat].filter(Boolean).join(' ') || 'N/A';
         
         return (
-            <div className={`border border-gray-700 rounded p-1.5 ${bgColor} relative flex gap-2 h-full items-center`}>
+            <div 
+                className={`border border-gray-700 rounded p-1.5 ${bgColor} relative flex gap-2 h-full items-center ${onClick ? 'cursor-pointer hover:opacity-80 transition' : ''}`}
+                onClick={onClick ? () => onClick(animal) : undefined}
+            >
                 {/* Image - 1/3 width */}
                 <div className="hide-for-pdf w-1/3 aspect-square bg-gray-100 rounded-lg border-2 border-gray-900 overflow-hidden flex items-center justify-center flex-shrink-0">
                     {imgSrc ? (
@@ -544,7 +548,7 @@ const PedigreeChart = ({ animalId, animalData, onClose, API_BASE_URL, authToken 
     };
 
     // Render card for grandparents (with image)
-    const renderGrandparentCard = (animal, isSire) => {
+    const renderGrandparentCard = (animal, isSire, onClick = null) => {
         const bgColor = isSire ? 'bg-[#d4f1f5]' : 'bg-[#f8e8ee]';
         const GenderIcon = isSire ? Mars : Venus;
         
@@ -641,7 +645,7 @@ const PedigreeChart = ({ animalId, animalData, onClose, API_BASE_URL, authToken 
     };
 
     // Render card for great-grandparents (text only, no image)
-    const renderGreatGrandparentCard = (animal, isSire) => {
+    const renderGreatGrandparentCard = (animal, isSire, onClick = null) => {
         const bgColor = isSire ? 'bg-[#d4f1f5]' : 'bg-[#f8e8ee]';
         const GenderIcon = isSire ? Mars : Venus;
         
@@ -658,9 +662,15 @@ const PedigreeChart = ({ animalId, animalData, onClose, API_BASE_URL, authToken 
         
         if (animal.isHidden) {
             return (
-                <div className={`border border-gray-700 rounded p-1 ${bgColor} flex flex-col items-center justify-center h-full relative`}>
-                    <EyeOff size={16} className="text-gray-500 mb-1" />
-                    <span className="text-xs text-gray-600 font-semibold">Hidden</span>
+                <div className={`border border-gray-700 rounded p-1 ${bgColor} flex gap-1 h-full items-center relative`}>
+                    {/* Icon placeholder */}
+                    <div className="hide-for-pdf w-8 h-8 bg-gray-100 rounded-lg border border-gray-900 overflow-hidden flex items-center justify-center flex-shrink-0">
+                        <EyeOff size={12} className="text-gray-500" />
+                    </div>
+                    {/* Text */}
+                    <div className="flex-1 flex items-center justify-start">
+                        <span className="text-xs text-gray-600 font-semibold">Hidden</span>
+                    </div>
                     <div className="absolute top-0.5 right-0.5">
                         <GenderIcon size={12} className="text-gray-900" strokeWidth={2.5} />
                     </div>
@@ -668,14 +678,29 @@ const PedigreeChart = ({ animalId, animalData, onClose, API_BASE_URL, authToken 
             );
         }
         
+        const imgSrc = animal.imageUrl || animal.photoUrl || null;
         const colorCoat = [animal.color, animal.coat].filter(Boolean).join(' ') || 'N/A';
         
         return (
-            <div className={`border border-gray-700 rounded p-1 ${bgColor} relative h-full flex flex-col justify-start gap-0.5 py-1`}>
-                {/* Name - inline */}
-                <div className="text-gray-900 leading-tight" style={{fontSize: '0.65rem', lineHeight: '1.3'}}>
-                    <span className="font-semibold">Name: </span>{animal.prefix && `${animal.prefix} `}{animal.name}{animal.suffix && ` ${animal.suffix}`}
+            <div 
+                className={`border border-gray-700 rounded p-1 ${bgColor} relative h-full flex gap-1 items-center ${onClick ? 'cursor-pointer hover:opacity-80 transition' : ''}`}
+                onClick={onClick ? () => onClick(animal) : undefined}
+            >
+                {/* Image */}
+                <div className="hide-for-pdf w-8 h-8 bg-gray-100 rounded-lg border border-gray-900 overflow-hidden flex items-center justify-center flex-shrink-0">
+                    {imgSrc ? (
+                        <AnimalImage src={imgSrc} alt={animal.name} className="w-full h-full object-cover" iconSize={12} />
+                    ) : (
+                        <Cat size={12} className="text-gray-400" />
+                    )}
                 </div>
+                
+                {/* Info */}
+                <div className="flex-1 min-w-0 flex flex-col justify-start gap-0.5 py-0.5">
+                    {/* Name - inline */}
+                    <div className="text-gray-900 leading-tight" style={{fontSize: '0.65rem', lineHeight: '1.3'}}>
+                        <span className="font-semibold">Name: </span>{animal.prefix && `${animal.prefix} `}{animal.name}{animal.suffix && ` ${animal.suffix}`}
+                    </div>
                 
                 {/* Variety */}
                 <div className="text-gray-900 leading-tight" style={{fontSize: '0.65rem', lineHeight: '1.3'}}>
@@ -704,6 +729,13 @@ const PedigreeChart = ({ animalId, animalData, onClose, API_BASE_URL, authToken 
 
     const renderPedigreeTree = (animal) => {
         if (!animal) return null;
+
+        // Handler for clicking on pedigree cards
+        const handleCardClick = (clickedAnimal) => {
+            if (clickedAnimal && clickedAnimal.id_public) {
+                setStackedPedigree(clickedAnimal);
+            }
+        };
 
         // Generation 1 (parents)
         const father = animal.father;
@@ -739,54 +771,54 @@ const PedigreeChart = ({ animalId, animalData, onClose, API_BASE_URL, authToken 
                     {/* Column 1: Parents (2 rows, each takes 1/2 height) */}
                     <div className={`w-1/3 flex flex-col ${gapClass}`}>
                         <div style={{height: `${parentHeight - (gap * 2)}px`}}>
-                            {renderParentCard(father, true)}
+                            {renderParentCard(father, true, handleCardClick)}
                         </div>
                         <div style={{height: `${parentHeight - (gap * 2)}px`}}>
-                            {renderParentCard(mother, false)}
+                            {renderParentCard(mother, false, handleCardClick)}
                         </div>
                     </div>
 
                     {/* Column 2: Grandparents (4 rows, each takes 1/4 height) */}
                     <div className={`w-1/3 flex flex-col ${gapClass}`}>
                         <div style={{height: `${grandparentHeight - (8 * 0.75)}px`}}>
-                            {renderGrandparentCard(paternalGrandfather, true)}
+                            {renderGrandparentCard(paternalGrandfather, true, handleCardClick)}
                         </div>
                         <div style={{height: `${grandparentHeight - (8 * 0.75)}px`}}>
-                            {renderGrandparentCard(paternalGrandmother, false)}
+                            {renderGrandparentCard(paternalGrandmother, false, handleCardClick)}
                         </div>
                         <div style={{height: `${grandparentHeight - (8 * 0.75)}px`}}>
-                            {renderGrandparentCard(maternalGrandfather, true)}
+                            {renderGrandparentCard(maternalGrandfather, true, handleCardClick)}
                         </div>
                         <div style={{height: `${grandparentHeight - (8 * 0.75)}px`}}>
-                            {renderGrandparentCard(maternalGrandmother, false)}
+                            {renderGrandparentCard(maternalGrandmother, false, handleCardClick)}
                         </div>
                     </div>
 
                     {/* Column 3: Great-Grandparents (8 rows, each takes 1/8 height) */}
                     <div className={`w-1/3 flex flex-col ${gapClass}`}>
                         <div style={{height: `${greatGrandparentHeight - (8 * 0.375)}px`}}>
-                            {renderGreatGrandparentCard(pgfFather, true)}
+                            {renderGreatGrandparentCard(pgfFather, true, handleCardClick)}
                         </div>
                         <div style={{height: `${greatGrandparentHeight - (8 * 0.375)}px`}}>
-                            {renderGreatGrandparentCard(pgfMother, false)}
+                            {renderGreatGrandparentCard(pgfMother, false, handleCardClick)}
                         </div>
                         <div style={{height: `${greatGrandparentHeight - (8 * 0.375)}px`}}>
-                            {renderGreatGrandparentCard(pgmFather, true)}
+                            {renderGreatGrandparentCard(pgmFather, true, handleCardClick)}
                         </div>
                         <div style={{height: `${greatGrandparentHeight - (8 * 0.375)}px`}}>
-                            {renderGreatGrandparentCard(pgmMother, false)}
+                            {renderGreatGrandparentCard(pgmMother, false, handleCardClick)}
                         </div>
                         <div style={{height: `${greatGrandparentHeight - (8 * 0.375)}px`}}>
-                            {renderGreatGrandparentCard(mgfFather, true)}
+                            {renderGreatGrandparentCard(mgfFather, true, handleCardClick)}
                         </div>
                         <div style={{height: `${greatGrandparentHeight - (8 * 0.375)}px`}}>
-                            {renderGreatGrandparentCard(mgfMother, false)}
+                            {renderGreatGrandparentCard(mgfMother, false, handleCardClick)}
                         </div>
                         <div style={{height: `${greatGrandparentHeight - (8 * 0.375)}px`}}>
-                            {renderGreatGrandparentCard(mgmFather, true)}
+                            {renderGreatGrandparentCard(mgmFather, true, handleCardClick)}
                         </div>
                         <div style={{height: `${greatGrandparentHeight - (8 * 0.375)}px`}}>
-                            {renderGreatGrandparentCard(mgmMother, false)}
+                            {renderGreatGrandparentCard(mgmMother, false, handleCardClick)}
                         </div>
                     </div>
                 </div>
@@ -962,6 +994,20 @@ const PedigreeChart = ({ animalId, animalData, onClose, API_BASE_URL, authToken 
             </div>
         </div>
     </div>
+    </div>
+    
+    {/* Stacked Pedigree Modal - Higher z-index to appear above main pedigree */}
+    {stackedPedigree && (
+        <div className="fixed inset-0 z-[90]">
+            <PedigreeChart
+                animalId={stackedPedigree.id_public}
+                animalData={stackedPedigree}
+                onClose={() => setStackedPedigree(null)}
+                API_BASE_URL={API_BASE_URL}
+                authToken={authToken}
+            />
+        </div>
+    )}
     </div>
     );
 };
