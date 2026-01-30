@@ -3853,7 +3853,7 @@ const ViewOnlyPrivateAnimalDetail = ({ animal, onClose, API_BASE_URL, authToken,
 // ==================== PUBLIC ANIMAL DETAIL (VIEW-ONLY FOR OTHERS) ====================
 // Respects privacy toggles - only shows public sections
 // Accessed from: Global search, user profiles, offspring links
-const ViewOnlyAnimalDetail = ({ animal, onClose, API_BASE_URL, onViewProfile, authToken, setModCurrentContext, setShowImageModal, setEnlargedImageUrl }) => {
+const ViewOnlyAnimalDetail = ({ animal, onClose, API_BASE_URL, onViewProfile, authToken, setModCurrentContext, setShowImageModal, setEnlargedImageUrl, zIndex = 50 }) => {
     const [breederInfo, setBreederInfo] = useState(null);
     const [showPedigree, setShowPedigree] = useState(false);
     const [copySuccess, setCopySuccess] = useState(false);
@@ -3968,7 +3968,7 @@ const ViewOnlyAnimalDetail = ({ animal, onClose, API_BASE_URL, onViewProfile, au
     });
 
     return (
-        <div className="fixed inset-0 bg-accent/10 flex items-center justify-center p-4 z-50 overflow-y-auto">
+        <div className="fixed inset-0 bg-accent/10 flex items-center justify-center p-4 overflow-y-auto" style={{zIndex}}>
             <div className="bg-primary rounded-xl shadow-2xl w-full max-w-5xl max-h-[90vh] overflow-y-auto">
                 {/* Header */}
                 <div className="bg-white rounded-t-lg p-4 border-b border-gray-300">
@@ -18006,18 +18006,17 @@ const App = () => {
             
             {/* Stacked Animal Detail - Higher z-index to appear above main detail */}
             {stackedPublicAnimal && (
-                <div style={{zIndex: 60}}>
-                    <ViewOnlyAnimalDetail 
-                        animal={stackedPublicAnimal}
-                        onClose={() => setStackedPublicAnimal(null)}
-                        API_BASE_URL={API_BASE_URL}
-                        setModCurrentContext={setModCurrentContext}
-                        authToken={authToken}
-                        onViewProfile={(user) => navigate(`/user/${user.id_public}`)}
-                        setShowImageModal={setShowImageModal}
-                        setEnlargedImageUrl={setEnlargedImageUrl}
-                    />
-                </div>
+                <ViewOnlyAnimalDetail 
+                    animal={stackedPublicAnimal}
+                    onClose={() => setStackedPublicAnimal(null)}
+                    API_BASE_URL={API_BASE_URL}
+                    setModCurrentContext={setModCurrentContext}
+                    authToken={authToken}
+                    onViewProfile={(user) => navigate(`/user/${user.id_public}`)}
+                    setShowImageModal={setShowImageModal}
+                    setEnlargedImageUrl={setEnlargedImageUrl}
+                    zIndex={60}
+                />
             )}
             
             <header className="w-full bg-white p-3 sm:p-4 rounded-xl shadow-lg mb-6 max-w-5xl overflow-hidden">
