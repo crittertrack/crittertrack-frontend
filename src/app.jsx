@@ -12871,6 +12871,31 @@ const DonationView = ({ onBack }) => {
                         </div>
                     </div>
                 </div>
+                
+                {/* Ko-fi Shop */}
+                <div className="border-2 border-blue-500/30 rounded-lg p-6 bg-gradient-to-r from-blue-500/5 to-cyan-500/5 hover:shadow-md transition">
+                    <div className="flex items-start gap-4">
+                        <div className="bg-blue-500/20 p-3 rounded-lg">
+                            <ShoppingBag size={24} className="text-blue-600" />
+                        </div>
+                        <div className="flex-1">
+                            <h3 className="font-bold text-lg text-gray-800 mb-2">Ko-fi Shop</h3>
+                            <p className="text-sm text-gray-600 mb-4">
+                                Support CritterTrack by purchasing Mouse Magic books and merchandise! Every purchase helps 
+                                fund server costs and development while you get quality products in return.
+                            </p>
+                            <a
+                                href="https://ko-fi.com/mousemagic/shop"
+                                target="_blank"
+                                rel="noopener noreferrer"
+                                className="w-full bg-gradient-to-r from-blue-500 to-cyan-500 hover:from-blue-600 hover:to-cyan-600 text-white font-semibold py-3 px-6 rounded-lg transition shadow-md flex items-center justify-center gap-2"
+                            >
+                                <ShoppingBag size={18} />
+                                Visit Ko-fi Shop
+                            </a>
+                        </div>
+                    </div>
+                </div>
             </div>
 
             {/* Footer Note */}
@@ -17752,6 +17777,16 @@ const App = () => {
                             <Heart size={18} className="fill-current" />
                             Learn More & Donate
                         </RouterLink>
+                        
+                        <a
+                            href="https://ko-fi.com/mousemagic/shop"
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className="w-full bg-gradient-to-r from-blue-500 to-cyan-500 hover:from-blue-600 hover:to-cyan-600 text-white font-semibold py-3 px-4 rounded-lg shadow-md transition flex items-center justify-center gap-2"
+                        >
+                            <ShoppingBag size={18} />
+                            Visit Ko-fi Shop
+                        </a>
                     </div>
                     
                     {/* MIDDLE: Auth Form */}
