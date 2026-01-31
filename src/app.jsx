@@ -12787,7 +12787,7 @@ const DonationView = ({ onBack }) => {
                     paywalls, or required subscriptions. However, hosting, maintaining, and improving this platform requires resources.
                 </p>
                 <p className="text-gray-700 leading-relaxed">
-                    If you find CritterTrack valuable for managing your breeding program, please consider supporting its 
+                    If you find CritterTrack valuable for managing your animals and breeding programs, please consider supporting its 
                     continued development with a voluntary donation. Every contribution, no matter the size, helps keep this 
                     platform running and improving.
                 </p>
@@ -13529,10 +13529,10 @@ const AuthView = ({ onLoginSuccess, showModalMessage, isRegister, setIsRegister,
                     <Users size={32} className="text-primary-dark" />
                     <div>
                         <div className="text-lg font-bold text-gray-800">
-                            Join {userCount} registered breeders!
+                            Join {userCount} breeders & keepers!
                         </div>
                         <div className="text-sm text-gray-700">
-                            Be part of a growing community. Register now and connect with passionate breeders worldwide!
+                            Be part of a growing community. Register now and connect with passionate breeders and keepers worldwide!
                         </div>
                     </div>
                 </div>
@@ -17809,7 +17809,7 @@ const App = () => {
                                 </div>
                                 <div>
                                     <h4 className="font-semibold text-gray-800 text-sm">Budget Tracking</h4>
-                                    <p className="text-xs text-gray-600">Monitor expenses and income for your breeding program</p>
+                                    <p className="text-xs text-gray-600">Monitor expenses and income for your animals and programs</p>
                                 </div>
                             </div>
                             
@@ -17819,7 +17819,7 @@ const App = () => {
                                 </div>
                                 <div>
                                     <h4 className="font-semibold text-gray-800 text-sm">Public Profiles</h4>
-                                    <p className="text-xs text-gray-600">Share your animals and connect with other breeders</p>
+                                    <p className="text-xs text-gray-600">Share your animals and connect with other breeders and keepers</p>
                                 </div>
                             </div>
                         </div>
