@@ -17737,7 +17737,7 @@ const App = () => {
                         
                         <p className="text-sm text-gray-700 leading-relaxed mb-4">
                             CritterTrack is <strong>completely free</strong> and developed by a single independent developer 
-                            passionate about helping breeders manage their programs.
+                            passionate about helping breeders and keepers manage their animals.
                         </p>
                         
                         <p className="text-sm text-gray-600 leading-relaxed mb-6">
