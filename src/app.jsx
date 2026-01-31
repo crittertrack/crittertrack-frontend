@@ -12881,7 +12881,7 @@ const DonationView = ({ onBack }) => {
                         <div className="flex-1">
                             <h3 className="font-bold text-lg text-gray-800 mb-2">Ko-fi Shop</h3>
                             <p className="text-sm text-gray-600 mb-4">
-                                Support CritterTrack by purchasing Mouse Magic books and merchandise! Every purchase helps 
+                                Support CritterTrack by purchasing the Mouse Magic genetics guide. Currently Available in English and French! Every purchase helps 
                                 fund server costs and development while you get quality products in return.
                             </p>
                             <a
@@ -12891,7 +12891,7 @@ const DonationView = ({ onBack }) => {
                                 className="w-full bg-gradient-to-r from-blue-500 to-cyan-500 hover:from-blue-600 hover:to-cyan-600 text-white font-semibold py-3 px-6 rounded-lg transition shadow-md flex items-center justify-center gap-2"
                             >
                                 <ShoppingBag size={18} />
-                                Visit Ko-fi Shop
+                                Buy Mouse Magic Genetics Guide
                             </a>
                         </div>
                     </div>
@@ -17782,10 +17782,10 @@ const App = () => {
                             href="https://ko-fi.com/mousemagic/shop"
                             target="_blank"
                             rel="noopener noreferrer"
-                            className="w-full bg-gradient-to-r from-blue-500 to-cyan-500 hover:from-blue-600 hover:to-cyan-600 text-white font-semibold py-3 px-4 rounded-lg shadow-md transition flex items-center justify-center gap-2"
+                            className="w-full mt-3 bg-gradient-to-r from-blue-500 to-cyan-500 hover:from-blue-600 hover:to-cyan-600 text-white font-semibold py-3 px-4 rounded-lg shadow-md transition flex items-center justify-center gap-2"
                         >
                             <ShoppingBag size={18} />
-                            Visit Ko-fi Shop
+                            Buy Mouse Magic Genetics Guide
                         </a>
                     </div>
                     
