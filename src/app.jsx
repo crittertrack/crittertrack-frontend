@@ -9368,11 +9368,11 @@ const AnimalForm = ({
                                         className="mt-1 block w-full p-2 border border-gray-300 rounded-md shadow-sm focus:ring-primary focus:border-primary">
                                         <option value="Pet">Pet - Personal animal, not for breeding/sale</option>
                                         <option value="Breeder">Breeder - Active breeding animal</option>
-                                        <option value="Available">Available - For sale (shown in public showcase)</option>
-                                        <option value="Sold">Sold - Sold to new owner</option>
+                                        <option value="Available">Available - For sale</option>
+                                        <option value="Booked">Booked - Reserved/deposit received</option>
                                         <option value="Retired">Retired - No longer breeding</option>
                                         <option value="Deceased">Deceased - Animal has passed away</option>
-                                        <option value="Rehomed">Rehomed - Given to new home</option>
+                                        <option value="Rehomed">Rehomed - Sold/given to new home</option>
                                         <option value="Unknown">Unknown</option>
                                     </select>
                                     <p className="text-xs text-gray-500 mt-1">
