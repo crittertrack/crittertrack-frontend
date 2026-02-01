@@ -166,16 +166,79 @@ const FamilyTree = ({ authToken, userProfile, onViewAnimal, showModalMessage, on
                 const ownedAnimals = animalsResponse.data;
                 console.log('Owned animals fetched:', ownedAnimals.length);
                 
-                // For now, just use owned animals without recursive fetching
-                // TODO: Implement proper related animal fetching with backend support
-                setAllAnimals(ownedAnimals);
+                // Collect all unique parent IDs from owned animals
+                const parentIds = new Set();
+                const collectParentIds = (animals) => {
+                    animals.forEach(animal => {
+                        if (animal.sireId_public) parentIds.add(animal.sireId_public);
+                        if (animal.damId_public) parentIds.add(animal.damId_public);
+                    });
+                };
+                
+                collectParentIds(ownedAnimals);
+                let allAnimals = [...ownedAnimals];
+                
+                // Fetch parent animals in batches
+                if (parentIds.size > 0) {
+                    console.log('Fetching', parentIds.size, 'parent animals');
+                    const alreadyHaveIds = new Set(ownedAnimals.map(a => a.id_public));
+                    const idsToFetch = Array.from(parentIds).filter(id => !alreadyHaveIds.has(id));
+                    
+                    if (idsToFetch.length > 0) {
+                        try {
+                            const parentsResponse = await axios.post(`${API_BASE_URL}/animals/family-tree-batch`, {
+                                ids: idsToFetch
+                            }, {
+                                headers: { Authorization: `Bearer ${authToken}` }
+                            });
+                            
+                            const parentAnimals = parentsResponse.data;
+                            console.log('Fetched', parentAnimals.length, 'parent animals');
+                            allAnimals = [...allAnimals, ...parentAnimals];
+                            
+                            // Recursively fetch grandparents and beyond
+                            let currentGeneration = parentAnimals;
+                            let maxGenerations = 10; // Safety limit
+                            
+                            for (let gen = 0; gen < maxGenerations; gen++) {
+                                parentIds.clear();
+                                collectParentIds(currentGeneration);
+                                
+                                if (parentIds.size === 0) break;
+                                
+                                const fetchedIds = new Set(allAnimals.map(a => a.id_public));
+                                const nextIds = Array.from(parentIds).filter(id => !fetchedIds.has(id));
+                                
+                                if (nextIds.length === 0) break;
+                                
+                                console.log(`Fetching generation ${gen + 2}:`, nextIds.length, 'animals');
+                                const nextResponse = await axios.post(`${API_BASE_URL}/animals/family-tree-batch`, {
+                                    ids: nextIds
+                                }, {
+                                    headers: { Authorization: `Bearer ${authToken}` }
+                                });
+                                
+                                currentGeneration = nextResponse.data;
+                                console.log('Fetched', currentGeneration.length, 'animals');
+                                allAnimals = [...allAnimals, ...currentGeneration];
+                                
+                                if (currentGeneration.length === 0) break;
+                            }
+                        } catch (err) {
+                            console.error('Failed to fetch parent animals:', err);
+                        }
+                    }
+                }
+                
+                console.log('Total animals in family tree:', allAnimals.length);
+                setAllAnimals(allAnimals);
                 
                 // Extract unique species
-                const species = [...new Set(ownedAnimals.map(a => a.species))];
+                const species = [...new Set(allAnimals.map(a => a.species))];
                 setAvailableSpecies(species);
                 
                 // Build graph nodes and edges
-                buildGraph(ownedAnimals);
+                buildGraph(allAnimals);
                 
                 setLoading(false);
             } catch (err) {
