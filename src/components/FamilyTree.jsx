@@ -817,8 +817,8 @@ const FamilyTree = ({ authToken, userProfile, onViewAnimal, showModalMessage, on
                             {selectedAnimal.coat && <div><span className="font-semibold">Coat:</span> {selectedAnimal.coat}</div>}
                         </div>
                         
-                        {/* Relationships Section */
                         <div className="border-t pt-4 mt-4">
+                            {/* Relationships Section */}
                             <h4 className="font-bold text-gray-800 mb-3">Relationships</h4>
                             <div className="space-y-3 text-sm">
                                 {/* Sire */}
