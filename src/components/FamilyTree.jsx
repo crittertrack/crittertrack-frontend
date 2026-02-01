@@ -11,6 +11,7 @@ import ReactFlow, {
 } from 'reactflow';
 import 'reactflow/dist/style.css';
 import axios from 'axios';
+import dagre from 'dagre';
 
 const API_BASE_URL = '/api';
 
@@ -180,20 +181,154 @@ const FamilyTree = ({ authToken, userProfile, onViewAnimal, showModalMessage, on
             }
         });
         
-        // Simple grid layout - position ALL animals
-        const HORIZONTAL_SPACING = 220;
-        const VERTICAL_SPACING = 200;
-        const COLUMNS = 15; // Animals per row
-        
-        const animalArray = Array.from(allUniqueAnimals.values());
-        animalArray.forEach((animal, index) => {
-            const row = Math.floor(index / COLUMNS);
-            const col = index % COLUMNS;
-            animal.position = {
-                x: col * HORIZONTAL_SPACING,
-                y: row * VERTICAL_SPACING
-            };
+        // Create edges for all relationships
+        allUniqueAnimals.forEach(animal => {
+            // Parent-child edges (sire)
+            if (animal.sireId_public && allUniqueAnimals.has(animal.sireId_public)) {
+                edgeList.push({
+                    id: `sire-${animal.sireId_public}-${animal.id_public}`,
+                    source: animal.sireId_public,
+                    target: animal.id_public,
+                    type: 'smoothstep',
+                    animated: false,
+                    style: { stroke: '#3b82f6', strokeWidth: 2 },
+                    markerEnd: {
+                        type: MarkerType.ArrowClosed,
+                        color: '#3b82f6',
+                    }
+                });
+            }
+            
+            // Parent-child edges (dam)
+            if (animal.damId_public && allUniqueAnimals.has(animal.damId_public)) {
+                edgeList.push({
+                    id: `dam-${animal.damId_public}-${animal.id_public}`,
+                    source: animal.damId_public,
+                    target: animal.id_public,
+                    type: 'smoothstep',
+                    animated: false,
+                    style: { stroke: '#ec4899', strokeWidth: 2 },
+                    markerEnd: {
+                        type: MarkerType.ArrowClosed,
+                        color: '#ec4899',
+                    }
+                });
+            }
         });
+        
+        // Add partner/mating edges (between animals that have offspring together)
+        const matingPairs = new Set();
+        allUniqueAnimals.forEach(animal => {
+            if (animal.sireId_public && animal.damId_public && 
+                allUniqueAnimals.has(animal.sireId_public) && 
+                allUniqueAnimals.has(animal.damId_public)) {
+                const pairKey = [animal.sireId_public, animal.damId_public].sort().join('-');
+                if (!matingPairs.has(pairKey)) {
+                    matingPairs.add(pairKey);
+                    edgeList.push({
+                        id: `mate-${pairKey}`,
+                        source: animal.sireId_public,
+                        target: animal.damId_public,
+                        type: 'straight',
+                        animated: false,
+                        style: { stroke: '#8b5cf6', strokeWidth: 2, strokeDasharray: '5,5' }
+                    });
+                }
+            }
+        });
+        
+        // Add sibling edges (animals with same parents)
+        const siblingGroups = new Map();
+        allUniqueAnimals.forEach(animal => {
+            if (animal.sireId_public || animal.damId_public) {
+                const siblingKey = [animal.sireId_public || 'none', animal.damId_public || 'none'].sort().join('-');
+                if (!siblingGroups.has(siblingKey)) {
+                    siblingGroups.set(siblingKey, []);
+                }
+                siblingGroups.get(siblingKey).push(animal.id_public);
+            }
+        });
+        
+        siblingGroups.forEach(siblings => {
+            if (siblings.length > 1) {
+                // Connect siblings with dashed green lines
+                for (let i = 0; i < siblings.length - 1; i++) {
+                    edgeList.push({
+                        id: `sibling-${siblings[i]}-${siblings[i + 1]}`,
+                        source: siblings[i],
+                        target: siblings[i + 1],
+                        type: 'straight',
+                        animated: false,
+                        style: { stroke: '#10b981', strokeWidth: 1.5, strokeDasharray: '3,3' }
+                    });
+                }
+            }
+        });
+        
+        // Create initial nodes without positions
+        const nodeList = Array.from(allUniqueAnimals.values()).map(animal => ({
+            id: animal.id_public,
+            type: 'animalNode',
+            position: { x: 0, y: 0 }, // Will be set by dagre
+            data: {
+                label: animal.name || animal.id_public,
+                prefix: animal.prefix || '',
+                suffix: animal.suffix || '',
+                gender: animal.gender || animal.sex || 'Unknown',
+                species: animal.species || 'Unknown',
+                genetics: animal.geneticCode || '',
+                image: animal.images?.[0] || null,
+                isOwned: animal.isOwned,
+                isSelected: selectedAnimal?.id_public === animal.id_public,
+                animal: animal
+            }
+        }));
+        
+        // Use dagre to calculate hierarchical layout
+        const dagreGraph = new dagre.graphlib.Graph();
+        dagreGraph.setDefaultEdgeLabel(() => ({}));
+        
+        // Configure the graph for top-to-bottom layout
+        dagreGraph.setGraph({ 
+            rankdir: 'TB', // Top to bottom
+            nodesep: 100,  // Horizontal spacing between nodes
+            ranksep: 150,  // Vertical spacing between ranks
+            marginx: 50,
+            marginy: 50
+        });
+        
+        // Add nodes to dagre graph
+        nodeList.forEach(node => {
+            dagreGraph.setNode(node.id, { width: 120, height: 120 });
+        });
+        
+        // Add edges to dagre graph (only parent-child for layout, not sibling/mate)
+        edgeList.forEach(edge => {
+            if (edge.id.startsWith('sire-') || edge.id.startsWith('dam-')) {
+                dagreGraph.setEdge(edge.source, edge.target);
+            }
+        });
+        
+        // Calculate layout
+        dagre.layout(dagreGraph);
+        
+        // Apply calculated positions to nodes
+        nodeList.forEach(node => {
+            const nodeWithPosition = dagreGraph.node(node.id);
+            if (nodeWithPosition) {
+                node.position = {
+                    x: nodeWithPosition.x,
+                    y: nodeWithPosition.y
+                };
+            }
+        });
+        
+        console.log(`Created ${nodeList.length} nodes and ${edgeList.length} edges`);
+        console.log('Edge types:', edgeList.map(e => e.id.split('-')[0]));
+        
+        setNodes(nodeList);
+        setEdges(edgeList);
+    };
         
         // Create edges for all relationships
         allUniqueAnimals.forEach(animal => {
