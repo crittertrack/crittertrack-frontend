@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useCallback, useRef, useMemo } from 'react';
+ï»¿import React, { useState, useEffect, useCallback, useRef, useMemo } from 'react';
 import { useParams, useNavigate, useLocation, Routes, Route, Link as RouterLink } from 'react-router-dom';
 import axios from 'axios';
 import { LogOut, Cat, UserPlus, LogIn, ChevronLeft, Trash2, Edit, Save, PlusCircle, Plus, ArrowLeft, Loader2, RefreshCw, User, Users, ClipboardList, BookOpen, Settings, Mail, Globe, Bean, Milk, Search, X, Mars, Venus, Eye, EyeOff, Heart, HeartOff, HeartHandshake, Bell, XCircle, CheckCircle, Download, FileText, Link, AlertCircle, DollarSign, Archive, ArrowLeftRight, RotateCcw, Info, Hourglass, MessageSquare, Ban, Flag, Scissors, VenusAndMars, Circle, Shield, Lock, AlertTriangle, ShoppingBag } from 'lucide-react';
@@ -1042,7 +1042,7 @@ const ParentSearchModal = ({
                     </p>
                     <p className="text-xs text-gray-500">{animal.id_public}</p>
                     <p className="text-sm text-gray-600">
-                        {animal.species} • {animal.gender} • {animal.status || 'Unknown'}
+                        {animal.species} ï¿½ {animal.gender} ï¿½ {animal.status || 'Unknown'}
                     </p>
                     {getSpeciesLatinName(animal.species) && (
                         <p className="text-xs italic text-gray-500">{getSpeciesLatinName(animal.species)}</p>
@@ -1473,7 +1473,7 @@ const UserSearchModal = ({ onClose, showModalMessage, onSelectUser, API_BASE_URL
                         {animal.prefix && `${animal.prefix} `}{animal.name}{animal.suffix && ` ${animal.suffix}`}
                     </p>
                     <p className="text-sm text-gray-600">
-                        {animal.species} • {animal.gender} • <span className="font-mono">{animal.id_public}</span>
+                        {animal.species} ï¿½ {animal.gender} ï¿½ <span className="font-mono">{animal.id_public}</span>
                     </p>
                     {animal.color && <p className="text-xs text-gray-500 mt-1">{animal.color}</p>}
                 </div>
@@ -12772,6 +12772,31 @@ const DonationView = ({ onBack }) => {
                         </div>
                     </div>
                 </div>
+
+                {/* Ko-fi Shop */}
+                <div className="border-2 border-blue-500/30 rounded-lg p-6 bg-gradient-to-r from-blue-500/5 to-cyan-500/5 hover:shadow-md transition">
+                    <div className="flex items-start gap-4">
+                        <div className="bg-blue-500/20 p-3 rounded-lg">
+                            <ShoppingBag size={24} className="text-blue-600" />
+                        </div>
+                        <div className="flex-1">
+                            <h3 className="font-bold text-lg text-gray-800 mb-2">Ko-fi Shop</h3>
+                            <p className="text-sm text-gray-600 mb-4">
+                                Support CritterTrack by purchasing the Mouse Magic genetics guide. Currently Available in English and French! Every purchase helps 
+                                fund server costs and development while you get quality products in return.
+                            </p>
+                            <a
+                                href="https://ko-fi.com/mousemagic/shop"
+                                target="_blank"
+                                rel="noopener noreferrer"
+                                className="w-full bg-gradient-to-r from-blue-500 to-cyan-500 hover:from-blue-600 hover:to-cyan-600 text-white font-semibold py-3 px-6 rounded-lg transition shadow-md flex items-center justify-center gap-2"
+                            >
+                                <ShoppingBag size={18} />
+                                Buy Mouse Magic Genetics Guide
+                            </a>
+                        </div>
+                    </div>
+                </div>
             </div>
 
             {/* Footer Note */}
@@ -13425,6 +13450,19 @@ const AuthView = ({ onLoginSuccess, showModalMessage, isRegister, setIsRegister,
 
     return (
         <div className="max-w-md w-full bg-white p-8 rounded-xl shadow-2xl">
+            {!forgotPasswordStep && !verificationStep && (
+                <div className="mb-6 p-4 rounded-lg bg-gradient-to-r from-blue-100 to-purple-100 flex items-center gap-4 shadow">
+                    <Users size={32} className="text-primary-dark" />
+                    <div>
+                        <div className="text-lg font-bold text-gray-800">
+                            Join {userCount} breeders & keepers!
+                        </div>
+                        <div className="text-sm text-gray-700">
+                            Be part of a growing community. Register now and connect with passionate breeders and keepers worldwide!
+                        </div>
+                    </div>
+                </div>
+            )}
             <h2 className="text-3xl font-extrabold text-gray-900 mb-6 text-center">
                 {forgotPasswordStep > 0 ? 'Reset Password' : (verificationStep ? 'Verify Your Email' : mainTitle)}
             </h2>
@@ -17569,7 +17607,7 @@ const App = () => {
                         
                         <p className="text-sm text-gray-700 leading-relaxed mb-4">
                             CritterTrack is <strong>completely free</strong> and developed by a single independent developer 
-                            passionate about helping breeders manage their programs.
+                            passionate about helping breeders and keepers manage their animals.
                         </p>
                         
                         <p className="text-sm text-gray-600 leading-relaxed mb-6">
@@ -17584,6 +17622,16 @@ const App = () => {
                             <Heart size={18} className="fill-current" />
                             Learn More & Donate
                         </RouterLink>
+                        
+                        <a
+                            href="https://ko-fi.com/mousemagic/shop"
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className="w-full mt-3 bg-gradient-to-r from-blue-500 to-cyan-500 hover:from-blue-600 hover:to-cyan-600 text-white font-semibold py-3 px-4 rounded-lg shadow-md transition flex items-center justify-center gap-2"
+                        >
+                            <ShoppingBag size={18} />
+                            Buy Mouse Magic Genetics Guide
+                        </a>
                     </div>
                     
                     {/* MIDDLE: Auth Form */}
@@ -17596,6 +17644,7 @@ const App = () => {
                             mainTitle={mainTitle}
                             onShowTerms={() => setShowTermsModal(true)}
                             onShowPrivacy={() => setShowPrivacyModal(true)}
+                            userCount={userCount}
                         />
                     </div>
                     
@@ -17760,12 +17809,12 @@ const App = () => {
                             <div className="mt-1 space-y-1">
                                 {availableAnimals[currentAvailableIndex].isForSale && availableAnimals[currentAvailableIndex].salePriceAmount && (
                                     <p className="text-xs text-green-600 font-semibold">
-                                        Fee: {availableAnimals[currentAvailableIndex].salePriceCurrency === 'Negotiable' ? 'Negotiable' : `${availableAnimals[currentAvailableIndex].salePriceCurrency === 'USD' ? '$' : availableAnimals[currentAvailableIndex].salePriceCurrency === 'EUR' ? '€' : ''}${availableAnimals[currentAvailableIndex].salePriceAmount}`}
+                                        Fee: {availableAnimals[currentAvailableIndex].salePriceCurrency === 'Negotiable' ? 'Negotiable' : `${availableAnimals[currentAvailableIndex].salePriceCurrency === 'USD' ? '$' : availableAnimals[currentAvailableIndex].salePriceCurrency === 'EUR' ? 'ï¿½' : ''}${availableAnimals[currentAvailableIndex].salePriceAmount}`}
                                     </p>
                                 )}
                                 {availableAnimals[currentAvailableIndex].availableForBreeding && availableAnimals[currentAvailableIndex].studFeeAmount && (
                                     <p className="text-xs text-purple-600 font-semibold">
-                                        Fee: {availableAnimals[currentAvailableIndex].studFeeCurrency === 'Negotiable' ? 'Negotiable' : `${availableAnimals[currentAvailableIndex].studFeeCurrency === 'USD' ? '$' : availableAnimals[currentAvailableIndex].studFeeCurrency === 'EUR' ? '€' : ''}${availableAnimals[currentAvailableIndex].studFeeAmount}`}
+                                        Fee: {availableAnimals[currentAvailableIndex].studFeeCurrency === 'Negotiable' ? 'Negotiable' : `${availableAnimals[currentAvailableIndex].studFeeCurrency === 'USD' ? '$' : availableAnimals[currentAvailableIndex].studFeeCurrency === 'EUR' ? 'ï¿½' : ''}${availableAnimals[currentAvailableIndex].studFeeAmount}`}
                                     </p>
                                 )}
                             </div>
@@ -20107,7 +20156,7 @@ const App = () => {
                                                         {animal.prefix ? `${animal.prefix} ` : ''}{animal.name}{animal.suffix ? ` ${animal.suffix}` : ''}
                                                     </h3>
                                                     <p className="text-sm text-gray-600">{animal.id_public}</p>
-                                                    <p className="text-xs text-gray-500">{animal.species} • {animal.gender}</p>
+                                                    <p className="text-xs text-gray-500">{animal.species} ï¿½ {animal.gender}</p>
                                                 </div>
                                             </div>
                                             <div className="flex gap-2">
