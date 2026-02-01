@@ -835,98 +835,134 @@ const FamilyTree = ({ authToken, userProfile, onViewAnimal, showModalMessage, on
                         <div className="border-t pt-4 mt-4">
                             {/* Relationships Section */}
                             <h4 className="font-bold text-gray-800 mb-3">Relationships</h4>
-                            <div className="space-y-3 text-sm">
-                                {/* Sire */}
-                                {(() => {
-                                    const sire = allAnimals?.find(a => a.id_public === selectedAnimal.sireId_public);
-                                    return sire ? (
-                                        <div>
-                                            <span className="font-semibold text-blue-600">Sire:</span>
-                                            <div className="ml-4 text-gray-700">
-                                                {[sire.prefix, sire.name, sire.suffix].filter(Boolean).join(' ')}
-                                                <span className="font-mono text-xs text-gray-500 ml-2">({sire.id_public})</span>
-                                            </div>
-                                        </div>
-                                    ) : null;
-                                })()}
+                            
+                            {/* Parent Info Grid */}
+                            <div className="grid grid-cols-2 gap-4 text-sm mb-4">
+                                {/* Sire Info Column */}
+                                <div>
+                                    <div className="font-semibold text-blue-600 mb-2">♂ "Sire Info"</div>
+                                    {(() => {
+                                        const sire = allAnimals?.find(a => a.id_public === selectedAnimal.sireId_public);
+                                        if (!sire) return <div className="text-gray-400 text-xs">Not available</div>;
+                                        
+                                        const sireGrandsire = allAnimals?.find(a => a.id_public === sire.sireId_public);
+                                        const sireGranddam = allAnimals?.find(a => a.id_public === sire.damId_public);
+                                        
+                                        return (
+                                            <>
+                                                <div className="mb-3">
+                                                    <div className="text-gray-700 font-medium">
+                                                        {[sire.prefix, sire.name, sire.suffix].filter(Boolean).join(' ')}
+                                                    </div>
+                                                    <div className="font-mono text-xs text-gray-500">({sire.id_public})</div>
+                                                </div>
+                                                
+                                                {(sireGrandsire || sireGranddam) && (
+                                                    <div className="pl-3 border-l-2 border-gray-200 space-y-2">
+                                                        {sireGrandsire && (
+                                                            <div>
+                                                                <div className="text-xs text-gray-500">♂ grandsire</div>
+                                                                <div className="text-gray-700">
+                                                                    {[sireGrandsire.prefix, sireGrandsire.name, sireGrandsire.suffix].filter(Boolean).join(' ')}
+                                                                </div>
+                                                                <div className="font-mono text-xs text-gray-500">({sireGrandsire.id_public})</div>
+                                                            </div>
+                                                        )}
+                                                        {sireGranddam && (
+                                                            <div>
+                                                                <div className="text-xs text-gray-500">♀ granddam</div>
+                                                                <div className="text-gray-700">
+                                                                    {[sireGranddam.prefix, sireGranddam.name, sireGranddam.suffix].filter(Boolean).join(' ')}
+                                                                </div>
+                                                                <div className="font-mono text-xs text-gray-500">({sireGranddam.id_public})</div>
+                                                            </div>
+                                                        )}
+                                                    </div>
+                                                )}
+                                            </>
+                                        );
+                                    })()}
+                                </div>
                                 
-                                {/* Dam */}
-                                {(() => {
-                                    const dam = allAnimals?.find(a => a.id_public === selectedAnimal.damId_public);
-                                    return dam ? (
-                                        <div>
-                                            <span className="font-semibold text-pink-600">Dam:</span>
-                                            <div className="ml-4 text-gray-700">
-                                                {[dam.prefix, dam.name, dam.suffix].filter(Boolean).join(' ')}
-                                                <span className="font-mono text-xs text-gray-500 ml-2">({dam.id_public})</span>
-                                            </div>
-                                        </div>
-                                    ) : null;
-                                })()}
-                                
-                                {/* Grandsire (Sire's Sire) */}
-                                {(() => {
-                                    const sire = allAnimals?.find(a => a.id_public === selectedAnimal.sireId_public);
-                                    const grandsire = sire ? allAnimals?.find(a => a.id_public === sire.sireId_public) : null;
-                                    return grandsire ? (
-                                        <div>
-                                            <span className="font-semibold text-blue-500">Grandsire:</span>
-                                            <div className="ml-4 text-gray-700">
-                                                {[grandsire.prefix, grandsire.name, grandsire.suffix].filter(Boolean).join(' ')}
-                                                <span className="font-mono text-xs text-gray-500 ml-2">({grandsire.id_public})</span>
-                                            </div>
-                                        </div>
-                                    ) : null;
-                                })()}
-                                
-                                {/* Granddam (Dam's Dam) */}
-                                {(() => {
-                                    const dam = allAnimals?.find(a => a.id_public === selectedAnimal.damId_public);
-                                    const granddam = dam ? allAnimals?.find(a => a.id_public === dam.damId_public) : null;
-                                    return granddam ? (
-                                        <div>
-                                            <span className="font-semibold text-pink-500">Granddam:</span>
-                                            <div className="ml-4 text-gray-700">
-                                                {[granddam.prefix, granddam.name, granddam.suffix].filter(Boolean).join(' ')}
-                                                <span className="font-mono text-xs text-gray-500 ml-2">({granddam.id_public})</span>
-                                            </div>
-                                        </div>
-                                    ) : null;
-                                })()}
-                                
-                                {/* Children */}
-                                {(() => {
-                                    const children = allAnimals?.filter(a => 
-                                        a.sireId_public === selectedAnimal.id_public || 
-                                        a.damId_public === selectedAnimal.id_public
-                                    );
-                                    return children && children.length > 0 ? (
-                                        <div>
-                                            <span className="font-semibold text-purple-600">Children:</span>
-                                            <div className="ml-4 space-y-1 mt-1">
-                                                {children.map(child => {
-                                                    const partner = child.sireId_public === selectedAnimal.id_public
-                                                        ? allAnimals?.find(a => a.id_public === child.damId_public)
-                                                        : allAnimals?.find(a => a.id_public === child.sireId_public);
-                                                    
-                                                    return (
-                                                        <div key={child.id_public} className="text-gray-700">
-                                                            {[child.prefix, child.name, child.suffix].filter(Boolean).join(' ')}
-                                                            <span className="font-mono text-xs text-gray-500 ml-1">({child.id_public})</span>
-                                                            {partner && (
-                                                                <span className="text-gray-500 text-xs ml-2">
-                                                                    with {[partner.prefix, partner.name, partner.suffix].filter(Boolean).join(' ')}
-                                                                    <span className="font-mono ml-1">({partner.id_public})</span>
-                                                                </span>
-                                                            )}
-                                                        </div>
-                                                    );
-                                                })}
-                                            </div>
-                                        </div>
-                                    ) : null;
-                                })()}
+                                {/* Dam Info Column */}
+                                <div>
+                                    <div className="font-semibold text-pink-600 mb-2">♀ "Dam Info"</div>
+                                    {(() => {
+                                        const dam = allAnimals?.find(a => a.id_public === selectedAnimal.damId_public);
+                                        if (!dam) return <div className="text-gray-400 text-xs">Not available</div>;
+                                        
+                                        const damGrandsire = allAnimals?.find(a => a.id_public === dam.sireId_public);
+                                        const damGranddam = allAnimals?.find(a => a.id_public === dam.damId_public);
+                                        
+                                        return (
+                                            <>
+                                                <div className="mb-3">
+                                                    <div className="text-gray-700 font-medium">
+                                                        {[dam.prefix, dam.name, dam.suffix].filter(Boolean).join(' ')}
+                                                    </div>
+                                                    <div className="font-mono text-xs text-gray-500">({dam.id_public})</div>
+                                                </div>
+                                                
+                                                {(damGrandsire || damGranddam) && (
+                                                    <div className="pl-3 border-l-2 border-gray-200 space-y-2">
+                                                        {damGrandsire && (
+                                                            <div>
+                                                                <div className="text-xs text-gray-500">♂ grandsire</div>
+                                                                <div className="text-gray-700">
+                                                                    {[damGrandsire.prefix, damGrandsire.name, damGrandsire.suffix].filter(Boolean).join(' ')}
+                                                                </div>
+                                                                <div className="font-mono text-xs text-gray-500">({damGrandsire.id_public})</div>
+                                                            </div>
+                                                        )}
+                                                        {damGranddam && (
+                                                            <div>
+                                                                <div className="text-xs text-gray-500">♀ granddam</div>
+                                                                <div className="text-gray-700">
+                                                                    {[damGranddam.prefix, damGranddam.name, damGranddam.suffix].filter(Boolean).join(' ')}
+                                                                </div>
+                                                                <div className="font-mono text-xs text-gray-500">({damGranddam.id_public})</div>
+                                                            </div>
+                                                        )}
+                                                    </div>
+                                                )}
+                                            </>
+                                        );
+                                    })()}
+                                </div>
                             </div>
+                            
+                            {/* Children Section */}
+                            {(() => {
+                                const children = allAnimals?.filter(a => 
+                                    a.sireId_public === selectedAnimal.id_public || 
+                                    a.damId_public === selectedAnimal.id_public
+                                );
+                                return children && children.length > 0 ? (
+                                    <div className="border-t pt-3 mt-3">
+                                        <div className="font-semibold text-purple-600 mb-2 text-sm">Children:</div>
+                                        <div className="space-y-1 text-sm">
+                                            {children.map(child => {
+                                                const partner = child.sireId_public === selectedAnimal.id_public
+                                                    ? allAnimals?.find(a => a.id_public === child.damId_public)
+                                                    : allAnimals?.find(a => a.id_public === child.sireId_public);
+                                                
+                                                return (
+                                                    <div key={child.id_public} className="text-gray-700">
+                                                        {[child.prefix, child.name, child.suffix].filter(Boolean).join(' ')}
+                                                        <span className="font-mono text-xs text-gray-500 ml-1">({child.id_public})</span>
+                                                        {partner && (
+                                                            <span className="text-gray-500 text-xs ml-2">
+                                                                with {[partner.prefix, partner.name, partner.suffix].filter(Boolean).join(' ')}
+                                                                <span className="font-mono ml-1">({partner.id_public})</span>
+                                                            </span>
+                                                        )}
+                                                    </div>
+                                                );
+                                            })}
+                                        </div>
+                                    </div>
+                                ) : null;
+                            })()}
                         </div>
                         
                         <button
