@@ -664,7 +664,7 @@ const FamilyTree = ({ authToken, userProfile, onViewAnimal, showModalMessage, on
                                 <Search size={18} className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" />
                                 <input
                                     type="text"
-                                    placeholder="Search by name or genetics..."
+                                    placeholder="Search by name or CTC..."
                                     value={searchQuery}
                                     onChange={(e) => setSearchQuery(e.target.value)}
                                     className="w-full pl-10 pr-10 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent"
@@ -795,26 +795,34 @@ const FamilyTree = ({ authToken, userProfile, onViewAnimal, showModalMessage, on
                         <div className="space-y-2 mb-4 text-sm">
                             {selectedAnimal.sex && <div><span className="font-semibold">Sex:</span> {selectedAnimal.sex}</div>}
                             {selectedAnimal.dateOfBirth && (
+                                <>
+                                    <div>
+                                        <span className="font-semibold">Birthdate:</span> {new Date(selectedAnimal.dateOfBirth).toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' })}
+                                    </div>
+                                    <div>
+                                        <span className="font-semibold">Age:</span> {
+                                            (() => {
+                                                const birthDate = new Date(selectedAnimal.dateOfBirth);
+                                                const today = new Date();
+                                                const ageInDays = Math.floor((today - birthDate) / (1000 * 60 * 60 * 24));
+                                                const ageInWeeks = Math.floor(ageInDays / 7);
+                                                const ageInMonths = Math.floor(ageInDays / 30);
+                                                const ageInYears = Math.floor(ageInDays / 365);
+                                                
+                                                if (ageInDays < 7) return `${ageInDays} days`;
+                                                if (ageInWeeks < 8) return `${ageInWeeks} weeks`;
+                                                if (ageInMonths < 24) return `${ageInMonths} months`;
+                                                return `${ageInYears} years`;
+                                            })()
+                                        }
+                                    </div>
+                                </>
+                            )}
+                            {(selectedAnimal.color || selectedAnimal.coat) && (
                                 <div>
-                                    <span className="font-semibold">Age:</span> {
-                                        (() => {
-                                            const birthDate = new Date(selectedAnimal.dateOfBirth);
-                                            const today = new Date();
-                                            const ageInDays = Math.floor((today - birthDate) / (1000 * 60 * 60 * 24));
-                                            const ageInWeeks = Math.floor(ageInDays / 7);
-                                            const ageInMonths = Math.floor(ageInDays / 30);
-                                            const ageInYears = Math.floor(ageInDays / 365);
-                                            
-                                            if (ageInDays < 7) return `${ageInDays} days`;
-                                            if (ageInWeeks < 8) return `${ageInWeeks} weeks`;
-                                            if (ageInMonths < 24) return `${ageInMonths} months`;
-                                            return `${ageInYears} years`;
-                                        })()
-                                    }
+                                    {[selectedAnimal.color, selectedAnimal.coat].filter(Boolean).join(', ')}
                                 </div>
                             )}
-                            {selectedAnimal.color && <div><span className="font-semibold">Color:</span> {selectedAnimal.color}</div>}
-                            {selectedAnimal.coat && <div><span className="font-semibold">Coat:</span> {selectedAnimal.coat}</div>}
                         </div>
                         
                         <div className="border-t pt-4 mt-4">
