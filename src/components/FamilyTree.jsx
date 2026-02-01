@@ -158,20 +158,69 @@ const FamilyTree = ({ authToken, userProfile, onViewAnimal, showModalMessage, on
                 setLoading(true);
                 setError(null);
                 
-                // Fetch all owned animals
+                // Fetch all owned animals first
                 const animalsResponse = await axios.get(`${API_BASE_URL}/animals`, {
                     headers: { Authorization: `Bearer ${authToken}` }
                 });
                 
                 const ownedAnimals = animalsResponse.data;
-                setAllAnimals(ownedAnimals);
+                
+                // Collect all unique related animal IDs (parents, grandparents, etc.)
+                const relatedIds = new Set();
+                const collectRelatedIds = (animals) => {
+                    animals.forEach(animal => {
+                        if (animal.sireId_public && !relatedIds.has(animal.sireId_public)) {
+                            relatedIds.add(animal.sireId_public);
+                        }
+                        if (animal.damId_public && !relatedIds.has(animal.damId_public)) {
+                            relatedIds.add(animal.damId_public);
+                        }
+                    });
+                };
+                
+                // Recursively fetch all related animals
+                const fetchRelatedAnimals = async (currentAnimals) => {
+                    collectRelatedIds(currentAnimals);
+                    
+                    if (relatedIds.size === 0) return currentAnimals;
+                    
+                    const idsToFetch = Array.from(relatedIds);
+                    const alreadyFetchedIds = new Set(currentAnimals.map(a => a.id_public));
+                    const newIdsToFetch = idsToFetch.filter(id => !alreadyFetchedIds.has(id));
+                    
+                    if (newIdsToFetch.length === 0) return currentAnimals;
+                    
+                    try {
+                        // Fetch related animals without privacy restrictions
+                        const relatedResponse = await axios.post(`${API_BASE_URL}/animals/batch-public`, {
+                            ids: newIdsToFetch
+                        }, {
+                            headers: { Authorization: `Bearer ${authToken}` }
+                        });
+                        
+                        const newAnimals = relatedResponse.data;
+                        const allFetched = [...currentAnimals, ...newAnimals];
+                        
+                        // Reset for next iteration
+                        relatedIds.clear();
+                        
+                        // Recursively fetch parents of newly fetched animals
+                        return await fetchRelatedAnimals(allFetched);
+                    } catch (err) {
+                        console.error('Failed to fetch related animals:', err);
+                        return currentAnimals;
+                    }
+                };
+                
+                const allFetchedAnimals = await fetchRelatedAnimals(ownedAnimals);
+                setAllAnimals(allFetchedAnimals);
                 
                 // Extract unique species
-                const species = [...new Set(ownedAnimals.map(a => a.species))];
+                const species = [...new Set(allFetchedAnimals.map(a => a.species))];
                 setAvailableSpecies(species);
                 
                 // Build graph nodes and edges
-                buildGraph(ownedAnimals);
+                buildGraph(allFetchedAnimals);
                 
                 setLoading(false);
             } catch (err) {
