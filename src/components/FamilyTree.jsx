@@ -162,9 +162,10 @@ const FamilyTree = ({ authToken, userProfile, onViewAnimal, showModalMessage, on
             if (animal.sireId_public && !allUniqueAnimals.has(animal.sireId_public)) {
                 allUniqueAnimals.set(animal.sireId_public, {
                     id_public: animal.sireId_public,
-                    name: animal.sireId_public, // Will be replaced with actual name if available
+                    name: animal.sireId_public,
                     species: animal.species,
                     sex: 'Male',
+                    gender: 'Male',
                     isOwned: false
                 });
             }
@@ -176,6 +177,7 @@ const FamilyTree = ({ authToken, userProfile, onViewAnimal, showModalMessage, on
                     name: animal.damId_public,
                     species: animal.species,
                     sex: 'Female',
+                    gender: 'Female',
                     isOwned: false
                 });
             }
@@ -212,40 +214,105 @@ const FamilyTree = ({ authToken, userProfile, onViewAnimal, showModalMessage, on
             }
         });
         
-        // Create nodes with automatic layout
-        const nodeList = [];
+        // Build hierarchical tree layout
         const animalsArray = Array.from(allUniqueAnimals.values());
+        const positionedNodes = calculateTreeLayout(animalsArray);
         
-        // Simple grid layout for now (we'll improve this)
-        const cols = Math.ceil(Math.sqrt(animalsArray.length));
-        animalsArray.forEach((animal, index) => {
-            const row = Math.floor(index / cols);
-            const col = index % cols;
-            
-            nodeList.push({
-                id: animal.id_public,
-                type: 'animalNode',
-                position: { 
-                    x: col * 200, 
-                    y: row * 150 
-                },
-                data: {
-                    label: animal.name || animal.id_public,
-                    prefix: animal.prefix || '',
-                    suffix: animal.suffix || '',
-                    gender: animal.gender || animal.sex || 'Unknown',
-                    species: animal.species || 'Unknown',
-                    genetics: animal.geneticCode || '',
-                    image: animal.images?.[0] || null,
-                    isOwned: animal.isOwned,
-                    isSelected: selectedAnimal?.id_public === animal.id_public,
-                    animal: animal
-                }
-            });
-        });
+        // Create nodes with calculated positions
+        const nodeList = positionedNodes.map(animal => ({
+            id: animal.id_public,
+            type: 'animalNode',
+            position: animal.position,
+            data: {
+                label: animal.name || animal.id_public,
+                prefix: animal.prefix || '',
+                suffix: animal.suffix || '',
+                gender: animal.gender || animal.sex || 'Unknown',
+                species: animal.species || 'Unknown',
+                genetics: animal.geneticCode || '',
+                image: animal.images?.[0] || null,
+                isOwned: animal.isOwned,
+                isSelected: selectedAnimal?.id_public === animal.id_public,
+                animal: animal
+            }
+        }));
         
         setNodes(nodeList);
         setEdges(edgeList);
+    };
+    
+    // Calculate hierarchical tree layout
+    const calculateTreeLayout = (animals) => {
+        const animalMap = new Map(animals.map(a => [a.id_public, { ...a, children: [] }]));
+        const roots = [];
+        
+        // Build parent-child relationships
+        animals.forEach(animal => {
+            const node = animalMap.get(animal.id_public);
+            let hasParent = false;
+            
+            // Link to sire
+            if (animal.sireId_public && animalMap.has(animal.sireId_public)) {
+                animalMap.get(animal.sireId_public).children.push(node);
+                hasParent = true;
+            }
+            
+            // Link to dam (but don't add twice to children)
+            if (animal.damId_public && animalMap.has(animal.damId_public)) {
+                const dam = animalMap.get(animal.damId_public);
+                if (!dam.children.includes(node)) {
+                    dam.children.push(node);
+                }
+                hasParent = true;
+            }
+            
+            if (!hasParent) {
+                roots.push(node);
+            }
+        });
+        
+        // Layout parameters
+        const HORIZONTAL_SPACING = 180;
+        const VERTICAL_SPACING = 200;
+        
+        // Recursive function to calculate positions
+        const calculateSubtreeWidth = (node) => {
+            if (node.children.length === 0) {
+                return 1;
+            }
+            return node.children.reduce((sum, child) => sum + calculateSubtreeWidth(child), 0);
+        };
+        
+        const positionSubtree = (node, x, y, depth = 0) => {
+            node.position = { x, y };
+            node.depth = depth;
+            
+            if (node.children.length > 0) {
+                // Calculate total width needed for children
+                const childWidths = node.children.map(child => calculateSubtreeWidth(child));
+                const totalWidth = childWidths.reduce((sum, w) => sum + w, 0);
+                
+                let currentX = x - ((totalWidth - 1) * HORIZONTAL_SPACING) / 2;
+                
+                node.children.forEach((child, i) => {
+                    const childWidth = childWidths[i];
+                    const childCenterX = currentX + ((childWidth - 1) * HORIZONTAL_SPACING) / 2;
+                    positionSubtree(child, childCenterX, y + VERTICAL_SPACING, depth + 1);
+                    currentX += childWidth * HORIZONTAL_SPACING;
+                });
+            }
+        };
+        
+        // Position each root tree
+        let currentRootX = 0;
+        roots.forEach((root, index) => {
+            const treeWidth = calculateSubtreeWidth(root);
+            const rootX = currentRootX + (treeWidth * HORIZONTAL_SPACING) / 2;
+            positionSubtree(root, rootX, 0);
+            currentRootX += (treeWidth + 2) * HORIZONTAL_SPACING; // Extra spacing between trees
+        });
+        
+        return Array.from(animalMap.values());
     };
 
     // Handle node click
