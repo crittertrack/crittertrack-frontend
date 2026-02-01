@@ -189,12 +189,12 @@ const FamilyTree = ({ authToken, userProfile, onViewAnimal, showModalMessage, on
                     id: `sire-${animal.sireId_public}-${animal.id_public}`,
                     source: animal.sireId_public,
                     target: animal.id_public,
-                    type: 'smoothstep',
+                    type: 'default',
                     animated: false,
                     style: { stroke: '#3b82f6', strokeWidth: 2 },
                     markerEnd: {
                         type: MarkerType.ArrowClosed,
-                        color: '#3b82f6',
+                        color: '#3b82f6'
                     }
                 });
             }
@@ -205,12 +205,12 @@ const FamilyTree = ({ authToken, userProfile, onViewAnimal, showModalMessage, on
                     id: `dam-${animal.damId_public}-${animal.id_public}`,
                     source: animal.damId_public,
                     target: animal.id_public,
-                    type: 'smoothstep',
+                    type: 'default',
                     animated: false,
                     style: { stroke: '#ec4899', strokeWidth: 2 },
                     markerEnd: {
                         type: MarkerType.ArrowClosed,
-                        color: '#ec4899',
+                        color: '#ec4899'
                     }
                 });
             }
@@ -291,10 +291,10 @@ const FamilyTree = ({ authToken, userProfile, onViewAnimal, showModalMessage, on
         // Configure the graph for top-to-bottom layout (oldest at top, children below)
         dagreGraph.setGraph({ 
             rankdir: 'TB', // Top to bottom (classical tree layout)
-            nodesep: 100,  // Horizontal spacing between nodes
-            ranksep: 150,  // Vertical spacing between ranks
-            marginx: 50,
-            marginy: 50
+            nodesep: 60,   // Horizontal spacing between nodes (reduced)
+            ranksep: 100,  // Vertical spacing between ranks (reduced)
+            marginx: 30,
+            marginy: 30
         });
         
         // Add nodes to dagre graph
