@@ -39,9 +39,6 @@ const AnimalNode = ({ data }) => {
     
     // Gender-based border color
     const getBorderColor = () => {
-        // Debug: Log gender values to see what's actually coming from API
-        console.log(`Animal: ${data.label}, Gender: "${data.gender}", Sex: "${data.animal?.sex}"`);
-        
         const gender = data.gender?.toLowerCase() || data.animal?.sex?.toLowerCase() || '';
         switch(gender) {
             case 'male':
@@ -53,7 +50,6 @@ const AnimalNode = ({ data }) => {
             case 'intersex':
                 return 'border-purple-500';
             default:
-                console.log(`Unknown gender: "${gender}" for ${data.label}`);
                 return 'border-gray-400';
         }
     };
