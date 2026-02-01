@@ -288,9 +288,9 @@ const FamilyTree = ({ authToken, userProfile, onViewAnimal, showModalMessage, on
         const dagreGraph = new dagre.graphlib.Graph();
         dagreGraph.setDefaultEdgeLabel(() => ({}));
         
-        // Configure the graph for bottom-to-top layout (children at top, parents below)
+        // Configure the graph for top-to-bottom layout (oldest at top, children below)
         dagreGraph.setGraph({ 
-            rankdir: 'BT', // Bottom to top (youngest at top)
+            rankdir: 'TB', // Top to bottom (classical tree layout)
             nodesep: 100,  // Horizontal spacing between nodes
             ranksep: 150,  // Vertical spacing between ranks
             marginx: 50,
