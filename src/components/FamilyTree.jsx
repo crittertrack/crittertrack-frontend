@@ -138,6 +138,7 @@ const nodeTypes = {
 const FamilyTree = ({ authToken, userProfile, onViewAnimal, showModalMessage, onBack }) => {
     const [loading, setLoading] = useState(true);
     const [allAnimals, setAllAnimals] = useState([]);
+    const [ownedAnimalsCount, setOwnedAnimalsCount] = useState(0);
     const [selectedAnimal, setSelectedAnimal] = useState(null);
     const [searchQuery, setSearchQuery] = useState('');
     const [filterSpecies, setFilterSpecies] = useState('all');
@@ -165,6 +166,7 @@ const FamilyTree = ({ authToken, userProfile, onViewAnimal, showModalMessage, on
                 
                 const ownedAnimals = animalsResponse.data;
                 console.log('Owned animals fetched:', ownedAnimals.length);
+                setOwnedAnimalsCount(ownedAnimals.length);
                 
                 // Build complete family tree by expanding ALL relationships
                 let allAnimals = [...ownedAnimals];
@@ -657,7 +659,7 @@ const FamilyTree = ({ authToken, userProfile, onViewAnimal, showModalMessage, on
                     {/* Stats */}
                     <div className="mt-3 grid grid-cols-4 gap-2 text-center">
                         <div className="bg-primary/10 rounded-lg p-2">
-                            <div className="text-xl font-bold text-primary">{allAnimals.length}</div>
+                            <div className="text-xl font-bold text-primary">{ownedAnimalsCount}</div>
                             <div className="text-xs text-gray-600">Owned Animals</div>
                         </div>
                         <div className="bg-blue-50 rounded-lg p-2">
@@ -686,7 +688,8 @@ const FamilyTree = ({ authToken, userProfile, onViewAnimal, showModalMessage, on
                     onNodeClick={onNodeClick}
                     nodeTypes={nodeTypes}
                     fitView
-                    fitViewOptions={{ padding: 0.05, minZoom: 0.25, maxZoom: 0.25 }}
+                    fitViewOptions={{ padding: 0.2, minZoom: 0.25, maxZoom: 0.25 }}
+                    defaultViewport={{ x: 0, y: 0, zoom: 0.25 }}
                     attributionPosition="bottom-left"
                     className="bg-gray-50"
                     defaultEdgeOptions={{
