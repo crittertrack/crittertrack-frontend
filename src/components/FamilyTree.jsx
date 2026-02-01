@@ -164,45 +164,45 @@ const FamilyTree = ({ authToken, userProfile, onViewAnimal, showModalMessage, on
                 });
                 
                 const ownedAnimals = animalsResponse.data;
-                
-                // Collect all unique related animal IDs (parents, grandparents, etc.)
-                const relatedIds = new Set();
-                const collectRelatedIds = (animals) => {
-                    animals.forEach(animal => {
-                        if (animal.sireId_public && !relatedIds.has(animal.sireId_public)) {
-                            relatedIds.add(animal.sireId_public);
-                        }
-                        if (animal.damId_public && !relatedIds.has(animal.damId_public)) {
-                            relatedIds.add(animal.damId_public);
-                        }
-                    });
-                };
+                console.log('Owned animals fetched:', ownedAnimals.length);
                 
                 // Recursively fetch all related animals
                 const fetchRelatedAnimals = async (currentAnimals) => {
-                    collectRelatedIds(currentAnimals);
-                    
-                    if (relatedIds.size === 0) return currentAnimals;
-                    
-                    const idsToFetch = Array.from(relatedIds);
                     const alreadyFetchedIds = new Set(currentAnimals.map(a => a.id_public));
-                    const newIdsToFetch = idsToFetch.filter(id => !alreadyFetchedIds.has(id));
+                    const relatedIds = new Set();
                     
-                    if (newIdsToFetch.length === 0) return currentAnimals;
+                    // Collect all parent IDs that we haven't fetched yet
+                    currentAnimals.forEach(animal => {
+                        if (animal.sireId_public && !alreadyFetchedIds.has(animal.sireId_public)) {
+                            relatedIds.add(animal.sireId_public);
+                        }
+                        if (animal.damId_public && !alreadyFetchedIds.has(animal.damId_public)) {
+                            relatedIds.add(animal.damId_public);
+                        }
+                    });
+                    
+                    if (relatedIds.size === 0) {
+                        console.log('No more related animals to fetch. Total animals:', currentAnimals.length);
+                        return currentAnimals;
+                    }
+                    
+                    console.log('Fetching', relatedIds.size, 'related animals:', Array.from(relatedIds));
                     
                     try {
-                        // Fetch related animals without privacy restrictions
-                        const relatedResponse = await axios.post(`${API_BASE_URL}/animals/batch-public`, {
-                            ids: newIdsToFetch
-                        }, {
-                            headers: { Authorization: `Bearer ${authToken}` }
-                        });
+                        // Fetch each related animal individually using the public endpoint
+                        const fetchPromises = Array.from(relatedIds).map(id =>
+                            axios.get(`${API_BASE_URL}/animals/public/${id}`)
+                                .then(response => response.data)
+                                .catch(err => {
+                                    console.error(`Failed to fetch animal ${id}:`, err.message);
+                                    return null;
+                                })
+                        );
                         
-                        const newAnimals = relatedResponse.data;
+                        const newAnimals = (await Promise.all(fetchPromises)).filter(a => a !== null);
+                        console.log('Successfully fetched', newAnimals.length, 'related animals');
+                        
                         const allFetched = [...currentAnimals, ...newAnimals];
-                        
-                        // Reset for next iteration
-                        relatedIds.clear();
                         
                         // Recursively fetch parents of newly fetched animals
                         return await fetchRelatedAnimals(allFetched);
@@ -213,6 +213,7 @@ const FamilyTree = ({ authToken, userProfile, onViewAnimal, showModalMessage, on
                 };
                 
                 const allFetchedAnimals = await fetchRelatedAnimals(ownedAnimals);
+                console.log('Total animals in family tree:', allFetchedAnimals.length);
                 setAllAnimals(allFetchedAnimals);
                 
                 // Extract unique species
