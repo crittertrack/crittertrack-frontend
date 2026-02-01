@@ -631,10 +631,12 @@ const FamilyTree = ({ authToken, userProfile, onViewAnimal, showModalMessage, on
         <div style={{ 
             width: '100vw',
             height: '100vh',
-            margin: 0,
+            margin: '0 -8px 0 -8px',
             padding: 0,
             display: 'flex',
-            overflow: 'hidden'
+            overflow: 'hidden',
+            position: 'relative',
+            left: '8px'
         }}>
             {/* Left Sidebar Search Menu */}
             <div className="w-80 bg-gray-900 text-white flex flex-col h-full shadow-lg z-20">
@@ -746,14 +748,14 @@ const FamilyTree = ({ authToken, userProfile, onViewAnimal, showModalMessage, on
 
             {/* Main Content Area */}
             <div style={{
-                position: 'relative',
-                width: 'calc(100vw - 320px)',
+                flex: '1 1 auto',
                 height: '100vh',
                 margin: 0,
                 padding: 0,
                 display: 'flex',
                 flexDirection: 'column',
-                overflow: 'hidden'
+                overflow: 'hidden',
+                minWidth: 0
             }}>
                 {/* Header */}
                 <div className="bg-white shadow-lg z-10 w-full" style={{ padding: '12px', margin: 0 }}>
