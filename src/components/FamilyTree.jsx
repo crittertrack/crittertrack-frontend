@@ -603,7 +603,7 @@ const FamilyTree = ({ authToken, userProfile, onViewAnimal, showModalMessage, on
                     onNodeClick={onNodeClick}
                     nodeTypes={nodeTypes}
                     fitView
-                    fitViewOptions={{ padding: 0.05, maxZoom: 1.5 }}
+                    fitViewOptions={{ padding: 0.02, maxZoom: 3 }}
                     attributionPosition="bottom-left"
                     className="bg-gray-50"
                     defaultEdgeOptions={{
@@ -611,7 +611,7 @@ const FamilyTree = ({ authToken, userProfile, onViewAnimal, showModalMessage, on
                         animated: false
                     }}
                     minZoom={0.1}
-                    maxZoom={2}
+                    maxZoom={4}
                 >
                     <Background color="#ddd" gap={16} />
                     <Controls />
