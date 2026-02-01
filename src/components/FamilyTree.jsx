@@ -630,13 +630,13 @@ const FamilyTree = ({ authToken, userProfile, onViewAnimal, showModalMessage, on
     return (
         <div style={{ 
             width: '100vw',
-            height: '100vh',
+            height: 'calc(100vh - 110px)',
             margin: 0,
             padding: 0,
             display: 'flex',
             overflow: 'hidden',
             position: 'absolute',
-            top: 0,
+            top: '110px',
             left: 0,
             right: 0,
             bottom: 0
