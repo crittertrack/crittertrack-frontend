@@ -669,12 +669,13 @@ const FamilyTree = ({ authToken, userProfile, onViewAnimal, showModalMessage, on
                                             key={animal.id_public}
                                             onClick={() => {
                                                 setSelectedAnimal(animal);
-                                                // Pan to animal with relationship lines visible
+                                                // Just pan to animal's existing position without changing zoom
                                                 const node = getNode(animal.id_public);
                                                 if (node) {
+                                                    const currentZoom = getZoom();
                                                     setCenter(node.position.x + 90, node.position.y + 90, { 
-                                                        zoom: 0.5, 
-                                                        duration: 1000 
+                                                        zoom: currentZoom, 
+                                                        duration: 800 
                                                     });
                                                 }
                                             }}
