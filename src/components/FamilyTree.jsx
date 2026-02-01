@@ -1,5 +1,15 @@
-import React, { useState, useEffect } from 'react';
-import { ArrowLeft, Loader2, Search, X, Users, ChevronDown, ChevronUp, Filter } from 'lucide-react';
+import React, { useState, useEffect, useCallback, useMemo } from 'react';
+import { ArrowLeft, Loader2, Search, X, Users, ChevronDown, ChevronUp, Filter, ZoomIn, ZoomOut, Maximize2 } from 'lucide-react';
+import ReactFlow, { 
+    Background, 
+    Controls, 
+    MiniMap,
+    useNodesState,
+    useEdgesState,
+    MarkerType,
+    Position
+} from 'reactflow';
+import 'reactflow/dist/style.css';
 import axios from 'axios';
 
 const API_BASE_URL = '/api';
@@ -8,26 +18,87 @@ const API_BASE_URL = '/api';
  * FamilyTree Component
  * 
  * Displays a comprehensive family tree visualization showing:
- * - All owned animals
- * - All related animals (parents, siblings, grandparents, great-grandparents, aunts, uncles, nephews, nieces, cousins)
- * - Interactive nodes with click-to-view functionality
- * - Filtering and search capabilities
+ * - All owned animals and their relationships
+ * - Interactive graph with pan/zoom
+ * - Parent-child connections shown as edges
+ * - Clickable nodes to view animal details
  */
+
+// Custom node component for animals
+const AnimalNode = ({ data }) => {
+    const isOwned = data.isOwned;
+    const isSelected = data.isSelected;
+    
+    return (
+        <div
+            className={`
+                px-3 py-2 rounded-lg border-2 shadow-md cursor-pointer transition-all
+                ${isOwned 
+                    ? 'bg-gradient-to-br from-primary/20 to-primary/10 border-primary' 
+                    : 'bg-white border-gray-300'
+                }
+                ${isSelected ? 'ring-4 ring-blue-500 scale-110' : 'hover:scale-105'}
+            `}
+            style={{ minWidth: '120px' }}
+        >
+            {data.image && (
+                <div className="w-12 h-12 mx-auto mb-1 rounded-full overflow-hidden border-2 border-white">
+                    <img
+                        src={data.image}
+                        alt={data.label}
+                        className="w-full h-full object-cover"
+                    />
+                </div>
+            )}
+            <div className="text-center">
+                <div className="font-semibold text-xs text-gray-800 truncate">
+                    {data.label}
+                </div>
+                <div className="text-[10px] text-gray-500">
+                    {data.species}
+                </div>
+                {data.genetics && (
+                    <div className="text-[9px] text-gray-400 truncate">
+                        {data.genetics}
+                    </div>
+                )}
+                {isOwned && (
+                    <div className="mt-1 inline-block px-2 py-0.5 bg-primary text-black text-[9px] font-bold rounded">
+                        OWNED
+                    </div>
+                )}
+            </div>
+        </div>
+    );
+};
+
+const nodeTypes = {
+    animalNode: AnimalNode
+};
+
 const FamilyTree = ({ authToken, userProfile, onViewAnimal, showModalMessage, onBack }) => {
     const [loading, setLoading] = useState(true);
-    const [treeData, setTreeData] = useState(null);
+    const [allAnimals, setAllAnimals] = useState([]);
     const [selectedAnimal, setSelectedAnimal] = useState(null);
     const [searchQuery, setSearchQuery] = useState('');
     const [filterSpecies, setFilterSpecies] = useState('all');
     const [showFilters, setShowFilters] = useState(false);
     const [availableSpecies, setAvailableSpecies] = useState([]);
     const [error, setError] = useState(null);
+    
+    // React Flow state
+    const [nodes, setNodes, onNodesChange] = useNodesState([]);
+    const [edges, setEdges, onEdgesChange] = useEdgesState([]);
 
-    // Fetch comprehensive family tree data
+    // React Flow state
+    const [nodes, setNodes, onNodesChange] = useNodesState([]);
+    const [edges, setEdges, onEdgesChange] = useEdgesState([]);
+
+    // Fetch all animals and build the graph
     useEffect(() => {
         if (!authToken) return;
         
-        const fetchFamilyTreeData = async () => {
+        const fetchAnimalsAndBuildGraph = async () => {
             try {
                 setLoading(true);
                 setError(null);
@@ -38,234 +109,153 @@ const FamilyTree = ({ authToken, userProfile, onViewAnimal, showModalMessage, on
                 });
                 
                 const ownedAnimals = animalsResponse.data;
+                setAllAnimals(ownedAnimals);
                 
-                // Build comprehensive relationship map
-                const relationshipMap = await buildRelationshipMap(ownedAnimals);
-                
-                // Extract unique species for filtering
+                // Extract unique species
                 const species = [...new Set(ownedAnimals.map(a => a.species))];
                 setAvailableSpecies(species);
                 
-                setTreeData({
-                    ownedAnimals,
-                    relationshipMap
-                });
+                // Build graph nodes and edges
+                buildGraph(ownedAnimals);
                 
                 setLoading(false);
             } catch (err) {
-                console.error('Failed to fetch family tree data:', err);
+                console.error('Failed to fetch animals:', err);
                 setError('Failed to load family tree data');
                 setLoading(false);
             }
         };
         
-        fetchFamilyTreeData();
+        fetchAnimalsAndBuildGraph();
     }, [authToken]);
 
-    /**
-     * Build a comprehensive relationship map for all animals
-     * This includes: parents, siblings, grandparents, great-grandparents, aunts, uncles, nephews, nieces, cousins
-     */
-    const buildRelationshipMap = async (ownedAnimals) => {
-        const map = new Map();
-        const allRelatedAnimals = new Set();
+    // Build graph from animals data
+    const buildGraph = (animals) => {
+        const nodeMap = new Map();
+        const edgeList = [];
         
-        // For each owned animal, fetch all their relationships
-        for (const animal of ownedAnimals) {
-            const relationships = {
-                parents: [],
-                siblings: [],
-                grandparents: [],
-                greatGrandparents: [],
-                auntsUncles: [],
-                nephewsNieces: [],
-                cousins: [],
-                children: []
-            };
-            
-            try {
-                // Fetch detailed relationship data from backend
-                const response = await axios.get(
-                    `${API_BASE_URL}/animals/${animal.id_public}/relationships`,
-                    { headers: { Authorization: `Bearer ${authToken}` } }
-                );
-                
-                const data = response.data;
-                
-                // Organize relationships
-                if (data.parents) relationships.parents = data.parents;
-                if (data.siblings) relationships.siblings = data.siblings;
-                if (data.grandparents) relationships.grandparents = data.grandparents;
-                if (data.greatGrandparents) relationships.greatGrandparents = data.greatGrandparents;
-                if (data.auntsUncles) relationships.auntsUncles = data.auntsUncles;
-                if (data.nephewsNieces) relationships.nephewsNieces = data.nephewsNieces;
-                if (data.cousins) relationships.cousins = data.cousins;
-                if (data.children) relationships.children = data.children;
-                
-                // Add all related animals to the set
-                Object.values(relationships).forEach(relGroup => {
-                    if (Array.isArray(relGroup)) {
-                        relGroup.forEach(rel => allRelatedAnimals.add(rel.id_public));
-                    }
+        // Track all unique animals (owned + parents/grandparents)
+        const allUniqueAnimals = new Map();
+        
+        // First pass: Add all owned animals
+        animals.forEach(animal => {
+            allUniqueAnimals.set(animal.id_public, {
+                ...animal,
+                isOwned: true
+            });
+        });
+        
+        // Second pass: Add parents and create edges
+        animals.forEach(animal => {
+            // Add sire
+            if (animal.sireId_public && !allUniqueAnimals.has(animal.sireId_public)) {
+                allUniqueAnimals.set(animal.sireId_public, {
+                    id_public: animal.sireId_public,
+                    name: animal.sireId_public, // Will be replaced with actual name if available
+                    species: animal.species,
+                    sex: 'Male',
+                    isOwned: false
                 });
-                
-            } catch (err) {
-                console.error(`Failed to fetch relationships for ${animal.name}:`, err);
             }
             
-            map.set(animal.id_public, relationships);
-        }
-        
-        return map;
-    };
-
-    /**
-     * Render a single animal node in the tree
-     */
-    const renderAnimalNode = (animal, relationshipType = null) => {
-        if (!animal) return null;
-        
-        const isOwned = treeData?.ownedAnimals?.some(a => a.id_public === animal.id_public);
-        
-        return (
-            <div
-                key={animal.id_public}
-                onClick={() => setSelectedAnimal(animal)}
-                className={`
-                    relative p-3 rounded-lg border-2 cursor-pointer transition-all
-                    ${isOwned 
-                        ? 'bg-primary/10 border-primary hover:border-primary-dark' 
-                        : 'bg-gray-50 border-gray-300 hover:border-gray-400'
+            // Add dam
+            if (animal.damId_public && !allUniqueAnimals.has(animal.damId_public)) {
+                allUniqueAnimals.set(animal.damId_public, {
+                    id_public: animal.damId_public,
+                    name: animal.damId_public,
+                    species: animal.species,
+                    sex: 'Female',
+                    isOwned: false
+                });
+            }
+            
+            // Create parent edges
+            if (animal.sireId_public) {
+                edgeList.push({
+                    id: `${animal.sireId_public}-${animal.id_public}`,
+                    source: animal.sireId_public,
+                    target: animal.id_public,
+                    type: 'smoothstep',
+                    animated: false,
+                    style: { stroke: '#3b82f6', strokeWidth: 2 },
+                    markerEnd: {
+                        type: MarkerType.ArrowClosed,
+                        color: '#3b82f6',
                     }
-                    ${selectedAnimal?.id_public === animal.id_public ? 'ring-4 ring-blue-400' : ''}
-                    hover:shadow-md
-                `}
-                title={`${animal.name} - ${relationshipType || 'Owned'}`}
-            >
-                {/* Animal Image */}
-                {animal.images && animal.images.length > 0 && (
-                    <div className="w-16 h-16 mx-auto mb-2 rounded-full overflow-hidden border-2 border-white shadow-sm">
-                        <img
-                            src={animal.images[0]}
-                            alt={animal.name}
-                            className="w-full h-full object-cover"
-                        />
-                    </div>
-                )}
-                
-                {/* Animal Info */}
-                <div className="text-center">
-                    <div className="font-semibold text-sm text-gray-800 truncate">
-                        {animal.name}
-                    </div>
-                    <div className="text-xs text-gray-500">
-                        {animal.species}
-                    </div>
-                    {animal.sex && (
-                        <div className="text-xs text-gray-400">
-                            {animal.sex}
-                        </div>
-                    )}
-                    {isOwned && (
-                        <div className="mt-1 inline-block px-2 py-0.5 bg-primary text-black text-xs font-semibold rounded">
-                            Owned
-                        </div>
-                    )}
-                </div>
-            </div>
-        );
+                });
+            }
+            
+            if (animal.damId_public) {
+                edgeList.push({
+                    id: `${animal.damId_public}-${animal.id_public}`,
+                    source: animal.damId_public,
+                    target: animal.id_public,
+                    type: 'smoothstep',
+                    animated: false,
+                    style: { stroke: '#ec4899', strokeWidth: 2 },
+                    markerEnd: {
+                        type: MarkerType.ArrowClosed,
+                        color: '#ec4899',
+                    }
+                });
+            }
+        });
+        
+        // Create nodes with automatic layout
+        const nodeList = [];
+        const animalsArray = Array.from(allUniqueAnimals.values());
+        
+        // Simple grid layout for now (we'll improve this)
+        const cols = Math.ceil(Math.sqrt(animalsArray.length));
+        animalsArray.forEach((animal, index) => {
+            const row = Math.floor(index / cols);
+            const col = index % cols;
+            
+            nodeList.push({
+                id: animal.id_public,
+                type: 'animalNode',
+                position: { 
+                    x: col * 200, 
+                    y: row * 150 
+                },
+                data: {
+                    label: animal.name || animal.id_public,
+                    species: animal.species || 'Unknown',
+                    genetics: animal.geneticCode || '',
+                    image: animal.images?.[0] || null,
+                    isOwned: animal.isOwned,
+                    isSelected: selectedAnimal?.id_public === animal.id_public,
+                    animal: animal
+                }
+            });
+        });
+        
+        setNodes(nodeList);
+        setEdges(edgeList);
     };
 
-    /**
-     * Render animal detail panel
-     */
-    const renderAnimalDetail = () => {
-        if (!selectedAnimal) return null;
+    // Handle node click
+    const onNodeClick = useCallback((event, node) => {
+        const animal = node.data.animal;
+        setSelectedAnimal(animal);
         
-        const relationships = treeData?.relationshipMap?.get(selectedAnimal.id_public);
-        
-        return (
-            <div className="bg-white rounded-lg shadow-lg p-6 border border-gray-200">
-                <div className="flex justify-between items-start mb-4">
-                    <h3 className="text-xl font-bold text-gray-800">{selectedAnimal.name}</h3>
-                    <button
-                        onClick={() => setSelectedAnimal(null)}
-                        className="text-gray-400 hover:text-gray-600"
-                    >
-                        <X size={20} />
-                    </button>
-                </div>
-                
-                {/* Animal Image */}
-                {selectedAnimal.images && selectedAnimal.images.length > 0 && (
-                    <div className="w-32 h-32 mx-auto mb-4 rounded-lg overflow-hidden border-2 border-gray-200">
-                        <img
-                            src={selectedAnimal.images[0]}
-                            alt={selectedAnimal.name}
-                            className="w-full h-full object-cover"
-                        />
-                    </div>
-                )}
-                
-                {/* Basic Info */}
-                <div className="space-y-2 mb-4 text-sm">
-                    <div><span className="font-semibold">Species:</span> {selectedAnimal.species}</div>
-                    {selectedAnimal.sex && <div><span className="font-semibold">Sex:</span> {selectedAnimal.sex}</div>}
-                    {selectedAnimal.dateOfBirth && (
-                        <div><span className="font-semibold">Born:</span> {new Date(selectedAnimal.dateOfBirth).toLocaleDateString()}</div>
-                    )}
-                    {selectedAnimal.geneticCode && <div><span className="font-semibold">Genetics:</span> {selectedAnimal.geneticCode}</div>}
-                </div>
-                
-                {/* Relationships Summary */}
-                {relationships && (
-                    <div className="border-t border-gray-200 pt-4">
-                        <h4 className="font-semibold text-gray-700 mb-3">Relationships</h4>
-                        <div className="grid grid-cols-2 gap-2 text-sm">
-                            {relationships.parents?.length > 0 && (
-                                <div className="bg-blue-50 px-3 py-2 rounded">
-                                    <div className="font-medium text-blue-700">Parents</div>
-                                    <div className="text-blue-600">{relationships.parents.length}</div>
-                                </div>
-                            )}
-                            {relationships.siblings?.length > 0 && (
-                                <div className="bg-green-50 px-3 py-2 rounded">
-                                    <div className="font-medium text-green-700">Siblings</div>
-                                    <div className="text-green-600">{relationships.siblings.length}</div>
-                                </div>
-                            )}
-                            {relationships.children?.length > 0 && (
-                                <div className="bg-purple-50 px-3 py-2 rounded">
-                                    <div className="font-medium text-purple-700">Children</div>
-                                    <div className="text-purple-600">{relationships.children.length}</div>
-                                </div>
-                            )}
-                            {relationships.grandparents?.length > 0 && (
-                                <div className="bg-yellow-50 px-3 py-2 rounded">
-                                    <div className="font-medium text-yellow-700">Grandparents</div>
-                                    <div className="text-yellow-600">{relationships.grandparents.length}</div>
-                                </div>
-                            )}
-                        </div>
-                    </div>
-                )}
-                
-                {/* View Full Details Button */}
-                <button
-                    onClick={() => onViewAnimal && onViewAnimal(selectedAnimal)}
-                    className="w-full mt-4 px-4 py-2 bg-primary hover:bg-primary-dark text-black font-semibold rounded-lg transition"
-                >
-                    View Full Details
-                </button>
-            </div>
+        // Update selected state in nodes
+        setNodes(nodes => 
+            nodes.map(n => ({
+                ...n,
+                data: {
+                    ...n.data,
+                    isSelected: n.id === node.id
+                }
+            }))
         );
-    };
+    }, [setNodes]);
 
-    // Filter animals based on search and species filter
-    const getFilteredAnimals = () => {
-        if (!treeData?.ownedAnimals) return [];
+    // Filter animals based on search and species
+    const filteredAnimals = useMemo(() => {
+        if (!allAnimals) return [];
         
-        return treeData.ownedAnimals.filter(animal => {
+        return allAnimals.filter(animal => {
             const matchesSearch = !searchQuery || 
                 animal.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
                 animal.geneticCode?.toLowerCase().includes(searchQuery.toLowerCase());
@@ -274,11 +264,22 @@ const FamilyTree = ({ authToken, userProfile, onViewAnimal, showModalMessage, on
             
             return matchesSearch && matchesSpecies;
         });
-    };
+    }, [allAnimals, searchQuery, filterSpecies]);
+    
+    // Update graph when filters change
+    useEffect(() => {
+        if (filteredAnimals.length > 0 && allAnimals.length > 0) {
+            if (searchQuery || filterSpecies !== 'all') {
+                buildGraph(filteredAnimals);
+            } else {
+                buildGraph(allAnimals);
+            }
+        }
+    }, [filteredAnimals, searchQuery, filterSpecies]);
 
     if (loading) {
         return (
-            <div className="flex items-center justify-center min-h-screen">
+            <div className="flex items-center justify-center min-h-screen bg-page-bg">
                 <div className="text-center">
                     <Loader2 size={48} className="animate-spin text-primary mx-auto mb-4" />
                     <p className="text-gray-600">Loading family tree...</p>
@@ -289,7 +290,7 @@ const FamilyTree = ({ authToken, userProfile, onViewAnimal, showModalMessage, on
 
     if (error) {
         return (
-            <div className="flex items-center justify-center min-h-screen">
+            <div className="flex items-center justify-center min-h-screen bg-page-bg">
                 <div className="text-center">
                     <p className="text-red-600 mb-4">{error}</p>
                     <button
@@ -303,14 +304,14 @@ const FamilyTree = ({ authToken, userProfile, onViewAnimal, showModalMessage, on
         );
     }
 
-    const filteredAnimals = getFilteredAnimals();
+    const totalRelationships = edges.length;
 
     return (
-        <div className="min-h-screen bg-page-bg p-4">
+        <div className="flex flex-col h-screen bg-page-bg">
             {/* Header */}
-            <div className="max-w-7xl mx-auto mb-6">
-                <div className="bg-white rounded-xl shadow-lg p-6">
-                    <div className="flex items-center justify-between mb-4">
+            <div className="bg-white shadow-lg p-4 z-10">
+                <div className="max-w-7xl mx-auto">
+                    <div className="flex items-center justify-between mb-3">
                         <div className="flex items-center gap-3">
                             <button
                                 onClick={onBack}
@@ -338,7 +339,7 @@ const FamilyTree = ({ authToken, userProfile, onViewAnimal, showModalMessage, on
                     
                     {/* Filters */}
                     {showFilters && (
-                        <div className="border-t border-gray-200 pt-4 grid grid-cols-1 md:grid-cols-2 gap-4">
+                        <div className="border-t border-gray-200 pt-3 grid grid-cols-1 md:grid-cols-2 gap-3">
                             {/* Search */}
                             <div className="relative">
                                 <Search size={18} className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" />
@@ -374,62 +375,106 @@ const FamilyTree = ({ authToken, userProfile, onViewAnimal, showModalMessage, on
                     )}
                     
                     {/* Stats */}
-                    <div className="mt-4 grid grid-cols-2 md:grid-cols-4 gap-4 text-center">
-                        <div className="bg-primary/10 rounded-lg p-3">
-                            <div className="text-2xl font-bold text-primary">{treeData?.ownedAnimals?.length || 0}</div>
-                            <div className="text-sm text-gray-600">Owned Animals</div>
+                    <div className="mt-3 grid grid-cols-4 gap-2 text-center">
+                        <div className="bg-primary/10 rounded-lg p-2">
+                            <div className="text-xl font-bold text-primary">{allAnimals.length}</div>
+                            <div className="text-xs text-gray-600">Owned Animals</div>
                         </div>
-                        <div className="bg-blue-50 rounded-lg p-3">
-                            <div className="text-2xl font-bold text-blue-600">{availableSpecies.length}</div>
-                            <div className="text-sm text-gray-600">Species</div>
+                        <div className="bg-blue-50 rounded-lg p-2">
+                            <div className="text-xl font-bold text-blue-600">{nodes.length}</div>
+                            <div className="text-xs text-gray-600">Total Nodes</div>
                         </div>
-                        <div className="bg-green-50 rounded-lg p-3">
-                            <div className="text-2xl font-bold text-green-600">{filteredAnimals.length}</div>
-                            <div className="text-sm text-gray-600">Filtered Results</div>
+                        <div className="bg-green-50 rounded-lg p-2">
+                            <div className="text-xl font-bold text-green-600">{totalRelationships}</div>
+                            <div className="text-xs text-gray-600">Connections</div>
                         </div>
-                        <div className="bg-purple-50 rounded-lg p-3">
-                            <div className="text-2xl font-bold text-purple-600">
-                                {treeData?.relationshipMap?.size || 0}
-                            </div>
-                            <div className="text-sm text-gray-600">With Relationships</div>
+                        <div className="bg-purple-50 rounded-lg p-2">
+                            <div className="text-xl font-bold text-purple-600">{availableSpecies.length}</div>
+                            <div className="text-xs text-gray-600">Species</div>
                         </div>
                     </div>
                 </div>
             </div>
             
-            {/* Main Content */}
-            <div className="max-w-7xl mx-auto grid grid-cols-1 lg:grid-cols-3 gap-6">
-                {/* Tree View */}
-                <div className="lg:col-span-2">
-                    <div className="bg-white rounded-xl shadow-lg p-6">
-                        <h2 className="text-xl font-bold text-gray-800 mb-4">Your Animals</h2>
+            {/* Graph Container */}
+            <div className="flex-1 relative">
+                <ReactFlow
+                    nodes={nodes}
+                    edges={edges}
+                    onNodesChange={onNodesChange}
+                    onEdgesChange={onEdgesChange}
+                    onNodeClick={onNodeClick}
+                    nodeTypes={nodeTypes}
+                    fitView
+                    attributionPosition="bottom-left"
+                    className="bg-gray-50"
+                >
+                    <Background color="#ddd" gap={16} />
+                    <Controls />
+                    <MiniMap 
+                        nodeColor={(node) => node.data.isOwned ? '#fbbf24' : '#d1d5db'}
+                        maskColor="rgba(0, 0, 0, 0.1)"
+                        style={{ backgroundColor: '#f9fafb' }}
+                    />
+                </ReactFlow>
+                
+                {/* Selected Animal Detail Panel */}
+                {selectedAnimal && (
+                    <div className="absolute top-4 right-4 w-80 bg-white rounded-lg shadow-2xl p-4 border border-gray-200 max-h-[calc(100vh-200px)] overflow-y-auto z-10">
+                        <div className="flex justify-between items-start mb-3">
+                            <h3 className="text-lg font-bold text-gray-800">{selectedAnimal.name}</h3>
+                            <button
+                                onClick={() => {
+                                    setSelectedAnimal(null);
+                                    setNodes(nodes => 
+                                        nodes.map(n => ({
+                                            ...n,
+                                            data: {
+                                                ...n.data,
+                                                isSelected: false
+                                            }
+                                        }))
+                                    );
+                                }}
+                                className="text-gray-400 hover:text-gray-600"
+                            >
+                                <X size={20} />
+                            </button>
+                        </div>
                         
-                        {filteredAnimals.length === 0 ? (
-                            <div className="text-center py-12 text-gray-500">
-                                <Users size={48} className="mx-auto mb-4 opacity-50" />
-                                <p>No animals found matching your filters</p>
-                            </div>
-                        ) : (
-                            <div className="grid grid-cols-2 md:grid-cols-3 xl:grid-cols-4 gap-4">
-                                {filteredAnimals.map(animal => renderAnimalNode(animal, 'Owned'))}
+                        {selectedAnimal.images && selectedAnimal.images[0] && (
+                            <div className="w-full h-40 mb-3 rounded-lg overflow-hidden border-2 border-gray-200">
+                                <img
+                                    src={selectedAnimal.images[0]}
+                                    alt={selectedAnimal.name}
+                                    className="w-full h-full object-cover"
+                                />
                             </div>
                         )}
-                    </div>
-                </div>
-                
-                {/* Detail Panel */}
-                <div className="lg:col-span-1">
-                    {selectedAnimal ? (
-                        renderAnimalDetail()
-                    ) : (
-                        <div className="bg-white rounded-lg shadow-lg p-6 border border-gray-200">
-                            <div className="text-center text-gray-500 py-12">
-                                <Users size={48} className="mx-auto mb-4 opacity-50" />
-                                <p>Select an animal to view details and relationships</p>
-                            </div>
+                        
+                        <div className="space-y-2 mb-4 text-sm">
+                            <div><span className="font-semibold">Species:</span> {selectedAnimal.species}</div>
+                            {selectedAnimal.sex && <div><span className="font-semibold">Sex:</span> {selectedAnimal.sex}</div>}
+                            {selectedAnimal.dateOfBirth && (
+                                <div><span className="font-semibold">Born:</span> {new Date(selectedAnimal.dateOfBirth).toLocaleDateString()}</div>
+                            )}
+                            {selectedAnimal.geneticCode && <div><span className="font-semibold">Genetics:</span> {selectedAnimal.geneticCode}</div>}
+                            {selectedAnimal.sireId_public && (
+                                <div><span className="font-semibold">Sire:</span> {selectedAnimal.sireId_public}</div>
+                            )}
+                            {selectedAnimal.damId_public && (
+                                <div><span className="font-semibold">Dam:</span> {selectedAnimal.damId_public}</div>
+                            )}
                         </div>
-                    )}
-                </div>
+                        
+                        <button
+                            onClick={() => onViewAnimal && onViewAnimal(selectedAnimal)}
+                            className="w-full px-4 py-2 bg-primary hover:bg-primary-dark text-black font-semibold rounded-lg transition"
+                        >
+                            View Full Details
+                        </button>
+                    </div>
+                )}
             </div>
         </div>
     );
