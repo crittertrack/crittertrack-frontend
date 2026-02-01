@@ -1473,7 +1473,7 @@ const UserSearchModal = ({ onClose, showModalMessage, onSelectUser, API_BASE_URL
                         {animal.prefix && `${animal.prefix} `}{animal.name}{animal.suffix && ` ${animal.suffix}`}
                     </p>
                     <p className="text-sm text-gray-600">
-                        {animal.species} � {animal.gender} � <span className="font-mono">{animal.id_public}</span>
+                        {animal.species} • {animal.gender} • <span className="font-mono">{animal.id_public}</span>
                     </p>
                     {animal.color && <p className="text-xs text-gray-500 mt-1">{animal.color}</p>}
                 </div>
