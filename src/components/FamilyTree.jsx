@@ -242,36 +242,6 @@ const FamilyTree = ({ authToken, userProfile, onViewAnimal, showModalMessage, on
             }
         });
         
-        // Add sibling edges (animals with same parents)
-        const siblingGroups = new Map();
-        allUniqueAnimals.forEach(animal => {
-            if (animal.sireId_public || animal.damId_public) {
-                const siblingKey = [animal.sireId_public || 'none', animal.damId_public || 'none'].sort().join('-');
-                if (!siblingGroups.has(siblingKey)) {
-                    siblingGroups.set(siblingKey, []);
-                }
-                siblingGroups.get(siblingKey).push(animal.id_public);
-            }
-        });
-        
-        siblingGroups.forEach(siblings => {
-            if (siblings.length > 1) {
-                // Connect siblings with horizontal dashed green lines
-                for (let i = 0; i < siblings.length - 1; i++) {
-                    edgeList.push({
-                        id: `sibling-${siblings[i]}-${siblings[i + 1]}`,
-                        source: siblings[i],
-                        target: siblings[i + 1],
-                        type: 'straight',
-                        animated: false,
-                        style: { stroke: '#10b981', strokeWidth: 2, strokeDasharray: '5,5' },
-                        sourceHandle: 'right',
-                        targetHandle: 'left-target'
-                    });
-                }
-            }
-        });
-        
         // Create initial nodes without positions
         const nodeList = Array.from(allUniqueAnimals.values()).map(animal => ({
             id: animal.id_public,
@@ -298,10 +268,10 @@ const FamilyTree = ({ authToken, userProfile, onViewAnimal, showModalMessage, on
         // Configure the graph for top-to-bottom layout (oldest at top, children below)
         dagreGraph.setGraph({ 
             rankdir: 'TB', // Top to bottom (classical tree layout)
-            nodesep: 100,  // Horizontal spacing between nodes
-            ranksep: 180,  // Vertical spacing between ranks (more space between generations)
-            marginx: 50,
-            marginy: 50
+            nodesep: 150,  // More horizontal spacing between nodes
+            ranksep: 200,  // More vertical spacing between ranks
+            marginx: 60,
+            marginy: 60
         });
         
         // Add nodes to dagre graph
