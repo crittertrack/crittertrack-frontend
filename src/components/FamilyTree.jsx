@@ -600,7 +600,7 @@ const FamilyTree = ({ authToken, userProfile, onViewAnimal, showModalMessage, on
                     onNodeClick={onNodeClick}
                     nodeTypes={nodeTypes}
                     fitView
-                    fitViewOptions={{ padding: 0.1, maxZoom: 0.8 }}
+                    fitViewOptions={{ padding: 0.05, maxZoom: 1.5 }}
                     attributionPosition="bottom-left"
                     className="bg-gray-50"
                     defaultEdgeOptions={{
