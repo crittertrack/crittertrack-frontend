@@ -7,7 +7,8 @@ import ReactFlow, {
     useNodesState,
     useEdgesState,
     MarkerType,
-    Position
+    Position,
+    Handle
 } from 'reactflow';
 import 'reactflow/dist/style.css';
 import axios from 'axios';
@@ -49,6 +50,13 @@ const AnimalNode = ({ data }) => {
     
     return (
         <div className="flex flex-col items-center">
+            {/* Top handle for incoming edges (from parents) */}
+            <Handle
+                type="target"
+                position={Position.Top}
+                style={{ background: '#555', width: '8px', height: '8px' }}
+            />
+            
             {/* Circular Image */}
             <div
                 className={`
@@ -84,6 +92,13 @@ const AnimalNode = ({ data }) => {
             >
                 <div className="truncate">{fullName}</div>
             </div>
+            
+            {/* Bottom handle for outgoing edges (to children) */}
+            <Handle
+                type="source"
+                position={Position.Bottom}
+                style={{ background: '#555', width: '8px', height: '8px' }}
+            />
         </div>
     );
 };
