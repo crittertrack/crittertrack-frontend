@@ -1151,9 +1151,18 @@ const FamilyTree = ({ authToken, userProfile, onViewAnimal, showModalMessage, on
                                     })()}
                                 </div>
                             )}
-                            {(selectedAnimal.color || selectedAnimal.coat || selectedAnimal.coatPattern) && (
+                            {(selectedAnimal.color || selectedAnimal.coat || selectedAnimal.coatPattern || selectedAnimal.pattern || selectedAnimal.genetics) && (
                                 <div>
-                                    {[selectedAnimal.color, selectedAnimal.coatPattern, selectedAnimal.coat].filter(Boolean).join(', ')}
+                                    {(() => {
+                                        console.log('Animal coat data:', { 
+                                            color: selectedAnimal.color, 
+                                            coat: selectedAnimal.coat, 
+                                            coatPattern: selectedAnimal.coatPattern, 
+                                            pattern: selectedAnimal.pattern,
+                                            genetics: selectedAnimal.genetics
+                                        });
+                                        return [selectedAnimal.color, selectedAnimal.coatPattern || selectedAnimal.pattern, selectedAnimal.coat].filter(Boolean).join(', ');
+                                    })()}
                                 </div>
                             )}
                         </div>
