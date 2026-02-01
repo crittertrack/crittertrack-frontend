@@ -758,7 +758,8 @@ const FamilyTree = ({ authToken, userProfile, onViewAnimal, showModalMessage, on
                 display: 'flex',
                 flexDirection: 'column',
                 overflow: 'hidden',
-                minWidth: 0
+                minWidth: 0,
+                marginLeft: '320px'
             }}>
                 {/* Header */}
                 <div className="bg-white shadow-lg z-10 w-full" style={{ padding: '12px', margin: 0 }}>
