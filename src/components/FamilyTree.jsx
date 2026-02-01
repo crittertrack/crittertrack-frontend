@@ -243,73 +243,92 @@ const FamilyTree = ({ authToken, userProfile, onViewAnimal, showModalMessage, on
     
     // Calculate hierarchical tree layout
     const calculateTreeLayout = (animals) => {
-        const animalMap = new Map(animals.map(a => [a.id_public, { ...a, children: [] }]));
-        const roots = [];
+        const animalMap = new Map(animals.map(a => [a.id_public, { ...a, parents: [] }]));
+        const leaves = []; // Animals with no children (youngest generation or no pedigree)
         
-        // Build parent-child relationships
+        // Build child-to-parent relationships (inverted from typical tree)
         animals.forEach(animal => {
             const node = animalMap.get(animal.id_public);
-            let hasParent = false;
             
-            // Link to sire
+            // Add parents to this node
             if (animal.sireId_public && animalMap.has(animal.sireId_public)) {
-                animalMap.get(animal.sireId_public).children.push(node);
-                hasParent = true;
+                node.parents.push(animalMap.get(animal.sireId_public));
             }
-            
-            // Link to dam (but don't add twice to children)
             if (animal.damId_public && animalMap.has(animal.damId_public)) {
-                const dam = animalMap.get(animal.damId_public);
-                if (!dam.children.includes(node)) {
-                    dam.children.push(node);
-                }
-                hasParent = true;
-            }
-            
-            if (!hasParent) {
-                roots.push(node);
+                node.parents.push(animalMap.get(animal.damId_public));
             }
         });
+        
+        // Find leaves (animals that are nobody's parent)
+        animals.forEach(animal => {
+            const isParent = animals.some(a => 
+                a.sireId_public === animal.id_public || a.damId_public === animal.id_public
+            );
+            if (!isParent) {
+                leaves.push(animalMap.get(animal.id_public));
+            }
+        });
+        
+        // If no leaves found, use animals without parents as starting points
+        if (leaves.length === 0) {
+            animals.forEach(animal => {
+                const node = animalMap.get(animal.id_public);
+                if (node.parents.length === 0) {
+                    leaves.push(node);
+                }
+            });
+        }
         
         // Layout parameters
         const HORIZONTAL_SPACING = 180;
         const VERTICAL_SPACING = 200;
         
-        // Recursive function to calculate positions
-        const calculateSubtreeWidth = (node) => {
-            if (node.children.length === 0) {
+        // Recursive function to calculate ancestor tree width
+        const calculateAncestorWidth = (node, visited = new Set()) => {
+            if (visited.has(node.id_public)) return 0;
+            visited.add(node.id_public);
+            
+            if (node.parents.length === 0) {
                 return 1;
             }
-            return node.children.reduce((sum, child) => sum + calculateSubtreeWidth(child), 0);
+            return node.parents.reduce((sum, parent) => sum + calculateAncestorWidth(parent, visited), 0);
         };
         
-        const positionSubtree = (node, x, y, depth = 0) => {
+        const positionAncestors = (node, x, y, depth = 0, visited = new Set()) => {
+            if (visited.has(node.id_public)) return;
+            visited.add(node.id_public);
+            
             node.position = { x, y };
             node.depth = depth;
             
-            if (node.children.length > 0) {
-                // Calculate total width needed for children
-                const childWidths = node.children.map(child => calculateSubtreeWidth(child));
-                const totalWidth = childWidths.reduce((sum, w) => sum + w, 0);
+            if (node.parents.length > 0) {
+                // Calculate total width needed for parents
+                const parentWidths = node.parents.map(parent => {
+                    const visited = new Set();
+                    return calculateAncestorWidth(parent, visited);
+                });
+                const totalWidth = parentWidths.reduce((sum, w) => sum + w, 0);
                 
                 let currentX = x - ((totalWidth - 1) * HORIZONTAL_SPACING) / 2;
                 
-                node.children.forEach((child, i) => {
-                    const childWidth = childWidths[i];
-                    const childCenterX = currentX + ((childWidth - 1) * HORIZONTAL_SPACING) / 2;
-                    positionSubtree(child, childCenterX, y + VERTICAL_SPACING, depth + 1);
-                    currentX += childWidth * HORIZONTAL_SPACING;
+                node.parents.forEach((parent, i) => {
+                    const parentWidth = parentWidths[i];
+                    const parentCenterX = currentX + ((parentWidth - 1) * HORIZONTAL_SPACING) / 2;
+                    const visitedCopy = new Set(visited);
+                    positionAncestors(parent, parentCenterX, y + VERTICAL_SPACING, depth + 1, visitedCopy);
+                    currentX += parentWidth * HORIZONTAL_SPACING;
                 });
             }
         };
         
-        // Position each root tree
-        let currentRootX = 0;
-        roots.forEach((root, index) => {
-            const treeWidth = calculateSubtreeWidth(root);
-            const rootX = currentRootX + (treeWidth * HORIZONTAL_SPACING) / 2;
-            positionSubtree(root, rootX, 0);
-            currentRootX += (treeWidth + 2) * HORIZONTAL_SPACING; // Extra spacing between trees
+        // Position each leaf tree (youngest at top, ancestors below)
+        let currentLeafX = 0;
+        leaves.forEach((leaf) => {
+            const visited = new Set();
+            const treeWidth = calculateAncestorWidth(leaf, visited);
+            const leafX = currentLeafX + (treeWidth * HORIZONTAL_SPACING) / 2;
+            positionAncestors(leaf, leafX, 0, 0, new Set());
+            currentLeafX += (treeWidth + 2) * HORIZONTAL_SPACING; // Extra spacing between trees
         });
         
         return Array.from(animalMap.values());
