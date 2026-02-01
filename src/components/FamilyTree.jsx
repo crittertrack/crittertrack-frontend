@@ -312,7 +312,7 @@ const FamilyTree = ({ authToken, userProfile, onViewAnimal, showModalMessage, on
                 gender: animal.gender || animal.sex || 'Unknown',
                 species: animal.species || 'Unknown',
                 genetics: animal.geneticCode || '',
-                image: animal.images?.[0] || null,
+                image: animal.imageUrl || animal.photoUrl || null,
                 isOwned: animal.isOwned,
                 isSelected: selectedAnimal?.id_public === animal.id_public,
                 animal: animal
@@ -780,9 +780,9 @@ const FamilyTree = ({ authToken, userProfile, onViewAnimal, showModalMessage, on
                         
                         {/* Image or Placeholder */}
                         <div className="w-full h-48 mb-4 rounded-lg overflow-hidden border-2 border-gray-200 bg-gray-100">
-                            {selectedAnimal.images && selectedAnimal.images[0] ? (
+                            {(selectedAnimal.imageUrl || selectedAnimal.photoUrl) ? (
                                 <img
-                                    src={selectedAnimal.images[0]}
+                                    src={selectedAnimal.imageUrl || selectedAnimal.photoUrl}
                                     alt={selectedAnimal.name}
                                     className="w-full h-full object-cover"
                                 />
