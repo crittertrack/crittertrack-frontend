@@ -628,7 +628,18 @@ const FamilyTree = ({ authToken, userProfile, onViewAnimal, showModalMessage, on
     const totalRelationships = edges.length;
 
     return (
-        <div className="h-screen flex" style={{ width: '100vw', maxWidth: 'none', margin: 0, padding: 0, overflow: 'hidden' }}>
+        <div style={{ 
+            position: 'fixed',
+            top: 0,
+            left: 0,
+            width: '100vw',
+            height: '100vh',
+            margin: 0,
+            padding: 0,
+            display: 'flex',
+            overflow: 'hidden',
+            zIndex: 10
+        }}>
             {/* Left Sidebar Search Menu */}
             <div className="w-80 bg-gray-900 text-white flex flex-col h-full shadow-lg z-20">
                 {/* Sidebar Header */}
@@ -738,7 +749,16 @@ const FamilyTree = ({ authToken, userProfile, onViewAnimal, showModalMessage, on
             </div>
 
             {/* Main Content Area */}
-            <div className="flex flex-col" style={{ width: 'calc(100vw - 320px)', height: '100vh', margin: 0, padding: 0 }}>
+            <div style={{
+                position: 'relative',
+                width: 'calc(100vw - 320px)',
+                height: '100vh',
+                margin: 0,
+                padding: 0,
+                display: 'flex',
+                flexDirection: 'column',
+                overflow: 'hidden'
+            }}>
                 {/* Header */}
                 <div className="bg-white shadow-lg z-10 w-full" style={{ padding: '12px', margin: 0 }}>
                     <div className="flex items-center justify-between w-full" style={{ margin: 0, padding: 0 }}>
@@ -764,7 +784,18 @@ const FamilyTree = ({ authToken, userProfile, onViewAnimal, showModalMessage, on
                 </div>
 
                 {/* Graph Container */}
-                <div className="" style={{ width: '100%', height: 'calc(100vh - 60px)', overflow: 'hidden', margin: 0, padding: 0, position: 'relative' }}>
+                <div style={{
+                    position: 'absolute',
+                    top: '60px',
+                    left: 0,
+                    right: 0,
+                    bottom: 0,
+                    width: '100%',
+                    height: 'calc(100% - 60px)',
+                    margin: 0,
+                    padding: 0,
+                    overflow: 'hidden'
+                }}>
                 <ReactFlow
                     nodes={nodes}
                     edges={edges}
@@ -776,7 +807,16 @@ const FamilyTree = ({ authToken, userProfile, onViewAnimal, showModalMessage, on
                     fitViewOptions={{ padding: 0, minZoom: 0.05, maxZoom: 2 }}
                     defaultViewport={{ x: 0, y: 0, zoom: 0.3 }}
                     attributionPosition="bottom-left"
-                    style={{ width: '100%', height: '100%', background: '#f9fafb', margin: 0, padding: 0, position: 'absolute', top: 0, left: 0 }}
+                    style={{ 
+                        position: 'absolute',
+                        top: 0,
+                        left: 0,
+                        width: '100%',
+                        height: '100%',
+                        background: '#f9fafb',
+                        margin: 0,
+                        padding: 0
+                    }}
                     defaultEdgeOptions={{
                         type: 'default',
                         animated: false,
