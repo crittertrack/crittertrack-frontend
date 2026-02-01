@@ -350,7 +350,7 @@ const FamilyTree = ({ authToken, userProfile, onViewAnimal, showModalMessage, on
                     target: midpointId,
                     type: 'straight',
                     animated: false,
-                    style: { stroke: '#8b5cf6', strokeWidth: 3, strokeDasharray: '8,4' },
+                    style: { stroke: '#f97316', strokeWidth: 3, strokeDasharray: '8,4' },
                     sourceHandle: 'right'
                 });
                 
@@ -360,7 +360,7 @@ const FamilyTree = ({ authToken, userProfile, onViewAnimal, showModalMessage, on
                     target: pairData.dam,
                     type: 'straight',
                     animated: false,
-                    style: { stroke: '#8b5cf6', strokeWidth: 3, strokeDasharray: '8,4' },
+                    style: { stroke: '#f97316', strokeWidth: 3, strokeDasharray: '8,4' },
                     targetHandle: 'left-target'
                 });
                 
