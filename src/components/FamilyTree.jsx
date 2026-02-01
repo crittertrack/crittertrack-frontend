@@ -3,7 +3,6 @@ import { ArrowLeft, Loader2, Search, X, Users, ChevronDown, ChevronUp, Filter, Z
 import ReactFlow, { 
     Background, 
     Controls, 
-    MiniMap,
     useNodesState,
     useEdgesState,
     MarkerType,
@@ -745,11 +744,6 @@ const FamilyTree = ({ authToken, userProfile, onViewAnimal, showModalMessage, on
                 >
                     <Background color="#ddd" gap={16} />
                     <Controls />
-                    <MiniMap 
-                        nodeColor={(node) => node.data.isOwned ? '#fbbf24' : '#d1d5db'}
-                        maskColor="rgba(0, 0, 0, 0.1)"
-                        style={{ backgroundColor: '#f9fafb' }}
-                    />
                 </ReactFlow>
                 
                 {/* Selected Animal Detail Panel */}
