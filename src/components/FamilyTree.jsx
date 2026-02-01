@@ -1071,9 +1071,13 @@ const FamilyTree = ({ authToken, userProfile, onViewAnimal, showModalMessage, on
                 
                 {/* Selected Animal Detail Panel */}
                 {selectedAnimal && (
-                    <div className="absolute top-4 right-4 w-80 bg-white rounded-lg shadow-2xl p-4 border border-gray-200 max-h-[calc(100vh-120px)] overflow-hidden z-10" 
-                         style={{ maxWidth: 'calc(100% - 40px)' }}>
-                        <div className="max-h-full overflow-y-auto">
+                    <div className="absolute top-4 right-4 w-80 bg-white rounded-lg shadow-2xl border border-gray-200 z-10" 
+                         style={{ 
+                             maxWidth: 'calc(100% - 40px)', 
+                             maxHeight: 'calc(100vh - 140px)',
+                             paddingBottom: '20px'
+                         }}>
+                        <div className="max-h-full overflow-y-auto p-4" style={{ maxHeight: 'calc(100vh - 180px)' }}>
                         <div className="flex justify-between items-start mb-4">
                             <div>
                                 <h3 className="text-xl font-bold text-gray-800">
@@ -1295,12 +1299,13 @@ const FamilyTree = ({ authToken, userProfile, onViewAnimal, showModalMessage, on
                             })()}
                         </div>
                         
-                        <button
-                            onClick={() => onViewAnimal && onViewAnimal(selectedAnimal)}
-                            className="w-full px-4 py-3 bg-primary hover:bg-primary-dark text-black font-semibold rounded-lg transition mt-4"
-                        >
-                            View Full Details
-                        </button>
+                        <div className="p-4 pt-2 border-t bg-white">
+                            <button
+                                onClick={() => onViewAnimal && onViewAnimal(selectedAnimal)}
+                                className="w-full px-4 py-3 bg-primary hover:bg-primary-dark text-black font-semibold rounded-lg transition"
+                            >
+                                View Full Details
+                            </button>
                         </div>
                     </div>
                 )}
