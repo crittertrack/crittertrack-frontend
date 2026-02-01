@@ -629,16 +629,12 @@ const FamilyTree = ({ authToken, userProfile, onViewAnimal, showModalMessage, on
 
     return (
         <div style={{ 
-            position: 'fixed',
-            top: 0,
-            left: 0,
             width: '100vw',
             height: '100vh',
             margin: 0,
             padding: 0,
             display: 'flex',
-            overflow: 'hidden',
-            zIndex: 10
+            overflow: 'hidden'
         }}>
             {/* Left Sidebar Search Menu */}
             <div className="w-80 bg-gray-900 text-white flex flex-col h-full shadow-lg z-20">
