@@ -764,7 +764,7 @@ const FamilyTree = ({ authToken, userProfile, onViewAnimal, showModalMessage, on
                 </div>
 
                 {/* Graph Container */}
-                <div className="relative" style={{ width: '100%', height: 'calc(100vh - 80px)', overflow: 'hidden' }}>
+                <div className="" style={{ width: '100%', height: 'calc(100vh - 60px)', overflow: 'hidden', margin: 0, padding: 0, position: 'relative' }}>
                 <ReactFlow
                     nodes={nodes}
                     edges={edges}
@@ -776,7 +776,7 @@ const FamilyTree = ({ authToken, userProfile, onViewAnimal, showModalMessage, on
                     fitViewOptions={{ padding: 0, minZoom: 0.05, maxZoom: 2 }}
                     defaultViewport={{ x: 0, y: 0, zoom: 0.3 }}
                     attributionPosition="bottom-left"
-                    style={{ width: '100%', height: '100%', background: '#f9fafb' }}
+                    style={{ width: '100%', height: '100%', background: '#f9fafb', margin: 0, padding: 0, position: 'absolute', top: 0, left: 0 }}
                     defaultEdgeOptions={{
                         type: 'default',
                         animated: false,
