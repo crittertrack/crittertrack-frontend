@@ -745,11 +745,27 @@ const FamilyTree = ({ authToken, userProfile, onViewAnimal, showModalMessage, on
                         )}
                         
                         <div className="space-y-2 mb-4 text-sm">
-                            <div><span className="font-semibold">Species:</span> {selectedAnimal.species}</div>
                             {selectedAnimal.sex && <div><span className="font-semibold">Sex:</span> {selectedAnimal.sex}</div>}
                             {selectedAnimal.dateOfBirth && (
-                                <div><span className="font-semibold">Born:</span> {new Date(selectedAnimal.dateOfBirth).toLocaleDateString()}</div>
+                                <div>
+                                    <span className="font-semibold">Age:</span> {
+                                        (() => {
+                                            const birthDate = new Date(selectedAnimal.dateOfBirth);
+                                            const today = new Date();
+                                            const ageInDays = Math.floor((today - birthDate) / (1000 * 60 * 60 * 24));
+                                            const ageInWeeks = Math.floor(ageInDays / 7);
+                                            const ageInMonths = Math.floor(ageInDays / 30);
+                                            const ageInYears = Math.floor(ageInDays / 365);
+                                            
+                                            if (ageInDays < 7) return `${ageInDays} days`;
+                                            if (ageInWeeks < 8) return `${ageInWeeks} weeks`;
+                                            if (ageInMonths < 24) return `${ageInMonths} months`;
+                                            return `${ageInYears} years`;
+                                        })()
+                                    }
+                                </div>
                             )}
+                            {selectedAnimal.color && <div><span className="font-semibold">Color:</span> {selectedAnimal.color}</div>}
                         </div>
                         
                         {/* Relationships Section */}
