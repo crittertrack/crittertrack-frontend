@@ -628,7 +628,7 @@ const FamilyTree = ({ authToken, userProfile, onViewAnimal, showModalMessage, on
     const totalRelationships = edges.length;
 
     return (
-        <div className="h-screen bg-page-bg flex">
+        <div className="h-screen bg-page-bg flex w-full max-w-none">
             {/* Left Sidebar Search Menu */}
             <div className="w-80 bg-gray-900 text-white flex flex-col h-full shadow-lg z-20">
                 {/* Sidebar Header */}
@@ -742,8 +742,8 @@ const FamilyTree = ({ authToken, userProfile, onViewAnimal, showModalMessage, on
             {/* Main Content Area */}
             <div className="flex-1 flex flex-col relative">
                 {/* Header */}
-                <div className="bg-white shadow-lg p-4 z-10">
-                    <div className="flex items-center justify-between">
+                <div className="bg-white shadow-lg p-4 z-10 w-full">
+                    <div className="flex items-center justify-between w-full">
                         <div className="flex items-center gap-3">
                             <button
                                 onClick={onBack}
@@ -766,7 +766,7 @@ const FamilyTree = ({ authToken, userProfile, onViewAnimal, showModalMessage, on
                 </div>
 
                 {/* Graph Container */}
-                <div className="flex-1 relative w-full">
+                <div className="flex-1 relative w-full h-full overflow-hidden">
                 <ReactFlow
                     nodes={nodes}
                     edges={edges}
@@ -775,10 +775,10 @@ const FamilyTree = ({ authToken, userProfile, onViewAnimal, showModalMessage, on
                     onNodeClick={onNodeClick}
                     nodeTypes={nodeTypes}
                     fitView={false}
-                    fitViewOptions={{ padding: 0.1, minZoom: 0.1, maxZoom: 2 }}
-                    defaultViewport={{ x: 0, y: 0, zoom: 0.5 }}
+                    fitViewOptions={{ padding: 0.05, minZoom: 0.05, maxZoom: 2 }}
+                    defaultViewport={{ x: 0, y: 0, zoom: 0.3 }}
                     attributionPosition="bottom-left"
-                    className="bg-gray-50 w-full h-full"
+                    className="bg-gray-50 w-full h-full absolute inset-0"
                     defaultEdgeOptions={{
                         type: 'default',
                         animated: false,
