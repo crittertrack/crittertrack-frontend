@@ -628,7 +628,7 @@ const FamilyTree = ({ authToken, userProfile, onViewAnimal, showModalMessage, on
     const totalRelationships = edges.length;
 
     return (
-        <div className="h-screen bg-page-bg flex w-full max-w-none">
+        <div className="h-screen flex" style={{ width: '100vw', maxWidth: 'none', margin: 0, padding: 0 }}>
             {/* Left Sidebar Search Menu */}
             <div className="w-80 bg-gray-900 text-white flex flex-col h-full shadow-lg z-20">
                 {/* Sidebar Header */}
@@ -740,7 +740,7 @@ const FamilyTree = ({ authToken, userProfile, onViewAnimal, showModalMessage, on
             </div>
 
             {/* Main Content Area */}
-            <div className="flex-1 flex flex-col relative">
+            <div className="flex flex-col relative" style={{ width: 'calc(100vw - 320px)', height: '100vh' }}>
                 {/* Header */}
                 <div className="bg-white shadow-lg p-4 z-10 w-full">
                     <div className="flex items-center justify-between w-full">
@@ -766,7 +766,7 @@ const FamilyTree = ({ authToken, userProfile, onViewAnimal, showModalMessage, on
                 </div>
 
                 {/* Graph Container */}
-                <div className="flex-1 relative w-full h-full overflow-hidden">
+                <div className="relative" style={{ width: '100%', height: 'calc(100vh - 80px)', overflow: 'hidden' }}>
                 <ReactFlow
                     nodes={nodes}
                     edges={edges}
@@ -775,10 +775,10 @@ const FamilyTree = ({ authToken, userProfile, onViewAnimal, showModalMessage, on
                     onNodeClick={onNodeClick}
                     nodeTypes={nodeTypes}
                     fitView={false}
-                    fitViewOptions={{ padding: 0.05, minZoom: 0.05, maxZoom: 2 }}
+                    fitViewOptions={{ padding: 0, minZoom: 0.05, maxZoom: 2 }}
                     defaultViewport={{ x: 0, y: 0, zoom: 0.3 }}
                     attributionPosition="bottom-left"
-                    className="bg-gray-50 w-full h-full absolute inset-0"
+                    style={{ width: '100%', height: '100%', background: '#f9fafb' }}
                     defaultEdgeOptions={{
                         type: 'default',
                         animated: false,
