@@ -57,20 +57,32 @@ const AnimalNode = ({ data }) => {
                 style={{ background: '#555', width: '8px', height: '8px' }}
             />
             
-            {/* Left handle for partner connections */}
+            {/* Left handle for partner/sibling connections */}
             <Handle
                 type="source"
                 position={Position.Left}
                 id="left"
-                style={{ background: '#8b5cf6', width: '8px', height: '8px', top: '50%' }}
+                style={{ background: '#10b981', width: '8px', height: '8px', top: '50%' }}
+            />
+            <Handle
+                type="target"
+                position={Position.Left}
+                id="left-target"
+                style={{ background: '#10b981', width: '8px', height: '8px', top: '50%' }}
             />
             
-            {/* Right handle for partner connections */}
+            {/* Right handle for partner/sibling connections */}
+            <Handle
+                type="source"
+                position={Position.Right}
+                id="right"
+                style={{ background: '#10b981', width: '8px', height: '8px', top: '50%' }}
+            />
             <Handle
                 type="target"
                 position={Position.Right}
-                id="right"
-                style={{ background: '#8b5cf6', width: '8px', height: '8px', top: '50%' }}
+                id="right-target"
+                style={{ background: '#10b981', width: '8px', height: '8px', top: '50%' }}
             />
             
             {/* Circular Image */}
@@ -264,7 +276,7 @@ const FamilyTree = ({ authToken, userProfile, onViewAnimal, showModalMessage, on
                         animated: false,
                         style: { stroke: '#8b5cf6', strokeWidth: 3, strokeDasharray: '8,4' },
                         sourceHandle: 'right',
-                        targetHandle: 'left'
+                        targetHandle: 'left-target'
                     });
                 }
             }
@@ -294,7 +306,7 @@ const FamilyTree = ({ authToken, userProfile, onViewAnimal, showModalMessage, on
                         animated: false,
                         style: { stroke: '#10b981', strokeWidth: 2, strokeDasharray: '5,5' },
                         sourceHandle: 'right',
-                        targetHandle: 'left'
+                        targetHandle: 'left-target'
                     });
                 }
             }
