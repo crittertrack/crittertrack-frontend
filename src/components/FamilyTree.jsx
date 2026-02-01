@@ -189,10 +189,16 @@ const FamilyTree = ({ authToken, userProfile, onViewAnimal, showModalMessage, on
                     console.log('Fetching', relatedIds.size, 'related animals:', Array.from(relatedIds));
                     
                     try {
-                        // Fetch each related animal individually using the public endpoint
+                        // Fetch each related animal individually using the global search endpoint
+                        // This will find animals regardless of privacy settings
                         const fetchPromises = Array.from(relatedIds).map(id =>
-                            axios.get(`${API_BASE_URL}/animal/${id}`)
-                                .then(response => response.data)
+                            axios.get(`${API_BASE_URL}/global/animals?id_public=${id}`, {
+                                headers: { Authorization: `Bearer ${authToken}` }
+                            })
+                                .then(response => {
+                                    // Global search returns an array, get first result
+                                    return response.data && response.data.length > 0 ? response.data[0] : null;
+                                })
                                 .catch(err => {
                                     console.error(`Failed to fetch animal ${id}:`, err.message);
                                     return null;
