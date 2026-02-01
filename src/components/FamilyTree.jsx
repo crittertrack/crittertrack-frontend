@@ -8,7 +8,9 @@ import ReactFlow, {
     useEdgesState,
     MarkerType,
     Position,
-    Handle
+    Handle,
+    useReactFlow,
+    ReactFlowProvider
 } from 'reactflow';
 import 'reactflow/dist/style.css';
 import axios from 'axios';
@@ -149,6 +151,7 @@ const FamilyTree = ({ authToken, userProfile, onViewAnimal, showModalMessage, on
     // React Flow state
     const [nodes, setNodes, onNodesChange] = useNodesState([]);
     const [edges, setEdges, onEdgesChange] = useEdgesState([]);
+    const { setCenter, getZoom, getNode } = useReactFlow();
 
     // Fetch all animals and build the graph
     useEffect(() => {
@@ -540,13 +543,24 @@ const FamilyTree = ({ authToken, userProfile, onViewAnimal, showModalMessage, on
         return allAnimals.filter(animal => {
             const matchesSearch = !searchQuery || 
                 animal.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-                animal.geneticCode?.toLowerCase().includes(searchQuery.toLowerCase());
+                animal.id_public?.toLowerCase().includes(searchQuery.toLowerCase());
             
             const matchesSpecies = filterSpecies === 'all' || animal.species === filterSpecies;
             
             return matchesSearch && matchesSpecies;
         });
     }, [allAnimals, searchQuery, filterSpecies]);
+    
+    // Zoom to animal when search finds a match
+    useEffect(() => {
+        if (searchQuery && filteredAnimals.length === 1 && nodes.length > 0) {
+            const foundAnimal = filteredAnimals[0];
+            const node = getNode(foundAnimal.id_public);
+            if (node) {
+                setCenter(node.position.x + 90, node.position.y + 90, { zoom: 1.5, duration: 800 });
+            }
+        }
+    }, [searchQuery, filteredAnimals, nodes, getNode, setCenter]);
     
     // Update graph when filters change
     useEffect(() => {
@@ -881,4 +895,10 @@ const FamilyTree = ({ authToken, userProfile, onViewAnimal, showModalMessage, on
     );
 };
 
-export default FamilyTree;
+const FamilyTreeWithProvider = (props) => (
+    <ReactFlowProvider>
+        <FamilyTree {...props} />
+    </ReactFlowProvider>
+);
+
+export default FamilyTreeWithProvider;
