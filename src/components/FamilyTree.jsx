@@ -302,9 +302,6 @@ const FamilyTree = ({ authToken, userProfile, onViewAnimal, showModalMessage, on
                 });
             });
         });
-                }
-            }
-        });
         
         // Add sibling edges (animals with same parents)
         const siblingGroups = new Map();
