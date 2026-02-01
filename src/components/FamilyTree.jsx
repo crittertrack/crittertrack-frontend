@@ -655,9 +655,16 @@ const FamilyTree = ({ authToken, userProfile, onViewAnimal, showModalMessage, on
                 
                 {/* Selected Animal Detail Panel */}
                 {selectedAnimal && (
-                    <div className="absolute top-4 right-4 w-80 bg-white rounded-lg shadow-2xl p-4 border border-gray-200 max-h-[calc(100vh-200px)] overflow-y-auto z-10">
-                        <div className="flex justify-between items-start mb-3">
-                            <h3 className="text-lg font-bold text-gray-800">{selectedAnimal.name}</h3>
+                    <div className="absolute top-4 right-4 w-96 bg-white rounded-lg shadow-2xl p-5 border border-gray-200 max-h-[calc(100vh-100px)] overflow-y-auto z-10">
+                        <div className="flex justify-between items-start mb-4">
+                            <div>
+                                <h3 className="text-xl font-bold text-gray-800">
+                                    {[selectedAnimal.prefix, selectedAnimal.name, selectedAnimal.suffix].filter(Boolean).join(' ')}
+                                </h3>
+                                {selectedAnimal.geneticCode && (
+                                    <p className="text-sm text-gray-600 font-mono mt-1">{selectedAnimal.geneticCode}</p>
+                                )}
+                            </div>
                             <button
                                 onClick={() => {
                                     setSelectedAnimal(null);
@@ -678,7 +685,7 @@ const FamilyTree = ({ authToken, userProfile, onViewAnimal, showModalMessage, on
                         </div>
                         
                         {selectedAnimal.images && selectedAnimal.images[0] && (
-                            <div className="w-full h-40 mb-3 rounded-lg overflow-hidden border-2 border-gray-200">
+                            <div className="w-full h-48 mb-4 rounded-lg overflow-hidden border-2 border-gray-200">
                                 <img
                                     src={selectedAnimal.images[0]}
                                     alt={selectedAnimal.name}
@@ -693,18 +700,108 @@ const FamilyTree = ({ authToken, userProfile, onViewAnimal, showModalMessage, on
                             {selectedAnimal.dateOfBirth && (
                                 <div><span className="font-semibold">Born:</span> {new Date(selectedAnimal.dateOfBirth).toLocaleDateString()}</div>
                             )}
-                            {selectedAnimal.geneticCode && <div><span className="font-semibold">Genetics:</span> {selectedAnimal.geneticCode}</div>}
-                            {selectedAnimal.sireId_public && (
-                                <div><span className="font-semibold">Sire:</span> {selectedAnimal.sireId_public}</div>
-                            )}
-                            {selectedAnimal.damId_public && (
-                                <div><span className="font-semibold">Dam:</span> {selectedAnimal.damId_public}</div>
-                            )}
+                        </div>
+                        
+                        {/* Relationships Section */}
+                        <div className="border-t pt-4 mt-4">
+                            <h4 className="font-bold text-gray-800 mb-3">Relationships</h4>
+                            <div className="space-y-3 text-sm">
+                                {/* Sire */}
+                                {(() => {
+                                    const sire = allAnimals?.find(a => a.id_public === selectedAnimal.sireId_public);
+                                    return sire ? (
+                                        <div>
+                                            <span className="font-semibold text-blue-600">Sire:</span>
+                                            <div className="ml-4 text-gray-700">
+                                                {[sire.prefix, sire.name, sire.suffix].filter(Boolean).join(' ')}
+                                                {sire.geneticCode && <span className="font-mono text-xs text-gray-500 ml-2">({sire.geneticCode})</span>}
+                                            </div>
+                                        </div>
+                                    ) : null;
+                                })()}
+                                
+                                {/* Dam */}
+                                {(() => {
+                                    const dam = allAnimals?.find(a => a.id_public === selectedAnimal.damId_public);
+                                    return dam ? (
+                                        <div>
+                                            <span className="font-semibold text-pink-600">Dam:</span>
+                                            <div className="ml-4 text-gray-700">
+                                                {[dam.prefix, dam.name, dam.suffix].filter(Boolean).join(' ')}
+                                                {dam.geneticCode && <span className="font-mono text-xs text-gray-500 ml-2">({dam.geneticCode})</span>}
+                                            </div>
+                                        </div>
+                                    ) : null;
+                                })()}
+                                
+                                {/* Grandsire (Sire's Sire) */}
+                                {(() => {
+                                    const sire = allAnimals?.find(a => a.id_public === selectedAnimal.sireId_public);
+                                    const grandsire = sire ? allAnimals?.find(a => a.id_public === sire.sireId_public) : null;
+                                    return grandsire ? (
+                                        <div>
+                                            <span className="font-semibold text-blue-500">Grandsire:</span>
+                                            <div className="ml-4 text-gray-700">
+                                                {[grandsire.prefix, grandsire.name, grandsire.suffix].filter(Boolean).join(' ')}
+                                                {grandsire.geneticCode && <span className="font-mono text-xs text-gray-500 ml-2">({grandsire.geneticCode})</span>}
+                                            </div>
+                                        </div>
+                                    ) : null;
+                                })()}
+                                
+                                {/* Granddam (Dam's Dam) */}
+                                {(() => {
+                                    const dam = allAnimals?.find(a => a.id_public === selectedAnimal.damId_public);
+                                    const granddam = dam ? allAnimals?.find(a => a.id_public === dam.damId_public) : null;
+                                    return granddam ? (
+                                        <div>
+                                            <span className="font-semibold text-pink-500">Granddam:</span>
+                                            <div className="ml-4 text-gray-700">
+                                                {[granddam.prefix, granddam.name, granddam.suffix].filter(Boolean).join(' ')}
+                                                {granddam.geneticCode && <span className="font-mono text-xs text-gray-500 ml-2">({granddam.geneticCode})</span>}
+                                            </div>
+                                        </div>
+                                    ) : null;
+                                })()}
+                                
+                                {/* Children */}
+                                {(() => {
+                                    const children = allAnimals?.filter(a => 
+                                        a.sireId_public === selectedAnimal.id_public || 
+                                        a.damId_public === selectedAnimal.id_public
+                                    );
+                                    return children && children.length > 0 ? (
+                                        <div>
+                                            <span className="font-semibold text-purple-600">Children:</span>
+                                            <div className="ml-4 space-y-1 mt-1">
+                                                {children.map(child => {
+                                                    const partner = child.sireId_public === selectedAnimal.id_public
+                                                        ? allAnimals?.find(a => a.id_public === child.damId_public)
+                                                        : allAnimals?.find(a => a.id_public === child.sireId_public);
+                                                    
+                                                    return (
+                                                        <div key={child.id_public} className="text-gray-700">
+                                                            {[child.prefix, child.name, child.suffix].filter(Boolean).join(' ')}
+                                                            {child.geneticCode && <span className="font-mono text-xs text-gray-500 ml-1">({child.geneticCode})</span>}
+                                                            {partner && (
+                                                                <span className="text-gray-500 text-xs ml-2">
+                                                                    with {[partner.prefix, partner.name, partner.suffix].filter(Boolean).join(' ')}
+                                                                    {partner.geneticCode && <span className="font-mono ml-1">({partner.geneticCode})</span>}
+                                                                </span>
+                                                            )}
+                                                        </div>
+                                                    );
+                                                })}
+                                            </div>
+                                        </div>
+                                    ) : null;
+                                })()}
+                            </div>
                         </div>
                         
                         <button
                             onClick={() => onViewAnimal && onViewAnimal(selectedAnimal)}
-                            className="w-full px-4 py-2 bg-primary hover:bg-primary-dark text-black font-semibold rounded-lg transition"
+                            className="w-full px-4 py-3 bg-primary hover:bg-primary-dark text-black font-semibold rounded-lg transition mt-4"
                         >
                             View Full Details
                         </button>
