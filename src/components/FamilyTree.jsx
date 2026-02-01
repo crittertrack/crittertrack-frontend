@@ -284,7 +284,7 @@ const FamilyTree = ({ authToken, userProfile, onViewAnimal, showModalMessage, on
         
         siblingGroups.forEach(siblings => {
             if (siblings.length > 1) {
-                // Connect siblings with dashed green lines
+                // Connect siblings with horizontal dashed green lines
                 for (let i = 0; i < siblings.length - 1; i++) {
                     edgeList.push({
                         id: `sibling-${siblings[i]}-${siblings[i + 1]}`,
@@ -292,7 +292,9 @@ const FamilyTree = ({ authToken, userProfile, onViewAnimal, showModalMessage, on
                         target: siblings[i + 1],
                         type: 'straight',
                         animated: false,
-                        style: { stroke: '#10b981', strokeWidth: 1.5, strokeDasharray: '3,3' }
+                        style: { stroke: '#10b981', strokeWidth: 2, strokeDasharray: '5,5' },
+                        sourceHandle: 'right',
+                        targetHandle: 'left'
                     });
                 }
             }
