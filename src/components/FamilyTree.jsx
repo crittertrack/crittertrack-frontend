@@ -243,7 +243,7 @@ const FamilyTree = ({ authToken, userProfile, onViewAnimal, showModalMessage, on
     
     // Calculate hierarchical tree layout
     const calculateTreeLayout = (animals) => {
-        const animalMap = new Map(animals.map(a => [a.id_public, { ...a, parents: [] }]));
+        const animalMap = new Map(animals.map(a => [a.id_public, { ...a, parents: [], positioned: false }]));
         const leaves = []; // Animals with no children (youngest generation or no pedigree)
         
         // Build child-to-parent relationships (inverted from typical tree)
@@ -269,13 +269,10 @@ const FamilyTree = ({ authToken, userProfile, onViewAnimal, showModalMessage, on
             }
         });
         
-        // If no leaves found, use animals without parents as starting points
+        // If no leaves found, use all animals as starting points
         if (leaves.length === 0) {
             animals.forEach(animal => {
-                const node = animalMap.get(animal.id_public);
-                if (node.parents.length === 0) {
-                    leaves.push(node);
-                }
+                leaves.push(animalMap.get(animal.id_public));
             });
         }
         
@@ -300,12 +297,13 @@ const FamilyTree = ({ authToken, userProfile, onViewAnimal, showModalMessage, on
             
             node.position = { x, y };
             node.depth = depth;
+            node.positioned = true;
             
             if (node.parents.length > 0) {
                 // Calculate total width needed for parents
                 const parentWidths = node.parents.map(parent => {
-                    const visited = new Set();
-                    return calculateAncestorWidth(parent, visited);
+                    const visitedCopy = new Set();
+                    return calculateAncestorWidth(parent, visitedCopy);
                 });
                 const totalWidth = parentWidths.reduce((sum, w) => sum + w, 0);
                 
@@ -328,8 +326,24 @@ const FamilyTree = ({ authToken, userProfile, onViewAnimal, showModalMessage, on
             const treeWidth = calculateAncestorWidth(leaf, visited);
             const leafX = currentLeafX + (treeWidth * HORIZONTAL_SPACING) / 2;
             positionAncestors(leaf, leafX, 0, 0, new Set());
-            currentLeafX += (treeWidth + 2) * HORIZONTAL_SPACING; // Extra spacing between trees
+            currentLeafX += (treeWidth + 2) * HORIZONTAL_SPACING;
         });
+        
+        // Position any remaining unpositioned animals (shouldn't happen but just in case)
+        const unpositioned = Array.from(animalMap.values()).filter(a => !a.positioned);
+        if (unpositioned.length > 0) {
+            let extraX = currentLeafX;
+            const cols = Math.ceil(Math.sqrt(unpositioned.length));
+            unpositioned.forEach((animal, index) => {
+                const row = Math.floor(index / cols);
+                const col = index % cols;
+                animal.position = {
+                    x: extraX + col * HORIZONTAL_SPACING,
+                    y: row * VERTICAL_SPACING
+                };
+                animal.positioned = true;
+            });
+        }
         
         return Array.from(animalMap.values());
     };
