@@ -1309,7 +1309,6 @@ const FamilyTree = ({ authToken, userProfile, onViewAnimal, showModalMessage, on
                         </div>
                     </div>
                 )}
-                </div>
             </div>
         </div>
     );
