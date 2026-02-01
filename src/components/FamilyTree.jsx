@@ -766,7 +766,7 @@ const FamilyTree = ({ authToken, userProfile, onViewAnimal, showModalMessage, on
                 </div>
 
                 {/* Graph Container */}
-                <div className="flex-1 relative">
+                <div className="flex-1 relative w-full">
                 <ReactFlow
                     nodes={nodes}
                     edges={edges}
@@ -774,11 +774,11 @@ const FamilyTree = ({ authToken, userProfile, onViewAnimal, showModalMessage, on
                     onEdgesChange={onEdgesChange}
                     onNodeClick={onNodeClick}
                     nodeTypes={nodeTypes}
-                    fitView
-                    fitViewOptions={{ padding: 0.2, minZoom: 0.25, maxZoom: 0.25 }}
-                    defaultViewport={{ x: 0, y: 0, zoom: 0.25 }}
+                    fitView={false}
+                    fitViewOptions={{ padding: 0.1, minZoom: 0.1, maxZoom: 2 }}
+                    defaultViewport={{ x: 0, y: 0, zoom: 0.5 }}
                     attributionPosition="bottom-left"
-                    className="bg-gray-50"
+                    className="bg-gray-50 w-full h-full"
                     defaultEdgeOptions={{
                         type: 'default',
                         animated: false,
@@ -787,7 +787,7 @@ const FamilyTree = ({ authToken, userProfile, onViewAnimal, showModalMessage, on
                             strokeWidth: 2
                         }
                     }}
-                    minZoom={0.1}
+                    minZoom={0.05}
                     maxZoom={4}
                     edgesReconnectable={false}
                     connectionMode="loose"
