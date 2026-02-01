@@ -1268,7 +1268,7 @@ const FamilyTree = ({ authToken, userProfile, onViewAnimal, showModalMessage, on
                                 return children && children.length > 0 ? (
                                     <div className="border-t pt-3 mt-3">
                                         <div className="font-semibold text-purple-600 mb-2 text-sm">Children:</div>
-                                        <div className="space-y-1 text-sm">
+                                        <div className="space-y-1 text-sm max-h-48 overflow-y-auto pr-2">
                                             {children.map(child => {
                                                 const partner = child.sireId_public === selectedAnimal.id_public
                                                     ? allAnimals?.find(a => a.id_public === child.damId_public)
