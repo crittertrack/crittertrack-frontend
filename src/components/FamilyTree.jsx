@@ -840,7 +840,6 @@ const FamilyTree = ({ authToken, userProfile, onViewAnimal, showModalMessage, on
                             <div className="grid grid-cols-2 gap-4 text-sm mb-4">
                                 {/* Sire Info Column */}
                                 <div>
-                                    <div className="font-semibold text-blue-600 mb-2">♂ "Sire Info"</div>
                                     {(() => {
                                         const sire = allAnimals?.find(a => a.id_public === selectedAnimal.sireId_public);
                                         if (!sire) return <div className="text-gray-400 text-xs">Not available</div>;
@@ -852,6 +851,7 @@ const FamilyTree = ({ authToken, userProfile, onViewAnimal, showModalMessage, on
                                             <>
                                                 <div className="mb-3">
                                                     <div className="text-gray-700 font-medium">
+                                                        <span className="text-blue-600 font-bold text-lg mr-1.5">♂</span>
                                                         {[sire.prefix, sire.name, sire.suffix].filter(Boolean).join(' ')}
                                                     </div>
                                                     <div className="font-mono text-xs text-gray-500">({sire.id_public})</div>
@@ -861,7 +861,9 @@ const FamilyTree = ({ authToken, userProfile, onViewAnimal, showModalMessage, on
                                                     <div className="pl-3 border-l-2 border-gray-200 space-y-2">
                                                         {sireGrandsire && (
                                                             <div>
-                                                                <div className="text-xs text-gray-500">♂ grandsire</div>
+                                                                <div className="text-xs text-gray-500">
+                                                                    <span className="font-bold">♂</span> grandsire
+                                                                </div>
                                                                 <div className="text-gray-700">
                                                                     {[sireGrandsire.prefix, sireGrandsire.name, sireGrandsire.suffix].filter(Boolean).join(' ')}
                                                                 </div>
@@ -870,7 +872,9 @@ const FamilyTree = ({ authToken, userProfile, onViewAnimal, showModalMessage, on
                                                         )}
                                                         {sireGranddam && (
                                                             <div>
-                                                                <div className="text-xs text-gray-500">♀ granddam</div>
+                                                                <div className="text-xs text-gray-500">
+                                                                    <span className="font-bold">♀</span> granddam
+                                                                </div>
                                                                 <div className="text-gray-700">
                                                                     {[sireGranddam.prefix, sireGranddam.name, sireGranddam.suffix].filter(Boolean).join(' ')}
                                                                 </div>
@@ -886,7 +890,6 @@ const FamilyTree = ({ authToken, userProfile, onViewAnimal, showModalMessage, on
                                 
                                 {/* Dam Info Column */}
                                 <div>
-                                    <div className="font-semibold text-pink-600 mb-2">♀ "Dam Info"</div>
                                     {(() => {
                                         const dam = allAnimals?.find(a => a.id_public === selectedAnimal.damId_public);
                                         if (!dam) return <div className="text-gray-400 text-xs">Not available</div>;
@@ -898,6 +901,7 @@ const FamilyTree = ({ authToken, userProfile, onViewAnimal, showModalMessage, on
                                             <>
                                                 <div className="mb-3">
                                                     <div className="text-gray-700 font-medium">
+                                                        <span className="text-pink-600 font-bold text-lg mr-1.5">♀</span>
                                                         {[dam.prefix, dam.name, dam.suffix].filter(Boolean).join(' ')}
                                                     </div>
                                                     <div className="font-mono text-xs text-gray-500">({dam.id_public})</div>
@@ -907,7 +911,9 @@ const FamilyTree = ({ authToken, userProfile, onViewAnimal, showModalMessage, on
                                                     <div className="pl-3 border-l-2 border-gray-200 space-y-2">
                                                         {damGrandsire && (
                                                             <div>
-                                                                <div className="text-xs text-gray-500">♂ grandsire</div>
+                                                                <div className="text-xs text-gray-500">
+                                                                    <span className="font-bold">♂</span> grandsire
+                                                                </div>
                                                                 <div className="text-gray-700">
                                                                     {[damGrandsire.prefix, damGrandsire.name, damGrandsire.suffix].filter(Boolean).join(' ')}
                                                                 </div>
@@ -916,7 +922,9 @@ const FamilyTree = ({ authToken, userProfile, onViewAnimal, showModalMessage, on
                                                         )}
                                                         {damGranddam && (
                                                             <div>
-                                                                <div className="text-xs text-gray-500">♀ granddam</div>
+                                                                <div className="text-xs text-gray-500">
+                                                                    <span className="font-bold">♀</span> granddam
+                                                                </div>
                                                                 <div className="text-gray-700">
                                                                     {[damGranddam.prefix, damGranddam.name, damGranddam.suffix].filter(Boolean).join(' ')}
                                                                 </div>
