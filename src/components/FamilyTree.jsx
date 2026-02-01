@@ -56,7 +56,7 @@ const AnimalNode = ({ data }) => {
                     ${getBorderColor()}
                     ${isSelected ? 'ring-4 ring-blue-500 scale-110' : 'hover:scale-105'}
                 `}
-                style={{ width: '80px', height: '80px' }}
+                style={{ width: '100px', height: '100px' }}
             >
                 {data.image ? (
                     <img
@@ -65,7 +65,7 @@ const AnimalNode = ({ data }) => {
                         className="w-full h-full object-cover"
                     />
                 ) : (
-                    <div className="w-full h-full bg-gray-200 flex items-center justify-center text-gray-400 text-xs">
+                    <div className="w-full h-full bg-gray-200 flex items-center justify-center text-gray-400 text-sm font-semibold">
                         No Image
                     </div>
                 )}
@@ -74,13 +74,13 @@ const AnimalNode = ({ data }) => {
             {/* Name Bar */}
             <div
                 className={`
-                    mt-2 px-3 py-1.5 rounded-full shadow-md text-center font-semibold text-sm
+                    mt-2 px-4 py-2 rounded-full shadow-md text-center font-semibold text-sm
                     ${isOwned 
                         ? 'bg-primary text-black' 
                         : 'bg-gray-600 text-white'
                     }
                 `}
-                style={{ minWidth: '100px', maxWidth: '150px' }}
+                style={{ minWidth: '120px', maxWidth: '180px' }}
             >
                 <div className="truncate">{fullName}</div>
             </div>
@@ -291,15 +291,15 @@ const FamilyTree = ({ authToken, userProfile, onViewAnimal, showModalMessage, on
         // Configure the graph for top-to-bottom layout (oldest at top, children below)
         dagreGraph.setGraph({ 
             rankdir: 'TB', // Top to bottom (classical tree layout)
-            nodesep: 60,   // Horizontal spacing between nodes (reduced)
-            ranksep: 100,  // Vertical spacing between ranks (reduced)
-            marginx: 30,
-            marginy: 30
+            nodesep: 80,   // Horizontal spacing between nodes
+            ranksep: 120,  // Vertical spacing between ranks
+            marginx: 40,
+            marginy: 40
         });
         
         // Add nodes to dagre graph
         nodeList.forEach(node => {
-            dagreGraph.setNode(node.id, { width: 120, height: 120 });
+            dagreGraph.setNode(node.id, { width: 150, height: 150 });
         });
         
         // Add edges to dagre graph (only parent-child for layout, not sibling/mate)
