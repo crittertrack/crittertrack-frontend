@@ -2096,17 +2096,17 @@ const PrivateAnimalDetail = ({ animal, onClose, onEdit, API_BASE_URL, authToken,
                 <div className="bg-white border-b border-gray-300 px-2 sm:px-6 pt-2 sm:pt-4">
                     <div className="flex flex-wrap gap-1 sm:gap-1 pb-2 sm:pb-4">
                         {[
-                            { id: 1, label: 'Overview', icon: '??' },
-                            { id: 2, label: 'Status & Privacy', icon: '??' },
-                            { id: 3, label: 'Physical', icon: '??' },
-                            { id: 4, label: 'Identification', icon: '??' },
-                            { id: 5, label: 'Lineage', icon: '??' },
-                            { id: 6, label: 'Breeding', icon: '??' },
-                            { id: 7, label: 'Health', icon: '??' },
-                            { id: 8, label: 'Husbandry', icon: '??' },
-                            { id: 9, label: 'Behavior', icon: '??' },
-                            { id: 10, label: 'Records', icon: '??' },
-                            { id: 11, label: 'End of Life', icon: '??' }
+                            { id: 1, label: 'Overview', icon: '📋' },
+                            { id: 2, label: 'Status & Privacy', icon: '🔒' },
+                            { id: 3, label: 'Physical', icon: '🎨' },
+                            { id: 4, label: 'Identification', icon: '🏷️' },
+                            { id: 5, label: 'Lineage', icon: '🌳' },
+                            { id: 6, label: 'Breeding', icon: '🫘' },
+                            { id: 7, label: 'Health', icon: '🏥' },
+                            { id: 8, label: 'Husbandry', icon: '🏠' },
+                            { id: 9, label: 'Behavior', icon: '🧠' },
+                            { id: 10, label: 'Records', icon: '📝' },
+                            { id: 11, label: 'End of Life', icon: '⚖️' }
                         ].map(tab => (
                             <button
                                 key={tab.id}
@@ -3005,17 +3005,17 @@ const ViewOnlyPrivateAnimalDetail = ({ animal, onClose, API_BASE_URL, authToken,
                 <div className="bg-white border-b border-gray-300 px-6 pt-4">
                     <div className="flex flex-wrap gap-1 pb-4">
                         {[
-                            { id: 1, label: 'Overview', icon: '??' },
-                            { id: 2, label: 'Status & Privacy', icon: '??' },
-                            { id: 3, label: 'Physical', icon: '??' },
-                            { id: 4, label: 'Identification', icon: '??' },
-                            { id: 5, label: 'Lineage', icon: '??' },
-                            { id: 6, label: 'Breeding', icon: '??' },
-                            { id: 7, label: 'Health', icon: '??' },
-                            { id: 8, label: 'Husbandry', icon: '??' },
-                            { id: 9, label: 'Behavior', icon: '??' },
-                            { id: 10, label: 'Records', icon: '??' },
-                            { id: 11, label: 'End of Life', icon: '??' }
+                            { id: 1, label: 'Overview', icon: '📋' },
+                            { id: 2, label: 'Status & Privacy', icon: '🔒' },
+                            { id: 3, label: 'Physical', icon: '🎨' },
+                            { id: 4, label: 'Identification', icon: '🏷️' },
+                            { id: 5, label: 'Lineage', icon: '🌳' },
+                            { id: 6, label: 'Breeding', icon: '🫘' },
+                            { id: 7, label: 'Health', icon: '🏥' },
+                            { id: 8, label: 'Husbandry', icon: '🏠' },
+                            { id: 9, label: 'Behavior', icon: '🧠' },
+                            { id: 10, label: 'Records', icon: '📝' },
+                            { id: 11, label: 'End of Life', icon: '⚖️' }
                         ].map(tab => (
                             <button
                                 key={tab.id}
@@ -3939,15 +3939,15 @@ const ViewOnlyAnimalDetail = ({ animal, onClose, API_BASE_URL, onViewProfile, au
                 <div className="bg-white border-b border-gray-300">
                     <div className="flex flex-wrap">
                         {[
-                            { id: 1, label: 'Overview', icon: '??' },
-                            { id: 3, label: 'Physical', icon: '??' },
-                            { id: 5, label: 'Lineage', icon: '??' },
-                            { id: 6, label: 'Breeding', icon: '??' },
-                            { id: 7, label: 'Health', icon: '??' },
-                            { id: 8, label: 'Husbandry', icon: '??' },
-                            { id: 9, label: 'Behavior', icon: '??' },
-                            { id: 10, label: 'Records', icon: '??' }, // Combined Records + End of Life
-                            { id: 11, label: 'Show', icon: '??' }
+                            { id: 1, label: 'Overview', icon: '📋' },
+                            { id: 3, label: 'Physical', icon: '🎨' },
+                            { id: 5, label: 'Lineage', icon: '🌳' },
+                            { id: 6, label: 'Breeding', icon: '🫘' },
+                            { id: 7, label: 'Health', icon: '🏥' },
+                            { id: 8, label: 'Husbandry', icon: '🏠' },
+                            { id: 9, label: 'Behavior', icon: '🧠' },
+                            { id: 10, label: 'Records', icon: '📝' }, // Combined Records + End of Life
+                            { id: 11, label: 'Show', icon: '🏆' }
                         ].map(tab => (
                             <button
                                 key={tab.id}
@@ -9242,17 +9242,17 @@ const AnimalForm = ({
                 <div className="border border-gray-300 -mx-6 px-6 pt-4">
                     <div className="flex flex-wrap gap-1 pb-px">
                         {[
-                            { id: 1, label: 'Overview', icon: '??' },
-                            { id: 2, label: 'Status & Privacy', icon: '??' },
-                            { id: 3, label: 'Physical', icon: '??' },
-                            { id: 4, label: 'Identification', icon: '??' },
-                            { id: 5, label: 'Lineage', icon: '??' },
-                            { id: 6, label: 'Breeding', icon: '??' },
-                            { id: 7, label: 'Health', icon: '??' },
-                            { id: 8, label: 'Husbandry', icon: '??' },
-                            { id: 9, label: 'Behavior', icon: '??' },
-                            { id: 10, label: 'Records', icon: '??' },
-                            { id: 11, label: 'End of Life', icon: '??' },
+                            { id: 1, label: 'Overview', icon: '📋' },
+                            { id: 2, label: 'Status & Privacy', icon: '🔒' },
+                            { id: 3, label: 'Physical', icon: '🎨' },
+                            { id: 4, label: 'Identification', icon: '🏷️' },
+                            { id: 5, label: 'Lineage', icon: '🌳' },
+                            { id: 6, label: 'Breeding', icon: '🫘' },
+                            { id: 7, label: 'Health', icon: '🏥' },
+                            { id: 8, label: 'Husbandry', icon: '🏠' },
+                            { id: 9, label: 'Behavior', icon: '🧠' },
+                            { id: 10, label: 'Records', icon: '📝' },
+                            { id: 11, label: 'End of Life', icon: '⚖️' },
                             { id: 12, label: 'Show', icon: '??' }
                         ].map(tab => (
                             <button
@@ -18867,15 +18867,15 @@ const App = () => {
                                             {showTabs && (
                                                 <div className="px-4 py-3 flex flex-wrap gap-2">
                                                     {[
-                                                        { id: 1, label: 'Overview', icon: '??' },
-                                                        { id: 2, label: 'Status & Privacy', icon: '??' },
-                                                        { id: 3, label: 'Physical', icon: '??' },
-                                                        { id: 4, label: 'Identification', icon: '??' },
-                                                        { id: 5, label: 'Lineage', icon: '??' },
-                                                        { id: 6, label: 'Breeding', icon: '??' },
-                                                        { id: 7, label: 'Health', icon: '??' },
-                                                        { id: 8, label: 'Husbandry', icon: '??' },
-                                                        { id: 9, label: 'Show', icon: '??' }
+                                                        { id: 1, label: 'Overview', icon: '📋' },
+                                                        { id: 2, label: 'Status & Privacy', icon: '🔒' },
+                                                        { id: 3, label: 'Physical', icon: '🎨' },
+                                                        { id: 4, label: 'Identification', icon: '🏷️' },
+                                                        { id: 5, label: 'Lineage', icon: '🌳' },
+                                                        { id: 6, label: 'Breeding', icon: '🫘' },
+                                                        { id: 7, label: 'Health', icon: '🏥' },
+                                                        { id: 8, label: 'Husbandry', icon: '🏠' },
+                                                        { id: 9, label: 'Show', icon: '🏆' }
                                                     ].map(tab => (
                                                         <button
                                                             key={tab.id}
