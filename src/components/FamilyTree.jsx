@@ -224,61 +224,21 @@ const FamilyTree = ({ authToken, userProfile, onViewAnimal, showModalMessage, on
             }
         });
         
-        // Create edges for parent-child relationships
-        allUniqueAnimals.forEach(animal => {
-            // Parent-child edges (sire)
-            if (animal.sireId_public && allUniqueAnimals.has(animal.sireId_public)) {
-                edgeList.push({
-                    id: `sire-${animal.sireId_public}-${animal.id_public}`,
-                    source: animal.sireId_public,
-                    target: animal.id_public,
-                    type: 'smoothstep',
-                    animated: false,
-                    style: { stroke: '#3b82f6', strokeWidth: 2 },
-                    markerEnd: {
-                        type: MarkerType.ArrowClosed,
-                        color: '#3b82f6'
-                    }
-                });
-            }
-            
-            // Parent-child edges (dam)
-            if (animal.damId_public && allUniqueAnimals.has(animal.damId_public)) {
-                edgeList.push({
-                    id: `dam-${animal.damId_public}-${animal.id_public}`,
-                    source: animal.damId_public,
-                    target: animal.id_public,
-                    type: 'smoothstep',
-                    animated: false,
-                    style: { stroke: '#ec4899', strokeWidth: 2 },
-                    markerEnd: {
-                        type: MarkerType.ArrowClosed,
-                        color: '#ec4899'
-                    }
-                });
-            }
-        });
-        
-        // Add partner/mating edges (horizontal between breeding pairs)
-        const matingPairs = new Set();
+        // Track mating pairs for later processing
+        const matingPairData = new Map();
         allUniqueAnimals.forEach(animal => {
             if (animal.sireId_public && animal.damId_public && 
                 allUniqueAnimals.has(animal.sireId_public) && 
                 allUniqueAnimals.has(animal.damId_public)) {
                 const pairKey = [animal.sireId_public, animal.damId_public].sort().join('-');
-                if (!matingPairs.has(pairKey)) {
-                    matingPairs.add(pairKey);
-                    edgeList.push({
-                        id: `mate-${pairKey}`,
-                        source: animal.sireId_public,
-                        target: animal.damId_public,
-                        type: 'straight',
-                        animated: false,
-                        style: { stroke: '#8b5cf6', strokeWidth: 3, strokeDasharray: '8,4' },
-                        sourceHandle: 'right',
-                        targetHandle: 'left-target'
+                if (!matingPairData.has(pairKey)) {
+                    matingPairData.set(pairKey, {
+                        sire: animal.sireId_public,
+                        dam: animal.damId_public,
+                        children: []
                     });
                 }
+                matingPairData.get(pairKey).children.push(animal.id_public);
             }
         });
         
@@ -369,6 +329,116 @@ const FamilyTree = ({ authToken, userProfile, onViewAnimal, showModalMessage, on
                 };
             }
         });
+        
+        // Now create family unit nodes and edges AFTER positions are calculated
+        const familyUnitNodes = [];
+        const childrenWithBothParents = new Set();
+        
+        matingPairData.forEach((pairData, pairKey) => {
+            const sireNode = nodeList.find(n => n.id === pairData.sire);
+            const damNode = nodeList.find(n => n.id === pairData.dam);
+            
+            if (sireNode && damNode && sireNode.position && damNode.position) {
+                const midpointId = `family-${pairKey}`;
+                
+                // Calculate midpoint between parents
+                const midX = (sireNode.position.x + damNode.position.x) / 2;
+                const midY = (sireNode.position.y + damNode.position.y) / 2;
+                
+                // Create small invisible family unit node
+                familyUnitNodes.push({
+                    id: midpointId,
+                    type: 'default',
+                    position: { x: midX, y: midY },
+                    data: { label: '' },
+                    style: {
+                        width: 1,
+                        height: 1,
+                        background: '#8b5cf6',
+                        border: 'none',
+                        borderRadius: '50%'
+                    }
+                });
+                
+                // Partnership line: split into two halves through family unit
+                edgeList.push({
+                    id: `partner-left-${pairKey}`,
+                    source: pairData.sire,
+                    target: midpointId,
+                    type: 'straight',
+                    animated: false,
+                    style: { stroke: '#8b5cf6', strokeWidth: 3, strokeDasharray: '8,4' },
+                    sourceHandle: 'right'
+                });
+                
+                edgeList.push({
+                    id: `partner-right-${pairKey}`,
+                    source: midpointId,
+                    target: pairData.dam,
+                    type: 'straight',
+                    animated: false,
+                    style: { stroke: '#8b5cf6', strokeWidth: 3, strokeDasharray: '8,4' },
+                    targetHandle: 'left-target'
+                });
+                
+                // Single line from family unit to each child
+                pairData.children.forEach(childId => {
+                    childrenWithBothParents.add(childId);
+                    edgeList.push({
+                        id: `offspring-${pairKey}-${childId}`,
+                        source: midpointId,
+                        target: childId,
+                        type: 'smoothstep',
+                        animated: false,
+                        style: { stroke: '#6366f1', strokeWidth: 2 },
+                        markerEnd: {
+                            type: MarkerType.ArrowClosed,
+                            color: '#6366f1'
+                        }
+                    });
+                });
+            }
+        });
+        
+        // Add edges for children with only ONE parent (no mating pair)
+        allUniqueAnimals.forEach(animal => {
+            if (!childrenWithBothParents.has(animal.id_public)) {
+                // Sire only
+                if (animal.sireId_public && allUniqueAnimals.has(animal.sireId_public) && !animal.damId_public) {
+                    edgeList.push({
+                        id: `sire-${animal.sireId_public}-${animal.id_public}`,
+                        source: animal.sireId_public,
+                        target: animal.id_public,
+                        type: 'smoothstep',
+                        animated: false,
+                        style: { stroke: '#3b82f6', strokeWidth: 2 },
+                        markerEnd: {
+                            type: MarkerType.ArrowClosed,
+                            color: '#3b82f6'
+                        }
+                    });
+                }
+                
+                // Dam only
+                if (animal.damId_public && allUniqueAnimals.has(animal.damId_public) && !animal.sireId_public) {
+                    edgeList.push({
+                        id: `dam-${animal.damId_public}-${animal.id_public}`,
+                        source: animal.damId_public,
+                        target: animal.id_public,
+                        type: 'smoothstep',
+                        animated: false,
+                        style: { stroke: '#ec4899', strokeWidth: 2 },
+                        markerEnd: {
+                            type: MarkerType.ArrowClosed,
+                            color: '#ec4899'
+                        }
+                    });
+                }
+            }
+        });
+        
+        // Add family unit nodes to the node list
+        nodeList.push(...familyUnitNodes);
         
         console.log(`Created ${nodeList.length} nodes and ${edgeList.length} edges`);
         console.log('Edge types:', edgeList.map(e => e.id.split('-')[0]));
