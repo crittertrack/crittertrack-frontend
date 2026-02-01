@@ -628,7 +628,7 @@ const FamilyTree = ({ authToken, userProfile, onViewAnimal, showModalMessage, on
     const totalRelationships = edges.length;
 
     return (
-        <div className="h-screen flex" style={{ width: '100vw', maxWidth: 'none', margin: 0, padding: 0 }}>
+        <div className="h-screen flex" style={{ width: '100vw', maxWidth: 'none', margin: 0, padding: 0, overflow: 'hidden' }}>
             {/* Left Sidebar Search Menu */}
             <div className="w-80 bg-gray-900 text-white flex flex-col h-full shadow-lg z-20">
                 {/* Sidebar Header */}
@@ -741,10 +741,10 @@ const FamilyTree = ({ authToken, userProfile, onViewAnimal, showModalMessage, on
             </div>
 
             {/* Main Content Area */}
-            <div className="flex flex-col relative" style={{ width: 'calc(100vw - 320px)', height: '100vh' }}>
+            <div className="flex flex-col" style={{ width: 'calc(100vw - 320px)', height: '100vh', margin: 0, padding: 0 }}>
                 {/* Header */}
-                <div className="bg-white shadow-lg p-4 z-10 w-full">
-                    <div className="flex items-center justify-between w-full">
+                <div className="bg-white shadow-lg z-10 w-full" style={{ padding: '12px', margin: 0 }}>
+                    <div className="flex items-center justify-between w-full" style={{ margin: 0, padding: 0 }}>
                         <div className="flex items-center gap-3">
                             <button
                                 onClick={onBack}
