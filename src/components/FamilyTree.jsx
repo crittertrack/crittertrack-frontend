@@ -1071,7 +1071,8 @@ const FamilyTree = ({ authToken, userProfile, onViewAnimal, showModalMessage, on
                 
                 {/* Selected Animal Detail Panel */}
                 {selectedAnimal && (
-                    <div className="absolute top-4 right-4 w-96 bg-white rounded-lg shadow-2xl p-5 border border-gray-200 max-h-[calc(100vh-100px)] overflow-y-auto z-10">
+                    <div className="absolute top-4 right-4 w-96 bg-white rounded-lg shadow-2xl p-5 border border-gray-200 max-h-[calc(100vh-120px)] overflow-hidden z-10">
+                        <div className="max-h-full overflow-y-auto">
                         <div className="flex justify-between items-start mb-4">
                             <div>
                                 <h3 className="text-xl font-bold text-gray-800">
@@ -1268,7 +1269,7 @@ const FamilyTree = ({ authToken, userProfile, onViewAnimal, showModalMessage, on
                                 return children && children.length > 0 ? (
                                     <div className="border-t pt-3 mt-3">
                                         <div className="font-semibold text-purple-600 mb-2 text-sm">Children:</div>
-                                        <div className="space-y-1 text-sm max-h-48 overflow-y-auto pr-2">
+                                        <div className="space-y-1 text-sm max-h-32 overflow-y-auto pr-2">
                                             {children.map(child => {
                                                 const partner = child.sireId_public === selectedAnimal.id_public
                                                     ? allAnimals?.find(a => a.id_public === child.damId_public)
@@ -1299,6 +1300,7 @@ const FamilyTree = ({ authToken, userProfile, onViewAnimal, showModalMessage, on
                         >
                             View Full Details
                         </button>
+                        </div>
                     </div>
                 )}
                 </div>
