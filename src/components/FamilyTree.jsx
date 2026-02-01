@@ -1028,7 +1028,7 @@ const FamilyTree = ({ authToken, userProfile, onViewAnimal, showModalMessage, on
                     padding: 0,
                     overflow: 'hidden'
                 }}>
-                <ReactFlow
+                    <ReactFlow
                     nodes={nodes}
                     edges={edges}
                     onNodesChange={onNodesChange}
@@ -1067,10 +1067,10 @@ const FamilyTree = ({ authToken, userProfile, onViewAnimal, showModalMessage, on
                 >
                     <Background color="#ddd" gap={16} />
                     <Controls />
-                </ReactFlow>
-                
-                {/* Selected Animal Detail Panel */}
-                {selectedAnimal && (
+                    </ReactFlow>
+                    
+                    {/* Selected Animal Detail Panel */}
+                    {selectedAnimal && (
                     <div className="absolute top-4 right-4 w-80 bg-white rounded-lg shadow-2xl border border-gray-200 z-10" 
                          style={{ 
                              maxWidth: 'calc(100% - 40px)', 
@@ -1309,6 +1309,7 @@ const FamilyTree = ({ authToken, userProfile, onViewAnimal, showModalMessage, on
                         </div>
                     </div>
                 )}
+                </div>
             </div>
         </div>
     );
