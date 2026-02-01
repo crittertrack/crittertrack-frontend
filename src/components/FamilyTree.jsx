@@ -309,10 +309,15 @@ const FamilyTree = ({ authToken, userProfile, onViewAnimal, showModalMessage, on
             dagreGraph.setNode(node.id, { width: 180, height: 180 });
         });
         
-        // Add edges to dagre graph (only parent-child for layout)
-        edgeList.forEach(edge => {
-            if (edge.id.startsWith('sire-') || edge.id.startsWith('dam-')) {
-                dagreGraph.setEdge(edge.source, edge.target);
+        // Add parent-child edges to dagre for layout calculation (using first parent of each child)
+        allUniqueAnimals.forEach(animal => {
+            // Add edge from sire for layout purposes
+            if (animal.sireId_public && allUniqueAnimals.has(animal.sireId_public)) {
+                dagreGraph.setEdge(animal.sireId_public, animal.id_public);
+            }
+            // If no sire but has dam, use dam for layout
+            else if (animal.damId_public && allUniqueAnimals.has(animal.damId_public)) {
+                dagreGraph.setEdge(animal.damId_public, animal.id_public);
             }
         });
         
