@@ -797,10 +797,10 @@ const FamilyTree = ({ authToken, userProfile, onViewAnimal, showModalMessage, on
                         </div>
                         
                         <div className="space-y-2 mb-4 text-sm">
-                            {selectedAnimal.dateOfBirth && (
+                            {selectedAnimal.birthDate && (
                                 <div>
                                     {(() => {
-                                        const birthDate = new Date(selectedAnimal.dateOfBirth);
+                                        const birthDate = new Date(selectedAnimal.birthDate);
                                         const today = new Date();
                                         const ageInDays = Math.floor((today - birthDate) / (1000 * 60 * 60 * 24));
                                         const ageInMonths = Math.floor(ageInDays / 30);
