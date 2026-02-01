@@ -166,68 +166,16 @@ const FamilyTree = ({ authToken, userProfile, onViewAnimal, showModalMessage, on
                 const ownedAnimals = animalsResponse.data;
                 console.log('Owned animals fetched:', ownedAnimals.length);
                 
-                // Recursively fetch all related animals
-                const fetchRelatedAnimals = async (currentAnimals) => {
-                    const alreadyFetchedIds = new Set(currentAnimals.map(a => a.id_public));
-                    const relatedIds = new Set();
-                    
-                    // Collect all parent IDs that we haven't fetched yet
-                    currentAnimals.forEach(animal => {
-                        if (animal.sireId_public && !alreadyFetchedIds.has(animal.sireId_public)) {
-                            relatedIds.add(animal.sireId_public);
-                        }
-                        if (animal.damId_public && !alreadyFetchedIds.has(animal.damId_public)) {
-                            relatedIds.add(animal.damId_public);
-                        }
-                    });
-                    
-                    if (relatedIds.size === 0) {
-                        console.log('No more related animals to fetch. Total animals:', currentAnimals.length);
-                        return currentAnimals;
-                    }
-                    
-                    console.log('Fetching', relatedIds.size, 'related animals:', Array.from(relatedIds));
-                    
-                    try {
-                        // Fetch each related animal individually using the global search endpoint
-                        // This will find animals regardless of privacy settings
-                        const fetchPromises = Array.from(relatedIds).map(id =>
-                            axios.get(`${API_BASE_URL}/global/animals?id_public=${id}`, {
-                                headers: { Authorization: `Bearer ${authToken}` }
-                            })
-                                .then(response => {
-                                    // Global search returns an array, get first result
-                                    return response.data && response.data.length > 0 ? response.data[0] : null;
-                                })
-                                .catch(err => {
-                                    console.error(`Failed to fetch animal ${id}:`, err.message);
-                                    return null;
-                                })
-                        );
-                        
-                        const newAnimals = (await Promise.all(fetchPromises)).filter(a => a !== null);
-                        console.log('Successfully fetched', newAnimals.length, 'related animals');
-                        
-                        const allFetched = [...currentAnimals, ...newAnimals];
-                        
-                        // Recursively fetch parents of newly fetched animals
-                        return await fetchRelatedAnimals(allFetched);
-                    } catch (err) {
-                        console.error('Failed to fetch related animals:', err);
-                        return currentAnimals;
-                    }
-                };
-                
-                const allFetchedAnimals = await fetchRelatedAnimals(ownedAnimals);
-                console.log('Total animals in family tree:', allFetchedAnimals.length);
-                setAllAnimals(allFetchedAnimals);
+                // For now, just use owned animals without recursive fetching
+                // TODO: Implement proper related animal fetching with backend support
+                setAllAnimals(ownedAnimals);
                 
                 // Extract unique species
-                const species = [...new Set(allFetchedAnimals.map(a => a.species))];
+                const species = [...new Set(ownedAnimals.map(a => a.species))];
                 setAvailableSpecies(species);
                 
                 // Build graph nodes and edges
-                buildGraph(allFetchedAnimals);
+                buildGraph(ownedAnimals);
                 
                 setLoading(false);
             } catch (err) {
