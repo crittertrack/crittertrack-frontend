@@ -23,6 +23,7 @@ import ModerationAuthModal from './components/moderation/ModerationAuthModal';
 import ModOversightPanel from './components/moderation/ModOversightPanel';
 import ModeratorActionSidebar from './components/moderation/ModeratorActionSidebar';
 import Marketplace from './components/Marketplace';
+import FamilyTree from './components/FamilyTree';
 
 // const API_BASE_URL = 'http://localhost:5000/api'; // Local development
 // const API_BASE_URL = 'https://crittertrack-pedigree-production.up.railway.app/api'; // Direct Railway (for testing)
@@ -17859,6 +17860,10 @@ const App = () => {
                             <Cat size={18} className="mb-1" />
                             <span>Calculator</span>
                         </button>
+                        <button onClick={() => navigate('/family-tree')} className={`px-4 py-2 text-xs font-medium rounded-lg transition duration-150 flex flex-col items-center ${currentView === 'family-tree' ? 'bg-primary text-black shadow-md' : 'text-gray-600 hover:bg-gray-100'}`}>
+                            <Users size={18} className="mb-1" />
+                            <span>Family Tree</span>
+                        </button>
                         <button onClick={() => navigate('/profile')} data-tutorial-target="profile-btn" className={`px-4 py-2 text-xs font-medium rounded-lg transition duration-150 flex flex-col items-center ${currentView === 'profile' ? 'bg-primary text-black shadow-md' : 'text-gray-600 hover:bg-gray-100'}`}>
                             <User size={18} className="mb-1" />
                             <span>Profile</span>
@@ -18020,11 +18025,15 @@ const App = () => {
                         </button>
                     </nav>
 
-                    {/* Third row: Navigation row 2 (3 buttons) */}
-                    <nav className="grid grid-cols-3 gap-1">
+                    {/* Third row: Navigation row 2 (4 buttons) */}
+                    <nav className="grid grid-cols-4 gap-1">
                         <button onClick={() => navigate('/genetics-calculator')} data-tutorial-target="genetics-btn" className={`px-2 py-2 text-xs font-medium rounded-lg transition duration-150 flex flex-col items-center ${currentView === 'genetics-calculator' ? 'bg-primary text-black shadow-md' : 'text-gray-600 hover:bg-gray-100'}`}>
                             <Cat size={18} className="mb-0.5" />
                             <span>Calculator</span>
+                        </button>
+                        <button onClick={() => navigate('/family-tree')} className={`px-2 py-2 text-xs font-medium rounded-lg transition duration-150 flex flex-col items-center ${currentView === 'family-tree' ? 'bg-primary text-black shadow-md' : 'text-gray-600 hover:bg-gray-100'}`}>
+                            <Users size={18} className="mb-0.5" />
+                            <span>Family Tree</span>
                         </button>
                         <button onClick={() => navigate('/profile')} data-tutorial-target="profile-btn" className={`px-2 py-2 text-xs font-medium rounded-lg transition duration-150 flex flex-col items-center ${currentView === 'profile' ? 'bg-primary text-black shadow-md' : 'text-gray-600 hover:bg-gray-100'}`}>
                             <User size={18} className="mb-0.5" />
@@ -18486,6 +18495,24 @@ const App = () => {
                                 setSelectedConversation(conversationData);
                                 setShowMessages(true);
                             }}
+                        />
+                    } />
+                    <Route path="/family-tree" element={
+                        <FamilyTree
+                            authToken={authToken}
+                            userProfile={userProfile}
+                            showModalMessage={showModalMessage}
+                            onViewAnimal={handleViewAnimal}
+                            onBack={() => navigate('/')}
+                        />
+                    } />
+                    <Route path="/family-tree" element={
+                        <FamilyTree
+                            authToken={authToken}
+                            userProfile={userProfile}
+                            showModalMessage={showModalMessage}
+                            onViewAnimal={handleViewAnimal}
+                            onBack={() => navigate('/')}
                         />
                     } />
                     <Route path="/profile" element={<ProfileView userProfile={userProfile} showModalMessage={showModalMessage} fetchUserProfile={fetchUserProfile} authToken={authToken} onProfileUpdated={setUserProfile} onProfileEditButtonClicked={setProfileEditButtonClicked} />} />
