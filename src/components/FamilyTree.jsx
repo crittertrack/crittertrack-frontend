@@ -247,11 +247,11 @@ const FamilyTree = ({ authToken, userProfile, onViewAnimal, showModalMessage, on
         const allUniqueAnimals = new Map();
         const edgeList = [];
         
-        // First pass: Add all owned animals
+        // First pass: Add all animals from API (preserving their actual ownership status)
         animals.forEach(animal => {
             allUniqueAnimals.set(animal.id_public, {
-                ...animal,
-                isOwned: true
+                ...animal
+                // Preserve the isOwned status from the API response
             });
         });
         
