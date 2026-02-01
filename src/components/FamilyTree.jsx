@@ -793,7 +793,6 @@ const FamilyTree = ({ authToken, userProfile, onViewAnimal, showModalMessage, on
                         </div>
                         
                         <div className="space-y-2 mb-4 text-sm">
-                            {selectedAnimal.sex && <div><span className="font-semibold">Sex:</span> {selectedAnimal.sex}</div>}
                             {selectedAnimal.dateOfBirth && (
                                 <>
                                     <div>
