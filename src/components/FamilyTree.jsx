@@ -794,28 +794,36 @@ const FamilyTree = ({ authToken, userProfile, onViewAnimal, showModalMessage, on
                         
                         <div className="space-y-2 mb-4 text-sm">
                             {selectedAnimal.dateOfBirth && (
-                                <>
-                                    <div>
-                                        <span className="font-semibold">Birthdate:</span> {new Date(selectedAnimal.dateOfBirth).toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' })}
-                                    </div>
-                                    <div>
-                                        <span className="font-semibold">Age:</span> {
-                                            (() => {
-                                                const birthDate = new Date(selectedAnimal.dateOfBirth);
-                                                const today = new Date();
-                                                const ageInDays = Math.floor((today - birthDate) / (1000 * 60 * 60 * 24));
-                                                const ageInWeeks = Math.floor(ageInDays / 7);
-                                                const ageInMonths = Math.floor(ageInDays / 30);
-                                                const ageInYears = Math.floor(ageInDays / 365);
-                                                
-                                                if (ageInDays < 7) return `${ageInDays} days`;
-                                                if (ageInWeeks < 8) return `${ageInWeeks} weeks`;
-                                                if (ageInMonths < 24) return `${ageInMonths} months`;
-                                                return `${ageInYears} years`;
-                                            })()
+                                <div>
+                                    {(() => {
+                                        const birthDate = new Date(selectedAnimal.dateOfBirth);
+                                        const today = new Date();
+                                        const ageInDays = Math.floor((today - birthDate) / (1000 * 60 * 60 * 24));
+                                        const ageInMonths = Math.floor(ageInDays / 30);
+                                        const remainingDays = ageInDays % 30;
+                                        const ageInYears = Math.floor(ageInDays / 365);
+                                        
+                                        // Format date as MM/DD/YYYY
+                                        const formattedDate = birthDate.toLocaleDateString('en-US', { 
+                                            year: 'numeric', 
+                                            month: '2-digit', 
+                                            day: '2-digit' 
+                                        });
+                                        
+                                        // Format age
+                                        let ageStr = '';
+                                        if (ageInYears > 0) {
+                                            const remainingMonths = Math.floor((ageInDays % 365) / 30);
+                                            ageStr = `~${ageInYears}y${remainingMonths > 0 ? ' ' + remainingMonths + 'm' : ''}`;
+                                        } else if (ageInMonths > 0) {
+                                            ageStr = `~${ageInMonths}m${remainingDays > 0 ? ' ' + remainingDays + 'd' : ''}`;
+                                        } else {
+                                            ageStr = `~${ageInDays}d`;
                                         }
-                                    </div>
-                                </>
+                                        
+                                        return `${formattedDate} (${ageStr})`;
+                                    })()}
+                                </div>
                             )}
                             {(selectedAnimal.color || selectedAnimal.coat) && (
                                 <div>
