@@ -668,13 +668,10 @@ const FamilyTree = ({ authToken, userProfile, onViewAnimal, showModalMessage, on
                                         <button
                                             key={animal.id_public}
                                             onClick={() => {
-                                                setSelectedAnimal(animal);
-                                                // Just pan to animal's existing position without changing zoom
+                                                // Just pan to animal's existing position without any other changes
                                                 const node = getNode(animal.id_public);
                                                 if (node) {
-                                                    const currentZoom = getZoom();
                                                     setCenter(node.position.x + 90, node.position.y + 90, { 
-                                                        zoom: currentZoom, 
                                                         duration: 800 
                                                     });
                                                 }
