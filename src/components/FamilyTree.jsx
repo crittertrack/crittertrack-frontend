@@ -149,8 +149,7 @@ const FamilyTree = ({ authToken, userProfile, onViewAnimal, showModalMessage, on
         animals.forEach(animal => {
             allUniqueAnimals.set(animal.id_public, {
                 ...animal,
-                isOwned: true,
-                depth: null
+                isOwned: true
             });
         });
         
@@ -164,8 +163,7 @@ const FamilyTree = ({ authToken, userProfile, onViewAnimal, showModalMessage, on
                     species: animal.species,
                     sex: 'Male',
                     gender: 'Male',
-                    isOwned: false,
-                    depth: null
+                    isOwned: false
                 });
             }
             
@@ -177,95 +175,25 @@ const FamilyTree = ({ authToken, userProfile, onViewAnimal, showModalMessage, on
                     species: animal.species,
                     sex: 'Female',
                     gender: 'Female',
-                    isOwned: false,
-                    depth: null
+                    isOwned: false
                 });
             }
         });
         
-        // Calculate depth for each animal (generation level)
-        const calculateDepth = (animalId, visited = new Set()) => {
-            if (visited.has(animalId)) return 0;
-            visited.add(animalId);
-            
-            const animal = allUniqueAnimals.get(animalId);
-            if (!animal) return 0;
-            if (animal.depth !== null) return animal.depth;
-            
-            let maxParentDepth = -1;
-            if (animal.sireId_public && allUniqueAnimals.has(animal.sireId_public)) {
-                maxParentDepth = Math.max(maxParentDepth, calculateDepth(animal.sireId_public, new Set(visited)));
-            }
-            if (animal.damId_public && allUniqueAnimals.has(animal.damId_public)) {
-                maxParentDepth = Math.max(maxParentDepth, calculateDepth(animal.damId_public, new Set(visited)));
-            }
-            
-            animal.depth = maxParentDepth + 1;
-            return animal.depth;
-        };
+        // Simple grid layout - position ALL animals
+        const HORIZONTAL_SPACING = 220;
+        const VERTICAL_SPACING = 200;
+        const COLUMNS = 15; // Animals per row
         
-        // Calculate depths for all animals
-        allUniqueAnimals.forEach((animal) => {
-            if (animal.depth === null) {
-                calculateDepth(animal.id_public);
-            }
-        });
-        
-        // Build children map for positioning
-        const childrenMap = new Map();
-        allUniqueAnimals.forEach(animal => {
-            childrenMap.set(animal.id_public, []);
-        });
-        allUniqueAnimals.forEach(animal => {
-            if (animal.sireId_public && childrenMap.has(animal.sireId_public)) {
-                childrenMap.get(animal.sireId_public).push(animal);
-            }
-            if (animal.damId_public && childrenMap.has(animal.damId_public)) {
-                childrenMap.get(animal.damId_public).push(animal);
-            }
-        });
-        
-        // Layout parameters
-        const HORIZONTAL_SPACING = 200;
-        const VERTICAL_SPACING = 220;
-        
-        // Find max depth (oldest generation)
-        const maxDepth = Math.max(...Array.from(allUniqueAnimals.values()).map(a => a.depth || 0));
-        
-        // Position youngest generation first (depth 0)
-        const youngestAnimals = Array.from(allUniqueAnimals.values()).filter(a => (a.depth || 0) === 0);
-        let currentX = 0;
-        youngestAnimals.forEach((animal, index) => {
+        const animalArray = Array.from(allUniqueAnimals.values());
+        animalArray.forEach((animal, index) => {
+            const row = Math.floor(index / COLUMNS);
+            const col = index % COLUMNS;
             animal.position = {
-                x: index * HORIZONTAL_SPACING,
-                y: 0
+                x: col * HORIZONTAL_SPACING,
+                y: row * VERTICAL_SPACING
             };
-            animal.positioned = true;
         });
-        
-        // Position older generations based on their children's positions
-        for (let depth = 1; depth <= maxDepth; depth++) {
-            const animalsAtDepth = Array.from(allUniqueAnimals.values()).filter(a => (a.depth || 0) === depth);
-            const y = depth * VERTICAL_SPACING;
-            
-            animalsAtDepth.forEach(animal => {
-                const children = childrenMap.get(animal.id_public) || [];
-                const positionedChildren = children.filter(c => c.positioned);
-                
-                if (positionedChildren.length > 0) {
-                    // Position centered above children
-                    const avgX = positionedChildren.reduce((sum, child) => sum + child.position.x, 0) / positionedChildren.length;
-                    animal.position = { x: avgX, y };
-                } else {
-                    // No positioned children, place at end
-                    const maxX = Math.max(...Array.from(allUniqueAnimals.values())
-                        .filter(a => a.positioned)
-                        .map(a => a.position.x), -HORIZONTAL_SPACING);
-                    animal.position = { x: maxX + HORIZONTAL_SPACING, y };
-                }
-                animal.positioned = true;
-            });
-        }
         
         // Create edges for all relationships
         allUniqueAnimals.forEach(animal => {
