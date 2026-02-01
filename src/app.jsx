@@ -20182,7 +20182,7 @@ const App = () => {
                                                         {animal.prefix ? `${animal.prefix} ` : ''}{animal.name}{animal.suffix ? ` ${animal.suffix}` : ''}
                                                     </h3>
                                                     <p className="text-sm text-gray-600">{animal.id_public}</p>
-                                                    <p className="text-xs text-gray-500">{animal.species} � {animal.gender}</p>
+                                                    <p className="text-xs text-gray-500">{animal.species} • {animal.gender}</p>
                                                 </div>
                                             </div>
                                             <div className="flex gap-2">
