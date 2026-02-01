@@ -1487,7 +1487,7 @@ const UserSearchModal = ({ onClose, showModalMessage, onSelectUser, API_BASE_URL
         <div className="fixed inset-0 bg-gray-600 bg-opacity-75 flex items-center justify-center p-4 z-50">
             <div className="bg-white rounded-xl shadow-2xl p-6 w-full max-w-xl max-h-[90vh] flex flex-col">
                 <div className="flex justify-between items-center border-b pb-3 mb-4">
-                    <h3 className="text-xl font-bold text-gray-800">Global Search ??</h3>
+                    <h3 className="text-xl font-bold text-gray-800">Global Search 🔍</h3>
                     <button onClick={onClose} className="text-gray-500 hover:text-gray-800"><X size={24} /></button>
                 </div>
 
@@ -2055,7 +2055,7 @@ const PrivateAnimalDetail = ({ animal, onClose, onEdit, API_BASE_URL, authToken,
                         </button>
                         <div className="flex items-center gap-2">
                             <span className="text-xs bg-green-100 text-green-800 px-2 py-1 rounded font-medium">
-                                ?? OWNER VIEW - All Data Visible
+                                👑 OWNER VIEW - All Data Visible
                             </span>
                             <button
                                 onClick={handleShare}
@@ -2187,7 +2187,7 @@ const PrivateAnimalDetail = ({ animal, onClose, onEdit, API_BASE_URL, authToken,
                                             }}
                                             title="Toggle public profile visibility"
                                         >
-                                            <span>{animal.isDisplay ? '??? Public' : '?? Private'}</span>
+                                            <span>{animal.isDisplay ? '🌐 Public' : '🔒 Private'}</span>
                                         </button>
 
                                         {/* Species/Breed/Strain/CTC - At Top */}
@@ -2942,7 +2942,7 @@ const ViewOnlyPrivateAnimalDetail = ({ animal, onClose, API_BASE_URL, authToken,
                                 <ArrowLeft size={16} className="mr-1" /> Back
                             </button>
                             <span className="text-[10px] bg-orange-100 text-orange-800 px-1.5 py-0.5 rounded font-medium">
-                                 VIEW-ONLY
+                                📋 VIEW-ONLY
                             </span>
                             <button onClick={onClose} className="text-gray-500 hover:text-gray-800">
                                 <X size={24} />
@@ -2977,7 +2977,7 @@ const ViewOnlyPrivateAnimalDetail = ({ animal, onClose, API_BASE_URL, authToken,
                         </button>
                         <div className="flex items-center gap-2">
                             <span className="text-xs bg-orange-100 text-orange-800 px-2 py-1 rounded font-medium">
-                                ??? VIEW-ONLY - Read Only Access
+                                📋 VIEW-ONLY - Read Only Access
                             </span>
                             {onHideAnimal && (
                                 <button
