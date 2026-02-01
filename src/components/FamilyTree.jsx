@@ -142,23 +142,21 @@ const FamilyTree = ({ authToken, userProfile, onViewAnimal, showModalMessage, on
 
     // Build graph from animals data
     const buildGraph = (animals) => {
-        const nodeMap = new Map();
-        const edgeList = [];
-        
-        // Track all unique animals (owned + parents/grandparents)
         const allUniqueAnimals = new Map();
+        const edgeList = [];
         
         // First pass: Add all owned animals
         animals.forEach(animal => {
             allUniqueAnimals.set(animal.id_public, {
                 ...animal,
-                isOwned: true
+                isOwned: true,
+                depth: null
             });
         });
         
-        // Second pass: Add parents and create edges
+        // Second pass: Add parents for all owned animals
         animals.forEach(animal => {
-            // Add sire
+            // Add sire if not already present
             if (animal.sireId_public && !allUniqueAnimals.has(animal.sireId_public)) {
                 allUniqueAnimals.set(animal.sireId_public, {
                     id_public: animal.sireId_public,
@@ -166,11 +164,12 @@ const FamilyTree = ({ authToken, userProfile, onViewAnimal, showModalMessage, on
                     species: animal.species,
                     sex: 'Male',
                     gender: 'Male',
-                    isOwned: false
+                    isOwned: false,
+                    depth: null
                 });
             }
             
-            // Add dam
+            // Add dam if not already present
             if (animal.damId_public && !allUniqueAnimals.has(animal.damId_public)) {
                 allUniqueAnimals.set(animal.damId_public, {
                     id_public: animal.damId_public,
@@ -178,14 +177,75 @@ const FamilyTree = ({ authToken, userProfile, onViewAnimal, showModalMessage, on
                     species: animal.species,
                     sex: 'Female',
                     gender: 'Female',
-                    isOwned: false
+                    isOwned: false,
+                    depth: null
                 });
             }
+        });
+        
+        // Calculate depth for each animal (generation level)
+        const calculateDepth = (animalId, visited = new Set()) => {
+            if (visited.has(animalId)) return 0;
+            visited.add(animalId);
             
-            // Create parent edges
-            if (animal.sireId_public) {
+            const animal = allUniqueAnimals.get(animalId);
+            if (!animal) return 0;
+            if (animal.depth !== null) return animal.depth;
+            
+            let maxParentDepth = -1;
+            if (animal.sireId_public && allUniqueAnimals.has(animal.sireId_public)) {
+                maxParentDepth = Math.max(maxParentDepth, calculateDepth(animal.sireId_public, new Set(visited)));
+            }
+            if (animal.damId_public && allUniqueAnimals.has(animal.damId_public)) {
+                maxParentDepth = Math.max(maxParentDepth, calculateDepth(animal.damId_public, new Set(visited)));
+            }
+            
+            animal.depth = maxParentDepth + 1;
+            return animal.depth;
+        };
+        
+        // Calculate depths for all animals
+        allUniqueAnimals.forEach((animal) => {
+            if (animal.depth === null) {
+                calculateDepth(animal.id_public);
+            }
+        });
+        
+        // Group animals by depth
+        const animalsByDepth = new Map();
+        allUniqueAnimals.forEach(animal => {
+            const depth = animal.depth || 0;
+            if (!animalsByDepth.has(depth)) {
+                animalsByDepth.set(depth, []);
+            }
+            animalsByDepth.get(depth).push(animal);
+        });
+        
+        // Layout parameters
+        const HORIZONTAL_SPACING = 200;
+        const VERTICAL_SPACING = 220;
+        
+        // Position animals by depth (youngest at top)
+        const maxDepth = Math.max(...Array.from(animalsByDepth.keys()));
+        animalsByDepth.forEach((animalsAtDepth, depth) => {
+            const y = (maxDepth - depth) * VERTICAL_SPACING; // Invert so youngest at top
+            const totalWidth = animalsAtDepth.length * HORIZONTAL_SPACING;
+            const startX = -totalWidth / 2;
+            
+            animalsAtDepth.forEach((animal, index) => {
+                animal.position = {
+                    x: startX + (index * HORIZONTAL_SPACING) + HORIZONTAL_SPACING / 2,
+                    y: y
+                };
+            });
+        });
+        
+        // Create edges for all relationships
+        allUniqueAnimals.forEach(animal => {
+            // Parent-child edges (sire)
+            if (animal.sireId_public && allUniqueAnimals.has(animal.sireId_public)) {
                 edgeList.push({
-                    id: `${animal.sireId_public}-${animal.id_public}`,
+                    id: `sire-${animal.sireId_public}-${animal.id_public}`,
                     source: animal.sireId_public,
                     target: animal.id_public,
                     type: 'smoothstep',
@@ -194,13 +254,15 @@ const FamilyTree = ({ authToken, userProfile, onViewAnimal, showModalMessage, on
                     markerEnd: {
                         type: MarkerType.ArrowClosed,
                         color: '#3b82f6',
-                    }
+                    },
+                    label: 'Sire'
                 });
             }
             
-            if (animal.damId_public) {
+            // Parent-child edges (dam)
+            if (animal.damId_public && allUniqueAnimals.has(animal.damId_public)) {
                 edgeList.push({
-                    id: `${animal.damId_public}-${animal.id_public}`,
+                    id: `dam-${animal.damId_public}-${animal.id_public}`,
                     source: animal.damId_public,
                     target: animal.id_public,
                     type: 'smoothstep',
@@ -209,20 +271,68 @@ const FamilyTree = ({ authToken, userProfile, onViewAnimal, showModalMessage, on
                     markerEnd: {
                         type: MarkerType.ArrowClosed,
                         color: '#ec4899',
-                    }
+                    },
+                    label: 'Dam'
                 });
             }
         });
         
-        // Build hierarchical tree layout
-        const animalsArray = Array.from(allUniqueAnimals.values());
-        const positionedNodes = calculateTreeLayout(animalsArray);
+        // Add partner/mating edges (between animals that have offspring together)
+        const matingPairs = new Set();
+        allUniqueAnimals.forEach(animal => {
+            if (animal.sireId_public && animal.damId_public && 
+                allUniqueAnimals.has(animal.sireId_public) && 
+                allUniqueAnimals.has(animal.damId_public)) {
+                const pairKey = [animal.sireId_public, animal.damId_public].sort().join('-');
+                if (!matingPairs.has(pairKey)) {
+                    matingPairs.add(pairKey);
+                    edgeList.push({
+                        id: `mate-${pairKey}`,
+                        source: animal.sireId_public,
+                        target: animal.damId_public,
+                        type: 'straight',
+                        animated: false,
+                        style: { stroke: '#8b5cf6', strokeWidth: 2, strokeDasharray: '5,5' },
+                        label: 'Mated'
+                    });
+                }
+            }
+        });
         
-        // Create nodes with calculated positions
-        const nodeList = positionedNodes.map(animal => ({
+        // Add sibling edges (animals with same parents)
+        const siblingGroups = new Map();
+        allUniqueAnimals.forEach(animal => {
+            if (animal.sireId_public || animal.damId_public) {
+                const siblingKey = [animal.sireId_public || 'none', animal.damId_public || 'none'].sort().join('-');
+                if (!siblingGroups.has(siblingKey)) {
+                    siblingGroups.set(siblingKey, []);
+                }
+                siblingGroups.get(siblingKey).push(animal.id_public);
+            }
+        });
+        
+        siblingGroups.forEach(siblings => {
+            if (siblings.length > 1) {
+                // Connect siblings with dashed green lines
+                for (let i = 0; i < siblings.length - 1; i++) {
+                    edgeList.push({
+                        id: `sibling-${siblings[i]}-${siblings[i + 1]}`,
+                        source: siblings[i],
+                        target: siblings[i + 1],
+                        type: 'straight',
+                        animated: false,
+                        style: { stroke: '#10b981', strokeWidth: 1.5, strokeDasharray: '3,3' },
+                        label: 'Sibling'
+                    });
+                }
+            }
+        });
+        
+        // Create nodes
+        const nodeList = Array.from(allUniqueAnimals.values()).map(animal => ({
             id: animal.id_public,
             type: 'animalNode',
-            position: animal.position,
+            position: animal.position || { x: 0, y: 0 },
             data: {
                 label: animal.name || animal.id_public,
                 prefix: animal.prefix || '',
@@ -239,113 +349,6 @@ const FamilyTree = ({ authToken, userProfile, onViewAnimal, showModalMessage, on
         
         setNodes(nodeList);
         setEdges(edgeList);
-    };
-    
-    // Calculate hierarchical tree layout
-    const calculateTreeLayout = (animals) => {
-        const animalMap = new Map(animals.map(a => [a.id_public, { ...a, parents: [], positioned: false }]));
-        const leaves = []; // Animals with no children (youngest generation or no pedigree)
-        
-        // Build child-to-parent relationships (inverted from typical tree)
-        animals.forEach(animal => {
-            const node = animalMap.get(animal.id_public);
-            
-            // Add parents to this node
-            if (animal.sireId_public && animalMap.has(animal.sireId_public)) {
-                node.parents.push(animalMap.get(animal.sireId_public));
-            }
-            if (animal.damId_public && animalMap.has(animal.damId_public)) {
-                node.parents.push(animalMap.get(animal.damId_public));
-            }
-        });
-        
-        // Find leaves (animals that are nobody's parent)
-        animals.forEach(animal => {
-            const isParent = animals.some(a => 
-                a.sireId_public === animal.id_public || a.damId_public === animal.id_public
-            );
-            if (!isParent) {
-                leaves.push(animalMap.get(animal.id_public));
-            }
-        });
-        
-        // If no leaves found, use all animals as starting points
-        if (leaves.length === 0) {
-            animals.forEach(animal => {
-                leaves.push(animalMap.get(animal.id_public));
-            });
-        }
-        
-        // Layout parameters
-        const HORIZONTAL_SPACING = 180;
-        const VERTICAL_SPACING = 200;
-        
-        // Recursive function to calculate ancestor tree width
-        const calculateAncestorWidth = (node, visited = new Set()) => {
-            if (visited.has(node.id_public)) return 0;
-            visited.add(node.id_public);
-            
-            if (node.parents.length === 0) {
-                return 1;
-            }
-            return node.parents.reduce((sum, parent) => sum + calculateAncestorWidth(parent, visited), 0);
-        };
-        
-        const positionAncestors = (node, x, y, depth = 0, visited = new Set()) => {
-            if (visited.has(node.id_public)) return;
-            visited.add(node.id_public);
-            
-            node.position = { x, y };
-            node.depth = depth;
-            node.positioned = true;
-            
-            if (node.parents.length > 0) {
-                // Calculate total width needed for parents
-                const parentWidths = node.parents.map(parent => {
-                    const visitedCopy = new Set();
-                    return calculateAncestorWidth(parent, visitedCopy);
-                });
-                const totalWidth = parentWidths.reduce((sum, w) => sum + w, 0);
-                
-                let currentX = x - ((totalWidth - 1) * HORIZONTAL_SPACING) / 2;
-                
-                node.parents.forEach((parent, i) => {
-                    const parentWidth = parentWidths[i];
-                    const parentCenterX = currentX + ((parentWidth - 1) * HORIZONTAL_SPACING) / 2;
-                    const visitedCopy = new Set(visited);
-                    positionAncestors(parent, parentCenterX, y + VERTICAL_SPACING, depth + 1, visitedCopy);
-                    currentX += parentWidth * HORIZONTAL_SPACING;
-                });
-            }
-        };
-        
-        // Position each leaf tree (youngest at top, ancestors below)
-        let currentLeafX = 0;
-        leaves.forEach((leaf) => {
-            const visited = new Set();
-            const treeWidth = calculateAncestorWidth(leaf, visited);
-            const leafX = currentLeafX + (treeWidth * HORIZONTAL_SPACING) / 2;
-            positionAncestors(leaf, leafX, 0, 0, new Set());
-            currentLeafX += (treeWidth + 2) * HORIZONTAL_SPACING;
-        });
-        
-        // Position any remaining unpositioned animals (shouldn't happen but just in case)
-        const unpositioned = Array.from(animalMap.values()).filter(a => !a.positioned);
-        if (unpositioned.length > 0) {
-            let extraX = currentLeafX;
-            const cols = Math.ceil(Math.sqrt(unpositioned.length));
-            unpositioned.forEach((animal, index) => {
-                const row = Math.floor(index / cols);
-                const col = index % cols;
-                animal.position = {
-                    x: extraX + col * HORIZONTAL_SPACING,
-                    y: row * VERTICAL_SPACING
-                };
-                animal.positioned = true;
-            });
-        }
-        
-        return Array.from(animalMap.values());
     };
 
     // Handle node click
