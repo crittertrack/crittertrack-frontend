@@ -758,8 +758,7 @@ const FamilyTree = ({ authToken, userProfile, onViewAnimal, showModalMessage, on
                 display: 'flex',
                 flexDirection: 'column',
                 overflow: 'hidden',
-                minWidth: 0,
-                marginLeft: '320px'
+                minWidth: 0
             }}>
                 {/* Header */}
                 <div className="bg-white shadow-lg z-10 w-full" style={{ padding: '12px', margin: 0 }}>
@@ -789,10 +788,10 @@ const FamilyTree = ({ authToken, userProfile, onViewAnimal, showModalMessage, on
                 <div style={{
                     position: 'absolute',
                     top: '60px',
-                    left: '320px',
+                    left: 0,
                     right: 0,
                     bottom: 0,
-                    width: 'calc(100% - 320px)',
+                    width: '100%',
                     height: 'calc(100% - 60px)',
                     margin: 0,
                     padding: 0,
