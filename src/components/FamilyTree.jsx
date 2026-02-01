@@ -90,10 +90,6 @@ const FamilyTree = ({ authToken, userProfile, onViewAnimal, showModalMessage, on
     const [nodes, setNodes, onNodesChange] = useNodesState([]);
     const [edges, setEdges, onEdgesChange] = useEdgesState([]);
 
-    // React Flow state
-    const [nodes, setNodes, onNodesChange] = useNodesState([]);
-    const [edges, setEdges, onEdgesChange] = useEdgesState([]);
-
     // Fetch all animals and build the graph
     useEffect(() => {
         if (!authToken) return;
