@@ -1153,7 +1153,7 @@ const FamilyTree = ({ authToken, userProfile, onViewAnimal, showModalMessage, on
                             )}
                             {(selectedAnimal.color || selectedAnimal.coat || selectedAnimal.coatPattern) && (
                                 <div>
-                                    {[selectedAnimal.color, selectedAnimal.coat, selectedAnimal.coatPattern].filter(Boolean).join(', ')}
+                                    {[selectedAnimal.color, selectedAnimal.coatPattern, selectedAnimal.coat].filter(Boolean).join(', ')}
                                 </div>
                             )}
                         </div>
