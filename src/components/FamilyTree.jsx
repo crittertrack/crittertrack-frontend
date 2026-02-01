@@ -39,21 +39,28 @@ const AnimalNode = ({ data }) => {
     
     // Gender-based border color
     const getBorderColor = () => {
-        // Add debugging
+        // Add detailed debugging
+        console.log(`Animal ${data.label}: gender='${data.gender}', isOwned=${data.isOwned}, raw data:`, data);
+        
         if (!data.gender) {
             console.log(`Animal ${data.label} has no gender data:`, data);
         }
         
-        switch(data.gender?.toLowerCase()) {
-            case 'male':
-                return 'border-blue-500';
-            case 'female':
-                return 'border-pink-500';
-            case 'intersex':
-                return 'border-purple-500';
-            default:
-                return 'border-gray-400';
-        }
+        const borderClass = (() => {
+            switch(data.gender?.toLowerCase()) {
+                case 'male':
+                    return 'border-blue-500';
+                case 'female':
+                    return 'border-pink-500';
+                case 'intersex':
+                    return 'border-purple-500';
+                default:
+                    return 'border-gray-400';
+            }
+        })();
+        
+        console.log(`Animal ${data.label} gets border class: ${borderClass}`);
+        return borderClass;
     };
     
     return (
