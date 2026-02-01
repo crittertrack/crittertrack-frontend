@@ -39,6 +39,11 @@ const AnimalNode = ({ data }) => {
     
     // Gender-based border color
     const getBorderColor = () => {
+        // Add debugging
+        if (!data.gender) {
+            console.log(`Animal ${data.label} has no gender data:`, data);
+        }
+        
         switch(data.gender?.toLowerCase()) {
             case 'male':
                 return 'border-blue-500';

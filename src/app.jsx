@@ -180,9 +180,11 @@ const PedigreeChart = ({ animalId, animalData, onClose, API_BASE_URL, authToken 
         const fetchPedigreeData = async () => {
             setLoading(true);
             try {
-                // Recursive function to fetch animal and ancestors
-                const fetchAnimalWithAncestors = async (id, depth = 0) => {
-                    if (!id || depth > 4) return null; // Limit to 5 generations (0-4)
+                // Enhanced recursive function to fetch animal, ancestors, and descendants
+                const fetchAnimalWithFamily = async (id, depth = 0, fetchedIds = new Set()) => {
+                    if (!id || depth > 4 || fetchedIds.has(id)) return null; // Limit to 5 generations (0-4) and prevent infinite loops
+                    
+                    fetchedIds.add(id); // Track this ID to prevent circular references
 
                     let animalInfo = null;
 
@@ -255,17 +257,43 @@ const PedigreeChart = ({ animalId, animalData, onClose, API_BASE_URL, authToken 
                     const fatherId = animalInfo.fatherId_public || animalInfo.sireId_public;
                     const motherId = animalInfo.motherId_public || animalInfo.damId_public;
 
-                    const father = fatherId ? await fetchAnimalWithAncestors(fatherId, depth + 1) : null;
-                    const mother = motherId ? await fetchAnimalWithAncestors(motherId, depth + 1) : null;
+                    const father = fatherId ? await fetchAnimalWithFamily(fatherId, depth + 1, fetchedIds) : null;
+                    const mother = motherId ? await fetchAnimalWithFamily(motherId, depth + 1, fetchedIds) : null;
+
+                    // Fetch offspring (children) if user is authenticated and depth allows
+                    let offspring = [];
+                    if (authToken && depth < 3) { // Limit offspring fetching to prevent too deep trees
+                        try {
+                            const offspringResponse = await axios.get(
+                                `${API_BASE_URL}/animals/${id}/offspring`,
+                                { headers: { Authorization: `Bearer ${authToken}` } }
+                            );
+                            
+                            if (offspringResponse.data && offspringResponse.data.length > 0) {
+                                // Recursively fetch offspring details but limit depth to prevent infinite expansion
+                                for (const child of offspringResponse.data.slice(0, 15)) { // Limit to first 15 offspring per animal to accommodate larger mouse litters
+                                    if (!fetchedIds.has(child.id_public)) {
+                                        const childData = await fetchAnimalWithFamily(child.id_public, depth + 1, fetchedIds);
+                                        if (childData) {
+                                            offspring.push(childData);
+                                        }
+                                    }
+                                }
+                            }
+                        } catch (error) {
+                            console.log(`No offspring data available for ${id}:`, error.message);
+                        }
+                    }
 
                     return {
                         ...animalInfo,
                         father,
-                        mother
+                        mother,
+                        offspring: offspring.length > 0 ? offspring : undefined
                     };
                 };
 
-                const data = await fetchAnimalWithAncestors(animalId || animalData?.id_public);
+                const data = await fetchAnimalWithFamily(animalId || animalData?.id_public);
                 setPedigreeData(data);
 
                 // Fetch owner profile for the main animal
@@ -459,10 +487,19 @@ const PedigreeChart = ({ animalId, animalData, onClose, API_BASE_URL, authToken 
         const bgColor = isSire ? 'bg-[#d4f1f5]' : 'bg-[#f8e8ee]';
         const GenderIcon = isSire ? Mars : Venus;
         
+        // Get border color based on actual gender
+        const getBorderColor = (animal) => {
+            if (!animal || !animal.gender) return 'border-gray-700';
+            if (animal.gender === 'Male') return 'border-blue-500';
+            if (animal.gender === 'Female') return 'border-pink-500';
+            if (animal.gender === 'Intersex') return 'border-purple-500';
+            return 'border-gray-700';
+        };
+        
         // Direct parents always show - either full data, "Unknown", or "Hidden" (private)
         if (!animal) {
             return (
-                <div className={`border border-gray-700 rounded p-2 ${bgColor} relative h-full flex items-center justify-center`}>
+                <div className={`border ${getBorderColor(null)} rounded p-2 ${bgColor} relative h-full flex items-center justify-center`}>
                     <div className="text-center">
                         <Cat size={32} className="hide-for-pdf text-gray-300 mx-auto mb-2" />
                         <div className="text-xs text-gray-400">Unknown</div>
@@ -476,7 +513,7 @@ const PedigreeChart = ({ animalId, animalData, onClose, API_BASE_URL, authToken 
         
         if (animal.isHidden) {
             return (
-                <div className={`border border-gray-700 rounded p-2 ${bgColor} relative h-full flex items-center justify-center`}>
+                <div className={`border ${getBorderColor(animal)} rounded p-2 ${bgColor} relative h-full flex items-center justify-center`}>
                     <div className="text-center">
                         <EyeOff size={32} className="hide-for-pdf text-gray-500 mx-auto mb-2" />
                         <div className="text-xs text-gray-600 font-semibold">Hidden</div>
@@ -493,7 +530,7 @@ const PedigreeChart = ({ animalId, animalData, onClose, API_BASE_URL, authToken 
         const colorCoat = [animal.color, animal.coat].filter(Boolean).join(' ') || 'N/A';
         
         return (
-            <div className={`border border-gray-700 rounded p-1.5 ${bgColor} relative flex gap-2 h-full items-center`}>
+            <div className={`border ${getBorderColor(animal)} rounded p-1.5 ${bgColor} relative flex gap-2 h-full items-center`}>
                 {/* Image - 1/3 width */}
                 <div className="hide-for-pdf w-1/3 aspect-square bg-gray-100 rounded-lg border-2 border-gray-900 overflow-hidden flex items-center justify-center flex-shrink-0">
                     {imgSrc ? (
@@ -550,9 +587,18 @@ const PedigreeChart = ({ animalId, animalData, onClose, API_BASE_URL, authToken 
         const bgColor = isSire ? 'bg-[#d4f1f5]' : 'bg-[#f8e8ee]';
         const GenderIcon = isSire ? Mars : Venus;
         
+        // Get border color based on actual gender
+        const getBorderColor = (animal) => {
+            if (!animal || !animal.gender) return 'border-gray-700';
+            if (animal.gender === 'Male') return 'border-blue-500';
+            if (animal.gender === 'Female') return 'border-pink-500';
+            if (animal.gender === 'Intersex') return 'border-purple-500';
+            return 'border-gray-700';
+        };
+        
         if (!animal) {
             return (
-                <div className={`border border-gray-700 rounded p-1.5 ${bgColor} flex gap-1.5 h-full items-center relative`}>
+                <div className={`border ${getBorderColor(null)} rounded p-1.5 ${bgColor} flex gap-1.5 h-full items-center relative`}>
                     {/* Image placeholder - 1/3 width */}
                     <div className="hide-for-pdf w-1/3 aspect-square bg-gray-100 rounded-lg border-2 border-gray-900 overflow-hidden flex items-center justify-center flex-shrink-0">
                         <Cat size={20} className="text-gray-400" />
@@ -570,7 +616,7 @@ const PedigreeChart = ({ animalId, animalData, onClose, API_BASE_URL, authToken 
         
         if (animal.isHidden) {
             return (
-                <div className={`border border-gray-700 rounded p-1.5 ${bgColor} flex gap-1.5 h-full items-center relative`}>
+                <div className={`border ${getBorderColor(animal)} rounded p-1.5 ${bgColor} flex gap-1.5 h-full items-center relative`}>
                     {/* Icon placeholder - 1/3 width */}
                     <div className="hide-for-pdf w-1/3 aspect-square bg-gray-100 rounded-lg border-2 border-gray-900 overflow-hidden flex items-center justify-center flex-shrink-0">
                         <EyeOff size={20} className="text-gray-500" />
@@ -590,7 +636,7 @@ const PedigreeChart = ({ animalId, animalData, onClose, API_BASE_URL, authToken 
         const colorCoat = [animal.color, animal.coat].filter(Boolean).join(' ') || 'N/A';
         
         return (
-            <div className={`border border-gray-700 rounded p-1 ${bgColor} relative flex gap-1.5 h-full items-center`}>
+            <div className={`border ${getBorderColor(animal)} rounded p-1 ${bgColor} relative flex gap-1.5 h-full items-center`}>
                 {/* Image - 1/3 width */}
                 <div className="hide-for-pdf w-1/3 aspect-square bg-gray-100 rounded-lg border-2 border-gray-900 overflow-hidden flex items-center justify-center flex-shrink-0">
                     {imgSrc ? (
@@ -647,9 +693,18 @@ const PedigreeChart = ({ animalId, animalData, onClose, API_BASE_URL, authToken 
         const bgColor = isSire ? 'bg-[#d4f1f5]' : 'bg-[#f8e8ee]';
         const GenderIcon = isSire ? Mars : Venus;
         
+        // Get border color based on actual gender
+        const getBorderColor = (animal) => {
+            if (!animal || !animal.gender) return 'border-gray-700';
+            if (animal.gender === 'Male') return 'border-blue-500';
+            if (animal.gender === 'Female') return 'border-pink-500';
+            if (animal.gender === 'Intersex') return 'border-purple-500';
+            return 'border-gray-700';
+        };
+        
         if (!animal) {
             return (
-                <div className={`border border-gray-700 rounded p-1 ${bgColor} flex items-center justify-center h-full relative`}>
+                <div className={`border ${getBorderColor(null)} rounded p-1 ${bgColor} flex items-center justify-center h-full relative`}>
                     <span className="text-xs text-gray-400">Unknown</span>
                     <div className="absolute top-0.5 right-0.5">
                         <GenderIcon size={12} className="text-gray-900" strokeWidth={2.5} />
@@ -660,7 +715,7 @@ const PedigreeChart = ({ animalId, animalData, onClose, API_BASE_URL, authToken 
         
         if (animal.isHidden) {
             return (
-                <div className={`border border-gray-700 rounded p-1 ${bgColor} flex flex-col items-center justify-center h-full relative`}>
+                <div className={`border ${getBorderColor(animal)} rounded p-1 ${bgColor} flex flex-col items-center justify-center h-full relative`}>
                     <EyeOff size={16} className="text-gray-500 mb-1" />
                     <span className="text-xs text-gray-600 font-semibold">Hidden</span>
                     <div className="absolute top-0.5 right-0.5">
@@ -673,7 +728,7 @@ const PedigreeChart = ({ animalId, animalData, onClose, API_BASE_URL, authToken 
         const colorCoat = [animal.color, animal.coat].filter(Boolean).join(' ') || 'N/A';
         
         return (
-            <div className={`border border-gray-700 rounded p-0.5 ${bgColor} relative h-full flex flex-col justify-start gap-1 py-1`}>
+            <div className={`border ${getBorderColor(animal)} rounded p-0.5 ${bgColor} relative h-full flex flex-col justify-start gap-1 py-1`}>
                 {/* Name */}
                 <div className="text-gray-900 leading-tight" style={{fontSize: '0.6rem', lineHeight: '1.2'}}>
                     <span className="font-semibold">Name: </span>
