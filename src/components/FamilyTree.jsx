@@ -271,8 +271,7 @@ const FamilyTree = ({ authToken, userProfile, onViewAnimal, showModalMessage, on
             nodesep: 80,   // Reduced horizontal spacing between nodes
             ranksep: 300,  // Much more vertical spacing between generations
             marginx: 60,
-            marginy: 60,
-            ranker: 'tight-tree' // Use tight tree ranking for better clustering
+            marginy: 60
         });
         
         // Add nodes to dagre graph
