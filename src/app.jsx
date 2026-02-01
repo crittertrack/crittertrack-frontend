@@ -13009,7 +13009,7 @@ const ProfileView = ({ userProfile, showModalMessage, fetchUserProfile, authToke
     );
 };
 
-const AuthView = ({ onLoginSuccess, showModalMessage, isRegister, setIsRegister, mainTitle, onShowTerms, onShowPrivacy }) => {
+const AuthView = ({ onLoginSuccess, showModalMessage, isRegister, setIsRegister, mainTitle, onShowTerms, onShowPrivacy, userCount }) => {
     const [email, setEmail] = useState('');
     const [password, setPassword] = useState('');
     const [confirmPassword, setConfirmPassword] = useState('');
@@ -15790,6 +15790,7 @@ const App = () => {
     const [userProfile, setUserProfile] = useState(null);
     const [hasSkippedTutorialThisSession, setHasSkippedTutorialThisSession] = useState(false);
     const [isMobile, setIsMobile] = useState(window.innerWidth < 768);
+    const [userCount, setUserCount] = useState('...');
     
     // Derive currentView from URL path
     const currentView = location.pathname.split('/')[1] || 'list';
@@ -15800,6 +15801,31 @@ const App = () => {
         window.addEventListener('resize', handleResize);
         return () => window.removeEventListener('resize', handleResize);
     }, []);
+    
+    // Fetch and display user count on login/register screen
+    useEffect(() => {
+        const fetchUserCount = async () => {
+            try {
+                console.log('Fetching user count from:', `${API_BASE_URL}/public/users/count`);
+                const response = await fetch(`${API_BASE_URL}/public/users/count`);
+                console.log('User count response status:', response.status);
+                if (response.ok) {
+                    const data = await response.json();
+                    console.log('User count data:', data);
+                    const count = data.totalUsers || 'many';
+                    const formattedCount = typeof count === 'number' ? count.toLocaleString() : count;
+                    console.log('Setting user count to:', formattedCount);
+                    setUserCount(formattedCount);
+                } else {
+                    console.log('User count response not ok:', await response.text());
+                }
+            } catch (err) {
+                console.error('Failed to fetch user count:', err);
+                // Keep the "..." placeholder if fetch fails
+            }
+        };
+        fetchUserCount();
+    }, [API_BASE_URL, setUserCount]);
     
     // Tutorial context hook
     const { hasSeenInitialTutorial, markInitialTutorialSeen, hasCompletedOnboarding, isLoading: tutorialLoading, markTutorialCompleted, completedTutorials, isTutorialCompleted, hasSeenWelcomeBanner, dismissWelcomeBanner } = useTutorial(); 
