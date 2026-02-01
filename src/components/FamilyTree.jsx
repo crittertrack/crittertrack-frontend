@@ -1071,7 +1071,8 @@ const FamilyTree = ({ authToken, userProfile, onViewAnimal, showModalMessage, on
                 
                 {/* Selected Animal Detail Panel */}
                 {selectedAnimal && (
-                    <div className="absolute top-4 right-4 w-96 bg-white rounded-lg shadow-2xl p-5 border border-gray-200 max-h-[calc(100vh-120px)] overflow-hidden z-10">
+                    <div className="absolute top-4 right-4 w-80 bg-white rounded-lg shadow-2xl p-4 border border-gray-200 max-h-[calc(100vh-120px)] overflow-hidden z-10" 
+                         style={{ maxWidth: 'calc(100% - 40px)' }}>
                         <div className="max-h-full overflow-y-auto">
                         <div className="flex justify-between items-start mb-4">
                             <div>
