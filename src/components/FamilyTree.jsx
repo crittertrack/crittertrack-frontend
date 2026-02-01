@@ -323,6 +323,7 @@ const FamilyTree = ({ authToken, userProfile, onViewAnimal, showModalMessage, on
                     gender: animal.gender,
                     sex: animal.sex,
                     allFields: Object.keys(animal),
+                    actualFieldValues: Object.entries(animal),
                     fullAnimal: animal
                 });
             }
