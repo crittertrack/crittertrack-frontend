@@ -291,6 +291,11 @@ const FamilyTree = ({ authToken, userProfile, onViewAnimal, showModalMessage, on
             }
         });
         
+        // Add partner edges to dagre so partners are positioned near each other
+        matingPairData.forEach((pairData) => {
+            dagreGraph.setEdge(pairData.sire, pairData.dam, { minlen: 1, weight: 10 });
+        });
+        
         // Calculate layout
         dagre.layout(dagreGraph);
         
