@@ -431,7 +431,7 @@ const PedigreeChart = ({ animalId, animalData, onClose, API_BASE_URL, authToken 
                     {/* Birth Date */}
                     <div className="text-xs text-gray-900 leading-tight" style={{lineHeight: '1.2'}}>
                         <span className="font-semibold">Birthdate: </span>
-                        {animal.birthDate ? ''rmatDate(animal.birthDate) : 'N/A'}
+                        {animal.birthDate ? formatDate(animal.birthDate) : 'N/A'}
                     </div>
                     
                     {/* Breeder Info */}
@@ -522,7 +522,7 @@ const PedigreeChart = ({ animalId, animalData, onClose, API_BASE_URL, authToken 
                     {/* Birth Date */}
                     <div className="text-xs text-gray-900 leading-tight" style={{lineHeight: '1.2'}}>
                         <span className="font-semibold">Birthdate: </span>
-                        {animal.birthDate ? ''rmatDate(animal.birthDate) : 'N/A'}
+                        {animal.birthDate ? formatDate(animal.birthDate) : 'N/A'}
                     </div>
                     
                     {/* Breeder */}
@@ -619,7 +619,7 @@ const PedigreeChart = ({ animalId, animalData, onClose, API_BASE_URL, authToken 
                     {/* Birth Date */}
                     <div className="text-gray-900 leading-tight" style={{fontSize: '0.65rem', lineHeight: '1.2'}}>
                         <span className="font-semibold">Birthdate: </span>
-                        {animal.birthDate ? ''rmatDate(animal.birthDate) : 'N/A'}
+                        {animal.birthDate ? formatDate(animal.birthDate) : 'N/A'}
                     </div>
                     
                     {/* Breeder */}
@@ -1886,7 +1886,7 @@ const PublicProfileView = ({ profile, onBack, onViewAnimal, API_BASE_URL, onStar
                             </h4>
                             <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-4">
                                 {groupedAnimals[species].map(animal => {
-                                    const birth = animal.birthDate ? ''rmatDate(animal.birthDate) : '--';
+                                    const birth = animal.birthDate ? formatDate(animal.birthDate) : '--';
                                     const imgSrc = animal.imageUrl || animal.photoUrl || null;
                                     
                                     return (
@@ -2135,7 +2135,7 @@ const PrivateAnimalDetail = ({ animal, onClose, onEdit, API_BASE_URL, authToken,
                                 <div className="flex flex-col md:flex-row relative">
                                     <div className="w-full md:w-1/3 p-4 sm:p-6 flex flex-col items-center justify-center relative min-h-60 md:min-h-80">
                                         <div className="absolute top-2 left-2 text-xs text-gray-600 bg-white/80 px-2 py-0.5 rounded">
-                                            {animal.birthDate ? ''rmatDate(animal.birthDate) : 'ÔøΩ'}
+                                            {animal.birthDate ? formatDate(animal.birthDate) : 'ÔøΩ'}
                                         </div>
                                         <div className="absolute top-2 right-2">
                                             {animal.gender === 'Male' ? ''ars size={20} strokeWidth={2.5} className="text-blue-600" /> : animal.gender === 'Female' ? ''enus size={20} strokeWidth={2.5} className="text-pink-600" /> : animal.gender === 'Intersex' ? ''enusAndMars size={20} strokeWidth={2.5} className="text-purple-500" /> : <Circle size={20} strokeWidth={2.5} className="text-gray-500" />}
@@ -2187,7 +2187,7 @@ const PrivateAnimalDetail = ({ animal, onClose, onEdit, API_BASE_URL, authToken,
                                             }}
                                             title="Toggle public profile visibility"
                                         >
-                                            <span>{animal.isDisplay ? ''üëÅÔ∏è Public' : 'üîí Private'}</span>
+                                            <span>{animal.isDisplay ? 'üëÅÔ∏è Public' : 'üîí Private'}</span>
                                         </button>
 
                                         {/* Species/Breed/Strain/CTC - At Top */}
@@ -2212,7 +2212,7 @@ const PrivateAnimalDetail = ({ animal, onClose, onEdit, API_BASE_URL, authToken,
                                                 <div>
                                                     <p className="text-sm font-semibold text-gray-700">For Sale</p>
                                                     <p className="text-sm text-gray-600">
-                                                        {animal.salePriceCurrency === 'Negotiable' || !animal.salePriceAmount ? ''egotiable' : `${animal.salePriceCurrency === 'USD' ? ''' : animal.salePriceCurrency === 'EUR' ? ''øΩ' : animal.salePriceCurrency === 'GBP' ? ''øΩ' : animal.salePriceCurrency === 'CAD' ? ''$' : animal.salePriceCurrency === 'AUD' ? ''$' : animal.salePriceCurrency === 'JPY' ? ''øΩ' : animal.salePriceCurrency}${animal.salePriceAmount ? ''${animal.salePriceAmount}` : '--'}`}
+                                                        {animal.salePriceCurrency === 'Negotiable' || !animal.salePriceAmount ? ''egotiable' : `${animal.salePriceCurrency === 'USD' ? ''' : animal.salePriceCurrency === 'EUR' ? ''ÔøΩÔøΩ' : animal.salePriceCurrency === 'GBP' ? ''ÔøΩÔøΩ' : animal.salePriceCurrency === 'CAD' ? ''$' : animal.salePriceCurrency === 'AUD' ? ''$' : animal.salePriceCurrency === 'JPY' ? ''ÔøΩÔøΩ' : animal.salePriceCurrency}${animal.salePriceAmount ? ''${animal.salePriceAmount}` : '--'}`}
                                                     </p>
                                                 </div>
                                             </div>
@@ -2225,7 +2225,7 @@ const PrivateAnimalDetail = ({ animal, onClose, onEdit, API_BASE_URL, authToken,
                                                 <div>
                                                     <p className="text-sm font-semibold text-gray-700">Available for Stud</p>
                                                     <p className="text-sm text-gray-600">
-                                                        {animal.studFeeCurrency === 'Negotiable' || !animal.studFeeAmount ? ''egotiable' : `${animal.studFeeCurrency === 'USD' ? ''' : animal.studFeeCurrency === 'EUR' ? ''øΩ' : animal.studFeeCurrency === 'GBP' ? ''øΩ' : animal.studFeeCurrency === 'CAD' ? ''$' : animal.studFeeCurrency === 'AUD' ? ''$' : animal.studFeeCurrency === 'JPY' ? ''øΩ' : animal.studFeeCurrency}${animal.studFeeAmount ? ''${animal.studFeeAmount}` : '--'}`}
+                                                        {animal.studFeeCurrency === 'Negotiable' || !animal.studFeeAmount ? ''egotiable' : `${animal.studFeeCurrency === 'USD' ? ''' : animal.studFeeCurrency === 'EUR' ? ''ÔøΩÔøΩ' : animal.studFeeCurrency === 'GBP' ? ''ÔøΩÔøΩ' : animal.studFeeCurrency === 'CAD' ? ''$' : animal.studFeeCurrency === 'AUD' ? ''$' : animal.studFeeCurrency === 'JPY' ? ''ÔøΩÔøΩ' : animal.studFeeCurrency}${animal.studFeeAmount ? ''${animal.studFeeAmount}` : '--'}`}
                                                     </p>
                                                 </div>
                                             </div>
@@ -3044,7 +3044,7 @@ const ViewOnlyPrivateAnimalDetail = ({ animal, onClose, API_BASE_URL, authToken,
                                 <div className="flex flex-col md:flex-row relative">
                                     <div className="w-full md:w-1/3 p-4 sm:p-6 flex flex-col items-center justify-center relative min-h-60 md:min-h-80">
                                         <div className="absolute top-2 left-2 text-xs text-gray-600 bg-white/80 px-2 py-0.5 rounded">
-                                            {animal.birthDate ? ''rmatDate(animal.birthDate) : 'ÔøΩ'}
+                                            {animal.birthDate ? formatDate(animal.birthDate) : 'ÔøΩ'}
                                         </div>
                                         <div className="absolute top-2 right-2">
                                             {animal.gender === 'Male' ? ''ars size={20} strokeWidth={2.5} className="text-blue-600" /> : animal.gender === 'Female' ? ''enus size={20} strokeWidth={2.5} className="text-pink-600" /> : animal.gender === 'Intersex' ? ''enusAndMars size={20} strokeWidth={2.5} className="text-purple-500" /> : <Circle size={20} strokeWidth={2.5} className="text-gray-500" />}
@@ -3103,7 +3103,7 @@ const ViewOnlyPrivateAnimalDetail = ({ animal, onClose, API_BASE_URL, authToken,
                                                 <div>
                                                     <p className="text-sm font-semibold text-gray-700">For Sale</p>
                                                     <p className="text-sm text-gray-600">
-                                                        {animal.salePriceCurrency === 'Negotiable' || !animal.salePriceAmount ? ''egotiable' : `${animal.salePriceCurrency === 'USD' ? ''' : animal.salePriceCurrency === 'EUR' ? ''øΩ' : animal.salePriceCurrency === 'GBP' ? ''øΩ' : animal.salePriceCurrency === 'CAD' ? ''$' : animal.salePriceCurrency === 'AUD' ? ''$' : animal.salePriceCurrency === 'JPY' ? ''øΩ' : animal.salePriceCurrency}${animal.salePriceAmount ? ''${animal.salePriceAmount}` : '--'}`}
+                                                        {animal.salePriceCurrency === 'Negotiable' || !animal.salePriceAmount ? ''egotiable' : `${animal.salePriceCurrency === 'USD' ? ''' : animal.salePriceCurrency === 'EUR' ? ''ÔøΩÔøΩ' : animal.salePriceCurrency === 'GBP' ? ''ÔøΩÔøΩ' : animal.salePriceCurrency === 'CAD' ? ''$' : animal.salePriceCurrency === 'AUD' ? ''$' : animal.salePriceCurrency === 'JPY' ? ''ÔøΩÔøΩ' : animal.salePriceCurrency}${animal.salePriceAmount ? ''${animal.salePriceAmount}` : '--'}`}
                                                     </p>
                                                 </div>
                                             </div>
@@ -3116,7 +3116,7 @@ const ViewOnlyPrivateAnimalDetail = ({ animal, onClose, API_BASE_URL, authToken,
                                                 <div>
                                                     <p className="text-sm font-semibold text-gray-700">Available for Stud</p>
                                                     <p className="text-sm text-gray-600">
-                                                        {animal.studFeeCurrency === 'Negotiable' || !animal.studFeeAmount ? ''egotiable' : `${animal.studFeeCurrency === 'USD' ? ''' : animal.studFeeCurrency === 'EUR' ? ''øΩ' : animal.studFeeCurrency === 'GBP' ? ''øΩ' : animal.studFeeCurrency === 'CAD' ? ''$' : animal.studFeeCurrency === 'AUD' ? ''$' : animal.studFeeCurrency === 'JPY' ? ''øΩ' : animal.studFeeCurrency}${animal.studFeeAmount ? ''${animal.studFeeAmount}` : '--'}`}
+                                                        {animal.studFeeCurrency === 'Negotiable' || !animal.studFeeAmount ? ''egotiable' : `${animal.studFeeCurrency === 'USD' ? ''' : animal.studFeeCurrency === 'EUR' ? ''ÔøΩÔøΩ' : animal.studFeeCurrency === 'GBP' ? ''ÔøΩÔøΩ' : animal.studFeeCurrency === 'CAD' ? ''$' : animal.studFeeCurrency === 'AUD' ? ''$' : animal.studFeeCurrency === 'JPY' ? ''ÔøΩÔøΩ' : animal.studFeeCurrency}${animal.studFeeAmount ? ''${animal.studFeeAmount}` : '--'}`}
                                                     </p>
                                                 </div>
                                             </div>
@@ -4037,7 +4037,7 @@ const ViewOnlyAnimalDetail = ({ animal, onClose, API_BASE_URL, onViewProfile, au
                                                 <div>
                                                     <p className="text-sm font-semibold text-gray-700">For Sale</p>
                                                     <p className="text-sm text-gray-600">
-                                                        {animal.salePriceCurrency === 'Negotiable' ? ''egotiable' : `${animal.salePriceCurrency === 'USD' ? ''' : animal.salePriceCurrency === 'EUR' ? ''øΩ' : animal.salePriceCurrency === 'GBP' ? ''øΩ' : animal.salePriceCurrency === 'CAD' ? ''$' : animal.salePriceCurrency === 'AUD' ? ''$' : animal.salePriceCurrency === 'JPY' ? ''øΩ' : animal.salePriceCurrency}${animal.salePriceAmount ? ''${animal.salePriceAmount}` : '--'}`}
+                                                        {animal.salePriceCurrency === 'Negotiable' ? ''egotiable' : `${animal.salePriceCurrency === 'USD' ? ''' : animal.salePriceCurrency === 'EUR' ? ''ÔøΩÔøΩ' : animal.salePriceCurrency === 'GBP' ? ''ÔøΩÔøΩ' : animal.salePriceCurrency === 'CAD' ? ''$' : animal.salePriceCurrency === 'AUD' ? ''$' : animal.salePriceCurrency === 'JPY' ? ''ÔøΩÔøΩ' : animal.salePriceCurrency}${animal.salePriceAmount ? ''${animal.salePriceAmount}` : '--'}`}
                                                     </p>
                                                 </div>
                                             </div>
@@ -4050,7 +4050,7 @@ const ViewOnlyAnimalDetail = ({ animal, onClose, API_BASE_URL, onViewProfile, au
                                                 <div>
                                                     <p className="text-sm font-semibold text-gray-700">Available for Stud</p>
                                                     <p className="text-sm text-gray-600">
-                                                        {animal.studFeeCurrency === 'Negotiable' ? ''egotiable' : `${animal.studFeeCurrency === 'USD' ? ''' : animal.studFeeCurrency === 'EUR' ? ''øΩ' : animal.studFeeCurrency === 'GBP' ? ''øΩ' : animal.studFeeCurrency === 'CAD' ? ''$' : animal.studFeeCurrency === 'AUD' ? ''$' : animal.studFeeCurrency === 'JPY' ? ''øΩ' : animal.studFeeCurrency}${animal.studFeeAmount ? ''${animal.studFeeAmount}` : '--'}`}
+                                                        {animal.studFeeCurrency === 'Negotiable' ? ''egotiable' : `${animal.studFeeCurrency === 'USD' ? ''' : animal.studFeeCurrency === 'EUR' ? ''ÔøΩÔøΩ' : animal.studFeeCurrency === 'GBP' ? ''ÔøΩÔøΩ' : animal.studFeeCurrency === 'CAD' ? ''$' : animal.studFeeCurrency === 'AUD' ? ''$' : animal.studFeeCurrency === 'JPY' ? ''ÔøΩÔøΩ' : animal.studFeeCurrency}${animal.studFeeAmount ? ''${animal.studFeeAmount}` : '--'}`}
                                                     </p>
                                                 </div>
                                             </div>
@@ -14248,7 +14248,7 @@ const AnimalList = ({ authToken, showModalMessage, onEditAnimal, onViewAnimal, f
     };
 
     const AnimalCard = ({ animal, onEditAnimal, species, isSelectable, isSelected, onToggleSelect }) => {
-        const birth = animal.birthDate ? ''rmatDate(animal.birthDate) : '--';
+        const birth = animal.birthDate ? formatDate(animal.birthDate) : '--';
         const imgSrc = animal.imageUrl || animal.photoUrl || null;
 
         const handleClick = () => {
@@ -17760,12 +17760,12 @@ const App = () => {
                             <div className="mt-1 space-y-1">
                                 {availableAnimals[currentAvailableIndex].isForSale && availableAnimals[currentAvailableIndex].salePriceAmount && (
                                     <p className="text-xs text-green-600 font-semibold">
-                                        Fee: {availableAnimals[currentAvailableIndex].salePriceCurrency === 'Negotiable' ? ''egotiable' : `${availableAnimals[currentAvailableIndex].salePriceCurrency === 'USD' ? ''' : availableAnimals[currentAvailableIndex].salePriceCurrency === 'EUR' ? ''øΩ' : '--'}${availableAnimals[currentAvailableIndex].salePriceAmount}`}
+                                        Fee: {availableAnimals[currentAvailableIndex].salePriceCurrency === 'Negotiable' ? ''egotiable' : `${availableAnimals[currentAvailableIndex].salePriceCurrency === 'USD' ? ''' : availableAnimals[currentAvailableIndex].salePriceCurrency === 'EUR' ? ''ÔøΩÔøΩ' : '--'}${availableAnimals[currentAvailableIndex].salePriceAmount}`}
                                     </p>
                                 )}
                                 {availableAnimals[currentAvailableIndex].availableForBreeding && availableAnimals[currentAvailableIndex].studFeeAmount && (
                                     <p className="text-xs text-purple-600 font-semibold">
-                                        Fee: {availableAnimals[currentAvailableIndex].studFeeCurrency === 'Negotiable' ? ''egotiable' : `${availableAnimals[currentAvailableIndex].studFeeCurrency === 'USD' ? ''' : availableAnimals[currentAvailableIndex].studFeeCurrency === 'EUR' ? ''øΩ' : '--'}${availableAnimals[currentAvailableIndex].studFeeAmount}`}
+                                        Fee: {availableAnimals[currentAvailableIndex].studFeeCurrency === 'Negotiable' ? ''egotiable' : `${availableAnimals[currentAvailableIndex].studFeeCurrency === 'USD' ? ''' : availableAnimals[currentAvailableIndex].studFeeCurrency === 'EUR' ? ''ÔøΩÔøΩ' : '--'}${availableAnimals[currentAvailableIndex].studFeeAmount}`}
                                     </p>
                                 )}
                             </div>
