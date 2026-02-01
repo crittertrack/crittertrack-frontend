@@ -661,9 +661,7 @@ const FamilyTree = ({ authToken, userProfile, onViewAnimal, showModalMessage, on
                                 <h3 className="text-xl font-bold text-gray-800">
                                     {[selectedAnimal.prefix, selectedAnimal.name, selectedAnimal.suffix].filter(Boolean).join(' ')}
                                 </h3>
-                                {selectedAnimal.geneticCode && (
-                                    <p className="text-sm text-gray-600 font-mono mt-1">{selectedAnimal.geneticCode}</p>
-                                )}
+                                <p className="text-sm text-gray-600 font-mono mt-1">{selectedAnimal.id_public}</p>
                             </div>
                             <button
                                 onClick={() => {
@@ -714,7 +712,7 @@ const FamilyTree = ({ authToken, userProfile, onViewAnimal, showModalMessage, on
                                             <span className="font-semibold text-blue-600">Sire:</span>
                                             <div className="ml-4 text-gray-700">
                                                 {[sire.prefix, sire.name, sire.suffix].filter(Boolean).join(' ')}
-                                                {sire.geneticCode && <span className="font-mono text-xs text-gray-500 ml-2">({sire.geneticCode})</span>}
+                                                <span className="font-mono text-xs text-gray-500 ml-2">({sire.id_public})</span>
                                             </div>
                                         </div>
                                     ) : null;
@@ -728,7 +726,7 @@ const FamilyTree = ({ authToken, userProfile, onViewAnimal, showModalMessage, on
                                             <span className="font-semibold text-pink-600">Dam:</span>
                                             <div className="ml-4 text-gray-700">
                                                 {[dam.prefix, dam.name, dam.suffix].filter(Boolean).join(' ')}
-                                                {dam.geneticCode && <span className="font-mono text-xs text-gray-500 ml-2">({dam.geneticCode})</span>}
+                                                <span className="font-mono text-xs text-gray-500 ml-2">({dam.id_public})</span>
                                             </div>
                                         </div>
                                     ) : null;
@@ -743,7 +741,7 @@ const FamilyTree = ({ authToken, userProfile, onViewAnimal, showModalMessage, on
                                             <span className="font-semibold text-blue-500">Grandsire:</span>
                                             <div className="ml-4 text-gray-700">
                                                 {[grandsire.prefix, grandsire.name, grandsire.suffix].filter(Boolean).join(' ')}
-                                                {grandsire.geneticCode && <span className="font-mono text-xs text-gray-500 ml-2">({grandsire.geneticCode})</span>}
+                                                <span className="font-mono text-xs text-gray-500 ml-2">({grandsire.id_public})</span>
                                             </div>
                                         </div>
                                     ) : null;
@@ -758,7 +756,7 @@ const FamilyTree = ({ authToken, userProfile, onViewAnimal, showModalMessage, on
                                             <span className="font-semibold text-pink-500">Granddam:</span>
                                             <div className="ml-4 text-gray-700">
                                                 {[granddam.prefix, granddam.name, granddam.suffix].filter(Boolean).join(' ')}
-                                                {granddam.geneticCode && <span className="font-mono text-xs text-gray-500 ml-2">({granddam.geneticCode})</span>}
+                                                <span className="font-mono text-xs text-gray-500 ml-2">({granddam.id_public})</span>
                                             </div>
                                         </div>
                                     ) : null;
@@ -782,11 +780,11 @@ const FamilyTree = ({ authToken, userProfile, onViewAnimal, showModalMessage, on
                                                     return (
                                                         <div key={child.id_public} className="text-gray-700">
                                                             {[child.prefix, child.name, child.suffix].filter(Boolean).join(' ')}
-                                                            {child.geneticCode && <span className="font-mono text-xs text-gray-500 ml-1">({child.geneticCode})</span>}
+                                                            <span className="font-mono text-xs text-gray-500 ml-1">({child.id_public})</span>
                                                             {partner && (
                                                                 <span className="text-gray-500 text-xs ml-2">
                                                                     with {[partner.prefix, partner.name, partner.suffix].filter(Boolean).join(' ')}
-                                                                    {partner.geneticCode && <span className="font-mono ml-1">({partner.geneticCode})</span>}
+                                                                    <span className="font-mono ml-1">({partner.id_public})</span>
                                                                 </span>
                                                             )}
                                                         </div>
