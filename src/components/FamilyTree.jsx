@@ -313,6 +313,19 @@ const FamilyTree = ({ authToken, userProfile, onViewAnimal, showModalMessage, on
             }
         });
         
+        // Align partners on the same horizontal line (same y-coordinate)
+        matingPairData.forEach((pairData) => {
+            const sireNode = nodeList.find(n => n.id === pairData.sire);
+            const damNode = nodeList.find(n => n.id === pairData.dam);
+            
+            if (sireNode?.position && damNode?.position) {
+                // Use the average y-coordinate for both partners
+                const avgY = (sireNode.position.y + damNode.position.y) / 2;
+                sireNode.position.y = avgY;
+                damNode.position.y = avgY;
+            }
+        });
+        
         // Now create family unit nodes and edges AFTER positions are calculated
         const familyUnitNodes = [];
         const childrenWithBothParents = new Set();
