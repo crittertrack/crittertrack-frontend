@@ -15,6 +15,7 @@ import ReactFlow, {
 import 'reactflow/dist/style.css';
 import axios from 'axios';
 import dagre from 'dagre';
+import { formatDate } from '../utils/dateFormatter';
 
 const API_BASE_URL = '/api';
 
@@ -803,12 +804,8 @@ const FamilyTree = ({ authToken, userProfile, onViewAnimal, showModalMessage, on
                                         const remainingDays = ageInDays % 30;
                                         const ageInYears = Math.floor(ageInDays / 365);
                                         
-                                        // Format date as MM/DD/YYYY
-                                        const formattedDate = birthDate.toLocaleDateString('en-US', { 
-                                            year: 'numeric', 
-                                            month: '2-digit', 
-                                            day: '2-digit' 
-                                        });
+                                        // Format date as DD/MM/YYYY
+                                        const formattedDate = formatDate(birthDate);
                                         
                                         // Format age
                                         let ageStr = '';
