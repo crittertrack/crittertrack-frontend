@@ -269,7 +269,7 @@ const FamilyTree = ({ authToken, userProfile, onViewAnimal, showModalMessage, on
         dagreGraph.setGraph({ 
             rankdir: 'TB', // Top to bottom (classical tree layout)
             nodesep: 150,  // More horizontal spacing between nodes
-            ranksep: 200,  // More vertical spacing between ranks
+            ranksep: 300,  // Much more vertical spacing between generations
             marginx: 60,
             marginy: 60
         });
