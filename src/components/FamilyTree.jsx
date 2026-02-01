@@ -562,6 +562,29 @@ const FamilyTree = ({ authToken, userProfile, onViewAnimal, showModalMessage, on
         }
     }, [searchQuery, filteredAnimals, nodes, getNode, setCenter]);
     
+    // Focus on latest born animal on initial load
+    useEffect(() => {
+        if (!loading && nodes.length > 0 && allAnimals.length > 0 && !searchQuery) {
+            // Find the animal with the most recent dateOfBirth or createdAt
+            const sortedAnimals = [...allAnimals].sort((a, b) => {
+                const dateA = new Date(a.dateOfBirth || a.createdAt || 0);
+                const dateB = new Date(b.dateOfBirth || b.createdAt || 0);
+                return dateB - dateA; // Most recent first
+            });
+            
+            const latestAnimal = sortedAnimals[0];
+            if (latestAnimal) {
+                const node = getNode(latestAnimal.id_public);
+                if (node) {
+                    // Small delay to ensure layout is complete
+                    setTimeout(() => {
+                        setCenter(node.position.x + 90, node.position.y + 90, { zoom: 0.5, duration: 1000 });
+                    }, 500);
+                }
+            }
+        }
+    }, [loading, nodes, allAnimals, searchQuery, getNode, setCenter]);
+    
     // Update graph when filters change
     useEffect(() => {
         if (filteredAnimals.length > 0 && allAnimals.length > 0) {
@@ -751,15 +774,23 @@ const FamilyTree = ({ authToken, userProfile, onViewAnimal, showModalMessage, on
                             </button>
                         </div>
                         
-                        {selectedAnimal.images && selectedAnimal.images[0] && (
-                            <div className="w-full h-48 mb-4 rounded-lg overflow-hidden border-2 border-gray-200">
+                        {/* Image or Placeholder */}
+                        <div className="w-full h-48 mb-4 rounded-lg overflow-hidden border-2 border-gray-200 bg-gray-100">
+                            {selectedAnimal.images && selectedAnimal.images[0] ? (
                                 <img
                                     src={selectedAnimal.images[0]}
                                     alt={selectedAnimal.name}
                                     className="w-full h-full object-cover"
                                 />
-                            </div>
-                        )}
+                            ) : (
+                                <div className="w-full h-full flex items-center justify-center text-gray-400">
+                                    <div className="text-center">
+                                        <Users size={48} className="mx-auto mb-2" />
+                                        <p className="text-sm">No image available</p>
+                                    </div>
+                                </div>
+                            )}
+                        </div>
                         
                         <div className="space-y-2 mb-4 text-sm">
                             {selectedAnimal.sex && <div><span className="font-semibold">Sex:</span> {selectedAnimal.sex}</div>}
@@ -783,9 +814,10 @@ const FamilyTree = ({ authToken, userProfile, onViewAnimal, showModalMessage, on
                                 </div>
                             )}
                             {selectedAnimal.color && <div><span className="font-semibold">Color:</span> {selectedAnimal.color}</div>}
+                            {selectedAnimal.coat && <div><span className="font-semibold">Coat:</span> {selectedAnimal.coat}</div>}
                         </div>
                         
-                        {/* Relationships Section */}
+                        {/* Relationships Section */
                         <div className="border-t pt-4 mt-4">
                             <h4 className="font-bold text-gray-800 mb-3">Relationships</h4>
                             <div className="space-y-3 text-sm">
