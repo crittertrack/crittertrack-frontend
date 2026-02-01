@@ -325,6 +325,7 @@ const FamilyTree = ({ authToken, userProfile, onViewAnimal, showModalMessage, on
         
         console.log(`Created ${nodeList.length} nodes and ${edgeList.length} edges`);
         console.log('Edge types:', edgeList.map(e => e.id.split('-')[0]));
+        console.log('Sample edges:', edgeList.slice(0, 3));
         
         setNodes(nodeList);
         setEdges(edgeList);
@@ -504,6 +505,12 @@ const FamilyTree = ({ authToken, userProfile, onViewAnimal, showModalMessage, on
                     fitView
                     attributionPosition="bottom-left"
                     className="bg-gray-50"
+                    defaultEdgeOptions={{
+                        type: 'default',
+                        animated: false
+                    }}
+                    minZoom={0.1}
+                    maxZoom={2}
                 >
                     <Background color="#ddd" gap={16} />
                     <Controls />
