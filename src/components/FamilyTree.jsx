@@ -646,53 +646,56 @@ const FamilyTree = ({ authToken, userProfile, onViewAnimal, showModalMessage, on
                                 <h1 className="text-2xl font-bold text-gray-800">Family Tree</h1>
                             </div>
                         </div>
-                        
-                        <button
-                            onClick={() => setShowFilters(!showFilters)}
-                            className="flex items-center gap-2 px-4 py-2 bg-gray-100 hover:bg-gray-200 rounded-lg transition"
-                        >
-                            <Filter size={18} />
-                            <span>Filters</span>
-                            {showFilters ? <ChevronUp size={18} /> : <ChevronDown size={18} />}
-                        </button>
                     </div>
                     
-                    {/* Filters */}
-                    {showFilters && (
-                        <div className="border-t border-gray-200 pt-3 grid grid-cols-1 md:grid-cols-2 gap-3">
-                            {/* Search */}
-                            <div className="relative">
-                                <Search size={18} className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" />
-                                <input
-                                    type="text"
-                                    placeholder="Search by name or CTC..."
-                                    value={searchQuery}
-                                    onChange={(e) => setSearchQuery(e.target.value)}
-                                    className="w-full pl-10 pr-10 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent"
-                                />
-                                {searchQuery && (
-                                    <button
-                                        onClick={() => setSearchQuery('')}
-                                        className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600"
-                                    >
-                                        <X size={18} />
-                                    </button>
-                                )}
-                            </div>
-                            
-                            {/* Species Filter */}
-                            <select
-                                value={filterSpecies}
-                                onChange={(e) => setFilterSpecies(e.target.value)}
-                                className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent"
-                            >
-                                <option value="all">All Species</option>
-                                {availableSpecies.map(species => (
-                                    <option key={species} value={species}>{species}</option>
-                                ))}
-                            </select>
+                    {/* Search Bar - Always Visible */}
+                    <div className="mb-3">
+                        <div className="relative">
+                            <Search size={18} className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" />
+                            <input
+                                type="text"
+                                placeholder="Search by name or CTC..."
+                                value={searchQuery}
+                                onChange={(e) => setSearchQuery(e.target.value)}
+                                className="w-full pl-10 pr-10 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent"
+                            />
+                            {searchQuery && (
+                                <button
+                                    onClick={() => setSearchQuery('')}
+                                    className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600"
+                                >
+                                    <X size={18} />
+                                </button>
+                            )}
                         </div>
-                    )}
+                    </div>
+                    
+                    {/* Additional Filters - Collapsible */}
+                    <div className="mb-3">
+                        <button
+                            onClick={() => setShowFilters(!showFilters)}
+                            className="flex items-center gap-2 px-3 py-1.5 text-sm bg-gray-100 hover:bg-gray-200 rounded-lg transition"
+                        >
+                            <Filter size={16} />
+                            <span>Species Filter</span>
+                            {showFilters ? <ChevronUp size={16} /> : <ChevronDown size={16} />}
+                        </button>
+                        
+                        {showFilters && (
+                            <div className="mt-2">
+                                <select
+                                    value={filterSpecies}
+                                    onChange={(e) => setFilterSpecies(e.target.value)}
+                                    className="w-full md:w-64 px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent"
+                                >
+                                    <option value="all">All Species</option>
+                                    {availableSpecies.map(species => (
+                                        <option key={species} value={species}>{species}</option>
+                                    ))}
+                                </select>
+                            </div>
+                        )}
+                    </div>
                     
                     {/* Stats */}
                     <div className="mt-3 grid grid-cols-4 gap-2 text-center">
