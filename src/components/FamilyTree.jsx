@@ -259,7 +259,6 @@ const FamilyTree = ({ authToken, userProfile, onViewAnimal, showModalMessage, on
         animals.forEach(animal => {
             // Add sire if not already present
             if (animal.sireId_public && !allUniqueAnimals.has(animal.sireId_public)) {
-                console.log(`Creating placeholder sire: ${animal.sireId_public} for ${animal.name || animal.id_public}`);
                 allUniqueAnimals.set(animal.sireId_public, {
                     id_public: animal.sireId_public,
                     name: animal.sireId_public,
@@ -272,7 +271,6 @@ const FamilyTree = ({ authToken, userProfile, onViewAnimal, showModalMessage, on
             
             // Add dam if not already present
             if (animal.damId_public && !allUniqueAnimals.has(animal.damId_public)) {
-                console.log(`Creating placeholder dam: ${animal.damId_public} for ${animal.name || animal.id_public}`);
                 allUniqueAnimals.set(animal.damId_public, {
                     id_public: animal.damId_public,
                     name: animal.damId_public,
@@ -320,11 +318,6 @@ const FamilyTree = ({ authToken, userProfile, onViewAnimal, showModalMessage, on
                 animal: animal
             }
         }));
-        
-        // Debug: Count owned vs non-owned animals
-        const ownedCount = Array.from(allUniqueAnimals.values()).filter(a => a.isOwned).length;
-        const nonOwnedCount = Array.from(allUniqueAnimals.values()).filter(a => !a.isOwned).length;
-        console.log(`Family tree contains: ${ownedCount} owned animals, ${nonOwnedCount} non-owned placeholders, total: ${ownedCount + nonOwnedCount}`);
         
         // Use dagre to calculate hierarchical layout
         const dagreGraph = new dagre.graphlib.Graph();
