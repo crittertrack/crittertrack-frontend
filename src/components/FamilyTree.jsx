@@ -191,7 +191,7 @@ const FamilyTree = ({ authToken, userProfile, onViewAnimal, showModalMessage, on
                     try {
                         // Fetch each related animal individually using the public endpoint
                         const fetchPromises = Array.from(relatedIds).map(id =>
-                            axios.get(`${API_BASE_URL}/animals/public/${id}`)
+                            axios.get(`${API_BASE_URL}/animal/${id}`)
                                 .then(response => response.data)
                                 .catch(err => {
                                     console.error(`Failed to fetch animal ${id}:`, err.message);
