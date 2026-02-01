@@ -32,16 +32,27 @@ const AnimalNode = ({ data }) => {
     // Build full name with prefix/suffix
     const fullName = [data.prefix, data.label, data.suffix].filter(Boolean).join(' ');
     
+    // Gender-based border color
+    const getBorderColor = () => {
+        switch(data.gender?.toLowerCase()) {
+            case 'male':
+                return 'border-blue-500';
+            case 'female':
+                return 'border-pink-500';
+            case 'intersex':
+                return 'border-purple-500';
+            default:
+                return 'border-gray-400';
+        }
+    };
+    
     return (
         <div className="flex flex-col items-center">
             {/* Circular Image */}
             <div
                 className={`
                     rounded-full overflow-hidden border-4 shadow-lg cursor-pointer transition-all
-                    ${isOwned 
-                        ? 'border-primary' 
-                        : 'border-gray-300'
-                    }
+                    ${getBorderColor()}
                     ${isSelected ? 'ring-4 ring-blue-500 scale-110' : 'hover:scale-105'}
                 `}
                 style={{ width: '80px', height: '80px' }}
@@ -222,6 +233,7 @@ const FamilyTree = ({ authToken, userProfile, onViewAnimal, showModalMessage, on
                     label: animal.name || animal.id_public,
                     prefix: animal.prefix || '',
                     suffix: animal.suffix || '',
+                    gender: animal.gender || animal.sex || 'Unknown',
                     species: animal.species || 'Unknown',
                     genetics: animal.geneticCode || '',
                     image: animal.images?.[0] || null,
