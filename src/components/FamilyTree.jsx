@@ -32,6 +32,7 @@ const API_BASE_URL = '/api';
 const AnimalNode = ({ data }) => {
     const isOwned = data.isOwned;
     const isSelected = data.isSelected;
+    const isSearchMatch = data.isSearchMatch;
     
     // Build full name with prefix/suffix
     const fullName = [data.prefix, data.label, data.suffix].filter(Boolean).join(' ');
@@ -96,8 +97,13 @@ const AnimalNode = ({ data }) => {
                     rounded-full overflow-hidden border-4 shadow-lg cursor-pointer transition-all
                     ${getBorderColor()}
                     ${isSelected ? 'ring-4 ring-blue-500 scale-110' : 'hover:scale-105'}
+                    ${isSearchMatch ? 'ring-4 ring-yellow-400 ring-offset-2 animate-pulse' : ''}
                 `}
-                style={{ width: '120px', height: '120px' }}
+                style={{ 
+                    width: '120px', 
+                    height: '120px',
+                    opacity: isSearchMatch ? 1 : (isSearchMatch === false ? 0.4 : 1)
+                }}
             >
                 {data.image ? (
                     <img
@@ -115,11 +121,12 @@ const AnimalNode = ({ data }) => {
             {/* Name Bar */}
             <div
                 className={`
-                    mt-2 px-4 py-2 rounded-full shadow-md text-center font-semibold text-sm
+                    mt-2 px-4 py-2 rounded-full shadow-md text-center font-semibold text-sm transition-all
                     ${isOwned 
                         ? 'bg-primary text-black' 
                         : 'bg-gray-600 text-white'
                     }
+                    ${isSearchMatch ? 'ring-2 ring-yellow-400 bg-yellow-100 text-black font-bold' : ''}
                 `}
                 style={{ minWidth: '120px', maxWidth: '180px' }}
             >
@@ -521,6 +528,226 @@ const FamilyTree = ({ authToken, userProfile, onViewAnimal, showModalMessage, on
         setEdges(edgeList);
     };
 
+    // Build graph with highlighted search results (keeps entire tree visible)
+    const buildGraphWithHighlights = (allAnimalsData, matchingAnimals) => {
+        const matchingIds = new Set(matchingAnimals.map(animal => animal.id_public));
+        
+        // Use the same graph building logic as buildGraph but highlight matches
+        const allUniqueAnimals = new Map();
+        const edgeList = [];
+        
+        // First pass: Add all animals from API (preserving their actual ownership status)
+        allAnimalsData.forEach(animal => {
+            allUniqueAnimals.set(animal.id_public, {
+                ...animal,
+                isSearchMatch: matchingIds.has(animal.id_public) // Add search match flag
+            });
+        });
+        
+        // Second pass: Add parents for all owned animals
+        allAnimalsData.forEach(animal => {
+            // Add sire if not already present
+            if (animal.sireId_public && !allUniqueAnimals.has(animal.sireId_public)) {
+                allUniqueAnimals.set(animal.sireId_public, {
+                    id_public: animal.sireId_public,
+                    name: animal.sireId_public,
+                    species: animal.species,
+                    sex: 'Male',
+                    gender: 'Male',
+                    isOwned: false,
+                    isSearchMatch: matchingIds.has(animal.sireId_public)
+                });
+            }
+            
+            // Add dam if not already present
+            if (animal.damId_public && !allUniqueAnimals.has(animal.damId_public)) {
+                allUniqueAnimals.set(animal.damId_public, {
+                    id_public: animal.damId_public,
+                    name: animal.damId_public,
+                    species: animal.species,
+                    sex: 'Female',
+                    gender: 'Female',
+                    isOwned: false,
+                    isSearchMatch: matchingIds.has(animal.damId_public)
+                });
+            }
+        });
+        
+        // Track mating pairs for later processing
+        const matingPairData = new Map();
+        allUniqueAnimals.forEach(animal => {
+            if (animal.sireId_public && animal.damId_public && 
+                allUniqueAnimals.has(animal.sireId_public) && 
+                allUniqueAnimals.has(animal.damId_public)) {
+                const pairKey = [animal.sireId_public, animal.damId_public].sort().join('-');
+                if (!matingPairData.has(pairKey)) {
+                    matingPairData.set(pairKey, {
+                        sire: animal.sireId_public,
+                        dam: animal.damId_public,
+                        children: []
+                    });
+                }
+                matingPairData.get(pairKey).children.push(animal.id_public);
+            }
+        });
+        
+        // Create initial nodes without positions (with highlight styling)
+        const nodeList = Array.from(allUniqueAnimals.values()).map(animal => ({
+            id: animal.id_public,
+            type: 'animalNode',
+            position: { x: 0, y: 0 }, // Will be set by dagre
+            data: {
+                label: animal.name || animal.id_public,
+                prefix: animal.prefix || '',
+                suffix: animal.suffix || '',
+                gender: animal.gender || animal.sex || 'Unknown',
+                species: animal.species || 'Unknown',
+                genetics: animal.geneticCode || '',
+                image: animal.imageUrl || animal.photoUrl || null,
+                isOwned: animal.isOwned,
+                isSelected: selectedAnimal?.id_public === animal.id_public,
+                isSearchMatch: animal.isSearchMatch, // Add search match flag for styling
+                animal: animal
+            }
+        }));
+        
+        // Use dagre to calculate hierarchical layout (same as buildGraph)
+        const dagreGraph = new dagre.graphlib.Graph();
+        dagreGraph.setDefaultEdgeLabel(() => ({}));
+        
+        dagreGraph.setGraph({ 
+            rankdir: 'TB',
+            nodesep: 80,
+            ranksep: 300,
+            marginx: 60,
+            marginy: 60
+        });
+        
+        nodeList.forEach(node => {
+            dagreGraph.setNode(node.id, { width: 180, height: 180 });
+        });
+        
+        // Add parent-child edges to dagre for layout calculation
+        allUniqueAnimals.forEach(animal => {
+            if (animal.sireId_public && allUniqueAnimals.has(animal.sireId_public)) {
+                dagreGraph.setEdge(animal.sireId_public, animal.id_public);
+            }
+            else if (animal.damId_public && allUniqueAnimals.has(animal.damId_public)) {
+                dagreGraph.setEdge(animal.damId_public, animal.id_public);
+            }
+        });
+        
+        // Calculate layout
+        dagre.layout(dagreGraph);
+        
+        // Apply calculated positions to nodes
+        nodeList.forEach(node => {
+            const nodeWithPosition = dagreGraph.node(node.id);
+            node.position = {
+                x: nodeWithPosition.x - 90,
+                y: nodeWithPosition.y - 90
+            };
+        });
+        
+        // Create family unit nodes and edges (same logic as buildGraph)
+        const familyUnitNodes = [];
+        const childrenWithBothParents = new Set();
+        
+        matingPairData.forEach((pairData, pairKey) => {
+            if (pairData.children.length > 0) {
+                const sireNode = dagreGraph.node(pairData.sire);
+                const damNode = dagreGraph.node(pairData.dam);
+                
+                const midpointX = (sireNode.x + damNode.x) / 2;
+                const midpointY = Math.max(sireNode.y, damNode.y) + 100;
+                const midpointId = `family-${pairKey}`;
+                
+                familyUnitNodes.push({
+                    id: midpointId,
+                    type: 'default',
+                    position: { x: midpointX - 10, y: midpointY - 10 },
+                    data: { label: '' },
+                    style: { 
+                        width: 20, 
+                        height: 20, 
+                        backgroundColor: '#8b5cf6', 
+                        borderRadius: '50%', 
+                        border: '2px solid #7c3aed',
+                        opacity: 0.8
+                    }
+                });
+                
+                edgeList.push({
+                    id: `sire-mating-${pairKey}`,
+                    source: pairData.sire,
+                    target: pairData.dam,
+                    type: 'straight',
+                    animated: false,
+                    style: { stroke: '#f97316', strokeWidth: 3, strokeDasharray: '8,4' },
+                    targetHandle: 'left-target'
+                });
+                
+                pairData.children.forEach(childId => {
+                    childrenWithBothParents.add(childId);
+                    edgeList.push({
+                        id: `offspring-${pairKey}-${childId}`,
+                        source: midpointId,
+                        target: childId,
+                        type: 'smoothstep',
+                        animated: false,
+                        style: { stroke: '#6366f1', strokeWidth: 2 },
+                        markerEnd: {
+                            type: MarkerType.ArrowClosed,
+                            color: '#6366f1'
+                        }
+                    });
+                });
+            }
+        });
+        
+        // Add edges for children with only ONE parent
+        allUniqueAnimals.forEach(animal => {
+            if (!childrenWithBothParents.has(animal.id_public)) {
+                if (animal.sireId_public && allUniqueAnimals.has(animal.sireId_public) && !animal.damId_public) {
+                    edgeList.push({
+                        id: `sire-${animal.sireId_public}-${animal.id_public}`,
+                        source: animal.sireId_public,
+                        target: animal.id_public,
+                        type: 'smoothstep',
+                        animated: false,
+                        style: { stroke: '#3b82f6', strokeWidth: 2 },
+                        markerEnd: {
+                            type: MarkerType.ArrowClosed,
+                            color: '#3b82f6'
+                        }
+                    });
+                }
+                
+                if (animal.damId_public && allUniqueAnimals.has(animal.damId_public) && !animal.sireId_public) {
+                    edgeList.push({
+                        id: `dam-${animal.damId_public}-${animal.id_public}`,
+                        source: animal.damId_public,
+                        target: animal.id_public,
+                        type: 'smoothstep',
+                        animated: false,
+                        style: { stroke: '#ec4899', strokeWidth: 2 },
+                        markerEnd: {
+                            type: MarkerType.ArrowClosed,
+                            color: '#ec4899'
+                        }
+                    });
+                }
+            }
+        });
+        
+        nodeList.push(...familyUnitNodes);
+        
+        console.log(`Created highlighted graph: ${nodeList.length} nodes, ${edgeList.length} edges, ${matchingAnimals.length} matches`);
+        
+        setNodes(nodeList);
+        setEdges(edgeList);
+    };
+
     // Handle node click
     const onNodeClick = useCallback((event, node) => {
         const animal = node.data.animal;
@@ -587,16 +814,20 @@ const FamilyTree = ({ authToken, userProfile, onViewAnimal, showModalMessage, on
         }
     }, [loading, nodes, allAnimals, searchQuery, getNode, setCenter]);
     
-    // Update graph when filters change
+    // Update graph when filters change - but keep entire tree for search
     useEffect(() => {
-        if (filteredAnimals.length > 0 && allAnimals.length > 0) {
-            if (searchQuery || filterSpecies !== 'all') {
+        if (allAnimals.length > 0) {
+            // For search, keep entire tree visible but highlight matches
+            if (searchQuery) {
+                buildGraphWithHighlights(allAnimals, filteredAnimals);
+            } else if (filterSpecies !== 'all') {
+                // Only for species filter, actually filter the tree
                 buildGraph(filteredAnimals);
             } else {
                 buildGraph(allAnimals);
             }
         }
-    }, [filteredAnimals, searchQuery, filterSpecies]);
+    }, [filteredAnimals, searchQuery, filterSpecies, allAnimals]);
 
     if (loading) {
         return (
