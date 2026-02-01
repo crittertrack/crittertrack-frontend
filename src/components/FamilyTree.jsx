@@ -224,60 +224,84 @@ const FamilyTree = ({ authToken, userProfile, onViewAnimal, showModalMessage, on
             }
         });
         
-        // Create edges for all relationships
-        allUniqueAnimals.forEach(animal => {
-            // Parent-child edges (sire)
-            if (animal.sireId_public && allUniqueAnimals.has(animal.sireId_public)) {
-                edgeList.push({
-                    id: `sire-${animal.sireId_public}-${animal.id_public}`,
-                    source: animal.sireId_public,
-                    target: animal.id_public,
-                    type: 'default',
-                    animated: false,
-                    style: { stroke: '#3b82f6', strokeWidth: 2 },
-                    markerEnd: {
-                        type: MarkerType.ArrowClosed,
-                        color: '#3b82f6'
-                    }
-                });
-            }
-            
-            // Parent-child edges (dam)
-            if (animal.damId_public && allUniqueAnimals.has(animal.damId_public)) {
-                edgeList.push({
-                    id: `dam-${animal.damId_public}-${animal.id_public}`,
-                    source: animal.damId_public,
-                    target: animal.id_public,
-                    type: 'default',
-                    animated: false,
-                    style: { stroke: '#ec4899', strokeWidth: 2 },
-                    markerEnd: {
-                        type: MarkerType.ArrowClosed,
-                        color: '#ec4899'
-                    }
-                });
-            }
-        });
+        // Build mating pair relationships and create midpoint nodes
+        const matingPairs = new Map(); // pairKey -> { sire, dam, children: [] }
+        const matingPairNodes = []; // Invisible midpoint nodes
         
-        // Add partner/mating edges (between animals that have offspring together)
-        const matingPairs = new Set();
         allUniqueAnimals.forEach(animal => {
             if (animal.sireId_public && animal.damId_public && 
                 allUniqueAnimals.has(animal.sireId_public) && 
                 allUniqueAnimals.has(animal.damId_public)) {
                 const pairKey = [animal.sireId_public, animal.damId_public].sort().join('-');
+                
                 if (!matingPairs.has(pairKey)) {
-                    matingPairs.add(pairKey);
-                    edgeList.push({
-                        id: `mate-${pairKey}`,
-                        source: animal.sireId_public,
-                        target: animal.damId_public,
-                        type: 'straight',
-                        animated: false,
-                        style: { stroke: '#8b5cf6', strokeWidth: 3, strokeDasharray: '8,4' },
-                        sourceHandle: 'right',
-                        targetHandle: 'left-target'
+                    matingPairs.set(pairKey, {
+                        sire: animal.sireId_public,
+                        dam: animal.damId_public,
+                        children: []
                     });
+                }
+                matingPairs.get(pairKey).children.push(animal.id_public);
+            }
+        });
+        
+        // Create edges for mating pairs and their children
+        matingPairs.forEach((pairData, pairKey) => {
+            const midpointId = `midpoint-${pairKey}`;
+            
+            // Create invisible midpoint node
+            matingPairNodes.push({
+                id: midpointId,
+                type: 'default',
+                position: { x: 0, y: 0 }, // Will be calculated by dagre
+                data: { label: '' },
+                style: {
+                    width: 10,
+                    height: 10,
+                    background: 'transparent',
+                    border: 'none'
+                },
+                hidden: false
+            });
+            
+            // Partner line: sire to midpoint
+            edgeList.push({
+                id: `mate1-${pairKey}`,
+                source: pairData.sire,
+                target: midpointId,
+                type: 'straight',
+                animated: false,
+                style: { stroke: '#8b5cf6', strokeWidth: 3, strokeDasharray: '8,4' },
+                sourceHandle: 'right'
+            });
+            
+            // Partner line: midpoint to dam
+            edgeList.push({
+                id: `mate2-${pairKey}`,
+                source: midpointId,
+                target: pairData.dam,
+                type: 'straight',
+                animated: false,
+                style: { stroke: '#8b5cf6', strokeWidth: 3, strokeDasharray: '8,4' },
+                targetHandle: 'left-target'
+            });
+            
+            // Children lines: from midpoint to each child
+            pairData.children.forEach(childId => {
+                edgeList.push({
+                    id: `child-${pairKey}-${childId}`,
+                    source: midpointId,
+                    target: childId,
+                    type: 'default',
+                    animated: false,
+                    style: { stroke: '#6366f1', strokeWidth: 2 },
+                    markerEnd: {
+                        type: MarkerType.ArrowClosed,
+                        color: '#6366f1'
+                    }
+                });
+            });
+        });
                 }
             }
         });
@@ -313,23 +337,26 @@ const FamilyTree = ({ authToken, userProfile, onViewAnimal, showModalMessage, on
         });
         
         // Create initial nodes without positions
-        const nodeList = Array.from(allUniqueAnimals.values()).map(animal => ({
-            id: animal.id_public,
-            type: 'animalNode',
-            position: { x: 0, y: 0 }, // Will be set by dagre
-            data: {
-                label: animal.name || animal.id_public,
-                prefix: animal.prefix || '',
-                suffix: animal.suffix || '',
-                gender: animal.gender || animal.sex || 'Unknown',
-                species: animal.species || 'Unknown',
-                genetics: animal.geneticCode || '',
-                image: animal.images?.[0] || null,
-                isOwned: animal.isOwned,
-                isSelected: selectedAnimal?.id_public === animal.id_public,
-                animal: animal
-            }
-        }));
+        const nodeList = [
+            ...Array.from(allUniqueAnimals.values()).map(animal => ({
+                id: animal.id_public,
+                type: 'animalNode',
+                position: { x: 0, y: 0 }, // Will be set by dagre
+                data: {
+                    label: animal.name || animal.id_public,
+                    prefix: animal.prefix || '',
+                    suffix: animal.suffix || '',
+                    gender: animal.gender || animal.sex || 'Unknown',
+                    species: animal.species || 'Unknown',
+                    genetics: animal.geneticCode || '',
+                    image: animal.images?.[0] || null,
+                    isOwned: animal.isOwned,
+                    isSelected: selectedAnimal?.id_public === animal.id_public,
+                    animal: animal
+                }
+            })),
+            ...matingPairNodes
+        ];
         
         // Use dagre to calculate hierarchical layout
         const dagreGraph = new dagre.graphlib.Graph();
@@ -346,12 +373,14 @@ const FamilyTree = ({ authToken, userProfile, onViewAnimal, showModalMessage, on
         
         // Add nodes to dagre graph
         nodeList.forEach(node => {
-            dagreGraph.setNode(node.id, { width: 180, height: 180 });
+            // Midpoint nodes are smaller
+            const size = node.id.startsWith('midpoint-') ? { width: 10, height: 10 } : { width: 180, height: 180 };
+            dagreGraph.setNode(node.id, size);
         });
         
-        // Add edges to dagre graph (only parent-child for layout, not sibling/mate)
+        // Add edges to dagre graph (for layout calculation)
         edgeList.forEach(edge => {
-            if (edge.id.startsWith('sire-') || edge.id.startsWith('dam-')) {
+            if (edge.id.startsWith('child-') || edge.id.startsWith('mate')) {
                 dagreGraph.setEdge(edge.source, edge.target);
             }
         });
