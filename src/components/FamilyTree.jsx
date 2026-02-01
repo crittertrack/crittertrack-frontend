@@ -268,10 +268,11 @@ const FamilyTree = ({ authToken, userProfile, onViewAnimal, showModalMessage, on
         // Configure the graph for top-to-bottom layout (oldest at top, children below)
         dagreGraph.setGraph({ 
             rankdir: 'TB', // Top to bottom (classical tree layout)
-            nodesep: 150,  // More horizontal spacing between nodes
+            nodesep: 80,   // Reduced horizontal spacing between nodes
             ranksep: 300,  // Much more vertical spacing between generations
             marginx: 60,
-            marginy: 60
+            marginy: 60,
+            ranker: 'tight-tree' // Use tight tree ranking for better clustering
         });
         
         // Add nodes to dagre graph
@@ -293,7 +294,10 @@ const FamilyTree = ({ authToken, userProfile, onViewAnimal, showModalMessage, on
         
         // Add partner edges to dagre so partners are positioned near each other
         matingPairData.forEach((pairData) => {
-            dagreGraph.setEdge(pairData.sire, pairData.dam, { minlen: 1, weight: 10 });
+            dagreGraph.setEdge(pairData.sire, pairData.dam, { 
+                minlen: 0,    // Allow them to be adjacent 
+                weight: 100   // Very high weight to keep them close together
+            });
         });
         
         // Calculate layout
