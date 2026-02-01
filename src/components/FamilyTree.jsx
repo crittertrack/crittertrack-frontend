@@ -29,44 +29,48 @@ const AnimalNode = ({ data }) => {
     const isOwned = data.isOwned;
     const isSelected = data.isSelected;
     
+    // Build full name with prefix/suffix
+    const fullName = [data.prefix, data.label, data.suffix].filter(Boolean).join(' ');
+    
     return (
-        <div
-            className={`
-                px-3 py-2 rounded-lg border-2 shadow-md cursor-pointer transition-all
-                ${isOwned 
-                    ? 'bg-gradient-to-br from-primary/20 to-primary/10 border-primary' 
-                    : 'bg-white border-gray-300'
-                }
-                ${isSelected ? 'ring-4 ring-blue-500 scale-110' : 'hover:scale-105'}
-            `}
-            style={{ minWidth: '120px' }}
-        >
-            {data.image && (
-                <div className="w-12 h-12 mx-auto mb-1 rounded-full overflow-hidden border-2 border-white">
+        <div className="flex flex-col items-center">
+            {/* Circular Image */}
+            <div
+                className={`
+                    rounded-full overflow-hidden border-4 shadow-lg cursor-pointer transition-all
+                    ${isOwned 
+                        ? 'border-primary' 
+                        : 'border-gray-300'
+                    }
+                    ${isSelected ? 'ring-4 ring-blue-500 scale-110' : 'hover:scale-105'}
+                `}
+                style={{ width: '80px', height: '80px' }}
+            >
+                {data.image ? (
                     <img
                         src={data.image}
-                        alt={data.label}
+                        alt={fullName}
                         className="w-full h-full object-cover"
                     />
-                </div>
-            )}
-            <div className="text-center">
-                <div className="font-semibold text-xs text-gray-800 truncate">
-                    {data.label}
-                </div>
-                <div className="text-[10px] text-gray-500">
-                    {data.species}
-                </div>
-                {data.genetics && (
-                    <div className="text-[9px] text-gray-400 truncate">
-                        {data.genetics}
+                ) : (
+                    <div className="w-full h-full bg-gray-200 flex items-center justify-center text-gray-400 text-xs">
+                        No Image
                     </div>
                 )}
-                {isOwned && (
-                    <div className="mt-1 inline-block px-2 py-0.5 bg-primary text-black text-[9px] font-bold rounded">
-                        OWNED
-                    </div>
-                )}
+            </div>
+            
+            {/* Name Bar */}
+            <div
+                className={`
+                    mt-2 px-3 py-1.5 rounded-full shadow-md text-center font-semibold text-sm
+                    ${isOwned 
+                        ? 'bg-primary text-black' 
+                        : 'bg-gray-600 text-white'
+                    }
+                `}
+                style={{ minWidth: '100px', maxWidth: '150px' }}
+            >
+                <div className="truncate">{fullName}</div>
             </div>
         </div>
     );
@@ -216,6 +220,8 @@ const FamilyTree = ({ authToken, userProfile, onViewAnimal, showModalMessage, on
                 },
                 data: {
                     label: animal.name || animal.id_public,
+                    prefix: animal.prefix || '',
+                    suffix: animal.suffix || '',
                     species: animal.species || 'Unknown',
                     genetics: animal.geneticCode || '',
                     image: animal.images?.[0] || null,
