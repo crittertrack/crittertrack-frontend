@@ -374,6 +374,9 @@ const FamilyTree = ({ authToken, userProfile, onViewAnimal, showModalMessage, on
             }
         }));
         
+        console.log(`Created ${nodeList.length} nodes and ${edgeList.length} edges`);
+        console.log('Edge types:', edgeList.map(e => e.id.split('-')[0]));
+        
         setNodes(nodeList);
         setEdges(edgeList);
     };
