@@ -2361,7 +2361,7 @@ const PrivateAnimalDetail = ({ animal, onClose, onEdit, API_BASE_URL, authToken,
                                 <div className="space-y-3 text-sm">
                                     <div className="flex items-center gap-2">
                                         <span className="text-gray-600">Currently Owned:</span>
-                                        <strong>{animal.isOwned ? '? Yes' : '? No'}</strong>
+                                        <strong>{animal.isOwned ? 'Yes' : 'No'}</strong>
                                     </div>
                                     <div>
                                         <span className="text-gray-600 block mb-1">Breeder:</span>
@@ -2394,13 +2394,13 @@ const PrivateAnimalDetail = ({ animal, onClose, onEdit, API_BASE_URL, authToken,
                                     <div>
                                         <span className="text-gray-600">For Sale:</span>
                                         <strong className="block mt-1">
-                                            {animal.isForSale ? `? Yes - ${animal.salePriceCurrency || ''} ${animal.salePriceAmount || 'Negotiable'}`.trim() : '? No'}
+                                            {animal.isForSale ? `Yes - ${animal.salePriceCurrency || ''} ${animal.salePriceAmount || 'Negotiable'}`.trim() : 'No'}
                                         </strong>
                                     </div>
                                     <div>
                                         <span className="text-gray-600">For Stud:</span>
                                         <strong className="block mt-1">
-                                            {animal.availableForBreeding ? `? Yes - ${animal.studFeeCurrency || ''} ${animal.studFeeAmount || 'Negotiable'}`.trim() : '? No'}
+                                            {animal.availableForBreeding ? `Yes - ${animal.studFeeCurrency || ''} ${animal.studFeeAmount || 'Negotiable'}`.trim() : 'No'}
                                         </strong>
                                     </div>
                                 </div>
@@ -2534,22 +2534,22 @@ const PrivateAnimalDetail = ({ animal, onClose, onEdit, API_BASE_URL, authToken,
                             <div className="bg-gray-50 p-4 rounded-lg border border-gray-200 space-y-4">
                                 <h3 className="text-lg font-semibold text-gray-700">Reproductive Status</h3>
                                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm">
-                                    <div><span className="text-gray-600">Neutered/Spayed:</span> <strong>{animal.isNeutered ? '? Yes' : '? No'}</strong></div>
-                                    <div><span className="text-gray-600">Infertile:</span> <strong>{animal.isInfertile ? '? Yes' : '? No'}</strong></div>
+                                    <div><span className="text-gray-600">Neutered/Spayed:</span> <strong>{animal.isNeutered ? 'Yes' : 'No'}</strong></div>
+                                    <div><span className="text-gray-600">Infertile:</span> <strong>{animal.isInfertile ? 'Yes' : 'No'}</strong></div>
                                     {!animal.isNeutered && !animal.isInfertile && (
-                                        <div><span className="text-gray-600">In Mating:</span> <strong>{animal.isInMating ? '? Yes' : '? No'}</strong></div>
+                                        <div><span className="text-gray-600">In Mating:</span> <strong>{animal.isInMating ? 'Yes' : 'No'}</strong></div>
                                     )}
                                     {(animal.gender === 'Female' || animal.gender === 'Intersex' || animal.gender === 'Unknown') && !animal.isNeutered && (
                                         <>
-                                            <div><span className="text-gray-600">Pregnant:</span> <strong>{animal.isPregnant ? '? Yes' : '? No'}</strong></div>
-                                            <div><span className="text-gray-600">Nursing:</span> <strong>{animal.isNursing ? '? Yes' : '? No'}</strong></div>
+                                            <div><span className="text-gray-600">Pregnant:</span> <strong>{animal.isPregnant ? 'Yes' : 'No'}</strong></div>
+                                            <div><span className="text-gray-600">Nursing:</span> <strong>{animal.isNursing ? 'Yes' : 'No'}</strong></div>
                                         </>
                                     )}
                                     {animal.gender === 'Male' && !animal.isNeutered && !animal.isInfertile && (
-                                        <div><span className="text-gray-600">Stud Animal:</span> <strong>{animal.isStudAnimal ? '? Yes' : '? No'}</strong></div>
+                                        <div><span className="text-gray-600">Stud Animal:</span> <strong>{animal.isStudAnimal ? 'Yes' : 'No'}</strong></div>
                                     )}
                                     {animal.gender === 'Female' && !animal.isNeutered && !animal.isInfertile && (
-                                        <div><span className="text-gray-600">Breeding Dam:</span> <strong>{animal.isDamAnimal ? '? Yes' : '? No'}</strong></div>
+                                        <div><span className="text-gray-600">Breeding Dam:</span> <strong>{animal.isDamAnimal ? 'Yes' : 'No'}</strong></div>
                                     )}
                                 </div>
                             </div>
@@ -2577,7 +2577,7 @@ const PrivateAnimalDetail = ({ animal, onClose, onEdit, API_BASE_URL, authToken,
                                         <div><span className="text-gray-600">Mating Date:</span> <strong>{formatDateDisplay(animal.matingDates)}</strong></div>
                                         <div><span className="text-gray-600">Expected Due Date:</span> <strong>{formatDateDisplay(animal.expectedDueDate)}</strong></div>
                                         {(animal.species === 'Dog' || animal.species === 'Cat') && (
-                                            <div><span className="text-gray-600">Artificial Insemination:</span> <strong>{animal.artificialInseminationUsed ? '? Yes' : '? No'}</strong></div>
+                                            <div><span className="text-gray-600">Artificial Insemination:</span> <strong>{animal.artificialInseminationUsed ? 'Yes' : 'No'}</strong></div>
                                         )}
                                     </div>
                                 </div>
@@ -3252,7 +3252,7 @@ const ViewOnlyPrivateAnimalDetail = ({ animal, onClose, API_BASE_URL, authToken,
                                 <div className="space-y-3 text-sm">
                                     <div className="flex items-center gap-2">
                                         <span className="text-gray-600">Currently Owned:</span>
-                                        <strong>{animal.isOwned ? '? Yes' : '? No'}</strong>
+                                        <strong>{animal.isOwned ? 'Yes' : 'No'}</strong>
                                     </div>
                                     <div>
                                         <span className="text-gray-600 block mb-1">Breeder:</span>
@@ -3285,13 +3285,13 @@ const ViewOnlyPrivateAnimalDetail = ({ animal, onClose, API_BASE_URL, authToken,
                                     <div>
                                         <span className="text-gray-600">For Sale:</span>
                                         <strong className="block mt-1">
-                                            {animal.isForSale ? `? Yes - ${animal.salePriceCurrency || ''} ${animal.salePriceAmount || 'Negotiable'}`.trim() : '? No'}
+                                            {animal.isForSale ? `Yes - ${animal.salePriceCurrency || ''} ${animal.salePriceAmount || 'Negotiable'}`.trim() : 'No'}
                                         </strong>
                                     </div>
                                     <div>
                                         <span className="text-gray-600">For Stud:</span>
                                         <strong className="block mt-1">
-                                            {animal.availableForBreeding ? `? Yes - ${animal.studFeeCurrency || ''} ${animal.studFeeAmount || 'Negotiable'}`.trim() : '? No'}
+                                            {animal.availableForBreeding ? `Yes - ${animal.studFeeCurrency || ''} ${animal.studFeeAmount || 'Negotiable'}`.trim() : 'No'}
                                         </strong>
                                     </div>
                                 </div>
@@ -3423,22 +3423,22 @@ const ViewOnlyPrivateAnimalDetail = ({ animal, onClose, API_BASE_URL, authToken,
                             <div className="bg-gray-50 p-4 rounded-lg border border-gray-200 space-y-4">
                                 <h3 className="text-lg font-semibold text-gray-700">Reproductive Status</h3>
                                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm">
-                                    <div><span className="text-gray-600">Neutered/Spayed:</span> <strong>{animal.isNeutered ? '? Yes' : '? No'}</strong></div>
-                                    <div><span className="text-gray-600">Infertile:</span> <strong>{animal.isInfertile ? '? Yes' : '? No'}</strong></div>
+                                    <div><span className="text-gray-600">Neutered/Spayed:</span> <strong>{animal.isNeutered ? 'Yes' : 'No'}</strong></div>
+                                    <div><span className="text-gray-600">Infertile:</span> <strong>{animal.isInfertile ? 'Yes' : 'No'}</strong></div>
                                     {!animal.isNeutered && !animal.isInfertile && (
-                                        <div><span className="text-gray-600">In Mating:</span> <strong>{animal.isInMating ? '? Yes' : '? No'}</strong></div>
+                                        <div><span className="text-gray-600">In Mating:</span> <strong>{animal.isInMating ? 'Yes' : 'No'}</strong></div>
                                     )}
                                     {(animal.gender === 'Female' || animal.gender === 'Intersex' || animal.gender === 'Unknown') && !animal.isNeutered && (
                                         <>
-                                            <div><span className="text-gray-600">Pregnant:</span> <strong>{animal.isPregnant ? '? Yes' : '? No'}</strong></div>
-                                            <div><span className="text-gray-600">Nursing:</span> <strong>{animal.isNursing ? '? Yes' : '? No'}</strong></div>
+                                            <div><span className="text-gray-600">Pregnant:</span> <strong>{animal.isPregnant ? 'Yes' : 'No'}</strong></div>
+                                            <div><span className="text-gray-600">Nursing:</span> <strong>{animal.isNursing ? 'Yes' : 'No'}</strong></div>
                                         </>
                                     )}
                                     {animal.gender === 'Male' && !animal.isNeutered && !animal.isInfertile && (
-                                        <div><span className="text-gray-600">Stud Animal:</span> <strong>{animal.isStudAnimal ? '? Yes' : '? No'}</strong></div>
+                                        <div><span className="text-gray-600">Stud Animal:</span> <strong>{animal.isStudAnimal ? 'Yes' : 'No'}</strong></div>
                                     )}
                                     {animal.gender === 'Female' && !animal.isNeutered && !animal.isInfertile && (
-                                        <div><span className="text-gray-600">Breeding Dam:</span> <strong>{animal.isDamAnimal ? '? Yes' : '? No'}</strong></div>
+                                        <div><span className="text-gray-600">Breeding Dam:</span> <strong>{animal.isDamAnimal ? 'Yes' : 'No'}</strong></div>
                                     )}
                                 </div>
                             </div>
@@ -3466,7 +3466,7 @@ const ViewOnlyPrivateAnimalDetail = ({ animal, onClose, API_BASE_URL, authToken,
                                         <div><span className="text-gray-600">Mating Date:</span> <strong>{formatDateDisplay(animal.matingDates)}</strong></div>
                                         <div><span className="text-gray-600">Expected Due Date:</span> <strong>{formatDateDisplay(animal.expectedDueDate)}</strong></div>
                                         {(animal.species === 'Dog' || animal.species === 'Cat') && (
-                                            <div><span className="text-gray-600">Artificial Insemination:</span> <strong>{animal.artificialInseminationUsed ? '? Yes' : '? No'}</strong></div>
+                                            <div><span className="text-gray-600">Artificial Insemination:</span> <strong>{animal.artificialInseminationUsed ? 'Yes' : 'No'}</strong></div>
                                         )}
                                     </div>
                                 </div>
@@ -4414,22 +4414,22 @@ const ViewOnlyAnimalDetail = ({ animal, onClose, API_BASE_URL, onViewProfile, au
                             <div className="bg-gray-50 p-4 rounded-lg border border-gray-200 space-y-4">
                                 <h3 className="text-lg font-semibold text-gray-700">Reproductive Status</h3>
                                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm">
-                                    <div><span className="text-gray-600">Neutered/Spayed:</span> <strong>{animal.isNeutered ? '? Yes' : '? No'}</strong></div>
-                                    <div><span className="text-gray-600">Infertile:</span> <strong>{animal.isInfertile ? '? Yes' : '? No'}</strong></div>
+                                    <div><span className="text-gray-600">Neutered/Spayed:</span> <strong>{animal.isNeutered ? 'Yes' : 'No'}</strong></div>
+                                    <div><span className="text-gray-600">Infertile:</span> <strong>{animal.isInfertile ? 'Yes' : 'No'}</strong></div>
                                     {!animal.isNeutered && !animal.isInfertile && (
-                                        <div><span className="text-gray-600">In Mating:</span> <strong>{animal.isInMating ? '? Yes' : '? No'}</strong></div>
+                                        <div><span className="text-gray-600">In Mating:</span> <strong>{animal.isInMating ? 'Yes' : 'No'}</strong></div>
                                     )}
                                     {(animal.gender === 'Female' || animal.gender === 'Intersex' || animal.gender === 'Unknown') && !animal.isNeutered && (
                                         <>
-                                            <div><span className="text-gray-600">Pregnant:</span> <strong>{animal.isPregnant ? '? Yes' : '? No'}</strong></div>
-                                            <div><span className="text-gray-600">Nursing:</span> <strong>{animal.isNursing ? '? Yes' : '? No'}</strong></div>
+                                            <div><span className="text-gray-600">Pregnant:</span> <strong>{animal.isPregnant ? 'Yes' : 'No'}</strong></div>
+                                            <div><span className="text-gray-600">Nursing:</span> <strong>{animal.isNursing ? 'Yes' : 'No'}</strong></div>
                                         </>
                                     )}
                                     {animal.gender === 'Male' && !animal.isNeutered && !animal.isInfertile && (
-                                        <div><span className="text-gray-600">Stud Animal:</span> <strong>{animal.isStudAnimal ? '? Yes' : '? No'}</strong></div>
+                                        <div><span className="text-gray-600">Stud Animal:</span> <strong>{animal.isStudAnimal ? 'Yes' : 'No'}</strong></div>
                                     )}
                                     {animal.gender === 'Female' && !animal.isNeutered && !animal.isInfertile && (
-                                        <div><span className="text-gray-600">Breeding Dam:</span> <strong>{animal.isDamAnimal ? '? Yes' : '? No'}</strong></div>
+                                        <div><span className="text-gray-600">Breeding Dam:</span> <strong>{animal.isDamAnimal ? 'Yes' : 'No'}</strong></div>
                                     )}
                                 </div>
                             </div>
@@ -4457,7 +4457,7 @@ const ViewOnlyAnimalDetail = ({ animal, onClose, API_BASE_URL, onViewProfile, au
                                         <div><span className="text-gray-600">Mating Date:</span> <strong>{formatDateDisplay(animal.matingDates)}</strong></div>
                                         <div><span className="text-gray-600">Expected Due Date:</span> <strong>{formatDateDisplay(animal.expectedDueDate)}</strong></div>
                                         {(animal.species === 'Dog' || animal.species === 'Cat') && (
-                                            <div><span className="text-gray-600">Artificial Insemination:</span> <strong>{animal.artificialInseminationUsed ? '? Yes' : '? No'}</strong></div>
+                                            <div><span className="text-gray-600">Artificial Insemination:</span> <strong>{animal.artificialInseminationUsed ? 'Yes' : 'No'}</strong></div>
                                         )}
                                     </div>
                                 </div>
@@ -12440,7 +12440,7 @@ const ProfileEditForm = ({ userProfile, showModalMessage, onSaveSuccess, onCance
                         <option value="ES">? Spain</option>
                         <option value="NL">? Netherlands</option>
                         <option value="SE">? Sweden</option>
-                        <option value="NO">? Norway</option>
+                        <option value="NO">Norway</option>
                         <option value="DK">? Denmark</option>
                         <option value="CH">? Switzerland</option>
                         <option value="BE">? Belgium</option>
@@ -19684,22 +19684,22 @@ const App = () => {
                             <div className="bg-gray-50 p-4 rounded-lg border border-gray-200 space-y-4">
                                 <h3 className="text-lg font-semibold text-gray-700">Reproductive Status</h3>
                                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm">
-                                    <div><span className="text-gray-600">Neutered/Spayed:</span> <strong>{animalToView.isNeutered ? '? Yes' : '? No'}</strong></div>
-                                    <div><span className="text-gray-600">Infertile:</span> <strong>{animalToView.isInfertile ? '? Yes' : '? No'}</strong></div>
+                                    <div><span className="text-gray-600">Neutered/Spayed:</span> <strong>{animalToView.isNeutered ? 'Yes' : 'No'}</strong></div>
+                                    <div><span className="text-gray-600">Infertile:</span> <strong>{animalToView.isInfertile ? 'Yes' : 'No'}</strong></div>
                                     {!animalToView.isNeutered && !animalToView.isInfertile && (
-                                        <div><span className="text-gray-600">In Mating:</span> <strong>{animalToView.isInMating ? '? Yes' : '? No'}</strong></div>
+                                        <div><span className="text-gray-600">In Mating:</span> <strong>{animalToView.isInMating ? 'Yes' : 'No'}</strong></div>
                                     )}
                                     {(animalToView.gender === 'Female' || animalToView.gender === 'Intersex' || animalToView.gender === 'Unknown') && !animalToView.isNeutered && (
                                         <>
-                                            <div><span className="text-gray-600">Pregnant:</span> <strong>{animalToView.isPregnant ? '? Yes' : '? No'}</strong></div>
-                                            <div><span className="text-gray-600">Nursing:</span> <strong>{animalToView.isNursing ? '? Yes' : '? No'}</strong></div>
+                                            <div><span className="text-gray-600">Pregnant:</span> <strong>{animalToView.isPregnant ? 'Yes' : 'No'}</strong></div>
+                                            <div><span className="text-gray-600">Nursing:</span> <strong>{animalToView.isNursing ? 'Yes' : 'No'}</strong></div>
                                         </>
                                     )}
                                     {animalToView.gender === 'Male' && !animalToView.isNeutered && !animalToView.isInfertile && (
-                                        <div><span className="text-gray-600">Stud Animal:</span> <strong>{animalToView.isStudAnimal ? '? Yes' : '? No'}</strong></div>
+                                        <div><span className="text-gray-600">Stud Animal:</span> <strong>{animalToView.isStudAnimal ? 'Yes' : 'No'}</strong></div>
                                     )}
                                     {animalToView.gender === 'Female' && !animalToView.isNeutered && !animalToView.isInfertile && (
-                                        <div><span className="text-gray-600">Breeding Dam:</span> <strong>{animalToView.isDamAnimal ? '? Yes' : '? No'}</strong></div>
+                                        <div><span className="text-gray-600">Breeding Dam:</span> <strong>{animalToView.isDamAnimal ? 'Yes' : 'No'}</strong></div>
                                     )}
                                 </div>
                             </div>
@@ -19727,7 +19727,7 @@ const App = () => {
                                         <div><span className="text-gray-600">Mating Date:</span> <strong>{formatDateDisplay(animalToView.matingDates)}</strong></div>
                                         <div><span className="text-gray-600">Expected Due Date:</span> <strong>{formatDateDisplay(animalToView.expectedDueDate)}</strong></div>
                                         {(animalToView.species === 'Dog' || animalToView.species === 'Cat') && (
-                                            <div><span className="text-gray-600">Artificial Insemination:</span> <strong>{animalToView.artificialInseminationUsed ? '? Yes' : '? No'}</strong></div>
+                                            <div><span className="text-gray-600">Artificial Insemination:</span> <strong>{animalToView.artificialInseminationUsed ? 'Yes' : 'No'}</strong></div>
                                         )}
                                     </div>
                                 </div>
