@@ -57,6 +57,22 @@ const AnimalNode = ({ data }) => {
                 style={{ background: '#555', width: '8px', height: '8px' }}
             />
             
+            {/* Left handle for partner connections */}
+            <Handle
+                type="source"
+                position={Position.Left}
+                id="left"
+                style={{ background: '#8b5cf6', width: '8px', height: '8px', top: '50%' }}
+            />
+            
+            {/* Right handle for partner connections */}
+            <Handle
+                type="target"
+                position={Position.Right}
+                id="right"
+                style={{ background: '#8b5cf6', width: '8px', height: '8px', top: '50%' }}
+            />
+            
             {/* Circular Image */}
             <div
                 className={`
@@ -64,7 +80,7 @@ const AnimalNode = ({ data }) => {
                     ${getBorderColor()}
                     ${isSelected ? 'ring-4 ring-blue-500 scale-110' : 'hover:scale-105'}
                 `}
-                style={{ width: '100px', height: '100px' }}
+                style={{ width: '120px', height: '120px' }}
             >
                 {data.image ? (
                     <img
@@ -246,7 +262,9 @@ const FamilyTree = ({ authToken, userProfile, onViewAnimal, showModalMessage, on
                         target: animal.damId_public,
                         type: 'straight',
                         animated: false,
-                        style: { stroke: '#8b5cf6', strokeWidth: 2, strokeDasharray: '5,5' }
+                        style: { stroke: '#8b5cf6', strokeWidth: 3, strokeDasharray: '8,4' },
+                        sourceHandle: 'right',
+                        targetHandle: 'left'
                     });
                 }
             }
@@ -306,15 +324,15 @@ const FamilyTree = ({ authToken, userProfile, onViewAnimal, showModalMessage, on
         // Configure the graph for top-to-bottom layout (oldest at top, children below)
         dagreGraph.setGraph({ 
             rankdir: 'TB', // Top to bottom (classical tree layout)
-            nodesep: 80,   // Horizontal spacing between nodes
-            ranksep: 120,  // Vertical spacing between ranks
-            marginx: 40,
-            marginy: 40
+            nodesep: 100,  // Horizontal spacing between nodes
+            ranksep: 180,  // Vertical spacing between ranks (more space between generations)
+            marginx: 50,
+            marginy: 50
         });
         
         // Add nodes to dagre graph
         nodeList.forEach(node => {
-            dagreGraph.setNode(node.id, { width: 150, height: 150 });
+            dagreGraph.setNode(node.id, { width: 180, height: 180 });
         });
         
         // Add edges to dagre graph (only parent-child for layout, not sibling/mate)
@@ -518,6 +536,7 @@ const FamilyTree = ({ authToken, userProfile, onViewAnimal, showModalMessage, on
                     onNodeClick={onNodeClick}
                     nodeTypes={nodeTypes}
                     fitView
+                    fitViewOptions={{ padding: 0.1, maxZoom: 0.8 }}
                     attributionPosition="bottom-left"
                     className="bg-gray-50"
                     defaultEdgeOptions={{
