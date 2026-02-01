@@ -1042,7 +1042,7 @@ const ParentSearchModal = ({
                     </p>
                     <p className="text-xs text-gray-500">{animal.id_public}</p>
                     <p className="text-sm text-gray-600">
-                        {animal.species} � {animal.gender} � {animal.status || 'Unknown'}
+                        {animal.species} • {animal.gender} • {animal.status || 'Unknown'}
                     </p>
                     {getSpeciesLatinName(animal.species) && (
                         <p className="text-xs italic text-gray-500">{getSpeciesLatinName(animal.species)}</p>
@@ -1473,7 +1473,7 @@ const UserSearchModal = ({ onClose, showModalMessage, onSelectUser, API_BASE_URL
                         {animal.prefix && `${animal.prefix} `}{animal.name}{animal.suffix && ` ${animal.suffix}`}
                     </p>
                     <p className="text-sm text-gray-600">
-                        {animal.species} � {animal.gender} � <span className="font-mono">{animal.id_public}</span>
+                        {animal.species} • {animal.gender} • <span className="font-mono">{animal.id_public}</span>
                     </p>
                     {animal.color && <p className="text-xs text-gray-500 mt-1">{animal.color}</p>}
                 </div>
@@ -2135,7 +2135,7 @@ const PrivateAnimalDetail = ({ animal, onClose, onEdit, API_BASE_URL, authToken,
                                 <div className="flex flex-col md:flex-row relative">
                                     <div className="w-full md:w-1/3 p-4 sm:p-6 flex flex-col items-center justify-center relative min-h-60 md:min-h-80">
                                         <div className="absolute top-2 left-2 text-xs text-gray-600 bg-white/80 px-2 py-0.5 rounded">
-                                            {animal.birthDate ? formatDate(animal.birthDate) : '?'}
+                                            {animal.birthDate ? formatDate(animal.birthDate) : ''}
                                         </div>
                                         <div className="absolute top-2 right-2">
                                             {animal.gender === 'Male' ? <Mars size={20} strokeWidth={2.5} className="text-blue-600" /> : animal.gender === 'Female' ? <Venus size={20} strokeWidth={2.5} className="text-pink-600" /> : animal.gender === 'Intersex' ? <VenusAndMars size={20} strokeWidth={2.5} className="text-purple-500" /> : <Circle size={20} strokeWidth={2.5} className="text-gray-500" />}
@@ -2275,7 +2275,7 @@ const PrivateAnimalDetail = ({ animal, onClose, onEdit, API_BASE_URL, authToken,
                                                     } else {
                                                         return `${days}d`;
                                                     }
-                                                })()})` : '?'}
+                                                })()})` : ''}
                                             </p>
                                             {animal.deceasedDate && (
                                                 <p className="text-red-600 font-semibold">
@@ -2311,7 +2311,7 @@ const PrivateAnimalDetail = ({ animal, onClose, onEdit, API_BASE_URL, authToken,
                                         } else {
                                             return 'Unknown Breeder';
                                         }
-                                    })() : ((animal.manualBreederName || animal.breederId_public) ? <span className="font-mono text-accent">{animal.manualBreederName || animal.breederId_public}</span> : '?')}
+                                    })() : ((animal.manualBreederName || animal.breederId_public) ? <span className="font-mono text-accent">{animal.manualBreederName || animal.breederId_public}</span> : '')}
                                 </p>
                             </div>
 
@@ -2474,7 +2474,7 @@ const PrivateAnimalDetail = ({ animal, onClose, onEdit, API_BASE_URL, authToken,
                                             </span>
                                         ))}
                                     </div>
-                                ) : <p className="text-gray-700 text-sm">?</p>}
+                                ) : <p className="text-gray-700 text-sm"></p>}
                             </div>
                         </div>
                     )}
@@ -2519,7 +2519,7 @@ const PrivateAnimalDetail = ({ animal, onClose, onEdit, API_BASE_URL, authToken,
                             {/* 3rd Section: Ownership History */}
                             <div className="bg-gray-50 p-4 rounded-lg border border-gray-200 space-y-4">
                                 <h3 className="text-lg font-semibold text-gray-700">Ownership History</h3>
-                                <p className="text-sm text-gray-700">?</p>
+                                <p className="text-sm text-gray-700"></p>
                             </div>
 
                             {/* Offspring Section */}
@@ -2560,10 +2560,10 @@ const PrivateAnimalDetail = ({ animal, onClose, onEdit, API_BASE_URL, authToken,
                                     <h3 className="text-lg font-semibold text-gray-700">Estrus/Cycle</h3>
                                     <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm">
                                         <div><span className="text-gray-600">Heat Status:</span> <strong>{animal.heatStatus || ''}</strong></div>
-                                        <div><span className="text-gray-600">Last Heat Date:</span> <strong>{animal.lastHeatDate ? formatDate(animal.lastHeatDate) : '?'}</strong></div>
-                                        <div><span className="text-gray-600">Ovulation Date:</span> <strong>{animal.ovulationDate ? formatDate(animal.ovulationDate) : '?'}</strong></div>
+                                        <div><span className="text-gray-600">Last Heat Date:</span> <strong>{animal.lastHeatDate ? formatDate(animal.lastHeatDate) : ''}</strong></div>
+                                        <div><span className="text-gray-600">Ovulation Date:</span> <strong>{animal.ovulationDate ? formatDate(animal.ovulationDate) : ''}</strong></div>
                                         {(animal.species === 'Dog' || animal.species === 'Cat') && (
-                                            <div><span className="text-gray-600">Estrus Cycle Length:</span> <strong>{animal.estrusCycleLength ? `${animal.estrusCycleLength} days` : '?'}</strong></div>
+                                            <div><span className="text-gray-600">Estrus Cycle Length:</span> <strong>{animal.estrusCycleLength ? `${animal.estrusCycleLength} days` : ''}</strong></div>
                                         )}
                                     </div>
                                 </div>
@@ -2615,7 +2615,7 @@ const PrivateAnimalDetail = ({ animal, onClose, onEdit, API_BASE_URL, authToken,
                                         <div><span className="text-gray-600">Dam Fertility Status:</span> <strong>{animal.damFertilityStatus || animal.fertilityStatus || ''}</strong></div>
                                         {(animal.species === 'Dog' || animal.species === 'Cat') && (
                                             <>
-                                                <div><span className="text-gray-600">Gestation Length:</span> <strong>{animal.gestationLength ? `${animal.gestationLength} days` : '?'}</strong></div>
+                                                <div><span className="text-gray-600">Gestation Length:</span> <strong>{animal.gestationLength ? `${animal.gestationLength} days` : ''}</strong></div>
                                                 <div><span className="text-gray-600">Delivery Method:</span> <strong>{animal.deliveryMethod || ''}</strong></div>
                                                 {animal.species === 'Dog' && animal.whelpingDate && (
                                                     <div><span className="text-gray-600">Whelping Date:</span> <strong>{formatDate(animal.whelpingDate)}</strong></div>
@@ -2648,13 +2648,13 @@ const PrivateAnimalDetail = ({ animal, onClose, onEdit, API_BASE_URL, authToken,
                                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm">
                                     {(animal.gender === 'Male' || animal.gender === 'Intersex' || animal.gender === 'Unknown') && (
                                         <>
-                                            <div><span className="text-gray-600">Last Mating Date:</span> <strong>{animal.lastMatingDate ? formatDate(animal.lastMatingDate) : '?'}</strong></div>
+                                            <div><span className="text-gray-600">Last Mating Date:</span> <strong>{animal.lastMatingDate ? formatDate(animal.lastMatingDate) : ''}</strong></div>
                                             <div><span className="text-gray-600">Successful Matings:</span> <strong>{animal.successfulMatings || ''}</strong></div>
                                         </>
                                     )}
                                     {(animal.gender === 'Female' || animal.gender === 'Intersex' || animal.gender === 'Unknown') && (
                                         <>
-                                            <div><span className="text-gray-600">Last Pregnancy Date:</span> <strong>{animal.lastPregnancyDate ? formatDate(animal.lastPregnancyDate) : '?'}</strong></div>
+                                            <div><span className="text-gray-600">Last Pregnancy Date:</span> <strong>{animal.lastPregnancyDate ? formatDate(animal.lastPregnancyDate) : ''}</strong></div>
                                             <div><span className="text-gray-600">Litter Count:</span> <strong>{animal.litterCount || ''}</strong></div>
                                         </>
                                     )}
@@ -3044,7 +3044,7 @@ const ViewOnlyPrivateAnimalDetail = ({ animal, onClose, API_BASE_URL, authToken,
                                 <div className="flex flex-col md:flex-row relative">
                                     <div className="w-full md:w-1/3 p-4 sm:p-6 flex flex-col items-center justify-center relative min-h-60 md:min-h-80">
                                         <div className="absolute top-2 left-2 text-xs text-gray-600 bg-white/80 px-2 py-0.5 rounded">
-                                            {animal.birthDate ? formatDate(animal.birthDate) : '?'}
+                                            {animal.birthDate ? formatDate(animal.birthDate) : ''}
                                         </div>
                                         <div className="absolute top-2 right-2">
                                             {animal.gender === 'Male' ? <Mars size={20} strokeWidth={2.5} className="text-blue-600" /> : animal.gender === 'Female' ? <Venus size={20} strokeWidth={2.5} className="text-pink-600" /> : animal.gender === 'Intersex' ? <VenusAndMars size={20} strokeWidth={2.5} className="text-purple-500" /> : <Circle size={20} strokeWidth={2.5} className="text-gray-500" />}
@@ -3166,7 +3166,7 @@ const ViewOnlyPrivateAnimalDetail = ({ animal, onClose, API_BASE_URL, authToken,
                                                     } else {
                                                         return `${days}d`;
                                                     }
-                                                })()})` : '?'}
+                                                })()})` : ''}
                                             </p>
                                             {animal.deceasedDate && (
                                                 <p className="text-red-600 font-semibold">
@@ -3202,7 +3202,7 @@ const ViewOnlyPrivateAnimalDetail = ({ animal, onClose, API_BASE_URL, authToken,
                                         } else {
                                             return 'Unknown Breeder';
                                         }
-                                    })() : ((animal.manualBreederName || animal.breederId_public) ? <span className="font-mono text-accent">{animal.manualBreederName || animal.breederId_public}</span> : '?')}
+                                    })() : ((animal.manualBreederName || animal.breederId_public) ? <span className="font-mono text-accent">{animal.manualBreederName || animal.breederId_public}</span> : '')}
                                 </p>
                             </div>
 
@@ -3365,7 +3365,7 @@ const ViewOnlyPrivateAnimalDetail = ({ animal, onClose, API_BASE_URL, authToken,
                                             </span>
                                         ))}
                                     </div>
-                                ) : <p className="text-gray-700 text-sm">?</p>}
+                                ) : <p className="text-gray-700 text-sm"></p>}
                             </div>
                         </div>
                     )}
@@ -3449,10 +3449,10 @@ const ViewOnlyPrivateAnimalDetail = ({ animal, onClose, API_BASE_URL, authToken,
                                     <h3 className="text-lg font-semibold text-gray-700">Estrus/Cycle</h3>
                                     <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm">
                                         <div><span className="text-gray-600">Heat Status:</span> <strong>{animal.heatStatus || ''}</strong></div>
-                                        <div><span className="text-gray-600">Last Heat Date:</span> <strong>{animal.lastHeatDate ? formatDate(animal.lastHeatDate) : '?'}</strong></div>
-                                        <div><span className="text-gray-600">Ovulation Date:</span> <strong>{animal.ovulationDate ? formatDate(animal.ovulationDate) : '?'}</strong></div>
+                                        <div><span className="text-gray-600">Last Heat Date:</span> <strong>{animal.lastHeatDate ? formatDate(animal.lastHeatDate) : ''}</strong></div>
+                                        <div><span className="text-gray-600">Ovulation Date:</span> <strong>{animal.ovulationDate ? formatDate(animal.ovulationDate) : ''}</strong></div>
                                         {(animal.species === 'Dog' || animal.species === 'Cat') && (
-                                            <div><span className="text-gray-600">Estrus Cycle Length:</span> <strong>{animal.estrusCycleLength ? `${animal.estrusCycleLength} days` : '?'}</strong></div>
+                                            <div><span className="text-gray-600">Estrus Cycle Length:</span> <strong>{animal.estrusCycleLength ? `${animal.estrusCycleLength} days` : ''}</strong></div>
                                         )}
                                     </div>
                                 </div>
@@ -3504,7 +3504,7 @@ const ViewOnlyPrivateAnimalDetail = ({ animal, onClose, API_BASE_URL, authToken,
                                         <div><span className="text-gray-600">Dam Fertility Status:</span> <strong>{animal.damFertilityStatus || animal.fertilityStatus || ''}</strong></div>
                                         {(animal.species === 'Dog' || animal.species === 'Cat') && (
                                             <>
-                                                <div><span className="text-gray-600">Gestation Length:</span> <strong>{animal.gestationLength ? `${animal.gestationLength} days` : '?'}</strong></div>
+                                                <div><span className="text-gray-600">Gestation Length:</span> <strong>{animal.gestationLength ? `${animal.gestationLength} days` : ''}</strong></div>
                                                 <div><span className="text-gray-600">Delivery Method:</span> <strong>{animal.deliveryMethod || ''}</strong></div>
                                                 {animal.species === 'Dog' && animal.whelpingDate && (
                                                     <div><span className="text-gray-600">Whelping Date:</span> <strong>{formatDate(animal.whelpingDate)}</strong></div>
@@ -3537,13 +3537,13 @@ const ViewOnlyPrivateAnimalDetail = ({ animal, onClose, API_BASE_URL, authToken,
                                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm">
                                     {(animal.gender === 'Male' || animal.gender === 'Intersex' || animal.gender === 'Unknown') && (
                                         <>
-                                            <div><span className="text-gray-600">Last Mating Date:</span> <strong>{animal.lastMatingDate ? formatDate(animal.lastMatingDate) : '?'}</strong></div>
+                                            <div><span className="text-gray-600">Last Mating Date:</span> <strong>{animal.lastMatingDate ? formatDate(animal.lastMatingDate) : ''}</strong></div>
                                             <div><span className="text-gray-600">Successful Matings:</span> <strong>{animal.successfulMatings || ''}</strong></div>
                                         </>
                                     )}
                                     {(animal.gender === 'Female' || animal.gender === 'Intersex' || animal.gender === 'Unknown') && (
                                         <>
-                                            <div><span className="text-gray-600">Last Pregnancy Date:</span> <strong>{animal.lastPregnancyDate ? formatDate(animal.lastPregnancyDate) : '?'}</strong></div>
+                                            <div><span className="text-gray-600">Last Pregnancy Date:</span> <strong>{animal.lastPregnancyDate ? formatDate(animal.lastPregnancyDate) : ''}</strong></div>
                                             <div><span className="text-gray-600">Litter Count:</span> <strong>{animal.litterCount || ''}</strong></div>
                                         </>
                                     )}
@@ -4440,10 +4440,10 @@ const ViewOnlyAnimalDetail = ({ animal, onClose, API_BASE_URL, onViewProfile, au
                                     <h3 className="text-lg font-semibold text-gray-700">Estrus/Cycle</h3>
                                     <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm">
                                         <div><span className="text-gray-600">Heat Status:</span> <strong>{animal.heatStatus || ''}</strong></div>
-                                        <div><span className="text-gray-600">Last Heat Date:</span> <strong>{animal.lastHeatDate ? formatDate(animal.lastHeatDate) : '?'}</strong></div>
-                                        <div><span className="text-gray-600">Ovulation Date:</span> <strong>{animal.ovulationDate ? formatDate(animal.ovulationDate) : '?'}</strong></div>
+                                        <div><span className="text-gray-600">Last Heat Date:</span> <strong>{animal.lastHeatDate ? formatDate(animal.lastHeatDate) : ''}</strong></div>
+                                        <div><span className="text-gray-600">Ovulation Date:</span> <strong>{animal.ovulationDate ? formatDate(animal.ovulationDate) : ''}</strong></div>
                                         {(animal.species === 'Dog' || animal.species === 'Cat') && (
-                                            <div><span className="text-gray-600">Estrus Cycle Length:</span> <strong>{animal.estrusCycleLength ? `${animal.estrusCycleLength} days` : '?'}</strong></div>
+                                            <div><span className="text-gray-600">Estrus Cycle Length:</span> <strong>{animal.estrusCycleLength ? `${animal.estrusCycleLength} days` : ''}</strong></div>
                                         )}
                                     </div>
                                 </div>
@@ -4495,7 +4495,7 @@ const ViewOnlyAnimalDetail = ({ animal, onClose, API_BASE_URL, onViewProfile, au
                                         <div><span className="text-gray-600">Dam Fertility Status:</span> <strong>{animal.damFertilityStatus || animal.fertilityStatus || ''}</strong></div>
                                         {(animal.species === 'Dog' || animal.species === 'Cat') && (
                                             <>
-                                                <div><span className="text-gray-600">Gestation Length:</span> <strong>{animal.gestationLength ? `${animal.gestationLength} days` : '?'}</strong></div>
+                                                <div><span className="text-gray-600">Gestation Length:</span> <strong>{animal.gestationLength ? `${animal.gestationLength} days` : ''}</strong></div>
                                                 <div><span className="text-gray-600">Delivery Method:</span> <strong>{animal.deliveryMethod || ''}</strong></div>
                                                 {animal.species === 'Dog' && animal.whelpingDate && (
                                                     <div><span className="text-gray-600">Whelping Date:</span> <strong>{formatDate(animal.whelpingDate)}</strong></div>
@@ -4528,13 +4528,13 @@ const ViewOnlyAnimalDetail = ({ animal, onClose, API_BASE_URL, onViewProfile, au
                                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm">
                                     {(animal.gender === 'Male' || animal.gender === 'Intersex' || animal.gender === 'Unknown') && (
                                         <>
-                                            <div><span className="text-gray-600">Last Mating Date:</span> <strong>{animal.lastMatingDate ? formatDate(animal.lastMatingDate) : '?'}</strong></div>
+                                            <div><span className="text-gray-600">Last Mating Date:</span> <strong>{animal.lastMatingDate ? formatDate(animal.lastMatingDate) : ''}</strong></div>
                                             <div><span className="text-gray-600">Successful Matings:</span> <strong>{animal.successfulMatings || ''}</strong></div>
                                         </>
                                     )}
                                     {(animal.gender === 'Female' || animal.gender === 'Intersex' || animal.gender === 'Unknown') && (
                                         <>
-                                            <div><span className="text-gray-600">Last Pregnancy Date:</span> <strong>{animal.lastPregnancyDate ? formatDate(animal.lastPregnancyDate) : '?'}</strong></div>
+                                            <div><span className="text-gray-600">Last Pregnancy Date:</span> <strong>{animal.lastPregnancyDate ? formatDate(animal.lastPregnancyDate) : ''}</strong></div>
                                             <div><span className="text-gray-600">Litter Count:</span> <strong>{animal.litterCount || ''}</strong></div>
                                         </>
                                     )}
@@ -4602,7 +4602,7 @@ const ViewOnlyAnimalDetail = ({ animal, onClose, API_BASE_URL, onViewProfile, au
                                             </ul>
                                         </div>
                                     )}
-                                {!animal.vaccinations && !animal.dewormingRecords && !animal.parasiteControl && <p className="text-sm text-gray-600">?</p>}
+                                {!animal.vaccinations && !animal.dewormingRecords && !animal.parasiteControl && <p className="text-sm text-gray-600"></p>}
                             </div>
                             )}
 
@@ -4628,7 +4628,7 @@ const ViewOnlyAnimalDetail = ({ animal, onClose, API_BASE_URL, onViewProfile, au
                                     </div>
                                 )}
                                 {animal.laboratoryResults && <div><strong className="text-sm">Laboratory Results:</strong> <p className="text-sm mt-1">{animal.laboratoryResults}</p></div>}
-                                {!animal.medicalProcedures && !animal.laboratoryResults && <p className="text-sm text-gray-600">?</p>}
+                                {!animal.medicalProcedures && !animal.laboratoryResults && <p className="text-sm text-gray-600"></p>}
                             </div>
                             )}
 
@@ -4684,7 +4684,7 @@ const ViewOnlyAnimalDetail = ({ animal, onClose, API_BASE_URL, onViewProfile, au
                                             </div>
                                         ) : null;
                                     })()}
-                                    {!animal.medicalConditions && !animal.allergies && !animal.medications && <p className="text-sm text-gray-600">?</p>}
+                                    {!animal.medicalConditions && !animal.allergies && !animal.medications && <p className="text-sm text-gray-600"></p>}
                             </div>
                             )}
 
@@ -4710,7 +4710,7 @@ const ViewOnlyAnimalDetail = ({ animal, onClose, API_BASE_URL, onViewProfile, au
                                         </ul>
                                     </div>
                                 )}
-                                {!animal.primaryVet && !animal.vetVisits && <p className="text-sm text-gray-600">?</p>}
+                                {!animal.primaryVet && !animal.vetVisits && <p className="text-sm text-gray-600"></p>}
                             </div>
                             )}
                         </div>
@@ -4726,7 +4726,7 @@ const ViewOnlyAnimalDetail = ({ animal, onClose, API_BASE_URL, onViewProfile, au
                                 {animal.dietType && <div><strong className="text-sm">Diet Type:</strong> <p className="text-sm mt-1">{animal.dietType}</p></div>}
                                 {animal.feedingSchedule && <div><strong className="text-sm">Feeding Schedule:</strong> <p className="text-sm mt-1">{animal.feedingSchedule}</p></div>}
                                 {animal.supplements && <div><strong className="text-sm">Supplements:</strong> <p className="text-sm mt-1">{animal.supplements}</p></div>}
-                                {!animal.dietType && !animal.feedingSchedule && !animal.supplements && <p className="text-sm text-gray-600">?</p>}
+                                {!animal.dietType && !animal.feedingSchedule && !animal.supplements && <p className="text-sm text-gray-600"></p>}
                             </div>
                             )}
 
@@ -4737,7 +4737,7 @@ const ViewOnlyAnimalDetail = ({ animal, onClose, API_BASE_URL, onViewProfile, au
                                 {animal.housingType && <div><strong className="text-sm">Housing Type:</strong> <p className="text-sm mt-1">{animal.housingType}</p></div>}
                                 {animal.bedding && <div><strong className="text-sm">Bedding:</strong> <p className="text-sm mt-1">{animal.bedding}</p></div>}
                                 {animal.enrichment && <div><strong className="text-sm">Enrichment:</strong> <p className="text-sm mt-1">{animal.enrichment}</p></div>}
-                                {!animal.housingType && !animal.bedding && !animal.enrichment && <p className="text-sm text-gray-600">?</p>}
+                                {!animal.housingType && !animal.bedding && !animal.enrichment && <p className="text-sm text-gray-600"></p>}
                             </div>
                             )}
 
@@ -4749,7 +4749,7 @@ const ViewOnlyAnimalDetail = ({ animal, onClose, API_BASE_URL, onViewProfile, au
                                 {animal.humidity && <div><strong className="text-sm">Humidity:</strong> <p className="text-sm mt-1">{animal.humidity}</p></div>}
                                 {animal.lighting && <div><strong className="text-sm">Lighting:</strong> <p className="text-sm mt-1">{animal.lighting}</p></div>}
                                 {animal.noise && <div><strong className="text-sm">Noise Level:</strong> <p className="text-sm mt-1">{animal.noise}</p></div>}
-                                {!animal.temperatureRange && !animal.humidity && !animal.lighting && !animal.noise && <p className="text-sm text-gray-600">?</p>}
+                                {!animal.temperatureRange && !animal.humidity && !animal.lighting && !animal.noise && <p className="text-sm text-gray-600"></p>}
                             </div>
                             )}
                         </div>
@@ -4765,7 +4765,7 @@ const ViewOnlyAnimalDetail = ({ animal, onClose, API_BASE_URL, onViewProfile, au
                                 {animal.temperament && <div><strong className="text-sm">Temperament:</strong> <p className="text-sm mt-1">{animal.temperament}</p></div>}
                                 {animal.handlingTolerance && <div><strong className="text-sm">Handling Tolerance:</strong> <p className="text-sm mt-1">{animal.handlingTolerance}</p></div>}
                                 {animal.socialStructure && <div><strong className="text-sm">Social Structure:</strong> <p className="text-sm mt-1">{animal.socialStructure}</p></div>}
-                                {!animal.temperament && !animal.handlingTolerance && !animal.socialStructure && <p className="text-sm text-gray-600">?</p>}
+                                {!animal.temperament && !animal.handlingTolerance && !animal.socialStructure && <p className="text-sm text-gray-600"></p>}
                             </div>
                             )}
 
@@ -4774,7 +4774,7 @@ const ViewOnlyAnimalDetail = ({ animal, onClose, API_BASE_URL, onViewProfile, au
                             <div className="bg-gray-50 p-4 rounded-lg border border-gray-200 space-y-4">
                                 <h3 className="text-lg font-semibold text-gray-700">Activity</h3>
                                 {animal.activityCycle && <div><strong className="text-sm">Activity Cycle:</strong> <p className="text-sm mt-1">{animal.activityCycle}</p></div>}
-                                {!animal.activityCycle && <p className="text-sm text-gray-600">?</p>}
+                                {!animal.activityCycle && <p className="text-sm text-gray-600"></p>}
                             </div>
                             )}
                         </div>
@@ -5143,7 +5143,7 @@ const OffspringSection = ({ animalId, API_BASE_URL, authToken = null, onViewAnim
                                     <span>Born: {formatDate(litter.birthDate)}</span>
                                     {litter.numberBorn && (
                                         <>
-                                            <span>?</span>
+                                            <span></span>
                                             <span>{litter.numberBorn} born</span>
                                         </>
                                     )}
@@ -6947,7 +6947,7 @@ const LitterManagement = ({ authToken, API_BASE_URL, userProfile, showModalMessa
                                                     </div>
                                                 </div>
                                                 <div className="text-xs text-gray-500 mb-3">
-                                                    Autofilled: Species ({sire?.species}), Birth Date ({formatDate(litter.birthDate)}), Parents ({litter.sireId_public} ? {litter.damId_public})
+                                                    Autofilled: Species ({sire?.species}), Birth Date ({formatDate(litter.birthDate)}), Parents ({litter.sireId_public} × {litter.damId_public})
                                                 </div>
                                                 <div className="flex gap-2">
                                                     <button
@@ -8092,13 +8092,13 @@ const AnimalForm = ({
             isForSale: false,
             salePriceCurrency: 'USD',
             salePriceAmount: '',
-            fertilityStatus: 'Unknown',
+            fertilityStatus: '',
             lastMatingDate: '',
             successfulMatings: '',
             fertilityNotes: '',
             // Dam/Fertility fields (dam role)
             isDamAnimal: false,
-            damFertilityStatus: 'Unknown',
+            damFertilityStatus: '',
             lastPregnancyDate: '',
             offspringCount: '',
             damFertilityNotes: '',
@@ -10151,7 +10151,7 @@ const AnimalForm = ({
                                                     )}
                                                     {record.bcs && (
                                                         <>
-                                                            <span className="mx-2">?</span>
+                                                            <span className="mx-2"></span>
                                                             <span className="text-gray-700">BCS: {record.bcs}</span>
                                                         </>
                                                     )}
@@ -17835,12 +17835,12 @@ const App = () => {
                             <div className="mt-1 space-y-1">
                                 {availableAnimals[currentAvailableIndex].isForSale && availableAnimals[currentAvailableIndex].salePriceAmount && (
                                     <p className="text-xs text-green-600 font-semibold">
-                                        Fee: {availableAnimals[currentAvailableIndex].salePriceCurrency === 'Negotiable' ? 'Negotiable' : `${availableAnimals[currentAvailableIndex].salePriceCurrency === 'USD' ? '$' : availableAnimals[currentAvailableIndex].salePriceCurrency === 'EUR' ? '�' : ''}${availableAnimals[currentAvailableIndex].salePriceAmount}`}
+                                        Fee: {availableAnimals[currentAvailableIndex].salePriceCurrency === 'Negotiable' ? 'Negotiable' : `${availableAnimals[currentAvailableIndex].salePriceCurrency === 'USD' ? '$' : availableAnimals[currentAvailableIndex].salePriceCurrency === 'EUR' ? '€' : ''}${availableAnimals[currentAvailableIndex].salePriceAmount}`}
                                     </p>
                                 )}
                                 {availableAnimals[currentAvailableIndex].availableForBreeding && availableAnimals[currentAvailableIndex].studFeeAmount && (
                                     <p className="text-xs text-purple-600 font-semibold">
-                                        Fee: {availableAnimals[currentAvailableIndex].studFeeCurrency === 'Negotiable' ? 'Negotiable' : `${availableAnimals[currentAvailableIndex].studFeeCurrency === 'USD' ? '$' : availableAnimals[currentAvailableIndex].studFeeCurrency === 'EUR' ? '�' : ''}${availableAnimals[currentAvailableIndex].studFeeAmount}`}
+                                        Fee: {availableAnimals[currentAvailableIndex].studFeeCurrency === 'Negotiable' ? 'Negotiable' : `${availableAnimals[currentAvailableIndex].studFeeCurrency === 'USD' ? '$' : availableAnimals[currentAvailableIndex].studFeeCurrency === 'EUR' ? '€' : ''}${availableAnimals[currentAvailableIndex].studFeeAmount}`}
                                     </p>
                                 )}
                             </div>
@@ -18787,7 +18787,7 @@ const App = () => {
                                 };
                                 const formattedBirthDate = animalToView.birthDate
                                     ? new Intl.DateTimeFormat('en-US', { year: 'numeric', month: 'long', day: 'numeric' }).format(new Date(animalToView.birthDate))
-                                    : '?';
+                                    : '';
                                 const handleShareAnimal = () => {
                                     const url = `${window.location.origin}/animal/${animalToView.id_public}`;
                                     navigator.clipboard.writeText(url).then(() => {
@@ -18859,7 +18859,7 @@ const App = () => {
                                                     className="p-1 hover:bg-gray-200 rounded transition-colors"
                                                     title={showTabs ? "Collapse tabs" : "Expand tabs"}
                                                 >
-                                                    {showTabs ? '?' : '?'} 
+                                                    {showTabs ? 'Hide' : 'Show'} 
                                                 </button>
                                             </div>
 
@@ -19785,10 +19785,10 @@ const App = () => {
                                     <h3 className="text-lg font-semibold text-gray-700">Estrus/Cycle</h3>
                                     <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm">
                                         <div><span className="text-gray-600">Heat Status:</span> <strong>{animalToView.heatStatus || ''}</strong></div>
-                                        <div><span className="text-gray-600">Last Heat Date:</span> <strong>{animalToView.lastHeatDate ? formatDate(animalToView.lastHeatDate) : '?'}</strong></div>
-                                        <div><span className="text-gray-600">Ovulation Date:</span> <strong>{animalToView.ovulationDate ? formatDate(animalToView.ovulationDate) : '?'}</strong></div>
+                                        <div><span className="text-gray-600">Last Heat Date:</span> <strong>{animalToView.lastHeatDate ? formatDate(animalToView.lastHeatDate) : ''}</strong></div>
+                                        <div><span className="text-gray-600">Ovulation Date:</span> <strong>{animalToView.ovulationDate ? formatDate(animalToView.ovulationDate) : ''}</strong></div>
                                         {(animalToView.species === 'Dog' || animalToView.species === 'Cat') && (
-                                            <div><span className="text-gray-600">Estrus Cycle Length:</span> <strong>{animalToView.estrusCycleLength ? `${animalToView.estrusCycleLength} days` : '?'}</strong></div>
+                                            <div><span className="text-gray-600">Estrus Cycle Length:</span> <strong>{animalToView.estrusCycleLength ? `${animalToView.estrusCycleLength} days` : ''}</strong></div>
                                         )}
                                     </div>
                                 </div>
@@ -19840,7 +19840,7 @@ const App = () => {
                                         <div><span className="text-gray-600">Dam Fertility Status:</span> <strong>{animalToView.damFertilityStatus || animalToView.fertilityStatus || ''}</strong></div>
                                         {(animalToView.species === 'Dog' || animalToView.species === 'Cat') && (
                                             <>
-                                                <div><span className="text-gray-600">Gestation Length:</span> <strong>{animalToView.gestationLength ? `${animalToView.gestationLength} days` : '?'}</strong></div>
+                                                <div><span className="text-gray-600">Gestation Length:</span> <strong>{animalToView.gestationLength ? `${animalToView.gestationLength} days` : ''}</strong></div>
                                                 <div><span className="text-gray-600">Delivery Method:</span> <strong>{animalToView.deliveryMethod || ''}</strong></div>
                                                 {animalToView.species === 'Dog' && animalToView.whelpingDate && (
                                                     <div><span className="text-gray-600">Whelping Date:</span> <strong>{formatDate(animalToView.whelpingDate)}</strong></div>
@@ -19873,13 +19873,13 @@ const App = () => {
                                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm">
                                     {(animalToView.gender === 'Male' || animalToView.gender === 'Intersex' || animalToView.gender === 'Unknown') && (
                                         <>
-                                            <div><span className="text-gray-600">Last Mating Date:</span> <strong>{animalToView.lastMatingDate ? formatDate(animalToView.lastMatingDate) : '?'}</strong></div>
+                                            <div><span className="text-gray-600">Last Mating Date:</span> <strong>{animalToView.lastMatingDate ? formatDate(animalToView.lastMatingDate) : ''}</strong></div>
                                             <div><span className="text-gray-600">Successful Matings:</span> <strong>{animalToView.successfulMatings || ''}</strong></div>
                                         </>
                                     )}
                                     {(animalToView.gender === 'Female' || animalToView.gender === 'Intersex' || animalToView.gender === 'Unknown') && (
                                         <>
-                                            <div><span className="text-gray-600">Last Pregnancy Date:</span> <strong>{animalToView.lastPregnancyDate ? formatDate(animalToView.lastPregnancyDate) : '?'}</strong></div>
+                                            <div><span className="text-gray-600">Last Pregnancy Date:</span> <strong>{animalToView.lastPregnancyDate ? formatDate(animalToView.lastPregnancyDate) : ''}</strong></div>
                                             <div><span className="text-gray-600">Litter Count:</span> <strong>{animalToView.litterCount || ''}</strong></div>
                                         </>
                                     )}
