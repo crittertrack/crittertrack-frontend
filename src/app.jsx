@@ -490,10 +490,7 @@ const PedigreeChart = ({ animalId, animalData, onClose, API_BASE_URL, authToken 
         // Get border color based on actual gender
         const getBorderColor = (animal) => {
             if (!animal || !animal.gender) return 'border-gray-700';
-            if (animal.gender === 'Male') return 'border-blue-500';
-            if (animal.gender === 'Female') return 'border-pink-500';
-            if (animal.gender === 'Intersex') return 'border-purple-500';
-            return 'border-gray-700';
+            return animal.gender === 'Male' ? 'border-blue-500' : 'border-pink-500';
         };
         
         // Direct parents always show - either full data, "Unknown", or "Hidden" (private)
@@ -590,10 +587,7 @@ const PedigreeChart = ({ animalId, animalData, onClose, API_BASE_URL, authToken 
         // Get border color based on actual gender
         const getBorderColor = (animal) => {
             if (!animal || !animal.gender) return 'border-gray-700';
-            if (animal.gender === 'Male') return 'border-blue-500';
-            if (animal.gender === 'Female') return 'border-pink-500';
-            if (animal.gender === 'Intersex') return 'border-purple-500';
-            return 'border-gray-700';
+            return animal.gender === 'Male' ? 'border-blue-500' : 'border-pink-500';
         };
         
         if (!animal) {
@@ -696,10 +690,7 @@ const PedigreeChart = ({ animalId, animalData, onClose, API_BASE_URL, authToken 
         // Get border color based on actual gender
         const getBorderColor = (animal) => {
             if (!animal || !animal.gender) return 'border-gray-700';
-            if (animal.gender === 'Male') return 'border-blue-500';
-            if (animal.gender === 'Female') return 'border-pink-500';
-            if (animal.gender === 'Intersex') return 'border-purple-500';
-            return 'border-gray-700';
+            return animal.gender === 'Male' ? 'border-blue-500' : 'border-pink-500';
         };
         
         if (!animal) {

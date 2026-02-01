@@ -39,6 +39,16 @@ const AnimalNode = ({ data }) => {
     
     // Gender-based border color
     const getBorderColor = () => {
+        // Debug: Check if there's a mismatch between what's in the animal data and gender field
+        if (data.label === 'MM Tetsu' || data.label === 'Tetsu') {
+            console.log(`🔍 TETSU DEBUG:`, {
+                label: data.label,
+                gender: data.gender,
+                sex: data.animal?.sex,
+                rawAnimal: data.animal
+            });
+        }
+        
         const gender = data.gender?.toLowerCase() || data.animal?.sex?.toLowerCase() || '';
         switch(gender) {
             case 'male':
@@ -304,23 +314,37 @@ const FamilyTree = ({ authToken, userProfile, onViewAnimal, showModalMessage, on
         });
         
         // Create initial nodes without positions
-        const nodeList = Array.from(allUniqueAnimals.values()).map(animal => ({
-            id: animal.id_public,
-            type: 'animalNode',
-            position: { x: 0, y: 0 }, // Will be set by dagre
-            data: {
-                label: animal.name || animal.id_public,
-                prefix: animal.prefix || '',
-                suffix: animal.suffix || '',
-                gender: animal.gender || animal.sex || 'Unknown',
-                species: animal.species || 'Unknown',
-                genetics: animal.geneticCode || '',
-                image: animal.imageUrl || animal.photoUrl || null,
-                isOwned: animal.isOwned,
-                isSelected: selectedAnimal?.id_public === animal.id_public,
-                animal: animal
+        const nodeList = Array.from(allUniqueAnimals.values()).map(animal => {
+            // Debug: Check what's in the raw animal data for Tetsu
+            if (animal.name === 'Tetsu' || animal.id_public === 'CTC558') {
+                console.log(`🔍 TETSU RAW ANIMAL DATA:`, {
+                    name: animal.name,
+                    id_public: animal.id_public,
+                    gender: animal.gender,
+                    sex: animal.sex,
+                    allFields: Object.keys(animal),
+                    fullAnimal: animal
+                });
             }
-        }));
+            
+            return {
+                id: animal.id_public,
+                type: 'animalNode',
+                position: { x: 0, y: 0 }, // Will be set by dagre
+                data: {
+                    label: animal.name || animal.id_public,
+                    prefix: animal.prefix || '',
+                    suffix: animal.suffix || '',
+                    gender: animal.gender || animal.sex || 'Unknown',
+                    species: animal.species || 'Unknown',
+                    genetics: animal.geneticCode || '',
+                    image: animal.imageUrl || animal.photoUrl || null,
+                    isOwned: animal.isOwned,
+                    isSelected: selectedAnimal?.id_public === animal.id_public,
+                    animal: animal
+                }
+            };
+        });
         
         // Use dagre to calculate hierarchical layout
         const dagreGraph = new dagre.graphlib.Graph();
