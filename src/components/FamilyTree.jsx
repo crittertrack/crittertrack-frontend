@@ -323,6 +323,24 @@ const FamilyTree = ({ authToken, userProfile, onViewAnimal, showModalMessage, on
                 const avgY = (sireNode.position.y + damNode.position.y) / 2;
                 sireNode.position.y = avgY;
                 damNode.position.y = avgY;
+                
+                // Ensure minimum horizontal spacing between partners (200px)
+                const minSpacing = 200;
+                const currentDistance = Math.abs(sireNode.position.x - damNode.position.x);
+                
+                if (currentDistance < minSpacing) {
+                    const midX = (sireNode.position.x + damNode.position.x) / 2;
+                    const halfSpacing = minSpacing / 2;
+                    
+                    // Position them on either side of the midpoint
+                    if (sireNode.position.x < damNode.position.x) {
+                        sireNode.position.x = midX - halfSpacing;
+                        damNode.position.x = midX + halfSpacing;
+                    } else {
+                        damNode.position.x = midX - halfSpacing;
+                        sireNode.position.x = midX + halfSpacing;
+                    }
+                }
             }
         });
         
