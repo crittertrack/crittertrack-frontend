@@ -789,10 +789,10 @@ const FamilyTree = ({ authToken, userProfile, onViewAnimal, showModalMessage, on
                 <div style={{
                     position: 'absolute',
                     top: '60px',
-                    left: 0,
+                    left: '320px',
                     right: 0,
                     bottom: 0,
-                    width: '100%',
+                    width: 'calc(100% - 320px)',
                     height: 'calc(100% - 60px)',
                     margin: 0,
                     padding: 0,
