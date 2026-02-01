@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useCallback, useMemo } from 'react';
-import { ArrowLeft, Loader2, Search, X, Users, ChevronDown, ChevronUp, Filter, ZoomIn, ZoomOut, Maximize2 } from 'lucide-react';
+import { ArrowLeft, Loader2, Search, X, Users } from 'lucide-react';
 import ReactFlow, { 
     Background, 
     Controls, 
@@ -147,7 +147,6 @@ const FamilyTree = ({ authToken, userProfile, onViewAnimal, showModalMessage, on
     const [selectedAnimal, setSelectedAnimal] = useState(null);
     const [searchQuery, setSearchQuery] = useState('');
     const [filterSpecies, setFilterSpecies] = useState('all');
-    const [showFilters, setShowFilters] = useState(false);
     const [availableSpecies, setAvailableSpecies] = useState([]);
     const [error, setError] = useState(null);
     
@@ -629,11 +628,122 @@ const FamilyTree = ({ authToken, userProfile, onViewAnimal, showModalMessage, on
     const totalRelationships = edges.length;
 
     return (
-        <div className="flex flex-col h-screen bg-page-bg">
-            {/* Header */}
-            <div className="bg-white shadow-lg p-4 z-10">
-                <div className="max-w-7xl mx-auto">
-                    <div className="flex items-center justify-between mb-3">
+        <div className="h-screen bg-page-bg flex">
+            {/* Left Sidebar Search Menu */}
+            <div className="w-80 bg-gray-900 text-white flex flex-col h-full shadow-lg z-20">
+                {/* Sidebar Header */}
+                <div className="p-4 border-b border-gray-700">
+                    <h2 className="text-lg font-semibold text-white mb-3">Family Tree Search</h2>
+                    
+                    {/* Search Input */}
+                    <div className="relative">
+                        <Search size={18} className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" />
+                        <input
+                            type="text"
+                            placeholder="Search animals..."
+                            value={searchQuery}
+                            onChange={(e) => setSearchQuery(e.target.value)}
+                            className="w-full pl-10 pr-10 py-2 bg-gray-800 border border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent text-white placeholder-gray-400"
+                        />
+                        {searchQuery && (
+                            <button
+                                onClick={() => setSearchQuery('')}
+                                className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-300"
+                            >
+                                <X size={18} />
+                            </button>
+                        )}
+                    </div>
+                </div>
+
+                {/* Search Results */}
+                <div className="flex-1 overflow-y-auto">
+                    {searchQuery ? (
+                        <div className="p-2">
+                            {filteredAnimals.length === 0 ? (
+                                <div className="text-gray-400 text-center py-8">No animals found</div>
+                            ) : (
+                                <div className="space-y-1">
+                                    {filteredAnimals.map((animal) => (
+                                        <button
+                                            key={animal.id_public}
+                                            onClick={() => {
+                                                setSelectedAnimal(animal);
+                                                // Pan to animal with relationship lines visible
+                                                const node = getNode(animal.id_public);
+                                                if (node) {
+                                                    setCenter(node.position.x + 90, node.position.y + 90, { 
+                                                        zoom: 0.5, 
+                                                        duration: 1000 
+                                                    });
+                                                }
+                                            }}
+                                            className={`w-full text-left px-3 py-2 rounded hover:bg-gray-700 transition ${
+                                                selectedAnimal?.id_public === animal.id_public 
+                                                    ? 'bg-blue-600 text-white' 
+                                                    : 'text-gray-200'
+                                            }`}
+                                        >
+                                            <div className="font-medium">{animal.name || animal.id_public}</div>
+                                            {animal.name && animal.id_public && (
+                                                <div className="text-sm text-gray-400">{animal.id_public}</div>
+                                            )}
+                                            <div className="text-xs text-gray-500">{animal.species}</div>
+                                        </button>
+                                    ))}
+                                </div>
+                            )}
+                        </div>
+                    ) : (
+                        <div className="p-4">
+                            <div className="text-gray-400 text-sm mb-4">
+                                Search to find animals in the family tree
+                            </div>
+                            
+                            {/* Species Filter */}
+                            <div className="mb-4">
+                                <label className="block text-sm font-medium text-gray-300 mb-2">Filter by Species</label>
+                                <select
+                                    value={filterSpecies}
+                                    onChange={(e) => setFilterSpecies(e.target.value)}
+                                    className="w-full px-3 py-2 bg-gray-800 border border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 text-white"
+                                >
+                                    <option value="all">All Species</option>
+                                    {availableSpecies.map(species => (
+                                        <option key={species} value={species}>{species}</option>
+                                    ))}
+                                </select>
+                            </div>
+
+                            {/* Stats */}
+                            <div className="space-y-2">
+                                <div className="flex justify-between text-sm">
+                                    <span className="text-gray-400">Total Animals:</span>
+                                    <span className="text-white">{allAnimals.length}</span>
+                                </div>
+                                <div className="flex justify-between text-sm">
+                                    <span className="text-gray-400">Owned Animals:</span>
+                                    <span className="text-white">{ownedAnimalsCount}</span>
+                                </div>
+                                <div className="flex justify-between text-sm">
+                                    <span className="text-gray-400">Connections:</span>
+                                    <span className="text-white">{totalRelationships}</span>
+                                </div>
+                                <div className="flex justify-between text-sm">
+                                    <span className="text-gray-400">Species:</span>
+                                    <span className="text-white">{availableSpecies.length}</span>
+                                </div>
+                            </div>
+                        </div>
+                    )}
+                </div>
+            </div>
+
+            {/* Main Content Area */}
+            <div className="flex-1 flex flex-col relative">
+                {/* Header */}
+                <div className="bg-white shadow-lg p-4 z-10">
+                    <div className="flex items-center justify-between">
                         <div className="flex items-center gap-3">
                             <button
                                 onClick={onBack}
@@ -648,81 +758,15 @@ const FamilyTree = ({ authToken, userProfile, onViewAnimal, showModalMessage, on
                                 <h1 className="text-2xl font-bold text-gray-800">Family Tree</h1>
                             </div>
                         </div>
-                    </div>
-                    
-                    {/* Search Bar - Always Visible */}
-                    <div className="mb-3">
-                        <div className="relative">
-                            <Search size={18} className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" />
-                            <input
-                                type="text"
-                                placeholder="Search by name or CTC..."
-                                value={searchQuery}
-                                onChange={(e) => setSearchQuery(e.target.value)}
-                                className="w-full pl-10 pr-10 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent"
-                            />
-                            {searchQuery && (
-                                <button
-                                    onClick={() => setSearchQuery('')}
-                                    className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600"
-                                >
-                                    <X size={18} />
-                                </button>
-                            )}
-                        </div>
-                    </div>
-                    
-                    {/* Additional Filters - Collapsible */}
-                    <div className="mb-3">
-                        <button
-                            onClick={() => setShowFilters(!showFilters)}
-                            className="flex items-center gap-2 px-3 py-1.5 text-sm bg-gray-100 hover:bg-gray-200 rounded-lg transition"
-                        >
-                            <Filter size={16} />
-                            <span>Species Filter</span>
-                            {showFilters ? <ChevronUp size={16} /> : <ChevronDown size={16} />}
-                        </button>
-                        
-                        {showFilters && (
-                            <div className="mt-2">
-                                <select
-                                    value={filterSpecies}
-                                    onChange={(e) => setFilterSpecies(e.target.value)}
-                                    className="w-full md:w-64 px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent"
-                                >
-                                    <option value="all">All Species</option>
-                                    {availableSpecies.map(species => (
-                                        <option key={species} value={species}>{species}</option>
-                                    ))}
-                                </select>
-                            </div>
-                        )}
-                    </div>
-                    
-                    {/* Stats */}
-                    <div className="mt-3 grid grid-cols-4 gap-2 text-center">
-                        <div className="bg-primary/10 rounded-lg p-2">
-                            <div className="text-xl font-bold text-primary">{ownedAnimalsCount}</div>
-                            <div className="text-xs text-gray-600">Owned Animals</div>
-                        </div>
-                        <div className="bg-blue-50 rounded-lg p-2">
-                            <div className="text-xl font-bold text-blue-600">{nodes.length}</div>
-                            <div className="text-xs text-gray-600">Total Nodes</div>
-                        </div>
-                        <div className="bg-green-50 rounded-lg p-2">
-                            <div className="text-xl font-bold text-green-600">{totalRelationships}</div>
-                            <div className="text-xs text-gray-600">Connections</div>
-                        </div>
-                        <div className="bg-purple-50 rounded-lg p-2">
-                            <div className="text-xl font-bold text-purple-600">{availableSpecies.length}</div>
-                            <div className="text-xs text-gray-600">Species</div>
+                        <div className="text-sm text-gray-600 bg-gray-50 px-3 py-1.5 rounded-lg">
+                            <Users size={16} className="inline mr-1.5" />
+                            {allAnimals.length} Animals in Tree
                         </div>
                     </div>
                 </div>
-            </div>
-            
-            {/* Graph Container */}
-            <div className="flex-1 relative">
+
+                {/* Graph Container */}
+                <div className="flex-1 relative">
                 <ReactFlow
                     nodes={nodes}
                     edges={edges}
@@ -737,10 +781,19 @@ const FamilyTree = ({ authToken, userProfile, onViewAnimal, showModalMessage, on
                     className="bg-gray-50"
                     defaultEdgeOptions={{
                         type: 'default',
-                        animated: false
+                        animated: false,
+                        style: {
+                            stroke: '#6b7280',
+                            strokeWidth: 2
+                        }
                     }}
                     minZoom={0.1}
                     maxZoom={4}
+                    edgesReconnectable={false}
+                    connectionMode="loose"
+                    nodesDraggable={false}
+                    nodesConnectable={false}
+                    elementsSelectable={true}
                 >
                     <Background color="#ddd" gap={16} />
                     <Controls />
@@ -978,6 +1031,7 @@ const FamilyTree = ({ authToken, userProfile, onViewAnimal, showModalMessage, on
                         </button>
                     </div>
                 )}
+                </div>
             </div>
         </div>
     );
