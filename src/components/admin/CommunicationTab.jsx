@@ -17,6 +17,13 @@ export default function CommunicationTab({ API_BASE_URL, authToken }) {
     const [scheduledDate, setScheduledDate] = useState('');
     const [scheduledTime, setScheduledTime] = useState('');
 
+    // Poll state
+    const [pollQuestion, setPollQuestion] = useState('');
+    const [pollOptions, setPollOptions] = useState(['', '']);
+    const [pollEndsAt, setPollEndsAt] = useState('');
+    const [allowMultipleChoices, setAllowMultipleChoices] = useState(false);
+    const [isAnonymous, setIsAnonymous] = useState(false);
+
     // History state
     const [broadcasts, setBroadcasts] = useState([]);
     const [total, setTotal] = useState(0);
@@ -31,6 +38,32 @@ export default function CommunicationTab({ API_BASE_URL, authToken }) {
             fetchBroadcastHistory();
         }
     }, [activeView]);
+
+    const addPollOption = () => {
+        if (pollOptions.length < 10) {
+            setPollOptions([...pollOptions, '']);
+        }
+    };
+
+    const removePollOption = (index) => {
+        if (pollOptions.length > 2) {
+            setPollOptions(pollOptions.filter((_, i) => i !== index));
+        }
+    };
+
+    const updatePollOption = (index, value) => {
+        const newOptions = [...pollOptions];
+        newOptions[index] = value;
+        setPollOptions(newOptions);
+    };
+
+    const clearPollForm = () => {
+        setPollQuestion('');
+        setPollOptions(['', '']);
+        setPollEndsAt('');
+        setAllowMultipleChoices(false);
+        setIsAnonymous(false);
+    };
 
     const fetchBroadcastHistory = async () => {
         setLoading(true);
@@ -69,10 +102,25 @@ export default function CommunicationTab({ API_BASE_URL, authToken }) {
         setError('');
         setSuccess('');
 
-        if (!subject || !message) {
-            setError('Subject and message are required');
-            setLoading(false);
-            return;
+        // Validation based on broadcast type
+        if (broadcastType === 'poll') {
+            if (!subject || !pollQuestion) {
+                setError('Subject and poll question are required for polls');
+                setLoading(false);
+                return;
+            }
+            const validOptions = pollOptions.filter(opt => opt.trim() !== '');
+            if (validOptions.length < 2) {
+                setError('Poll must have at least 2 non-empty options');
+                setLoading(false);
+                return;
+            }
+        } else {
+            if (!subject || !message) {
+                setError('Subject and message are required');
+                setLoading(false);
+                return;
+            }
         }
 
         // Validate scheduled time if enabled
@@ -91,14 +139,43 @@ export default function CommunicationTab({ API_BASE_URL, authToken }) {
             }
         }
 
+        // Validate poll end time if provided
+        let pollEndTime = null;
+        if (broadcastType === 'poll' && pollEndsAt) {
+            pollEndTime = new Date(pollEndsAt);
+            if (pollEndTime <= new Date()) {
+                setError('Poll end time must be in the future');
+                setLoading(false);
+                return;
+            }
+        }
+                setError('Scheduled time must be in the future');
+                setLoading(false);
+                return;
+            }
+        }
+
         try {
-            // Use moderation endpoint which supports scheduling and emails
+            // Prepare payload based on broadcast type
             const payload = {
                 title: subject,
-                message,
                 type: broadcastType,
                 ...(scheduledFor && { scheduledFor: scheduledFor.toISOString() })
             };
+
+            if (broadcastType === 'poll') {
+                // Poll-specific payload
+                payload.pollQuestion = pollQuestion;
+                payload.pollOptions = pollOptions.filter(opt => opt.trim() !== '');
+                payload.allowMultipleChoices = allowMultipleChoices;
+                payload.isAnonymous = isAnonymous;
+                if (pollEndTime) {
+                    payload.pollEndsAt = pollEndTime.toISOString();
+                }
+            } else {
+                // Regular broadcast payload
+                payload.message = message;
+            }
 
             const response = await fetch(`${API_BASE_URL}/moderation/broadcast`, {
                 method: 'POST',
@@ -121,9 +198,9 @@ export default function CommunicationTab({ API_BASE_URL, authToken }) {
             }
 
             if (scheduledFor) {
-                setSuccess(`Broadcast scheduled for ${scheduledFor.toLocaleString()} - will be sent to ${data.recipientCount} users`);
+                setSuccess(`${broadcastType === 'poll' ? 'Poll' : 'Broadcast'} scheduled for ${scheduledFor.toLocaleString()} - will be sent to ${data.recipientCount} users`);
             } else {
-                setSuccess(`Broadcast sent successfully to ${data.recipientCount} users!`);
+                setSuccess(`${broadcastType === 'poll' ? 'Poll' : 'Broadcast'} sent successfully to ${data.recipientCount} users!`);
             }
             
             // Reset form
@@ -133,6 +210,7 @@ export default function CommunicationTab({ API_BASE_URL, authToken }) {
             setScheduleEnabled(false);
             setScheduledDate('');
             setScheduledTime('');
+            clearPollForm();
 
             // Refresh history
             if (activeView === 'history') {
@@ -248,6 +326,7 @@ export default function CommunicationTab({ API_BASE_URL, authToken }) {
                             >
                                 <option value="info">ℹ️ Info - General information</option>
                                 <option value="announcement">📢 Announcement - Important news</option>
+                                <option value="poll">📊 Poll - Interactive survey</option>
                                 <option value="warning">⚠️ Warning - Action may be required</option>
                                 <option value="alert">🚨 Alert - Urgent message</option>
                             </select>
@@ -266,18 +345,111 @@ export default function CommunicationTab({ API_BASE_URL, authToken }) {
                             <span className="char-count">{subject.length}/100</span>
                         </div>
 
-                        <div className="form-group">
-                            <label>Message *</label>
-                            <textarea
-                                value={message}
-                                onChange={(e) => setMessage(e.target.value)}
-                                placeholder="Your announcement message..."
-                                disabled={loading}
-                                rows="6"
-                                maxLength="1000"
-                            />
-                            <span className="char-count">{message.length}/1000</span>
-                        </div>
+                        {/* Poll Fields */}
+                        {broadcastType === 'poll' ? (
+                            <div className="poll-fields">
+                                <div className="form-group">
+                                    <label>Poll Question *</label>
+                                    <input
+                                        type="text"
+                                        value={pollQuestion}
+                                        onChange={(e) => setPollQuestion(e.target.value)}
+                                        placeholder="What question do you want to ask?"
+                                        disabled={loading}
+                                        maxLength="200"
+                                    />
+                                    <span className="char-count">{pollQuestion.length}/200</span>
+                                </div>
+
+                                <div className="form-group">
+                                    <label>Poll Options *</label>
+                                    <div className="poll-options">
+                                        {pollOptions.map((option, index) => (
+                                            <div key={index} className="poll-option-row">
+                                                <input
+                                                    type="text"
+                                                    value={option}
+                                                    onChange={(e) => updatePollOption(index, e.target.value)}
+                                                    placeholder={`Option ${index + 1}`}
+                                                    disabled={loading}
+                                                    maxLength="100"
+                                                />
+                                                {pollOptions.length > 2 && (
+                                                    <button
+                                                        type="button"
+                                                        onClick={() => removePollOption(index)}
+                                                        className="remove-option-btn"
+                                                        disabled={loading}
+                                                    >
+                                                        ❌
+                                                    </button>
+                                                )}
+                                            </div>
+                                        ))}
+                                        {pollOptions.length < 10 && (
+                                            <button
+                                                type="button"
+                                                onClick={addPollOption}
+                                                className="add-option-btn"
+                                                disabled={loading}
+                                            >
+                                                ➕ Add Option
+                                            </button>
+                                        )}
+                                    </div>
+                                </div>
+
+                                <div className="form-group">
+                                    <label>Poll Settings</label>
+                                    <div className="poll-settings">
+                                        <label className="checkbox-label">
+                                            <input
+                                                type="checkbox"
+                                                checked={allowMultipleChoices}
+                                                onChange={(e) => setAllowMultipleChoices(e.target.checked)}
+                                                disabled={loading}
+                                            />
+                                            <span>☑️ Allow multiple choices</span>
+                                        </label>
+                                        <label className="checkbox-label">
+                                            <input
+                                                type="checkbox"
+                                                checked={isAnonymous}
+                                                onChange={(e) => setIsAnonymous(e.target.checked)}
+                                                disabled={loading}
+                                            />
+                                            <span>🔒 Anonymous voting</span>
+                                        </label>
+                                    </div>
+                                </div>
+
+                                <div className="form-group">
+                                    <label>Poll End Date/Time (optional)</label>
+                                    <input
+                                        type="datetime-local"
+                                        value={pollEndsAt}
+                                        onChange={(e) => setPollEndsAt(e.target.value)}
+                                        min={new Date().toISOString().slice(0, 16)}
+                                        disabled={loading}
+                                    />
+                                    <small>Leave empty for polls that don't expire</small>
+                                </div>
+                            </div>
+                        ) : (
+                            /* Regular Message Field */
+                            <div className="form-group">
+                                <label>Message *</label>
+                                <textarea
+                                    value={message}
+                                    onChange={(e) => setMessage(e.target.value)}
+                                    placeholder="Your announcement message..."
+                                    disabled={loading}
+                                    rows="6"
+                                    maxLength="1000"
+                                />
+                                <span className="char-count">{message.length}/1000</span>
+                            </div>
+                        )}
 
                         <div className="form-group schedule-toggle">
                             <label className="checkbox-label">
