@@ -15282,10 +15282,10 @@ const BroadcastPoll = ({ poll, onVote, isVoting, styles }) => {
     };
     
     return (
-        <div className="mt-4">
-            <h4 className={`font-semibold ${styles.title} mb-3`}>{poll.pollQuestion}</h4>
+        <div className="mt-3">
+            <h4 className={`font-medium ${styles.title} mb-2 text-base`}>{poll.pollQuestion}</h4>
             
-            <div className="space-y-2">
+            <div className="space-y-1.5">
                 {poll.pollOptions?.map((option, index) => {
                     const isSelected = selectedOptions.includes(index);
                     const hasUserVote = hasVoted && poll.userVote.includes(index);
@@ -15296,7 +15296,7 @@ const BroadcastPoll = ({ poll, onVote, isVoting, styles }) => {
                             <button
                                 onClick={() => handleOptionToggle(index)}
                                 disabled={hasVoted || hasEnded || isVoting}
-                                className={`w-full text-left p-3 rounded-lg border transition-all ${
+                                className={`w-full text-left p-2 rounded-md border transition-all text-sm ${
                                     hasVoted || hasEnded
                                         ? 'cursor-not-allowed opacity-60'
                                         : `cursor-pointer ${styles.optionBg} border-gray-300 hover:border-gray-400`
@@ -15308,21 +15308,21 @@ const BroadcastPoll = ({ poll, onVote, isVoting, styles }) => {
                             >
                                 <div className="flex items-center justify-between">
                                     <div className="flex items-center">
-                                        <div className={`w-4 h-4 rounded mr-3 border-2 ${
+                                        <div className={`w-3.5 h-3.5 rounded mr-2.5 border-2 ${
                                             isSelected || hasUserVote 
                                                 ? 'bg-green-500 border-green-500' 
                                                 : 'border-gray-400'
                                         } ${poll.allowMultipleChoices ? '' : 'rounded-full'}`}>
                                             {(isSelected || hasUserVote) && (
-                                                <Check size={12} className="text-white m-0.5" />
+                                                <Check size={10} className="text-white m-0.5" />
                                             )}
                                         </div>
                                         <span className={styles.text}>{option.text}</span>
-                                        {hasUserVote && <span className="ml-2 text-green-600 font-medium">(Your vote)</span>}
+                                        {hasUserVote && <span className="ml-2 text-green-600 text-xs font-medium">(Your vote)</span>}
                                     </div>
                                     {(hasVoted || hasEnded) && (
                                         <div className="flex items-center gap-2">
-                                            <span className={`${styles.subtitle} text-sm`}>
+                                            <span className={`${styles.subtitle} text-xs`}>
                                                 {option.votes || 0} votes ({percentage}%)
                                             </span>
                                         </div>
@@ -15331,9 +15331,9 @@ const BroadcastPoll = ({ poll, onVote, isVoting, styles }) => {
                                 
                                 {/* Results bar */}
                                 {(hasVoted || hasEnded) && percentage > 0 && (
-                                    <div className="mt-2 bg-gray-200 rounded-full h-2">
+                                    <div className="mt-1.5 bg-gray-200 rounded-full h-1.5">
                                         <div 
-                                            className={`${styles.resultBar} h-2 rounded-full transition-all duration-300`}
+                                            className={`${styles.resultBar} h-1.5 rounded-full transition-all duration-300`}
                                             style={{ width: `${percentage}%` }}
                                         />
                                     </div>
@@ -15348,7 +15348,7 @@ const BroadcastPoll = ({ poll, onVote, isVoting, styles }) => {
                 <button
                     onClick={handleSubmitVote}
                     disabled={selectedOptions.length === 0 || isVoting}
-                    className={`mt-3 px-4 py-2 rounded-lg font-medium transition-all ${
+                    className={`mt-2 px-3 py-1.5 rounded-md text-sm font-medium transition-all ${
                         selectedOptions.length === 0 || isVoting
                             ? 'bg-gray-300 text-gray-500 cursor-not-allowed'
                             : styles.button
@@ -15358,7 +15358,7 @@ const BroadcastPoll = ({ poll, onVote, isVoting, styles }) => {
                 </button>
             )}
             
-            <div className={`mt-3 text-sm ${styles.subtitle} flex justify-between`}>
+            <div className={`mt-2 text-xs ${styles.subtitle} flex justify-between`}>
                 <span>Total votes: {getTotalVotes()}</span>
                 {poll.pollEndsAt && (
                     <span>
@@ -15501,29 +15501,29 @@ const BroadcastBanner = ({ authToken, API_BASE_URL }) => {
     };
 
     return (
-        <div className="w-full max-w-5xl mx-auto">
+        <div className="w-full max-w-4xl mx-auto">
             {broadcasts.map(broadcast => {
                 const styles = getStyles(broadcast.broadcastType);
                 return (
-                    <div key={broadcast._id} className={`${styles.bg} border-l-4 ${styles.border} p-4 rounded-lg shadow-md mb-3`}>
+                    <div key={broadcast._id} className={`${styles.bg} border-l-4 ${styles.border} p-3 rounded-lg shadow-sm mb-2`}>
                             <div className="flex items-start">
                                 <div className="flex-shrink-0">
-                                    <Info className={`h-6 w-6 ${styles.icon}`} />
+                                    <Info className={`h-5 w-5 ${styles.icon}`} />
                                 </div>
-                                <div className="ml-3 flex-1">
+                                <div className="ml-2.5 flex-1">
                                     <div className="flex justify-between items-start">
-                                        <h3 className={`text-lg font-bold ${styles.title}`}>
+                                        <h3 className={`text-base font-bold ${styles.title}`}>
                                             {styles.emoji} {broadcast.title || `System ${styles.label}`}
                                         </h3>
                                         <button 
                                             onClick={() => handleDismiss(broadcast._id)}
                                             className={`${styles.dismissBtn} ml-2`}
                                         >
-                                            <X size={20} />
+                                            <X size={16} />
                                         </button>
                                     </div>
                                     {broadcast.message && (
-                                        <p className={`mt-2 ${styles.text} text-sm`}>{broadcast.message}</p>
+                                        <p className={`mt-1.5 ${styles.text} text-sm`}>{broadcast.message}</p>
                                     )}
                                     
                                     {broadcast.broadcastType === 'poll' && broadcast.pollQuestion && (
@@ -15535,7 +15535,7 @@ const BroadcastBanner = ({ authToken, API_BASE_URL }) => {
                                         />
                                     )}
                                     
-                                    <p className={`mt-2 ${styles.subtitle} text-xs`}>
+                                    <p className={`mt-1.5 ${styles.subtitle} text-xs`}>
                                         {new Date(broadcast.createdAt).toLocaleString()}
                                     </p>
                                 </div>
