@@ -18206,10 +18206,12 @@ const App = () => {
                             <Cat size={18} className="mb-1" />
                             <span>Calculator</span>
                         </button>
-                        <button onClick={() => navigate('/family-tree')} className={`px-4 py-2 text-xs font-medium rounded-lg transition duration-150 flex flex-col items-center ${currentView === 'family-tree' ? 'bg-primary text-black shadow-md' : 'text-gray-600 hover:bg-gray-100'}`}>
-                            <Users size={18} className="mb-1" />
-                            <span>Family Tree</span>
-                        </button>
+                        {userProfile?.id_public === 'CTU2' && (
+                            <button onClick={() => navigate('/family-tree')} className={`px-4 py-2 text-xs font-medium rounded-lg transition duration-150 flex flex-col items-center ${currentView === 'family-tree' ? 'bg-primary text-black shadow-md' : 'text-gray-600 hover:bg-gray-100'}`}>
+                                <Users size={18} className="mb-1" />
+                                <span>Family Tree</span>
+                            </button>
+                        )}
                         <button onClick={() => navigate('/profile')} data-tutorial-target="profile-btn" className={`px-4 py-2 text-xs font-medium rounded-lg transition duration-150 flex flex-col items-center ${currentView === 'profile' ? 'bg-primary text-black shadow-md' : 'text-gray-600 hover:bg-gray-100'}`}>
                             <User size={18} className="mb-1" />
                             <span>Profile</span>
@@ -18377,10 +18379,12 @@ const App = () => {
                             <Cat size={18} className="mb-0.5" />
                             <span>Calculator</span>
                         </button>
-                        <button onClick={() => navigate('/family-tree')} className={`px-2 py-2 text-xs font-medium rounded-lg transition duration-150 flex flex-col items-center ${currentView === 'family-tree' ? 'bg-primary text-black shadow-md' : 'text-gray-600 hover:bg-gray-100'}`}>
-                            <Users size={18} className="mb-0.5" />
-                            <span>Family Tree</span>
-                        </button>
+                        {userProfile?.id_public === 'CTU2' && (
+                            <button onClick={() => navigate('/family-tree')} className={`px-2 py-2 text-xs font-medium rounded-lg transition duration-150 flex flex-col items-center ${currentView === 'family-tree' ? 'bg-primary text-black shadow-md' : 'text-gray-600 hover:bg-gray-100'}`}>
+                                <Users size={18} className="mb-0.5" />
+                                <span>Family Tree</span>
+                            </button>
+                        )}
                         <button onClick={() => navigate('/profile')} data-tutorial-target="profile-btn" className={`px-2 py-2 text-xs font-medium rounded-lg transition duration-150 flex flex-col items-center ${currentView === 'profile' ? 'bg-primary text-black shadow-md' : 'text-gray-600 hover:bg-gray-100'}`}>
                             <User size={18} className="mb-0.5" />
                             <span>Profile</span>
