@@ -1089,7 +1089,7 @@ const ParentSearchModal = ({
                     </p>
                     <p className="text-xs text-gray-500">{animal.id_public}</p>
                     <p className="text-sm text-gray-600">
-                        {animal.species} � {animal.gender} � {animal.status || 'Unknown'}
+                        {animal.species} • {animal.gender} • {animal.status || 'Unknown'}
                     </p>
                     {getSpeciesLatinName(animal.species) && (
                         <p className="text-xs italic text-gray-500">{getSpeciesLatinName(animal.species)}</p>
@@ -1520,7 +1520,7 @@ const UserSearchModal = ({ onClose, showModalMessage, onSelectUser, API_BASE_URL
                         {animal.prefix && `${animal.prefix} `}{animal.name}{animal.suffix && ` ${animal.suffix}`}
                     </p>
                     <p className="text-sm text-gray-600">
-                        {animal.species} � {animal.gender} � <span className="font-mono">{animal.id_public}</span>
+                        {animal.species} • {animal.gender} • <span className="font-mono">{animal.id_public}</span>
                     </p>
                     {animal.color && <p className="text-xs text-gray-500 mt-1">{animal.color}</p>}
                 </div>
@@ -2868,7 +2868,7 @@ const PrivateAnimalDetail = ({ animal, onClose, onEdit, API_BASE_URL, authToken,
                             <div className="bg-gray-50 p-4 rounded-lg border border-gray-200 space-y-4">
                                 <h3 className="text-lg font-semibold text-gray-700">Information</h3>
                                 <div className="space-y-3 text-sm">
-                                    <div><span className="text-gray-600">Deceased Date:</span> <strong>{animal.deceasedDate ? formatDate(animal.deceasedDate) : '�'}</strong></div>
+                                    <div><span className="text-gray-600">Deceased Date:</span> <strong>{animal.deceasedDate ? formatDate(animal.deceasedDate) : ''}</strong></div>
                                     <div><span className="text-gray-600">Cause of Death:</span> <strong>{animal.causeOfDeath || ''}</strong></div>
                                     <div><span className="text-gray-600">Necropsy Results:</span> <strong>{animal.necropsyResults || ''}</strong></div>
                                     {(animal.species === 'Dog' || animal.species === 'Cat') && animal.endOfLifeCareNotes && (
@@ -3759,7 +3759,7 @@ const ViewOnlyPrivateAnimalDetail = ({ animal, onClose, API_BASE_URL, authToken,
                             <div className="bg-gray-50 p-4 rounded-lg border border-gray-200 space-y-4">
                                 <h3 className="text-lg font-semibold text-gray-700">Information</h3>
                                 <div className="space-y-3 text-sm">
-                                    <div><span className="text-gray-600">Deceased Date:</span> <strong>{animal.deceasedDate ? formatDate(animal.deceasedDate) : '�'}</strong></div>
+                                    <div><span className="text-gray-600">Deceased Date:</span> <strong>{animal.deceasedDate ? formatDate(animal.deceasedDate) : ''}</strong></div>
                                     <div><span className="text-gray-600">Cause of Death:</span> <strong>{animal.causeOfDeath || ''}</strong></div>
                                     <div><span className="text-gray-600">Necropsy Results:</span> <strong>{animal.necropsyResults || ''}</strong></div>
                                     {(animal.species === 'Dog' || animal.species === 'Cat') && animal.endOfLifeCareNotes && (
@@ -6999,7 +6999,7 @@ const LitterManagement = ({ authToken, API_BASE_URL, userProfile, showModalMessa
                                                     </div>
                                                 </div>
                                                 <div className="text-xs text-gray-500 mb-3">
-                                                    Autofilled: Species ({sire?.species}), Birth Date ({formatDate(litter.birthDate)}), Parents ({litter.sireId_public} � {litter.damId_public})
+                                                    Autofilled: Species ({sire?.species}), Birth Date ({formatDate(litter.birthDate)}), Parents ({litter.sireId_public} • {litter.damId_public})
                                                 </div>
                                                 <div className="flex gap-2">
                                                     <button
@@ -18110,12 +18110,12 @@ const App = () => {
                             <div className="mt-1 space-y-1">
                                 {availableAnimals[currentAvailableIndex].isForSale && availableAnimals[currentAvailableIndex].salePriceAmount && (
                                     <p className="text-xs text-green-600 font-semibold">
-                                        Fee: {availableAnimals[currentAvailableIndex].salePriceCurrency === 'Negotiable' ? 'Negotiable' : `${availableAnimals[currentAvailableIndex].salePriceCurrency === 'USD' ? '$' : availableAnimals[currentAvailableIndex].salePriceCurrency === 'EUR' ? '�' : ''}${availableAnimals[currentAvailableIndex].salePriceAmount}`}
+                                        Fee: {availableAnimals[currentAvailableIndex].salePriceCurrency === 'Negotiable' ? 'Negotiable' : `${availableAnimals[currentAvailableIndex].salePriceCurrency === 'USD' ? '$' : availableAnimals[currentAvailableIndex].salePriceCurrency === 'EUR' ? '€' : ''}${availableAnimals[currentAvailableIndex].salePriceAmount}`}
                                     </p>
                                 )}
                                 {availableAnimals[currentAvailableIndex].availableForBreeding && availableAnimals[currentAvailableIndex].studFeeAmount && (
                                     <p className="text-xs text-purple-600 font-semibold">
-                                        Fee: {availableAnimals[currentAvailableIndex].studFeeCurrency === 'Negotiable' ? 'Negotiable' : `${availableAnimals[currentAvailableIndex].studFeeCurrency === 'USD' ? '$' : availableAnimals[currentAvailableIndex].studFeeCurrency === 'EUR' ? '�' : ''}${availableAnimals[currentAvailableIndex].studFeeAmount}`}
+                                        Fee: {availableAnimals[currentAvailableIndex].studFeeCurrency === 'Negotiable' ? 'Negotiable' : `${availableAnimals[currentAvailableIndex].studFeeCurrency === 'USD' ? '$' : availableAnimals[currentAvailableIndex].studFeeCurrency === 'EUR' ? '€' : ''}${availableAnimals[currentAvailableIndex].studFeeAmount}`}
                                     </p>
                                 )}
                             </div>
@@ -20368,7 +20368,7 @@ const App = () => {
                             <div className="bg-gray-50 p-4 rounded-lg border border-gray-200 space-y-4">
                                 <h3 className="text-lg font-semibold text-gray-700">Information</h3>
                                 <div className="space-y-3 text-sm">
-                                    <div><span className="text-gray-600">Deceased Date:</span> <strong>{animalToView.deceasedDate ? formatDate(animalToView.deceasedDate) : '�'}</strong></div>
+                                    <div><span className="text-gray-600">Deceased Date:</span> <strong>{animalToView.deceasedDate ? formatDate(animalToView.deceasedDate) : ''}</strong></div>
                                     <div><span className="text-gray-600">Cause of Death:</span> <strong>{animalToView.causeOfDeath || ''}</strong></div>
                                     <div><span className="text-gray-600">Necropsy Results:</span> <strong>{animalToView.necropsyResults || ''}</strong></div>
                                     {(animalToView.species === 'Dog' || animalToView.species === 'Cat') && animalToView.endOfLifeCareNotes && (
@@ -20482,7 +20482,7 @@ const App = () => {
                                                         {animal.prefix ? `${animal.prefix} ` : ''}{animal.name}{animal.suffix ? ` ${animal.suffix}` : ''}
                                                     </h3>
                                                     <p className="text-sm text-gray-600">{animal.id_public}</p>
-                                                    <p className="text-xs text-gray-500">{animal.species} � {animal.gender}</p>
+                                                    <p className="text-xs text-gray-500">{animal.species} • {animal.gender}</p>
                                                 </div>
                                             </div>
                                             <div className="flex gap-2">
