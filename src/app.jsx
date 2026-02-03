@@ -1,4 +1,4 @@
-﻿// CritterTrack Frontend Application
+// CritterTrack Frontend Application
 import React, { useState, useEffect, useCallback, useRef, useMemo } from 'react';
 import { useParams, useNavigate, useLocation, Routes, Route, Link as RouterLink } from 'react-router-dom';
 import axios from 'axios';
@@ -1089,7 +1089,7 @@ const ParentSearchModal = ({
                     </p>
                     <p className="text-xs text-gray-500">{animal.id_public}</p>
                     <p className="text-sm text-gray-600">
-                        {animal.species} • {animal.gender} • {animal.status || 'Unknown'}
+                        {animal.species} � {animal.gender} � {animal.status || 'Unknown'}
                     </p>
                     {getSpeciesLatinName(animal.species) && (
                         <p className="text-xs italic text-gray-500">{getSpeciesLatinName(animal.species)}</p>
@@ -1520,7 +1520,7 @@ const UserSearchModal = ({ onClose, showModalMessage, onSelectUser, API_BASE_URL
                         {animal.prefix && `${animal.prefix} `}{animal.name}{animal.suffix && ` ${animal.suffix}`}
                     </p>
                     <p className="text-sm text-gray-600">
-                        {animal.species} • {animal.gender} • <span className="font-mono">{animal.id_public}</span>
+                        {animal.species} � {animal.gender} � <span className="font-mono">{animal.id_public}</span>
                     </p>
                     {animal.color && <p className="text-xs text-gray-500 mt-1">{animal.color}</p>}
                 </div>
@@ -1534,7 +1534,7 @@ const UserSearchModal = ({ onClose, showModalMessage, onSelectUser, API_BASE_URL
         <div className="fixed inset-0 bg-gray-600 bg-opacity-75 flex items-center justify-center p-4 z-50">
             <div className="bg-white rounded-xl shadow-2xl p-6 w-full max-w-xl max-h-[90vh] flex flex-col">
                 <div className="flex justify-between items-center border-b pb-3 mb-4">
-                    <h3 className="text-xl font-bold text-gray-800">Global Search 🔍</h3>
+                    <h3 className="text-xl font-bold text-gray-800">Global Search ??</h3>
                     <button onClick={onClose} className="text-gray-500 hover:text-gray-800"><X size={24} /></button>
                 </div>
 
@@ -2102,7 +2102,7 @@ const PrivateAnimalDetail = ({ animal, onClose, onEdit, API_BASE_URL, authToken,
                         </button>
                         <div className="flex items-center gap-2">
                             <span className="text-xs bg-green-100 text-green-800 px-2 py-1 rounded font-medium">
-                                👑 OWNER VIEW - All Data Visible
+                                ?? OWNER VIEW - All Data Visible
                             </span>
                             <button
                                 onClick={handleShare}
@@ -2143,17 +2143,17 @@ const PrivateAnimalDetail = ({ animal, onClose, onEdit, API_BASE_URL, authToken,
                 <div className="bg-white border-b border-gray-300 px-2 sm:px-6 pt-2 sm:pt-4">
                     <div className="flex flex-wrap gap-1 sm:gap-1 pb-2 sm:pb-4">
                         {[
-                            { id: 1, label: 'Overview', icon: '📋' },
-                            { id: 2, label: 'Status & Privacy', icon: '🔒' },
-                            { id: 3, label: 'Physical', icon: '🎨' },
-                            { id: 4, label: 'Identification', icon: '🏷️' },
-                            { id: 5, label: 'Lineage', icon: '🌳' },
-                            { id: 6, label: 'Breeding', icon: '🫘' },
-                            { id: 7, label: 'Health', icon: '🏥' },
-                            { id: 8, label: 'Husbandry', icon: '🏠' },
-                            { id: 9, label: 'Behavior', icon: '🧠' },
-                            { id: 10, label: 'Records', icon: '📝' },
-                            { id: 11, label: 'End of Life', icon: '⚖️' }
+                            { id: 1, label: 'Overview', icon: '??' },
+                            { id: 2, label: 'Status & Privacy', icon: '??' },
+                            { id: 3, label: 'Physical', icon: '??' },
+                            { id: 4, label: 'Identification', icon: '???' },
+                            { id: 5, label: 'Lineage', icon: '??' },
+                            { id: 6, label: 'Breeding', icon: '??' },
+                            { id: 7, label: 'Health', icon: '??' },
+                            { id: 8, label: 'Husbandry', icon: '??' },
+                            { id: 9, label: 'Behavior', icon: '??' },
+                            { id: 10, label: 'Records', icon: '??' },
+                            { id: 11, label: 'End of Life', icon: '??' }
                         ].map(tab => (
                             <button
                                 key={tab.id}
@@ -2234,15 +2234,15 @@ const PrivateAnimalDetail = ({ animal, onClose, onEdit, API_BASE_URL, authToken,
                                             }}
                                             title="Toggle public profile visibility"
                                         >
-                                            <span>{animal.isDisplay ? '🌐 Public' : '🔒 Private'}</span>
+                                            <span>{animal.isDisplay ? '?? Public' : '?? Private'}</span>
                                         </button>
 
                                         {/* Species/Breed/Strain/CTC - At Top */}
                                         <p className="text-sm text-gray-600">
                                             {animal.species || 'Unknown'}
-                                            {animal.breed && ` • ${animal.breed}`}
-                                            {animal.strain && ` • ${animal.strain}`}
-                                            {animal.id_public && ` • ${animal.id_public}`}
+                                            {animal.breed && ` � ${animal.breed}`}
+                                            {animal.strain && ` � ${animal.strain}`}
+                                            {animal.id_public && ` � ${animal.id_public}`}
                                         </p>
 
                                         {/* Full Name */}
@@ -2366,6 +2366,7 @@ const PrivateAnimalDetail = ({ animal, onClose, onEdit, API_BASE_URL, authToken,
                             <div className="bg-gray-50 p-4 rounded-lg border border-gray-200">
                                 <h3 className="text-lg font-semibold text-gray-700 border-b pb-2 mb-3">Identification Numbers</h3>
                                 <div className="space-y-2">
+                                    <p className="text-sm"><span className="font-medium">CritterTrack ID:</span> {animal.id_public || ''}</p>
                                     <p className="text-sm"><span className="font-medium">Identification:</span> {animal.breederyId || ''}</p>
                                     <p className="text-sm"><span className="font-medium">Microchip:</span> {animal.microchipNumber || ''}</p>
                                     <p className="text-sm"><span className="font-medium">Pedigree Reg ID:</span> {animal.pedigreeRegistrationId || ''}</p>
@@ -2494,7 +2495,8 @@ const PrivateAnimalDetail = ({ animal, onClose, onEdit, API_BASE_URL, authToken,
                             <div className="bg-gray-50 p-4 rounded-lg border border-gray-200 space-y-4">
                                 <h3 className="text-lg font-semibold text-gray-700">Identification Numbers</h3>
                                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm">
-                                    <div><span className="text-gray-600">Identification:</span> <strong>{animal.id_public || ''}</strong></div>
+                                    <div><span className="text-gray-600">CritterTrack ID:</span> <strong>{animal.id_public || ''}</strong></div>
+                                    <div><span className="text-gray-600">Identification:</span> <strong>{animal.breederyId || ''}</strong></div>
                                     <div><span className="text-gray-600">Microchip Number:</span> <strong>{animal.microchipNumber || ''}</strong></div>
                                     <div><span className="text-gray-600">Pedigree Registration ID:</span> <strong>{animal.pedigreeRegistrationId || ''}</strong></div>
                                 </div>
@@ -2866,7 +2868,7 @@ const PrivateAnimalDetail = ({ animal, onClose, onEdit, API_BASE_URL, authToken,
                             <div className="bg-gray-50 p-4 rounded-lg border border-gray-200 space-y-4">
                                 <h3 className="text-lg font-semibold text-gray-700">Information</h3>
                                 <div className="space-y-3 text-sm">
-                                    <div><span className="text-gray-600">Deceased Date:</span> <strong>{animal.deceasedDate ? formatDate(animal.deceasedDate) : '—'}</strong></div>
+                                    <div><span className="text-gray-600">Deceased Date:</span> <strong>{animal.deceasedDate ? formatDate(animal.deceasedDate) : '�'}</strong></div>
                                     <div><span className="text-gray-600">Cause of Death:</span> <strong>{animal.causeOfDeath || ''}</strong></div>
                                     <div><span className="text-gray-600">Necropsy Results:</span> <strong>{animal.necropsyResults || ''}</strong></div>
                                     {(animal.species === 'Dog' || animal.species === 'Cat') && animal.endOfLifeCareNotes && (
@@ -2989,7 +2991,7 @@ const ViewOnlyPrivateAnimalDetail = ({ animal, onClose, API_BASE_URL, authToken,
                                 <ArrowLeft size={16} className="mr-1" /> Back
                             </button>
                             <span className="text-[10px] bg-orange-100 text-orange-800 px-1.5 py-0.5 rounded font-medium">
-                                📋 VIEW-ONLY
+                                ?? VIEW-ONLY
                             </span>
                             <button onClick={onClose} className="text-gray-500 hover:text-gray-800">
                                 <X size={24} />
@@ -3024,7 +3026,7 @@ const ViewOnlyPrivateAnimalDetail = ({ animal, onClose, API_BASE_URL, authToken,
                         </button>
                         <div className="flex items-center gap-2">
                             <span className="text-xs bg-orange-100 text-orange-800 px-2 py-1 rounded font-medium">
-                                📋 VIEW-ONLY - Read Only Access
+                                ?? VIEW-ONLY - Read Only Access
                             </span>
                             {onHideAnimal && (
                                 <button
@@ -3052,17 +3054,17 @@ const ViewOnlyPrivateAnimalDetail = ({ animal, onClose, API_BASE_URL, authToken,
                 <div className="bg-white border-b border-gray-300 px-6 pt-4">
                     <div className="flex flex-wrap gap-1 pb-4">
                         {[
-                            { id: 1, label: 'Overview', icon: '📋' },
-                            { id: 2, label: 'Status & Privacy', icon: '🔒' },
-                            { id: 3, label: 'Physical', icon: '🎨' },
-                            { id: 4, label: 'Identification', icon: '🏷️' },
-                            { id: 5, label: 'Lineage', icon: '🌳' },
-                            { id: 6, label: 'Breeding', icon: '🫘' },
-                            { id: 7, label: 'Health', icon: '🏥' },
-                            { id: 8, label: 'Husbandry', icon: '🏠' },
-                            { id: 9, label: 'Behavior', icon: '🧠' },
-                            { id: 10, label: 'Records', icon: '📝' },
-                            { id: 11, label: 'End of Life', icon: '⚖️' }
+                            { id: 1, label: 'Overview', icon: '??' },
+                            { id: 2, label: 'Status & Privacy', icon: '??' },
+                            { id: 3, label: 'Physical', icon: '??' },
+                            { id: 4, label: 'Identification', icon: '???' },
+                            { id: 5, label: 'Lineage', icon: '??' },
+                            { id: 6, label: 'Breeding', icon: '??' },
+                            { id: 7, label: 'Health', icon: '??' },
+                            { id: 8, label: 'Husbandry', icon: '??' },
+                            { id: 9, label: 'Behavior', icon: '??' },
+                            { id: 10, label: 'Records', icon: '??' },
+                            { id: 11, label: 'End of Life', icon: '??' }
                         ].map(tab => (
                             <button
                                 key={tab.id}
@@ -3131,9 +3133,9 @@ const ViewOnlyPrivateAnimalDetail = ({ animal, onClose, API_BASE_URL, authToken,
                                         {/* Species/Breed/Strain/CTC - At Top (NO PRIVACY TOGGLE) */}
                                         <p className="text-sm text-gray-600">
                                             {animal.species || 'Unknown'}
-                                            {animal.breed && ` • ${animal.breed}`}
-                                            {animal.strain && ` • ${animal.strain}`}
-                                            {animal.id_public && ` • ${animal.id_public}`}
+                                            {animal.breed && ` � ${animal.breed}`}
+                                            {animal.strain && ` � ${animal.strain}`}
+                                            {animal.id_public && ` � ${animal.id_public}`}
                                         </p>
 
                                         {/* Full Name */}
@@ -3257,6 +3259,7 @@ const ViewOnlyPrivateAnimalDetail = ({ animal, onClose, API_BASE_URL, authToken,
                             <div className="bg-gray-50 p-4 rounded-lg border border-gray-200">
                                 <h3 className="text-lg font-semibold text-gray-700 border-b pb-2 mb-3">Identification Numbers</h3>
                                 <div className="space-y-2">
+                                    <p className="text-sm"><span className="font-medium">CritterTrack ID:</span> {animal.id_public || ''}</p>
                                     <p className="text-sm"><span className="font-medium">Identification:</span> {animal.breederyId || ''}</p>
                                     <p className="text-sm"><span className="font-medium">Microchip:</span> {animal.microchipNumber || ''}</p>
                                     <p className="text-sm"><span className="font-medium">Pedigree Reg ID:</span> {animal.pedigreeRegistrationId || ''}</p>
@@ -3385,7 +3388,8 @@ const ViewOnlyPrivateAnimalDetail = ({ animal, onClose, API_BASE_URL, authToken,
                             <div className="bg-gray-50 p-4 rounded-lg border border-gray-200 space-y-4">
                                 <h3 className="text-lg font-semibold text-gray-700">Identification Numbers</h3>
                                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm">
-                                    <div><span className="text-gray-600">Identification:</span> <strong>{animal.id_public || ''}</strong></div>
+                                    <div><span className="text-gray-600">CritterTrack ID:</span> <strong>{animal.id_public || ''}</strong></div>
+                                    <div><span className="text-gray-600">Identification:</span> <strong>{animal.breederyId || ''}</strong></div>
                                     <div><span className="text-gray-600">Microchip Number:</span> <strong>{animal.microchipNumber || ''}</strong></div>
                                     <div><span className="text-gray-600">Pedigree Registration ID:</span> <strong>{animal.pedigreeRegistrationId || ''}</strong></div>
                                 </div>
@@ -3755,7 +3759,7 @@ const ViewOnlyPrivateAnimalDetail = ({ animal, onClose, API_BASE_URL, authToken,
                             <div className="bg-gray-50 p-4 rounded-lg border border-gray-200 space-y-4">
                                 <h3 className="text-lg font-semibold text-gray-700">Information</h3>
                                 <div className="space-y-3 text-sm">
-                                    <div><span className="text-gray-600">Deceased Date:</span> <strong>{animal.deceasedDate ? formatDate(animal.deceasedDate) : '—'}</strong></div>
+                                    <div><span className="text-gray-600">Deceased Date:</span> <strong>{animal.deceasedDate ? formatDate(animal.deceasedDate) : '�'}</strong></div>
                                     <div><span className="text-gray-600">Cause of Death:</span> <strong>{animal.causeOfDeath || ''}</strong></div>
                                     <div><span className="text-gray-600">Necropsy Results:</span> <strong>{animal.necropsyResults || ''}</strong></div>
                                     {(animal.species === 'Dog' || animal.species === 'Cat') && animal.endOfLifeCareNotes && (
@@ -3986,15 +3990,15 @@ const ViewOnlyAnimalDetail = ({ animal, onClose, API_BASE_URL, onViewProfile, au
                 <div className="bg-white border-b border-gray-300">
                     <div className="flex flex-wrap">
                         {[
-                            { id: 1, label: 'Overview', icon: '📋' },
-                            { id: 3, label: 'Physical', icon: '🎨' },
-                            { id: 5, label: 'Lineage', icon: '🌳' },
-                            { id: 6, label: 'Breeding', icon: '🫘' },
-                            { id: 7, label: 'Health', icon: '🏥' },
-                            { id: 8, label: 'Husbandry', icon: '🏠' },
-                            { id: 9, label: 'Behavior', icon: '🧠' },
-                            { id: 10, label: 'Records', icon: '📝' }, // Combined Records + End of Life
-                            { id: 11, label: 'Show', icon: '🏆' }
+                            { id: 1, label: 'Overview', icon: '??' },
+                            { id: 3, label: 'Physical', icon: '??' },
+                            { id: 5, label: 'Lineage', icon: '??' },
+                            { id: 6, label: 'Breeding', icon: '??' },
+                            { id: 7, label: 'Health', icon: '??' },
+                            { id: 8, label: 'Husbandry', icon: '??' },
+                            { id: 9, label: 'Behavior', icon: '??' },
+                            { id: 10, label: 'Records', icon: '??' }, // Combined Records + End of Life
+                            { id: 11, label: 'Show', icon: '??' }
                         ].map(tab => (
                             <button
                                 key={tab.id}
@@ -4202,6 +4206,7 @@ const ViewOnlyAnimalDetail = ({ animal, onClose, API_BASE_URL, onViewProfile, au
                             <div className="bg-gray-50 p-4 rounded-lg border border-gray-200">
                                 <h3 className="text-lg font-semibold text-gray-700 border-b pb-2 mb-3">Identification Numbers</h3>
                                 <div className="space-y-2">
+                                    <p className="text-sm"><span className="font-medium">CritterTrack ID:</span> {animal.id_public || ''}</p>
                                     <p className="text-sm"><span className="font-medium">Identification:</span> {animal.breederyId || ''}</p>
                                     <p className="text-sm"><span className="font-medium">Microchip:</span> {animal.microchipNumber || ''}</p>
                                     <p className="text-sm"><span className="font-medium">Pedigree Reg ID:</span> {animal.pedigreeRegistrationId || ''}</p>
@@ -6994,7 +6999,7 @@ const LitterManagement = ({ authToken, API_BASE_URL, userProfile, showModalMessa
                                                     </div>
                                                 </div>
                                                 <div className="text-xs text-gray-500 mb-3">
-                                                    Autofilled: Species ({sire?.species}), Birth Date ({formatDate(litter.birthDate)}), Parents ({litter.sireId_public} × {litter.damId_public})
+                                                    Autofilled: Species ({sire?.species}), Birth Date ({formatDate(litter.birthDate)}), Parents ({litter.sireId_public} � {litter.damId_public})
                                                 </div>
                                                 <div className="flex gap-2">
                                                     <button
@@ -9289,17 +9294,17 @@ const AnimalForm = ({
                 <div className="border border-gray-300 -mx-6 px-6 pt-4">
                     <div className="flex flex-wrap gap-1 pb-px">
                         {[
-                            { id: 1, label: 'Overview', icon: '📋' },
-                            { id: 2, label: 'Status & Privacy', icon: '🔒' },
-                            { id: 3, label: 'Physical', icon: '🎨' },
-                            { id: 4, label: 'Identification', icon: '🏷️' },
-                            { id: 5, label: 'Lineage', icon: '🌳' },
-                            { id: 6, label: 'Breeding', icon: '🫘' },
-                            { id: 7, label: 'Health', icon: '🏥' },
-                            { id: 8, label: 'Husbandry', icon: '🏠' },
-                            { id: 9, label: 'Behavior', icon: '🧠' },
-                            { id: 10, label: 'Records', icon: '📝' },
-                            { id: 11, label: 'End of Life', icon: '⚖️' },
+                            { id: 1, label: 'Overview', icon: '??' },
+                            { id: 2, label: 'Status & Privacy', icon: '??' },
+                            { id: 3, label: 'Physical', icon: '??' },
+                            { id: 4, label: 'Identification', icon: '???' },
+                            { id: 5, label: 'Lineage', icon: '??' },
+                            { id: 6, label: 'Breeding', icon: '??' },
+                            { id: 7, label: 'Health', icon: '??' },
+                            { id: 8, label: 'Husbandry', icon: '??' },
+                            { id: 9, label: 'Behavior', icon: '??' },
+                            { id: 10, label: 'Records', icon: '??' },
+                            { id: 11, label: 'End of Life', icon: '??' },
                             { id: 12, label: 'Show', icon: '??' }
                         ].map(tab => (
                             <button
@@ -15499,7 +15504,7 @@ const BroadcastBanner = ({ authToken, API_BASE_URL }) => {
                 text: 'text-purple-700',
                 subtitle: 'text-purple-500',
                 dismissBtn: 'text-purple-400 hover:text-purple-600',
-                emoji: '📢',
+                emoji: '??',
                 label: 'Announcement'
             };
         }
@@ -15513,7 +15518,7 @@ const BroadcastBanner = ({ authToken, API_BASE_URL }) => {
                 text: 'text-green-700',
                 subtitle: 'text-green-500',
                 dismissBtn: 'text-green-400 hover:text-green-600',
-                emoji: '📊',
+                emoji: '??',
                 label: 'Poll',
                 button: 'bg-green-500 hover:bg-green-600 text-white',
                 optionBg: 'bg-green-100 hover:bg-green-200',
@@ -15529,7 +15534,7 @@ const BroadcastBanner = ({ authToken, API_BASE_URL }) => {
             text: 'text-blue-700',
             subtitle: 'text-blue-500',
             dismissBtn: 'text-blue-400 hover:text-blue-600',
-            emoji: 'ℹ️',
+            emoji: '??',
             label: 'Info'
         };
     };
@@ -18105,12 +18110,12 @@ const App = () => {
                             <div className="mt-1 space-y-1">
                                 {availableAnimals[currentAvailableIndex].isForSale && availableAnimals[currentAvailableIndex].salePriceAmount && (
                                     <p className="text-xs text-green-600 font-semibold">
-                                        Fee: {availableAnimals[currentAvailableIndex].salePriceCurrency === 'Negotiable' ? 'Negotiable' : `${availableAnimals[currentAvailableIndex].salePriceCurrency === 'USD' ? '$' : availableAnimals[currentAvailableIndex].salePriceCurrency === 'EUR' ? '€' : ''}${availableAnimals[currentAvailableIndex].salePriceAmount}`}
+                                        Fee: {availableAnimals[currentAvailableIndex].salePriceCurrency === 'Negotiable' ? 'Negotiable' : `${availableAnimals[currentAvailableIndex].salePriceCurrency === 'USD' ? '$' : availableAnimals[currentAvailableIndex].salePriceCurrency === 'EUR' ? '�' : ''}${availableAnimals[currentAvailableIndex].salePriceAmount}`}
                                     </p>
                                 )}
                                 {availableAnimals[currentAvailableIndex].availableForBreeding && availableAnimals[currentAvailableIndex].studFeeAmount && (
                                     <p className="text-xs text-purple-600 font-semibold">
-                                        Fee: {availableAnimals[currentAvailableIndex].studFeeCurrency === 'Negotiable' ? 'Negotiable' : `${availableAnimals[currentAvailableIndex].studFeeCurrency === 'USD' ? '$' : availableAnimals[currentAvailableIndex].studFeeCurrency === 'EUR' ? '€' : ''}${availableAnimals[currentAvailableIndex].studFeeAmount}`}
+                                        Fee: {availableAnimals[currentAvailableIndex].studFeeCurrency === 'Negotiable' ? 'Negotiable' : `${availableAnimals[currentAvailableIndex].studFeeCurrency === 'USD' ? '$' : availableAnimals[currentAvailableIndex].studFeeCurrency === 'EUR' ? '�' : ''}${availableAnimals[currentAvailableIndex].studFeeAmount}`}
                                     </p>
                                 )}
                             </div>
@@ -19161,15 +19166,15 @@ const App = () => {
                                             {showTabs && (
                                                 <div className="px-4 py-3 flex flex-wrap gap-2">
                                                     {[
-                                                        { id: 1, label: 'Overview', icon: '📋' },
-                                                        { id: 2, label: 'Status & Privacy', icon: '🔒' },
-                                                        { id: 3, label: 'Physical', icon: '🎨' },
-                                                        { id: 4, label: 'Identification', icon: '🏷️' },
-                                                        { id: 5, label: 'Lineage', icon: '🌳' },
-                                                        { id: 6, label: 'Breeding', icon: '🫘' },
-                                                        { id: 7, label: 'Health', icon: '🏥' },
-                                                        { id: 8, label: 'Husbandry', icon: '🏠' },
-                                                        { id: 9, label: 'Show', icon: '🏆' }
+                                                        { id: 1, label: 'Overview', icon: '??' },
+                                                        { id: 2, label: 'Status & Privacy', icon: '??' },
+                                                        { id: 3, label: 'Physical', icon: '??' },
+                                                        { id: 4, label: 'Identification', icon: '???' },
+                                                        { id: 5, label: 'Lineage', icon: '??' },
+                                                        { id: 6, label: 'Breeding', icon: '??' },
+                                                        { id: 7, label: 'Health', icon: '??' },
+                                                        { id: 8, label: 'Husbandry', icon: '??' },
+                                                        { id: 9, label: 'Show', icon: '??' }
                                                     ].map(tab => (
                                                         <button
                                                             key={tab.id}
@@ -19986,6 +19991,7 @@ const App = () => {
                                                 <div className="bg-gray-50 p-4 rounded-lg border border-gray-200 space-y-4">
                                                     <h3 className="text-lg font-semibold text-gray-700">Identification Numbers</h3>
                                                     <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm">
+                                                        <div><span className="text-gray-600">CritterTrack ID:</span> <strong>{animalToView.id_public || ''}</strong></div>
                                                         <div><span className="text-gray-600">Identification:</span> <strong>{animalToView.breederyId || ''}</strong></div>
                                                         <div><span className="text-gray-600">Microchip:</span> <strong>{animalToView.microchipNumber || ''}</strong></div>
                                                         <div><span className="text-gray-600">Pedigree Reg ID:</span> <strong>{animalToView.pedigreeRegistrationId || ''}</strong></div>
@@ -20362,7 +20368,7 @@ const App = () => {
                             <div className="bg-gray-50 p-4 rounded-lg border border-gray-200 space-y-4">
                                 <h3 className="text-lg font-semibold text-gray-700">Information</h3>
                                 <div className="space-y-3 text-sm">
-                                    <div><span className="text-gray-600">Deceased Date:</span> <strong>{animalToView.deceasedDate ? formatDate(animalToView.deceasedDate) : '—'}</strong></div>
+                                    <div><span className="text-gray-600">Deceased Date:</span> <strong>{animalToView.deceasedDate ? formatDate(animalToView.deceasedDate) : '�'}</strong></div>
                                     <div><span className="text-gray-600">Cause of Death:</span> <strong>{animalToView.causeOfDeath || ''}</strong></div>
                                     <div><span className="text-gray-600">Necropsy Results:</span> <strong>{animalToView.necropsyResults || ''}</strong></div>
                                     {(animalToView.species === 'Dog' || animalToView.species === 'Cat') && animalToView.endOfLifeCareNotes && (
@@ -20476,7 +20482,7 @@ const App = () => {
                                                         {animal.prefix ? `${animal.prefix} ` : ''}{animal.name}{animal.suffix ? ` ${animal.suffix}` : ''}
                                                     </h3>
                                                     <p className="text-sm text-gray-600">{animal.id_public}</p>
-                                                    <p className="text-xs text-gray-500">{animal.species} • {animal.gender}</p>
+                                                    <p className="text-xs text-gray-500">{animal.species} � {animal.gender}</p>
                                                 </div>
                                             </div>
                                             <div className="flex gap-2">
