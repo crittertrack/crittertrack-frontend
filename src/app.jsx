@@ -1,7 +1,7 @@
 ﻿import React, { useState, useEffect, useCallback, useRef, useMemo } from 'react';
 import { useParams, useNavigate, useLocation, Routes, Route, Link as RouterLink } from 'react-router-dom';
 import axios from 'axios';
-import { LogOut, Cat, UserPlus, LogIn, ChevronLeft, Trash2, Edit, Save, PlusCircle, Plus, ArrowLeft, Loader2, RefreshCw, User, Users, ClipboardList, BookOpen, Settings, Mail, Globe, Bean, Milk, Search, X, Mars, Venus, Eye, EyeOff, Heart, HeartOff, HeartHandshake, Bell, XCircle, CheckCircle, Download, FileText, Link, AlertCircle, DollarSign, Archive, ArrowLeftRight, RotateCcw, Info, Hourglass, MessageSquare, Ban, Flag, Scissors, VenusAndMars, Circle, Shield, Lock, AlertTriangle, ShoppingBag } from 'lucide-react';
+import { LogOut, Cat, UserPlus, LogIn, ChevronLeft, Trash2, Edit, Save, PlusCircle, Plus, ArrowLeft, Loader2, RefreshCw, User, Users, ClipboardList, BookOpen, Settings, Mail, Globe, Bean, Milk, Search, X, Mars, Venus, Eye, EyeOff, Heart, HeartOff, HeartHandshake, Bell, XCircle, CheckCircle, Download, FileText, Link, AlertCircle, DollarSign, Archive, ArrowLeftRight, RotateCcw, Info, Hourglass, MessageSquare, Ban, Flag, Scissors, VenusAndMars, Circle, Shield, Lock, AlertTriangle, ShoppingBag, Check } from 'lucide-react';
 import jsPDF from 'jspdf';
 import html2canvas from 'html2canvas';
 import 'flag-icons/css/flag-icons.min.css';
@@ -15247,6 +15247,129 @@ const WarningBanner = ({ authToken, API_BASE_URL, userProfile }) => {
     );
 };
 
+// Poll Component for Broadcasts
+const BroadcastPoll = ({ poll, onVote, isVoting, styles }) => {
+    const [selectedOptions, setSelectedOptions] = useState([]);
+    const hasEnded = poll.pollEndsAt && new Date() > new Date(poll.pollEndsAt);
+    const hasVoted = poll.userVote && poll.userVote.length > 0;
+    
+    const handleOptionToggle = (index) => {
+        if (hasVoted || hasEnded) return;
+        
+        setSelectedOptions(prev => {
+            if (poll.allowMultipleChoices) {
+                return prev.includes(index) 
+                    ? prev.filter(i => i !== index)
+                    : [...prev, index];
+            } else {
+                return [index];
+            }
+        });
+    };
+    
+    const handleSubmitVote = () => {
+        if (selectedOptions.length === 0 || isVoting) return;
+        onVote(selectedOptions);
+    };
+    
+    const getTotalVotes = () => {
+        return poll.pollOptions?.reduce((sum, option) => sum + (option.votes || 0), 0) || 0;
+    };
+    
+    const getOptionPercentage = (votes) => {
+        const total = getTotalVotes();
+        return total > 0 ? Math.round((votes / total) * 100) : 0;
+    };
+    
+    return (
+        <div className="mt-4">
+            <h4 className={`font-semibold ${styles.title} mb-3`}>{poll.pollQuestion}</h4>
+            
+            <div className="space-y-2">
+                {poll.pollOptions?.map((option, index) => {
+                    const isSelected = selectedOptions.includes(index);
+                    const hasUserVote = hasVoted && poll.userVote.includes(index);
+                    const percentage = getOptionPercentage(option.votes || 0);
+                    
+                    return (
+                        <div key={index} className="relative">
+                            <button
+                                onClick={() => handleOptionToggle(index)}
+                                disabled={hasVoted || hasEnded || isVoting}
+                                className={`w-full text-left p-3 rounded-lg border transition-all ${
+                                    hasVoted || hasEnded
+                                        ? 'cursor-not-allowed opacity-60'
+                                        : `cursor-pointer ${styles.optionBg} border-gray-300 hover:border-gray-400`
+                                } ${
+                                    isSelected || hasUserVote 
+                                        ? `border-green-500 ${styles.optionBg}` 
+                                        : ''
+                                }`}
+                            >
+                                <div className="flex items-center justify-between">
+                                    <div className="flex items-center">
+                                        <div className={`w-4 h-4 rounded mr-3 border-2 ${
+                                            isSelected || hasUserVote 
+                                                ? 'bg-green-500 border-green-500' 
+                                                : 'border-gray-400'
+                                        } ${poll.allowMultipleChoices ? '' : 'rounded-full'}`}>
+                                            {(isSelected || hasUserVote) && (
+                                                <Check size={12} className="text-white m-0.5" />
+                                            )}
+                                        </div>
+                                        <span className={styles.text}>{option.text}</span>
+                                        {hasUserVote && <span className="ml-2 text-green-600 font-medium">(Your vote)</span>}
+                                    </div>
+                                    {(hasVoted || hasEnded) && (
+                                        <div className="flex items-center gap-2">
+                                            <span className={`${styles.subtitle} text-sm`}>
+                                                {option.votes || 0} votes ({percentage}%)
+                                            </span>
+                                        </div>
+                                    )}
+                                </div>
+                                
+                                {/* Results bar */}
+                                {(hasVoted || hasEnded) && percentage > 0 && (
+                                    <div className="mt-2 bg-gray-200 rounded-full h-2">
+                                        <div 
+                                            className={`${styles.resultBar} h-2 rounded-full transition-all duration-300`}
+                                            style={{ width: `${percentage}%` }}
+                                        />
+                                    </div>
+                                )}
+                            </button>
+                        </div>
+                    );
+                })}
+            </div>
+            
+            {!hasVoted && !hasEnded && (
+                <button
+                    onClick={handleSubmitVote}
+                    disabled={selectedOptions.length === 0 || isVoting}
+                    className={`mt-3 px-4 py-2 rounded-lg font-medium transition-all ${
+                        selectedOptions.length === 0 || isVoting
+                            ? 'bg-gray-300 text-gray-500 cursor-not-allowed'
+                            : styles.button
+                    }`}
+                >
+                    {isVoting ? 'Voting...' : `Vote ${poll.allowMultipleChoices ? '(Multiple allowed)' : ''}`}
+                </button>
+            )}
+            
+            <div className={`mt-3 text-sm ${styles.subtitle} flex justify-between`}>
+                <span>Total votes: {getTotalVotes()}</span>
+                {poll.pollEndsAt && (
+                    <span>
+                        {hasEnded ? 'Poll ended' : `Ends: ${new Date(poll.pollEndsAt).toLocaleDateString()}`}
+                    </span>
+                )}
+            </div>
+        </div>
+    );
+};
+
 // System Broadcast Banner Component (for info/announcements - shows in banner area)
 const BroadcastBanner = ({ authToken, API_BASE_URL }) => {
     const [broadcasts, setBroadcasts] = useState([]);
@@ -15254,6 +15377,8 @@ const BroadcastBanner = ({ authToken, API_BASE_URL }) => {
         const saved = localStorage.getItem('dismissedBroadcasts');
         return saved ? JSON.parse(saved) : [];
     });
+    const [pollVotes, setPollVotes] = useState({});
+    const [votingInProgress, setVotingInProgress] = useState({});
 
     useEffect(() => {
         const fetchBroadcasts = async () => {
@@ -15290,6 +15415,42 @@ const BroadcastBanner = ({ authToken, API_BASE_URL }) => {
         setBroadcasts(prev => prev.filter(b => b._id !== id));
     };
 
+    const handlePollVote = async (notificationId, selectedOptions) => {
+        if (!authToken || votingInProgress[notificationId]) return;
+        
+        setVotingInProgress(prev => ({ ...prev, [notificationId]: true }));
+        
+        try {
+            const response = await axios.post(
+                `${API_BASE_URL}/moderation/poll/vote`,
+                { notificationId, selectedOptions },
+                { headers: { Authorization: `Bearer ${authToken}` } }
+            );
+            
+            if (response.data.success) {
+                // Update local state to reflect the vote
+                setPollVotes(prev => ({ ...prev, [notificationId]: selectedOptions }));
+                
+                // Update the broadcast with new results
+                setBroadcasts(prev => prev.map(broadcast => {
+                    if (broadcast._id === notificationId) {
+                        return {
+                            ...broadcast,
+                            userVote: selectedOptions,
+                            pollOptions: response.data.pollResults
+                        };
+                    }
+                    return broadcast;
+                }));
+            }
+        } catch (error) {
+            console.error('Failed to vote on poll:', error);
+            // Could add error notification here
+        } finally {
+            setVotingInProgress(prev => ({ ...prev, [notificationId]: false }));
+        }
+    };
+
     if (broadcasts.length === 0) return null;
 
     // Style configurations for different broadcast types
@@ -15304,8 +15465,25 @@ const BroadcastBanner = ({ authToken, API_BASE_URL }) => {
                 text: 'text-purple-700',
                 subtitle: 'text-purple-500',
                 dismissBtn: 'text-purple-400 hover:text-purple-600',
-                emoji: '??',
+                emoji: '📢',
                 label: 'Announcement'
+            };
+        }
+        if (broadcastType === 'poll') {
+            // Poll: Green - interactive
+            return {
+                bg: 'bg-green-50',
+                border: 'border-green-500',
+                icon: 'text-green-500',
+                title: 'text-green-800',
+                text: 'text-green-700',
+                subtitle: 'text-green-500',
+                dismissBtn: 'text-green-400 hover:text-green-600',
+                emoji: '📊',
+                label: 'Poll',
+                button: 'bg-green-500 hover:bg-green-600 text-white',
+                optionBg: 'bg-green-100 hover:bg-green-200',
+                resultBar: 'bg-green-400'
             };
         }
         // Info: Blue - standard informational
@@ -15317,7 +15495,7 @@ const BroadcastBanner = ({ authToken, API_BASE_URL }) => {
             text: 'text-blue-700',
             subtitle: 'text-blue-500',
             dismissBtn: 'text-blue-400 hover:text-blue-600',
-            emoji: '??',
+            emoji: 'ℹ️',
             label: 'Info'
         };
     };
@@ -15344,7 +15522,19 @@ const BroadcastBanner = ({ authToken, API_BASE_URL }) => {
                                             <X size={20} />
                                         </button>
                                     </div>
-                                    <p className={`mt-2 ${styles.text} text-sm`}>{broadcast.message}</p>
+                                    {broadcast.message && (
+                                        <p className={`mt-2 ${styles.text} text-sm`}>{broadcast.message}</p>
+                                    )}
+                                    
+                                    {broadcast.broadcastType === 'poll' && broadcast.pollQuestion && (
+                                        <BroadcastPoll
+                                            poll={broadcast}
+                                            onVote={(selectedOptions) => handlePollVote(broadcast._id, selectedOptions)}
+                                            isVoting={votingInProgress[broadcast._id] || false}
+                                            styles={styles}
+                                        />
+                                    )}
+                                    
                                     <p className={`mt-2 ${styles.subtitle} text-xs`}>
                                         {new Date(broadcast.createdAt).toLocaleString()}
                                     </p>
