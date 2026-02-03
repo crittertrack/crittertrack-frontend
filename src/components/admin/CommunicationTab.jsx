@@ -436,7 +436,7 @@ export default function CommunicationTab({ API_BASE_URL, authToken }) {
                                 </div>
                             </div>
                         ) : (
-                            /* Regular Message Field */
+                            {/* Regular Message Field */}
                             <div className="form-group">
                                 <label>Message *</label>
                                 <textarea
