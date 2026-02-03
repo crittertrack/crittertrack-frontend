@@ -149,11 +149,6 @@ export default function CommunicationTab({ API_BASE_URL, authToken }) {
                 return;
             }
         }
-                setError('Scheduled time must be in the future');
-                setLoading(false);
-                return;
-            }
-        }
 
         try {
             // Prepare payload based on broadcast type
@@ -436,19 +431,21 @@ export default function CommunicationTab({ API_BASE_URL, authToken }) {
                                 </div>
                             </div>
                         ) : (
-                            {/* Regular Message Field */}
-                            <div className="form-group">
-                                <label>Message *</label>
-                                <textarea
-                                    value={message}
-                                    onChange={(e) => setMessage(e.target.value)}
-                                    placeholder="Your announcement message..."
-                                    disabled={loading}
-                                    rows="6"
-                                    maxLength="1000"
-                                />
-                                <span className="char-count">{message.length}/1000</span>
-                            </div>
+                            <>
+                                {/* Regular Message Field */}
+                                <div className="form-group">
+                                    <label>Message *</label>
+                                    <textarea
+                                        value={message}
+                                        onChange={(e) => setMessage(e.target.value)}
+                                        placeholder="Your announcement message..."
+                                        disabled={loading}
+                                        rows="6"
+                                        maxLength="1000"
+                                    />
+                                    <span className="char-count">{message.length}/1000</span>
+                                </div>
+                            </>
                         )}
 
                         <div className="form-group schedule-toggle">
