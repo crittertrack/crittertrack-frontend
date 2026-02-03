@@ -18844,22 +18844,42 @@ const App = () => {
                         />
                     } />
                     <Route path="/family-tree" element={
-                        <FamilyTree
-                            authToken={authToken}
-                            userProfile={userProfile}
-                            showModalMessage={showModalMessage}
-                            onViewAnimal={handleViewAnimal}
-                            onBack={() => navigate('/')}
-                        />
+                        userProfile?.id_public === 'CTU2' ? (
+                            <FamilyTree
+                                authToken={authToken}
+                                userProfile={userProfile}
+                                showModalMessage={showModalMessage}
+                                onViewAnimal={handleViewAnimal}
+                                onBack={() => navigate('/')}
+                            />
+                        ) : (
+                            <div style={{ padding: '20px', textAlign: 'center' }}>
+                                <h2>Access Restricted</h2>
+                                <p>The Family Tree feature is currently in testing and only available to select users.</p>
+                                <button onClick={() => navigate('/')} style={{ marginTop: '20px', padding: '10px 20px', cursor: 'pointer' }}>
+                                    Back to Home
+                                </button>
+                            </div>
+                        )
                     } />
                     <Route path="/family-tree" element={
-                        <FamilyTree
-                            authToken={authToken}
-                            userProfile={userProfile}
-                            showModalMessage={showModalMessage}
-                            onViewAnimal={handleViewAnimal}
-                            onBack={() => navigate('/')}
-                        />
+                        userProfile?.id_public === 'CTU2' ? (
+                            <FamilyTree
+                                authToken={authToken}
+                                userProfile={userProfile}
+                                showModalMessage={showModalMessage}
+                                onViewAnimal={handleViewAnimal}
+                                onBack={() => navigate('/')}
+                            />
+                        ) : (
+                            <div style={{ padding: '20px', textAlign: 'center' }}>
+                                <h2>Access Restricted</h2>
+                                <p>The Family Tree feature is currently in testing and only available to select users.</p>
+                                <button onClick={() => navigate('/')} style={{ marginTop: '20px', padding: '10px 20px', cursor: 'pointer' }}>
+                                    Back to Home
+                                </button>
+                            </div>
+                        )
                     } />
                     <Route path="/profile" element={<ProfileView userProfile={userProfile} showModalMessage={showModalMessage} fetchUserProfile={fetchUserProfile} authToken={authToken} onProfileUpdated={setUserProfile} onProfileEditButtonClicked={setProfileEditButtonClicked} />} />
                     <Route path="/litters" element={
