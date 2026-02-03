@@ -15289,7 +15289,7 @@ const BroadcastPoll = ({ poll, onVote, isVoting, styles }) => {
     
     return (
         <div className="mt-3">
-            <h4 className={`font-medium ${styles.title} mb-2 text-base`}>{poll.pollQuestion}</h4>
+            <h4 className={`font-medium ${styles.title} mb-2 text-sm md:text-base`}>{poll.pollQuestion}</h4>
             
             <div className="grid grid-cols-2 gap-2">
                 {poll.pollOptions?.map((option, index) => {
@@ -15302,7 +15302,7 @@ const BroadcastPoll = ({ poll, onVote, isVoting, styles }) => {
                             <button
                                 onClick={() => handleOptionToggle(index)}
                                 disabled={hasVoted || hasEnded || isVoting}
-                                className={`w-full text-left p-2 rounded-md border transition-all text-sm ${
+                                className={`w-full text-left p-1.5 md:p-2 rounded-md border transition-all text-xs md:text-sm ${
                                     hasVoted || hasEnded
                                         ? 'cursor-not-allowed opacity-60'
                                         : `cursor-pointer ${styles.optionBg} border-gray-300 hover:border-gray-400`
@@ -15314,7 +15314,7 @@ const BroadcastPoll = ({ poll, onVote, isVoting, styles }) => {
                             >
                                 <div className="flex items-center justify-between">
                                     <div className="flex items-center">
-                                        <div className={`w-3.5 h-3.5 rounded mr-2.5 border-2 ${
+                                        <div className={`w-3 h-3 md:w-3.5 md:h-3.5 rounded mr-1.5 md:mr-2.5 border-2 ${
                                             isSelected || hasUserVote 
                                                 ? 'bg-green-500 border-green-500' 
                                                 : 'border-gray-400'
@@ -15324,10 +15324,10 @@ const BroadcastPoll = ({ poll, onVote, isVoting, styles }) => {
                                             )}
                                         </div>
                                         <span className={styles.text}>{option.text}</span>
-                                        {hasUserVote && <span className="ml-2 text-green-600 text-xs font-medium">(Your vote)</span>}
+                                        {hasUserVote && <span className="ml-1 md:ml-2 text-green-600 text-xs font-medium">(Your vote)</span>}
                                     </div>
                                     {(hasVoted || hasEnded) && (
-                                        <div className="flex items-center gap-2">
+                                        <div className="flex items-center gap-1 md:gap-2">
                                             <span className={`${styles.subtitle} text-xs`}>
                                                 {option.votes || 0} votes ({percentage}%)
                                             </span>
@@ -15337,7 +15337,7 @@ const BroadcastPoll = ({ poll, onVote, isVoting, styles }) => {
                                 
                                 {/* Results bar */}
                                 {(hasVoted || hasEnded) && percentage > 0 && (
-                                    <div className="mt-1.5 bg-gray-200 rounded-full h-1.5">
+                                    <div className="mt-1 md:mt-1.5 bg-gray-200 rounded-full h-1.5">
                                         <div 
                                             className={`${styles.resultBar} h-1.5 rounded-full transition-all duration-300`}
                                             style={{ width: `${percentage}%` }}
@@ -15354,7 +15354,7 @@ const BroadcastPoll = ({ poll, onVote, isVoting, styles }) => {
                 <button
                     onClick={handleSubmitVote}
                     disabled={selectedOptions.length === 0 || isVoting}
-                    className={`mt-2 px-3 py-1.5 rounded-md text-sm font-medium transition-all ${
+                    className={`mt-2 px-2.5 md:px-3 py-1 md:py-1.5 rounded-md text-xs md:text-sm font-medium transition-all ${
                         selectedOptions.length === 0 || isVoting
                             ? 'bg-gray-300 text-gray-500 cursor-not-allowed'
                             : styles.button
@@ -15364,7 +15364,7 @@ const BroadcastPoll = ({ poll, onVote, isVoting, styles }) => {
                 </button>
             )}
             
-            <div className={`mt-2 text-xs ${styles.subtitle} flex justify-between`}>
+            <div className={`mt-1.5 md:mt-2 text-xs ${styles.subtitle} flex justify-between`}>
                 <span>Total votes: {getTotalVotes()}</span>
                 {poll.pollEndsAt && (
                     <span>
