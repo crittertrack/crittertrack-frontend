@@ -15421,32 +15421,65 @@ const BroadcastBanner = ({ authToken, API_BASE_URL }) => {
         
         setVotingInProgress(prev => ({ ...prev, [notificationId]: true }));
         
+        // Optimistic update - update UI immediately
+        const previousBroadcasts = broadcasts;
+        setPollVotes(prev => ({ ...prev, [notificationId]: selectedOptions }));
+        
+        setBroadcasts(prev => prev.map(broadcast => {
+            if (broadcast._id === notificationId) {
+                // Calculate optimistic vote counts
+                const updatedOptions = broadcast.pollOptions.map((option, index) => {
+                    if (selectedOptions.includes(index)) {
+                        return {
+                            ...option,
+                            votes: (option.votes || 0) + 1
+                        };
+                    }
+                    return option;
+                });
+                
+                return {
+                    ...broadcast,
+                    userVote: selectedOptions,
+                    pollOptions: updatedOptions
+                };
+            }
+            return broadcast;
+        }));
+        
         try {
+            console.log('[POLL] Voting:', { notificationId, selectedOptions });
+            
             const response = await axios.post(
                 `${API_BASE_URL}/moderation/poll/vote`,
                 { notificationId, selectedOptions },
                 { headers: { Authorization: `Bearer ${authToken}` } }
             );
             
-            if (response.data.success) {
-                // Update local state to reflect the vote
-                setPollVotes(prev => ({ ...prev, [notificationId]: selectedOptions }));
-                
-                // Update the broadcast with new results
-                setBroadcasts(prev => prev.map(broadcast => {
-                    if (broadcast._id === notificationId) {
-                        return {
-                            ...broadcast,
-                            userVote: selectedOptions,
-                            pollOptions: response.data.pollResults
-                        };
-                    }
-                    return broadcast;
-                }));
-            }
+            console.log('[POLL] Vote response:', response.data);
+            
+            // Update with actual server response
+            setBroadcasts(prev => prev.map(broadcast => {
+                if (broadcast._id === notificationId) {
+                    return {
+                        ...broadcast,
+                        userVote: response.data.userVote || selectedOptions,
+                        pollOptions: response.data.pollResults || broadcast.pollOptions
+                    };
+                }
+                return broadcast;
+            }));
         } catch (error) {
-            console.error('Failed to vote on poll:', error);
-            // Could add error notification here
+            console.error('[POLL] Failed to vote on poll:', error);
+            console.error('[POLL] Error response:', error.response?.data);
+            
+            // Revert optimistic update on error
+            setBroadcasts(previousBroadcasts);
+            setPollVotes(prev => {
+                const updated = { ...prev };
+                delete updated[notificationId];
+                return updated;
+            });
         } finally {
             setVotingInProgress(prev => ({ ...prev, [notificationId]: false }));
         }
