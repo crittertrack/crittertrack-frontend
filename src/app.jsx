@@ -15286,7 +15286,7 @@ const BroadcastPoll = ({ poll, onVote, isVoting, styles }) => {
         <div className="mt-3">
             <h4 className={`font-medium ${styles.title} mb-2 text-base`}>{poll.pollQuestion}</h4>
             
-            <div className="space-y-1.5">
+            <div className="grid grid-cols-2 gap-2">
                 {poll.pollOptions?.map((option, index) => {
                     const isSelected = selectedOptions.includes(index);
                     const hasUserVote = hasVoted && poll.userVote.includes(index);
