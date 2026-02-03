@@ -5328,10 +5328,8 @@ const LitterManagement = ({ authToken, API_BASE_URL, userProfile, showModalMessa
     const [searchQuery, setSearchQuery] = useState('');
     const [speciesFilter, setSpeciesFilter] = useState('');
     const [yearFilter, setYearFilter] = useState('');
-    // COI calculation state (feature in development - UI display pending)
-    // eslint-disable-next-line no-unused-vars
+    // COI calculation state
     const [predictedCOI, setPredictedCOI] = useState(null);
-    // eslint-disable-next-line no-unused-vars
     const [calculatingCOI, setCalculatingCOI] = useState(false);
     const [addingOffspring, setAddingOffspring] = useState(null);
     const [newOffspringData, setNewOffspringData] = useState({
@@ -6392,6 +6390,24 @@ const LitterManagement = ({ authToken, API_BASE_URL, userProfile, showModalMessa
                             </button>
                         </div>
                     </div>
+
+                    {/* Predicted COI Display */}
+                    {formData.sireId_public && formData.damId_public && (
+                        <div className="mb-4 bg-blue-50 border border-blue-200 rounded-lg p-4">
+                            <div className="flex items-center gap-2">
+                                <span className="text-sm font-medium text-gray-700">Predicted COI (Coefficient of Inbreeding):</span>
+                                {calculatingCOI ? (
+                                    <span className="text-sm text-gray-500 italic">Calculating...</span>
+                                ) : predictedCOI != null ? (
+                                    <span className="text-sm font-bold text-gray-900">
+                                        {predictedCOI.toFixed(2)}%
+                                    </span>
+                                ) : (
+                                    <span className="text-sm text-gray-500 italic">-</span>
+                                )}
+                            </div>
+                        </div>
+                    )}
 
                     {/* Birth Date & Counts */}
                     <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-4" data-tutorial-target="litter-dates-counts">
@@ -18211,7 +18227,7 @@ const App = () => {
                             <Cat size={18} className="mb-1" />
                             <span>Calculator</span>
                         </button>
-                        {userProfile?.id_public === 'CTU2' && (
+                        {userProfile?.id_public === 'CTU2' && !isMobile && (
                             <button onClick={() => navigate('/family-tree')} className={`px-4 py-2 text-xs font-medium rounded-lg transition duration-150 flex flex-col items-center ${currentView === 'family-tree' ? 'bg-primary text-black shadow-md' : 'text-gray-600 hover:bg-gray-100'}`}>
                                 <Users size={18} className="mb-1" />
                                 <span>Family Tree</span>
@@ -18378,18 +18394,12 @@ const App = () => {
                         </button>
                     </nav>
 
-                    {/* Third row: Navigation row 2 (4 buttons) */}
-                    <nav className="grid grid-cols-4 gap-1">
+                    {/* Third row: Navigation row 2 (3 buttons) */}
+                    <nav className="grid grid-cols-3 gap-1">
                         <button onClick={() => navigate('/genetics-calculator')} data-tutorial-target="genetics-btn" className={`px-2 py-2 text-xs font-medium rounded-lg transition duration-150 flex flex-col items-center ${currentView === 'genetics-calculator' ? 'bg-primary text-black shadow-md' : 'text-gray-600 hover:bg-gray-100'}`}>
                             <Cat size={18} className="mb-0.5" />
                             <span>Calculator</span>
                         </button>
-                        {userProfile?.id_public === 'CTU2' && (
-                            <button onClick={() => navigate('/family-tree')} className={`px-2 py-2 text-xs font-medium rounded-lg transition duration-150 flex flex-col items-center ${currentView === 'family-tree' ? 'bg-primary text-black shadow-md' : 'text-gray-600 hover:bg-gray-100'}`}>
-                                <Users size={18} className="mb-0.5" />
-                                <span>Family Tree</span>
-                            </button>
-                        )}
                         <button onClick={() => navigate('/profile')} data-tutorial-target="profile-btn" className={`px-2 py-2 text-xs font-medium rounded-lg transition duration-150 flex flex-col items-center ${currentView === 'profile' ? 'bg-primary text-black shadow-md' : 'text-gray-600 hover:bg-gray-100'}`}>
                             <User size={18} className="mb-0.5" />
                             <span>Profile</span>
