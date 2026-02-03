@@ -1,8 +1,7 @@
-﻿// CritterTrack Frontend Application
-import React, { useState, useEffect, useCallback, useRef, useMemo } from 'react';
+﻿import React, { useState, useEffect, useCallback, useRef, useMemo } from 'react';
 import { useParams, useNavigate, useLocation, Routes, Route, Link as RouterLink } from 'react-router-dom';
 import axios from 'axios';
-import { LogOut, Cat, UserPlus, LogIn, ChevronLeft, Trash2, Edit, Save, PlusCircle, Plus, ArrowLeft, Loader2, RefreshCw, User, Users, ClipboardList, BookOpen, Settings, Mail, Globe, Bean, Milk, Search, X, Mars, Venus, Eye, EyeOff, Heart, HeartOff, HeartHandshake, Bell, XCircle, CheckCircle, Download, FileText, Link, AlertCircle, DollarSign, Archive, ArrowLeftRight, RotateCcw, Info, Hourglass, MessageSquare, Ban, Flag, Scissors, VenusAndMars, Circle, Shield, Lock, AlertTriangle, ShoppingBag, Check } from 'lucide-react';
+import { LogOut, Cat, UserPlus, LogIn, ChevronLeft, Trash2, Edit, Save, PlusCircle, Plus, ArrowLeft, Loader2, RefreshCw, User, Users, ClipboardList, BookOpen, Settings, Mail, Globe, Bean, Milk, Search, X, Mars, Venus, Eye, EyeOff, Heart, HeartOff, HeartHandshake, Bell, XCircle, CheckCircle, Download, FileText, Link, AlertCircle, DollarSign, Archive, ArrowLeftRight, RotateCcw, Info, Hourglass, MessageSquare, Ban, Flag, Scissors, VenusAndMars, Circle, Shield, Lock, AlertTriangle, ShoppingBag } from 'lucide-react';
 import jsPDF from 'jspdf';
 import html2canvas from 'html2canvas';
 import 'flag-icons/css/flag-icons.min.css';
@@ -181,11 +180,9 @@ const PedigreeChart = ({ animalId, animalData, onClose, API_BASE_URL, authToken 
         const fetchPedigreeData = async () => {
             setLoading(true);
             try {
-                // Enhanced recursive function to fetch animal, ancestors, and descendants
-                const fetchAnimalWithFamily = async (id, depth = 0, fetchedIds = new Set()) => {
-                    if (!id || depth > 4 || fetchedIds.has(id)) return null; // Limit to 5 generations (0-4) and prevent infinite loops
-                    
-                    fetchedIds.add(id); // Track this ID to prevent circular references
+                // Recursive function to fetch animal and ancestors
+                const fetchAnimalWithAncestors = async (id, depth = 0) => {
+                    if (!id || depth > 4) return null; // Limit to 5 generations (0-4)
 
                     let animalInfo = null;
 
@@ -258,43 +255,17 @@ const PedigreeChart = ({ animalId, animalData, onClose, API_BASE_URL, authToken 
                     const fatherId = animalInfo.fatherId_public || animalInfo.sireId_public;
                     const motherId = animalInfo.motherId_public || animalInfo.damId_public;
 
-                    const father = fatherId ? await fetchAnimalWithFamily(fatherId, depth + 1, fetchedIds) : null;
-                    const mother = motherId ? await fetchAnimalWithFamily(motherId, depth + 1, fetchedIds) : null;
-
-                    // Fetch offspring (children) if user is authenticated and depth allows
-                    let offspring = [];
-                    if (authToken && depth < 3) { // Limit offspring fetching to prevent too deep trees
-                        try {
-                            const offspringResponse = await axios.get(
-                                `${API_BASE_URL}/animals/${id}/offspring`,
-                                { headers: { Authorization: `Bearer ${authToken}` } }
-                            );
-                            
-                            if (offspringResponse.data && offspringResponse.data.length > 0) {
-                                // Recursively fetch offspring details but limit depth to prevent infinite expansion
-                                for (const child of offspringResponse.data.slice(0, 15)) { // Limit to first 15 offspring per animal to accommodate larger mouse litters
-                                    if (!fetchedIds.has(child.id_public)) {
-                                        const childData = await fetchAnimalWithFamily(child.id_public, depth + 1, fetchedIds);
-                                        if (childData) {
-                                            offspring.push(childData);
-                                        }
-                                    }
-                                }
-                            }
-                        } catch (error) {
-                            console.log(`No offspring data available for ${id}:`, error.message);
-                        }
-                    }
+                    const father = fatherId ? await fetchAnimalWithAncestors(fatherId, depth + 1) : null;
+                    const mother = motherId ? await fetchAnimalWithAncestors(motherId, depth + 1) : null;
 
                     return {
                         ...animalInfo,
                         father,
-                        mother,
-                        offspring: offspring.length > 0 ? offspring : undefined
+                        mother
                     };
                 };
 
-                const data = await fetchAnimalWithFamily(animalId || animalData?.id_public);
+                const data = await fetchAnimalWithAncestors(animalId || animalData?.id_public);
                 setPedigreeData(data);
 
                 // Fetch owner profile for the main animal
@@ -488,16 +459,10 @@ const PedigreeChart = ({ animalId, animalData, onClose, API_BASE_URL, authToken 
         const bgColor = isSire ? 'bg-[#d4f1f5]' : 'bg-[#f8e8ee]';
         const GenderIcon = isSire ? Mars : Venus;
         
-        // Get border color based on actual gender
-        const getBorderColor = (animal) => {
-            if (!animal || !animal.gender) return 'border-gray-700';
-            return animal.gender === 'Male' ? 'border-blue-500' : 'border-pink-500';
-        };
-        
         // Direct parents always show - either full data, "Unknown", or "Hidden" (private)
         if (!animal) {
             return (
-                <div className={`border ${getBorderColor(null)} rounded p-2 ${bgColor} relative h-full flex items-center justify-center`}>
+                <div className={`border border-gray-700 rounded p-2 ${bgColor} relative h-full flex items-center justify-center`}>
                     <div className="text-center">
                         <Cat size={32} className="hide-for-pdf text-gray-300 mx-auto mb-2" />
                         <div className="text-xs text-gray-400">Unknown</div>
@@ -511,7 +476,7 @@ const PedigreeChart = ({ animalId, animalData, onClose, API_BASE_URL, authToken 
         
         if (animal.isHidden) {
             return (
-                <div className={`border ${getBorderColor(animal)} rounded p-2 ${bgColor} relative h-full flex items-center justify-center`}>
+                <div className={`border border-gray-700 rounded p-2 ${bgColor} relative h-full flex items-center justify-center`}>
                     <div className="text-center">
                         <EyeOff size={32} className="hide-for-pdf text-gray-500 mx-auto mb-2" />
                         <div className="text-xs text-gray-600 font-semibold">Hidden</div>
@@ -528,7 +493,7 @@ const PedigreeChart = ({ animalId, animalData, onClose, API_BASE_URL, authToken 
         const colorCoat = [animal.color, animal.coat].filter(Boolean).join(' ') || 'N/A';
         
         return (
-            <div className={`border ${getBorderColor(animal)} rounded p-1.5 ${bgColor} relative flex gap-2 h-full items-center`}>
+            <div className={`border border-gray-700 rounded p-1.5 ${bgColor} relative flex gap-2 h-full items-center`}>
                 {/* Image - 1/3 width */}
                 <div className="hide-for-pdf w-1/3 aspect-square bg-gray-100 rounded-lg border-2 border-gray-900 overflow-hidden flex items-center justify-center flex-shrink-0">
                     {imgSrc ? (
@@ -585,15 +550,9 @@ const PedigreeChart = ({ animalId, animalData, onClose, API_BASE_URL, authToken 
         const bgColor = isSire ? 'bg-[#d4f1f5]' : 'bg-[#f8e8ee]';
         const GenderIcon = isSire ? Mars : Venus;
         
-        // Get border color based on actual gender
-        const getBorderColor = (animal) => {
-            if (!animal || !animal.gender) return 'border-gray-700';
-            return animal.gender === 'Male' ? 'border-blue-500' : 'border-pink-500';
-        };
-        
         if (!animal) {
             return (
-                <div className={`border ${getBorderColor(null)} rounded p-1.5 ${bgColor} flex gap-1.5 h-full items-center relative`}>
+                <div className={`border border-gray-700 rounded p-1.5 ${bgColor} flex gap-1.5 h-full items-center relative`}>
                     {/* Image placeholder - 1/3 width */}
                     <div className="hide-for-pdf w-1/3 aspect-square bg-gray-100 rounded-lg border-2 border-gray-900 overflow-hidden flex items-center justify-center flex-shrink-0">
                         <Cat size={20} className="text-gray-400" />
@@ -611,7 +570,7 @@ const PedigreeChart = ({ animalId, animalData, onClose, API_BASE_URL, authToken 
         
         if (animal.isHidden) {
             return (
-                <div className={`border ${getBorderColor(animal)} rounded p-1.5 ${bgColor} flex gap-1.5 h-full items-center relative`}>
+                <div className={`border border-gray-700 rounded p-1.5 ${bgColor} flex gap-1.5 h-full items-center relative`}>
                     {/* Icon placeholder - 1/3 width */}
                     <div className="hide-for-pdf w-1/3 aspect-square bg-gray-100 rounded-lg border-2 border-gray-900 overflow-hidden flex items-center justify-center flex-shrink-0">
                         <EyeOff size={20} className="text-gray-500" />
@@ -631,7 +590,7 @@ const PedigreeChart = ({ animalId, animalData, onClose, API_BASE_URL, authToken 
         const colorCoat = [animal.color, animal.coat].filter(Boolean).join(' ') || 'N/A';
         
         return (
-            <div className={`border ${getBorderColor(animal)} rounded p-1 ${bgColor} relative flex gap-1.5 h-full items-center`}>
+            <div className={`border border-gray-700 rounded p-1 ${bgColor} relative flex gap-1.5 h-full items-center`}>
                 {/* Image - 1/3 width */}
                 <div className="hide-for-pdf w-1/3 aspect-square bg-gray-100 rounded-lg border-2 border-gray-900 overflow-hidden flex items-center justify-center flex-shrink-0">
                     {imgSrc ? (
@@ -688,15 +647,9 @@ const PedigreeChart = ({ animalId, animalData, onClose, API_BASE_URL, authToken 
         const bgColor = isSire ? 'bg-[#d4f1f5]' : 'bg-[#f8e8ee]';
         const GenderIcon = isSire ? Mars : Venus;
         
-        // Get border color based on actual gender
-        const getBorderColor = (animal) => {
-            if (!animal || !animal.gender) return 'border-gray-700';
-            return animal.gender === 'Male' ? 'border-blue-500' : 'border-pink-500';
-        };
-        
         if (!animal) {
             return (
-                <div className={`border ${getBorderColor(null)} rounded p-1 ${bgColor} flex items-center justify-center h-full relative`}>
+                <div className={`border border-gray-700 rounded p-1 ${bgColor} flex items-center justify-center h-full relative`}>
                     <span className="text-xs text-gray-400">Unknown</span>
                     <div className="absolute top-0.5 right-0.5">
                         <GenderIcon size={12} className="text-gray-900" strokeWidth={2.5} />
@@ -707,7 +660,7 @@ const PedigreeChart = ({ animalId, animalData, onClose, API_BASE_URL, authToken 
         
         if (animal.isHidden) {
             return (
-                <div className={`border ${getBorderColor(animal)} rounded p-1 ${bgColor} flex flex-col items-center justify-center h-full relative`}>
+                <div className={`border border-gray-700 rounded p-1 ${bgColor} flex flex-col items-center justify-center h-full relative`}>
                     <EyeOff size={16} className="text-gray-500 mb-1" />
                     <span className="text-xs text-gray-600 font-semibold">Hidden</span>
                     <div className="absolute top-0.5 right-0.5">
@@ -720,7 +673,7 @@ const PedigreeChart = ({ animalId, animalData, onClose, API_BASE_URL, authToken 
         const colorCoat = [animal.color, animal.coat].filter(Boolean).join(' ') || 'N/A';
         
         return (
-            <div className={`border ${getBorderColor(animal)} rounded p-0.5 ${bgColor} relative h-full flex flex-col justify-start gap-1 py-1`}>
+            <div className={`border border-gray-700 rounded p-0.5 ${bgColor} relative h-full flex flex-col justify-start gap-1 py-1`}>
                 {/* Name */}
                 <div className="text-gray-900 leading-tight" style={{fontSize: '0.6rem', lineHeight: '1.2'}}>
                     <span className="font-semibold">Name: </span>
@@ -9415,11 +9368,11 @@ const AnimalForm = ({
                                         className="mt-1 block w-full p-2 border border-gray-300 rounded-md shadow-sm focus:ring-primary focus:border-primary">
                                         <option value="Pet">Pet - Personal animal, not for breeding/sale</option>
                                         <option value="Breeder">Breeder - Active breeding animal</option>
-                                        <option value="Available">Available - For sale</option>
-                                        <option value="Booked">Booked - Reserved/deposit received</option>
+                                        <option value="Available">Available - For sale (shown in public showcase)</option>
+                                        <option value="Sold">Sold - Sold to new owner</option>
                                         <option value="Retired">Retired - No longer breeding</option>
                                         <option value="Deceased">Deceased - Animal has passed away</option>
-                                        <option value="Rehomed">Rehomed - Sold/given to new home</option>
+                                        <option value="Rehomed">Rehomed - Given to new home</option>
                                         <option value="Unknown">Unknown</option>
                                     </select>
                                     <p className="text-xs text-gray-500 mt-1">
@@ -15248,129 +15201,6 @@ const WarningBanner = ({ authToken, API_BASE_URL, userProfile }) => {
     );
 };
 
-// Poll Component for Broadcasts
-const BroadcastPoll = ({ poll, onVote, isVoting, styles }) => {
-    const [selectedOptions, setSelectedOptions] = useState([]);
-    const hasEnded = poll.pollEndsAt && new Date() > new Date(poll.pollEndsAt);
-    const hasVoted = poll.userVote && poll.userVote.length > 0;
-    
-    const handleOptionToggle = (index) => {
-        if (hasVoted || hasEnded) return;
-        
-        setSelectedOptions(prev => {
-            if (poll.allowMultipleChoices) {
-                return prev.includes(index) 
-                    ? prev.filter(i => i !== index)
-                    : [...prev, index];
-            } else {
-                return [index];
-            }
-        });
-    };
-    
-    const handleSubmitVote = () => {
-        if (selectedOptions.length === 0 || isVoting) return;
-        onVote(selectedOptions);
-    };
-    
-    const getTotalVotes = () => {
-        return poll.pollOptions?.reduce((sum, option) => sum + (option.votes || 0), 0) || 0;
-    };
-    
-    const getOptionPercentage = (votes) => {
-        const total = getTotalVotes();
-        return total > 0 ? Math.round((votes / total) * 100) : 0;
-    };
-    
-    return (
-        <div className="mt-3">
-            <h4 className={`font-medium ${styles.title} mb-2 text-base`}>{poll.pollQuestion}</h4>
-            
-            <div className="grid grid-cols-2 gap-2">
-                {poll.pollOptions?.map((option, index) => {
-                    const isSelected = selectedOptions.includes(index);
-                    const hasUserVote = hasVoted && poll.userVote.includes(index);
-                    const percentage = getOptionPercentage(option.votes || 0);
-                    
-                    return (
-                        <div key={index} className="relative">
-                            <button
-                                onClick={() => handleOptionToggle(index)}
-                                disabled={hasVoted || hasEnded || isVoting}
-                                className={`w-full text-left p-2 rounded-md border transition-all text-sm ${
-                                    hasVoted || hasEnded
-                                        ? 'cursor-not-allowed opacity-60'
-                                        : `cursor-pointer ${styles.optionBg} border-gray-300 hover:border-gray-400`
-                                } ${
-                                    isSelected || hasUserVote 
-                                        ? `border-green-500 ${styles.optionBg}` 
-                                        : ''
-                                }`}
-                            >
-                                <div className="flex items-center justify-between">
-                                    <div className="flex items-center">
-                                        <div className={`w-3.5 h-3.5 rounded mr-2.5 border-2 ${
-                                            isSelected || hasUserVote 
-                                                ? 'bg-green-500 border-green-500' 
-                                                : 'border-gray-400'
-                                        } ${poll.allowMultipleChoices ? '' : 'rounded-full'}`}>
-                                            {(isSelected || hasUserVote) && (
-                                                <Check size={10} className="text-white m-0.5" />
-                                            )}
-                                        </div>
-                                        <span className={styles.text}>{option.text}</span>
-                                        {hasUserVote && <span className="ml-2 text-green-600 text-xs font-medium">(Your vote)</span>}
-                                    </div>
-                                    {(hasVoted || hasEnded) && (
-                                        <div className="flex items-center gap-2">
-                                            <span className={`${styles.subtitle} text-xs`}>
-                                                {option.votes || 0} votes ({percentage}%)
-                                            </span>
-                                        </div>
-                                    )}
-                                </div>
-                                
-                                {/* Results bar */}
-                                {(hasVoted || hasEnded) && percentage > 0 && (
-                                    <div className="mt-1.5 bg-gray-200 rounded-full h-1.5">
-                                        <div 
-                                            className={`${styles.resultBar} h-1.5 rounded-full transition-all duration-300`}
-                                            style={{ width: `${percentage}%` }}
-                                        />
-                                    </div>
-                                )}
-                            </button>
-                        </div>
-                    );
-                })}
-            </div>
-            
-            {!hasVoted && !hasEnded && (
-                <button
-                    onClick={handleSubmitVote}
-                    disabled={selectedOptions.length === 0 || isVoting}
-                    className={`mt-2 px-3 py-1.5 rounded-md text-sm font-medium transition-all ${
-                        selectedOptions.length === 0 || isVoting
-                            ? 'bg-gray-300 text-gray-500 cursor-not-allowed'
-                            : styles.button
-                    }`}
-                >
-                    {isVoting ? 'Voting...' : `Vote ${poll.allowMultipleChoices ? '(Multiple allowed)' : ''}`}
-                </button>
-            )}
-            
-            <div className={`mt-2 text-xs ${styles.subtitle} flex justify-between`}>
-                <span>Total votes: {getTotalVotes()}</span>
-                {poll.pollEndsAt && (
-                    <span>
-                        {hasEnded ? 'Poll ended' : `Ends: ${new Date(poll.pollEndsAt).toLocaleDateString()}`}
-                    </span>
-                )}
-            </div>
-        </div>
-    );
-};
-
 // System Broadcast Banner Component (for info/announcements - shows in banner area)
 const BroadcastBanner = ({ authToken, API_BASE_URL }) => {
     const [broadcasts, setBroadcasts] = useState([]);
@@ -15378,8 +15208,6 @@ const BroadcastBanner = ({ authToken, API_BASE_URL }) => {
         const saved = localStorage.getItem('dismissedBroadcasts');
         return saved ? JSON.parse(saved) : [];
     });
-    const [pollVotes, setPollVotes] = useState({});
-    const [votingInProgress, setVotingInProgress] = useState({});
 
     useEffect(() => {
         const fetchBroadcasts = async () => {
@@ -15416,75 +15244,6 @@ const BroadcastBanner = ({ authToken, API_BASE_URL }) => {
         setBroadcasts(prev => prev.filter(b => b._id !== id));
     };
 
-    const handlePollVote = async (notificationId, selectedOptions) => {
-        if (!authToken || votingInProgress[notificationId]) return;
-        
-        setVotingInProgress(prev => ({ ...prev, [notificationId]: true }));
-        
-        // Optimistic update - update UI immediately
-        const previousBroadcasts = broadcasts;
-        setPollVotes(prev => ({ ...prev, [notificationId]: selectedOptions }));
-        
-        setBroadcasts(prev => prev.map(broadcast => {
-            if (broadcast._id === notificationId) {
-                // Calculate optimistic vote counts
-                const updatedOptions = broadcast.pollOptions.map((option, index) => {
-                    if (selectedOptions.includes(index)) {
-                        return {
-                            ...option,
-                            votes: (option.votes || 0) + 1
-                        };
-                    }
-                    return option;
-                });
-                
-                return {
-                    ...broadcast,
-                    userVote: selectedOptions,
-                    pollOptions: updatedOptions
-                };
-            }
-            return broadcast;
-        }));
-        
-        try {
-            console.log('[POLL] Voting:', { notificationId, selectedOptions });
-            
-            const response = await axios.post(
-                `${API_BASE_URL}/moderation/poll/vote`,
-                { notificationId, selectedOptions },
-                { headers: { Authorization: `Bearer ${authToken}` } }
-            );
-            
-            console.log('[POLL] Vote response:', response.data);
-            
-            // Update with actual server response
-            setBroadcasts(prev => prev.map(broadcast => {
-                if (broadcast._id === notificationId) {
-                    return {
-                        ...broadcast,
-                        userVote: response.data.userVote || selectedOptions,
-                        pollOptions: response.data.pollResults || broadcast.pollOptions
-                    };
-                }
-                return broadcast;
-            }));
-        } catch (error) {
-            console.error('[POLL] Failed to vote on poll:', error);
-            console.error('[POLL] Error response:', error.response?.data);
-            
-            // Revert optimistic update on error
-            setBroadcasts(previousBroadcasts);
-            setPollVotes(prev => {
-                const updated = { ...prev };
-                delete updated[notificationId];
-                return updated;
-            });
-        } finally {
-            setVotingInProgress(prev => ({ ...prev, [notificationId]: false }));
-        }
-    };
-
     if (broadcasts.length === 0) return null;
 
     // Style configurations for different broadcast types
@@ -15499,25 +15258,8 @@ const BroadcastBanner = ({ authToken, API_BASE_URL }) => {
                 text: 'text-purple-700',
                 subtitle: 'text-purple-500',
                 dismissBtn: 'text-purple-400 hover:text-purple-600',
-                emoji: '📢',
+                emoji: '??',
                 label: 'Announcement'
-            };
-        }
-        if (broadcastType === 'poll') {
-            // Poll: Green - interactive
-            return {
-                bg: 'bg-green-50',
-                border: 'border-green-500',
-                icon: 'text-green-500',
-                title: 'text-green-800',
-                text: 'text-green-700',
-                subtitle: 'text-green-500',
-                dismissBtn: 'text-green-400 hover:text-green-600',
-                emoji: '📊',
-                label: 'Poll',
-                button: 'bg-green-500 hover:bg-green-600 text-white',
-                optionBg: 'bg-green-100 hover:bg-green-200',
-                resultBar: 'bg-green-400'
             };
         }
         // Info: Blue - standard informational
@@ -15529,47 +15271,35 @@ const BroadcastBanner = ({ authToken, API_BASE_URL }) => {
             text: 'text-blue-700',
             subtitle: 'text-blue-500',
             dismissBtn: 'text-blue-400 hover:text-blue-600',
-            emoji: 'ℹ️',
+            emoji: '??',
             label: 'Info'
         };
     };
 
     return (
-        <div className="w-full max-w-4xl mx-auto">
+        <div className="w-full max-w-5xl mx-auto">
             {broadcasts.map(broadcast => {
                 const styles = getStyles(broadcast.broadcastType);
                 return (
-                    <div key={broadcast._id} className={`${styles.bg} border-l-4 ${styles.border} p-3 rounded-lg shadow-sm mb-2`}>
+                    <div key={broadcast._id} className={`${styles.bg} border-l-4 ${styles.border} p-4 rounded-lg shadow-md mb-3`}>
                             <div className="flex items-start">
                                 <div className="flex-shrink-0">
-                                    <Info className={`h-5 w-5 ${styles.icon}`} />
+                                    <Info className={`h-6 w-6 ${styles.icon}`} />
                                 </div>
-                                <div className="ml-2.5 flex-1">
+                                <div className="ml-3 flex-1">
                                     <div className="flex justify-between items-start">
-                                        <h3 className={`text-base font-bold ${styles.title}`}>
+                                        <h3 className={`text-lg font-bold ${styles.title}`}>
                                             {styles.emoji} {broadcast.title || `System ${styles.label}`}
                                         </h3>
                                         <button 
                                             onClick={() => handleDismiss(broadcast._id)}
                                             className={`${styles.dismissBtn} ml-2`}
                                         >
-                                            <X size={16} />
+                                            <X size={20} />
                                         </button>
                                     </div>
-                                    {broadcast.message && (
-                                        <p className={`mt-1.5 ${styles.text} text-sm`}>{broadcast.message}</p>
-                                    )}
-                                    
-                                    {broadcast.broadcastType === 'poll' && broadcast.pollQuestion && (
-                                        <BroadcastPoll
-                                            poll={broadcast}
-                                            onVote={(selectedOptions) => handlePollVote(broadcast._id, selectedOptions)}
-                                            isVoting={votingInProgress[broadcast._id] || false}
-                                            styles={styles}
-                                        />
-                                    )}
-                                    
-                                    <p className={`mt-1.5 ${styles.subtitle} text-xs`}>
+                                    <p className={`mt-2 ${styles.text} text-sm`}>{broadcast.message}</p>
+                                    <p className={`mt-2 ${styles.subtitle} text-xs`}>
                                         {new Date(broadcast.createdAt).toLocaleString()}
                                     </p>
                                 </div>
@@ -18206,12 +17936,10 @@ const App = () => {
                             <Cat size={18} className="mb-1" />
                             <span>Calculator</span>
                         </button>
-                        {userProfile?.id_public === 'CTU2' && (
-                            <button onClick={() => navigate('/family-tree')} className={`px-4 py-2 text-xs font-medium rounded-lg transition duration-150 flex flex-col items-center ${currentView === 'family-tree' ? 'bg-primary text-black shadow-md' : 'text-gray-600 hover:bg-gray-100'}`}>
-                                <Users size={18} className="mb-1" />
-                                <span>Family Tree</span>
-                            </button>
-                        )}
+                        <button onClick={() => navigate('/family-tree')} className={`px-4 py-2 text-xs font-medium rounded-lg transition duration-150 flex flex-col items-center ${currentView === 'family-tree' ? 'bg-primary text-black shadow-md' : 'text-gray-600 hover:bg-gray-100'}`}>
+                            <Users size={18} className="mb-1" />
+                            <span>Family Tree</span>
+                        </button>
                         <button onClick={() => navigate('/profile')} data-tutorial-target="profile-btn" className={`px-4 py-2 text-xs font-medium rounded-lg transition duration-150 flex flex-col items-center ${currentView === 'profile' ? 'bg-primary text-black shadow-md' : 'text-gray-600 hover:bg-gray-100'}`}>
                             <User size={18} className="mb-1" />
                             <span>Profile</span>
@@ -18379,12 +18107,10 @@ const App = () => {
                             <Cat size={18} className="mb-0.5" />
                             <span>Calculator</span>
                         </button>
-                        {userProfile?.id_public === 'CTU2' && (
-                            <button onClick={() => navigate('/family-tree')} className={`px-2 py-2 text-xs font-medium rounded-lg transition duration-150 flex flex-col items-center ${currentView === 'family-tree' ? 'bg-primary text-black shadow-md' : 'text-gray-600 hover:bg-gray-100'}`}>
-                                <Users size={18} className="mb-0.5" />
-                                <span>Family Tree</span>
-                            </button>
-                        )}
+                        <button onClick={() => navigate('/family-tree')} className={`px-2 py-2 text-xs font-medium rounded-lg transition duration-150 flex flex-col items-center ${currentView === 'family-tree' ? 'bg-primary text-black shadow-md' : 'text-gray-600 hover:bg-gray-100'}`}>
+                            <Users size={18} className="mb-0.5" />
+                            <span>Family Tree</span>
+                        </button>
                         <button onClick={() => navigate('/profile')} data-tutorial-target="profile-btn" className={`px-2 py-2 text-xs font-medium rounded-lg transition duration-150 flex flex-col items-center ${currentView === 'profile' ? 'bg-primary text-black shadow-md' : 'text-gray-600 hover:bg-gray-100'}`}>
                             <User size={18} className="mb-0.5" />
                             <span>Profile</span>
@@ -18848,42 +18574,22 @@ const App = () => {
                         />
                     } />
                     <Route path="/family-tree" element={
-                        userProfile?.id_public === 'CTU2' ? (
-                            <FamilyTree
-                                authToken={authToken}
-                                userProfile={userProfile}
-                                showModalMessage={showModalMessage}
-                                onViewAnimal={handleViewAnimal}
-                                onBack={() => navigate('/')}
-                            />
-                        ) : (
-                            <div style={{ padding: '20px', textAlign: 'center' }}>
-                                <h2>Access Restricted</h2>
-                                <p>The Family Tree feature is currently in testing and only available to select users.</p>
-                                <button onClick={() => navigate('/')} style={{ marginTop: '20px', padding: '10px 20px', cursor: 'pointer' }}>
-                                    Back to Home
-                                </button>
-                            </div>
-                        )
+                        <FamilyTree
+                            authToken={authToken}
+                            userProfile={userProfile}
+                            showModalMessage={showModalMessage}
+                            onViewAnimal={handleViewAnimal}
+                            onBack={() => navigate('/')}
+                        />
                     } />
                     <Route path="/family-tree" element={
-                        userProfile?.id_public === 'CTU2' ? (
-                            <FamilyTree
-                                authToken={authToken}
-                                userProfile={userProfile}
-                                showModalMessage={showModalMessage}
-                                onViewAnimal={handleViewAnimal}
-                                onBack={() => navigate('/')}
-                            />
-                        ) : (
-                            <div style={{ padding: '20px', textAlign: 'center' }}>
-                                <h2>Access Restricted</h2>
-                                <p>The Family Tree feature is currently in testing and only available to select users.</p>
-                                <button onClick={() => navigate('/')} style={{ marginTop: '20px', padding: '10px 20px', cursor: 'pointer' }}>
-                                    Back to Home
-                                </button>
-                            </div>
-                        )
+                        <FamilyTree
+                            authToken={authToken}
+                            userProfile={userProfile}
+                            showModalMessage={showModalMessage}
+                            onViewAnimal={handleViewAnimal}
+                            onBack={() => navigate('/')}
+                        />
                     } />
                     <Route path="/profile" element={<ProfileView userProfile={userProfile} showModalMessage={showModalMessage} fetchUserProfile={fetchUserProfile} authToken={authToken} onProfileUpdated={setUserProfile} onProfileEditButtonClicked={setProfileEditButtonClicked} />} />
                     <Route path="/litters" element={
