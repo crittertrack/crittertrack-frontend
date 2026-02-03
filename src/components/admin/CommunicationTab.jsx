@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import './CommunicationTab.css';
 
 export default function CommunicationTab({ API_BASE_URL, authToken }) {
-    const [activeView, setActiveView] = useState('broadcast'); // broadcast, history, direct
+    const [activeView, setActiveView] = useState('broadcast'); // broadcast, history, direct, poll-results
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState('');
     const [success, setSuccess] = useState('');
@@ -28,6 +28,10 @@ export default function CommunicationTab({ API_BASE_URL, authToken }) {
     const [broadcasts, setBroadcasts] = useState([]);
     const [total, setTotal] = useState(0);
 
+    // Poll results state
+    const [pollResults, setPollResults] = useState([]);
+    const [selectedPoll, setSelectedPoll] = useState(null);
+
     // Direct message state
     const [targetUserId, setTargetUserId] = useState('');
     const [targetUserEmail, setTargetUserEmail] = useState('');
@@ -36,6 +40,8 @@ export default function CommunicationTab({ API_BASE_URL, authToken }) {
     useEffect(() => {
         if (activeView === 'history') {
             fetchBroadcastHistory();
+        } else if (activeView === 'poll-results') {
+            fetchPollResults();
         }
     }, [activeView]);
 
@@ -91,6 +97,32 @@ export default function CommunicationTab({ API_BASE_URL, authToken }) {
             setTotal(data.total || 0);
         } catch (err) {
             setError(err.message);
+        } finally {
+            setLoading(false);
+        }
+    };
+
+    const fetchPollResults = async () => {
+        setLoading(true);
+        setError('');
+
+        try {
+            const response = await fetch(`${API_BASE_URL}/moderation/polls`, {
+                headers: {
+                    'Authorization': `Bearer ${authToken}`
+                }
+            });
+
+            if (!response.ok) {
+                const data = await response.json();
+                throw new Error(data.error || 'Failed to fetch poll results');
+            }
+
+            const data = await response.json();
+            setPollResults(data.polls || []);
+        } catch (err) {
+            setError(err.message);
+            setPollResults([]);
         } finally {
             setLoading(false);
         }
@@ -281,6 +313,12 @@ export default function CommunicationTab({ API_BASE_URL, authToken }) {
                         onClick={() => setActiveView('history')}
                     >
                         📋 History
+                    </button>
+                    <button
+                        className={activeView === 'poll-results' ? 'active' : ''}
+                        onClick={() => setActiveView('poll-results')}
+                    >
+                        📊 Poll Results
                     </button>
                     <button
                         className={activeView === 'direct' ? 'active' : ''}
@@ -535,6 +573,82 @@ export default function CommunicationTab({ API_BASE_URL, authToken }) {
                     {total > 20 && (
                         <div className="pagination-info">
                             Showing 20 of {total} broadcasts
+                        </div>
+                    )}
+                </div>
+            )}
+
+            {/* Poll Results View */}
+            {activeView === 'poll-results' && (
+                <div className="poll-results-view">
+                    <div className="info-card">
+                        <h4>Poll Results</h4>
+                        <p>View all poll broadcasts and their voting results.</p>
+                    </div>
+
+                    {loading ? (
+                        <div className="loading">Loading poll results...</div>
+                    ) : pollResults.length === 0 ? (
+                        <div className="no-data">No polls found</div>
+                    ) : (
+                        <div className="polls-list">
+                            {pollResults.map((poll, idx) => {
+                                const totalVotes = poll.pollOptions?.reduce((sum, opt) => sum + (opt.votes || 0), 0) || 0;
+                                const hasEnded = poll.pollEndsAt && new Date() > new Date(poll.pollEndsAt);
+                                
+                                return (
+                                    <div key={idx} className="poll-result-card">
+                                        <div className="poll-header">
+                                            <strong>{poll.title}</strong>
+                                            <span className="poll-date">
+                                                {new Date(poll.createdAt).toLocaleString()}
+                                            </span>
+                                        </div>
+                                        
+                                        <div className="poll-question">
+                                            <h4>{poll.pollQuestion}</h4>
+                                        </div>
+                                        
+                                        <div className="poll-meta">
+                                            <span>Total Votes: {totalVotes}</span>
+                                            <span>Type: {poll.allowMultipleChoices ? 'Multiple Choice' : 'Single Choice'}</span>
+                                            {poll.pollEndsAt && (
+                                                <span className={hasEnded ? 'ended' : 'active'}>
+                                                    {hasEnded ? '🔴 Ended' : '🟢 Active'} - {new Date(poll.pollEndsAt).toLocaleString()}
+                                                </span>
+                                            )}
+                                        </div>
+
+                                        <div className="poll-options-results">
+                                            {poll.pollOptions?.map((option, optIdx) => {
+                                                const percentage = totalVotes > 0 ? Math.round((option.votes / totalVotes) * 100) : 0;
+                                                
+                                                return (
+                                                    <div key={optIdx} className="poll-option-result">
+                                                        <div className="option-header">
+                                                            <span className="option-text">{option.text}</span>
+                                                            <span className="option-stats">
+                                                                {option.votes || 0} votes ({percentage}%)
+                                                            </span>
+                                                        </div>
+                                                        <div className="option-bar-container">
+                                                            <div 
+                                                                className="option-bar"
+                                                                style={{ width: `${percentage}%` }}
+                                                            />
+                                                        </div>
+                                                        {!poll.isAnonymous && option.voters && option.voters.length > 0 && (
+                                                            <div className="voters-list">
+                                                                <small>Voters: {option.voters.length} user{option.voters.length !== 1 ? 's' : ''}</small>
+                                                            </div>
+                                                        )}
+                                                    </div>
+                                                );
+                                            })}
+                                        </div>
+                                    </div>
+                                );
+                            })}
                         </div>
                     )}
                 </div>
