@@ -113,15 +113,22 @@ export default function CommunicationTab({ API_BASE_URL, authToken }) {
                 }
             });
 
-            if (!response.ok) {
-                const data = await response.json();
-                throw new Error(data.error || 'Failed to fetch poll results');
+            const contentType = response.headers.get('content-type');
+            if (!contentType || !contentType.includes('application/json')) {
+                console.error('Non-JSON response received:', await response.text());
+                throw new Error('Server returned invalid response. Please ensure backend is running.');
             }
 
             const data = await response.json();
+
+            if (!response.ok) {
+                throw new Error(data.error || 'Failed to fetch poll results');
+            }
+
             setPollResults(data.polls || []);
         } catch (err) {
-            setError(err.message);
+            console.error('Poll results fetch error:', err);
+            setError(err.message || 'Failed to load poll results');
             setPollResults([]);
         } finally {
             setLoading(false);
