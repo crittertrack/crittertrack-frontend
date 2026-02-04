@@ -3296,7 +3296,7 @@ const ViewOnlyPrivateAnimalDetail = ({ animal, onClose, API_BASE_URL, authToken,
                                                 <div>
                                                     <p className="text-sm font-semibold text-gray-700">For Sale</p>
                                                     <p className="text-sm text-gray-600">
-                                                        {animal.salePriceCurrency === 'Negotiable' || !animal.salePriceAmount ? 'Negotiable' : `${animal.salePriceCurrency === 'USD' ? '$' : animal.salePriceCurrency === 'EUR' ? '?' : animal.salePriceCurrency === 'GBP' ? '?' : animal.salePriceCurrency === 'CAD' ? 'C$' : animal.salePriceCurrency === 'AUD' ? 'A$' : animal.salePriceCurrency === 'JPY' ? '?' : animal.salePriceCurrency}${animal.salePriceAmount ? ` ${animal.salePriceAmount}` : ''}`}
+                                                        {animal.salePriceCurrency === 'Negotiable' || !animal.salePriceAmount ? 'Negotiable' : `${animal.salePriceCurrency === 'USD' ? '$' : animal.salePriceCurrency === 'EUR' ? '€' : animal.salePriceCurrency === 'GBP' ? '£' : animal.salePriceCurrency === 'CAD' ? 'C$' : animal.salePriceCurrency === 'AUD' ? 'A$' : animal.salePriceCurrency === 'JPY' ? '¥' : animal.salePriceCurrency}${animal.salePriceAmount ? ` ${animal.salePriceAmount}` : ''}`}
                                                     </p>
                                                 </div>
                                             </div>
@@ -3309,7 +3309,7 @@ const ViewOnlyPrivateAnimalDetail = ({ animal, onClose, API_BASE_URL, authToken,
                                                 <div>
                                                     <p className="text-sm font-semibold text-gray-700">Available for Stud</p>
                                                     <p className="text-sm text-gray-600">
-                                                        {animal.studFeeCurrency === 'Negotiable' || !animal.studFeeAmount ? 'Negotiable' : `${animal.studFeeCurrency === 'USD' ? '$' : animal.studFeeCurrency === 'EUR' ? '?' : animal.studFeeCurrency === 'GBP' ? '?' : animal.studFeeCurrency === 'CAD' ? 'C$' : animal.studFeeCurrency === 'AUD' ? 'A$' : animal.studFeeCurrency === 'JPY' ? '?' : animal.studFeeCurrency}${animal.studFeeAmount ? ` ${animal.studFeeAmount}` : ''}`}
+                                                        {animal.studFeeCurrency === 'Negotiable' || !animal.studFeeAmount ? 'Negotiable' : `${animal.studFeeCurrency === 'USD' ? '$' : animal.studFeeCurrency === 'EUR' ? '€' : animal.studFeeCurrency === 'GBP' ? '£' : animal.studFeeCurrency === 'CAD' ? 'C$' : animal.studFeeCurrency === 'AUD' ? 'A$' : animal.studFeeCurrency === 'JPY' ? '¥' : animal.studFeeCurrency}${animal.studFeeAmount ? ` ${animal.studFeeAmount}` : ''}`}
                                                     </p>
                                                 </div>
                                             </div>
@@ -4232,7 +4232,7 @@ const ViewOnlyAnimalDetail = ({ animal, onClose, API_BASE_URL, onViewProfile, au
                                                 <div>
                                                     <p className="text-sm font-semibold text-gray-700">For Sale</p>
                                                     <p className="text-sm text-gray-600">
-                                                        {animal.salePriceCurrency === 'Negotiable' ? 'Negotiable' : `${animal.salePriceCurrency === 'USD' ? '$' : animal.salePriceCurrency === 'EUR' ? '?' : animal.salePriceCurrency === 'GBP' ? '?' : animal.salePriceCurrency === 'CAD' ? 'C$' : animal.salePriceCurrency === 'AUD' ? 'A$' : animal.salePriceCurrency === 'JPY' ? '?' : animal.salePriceCurrency}${animal.salePriceAmount ? ` ${animal.salePriceAmount}` : ''}`}
+                                                        {animal.salePriceCurrency === 'Negotiable' ? 'Negotiable' : `${animal.salePriceCurrency === 'USD' ? '$' : animal.salePriceCurrency === 'EUR' ? '€' : animal.salePriceCurrency === 'GBP' ? '£' : animal.salePriceCurrency === 'CAD' ? 'C$' : animal.salePriceCurrency === 'AUD' ? 'A$' : animal.salePriceCurrency === 'JPY' ? '¥' : animal.salePriceCurrency}${animal.salePriceAmount ? ` ${animal.salePriceAmount}` : ''}`}
                                                     </p>
                                                 </div>
                                             </div>
