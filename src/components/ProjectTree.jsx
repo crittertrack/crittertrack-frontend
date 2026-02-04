@@ -499,11 +499,17 @@ const ProjectTreeContent = ({ authToken, userProfile, showModalMessage, onViewAn
         // Search filter
         if (searchQuery.trim()) {
             const query = searchQuery.toLowerCase();
+            let firstMatch = null;
+            
             filtered = filtered.map(node => {
                 const fullName = [node.data.prefix, node.data.label, node.data.suffix].filter(Boolean).join(' ').toLowerCase();
                 const matches = fullName.includes(query) || 
                                node.id.toLowerCase().includes(query) ||
                                node.data.genetics?.toLowerCase().includes(query);
+                
+                if (matches && !firstMatch) {
+                    firstMatch = node.id;
+                }
                 
                 return {
                     ...node,
@@ -513,6 +519,20 @@ const ProjectTreeContent = ({ authToken, userProfile, showModalMessage, onViewAn
                     }
                 };
             });
+            
+            // Pan to first match
+            if (firstMatch) {
+                setTimeout(() => {
+                    const matchedNode = filtered.find(n => n.id === firstMatch);
+                    if (matchedNode && matchedNode.position) {
+                        fitView({
+                            nodes: [{ id: firstMatch, position: matchedNode.position }],
+                            duration: 800,
+                            padding: 0.3
+                        });
+                    }
+                }, 100);
+            }
         } else {
             filtered = filtered.map(node => ({
                 ...node,
@@ -524,7 +544,7 @@ const ProjectTreeContent = ({ authToken, userProfile, showModalMessage, onViewAn
         }
         
         return filtered;
-    }, [nodes, searchQuery, decodedSpecies]);
+    }, [nodes, searchQuery, decodedSpecies, fitView]);
 
     const clearSearch = () => {
         setSearchQuery('');
