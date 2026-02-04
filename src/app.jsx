@@ -18441,7 +18441,7 @@ const App = () => {
                         </button>
                         <button onClick={() => navigate('/marketplace')} className={`px-4 py-2 text-xs font-medium rounded-lg transition duration-150 flex flex-col items-center ${currentView === 'marketplace' ? 'bg-primary text-black shadow-md' : 'text-gray-600 hover:bg-gray-100'}`}>
                             <ShoppingBag size={18} className="mb-1" />
-                            <span>Shop</span>
+                            <span>Marketplace</span>
                         </button>
                         <button onClick={() => navigate('/genetics-calculator')} data-tutorial-target="genetics-btn" className={`px-4 py-2 text-xs font-medium rounded-lg transition duration-150 flex flex-col items-center ${currentView === 'genetics-calculator' ? 'bg-primary text-black shadow-md' : 'text-gray-600 hover:bg-gray-100'}`}>
                             <Calculator size={18} className="mb-1" />
@@ -18614,7 +18614,7 @@ const App = () => {
                         </button>
                         <button onClick={() => navigate('/marketplace')} className={`px-2 py-2 text-xs font-medium rounded-lg transition duration-150 flex flex-col items-center ${currentView === 'marketplace' ? 'bg-primary text-black shadow-md' : 'text-gray-600 hover:bg-gray-100'}`}>
                             <ShoppingBag size={18} className="mb-0.5" />
-                            <span>Shop</span>
+                            <span>Marketplace</span>
                         </button>
                     </nav>
 
