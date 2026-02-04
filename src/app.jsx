@@ -10578,7 +10578,7 @@ const AnimalForm = ({
                     <div className="space-y-6">
                         {/* Reproductive Status - Key Status Indicators */}
                         <div className="bg-gray-50 p-4 rounded-lg border border-gray-200 space-y-4" data-tutorial-target="reproductive-status-section">
-                            <h3 className="text-lg font-semibold text-gray-700 border-b pb-2">? Reproductive Status</h3>
+                            <h3 className="text-lg font-semibold text-gray-700 border-b pb-2"> Reproductive Status</h3>
                             <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
                                 <label className="flex items-center space-x-2 cursor-pointer p-3 border rounded-lg bg-white hover:bg-gray-50 transition">
                                     <input
