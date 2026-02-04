@@ -26,7 +26,7 @@ import ModOversightPanel from './components/moderation/ModOversightPanel';
 import ModeratorActionSidebar from './components/moderation/ModeratorActionSidebar';
 import Marketplace from './components/Marketplace';
 import FamilyTree from './components/FamilyTree';
-import ProjectTree from './components/ProjectTree';
+import AnimalTree from './components/AnimalTree';
 
 // const API_BASE_URL = 'http://localhost:5000/api'; // Local development
 // const API_BASE_URL = 'https://crittertrack-pedigree-production.up.railway.app/api'; // Direct Railway (for testing)
@@ -14722,9 +14722,9 @@ const AnimalList = ({ authToken, showModalMessage, onEditAnimal, onViewAnimal, f
                                     {!isBulkMode && (
                                         <>
                                             <button
-                                                onClick={() => navigate(`/project-tree/${encodeURIComponent(species)}`)}
+                                                onClick={() => navigate(`/animal-tree/${encodeURIComponent(species)}`)}
                                                 className="p-1.5 sm:p-2 hover:bg-gray-200 rounded-lg transition"
-                                                title="Project Tree"
+                                                title="Animal Tree"
                                             >
                                                 <Users className="w-4 h-4 sm:w-[18px] sm:h-[18px] text-blue-500" />
                                             </button>
@@ -18910,8 +18910,8 @@ const App = () => {
                             </div>
                         )
                     } />
-                    <Route path="/project-tree/:species" element={
-                        <ProjectTree
+                    <Route path="/animal-tree/:species" element={
+                        <AnimalTree
                             authToken={authToken}
                             userProfile={userProfile}
                             showModalMessage={showModalMessage}
