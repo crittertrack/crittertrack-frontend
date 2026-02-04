@@ -2146,7 +2146,7 @@ const PublicProfileView = ({ profile, onBack, onViewAnimal, API_BASE_URL, onStar
 // ==================== PRIVATE ANIMAL DETAIL (OWNER VIEW) ====================
 // Shows ALL data for animal owners viewing their own animals (ignores privacy toggles)
 // Accessed from: MY ANIMALS LIST
-const PrivateAnimalDetail = ({ animal, onClose, onEdit, API_BASE_URL, authToken, setShowImageModal, setEnlargedImageUrl, toggleSectionPrivacy, onUpdateAnimal, onHideAnimal, showModalMessage, onTransfer, onViewAnimal }) => {
+const PrivateAnimalDetail = ({ animal, onClose, onEdit, API_BASE_URL, authToken, setShowImageModal, setEnlargedImageUrl, onUpdateAnimal, onHideAnimal, showModalMessage, onTransfer, onViewAnimal }) => {
     const [breederInfo, setBreederInfo] = useState(null);
     const [showPedigree, setShowPedigree] = useState(false);
     const [detailViewTab, setDetailViewTab] = useState(1);
@@ -3989,11 +3989,16 @@ const ViewOnlyAnimalDetail = ({ animal, onClose, API_BASE_URL, onViewProfile, au
     const [detailViewTab, setDetailViewTab] = useState(1);
     
     // Get section privacy settings from animal data (default to true/public if not set)
-    const sectionPrivacy = animal?.sectionPrivacy || {};
+    // Note: All sections now follow the main animal's public/private status
+    // Individual section privacy has been removed for simplicity
     
-    console.log('ViewOnlyAnimalDetail - sectionPrivacy:', sectionPrivacy);
-    console.log('ViewOnlyAnimalDetail - currentOwner field:', animal?.currentOwner);
-    console.log('ViewOnlyAnimalDetail - currentOwner privacy:', sectionPrivacy.currentOwner);
+    console.log('ViewOnlyAnimalDetail rendering', { 
+        animalId: animal.id_public,
+        animalName: animal.name,
+        detailViewTab,
+        hasRemarks: !!animal.remarks,
+        hasGeneticCode: !!animal.geneticCode
+    });
     
     // Set moderator context when viewing this animal
     useEffect(() => {
@@ -4057,43 +4062,15 @@ const ViewOnlyAnimalDetail = ({ animal, onClose, API_BASE_URL, onViewProfile, au
     
     if (!animal) return null;
 
-    // Only show remarks and genetic code if section privacy allows AND data exists
-    // sectionPrivacy: true = public (show), false = private (hide), undefined = public by default
-    const showRemarks = animal.remarks && (sectionPrivacy.remarks !== false);
-    const showGeneticCode = animal.geneticCode && (sectionPrivacy.geneticCode !== false);
+    // All sections are now publicly visible if the animal is public
+    // Privacy is controlled at the animal level, not per-section
     
-    // Privacy checks for all 23 sections (default to true/public if not set)
-    const showLifeStage = sectionPrivacy.lifeStage !== false;
-    const showCurrentMeasurements = sectionPrivacy.currentMeasurements !== false;
-    const showGrowthHistory = sectionPrivacy.growthHistory !== false;
-    const showOrigin = sectionPrivacy.origin !== false;
-    const showMating = sectionPrivacy.mating !== false;
-    const showStudInformation = sectionPrivacy.studInformation !== false;
-    const showDamInformation = sectionPrivacy.damInformation !== false;
-    const showPreventiveCare = sectionPrivacy.preventiveCare !== false;
-    const showProceduresAndDiagnostics = sectionPrivacy.proceduresAndDiagnostics !== false;
-    const showActiveMedicalRecords = sectionPrivacy.activeMedicalRecords !== false;
-    const showVeteriniaryCare = sectionPrivacy.veterinaryCare !== false;
-    const showNutrition = sectionPrivacy.nutrition !== false;
-    const showHusbandry = sectionPrivacy.husbandry !== false;
-    const showEnvironment = sectionPrivacy.environment !== false;
-    const showBehavior = sectionPrivacy.behavior !== false;
-    const showActivity = sectionPrivacy.activity !== false;
-    const showEndOfLife = sectionPrivacy.endOfLife !== false;
-    const showLegalAdministrative = sectionPrivacy.legalAdministrative !== false;
-    const showBreedingHistory = sectionPrivacy.breedingHistory !== false;
-    const showCurrentOwner = sectionPrivacy.currentOwner !== false;
-    
-    console.log('ViewOnlyAnimalDetail rendering', { 
+    console.log('ViewOnlyAnimalDetail rendering animal:', { 
         animalId: animal.id_public,
         animalName: animal.name,
         detailViewTab,
         hasRemarks: !!animal.remarks,
-        remarksPrivacy: sectionPrivacy.remarks,
-        hasGeneticCode: !!animal.geneticCode,
-        geneticCodePrivacy: sectionPrivacy.geneticCode,
-        showRemarks,
-        showGeneticCode
+        hasGeneticCode: !!animal.geneticCode
     });
 
     return (
@@ -4336,7 +4313,7 @@ const ViewOnlyAnimalDetail = ({ animal, onClose, API_BASE_URL, onViewProfile, au
                             )}
 
                             {/* Current Owner Section */}
-                            {showCurrentOwner && animal.currentOwner && (
+                            {animal.currentOwner && (
                                 <div className="bg-gray-50 p-4 rounded-lg border border-gray-200">
                                     <h3 className="text-lg font-semibold text-gray-700 border-b pb-2 mb-3">Current Owner</h3>
                                     <p className="text-gray-700">{animal.currentOwner}</p>
@@ -4357,14 +4334,14 @@ const ViewOnlyAnimalDetail = ({ animal, onClose, API_BASE_URL, onViewProfile, au
                                 </div>
                             </div>
                             {/* Genetic Code Display Section */}
-                            {showGeneticCode && (
+                            {animal.geneticCode && (
                                 <div className="bg-gray-50 p-4 rounded-lg border border-gray-200">
                                     <h3 className="text-lg font-semibold text-gray-700 border-b pb-2 mb-3">Genetic Code</h3>
                                     <p className="text-gray-700 font-mono text-sm break-all">{animal.geneticCode || ''}</p>
                                 </div>
                             )}
                             {/* Medical Information Section */}
-                            {(animal.allergies || animal.medications || animal.medicalConditions) && (showPreventiveCare || showVeteriniaryCare) && (
+                            {(animal.allergies || animal.medications || animal.medicalConditions) && (
                                 <div className="bg-gray-50 p-4 rounded-lg border border-gray-200">
                                     <h3 className="text-lg font-semibold text-gray-700 border-b pb-2 mb-3">Medical Information</h3>
                                     <div className="space-y-3">
@@ -4464,20 +4441,21 @@ const ViewOnlyAnimalDetail = ({ animal, onClose, API_BASE_URL, onViewProfile, au
                     {animal.species === 'Fancy Rat' && <p className="text-sm"><span className="font-medium">Earset:</span> {animal.earset || ''}</p>}
                 </div>
             </div>
-            {showGeneticCode && (
+            {animal.geneticCode && (
             <div className="bg-gray-50 p-4 rounded-lg border border-gray-200">
                 <h3 className="text-lg font-semibold text-gray-700 border-b pb-2 mb-3">Genetic Code</h3>
                 <p className="text-gray-700 font-mono text-sm break-all">{animal.geneticCode || ''}</p>
             </div>
             )}
-                            {showLifeStage && (
+                            {/* Life Stage Section */}
+                            {animal.lifeStage && (
             <div className="bg-gray-50 p-4 rounded-lg border border-gray-200">
                 <h3 className="text-lg font-semibold text-gray-700 border-b pb-2 mb-3">Life Stage</h3>
                 <p className="text-gray-700">{animal.lifeStage || ''}</p>
             </div>
                             )}
                             {/* Current Measurements Section */}
-                            {showCurrentMeasurements && (() => {
+                            {(() => {
                                 // Compute current measurements from growth records if available, otherwise use stored fields
                                 let currentWeight = null;
                                 let currentLength = null;
@@ -4505,7 +4483,7 @@ const ViewOnlyAnimalDetail = ({ animal, onClose, API_BASE_URL, onViewProfile, au
                             })()}
 
                             {/* Growth Records Section */}
-                            {showGrowthHistory && (() => {
+                            {(() => {
                                 let growthRecords = animal.growthRecords;
                                 if (typeof growthRecords === 'string') {
                                     try {
@@ -4585,7 +4563,7 @@ const ViewOnlyAnimalDetail = ({ animal, onClose, API_BASE_URL, onViewProfile, au
                             </div>
 
                             {/* 2nd Section: Origin */}
-                            {showOrigin && (
+                            {animal.origin && (
                             <div className="bg-gray-50 p-4 rounded-lg border border-gray-200 space-y-4">
                                 <h3 className="text-lg font-semibold text-gray-700">Origin</h3>
                                 <p className="text-gray-700">{animal.origin || ''}</p>
@@ -4744,7 +4722,8 @@ const ViewOnlyAnimalDetail = ({ animal, onClose, API_BASE_URL, onViewProfile, au
                     {detailViewTab === 7 && (
                         <div className="space-y-6">
                             {/* 1st Section: Preventive Care */}
-                            {showPreventiveCare && (
+                            {/* 1st Section: Preventive Care */}
+                            {(animal.vaccinations || animal.dewormingRecords || animal.parasiteControl) && (
                             <div className="bg-gray-50 p-4 rounded-lg border border-gray-200 space-y-4">
                                 <h3 className="text-lg font-semibold text-gray-700">Preventive Care</h3>
                                     {animal.vaccinations && (
@@ -4803,7 +4782,7 @@ const ViewOnlyAnimalDetail = ({ animal, onClose, API_BASE_URL, onViewProfile, au
                             )}
 
                             {/* 2nd Section: Procedures & Diagnostics */}
-                            {showProceduresAndDiagnostics && (
+                            {(animal.medicalProcedures || animal.laboratoryResults) && (
                             <div className="bg-gray-50 p-4 rounded-lg border border-gray-200 space-y-4">
                                 <h3 className="text-lg font-semibold text-gray-700">Procedures & Diagnostics</h3>
                                 {animal.medicalProcedures && (
@@ -4829,7 +4808,7 @@ const ViewOnlyAnimalDetail = ({ animal, onClose, API_BASE_URL, onViewProfile, au
                             )}
 
                             {/* 3rd Section: Active Medical Records */}
-                            {showActiveMedicalRecords && (
+                            {(animal.medicalConditions || animal.allergies || animal.medications) && (
                             <div className="bg-gray-50 p-4 rounded-lg border border-gray-200 space-y-4">
                                 <h3 className="text-lg font-semibold text-gray-700">Active Medical Records</h3>
                                     {animal.medicalConditions && (() => {
@@ -4885,7 +4864,7 @@ const ViewOnlyAnimalDetail = ({ animal, onClose, API_BASE_URL, onViewProfile, au
                             )}
 
                             {/* 4th Section: Veterinary Care */}
-                            {showVeteriniaryCare && (
+                            {(animal.primaryVet || animal.vetVisits) && (
                             <div className="bg-gray-50 p-4 rounded-lg border border-gray-200 space-y-4">
                                 <h3 className="text-lg font-semibold text-gray-700">Veterinary Care</h3>
                                 {animal.primaryVet && <div><strong className="text-sm">Primary Veterinarian:</strong> <p className="text-sm mt-1">{animal.primaryVet}</p></div>}
@@ -4916,7 +4895,7 @@ const ViewOnlyAnimalDetail = ({ animal, onClose, API_BASE_URL, onViewProfile, au
                     {detailViewTab === 8 && (
                         <div className="space-y-6">
                             {/* 1st Section: Nutrition */}
-                            {showNutrition && (
+                            {(animal.dietType || animal.feedingSchedule || animal.supplements) && (
                             <div className="bg-gray-50 p-4 rounded-lg border border-gray-200 space-y-4">
                                 <h3 className="text-lg font-semibold text-gray-700">Nutrition</h3>
                                 {animal.dietType && <div><strong className="text-sm">Diet Type:</strong> <p className="text-sm mt-1">{animal.dietType}</p></div>}
@@ -4927,7 +4906,7 @@ const ViewOnlyAnimalDetail = ({ animal, onClose, API_BASE_URL, onViewProfile, au
                             )}
 
                             {/* 2nd Section: Husbandry */}
-                            {showHusbandry && (
+                            {(animal.housingType || animal.bedding || animal.enrichment) && (
                             <div className="bg-gray-50 p-4 rounded-lg border border-gray-200 space-y-4">
                                 <h3 className="text-lg font-semibold text-gray-700">Husbandry</h3>
                                 {animal.housingType && <div><strong className="text-sm">Housing Type:</strong> <p className="text-sm mt-1">{animal.housingType}</p></div>}
@@ -4938,7 +4917,7 @@ const ViewOnlyAnimalDetail = ({ animal, onClose, API_BASE_URL, onViewProfile, au
                             )}
 
                             {/* 3rd Section: Environment */}
-                            {showEnvironment && (
+                            {(animal.temperatureRange || animal.humidity || animal.lighting || animal.noise) && (
                             <div className="bg-gray-50 p-4 rounded-lg border border-gray-200 space-y-4">
                                 <h3 className="text-lg font-semibold text-gray-700">Environment</h3>
                                 {animal.temperatureRange && <div><strong className="text-sm">Temperature Range:</strong> <p className="text-sm mt-1">{animal.temperatureRange}</p></div>}
@@ -4955,7 +4934,7 @@ const ViewOnlyAnimalDetail = ({ animal, onClose, API_BASE_URL, onViewProfile, au
                     {detailViewTab === 9 && (
                         <div className="space-y-6">
                             {/* 1st Section: Behavior */}
-                            {showBehavior && (
+                            {(animal.temperament || animal.handlingTolerance || animal.socialStructure) && (
                             <div className="bg-gray-50 p-4 rounded-lg border border-gray-200 space-y-4">
                                 <h3 className="text-lg font-semibold text-gray-700">Behavior</h3>
                                 {animal.temperament && <div><strong className="text-sm">Temperament:</strong> <p className="text-sm mt-1">{animal.temperament}</p></div>}
@@ -4966,7 +4945,7 @@ const ViewOnlyAnimalDetail = ({ animal, onClose, API_BASE_URL, onViewProfile, au
                             )}
 
                             {/* 2nd Section: Activity */}
-                            {showActivity && (
+                            {animal.activityCycle && (
                             <div className="bg-gray-50 p-4 rounded-lg border border-gray-200 space-y-4">
                                 <h3 className="text-lg font-semibold text-gray-700">Activity</h3>
                                 {animal.activityCycle && <div><strong className="text-sm">Activity Cycle:</strong> <p className="text-sm mt-1">{animal.activityCycle}</p></div>}
@@ -4980,7 +4959,7 @@ const ViewOnlyAnimalDetail = ({ animal, onClose, API_BASE_URL, onViewProfile, au
                     {detailViewTab === 10 && (
                         <div className="space-y-6">
                             {/* Current Owner Section */}
-                            {showCurrentOwner && (
+                            {animal.currentOwner && (
                                 <div className="bg-gray-50 p-4 rounded-lg border border-gray-200">
                                     <h3 className="text-lg font-semibold text-gray-700 border-b pb-2 mb-3">Current Owner</h3>
                                     <p className="text-gray-700">{animal.currentOwner || ''}</p>
@@ -4991,7 +4970,7 @@ const ViewOnlyAnimalDetail = ({ animal, onClose, API_BASE_URL, onViewProfile, au
                             )}
                             
                             {/* Remarks & Notes Section */}
-                            {showRemarks && (
+                            {animal.remarks && (
                                 <div className="bg-gray-50 p-4 rounded-lg border border-gray-200">
                                     <h3 className="text-lg font-semibold text-gray-700">Remarks & Notes</h3>
                                     <p className="text-sm text-gray-700 whitespace-pre-wrap mt-3">{animal.remarks}</p>
@@ -4999,7 +4978,7 @@ const ViewOnlyAnimalDetail = ({ animal, onClose, API_BASE_URL, onViewProfile, au
                             )}
                             
                             {/* End of Life Information Section */}
-                            {showEndOfLife && (animal.deceasedDate || animal.causeOfDeath || animal.necropsyResults) && (
+                            {(animal.deceasedDate || animal.causeOfDeath || animal.necropsyResults) && (
                                 <div className="bg-gray-50 p-4 rounded-lg border border-gray-200 space-y-4">
                                     <h3 className="text-lg font-semibold text-gray-700">Information</h3>
                                     <div className="space-y-2 text-sm">
@@ -5017,7 +4996,7 @@ const ViewOnlyAnimalDetail = ({ animal, onClose, API_BASE_URL, onViewProfile, au
                             )}
 
                             {/* Legal/Administrative Section */}
-                            {showLegalAdministrative && (animal.insurance || animal.legalStatus) && (
+                            {(animal.insurance || animal.legalStatus) && (
                                 <div className="bg-gray-50 p-4 rounded-lg border border-gray-200 space-y-4">
                                     <h3 className="text-lg font-semibold text-gray-700">Legal/Administrative</h3>
                                     <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm">
@@ -5028,7 +5007,7 @@ const ViewOnlyAnimalDetail = ({ animal, onClose, API_BASE_URL, onViewProfile, au
                             )}
                             
                             {/* Show message if no data in any section */}
-                            {!showRemarks && !animal.deceasedDate && !animal.causeOfDeath && !animal.necropsyResults && !animal.insurance && !animal.legalStatus && (
+                            {!animal.remarks && !animal.deceasedDate && !animal.causeOfDeath && !animal.necropsyResults && !animal.insurance && !animal.legalStatus && (
                                 <div className="bg-gray-50 p-4 rounded-lg border border-gray-200 text-center text-gray-500">
                                     <p>No records or end-of-life information available</p>
                                 </div>
@@ -8043,9 +8022,7 @@ const AnimalForm = ({
     LoadingSpinner,
     PlusCircle, ArrowLeft, Save, Trash2, RotateCcw,
     GENDER_OPTIONS, STATUS_OPTIONS,
-    AnimalImageUpload, // Assuming this component is defined elsewhere
-    sectionPrivacy,
-    toggleSectionPrivacy
+    AnimalImageUpload // Assuming this component is defined elsewhere
 }) => {
     
     // Default field labels - can be overridden by species config
@@ -9652,20 +9629,7 @@ const AnimalForm = ({
                         
                         {/* Current Owner */}
                         <div data-tutorial-target="current-owner-field" className="bg-gray-50 p-4 rounded-lg border border-gray-200 space-y-4">
-                            <div className="flex justify-between items-center mb-4">
-                                <h3 className="text-lg font-semibold text-gray-700 border-b pb-2">Current Owner</h3>
-                                <button
-                                    onClick={() => toggleSectionPrivacy(animalToEdit?.id_public, 'currentOwner')}
-                                    className="px-3 py-1.5 text-xs font-medium rounded-lg transition cursor-pointer"
-                                    style={{
-                                        backgroundColor: sectionPrivacy[animalToEdit?.id_public]?.currentOwner ? '#dbeafe' : '#f3f4f6',
-                                        color: sectionPrivacy[animalToEdit?.id_public]?.currentOwner ? '#1e40af' : '#374151'
-                                    }}
-                                    title="Toggle public visibility"
-                                >
-                                    <span>{sectionPrivacy[animalToEdit?.id_public]?.currentOwner ? ' Public' : ' Private'}</span>
-                                </button>
-                            </div>
+                            <h3 className="text-lg font-semibold text-gray-700 border-b pb-2 mb-4">Current Owner</h3>
                             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                                 <label className="flex items-center space-x-2 cursor-pointer p-3 border rounded-lg bg-white hover:bg-gray-50 transition">
                                     <input type="checkbox" name="isOwned" checked={formData.isOwned} onChange={handleChange} 
@@ -9800,20 +9764,7 @@ const AnimalForm = ({
                         {/* Genetic Code */}
                         {!isFieldHidden('geneticCode') && (
                             <div className="bg-gray-50 p-4 rounded-lg border border-gray-200 space-y-4">
-                                <div className="flex justify-between items-center mb-4">
-                                    <h3 className="text-lg font-semibold text-gray-700">{getFieldLabel('geneticCode', 'Genetic Code')}</h3>
-                                    <button
-                                        onClick={() => toggleSectionPrivacy(animalToEdit?.id_public, 'geneticCode')}
-                                        className="px-3 py-1.5 text-xs font-medium rounded-lg transition cursor-pointer"
-                                        style={{
-                                            backgroundColor: sectionPrivacy[animalToEdit?.id_public]?.geneticCode ? '#dbeafe' : '#f3f4f6',
-                                            color: sectionPrivacy[animalToEdit?.id_public]?.geneticCode ? '#1e40af' : '#374151'
-                                        }}
-                                        title="Toggle public visibility"
-                                    >
-                                        <span>{sectionPrivacy[animalToEdit?.id_public]?.geneticCode ? ' Public' : ' Private'}</span>
-                                    </button>
-                                </div>
+                                <h3 className="text-lg font-semibold text-gray-700 mb-4">{getFieldLabel('geneticCode', 'Genetic Code')}</h3>
                                 <GeneticCodeBuilder
                                     species={formData.species}
                                     gender={formData.gender}
@@ -9826,20 +9777,7 @@ const AnimalForm = ({
 
                         {/* Life Stage */}
                         <div className="bg-gray-50 p-4 rounded-lg border border-gray-200 space-y-4">
-                            <div className="flex justify-between items-center mb-4">
-                                <h3 className="text-lg font-semibold text-gray-700">Life Stage</h3>
-                                <button
-                                    onClick={() => toggleSectionPrivacy(animalToEdit?.id_public, 'lifeStage')}
-                                    className="px-3 py-1.5 text-xs font-medium rounded-lg transition cursor-pointer"
-                                    style={{
-                                        backgroundColor: sectionPrivacy[animalToEdit?.id_public]?.lifeStage ? '#dbeafe' : '#f3f4f6',
-                                        color: sectionPrivacy[animalToEdit?.id_public]?.lifeStage ? '#1e40af' : '#374151'
-                                    }}
-                                    title="Toggle public visibility"
-                                >
-                                    <span>{sectionPrivacy[animalToEdit?.id_public]?.lifeStage ? ' Public' : ' Private'}</span>
-                                </button>
-                            </div>
+                            <h3 className="text-lg font-semibold text-gray-700 mb-4">Life Stage</h3>
                             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                                 <div>
                                     <select name="lifeStage" value={formData.lifeStage} onChange={handleChange} 
@@ -9858,41 +9796,9 @@ const AnimalForm = ({
 
                         {/* Measurements & Growth Tracking */}
                         <div data-tutorial-target="measurements-growth-section" className="bg-gray-50 p-4 rounded-lg border border-gray-200 space-y-4">
-                            <div className="flex justify-between items-center mb-4">
-                                <div>
-                                    <h3 className="text-lg font-semibold text-gray-700">Measurements & Growth Tracking</h3>
-                                    <p className="text-xs text-gray-600 mt-1">Current measurements & growth history</p>
-                                </div>
-                                <div className="flex gap-4">
-                                    <div className="flex flex-col items-center gap-1">
-                                        <span className="text-xs text-gray-600">Current</span>
-                                        <button
-                                            onClick={() => toggleSectionPrivacy(animalToEdit?.id_public, 'currentMeasurements')}
-                                            className="px-3 py-1.5 text-xs font-medium rounded-lg transition cursor-pointer"
-                                            style={{
-                                                backgroundColor: sectionPrivacy[animalToEdit?.id_public]?.currentMeasurements ? '#dbeafe' : '#f3f4f6',
-                                                color: sectionPrivacy[animalToEdit?.id_public]?.currentMeasurements ? '#1e40af' : '#374151'
-                                            }}
-                                            title="Toggle public visibility"
-                                        >
-                                            <span>{sectionPrivacy[animalToEdit?.id_public]?.currentMeasurements ? ' Public' : ' Private'}</span>
-                                        </button>
-                                    </div>
-                                    <div className="flex flex-col items-center gap-1">
-                                        <span className="text-xs text-gray-600">History</span>
-                                        <button
-                                            onClick={() => toggleSectionPrivacy(animalToEdit?.id_public, 'growthHistory')}
-                                            className="px-3 py-1.5 text-xs font-medium rounded-lg transition cursor-pointer"
-                                            style={{
-                                                backgroundColor: sectionPrivacy[animalToEdit?.id_public]?.growthHistory ? '#dbeafe' : '#f3f4f6',
-                                                color: sectionPrivacy[animalToEdit?.id_public]?.growthHistory ? '#1e40af' : '#374151'
-                                            }}
-                                            title="Toggle public visibility"
-                                        >
-                                            <span>{sectionPrivacy[animalToEdit?.id_public]?.growthHistory ? ' Public' : ' Private'}</span>
-                                        </button>
-                                    </div>
-                                </div>
+                            <div className="mb-4">
+                                <h3 className="text-lg font-semibold text-gray-700">Measurements & Growth Tracking</h3>
+                                <p className="text-xs text-gray-600 mt-1">Current measurements & growth history</p>
                             </div>
                             
                             {/* Current Measurement Display */}
@@ -10621,20 +10527,7 @@ const AnimalForm = ({
 
                         {/* Origin Section */}
                         <div className="bg-gray-50 p-4 rounded-lg border border-gray-200 space-y-4">
-                            <div className="flex justify-between items-center mb-4">
-                                <h3 className="text-lg font-semibold text-gray-700">Origin</h3>
-                                <button
-                                    onClick={() => toggleSectionPrivacy(animalToEdit?.id_public, 'origin')}
-                                    className="px-3 py-1.5 text-xs font-medium rounded-lg transition cursor-pointer"
-                                    style={{
-                                        backgroundColor: sectionPrivacy[animalToEdit?.id_public]?.origin ? '#dbeafe' : '#f3f4f6',
-                                        color: sectionPrivacy[animalToEdit?.id_public]?.origin ? '#1e40af' : '#374151'
-                                    }}
-                                    title="Toggle public visibility"
-                                >
-                                    <span>{sectionPrivacy[animalToEdit?.id_public]?.origin ? ' Public' : ' Private'}</span>
-                                </button>
-                            </div>
+                            <h3 className="text-lg font-semibold text-gray-700 mb-4">Origin</h3>
                             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                                 <div data-tutorial-target="origin-select">
                                     <select name="origin" value={formData.origin} onChange={handleChange} 
@@ -10784,20 +10677,7 @@ const AnimalForm = ({
                         {/* Estrus/Cycle - Only for females when not neutered */}
                         {(formData.gender === 'Female' || formData.gender === 'Intersex' || formData.gender === 'Unknown') && !formData.isNeutered && (
                             <div className="bg-gray-50 p-4 rounded-lg border border-gray-200 space-y-4" data-tutorial-target="estrus-cycle-section">
-                                <div className="flex justify-between items-center mb-4">
-                                    <h3 className="text-lg font-semibold text-gray-700">Estrus/Cycle</h3>
-                                    <button
-                                        onClick={() => toggleSectionPrivacy(animalToEdit?.id_public, 'estrusCycle')}
-                                        className="px-3 py-1.5 text-xs font-medium rounded-lg transition cursor-pointer"
-                                        style={{
-                                            backgroundColor: sectionPrivacy[animalToEdit?.id_public]?.estrusCycle ? '#dbeafe' : '#f3f4f6',
-                                            color: sectionPrivacy[animalToEdit?.id_public]?.estrusCycle ? '#1e40af' : '#374151'
-                                        }}
-                                        title="Toggle public visibility"
-                                    >
-                                        <span>{sectionPrivacy[animalToEdit?.id_public]?.estrusCycle ? ' Public' : ' Private'}</span>
-                                    </button>
-                                </div>
+                                <h3 className="text-lg font-semibold text-gray-700 mb-4">Estrus/Cycle</h3>
                                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                                     <div>
                                         <label className="block text-sm font-medium text-gray-700 mb-2">{getFieldLabel('heatStatus', 'Heat Status')}</label>
@@ -10839,20 +10719,7 @@ const AnimalForm = ({
                         {/* Mating - Hidden when neutered/spayed */}
                         {!formData.isNeutered && !formData.isInfertile && (formData.gender === 'Female' || formData.gender === 'Intersex' || formData.gender === 'Unknown' || formData.gender === 'Male') && (
                             <div className="bg-gray-50 p-4 rounded-lg border border-gray-200 space-y-4">
-                                <div className="flex justify-between items-center mb-4">
-                                    <h3 className="text-lg font-semibold text-gray-700">Mating {formData.isNeutered && <span className="text-xs font-normal text-gray-500">(History)</span>}</h3>
-                                    <button
-                                        onClick={() => toggleSectionPrivacy(animalToEdit?.id_public, 'mating')}
-                                        className="px-3 py-1.5 text-xs font-medium rounded-lg transition cursor-pointer"
-                                        style={{
-                                            backgroundColor: sectionPrivacy[animalToEdit?.id_public]?.mating ? '#dbeafe' : '#f3f4f6',
-                                            color: sectionPrivacy[animalToEdit?.id_public]?.mating ? '#1e40af' : '#374151'
-                                        }}
-                                        title="Toggle public visibility"
-                                    >
-                                        <span>{sectionPrivacy[animalToEdit?.id_public]?.mating ? ' Public' : ' Private'}</span>
-                                    </button>
-                                </div>
+                                <h3 className="text-lg font-semibold text-gray-700 mb-4">Mating {formData.isNeutered && <span className="text-xs font-normal text-gray-500">(History)</span>}</h3>
                                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                                     <div className="md:col-span-2">
                                         <label className="block text-sm font-medium text-gray-700 mb-2">Mating Date</label>
@@ -10878,23 +10745,10 @@ const AnimalForm = ({
                         {/* Stud Information - Always shown when not neutered and not infertile */}
                         {!formData.isNeutered && !formData.isInfertile && (formData.gender === 'Male' || formData.gender === 'Intersex' || formData.gender === 'Unknown') && (
                             <div className="bg-gray-50 p-4 rounded-lg border border-gray-200 space-y-4" data-tutorial-target="stud-info-section">
-                                <div className="flex items-start justify-between">
-                                    <div className="flex-1">
-                                        <h3 className="text-lg font-semibold text-gray-700">Stud Information <span className="text-xs font-normal text-gray-500">(Active Status)</span></h3>
-                                        {formData.gender === 'Unknown' && <span className="text-xs bg-blue-100 text-blue-700 px-2 py-1 rounded mt-1 inline-block">Sperm Fertility</span>}
-                                        {formData.gender === 'Intersex' && <span className="text-xs bg-purple-100 text-purple-700 px-2 py-1 rounded mt-1 inline-block">Sire Role</span>}
-                                    </div>
-                                    <button
-                                        onClick={() => toggleSectionPrivacy(animalToEdit?.id_public, 'studInformation')}
-                                        className="px-3 py-1.5 text-xs font-medium rounded-lg transition cursor-pointer"
-                                        style={{
-                                            backgroundColor: sectionPrivacy[animalToEdit?.id_public]?.studInformation ? '#dbeafe' : '#f3f4f6',
-                                            color: sectionPrivacy[animalToEdit?.id_public]?.studInformation ? '#1e40af' : '#374151'
-                                        }}
-                                        title="Toggle public visibility"
-                                    >
-                                        <span>{sectionPrivacy[animalToEdit?.id_public]?.studInformation ? ' Public' : ' Private'}</span>
-                                    </button>
+                                <div className="mb-4">
+                                    <h3 className="text-lg font-semibold text-gray-700">Stud Information <span className="text-xs font-normal text-gray-500">(Active Status)</span></h3>
+                                    {formData.gender === 'Unknown' && <span className="text-xs bg-blue-100 text-blue-700 px-2 py-1 rounded mt-1 inline-block">Sperm Fertility</span>}
+                                    {formData.gender === 'Intersex' && <span className="text-xs bg-purple-100 text-purple-700 px-2 py-1 rounded mt-1 inline-block">Sire Role</span>}
                                 </div>
                                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                                     <div>
@@ -10939,23 +10793,10 @@ const AnimalForm = ({
                         {/* Dam Information - Always shown when not neutered and not infertile */}
                         {!formData.isNeutered && !formData.isInfertile && (formData.gender === 'Female' || formData.gender === 'Intersex' || formData.gender === 'Unknown') && (
                             <div className="bg-gray-50 p-4 rounded-lg border border-gray-200 space-y-4" data-tutorial-target="dam-info-section">
-                                <div className="flex items-start justify-between">
-                                    <div className="flex-1">
-                                        <h3 className="text-lg font-semibold text-gray-700">Dam Information <span className="text-xs font-normal text-gray-500">(Active Status)</span></h3>
-                                        {formData.gender === 'Unknown' && <span className="text-xs bg-pink-100 text-pink-700 px-2 py-1 rounded mt-1 inline-block">Egg Fertility</span>}
-                                        {formData.gender === 'Intersex' && <span className="text-xs bg-purple-100 text-purple-700 px-2 py-1 rounded mt-1 inline-block">Dam Role</span>}
-                                    </div>
-                                    <button
-                                        onClick={() => toggleSectionPrivacy(animalToEdit?.id_public, 'damInformation')}
-                                        className="px-3 py-1.5 text-xs font-medium rounded-lg transition cursor-pointer"
-                                        style={{
-                                            backgroundColor: sectionPrivacy[animalToEdit?.id_public]?.damInformation ? '#dbeafe' : '#f3f4f6',
-                                            color: sectionPrivacy[animalToEdit?.id_public]?.damInformation ? '#1e40af' : '#374151'
-                                        }}
-                                        title="Toggle public visibility"
-                                    >
-                                        <span>{sectionPrivacy[animalToEdit?.id_public]?.damInformation ? ' Public' : ' Private'}</span>
-                                    </button>
+                                <div className="mb-4">
+                                    <h3 className="text-lg font-semibold text-gray-700">Dam Information <span className="text-xs font-normal text-gray-500">(Active Status)</span></h3>
+                                    {formData.gender === 'Unknown' && <span className="text-xs bg-pink-100 text-pink-700 px-2 py-1 rounded mt-1 inline-block">Egg Fertility</span>}
+                                    {formData.gender === 'Intersex' && <span className="text-xs bg-purple-100 text-purple-700 px-2 py-1 rounded mt-1 inline-block">Dam Role</span>}
                                 </div>
                                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                                     <div>
@@ -11022,20 +10863,7 @@ const AnimalForm = ({
 
                         {/* Breeding History (All animals - Historical Data) - ALWAYS SHOWN */}
                         <div className="bg-blue-50 p-4 rounded-lg border border-blue-200 space-y-4" data-tutorial-target="breeding-history-section">
-                            <div className="flex justify-between items-center mb-4">
-                                <h3 className="text-lg font-semibold text-gray-700 border-b pb-2 flex items-center"><span className="text-blue-600 mr-2"></span>Breeding History <span className="text-xs font-normal text-gray-500">(Historical Data)</span></h3>
-                                <button
-                                    onClick={() => toggleSectionPrivacy(animalToEdit?.id_public, 'breedingHistory')}
-                                    className="px-3 py-1.5 text-xs font-medium rounded-lg transition cursor-pointer"
-                                    style={{
-                                        backgroundColor: sectionPrivacy[animalToEdit?.id_public]?.breedingHistory ? '#dbeafe' : '#f3f4f6',
-                                        color: sectionPrivacy[animalToEdit?.id_public]?.breedingHistory ? '#1e40af' : '#374151'
-                                    }}
-                                    title="Toggle public visibility"
-                                >
-                                    <span>{sectionPrivacy[animalToEdit?.id_public]?.breedingHistory ? ' Public' : ' Private'}</span>
-                                </button>
-                            </div>
+                            <h3 className="text-lg font-semibold text-gray-700 border-b pb-2 flex items-center mb-4"><span className="text-blue-600 mr-2"></span>Breeding History <span className="text-xs font-normal text-gray-500">(Historical Data)</span></h3>
                                 
                                 {/* Breeding Role Selector - for animals with unclear breeding roles */}
                                 {(formData.gender === 'Intersex' || formData.gender === 'Unknown') && (
@@ -11125,20 +10953,7 @@ const AnimalForm = ({
                     <div className="space-y-6">
                         {/* Preventive Care */}
                         <div className="bg-gray-50 p-4 rounded-lg border border-gray-200 space-y-6">
-                            <div className="flex justify-between items-center mb-4">
-                                <h3 className="text-lg font-semibold text-gray-700">Preventive Care</h3>
-                                <button
-                                    onClick={() => toggleSectionPrivacy(animalToEdit?.id_public, 'preventiveCare')}
-                                    className="px-3 py-1.5 text-xs font-medium rounded-lg transition cursor-pointer"
-                                    style={{
-                                        backgroundColor: sectionPrivacy[animalToEdit?.id_public]?.preventiveCare ? '#dbeafe' : '#f3f4f6',
-                                        color: sectionPrivacy[animalToEdit?.id_public]?.preventiveCare ? '#1e40af' : '#374151'
-                                    }}
-                                    title="Toggle public visibility"
-                                >
-                                    <span>{sectionPrivacy[animalToEdit?.id_public]?.preventiveCare ? ' Public' : ' Private'}</span>
-                                </button>
-                            </div>
+                            <h3 className="text-lg font-semibold text-gray-700 mb-4">Preventive Care</h3>
                             
                             {/* Vaccinations */}
                             <div className="space-y-3">
@@ -11266,20 +11081,7 @@ const AnimalForm = ({
 
                         {/* Procedures & Diagnostics */}
                         <div className="bg-gray-50 p-4 rounded-lg border border-gray-200 space-y-6" data-tutorial-target="procedures-section">
-                            <div className="flex justify-between items-center mb-4">
-                                <h3 className="text-lg font-semibold text-gray-700">Procedures & Diagnostics</h3>
-                                <button
-                                    onClick={() => toggleSectionPrivacy(animalToEdit?.id_public, 'proceduresAndDiagnostics')}
-                                    className="px-3 py-1.5 text-xs font-medium rounded-lg transition cursor-pointer"
-                                    style={{
-                                        backgroundColor: sectionPrivacy[animalToEdit?.id_public]?.proceduresAndDiagnostics ? '#dbeafe' : '#f3f4f6',
-                                        color: sectionPrivacy[animalToEdit?.id_public]?.proceduresAndDiagnostics ? '#1e40af' : '#374151'
-                                    }}
-                                    title="Toggle public visibility"
-                                >
-                                    <span>{sectionPrivacy[animalToEdit?.id_public]?.proceduresAndDiagnostics ? ' Public' : ' Private'}</span>
-                                </button>
-                            </div>
+                            <h3 className="text-lg font-semibold text-gray-700 mb-4">Procedures & Diagnostics</h3>
                             
                             {/* Medical Procedures */}
                             <div className="space-y-3">
@@ -11371,20 +11173,7 @@ const AnimalForm = ({
 
                         {/* Active Medical Records */}
                         <div className="bg-gray-50 p-4 rounded-lg border border-gray-200 space-y-4" data-tutorial-target="medical-history-section">
-                            <div className="flex justify-between items-center mb-4">
-                                <h3 className="text-lg font-semibold text-gray-700">Active Medical Records</h3>
-                                <button
-                                    onClick={() => toggleSectionPrivacy(animalToEdit?.id_public, 'activeMedicalRecords')}
-                                    className="px-3 py-1.5 text-xs font-medium rounded-lg transition cursor-pointer"
-                                    style={{
-                                        backgroundColor: sectionPrivacy[animalToEdit?.id_public]?.activeMedicalRecords ? '#dbeafe' : '#f3f4f6',
-                                        color: sectionPrivacy[animalToEdit?.id_public]?.activeMedicalRecords ? '#1e40af' : '#374151'
-                                    }}
-                                    title="Toggle public visibility"
-                                >
-                                    <span>{sectionPrivacy[animalToEdit?.id_public]?.activeMedicalRecords ? ' Public' : ' Private'}</span>
-                                </button>
-                            </div>
+                            <h3 className="text-lg font-semibold text-gray-700 mb-4">Active Medical Records</h3>
                             <div className="space-y-4">
                                 {/* Medical Conditions */}
                                 <div className="space-y-3">
@@ -11563,20 +11352,7 @@ const AnimalForm = ({
 
                         {/* Veterinary Care */}
                         <div className="bg-gray-50 p-4 rounded-lg border border-gray-200 space-y-4" data-tutorial-target="vet-care-section">
-                            <div className="flex justify-between items-center mb-4">
-                                <h3 className="text-lg font-semibold text-gray-700">Veterinary Care</h3>
-                                <button
-                                    onClick={() => toggleSectionPrivacy(animalToEdit?.id_public, 'veterinaryCare')}
-                                    className="px-3 py-1.5 text-xs font-medium rounded-lg transition cursor-pointer"
-                                    style={{
-                                        backgroundColor: sectionPrivacy[animalToEdit?.id_public]?.veterinaryCare ? '#dbeafe' : '#f3f4f6',
-                                        color: sectionPrivacy[animalToEdit?.id_public]?.veterinaryCare ? '#1e40af' : '#374151'
-                                    }}
-                                    title="Toggle public visibility"
-                                >
-                                    <span>{sectionPrivacy[animalToEdit?.id_public]?.veterinaryCare ? ' Public' : ' Private'}</span>
-                                </button>
-                            </div>
+                            <h3 className="text-lg font-semibold text-gray-700 mb-4">Veterinary Care</h3>
                             <div className="space-y-4">
                                 {/* Veterinary Visits */}
                                 <div className="space-y-3">
@@ -11637,20 +11413,7 @@ const AnimalForm = ({
                     <div className="space-y-6">
                         {/* 1st Section: Nutrition */}
                         <div className="bg-gray-50 p-4 rounded-lg border border-gray-200 space-y-4">
-                            <div className="flex justify-between items-center mb-4">
-                                <h3 className="text-lg font-semibold text-gray-700">Nutrition</h3>
-                                <button
-                                    onClick={() => toggleSectionPrivacy(animalToEdit?.id_public, 'nutrition')}
-                                    className="px-3 py-1.5 text-xs font-medium rounded-lg transition cursor-pointer"
-                                    style={{
-                                        backgroundColor: sectionPrivacy[animalToEdit?.id_public]?.nutrition ? '#dbeafe' : '#f3f4f6',
-                                        color: sectionPrivacy[animalToEdit?.id_public]?.nutrition ? '#1e40af' : '#374151'
-                                    }}
-                                    title="Toggle public visibility"
-                                >
-                                    <span>{sectionPrivacy[animalToEdit?.id_public]?.nutrition ? ' Public' : ' Private'}</span>
-                                </button>
-                            </div>
+                            <h3 className="text-lg font-semibold text-gray-700 mb-4">Nutrition</h3>
                             <div className="space-y-4">
                                 <div>
                                     <label className="block text-sm font-medium text-gray-700 mb-2">Diet Type</label>
@@ -11677,20 +11440,7 @@ const AnimalForm = ({
 
                         {/* 2nd Section: Husbandry */}
                         <div className="bg-gray-50 p-4 rounded-lg border border-gray-200 space-y-4" data-tutorial-target="husbandry-details-section">
-                            <div className="flex justify-between items-center mb-4">
-                                <h3 className="text-lg font-semibold text-gray-700">Husbandry</h3>
-                                <button
-                                    onClick={() => toggleSectionPrivacy(animalToEdit?.id_public, 'husbandry')}
-                                    className="px-3 py-1.5 text-xs font-medium rounded-lg transition cursor-pointer"
-                                    style={{
-                                        backgroundColor: sectionPrivacy[animalToEdit?.id_public]?.husbandry ? '#dbeafe' : '#f3f4f6',
-                                        color: sectionPrivacy[animalToEdit?.id_public]?.husbandry ? '#1e40af' : '#374151'
-                                    }}
-                                    title="Toggle public visibility"
-                                >
-                                    <span>{sectionPrivacy[animalToEdit?.id_public]?.husbandry ? ' Public' : ' Private'}</span>
-                                </button>
-                            </div>
+                            <h3 className="text-lg font-semibold text-gray-700 mb-4">Husbandry</h3>
                             <div className="space-y-4">
                                 {!isFieldHidden('housingType') && (
                                     <div>
@@ -11721,20 +11471,7 @@ const AnimalForm = ({
 
                         {/* 3rd Section: Environment */}
                         <div className="bg-gray-50 p-4 rounded-lg border border-gray-200 space-y-4" data-tutorial-target="environment-section">
-                            <div className="flex justify-between items-center mb-4">
-                                <h3 className="text-lg font-semibold text-gray-700">Environment</h3>
-                                <button
-                                    onClick={() => toggleSectionPrivacy(animalToEdit?.id_public, 'environment')}
-                                    className="px-3 py-1.5 text-xs font-medium rounded-lg transition cursor-pointer"
-                                    style={{
-                                        backgroundColor: sectionPrivacy[animalToEdit?.id_public]?.environment ? '#dbeafe' : '#f3f4f6',
-                                        color: sectionPrivacy[animalToEdit?.id_public]?.environment ? '#1e40af' : '#374151'
-                                    }}
-                                    title="Toggle public visibility"
-                                >
-                                    <span>{sectionPrivacy[animalToEdit?.id_public]?.environment ? ' Public' : ' Private'}</span>
-                                </button>
-                            </div>
+                            <h3 className="text-lg font-semibold text-gray-700 mb-4">Environment</h3>
                             <div className="space-y-4">
                                 <div>
                                     <label className="block text-sm font-medium text-gray-700 mb-2">Temperature Range</label>
@@ -11845,20 +11582,7 @@ const AnimalForm = ({
                     <div className="space-y-6">
                         {/* Behavior */}
                         <div className="bg-gray-50 p-4 rounded-lg border border-gray-200 space-y-4">
-                            <div className="flex justify-between items-center mb-4">
-                                <h3 className="text-lg font-semibold text-gray-700">Behavior</h3>
-                                <button
-                                    onClick={() => toggleSectionPrivacy(animalToEdit?.id_public, 'behavior')}
-                                    className="px-3 py-1.5 text-xs font-medium rounded-lg transition cursor-pointer"
-                                    style={{
-                                        backgroundColor: sectionPrivacy[animalToEdit?.id_public]?.behavior ? '#dbeafe' : '#f3f4f6',
-                                        color: sectionPrivacy[animalToEdit?.id_public]?.behavior ? '#1e40af' : '#374151'
-                                    }}
-                                    title="Toggle public visibility"
-                                >
-                                    <span>{sectionPrivacy[animalToEdit?.id_public]?.behavior ? ' Public' : ' Private'}</span>
-                                </button>
-                            </div>
+                            <h3 className="text-lg font-semibold text-gray-700 mb-4">Behavior</h3>
                             <div className="space-y-4" data-tutorial-target="behavior-items-section">
                                 <div>
                                     <label className="block text-sm font-medium text-gray-700 mb-2">Temperament</label>
@@ -11885,20 +11609,7 @@ const AnimalForm = ({
 
                         {/* Activity */}
                         <div className="bg-gray-50 p-4 rounded-lg border border-gray-200 space-y-4">
-                            <div className="flex justify-between items-center mb-4">
-                                <h3 className="text-lg font-semibold text-gray-700">Activity</h3>
-                                <button
-                                    onClick={() => toggleSectionPrivacy(animalToEdit?.id_public, 'activity')}
-                                    className="px-3 py-1.5 text-xs font-medium rounded-lg transition cursor-pointer"
-                                    style={{
-                                        backgroundColor: sectionPrivacy[animalToEdit?.id_public]?.activity ? '#dbeafe' : '#f3f4f6',
-                                        color: sectionPrivacy[animalToEdit?.id_public]?.activity ? '#1e40af' : '#374151'
-                                    }}
-                                    title="Toggle public visibility"
-                                >
-                                    <span>{sectionPrivacy[animalToEdit?.id_public]?.activity ? ' Public' : ' Private'}</span>
-                                </button>
-                            </div>
+                            <h3 className="text-lg font-semibold text-gray-700 mb-4">Activity</h3>
                             <div>
                                 <label className="block text-sm font-medium text-gray-700 mb-2">Activity Cycle</label>
                                 <select name="activityCycle" value={formData.activityCycle} onChange={handleChange} data-tutorial-target="activity-pattern-select"
@@ -11978,20 +11689,7 @@ const AnimalForm = ({
                 {activeTab === 10 && (
                     <div className="space-y-6">
                         <div className="bg-gray-50 p-4 rounded-lg border border-gray-200" data-tutorial-target="remarks-section">
-                            <div className="flex justify-between items-center mb-4">
-                                <h3 className="text-lg font-semibold text-gray-700">Remarks & Notes</h3>
-                                <button
-                                    onClick={() => toggleSectionPrivacy(animalToEdit?.id_public, 'remarks')}
-                                    className="px-3 py-1.5 text-xs font-medium rounded-lg transition cursor-pointer"
-                                    style={{
-                                        backgroundColor: sectionPrivacy[animalToEdit?.id_public]?.remarks ? '#dbeafe' : '#f3f4f6',
-                                        color: sectionPrivacy[animalToEdit?.id_public]?.remarks ? '#1e40af' : '#374151'
-                                    }}
-                                    title="Toggle public visibility"
-                                >
-                                    <span>{sectionPrivacy[animalToEdit?.id_public]?.remarks ? ' Public' : ' Private'}</span>
-                                </button>
-                            </div>
+                            <h3 className="text-lg font-semibold text-gray-700 mb-4">Remarks & Notes</h3>
                             <textarea name="remarks" value={formData.remarks} onChange={handleChange} rows="5"
                                 className="block w-full p-2 border border-gray-300 rounded-md shadow-sm focus:ring-primary focus:border-primary" 
                                 placeholder="General notes, observations, and records..." />
@@ -12005,20 +11703,7 @@ const AnimalForm = ({
                     <div className="space-y-6">
                         {/* End of Life */}
                         <div className="bg-gray-50 p-4 rounded-lg border border-gray-200 space-y-4">
-                            <div className="flex justify-between items-center mb-4">
-                                <h3 className="text-lg font-semibold text-gray-700">End of Life</h3>
-                                <button
-                                    onClick={() => toggleSectionPrivacy(animalToEdit?.id_public, 'endOfLife')}
-                                    className="px-3 py-1.5 text-xs font-medium rounded-lg transition cursor-pointer"
-                                    style={{
-                                        backgroundColor: sectionPrivacy[animalToEdit?.id_public]?.endOfLife ? '#dbeafe' : '#f3f4f6',
-                                        color: sectionPrivacy[animalToEdit?.id_public]?.endOfLife ? '#1e40af' : '#374151'
-                                    }}
-                                    title="Toggle public visibility"
-                                >
-                                    <span>{sectionPrivacy[animalToEdit?.id_public]?.endOfLife ? ' Public' : ' Private'}</span>
-                                </button>
-                            </div>
+                            <h3 className="text-lg font-semibold text-gray-700 mb-4">End of Life</h3>
                             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                                 <div>
                                     <label className="block text-sm font-medium text-gray-700 mb-2">Date of Death</label>
@@ -12055,20 +11740,7 @@ const AnimalForm = ({
 
                         {/* Legal / Administrative */}
                         <div className="bg-gray-50 p-4 rounded-lg border border-gray-200 space-y-4" data-tutorial-target="legal-admin-section">
-                            <div className="flex justify-between items-center mb-4">
-                                <h3 className="text-lg font-semibold text-gray-700">Legal / Administrative</h3>
-                                <button
-                                    onClick={() => toggleSectionPrivacy(animalToEdit?.id_public, 'legalAdministrative')}
-                                    className="px-3 py-1.5 text-xs font-medium rounded-lg transition cursor-pointer"
-                                    style={{
-                                        backgroundColor: sectionPrivacy[animalToEdit?.id_public]?.legalAdministrative ? '#dbeafe' : '#f3f4f6',
-                                        color: sectionPrivacy[animalToEdit?.id_public]?.legalAdministrative ? '#1e40af' : '#374151'
-                                    }}
-                                    title="Toggle public visibility"
-                                >
-                                    <span>{sectionPrivacy[animalToEdit?.id_public]?.legalAdministrative ? ' Public' : ' Private'}</span>
-                                </button>
-                            </div>
+                            <h3 className="text-lg font-semibold text-gray-700 mb-4">Legal / Administrative</h3>
                             <div className="space-y-4">
                                 <div>
                                     <label className="block text-sm font-medium text-gray-700 mb-2">Insurance</label>
@@ -12114,23 +11786,7 @@ const AnimalForm = ({
                     <div className="space-y-6">
                         {/* Show Titles & Ratings */}
                         <div className="bg-gray-50 p-4 rounded-lg border border-gray-200 space-y-4">
-                            <div className="flex justify-between items-center mb-4">
-                                <h3 className="text-lg font-semibold text-gray-700">Show Titles & Ratings</h3>
-                                {animalToEdit && (
-                                    <button
-                                        type="button"
-                                        onClick={() => toggleSectionPrivacy(animalToEdit?.id_public, 'showTab')}
-                                        className="px-3 py-1.5 text-xs font-medium rounded-lg transition cursor-pointer"
-                                        style={{
-                                            backgroundColor: sectionPrivacy[animalToEdit?.id_public]?.showTab ? '#dbeafe' : '#f3f4f6',
-                                            color: sectionPrivacy[animalToEdit?.id_public]?.showTab ? '#1e40af' : '#374151'
-                                        }}
-                                        title="Toggle public visibility"
-                                    >
-                                        <span>{sectionPrivacy[animalToEdit?.id_public]?.showTab ? ' Public' : ' Private'}</span>
-                                    </button>
-                                )}
-                            </div>
+                            <h3 className="text-lg font-semibold text-gray-700 mb-4">Show Titles & Ratings</h3>
                             <div className="space-y-4">
                                 <div>
                                     <label className="block text-sm font-medium text-gray-700 mb-2">Show Titles</label>
@@ -16580,7 +16236,6 @@ const App = () => {
     const [sireData, setSireData] = useState(null);
     const [damData, setDamData] = useState(null);
     const [offspringData, setOffspringData] = useState([]);
-    const [sectionPrivacy, setSectionPrivacy] = useState({}); // Track which sections are public per animal
     
     // Fetch parent animals when viewing an animal
     React.useEffect(() => {
@@ -16588,34 +16243,8 @@ const App = () => {
             setSireData(null);
             setDamData(null);
             setOffspringData([]);
-            setSectionPrivacy({});
             return;
         }
-        
-        // Initialize section privacy settings from animal data
-        const animalId = animalToView.id_public;
-        setSectionPrivacy(prev => ({
-            ...prev,
-            [animalId]: animalToView.sectionPrivacy || {
-                appearance: true,
-                identification: true,
-                health: true,
-                reproductive: true,
-                genetics: true,
-                husbandry: true,
-                behavior: true,
-                records: true,
-                endOfLife: true,
-                remarks: true,
-                owner: true,
-                lifeStage: true,
-                measurements: true,
-                origin: true,
-                medicalHistory: true,
-                environment: true,
-                activity: true
-            }
-        }));
         
         const fetchPedigreeData = async () => {
             try {
@@ -16741,41 +16370,6 @@ const App = () => {
         setModalMessage({ title, message });
         setShowModal(true);
     }, []);
-
-    // Toggle section privacy and save to animal
-    const toggleSectionPrivacy = useCallback(async (animalId, sectionName) => {
-        if (!animalId || !sectionName) return;
-        
-        const currentPrivacy = sectionPrivacy[animalId] || {};
-        const newPrivacy = {
-            ...currentPrivacy,
-            [sectionName]: !currentPrivacy[sectionName]
-        };
-        
-        // Update local state immediately for responsiveness
-        setSectionPrivacy(prev => ({
-            ...prev,
-            [animalId]: newPrivacy
-        }));
-        
-        // Save to backend (backend will sync to PublicAnimal automatically)
-        try {
-            await axios.put(`${API_BASE_URL}/animals/${animalId}`, {
-                sectionPrivacy: newPrivacy
-            }, {
-                headers: { Authorization: `Bearer ${authToken}` }
-            });
-            // Changes will be reflected when user next views the animal (handleViewAnimal fetches fresh data)
-        } catch (error) {
-            console.error('Error saving section privacy:', error);
-            // Revert on error
-            setSectionPrivacy(prev => ({
-                ...prev,
-                [animalId]: currentPrivacy
-            }));
-            showModalMessage('Error', 'Failed to save privacy settings');
-        }
-    }, [sectionPrivacy, authToken, API_BASE_URL, showModalMessage]);
 
     const handleLogout = useCallback((expired = false) => {
         setAuthToken(null);
@@ -19443,8 +19037,6 @@ const App = () => {
                                 GENDER_OPTIONS={GENDER_OPTIONS}
                                 STATUS_OPTIONS={STATUS_OPTIONS}
                                 AnimalImageUpload={AnimalImageUpload}
-                                sectionPrivacy={sectionPrivacy}
-                                toggleSectionPrivacy={toggleSectionPrivacy}
                             />
                         )
                     } />
@@ -19474,8 +19066,6 @@ const App = () => {
                                 GENDER_OPTIONS={GENDER_OPTIONS}
                                 STATUS_OPTIONS={STATUS_OPTIONS}
                                 AnimalImageUpload={AnimalImageUpload}
-                                sectionPrivacy={sectionPrivacy}
-                                toggleSectionPrivacy={toggleSectionPrivacy}
                             />
                         )
                     } />
@@ -19500,7 +19090,6 @@ const App = () => {
                                         authToken={authToken}
                                         setShowImageModal={setShowImageModal}
                                         setEnlargedImageUrl={setEnlargedImageUrl}
-                                        toggleSectionPrivacy={toggleSectionPrivacy}
                                         onUpdateAnimal={setAnimalToView}
                                         onHideAnimal={handleHideAnimal}
                                         showModalMessage={showModalMessage}
