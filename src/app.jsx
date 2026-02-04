@@ -2,7 +2,7 @@
 import React, { useState, useEffect, useCallback, useRef, useMemo } from 'react';
 import { useParams, useNavigate, useLocation, Routes, Route, Link as RouterLink } from 'react-router-dom';
 import axios from 'axios';
-import { LogOut, Cat, UserPlus, LogIn, ChevronLeft, Trash2, Edit, Save, PlusCircle, Plus, ArrowLeft, Loader2, RefreshCw, User, Users, ClipboardList, BookOpen, Settings, Mail, Globe, Bean, Milk, Search, X, Mars, Venus, Eye, EyeOff, Heart, HeartOff, HeartHandshake, Bell, XCircle, CheckCircle, Download, FileText, Link, AlertCircle, DollarSign, Archive, ArrowLeftRight, RotateCcw, Info, Hourglass, MessageSquare, Ban, Flag, Scissors, VenusAndMars, Circle, Shield, Lock, AlertTriangle, ShoppingBag, Check, Star, Moon, MoonStar } from 'lucide-react';
+import { LogOut, Cat, UserPlus, LogIn, ChevronLeft, Trash2, Edit, Save, PlusCircle, Plus, ArrowLeft, Loader2, RefreshCw, User, Users, ClipboardList, BookOpen, Settings, Mail, Globe, Bean, Milk, Search, X, Mars, Venus, Eye, EyeOff, Heart, HeartOff, HeartHandshake, Bell, XCircle, CheckCircle, Download, FileText, Link, AlertCircle, DollarSign, Archive, ArrowLeftRight, RotateCcw, Info, Hourglass, MessageSquare, Ban, Flag, Scissors, VenusAndMars, Circle, Shield, Lock, AlertTriangle, ShoppingBag, Check, Star, Moon, MoonStar, Calculator } from 'lucide-react';
 import jsPDF from 'jspdf';
 import html2canvas from 'html2canvas';
 import 'flag-icons/css/flag-icons.min.css';
@@ -18641,7 +18641,7 @@ const App = () => {
                     
                     <nav className="flex space-x-3">
                         <button onClick={() => navigate('/')} className={`px-4 py-2 text-xs font-medium rounded-lg transition duration-150 flex flex-col items-center ${currentView === 'list' ? 'bg-primary text-black shadow-md' : 'text-gray-600 hover:bg-gray-100'}`}>
-                            <ClipboardList size={18} className="mb-1" />
+                            <Cat size={18} className="mb-1" />
                             <span>Animals</span>
                         </button>
                         <button onClick={() => navigate('/litters')} data-tutorial-target="litters-btn" className={`px-4 py-2 text-xs font-medium rounded-lg transition duration-150 flex flex-col items-center ${currentView === 'litters' ? 'bg-primary text-black shadow-md' : 'text-gray-600 hover:bg-gray-100'}`}>
@@ -18657,7 +18657,7 @@ const App = () => {
                             <span>Shop</span>
                         </button>
                         <button onClick={() => navigate('/genetics-calculator')} data-tutorial-target="genetics-btn" className={`px-4 py-2 text-xs font-medium rounded-lg transition duration-150 flex flex-col items-center ${currentView === 'genetics-calculator' ? 'bg-primary text-black shadow-md' : 'text-gray-600 hover:bg-gray-100'}`}>
-                            <Cat size={18} className="mb-1" />
+                            <Calculator size={18} className="mb-1" />
                             <span>Calculator</span>
                         </button>
                         {userProfile?.id_public === 'CTU2' && (
@@ -18814,7 +18814,7 @@ const App = () => {
                     {/* Second row: Navigation row 1 (4 buttons) */}
                     <nav className="grid grid-cols-4 gap-1 mb-1">
                         <button onClick={() => navigate('/')} className={`px-2 py-2 text-xs font-medium rounded-lg transition duration-150 flex flex-col items-center ${currentView === 'list' ? 'bg-primary text-black shadow-md' : 'text-gray-600 hover:bg-gray-100'}`}>
-                            <ClipboardList size={18} className="mb-0.5" />
+                            <Cat size={18} className="mb-0.5" />
                             <span>Animals</span>
                         </button>
                         <button onClick={() => navigate('/litters')} data-tutorial-target="litters-btn" className={`px-2 py-2 text-xs font-medium rounded-lg transition duration-150 flex flex-col items-center ${currentView === 'litters' ? 'bg-primary text-black shadow-md' : 'text-gray-600 hover:bg-gray-100'}`}>
@@ -18834,7 +18834,7 @@ const App = () => {
                     {/* Third row: Navigation row 2 (4 buttons) */}
                     <nav className="grid grid-cols-4 gap-1">
                         <button onClick={() => navigate('/genetics-calculator')} data-tutorial-target="genetics-btn" className={`px-2 py-2 text-xs font-medium rounded-lg transition duration-150 flex flex-col items-center ${currentView === 'genetics-calculator' ? 'bg-primary text-black shadow-md' : 'text-gray-600 hover:bg-gray-100'}`}>
-                            <Cat size={18} className="mb-0.5" />
+                            <Calculator size={18} className="mb-0.5" />
                             <span>Calculator</span>
                         </button>
                         {userProfile?.id_public === 'CTU2' && (
