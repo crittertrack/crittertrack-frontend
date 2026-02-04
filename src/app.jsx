@@ -12625,25 +12625,25 @@ const ProfileEditForm = ({ userProfile, showModalMessage, onSaveSuccess, onCance
                         <select value={country} onChange={(e) => setCountry(e.target.value)}
                         className="w-full p-3 border border-gray-300 rounded-lg focus:ring-primary focus:border-primary transition box-border" disabled={profileLoading}>
                         <option value="">Select Country (Optional)</option>
-                        <option value="US">? United States</option>
-                        <option value="CA">? Canada</option>
-                        <option value="GB">? United Kingdom</option>
-                        <option value="AU">? Australia</option>
-                        <option value="NZ">? New Zealand</option>
-                        <option value="DE">? Germany</option>
-                        <option value="FR">? France</option>
-                        <option value="IT">? Italy</option>
-                        <option value="ES">? Spain</option>
-                        <option value="NL">? Netherlands</option>
-                        <option value="SE">? Sweden</option>
-                        <option value="NO">? Norway</option>
-                        <option value="DK">? Denmark</option>
-                        <option value="CH">? Switzerland</option>
-                        <option value="BE">? Belgium</option>
-                        <option value="AT">? Austria</option>
-                        <option value="PL">? Poland</option>
-                        <option value="CZ">? Czech Republic</option>
-                        <option value="IE">? Ireland</option>
+                        <option value="US">United States</option>
+                        <option value="CA">Canada</option>
+                        <option value="GB">United Kingdom</option>
+                        <option value="AU">Australia</option>
+                        <option value="NZ">New Zealand</option>
+                        <option value="DE">Germany</option>
+                        <option value="FR">France</option>
+                        <option value="IT">Italy</option>
+                        <option value="ES">Spain</option>
+                        <option value="NL">Netherlands</option>
+                        <option value="SE">Sweden</option>
+                        <option value="NO">Norway</option>
+                        <option value="DK">Denmark</option>
+                        <option value="CH">Switzerland</option>
+                        <option value="BE">Belgium</option>
+                        <option value="AT">Austria</option>
+                        <option value="PL">Poland</option>
+                        <option value="CZ">Czech Republic</option>
+                        <option value="IE">Ireland</option>
                         <option value="PT">? Portugal</option>
                         <option value="GR">? Greece</option>
                         <option value="RU">? Russia</option>
@@ -18291,23 +18291,8 @@ const App = () => {
                 {showModal && <ModalMessage title={modalMessage.title} message={modalMessage.message} onClose={() => setShowModal(false)} />}
                 
                 {/* Public navigation header */}
-                <header className="w-full max-w-5xl bg-white p-4 rounded-xl shadow-lg mb-6 flex justify-between items-center">
+                <header className="w-full max-w-5xl bg-white p-4 rounded-xl shadow-lg mb-6 flex justify-center items-center">
                     <CustomAppLogo size="w-10 h-10" />
-                    <div className="flex items-center space-x-3">
-                        <button 
-                            onClick={() => setShowUserSearchModal(true)}
-                            className="px-3 py-2 bg-primary hover:bg-primary-dark text-black font-semibold rounded-lg transition flex items-center"
-                            data-tutorial-target="global-search-btn"
-                        >
-                            <Search size={18} className="mr-1" /> Search
-                        </button>
-                        <button 
-                            onClick={() => navigate('/genetics-calculator')}
-                            className="px-3 py-2 bg-primary hover:bg-primary-dark text-black font-semibold rounded-lg transition flex items-center"
-                        >
-                            <Cat size={18} className="mr-1" /> Calculator
-                        </button>
-                    </div>
                 </header>
                 
                 {showUserSearchModal && (
