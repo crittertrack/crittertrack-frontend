@@ -281,32 +281,7 @@ const ProjectTreeContent = ({ authToken, userProfile, showModalMessage, onViewAn
             });
         });
         
-        // Add placeholder nodes for missing parents
-        allAnimals.forEach(animal => {
-            if (animal.sireId_public && !allUniqueAnimals.has(animal.sireId_public)) {
-                allUniqueAnimals.set(animal.sireId_public, {
-                    id_public: animal.sireId_public,
-                    name: animal.sireId_public,
-                    species: animal.species,
-                    sex: 'Male',
-                    gender: 'Male',
-                    isOwned: false,
-                    isPrivate: true
-                });
-            }
-            
-            if (animal.damId_public && !allUniqueAnimals.has(animal.damId_public)) {
-                allUniqueAnimals.set(animal.damId_public, {
-                    id_public: animal.damId_public,
-                    name: animal.damId_public,
-                    species: animal.species,
-                    sex: 'Female',
-                    gender: 'Female',
-                    isOwned: false,
-                    isPrivate: true
-                });
-            }
-        });
+        // Don't create placeholder nodes - only show animals we actually have data for
         
         // Track mating pairs
         const matingPairData = new Map();
