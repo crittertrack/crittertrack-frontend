@@ -14954,7 +14954,7 @@ const AnimalList = ({ authToken, showModalMessage, onEditAnimal, onViewAnimal, f
                                                 className="p-1.5 sm:p-2 hover:bg-gray-200 rounded-lg transition"
                                                 title="Make All Public"
                                             >
-                                                <Eye className="w-4 h-4 sm:w-[18px] sm:h-[18px] text-blue-600" />
+                                                <Eye className="w-4 h-4 sm:w-[18px] sm:h-[18px] text-green-600" />
                                             </button>
                                             <button
                                                 onClick={() => toggleBulkPrivacy(species, false)}
