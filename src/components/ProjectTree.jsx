@@ -173,13 +173,28 @@ const ProjectTreeContent = ({ authToken, userProfile, showModalMessage, onViewAn
             try {
                 console.log('[ProjectTree] Fetching owned animals...');
                 
-                // Get all owned animals
+                // Get all owned animals (active)
                 const ownedResponse = await axios.get(`${API_BASE_URL}/animals`, {
                     headers: { Authorization: `Bearer ${authToken}` }
                 });
                 
-                const ownedAnimals = ownedResponse.data;
-                console.log(`[ProjectTree] Found ${ownedAnimals.length} owned animals`);
+                let ownedAnimals = ownedResponse.data;
+                console.log(`[ProjectTree] Found ${ownedAnimals.length} active owned animals`);
+                
+                // Also fetch hidden/transferred animals
+                try {
+                    const hiddenResponse = await axios.get(`${API_BASE_URL}/animals/hidden/list`, {
+                        headers: { Authorization: `Bearer ${authToken}` }
+                    });
+                    if (hiddenResponse.data && hiddenResponse.data.length > 0) {
+                        console.log(`[ProjectTree] Found ${hiddenResponse.data.length} hidden/transferred animals`);
+                        ownedAnimals = [...ownedAnimals, ...hiddenResponse.data];
+                    }
+                } catch (hiddenError) {
+                    console.log('[ProjectTree] No hidden animals or error fetching:', hiddenError.message);
+                }
+                
+                console.log(`[ProjectTree] Total owned animals (including hidden): ${ownedAnimals.length}`);
                 
                 // Collect all parent IDs
                 const parentIds = new Set();
