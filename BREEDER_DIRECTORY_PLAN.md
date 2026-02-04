@@ -24,12 +24,12 @@ Add a new section in user settings where users can manage their breeding status:
 
 ## 2. Header Navigation Button
 
-Add a button in the main header next to the search button:
+Add a button in the main header next to the profile button:
 
 - **Icon**: `MoonStar` (Lucide icon)
 - **Label**: "Breeders" (tooltip/title)
 - **Action**: Opens the breeders page
-- **Placement**: Next to search button in header for prominent access
+- **Placement**: Next to profile button in header for prominent access
 
 ---
 

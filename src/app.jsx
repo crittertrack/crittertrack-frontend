@@ -1017,31 +1017,54 @@ const BreederDirectorySettings = ({ authToken, API_BASE_URL, showModalMessage, u
     const [breedingStatus, setBreedingStatus] = useState({});
     const [loading, setLoading] = useState(false);
     const [loadingStatus, setLoadingStatus] = useState(true);
-
-    const allSpecies = ['Mouse', 'Rat', 'Rabbit', 'Guinea Pig', 'Hamster', 'Gerbil', 'Chinchilla', 'Hedgehog', 'Ferret', 'Sugar Glider', 'Degu', 'Cat', 'Dog'];
+    const [userAnimals, setUserAnimals] = useState([]);
 
     useEffect(() => {
-        fetchBreedingStatus();
+        fetchData();
     }, []);
 
-    const fetchBreedingStatus = async () => {
+    const fetchData = async () => {
         try {
-            const response = await axios.get(`${API_BASE_URL}/users/breeding-status`, {
+            // Fetch user's animals
+            const animalsResponse = await axios.get(`${API_BASE_URL}/animals`, {
                 headers: { Authorization: `Bearer ${authToken}` }
             });
-            setBreedingStatus(response.data.breedingStatus || {});
+            setUserAnimals(animalsResponse.data || []);
+
+            // Fetch breeding status
+            const statusResponse = await axios.get(`${API_BASE_URL}/users/breeding-status`, {
+                headers: { Authorization: `Bearer ${authToken}` }
+            });
+            setBreedingStatus(statusResponse.data.breedingStatus || {});
         } catch (error) {
-            console.error('Error fetching breeding status:', error);
+            console.error('Error fetching data:', error);
         } finally {
             setLoadingStatus(false);
         }
     };
 
+    // Get unique species from user's animals
+    const userSpecies = [...new Set(userAnimals.map(animal => animal.species))];
+    
+    // Get species that are marked as breeder or retired (even if no animals)
+    const markedSpecies = Object.keys(breedingStatus).filter(
+        species => breedingStatus[species] === 'breeder' || breedingStatus[species] === 'retired'
+    );
+    
+    // Combine: species with animals + species marked as breeder/retired
+    const displaySpecies = [...new Set([...userSpecies, ...markedSpecies])].sort();
+
     const handleStatusChange = (species, status) => {
-        setBreedingStatus(prev => ({
-            ...prev,
-            [species]: status
-        }));
+        setBreedingStatus(prev => {
+            const updated = { ...prev };
+            if (status === 'owner' || status === '') {
+                // Remove from object if set to owner (default)
+                delete updated[species];
+            } else {
+                updated[species] = status;
+            }
+            return updated;
+        });
     };
 
     const handleSave = async () => {
@@ -1052,10 +1075,10 @@ const BreederDirectorySettings = ({ authToken, API_BASE_URL, showModalMessage, u
                 { breedingStatus },
                 { headers: { Authorization: `Bearer ${authToken}` } }
             );
-            showModalMessage('Success', 'Breeder directory settings updated successfully.');
+            showModalMessage('Success', 'Breeding status updated successfully.');
         } catch (error) {
             console.error('Error updating breeding status:', error);
-            showModalMessage('Error', 'Failed to update breeder directory settings.');
+            showModalMessage('Error', 'Failed to update breeding status.');
         } finally {
             setLoading(false);
         }
@@ -1066,37 +1089,57 @@ const BreederDirectorySettings = ({ authToken, API_BASE_URL, showModalMessage, u
             <div className="mb-8 p-4 sm:p-6 border rounded-lg bg-gray-50">
                 <div className="flex items-center justify-center py-8">
                     <Loader2 className="animate-spin mr-2" size={24} />
-                    <span>Loading breeder settings...</span>
+                    <span>Loading breeding status...</span>
                 </div>
+            </div>
+        );
+    }
+
+    if (displaySpecies.length === 0) {
+        return (
+            <div className="mb-8 p-4 sm:p-6 border rounded-lg bg-gray-50 overflow-x-hidden">
+                <h3 className="text-xl font-semibold text-gray-800 border-b pb-2 mb-4">Species & Breeding Status</h3>
+                <p className="text-sm text-gray-600">
+                    Add some animals to your collection to manage your breeding status and appear in the Breeders directory.
+                </p>
             </div>
         );
     }
 
     return (
         <div className="mb-8 p-4 sm:p-6 border rounded-lg bg-gray-50 overflow-x-hidden">
-            <h3 className="text-xl font-semibold text-gray-800 border-b pb-2 mb-4">Breeder Directory Settings</h3>
-            <p className="text-sm text-gray-600 mb-4">
-                Set your breeding status for each species to appear in the public breeder directory. 
-                Choose "Active Breeder" for species you currently breed, "Retired" for species you no longer breed, 
-                or leave blank to not be listed for that species.
+            <h3 className="text-xl font-semibold text-gray-800 border-b pb-2 mb-4">Species & Breeding Status</h3>
+            <p className="text-sm text-gray-600 mb-1">
+                Set your breeding status for each species. Marking yourself as an <strong>Active Breeder</strong> or <strong>Retired Breeder</strong> will make you visible in the Breeders directory.
+            </p>
+            <p className="text-xs text-gray-500 mb-4">
+                Note: Species marked as Active or Retired will remain in your list even if you have no animals of that species.
             </p>
 
             <div className="space-y-3 mb-4">
-                {allSpecies.map(species => (
-                    <div key={species} className="flex items-center justify-between py-2 border-b border-gray-200">
-                        <span className="text-sm font-medium text-gray-700">{species}</span>
-                        <select
-                            value={breedingStatus[species] || ''}
-                            onChange={(e) => handleStatusChange(species, e.target.value)}
-                            className="px-3 py-1.5 border border-gray-300 rounded-lg focus:ring-primary focus:border-primary text-sm"
-                            disabled={loading}
-                        >
-                            <option value="">Not Listed</option>
-                            <option value="breeder">Active Breeder</option>
-                            <option value="retired">Retired</option>
-                        </select>
-                    </div>
-                ))}
+                {displaySpecies.map(species => {
+                    const animalCount = userAnimals.filter(a => a.species === species).length;
+                    const currentStatus = breedingStatus[species] || 'owner';
+                    
+                    return (
+                        <div key={species} className="flex items-center justify-between py-2 border-b border-gray-200">
+                            <div className="flex flex-col">
+                                <span className="text-sm font-medium text-gray-700">{species}</span>
+                                <span className="text-xs text-gray-500">{animalCount} animal{animalCount !== 1 ? 's' : ''}</span>
+                            </div>
+                            <select
+                                value={currentStatus}
+                                onChange={(e) => handleStatusChange(species, e.target.value)}
+                                className="px-3 py-1.5 border border-gray-300 rounded-lg focus:ring-primary focus:border-primary text-sm"
+                                disabled={loading}
+                            >
+                                <option value="owner">🏠 Owner</option>
+                                <option value="breeder">⭐ Active Breeder</option>
+                                <option value="retired">🌙 Retired Breeder</option>
+                            </select>
+                        </div>
+                    );
+                })}
             </div>
 
             <div className="flex justify-end pt-2">
@@ -1106,7 +1149,7 @@ const BreederDirectorySettings = ({ authToken, API_BASE_URL, showModalMessage, u
                     className="bg-accent hover:bg-accent/90 text-white font-bold py-2 px-4 rounded-lg shadow-md transition duration-150 flex items-center justify-center disabled:opacity-50"
                 >
                     {loading ? <Loader2 className="animate-spin mr-2" size={20} /> : <Save size={20} className="mr-2" />}
-                    Save Breeder Settings
+                    Save Breeding Status
                 </button>
             </div>
         </div>
