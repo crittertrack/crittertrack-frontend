@@ -1013,6 +1013,106 @@ const PedigreeChart = ({ animalId, animalData, onClose, API_BASE_URL, authToken 
 
 // (Removed unused `AnimalListItem` component to reduce redundancy)
 
+const BreederDirectorySettings = ({ authToken, API_BASE_URL, showModalMessage, userProfile }) => {
+    const [breedingStatus, setBreedingStatus] = useState({});
+    const [loading, setLoading] = useState(false);
+    const [loadingStatus, setLoadingStatus] = useState(true);
+
+    const allSpecies = ['Mouse', 'Rat', 'Rabbit', 'Guinea Pig', 'Hamster', 'Gerbil', 'Chinchilla', 'Hedgehog', 'Ferret', 'Sugar Glider', 'Degu', 'Cat', 'Dog'];
+
+    useEffect(() => {
+        fetchBreedingStatus();
+    }, []);
+
+    const fetchBreedingStatus = async () => {
+        try {
+            const response = await axios.get(`${API_BASE_URL}/users/breeding-status`, {
+                headers: { Authorization: `Bearer ${authToken}` }
+            });
+            setBreedingStatus(response.data.breedingStatus || {});
+        } catch (error) {
+            console.error('Error fetching breeding status:', error);
+        } finally {
+            setLoadingStatus(false);
+        }
+    };
+
+    const handleStatusChange = (species, status) => {
+        setBreedingStatus(prev => ({
+            ...prev,
+            [species]: status
+        }));
+    };
+
+    const handleSave = async () => {
+        setLoading(true);
+        try {
+            await axios.put(
+                `${API_BASE_URL}/users/breeding-status`,
+                { breedingStatus },
+                { headers: { Authorization: `Bearer ${authToken}` } }
+            );
+            showModalMessage('Success', 'Breeder directory settings updated successfully.');
+        } catch (error) {
+            console.error('Error updating breeding status:', error);
+            showModalMessage('Error', 'Failed to update breeder directory settings.');
+        } finally {
+            setLoading(false);
+        }
+    };
+
+    if (loadingStatus) {
+        return (
+            <div className="mb-8 p-4 sm:p-6 border rounded-lg bg-gray-50">
+                <div className="flex items-center justify-center py-8">
+                    <Loader2 className="animate-spin mr-2" size={24} />
+                    <span>Loading breeder settings...</span>
+                </div>
+            </div>
+        );
+    }
+
+    return (
+        <div className="mb-8 p-4 sm:p-6 border rounded-lg bg-gray-50 overflow-x-hidden">
+            <h3 className="text-xl font-semibold text-gray-800 border-b pb-2 mb-4">Breeder Directory Settings</h3>
+            <p className="text-sm text-gray-600 mb-4">
+                Set your breeding status for each species to appear in the public breeder directory. 
+                Choose "Active Breeder" for species you currently breed, "Retired" for species you no longer breed, 
+                or leave blank to not be listed for that species.
+            </p>
+
+            <div className="space-y-3 mb-4">
+                {allSpecies.map(species => (
+                    <div key={species} className="flex items-center justify-between py-2 border-b border-gray-200">
+                        <span className="text-sm font-medium text-gray-700">{species}</span>
+                        <select
+                            value={breedingStatus[species] || ''}
+                            onChange={(e) => handleStatusChange(species, e.target.value)}
+                            className="px-3 py-1.5 border border-gray-300 rounded-lg focus:ring-primary focus:border-primary text-sm"
+                            disabled={loading}
+                        >
+                            <option value="">Not Listed</option>
+                            <option value="breeder">Active Breeder</option>
+                            <option value="retired">Retired</option>
+                        </select>
+                    </div>
+                ))}
+            </div>
+
+            <div className="flex justify-end pt-2">
+                <button
+                    onClick={handleSave}
+                    disabled={loading}
+                    className="bg-accent hover:bg-accent/90 text-white font-bold py-2 px-4 rounded-lg shadow-md transition duration-150 flex items-center justify-center disabled:opacity-50"
+                >
+                    {loading ? <Loader2 className="animate-spin mr-2" size={20} /> : <Save size={20} className="mr-2" />}
+                    Save Breeder Settings
+                </button>
+            </div>
+        </div>
+    );
+};
+
 const ProfileImagePlaceholder = ({ url, onFileChange, disabled }) => (
     <div className="flex flex-col items-center space-y-3">
         <div 
@@ -12493,7 +12593,7 @@ const ProfileEditForm = ({ userProfile, showModalMessage, onSaveSuccess, onCance
                         <option value="ES">? Spain</option>
                         <option value="NL">? Netherlands</option>
                         <option value="SE">? Sweden</option>
-                        <option value="NO">Norway</option>
+                        <option value="NO">? Norway</option>
                         <option value="DK">? Denmark</option>
                         <option value="CH">? Switzerland</option>
                         <option value="BE">? Belgium</option>
@@ -12638,6 +12738,13 @@ const ProfileEditForm = ({ userProfile, showModalMessage, onSaveSuccess, onCance
                     </button>
                 </div>
             </form>
+
+            <BreederDirectorySettings
+                authToken={authToken}
+                API_BASE_URL={API_BASE_URL}
+                showModalMessage={showModalMessage}
+                userProfile={userProfile}
+            />
             
             <form onSubmit={handleEmailUpdate} className="space-y-4 mb-8 p-4 sm:p-6 border rounded-lg bg-gray-50 overflow-x-hidden">
                 <h3 className="text-xl font-semibold text-gray-800 border-b pb-2">Change Email Address</h3>
