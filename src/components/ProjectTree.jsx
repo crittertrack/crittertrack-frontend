@@ -207,23 +207,38 @@ const ProjectTreeContent = ({ authToken, userProfile, showModalMessage, onViewAn
                         const missingIds = Array.from(parentIds).filter(id => !fetchedIds.has(id));
                         
                         if (missingIds.length > 0) {
-                            console.log(`[ProjectTree] Fetching basic info for ${missingIds.length} private parents`);
+                            console.log(`[ProjectTree] Fetching basic info for ${missingIds.length} private/related parents`);
                             
-                            // Fetch each missing parent from public global endpoint
+                            // Fetch each missing parent from /animals/any endpoint (returns owned, public, or related)
                             for (const parentId of missingIds) {
                                 try {
-                                    const publicResponse = await axios.get(`${API_BASE_URL}/public/global/animals?id_public=${parentId}`);
-                                    if (publicResponse.data?.[0]) {
-                                        const publicAnimal = publicResponse.data[0];
-                                        // Mark as private (limited info available)
+                                    const anyResponse = await axios.get(`${API_BASE_URL}/animals/any/${parentId}`, {
+                                        headers: { Authorization: `Bearer ${authToken}` }
+                                    });
+                                    if (anyResponse.data) {
+                                        // Mark as private (limited relationship info shown in UI)
                                         parentAnimals.push({
-                                            ...publicAnimal,
+                                            ...anyResponse.data,
                                             isPrivate: true
                                         });
-                                        console.log(`[ProjectTree] Found basic info for ${parentId}`);
+                                        console.log(`[ProjectTree] Found info for ${parentId} via /animals/any`);
                                     }
-                                } catch (err) {
-                                    console.log(`[ProjectTree] No public info for ${parentId}`);
+                                } catch (anyError) {
+                                    console.log(`[ProjectTree] Could not fetch ${parentId} from /animals/any, trying public endpoint`);
+                                    // Fallback to public endpoint
+                                    try {
+                                        const publicResponse = await axios.get(`${API_BASE_URL}/public/global/animals?id_public=${parentId}`);
+                                        if (publicResponse.data?.[0]) {
+                                            const publicAnimal = publicResponse.data[0];
+                                            parentAnimals.push({
+                                                ...publicAnimal,
+                                                isPrivate: true
+                                            });
+                                            console.log(`[ProjectTree] Found basic info for ${parentId} via public endpoint`);
+                                        }
+                                    } catch (publicError) {
+                                        console.log(`[ProjectTree] No info available for ${parentId}`);
+                                    }
                                 }
                             }
                         }
