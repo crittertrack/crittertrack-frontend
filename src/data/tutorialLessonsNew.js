@@ -291,14 +291,14 @@ const GETTING_STARTED_LESSONS = [
       {
         stepNumber: 5,
         title: 'Public Profile Visibility',
-        content: 'This toggle controls whether your animal appears on your public profile. Click the button to toggle between Public (🌍) and Private (🔒). When public, other CritterTrack users can see this animal\'s information (subject to section privacy toggles). When private, the animal is only visible to you.',
+        content: 'This toggle controls whether your animal appears on your public profile. Click the button to toggle between Public (green with eye icon) and Private (gray with eye-off icon). When public, other CritterTrack users can see this animal\'s information (subject to section privacy toggles). When private, the animal is only visible to you.',
         highlightElement: '[data-tutorial-target="visibility-section"]',
         actionType: 'click',
         tips: [
-          'Public = appears on your public profile',
-          'Private = only visible to you',
+          'Green Eye icon = Public (appears on your public profile)',
+          'Gray Eye-Off icon = Private (only visible to you)',
           'Toggle button at top right of Overview tab',
-          'Toggling instantly updates the setting'
+          'Toggling instantly updates - changes save in background'
         ]
       },
       {
@@ -1156,7 +1156,7 @@ const GETTING_STARTED_LESSONS = [
         highlightElement: '[data-tutorial-target="visibility-section"], [data-tutorial-target="owner-privacy-toggle"]',
         tips: [
           'Different sections have different toggles',
-          'Toggle buttons show 🌍 Public or 🔒 Private',
+          'Toggle buttons show Eye icon (Public) or Eye-Off icon (Private)',
           'Strategic privacy increases sharing',
           'You control what\'s visible',
           'Helpful for protecting sensitive info'
@@ -1233,13 +1233,14 @@ const KEY_FEATURES_LESSONS = [
       {
         stepNumber: 2,
         title: 'Private Toggle',
-        content: 'The private/public toggle controls whether this entire animal appears on your public profile. When set to private, only you can see it. When public, everyone can view it. You can find this toggle at the top right of the detail overview screen.',
+        content: 'The private/public toggle controls whether this entire animal appears on your public profile. When set to private (gray Eye-Off icon), only you can see it. When public (green Eye icon), everyone can view it. You can find this toggle at the top right of the detail overview screen. Changes apply instantly!',
         highlightElement: '[data-tutorial-target="detail-private-toggle"]',
         tips: [
           'Located at top right of detail view',
+          'Green Eye = Public, Gray Eye-Off = Private',
           'Controls whole animal visibility',
           'Different from section-specific toggles',
-          'Can be toggled anytime'
+          'Can be toggled anytime - updates instantly'
         ]
       },
       {
@@ -1938,6 +1939,20 @@ const ADVANCED_FEATURES_LESSONS = [
       },
       {
         stepNumber: 4,
+        title: 'Bulk Privacy Controls',
+        content: 'At the top of the My Animals page, you\'ll see "All Public" and "All Private" buttons. These let you instantly change the visibility of ALL your animals at once. The UI updates immediately, and changes sync with the database in the background.',
+        highlightElement: '[data-tutorial-target="add-animal-btn"]',
+        hideHighlightPrompt: true,
+        tips: [
+          'Green Eye icon = Make All Public',
+          'Gray Eye-Off icon = Make All Private',
+          'Changes apply instantly to all animals',
+          'Background sync keeps database updated',
+          'Confirmation prompt before applying'
+        ]
+      },
+      {
+        stepNumber: 5,
         title: 'Mass Delete',
         content: 'Click the trash icon to enter mass delete mode. Select multiple animals using checkboxes, then click "Delete Selected" to remove them all at once.',
         highlightElement: '[data-tutorial-target="bulk-delete-btn"]',
