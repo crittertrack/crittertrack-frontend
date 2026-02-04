@@ -76,6 +76,37 @@ const getCountryFlag = (countryCode) => {
     return `fi fi-${countryCode.toLowerCase()}`;
 };
 
+// Helper function to get currency symbol from currency code
+const getCurrencySymbol = (currencyCode) => {
+    const currencyMap = {
+        'USD': '$',
+        'EUR': '�', 
+        'GBP': '�',
+        'JPY': '�',
+        'CAD': 'C$',
+        'AUD': 'A$',
+        'CHF': 'CHF',
+        'CNY': '�',
+        'SEK': 'kr',
+        'NOK': 'kr',
+        'DKK': 'kr',
+        'PLN': 'zl',
+        'CZK': 'Kc',
+        'HUF': 'Ft',
+        'RUB': '?',
+        'BRL': 'R$',
+        'INR': '?',
+        'KRW': '?',
+        'SGD': 'S$',
+        'HKD': 'HK$',
+        'NZD': 'NZ$',
+        'ZAR': 'R',
+        'MXN': '$',
+        'Negotiable': 'Negotiable'
+    };
+    return currencyMap[currencyCode] || currencyCode;
+};
+
 // Get country name from code
 const getCountryName = (countryCode) => {
     const countryNames = {
@@ -1133,9 +1164,9 @@ const BreederDirectorySettings = ({ authToken, API_BASE_URL, showModalMessage, u
                                 className="px-3 py-1.5 border border-gray-300 rounded-lg focus:ring-primary focus:border-primary text-sm"
                                 disabled={loading}
                             >
-                                <option value="owner">🏠 Owner</option>
-                                <option value="breeder">⭐ Active Breeder</option>
-                                <option value="retired">🌙 Retired Breeder</option>
+                                <option value="owner">?? Owner</option>
+                                <option value="breeder">? Active Breeder</option>
+                                <option value="retired">?? Retired Breeder</option>
                             </select>
                         </div>
                     );
@@ -1233,7 +1264,7 @@ const ParentSearchModal = ({
                     </p>
                     <p className="text-xs text-gray-500">{animal.id_public}</p>
                     <p className="text-sm text-gray-600">
-                        {animal.species} • {animal.gender} • {animal.status || 'Unknown'}
+                        {animal.species} � {animal.gender} � {animal.status || 'Unknown'}
                     </p>
                     {getSpeciesLatinName(animal.species) && (
                         <p className="text-xs italic text-gray-500">{getSpeciesLatinName(animal.species)}</p>
@@ -1664,7 +1695,7 @@ const UserSearchModal = ({ onClose, showModalMessage, onSelectUser, API_BASE_URL
                         {animal.prefix && `${animal.prefix} `}{animal.name}{animal.suffix && ` ${animal.suffix}`}
                     </p>
                     <p className="text-sm text-gray-600">
-                        {animal.species} • {animal.gender} • <span className="font-mono">{animal.id_public}</span>
+                        {animal.species} � {animal.gender} � <span className="font-mono">{animal.id_public}</span>
                     </p>
                     {animal.color && <p className="text-xs text-gray-500 mt-1">{animal.color}</p>}
                 </div>
@@ -1678,7 +1709,7 @@ const UserSearchModal = ({ onClose, showModalMessage, onSelectUser, API_BASE_URL
         <div className="fixed inset-0 bg-gray-600 bg-opacity-75 flex items-center justify-center p-4 z-50">
             <div className="bg-white rounded-xl shadow-2xl p-6 w-full max-w-xl max-h-[90vh] flex flex-col">
                 <div className="flex justify-between items-center border-b pb-3 mb-4">
-                    <h3 className="text-xl font-bold text-gray-800">Global Search 🔎</h3>
+                    <h3 className="text-xl font-bold text-gray-800">Global Search ??</h3>
                     <button onClick={onClose} className="text-gray-500 hover:text-gray-800"><X size={24} /></button>
                 </div>
 
@@ -2246,7 +2277,7 @@ const PrivateAnimalDetail = ({ animal, onClose, onEdit, API_BASE_URL, authToken,
                         </button>
                         <div className="flex items-center gap-2">
                             <span className="text-xs bg-green-100 text-green-800 px-2 py-1 rounded font-medium">
-                                👁️ OWNER VIEW - All Data Visible
+                                ??? OWNER VIEW - All Data Visible
                             </span>
                             <button
                                 onClick={handleShare}
@@ -2287,17 +2318,17 @@ const PrivateAnimalDetail = ({ animal, onClose, onEdit, API_BASE_URL, authToken,
                 <div className="bg-white border-b border-gray-300 px-2 sm:px-6 pt-2 sm:pt-4">
                     <div className="flex flex-wrap gap-1 sm:gap-1 pb-2 sm:pb-4">
                         {[
-                            { id: 1, label: 'Overview', icon: '📋' },
-                            { id: 2, label: 'Status & Privacy', icon: '🔒' },
-                            { id: 3, label: 'Physical', icon: '🎨' },
-                            { id: 4, label: 'Identification', icon: '🏷️' },
-                            { id: 5, label: 'Lineage', icon: '🌳' },
-                            { id: 6, label: 'Breeding', icon: '🫘' },
-                            { id: 7, label: 'Health', icon: '🏥' },
-                            { id: 8, label: 'Husbandry', icon: '🏠' },
-                            { id: 9, label: 'Behavior', icon: '🧠' },
-                            { id: 10, label: 'Records', icon: '📝' },
-                            { id: 11, label: 'End of Life', icon: '⚖️' }
+                            { id: 1, label: 'Overview', icon: '??' },
+                            { id: 2, label: 'Status & Privacy', icon: '??' },
+                            { id: 3, label: 'Physical', icon: '??' },
+                            { id: 4, label: 'Identification', icon: '???' },
+                            { id: 5, label: 'Lineage', icon: '??' },
+                            { id: 6, label: 'Breeding', icon: '??' },
+                            { id: 7, label: 'Health', icon: '??' },
+                            { id: 8, label: 'Husbandry', icon: '??' },
+                            { id: 9, label: 'Behavior', icon: '??' },
+                            { id: 10, label: 'Records', icon: '??' },
+                            { id: 11, label: 'End of Life', icon: '??' }
                         ].map(tab => (
                             <button
                                 key={tab.id}
@@ -2371,22 +2402,32 @@ const PrivateAnimalDetail = ({ animal, onClose, onEdit, API_BASE_URL, authToken,
                                                     console.error('Failed to update isDisplay:', err);
                                                 });
                                             }}
-                                            className="absolute top-4 right-4 px-3 py-1.5 text-xs font-medium rounded-lg transition cursor-pointer"
-                                            style={{
-                                                backgroundColor: animal.isDisplay ? '#dbeafe' : '#f3f4f6',
-                                                color: animal.isDisplay ? '#1e40af' : '#374151'
-                                            }}
+                                            className={`absolute top-4 right-4 flex items-center gap-2 px-3 py-1.5 rounded-lg font-medium transition ${
+                                                animal.isDisplay 
+                                                    ? 'bg-green-100 text-green-800 hover:bg-green-200' 
+                                                    : 'bg-gray-100 text-gray-800 hover:bg-gray-200'
+                                            }`}
                                             title="Toggle public profile visibility"
                                         >
-                                            <span>{animal.isDisplay ? '🌍 Public' : '🔒 Private'}</span>
+                                            {animal.isDisplay ? (
+                                                <>
+                                                    <Eye size={16} />
+                                                    <span>Public</span>
+                                                </>
+                                            ) : (
+                                                <>
+                                                    <EyeOff size={16} />
+                                                    <span>Private</span>
+                                                </>
+                                            )}
                                         </button>
 
                                         {/* Species/Breed/Strain/CTC - At Top */}
                                         <p className="text-sm text-gray-600">
                                             {animal.species || 'Unknown'}
-                                            {animal.breed && ` • ${animal.breed}`}
-                                            {animal.strain && ` • ${animal.strain}`}
-                                            {animal.id_public && ` • ${animal.id_public}`}
+                                            {animal.breed && ` � ${animal.breed}`}
+                                            {animal.strain && ` � ${animal.strain}`}
+                                            {animal.id_public && ` � ${animal.id_public}`}
                                         </p>
 
                                         {/* Full Name */}
@@ -2403,7 +2444,7 @@ const PrivateAnimalDetail = ({ animal, onClose, onEdit, API_BASE_URL, authToken,
                                                 <div>
                                                     <p className="text-sm font-semibold text-gray-700">For Sale</p>
                                                     <p className="text-sm text-gray-600">
-                                                        {animal.salePriceCurrency === 'Negotiable' || !animal.salePriceAmount ? 'Negotiable' : `${animal.salePriceCurrency === 'USD' ? '$' : animal.salePriceCurrency === 'EUR' ? '€' : animal.salePriceCurrency === 'GBP' ? '£' : animal.salePriceCurrency === 'CAD' ? 'C$' : animal.salePriceCurrency === 'AUD' ? 'A$' : animal.salePriceCurrency === 'JPY' ? '¥' : animal.salePriceCurrency}${animal.salePriceAmount ? ` ${animal.salePriceAmount}` : ''}`}
+                                                        {animal.salePriceCurrency === 'Negotiable' || !animal.salePriceAmount ? 'Negotiable' : `${getCurrencySymbol(animal.salePriceCurrency)}${animal.salePriceAmount ? ` ${animal.salePriceAmount}` : ''}`}
                                                     </p>
                                                 </div>
                                             </div>
@@ -2586,7 +2627,7 @@ const PrivateAnimalDetail = ({ animal, onClose, onEdit, API_BASE_URL, authToken,
                                     <div>
                                         <span className="text-gray-600">For Sale:</span>
                                         <strong className="block mt-1">
-                                            {animal.isForSale ? `Yes - ${animal.salePriceCurrency || ''} ${animal.salePriceAmount || 'Negotiable'}`.trim() : 'No'}
+                                            {animal.isForSale ? `Yes - ${getCurrencySymbol(animal.salePriceCurrency)} ${animal.salePriceAmount || 'Negotiable'}`.trim() : 'No'}
                                         </strong>
                                     </div>
                                     <div>
@@ -3135,7 +3176,7 @@ const ViewOnlyPrivateAnimalDetail = ({ animal, onClose, API_BASE_URL, authToken,
                                 <ArrowLeft size={16} className="mr-1" /> Back
                             </button>
                             <span className="text-[10px] bg-orange-100 text-orange-800 px-1.5 py-0.5 rounded font-medium">
-                                📋 VIEW-ONLY
+                                ?? VIEW-ONLY
                             </span>
                             <button onClick={onClose} className="text-gray-500 hover:text-gray-800">
                                 <X size={24} />
@@ -3170,7 +3211,7 @@ const ViewOnlyPrivateAnimalDetail = ({ animal, onClose, API_BASE_URL, authToken,
                         </button>
                         <div className="flex items-center gap-2">
                             <span className="text-xs bg-orange-100 text-orange-800 px-2 py-1 rounded font-medium">
-                                📋 VIEW-ONLY - Read Only Access
+                                ?? VIEW-ONLY - Read Only Access
                             </span>
                             {onHideAnimal && (
                                 <button
@@ -3198,17 +3239,17 @@ const ViewOnlyPrivateAnimalDetail = ({ animal, onClose, API_BASE_URL, authToken,
                 <div className="bg-white border-b border-gray-300 px-6 pt-4">
                     <div className="flex flex-wrap gap-1 pb-4">
                         {[
-                            { id: 1, label: 'Overview', icon: '📋' },
-                            { id: 2, label: 'Status & Privacy', icon: '🔒' },
-                            { id: 3, label: 'Physical', icon: '🎨' },
-                            { id: 4, label: 'Identification', icon: '🏷️' },
-                            { id: 5, label: 'Lineage', icon: '🌳' },
-                            { id: 6, label: 'Breeding', icon: '🫘' },
-                            { id: 7, label: 'Health', icon: '🏥' },
-                            { id: 8, label: 'Husbandry', icon: '🏠' },
-                            { id: 9, label: 'Behavior', icon: '🧠' },
-                            { id: 10, label: 'Records', icon: '📝' },
-                            { id: 11, label: 'End of Life', icon: '⚖️' }
+                            { id: 1, label: 'Overview', icon: '??' },
+                            { id: 2, label: 'Status & Privacy', icon: '??' },
+                            { id: 3, label: 'Physical', icon: '??' },
+                            { id: 4, label: 'Identification', icon: '???' },
+                            { id: 5, label: 'Lineage', icon: '??' },
+                            { id: 6, label: 'Breeding', icon: '??' },
+                            { id: 7, label: 'Health', icon: '??' },
+                            { id: 8, label: 'Husbandry', icon: '??' },
+                            { id: 9, label: 'Behavior', icon: '??' },
+                            { id: 10, label: 'Records', icon: '??' },
+                            { id: 11, label: 'End of Life', icon: '??' }
                         ].map(tab => (
                             <button
                                 key={tab.id}
@@ -3277,9 +3318,9 @@ const ViewOnlyPrivateAnimalDetail = ({ animal, onClose, API_BASE_URL, authToken,
                                         {/* Species/Breed/Strain/CTC - At Top (NO PRIVACY TOGGLE) */}
                                         <p className="text-sm text-gray-600">
                                             {animal.species || 'Unknown'}
-                                            {animal.breed && ` • ${animal.breed}`}
-                                            {animal.strain && ` • ${animal.strain}`}
-                                            {animal.id_public && ` • ${animal.id_public}`}
+                                            {animal.breed && ` � ${animal.breed}`}
+                                            {animal.strain && ` � ${animal.strain}`}
+                                            {animal.id_public && ` � ${animal.id_public}`}
                                         </p>
 
                                         {/* Full Name */}
@@ -3296,7 +3337,7 @@ const ViewOnlyPrivateAnimalDetail = ({ animal, onClose, API_BASE_URL, authToken,
                                                 <div>
                                                     <p className="text-sm font-semibold text-gray-700">For Sale</p>
                                                     <p className="text-sm text-gray-600">
-                                                        {animal.salePriceCurrency === 'Negotiable' || !animal.salePriceAmount ? 'Negotiable' : `${animal.salePriceCurrency === 'USD' ? '$' : animal.salePriceCurrency === 'EUR' ? '€' : animal.salePriceCurrency === 'GBP' ? '£' : animal.salePriceCurrency === 'CAD' ? 'C$' : animal.salePriceCurrency === 'AUD' ? 'A$' : animal.salePriceCurrency === 'JPY' ? '¥' : animal.salePriceCurrency}${animal.salePriceAmount ? ` ${animal.salePriceAmount}` : ''}`}
+                                                        {animal.salePriceCurrency === 'Negotiable' || !animal.salePriceAmount ? 'Negotiable' : `${getCurrencySymbol(animal.salePriceCurrency)}${animal.salePriceAmount ? ` ${animal.salePriceAmount}` : ''}`}
                                                     </p>
                                                 </div>
                                             </div>
@@ -3309,7 +3350,7 @@ const ViewOnlyPrivateAnimalDetail = ({ animal, onClose, API_BASE_URL, authToken,
                                                 <div>
                                                     <p className="text-sm font-semibold text-gray-700">Available for Stud</p>
                                                     <p className="text-sm text-gray-600">
-                                                        {animal.studFeeCurrency === 'Negotiable' || !animal.studFeeAmount ? 'Negotiable' : `${animal.studFeeCurrency === 'USD' ? '$' : animal.studFeeCurrency === 'EUR' ? '€' : animal.studFeeCurrency === 'GBP' ? '£' : animal.studFeeCurrency === 'CAD' ? 'C$' : animal.studFeeCurrency === 'AUD' ? 'A$' : animal.studFeeCurrency === 'JPY' ? '¥' : animal.studFeeCurrency}${animal.studFeeAmount ? ` ${animal.studFeeAmount}` : ''}`}
+                                                        {animal.studFeeCurrency === 'Negotiable' || !animal.studFeeAmount ? 'Negotiable' : `${animal.studFeeCurrency === 'USD' ? '$' : animal.studFeeCurrency === 'EUR' ? '�' : animal.studFeeCurrency === 'GBP' ? '�' : animal.studFeeCurrency === 'CAD' ? 'C$' : animal.studFeeCurrency === 'AUD' ? 'A$' : animal.studFeeCurrency === 'JPY' ? '�' : animal.studFeeCurrency}${animal.studFeeAmount ? ` ${animal.studFeeAmount}` : ''}`}
                                                     </p>
                                                 </div>
                                             </div>
@@ -3479,7 +3520,7 @@ const ViewOnlyPrivateAnimalDetail = ({ animal, onClose, API_BASE_URL, authToken,
                                     <div>
                                         <span className="text-gray-600">For Sale:</span>
                                         <strong className="block mt-1">
-                                            {animal.isForSale ? `Yes - ${animal.salePriceCurrency || ''} ${animal.salePriceAmount || 'Negotiable'}`.trim() : 'No'}
+                                            {animal.isForSale ? `Yes - ${getCurrencySymbol(animal.salePriceCurrency)} ${animal.salePriceAmount || 'Negotiable'}`.trim() : 'No'}
                                         </strong>
                                     </div>
                                     <div>
@@ -4111,15 +4152,15 @@ const ViewOnlyAnimalDetail = ({ animal, onClose, API_BASE_URL, onViewProfile, au
                 <div className="bg-white border-b border-gray-300">
                     <div className="flex flex-wrap">
                         {[
-                            { id: 1, label: 'Overview', icon: '📋' },
-                            { id: 3, label: 'Physical', icon: '🎨' },
-                            { id: 5, label: 'Lineage', icon: '🌳' },
-                            { id: 6, label: 'Breeding', icon: '🫘' },
-                            { id: 7, label: 'Health', icon: '🏥' },
-                            { id: 8, label: 'Husbandry', icon: '🏠' },
-                            { id: 9, label: 'Behavior', icon: '🧠' },
-                            { id: 10, label: 'Records', icon: '📝' },
-                            { id: 11, label: 'Show', icon: '🏆' }
+                            { id: 1, label: 'Overview', icon: '??' },
+                            { id: 3, label: 'Physical', icon: '??' },
+                            { id: 5, label: 'Lineage', icon: '??' },
+                            { id: 6, label: 'Breeding', icon: '??' },
+                            { id: 7, label: 'Health', icon: '??' },
+                            { id: 8, label: 'Husbandry', icon: '??' },
+                            { id: 9, label: 'Behavior', icon: '??' },
+                            { id: 10, label: 'Records', icon: '??' },
+                            { id: 11, label: 'Show', icon: '??' }
                         ].map(tab => (
                             <button
                                 key={tab.id}
@@ -4190,9 +4231,9 @@ const ViewOnlyAnimalDetail = ({ animal, onClose, API_BASE_URL, onViewProfile, au
                                         {/* Species/Breed/Strain/CTC - At Top */}
                                         <p className="text-sm text-gray-600">
                                             {animal.species}
-                                            {animal.breed && ` • ${animal.breed}`}
-                                            {animal.strain && ` • ${animal.strain}`}
-                                            {animal.id_public && ` • ${animal.id_public}`}
+                                            {animal.breed && ` � ${animal.breed}`}
+                                            {animal.strain && ` � ${animal.strain}`}
+                                            {animal.id_public && ` � ${animal.id_public}`}
                                         </p>
 
                                         {/* Full Name */}
@@ -4209,7 +4250,7 @@ const ViewOnlyAnimalDetail = ({ animal, onClose, API_BASE_URL, onViewProfile, au
                                                 <div>
                                                     <p className="text-sm font-semibold text-gray-700">For Sale</p>
                                                     <p className="text-sm text-gray-600">
-                                                        {animal.salePriceCurrency === 'Negotiable' ? 'Negotiable' : `${animal.salePriceCurrency === 'USD' ? '$' : animal.salePriceCurrency === 'EUR' ? '€' : animal.salePriceCurrency === 'GBP' ? '£' : animal.salePriceCurrency === 'CAD' ? 'C$' : animal.salePriceCurrency === 'AUD' ? 'A$' : animal.salePriceCurrency === 'JPY' ? '¥' : animal.salePriceCurrency}${animal.salePriceAmount ? ` ${animal.salePriceAmount}` : ''}`}
+                                                        {animal.salePriceCurrency === 'Negotiable' ? 'Negotiable' : `${getCurrencySymbol(animal.salePriceCurrency)}${animal.salePriceAmount ? ` ${animal.salePriceAmount}` : ''}`}
                                                     </p>
                                                 </div>
                                             </div>
@@ -7122,7 +7163,7 @@ const LitterManagement = ({ authToken, API_BASE_URL, userProfile, showModalMessa
                                                     </div>
                                                 </div>
                                                 <div className="text-xs text-gray-500 mb-3">
-                                                    Autofilled: Species ({sire?.species}), Birth Date ({formatDate(litter.birthDate)}), Parents ({litter.sireId_public} • {litter.damId_public})
+                                                    Autofilled: Species ({sire?.species}), Birth Date ({formatDate(litter.birthDate)}), Parents ({litter.sireId_public} � {litter.damId_public})
                                                 </div>
                                                 <div className="flex gap-2">
                                                     <button
@@ -7403,7 +7444,7 @@ const SpeciesManager = ({ speciesOptions, setSpeciesOptions, onCancel, showModal
                         {loading ? 'Adding...' : 'Add'}
                     </button>
                 </div>
-                <p className="text-xs text-gray-500">💡 Species you add will be available to all users globally! Include the scientific name if known. </p>
+                <p className="text-xs text-gray-500">?? Species you add will be available to all users globally! Include the scientific name if known. </p>
             </form>
 
             <div className="mb-4 flex flex-col sm:flex-row gap-2 sm:space-x-3 overflow-x-hidden">
@@ -7555,7 +7596,7 @@ const SpeciesSelector = ({ speciesOptions, onSelectSpecies, onManageSpecies, sea
             
             <div className="mb-4 p-4 bg-yellow-50 border-l-4 border-yellow-400 rounded-lg">
                 <p className="text-sm text-yellow-800">
-                    <span className="font-semibold">⚠️ Work in Progress:</span> All species can be selected, but species-specific details (traits, colors, coat types, etc.) are not yet implemented. Currently optimized for Mouse, Rat, and Hamster.
+                    <span className="font-semibold">?? Work in Progress:</span> All species can be selected, but species-specific details (traits, colors, coat types, etc.) are not yet implemented. Currently optimized for Mouse, Rat, and Hamster.
                 </p>
             </div>
             
@@ -9415,18 +9456,18 @@ const AnimalForm = ({
                 <div className="border border-gray-300 -mx-6 px-6 pt-4">
                     <div className="flex flex-wrap gap-1 pb-px">
                         {[
-                            { id: 1, label: 'Overview', icon: '📋' },
-                            { id: 2, label: 'Status & Privacy', icon: '🔒' },
-                            { id: 3, label: 'Physical', icon: '🎨' },
-                            { id: 4, label: 'Identification', icon: '🏷️' },
-                            { id: 5, label: 'Lineage', icon: '🌳' },
-                            { id: 6, label: 'Breeding', icon: '🫘' },
-                            { id: 7, label: 'Health', icon: '🏥' },
-                            { id: 8, label: 'Husbandry', icon: '🏠' },
-                            { id: 9, label: 'Behavior', icon: '🧠' },
-                            { id: 10, label: 'Records', icon: '📝' },
-                            { id: 11, label: 'End of Life', icon: '⚖️' },
-                            { id: 12, label: 'Show', icon: '🏆' }
+                            { id: 1, label: 'Overview', icon: '??' },
+                            { id: 2, label: 'Status & Privacy', icon: '??' },
+                            { id: 3, label: 'Physical', icon: '??' },
+                            { id: 4, label: 'Identification', icon: '???' },
+                            { id: 5, label: 'Lineage', icon: '??' },
+                            { id: 6, label: 'Breeding', icon: '??' },
+                            { id: 7, label: 'Health', icon: '??' },
+                            { id: 8, label: 'Husbandry', icon: '??' },
+                            { id: 9, label: 'Behavior', icon: '??' },
+                            { id: 10, label: 'Records', icon: '??' },
+                            { id: 11, label: 'End of Life', icon: '??' },
+                            { id: 12, label: 'Show', icon: '??' }
                         ].map(tab => (
                             <button
                                 key={tab.id}
@@ -9671,7 +9712,7 @@ const AnimalForm = ({
                                 <div className="flex items-center space-x-2">
                                     <input type="checkbox" name="isForSale" checked={formData.isForSale} onChange={handleChange} 
                                         className="form-checkbox h-5 w-5 text-primary rounded focus:ring-primary" />
-                                    <span className="text-sm font-medium text-gray-700">🏷️ Available for Sale</span>
+                                    <span className="text-sm font-medium text-gray-700">??? Available for Sale</span>
                                 </div>
                                 {formData.isForSale && (
                                     <div className="ml-7 flex gap-2">
@@ -9697,7 +9738,7 @@ const AnimalForm = ({
                                 <div className="flex items-center space-x-2">
                                     <input type="checkbox" name="availableForBreeding" checked={formData.availableForBreeding} onChange={handleChange} 
                                         className="form-checkbox h-5 w-5 text-primary rounded focus:ring-primary" />
-                                    <span className="text-sm font-medium text-gray-700">🫘 Available for Stud</span>
+                                    <span className="text-sm font-medium text-gray-700">?? Available for Stud</span>
                                 </div>
                                 {formData.availableForBreeding && (
                                     <div className="ml-7 flex gap-2">
@@ -11624,7 +11665,7 @@ const AnimalForm = ({
                             {/* Dog/Cat Training & Behavior - Integrated */}
                             {(formData.species === 'Dog' || formData.species === 'Cat') && (
                                 <>
-                                    <h4 className="text-md font-semibold text-gray-600 mt-4 pt-4 border-t border-gray-200">🎓 Training & Working</h4>
+                                    <h4 className="text-md font-semibold text-gray-600 mt-4 pt-4 border-t border-gray-200">?? Training & Working</h4>
                                     <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                                         <div>
                                             <label className="block text-sm font-medium text-gray-700">Training Level</label>
@@ -12669,7 +12710,7 @@ const DonationView = ({ onBack }) => {
             {/* Thank You */}
             <div className="mt-6 text-center">
                 <p className="text-sm text-gray-500 italic">
-                    Thank you for considering supporting CritterTrack. Your generosity is deeply appreciated! ❤️
+                    Thank you for considering supporting CritterTrack. Your generosity is deeply appreciated! ??
                 </p>
             </div>
         </div>
@@ -13630,7 +13671,7 @@ const AuthView = ({ onLoginSuccess, showModalMessage, isRegister, setIsRegister,
                     
                     {forgotPasswordStep === 2 && (
                         <div>
-                            <p className="text-sm text-gray-600 mb-4">✉️ Check your email for a password reset button. Click it to proceed with resetting your password.</p>
+                            <p className="text-sm text-gray-600 mb-4">?? Check your email for a password reset button. Click it to proceed with resetting your password.</p>
                             <p className="text-xs text-gray-500 bg-blue-50 p-3 rounded border border-blue-200">The reset link will expire in 1 hour.</p>
                         </div>
                     )}
@@ -13745,7 +13786,7 @@ const AuthView = ({ onLoginSuccess, showModalMessage, isRegister, setIsRegister,
                                     <CheckCircle className="h-5 w-5 text-green-500" />
                                 </div>
                                 <div className="ml-3 w-full">
-                                    <p className="text-sm font-bold text-green-900">Good News! 🎉</p>
+                                    <p className="text-sm font-bold text-green-900">Good News! ??</p>
                                     <p className="text-sm text-green-800 mt-2">Your suspension has been lifted. You can now log in to your account.</p>
                                     <p className="text-xs text-green-600 mt-2">This message will disappear in 24 hours.</p>
                                 </div>
@@ -15486,7 +15527,7 @@ const WarningBanner = ({ authToken, API_BASE_URL, userProfile }) => {
                             <AlertCircle className="h-6 w-6 text-yellow-400" />
                         </div>
                         <div className="ml-3 flex-1">
-                            <h3 className="text-lg font-bold text-yellow-800">⚠️ Official Warning{warnings.length !== 1 ? 's' : ''} from Moderation Team</h3>
+                            <h3 className="text-lg font-bold text-yellow-800">?? Official Warning{warnings.length !== 1 ? 's' : ''} from Moderation Team</h3>
                             <div className="mt-3 text-yellow-700">
                                 <p className="text-sm font-semibold mb-2">
                                     You have {warnings.length} active warning{warnings.length !== 1 ? 's' : ''}:
@@ -15503,7 +15544,7 @@ const WarningBanner = ({ authToken, API_BASE_URL, userProfile }) => {
                                 </div>
                                 {warnings.length >= 3 && (
                                     <p className="text-xs mt-3 text-red-600 font-semibold">
-                                        ⚠️ You have reached 3 warnings - your account is suspended. Contact moderators for appeal.
+                                        ?? You have reached 3 warnings - your account is suspended. Contact moderators for appeal.
                                     </p>
                                 )}
                             </div>
@@ -15766,7 +15807,7 @@ const BroadcastBanner = ({ authToken, API_BASE_URL }) => {
                 text: 'text-purple-700',
                 subtitle: 'text-purple-500',
                 dismissBtn: 'text-purple-400 hover:text-purple-600',
-                emoji: '📣',
+                emoji: '??',
                 label: 'Announcement'
             };
         }
@@ -15780,7 +15821,7 @@ const BroadcastBanner = ({ authToken, API_BASE_URL }) => {
                 text: 'text-green-700',
                 subtitle: 'text-green-500',
                 dismissBtn: 'text-green-400 hover:text-green-600',
-                emoji: '📊',
+                emoji: '??',
                 label: 'Poll',
                 button: 'bg-green-500 hover:bg-green-600 text-white',
                 optionBg: 'bg-green-100 hover:bg-green-200',
@@ -15796,7 +15837,7 @@ const BroadcastBanner = ({ authToken, API_BASE_URL }) => {
             text: 'text-blue-700',
             subtitle: 'text-blue-500',
             dismissBtn: 'text-blue-400 hover:text-blue-600',
-            emoji: 'ℹ️',
+            emoji: '??',
             label: 'Info'
         };
     };
@@ -15913,7 +15954,7 @@ const UrgentBroadcastPopup = ({ authToken, API_BASE_URL }) => {
                     </div>
                     <div className="ml-4 flex-1">
                         <h3 className={`text-xl font-bold ${textColor}`}>
-                            {isAlert ? '🚨 URGENT ALERT' : '⚠️ Important Notice'}
+                            {isAlert ? '?? URGENT ALERT' : '?? Important Notice'}
                         </h3>
                         <h4 className={`text-lg font-semibold ${textColor} mt-2`}>
                             {urgentBroadcast.title || 'System Message'}
@@ -16128,7 +16169,7 @@ const NotificationPanel = ({ authToken, API_BASE_URL, onClose, showModalMessage,
                                             {/* Moderation Notice Header */}
                                             {notification.type === 'content_edited' && (
                                                 <div className="flex items-center text-orange-700 font-semibold mb-2">
-                                                    <span className="mr-2">⚠️</span>
+                                                    <span className="mr-2">??</span>
                                                     <span>Moderation Notice</span>
                                                 </div>
                                             )}
@@ -18229,7 +18270,7 @@ const App = () => {
                 {!hasSeenDonationHighlight && (
                     <div className="absolute top-full mt-2 left-0 bg-gray-900 text-white text-xs px-3 py-2 rounded-lg shadow-xl whitespace-nowrap animate-bounce">
                         <div className="absolute bottom-full left-4 w-0 h-0 border-l-4 border-l-transparent border-r-4 border-r-transparent border-b-4 border-b-gray-900"></div>
-                        💝 Support CritterTrack
+                        ?? Support CritterTrack
                     </div>
                 )}
             </div>
@@ -18254,7 +18295,7 @@ const App = () => {
                                     <><span></span> For Sale</>
                                 )}
                                 {availableAnimals[currentAvailableIndex].availableForBreeding && (
-                                    <><span>🫘</span> For Stud</>
+                                    <><span>??</span> For Stud</>
                                 )}
                                 {availableAnimals[currentAvailableIndex].isForSale && availableAnimals[currentAvailableIndex].availableForBreeding && (
                                     <span className="text-xs">?</span>
@@ -18301,12 +18342,12 @@ const App = () => {
                             <div className="mt-1 space-y-1">
                                 {availableAnimals[currentAvailableIndex].isForSale && availableAnimals[currentAvailableIndex].salePriceAmount && (
                                     <p className="text-xs text-green-600 font-semibold">
-                                        Fee: {availableAnimals[currentAvailableIndex].salePriceCurrency === 'Negotiable' ? 'Negotiable' : `${availableAnimals[currentAvailableIndex].salePriceCurrency === 'USD' ? '$' : availableAnimals[currentAvailableIndex].salePriceCurrency === 'EUR' ? '€' : ''}${availableAnimals[currentAvailableIndex].salePriceAmount}`}
+                                        Fee: {availableAnimals[currentAvailableIndex].salePriceCurrency === 'Negotiable' ? 'Negotiable' : `${availableAnimals[currentAvailableIndex].salePriceCurrency === 'USD' ? '$' : availableAnimals[currentAvailableIndex].salePriceCurrency === 'EUR' ? '�' : ''}${availableAnimals[currentAvailableIndex].salePriceAmount}`}
                                     </p>
                                 )}
                                 {availableAnimals[currentAvailableIndex].availableForBreeding && availableAnimals[currentAvailableIndex].studFeeAmount && (
                                     <p className="text-xs text-purple-600 font-semibold">
-                                        Fee: {availableAnimals[currentAvailableIndex].studFeeCurrency === 'Negotiable' ? 'Negotiable' : `${availableAnimals[currentAvailableIndex].studFeeCurrency === 'USD' ? '$' : availableAnimals[currentAvailableIndex].studFeeCurrency === 'EUR' ? '€' : ''}${availableAnimals[currentAvailableIndex].studFeeAmount}`}
+                                        Fee: {availableAnimals[currentAvailableIndex].studFeeCurrency === 'Negotiable' ? 'Negotiable' : `${availableAnimals[currentAvailableIndex].studFeeCurrency === 'USD' ? '$' : availableAnimals[currentAvailableIndex].studFeeCurrency === 'EUR' ? '�' : ''}${availableAnimals[currentAvailableIndex].studFeeAmount}`}
                                     </p>
                                 )}
                             </div>
@@ -19376,15 +19417,15 @@ const App = () => {
                                             {showTabs && (
                                                 <div className="px-4 py-3 flex flex-wrap gap-2">
                                                     {[
-                            { id: 1, label: 'Overview', icon: '📋' },
-                            { id: 2, label: 'Status & Privacy', icon: '🔒' },
-                            { id: 3, label: 'Physical', icon: '🎨' },
-                            { id: 4, label: 'Identification', icon: '🏷️' },
-                            { id: 5, label: 'Lineage', icon: '🌳' },
-                            { id: 6, label: 'Breeding', icon: '🫘' },
-                            { id: 7, label: 'Health', icon: '🏥' },
-                            { id: 8, label: 'Husbandry', icon: '🏠' },
-                            { id: 11, label: 'Show', icon: '🏆' }
+                            { id: 1, label: 'Overview', icon: '??' },
+                            { id: 2, label: 'Status & Privacy', icon: '??' },
+                            { id: 3, label: 'Physical', icon: '??' },
+                            { id: 4, label: 'Identification', icon: '???' },
+                            { id: 5, label: 'Lineage', icon: '??' },
+                            { id: 6, label: 'Breeding', icon: '??' },
+                            { id: 7, label: 'Health', icon: '??' },
+                            { id: 8, label: 'Husbandry', icon: '??' },
+                            { id: 11, label: 'Show', icon: '??' }
                                                     ].map(tab => (
                                                         <button
                                                             key={tab.id}
@@ -20703,7 +20744,7 @@ const App = () => {
                                                         {animal.prefix ? `${animal.prefix} ` : ''}{animal.name}{animal.suffix ? ` ${animal.suffix}` : ''}
                                                     </h3>
                                                     <p className="text-sm text-gray-600">{animal.id_public}</p>
-                                                    <p className="text-xs text-gray-500">{animal.species} • {animal.gender}</p>
+                                                    <p className="text-xs text-gray-500">{animal.species} � {animal.gender}</p>
                                                 </div>
                                             </div>
                                             <div className="flex gap-2">
@@ -20918,7 +20959,7 @@ const App = () => {
                                 <div className="flex items-start gap-2">
                                     <Info className="w-4 h-4 text-blue-600 mt-0.5 flex-shrink-0" />
                                     <div className="text-xs text-blue-800">
-                                        <p className="font-semibold mb-1">🎉 How Transfer Works</p>
+                                        <p className="font-semibold mb-1">?? How Transfer Works</p>
                                         <p>The buyer will receive a notification to accept the transfer. Once accepted, the animal will be transferred to their account and you'll keep view-only access to track lineage.</p>
                                     </div>
                                 </div>
