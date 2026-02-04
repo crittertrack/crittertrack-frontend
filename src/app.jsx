@@ -18516,6 +18516,10 @@ const App = () => {
                                 <span>Family Tree</span>
                             </button>
                         )}
+                        <button onClick={() => navigate('/breeder-directory')} className={`px-4 py-2 text-xs font-medium rounded-lg transition duration-150 flex flex-col items-center ${currentView === 'breeder-directory' ? 'bg-primary text-black shadow-md' : 'text-gray-600 hover:bg-gray-100'}`}>
+                            <Star size={18} className="mb-1" />
+                            <span>Breeders</span>
+                        </button>
                         <button onClick={() => navigate('/profile')} data-tutorial-target="profile-btn" className={`px-4 py-2 text-xs font-medium rounded-lg transition duration-150 flex flex-col items-center ${currentView === 'profile' ? 'bg-primary text-black shadow-md' : 'text-gray-600 hover:bg-gray-100'}`}>
                             <User size={18} className="mb-1" />
                             <span>Profile</span>
@@ -18546,15 +18550,6 @@ const App = () => {
                     </nav>
 
                     <div className="flex items-center space-x-3">
-                        <button
-                            onClick={() => navigate('/breeder-directory')}
-                            className="px-4 py-2 text-xs font-medium rounded-lg transition duration-150 flex flex-col items-center text-gray-600 hover:bg-gray-100"
-                            title="Find Breeders"
-                        >
-                            <Star size={18} className="mb-1" />
-                            <span>Breeders</span>
-                        </button>
-
                         <button 
                             onClick={() => setShowUserSearchModal(true)} 
                             className="flex flex-col items-center justify-center bg-gray-100 hover:bg-gray-200 text-gray-600 py-2 px-3 rounded-lg transition duration-150 shadow-sm"
@@ -18615,14 +18610,6 @@ const App = () => {
                         <CustomAppLogo size="w-8 h-8" className="flex-shrink-0" />
                         
                         <div className="flex items-center space-x-2 flex-shrink-0">
-                            <button
-                                onClick={() => navigate('/breeder-directory')}
-                                className="flex items-center justify-center text-gray-600 hover:bg-gray-100 p-2 rounded-lg transition duration-150"
-                                title="Find Breeders"
-                            >
-                                <Star size={18} />
-                            </button>
-
                             <button 
                                 onClick={() => setShowUserSearchModal(true)} 
                                 className="flex items-center justify-center bg-gray-100 hover:bg-gray-200 text-gray-600 p-2 rounded-lg transition duration-150 shadow-sm"
@@ -18706,6 +18693,10 @@ const App = () => {
                                 <span>Family Tree</span>
                             </button>
                         )}
+                        <button onClick={() => navigate('/breeder-directory')} className={`px-2 py-2 text-xs font-medium rounded-lg transition duration-150 flex flex-col items-center ${currentView === 'breeder-directory' ? 'bg-primary text-black shadow-md' : 'text-gray-600 hover:bg-gray-100'}`}>
+                            <Star size={18} className="mb-0.5" />
+                            <span>Breeders</span>
+                        </button>
                         <button onClick={() => navigate('/profile')} data-tutorial-target="profile-btn" className={`px-2 py-2 text-xs font-medium rounded-lg transition duration-150 flex flex-col items-center ${currentView === 'profile' ? 'bg-primary text-black shadow-md' : 'text-gray-600 hover:bg-gray-100'}`}>
                             <User size={18} className="mb-0.5" />
                             <span>Profile</span>
