@@ -13274,7 +13274,7 @@ const BreederDirectory = ({ authToken, API_BASE_URL, onBack }) => {
                                                     <h3 className="text-lg font-semibold text-gray-800 flex items-center gap-2 flex-wrap">
                                                         {displayName}
                                                         <span className="text-xs bg-primary text-black px-2 py-0.5 rounded font-medium">
-                                                            CTU
+                                                            {breeder.id_public}
                                                         </span>
                                                     </h3>
                                                     {breeder.country && (
