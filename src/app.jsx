@@ -13066,6 +13066,13 @@ const BreederDirectory = ({ authToken, API_BASE_URL, onBack }) => {
     const filteredBreeders = useMemo(() => {
         let result = breeders;
 
+        // Filter out breeders with no public names
+        result = result.filter(breeder => {
+            const hasPersonalName = breeder.showPersonalName && breeder.personalName;
+            const hasBreederName = breeder.showBreederName && breeder.breederName;
+            return hasPersonalName || hasBreederName;
+        });
+
         // Filter by search query
         if (searchQuery.trim()) {
             const query = searchQuery.toLowerCase();
@@ -13222,8 +13229,20 @@ const BreederDirectory = ({ authToken, API_BASE_URL, onBack }) => {
                 ) : (
                     <div className="space-y-4">
                         {filteredBreeders.map(breeder => {
-                            const displayName = breeder.breederName || breeder.personalName || breeder.id_public;
-                            const showCTU = breeder.showBreederName && breeder.breederName;
+                            // Build display name based on what's public
+                            let displayName = '';
+                            const hasPersonalName = breeder.showPersonalName && breeder.personalName;
+                            const hasBreederName = breeder.showBreederName && breeder.breederName;
+                            
+                            if (hasPersonalName && hasBreederName) {
+                                displayName = `${breeder.personalName} (${breeder.breederName})`;
+                            } else if (hasBreederName) {
+                                displayName = breeder.breederName;
+                            } else if (hasPersonalName) {
+                                displayName = breeder.personalName;
+                            } else {
+                                displayName = breeder.id_public;
+                            }
 
                             return (
                                 <div
@@ -13252,15 +13271,18 @@ const BreederDirectory = ({ authToken, API_BASE_URL, onBack }) => {
                                         <div className="flex-1 min-w-0">
                                             <div className="flex items-start justify-between gap-2 mb-2">
                                                 <div>
-                                                    <h3 className="text-lg font-semibold text-gray-800 flex items-center gap-2">
+                                                    <h3 className="text-lg font-semibold text-gray-800 flex items-center gap-2 flex-wrap">
                                                         {displayName}
-                                                        {showCTU && (
-                                                            <span className="text-xs bg-primary text-black px-2 py-0.5 rounded font-medium">
-                                                                CTU
-                                                            </span>
-                                                        )}
+                                                        <span className="text-xs bg-primary text-black px-2 py-0.5 rounded font-medium">
+                                                            CTU
+                                                        </span>
                                                     </h3>
-                                                    <p className="text-sm text-gray-600">@{breeder.id_public}</p>
+                                                    {breeder.country && (
+                                                        <div className="flex items-center gap-2 text-sm text-gray-600 mt-1">
+                                                            <span className={`${getCountryFlag(breeder.country)} inline-block h-4 w-6 flex-shrink-0`}></span>
+                                                            <span>{getCountryName(breeder.country)}</span>
+                                                        </div>
+                                                    )}
                                                 </div>
                                                 <button
                                                     onClick={() => navigate(`/user/${breeder.id_public}`)}
