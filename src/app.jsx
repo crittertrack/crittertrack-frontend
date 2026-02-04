@@ -14674,7 +14674,7 @@ const AnimalList = ({ authToken, showModalMessage, onEditAnimal, onViewAnimal, f
                 <div className="flex items-center gap-2">
                     <button
                         onClick={() => toggleAllAnimalsPrivacy(true)}
-                        className="text-gray-600 hover:text-blue-600 transition flex items-center gap-1 px-3 py-1.5 rounded-lg hover:bg-blue-50"
+                        className="text-green-600 hover:text-green-700 transition flex items-center gap-1 px-3 py-1.5 rounded-lg hover:bg-green-50"
                         title="Make All Animals Public"
                     >
                         <Eye size={16} />
@@ -19414,50 +19414,48 @@ const App = () => {
                                                 <div className="bg-white border-2 border-gray-300 rounded-lg overflow-hidden relative">
                                                     {/* Public Profile Toggle - Top Right */}
                                                     <div className="absolute top-4 right-4 z-10">
-                                                        <div className="flex items-center gap-2">
-                                                            <span className="text-sm text-gray-600">
-                                                                {animalToView.isDisplay ? 'Public' : 'Private'}
-                                                            </span>
-                                                            <button
-                                                                type="button"
-                                                                data-tutorial-target="detail-private-toggle"
-                                                                onClick={async () => {
-                                                                    const newIsDisplay = !animalToView.isDisplay;
-                                                                    try {
-                                                                        const response = await fetch(`${API_BASE_URL}/animals/${animalToView.id_public}`, {
-                                                                            method: 'PUT',
-                                                                            headers: {
-                                                                                'Content-Type': 'application/json',
-                                                                                'Authorization': `Bearer ${authToken}`
-                                                                            },
-                                                                            body: JSON.stringify({ isDisplay: newIsDisplay })
-                                                                        });
-                                                                        if (response.ok) {
-                                                                            setAnimalToView({ ...animalToView, isDisplay: newIsDisplay });
-                                                                        } else {
-                                                                            showModalMessage('Error', 'Failed to update visibility.');
-                                                                        }
-                                                                    } catch (err) {
-                                                                        console.error('Error updating visibility:', err);
+                                                        <button
+                                                            type="button"
+                                                            data-tutorial-target="detail-private-toggle"
+                                                            onClick={async () => {
+                                                                const newIsDisplay = !animalToView.isDisplay;
+                                                                try {
+                                                                    const response = await fetch(`${API_BASE_URL}/animals/${animalToView.id_public}`, {
+                                                                        method: 'PUT',
+                                                                        headers: {
+                                                                            'Content-Type': 'application/json',
+                                                                            'Authorization': `Bearer ${authToken}`
+                                                                        },
+                                                                        body: JSON.stringify({ isDisplay: newIsDisplay })
+                                                                    });
+                                                                    if (response.ok) {
+                                                                        setAnimalToView({ ...animalToView, isDisplay: newIsDisplay });
+                                                                    } else {
                                                                         showModalMessage('Error', 'Failed to update visibility.');
                                                                     }
-                                                                }}
-                                                                className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors duration-200 ease-in-out focus:outline-none ${
-                                                                    animalToView.isDisplay 
-                                                                        ? 'bg-green-500' 
-                                                                        : 'bg-gray-300'
-                                                                }`}
-                                                                title={animalToView.isDisplay ? "Click to make Private" : "Click to make Public"}
-                                                            >
-                                                                <span
-                                                                    className={`inline-block h-5 w-5 transform rounded-full bg-white transition-transform duration-200 ease-in-out ${
-                                                                        animalToView.isDisplay 
-                                                                            ? 'translate-x-5' 
-                                                                            : 'translate-x-0.5'
-                                                                    }`}
-                                                                />
-                                                            </button>
-                                                        </div>
+                                                                } catch (err) {
+                                                                    console.error('Error updating visibility:', err);
+                                                                    showModalMessage('Error', 'Failed to update visibility.');
+                                                                }
+                                                            }}
+                                                            className={`flex items-center gap-2 px-3 py-1.5 rounded-lg font-medium transition ${
+                                                                animalToView.isDisplay 
+                                                                    ? 'bg-green-100 text-green-800 hover:bg-green-200' 
+                                                                    : 'bg-gray-100 text-gray-800 hover:bg-gray-200'
+                                                            }`}
+                                                        >
+                                                            {animalToView.isDisplay ? (
+                                                                <>
+                                                                    <Eye size={16} />
+                                                                    <span>Public</span>
+                                                                </>
+                                                            ) : (
+                                                                <>
+                                                                    <EyeOff size={16} />
+                                                                    <span>Private</span>
+                                                                </>
+                                                            )}
+                                                        </button>
                                                     </div>
                                                     <div className="flex relative">
                                                         {/* Left Column - Image */}
