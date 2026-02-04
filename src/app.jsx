@@ -14633,14 +14633,20 @@ const AnimalList = ({ authToken, showModalMessage, onEditAnimal, onViewAnimal, f
                                     e.stopPropagation();
                                     onTogglePrivacy && onTogglePrivacy(animal.id_public, !animal.showOnPublicProfile);
                                 }}
-                                className="text-black hover:text-gray-600 transition"
-                                title={animal.showOnPublicProfile ? "Make Private" : "Make Public"}
+                                className={`relative inline-flex h-4 w-7 sm:h-5 sm:w-9 items-center rounded-full transition-colors duration-200 ease-in-out focus:outline-none ${
+                                    animal.showOnPublicProfile 
+                                        ? 'bg-green-500' 
+                                        : 'bg-gray-300'
+                                }`}
+                                title={animal.showOnPublicProfile ? "Click to make Private" : "Click to make Public"}
                             >
-                                {animal.showOnPublicProfile ? (
-                                    <Eye className="w-3 h-3 sm:w-3.5 sm:h-3.5" strokeWidth={2.5} />
-                                ) : (
-                                    <EyeOff className="w-3 h-3 sm:w-3.5 sm:h-3.5" strokeWidth={2.5} />
-                                )}
+                                <span
+                                    className={`inline-block h-3 w-3 sm:h-4 sm:w-4 transform rounded-full bg-white transition-transform duration-200 ease-in-out ${
+                                        animal.showOnPublicProfile 
+                                            ? 'translate-x-3.5 sm:translate-x-4' 
+                                            : 'translate-x-0.5'
+                                    }`}
+                                />
                             </button>
                         )}
                         {/* Spacer if no privacy toggle (in selection mode) */}
@@ -19411,37 +19417,51 @@ const App = () => {
                                                 <div className="bg-white border-2 border-gray-300 rounded-lg overflow-hidden relative">
                                                     {/* Public Profile Toggle - Top Right */}
                                                     <div className="absolute top-4 right-4 z-10">
-                                                        <button
-                                                            type="button"
-                                                            data-tutorial-target="detail-private-toggle"
-                                                            onClick={async () => {
-                                                                const newIsDisplay = !animalToView.isDisplay;
-                                                                try {
-                                                                    const response = await fetch(`${API_BASE_URL}/animals/${animalToView.id_public}`, {
-                                                                        method: 'PUT',
-                                                                        headers: {
-                                                                            'Content-Type': 'application/json',
-                                                                            'Authorization': `Bearer ${authToken}`
-                                                                        },
-                                                                        body: JSON.stringify({ isDisplay: newIsDisplay })
-                                                                    });
-                                                                    if (response.ok) {
-                                                                        setAnimalToView({ ...animalToView, isDisplay: newIsDisplay });
-                                                                        showModalMessage('Success', `Animal is now ${newIsDisplay ? 'public' : 'private'}.`);
-                                                                    } else {
+                                                        <div className="flex items-center gap-2">
+                                                            <span className="text-sm text-gray-600">
+                                                                {animalToView.isDisplay ? 'Public' : 'Private'}
+                                                            </span>
+                                                            <button
+                                                                type="button"
+                                                                data-tutorial-target="detail-private-toggle"
+                                                                onClick={async () => {
+                                                                    const newIsDisplay = !animalToView.isDisplay;
+                                                                    try {
+                                                                        const response = await fetch(`${API_BASE_URL}/animals/${animalToView.id_public}`, {
+                                                                            method: 'PUT',
+                                                                            headers: {
+                                                                                'Content-Type': 'application/json',
+                                                                                'Authorization': `Bearer ${authToken}`
+                                                                            },
+                                                                            body: JSON.stringify({ isDisplay: newIsDisplay })
+                                                                        });
+                                                                        if (response.ok) {
+                                                                            setAnimalToView({ ...animalToView, isDisplay: newIsDisplay });
+                                                                            showModalMessage('Success', `Animal is now ${newIsDisplay ? 'public' : 'private'}.`);
+                                                                        } else {
+                                                                            showModalMessage('Error', 'Failed to update visibility.');
+                                                                        }
+                                                                    } catch (err) {
+                                                                        console.error('Error updating visibility:', err);
                                                                         showModalMessage('Error', 'Failed to update visibility.');
                                                                     }
-                                                                } catch (err) {
-                                                                    console.error('Error updating visibility:', err);
-                                                                    showModalMessage('Error', 'Failed to update visibility.');
-                                                                }
-                                                            }}
-                                                            className={`px-3 py-1 rounded-full text-xs font-medium transition ${
-                                                                animalToView.isDisplay ? 'bg-blue-100 text-blue-800' : 'bg-gray-100 text-gray-800'
-                                                            }`}
-                                                        >
-                                                            {animalToView.isDisplay ? ' Public' : ' Private'}
-                                                        </button>
+                                                                }}
+                                                                className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors duration-200 ease-in-out focus:outline-none ${
+                                                                    animalToView.isDisplay 
+                                                                        ? 'bg-green-500' 
+                                                                        : 'bg-gray-300'
+                                                                }`}
+                                                                title={animalToView.isDisplay ? "Click to make Private" : "Click to make Public"}
+                                                            >
+                                                                <span
+                                                                    className={`inline-block h-5 w-5 transform rounded-full bg-white transition-transform duration-200 ease-in-out ${
+                                                                        animalToView.isDisplay 
+                                                                            ? 'translate-x-5' 
+                                                                            : 'translate-x-0.5'
+                                                                    }`}
+                                                                />
+                                                            </button>
+                                                        </div>
                                                     </div>
                                                     <div className="flex relative">
                                                         {/* Left Column - Image */}
