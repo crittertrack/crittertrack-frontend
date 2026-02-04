@@ -254,70 +254,44 @@ const GETTING_STARTED_LESSONS = [
       },
       {
         stepNumber: 2,
-        title: 'Ownership - Currently Owned',
-        content: 'This checkbox indicates that you currently own this animal. It should be checked for animals in your collection. Uncheck it if you\'ve already sold or rehomed the animal.',
+        title: 'Breeder Assignment',
+        content: 'The Breeder section lets you specify who bred this animal. You can either select a registered CritterTrack user as the breeder, or enter a manual name if they\'re not a registered user. Click the field to search for users.',
         highlightElement: '[data-tutorial-target="ownership-section"]',
-        actionType: 'click',
         tips: [
-          'Checked = you own the animal',
-          'Unchecked = you used to own it but don\'t anymore',
-          'This affects visibility and permissions'
+          'Click to search for registered breeders',
+          'Search by name or ID across the platform',
+          'Use Manual Name field for non-registered breeders',
+          'Tracks breeding history and lineage'
         ]
       },
       {
         stepNumber: 3,
-        title: 'Assign Breeder',
-        content: 'Click here to specify who the breeder of this animal is. When you click this button, a search modal will appear letting you pick a user that could be the breeder. You can search for breeders across the entire website.',
-        highlightElement: '[data-tutorial-target="ownership-section"]',
-        actionType: 'click',
+        title: 'Current Owner Section',
+        content: 'This section tracks ownership. Check "Currently Owned by Me" if you own the animal. The Owner Name field lets you record the owner\'s name for your records and builds an ownership history.',
+        highlightElement: '[data-tutorial-target="current-owner-field"]',
         tips: [
-          'This tracks breeding history',
-          'Can search by name or ID',
-          'The breeder might be a different person/breeder'
+          'Checkbox: Currently owned vs previously owned',
+          'Owner Name: Records for tracking',
+          'Ownership history is automatically maintained',
+          'Useful when transferring animals'
         ]
       },
       {
         stepNumber: 4,
-        title: 'Current Owner',
-        content: 'This field records who currently owns the animal for your personal administrative use. Enter the owner\'s name to keep detailed ownership records. This helps you maintain a complete ownership history.',
-        highlightElement: '[data-tutorial-target="current-owner-field"]',
-        actionType: 'click',
-        tips: [
-          'Updates automatically when you own the animal',
-          'Shows new owner when transferred',
-          'Clicking allows you to assign current owner'
-        ]
-      },
-      {
-        stepNumber: 5,
-        title: 'Public Profile Visibility',
-        content: 'This toggle controls whether your animal appears on your public profile. Click the button to toggle between Public (green with eye icon) and Private (gray with eye-off icon). When public, other CritterTrack users can see this animal\'s information (subject to section privacy toggles). When private, the animal is only visible to you.',
-        highlightElement: '[data-tutorial-target="visibility-section"]',
-        actionType: 'click',
-        tips: [
-          'Green Eye icon = Public (appears on your public profile)',
-          'Gray Eye-Off icon = Private (only visible to you)',
-          'Toggle button at top right of Overview tab',
-          'Toggling instantly updates - changes save in background'
-        ]
-      },
-      {
-        stepNumber: 6,
         title: 'Availability for Sale or Stud',
-        content: 'Use this section to make your animal available in the public showcase. When you enable "Available for Sale" or "Available for Stud", the price/fee fields will appear inline below the checkbox. Set your desired currency and amount (or select Negotiable). Only public animals marked for sale or stud will appear in the showcase.',
+        content: 'Use this section to make your animal available in the public Marketplace. When you enable "Available for Sale" or "Available for Stud", the price/fee fields will appear inline below the checkbox. Set your desired currency and amount (or select Negotiable). Only public animals marked for sale or stud will appear in the Marketplace.',
         highlightElement: '[data-tutorial-target="availability-for-sale-stud"]',
         tips: [
           'Enable "Available for Sale" to list with a price',
           'Enable "Available for Stud" to offer breeding services',
-          'When enabled, currency and amount fields appear directly below',
-          'Select currency (USD/EUR/GBP/CAD/AUD/JPY) or choose Negotiable',
-          'Enter the price or fee amount in the amount field',
-          'Requires Public Profile to be enabled',
-          'Public + For Sale/Stud = appears in showcase'
+          'When enabled, currency and amount fields appear below',
+          'Select currency (USD/EUR/GBP/CAD/AUD/JPY) or Negotiable',
+          'Requires Public Profile to be enabled (on Overview tab)',
+          'Public + For Sale/Stud = appears in Marketplace'
         ]
       },
       {
-        stepNumber: 7,
+        stepNumber: 5,
         title: 'Move to Physical Tab',
         content: 'Now let\'s continue to the Physical tab to add more details about your animal\'s physical characteristics. Click the "Physical" tab.',
         highlightElement: '[data-tutorial-target="physical-tab"]',
