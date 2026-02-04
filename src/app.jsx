@@ -2386,14 +2386,11 @@ const PrivateAnimalDetail = ({ animal, onClose, onEdit, API_BASE_URL, authToken,
                                                     console.error('Failed to update isDisplay:', err);
                                                 });
                                             }}
-                                            className="absolute top-4 right-4 px-3 py-1.5 text-xs font-medium rounded-lg transition cursor-pointer"
-                                            style={{
-                                                backgroundColor: animal.isDisplay ? '#dbeafe' : '#f3f4f6',
-                                                color: animal.isDisplay ? '#1e40af' : '#374151'
-                                            }}
+                                            className={`absolute top-4 right-4 flex items-center gap-2 px-3 py-1.5 rounded-lg font-medium transition ${animal.isDisplay ? 'bg-green-100 text-green-800 hover:bg-green-200' : 'bg-gray-100 text-gray-800 hover:bg-gray-200'}`}
                                             title="Toggle public profile visibility"
                                         >
-                                            <span>{animal.isDisplay ? '🌍 Public' : '🔒 Private'}</span>
+                                            {animal.isDisplay ? <Eye size={16} /> : <EyeOff size={16} />}
+                                            <span>{animal.isDisplay ? 'Public' : 'Private'}</span>
                                         </button>
 
                                         {/* Species/Breed/Strain/CTC - At Top */}
