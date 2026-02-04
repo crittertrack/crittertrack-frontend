@@ -101,7 +101,7 @@ const AnimalNode = ({ data }) => {
                 `}
                 style={{ 
                     opacity: isSearchMatch ? 1 : (isSearchMatch === false ? 0.4 : 1)
-                }}}
+                }}
                 onClick={data.onClick}
             >
                 {data.image ? (
