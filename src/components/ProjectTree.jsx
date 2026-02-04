@@ -694,7 +694,7 @@ const ProjectTreeContent = ({ authToken, userProfile, showModalMessage, onViewAn
                                         <div className="mb-3">
                                             <div className="text-gray-700 font-medium">
                                                 <span className="text-blue-600 font-bold text-lg mr-1.5">♂</span>
-                                                {[sire.prefix, sire.name, sire.suffix].filter(Boolean).join(' ')}
+                                                {[sire.prefix, sire.name || sire.id_public, sire.suffix].filter(Boolean).join(' ')}
                                             </div>
                                             <div className="font-mono text-xs text-gray-500">({sire.id_public})</div>
                                         </div>
@@ -712,7 +712,7 @@ const ProjectTreeContent = ({ authToken, userProfile, showModalMessage, onViewAn
                                         <div className="mb-3">
                                             <div className="text-gray-700 font-medium">
                                                 <span className="text-pink-600 font-bold text-lg mr-1.5">♀</span>
-                                                {[dam.prefix, dam.name, dam.suffix].filter(Boolean).join(' ')}
+                                                {[dam.prefix, dam.name || dam.id_public, dam.suffix].filter(Boolean).join(' ')}
                                             </div>
                                             <div className="font-mono text-xs text-gray-500">({dam.id_public})</div>
                                         </div>
@@ -738,11 +738,11 @@ const ProjectTreeContent = ({ authToken, userProfile, showModalMessage, onViewAn
                                             
                                             return (
                                                 <div key={child.id_public} className="text-gray-700">
-                                                    {[child.prefix, child.name, child.suffix].filter(Boolean).join(' ')}
+                                                    {[child.prefix, child.name || child.id_public, child.suffix].filter(Boolean).join(' ')}
                                                     <span className="font-mono text-xs text-gray-500 ml-1">({child.id_public})</span>
                                                     {partner && (
                                                         <span className="text-gray-500 text-xs ml-2">
-                                                            with {[partner.prefix, partner.name, partner.suffix].filter(Boolean).join(' ')}
+                                                            with {[partner.prefix, partner.name || partner.id_public, partner.suffix].filter(Boolean).join(' ')}
                                                             <span className="font-mono ml-1">({partner.id_public})</span>
                                                         </span>
                                                     )}
