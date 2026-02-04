@@ -13227,7 +13227,7 @@ const BreederDirectory = ({ authToken, API_BASE_URL, onBack }) => {
                         )}
                     </div>
                 ) : (
-                    <div className="space-y-4">
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                         {filteredBreeders.map(breeder => {
                             // Build display name based on what's public
                             let displayName = '';
