@@ -644,7 +644,7 @@ const ProjectTreeContent = ({ authToken, userProfile, showModalMessage, onViewAn
                     <div className="flex justify-between items-start mb-4">
                         <div>
                             <h3 className="text-xl font-bold text-gray-800">
-                                {[selectedAnimal.prefix, selectedAnimal.name, selectedAnimal.suffix].filter(Boolean).join(' ')}
+                                {[selectedAnimal.prefix, selectedAnimal.name || selectedAnimal.id_public, selectedAnimal.suffix].filter(Boolean).join(' ')}
                             </h3>
                             <p className="text-sm text-gray-600 font-mono mt-1">{selectedAnimal.id_public}</p>
                         </div>
