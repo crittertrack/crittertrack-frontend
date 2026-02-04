@@ -13289,7 +13289,7 @@ const BreederDirectory = ({ authToken, API_BASE_URL, onBack }) => {
                                                             ) : (
                                                                 <Moon size={16} className="text-gray-500" />
                                                             )}
-                                                            <span className="font-medium text-gray-800">{species}</span>
+                                                            <span className="font-medium text-gray-800">{getSpeciesDisplayName(species)}</span>
                                                             <span className="text-gray-600">
                                                                 ({status === 'breeder' ? 'Active' : 'Retired'})
                                                             </span>
