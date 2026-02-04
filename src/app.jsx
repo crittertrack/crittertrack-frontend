@@ -18557,6 +18557,15 @@ const App = () => {
                         </button>
 
                         <button
+                            onClick={() => navigate('/breeder-directory')}
+                            className="flex flex-col items-center justify-center bg-gray-100 hover:bg-gray-200 text-gray-600 py-2 px-3 rounded-lg transition duration-150 shadow-sm"
+                            title="Find Breeders"
+                        >
+                            <Star size={18} className="mb-1" />
+                            <span className="text-xs">Breeders</span>
+                        </button>
+
+                        <button
                             onClick={() => {
                                 setShowNotifications(true);
                                 setNotificationCount(0);
@@ -18613,6 +18622,14 @@ const App = () => {
                                 data-tutorial-target="global-search-btn"
                             >
                                 <Search size={18} />
+                            </button>
+
+                            <button
+                                onClick={() => navigate('/breeder-directory')}
+                                className="flex items-center justify-center bg-gray-100 hover:bg-gray-200 text-gray-600 p-2 rounded-lg transition duration-150 shadow-sm"
+                                title="Find Breeders"
+                            >
+                                <Star size={18} />
                             </button>
 
                             <button
@@ -19034,20 +19051,10 @@ const App = () => {
                     {/* Community Activity Banner */}
                     {(newestUsers.length > 0 || activeUsers.length > 0) && (
                         <div className="flex-1 min-w-0 bg-gradient-to-r from-primary/20 to-accent/20 p-3 rounded-lg border border-primary/30" data-tutorial-target="community-activity">
-                            <div className="flex items-center justify-between mb-2">
-                                <h3 className="text-xs font-semibold text-gray-800 flex items-center flex-1 justify-center">
-                                    <Users size={14} className="mr-2 text-primary-dark" />
-                                    Community Activity
-                                </h3>
-                                <button
-                                    onClick={() => navigate('/breeder-directory')}
-                                    className="px-2 py-1 bg-primary hover:bg-primary/80 text-black text-xs font-medium rounded transition flex items-center gap-1"
-                                    title="Find Breeders"
-                                >
-                                    <Star size={12} />
-                                    <span className="hidden sm:inline">Breeders</span>
-                                </button>
-                            </div>
+                            <h3 className="text-xs font-semibold text-gray-800 mb-2 flex items-center justify-center">
+                                <Users size={14} className="mr-2 text-primary-dark" />
+                                Community Activity
+                            </h3>
                             <div 
                                 ref={scrollContainerRef}
                                 className="flex flex-wrap justify-center gap-3 pb-2"
