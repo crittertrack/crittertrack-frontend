@@ -13026,9 +13026,10 @@ const BreederDirectory = ({ authToken, API_BASE_URL, onBack }) => {
     const [breeders, setBreeders] = useState([]);
     const [loading, setLoading] = useState(true);
     const [searchQuery, setSearchQuery] = useState('');
-    const [selectedSpecies, setSelectedSpecies] = useState([]);
-    const [sortBy, setSortBy] = useState('username'); // 'username' or 'country'
+    const [selectedSpecies, setSelectedSpecies] = useState('');
+    const [selectedCountry, setSelectedCountry] = useState('');
     const [availableSpecies, setAvailableSpecies] = useState([]);
+    const [availableCountries, setAvailableCountries] = useState([]);
 
     // Fetch breeders on mount
     useEffect(() => {
@@ -13055,6 +13056,15 @@ const BreederDirectory = ({ authToken, API_BASE_URL, onBack }) => {
                 }
             });
             setAvailableSpecies(Array.from(speciesSet).sort());
+            
+            // Extract unique countries from all breeders
+            const countrySet = new Set();
+            response.data.forEach(breeder => {
+                if (breeder.country) {
+                    countrySet.add(breeder.country);
+                }
+            });
+            setAvailableCountries(Array.from(countrySet).sort());
         } catch (error) {
             console.error('Failed to fetch breeders:', error);
         } finally {
@@ -13085,41 +13095,21 @@ const BreederDirectory = ({ authToken, API_BASE_URL, onBack }) => {
         }
 
         // Filter by selected species
-        if (selectedSpecies.length > 0) {
+        if (selectedSpecies) {
             result = result.filter(breeder => {
                 if (!breeder.breedingStatus) return false;
-                return selectedSpecies.some(species => 
-                    breeder.breedingStatus[species] === 'breeder' || 
-                    breeder.breedingStatus[species] === 'retired'
-                );
+                return breeder.breedingStatus[selectedSpecies] === 'breeder' || 
+                       breeder.breedingStatus[selectedSpecies] === 'retired';
             });
         }
 
-        // Sort
-        if (sortBy === 'username') {
-            result.sort((a, b) => {
-                const nameA = (a.breederName || a.personalName || a.id_public || '').toLowerCase();
-                const nameB = (b.breederName || b.personalName || b.id_public || '').toLowerCase();
-                return nameA.localeCompare(nameB);
-            });
-        } else if (sortBy === 'country') {
-            result.sort((a, b) => {
-                const countryA = (a.country || '').toLowerCase();
-                const countryB = (b.country || '').toLowerCase();
-                return countryA.localeCompare(countryB);
-            });
+        // Filter by selected country
+        if (selectedCountry) {
+            result = result.filter(breeder => breeder.country === selectedCountry);
         }
 
         return result;
-    }, [breeders, searchQuery, selectedSpecies, sortBy]);
-
-    const toggleSpecies = (species) => {
-        setSelectedSpecies(prev => 
-            prev.includes(species) 
-                ? prev.filter(s => s !== species)
-                : [...prev, species]
-        );
-    };
+    }, [breeders, searchQuery, selectedSpecies, selectedCountry]);
 
     return (
         <div className="min-h-screen bg-gray-50 pb-20">
@@ -13152,54 +13142,35 @@ const BreederDirectory = ({ authToken, API_BASE_URL, onBack }) => {
                     </div>
 
                     {/* Filters */}
-                    <div className="flex flex-wrap gap-2 items-center">
-                        <span className="text-sm font-medium text-gray-700">Species:</span>
-                        {availableSpecies.map(species => (
-                            <button
-                                key={species}
-                                onClick={() => toggleSpecies(species)}
-                                className={`px-3 py-1 text-sm rounded-full transition ${
-                                    selectedSpecies.includes(species)
-                                        ? 'bg-primary text-black font-medium'
-                                        : 'bg-gray-200 text-gray-700 hover:bg-gray-300'
-                                }`}
+                    <div className="flex gap-3">
+                        <div className="flex-1">
+                            <select
+                                value={selectedSpecies}
+                                onChange={(e) => setSelectedSpecies(e.target.value)}
+                                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary text-sm"
                             >
-                                {getSpeciesDisplayName(species)}
-                            </button>
-                        ))}
-                        {selectedSpecies.length > 0 && (
-                            <button
-                                onClick={() => setSelectedSpecies([])}
-                                className="px-3 py-1 text-sm text-gray-600 hover:text-gray-800 underline"
+                                <option value="">All Species</option>
+                                {availableSpecies.map(species => (
+                                    <option key={species} value={species}>
+                                        {getSpeciesDisplayName(species)}
+                                    </option>
+                                ))}
+                            </select>
+                        </div>
+                        <div className="flex-1">
+                            <select
+                                value={selectedCountry}
+                                onChange={(e) => setSelectedCountry(e.target.value)}
+                                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary text-sm"
                             >
-                                Clear
-                            </button>
-                        )}
-                    </div>
-
-                    {/* Sort */}
-                    <div className="flex items-center gap-2 mt-3">
-                        <span className="text-sm font-medium text-gray-700">Sort by:</span>
-                        <button
-                            onClick={() => setSortBy('username')}
-                            className={`px-3 py-1 text-sm rounded transition ${
-                                sortBy === 'username'
-                                    ? 'bg-primary text-black font-medium'
-                                    : 'bg-gray-200 text-gray-700 hover:bg-gray-300'
-                            }`}
-                        >
-                            Name
-                        </button>
-                        <button
-                            onClick={() => setSortBy('country')}
-                            className={`px-3 py-1 text-sm rounded transition ${
-                                sortBy === 'country'
-                                    ? 'bg-primary text-black font-medium'
-                                    : 'bg-gray-200 text-gray-700 hover:bg-gray-300'
-                            }`}
-                        >
-                            Country
-                        </button>
+                                <option value="">All Countries</option>
+                                {availableCountries.map(country => (
+                                    <option key={country} value={country}>
+                                        {getCountryName(country)}
+                                    </option>
+                                ))}
+                            </select>
+                        </div>
                     </div>
                 </div>
             </div>
@@ -13214,11 +13185,12 @@ const BreederDirectory = ({ authToken, API_BASE_URL, onBack }) => {
                     <div className="text-center py-20">
                         <Star size={48} className="mx-auto text-gray-300 mb-3" />
                         <p className="text-gray-600">No breeders found</p>
-                        {(searchQuery || selectedSpecies.length > 0) && (
+                        {(searchQuery || selectedSpecies || selectedCountry) && (
                             <button
                                 onClick={() => {
                                     setSearchQuery('');
-                                    setSelectedSpecies([]);
+                                    setSelectedSpecies('');
+                                    setSelectedCountry('');
                                 }}
                                 className="mt-3 text-primary hover:underline"
                             >
