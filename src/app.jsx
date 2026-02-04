@@ -26,6 +26,7 @@ import ModOversightPanel from './components/moderation/ModOversightPanel';
 import ModeratorActionSidebar from './components/moderation/ModeratorActionSidebar';
 import Marketplace from './components/Marketplace';
 import FamilyTree from './components/FamilyTree';
+import ProjectTree from './components/ProjectTree';
 
 // const API_BASE_URL = 'http://localhost:5000/api'; // Local development
 // const API_BASE_URL = 'https://crittertrack-pedigree-production.up.railway.app/api'; // Direct Railway (for testing)
@@ -90,7 +91,7 @@ const getCountryName = (countryCode) => {
     return countryNames[countryCode] || countryCode;
 };
 
-const IDLE_TIMEOUT_MS = 15 * 60 * 1000; // 15 minutes in milliseconds
+const IDLE_TIMEOUT_MS = 30 * 60 * 1000; // 30 minutes in milliseconds
 
 // Helper function to format date strings for display
 const formatDateDisplay = (dateString) => {
@@ -14719,14 +14720,23 @@ const AnimalList = ({ authToken, showModalMessage, onEditAnimal, onViewAnimal, f
                                         </>
                                     )}
                                     {!isBulkMode && (
-                                        <button
-                                            onClick={() => toggleBulkDeleteMode(species)}
-                                            data-tutorial-target="bulk-delete-btn"
-                                            className="p-1.5 sm:p-2 hover:bg-gray-200 rounded-lg transition"
-                                            title="Delete Multiple"
-                                        >
-                                            <Trash2 className="w-4 h-4 sm:w-[18px] sm:h-[18px] text-red-500" />
-                                        </button>
+                                        <>
+                                            <button
+                                                onClick={() => navigate(`/project-tree/${encodeURIComponent(species)}`)}
+                                                className="p-1.5 sm:p-2 hover:bg-gray-200 rounded-lg transition"
+                                                title="Project Tree"
+                                            >
+                                                <Users className="w-4 h-4 sm:w-[18px] sm:h-[18px] text-blue-500" />
+                                            </button>
+                                            <button
+                                                onClick={() => toggleBulkDeleteMode(species)}
+                                                data-tutorial-target="bulk-delete-btn"
+                                                className="p-1.5 sm:p-2 hover:bg-gray-200 rounded-lg transition"
+                                                title="Delete Multiple"
+                                            >
+                                                <Trash2 className="w-4 h-4 sm:w-[18px] sm:h-[18px] text-red-500" />
+                                            </button>
+                                        </>
                                     )}
                                 </div>
                             </div>
@@ -18900,6 +18910,15 @@ const App = () => {
                             </div>
                         )
                     } />
+                    <Route path="/project-tree/:species" element={
+                        <ProjectTree
+                            authToken={authToken}
+                            userProfile={userProfile}
+                            showModalMessage={showModalMessage}
+                            onViewAnimal={handleViewAnimal}
+                            onBack={() => navigate('/')}
+                        />
+                    } />
                     <Route path="/profile" element={<ProfileView userProfile={userProfile} showModalMessage={showModalMessage} fetchUserProfile={fetchUserProfile} authToken={authToken} onProfileUpdated={setUserProfile} onProfileEditButtonClicked={setProfileEditButtonClicked} />} />
                     <Route path="/litters" element={
                         <LitterManagement
@@ -20821,6 +20840,17 @@ const PublicAnimalPage = () => {
     const authToken = localStorage.getItem('authToken');
     const inModeratorMode = localStorage.getItem('moderationAuthenticated') === 'true';
 
+    // Determine where to go back to
+    const handleGoBack = () => {
+        // Check if there's a referrer in location state
+        if (location.state?.from) {
+            navigate(location.state.from);
+        } else {
+            // Default to home
+            navigate('/');
+        }
+    };
+
     useEffect(() => {
         const fetchAnimal = async () => {
             try {
@@ -20876,13 +20906,13 @@ const PublicAnimalPage = () => {
                 <header className="w-full max-w-5xl bg-white p-4 rounded-xl shadow-lg mb-6 flex justify-between items-center">
                     <CustomAppLogo size="w-10 h-10" />
                     <button
-                        onClick={() => navigate('/')}
+                        onClick={handleGoBack}
                         className="px-3 py-2 bg-gray-200 hover:bg-gray-300 text-gray-700 font-semibold rounded-lg transition"
                     >
                         Home
                     </button>
                 </header>
-                <PrivateAnimalScreen onBack={() => navigate('/')} />
+                <PrivateAnimalScreen onBack={handleGoBack} />
             </div>
         );
     }
@@ -20897,7 +20927,7 @@ const PublicAnimalPage = () => {
                         This animal either doesn't exist or is not publicly visible.
                     </p>
                     <button
-                        onClick={() => navigate('/')}
+                        onClick={handleGoBack}
                         className="w-full px-4 py-2 bg-primary text-black font-semibold rounded-lg hover:bg-primary/90 transition"
                     >
                         Login / Register
@@ -20912,7 +20942,7 @@ const PublicAnimalPage = () => {
             <header className="w-full max-w-5xl bg-white p-4 rounded-xl shadow-lg mb-6 flex justify-between items-center">
                 <CustomAppLogo size="w-10 h-10" />
                 <button
-                    onClick={() => navigate('/')}
+                    onClick={handleGoBack}
                     className="px-3 py-2 bg-gray-200 hover:bg-gray-300 text-gray-700 font-semibold rounded-lg transition"
                 >
                     Home
@@ -20920,7 +20950,7 @@ const PublicAnimalPage = () => {
             </header>
             <ViewOnlyAnimalDetail
                 animal={animal}
-                onClose={() => navigate('/')}
+                onClose={handleGoBack}
                 API_BASE_URL={API_BASE_URL}
                 authToken={authToken}
                 onViewProfile={(user) => navigate(`/user/${user.id_public}`)}
@@ -21283,7 +21313,7 @@ const PublicProfilePage = () => {
             <PublicProfileView
                 profile={profile}
                 onBack={() => navigate('/')}
-                onViewAnimal={(animal) => navigate(`/animal/${animal.id_public}`)}
+                onViewAnimal={(animal) => navigate(`/animal/${animal.id_public}`, { state: { from: `/user/${userId}` } })}
                 API_BASE_URL={API_BASE_URL}
                 authToken={authToken}
                 setModCurrentContext={setModCurrentContext}
