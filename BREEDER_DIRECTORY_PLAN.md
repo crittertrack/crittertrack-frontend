@@ -19,6 +19,7 @@ Add a new section in user settings where users can manage their breeding status:
 - Users must manually select their breeding status - no automatic suggestions
 - **Note**: Include explanation that marking yourself as a breeder will make you visible in Breeders
 - Species marked as "Active Breeder" or "Retired Breeder" remain visible even if animal count drops to 0 (user must manually change status to remove from directory)
+- **Removal**: Users can remove a species from their breeder profile by changing the status back to "Owner" - this will remove them from the directory for that species, and if they have 0 animals of that species, it will also disappear from their settings list
 
 ---
 
