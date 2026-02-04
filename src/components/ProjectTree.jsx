@@ -200,7 +200,33 @@ const ProjectTreeContent = ({ authToken, userProfile, showModalMessage, onViewAn
                             headers: { Authorization: `Bearer ${authToken}` }
                         });
                         parentAnimals = parentsResponse.data;
-                        console.log(`[ProjectTree] Retrieved ${parentAnimals.length} parent animals`);
+                        console.log(`[ProjectTree] Retrieved ${parentAnimals.length} parent animals from batch`);
+                        
+                        // For parents not returned by batch (private animals), try fetching basic public info
+                        const fetchedIds = new Set(parentAnimals.map(a => a.id_public));
+                        const missingIds = Array.from(parentIds).filter(id => !fetchedIds.has(id));
+                        
+                        if (missingIds.length > 0) {
+                            console.log(`[ProjectTree] Fetching basic info for ${missingIds.length} private parents`);
+                            
+                            // Fetch each missing parent from public global endpoint
+                            for (const parentId of missingIds) {
+                                try {
+                                    const publicResponse = await axios.get(`${API_BASE_URL}/public/global/animals?id_public=${parentId}`);
+                                    if (publicResponse.data?.[0]) {
+                                        const publicAnimal = publicResponse.data[0];
+                                        // Mark as private (limited info available)
+                                        parentAnimals.push({
+                                            ...publicAnimal,
+                                            isPrivate: true
+                                        });
+                                        console.log(`[ProjectTree] Found basic info for ${parentId}`);
+                                    }
+                                } catch (err) {
+                                    console.log(`[ProjectTree] No public info for ${parentId}`);
+                                }
+                            }
+                        }
                     } catch (err) {
                         console.error('[ProjectTree] Failed to fetch parent details:', err);
                         // Continue without parent details
