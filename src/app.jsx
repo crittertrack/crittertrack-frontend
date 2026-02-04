@@ -2,7 +2,7 @@
 import React, { useState, useEffect, useCallback, useRef, useMemo } from 'react';
 import { useParams, useNavigate, useLocation, Routes, Route, Link as RouterLink } from 'react-router-dom';
 import axios from 'axios';
-import { LogOut, Cat, UserPlus, LogIn, ChevronLeft, Trash2, Edit, Save, PlusCircle, Plus, ArrowLeft, Loader2, RefreshCw, User, Users, ClipboardList, BookOpen, Settings, Mail, Globe, Bean, Milk, Search, X, Mars, Venus, Eye, EyeOff, Heart, HeartOff, HeartHandshake, Bell, XCircle, CheckCircle, Download, FileText, Link, AlertCircle, DollarSign, Archive, ArrowLeftRight, RotateCcw, Info, Hourglass, MessageSquare, Ban, Flag, Scissors, VenusAndMars, Circle, Shield, Lock, AlertTriangle, ShoppingBag, Check } from 'lucide-react';
+import { LogOut, Cat, UserPlus, LogIn, ChevronLeft, Trash2, Edit, Save, PlusCircle, Plus, ArrowLeft, Loader2, RefreshCw, User, Users, ClipboardList, BookOpen, Settings, Mail, Globe, Bean, Milk, Search, X, Mars, Venus, Eye, EyeOff, Heart, HeartOff, HeartHandshake, Bell, XCircle, CheckCircle, Download, FileText, Link, AlertCircle, DollarSign, Archive, ArrowLeftRight, RotateCcw, Info, Hourglass, MessageSquare, Ban, Flag, Scissors, VenusAndMars, Circle, Shield, Lock, AlertTriangle, ShoppingBag, Check, Star, Moon, MoonStar, Calculator } from 'lucide-react';
 import jsPDF from 'jspdf';
 import html2canvas from 'html2canvas';
 import 'flag-icons/css/flag-icons.min.css';
@@ -1012,6 +1012,149 @@ const PedigreeChart = ({ animalId, animalData, onClose, API_BASE_URL, authToken 
 };
 
 // (Removed unused `AnimalListItem` component to reduce redundancy)
+
+const BreederDirectorySettings = ({ authToken, API_BASE_URL, showModalMessage, userProfile }) => {
+    const [breedingStatus, setBreedingStatus] = useState({});
+    const [loading, setLoading] = useState(false);
+    const [loadingStatus, setLoadingStatus] = useState(true);
+    const [userAnimals, setUserAnimals] = useState([]);
+
+    useEffect(() => {
+        fetchData();
+    }, []);
+
+    const fetchData = async () => {
+        try {
+            // Fetch user's animals
+            const animalsResponse = await axios.get(`${API_BASE_URL}/animals`, {
+                headers: { Authorization: `Bearer ${authToken}` }
+            });
+            setUserAnimals(animalsResponse.data || []);
+
+            // Fetch breeding status
+            const statusResponse = await axios.get(`${API_BASE_URL}/users/breeding-status`, {
+                headers: { Authorization: `Bearer ${authToken}` }
+            });
+            setBreedingStatus(statusResponse.data.breedingStatus || {});
+        } catch (error) {
+            console.error('Error fetching data:', error);
+        } finally {
+            setLoadingStatus(false);
+        }
+    };
+
+    // Get unique species from user's animals
+    const userSpecies = [...new Set(userAnimals.map(animal => animal.species))];
+    
+    // Get species that are marked as breeder or retired (even if no animals)
+    const markedSpecies = Object.keys(breedingStatus).filter(
+        species => breedingStatus[species] === 'breeder' || breedingStatus[species] === 'retired'
+    );
+    
+    // Combine: species with animals + species marked as breeder/retired
+    const displaySpecies = [...new Set([...userSpecies, ...markedSpecies])].sort();
+
+    const handleStatusChange = (species, status) => {
+        setBreedingStatus(prev => {
+            const updated = { ...prev };
+            if (status === 'owner' || status === '') {
+                // Remove from object if set to owner (default)
+                delete updated[species];
+            } else {
+                updated[species] = status;
+            }
+            return updated;
+        });
+    };
+
+    const handleSave = async () => {
+        setLoading(true);
+        try {
+            await axios.put(
+                `${API_BASE_URL}/users/breeding-status`,
+                { breedingStatus },
+                { headers: { Authorization: `Bearer ${authToken}` } }
+            );
+            showModalMessage('Success', 'Breeding status updated successfully.');
+        } catch (error) {
+            console.error('Error updating breeding status:', error);
+            showModalMessage('Error', 'Failed to update breeding status.');
+        } finally {
+            setLoading(false);
+        }
+    };
+
+    if (loadingStatus) {
+        return (
+            <div className="mb-8 p-4 sm:p-6 border rounded-lg bg-gray-50">
+                <div className="flex items-center justify-center py-8">
+                    <Loader2 className="animate-spin mr-2" size={24} />
+                    <span>Loading breeding status...</span>
+                </div>
+            </div>
+        );
+    }
+
+    if (displaySpecies.length === 0) {
+        return (
+            <div className="mb-8 p-4 sm:p-6 border rounded-lg bg-gray-50 overflow-x-hidden">
+                <h3 className="text-xl font-semibold text-gray-800 border-b pb-2 mb-4">Species & Breeding Status</h3>
+                <p className="text-sm text-gray-600">
+                    Add some animals to your collection to manage your breeding status and appear in the Breeders directory.
+                </p>
+            </div>
+        );
+    }
+
+    return (
+        <div className="mb-8 p-4 sm:p-6 border rounded-lg bg-gray-50 overflow-x-hidden">
+            <h3 className="text-xl font-semibold text-gray-800 border-b pb-2 mb-4">Species & Breeding Status</h3>
+            <p className="text-sm text-gray-600 mb-1">
+                Set your breeding status for each species. Marking yourself as an <strong>Active Breeder</strong> or <strong>Retired Breeder</strong> will make you visible in the Breeders directory.
+            </p>
+            <p className="text-xs text-gray-500 mb-4">
+                Note: Species marked as Active or Retired will remain in your list even if you have no animals of that species.
+            </p>
+
+            <div className="space-y-3 mb-4">
+                {displaySpecies.map(species => {
+                    const animalCount = userAnimals.filter(a => a.species === species).length;
+                    const currentStatus = breedingStatus[species] || 'owner';
+                    
+                    return (
+                        <div key={species} className="flex items-center justify-between py-2 border-b border-gray-200">
+                            <div className="flex flex-col">
+                                <span className="text-sm font-medium text-gray-700">{species}</span>
+                                <span className="text-xs text-gray-500">{animalCount} animal{animalCount !== 1 ? 's' : ''}</span>
+                            </div>
+                            <select
+                                value={currentStatus}
+                                onChange={(e) => handleStatusChange(species, e.target.value)}
+                                className="px-3 py-1.5 border border-gray-300 rounded-lg focus:ring-primary focus:border-primary text-sm"
+                                disabled={loading}
+                            >
+                                <option value="owner">🏠 Owner</option>
+                                <option value="breeder">⭐ Active Breeder</option>
+                                <option value="retired">🌙 Retired Breeder</option>
+                            </select>
+                        </div>
+                    );
+                })}
+            </div>
+
+            <div className="flex justify-end pt-2">
+                <button
+                    onClick={handleSave}
+                    disabled={loading}
+                    className="bg-accent hover:bg-accent/90 text-white font-bold py-2 px-4 rounded-lg shadow-md transition duration-150 flex items-center justify-center disabled:opacity-50"
+                >
+                    {loading ? <Loader2 className="animate-spin mr-2" size={20} /> : <Save size={20} className="mr-2" />}
+                    Save Breeding Status
+                </button>
+            </div>
+        </div>
+    );
+};
 
 const ProfileImagePlaceholder = ({ url, onFileChange, disabled }) => (
     <div className="flex flex-col items-center space-y-3">
@@ -5329,8 +5472,10 @@ const LitterManagement = ({ authToken, API_BASE_URL, userProfile, showModalMessa
     const [searchQuery, setSearchQuery] = useState('');
     const [speciesFilter, setSpeciesFilter] = useState('');
     const [yearFilter, setYearFilter] = useState('');
-    // COI calculation state
+    // COI calculation state (feature in development - UI display pending)
+    // eslint-disable-next-line no-unused-vars
     const [predictedCOI, setPredictedCOI] = useState(null);
+    // eslint-disable-next-line no-unused-vars
     const [calculatingCOI, setCalculatingCOI] = useState(false);
     const [addingOffspring, setAddingOffspring] = useState(null);
     const [newOffspringData, setNewOffspringData] = useState({
@@ -6391,24 +6536,6 @@ const LitterManagement = ({ authToken, API_BASE_URL, userProfile, showModalMessa
                             </button>
                         </div>
                     </div>
-
-                    {/* Predicted COI Display */}
-                    {formData.sireId_public && formData.damId_public && (
-                        <div className="mb-4 bg-blue-50 border border-blue-200 rounded-lg p-4">
-                            <div className="flex items-center gap-2">
-                                <span className="text-sm font-medium text-gray-700">Predicted COI (Coefficient of Inbreeding):</span>
-                                {calculatingCOI ? (
-                                    <span className="text-sm text-gray-500 italic">Calculating...</span>
-                                ) : predictedCOI != null ? (
-                                    <span className="text-sm font-bold text-gray-900">
-                                        {predictedCOI.toFixed(2)}%
-                                    </span>
-                                ) : (
-                                    <span className="text-sm text-gray-500 italic">-</span>
-                                )}
-                            </div>
-                        </div>
-                    )}
 
                     {/* Birth Date & Counts */}
                     <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-4" data-tutorial-target="litter-dates-counts">
@@ -12498,25 +12625,25 @@ const ProfileEditForm = ({ userProfile, showModalMessage, onSaveSuccess, onCance
                         <select value={country} onChange={(e) => setCountry(e.target.value)}
                         className="w-full p-3 border border-gray-300 rounded-lg focus:ring-primary focus:border-primary transition box-border" disabled={profileLoading}>
                         <option value="">Select Country (Optional)</option>
-                        <option value="US">? United States</option>
-                        <option value="CA">? Canada</option>
-                        <option value="GB">? United Kingdom</option>
-                        <option value="AU">? Australia</option>
-                        <option value="NZ">? New Zealand</option>
-                        <option value="DE">? Germany</option>
-                        <option value="FR">? France</option>
-                        <option value="IT">? Italy</option>
-                        <option value="ES">? Spain</option>
-                        <option value="NL">? Netherlands</option>
-                        <option value="SE">? Sweden</option>
+                        <option value="US">United States</option>
+                        <option value="CA">Canada</option>
+                        <option value="GB">United Kingdom</option>
+                        <option value="AU">Australia</option>
+                        <option value="NZ">New Zealand</option>
+                        <option value="DE">Germany</option>
+                        <option value="FR">France</option>
+                        <option value="IT">Italy</option>
+                        <option value="ES">Spain</option>
+                        <option value="NL">Netherlands</option>
+                        <option value="SE">Sweden</option>
                         <option value="NO">Norway</option>
-                        <option value="DK">? Denmark</option>
-                        <option value="CH">? Switzerland</option>
-                        <option value="BE">? Belgium</option>
-                        <option value="AT">? Austria</option>
-                        <option value="PL">? Poland</option>
-                        <option value="CZ">? Czech Republic</option>
-                        <option value="IE">? Ireland</option>
+                        <option value="DK">Denmark</option>
+                        <option value="CH">Switzerland</option>
+                        <option value="BE">Belgium</option>
+                        <option value="AT">Austria</option>
+                        <option value="PL">Poland</option>
+                        <option value="CZ">Czech Republic</option>
+                        <option value="IE">Ireland</option>
                         <option value="PT">? Portugal</option>
                         <option value="GR">? Greece</option>
                         <option value="RU">? Russia</option>
@@ -12654,6 +12781,13 @@ const ProfileEditForm = ({ userProfile, showModalMessage, onSaveSuccess, onCance
                     </button>
                 </div>
             </form>
+
+            <BreederDirectorySettings
+                authToken={authToken}
+                API_BASE_URL={API_BASE_URL}
+                showModalMessage={showModalMessage}
+                userProfile={userProfile}
+            />
             
             <form onSubmit={handleEmailUpdate} className="space-y-4 mb-8 p-4 sm:p-6 border rounded-lg bg-gray-50 overflow-x-hidden">
                 <h3 className="text-xl font-semibold text-gray-800 border-b pb-2">Change Email Address</h3>
@@ -12881,6 +13015,291 @@ const DonationView = ({ onBack }) => {
                 <p className="text-sm text-gray-500 italic">
                     Thank you for considering supporting CritterTrack. Your generosity is deeply appreciated! ❤️
                 </p>
+            </div>
+        </div>
+    );
+};
+
+// ==================== BREEDER DIRECTORY VIEW ====================
+const BreederDirectory = ({ authToken, API_BASE_URL, onBack }) => {
+    const navigate = useNavigate();
+    const [breeders, setBreeders] = useState([]);
+    const [loading, setLoading] = useState(true);
+    const [searchQuery, setSearchQuery] = useState('');
+    const [selectedSpecies, setSelectedSpecies] = useState('');
+    const [selectedCountry, setSelectedCountry] = useState('');
+    const [availableSpecies, setAvailableSpecies] = useState([]);
+    const [availableCountries, setAvailableCountries] = useState([]);
+
+    // Fetch breeders on mount
+    useEffect(() => {
+        fetchBreeders();
+    }, []);
+
+    const fetchBreeders = async () => {
+        setLoading(true);
+        try {
+            const response = await axios.get(`${API_BASE_URL}/users/breeder-directory`, {
+                headers: authToken ? { Authorization: `Bearer ${authToken}` } : {}
+            });
+            setBreeders(response.data || []);
+            
+            // Extract unique species from all breeders
+            const speciesSet = new Set();
+            response.data.forEach(breeder => {
+                if (breeder.breedingStatus) {
+                    Object.keys(breeder.breedingStatus).forEach(species => {
+                        if (breeder.breedingStatus[species] === 'breeder' || breeder.breedingStatus[species] === 'retired') {
+                            speciesSet.add(species);
+                        }
+                    });
+                }
+            });
+            setAvailableSpecies(Array.from(speciesSet).sort());
+            
+            // Extract unique countries from all breeders
+            const countrySet = new Set();
+            response.data.forEach(breeder => {
+                if (breeder.country) {
+                    countrySet.add(breeder.country);
+                }
+            });
+            setAvailableCountries(Array.from(countrySet).sort());
+        } catch (error) {
+            console.error('Failed to fetch breeders:', error);
+        } finally {
+            setLoading(false);
+        }
+    };
+
+    // Filter and sort breeders
+    const filteredBreeders = useMemo(() => {
+        let result = breeders;
+
+        // Filter out breeders with no public names
+        result = result.filter(breeder => {
+            const hasPersonalName = breeder.showPersonalName && breeder.personalName;
+            const hasBreederName = breeder.showBreederName && breeder.breederName;
+            return hasPersonalName || hasBreederName;
+        });
+
+        // Filter by search query
+        if (searchQuery.trim()) {
+            const query = searchQuery.toLowerCase();
+            result = result.filter(breeder => {
+                const personalName = breeder.personalName?.toLowerCase() || '';
+                const breederName = breeder.breederName?.toLowerCase() || '';
+                const id = breeder.id_public?.toLowerCase() || '';
+                return personalName.includes(query) || breederName.includes(query) || id.includes(query);
+            });
+        }
+
+        // Filter by selected species
+        if (selectedSpecies) {
+            result = result.filter(breeder => {
+                if (!breeder.breedingStatus) return false;
+                return breeder.breedingStatus[selectedSpecies] === 'breeder' || 
+                       breeder.breedingStatus[selectedSpecies] === 'retired';
+            });
+        }
+
+        // Filter by selected country
+        if (selectedCountry) {
+            result = result.filter(breeder => breeder.country === selectedCountry);
+        }
+
+        return result;
+    }, [breeders, searchQuery, selectedSpecies, selectedCountry]);
+
+    return (
+        <div className="min-h-screen bg-gray-50 pb-20">
+            {/* Header */}
+            <div className="bg-white border-b border-gray-200 p-4 sticky top-0 z-10">
+                <div className="max-w-5xl mx-auto">
+                    <div className="flex items-center gap-3 mb-3">
+                        <button
+                            onClick={() => navigate(-1)}
+                            className="p-2 hover:bg-gray-100 rounded transition"
+                        >
+                            <ArrowLeft size={20} />
+                        </button>
+                        <h1 className="text-xl font-bold text-gray-800 flex items-center gap-2">
+                            <Star size={24} className="text-primary" />
+                            Breeder Directory
+                        </h1>
+                    </div>
+
+                    {/* Search */}
+                    <div className="relative mb-3">
+                        <Search size={18} className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400" />
+                        <input
+                            type="text"
+                            placeholder="Search by name or ID..."
+                            value={searchQuery}
+                            onChange={(e) => setSearchQuery(e.target.value)}
+                            className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary"
+                        />
+                    </div>
+
+                    {/* Filters */}
+                    <div className="flex gap-3">
+                        <div className="flex-1">
+                            <select
+                                value={selectedSpecies}
+                                onChange={(e) => setSelectedSpecies(e.target.value)}
+                                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary text-sm"
+                            >
+                                <option value="">All Species</option>
+                                {availableSpecies.map(species => (
+                                    <option key={species} value={species}>
+                                        {getSpeciesDisplayName(species)}
+                                    </option>
+                                ))}
+                            </select>
+                        </div>
+                        <div className="flex-1">
+                            <select
+                                value={selectedCountry}
+                                onChange={(e) => setSelectedCountry(e.target.value)}
+                                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary text-sm"
+                            >
+                                <option value="">All Countries</option>
+                                {availableCountries.map(country => (
+                                    <option key={country} value={country}>
+                                        {getCountryName(country)}
+                                    </option>
+                                ))}
+                            </select>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            {/* Content */}
+            <div className="max-w-5xl mx-auto p-4">
+                {loading ? (
+                    <div className="flex items-center justify-center py-20">
+                        <Loader2 size={32} className="animate-spin text-primary" />
+                    </div>
+                ) : filteredBreeders.length === 0 ? (
+                    <div className="text-center py-20">
+                        <Star size={48} className="mx-auto text-gray-300 mb-3" />
+                        <p className="text-gray-600">No breeders found</p>
+                        {(searchQuery || selectedSpecies || selectedCountry) && (
+                            <button
+                                onClick={() => {
+                                    setSearchQuery('');
+                                    setSelectedSpecies('');
+                                    setSelectedCountry('');
+                                }}
+                                className="mt-3 text-primary hover:underline"
+                            >
+                                Clear filters
+                            </button>
+                        )}
+                    </div>
+                ) : (
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        {filteredBreeders.map(breeder => {
+                            // Build display name based on what's public
+                            let displayName = '';
+                            const hasPersonalName = breeder.showPersonalName && breeder.personalName;
+                            const hasBreederName = breeder.showBreederName && breeder.breederName;
+                            
+                            if (hasPersonalName && hasBreederName) {
+                                displayName = `${breeder.personalName} (${breeder.breederName})`;
+                            } else if (hasBreederName) {
+                                displayName = breeder.breederName;
+                            } else if (hasPersonalName) {
+                                displayName = breeder.personalName;
+                            } else {
+                                displayName = breeder.id_public;
+                            }
+
+                            return (
+                                <div
+                                    key={breeder.id_public}
+                                    className="bg-white rounded-lg border border-gray-200 p-6 hover:shadow-md transition"
+                                >
+                                    {/* Header Row */}
+                                    <div className="flex items-start gap-4 mb-4">
+                                        {/* Profile Picture */}
+                                        <div className="flex-shrink-0">
+                                            <div className="w-20 h-20 bg-gray-100 rounded-full overflow-hidden">
+                                                {breeder.profileImage ? (
+                                                    <img 
+                                                        src={breeder.profileImage} 
+                                                        alt={displayName} 
+                                                        className="w-full h-full object-cover"
+                                                    />
+                                                ) : (
+                                                    <div className="w-full h-full flex items-center justify-center text-gray-400">
+                                                        <User size={36} />
+                                                    </div>
+                                                )}
+                                            </div>
+                                        </div>
+
+                                        {/* Name and CTU Badge */}
+                                        <div className="flex-1 min-w-0">
+                                            <h3 className="text-xl font-bold text-gray-800 mb-1">{displayName}</h3>
+                                            <div className="flex items-center gap-3 flex-wrap">
+                                                <span className="text-xs bg-primary text-black px-2.5 py-1 rounded font-medium">
+                                                    {breeder.id_public}
+                                                </span>
+                                                {breeder.country && (
+                                                    <div className="flex items-center gap-2 text-sm text-gray-600">
+                                                        <span className={`${getCountryFlag(breeder.country)} inline-block h-4 w-6 flex-shrink-0`}></span>
+                                                        <span>{getCountryName(breeder.country)}</span>
+                                                    </div>
+                                                )}
+                                            </div>
+                                        </div>
+
+                                        {/* View Profile Button */}
+                                        <button
+                                            onClick={() => navigate(`/user/${breeder.id_public}`)}
+                                            className="px-4 py-2 bg-primary hover:bg-primary/80 text-black text-sm font-medium rounded transition flex-shrink-0"
+                                        >
+                                            View Profile
+                                        </button>
+                                    </div>
+
+                                    {/* Bio */}
+                                    {breeder.bio && (
+                                        <p className="text-sm text-gray-700 mb-4 leading-relaxed">
+                                            {breeder.bio}
+                                        </p>
+                                    )}
+
+                                    {/* Breeding Species */}
+                                    <div className="flex flex-wrap gap-3">
+                                        {breeder.breedingStatus && Object.entries(breeder.breedingStatus).map(([species, status]) => {
+                                            if (status !== 'breeder' && status !== 'retired') return null;
+                                            
+                                            return (
+                                                <div 
+                                                    key={species} 
+                                                    className="flex items-center gap-2 px-3 py-1.5 bg-gray-50 rounded-full border border-gray-200"
+                                                >
+                                                    {status === 'breeder' ? (
+                                                        <Star size={14} className="text-primary" />
+                                                    ) : (
+                                                        <Moon size={14} className="text-gray-500" />
+                                                    )}
+                                                    <span className="text-sm font-medium text-gray-800">{getSpeciesDisplayName(species)}</span>
+                                                    <span className="text-xs text-gray-500">
+                                                        ({status === 'breeder' ? 'Active' : 'Retired'})
+                                                    </span>
+                                                </div>
+                                            );
+                                        })}
+                                    </div>
+                                </div>
+                            );
+                        })}
+                    </div>
+                )}
             </div>
         </div>
     );
@@ -15315,7 +15734,7 @@ const BroadcastPoll = ({ poll, onVote, isVoting, styles }) => {
     
     return (
         <div className="mt-3">
-            <h4 className={`font-medium ${styles.title} mb-2 text-sm md:text-base`}>{poll.pollQuestion}</h4>
+            <h4 className={`font-medium ${styles.title} mb-2 text-base`}>{poll.pollQuestion}</h4>
             
             <div className="grid grid-cols-2 gap-2">
                 {poll.pollOptions?.map((option, index) => {
@@ -15328,7 +15747,7 @@ const BroadcastPoll = ({ poll, onVote, isVoting, styles }) => {
                             <button
                                 onClick={() => handleOptionToggle(index)}
                                 disabled={hasVoted || hasEnded || isVoting}
-                                className={`w-full text-left p-1.5 md:p-2 rounded-md border transition-all text-xs md:text-sm ${
+                                className={`w-full text-left p-2 rounded-md border transition-all text-sm ${
                                     hasVoted || hasEnded
                                         ? 'cursor-not-allowed opacity-60'
                                         : `cursor-pointer ${styles.optionBg} border-gray-300 hover:border-gray-400`
@@ -15340,7 +15759,7 @@ const BroadcastPoll = ({ poll, onVote, isVoting, styles }) => {
                             >
                                 <div className="flex items-center justify-between">
                                     <div className="flex items-center">
-                                        <div className={`w-3 h-3 md:w-3.5 md:h-3.5 rounded mr-1.5 md:mr-2.5 border-2 ${
+                                        <div className={`w-3.5 h-3.5 rounded mr-2.5 border-2 ${
                                             isSelected || hasUserVote 
                                                 ? 'bg-green-500 border-green-500' 
                                                 : 'border-gray-400'
@@ -15350,10 +15769,10 @@ const BroadcastPoll = ({ poll, onVote, isVoting, styles }) => {
                                             )}
                                         </div>
                                         <span className={styles.text}>{option.text}</span>
-                                        {hasUserVote && <span className="ml-1 md:ml-2 text-green-600 text-xs font-medium">(Your vote)</span>}
+                                        {hasUserVote && <span className="ml-2 text-green-600 text-xs font-medium">(Your vote)</span>}
                                     </div>
                                     {(hasVoted || hasEnded) && (
-                                        <div className="flex items-center gap-1 md:gap-2">
+                                        <div className="flex items-center gap-2">
                                             <span className={`${styles.subtitle} text-xs`}>
                                                 {option.votes || 0} votes ({percentage}%)
                                             </span>
@@ -15363,7 +15782,7 @@ const BroadcastPoll = ({ poll, onVote, isVoting, styles }) => {
                                 
                                 {/* Results bar */}
                                 {(hasVoted || hasEnded) && percentage > 0 && (
-                                    <div className="mt-1 md:mt-1.5 bg-gray-200 rounded-full h-1.5">
+                                    <div className="mt-1.5 bg-gray-200 rounded-full h-1.5">
                                         <div 
                                             className={`${styles.resultBar} h-1.5 rounded-full transition-all duration-300`}
                                             style={{ width: `${percentage}%` }}
@@ -15380,7 +15799,7 @@ const BroadcastPoll = ({ poll, onVote, isVoting, styles }) => {
                 <button
                     onClick={handleSubmitVote}
                     disabled={selectedOptions.length === 0 || isVoting}
-                    className={`mt-2 px-2.5 md:px-3 py-1 md:py-1.5 rounded-md text-xs md:text-sm font-medium transition-all ${
+                    className={`mt-2 px-3 py-1.5 rounded-md text-sm font-medium transition-all ${
                         selectedOptions.length === 0 || isVoting
                             ? 'bg-gray-300 text-gray-500 cursor-not-allowed'
                             : styles.button
@@ -15390,7 +15809,7 @@ const BroadcastPoll = ({ poll, onVote, isVoting, styles }) => {
                 </button>
             )}
             
-            <div className={`mt-1.5 md:mt-2 text-xs ${styles.subtitle} flex justify-between`}>
+            <div className={`mt-2 text-xs ${styles.subtitle} flex justify-between`}>
                 <span>Total votes: {getTotalVotes()}</span>
                 {poll.pollEndsAt && (
                     <span>
@@ -17874,21 +18293,12 @@ const App = () => {
                 {/* Public navigation header */}
                 <header className="w-full max-w-5xl bg-white p-4 rounded-xl shadow-lg mb-6 flex justify-between items-center">
                     <CustomAppLogo size="w-10 h-10" />
-                    <div className="flex items-center space-x-3">
-                        <button 
-                            onClick={() => setShowUserSearchModal(true)}
-                            className="px-3 py-2 bg-primary hover:bg-primary-dark text-black font-semibold rounded-lg transition flex items-center"
-                            data-tutorial-target="global-search-btn"
-                        >
-                            <Search size={18} className="mr-1" /> Search
-                        </button>
-                        <button 
-                            onClick={() => navigate('/genetics-calculator')}
-                            className="px-3 py-2 bg-primary hover:bg-primary-dark text-black font-semibold rounded-lg transition flex items-center"
-                        >
-                            <Cat size={18} className="mr-1" /> Calculator
-                        </button>
-                    </div>
+                    <button 
+                        onClick={() => navigate('/genetics-calculator')}
+                        className="px-3 py-2 bg-primary hover:bg-primary-dark text-black font-semibold rounded-lg transition flex items-center"
+                    >
+                        <Cat size={18} className="mr-1" /> Calculator
+                    </button>
                 </header>
                 
                 {showUserSearchModal && (
@@ -17982,7 +18392,7 @@ const App = () => {
                         <div className="space-y-3">
                             <div className="flex items-start gap-3">
                                 <div className="bg-primary/20 p-2 rounded-lg mt-0.5">
-                                    <ClipboardList size={18} className="text-primary-dark" />
+                                    <Cat size={18} className="text-primary-dark" />
                                 </div>
                                 <div>
                                     <h4 className="font-semibold text-gray-800 text-sm">Animal Management</h4>
@@ -18002,7 +18412,7 @@ const App = () => {
                             
                             <div className="flex items-start gap-3">
                                 <div className="bg-primary/20 p-2 rounded-lg mt-0.5">
-                                    <Cat size={18} className="text-primary-dark" />
+                                    <Calculator size={18} className="text-primary-dark" />
                                 </div>
                                 <div>
                                     <h4 className="font-semibold text-gray-800 text-sm">Genetics Calculator</h4>
@@ -18218,7 +18628,7 @@ const App = () => {
                     
                     <nav className="flex space-x-3">
                         <button onClick={() => navigate('/')} className={`px-4 py-2 text-xs font-medium rounded-lg transition duration-150 flex flex-col items-center ${currentView === 'list' ? 'bg-primary text-black shadow-md' : 'text-gray-600 hover:bg-gray-100'}`}>
-                            <ClipboardList size={18} className="mb-1" />
+                            <Cat size={18} className="mb-1" />
                             <span>Animals</span>
                         </button>
                         <button onClick={() => navigate('/litters')} data-tutorial-target="litters-btn" className={`px-4 py-2 text-xs font-medium rounded-lg transition duration-150 flex flex-col items-center ${currentView === 'litters' ? 'bg-primary text-black shadow-md' : 'text-gray-600 hover:bg-gray-100'}`}>
@@ -18234,15 +18644,19 @@ const App = () => {
                             <span>Shop</span>
                         </button>
                         <button onClick={() => navigate('/genetics-calculator')} data-tutorial-target="genetics-btn" className={`px-4 py-2 text-xs font-medium rounded-lg transition duration-150 flex flex-col items-center ${currentView === 'genetics-calculator' ? 'bg-primary text-black shadow-md' : 'text-gray-600 hover:bg-gray-100'}`}>
-                            <Cat size={18} className="mb-1" />
+                            <Calculator size={18} className="mb-1" />
                             <span>Calculator</span>
                         </button>
-                        {userProfile?.id_public === 'CTU2' && !isMobile && (
+                        {userProfile?.id_public === 'CTU2' && (
                             <button onClick={() => navigate('/family-tree')} className={`px-4 py-2 text-xs font-medium rounded-lg transition duration-150 flex flex-col items-center ${currentView === 'family-tree' ? 'bg-primary text-black shadow-md' : 'text-gray-600 hover:bg-gray-100'}`}>
                                 <Users size={18} className="mb-1" />
                                 <span>Family Tree</span>
                             </button>
                         )}
+                        <button onClick={() => navigate('/breeder-directory')} className={`px-4 py-2 text-xs font-medium rounded-lg transition duration-150 flex flex-col items-center ${currentView === 'breeder-directory' ? 'bg-primary text-black shadow-md' : 'text-gray-600 hover:bg-gray-100'}`}>
+                            <MoonStar size={18} className="mb-1" />
+                            <span>Breeders</span>
+                        </button>
                         <button onClick={() => navigate('/profile')} data-tutorial-target="profile-btn" className={`px-4 py-2 text-xs font-medium rounded-lg transition duration-150 flex flex-col items-center ${currentView === 'profile' ? 'bg-primary text-black shadow-md' : 'text-gray-600 hover:bg-gray-100'}`}>
                             <User size={18} className="mb-1" />
                             <span>Profile</span>
@@ -18387,7 +18801,7 @@ const App = () => {
                     {/* Second row: Navigation row 1 (4 buttons) */}
                     <nav className="grid grid-cols-4 gap-1 mb-1">
                         <button onClick={() => navigate('/')} className={`px-2 py-2 text-xs font-medium rounded-lg transition duration-150 flex flex-col items-center ${currentView === 'list' ? 'bg-primary text-black shadow-md' : 'text-gray-600 hover:bg-gray-100'}`}>
-                            <ClipboardList size={18} className="mb-0.5" />
+                            <Cat size={18} className="mb-0.5" />
                             <span>Animals</span>
                         </button>
                         <button onClick={() => navigate('/litters')} data-tutorial-target="litters-btn" className={`px-2 py-2 text-xs font-medium rounded-lg transition duration-150 flex flex-col items-center ${currentView === 'litters' ? 'bg-primary text-black shadow-md' : 'text-gray-600 hover:bg-gray-100'}`}>
@@ -18404,11 +18818,21 @@ const App = () => {
                         </button>
                     </nav>
 
-                    {/* Third row: Navigation row 2 (3 buttons) */}
-                    <nav className="grid grid-cols-3 gap-1">
+                    {/* Third row: Navigation row 2 (4 buttons) */}
+                    <nav className="grid grid-cols-4 gap-1">
                         <button onClick={() => navigate('/genetics-calculator')} data-tutorial-target="genetics-btn" className={`px-2 py-2 text-xs font-medium rounded-lg transition duration-150 flex flex-col items-center ${currentView === 'genetics-calculator' ? 'bg-primary text-black shadow-md' : 'text-gray-600 hover:bg-gray-100'}`}>
-                            <Cat size={18} className="mb-0.5" />
+                            <Calculator size={18} className="mb-0.5" />
                             <span>Calculator</span>
+                        </button>
+                        {userProfile?.id_public === 'CTU2' && (
+                            <button onClick={() => navigate('/family-tree')} className={`px-2 py-2 text-xs font-medium rounded-lg transition duration-150 flex flex-col items-center ${currentView === 'family-tree' ? 'bg-primary text-black shadow-md' : 'text-gray-600 hover:bg-gray-100'}`}>
+                                <Users size={18} className="mb-0.5" />
+                                <span>Family Tree</span>
+                            </button>
+                        )}
+                        <button onClick={() => navigate('/breeder-directory')} className={`px-2 py-2 text-xs font-medium rounded-lg transition duration-150 flex flex-col items-center ${currentView === 'breeder-directory' ? 'bg-primary text-black shadow-md' : 'text-gray-600 hover:bg-gray-100'}`}>
+                            <MoonStar size={18} className="mb-0.5" />
+                            <span>Breeders</span>
                         </button>
                         <button onClick={() => navigate('/profile')} data-tutorial-target="profile-btn" className={`px-2 py-2 text-xs font-medium rounded-lg transition duration-150 flex flex-col items-center ${currentView === 'profile' ? 'bg-primary text-black shadow-md' : 'text-gray-600 hover:bg-gray-100'}`}>
                             <User size={18} className="mb-0.5" />
@@ -18920,6 +19344,13 @@ const App = () => {
                         />
                     } />
                     <Route path="/profile" element={<ProfileView userProfile={userProfile} showModalMessage={showModalMessage} fetchUserProfile={fetchUserProfile} authToken={authToken} onProfileUpdated={setUserProfile} onProfileEditButtonClicked={setProfileEditButtonClicked} />} />
+                    <Route path="/breeder-directory" element={
+                        <BreederDirectory
+                            authToken={authToken}
+                            API_BASE_URL={API_BASE_URL}
+                            onBack={() => navigate('/')}
+                        />
+                    } />
                     <Route path="/litters" element={
                         <LitterManagement
                             authToken={authToken}
