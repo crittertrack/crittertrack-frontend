@@ -13247,12 +13247,13 @@ const BreederDirectory = ({ authToken, API_BASE_URL, onBack }) => {
                             return (
                                 <div
                                     key={breeder.id_public}
-                                    className="bg-white rounded-lg border border-gray-200 p-4 hover:shadow-md transition"
+                                    className="bg-white rounded-lg border border-gray-200 p-6 hover:shadow-md transition"
                                 >
-                                    <div className="flex gap-4">
+                                    {/* Header Row */}
+                                    <div className="flex items-start gap-4 mb-4">
                                         {/* Profile Picture */}
                                         <div className="flex-shrink-0">
-                                            <div className="w-16 h-16 bg-gray-100 rounded-full overflow-hidden">
+                                            <div className="w-20 h-20 bg-gray-100 rounded-full overflow-hidden">
                                                 {breeder.profileImage ? (
                                                     <img 
                                                         src={breeder.profileImage} 
@@ -13261,67 +13262,66 @@ const BreederDirectory = ({ authToken, API_BASE_URL, onBack }) => {
                                                     />
                                                 ) : (
                                                     <div className="w-full h-full flex items-center justify-center text-gray-400">
-                                                        <User size={32} />
+                                                        <User size={36} />
                                                     </div>
                                                 )}
                                             </div>
                                         </div>
 
-                                        {/* Main Content */}
+                                        {/* Name and CTU Badge */}
                                         <div className="flex-1 min-w-0">
-                                            {/* Name and Badges Row */}
-                                            <div className="flex items-start justify-between gap-4 mb-2">
-                                                <div className="flex items-center gap-2 flex-wrap">
-                                                    <h3 className="text-lg font-bold text-gray-800">{displayName}</h3>
-                                                    <span className="text-xs bg-primary text-black px-2 py-0.5 rounded font-medium">
-                                                        {breeder.id_public}
-                                                    </span>
-                                                    {breeder.country && (
-                                                        <div className="flex items-center gap-1.5">
-                                                            <span className={`${getCountryFlag(breeder.country)} inline-block h-3.5 w-5 flex-shrink-0`}></span>
-                                                            <span className="text-sm text-gray-600">{getCountryName(breeder.country)}</span>
-                                                        </div>
-                                                    )}
-                                                </div>
-                                                
-                                                {/* View Profile Button */}
-                                                <button
-                                                    onClick={() => navigate(`/user/${breeder.id_public}`)}
-                                                    className="px-3 py-1.5 bg-primary hover:bg-primary/80 text-black text-sm font-medium rounded transition flex-shrink-0"
-                                                >
-                                                    View Profile
-                                                </button>
+                                            <h3 className="text-xl font-bold text-gray-800 mb-1">{displayName}</h3>
+                                            <div className="flex items-center gap-3 flex-wrap">
+                                                <span className="text-xs bg-primary text-black px-2.5 py-1 rounded font-medium">
+                                                    {breeder.id_public}
+                                                </span>
+                                                {breeder.country && (
+                                                    <div className="flex items-center gap-2 text-sm text-gray-600">
+                                                        <span className={`${getCountryFlag(breeder.country)} inline-block h-4 w-6 flex-shrink-0`}></span>
+                                                        <span>{getCountryName(breeder.country)}</span>
+                                                    </div>
+                                                )}
                                             </div>
+                                        </div>
 
-                                            {/* Bio */}
-                                            {breeder.bio && (
-                                                <p className="text-sm text-gray-700 mb-2 leading-relaxed">
-                                                    {breeder.bio}
-                                                </p>
-                                            )}
+                                        {/* View Profile Button */}
+                                        <button
+                                            onClick={() => navigate(`/user/${breeder.id_public}`)}
+                                            className="px-4 py-2 bg-primary hover:bg-primary/80 text-black text-sm font-medium rounded transition flex-shrink-0"
+                                        >
+                                            View Profile
+                                        </button>
+                                    </div>
 
-                                            {/* Breeding Species */}
-                                            <div className="flex flex-wrap gap-2">
-                                                {breeder.breedingStatus && Object.entries(breeder.breedingStatus).map(([species, status]) => {
-                                                    if (status !== 'breeder' && status !== 'retired') return null;
-                                                    
-                                                    return (
-                                                        <div 
-                                                            key={species} 
-                                                            className="flex items-center gap-1.5 px-2.5 py-1 bg-gray-50 rounded-full border border-gray-200 text-xs"
-                                                        >
-                                                            {status === 'breeder' ? (
-                                                                <Star size={12} className="text-primary flex-shrink-0" />
-                                                            ) : (
-                                                                <Moon size={12} className="text-gray-500 flex-shrink-0" />
-                                                            )}
-                                                            <span className="font-medium text-gray-800">{getSpeciesDisplayName(species)}</span>
-                                                            <span className="text-gray-500">
-                                                                ({status === 'breeder' ? 'Active' : 'Retired'})
-                                                            </span>
-                                                        </div>
-                                                    );
-                                                })}
+                                    {/* Bio */}
+                                    {breeder.bio && (
+                                        <p className="text-sm text-gray-700 mb-4 leading-relaxed">
+                                            {breeder.bio}
+                                        </p>
+                                    )}
+
+                                    {/* Breeding Species */}
+                                    <div className="flex flex-wrap gap-3">
+                                        {breeder.breedingStatus && Object.entries(breeder.breedingStatus).map(([species, status]) => {
+                                            if (status !== 'breeder' && status !== 'retired') return null;
+                                            
+                                            return (
+                                                <div 
+                                                    key={species} 
+                                                    className="flex items-center gap-2 px-3 py-1.5 bg-gray-50 rounded-full border border-gray-200"
+                                                >
+                                                    {status === 'breeder' ? (
+                                                        <Star size={14} className="text-primary" />
+                                                    ) : (
+                                                        <Moon size={14} className="text-gray-500" />
+                                                    )}
+                                                    <span className="text-sm font-medium text-gray-800">{getSpeciesDisplayName(species)}</span>
+                                                    <span className="text-xs text-gray-500">
+                                                        ({status === 'breeder' ? 'Active' : 'Retired'})
+                                                    </span>
+                                                </div>
+                                            );
+                                        })}
                                     </div>
                                 </div>
                             );
