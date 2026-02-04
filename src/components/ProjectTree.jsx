@@ -298,8 +298,7 @@ const ProjectTreeContent = ({ authToken, userProfile, showModalMessage, onViewAn
                 image: animal.imageUrl || animal.photoUrl || null,
                 isOwned: animal.isOwned,
                 isSelected: selectedAnimal?.id_public === animal.id_public,
-                animal: animal,
-                onClick: () => handleNodeClick(animal)
+                animal: animal
             }
         }));
         
@@ -436,12 +435,21 @@ const ProjectTreeContent = ({ authToken, userProfile, showModalMessage, onViewAn
         }, 100);
     };
 
-    const handleNodeClick = (animal) => {
+    const handleNodeClick = useCallback((event, node) => {
+        const animal = node.data.animal;
         setSelectedAnimal(animal);
-        if (onViewAnimal) {
-            onViewAnimal(animal);
-        }
-    };
+        
+        // Update selected state in nodes
+        setNodes(nodes => 
+            nodes.map(n => ({
+                ...n,
+                data: {
+                    ...n.data,
+                    isSelected: n.id === node.id
+                }
+            }))
+        );
+    }, [setNodes]);
 
     // Apply search filter
     const filteredNodes = useMemo(() => {
@@ -567,6 +575,7 @@ const ProjectTreeContent = ({ authToken, userProfile, showModalMessage, onViewAn
                     edges={edges}
                     onNodesChange={onNodesChange}
                     onEdgesChange={onEdgesChange}
+                    onNodeClick={handleNodeClick}
                     nodeTypes={nodeTypes}
                     fitView
                     minZoom={0.1}
@@ -579,6 +588,184 @@ const ProjectTreeContent = ({ authToken, userProfile, showModalMessage, onViewAn
                     <Background color="#e5e7eb" gap={16} />
                     <Controls />
                 </ReactFlow>
+                
+                {/* Selected Animal Detail Panel */}
+                {selectedAnimal && (
+                <div className="absolute top-4 right-4 w-80 bg-white rounded-lg shadow-2xl border border-gray-200 z-10" 
+                     style={{ 
+                         maxWidth: 'calc(100% - 40px)', 
+                         maxHeight: 'calc(100vh - 140px)',
+                         paddingBottom: '20px'
+                     }}>
+                    <div className="max-h-full overflow-y-auto p-4" style={{ maxHeight: 'calc(100vh - 180px)' }}>
+                    <div className="flex justify-between items-start mb-4">
+                        <div>
+                            <h3 className="text-xl font-bold text-gray-800">
+                                {[selectedAnimal.prefix, selectedAnimal.name, selectedAnimal.suffix].filter(Boolean).join(' ')}
+                            </h3>
+                            <p className="text-sm text-gray-600 font-mono mt-1">{selectedAnimal.id_public}</p>
+                        </div>
+                        <button
+                            onClick={() => {
+                                setSelectedAnimal(null);
+                                setNodes(nodes => 
+                                    nodes.map(n => ({
+                                        ...n,
+                                        data: {
+                                            ...n.data,
+                                            isSelected: false
+                                        }
+                                    }))
+                                );
+                            }}
+                            className="text-gray-400 hover:text-gray-600"
+                        >
+                            <X size={20} />
+                        </button>
+                    </div>
+                    
+                    {/* Image or Placeholder */}
+                    <div className="w-full h-48 mb-4 rounded-lg overflow-hidden border-2 border-gray-200 bg-gray-100">
+                        {(selectedAnimal.imageUrl || selectedAnimal.photoUrl) ? (
+                            <img
+                                src={selectedAnimal.imageUrl || selectedAnimal.photoUrl}
+                                alt={selectedAnimal.name}
+                                className="w-full h-full object-cover"
+                            />
+                        ) : (
+                            <div className="w-full h-full flex items-center justify-center text-gray-400">
+                                <div className="text-center">
+                                    <Users size={48} className="mx-auto mb-2" />
+                                    <p className="text-sm">No image available</p>
+                                </div>
+                            </div>
+                        )}
+                    </div>
+                    
+                    <div className="space-y-2 mb-4 text-sm">
+                        {selectedAnimal.birthDate && (
+                            <div>
+                                {(() => {
+                                    const birthDate = new Date(selectedAnimal.birthDate);
+                                    const today = new Date();
+                                    const ageInDays = Math.floor((today - birthDate) / (1000 * 60 * 60 * 24));
+                                    const ageInMonths = Math.floor(ageInDays / 30);
+                                    const remainingDays = ageInDays % 30;
+                                    const ageInYears = Math.floor(ageInDays / 365);
+                                    
+                                    // Format date as DD/MM/YYYY
+                                    const formattedDate = formatDate(birthDate);
+                                    
+                                    // Format age
+                                    let ageStr = '';
+                                    if (ageInYears > 0) {
+                                        const remainingMonths = Math.floor((ageInDays % 365) / 30);
+                                        ageStr = `~${ageInYears}y${remainingMonths > 0 ? ' ' + remainingMonths + 'm' : ''}`;
+                                    } else if (ageInMonths > 0) {
+                                        ageStr = `~${ageInMonths}m${remainingDays > 0 ? ' ' + remainingDays + 'd' : ''}`;
+                                    } else {
+                                        ageStr = `~${ageInDays}d`;
+                                    }
+                                    
+                                    return `${formattedDate} (${ageStr})`;
+                                })()}
+                            </div>
+                        )}
+                        {(selectedAnimal.color || selectedAnimal.coat || selectedAnimal.coatPattern) && (
+                            <div>
+                                {[selectedAnimal.color, selectedAnimal.coatPattern, selectedAnimal.coat].filter(Boolean).join(', ')}
+                            </div>
+                        )}
+                    </div>
+                    
+                    <div className="border-t pt-4 mt-4">
+                        {/* Relationships Section */}
+                        <h4 className="font-bold text-gray-800 mb-3">Relationships</h4>
+                        
+                        {/* Parent Info Grid */}
+                        <div className="grid grid-cols-2 gap-4 text-sm mb-4">
+                            {/* Sire Info Column */}
+                            <div>
+                                {(() => {
+                                    const sire = allAnimals?.find(a => a.id_public === selectedAnimal.sireId_public);
+                                    if (!sire) return <div className="text-gray-400 text-xs">Not available</div>;
+                                    
+                                    return (
+                                        <div className="mb-3">
+                                            <div className="text-gray-700 font-medium">
+                                                <span className="text-blue-600 font-bold text-lg mr-1.5">♂</span>
+                                                {[sire.prefix, sire.name, sire.suffix].filter(Boolean).join(' ')}
+                                            </div>
+                                            <div className="font-mono text-xs text-gray-500">({sire.id_public})</div>
+                                        </div>
+                                    );
+                                })()}
+                            </div>
+                            
+                            {/* Dam Info Column */}
+                            <div>
+                                {(() => {
+                                    const dam = allAnimals?.find(a => a.id_public === selectedAnimal.damId_public);
+                                    if (!dam) return <div className="text-gray-400 text-xs">Not available</div>;
+                                    
+                                    return (
+                                        <div className="mb-3">
+                                            <div className="text-gray-700 font-medium">
+                                                <span className="text-pink-600 font-bold text-lg mr-1.5">♀</span>
+                                                {[dam.prefix, dam.name, dam.suffix].filter(Boolean).join(' ')}
+                                            </div>
+                                            <div className="font-mono text-xs text-gray-500">({dam.id_public})</div>
+                                        </div>
+                                    );
+                                })()}
+                            </div>
+                        </div>
+                        
+                        {/* Children Section */}
+                        {(() => {
+                            const children = allAnimals?.filter(a => 
+                                a.sireId_public === selectedAnimal.id_public || 
+                                a.damId_public === selectedAnimal.id_public
+                            );
+                            return children && children.length > 0 ? (
+                                <div className="border-t pt-3 mt-3">
+                                    <div className="font-semibold text-purple-600 mb-2 text-sm">Children:</div>
+                                    <div className="space-y-1 text-sm max-h-32 overflow-y-auto pr-2">
+                                        {children.map(child => {
+                                            const partner = child.sireId_public === selectedAnimal.id_public
+                                                ? allAnimals?.find(a => a.id_public === child.damId_public)
+                                                : allAnimals?.find(a => a.id_public === child.sireId_public);
+                                            
+                                            return (
+                                                <div key={child.id_public} className="text-gray-700">
+                                                    {[child.prefix, child.name, child.suffix].filter(Boolean).join(' ')}
+                                                    <span className="font-mono text-xs text-gray-500 ml-1">({child.id_public})</span>
+                                                    {partner && (
+                                                        <span className="text-gray-500 text-xs ml-2">
+                                                            with {[partner.prefix, partner.name, partner.suffix].filter(Boolean).join(' ')}
+                                                            <span className="font-mono ml-1">({partner.id_public})</span>
+                                                        </span>
+                                                    )}
+                                                </div>
+                                            );
+                                        })}
+                                    </div>
+                                </div>
+                            ) : null;
+                        })()}
+                    </div>
+                    
+                    <div className="p-4 pt-2 border-t bg-white">
+                        <button
+                            onClick={() => onViewAnimal && onViewAnimal(selectedAnimal)}
+                            className="w-full px-4 py-3 bg-primary hover:bg-primary-dark text-black font-semibold rounded-lg transition"
+                        >
+                            View Full Details
+                        </button>
+                    </div>
+                </div>
+                </div>
+            )}
             </div>
         </div>
     );
