@@ -2202,11 +2202,65 @@ const ADVANCED_FEATURES_LESSONS = [
   },
 
   {
+    id: 'af-animal-tree',
+    title: '7. Animal Tree Visualization',
+    description: 'View your animals in an interactive family tree by species',
+    tour: 'advanced-features',
+    tourOrder: 7,
+    steps: [
+      {
+        stepNumber: 1,
+        title: 'Animal Tree Overview',
+        content: 'The Animal Tree provides a visual family tree for each species, showing all your owned animals and their immediate parents. Click the Users icon next to a species name on your My Animals page to view the tree for that species.',
+        tips: [
+          'Visual family tree per species',
+          'Shows owned animals + parents',
+          'Interactive drag and zoom',
+          'Organized by generations'
+        ]
+      },
+      {
+        stepNumber: 2,
+        title: 'Navigate the Tree',
+        content: 'The tree displays animals as nodes connected by lines showing parent-child relationships. You can click and drag to pan around, zoom in/out, and click on any animal to view their full details.',
+        tips: [
+          'Drag to pan the view',
+          'Scroll or pinch to zoom',
+          'Click animals to view details',
+          'Different colors show gender'
+        ]
+      },
+      {
+        stepNumber: 3,
+        title: 'Search in Tree',
+        content: 'Use the search bar to find specific animals in the tree. When you search, matching animals will be highlighted, making it easy to locate them even in large family trees.',
+        tips: [
+          'Search by animal name',
+          'Matching animals highlighted',
+          'Useful for large collections',
+          'Clear search to reset view'
+        ]
+      },
+      {
+        stepNumber: 4,
+        title: 'Understanding Connections',
+        content: 'Lines connect parents to offspring. Your owned animals are shown prominently, while parents (which may be from other breeders) appear with different styling. This helps you visualize your entire breeding lineage at a glance.',
+        tips: [
+          'Lines show parent-child links',
+          'Owned animals clearly marked',
+          'Parent animals may be view-only',
+          'Great for understanding lineages'
+        ]
+      }
+    ]
+  },
+
+  {
     id: 'af-genetics-calculator',
-    title: '6. Genetics Calculator',
+    title: '8. Genetics Calculator',
     description: 'Use the genetics calculator to predict offspring traits',
     tour: 'advanced-features',
-    tourOrder: 6,
+    tourOrder: 8,
     steps: [
       {
         stepNumber: 1,
