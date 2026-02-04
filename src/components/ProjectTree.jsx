@@ -249,7 +249,8 @@ const ProjectTreeContent = ({ authToken, userProfile, showModalMessage, onViewAn
                     species: animal.species,
                     sex: 'Male',
                     gender: 'Male',
-                    isOwned: false
+                    isOwned: false,
+                    isPrivate: true
                 });
             }
             
@@ -260,7 +261,8 @@ const ProjectTreeContent = ({ authToken, userProfile, showModalMessage, onViewAn
                     species: animal.species,
                     sex: 'Female',
                     gender: 'Female',
-                    isOwned: false
+                    isOwned: false,
+                    isPrivate: true
                 });
             }
         });
@@ -642,6 +644,7 @@ const ProjectTreeContent = ({ authToken, userProfile, showModalMessage, onViewAn
                         )}
                     </div>
                     
+                    {!selectedAnimal.isPrivate && (
                     <div className="space-y-2 mb-4 text-sm">
                         {selectedAnimal.birthDate && (
                             <div>
@@ -677,7 +680,9 @@ const ProjectTreeContent = ({ authToken, userProfile, showModalMessage, onViewAn
                             </div>
                         )}
                     </div>
+                    )}
                     
+                    {!selectedAnimal.isPrivate && (
                     <div className="border-t pt-4 mt-4">
                         {/* Relationships Section */}
                         <h4 className="font-bold text-gray-800 mb-3">Relationships</h4>
@@ -754,7 +759,9 @@ const ProjectTreeContent = ({ authToken, userProfile, showModalMessage, onViewAn
                             ) : null;
                         })()}
                     </div>
+                    )}
                     
+                    {!selectedAnimal.isPrivate && (
                     <div className="p-4 pt-2 border-t bg-white">
                         <button
                             onClick={() => onViewAnimal && onViewAnimal(selectedAnimal)}
@@ -763,6 +770,7 @@ const ProjectTreeContent = ({ authToken, userProfile, showModalMessage, onViewAn
                             View Full Details
                         </button>
                     </div>
+                    )}
                 </div>
                 </div>
             )}
