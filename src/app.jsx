@@ -14419,7 +14419,6 @@ const AnimalList = ({ authToken, showModalMessage, onEditAnimal, onViewAnimal, f
                         : animal
                 );
                 setAnimals(updatedAnimals);
-                showModalMessage('Success', `Animal is now ${newPrivacyValue ? 'public' : 'private'}.`);
             } else {
                 showModalMessage('Error', 'Failed to update privacy setting.');
             }
@@ -14462,7 +14461,6 @@ const AnimalList = ({ authToken, showModalMessage, onEditAnimal, onViewAnimal, f
                     : animal
             );
             setAnimals(updatedAnimals);
-            showModalMessage('Success', `Successfully made ${animalIds.length} animals ${action}.`);
         } catch (error) {
             console.error('Error updating bulk privacy:', error);
             showModalMessage('Error', 'Failed to update privacy settings.');
@@ -14500,7 +14498,6 @@ const AnimalList = ({ authToken, showModalMessage, onEditAnimal, onViewAnimal, f
                 showOnPublicProfile: makePublic
             }));
             setAnimals(updatedAnimals);
-            showModalMessage('Success', `Successfully made all ${animals.length} animals ${action}.`);
         } catch (error) {
             console.error('Error updating all animals privacy:', error);
             showModalMessage('Error', 'Failed to update privacy settings.');
@@ -19437,7 +19434,6 @@ const App = () => {
                                                                         });
                                                                         if (response.ok) {
                                                                             setAnimalToView({ ...animalToView, isDisplay: newIsDisplay });
-                                                                            showModalMessage('Success', `Animal is now ${newIsDisplay ? 'public' : 'private'}.`);
                                                                         } else {
                                                                             showModalMessage('Error', 'Failed to update visibility.');
                                                                         }
