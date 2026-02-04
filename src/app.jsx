@@ -4398,7 +4398,7 @@ const ViewOnlyAnimalDetail = ({ animal, onClose, API_BASE_URL, onViewProfile, au
                             )}
 
                             {/* Parents Section */}
-                            {sectionPrivacy.lineage && (animal.fatherId_public || animal.sireId_public || animal.motherId_public || animal.damId_public) && (
+                            {(animal.fatherId_public || animal.sireId_public || animal.motherId_public || animal.damId_public) && (
                                 <div className="bg-gray-50 p-4 rounded-lg border border-gray-200">
                                     <h3 className="text-lg font-semibold text-gray-700 border-b pb-2 mb-4">Parents</h3>
                                     <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
