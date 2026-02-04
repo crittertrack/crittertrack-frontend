@@ -18546,6 +18546,15 @@ const App = () => {
                     </nav>
 
                     <div className="flex items-center space-x-3">
+                        <button
+                            onClick={() => navigate('/breeder-directory')}
+                            className="px-4 py-2 text-xs font-medium rounded-lg transition duration-150 flex flex-col items-center text-gray-600 hover:bg-gray-100"
+                            title="Find Breeders"
+                        >
+                            <Star size={18} className="mb-1" />
+                            <span>Breeders</span>
+                        </button>
+
                         <button 
                             onClick={() => setShowUserSearchModal(true)} 
                             className="flex flex-col items-center justify-center bg-gray-100 hover:bg-gray-200 text-gray-600 py-2 px-3 rounded-lg transition duration-150 shadow-sm"
@@ -18554,15 +18563,6 @@ const App = () => {
                         >
                             <Search size={18} className="mb-1" />
                             <span className="text-xs">Search</span>
-                        </button>
-
-                        <button
-                            onClick={() => navigate('/breeder-directory')}
-                            className="flex flex-col items-center justify-center bg-gray-100 hover:bg-gray-200 text-gray-600 py-2 px-3 rounded-lg transition duration-150 shadow-sm"
-                            title="Find Breeders"
-                        >
-                            <Star size={18} className="mb-1" />
-                            <span className="text-xs">Breeders</span>
                         </button>
 
                         <button
@@ -18615,6 +18615,14 @@ const App = () => {
                         <CustomAppLogo size="w-8 h-8" className="flex-shrink-0" />
                         
                         <div className="flex items-center space-x-2 flex-shrink-0">
+                            <button
+                                onClick={() => navigate('/breeder-directory')}
+                                className="flex items-center justify-center text-gray-600 hover:bg-gray-100 p-2 rounded-lg transition duration-150"
+                                title="Find Breeders"
+                            >
+                                <Star size={18} />
+                            </button>
+
                             <button 
                                 onClick={() => setShowUserSearchModal(true)} 
                                 className="flex items-center justify-center bg-gray-100 hover:bg-gray-200 text-gray-600 p-2 rounded-lg transition duration-150 shadow-sm"
@@ -18622,14 +18630,6 @@ const App = () => {
                                 data-tutorial-target="global-search-btn"
                             >
                                 <Search size={18} />
-                            </button>
-
-                            <button
-                                onClick={() => navigate('/breeder-directory')}
-                                className="flex items-center justify-center bg-gray-100 hover:bg-gray-200 text-gray-600 p-2 rounded-lg transition duration-150 shadow-sm"
-                                title="Find Breeders"
-                            >
-                                <Star size={18} />
                             </button>
 
                             <button
