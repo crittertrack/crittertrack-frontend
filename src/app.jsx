@@ -18405,7 +18405,7 @@ const App = () => {
                         <div className="space-y-3">
                             <div className="flex items-start gap-3">
                                 <div className="bg-primary/20 p-2 rounded-lg mt-0.5">
-                                    <ClipboardList size={18} className="text-primary-dark" />
+                                    <Cat size={18} className="text-primary-dark" />
                                 </div>
                                 <div>
                                     <h4 className="font-semibold text-gray-800 text-sm">Animal Management</h4>
@@ -18425,7 +18425,7 @@ const App = () => {
                             
                             <div className="flex items-start gap-3">
                                 <div className="bg-primary/20 p-2 rounded-lg mt-0.5">
-                                    <Cat size={18} className="text-primary-dark" />
+                                    <Calculator size={18} className="text-primary-dark" />
                                 </div>
                                 <div>
                                     <h4 className="font-semibold text-gray-800 text-sm">Genetics Calculator</h4>
