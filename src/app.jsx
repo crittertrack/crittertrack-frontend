@@ -14400,6 +14400,115 @@ const AnimalList = ({ authToken, showModalMessage, onEditAnimal, onViewAnimal, f
         });
     };
 
+    const toggleAnimalPrivacy = async (animalId, newPrivacyValue) => {
+        try {
+            const response = await fetch(`${API_BASE_URL}/animals/${animalId}`, {
+                method: 'PUT',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Authorization': `Bearer ${authToken}`
+                },
+                body: JSON.stringify({ showOnPublicProfile: newPrivacyValue })
+            });
+
+            if (response.ok) {
+                // Update local state
+                const updatedAnimals = animals.map(animal => 
+                    animal.id_public === animalId 
+                        ? { ...animal, showOnPublicProfile: newPrivacyValue }
+                        : animal
+                );
+                setAnimals(updatedAnimals);
+                showModalMessage('Success', `Animal is now ${newPrivacyValue ? 'public' : 'private'}.`);
+            } else {
+                showModalMessage('Error', 'Failed to update privacy setting.');
+            }
+        } catch (error) {
+            console.error('Error updating privacy:', error);
+            showModalMessage('Error', 'Failed to update privacy setting.');
+        }
+    };
+
+    const toggleBulkPrivacy = async (species, makePublic) => {
+        const speciesAnimals = groupedAnimals[species] || [];
+        const animalIds = speciesAnimals.map(animal => animal.id_public);
+        
+        if (animalIds.length === 0) {
+            showModalMessage('No Animals', 'No animals found for this species.');
+            return;
+        }
+
+        const action = makePublic ? 'public' : 'private';
+        const confirmChange = window.confirm(`Are you sure you want to make all ${animalIds.length} ${getSpeciesDisplayName(species)} animals ${action}?`);
+        if (!confirmChange) return;
+
+        try {
+            setLoading(true);
+            for (const animalId of animalIds) {
+                await fetch(`${API_BASE_URL}/animals/${animalId}`, {
+                    method: 'PUT',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': `Bearer ${authToken}`
+                    },
+                    body: JSON.stringify({ showOnPublicProfile: makePublic })
+                });
+            }
+
+            // Update local state
+            const updatedAnimals = animals.map(animal => 
+                animalIds.includes(animal.id_public) 
+                    ? { ...animal, showOnPublicProfile: makePublic }
+                    : animal
+            );
+            setAnimals(updatedAnimals);
+            showModalMessage('Success', `Successfully made ${animalIds.length} animals ${action}.`);
+        } catch (error) {
+            console.error('Error updating bulk privacy:', error);
+            showModalMessage('Error', 'Failed to update privacy settings.');
+        } finally {
+            setLoading(false);
+        }
+    };
+
+    const toggleAllAnimalsPrivacy = async (makePublic) => {
+        if (animals.length === 0) {
+            showModalMessage('No Animals', 'No animals found.');
+            return;
+        }
+
+        const action = makePublic ? 'public' : 'private';
+        const confirmChange = window.confirm(`Are you sure you want to make ALL ${animals.length} animals ${action}?`);
+        if (!confirmChange) return;
+
+        try {
+            setLoading(true);
+            for (const animal of animals) {
+                await fetch(`${API_BASE_URL}/animals/${animal.id_public}`, {
+                    method: 'PUT',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': `Bearer ${authToken}`
+                    },
+                    body: JSON.stringify({ showOnPublicProfile: makePublic })
+                });
+            }
+
+            // Update local state
+            const updatedAnimals = animals.map(animal => ({
+                ...animal,
+                showOnPublicProfile: makePublic
+            }));
+            setAnimals(updatedAnimals);
+            showModalMessage('Success', `Successfully made all ${animals.length} animals ${action}.`);
+        } catch (error) {
+            console.error('Error updating all animals privacy:', error);
+            showModalMessage('Error', 'Failed to update privacy settings.');
+        } finally {
+            setLoading(false);
+        }
+    };
+
     const handleBulkDelete = async (species) => {
         const selectedIds = selectedAnimals[species] || [];
         if (selectedIds.length === 0) {
@@ -14429,7 +14538,7 @@ const AnimalList = ({ authToken, showModalMessage, onEditAnimal, onViewAnimal, f
         }
     };
 
-    const AnimalCard = ({ animal, onEditAnimal, species, isSelectable, isSelected, onToggleSelect }) => {
+    const AnimalCard = ({ animal, onEditAnimal, species, isSelectable, isSelected, onToggleSelect, onTogglePrivacy }) => {
         const birth = animal.birthDate ? formatDate(animal.birthDate) : '';
         const imgSrc = animal.imageUrl || animal.photoUrl || null;
 
@@ -14459,9 +14568,16 @@ const AnimalList = ({ authToken, showModalMessage, onEditAnimal, onViewAnimal, f
                             />
                         </div>
                     )}
-                    {/* Birthdate top-left - only show if not in selection mode, hidden on mobile */}
+                    {/* Transfer icon top-left */}
+                    {(animal.soldStatus || animal.isViewOnly) && !isSelectable && (
+                        <div className="absolute top-1 sm:top-2 left-1 sm:left-2 text-black" title="Transferred Animal">
+                            <ArrowLeftRight className="w-3 h-3 sm:w-3.5 sm:h-3.5" strokeWidth={2.5} />
+                        </div>
+                    )}
+
+                    {/* Birthdate center-top - only show if not in selection mode */}
                     {birth && !isSelectable && (
-                        <div className="absolute top-1 sm:top-2 left-1 sm:left-2 text-[10px] sm:text-xs text-gray-600 bg-white/80 px-1 sm:px-2 py-0.5 rounded hidden sm:block">
+                        <div className="absolute top-1 sm:top-2 left-1/2 transform -translate-x-1/2 text-[10px] sm:text-xs text-gray-600 bg-white/80 px-1 sm:px-2 py-0.5 rounded">
                             {birth}
                         </div>
                     )}
@@ -14510,14 +14626,25 @@ const AnimalList = ({ authToken, showModalMessage, onEditAnimal, onViewAnimal, f
 
                     {/* ID bottom-right */}
                     <div className="w-full px-1 sm:px-2 pb-1 sm:pb-2 flex justify-between items-center">
-                        {/* Transfer icon bottom-left */}
-                        {(animal.soldStatus || animal.isViewOnly) && (
-                            <div className="text-black" title="Transferred Animal">
-                                <ArrowLeftRight className="w-3 h-3 sm:w-3.5 sm:h-3.5" strokeWidth={2.5} />
-                            </div>
+                        {/* Privacy toggle bottom-left */}
+                        {!isSelectable && (
+                            <button
+                                onClick={(e) => {
+                                    e.stopPropagation();
+                                    onTogglePrivacy && onTogglePrivacy(animal.id_public, !animal.showOnPublicProfile);
+                                }}
+                                className="text-black hover:text-gray-600 transition"
+                                title={animal.showOnPublicProfile ? "Make Private" : "Make Public"}
+                            >
+                                {animal.showOnPublicProfile ? (
+                                    <Eye className="w-3 h-3 sm:w-3.5 sm:h-3.5" strokeWidth={2.5} />
+                                ) : (
+                                    <EyeOff className="w-3 h-3 sm:w-3.5 sm:h-3.5" strokeWidth={2.5} />
+                                )}
+                            </button>
                         )}
-                        {/* Spacer if no transfer icon */}
-                        {!(animal.soldStatus || animal.isViewOnly) && <div></div>}
+                        {/* Spacer if no privacy toggle (in selection mode) */}
+                        {isSelectable && <div></div>}
                         <div className="text-[9px] sm:text-[10px] md:text-xs text-gray-500">{animal.id_public}</div>
                     </div>
                     
@@ -14542,6 +14669,22 @@ const AnimalList = ({ authToken, showModalMessage, onEditAnimal, onViewAnimal, f
                     My Animals ({animals.length})
                 </div>
                 <div className="flex items-center gap-2">
+                    <button
+                        onClick={() => toggleAllAnimalsPrivacy(true)}
+                        className="text-gray-600 hover:text-blue-600 transition flex items-center gap-1 px-3 py-1.5 rounded-lg hover:bg-blue-50"
+                        title="Make All Animals Public"
+                    >
+                        <Eye size={16} />
+                        <span className="text-sm font-medium">All Public</span>
+                    </button>
+                    <button
+                        onClick={() => toggleAllAnimalsPrivacy(false)}
+                        className="text-gray-600 hover:text-gray-800 transition flex items-center gap-1 px-3 py-1.5 rounded-lg hover:bg-gray-100"
+                        title="Make All Animals Private"
+                    >
+                        <EyeOff size={16} />
+                        <span className="text-sm font-medium">All Private</span>
+                    </button>
                     <button 
                         onClick={() => { navigate('/hidden-animals'); fetchHiddenAnimals(); }}
                         data-tutorial-target="hidden-animals-btn"
@@ -14804,6 +14947,20 @@ const AnimalList = ({ authToken, showModalMessage, onEditAnimal, onViewAnimal, f
                                                 <Users className="w-4 h-4 sm:w-[18px] sm:h-[18px] text-blue-500" />
                                             </button>
                                             <button
+                                                onClick={() => toggleBulkPrivacy(species, true)}
+                                                className="p-1.5 sm:p-2 hover:bg-gray-200 rounded-lg transition"
+                                                title="Make All Public"
+                                            >
+                                                <Eye className="w-4 h-4 sm:w-[18px] sm:h-[18px] text-blue-600" />
+                                            </button>
+                                            <button
+                                                onClick={() => toggleBulkPrivacy(species, false)}
+                                                className="p-1.5 sm:p-2 hover:bg-gray-200 rounded-lg transition"
+                                                title="Make All Private"
+                                            >
+                                                <EyeOff className="w-4 h-4 sm:w-[18px] sm:h-[18px] text-gray-600" />
+                                            </button>
+                                            <button
                                                 onClick={() => toggleBulkDeleteMode(species)}
                                                 data-tutorial-target="bulk-delete-btn"
                                                 className="p-1.5 sm:p-2 hover:bg-gray-200 rounded-lg transition"
@@ -14827,6 +14984,7 @@ const AnimalList = ({ authToken, showModalMessage, onEditAnimal, onViewAnimal, f
                                             isSelectable={isBulkMode}
                                             isSelected={selected.includes(animal.id_public)}
                                             onToggleSelect={toggleAnimalSelection}
+                                            onTogglePrivacy={toggleAnimalPrivacy}
                                         />
                                     ))}
                                 </div>
