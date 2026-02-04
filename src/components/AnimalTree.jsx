@@ -20,7 +20,7 @@ import { formatDate } from '../utils/dateFormatter';
 const API_BASE_URL = '/api';
 
 /**
- * ProjectTree Component
+ * AnimalTree Component
  * 
  * Displays a simplified family tree visualization showing:
  * - Only owned animals and their immediate parents
@@ -142,7 +142,7 @@ const AnimalNode = ({ data }) => {
     );
 };
 
-const ProjectTreeContent = ({ authToken, userProfile, showModalMessage, onViewAnimal, onBack }) => {
+const AnimalTreeContent = ({ authToken, userProfile, showModalMessage, onViewAnimal, onBack }) => {
     const { species: urlSpecies } = useParams();
     const decodedSpecies = urlSpecies ? decodeURIComponent(urlSpecies) : 'all';
     
@@ -169,7 +169,7 @@ const ProjectTreeContent = ({ authToken, userProfile, showModalMessage, onViewAn
             setError(null);
             
             try {
-                console.log('[ProjectTree] Fetching owned animals...');
+                console.log('[AnimalTree] Fetching owned animals...');
                 
                 // Get all owned animals (active)
                 const ownedResponse = await axios.get(`${API_BASE_URL}/animals`, {
@@ -177,7 +177,7 @@ const ProjectTreeContent = ({ authToken, userProfile, showModalMessage, onViewAn
                 });
                 
                 let ownedAnimals = ownedResponse.data;
-                console.log(`[ProjectTree] Found ${ownedAnimals.length} active owned animals`);
+                console.log(`[AnimalTree] Found ${ownedAnimals.length} active owned animals`);
                 
                 // Also fetch hidden/transferred animals
                 try {
@@ -185,14 +185,14 @@ const ProjectTreeContent = ({ authToken, userProfile, showModalMessage, onViewAn
                         headers: { Authorization: `Bearer ${authToken}` }
                     });
                     if (hiddenResponse.data && hiddenResponse.data.length > 0) {
-                        console.log(`[ProjectTree] Found ${hiddenResponse.data.length} hidden/transferred animals`);
+                        console.log(`[AnimalTree] Found ${hiddenResponse.data.length} hidden/transferred animals`);
                         ownedAnimals = [...ownedAnimals, ...hiddenResponse.data];
                     }
                 } catch (hiddenError) {
-                    console.log('[ProjectTree] No hidden animals or error fetching:', hiddenError.message);
+                    console.log('[AnimalTree] No hidden animals or error fetching:', hiddenError.message);
                 }
                 
-                console.log(`[ProjectTree] Total owned animals (including hidden): ${ownedAnimals.length}`);
+                console.log(`[AnimalTree] Total owned animals (including hidden): ${ownedAnimals.length}`);
                 
                 // Collect all parent IDs
                 const parentIds = new Set();
@@ -201,7 +201,7 @@ const ProjectTreeContent = ({ authToken, userProfile, showModalMessage, onViewAn
                     if (animal.damId_public) parentIds.add(animal.damId_public);
                 });
                 
-                console.log(`[ProjectTree] Found ${parentIds.size} unique parent references`);
+                console.log(`[AnimalTree] Found ${parentIds.size} unique parent references`);
                 
                 // Fetch parent details if any
                 let parentAnimals = [];
@@ -213,14 +213,14 @@ const ProjectTreeContent = ({ authToken, userProfile, showModalMessage, onViewAn
                             headers: { Authorization: `Bearer ${authToken}` }
                         });
                         parentAnimals = parentsResponse.data;
-                        console.log(`[ProjectTree] Retrieved ${parentAnimals.length} parent animals from batch`);
+                        console.log(`[AnimalTree] Retrieved ${parentAnimals.length} parent animals from batch`);
                         
                         // For parents not returned by batch (private animals), try fetching basic public info
                         const fetchedIds = new Set(parentAnimals.map(a => a.id_public));
                         const missingIds = Array.from(parentIds).filter(id => !fetchedIds.has(id));
                         
                         if (missingIds.length > 0) {
-                            console.log(`[ProjectTree] Fetching basic info for ${missingIds.length} private/related parents`);
+                            console.log(`[AnimalTree] Fetching basic info for ${missingIds.length} private/related parents`);
                             
                             // Fetch each missing parent from /animals/any endpoint (returns owned, public, or related)
                             for (const parentId of missingIds) {
@@ -234,10 +234,10 @@ const ProjectTreeContent = ({ authToken, userProfile, showModalMessage, onViewAn
                                             ...anyResponse.data,
                                             isPrivate: true
                                         });
-                                        console.log(`[ProjectTree] Found info for ${parentId} via /animals/any`);
+                                        console.log(`[AnimalTree] Found info for ${parentId} via /animals/any`);
                                     }
                                 } catch (anyError) {
-                                    console.log(`[ProjectTree] Could not fetch ${parentId} from /animals/any, trying public endpoint`);
+                                    console.log(`[AnimalTree] Could not fetch ${parentId} from /animals/any, trying public endpoint`);
                                     // Fallback to public endpoint
                                     try {
                                         const publicResponse = await axios.get(`${API_BASE_URL}/public/global/animals?id_public=${parentId}`);
@@ -247,16 +247,16 @@ const ProjectTreeContent = ({ authToken, userProfile, showModalMessage, onViewAn
                                                 ...publicAnimal,
                                                 isPrivate: true
                                             });
-                                            console.log(`[ProjectTree] Found basic info for ${parentId} via public endpoint`);
+                                            console.log(`[AnimalTree] Found basic info for ${parentId} via public endpoint`);
                                         }
                                     } catch (publicError) {
-                                        console.log(`[ProjectTree] No info available for ${parentId}`);
+                                        console.log(`[AnimalTree] No info available for ${parentId}`);
                                     }
                                 }
                             }
                         }
                     } catch (err) {
-                        console.error('[ProjectTree] Failed to fetch parent details:', err);
+                        console.error('[AnimalTree] Failed to fetch parent details:', err);
                         // Continue without parent details
                     }
                 }
@@ -273,7 +273,7 @@ const ProjectTreeContent = ({ authToken, userProfile, showModalMessage, onViewAn
                 setLoading(false);
             } catch (err) {
                 console.error('[ProjectTree] Failed to fetch animals:', err);
-                setError('Failed to load project tree data');
+                setError('Failed to load animal tree data');
                 setLoading(false);
             }
         };
@@ -553,7 +553,7 @@ const ProjectTreeContent = ({ authToken, userProfile, showModalMessage, onViewAn
             <div className="flex items-center justify-center h-screen bg-gray-50">
                 <div className="text-center">
                     <Loader2 className="w-12 h-12 animate-spin text-primary mx-auto mb-4" />
-                    <p className="text-gray-600">Building your project tree...</p>
+                    <p className="text-gray-600">Building your animal tree...</p>
                 </div>
             </div>
         );
@@ -588,7 +588,7 @@ const ProjectTreeContent = ({ authToken, userProfile, showModalMessage, onViewAn
                     </button>
                     <div className="flex-1 min-w-0">
                         <h1 className="text-lg sm:text-2xl font-bold text-gray-800 truncate">
-                            Project Tree {decodedSpecies && decodedSpecies !== 'all' && `- ${decodedSpecies}`}
+                            Animal Tree {decodedSpecies && decodedSpecies !== 'all' && `- ${decodedSpecies}`}
                         </h1>
                         <p className="text-xs sm:text-sm text-gray-600 truncate">
                             {allAnimals.length} animals • Your collection and their parents
@@ -828,12 +828,12 @@ const ProjectTreeContent = ({ authToken, userProfile, showModalMessage, onViewAn
     );
 };
 
-const ProjectTree = (props) => {
+const AnimalTree = (props) => {
     return (
         <ReactFlowProvider>
-            <ProjectTreeContent {...props} />
+            <AnimalTreeContent {...props} />
         </ReactFlowProvider>
     );
 };
 
-export default ProjectTree;
+export default AnimalTree;

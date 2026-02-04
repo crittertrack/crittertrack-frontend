@@ -26,7 +26,7 @@ import ModOversightPanel from './components/moderation/ModOversightPanel';
 import ModeratorActionSidebar from './components/moderation/ModeratorActionSidebar';
 import Marketplace from './components/Marketplace';
 import FamilyTree from './components/FamilyTree';
-import ProjectTree from './components/ProjectTree';
+import AnimalTree from './components/AnimalTree';
 
 // const API_BASE_URL = 'http://localhost:5000/api'; // Local development
 // const API_BASE_URL = 'https://crittertrack-pedigree-production.up.railway.app/api'; // Direct Railway (for testing)
@@ -18900,8 +18900,8 @@ const App = () => {
                             </div>
                         )
                     } />
-                    <Route path="/project-tree/:species" element={
-                        <ProjectTree
+                    <Route path="/animal-tree/:species" element={
+                        <AnimalTree
                             authToken={authToken}
                             userProfile={userProfile}
                             showModalMessage={showModalMessage}
