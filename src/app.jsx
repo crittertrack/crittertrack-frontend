@@ -26,6 +26,7 @@ import ModOversightPanel from './components/moderation/ModOversightPanel';
 import ModeratorActionSidebar from './components/moderation/ModeratorActionSidebar';
 import Marketplace from './components/Marketplace';
 import FamilyTree from './components/FamilyTree';
+import ProjectTree from './components/ProjectTree';
 
 // const API_BASE_URL = 'http://localhost:5000/api'; // Local development
 // const API_BASE_URL = 'https://crittertrack-pedigree-production.up.railway.app/api'; // Direct Railway (for testing)
@@ -14703,14 +14704,23 @@ const AnimalList = ({ authToken, showModalMessage, onEditAnimal, onViewAnimal, f
                                         </>
                                     )}
                                     {!isBulkMode && (
-                                        <button
-                                            onClick={() => toggleBulkDeleteMode(species)}
-                                            data-tutorial-target="bulk-delete-btn"
-                                            className="p-1.5 sm:p-2 hover:bg-gray-200 rounded-lg transition"
-                                            title="Delete Multiple"
-                                        >
-                                            <Trash2 className="w-4 h-4 sm:w-[18px] sm:h-[18px] text-red-500" />
-                                        </button>
+                                        <>
+                                            <button
+                                                onClick={() => navigate(`/project-tree/${encodeURIComponent(species)}`)}
+                                                className="p-1.5 sm:p-2 hover:bg-gray-200 rounded-lg transition"
+                                                title="Project Tree"
+                                            >
+                                                <Users className="w-4 h-4 sm:w-[18px] sm:h-[18px] text-blue-500" />
+                                            </button>
+                                            <button
+                                                onClick={() => toggleBulkDeleteMode(species)}
+                                                data-tutorial-target="bulk-delete-btn"
+                                                className="p-1.5 sm:p-2 hover:bg-gray-200 rounded-lg transition"
+                                                title="Delete Multiple"
+                                            >
+                                                <Trash2 className="w-4 h-4 sm:w-[18px] sm:h-[18px] text-red-500" />
+                                            </button>
+                                        </>
                                     )}
                                 </div>
                             </div>
@@ -18889,6 +18899,15 @@ const App = () => {
                                 </button>
                             </div>
                         )
+                    } />
+                    <Route path="/project-tree/:species" element={
+                        <ProjectTree
+                            authToken={authToken}
+                            userProfile={userProfile}
+                            showModalMessage={showModalMessage}
+                            onViewAnimal={handleViewAnimal}
+                            onBack={() => navigate('/')}
+                        />
                     } />
                     <Route path="/profile" element={<ProfileView userProfile={userProfile} showModalMessage={showModalMessage} fetchUserProfile={fetchUserProfile} authToken={authToken} onProfileUpdated={setUserProfile} onProfileEditButtonClicked={setProfileEditButtonClicked} />} />
                     <Route path="/litters" element={
