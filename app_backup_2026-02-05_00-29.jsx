@@ -14413,15 +14413,6 @@ const AnimalList = ({ authToken, showModalMessage, onEditAnimal, onViewAnimal, f
     };
 
     const toggleAnimalPrivacy = async (animalId, newPrivacyValue) => {
-        // Update local state immediately for instant UI feedback
-        const updatedAnimals = animals.map(animal => 
-            animal.id_public === animalId 
-                ? { ...animal, showOnPublicProfile: newPrivacyValue, isDisplay: newPrivacyValue }
-                : animal
-        );
-        setAnimals(updatedAnimals);
-
-        // Update database in the background
         try {
             const response = await fetch(`${API_BASE_URL}/animals/${animalId}`, {
                 method: 'PUT',
@@ -14429,31 +14420,22 @@ const AnimalList = ({ authToken, showModalMessage, onEditAnimal, onViewAnimal, f
                     'Content-Type': 'application/json',
                     'Authorization': `Bearer ${authToken}`
                 },
-                body: JSON.stringify({ 
-                    showOnPublicProfile: newPrivacyValue,
-                    isDisplay: newPrivacyValue 
-                })
+                body: JSON.stringify({ showOnPublicProfile: newPrivacyValue })
             });
 
-            if (!response.ok) {
-                // Revert on failure
-                const revertedAnimals = animals.map(animal => 
+            if (response.ok) {
+                // Update local state
+                const updatedAnimals = animals.map(animal => 
                     animal.id_public === animalId 
-                        ? { ...animal, showOnPublicProfile: !newPrivacyValue, isDisplay: !newPrivacyValue }
+                        ? { ...animal, showOnPublicProfile: newPrivacyValue }
                         : animal
                 );
-                setAnimals(revertedAnimals);
+                setAnimals(updatedAnimals);
+            } else {
                 showModalMessage('Error', 'Failed to update privacy setting.');
             }
         } catch (error) {
             console.error('Error updating privacy:', error);
-            // Revert on error
-            const revertedAnimals = animals.map(animal => 
-                animal.id_public === animalId 
-                    ? { ...animal, showOnPublicProfile: !newPrivacyValue, isDisplay: !newPrivacyValue }
-                    : animal
-            );
-            setAnimals(revertedAnimals);
             showModalMessage('Error', 'Failed to update privacy setting.');
         }
     };
@@ -14471,38 +14453,31 @@ const AnimalList = ({ authToken, showModalMessage, onEditAnimal, onViewAnimal, f
         const confirmChange = window.confirm(`Are you sure you want to make all ${animalIds.length} ${getSpeciesDisplayName(species)} animals ${action}?`);
         if (!confirmChange) return;
 
-        // Update local state immediately for instant UI feedback
-        const updatedAnimals = animals.map(animal => 
-            animalIds.includes(animal.id_public) 
-                ? { ...animal, showOnPublicProfile: makePublic, isDisplay: makePublic }
-                : animal
-        );
-        setAnimals(updatedAnimals);
-
-        // Update database in the background
-        let failedUpdates = 0;
-        for (const animalId of animalIds) {
-            try {
+        try {
+            setLoading(true);
+            for (const animalId of animalIds) {
                 await fetch(`${API_BASE_URL}/animals/${animalId}`, {
                     method: 'PUT',
                     headers: {
                         'Content-Type': 'application/json',
                         'Authorization': `Bearer ${authToken}`
                     },
-                    body: JSON.stringify({ 
-                        showOnPublicProfile: makePublic,
-                        isDisplay: makePublic 
-                    })
+                    body: JSON.stringify({ showOnPublicProfile: makePublic })
                 });
-            } catch (error) {
-                console.error(`Error updating animal ${animalId}:`, error);
-                failedUpdates++;
             }
-        }
 
-        // Show notification if there were failures
-        if (failedUpdates > 0) {
-            showModalMessage('Partial Success', `Updated locally, but ${failedUpdates} animal(s) failed to sync with the server. They will be updated on next refresh.`);
+            // Update local state
+            const updatedAnimals = animals.map(animal => 
+                animalIds.includes(animal.id_public) 
+                    ? { ...animal, showOnPublicProfile: makePublic }
+                    : animal
+            );
+            setAnimals(updatedAnimals);
+        } catch (error) {
+            console.error('Error updating bulk privacy:', error);
+            showModalMessage('Error', 'Failed to update privacy settings.');
+        } finally {
+            setLoading(false);
         }
     };
 
@@ -14516,38 +14491,30 @@ const AnimalList = ({ authToken, showModalMessage, onEditAnimal, onViewAnimal, f
         const confirmChange = window.confirm(`Are you sure you want to make ALL ${animals.length} animals ${action}?`);
         if (!confirmChange) return;
 
-        // Update local state immediately for instant UI feedback
-        const updatedAnimals = animals.map(animal => ({
-            ...animal,
-            showOnPublicProfile: makePublic,
-            isDisplay: makePublic
-        }));
-        setAnimals(updatedAnimals);
-
-        // Update database in the background
-        let failedUpdates = 0;
-        for (const animal of animals) {
-            try {
+        try {
+            setLoading(true);
+            for (const animal of animals) {
                 await fetch(`${API_BASE_URL}/animals/${animal.id_public}`, {
                     method: 'PUT',
                     headers: {
                         'Content-Type': 'application/json',
                         'Authorization': `Bearer ${authToken}`
                     },
-                    body: JSON.stringify({ 
-                        showOnPublicProfile: makePublic,
-                        isDisplay: makePublic 
-                    })
+                    body: JSON.stringify({ showOnPublicProfile: makePublic })
                 });
-            } catch (error) {
-                console.error(`Error updating animal ${animal.id_public}:`, error);
-                failedUpdates++;
             }
-        }
 
-        // Show notification if there were failures
-        if (failedUpdates > 0) {
-            showModalMessage('Partial Success', `Updated locally, but ${failedUpdates} animal(s) failed to sync with the server. They will be updated on next refresh.`);
+            // Update local state
+            const updatedAnimals = animals.map(animal => ({
+                ...animal,
+                showOnPublicProfile: makePublic
+            }));
+            setAnimals(updatedAnimals);
+        } catch (error) {
+            console.error('Error updating all animals privacy:', error);
+            showModalMessage('Error', 'Failed to update privacy settings.');
+        } finally {
+            setLoading(false);
         }
     };
 
