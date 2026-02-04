@@ -2093,11 +2093,120 @@ const ADVANCED_FEATURES_LESSONS = [
   },
 
   {
-    id: 'af-genetics-calculator',
-    title: '4. Genetics Calculator',
-    description: 'Use the genetics calculator to predict offspring traits',
+    id: 'af-marketplace',
+    title: '4. Marketplace',
+    description: 'Browse and discover animals available for sale or stud',
     tour: 'advanced-features',
     tourOrder: 4,
+    steps: [
+      {
+        stepNumber: 1,
+        title: 'Marketplace Overview',
+        content: 'The Marketplace lets you browse animals that breeders have marked as "Available for Sale" or "Available for Stud". Only animals that are both marked as available AND have their public profile enabled will appear here.',
+        highlightElement: '[data-tutorial-target="marketplace-btn"]',
+        tips: [
+          'Find animals for sale',
+          'Discover stud services',
+          'Connect with breeders',
+          'Filter by species and location'
+        ]
+      },
+      {
+        stepNumber: 2,
+        title: 'Search and Filter',
+        content: 'Use the search bar to find animals by name, and filter by species, gender, country, and availability type (For Sale vs For Stud). This helps you narrow down exactly what you\'re looking for.',
+        tips: [
+          'Search by animal name',
+          'Filter by multiple criteria',
+          'Find local breeders',
+          'Specify what you need'
+        ]
+      },
+      {
+        stepNumber: 3,
+        title: 'Animal Cards',
+        content: 'Each animal card shows the photo, name, price/fee, gender, species, and location. Click on a card to view the full animal profile with pedigree, genetics, and other details.',
+        tips: [
+          'See key info at a glance',
+          'Prices shown with currency',
+          'Click for full details',
+          'View pedigree and lineage'
+        ]
+      },
+      {
+        stepNumber: 4,
+        title: 'Contact Breeders',
+        content: 'When viewing an animal, you can contact the breeder through their public profile to inquire about availability, ask questions, or arrange a purchase or stud service.',
+        tips: [
+          'Message breeders directly',
+          'Ask about availability',
+          'Negotiate terms',
+          'Arrange safe transactions'
+        ]
+      }
+    ]
+  },
+
+  {
+    id: 'af-breeder-directory',
+    title: '5. Breeder Directory',
+    description: 'Discover and connect with breeders around the world',
+    tour: 'advanced-features',
+    tourOrder: 5,
+    steps: [
+      {
+        stepNumber: 1,
+        title: 'Breeder Directory Overview',
+        content: 'The Breeder Directory helps you find active breeders of specific species. Click the star/moon icon in the header to access it. Breeders can mark themselves as "Active Breeder" or "Retired Breeder" for each species in their settings.',
+        tips: [
+          'Find breeders by species',
+          'Connect with the community',
+          'Search by name or location',
+          'Filter by country and species'
+        ]
+      },
+      {
+        stepNumber: 2,
+        title: 'Setting Your Breeding Status',
+        content: 'In your Settings, you can mark yourself as an "Active Breeder", "Retired Breeder", or "Owner" for each species you keep. Active and Retired breeders appear in the directory. This is optional - you only appear if you choose to.',
+        tips: [
+          'Choose your status per species',
+          'Only opt-in if you want to be listed',
+          'Update status as your program changes',
+          'Active breeders marked with star icon'
+        ]
+      },
+      {
+        stepNumber: 3,
+        title: 'Search and Filter Breeders',
+        content: 'Search by breeder name or ID, and filter by species they breed and country. This helps you find local breeders or specialists in specific species.',
+        tips: [
+          'Find local breeders',
+          'Search by species',
+          'Filter by country',
+          'Discover specialists'
+        ]
+      },
+      {
+        stepNumber: 4,
+        title: 'Breeder Profiles',
+        content: 'Click on a breeder card to view their public profile. You can see their animals, contact information (if they\'ve made it public), website, and breeding program.',
+        tips: [
+          'View their animals',
+          'See what they breed',
+          'Contact via message or email',
+          'Visit their website if available'
+        ]
+      }
+    ]
+  },
+
+  {
+    id: 'af-genetics-calculator',
+    title: '6. Genetics Calculator',
+    description: 'Use the genetics calculator to predict offspring traits',
+    tour: 'advanced-features',
+    tourOrder: 6,
     steps: [
       {
         stepNumber: 1,
