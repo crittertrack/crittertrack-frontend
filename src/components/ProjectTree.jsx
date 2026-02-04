@@ -591,13 +591,13 @@ const ProjectTreeContent = ({ authToken, userProfile, showModalMessage, onViewAn
                 
                 {/* Selected Animal Detail Panel */}
                 {selectedAnimal && (
-                <div className="absolute top-4 right-4 w-80 bg-white rounded-lg shadow-2xl border border-gray-200 z-10" 
+                <div className="absolute top-20 right-4 w-80 bg-white rounded-lg shadow-2xl border border-gray-200 z-10" 
                      style={{ 
                          maxWidth: 'calc(100% - 40px)', 
-                         maxHeight: 'calc(100vh - 140px)',
+                         maxHeight: 'calc(100vh - 200px)',
                          paddingBottom: '20px'
                      }}>
-                    <div className="max-h-full overflow-y-auto p-4" style={{ maxHeight: 'calc(100vh - 180px)' }}>
+                    <div className="max-h-full overflow-y-auto p-4" style={{ maxHeight: 'calc(100vh - 240px)' }}>
                     <div className="flex justify-between items-start mb-4">
                         <div>
                             <h3 className="text-xl font-bold text-gray-800">
