@@ -18291,8 +18291,14 @@ const App = () => {
                 {showModal && <ModalMessage title={modalMessage.title} message={modalMessage.message} onClose={() => setShowModal(false)} />}
                 
                 {/* Public navigation header */}
-                <header className="w-full max-w-5xl bg-white p-4 rounded-xl shadow-lg mb-6 flex justify-center items-center">
+                <header className="w-full max-w-5xl bg-white p-4 rounded-xl shadow-lg mb-6 flex justify-between items-center">
                     <CustomAppLogo size="w-10 h-10" />
+                    <button 
+                        onClick={() => navigate('/genetics-calculator')}
+                        className="px-3 py-2 bg-primary hover:bg-primary-dark text-black font-semibold rounded-lg transition flex items-center"
+                    >
+                        <Cat size={18} className="mr-1" /> Calculator
+                    </button>
                 </header>
                 
                 {showUserSearchModal && (
