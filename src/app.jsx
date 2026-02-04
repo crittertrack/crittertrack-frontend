@@ -2403,7 +2403,7 @@ const PrivateAnimalDetail = ({ animal, onClose, onEdit, API_BASE_URL, authToken,
                                                 <div>
                                                     <p className="text-sm font-semibold text-gray-700">For Sale</p>
                                                     <p className="text-sm text-gray-600">
-                                                        {animal.salePriceCurrency === 'Negotiable' || !animal.salePriceAmount ? 'Negotiable' : `${animal.salePriceCurrency === 'USD' ? '$' : animal.salePriceCurrency === 'EUR' ? '?' : animal.salePriceCurrency === 'GBP' ? '?' : animal.salePriceCurrency === 'CAD' ? 'C$' : animal.salePriceCurrency === 'AUD' ? 'A$' : animal.salePriceCurrency === 'JPY' ? '?' : animal.salePriceCurrency}${animal.salePriceAmount ? ` ${animal.salePriceAmount}` : ''}`}
+                                                        {animal.salePriceCurrency === 'Negotiable' || !animal.salePriceAmount ? 'Negotiable' : `${animal.salePriceCurrency === 'USD' ? '$' : animal.salePriceCurrency === 'EUR' ? '€' : animal.salePriceCurrency === 'GBP' ? '£' : animal.salePriceCurrency === 'CAD' ? 'C$' : animal.salePriceCurrency === 'AUD' ? 'A$' : animal.salePriceCurrency === 'JPY' ? '¥' : animal.salePriceCurrency}${animal.salePriceAmount ? ` ${animal.salePriceAmount}` : ''}`}
                                                     </p>
                                                 </div>
                                             </div>
