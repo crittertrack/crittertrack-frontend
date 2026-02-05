@@ -1967,7 +1967,7 @@ const ADVANCED_FEATURES_LESSONS = [
       {
         stepNumber: 3,
         title: 'Public Animal Profiles',
-        content: 'When you make an animal public, other users can see its profile including lineage, genetics (if shared), breeding history, and availability.',
+        content: 'When you make an animal public, other users can see its profile including lineage, genetics, breeding history, and availability.',
         highlightElement: '[data-tutorial-target="public-animal-profile"]',
         hideHighlightPrompt: true,
         tips: [
