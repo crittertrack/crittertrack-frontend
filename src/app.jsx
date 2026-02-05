@@ -14717,7 +14717,7 @@ const AnimalList = ({ authToken, showModalMessage, onEditAnimal, onViewAnimal, f
                     <ClipboardList size={24} className="mr-3 text-primary-dark" />
                     My Animals ({animals.length})
                 </div>
-                <div className="flex items-center gap-2">
+                <div className="flex items-center gap-2" data-tutorial-target="bulk-privacy-controls">
                     <button
                         onClick={() => toggleAllAnimalsPrivacy(true)}
                         className="text-green-600 hover:text-green-700 transition flex items-center gap-1 px-3 py-1.5 rounded-lg hover:bg-green-50"

@@ -1909,7 +1909,7 @@ const ADVANCED_FEATURES_LESSONS = [
         stepNumber: 4,
         title: 'Bulk Privacy Controls',
         content: 'At the top of the My Animals page, you\'ll see "All Public" and "All Private" buttons. These let you instantly change the visibility of ALL your animals at once. The UI updates immediately, and changes sync with the database in the background.',
-        highlightElement: '[data-tutorial-target="add-animal-btn"]',
+        highlightElement: '[data-tutorial-target="bulk-privacy-controls"]',
         hideHighlightPrompt: true,
         tips: [
           'Green Eye icon = Make All Public',
