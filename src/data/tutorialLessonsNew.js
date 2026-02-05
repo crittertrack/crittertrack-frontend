@@ -848,8 +848,8 @@ const GETTING_STARTED_LESSONS = [
       },
       {
         stepNumber: 4,
-        title: 'Medical History',
-        content: 'Document any medical conditions, illnesses, or injuries your animal has had. Include dates, treatments, and outcomes.',
+        title: 'Active Medical Records',
+        content: 'Track current medical conditions, allergies, and medications. This section helps you monitor ongoing health issues and treatments.',
         highlightElement: '[data-tutorial-target="medical-history-section"]',
         tips: [
           'Complete medical records are valuable',
