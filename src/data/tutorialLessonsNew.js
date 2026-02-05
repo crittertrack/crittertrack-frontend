@@ -254,70 +254,44 @@ const GETTING_STARTED_LESSONS = [
       },
       {
         stepNumber: 2,
-        title: 'Ownership - Currently Owned',
-        content: 'This checkbox indicates that you currently own this animal. It should be checked for animals in your collection. Uncheck it if you\'ve already sold or rehomed the animal.',
+        title: 'Breeder Assignment',
+        content: 'The Breeder section lets you specify who bred this animal. You can either select a registered CritterTrack user as the breeder, or enter a manual name if they\'re not a registered user. Click the field to search for users.',
         highlightElement: '[data-tutorial-target="ownership-section"]',
-        actionType: 'click',
         tips: [
-          'Checked = you own the animal',
-          'Unchecked = you used to own it but don\'t anymore',
-          'This affects visibility and permissions'
+          'Click to search for registered breeders',
+          'Search by name or ID across the platform',
+          'Use Manual Name field for non-registered breeders',
+          'Tracks breeding history and lineage'
         ]
       },
       {
         stepNumber: 3,
-        title: 'Assign Breeder',
-        content: 'Click here to specify who the breeder of this animal is. When you click this button, a search modal will appear letting you pick a user that could be the breeder. You can search for breeders across the entire website.',
-        highlightElement: '[data-tutorial-target="ownership-section"]',
-        actionType: 'click',
+        title: 'Current Owner Section',
+        content: 'This section tracks ownership. Check "Currently Owned by Me" if you own the animal. The Owner Name field lets you record the owner\'s name for your records and builds an ownership history.',
+        highlightElement: '[data-tutorial-target="current-owner-field"]',
         tips: [
-          'This tracks breeding history',
-          'Can search by name or ID',
-          'The breeder might be a different person/breeder'
+          'Checkbox: Currently owned vs previously owned',
+          'Owner Name: Records for tracking',
+          'Ownership history is automatically maintained',
+          'Useful when transferring animals'
         ]
       },
       {
         stepNumber: 4,
-        title: 'Current Owner',
-        content: 'This field records who currently owns the animal for your personal administrative use. Enter the owner\'s name to keep detailed ownership records. This helps you maintain a complete ownership history.',
-        highlightElement: '[data-tutorial-target="current-owner-field"]',
-        actionType: 'click',
-        tips: [
-          'Updates automatically when you own the animal',
-          'Shows new owner when transferred',
-          'Clicking allows you to assign current owner'
-        ]
-      },
-      {
-        stepNumber: 5,
-        title: 'Public Profile Visibility',
-        content: 'This toggle controls whether your animal appears on your public profile. Click the button to toggle between Public (🌍) and Private (🔒). When public, other CritterTrack users can see this animal\'s information (subject to section privacy toggles). When private, the animal is only visible to you.',
-        highlightElement: '[data-tutorial-target="visibility-section"]',
-        actionType: 'click',
-        tips: [
-          'Public = appears on your public profile',
-          'Private = only visible to you',
-          'Toggle button at top right of Overview tab',
-          'Toggling instantly updates the setting'
-        ]
-      },
-      {
-        stepNumber: 6,
         title: 'Availability for Sale or Stud',
-        content: 'Use this section to make your animal available in the public showcase. When you enable "Available for Sale" or "Available for Stud", the price/fee fields will appear inline below the checkbox. Set your desired currency and amount (or select Negotiable). Only public animals marked for sale or stud will appear in the showcase.',
+        content: 'Use this section to make your animal available in the public Marketplace. When you enable "Available for Sale" or "Available for Stud", the price/fee fields will appear inline below the checkbox. Set your desired currency and amount (or select Negotiable). Only public animals marked for sale or stud will appear in the Marketplace.',
         highlightElement: '[data-tutorial-target="availability-for-sale-stud"]',
         tips: [
           'Enable "Available for Sale" to list with a price',
           'Enable "Available for Stud" to offer breeding services',
-          'When enabled, currency and amount fields appear directly below',
-          'Select currency (USD/EUR/GBP/CAD/AUD/JPY) or choose Negotiable',
-          'Enter the price or fee amount in the amount field',
-          'Requires Public Profile to be enabled',
-          'Public + For Sale/Stud = appears in showcase'
+          'When enabled, currency and amount fields appear below',
+          'Select currency (USD/EUR/GBP/CAD/AUD/JPY) or Negotiable',
+          'Requires Public Profile to be enabled (on Overview tab)',
+          'Public + For Sale/Stud = appears in Marketplace'
         ]
       },
       {
-        stepNumber: 7,
+        stepNumber: 5,
         title: 'Move to Physical Tab',
         content: 'Now let\'s continue to the Physical tab to add more details about your animal\'s physical characteristics. Click the "Physical" tab.',
         highlightElement: '[data-tutorial-target="physical-tab"]',
@@ -874,8 +848,8 @@ const GETTING_STARTED_LESSONS = [
       },
       {
         stepNumber: 4,
-        title: 'Medical History',
-        content: 'Document any medical conditions, illnesses, or injuries your animal has had. Include dates, treatments, and outcomes.',
+        title: 'Active Medical Records',
+        content: 'Track current medical conditions, allergies, and medications. This section helps you monitor ongoing health issues and treatments.',
         highlightElement: '[data-tutorial-target="medical-history-section"]',
         tips: [
           'Complete medical records are valuable',
@@ -1118,87 +1092,70 @@ const GETTING_STARTED_LESSONS = [
       },
       {
         stepNumber: 8,
-        title: 'Back to Status & Privacy',
-        content: 'Now let\'s go back to the Status & Privacy tab to review the privacy settings one more time before saving. Click the "Status & Privacy" tab.',
-        highlightElement: '[data-tutorial-target="status-privacy-tab"]',
+        title: 'Move to Show Tab',
+        content: 'Now let\'s check out the Show tab where you can document titles, ratings, and accomplishments. Click the "Show" tab.',
+        highlightElement: '[data-tutorial-target="show-tab"]',
         actionType: 'click',
         tips: [
-          'Final privacy review',
-          'Make sure settings are correct',
-          'Privacy affects data visibility'
+          'Track titles and awards',
+          'Record competition results',
+          'Document your animal\'s achievements'
         ]
       }
     ]
   },
 
   {
-    id: 'gs-privacy-save',
-    title: '13. Privacy Settings & Saving Your Animal',
-    description: 'Review privacy settings and save your complete animal record',
+    id: 'gs-show',
+    title: '13. Show Titles & Accomplishments',
+    description: 'Document show titles, ratings, and achievements',
     tour: 'getting-started',
     tourOrder: 13,
     steps: [
       {
         stepNumber: 1,
-        title: 'Privacy Review',
-        content: 'This is our final stop in the Getting Started tour. Let\'s review the privacy toggles. Throughout the app, you\'ll see privacy toggles (eye icons or checkboxes) next to various sections. When checked/visible, that section is visible to other users (if your animal is public). When unchecked/hidden, only you can see it.',
-        highlightElement: '[data-tutorial-target="status-privacy-tab"]',
+        title: 'Show Tab',
+        content: 'This tab is where you document your animal\'s show titles, ratings, judge comments, and any accomplishments from competitions or events.',
+        highlightElement: '[data-tutorial-target="show-tab"]',
         tips: [
-          'Privacy toggles control visibility',
-          'Affects sharing with other users',
-          'You always see everything'
+          'Important for competitive animals',
+          'Track progression over time',
+          'Valuable for breeding programs'
         ]
       },
       {
         stepNumber: 2,
-        title: 'Example Privacy Toggles',
-        content: 'For example, the "Public Profile" checkbox controls whether the whole animal appears publicly. Individual sections might have their own toggles. The "Current Owner" field has a toggle to show/hide owner information - you can decide whether to display owner details publicly or keep them private. These toggles let you share some info while keeping other details private.',
-        highlightElement: '[data-tutorial-target="visibility-section"], [data-tutorial-target="owner-privacy-toggle"]',
+        title: 'Show Titles & Ratings',
+        content: 'Document any official titles your animal has earned at shows or competitions. Show Titles might include "Champion (CH)", "Grand Champion (GCH)", or "Best in Show". Show Ratings include scores and ratings like "Excellent" or "Very Good".',
+        highlightElement: '[data-tutorial-target="show-titles-section"]',
         tips: [
-          'Different sections have different toggles',
-          'Toggle buttons show 🌍 Public or 🔒 Private',
-          'Strategic privacy increases sharing',
-          'You control what\'s visible',
-          'Helpful for protecting sensitive info'
+          'List all titles earned',
+          'Include abbreviations and full names',
+          'Helps track accomplishments',
+          'Valuable for marketing breeding animals'
         ]
       },
       {
         stepNumber: 3,
-        title: 'Save Your Animal',
-        content: 'Now you\'re ready! Click the "Save Animal" button at the bottom to finalize your animal record. All the information from all tabs will be saved together.',
-        highlightElement: '[data-tutorial-target="save-animal-btn"]',
-        actionType: 'click',
+        title: 'Judge Comments',
+        content: 'Record any notable feedback or comments from judges at shows or competitions. This can help you understand your animal\'s strengths and areas for improvement.',
+        highlightElement: '[data-tutorial-target="judge-comments-textarea"]',
         tips: [
-          'This is the final step',
-          'All tabs are saved together',
-          'Can edit anytime after saving',
-          'Your first animal is now created!'
+          'Valuable feedback for breeders',
+          'Helps identify strengths',
+          'Useful for breeding decisions',
+          'Can guide future showing strategy'
         ]
       },
       {
         stepNumber: 4,
-        title: 'Congratulations!',
-        content: 'You\'ve successfully completed the Getting Started tour and created your first animal! You now understand how to document every aspect of an animal in CritterTrack - from basic info to genetics to health to breeding records.',
-        highlightElement: '[data-tutorial-target="success-message"]',
-        hideHighlightPrompt: true,
+        title: 'Tutorial Complete!',
+        content: 'Congratulations! You\'ve completed the Getting Started tour and learned about all the tabs and features for documenting your animals in CritterTrack. You can now create and manage your collection with confidence.',
         tips: [
           'You can create more animals anytime',
           'Edit animals at any time',
           'All information is preserved',
-          'Start the Key Features tour next'
-        ]
-      },
-      {
-        stepNumber: 5,
-        title: 'Next: Key Features Tour',
-        content: 'Congratulations on completing the Getting Started tour! You now know how to create and configure animals. Would you like to start the "Key Features" tour? This will teach you about viewing and editing animals, creating litters, managing your profile, and handling finances.',
-        actionType: 'startNextTour',
-        actionData: { nextTour: 'features' },
-        tips: [
-          'Key Features builds on Getting Started',
-          'Covers litters, profile, budget',
-          'You can start it anytime from the tutorial menu',
-          'Optional but highly recommended'
+          'Explore the Key Features tour next'
         ]
       }
     ]
@@ -1233,13 +1190,13 @@ const KEY_FEATURES_LESSONS = [
       {
         stepNumber: 2,
         title: 'Private Toggle',
-        content: 'The private/public toggle controls whether this entire animal appears on your public profile. When set to private, only you can see it. When public, everyone can view it. You can find this toggle at the top right of the detail overview screen.',
+        content: 'The private/public toggle controls whether this entire animal appears on your public profile. When set to private (gray Eye-Off icon), only you can see it. When public (green Eye icon), everyone can view it. You can find this toggle at the top right of the detail overview screen. Changes apply instantly!',
         highlightElement: '[data-tutorial-target="detail-private-toggle"]',
         tips: [
           'Located at top right of detail view',
+          'Green Eye = Public, Gray Eye-Off = Private',
           'Controls whole animal visibility',
-          'Different from section-specific toggles',
-          'Can be toggled anytime'
+          'Can be toggled anytime - updates instantly'
         ]
       },
       {
@@ -1481,7 +1438,7 @@ const KEY_FEATURES_LESSONS = [
       {
         stepNumber: 5,
         title: 'Website & Country',
-        content: 'Add your website (if you have a breeding website) and select your country. These help other users find and learn about you.',
+        content: 'Add your website (if you have a breeding website), select your country, and write a bio. The bio helps tell other breeders about yourself and your breeding program. These help other users find and learn about you.',
         highlightElement: '[data-tutorial-target="website-country-fields"]',
         tips: [
           'Website links to your info',
@@ -1525,6 +1482,18 @@ const KEY_FEATURES_LESSONS = [
       },
       {
         stepNumber: 9,
+        title: 'Breeding Status',
+        content: 'Set your breeding status for each species you work with. Choose Owner (not breeding), Active Breeder, or Retired Breeder. Active and Retired breeders are visible in the public Breeders Directory.',
+        highlightElement: '[data-tutorial-target="breeding-status-section"]',
+        tips: [
+          'Owner: You have animals but don\'t breed',
+          'Active Breeder: Currently breeding this species',
+          'Retired Breeder: No longer actively breeding',
+          'Active/Retired breeders appear in directory'
+        ]
+      },
+      {
+        stepNumber: 10,
         title: 'Save or Cancel',
         content: 'Use the Save button to keep your changes or Cancel to discard them. Changes are applied immediately upon save.',
         highlightElement: '[data-tutorial-target="profile-save-cancel"]',
@@ -1535,7 +1504,7 @@ const KEY_FEATURES_LESSONS = [
         ]
       },
       {
-        stepNumber: 10,
+        stepNumber: 11,
         title: 'Move to Budget',
         content: 'Now let\'s explore the Budget section to understand financial tracking. Click the "Budget" button in the header.',
         highlightElement: '[data-tutorial-target="budget-btn"]',
@@ -1938,6 +1907,20 @@ const ADVANCED_FEATURES_LESSONS = [
       },
       {
         stepNumber: 4,
+        title: 'Bulk Privacy Controls',
+        content: 'At the top of the My Animals page, you\'ll see "All Public" and "All Private" buttons. These let you instantly change the visibility of ALL your animals at once. The UI updates immediately, and changes sync with the database in the background.',
+        highlightElement: '[data-tutorial-target="bulk-privacy-controls"]',
+        hideHighlightPrompt: true,
+        tips: [
+          'Green Eye icon = Make All Public',
+          'Gray Eye-Off icon = Make All Private',
+          'Changes apply instantly to all animals',
+          'Background sync keeps database updated',
+          'Confirmation prompt before applying'
+        ]
+      },
+      {
+        stepNumber: 5,
         title: 'Mass Delete',
         content: 'Click the trash icon to enter mass delete mode. Select multiple animals using checkboxes, then click "Delete Selected" to remove them all at once.',
         highlightElement: '[data-tutorial-target="bulk-delete-btn"]',
@@ -1984,7 +1967,7 @@ const ADVANCED_FEATURES_LESSONS = [
       {
         stepNumber: 3,
         title: 'Public Animal Profiles',
-        content: 'When you make an animal public, other users can see its profile including lineage, genetics (if shared), breeding history, and availability.',
+        content: 'When you make an animal public, other users can see its profile including lineage, genetics, breeding history, and availability.',
         highlightElement: '[data-tutorial-target="public-animal-profile"]',
         hideHighlightPrompt: true,
         tips: [
@@ -2017,25 +2000,25 @@ const ADVANCED_FEATURES_LESSONS = [
       {
         stepNumber: 1,
         title: 'What is COI?',
-        content: 'The Coefficient of Inbreeding (COI) is a mathematical measure of genetic diversity. It ranges from 0% (no common ancestors) to 100% (completely inbred). Lower COI is healthier.',
+        content: 'The Coefficient of Inbreeding (COI) is a mathematical measure of genetic diversity. It ranges from 0% (no common ancestors) to 100% (completely inbred).',
         highlightElement: '[data-tutorial-target="coi-explanation"]',
         hideHighlightPrompt: true,
         tips: [
           '0% = maximum diversity',
           '100% = completely inbred',
-          'Aim for lower percentages'
+          'Important metric for breeding decisions'
         ]
       },
       {
         stepNumber: 2,
         title: 'Why COI Matters',
-        content: 'High inbreeding (high COI) increases genetic problems, reduces fitness, and increases disease susceptibility. Selective breeding requires monitoring COI to maintain healthy animals.',
+        content: 'COI helps breeders understand the genetic relationship between ancestors in a pedigree. Monitoring COI allows breeders to make informed decisions about their breeding programs.',
         highlightElement: '[data-tutorial-target="why-coi-matters"]',
         hideHighlightPrompt: true,
         tips: [
           'Genetics matter',
-          'Health depends on diversity',
-          'Responsible breeding tracks COI'
+          'Track genetic relationships',
+          'Use COI in breeding decisions'
         ]
       },
       {
@@ -2047,31 +2030,196 @@ const ADVANCED_FEATURES_LESSONS = [
         tips: [
           'Check before breeding',
           'Use in breeding decisions',
-          'Lower is better'
+          'Important pedigree metric'
         ]
       },
       {
         stepNumber: 4,
         title: 'Predicted COI for Pairings',
-        content: 'When selecting potential breeding pairs, the system can predict the COI of offspring. Higher predictions mean more inbreeding - choose pairings carefully.',
+        content: 'When selecting potential breeding pairs, the system can predict the COI of offspring. This helps you understand the genetic relationship before making breeding decisions.',
         highlightElement: '[data-tutorial-target="predicted-coi"]',
         hideHighlightPrompt: true,
         tips: [
           'Plan ahead',
-          'Avoid excessive inbreeding',
-          'Predict offspring health'
+          'Compare different pairings',
+          'Preview offspring COI'
         ]
       },
       {
         stepNumber: 5,
-        title: 'Ethical Breeding',
-        content: 'Responsible breeders use COI to make ethical decisions. Never breed animals with excessively high COI. Always prioritize health over appearance.',
+        title: 'Using COI in Your Program',
+        content: 'COI is one of many tools breeders use to make informed decisions. Consider COI alongside other factors like temperament, conformation, and health testing when planning your breeding program.',
         highlightElement: '[data-tutorial-target="ethical-breeding"]',
         hideHighlightPrompt: true,
         tips: [
-          'Health first',
+          'One factor among many',
           'Consider COI in every decision',
-          'Breed responsibly'
+          'Use alongside other metrics'
+        ]
+      }
+    ]
+  },
+
+  {
+    id: 'af-marketplace',
+    title: '4. Marketplace',
+    description: 'Browse and discover animals available for sale or stud',
+    tour: 'advanced-features',
+    tourOrder: 4,
+    steps: [
+      {
+        stepNumber: 1,
+        title: 'Marketplace Overview',
+        content: 'The Marketplace lets you browse animals that breeders have marked as "Available for Sale" or "Available for Stud". Only animals that are both marked as available AND have their public profile enabled will appear here.',
+        highlightElement: '[data-tutorial-target="marketplace-btn"]',
+        tips: [
+          'Find animals for sale',
+          'Discover stud services',
+          'Connect with breeders',
+          'Filter by species and location'
+        ]
+      },
+      {
+        stepNumber: 2,
+        title: 'Search and Filter',
+        content: 'Use the search bar to find animals by name, and filter by species, gender, country, and availability type (For Sale vs For Stud). This helps you narrow down exactly what you\'re looking for.',
+        tips: [
+          'Search by animal name',
+          'Filter by multiple criteria',
+          'Find local breeders',
+          'Specify what you need'
+        ]
+      },
+      {
+        stepNumber: 3,
+        title: 'Animal Cards',
+        content: 'Each animal card shows the photo, name, price/fee, gender, species, and location. Click on a card to view the full animal profile with pedigree, genetics, and other details.',
+        tips: [
+          'See key info at a glance',
+          'Prices shown with currency',
+          'Click for full details',
+          'View pedigree and lineage'
+        ]
+      },
+      {
+        stepNumber: 4,
+        title: 'Contact Breeders',
+        content: 'When viewing an animal, you can contact the breeder through their public profile to inquire about availability, ask questions, or arrange a purchase or stud service.',
+        tips: [
+          'Message breeders directly',
+          'Ask about availability',
+          'Negotiate terms',
+          'Arrange safe transactions'
+        ]
+      }
+    ]
+  },
+
+  {
+    id: 'af-breeder-directory',
+    title: '5. Breeder Directory',
+    description: 'Discover and connect with breeders around the world',
+    tour: 'advanced-features',
+    tourOrder: 5,
+    steps: [
+      {
+        stepNumber: 1,
+        title: 'Breeder Directory Overview',
+        content: 'The Breeder Directory helps you find active breeders of specific species. Click the star/moon icon in the header to access it. Breeders can mark themselves as "Active Breeder" or "Retired Breeder" for each species in their settings.',
+        highlightElement: '[data-tutorial-target="breeders-btn"]',
+        tips: [
+          'Find breeders by species',
+          'Connect with the community',
+          'Search by name or location',
+          'Filter by country and species'
+        ]
+      },
+      {
+        stepNumber: 2,
+        title: 'Setting Your Breeding Status',
+        content: 'In your Settings, you can mark yourself as an "Active Breeder", "Retired Breeder", or "Owner" for each species you keep. Active and Retired breeders appear in the directory. This is optional - you only appear if you choose to.',
+        tips: [
+          'Choose your status per species',
+          'Only opt-in if you want to be listed',
+          'Update status as your program changes',
+          'Active breeders marked with star icon'
+        ]
+      },
+      {
+        stepNumber: 3,
+        title: 'Search and Filter Breeders',
+        content: 'Search by breeder name or ID, and filter by species they breed and country. This helps you find local breeders or specialists in specific species.',
+        tips: [
+          'Find local breeders',
+          'Search by species',
+          'Filter by country',
+          'Discover specialists'
+        ]
+      },
+      {
+        stepNumber: 4,
+        title: 'Breeder Profiles',
+        content: 'Click on a breeder card to view their public profile. You can see their animals, contact information (if they\'ve made it public), website, and breeding program.',
+        tips: [
+          'View their animals',
+          'See what they breed',
+          'Contact via message or email',
+          'Visit their website if available'
+        ]
+      }
+    ]
+  },
+
+  {
+    id: 'af-animal-tree',
+    title: '7. Animal Tree Visualization',
+    description: 'View your animals in an interactive family tree by species',
+    tour: 'advanced-features',
+    tourOrder: 7,
+    steps: [
+      {
+        stepNumber: 1,
+        title: 'Animal Tree Overview',
+        content: 'The Animal Tree provides a visual family tree for each species, showing all your owned animals and their immediate parents. Click the Network icon next to a species name on your My Animals page to view the tree for that species.',
+        highlightElement: '[data-tutorial-target="animal-tree-btn"]',
+        tips: [
+          'Visual family tree per species',
+          'Shows owned animals + parents',
+          'Interactive drag and zoom',
+          'Organized by generations'
+        ]
+      },
+      {
+        stepNumber: 2,
+        title: 'Navigate the Tree',
+        content: 'The tree displays animals as nodes connected by lines showing parent-child relationships. You can click and drag to pan around, zoom in/out, and click on any animal to view their full details.',
+        tips: [
+          'Drag to pan the view',
+          'Scroll or pinch to zoom',
+          'Click animals to view details',
+          'Different colors show gender'
+        ]
+      },
+      {
+        stepNumber: 3,
+        title: 'Search in Tree',
+        content: 'Use the search bar to find specific animals in the tree. When you search, matching animals will be highlighted, making it easy to locate them even in large family trees.',
+        tips: [
+          'Search by animal name',
+          'Matching animals highlighted',
+          'Useful for large collections',
+          'Clear search to reset view'
+        ]
+      },
+      {
+        stepNumber: 4,
+        title: 'Understanding Connections',
+        content: 'Lines connect parents to offspring. Your owned animals are shown prominently, while parents (which may be from other breeders) appear with different styling. This helps you visualize your entire breeding lineage at a glance.',
+        tips: [
+          'Lines show parent-child links',
+          'Owned animals clearly marked',
+          'Parent animals may be view-only',
+          'Great for understanding lineages'
         ]
       }
     ]
@@ -2079,10 +2227,10 @@ const ADVANCED_FEATURES_LESSONS = [
 
   {
     id: 'af-genetics-calculator',
-    title: '4. Genetics Calculator',
+    title: '8. Genetics Calculator',
     description: 'Use the genetics calculator to predict offspring traits',
     tour: 'advanced-features',
-    tourOrder: 4,
+    tourOrder: 8,
     steps: [
       {
         stepNumber: 1,

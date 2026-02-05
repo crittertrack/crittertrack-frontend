@@ -2,7 +2,7 @@
 import React, { useState, useEffect, useCallback, useRef, useMemo } from 'react';
 import { useParams, useNavigate, useLocation, Routes, Route, Link as RouterLink } from 'react-router-dom';
 import axios from 'axios';
-import { LogOut, Cat, UserPlus, LogIn, ChevronLeft, Trash2, Edit, Save, PlusCircle, Plus, ArrowLeft, Loader2, RefreshCw, User, Users, ClipboardList, BookOpen, Settings, Mail, Globe, Bean, Milk, Search, X, Mars, Venus, Eye, EyeOff, Heart, HeartOff, HeartHandshake, Bell, XCircle, CheckCircle, Download, FileText, Link, AlertCircle, DollarSign, Archive, ArrowLeftRight, RotateCcw, Info, Hourglass, MessageSquare, Ban, Flag, Scissors, VenusAndMars, Circle, Shield, Lock, AlertTriangle, ShoppingBag, Check, Star, Moon, MoonStar, Calculator, Network } from 'lucide-react';
+import { LogOut, Cat, UserPlus, LogIn, ChevronLeft, Trash2, Edit, Save, PlusCircle, Plus, ArrowLeft, Loader2, RefreshCw, User, Users, ClipboardList, BookOpen, Settings, Mail, Globe, Bean, Milk, Search, X, Mars, Venus, Eye, EyeOff, Heart, HeartOff, HeartHandshake, Bell, XCircle, CheckCircle, Download, FileText, Link, AlertCircle, DollarSign, Archive, ArrowLeftRight, RotateCcw, Info, Hourglass, MessageSquare, Ban, Flag, Scissors, VenusAndMars, Circle, Shield, Lock, AlertTriangle, ShoppingBag, Check, Star, Moon, MoonStar, Calculator } from 'lucide-react';
 import jsPDF from 'jspdf';
 import html2canvas from 'html2canvas';
 import 'flag-icons/css/flag-icons.min.css';
@@ -1122,7 +1122,7 @@ const BreederDirectorySettings = ({ authToken, API_BASE_URL, showModalMessage, u
     }
 
     return (
-        <div className="mb-8 p-4 sm:p-6 border rounded-lg bg-gray-50 overflow-x-hidden" data-tutorial-target="breeding-status-section">
+        <div className="mb-8 p-4 sm:p-6 border rounded-lg bg-gray-50 overflow-x-hidden">
             <h3 className="text-xl font-semibold text-gray-800 border-b pb-2 mb-4">Species & Breeding Status</h3>
             <p className="text-sm text-gray-600 mb-1">
                 Set your breeding status for each species. Marking yourself as an <strong>Active Breeder</strong> or <strong>Retired Breeder</strong> will make you visible in the Breeders directory.
@@ -2386,7 +2386,6 @@ const PrivateAnimalDetail = ({ animal, onClose, onEdit, API_BASE_URL, authToken,
                                                     console.error('Failed to update isDisplay:', err);
                                                 });
                                             }}
-                                            data-tutorial-target="detail-private-toggle"
                                             className={`absolute top-4 right-4 flex items-center gap-2 px-3 py-1.5 rounded-lg font-medium transition ${animal.isDisplay ? 'bg-green-100 text-green-800 hover:bg-green-200' : 'bg-gray-100 text-gray-800 hover:bg-gray-200'}`}
                                             title="Toggle public profile visibility"
                                         >
@@ -2620,7 +2619,7 @@ const PrivateAnimalDetail = ({ animal, onClose, onEdit, API_BASE_URL, authToken,
                                 <h3 className="text-lg font-semibold text-gray-700">Appearance</h3>
                                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm">
                                     <div><span className="text-gray-600">Color:</span> <strong>{animal.color || ''}</strong></div>
-                                    <div><span className="text-gray-600">Pattern:</span> <strong>{animal.coatPattern || ''}</strong></div>
+                                    <div><span className="text-gray-600">Coat Pattern:</span> <strong>{animal.coatPattern || ''}</strong></div>
                                     <div><span className="text-gray-600">Coat Type:</span> <strong>{animal.coat || ''}</strong></div>
                                     {animal.species === 'Fancy Rat' && <div><span className="text-gray-600">Earset:</span> <strong>{animal.earset || ''}</strong></div>}
                                 </div>
@@ -3513,7 +3512,7 @@ const ViewOnlyPrivateAnimalDetail = ({ animal, onClose, API_BASE_URL, authToken,
                                 <h3 className="text-lg font-semibold text-gray-700">Appearance</h3>
                                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm">
                                     <div><span className="text-gray-600">Color:</span> <strong>{animal.color || ''}</strong></div>
-                                    <div><span className="text-gray-600">Pattern:</span> <strong>{animal.coatPattern || ''}</strong></div>
+                                    <div><span className="text-gray-600">Coat Pattern:</span> <strong>{animal.coatPattern || ''}</strong></div>
                                     <div><span className="text-gray-600">Coat Type:</span> <strong>{animal.coat || ''}</strong></div>
                                     {animal.species === 'Fancy Rat' && <div><span className="text-gray-600">Earset:</span> <strong>{animal.earset || ''}</strong></div>}
                                 </div>
@@ -4449,7 +4448,7 @@ const ViewOnlyAnimalDetail = ({ animal, onClose, API_BASE_URL, onViewProfile, au
                 <h3 className="text-lg font-semibold text-gray-700 border-b pb-2 mb-3">Appearance</h3>
                 <div className="space-y-2">
                     <p className="text-sm"><span className="font-medium">Color:</span> {animal.color || ''}</p>
-                    <p className="text-sm"><span className="font-medium">Pattern:</span> {animal.coatPattern || ''}</p>
+                    <p className="text-sm"><span className="font-medium">Coat Pattern:</span> {animal.coatPattern || ''}</p>
                     <p className="text-sm"><span className="font-medium">Coat Type:</span> {animal.coat || ''}</p>
                     {animal.species === 'Fancy Rat' && <p className="text-sm"><span className="font-medium">Earset:</span> {animal.earset || ''}</p>}
                 </div>
@@ -9445,7 +9444,7 @@ const AnimalForm = ({
                                 key={tab.id}
                                 type="button"
                                 onClick={() => setActiveTab(tab.id)}
-                                data-tutorial-target={tab.id === 2 ? 'status-privacy-tab' : tab.id === 3 ? 'physical-tab' : tab.id === 4 ? 'identification-tab' : tab.id === 5 ? 'lineage-tab' : tab.id === 6 ? 'breeding-tab' : tab.id === 7 ? 'health-tab' : tab.id === 8 ? 'husbandry-tab' : tab.id === 9 ? 'behavior-tab' : tab.id === 10 ? 'records-tab' : tab.id === 11 ? 'end-of-life-tab' : tab.id === 12 ? 'show-tab' : undefined}
+                                data-tutorial-target={tab.id === 2 ? 'status-privacy-tab' : tab.id === 3 ? 'physical-tab' : tab.id === 4 ? 'identification-tab' : tab.id === 5 ? 'lineage-tab' : tab.id === 6 ? 'breeding-tab' : tab.id === 7 ? 'health-tab' : tab.id === 8 ? 'husbandry-tab' : tab.id === 9 ? 'behavior-tab' : tab.id === 10 ? 'records-tab' : tab.id === 11 ? 'end-of-life-tab' : undefined}
                                 className={`flex-shrink-0 px-2 sm:px-3 py-2 text-xs sm:text-sm font-medium rounded border transition-colors ${
                                     activeTab === tab.id 
                                         ? 'bg-primary text-black border-gray-400' 
@@ -9748,17 +9747,17 @@ const AnimalForm = ({
                                 </div>
                                 
                                 <div>
-                                    <label className="block text-sm font-medium text-gray-700">Pattern</label>
-                                    <input type="text" name="coatPattern" value={formData.coatPattern} onChange={handleChange} 
-                                        className="mt-1 block w-full p-2 border border-gray-300 rounded-md shadow-sm focus:ring-primary focus:border-primary" 
-                                        placeholder="e.g., Solid, Hooded, Brindle" />
-                                </div>
-                                
-                                <div>
                                     <label className="block text-sm font-medium text-gray-700">Coat Type</label>
                                     <input type="text" name="coat" value={formData.coat} onChange={handleChange} 
                                         className="mt-1 block w-full p-2 border border-gray-300 rounded-md shadow-sm focus:ring-primary focus:border-primary" 
                                         placeholder="e.g., Short, Long, Rex" />
+                                </div>
+                                
+                                <div>
+                                    <label className="block text-sm font-medium text-gray-700">Coat Pattern</label>
+                                    <input type="text" name="coatPattern" value={formData.coatPattern} onChange={handleChange} 
+                                        className="mt-1 block w-full p-2 border border-gray-300 rounded-md shadow-sm focus:ring-primary focus:border-primary" 
+                                        placeholder="e.g., Solid, Hooded, Brindle" />
                                 </div>
                                 
                                 {!isFieldHidden('earset') && (formData.species === 'Rat' || formData.species === 'Fancy Rat') && (
@@ -10631,7 +10630,7 @@ const AnimalForm = ({
                                 </label>
 
                                 {(formData.gender === 'Female' || formData.gender === 'Intersex' || formData.gender === 'Unknown') && !formData.isNeutered && !formData.isInfertile && (
-                                    <label className="flex items-center space-x-2 cursor-pointer p-3 border rounded-lg bg-white hover:bg-gray-50 transition" data-tutorial-target="mating-pregnancy-checkbox">
+                                    <label className="flex items-center space-x-2 cursor-pointer p-3 border rounded-lg bg-white hover:bg-gray-50 transition">
                                         <input
                                             type="checkbox"
                                             name="isPregnant"
@@ -10965,7 +10964,7 @@ const AnimalForm = ({
                 {activeTab === 7 && (
                     <div className="space-y-6">
                         {/* Preventive Care */}
-                        <div className="bg-gray-50 p-4 rounded-lg border border-gray-200 space-y-6" data-tutorial-target="preventive-care-section">
+                        <div className="bg-gray-50 p-4 rounded-lg border border-gray-200 space-y-6">
                             <h3 className="text-lg font-semibold text-gray-700 mb-4">Preventive Care</h3>
                             
                             {/* Vaccinations */}
@@ -11425,7 +11424,7 @@ const AnimalForm = ({
                 {activeTab === 8 && (
                     <div className="space-y-6">
                         {/* 1st Section: Nutrition */}
-                        <div className="bg-gray-50 p-4 rounded-lg border border-gray-200 space-y-4" data-tutorial-target="nutrition-section">
+                        <div className="bg-gray-50 p-4 rounded-lg border border-gray-200 space-y-4">
                             <h3 className="text-lg font-semibold text-gray-700 mb-4">Nutrition</h3>
                             <div className="space-y-4">
                                 <div>
@@ -11798,7 +11797,7 @@ const AnimalForm = ({
                 {activeTab === 12 && (
                     <div className="space-y-6">
                         {/* Show Titles & Ratings */}
-                        <div className="bg-gray-50 p-4 rounded-lg border border-gray-200 space-y-4" data-tutorial-target="show-titles-section">
+                        <div className="bg-gray-50 p-4 rounded-lg border border-gray-200 space-y-4">
                             <h3 className="text-lg font-semibold text-gray-700 mb-4">Show Titles & Ratings</h3>
                             <div className="space-y-4">
                                 <div>
@@ -11819,7 +11818,7 @@ const AnimalForm = ({
                                 
                                 <div>
                                     <label className="block text-sm font-medium text-gray-700 mb-2">Judge Comments</label>
-                                    <textarea name="judgeComments" value={formData.judgeComments || ''} onChange={handleChange} rows="4" data-tutorial-target="judge-comments-textarea"
+                                    <textarea name="judgeComments" value={formData.judgeComments || ''} onChange={handleChange} rows="4"
                                         className="block w-full p-2 border border-gray-300 rounded-md shadow-sm focus:ring-primary focus:border-primary" 
                                         placeholder="Notable comments from judges at shows or competitions" />
                                 </div>
@@ -12975,7 +12974,6 @@ const BreederDirectory = ({ authToken, API_BASE_URL, onBack }) => {
 };
 
 const ProfileView = ({ userProfile, showModalMessage, fetchUserProfile, authToken, onProfileUpdated, onProfileEditButtonClicked }) => {
-    const navigate = useNavigate();
     const [isEditing, setIsEditing] = useState(false);
     const [copySuccess, setCopySuccess] = useState(false);
     const [checkingForUpdates, setCheckingForUpdates] = useState(false);
@@ -13163,15 +13161,6 @@ const ProfileView = ({ userProfile, showModalMessage, fetchUserProfile, authToke
                     </>
                 )}
             </button>
-            
-            {userProfile?.id_public === 'CTU2' && (
-                <button 
-                    onClick={() => navigate('/family-tree')}
-                    className="mt-3 bg-blue-500 hover:bg-blue-600 text-white font-semibold py-3 px-6 rounded-lg transition duration-150 shadow-md flex items-center"
-                >
-                    <Users size={20} className="mr-2" /> Family Tree (Testing)
-                </button>
-            )}
         </div>
     );
 };
@@ -14424,15 +14413,6 @@ const AnimalList = ({ authToken, showModalMessage, onEditAnimal, onViewAnimal, f
     };
 
     const toggleAnimalPrivacy = async (animalId, newPrivacyValue) => {
-        // Update local state immediately for instant UI feedback
-        const updatedAnimals = animals.map(animal => 
-            animal.id_public === animalId 
-                ? { ...animal, showOnPublicProfile: newPrivacyValue, isDisplay: newPrivacyValue }
-                : animal
-        );
-        setAnimals(updatedAnimals);
-
-        // Update database in the background
         try {
             const response = await fetch(`${API_BASE_URL}/animals/${animalId}`, {
                 method: 'PUT',
@@ -14440,31 +14420,22 @@ const AnimalList = ({ authToken, showModalMessage, onEditAnimal, onViewAnimal, f
                     'Content-Type': 'application/json',
                     'Authorization': `Bearer ${authToken}`
                 },
-                body: JSON.stringify({ 
-                    showOnPublicProfile: newPrivacyValue,
-                    isDisplay: newPrivacyValue 
-                })
+                body: JSON.stringify({ showOnPublicProfile: newPrivacyValue })
             });
 
-            if (!response.ok) {
-                // Revert on failure
-                const revertedAnimals = animals.map(animal => 
+            if (response.ok) {
+                // Update local state
+                const updatedAnimals = animals.map(animal => 
                     animal.id_public === animalId 
-                        ? { ...animal, showOnPublicProfile: !newPrivacyValue, isDisplay: !newPrivacyValue }
+                        ? { ...animal, showOnPublicProfile: newPrivacyValue }
                         : animal
                 );
-                setAnimals(revertedAnimals);
+                setAnimals(updatedAnimals);
+            } else {
                 showModalMessage('Error', 'Failed to update privacy setting.');
             }
         } catch (error) {
             console.error('Error updating privacy:', error);
-            // Revert on error
-            const revertedAnimals = animals.map(animal => 
-                animal.id_public === animalId 
-                    ? { ...animal, showOnPublicProfile: !newPrivacyValue, isDisplay: !newPrivacyValue }
-                    : animal
-            );
-            setAnimals(revertedAnimals);
             showModalMessage('Error', 'Failed to update privacy setting.');
         }
     };
@@ -14482,38 +14453,31 @@ const AnimalList = ({ authToken, showModalMessage, onEditAnimal, onViewAnimal, f
         const confirmChange = window.confirm(`Are you sure you want to make all ${animalIds.length} ${getSpeciesDisplayName(species)} animals ${action}?`);
         if (!confirmChange) return;
 
-        // Update local state immediately for instant UI feedback
-        const updatedAnimals = animals.map(animal => 
-            animalIds.includes(animal.id_public) 
-                ? { ...animal, showOnPublicProfile: makePublic, isDisplay: makePublic }
-                : animal
-        );
-        setAnimals(updatedAnimals);
-
-        // Update database in the background
-        let failedUpdates = 0;
-        for (const animalId of animalIds) {
-            try {
+        try {
+            setLoading(true);
+            for (const animalId of animalIds) {
                 await fetch(`${API_BASE_URL}/animals/${animalId}`, {
                     method: 'PUT',
                     headers: {
                         'Content-Type': 'application/json',
                         'Authorization': `Bearer ${authToken}`
                     },
-                    body: JSON.stringify({ 
-                        showOnPublicProfile: makePublic,
-                        isDisplay: makePublic 
-                    })
+                    body: JSON.stringify({ showOnPublicProfile: makePublic })
                 });
-            } catch (error) {
-                console.error(`Error updating animal ${animalId}:`, error);
-                failedUpdates++;
             }
-        }
 
-        // Show notification if there were failures
-        if (failedUpdates > 0) {
-            showModalMessage('Partial Success', `Updated locally, but ${failedUpdates} animal(s) failed to sync with the server. They will be updated on next refresh.`);
+            // Update local state
+            const updatedAnimals = animals.map(animal => 
+                animalIds.includes(animal.id_public) 
+                    ? { ...animal, showOnPublicProfile: makePublic }
+                    : animal
+            );
+            setAnimals(updatedAnimals);
+        } catch (error) {
+            console.error('Error updating bulk privacy:', error);
+            showModalMessage('Error', 'Failed to update privacy settings.');
+        } finally {
+            setLoading(false);
         }
     };
 
@@ -14527,38 +14491,30 @@ const AnimalList = ({ authToken, showModalMessage, onEditAnimal, onViewAnimal, f
         const confirmChange = window.confirm(`Are you sure you want to make ALL ${animals.length} animals ${action}?`);
         if (!confirmChange) return;
 
-        // Update local state immediately for instant UI feedback
-        const updatedAnimals = animals.map(animal => ({
-            ...animal,
-            showOnPublicProfile: makePublic,
-            isDisplay: makePublic
-        }));
-        setAnimals(updatedAnimals);
-
-        // Update database in the background
-        let failedUpdates = 0;
-        for (const animal of animals) {
-            try {
+        try {
+            setLoading(true);
+            for (const animal of animals) {
                 await fetch(`${API_BASE_URL}/animals/${animal.id_public}`, {
                     method: 'PUT',
                     headers: {
                         'Content-Type': 'application/json',
                         'Authorization': `Bearer ${authToken}`
                     },
-                    body: JSON.stringify({ 
-                        showOnPublicProfile: makePublic,
-                        isDisplay: makePublic 
-                    })
+                    body: JSON.stringify({ showOnPublicProfile: makePublic })
                 });
-            } catch (error) {
-                console.error(`Error updating animal ${animal.id_public}:`, error);
-                failedUpdates++;
             }
-        }
 
-        // Show notification if there were failures
-        if (failedUpdates > 0) {
-            showModalMessage('Partial Success', `Updated locally, but ${failedUpdates} animal(s) failed to sync with the server. They will be updated on next refresh.`);
+            // Update local state
+            const updatedAnimals = animals.map(animal => ({
+                ...animal,
+                showOnPublicProfile: makePublic
+            }));
+            setAnimals(updatedAnimals);
+        } catch (error) {
+            console.error('Error updating all animals privacy:', error);
+            showModalMessage('Error', 'Failed to update privacy settings.');
+        } finally {
+            setLoading(false);
         }
     };
 
@@ -14727,7 +14683,7 @@ const AnimalList = ({ authToken, showModalMessage, onEditAnimal, onViewAnimal, f
                     <ClipboardList size={24} className="mr-3 text-primary-dark" />
                     My Animals ({animals.length})
                 </div>
-                <div className="flex items-center gap-2" data-tutorial-target="bulk-privacy-controls">
+                <div className="flex items-center gap-2">
                     <button
                         onClick={() => toggleAllAnimalsPrivacy(true)}
                         className="text-green-600 hover:text-green-700 transition flex items-center gap-1 px-3 py-1.5 rounded-lg hover:bg-green-50"
@@ -15002,9 +14958,8 @@ const AnimalList = ({ authToken, showModalMessage, onEditAnimal, onViewAnimal, f
                                                 onClick={() => navigate(`/animal-tree/${encodeURIComponent(species)}`)}
                                                 className="p-1.5 sm:p-2 hover:bg-gray-200 rounded-lg transition"
                                                 title="Animal Tree"
-                                                data-tutorial-target="animal-tree-btn"
                                             >
-                                                <Network className="w-4 h-4 sm:w-[18px] sm:h-[18px] text-blue-500" />
+                                                <Users className="w-4 h-4 sm:w-[18px] sm:h-[18px] text-blue-500" />
                                             </button>
                                             <button
                                                 onClick={() => toggleBulkPrivacy(species, true)}
@@ -18453,13 +18408,19 @@ const App = () => {
                         </button>
                         <button onClick={() => navigate('/marketplace')} className={`px-4 py-2 text-xs font-medium rounded-lg transition duration-150 flex flex-col items-center ${currentView === 'marketplace' ? 'bg-primary text-black shadow-md' : 'text-gray-600 hover:bg-gray-100'}`}>
                             <ShoppingBag size={18} className="mb-1" />
-                            <span>Marketplace</span>
+                            <span>Shop</span>
                         </button>
                         <button onClick={() => navigate('/genetics-calculator')} data-tutorial-target="genetics-btn" className={`px-4 py-2 text-xs font-medium rounded-lg transition duration-150 flex flex-col items-center ${currentView === 'genetics-calculator' ? 'bg-primary text-black shadow-md' : 'text-gray-600 hover:bg-gray-100'}`}>
                             <Calculator size={18} className="mb-1" />
                             <span>Calculator</span>
                         </button>
-                        <button onClick={() => navigate('/breeder-directory')} data-tutorial-target="breeders-btn" className={`px-4 py-2 text-xs font-medium rounded-lg transition duration-150 flex flex-col items-center ${currentView === 'breeder-directory' ? 'bg-primary text-black shadow-md' : 'text-gray-600 hover:bg-gray-100'}`}>
+                        {userProfile?.id_public === 'CTU2' && (
+                            <button onClick={() => navigate('/family-tree')} className={`px-4 py-2 text-xs font-medium rounded-lg transition duration-150 flex flex-col items-center ${currentView === 'family-tree' ? 'bg-primary text-black shadow-md' : 'text-gray-600 hover:bg-gray-100'}`}>
+                                <Users size={18} className="mb-1" />
+                                <span>Family Tree</span>
+                            </button>
+                        )}
+                        <button onClick={() => navigate('/breeder-directory')} className={`px-4 py-2 text-xs font-medium rounded-lg transition duration-150 flex flex-col items-center ${currentView === 'breeder-directory' ? 'bg-primary text-black shadow-md' : 'text-gray-600 hover:bg-gray-100'}`}>
                             <MoonStar size={18} className="mb-1" />
                             <span>Breeders</span>
                         </button>
@@ -18618,9 +18579,9 @@ const App = () => {
                             <DollarSign size={18} className="mb-0.5" />
                             <span>Budget</span>
                         </button>
-                        <button onClick={() => navigate('/marketplace')} data-tutorial-target="marketplace-btn" className={`px-2 py-2 text-xs font-medium rounded-lg transition duration-150 flex flex-col items-center ${currentView === 'marketplace' ? 'bg-primary text-black shadow-md' : 'text-gray-600 hover:bg-gray-100'}`}>
+                        <button onClick={() => navigate('/marketplace')} className={`px-2 py-2 text-xs font-medium rounded-lg transition duration-150 flex flex-col items-center ${currentView === 'marketplace' ? 'bg-primary text-black shadow-md' : 'text-gray-600 hover:bg-gray-100'}`}>
                             <ShoppingBag size={18} className="mb-0.5" />
-                            <span>Marketplace</span>
+                            <span>Shop</span>
                         </button>
                     </nav>
 
@@ -18630,7 +18591,13 @@ const App = () => {
                             <Calculator size={18} className="mb-0.5" />
                             <span>Calculator</span>
                         </button>
-                        <button onClick={() => navigate('/breeder-directory')} data-tutorial-target="breeders-btn" className={`px-2 py-2 text-xs font-medium rounded-lg transition duration-150 flex flex-col items-center ${currentView === 'breeder-directory' ? 'bg-primary text-black shadow-md' : 'text-gray-600 hover:bg-gray-100'}`}>
+                        {userProfile?.id_public === 'CTU2' && (
+                            <button onClick={() => navigate('/family-tree')} className={`px-2 py-2 text-xs font-medium rounded-lg transition duration-150 flex flex-col items-center ${currentView === 'family-tree' ? 'bg-primary text-black shadow-md' : 'text-gray-600 hover:bg-gray-100'}`}>
+                                <Users size={18} className="mb-0.5" />
+                                <span>Family Tree</span>
+                            </button>
+                        )}
+                        <button onClick={() => navigate('/breeder-directory')} className={`px-2 py-2 text-xs font-medium rounded-lg transition duration-150 flex flex-col items-center ${currentView === 'breeder-directory' ? 'bg-primary text-black shadow-md' : 'text-gray-600 hover:bg-gray-100'}`}>
                             <MoonStar size={18} className="mb-0.5" />
                             <span>Breeders</span>
                         </button>
@@ -19434,7 +19401,7 @@ const App = () => {
                                                         <button
                                                             key={tab.id}
                                                             onClick={() => setDetailViewTab(tab.id)}
-                                                            data-tutorial-target={tab.id === 2 ? 'status-privacy-tab' : tab.id === 3 ? 'physical-tab' : tab.id === 4 ? 'identification-tab' : tab.id === 5 ? 'lineage-tab' : tab.id === 6 ? 'breeding-tab' : tab.id === 7 ? 'health-tab' : tab.id === 8 ? 'husbandry-tab' : tab.id === 11 ? 'show-tab' : undefined}
+                                                            data-tutorial-target={tab.id === 2 ? 'status-privacy-tab' : tab.id === 3 ? 'physical-tab' : tab.id === 4 ? 'identification-tab' : tab.id === 5 ? 'lineage-tab' : tab.id === 6 ? 'breeding-tab' : tab.id === 7 ? 'health-tab' : tab.id === 8 ? 'husbandry-tab' : tab.id === 9 ? 'show-tab' : undefined}
                                                             className={`px-3 py-1.5 text-xs sm:text-sm font-medium rounded transition-colors ${
                                                                 detailViewTab === tab.id 
                                                                     ? 'bg-primary text-black' 
@@ -19964,8 +19931,8 @@ const App = () => {
                                                     <h3 className="text-lg font-semibold text-gray-700">Appearance</h3>
                                                     <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm">
                                                         <div><span className="text-gray-600">Color:</span> <strong>{animalToView.color || ''}</strong></div>
-                                                        <div><span className="text-gray-600">Pattern:</span> <strong>{animalToView.coatPattern || ''}</strong></div>
                                                         <div><span className="text-gray-600">Coat Type:</span> <strong>{animalToView.coat || ''}</strong></div>
+                                                        <div><span className="text-gray-600">Coat Pattern:</span> <strong>{animalToView.coatPattern || ''}</strong></div>
                                                         {(animalToView.species === 'Fancy Rat' || animalToView.species === 'Rat') && (
                                                             <div><span className="text-gray-600">Earset:</span> <strong>{animalToView.earset || ''}</strong></div>
                                                         )}

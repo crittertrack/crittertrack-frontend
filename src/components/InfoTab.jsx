@@ -2,18 +2,16 @@ import React, { useState } from 'react';
 import { BookOpen, ChevronDown, Play, RotateCcw, X, ChevronLeft } from 'lucide-react';
 import { TUTORIAL_LESSONS } from '../data/tutorialLessonsNew';
 import { useTutorial } from '../contexts/TutorialContext';
-import { TutorialOverlay } from './TutorialOverlay';
 
 /**
  * InfoTab
  * Displays all tutorial lessons and features
  * Users can view lessons, restart tutorials, and explore features
  */
-export const InfoTab = ({ onClose, isMobile }) => {
+export const InfoTab = ({ onClose, isMobile, onStartTutorial }) => {
   const [activeTab, setActiveTab] = useState('getting-started'); // 'getting-started', 'key-features', or 'advanced'
   const [selectedLesson, setSelectedLesson] = useState(null);
   const [expandedLesson, setExpandedLesson] = useState(null);
-  const [runningTutorialId, setRunningTutorialId] = useState(null);
   
   const { isTutorialCompleted, restartTutorial, markTutorialCompleted } = useTutorial();
 
@@ -28,24 +26,19 @@ export const InfoTab = ({ onClose, isMobile }) => {
     : advancedLessons;
 
   const handleStartTutorial = (lessonId) => {
-    setRunningTutorialId(lessonId);
+    if (onStartTutorial) {
+      onStartTutorial(lessonId);
+    }
     onClose(); // Close the Help modal when starting tutorial
   };
 
   const handleRestartTutorial = (lessonId, e) => {
     e.stopPropagation();
     restartTutorial(lessonId);
-    setRunningTutorialId(lessonId);
+    if (onStartTutorial) {
+      onStartTutorial(lessonId);
+    }
     onClose(); // Close the Help modal when restarting tutorial
-  };
-
-  const handleTutorialClose = () => {
-    setRunningTutorialId(null);
-  };
-
-  const handleTutorialComplete = (lessonId) => {
-    setRunningTutorialId(null);
-    markTutorialCompleted(lessonId);
   };
 
   // Lesson Card Component
@@ -74,7 +67,7 @@ export const InfoTab = ({ onClose, isMobile }) => {
                 </div>
               ) : (
                 <div className="w-8 h-8 rounded-full bg-gray-200 flex items-center justify-center text-gray-600 text-sm font-bold">
-                  {lesson.steps.length}
+                  {lesson.steps?.length || 0}
                 </div>
               )}
             </div>
@@ -99,10 +92,10 @@ export const InfoTab = ({ onClose, isMobile }) => {
               </p>
               <div className="mt-3 flex flex-wrap gap-2">
                 <span className="inline-block px-3 py-1 bg-blue-100 text-blue-800 text-xs font-semibold rounded-full">
-                  {lesson.category}
+                  {lesson.tour}
                 </span>
                 <span className="inline-block px-3 py-1 bg-gray-200 text-gray-800 text-xs font-semibold rounded-full">
-                  {lesson.steps.length} steps
+                  {lesson.steps?.length || 0} steps
                 </span>
                 {isCompleted && (
                   <span className="inline-block px-3 py-1 bg-green-100 text-green-800 text-xs font-semibold rounded-full">
@@ -116,7 +109,7 @@ export const InfoTab = ({ onClose, isMobile }) => {
             <div className="bg-white rounded-lg p-4 border border-gray-200">
               <h4 className="font-semibold text-gray-800 mb-3">Lesson Overview:</h4>
               <div className="space-y-2">
-                {lesson.steps.map((step, idx) => (
+                {(lesson.steps || []).map((step, idx) => (
                   <div key={idx} className="flex gap-3 text-sm">
                     <div className="flex-shrink-0 w-6 h-6 rounded-full bg-primary text-black font-bold flex items-center justify-center text-xs">
                       {idx + 1}
@@ -238,15 +231,6 @@ export const InfoTab = ({ onClose, isMobile }) => {
           </div>
         </div>
       </div>
-
-      {/* Tutorial Running */}
-      {runningTutorialId && (
-        <TutorialOverlay
-          lessonId={runningTutorialId}
-          onClose={handleTutorialClose}
-          onComplete={handleTutorialComplete}
-        />
-      )}
     </>
   );
 };
