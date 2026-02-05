@@ -1438,7 +1438,7 @@ const KEY_FEATURES_LESSONS = [
       {
         stepNumber: 5,
         title: 'Website & Country',
-        content: 'Add your website (if you have a breeding website) and select your country. These help other users find and learn about you.',
+        content: 'Add your website (if you have a breeding website), select your country, and write a bio. The bio helps tell other breeders about yourself and your breeding program. These help other users find and learn about you.',
         highlightElement: '[data-tutorial-target="website-country-fields"]',
         tips: [
           'Website links to your info',
