@@ -14992,6 +14992,7 @@ const AnimalList = ({ authToken, showModalMessage, onEditAnimal, onViewAnimal, f
                                                 onClick={() => navigate(`/animal-tree/${encodeURIComponent(species)}`)}
                                                 className="p-1.5 sm:p-2 hover:bg-gray-200 rounded-lg transition"
                                                 title="Animal Tree"
+                                                data-tutorial-target="animal-tree-btn"
                                             >
                                                 <Users className="w-4 h-4 sm:w-[18px] sm:h-[18px] text-blue-500" />
                                             </button>
