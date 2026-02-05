@@ -9444,7 +9444,7 @@ const AnimalForm = ({
                                 key={tab.id}
                                 type="button"
                                 onClick={() => setActiveTab(tab.id)}
-                                data-tutorial-target={tab.id === 2 ? 'status-privacy-tab' : tab.id === 3 ? 'physical-tab' : tab.id === 4 ? 'identification-tab' : tab.id === 5 ? 'lineage-tab' : tab.id === 6 ? 'breeding-tab' : tab.id === 7 ? 'health-tab' : tab.id === 8 ? 'husbandry-tab' : tab.id === 9 ? 'behavior-tab' : tab.id === 10 ? 'records-tab' : tab.id === 11 ? 'end-of-life-tab' : undefined}
+                                data-tutorial-target={tab.id === 2 ? 'status-privacy-tab' : tab.id === 3 ? 'physical-tab' : tab.id === 4 ? 'identification-tab' : tab.id === 5 ? 'lineage-tab' : tab.id === 6 ? 'breeding-tab' : tab.id === 7 ? 'health-tab' : tab.id === 8 ? 'husbandry-tab' : tab.id === 9 ? 'behavior-tab' : tab.id === 10 ? 'records-tab' : tab.id === 11 ? 'end-of-life-tab' : tab.id === 12 ? 'show-tab' : undefined}
                                 className={`flex-shrink-0 px-2 sm:px-3 py-2 text-xs sm:text-sm font-medium rounded border transition-colors ${
                                     activeTab === tab.id 
                                         ? 'bg-primary text-black border-gray-400' 
@@ -11797,7 +11797,7 @@ const AnimalForm = ({
                 {activeTab === 12 && (
                     <div className="space-y-6">
                         {/* Show Titles & Ratings */}
-                        <div className="bg-gray-50 p-4 rounded-lg border border-gray-200 space-y-4">
+                        <div className="bg-gray-50 p-4 rounded-lg border border-gray-200 space-y-4" data-tutorial-target="show-titles-section">
                             <h3 className="text-lg font-semibold text-gray-700 mb-4">Show Titles & Ratings</h3>
                             <div className="space-y-4">
                                 <div>
@@ -11818,7 +11818,7 @@ const AnimalForm = ({
                                 
                                 <div>
                                     <label className="block text-sm font-medium text-gray-700 mb-2">Judge Comments</label>
-                                    <textarea name="judgeComments" value={formData.judgeComments || ''} onChange={handleChange} rows="4"
+                                    <textarea name="judgeComments" value={formData.judgeComments || ''} onChange={handleChange} rows="4" data-tutorial-target="judge-comments-textarea"
                                         className="block w-full p-2 border border-gray-300 rounded-md shadow-sm focus:ring-primary focus:border-primary" 
                                         placeholder="Notable comments from judges at shows or competitions" />
                                 </div>
@@ -19434,7 +19434,7 @@ const App = () => {
                                                         <button
                                                             key={tab.id}
                                                             onClick={() => setDetailViewTab(tab.id)}
-                                                            data-tutorial-target={tab.id === 2 ? 'status-privacy-tab' : tab.id === 3 ? 'physical-tab' : tab.id === 4 ? 'identification-tab' : tab.id === 5 ? 'lineage-tab' : tab.id === 6 ? 'breeding-tab' : tab.id === 7 ? 'health-tab' : tab.id === 8 ? 'husbandry-tab' : tab.id === 9 ? 'show-tab' : undefined}
+                                                            data-tutorial-target={tab.id === 2 ? 'status-privacy-tab' : tab.id === 3 ? 'physical-tab' : tab.id === 4 ? 'identification-tab' : tab.id === 5 ? 'lineage-tab' : tab.id === 6 ? 'breeding-tab' : tab.id === 7 ? 'health-tab' : tab.id === 8 ? 'husbandry-tab' : tab.id === 11 ? 'show-tab' : undefined}
                                                             className={`px-3 py-1.5 text-xs sm:text-sm font-medium rounded transition-colors ${
                                                                 detailViewTab === tab.id 
                                                                     ? 'bg-primary text-black' 

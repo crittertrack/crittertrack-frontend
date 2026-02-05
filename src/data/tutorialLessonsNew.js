@@ -1092,8 +1092,65 @@ const GETTING_STARTED_LESSONS = [
       },
       {
         stepNumber: 8,
+        title: 'Move to Show Tab',
+        content: 'Now let\'s check out the Show tab where you can document titles, ratings, and accomplishments. Click the "Show" tab.',
+        highlightElement: '[data-tutorial-target="show-tab"]',
+        actionType: 'click',
+        tips: [
+          'Track titles and awards',
+          'Record competition results',
+          'Document your animal\'s achievements'
+        ]
+      }
+    ]
+  },
+
+  {
+    id: 'gs-show',
+    title: '13. Show Titles & Accomplishments',
+    description: 'Document show titles, ratings, and achievements',
+    tour: 'getting-started',
+    tourOrder: 13,
+    steps: [
+      {
+        stepNumber: 1,
+        title: 'Show Tab',
+        content: 'This tab is where you document your animal\'s show titles, ratings, judge comments, and any accomplishments from competitions or events.',
+        highlightElement: '[data-tutorial-target="show-tab"]',
+        tips: [
+          'Important for competitive animals',
+          'Track progression over time',
+          'Valuable for breeding programs'
+        ]
+      },
+      {
+        stepNumber: 2,
+        title: 'Show Titles & Ratings',
+        content: 'Document any official titles your animal has earned at shows or competitions. Show Titles might include "Champion (CH)", "Grand Champion (GCH)", or "Best in Show". Show Ratings include scores and ratings like "Excellent" or "Very Good".',
+        highlightElement: '[data-tutorial-target="show-titles-section"]',
+        tips: [
+          'List all titles earned',
+          'Include abbreviations and full names',
+          'Helps track accomplishments',
+          'Valuable for marketing breeding animals'
+        ]
+      },
+      {
+        stepNumber: 3,
+        title: 'Judge Comments',
+        content: 'Record any notable feedback or comments from judges at shows or competitions. This can help you understand your animal\'s strengths and areas for improvement.',
+        highlightElement: '[data-tutorial-target="judge-comments-textarea"]',
+        tips: [
+          'Valuable feedback for breeders',
+          'Helps identify strengths',
+          'Useful for breeding decisions',
+          'Can guide future showing strategy'
+        ]
+      },
+      {
+        stepNumber: 4,
         title: 'Back to Status & Privacy',
-        content: 'Now let\'s go back to the Status & Privacy tab to review the privacy settings one more time before saving. Click the "Status & Privacy" tab.',
+        content: 'Now that we\'ve covered all the tabs, let\'s go back to the Status & Privacy tab to review the privacy settings one more time before saving. Click the "Status & Privacy" tab.',
         highlightElement: '[data-tutorial-target="status-privacy-tab"]',
         actionType: 'click',
         tips: [
@@ -1107,10 +1164,10 @@ const GETTING_STARTED_LESSONS = [
 
   {
     id: 'gs-privacy-save',
-    title: '13. Privacy Settings & Saving Your Animal',
+    title: '14. Privacy Settings & Saving Your Animal',
     description: 'Review privacy settings and save your complete animal record',
     tour: 'getting-started',
-    tourOrder: 13,
+    tourOrder: 14,
     steps: [
       {
         stepNumber: 1,
