@@ -2619,8 +2619,8 @@ const PrivateAnimalDetail = ({ animal, onClose, onEdit, API_BASE_URL, authToken,
                                 <h3 className="text-lg font-semibold text-gray-700">Appearance</h3>
                                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm">
                                     <div><span className="text-gray-600">Color:</span> <strong>{animal.color || ''}</strong></div>
-                                    <div><span className="text-gray-600">Coat Pattern:</span> <strong>{animal.coatPattern || ''}</strong></div>
                                     <div><span className="text-gray-600">Coat Type:</span> <strong>{animal.coat || ''}</strong></div>
+                                    <div><span className="text-gray-600">Pattern:</span> <strong>{animal.coatPattern || ''}</strong></div>
                                     {animal.species === 'Fancy Rat' && <div><span className="text-gray-600">Earset:</span> <strong>{animal.earset || ''}</strong></div>}
                                 </div>
                             </div>
@@ -3512,8 +3512,8 @@ const ViewOnlyPrivateAnimalDetail = ({ animal, onClose, API_BASE_URL, authToken,
                                 <h3 className="text-lg font-semibold text-gray-700">Appearance</h3>
                                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm">
                                     <div><span className="text-gray-600">Color:</span> <strong>{animal.color || ''}</strong></div>
-                                    <div><span className="text-gray-600">Coat Pattern:</span> <strong>{animal.coatPattern || ''}</strong></div>
                                     <div><span className="text-gray-600">Coat Type:</span> <strong>{animal.coat || ''}</strong></div>
+                                    <div><span className="text-gray-600">Pattern:</span> <strong>{animal.coatPattern || ''}</strong></div>
                                     {animal.species === 'Fancy Rat' && <div><span className="text-gray-600">Earset:</span> <strong>{animal.earset || ''}</strong></div>}
                                 </div>
                             </div>
@@ -4448,8 +4448,8 @@ const ViewOnlyAnimalDetail = ({ animal, onClose, API_BASE_URL, onViewProfile, au
                 <h3 className="text-lg font-semibold text-gray-700 border-b pb-2 mb-3">Appearance</h3>
                 <div className="space-y-2">
                     <p className="text-sm"><span className="font-medium">Color:</span> {animal.color || ''}</p>
-                    <p className="text-sm"><span className="font-medium">Coat Pattern:</span> {animal.coatPattern || ''}</p>
                     <p className="text-sm"><span className="font-medium">Coat Type:</span> {animal.coat || ''}</p>
+                    <p className="text-sm"><span className="font-medium">Pattern:</span> {animal.coatPattern || ''}</p>
                     {animal.species === 'Fancy Rat' && <p className="text-sm"><span className="font-medium">Earset:</span> {animal.earset || ''}</p>}
                 </div>
             </div>
@@ -9754,7 +9754,7 @@ const AnimalForm = ({
                                 </div>
                                 
                                 <div>
-                                    <label className="block text-sm font-medium text-gray-700">Coat Pattern</label>
+                                    <label className="block text-sm font-medium text-gray-700">Pattern</label>
                                     <input type="text" name="coatPattern" value={formData.coatPattern} onChange={handleChange} 
                                         className="mt-1 block w-full p-2 border border-gray-300 rounded-md shadow-sm focus:ring-primary focus:border-primary" 
                                         placeholder="e.g., Solid, Hooded, Brindle" />
@@ -19965,7 +19965,7 @@ const App = () => {
                                                     <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm">
                                                         <div><span className="text-gray-600">Color:</span> <strong>{animalToView.color || ''}</strong></div>
                                                         <div><span className="text-gray-600">Coat Type:</span> <strong>{animalToView.coat || ''}</strong></div>
-                                                        <div><span className="text-gray-600">Coat Pattern:</span> <strong>{animalToView.coatPattern || ''}</strong></div>
+                                                        <div><span className="text-gray-600">Pattern:</span> <strong>{animalToView.coatPattern || ''}</strong></div>
                                                         {(animalToView.species === 'Fancy Rat' || animalToView.species === 'Rat') && (
                                                             <div><span className="text-gray-600">Earset:</span> <strong>{animalToView.earset || ''}</strong></div>
                                                         )}
