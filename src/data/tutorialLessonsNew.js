@@ -2000,25 +2000,25 @@ const ADVANCED_FEATURES_LESSONS = [
       {
         stepNumber: 1,
         title: 'What is COI?',
-        content: 'The Coefficient of Inbreeding (COI) is a mathematical measure of genetic diversity. It ranges from 0% (no common ancestors) to 100% (completely inbred). Lower COI is healthier.',
+        content: 'The Coefficient of Inbreeding (COI) is a mathematical measure of genetic diversity. It ranges from 0% (no common ancestors) to 100% (completely inbred).',
         highlightElement: '[data-tutorial-target="coi-explanation"]',
         hideHighlightPrompt: true,
         tips: [
           '0% = maximum diversity',
           '100% = completely inbred',
-          'Aim for lower percentages'
+          'Important metric for breeding decisions'
         ]
       },
       {
         stepNumber: 2,
         title: 'Why COI Matters',
-        content: 'High inbreeding (high COI) increases genetic problems, reduces fitness, and increases disease susceptibility. Selective breeding requires monitoring COI to maintain healthy animals.',
+        content: 'COI helps breeders understand the genetic relationship between ancestors in a pedigree. Monitoring COI allows breeders to make informed decisions about their breeding programs.',
         highlightElement: '[data-tutorial-target="why-coi-matters"]',
         hideHighlightPrompt: true,
         tips: [
           'Genetics matter',
-          'Health depends on diversity',
-          'Responsible breeding tracks COI'
+          'Track genetic relationships',
+          'Use COI in breeding decisions'
         ]
       },
       {
@@ -2030,31 +2030,31 @@ const ADVANCED_FEATURES_LESSONS = [
         tips: [
           'Check before breeding',
           'Use in breeding decisions',
-          'Lower is better'
+          'Important pedigree metric'
         ]
       },
       {
         stepNumber: 4,
         title: 'Predicted COI for Pairings',
-        content: 'When selecting potential breeding pairs, the system can predict the COI of offspring. Higher predictions mean more inbreeding - choose pairings carefully.',
+        content: 'When selecting potential breeding pairs, the system can predict the COI of offspring. This helps you understand the genetic relationship before making breeding decisions.',
         highlightElement: '[data-tutorial-target="predicted-coi"]',
         hideHighlightPrompt: true,
         tips: [
           'Plan ahead',
-          'Avoid excessive inbreeding',
-          'Predict offspring health'
+          'Compare different pairings',
+          'Preview offspring COI'
         ]
       },
       {
         stepNumber: 5,
-        title: 'Ethical Breeding',
-        content: 'Responsible breeders use COI to make ethical decisions. Never breed animals with excessively high COI. Always prioritize health over appearance.',
+        title: 'Using COI in Your Program',
+        content: 'COI is one of many tools breeders use to make informed decisions. Consider COI alongside other factors like temperament, conformation, and health testing when planning your breeding program.',
         highlightElement: '[data-tutorial-target="ethical-breeding"]',
         hideHighlightPrompt: true,
         tips: [
-          'Health first',
+          'One factor among many',
           'Consider COI in every decision',
-          'Breed responsibly'
+          'Use alongside other metrics'
         ]
       }
     ]
