@@ -1196,7 +1196,6 @@ const KEY_FEATURES_LESSONS = [
           'Located at top right of detail view',
           'Green Eye = Public, Gray Eye-Off = Private',
           'Controls whole animal visibility',
-          'Different from section-specific toggles',
           'Can be toggled anytime - updates instantly'
         ]
       },

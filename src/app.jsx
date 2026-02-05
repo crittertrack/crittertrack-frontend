@@ -2386,6 +2386,7 @@ const PrivateAnimalDetail = ({ animal, onClose, onEdit, API_BASE_URL, authToken,
                                                     console.error('Failed to update isDisplay:', err);
                                                 });
                                             }}
+                                            data-tutorial-target="detail-private-toggle"
                                             className={`absolute top-4 right-4 flex items-center gap-2 px-3 py-1.5 rounded-lg font-medium transition ${animal.isDisplay ? 'bg-green-100 text-green-800 hover:bg-green-200' : 'bg-gray-100 text-gray-800 hover:bg-gray-200'}`}
                                             title="Toggle public profile visibility"
                                         >
