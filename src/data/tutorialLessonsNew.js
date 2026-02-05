@@ -1482,6 +1482,18 @@ const KEY_FEATURES_LESSONS = [
       },
       {
         stepNumber: 9,
+        title: 'Breeding Status',
+        content: 'Set your breeding status for each species you work with. Choose Owner (not breeding), Active Breeder, or Retired Breeder. Active and Retired breeders are visible in the public Breeders Directory.',
+        highlightElement: '[data-tutorial-target="breeding-status-section"]',
+        tips: [
+          'Owner: You have animals but don\'t breed',
+          'Active Breeder: Currently breeding this species',
+          'Retired Breeder: No longer actively breeding',
+          'Active/Retired breeders appear in directory'
+        ]
+      },
+      {
+        stepNumber: 10,
         title: 'Save or Cancel',
         content: 'Use the Save button to keep your changes or Cancel to discard them. Changes are applied immediately upon save.',
         highlightElement: '[data-tutorial-target="profile-save-cancel"]',
@@ -1492,7 +1504,7 @@ const KEY_FEATURES_LESSONS = [
         ]
       },
       {
-        stepNumber: 10,
+        stepNumber: 11,
         title: 'Move to Budget',
         content: 'Now let\'s explore the Budget section to understand financial tracking. Click the "Budget" button in the header.',
         highlightElement: '[data-tutorial-target="budget-btn"]',

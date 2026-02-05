@@ -1122,7 +1122,7 @@ const BreederDirectorySettings = ({ authToken, API_BASE_URL, showModalMessage, u
     }
 
     return (
-        <div className="mb-8 p-4 sm:p-6 border rounded-lg bg-gray-50 overflow-x-hidden">
+        <div className="mb-8 p-4 sm:p-6 border rounded-lg bg-gray-50 overflow-x-hidden" data-tutorial-target="breeding-status-section">
             <h3 className="text-xl font-semibold text-gray-800 border-b pb-2 mb-4">Species & Breeding Status</h3>
             <p className="text-sm text-gray-600 mb-1">
                 Set your breeding status for each species. Marking yourself as an <strong>Active Breeder</strong> or <strong>Retired Breeder</strong> will make you visible in the Breeders directory.
