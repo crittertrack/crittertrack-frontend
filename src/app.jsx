@@ -12975,6 +12975,7 @@ const BreederDirectory = ({ authToken, API_BASE_URL, onBack }) => {
 };
 
 const ProfileView = ({ userProfile, showModalMessage, fetchUserProfile, authToken, onProfileUpdated, onProfileEditButtonClicked }) => {
+    const navigate = useNavigate();
     const [isEditing, setIsEditing] = useState(false);
     const [copySuccess, setCopySuccess] = useState(false);
     const [checkingForUpdates, setCheckingForUpdates] = useState(false);
@@ -13162,6 +13163,15 @@ const ProfileView = ({ userProfile, showModalMessage, fetchUserProfile, authToke
                     </>
                 )}
             </button>
+            
+            {userProfile?.id_public === 'CTU2' && (
+                <button 
+                    onClick={() => navigate('/family-tree')}
+                    className="mt-3 bg-blue-500 hover:bg-blue-600 text-white font-semibold py-3 px-6 rounded-lg transition duration-150 shadow-md flex items-center"
+                >
+                    <Users size={20} className="mr-2" /> Family Tree (Testing)
+                </button>
+            )}
         </div>
     );
 };
@@ -18449,12 +18459,6 @@ const App = () => {
                             <Calculator size={18} className="mb-1" />
                             <span>Calculator</span>
                         </button>
-                        {userProfile?.id_public === 'CTU2' && (
-                            <button onClick={() => navigate('/family-tree')} className={`px-4 py-2 text-xs font-medium rounded-lg transition duration-150 flex flex-col items-center ${currentView === 'family-tree' ? 'bg-primary text-black shadow-md' : 'text-gray-600 hover:bg-gray-100'}`}>
-                                <Users size={18} className="mb-1" />
-                                <span>Family Tree</span>
-                            </button>
-                        )}
                         <button onClick={() => navigate('/breeder-directory')} data-tutorial-target="breeders-btn" className={`px-4 py-2 text-xs font-medium rounded-lg transition duration-150 flex flex-col items-center ${currentView === 'breeder-directory' ? 'bg-primary text-black shadow-md' : 'text-gray-600 hover:bg-gray-100'}`}>
                             <MoonStar size={18} className="mb-1" />
                             <span>Breeders</span>
@@ -18626,12 +18630,6 @@ const App = () => {
                             <Calculator size={18} className="mb-0.5" />
                             <span>Calculator</span>
                         </button>
-                        {userProfile?.id_public === 'CTU2' && (
-                            <button onClick={() => navigate('/family-tree')} className={`px-2 py-2 text-xs font-medium rounded-lg transition duration-150 flex flex-col items-center ${currentView === 'family-tree' ? 'bg-primary text-black shadow-md' : 'text-gray-600 hover:bg-gray-100'}`}>
-                                <Users size={18} className="mb-0.5" />
-                                <span>Family Tree</span>
-                            </button>
-                        )}
                         <button onClick={() => navigate('/breeder-directory')} data-tutorial-target="breeders-btn" className={`px-2 py-2 text-xs font-medium rounded-lg transition duration-150 flex flex-col items-center ${currentView === 'breeder-directory' ? 'bg-primary text-black shadow-md' : 'text-gray-600 hover:bg-gray-100'}`}>
                             <MoonStar size={18} className="mb-0.5" />
                             <span>Breeders</span>
