@@ -14682,8 +14682,10 @@ const AnimalList = ({ authToken, showModalMessage, onEditAnimal, onViewAnimal, f
                         {/* Privacy toggle bottom-left */}
                         {!isSelectable && (
                             <button
+                                type="button"
                                 onClick={(e) => {
                                     e.stopPropagation();
+                                    e.preventDefault();
                                     onTogglePrivacy && onTogglePrivacy(animal.id_public, !animal.showOnPublicProfile);
                                 }}
                                 className={`relative inline-flex h-4 w-7 sm:h-5 sm:w-9 items-center rounded-full transition-colors duration-200 ease-in-out focus:outline-none ${
