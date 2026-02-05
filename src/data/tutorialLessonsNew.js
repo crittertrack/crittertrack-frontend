@@ -1149,87 +1149,13 @@ const GETTING_STARTED_LESSONS = [
       },
       {
         stepNumber: 4,
-        title: 'Back to Status & Privacy',
-        content: 'Now that we\'ve covered all the tabs, let\'s go back to the Status & Privacy tab to review the privacy settings one more time before saving. Click the "Status & Privacy" tab.',
-        highlightElement: '[data-tutorial-target="status-privacy-tab"]',
-        actionType: 'click',
-        tips: [
-          'Final privacy review',
-          'Make sure settings are correct',
-          'Privacy affects data visibility'
-        ]
-      }
-    ]
-  },
-
-  {
-    id: 'gs-privacy-save',
-    title: '14. Privacy Settings & Saving Your Animal',
-    description: 'Review privacy settings and save your complete animal record',
-    tour: 'getting-started',
-    tourOrder: 14,
-    steps: [
-      {
-        stepNumber: 1,
-        title: 'Privacy Review',
-        content: 'This is our final stop in the Getting Started tour. Let\'s review the privacy toggles. Throughout the app, you\'ll see privacy toggles (eye icons or checkboxes) next to various sections. When checked/visible, that section is visible to other users (if your animal is public). When unchecked/hidden, only you can see it.',
-        highlightElement: '[data-tutorial-target="status-privacy-tab"]',
-        tips: [
-          'Privacy toggles control visibility',
-          'Affects sharing with other users',
-          'You always see everything'
-        ]
-      },
-      {
-        stepNumber: 2,
-        title: 'Example Privacy Toggles',
-        content: 'For example, the "Public Profile" checkbox controls whether the whole animal appears publicly. Individual sections might have their own toggles. The "Current Owner" field has a toggle to show/hide owner information - you can decide whether to display owner details publicly or keep them private. These toggles let you share some info while keeping other details private.',
-        highlightElement: '[data-tutorial-target="visibility-section"], [data-tutorial-target="owner-privacy-toggle"]',
-        tips: [
-          'Different sections have different toggles',
-          'Toggle buttons show Eye icon (Public) or Eye-Off icon (Private)',
-          'Strategic privacy increases sharing',
-          'You control what\'s visible',
-          'Helpful for protecting sensitive info'
-        ]
-      },
-      {
-        stepNumber: 3,
-        title: 'Save Your Animal',
-        content: 'Now you\'re ready! Click the "Save Animal" button at the bottom to finalize your animal record. All the information from all tabs will be saved together.',
-        highlightElement: '[data-tutorial-target="save-animal-btn"]',
-        actionType: 'click',
-        tips: [
-          'This is the final step',
-          'All tabs are saved together',
-          'Can edit anytime after saving',
-          'Your first animal is now created!'
-        ]
-      },
-      {
-        stepNumber: 4,
-        title: 'Congratulations!',
-        content: 'You\'ve successfully completed the Getting Started tour and created your first animal! You now understand how to document every aspect of an animal in CritterTrack - from basic info to genetics to health to breeding records.',
-        highlightElement: '[data-tutorial-target="success-message"]',
-        hideHighlightPrompt: true,
+        title: 'Tutorial Complete!',
+        content: 'Congratulations! You\'ve completed the Getting Started tour and learned about all the tabs and features for documenting your animals in CritterTrack. You can now create and manage your collection with confidence.',
         tips: [
           'You can create more animals anytime',
           'Edit animals at any time',
           'All information is preserved',
-          'Start the Key Features tour next'
-        ]
-      },
-      {
-        stepNumber: 5,
-        title: 'Next: Key Features Tour',
-        content: 'Congratulations on completing the Getting Started tour! You now know how to create and configure animals. Would you like to start the "Key Features" tour? This will teach you about viewing and editing animals, creating litters, managing your profile, and handling finances.',
-        actionType: 'startNextTour',
-        actionData: { nextTour: 'features' },
-        tips: [
-          'Key Features builds on Getting Started',
-          'Covers litters, profile, budget',
-          'You can start it anytime from the tutorial menu',
-          'Optional but highly recommended'
+          'Explore the Key Features tour next'
         ]
       }
     ]
