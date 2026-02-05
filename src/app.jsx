@@ -10964,7 +10964,7 @@ const AnimalForm = ({
                 {activeTab === 7 && (
                     <div className="space-y-6">
                         {/* Preventive Care */}
-                        <div className="bg-gray-50 p-4 rounded-lg border border-gray-200 space-y-6">
+                        <div className="bg-gray-50 p-4 rounded-lg border border-gray-200 space-y-6" data-tutorial-target="preventive-care-section">
                             <h3 className="text-lg font-semibold text-gray-700 mb-4">Preventive Care</h3>
                             
                             {/* Vaccinations */}
