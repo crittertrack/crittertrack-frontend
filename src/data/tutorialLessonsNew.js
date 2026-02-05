@@ -2180,7 +2180,7 @@ const ADVANCED_FEATURES_LESSONS = [
       {
         stepNumber: 1,
         title: 'Animal Tree Overview',
-        content: 'The Animal Tree provides a visual family tree for each species, showing all your owned animals and their immediate parents. Click the Users icon next to a species name on your My Animals page to view the tree for that species.',
+        content: 'The Animal Tree provides a visual family tree for each species, showing all your owned animals and their immediate parents. Click the Network icon next to a species name on your My Animals page to view the tree for that species.',
         highlightElement: '[data-tutorial-target="animal-tree-btn"]',
         tips: [
           'Visual family tree per species',
