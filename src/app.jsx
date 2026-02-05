@@ -18613,7 +18613,7 @@ const App = () => {
                             <DollarSign size={18} className="mb-0.5" />
                             <span>Budget</span>
                         </button>
-                        <button onClick={() => navigate('/marketplace')} className={`px-2 py-2 text-xs font-medium rounded-lg transition duration-150 flex flex-col items-center ${currentView === 'marketplace' ? 'bg-primary text-black shadow-md' : 'text-gray-600 hover:bg-gray-100'}`}>
+                        <button onClick={() => navigate('/marketplace')} data-tutorial-target="marketplace-btn" className={`px-2 py-2 text-xs font-medium rounded-lg transition duration-150 flex flex-col items-center ${currentView === 'marketplace' ? 'bg-primary text-black shadow-md' : 'text-gray-600 hover:bg-gray-100'}`}>
                             <ShoppingBag size={18} className="mb-0.5" />
                             <span>Marketplace</span>
                         </button>
