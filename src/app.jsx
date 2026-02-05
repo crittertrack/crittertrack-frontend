@@ -11424,7 +11424,7 @@ const AnimalForm = ({
                 {activeTab === 8 && (
                     <div className="space-y-6">
                         {/* 1st Section: Nutrition */}
-                        <div className="bg-gray-50 p-4 rounded-lg border border-gray-200 space-y-4">
+                        <div className="bg-gray-50 p-4 rounded-lg border border-gray-200 space-y-4" data-tutorial-target="nutrition-section">
                             <h3 className="text-lg font-semibold text-gray-700 mb-4">Nutrition</h3>
                             <div className="space-y-4">
                                 <div>
