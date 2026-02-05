@@ -2126,6 +2126,7 @@ const ADVANCED_FEATURES_LESSONS = [
         stepNumber: 1,
         title: 'Breeder Directory Overview',
         content: 'The Breeder Directory helps you find active breeders of specific species. Click the star/moon icon in the header to access it. Breeders can mark themselves as "Active Breeder" or "Retired Breeder" for each species in their settings.',
+        highlightElement: '[data-tutorial-target="breeders-btn"]',
         tips: [
           'Find breeders by species',
           'Connect with the community',
