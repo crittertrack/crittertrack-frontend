@@ -550,7 +550,7 @@ const PedigreeChart = ({ animalId, animalData, onClose, API_BASE_URL, authToken 
                 onClick={onClick ? () => onClick(animal) : undefined}
             >
                 {/* Image - 1/3 width */}
-                <div className="hide-for-pdf w-1/3 aspect-square bg-gray-100 rounded-lg border-2 border-gray-900 overflow-hidden flex items-center justify-center flex-shrink-0">
+                <div className="hide-for-pdf w-1/3 aspect-square bg-gray-100 rounded-lg border-2 border-gray-900 overflow-hidden flex items-center justify-center flex-shrink-0 pointer-events-none">
                     {imgSrc ? (
                         <AnimalImage src={imgSrc} alt={animal.name} className="w-full h-full object-cover" iconSize={window.innerWidth < 640 ? 24 : 32} />
                     ) : (
@@ -559,7 +559,7 @@ const PedigreeChart = ({ animalId, animalData, onClose, API_BASE_URL, authToken 
                 </div>
                 
                 {/* Info */}
-                <div className="flex-1 min-w-0 flex flex-col justify-start gap-1.5 py-1">
+                <div className="flex-1 min-w-0 flex flex-col justify-start gap-1.5 py-1 pointer-events-none">
                     {/* Name */}
                     <div className="text-xs text-gray-900 leading-tight" style={{lineHeight: '1.2'}}>
                         <span className="font-semibold">Name: </span>
@@ -588,12 +588,12 @@ const PedigreeChart = ({ animalId, animalData, onClose, API_BASE_URL, authToken 
                 </div>
                 
                 {/* Gender Icon - Top Right */}
-                <div className="absolute top-2 right-2">
+                <div className="absolute top-2 right-2 pointer-events-none">
                     <GenderIcon size={20} className="text-gray-900" strokeWidth={2.5} />
                 </div>
                 
                 {/* CT ID - Bottom Right */}
-                <div className="absolute bottom-1 right-2 text-xs font-mono text-gray-700">
+                <div className="absolute bottom-1 right-2 text-xs font-mono text-gray-700 pointer-events-none">
                     {animal.id_public}
                 </div>
             </div>
@@ -651,9 +651,12 @@ const PedigreeChart = ({ animalId, animalData, onClose, API_BASE_URL, authToken 
         const colorCoat = [animal.color, animal.pattern, animal.coat].filter(Boolean).join(' ') || 'N/A';
         
         return (
-            <div className={`border ${getBorderColor(animal)} rounded p-1 ${bgColor} relative flex gap-1.5 h-full items-center`}>
+            <div 
+                className={`border ${getBorderColor(animal)} rounded p-1 ${bgColor} relative flex gap-1.5 h-full items-center ${onClick ? 'cursor-pointer hover:opacity-80 transition' : ''}`}
+                onClick={onClick ? () => onClick(animal) : undefined}
+            >
                 {/* Image - 1/3 width */}
-                <div className="hide-for-pdf w-1/3 aspect-square bg-gray-100 rounded-lg border-2 border-gray-900 overflow-hidden flex items-center justify-center flex-shrink-0">
+                <div className="hide-for-pdf w-1/3 aspect-square bg-gray-100 rounded-lg border-2 border-gray-900 overflow-hidden flex items-center justify-center flex-shrink-0 pointer-events-none">
                     {imgSrc ? (
                         <AnimalImage src={imgSrc} alt={animal.name} className="w-full h-full object-cover" iconSize={20} />
                     ) : (
@@ -662,7 +665,7 @@ const PedigreeChart = ({ animalId, animalData, onClose, API_BASE_URL, authToken 
                 </div>
                 
                 {/* Info */}
-                <div className="flex-1 min-w-0 flex flex-col justify-start gap-1 py-0.5">
+                <div className="flex-1 min-w-0 flex flex-col justify-start gap-1 py-0.5 pointer-events-none">
                     {/* Name */}
                     <div className="text-gray-900 leading-tight" style={{fontSize: '0.65rem', lineHeight: '1.2'}}>
                         <span className="font-semibold">Name: </span>
@@ -691,12 +694,12 @@ const PedigreeChart = ({ animalId, animalData, onClose, API_BASE_URL, authToken 
                 </div>
                 
                 {/* Gender Icon - Top Right */}
-                <div className="absolute top-1 right-1">
+                <div className="absolute top-1 right-1 pointer-events-none">
                     <GenderIcon size={14} className="text-gray-900" strokeWidth={2.5} />
                 </div>
                 
                 {/* CT ID - Bottom Right */}
-                <div className="absolute bottom-1 right-1 text-xs font-mono text-gray-700">
+                <div className="absolute bottom-1 right-1 text-xs font-mono text-gray-700 pointer-events-none">
                     {animal.id_public}
                 </div>
             </div>
@@ -752,7 +755,7 @@ const PedigreeChart = ({ animalId, animalData, onClose, API_BASE_URL, authToken 
                 onClick={onClick ? () => onClick(animal) : undefined}
             >
                 {/* Image */}
-                <div className="hide-for-pdf w-8 h-8 bg-gray-100 rounded-lg border border-gray-900 overflow-hidden flex items-center justify-center flex-shrink-0">
+                <div className="hide-for-pdf w-8 h-8 bg-gray-100 rounded-lg border border-gray-900 overflow-hidden flex items-center justify-center flex-shrink-0 pointer-events-none">
                     {imgSrc ? (
                         <AnimalImage src={imgSrc} alt={animal.name} className="w-full h-full object-cover" iconSize={12} />
                     ) : (
@@ -761,7 +764,7 @@ const PedigreeChart = ({ animalId, animalData, onClose, API_BASE_URL, authToken 
                 </div>
                 
                 {/* Info */}
-                <div className="flex-1 min-w-0 flex flex-col justify-start gap-0.5 py-0.5">
+                <div className="flex-1 min-w-0 flex flex-col justify-start gap-0.5 py-0.5 pointer-events-none">
                     {/* Name - inline */}
                     <div className="text-gray-900 leading-tight" style={{fontSize: '0.65rem', lineHeight: '1.3'}}>
                         <span className="font-semibold">Name: </span>{animal.prefix && `${animal.prefix} `}{animal.name}{animal.suffix && ` ${animal.suffix}`}
@@ -781,12 +784,12 @@ const PedigreeChart = ({ animalId, animalData, onClose, API_BASE_URL, authToken 
                 </div>
                 
                 {/* Gender Icon - Top Right */}
-                <div className="absolute top-0.5 right-0.5">
+                <div className="absolute top-0.5 right-0.5 pointer-events-none">
                     <GenderIcon size={12} className="text-gray-900" strokeWidth={2.5} />
                 </div>
                 
                 {/* CT ID - Bottom Right */}
-                <div className="absolute bottom-0.5 right-0.5 text-xs font-mono text-gray-700">
+                <div className="absolute bottom-0.5 right-0.5 text-xs font-mono text-gray-700 pointer-events-none">
                     {animal.id_public}
                 </div>
             </div>
@@ -14780,44 +14783,44 @@ const AnimalList = ({ authToken, showModalMessage, onEditAnimal, onViewAnimal, f
 
     return (
         <div className="w-full max-w-5xl bg-white p-6 rounded-xl shadow-lg">
-            <h2 className="text-3xl font-bold text-gray-800 mb-6 flex items-center justify-between">
+            <h2 className="text-2xl sm:text-3xl font-bold text-gray-800 mb-6 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3">
                 <div className='flex items-center'>
-                    <ClipboardList size={24} className="mr-3 text-primary-dark" />
+                    <ClipboardList size={20} className="sm:w-6 sm:h-6 mr-2 sm:mr-3 text-primary-dark" />
                     My Animals ({animals.length})
                 </div>
-                <div className="flex items-center gap-2" data-tutorial-target="bulk-privacy-controls">
+                <div className="flex items-center gap-1 sm:gap-2 flex-wrap" data-tutorial-target="bulk-privacy-controls">
                     <button
                         onClick={() => toggleAllAnimalsPrivacy(true)}
-                        className="text-green-600 hover:text-green-700 transition flex items-center gap-1 px-3 py-1.5 rounded-lg hover:bg-green-50"
+                        className="text-green-600 hover:text-green-700 transition flex items-center gap-0.5 sm:gap-1 px-2 sm:px-3 py-1 sm:py-1.5 rounded-lg hover:bg-green-50 text-xs sm:text-sm"
                         title="Make All Animals Public"
                     >
-                        <Eye size={16} />
-                        <span className="text-sm font-medium">All Public</span>
+                        <Eye size={14} className="sm:w-4 sm:h-4" />
+                        <span className="font-medium">All Public</span>
                     </button>
                     <button
                         onClick={() => toggleAllAnimalsPrivacy(false)}
-                        className="text-gray-600 hover:text-gray-800 transition flex items-center gap-1 px-3 py-1.5 rounded-lg hover:bg-gray-100"
+                        className="text-gray-600 hover:text-gray-800 transition flex items-center gap-0.5 sm:gap-1 px-2 sm:px-3 py-1 sm:py-1.5 rounded-lg hover:bg-gray-100 text-xs sm:text-sm"
                         title="Make All Animals Private"
                     >
-                        <EyeOff size={16} />
-                        <span className="text-sm font-medium">All Private</span>
+                        <EyeOff size={14} className="sm:w-4 sm:h-4" />
+                        <span className="font-medium">All Private</span>
                     </button>
                     <button 
                         onClick={() => { navigate('/hidden-animals'); fetchHiddenAnimals(); }}
                         data-tutorial-target="hidden-animals-btn"
-                        className="text-gray-600 hover:text-gray-800 transition flex items-center gap-1 px-3 py-1.5 rounded-lg hover:bg-gray-100"
+                        className="text-gray-600 hover:text-gray-800 transition flex items-center gap-0.5 sm:gap-1 px-2 sm:px-3 py-1 sm:py-1.5 rounded-lg hover:bg-gray-100 text-xs sm:text-sm"
                         title="View Hidden Animals"
                     >
-                        <Archive size={18} />
-                        <span className="text-sm font-medium">Hidden</span>
+                        <Archive size={14} className="sm:w-[18px] sm:h-[18px]" />
+                        <span className="font-medium">Hidden</span>
                     </button>
                     <button 
                         onClick={handleRefresh} 
                         disabled={loading}
-                        className="text-gray-600 hover:text-primary transition disabled:opacity-50 flex items-center"
+                        className="text-gray-600 hover:text-primary transition disabled:opacity-50 flex items-center p-1 sm:p-0"
                         title="Refresh List"
                     >
-                        {loading ? <Loader2 size={18} className="animate-spin" /> : <RefreshCw size={18} />}
+                        {loading ? <Loader2 size={16} className="sm:w-[18px] sm:h-[18px] animate-spin" /> : <RefreshCw size={16} className="sm:w-[18px] sm:h-[18px]" />}
                     </button>
                 </div>
             </h2>
