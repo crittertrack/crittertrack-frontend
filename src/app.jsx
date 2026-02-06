@@ -191,6 +191,7 @@ const PedigreeChart = ({ animalId, animalData, onClose, API_BASE_URL, authToken 
     const [ownerProfile, setOwnerProfile] = useState(null);
     const [loading, setLoading] = useState(true);
     const [imagesLoaded, setImagesLoaded] = useState(false);
+    const [stackedPedigree, setStackedPedigree] = useState(null); // For nested pedigree viewing
     const pedigreeRef = useRef(null);
 
     useEffect(() => {
@@ -439,7 +440,7 @@ const PedigreeChart = ({ animalId, animalData, onClose, API_BASE_URL, authToken 
         if (!animal) return null;
         
         const imgSrc = animal.imageUrl || animal.photoUrl || null;
-        const colorCoat = [animal.color, animal.coat].filter(Boolean).join(' ') || 'N/A';
+        const colorCoat = [animal.color, animal.pattern, animal.coat].filter(Boolean).join(' ') || 'N/A';
         
         // Determine gender-based styling
         const isMale = animal.gender === 'Male';
@@ -447,13 +448,13 @@ const PedigreeChart = ({ animalId, animalData, onClose, API_BASE_URL, authToken 
         const GenderIcon = isMale ? Mars : Venus;
         
         return (
-            <div className={`border border-gray-700 rounded-lg p-2 ${bgColor} relative flex gap-3 items-center`} style={{height: '160px'}}>
+            <div className={`border border-gray-700 rounded-lg p-2 ${bgColor} relative flex gap-3 items-center`} style={{height: window.innerWidth < 640 ? '140px' : '160px'}}>
                 {/* Image */}
-                <div className="hide-for-pdf w-32 h-32 bg-gray-100 rounded-lg overflow-hidden flex items-center justify-center flex-shrink-0 border-2 border-gray-900">
+                <div className="hide-for-pdf w-16 h-16 sm:w-20 sm:h-20 bg-gray-100 rounded-lg overflow-hidden flex items-center justify-center flex-shrink-0 border-2 border-gray-900">
                     {imgSrc ? (
-                        <AnimalImage src={imgSrc} alt={animal.name} className="w-full h-full object-cover" iconSize={48} />
+                        <AnimalImage src={imgSrc} alt={animal.name} className="w-full h-full object-cover" iconSize={window.innerWidth < 640 ? 24 : 32} />
                     ) : (
-                        <Cat size={48} className="text-gray-400" />
+                        <Cat size={window.innerWidth < 640 ? 24 : 32} className="text-gray-400" />
                     )}
                 </div>
                 
@@ -500,7 +501,7 @@ const PedigreeChart = ({ animalId, animalData, onClose, API_BASE_URL, authToken 
     };
 
     // Render card for parents (medium with image)
-    const renderParentCard = (animal, isSire) => {
+    const renderParentCard = (animal, isSire, onClick = null) => {
         const bgColor = isSire ? 'bg-[#d4f1f5]' : 'bg-[#f8e8ee]';
         const GenderIcon = isSire ? Mars : Venus;
         
@@ -519,7 +520,7 @@ const PedigreeChart = ({ animalId, animalData, onClose, API_BASE_URL, authToken 
                         <div className="text-xs text-gray-400">Unknown</div>
                     </div>
                     <div className="absolute top-2 right-2">
-                        <GenderIcon size={20} className="text-gray-900" strokeWidth={2.5} />
+                        <GenderIcon size={24} className="text-gray-900" strokeWidth={2.5} />
                     </div>
                 </div>
             );
@@ -534,23 +535,26 @@ const PedigreeChart = ({ animalId, animalData, onClose, API_BASE_URL, authToken 
                         <div className="text-xs text-gray-500 mt-1">Private Profile</div>
                     </div>
                     <div className="absolute top-2 right-2">
-                        <GenderIcon size={20} className="text-gray-900" strokeWidth={2.5} />
+                        <GenderIcon size={24} className="text-gray-900" strokeWidth={2.5} />
                     </div>
                 </div>
             );
         }
         
         const imgSrc = animal.imageUrl || animal.photoUrl || null;
-        const colorCoat = [animal.color, animal.coat].filter(Boolean).join(' ') || 'N/A';
+        const colorCoat = [animal.color, animal.pattern, animal.coat].filter(Boolean).join(' ') || 'N/A';
         
         return (
-            <div className={`border ${getBorderColor(animal)} rounded p-1.5 ${bgColor} relative flex gap-2 h-full items-center`}>
+            <div 
+                className={`border ${getBorderColor(animal)} rounded p-1.5 ${bgColor} relative flex gap-2 h-full items-center ${onClick ? 'cursor-pointer hover:opacity-80 transition' : ''}`}
+                onClick={onClick ? () => onClick(animal) : undefined}
+            >
                 {/* Image - 1/3 width */}
                 <div className="hide-for-pdf w-1/3 aspect-square bg-gray-100 rounded-lg border-2 border-gray-900 overflow-hidden flex items-center justify-center flex-shrink-0">
                     {imgSrc ? (
-                        <AnimalImage src={imgSrc} alt={animal.name} className="w-full h-full object-cover" iconSize={28} />
+                        <AnimalImage src={imgSrc} alt={animal.name} className="w-full h-full object-cover" iconSize={window.innerWidth < 640 ? 24 : 32} />
                     ) : (
-                        <Cat size={28} className="text-gray-400" />
+                        <Cat size={window.innerWidth < 640 ? 24 : 32} className="text-gray-400" />
                     )}
                 </div>
                 
@@ -597,7 +601,7 @@ const PedigreeChart = ({ animalId, animalData, onClose, API_BASE_URL, authToken 
     };
 
     // Render card for grandparents (with image)
-    const renderGrandparentCard = (animal, isSire) => {
+    const renderGrandparentCard = (animal, isSire, onClick = null) => {
         const bgColor = isSire ? 'bg-[#d4f1f5]' : 'bg-[#f8e8ee]';
         const GenderIcon = isSire ? Mars : Venus;
         
@@ -644,7 +648,7 @@ const PedigreeChart = ({ animalId, animalData, onClose, API_BASE_URL, authToken 
         }
         
         const imgSrc = animal.imageUrl || animal.photoUrl || null;
-        const colorCoat = [animal.color, animal.coat].filter(Boolean).join(' ') || 'N/A';
+        const colorCoat = [animal.color, animal.pattern, animal.coat].filter(Boolean).join(' ') || 'N/A';
         
         return (
             <div className={`border ${getBorderColor(animal)} rounded p-1 ${bgColor} relative flex gap-1.5 h-full items-center`}>
@@ -700,7 +704,7 @@ const PedigreeChart = ({ animalId, animalData, onClose, API_BASE_URL, authToken 
     };
 
     // Render card for great-grandparents (text only, no image)
-    const renderGreatGrandparentCard = (animal, isSire) => {
+    const renderGreatGrandparentCard = (animal, isSire, onClick = null) => {
         const bgColor = isSire ? 'bg-[#d4f1f5]' : 'bg-[#f8e8ee]';
         const GenderIcon = isSire ? Mars : Venus;
         
@@ -723,9 +727,15 @@ const PedigreeChart = ({ animalId, animalData, onClose, API_BASE_URL, authToken 
         
         if (animal.isHidden) {
             return (
-                <div className={`border ${getBorderColor(animal)} rounded p-1 ${bgColor} flex flex-col items-center justify-center h-full relative`}>
-                    <EyeOff size={16} className="text-gray-500 mb-1" />
-                    <span className="text-xs text-gray-600 font-semibold">Hidden</span>
+                <div className={`border ${getBorderColor(animal)} rounded p-1 ${bgColor} flex gap-1 h-full items-center relative`}>
+                    {/* Icon placeholder */}
+                    <div className="hide-for-pdf w-8 h-8 bg-gray-100 rounded-lg border border-gray-900 overflow-hidden flex items-center justify-center flex-shrink-0">
+                        <EyeOff size={12} className="text-gray-500" />
+                    </div>
+                    {/* Text */}
+                    <div className="flex-1 flex items-center justify-start">
+                        <span className="text-xs text-gray-600 font-semibold">Hidden</span>
+                    </div>
                     <div className="absolute top-0.5 right-0.5">
                         <GenderIcon size={12} className="text-gray-900" strokeWidth={2.5} />
                     </div>
@@ -733,28 +743,41 @@ const PedigreeChart = ({ animalId, animalData, onClose, API_BASE_URL, authToken 
             );
         }
         
-        const colorCoat = [animal.color, animal.coat].filter(Boolean).join(' ') || 'N/A';
+        const imgSrc = animal.imageUrl || animal.photoUrl || null;
+        const colorCoat = [animal.color, animal.pattern, animal.coat].filter(Boolean).join(' ') || 'N/A';
         
         return (
-            <div className={`border ${getBorderColor(animal)} rounded p-0.5 ${bgColor} relative h-full flex flex-col justify-start gap-1 py-1`}>
-                {/* Name */}
-                <div className="text-gray-900 leading-tight" style={{fontSize: '0.6rem', lineHeight: '1.2'}}>
-                    <span className="font-semibold">Name: </span>
-                    <span className="line-clamp-2">
-                        {animal.prefix && `${animal.prefix} `}{animal.name}{animal.suffix && ` ${animal.suffix}`}
-                    </span>
+            <div 
+                className={`border ${getBorderColor(animal)} rounded p-1 ${bgColor} relative h-full flex gap-1 items-center ${onClick ? 'cursor-pointer hover:opacity-80 transition' : ''}`}
+                onClick={onClick ? () => onClick(animal) : undefined}
+            >
+                {/* Image */}
+                <div className="hide-for-pdf w-8 h-8 bg-gray-100 rounded-lg border border-gray-900 overflow-hidden flex items-center justify-center flex-shrink-0">
+                    {imgSrc ? (
+                        <AnimalImage src={imgSrc} alt={animal.name} className="w-full h-full object-cover" iconSize={12} />
+                    ) : (
+                        <Cat size={12} className="text-gray-400" />
+                    )}
                 </div>
                 
-                {/* Variety */}
-                <div className="text-gray-900 leading-tight" style={{fontSize: '0.6rem', lineHeight: '1.2'}}>
-                    <span className="font-semibold">Variety: </span>
-                    {colorCoat}
-                </div>
+                {/* Info */}
+                <div className="flex-1 min-w-0 flex flex-col justify-start gap-0.5 py-0.5">
+                    {/* Name - inline */}
+                    <div className="text-gray-900 leading-tight" style={{fontSize: '0.65rem', lineHeight: '1.3'}}>
+                        <span className="font-semibold">Name: </span>{animal.prefix && `${animal.prefix} `}{animal.name}{animal.suffix && ` ${animal.suffix}`}
+                    </div>
                 
-                {/* Breeder */}
-                <div className="text-gray-900 leading-tight" style={{fontSize: '0.6rem', lineHeight: '1.2'}}>
-                    <span className="font-semibold">Breeder: </span>
-                    {animal.breederName || 'N/A'}
+                    {/* Variety */}
+                    <div className="text-gray-900 leading-tight" style={{fontSize: '0.65rem', lineHeight: '1.3'}}>
+                        <span className="font-semibold">Variety: </span>
+                        {colorCoat}
+                    </div>
+                    
+                    {/* Breeder */}
+                    <div className="text-gray-900 leading-tight" style={{fontSize: '0.65rem', lineHeight: '1.3'}}>
+                        <span className="font-semibold">Breeder: </span>
+                        {animal.breederName || 'N/A'}
+                    </div>
                 </div>
                 
                 {/* Gender Icon - Top Right */}
@@ -772,6 +795,13 @@ const PedigreeChart = ({ animalId, animalData, onClose, API_BASE_URL, authToken 
 
     const renderPedigreeTree = (animal) => {
         if (!animal) return null;
+
+        // Handler for clicking on pedigree cards
+        const handleCardClick = (clickedAnimal) => {
+            if (clickedAnimal && clickedAnimal.id_public) {
+                setStackedPedigree(clickedAnimal);
+            }
+        };
 
         // Generation 1 (parents)
         const father = animal.father;
@@ -793,65 +823,68 @@ const PedigreeChart = ({ animalId, animalData, onClose, API_BASE_URL, authToken 
         const mgmFather = maternalGrandmother?.father;
         const mgmMother = maternalGrandmother?.mother;
 
-        // Calculate heights based on full height (794px - padding 48px - top section ~170px - footer ~50px - gaps = ~526px for content)
-        const contentHeight = 526;
-        const parentHeight = contentHeight / 2; // ~263px for each parent
-        const grandparentHeight = contentHeight / 4; // ~131.5px for each grandparent
-        const greatGrandparentHeight = contentHeight / 8; // ~65.75px for each great-grandparent
+        // Responsive heights - reasonable mobile sizing
+        const isMobile = window.innerWidth < 640; // sm breakpoint
+        const contentHeight = isMobile ? 450 : 600; // Increased height to fit text
+        const parentHeight = contentHeight / 2;
+        const grandparentHeight = contentHeight / 4;
+        const greatGrandparentHeight = contentHeight / 8;
+        const gap = isMobile ? 4 : 8; // gap-1 = 4px, gap-2 = 8px
+        const gapClass = isMobile ? 'gap-1' : 'gap-2';
 
         return (
-            <div className="flex gap-2 w-full" style={{height: `${contentHeight}px`}}>
+            <div className={`flex ${gapClass} w-full`} style={{height: `${contentHeight}px`, minWidth: isMobile ? '600px' : 'auto'}}>
                     {/* Column 1: Parents (2 rows, each takes 1/2 height) */}
-                    <div className="w-1/3 flex flex-col gap-2">
-                        <div style={{height: `${parentHeight - 4}px`}}>
-                            {renderParentCard(father, true)}
+                    <div className={`w-1/3 flex flex-col ${gapClass}`}>
+                        <div style={{height: `${parentHeight - (gap * 2)}px`}}>
+                            {renderParentCard(father, true, handleCardClick)}
                         </div>
-                        <div style={{height: `${parentHeight - 4}px`}}>
-                            {renderParentCard(mother, false)}
+                        <div style={{height: `${parentHeight - (gap * 2)}px`}}>
+                            {renderParentCard(mother, false, handleCardClick)}
                         </div>
                     </div>
 
                     {/* Column 2: Grandparents (4 rows, each takes 1/4 height) */}
-                    <div className="w-1/3 flex flex-col gap-2">
-                        <div style={{height: `${grandparentHeight - 6}px`}}>
-                            {renderGrandparentCard(paternalGrandfather, true)}
+                    <div className={`w-1/3 flex flex-col ${gapClass}`}>
+                        <div style={{height: `${grandparentHeight - (8 * 0.75)}px`}}>
+                            {renderGrandparentCard(paternalGrandfather, true, handleCardClick)}
                         </div>
-                        <div style={{height: `${grandparentHeight - 6}px`}}>
-                            {renderGrandparentCard(paternalGrandmother, false)}
+                        <div style={{height: `${grandparentHeight - (8 * 0.75)}px`}}>
+                            {renderGrandparentCard(paternalGrandmother, false, handleCardClick)}
                         </div>
-                        <div style={{height: `${grandparentHeight - 6}px`}}>
-                            {renderGrandparentCard(maternalGrandfather, true)}
+                        <div style={{height: `${grandparentHeight - (8 * 0.75)}px`}}>
+                            {renderGrandparentCard(maternalGrandfather, true, handleCardClick)}
                         </div>
-                        <div style={{height: `${grandparentHeight - 6}px`}}>
-                            {renderGrandparentCard(maternalGrandmother, false)}
+                        <div style={{height: `${grandparentHeight - (8 * 0.75)}px`}}>
+                            {renderGrandparentCard(maternalGrandmother, false, handleCardClick)}
                         </div>
                     </div>
 
                     {/* Column 3: Great-Grandparents (8 rows, each takes 1/8 height) */}
-                    <div className="w-1/3 flex flex-col gap-2">
-                        <div style={{height: `${greatGrandparentHeight - 7}px`}}>
-                            {renderGreatGrandparentCard(pgfFather, true)}
+                    <div className={`w-1/3 flex flex-col ${gapClass}`}>
+                        <div style={{height: `${greatGrandparentHeight - (8 * 0.375)}px`}}>
+                            {renderGreatGrandparentCard(pgfFather, true, handleCardClick)}
                         </div>
-                        <div style={{height: `${greatGrandparentHeight - 7}px`}}>
-                            {renderGreatGrandparentCard(pgfMother, false)}
+                        <div style={{height: `${greatGrandparentHeight - (8 * 0.375)}px`}}>
+                            {renderGreatGrandparentCard(pgfMother, false, handleCardClick)}
                         </div>
-                        <div style={{height: `${greatGrandparentHeight - 7}px`}}>
-                            {renderGreatGrandparentCard(pgmFather, true)}
+                        <div style={{height: `${greatGrandparentHeight - (8 * 0.375)}px`}}>
+                            {renderGreatGrandparentCard(pgmFather, true, handleCardClick)}
                         </div>
-                        <div style={{height: `${greatGrandparentHeight - 7}px`}}>
-                            {renderGreatGrandparentCard(pgmMother, false)}
+                        <div style={{height: `${greatGrandparentHeight - (8 * 0.375)}px`}}>
+                            {renderGreatGrandparentCard(pgmMother, false, handleCardClick)}
                         </div>
-                        <div style={{height: `${greatGrandparentHeight - 7}px`}}>
-                            {renderGreatGrandparentCard(mgfFather, true)}
+                        <div style={{height: `${greatGrandparentHeight - (8 * 0.375)}px`}}>
+                            {renderGreatGrandparentCard(mgfFather, true, handleCardClick)}
                         </div>
-                        <div style={{height: `${greatGrandparentHeight - 7}px`}}>
-                            {renderGreatGrandparentCard(mgfMother, false)}
+                        <div style={{height: `${greatGrandparentHeight - (8 * 0.375)}px`}}>
+                            {renderGreatGrandparentCard(mgfMother, false, handleCardClick)}
                         </div>
-                        <div style={{height: `${greatGrandparentHeight - 7}px`}}>
-                            {renderGreatGrandparentCard(mgmFather, true)}
+                        <div style={{height: `${greatGrandparentHeight - (8 * 0.375)}px`}}>
+                            {renderGreatGrandparentCard(mgmFather, true, handleCardClick)}
                         </div>
-                        <div style={{height: `${greatGrandparentHeight - 7}px`}}>
-                            {renderGreatGrandparentCard(mgmMother, false)}
+                        <div style={{height: `${greatGrandparentHeight - (8 * 0.375)}px`}}>
+                            {renderGreatGrandparentCard(mgmMother, false, handleCardClick)}
                         </div>
                     </div>
                 </div>
@@ -924,104 +957,123 @@ const PedigreeChart = ({ animalId, animalData, onClose, API_BASE_URL, authToken 
 
     return (
         <div className="fixed inset-0 bg-black bg-opacity-50 z-50 overflow-y-auto">
-            <div className="min-h-screen flex justify-center pt-4 pb-4 px-4">
-                <div className="bg-white rounded-xl shadow-2xl h-fit w-full max-w-[95vw]">
+            <div className="min-h-screen flex justify-center pt-2 sm:pt-4 pb-2 sm:pb-4 px-2 sm:px-4">
+                <div className="bg-white rounded-xl shadow-2xl h-fit w-full max-w-[98vw] sm:max-w-[95vw]">
                     {/* Header */}
-                    <div className="flex justify-between items-center px-4 sm:px-6 py-4 border-b border-gray-200 bg-gray-50 rounded-t-xl">
-                        <h2 className="text-xl sm:text-2xl font-bold text-gray-800 flex items-center">
-                            <FileText className="mr-2" size={24} />
-                            Pedigree Chart
+                    <div className="flex justify-between items-center px-2 sm:px-6 py-2 sm:py-4 border-b border-gray-200 bg-gray-50 rounded-t-xl">
+                        <h2 className="text-lg sm:text-2xl font-bold text-gray-800 flex items-center">
+                            <FileText className="mr-1 sm:mr-2" size={18} />
+                            <span className="hidden sm:inline">Pedigree Chart</span>
+                            <span className="sm:hidden">Pedigree</span>
                         </h2>
-                        <div className="flex items-center gap-2">
+                        <div className="flex items-center gap-1 sm:gap-2">
                             <button
                                 onClick={downloadPDF}
                                 disabled={!imagesLoaded}
                                 data-tutorial-target="download-pdf-btn"
-                                className={`flex items-center gap-2 px-3 sm:px-4 py-2 font-semibold rounded-lg transition text-sm sm:text-base ${
+                                className={`flex items-center gap-1 sm:gap-2 px-2 sm:px-4 py-1.5 sm:py-2 font-semibold rounded-lg transition text-xs sm:text-base ${
                                     imagesLoaded 
                                         ? 'bg-primary hover:bg-primary/90 text-black cursor-pointer' 
                                         : 'bg-gray-300 text-gray-500 cursor-not-allowed'
                                 }`}
                                 title={!imagesLoaded ? 'Waiting for images to load...' : 'Download PDF'}
                             >
-                                <Download size={18} />
+                                <Download size={16} />
                                 <span className="hidden sm:inline">{imagesLoaded ? 'Download PDF' : 'Loading...'}</span>
                                 <span className="sm:hidden">{imagesLoaded ? 'PDF' : '...'}</span>
                             </button>
                             <button
                                 onClick={onClose}
-                                className="p-2 hover:bg-gray-100 rounded-lg transition"
+                                className="p-1.5 sm:p-2 hover:bg-gray-100 rounded-lg transition"
                             >
-                                <X size={24} />
+                                <X size={20} />
                             </button>
                         </div>
                     </div>
 
                     {/* Content */}
-                    <div className="p-3 sm:p-6">
+                    <div className="p-1 sm:p-6" style={{paddingBottom: window.innerWidth < 640 ? '80px' : '1.5rem'}}>
 
-                {/* Pedigree Chart - Responsive width but fixed for PDF download */}
-                <div ref={pedigreeRef} className="bg-white p-3 sm:p-6 rounded-lg border-2 border-gray-300 relative w-full overflow-hidden" style={{minHeight: '500px', aspectRatio: '1123/794'}}>
-                    {/* Top Row: 3 columns - Main Animal | Species | Owner */}
-                    <div className="flex gap-2 mb-2 items-start">
-                        {/* Left: Main Animal */}
-                        <div className="w-1/3">
-                            {pedigreeData && renderMainAnimalCard(pedigreeData)}
-                        </div>
-                        
-                        {/* Middle: Species */}
-                        <div className="w-1/3 flex items-center justify-center">
-                            <div className="text-center">
-                                <h3 className="text-lg font-bold text-gray-800">{pedigreeData?.species || 'Unknown Species'}</h3>
-                                {pedigreeData?.species && getSpeciesLatinName(pedigreeData.species) && (
-                                    <p className="text-sm italic text-gray-600">{getSpeciesLatinName(pedigreeData.species)}</p>
-                                )}
+                {/* Pedigree Chart - Responsive on mobile, fixed aspect ratio for PDF */}
+                <div ref={pedigreeRef} className="bg-white p-1 sm:p-6 rounded-lg border-2 border-gray-300 relative w-full" style={{minHeight: window.innerWidth < 640 ? '320px' : '400px'}}>
+                    {/* Entire content scrollable horizontally inside the white container */}
+                    <div className="overflow-x-auto overflow-y-visible sm:overflow-hidden" style={{minWidth: 'auto'}}>
+                        <div style={{minWidth: window.innerWidth < 640 ? '800px' : 'auto'}}>
+                            {/* Top Row: 3 columns - Main Animal | Species | Owner */}
+                            <div className="flex gap-0.5 sm:gap-2 mb-0.5 sm:mb-2 items-start">
+                                {/* Left: Main Animal - Same width as parent cards */}
+                                <div className="w-1/3">
+                                    {pedigreeData && renderMainAnimalCard(pedigreeData)}
+                                </div>
+
+                                {/* Species */}
+                                <div className="w-1/3 flex items-center justify-center">
+                                    <div className="text-center">
+                                        <h3 className="text-xs sm:text-lg font-bold text-gray-800">{pedigreeData?.species || 'Unknown Species'}</h3>
+                                        {pedigreeData?.species && getSpeciesLatinName(pedigreeData.species) && (
+                                            <p className="text-xs sm:text-sm italic text-gray-600">{getSpeciesLatinName(pedigreeData.species)}</p>
+                                        )}
+                                    </div>
+                                </div>
+
+                                {/* Owner Profile */}
+                                <div className="w-1/3 flex items-center justify-end gap-0.5 sm:gap-3">
+                                    <div className="text-right">
+                                        {(() => {
+                                            const ownerInfo = getOwnerDisplayInfoTopRight();
+                                            return (
+                                                <>
+                                                    {ownerInfo.lines.map((line, idx) => (
+                                                        <div key={idx} className="text-xs sm:text-base font-semibold text-gray-800 leading-tight">{line}</div>
+                                                    ))}
+                                                    {ownerInfo.userId && (
+                                                        <div className="text-xs text-gray-600 mt-1">{ownerInfo.userId}</div>
+                                                    )}
+                                                </>
+                                            );
+                                        })()}
+                                    </div>
+                                    <div className="hide-for-pdf w-6 h-6 sm:w-16 sm:h-16 bg-gray-200 rounded-lg overflow-hidden flex items-center justify-center">
+                                        {(ownerProfile?.profileImage || ownerProfile?.profileImageUrl) ? (
+                                            <img src={ownerProfile.profileImage || ownerProfile.profileImageUrl} alt="Owner" className="w-full h-full object-cover" />
+                                        ) : (
+                                            <User size={12} className="text-gray-400 sm:w-8 sm:h-8" />
+                                        )}
+                                    </div>
+                                </div>
+                            </div>
+
+                            {/* Pedigree Tree */}
+                            <div>
+                                {renderPedigreeTree(pedigreeData)}
+                            </div>
+
+                            {/* Footer - Inside scrollable content */}
+                            <div className="mt-2 sm:mt-4 pt-1 sm:pt-3 border-t-2 border-gray-300 flex justify-between items-center text-xs sm:text-sm text-gray-600">
+                                <div>
+                                    {getOwnerDisplayInfoBottomLeft()}
+                                </div>
+                                <div>{formatDate(new Date())}</div>
                             </div>
                         </div>
-                        
-                        {/* Right: Owner Profile */}
-                        <div className="w-1/3 flex items-center justify-end gap-3">
-                            <div className="text-right">
-                                {(() => {
-                                    const ownerInfo = getOwnerDisplayInfoTopRight();
-                                    return (
-                                        <>
-                                            {ownerInfo.lines.map((line, idx) => (
-                                                <div key={idx} className="text-base font-semibold text-gray-800 leading-tight">{line}</div>
-                                            ))}
-                                            {ownerInfo.userId && (
-                                                <div className="text-xs text-gray-600 mt-1">{ownerInfo.userId}</div>
-                                            )}
-                                        </>
-                                    );
-                                })()}
-                            </div>
-                            <div className="hide-for-pdf w-16 h-16 bg-gray-200 rounded-lg overflow-hidden flex items-center justify-center">
-                                {(ownerProfile?.profileImage || ownerProfile?.profileImageUrl) ? (
-                                    <img src={ownerProfile.profileImage || ownerProfile.profileImageUrl} alt="Owner" className="w-full h-full object-cover" />
-                                ) : (
-                                    <User size={32} className="text-gray-400" />
-                                )}
-                            </div>
-                        </div>
-                    </div>
-
-                    {/* Pedigree Tree */}
-                    <div className="overflow-hidden">
-                        {renderPedigreeTree(pedigreeData)}
-                    </div>
-
-                    {/* Footer */}
-                    <div className="absolute bottom-6 left-6 right-6 pt-3 border-t-2 border-gray-300 flex justify-between items-center text-sm text-gray-600">
-                        <div>
-                            {getOwnerDisplayInfoBottomLeft()}
-                        </div>
-                        <div>{formatDate(new Date())}</div>
                     </div>
                 </div>
                     </div>
                 </div>
-            </div>
+
+            {/* Stacked Pedigree Modal - Higher z-index to appear above main pedigree */}
+            {stackedPedigree && (
+                <div className="fixed inset-0 z-[90]">
+                    <PedigreeChart
+                        animalId={stackedPedigree.id_public}
+                        animalData={stackedPedigree}
+                        onClose={() => setStackedPedigree(null)}
+                        API_BASE_URL={API_BASE_URL}
+                        authToken={authToken}
+                    />
+                </div>
+            )}
+        </div>
         </div>
     );
 };
@@ -2394,7 +2446,7 @@ const PrivateAnimalDetail = ({ animal, onClose, onEdit, API_BASE_URL, authToken,
                                             <span>{animal.isDisplay ? 'Public' : 'Private'}</span>
                                         </button>
 
-                                        {/* Species/Breed/Strain/CTC - At Top */}
+{/* Species/Breed/Strain/CTC - At Top */}
                                         <p className="text-sm text-gray-600">
                                             {animal.species || 'Unknown'}
                                             {animal.breed && ` • ${animal.breed}`}
@@ -2435,14 +2487,14 @@ const PrivateAnimalDetail = ({ animal, onClose, onEdit, API_BASE_URL, authToken,
                                             </div>
                                         )}
 
-                                        {/* Appearance */}
+                                        {/* Variety */}
                                         <p className="text-sm text-gray-700">
-                                            <span className="font-semibold">Appearance:</span> {[
+                                            <span className="font-semibold">Variety:</span> {[
                                                 animal.color,
                                                 animal.coatPattern,
                                                 animal.coat,
                                                 animal.earset
-                                            ].filter(Boolean).join(', ') || ''}
+                                            ].filter(Boolean).join(' ') || ''}
                                         </p>
 
                                         {/* Genetic Code */}
@@ -2617,12 +2669,14 @@ const PrivateAnimalDetail = ({ animal, onClose, onEdit, API_BASE_URL, authToken,
                     {detailViewTab === 3 && (
                         <div className="space-y-6">
                             <div className="bg-gray-50 p-4 rounded-lg border border-gray-200 space-y-4">
-                                <h3 className="text-lg font-semibold text-gray-700">Appearance</h3>
-                                <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm">
-                                    <div><span className="text-gray-600">Color:</span> <strong>{animal.color || ''}</strong></div>
-                                    <div><span className="text-gray-600">Pattern:</span> <strong>{animal.coatPattern || ''}</strong></div>
-                                    <div><span className="text-gray-600">Coat Type:</span> <strong>{animal.coat || ''}</strong></div>
-                                    {animal.species === 'Fancy Rat' && <div><span className="text-gray-600">Earset:</span> <strong>{animal.earset || ''}</strong></div>}
+                                <h3 className="text-lg font-semibold text-gray-700">Variety</h3>
+                                <div className="text-sm">
+                                    <span className="text-gray-600">Variety:</span> <strong>{[
+                                        animal.color,
+                                        animal.coatPattern,
+                                        animal.coat,
+                                        animal.earset
+                                    ].filter(Boolean).join(' ') || ''}</strong>
                                 </div>
                             </div>
                             <div className="bg-gray-50 p-4 rounded-lg border border-gray-200 space-y-4">
@@ -3328,14 +3382,14 @@ const ViewOnlyPrivateAnimalDetail = ({ animal, onClose, API_BASE_URL, authToken,
                                             </div>
                                         )}
 
-                                        {/* Appearance */}
+                                        {/* Variety */}
                                         <p className="text-sm text-gray-700">
-                                            <span className="font-semibold">Appearance:</span> {[
+                                            <span className="font-semibold">Variety:</span> {[
                                                 animal.color,
                                                 animal.coatPattern,
                                                 animal.coat,
                                                 animal.earset
-                                            ].filter(Boolean).join(', ') || ''}
+                                            ].filter(Boolean).join(' ') || ''}
                                         </p>
 
                                         {/* Genetic Code */}
@@ -3510,12 +3564,14 @@ const ViewOnlyPrivateAnimalDetail = ({ animal, onClose, API_BASE_URL, authToken,
                     {detailViewTab === 3 && (
                         <div className="space-y-6">
                             <div className="bg-gray-50 p-4 rounded-lg border border-gray-200 space-y-4">
-                                <h3 className="text-lg font-semibold text-gray-700">Appearance</h3>
-                                <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm">
-                                    <div><span className="text-gray-600">Color:</span> <strong>{animal.color || ''}</strong></div>
-                                    <div><span className="text-gray-600">Pattern:</span> <strong>{animal.coatPattern || ''}</strong></div>
-                                    <div><span className="text-gray-600">Coat Type:</span> <strong>{animal.coat || ''}</strong></div>
-                                    {animal.species === 'Fancy Rat' && <div><span className="text-gray-600">Earset:</span> <strong>{animal.earset || ''}</strong></div>}
+                                <h3 className="text-lg font-semibold text-gray-700">Variety</h3>
+                                <div className="text-sm">
+                                    <span className="text-gray-600">Variety:</span> <strong>{[
+                                        animal.color,
+                                        animal.coatPattern,
+                                        animal.coat,
+                                        animal.earset
+                                    ].filter(Boolean).join(' ') || ''}</strong>
                                 </div>
                             </div>
                             <div className="bg-gray-50 p-4 rounded-lg border border-gray-200 space-y-4">
@@ -4241,17 +4297,17 @@ const ViewOnlyAnimalDetail = ({ animal, onClose, API_BASE_URL, onViewProfile, au
                                             </div>
                                         )}
 
-                                        {/* Appearance */}
-                                        {(animal.color || animal.coat || animal.coatPattern || (animal.species === 'Fancy Rat' && animal.earset)) && (
-                                            <p className="text-sm text-gray-700">
-                                                <span className="font-semibold">Appearance:</span> {[
-                                                    animal.color,
-                                                    animal.coatPattern,
-                                                    animal.coat,
-                                                    ...(animal.species === 'Fancy Rat' ? [animal.earset] : [])
-                                                ].filter(Boolean).join(', ')}
-                                            </p>
-                                        )}
+                                        {/* Variety */}
+                        {(animal.color || animal.coat || animal.coatPattern || animal.earset) && (
+                            <p className="text-sm text-gray-700">
+                                <span className="font-semibold">Variety:</span> {[
+                                    animal.color,
+                                    animal.coatPattern,
+                                    animal.coat,
+                                    animal.earset
+                                ].filter(Boolean).join(' ')}
+                            </p>
+                        )}
 
                                         {/* Date of Birth and Age/Deceased */}
                                         {animal.birthDate && (
@@ -4444,15 +4500,15 @@ const ViewOnlyAnimalDetail = ({ animal, onClose, API_BASE_URL, onViewProfile, au
                     {/* Tab 3: Physical */}
                     {detailViewTab === 3 && (
                         <div className="space-y-4">
-                            {/* Appearance Section */}
+                            {/* Variety Section */}
             <div className="bg-gray-50 p-4 rounded-lg border border-gray-200">
-                <h3 className="text-lg font-semibold text-gray-700 border-b pb-2 mb-3">Appearance</h3>
-                <div className="space-y-2">
-                    <p className="text-sm"><span className="font-medium">Color:</span> {animal.color || ''}</p>
-                    <p className="text-sm"><span className="font-medium">Pattern:</span> {animal.coatPattern || ''}</p>
-                    <p className="text-sm"><span className="font-medium">Coat Type:</span> {animal.coat || ''}</p>
-                    {animal.species === 'Fancy Rat' && <p className="text-sm"><span className="font-medium">Earset:</span> {animal.earset || ''}</p>}
-                </div>
+                <h3 className="text-lg font-semibold text-gray-700 border-b pb-2 mb-3">Variety</h3>
+                <p className="text-sm"><span className="font-medium">Variety:</span> {[
+                    animal.color,
+                    animal.coatPattern,
+                    animal.coat,
+                    animal.earset
+                ].filter(Boolean).join(' ') || ''}</p>
             </div>
             {animal.geneticCode && (
             <div className="bg-gray-50 p-4 rounded-lg border border-gray-200">
@@ -14973,7 +15029,7 @@ const AnimalList = ({ authToken, showModalMessage, onEditAnimal, onViewAnimal, f
                                         {getSpeciesDisplayName(species)} ({groupedAnimals[species].length})
                                     </h3>
                                 </div>
-                                <div className="flex items-center gap-1 sm:gap-2" onClick={(e) => e.stopPropagation()}>
+                                <div className="flex items-center gap-0.5 sm:gap-2 flex-wrap" onClick={(e) => e.stopPropagation()}>
                                     {isBulkMode && (
                                         <>
                                             <span className="text-xs sm:text-sm text-gray-600 hidden sm:inline">
@@ -15002,33 +15058,33 @@ const AnimalList = ({ authToken, showModalMessage, onEditAnimal, onViewAnimal, f
                                         <>
                                             <button
                                                 onClick={() => navigate(`/animal-tree/${encodeURIComponent(species)}`)}
-                                                className="p-1.5 sm:p-2 hover:bg-gray-200 rounded-lg transition"
+                                                className="p-1 sm:p-2 hover:bg-gray-200 rounded-lg transition"
                                                 title="Animal Tree"
                                                 data-tutorial-target="animal-tree-btn"
                                             >
-                                                <Network className="w-4 h-4 sm:w-[18px] sm:h-[18px] text-blue-500" />
+                                                <Network className="w-3.5 h-3.5 sm:w-[18px] sm:h-[18px] text-blue-500" />
                                             </button>
                                             <button
                                                 onClick={() => toggleBulkPrivacy(species, true)}
-                                                className="p-1.5 sm:p-2 hover:bg-gray-200 rounded-lg transition"
+                                                className="p-1 sm:p-2 hover:bg-gray-200 rounded-lg transition"
                                                 title="Make All Public"
                                             >
-                                                <Eye className="w-4 h-4 sm:w-[18px] sm:h-[18px] text-green-600" />
+                                                <Eye className="w-3.5 h-3.5 sm:w-[18px] sm:h-[18px] text-green-600" />
                                             </button>
                                             <button
                                                 onClick={() => toggleBulkPrivacy(species, false)}
-                                                className="p-1.5 sm:p-2 hover:bg-gray-200 rounded-lg transition"
+                                                className="p-1 sm:p-2 hover:bg-gray-200 rounded-lg transition"
                                                 title="Make All Private"
                                             >
-                                                <EyeOff className="w-4 h-4 sm:w-[18px] sm:h-[18px] text-gray-600" />
+                                                <EyeOff className="w-3.5 h-3.5 sm:w-[18px] sm:h-[18px] text-gray-600" />
                                             </button>
                                             <button
                                                 onClick={() => toggleBulkDeleteMode(species)}
                                                 data-tutorial-target="bulk-delete-btn"
-                                                className="p-1.5 sm:p-2 hover:bg-gray-200 rounded-lg transition"
+                                                className="p-1 sm:p-2 hover:bg-gray-200 rounded-lg transition"
                                                 title="Delete Multiple"
                                             >
-                                                <Trash2 className="w-4 h-4 sm:w-[18px] sm:h-[18px] text-red-500" />
+                                                <Trash2 className="w-3.5 h-3.5 sm:w-[18px] sm:h-[18px] text-red-500" />
                                             </button>
                                         </>
                                     )}
@@ -19588,7 +19644,7 @@ const App = () => {
                                                                         animalToView.coatPattern,
                                                                         animalToView.coat,
                                                                         animalToView.earset
-                                                                    ].filter(Boolean).join(', ')}
+                                                                    ].filter(Boolean).join(' ')}
                                                                 </p>
                                                             )}
 
@@ -19963,14 +20019,14 @@ const App = () => {
                                         {detailViewTab === 3 && (
                                             <div className="space-y-6">
                                                 <div className="bg-gray-50 p-4 rounded-lg border border-gray-200 space-y-4">
-                                                    <h3 className="text-lg font-semibold text-gray-700">Appearance</h3>
-                                                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm">
-                                                        <div><span className="text-gray-600">Color:</span> <strong>{animalToView.color || ''}</strong></div>
-                                                        <div><span className="text-gray-600">Pattern:</span> <strong>{animalToView.coatPattern || ''}</strong></div>
-                                                        <div><span className="text-gray-600">Coat Type:</span> <strong>{animalToView.coat || ''}</strong></div>
-                                                        {(animalToView.species === 'Fancy Rat' || animalToView.species === 'Rat') && (
-                                                            <div><span className="text-gray-600">Earset:</span> <strong>{animalToView.earset || ''}</strong></div>
-                                                        )}
+                                                    <h3 className="text-lg font-semibold text-gray-700">Variety</h3>
+                                                    <div className="text-sm">
+                                                        <span className="text-gray-600">Variety:</span> <strong>{[
+                                                            animalToView.color,
+                                                            animalToView.coatPattern,
+                                                            animalToView.coat,
+                                                            animalToView.earset
+                                                        ].filter(Boolean).join(' ') || ''}</strong>
                                                     </div>
                                                 </div>
                                                 {animalToView.geneticCode && (
