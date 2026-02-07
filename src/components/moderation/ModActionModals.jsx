@@ -108,6 +108,10 @@ export const EditContentModal = ({ isOpen, onClose, onSubmit, context }) => {
                 // Images
                 { value: 'imageUrl', label: 'Animal Image', clearable: true, removeOnly: true },
                 
+                // Pedigree
+                { value: 'sireId_public', label: 'Sire (Father) ID', clearable: true },
+                { value: 'damId_public', label: 'Dam (Mother) ID', clearable: true },
+                
                 // Description/Notes
                 { value: 'remarks', label: 'Remarks/Notes', clearable: true },
                 { value: 'geneticCode', label: 'Genetic Code', clearable: true },
