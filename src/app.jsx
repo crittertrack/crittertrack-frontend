@@ -19989,7 +19989,9 @@ const App = () => {
                                                     <h3 className="text-lg font-semibold text-gray-700 mb-3">Breeder Info</h3>
                                                     <div className="text-sm">
                                                         <strong>Breeder:</strong>{' '}
-                                                        {animalToView.breederId_public ? (
+                                                        {animalToView.manualBreederName ? (
+                                                            <span>{animalToView.manualBreederName}</span>
+                                                        ) : animalToView.breederId_public ? (
                                                             viewAnimalBreederInfo ? (
                                                                 <span>
                                                                     {(() => {
