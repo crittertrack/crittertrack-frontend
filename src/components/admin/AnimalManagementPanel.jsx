@@ -40,13 +40,18 @@ export default function AnimalManagementPanel({ API_BASE_URL, authToken, userRol
     const [editReason, setEditReason] = useState('');
     const [actionReason, setActionReason] = useState('');
     
-    // Owner and Breeder selection
+    // Owner and Breeder selection (Edit Modal)
     const [showOwnerSearch, setShowOwnerSearch] = useState(false);
     const [showBreederSearch, setShowBreederSearch] = useState(false);
     const [ownerSearchQuery, setOwnerSearchQuery] = useState('');
     const [breederSearchQuery, setBreederSearchQuery] = useState('');
     const [ownerSearchResults, setOwnerSearchResults] = useState([]);
     const [breederSearchResults, setBreederSearchResults] = useState([]);
+    
+    // Owner Filter (Main Filters)
+    const [showOwnerFilterDropdown, setShowOwnerFilterDropdown] = useState(false);
+    const [ownerFilterSearchQuery, setOwnerFilterSearchQuery] = useState('');
+    const [ownerFilterSearchResults, setOwnerFilterSearchResults] = useState([]);
 
     const fetchAnimals = useCallback(async () => {
         setLoading(true);
@@ -237,6 +242,45 @@ export default function AnimalManagementPanel({ API_BASE_URL, authToken, userRol
         const breeder = users.find(u => u.id_public === editForm.breederId_public);
         if (!breeder) return editForm.breederId_public;
         return `${breeder.personalName || breeder.username || breeder.email} (${breeder.id_public})`;
+    };
+    
+    const getOwnerFilterDisplay = () => {
+        if (!ownerFilter) return 'All Owners';
+        const owner = users.find(u => u.id_public === ownerFilter);
+        if (!owner) return ownerFilter;
+        return owner.personalName || owner.username || owner.email;
+    };
+    
+    const searchOwnerFilter = (query) => {
+        if (!query.trim()) {
+            setOwnerFilterSearchResults([]);
+            return;
+        }
+        const filtered = users.filter(user => {
+            const searchText = query.toLowerCase();
+            const personalName = (user.personalName || '').toLowerCase();
+            const username = (user.username ||'').toLowerCase();
+            const email = (user.email || '').toLowerCase();
+            const idPublic = (user.id_public || '').toLowerCase();
+            return personalName.includes(searchText) || 
+                   username.includes(searchText) || 
+                   email.includes(searchText) ||
+                   idPublic.includes(searchText);
+        }).slice(0, 10);
+        setOwnerFilterSearchResults(filtered);
+    };
+    
+    const selectOwnerFilter = (user) => {
+        setOwnerFilter(user.id_public);
+        setShowOwnerFilterDropdown(false);
+        setOwnerFilterSearchQuery('');
+        setOwnerFilterSearchResults([]);
+        setPage(1);
+    };
+    
+    const clearOwnerFilter = () => {
+        setOwnerFilter('');
+        setPage(1);
     };
 
     const handleSaveEdit = async () => {
@@ -490,17 +534,93 @@ export default function AnimalManagementPanel({ API_BASE_URL, authToken, userRol
                         <option value="false">No Reports</option>
                     </select>
 
-                    <select 
-                        value={ownerFilter} 
-                        onChange={(e) => { setOwnerFilter(e.target.value); setPage(1); }}
-                    >
-                        <option value="">All Owners</option>
-                        {users.map(user => (
-                            <option key={user._id} value={user.id_public}>
-                                {user.personalName || user.username || user.email}
-                            </option>
-                        ))}
-                    </select>
+                    <div style={{ position: 'relative', minWidth: '180px' }}>
+                        <div 
+                            onClick={() => setShowOwnerFilterDropdown(!showOwnerFilterDropdown)}
+                            style={{
+                                padding: '8px 12px',
+                                border: '1px solid #ccc',
+                                borderRadius: '4px',
+                                backgroundColor: '#fff',
+                                cursor: 'pointer',
+                                display: 'flex',
+                                justifyContent: 'space-between',
+                                alignItems: 'center',
+                                fontSize: '14px'
+                            }}
+                        >
+                            <span style={{ color: ownerFilter ? '#000' : '#666' }}>
+                                {getOwnerFilterDisplay()}
+                            </span>
+                            {ownerFilter && (
+                                <X 
+                                    size={16} 
+                                    onClick={(e) => { e.stopPropagation(); clearOwnerFilter(); }}
+                                    style={{ color: '#ef4444', cursor: 'pointer', marginLeft: '8px' }}
+                                />
+                            )}
+                        </div>
+                        {showOwnerFilterDropdown && (
+                            <div style={{
+                                position: 'absolute',
+                                top: '100%',
+                                left: 0,
+                                right: 0,
+                                backgroundColor: '#fff',
+                                border: '1px solid #ccc',
+                                borderRadius: '4px',
+                                marginTop: '4px',
+                                maxHeight: '300px',
+                                overflowY: 'auto',
+                                zIndex: 1000,
+                                boxShadow: '0 4px 6px rgba(0,0,0,0.1)'
+                            }}>
+                                <input
+                                    type="text"
+                                    value={ownerFilterSearchQuery}
+                                    onChange={(e) => {
+                                        setOwnerFilterSearchQuery(e.target.value);
+                                        searchOwnerFilter(e.target.value);
+                                    }}
+                                    placeholder="Search owners..."
+                                    style={{
+                                        width: '100%',
+                                        padding: '8px',
+                                        border: 'none',
+                                        borderBottom: '1px solid #eee',
+                                        outline: 'none',
+                                        fontSize: '14px'
+                                    }}
+                                    autoFocus
+                                    onClick={(e) => e.stopPropagation()}
+                                />
+                                <div>
+                                    {(ownerFilterSearchQuery ? ownerFilterSearchResults : users.slice(0, 10)).map(user => (
+                                        <div
+                                            key={user._id}
+                                            onClick={() => selectOwnerFilter(user)}
+                                            style={{
+                                                padding: '8px 12px',
+                                                cursor: 'pointer',
+                                                borderBottom: '1px solid #eee',
+                                                backgroundColor: ownerFilter === user.id_public ? '#f3f4f6' : '#fff',
+                                                fontSize: '14px'
+                                            }}
+                                            onMouseEnter={(e) => e.target.style.backgroundColor = '#f9fafb'}
+                                            onMouseLeave={(e) => e.target.style.backgroundColor = ownerFilter === user.id_public ? '#f3f4f6' : '#fff'}
+                                        >
+                                            <div style={{ fontWeight: '500' }}>
+                                                {user.personalName || user.username || user.email}
+                                            </div>
+                                            <div style={{ fontSize: '0.75rem', color: '#666' }}>
+                                                {user.id_public}
+                                            </div>
+                                        </div>
+                                    ))}
+                                </div>
+                            </div>
+                        )}
+                    </div>
 
                     <button 
                         className="refresh-btn"
