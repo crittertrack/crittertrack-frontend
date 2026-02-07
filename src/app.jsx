@@ -4359,11 +4359,13 @@ const ViewOnlyAnimalDetail = ({ animal, onClose, API_BASE_URL, onViewProfile, au
                             </div>
 
                             {/* Breeder Section */}
-                            {animal.breederId_public && (
+                            {(animal.manualBreederName || animal.breederId_public) && (
                                 <div className="bg-gray-50 p-4 rounded-lg border border-gray-200">
                                     <h3 className="text-lg font-semibold text-gray-700 border-b pb-2 mb-3">Breeder</h3>
                                     <p className="text-gray-700">
-                                        {breederInfo ? (
+                                        {animal.manualBreederName ? (
+                                            <span className="font-medium">{animal.manualBreederName}</span>
+                                        ) : breederInfo ? (
                                             <button
                                                 onClick={() => onViewProfile && onViewProfile(breederInfo)}
                                                 className="text-primary hover:underline font-medium"
