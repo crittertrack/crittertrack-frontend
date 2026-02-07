@@ -88,6 +88,14 @@ export default function AnimalManagementPanel({ API_BASE_URL, authToken, userRol
             const response = await fetch(`${API_BASE_URL}/admin/users`, {
                 headers: { 'Authorization': `Bearer ${authToken}` }
             });
+            
+            // Check content type before parsing
+            const contentType = response.headers.get('content-type');
+            if (!contentType || !contentType.includes('application/json')) {
+                console.error('Users endpoint did not return JSON');
+                return;
+            }
+            
             const data = await response.json();
             if (!response.ok) throw new Error(data.error);
             
@@ -100,6 +108,7 @@ export default function AnimalManagementPanel({ API_BASE_URL, authToken, userRol
             setUsers(sortedUsers);
         } catch (err) {
             console.error('Failed to fetch users:', err);
+            // Don't throw - just log, so the panel still works without user dropdown
         }
     };
 
@@ -114,13 +123,20 @@ export default function AnimalManagementPanel({ API_BASE_URL, authToken, userRol
             const response = await fetch(`${API_BASE_URL}/admin/animals/${animal._id}`, {
                 headers: { 'Authorization': `Bearer ${authToken}` }
             });
+            
+            // Check content type before parsing
+            const contentType = response.headers.get('content-type');
+            if (!contentType || !contentType.includes('application/json')) {
+                throw new Error('Invalid response from server');
+            }
+            
             const data = await response.json();
             if (!response.ok) throw new Error(data.error);
             
             setSelectedAnimal({ ...data.animal, reports: data.reports });
             setShowDetailModal(true);
         } catch (err) {
-            setError(err.message);
+            setError(err.message || 'Failed to load animal details');
         }
     };
 
@@ -195,6 +211,12 @@ export default function AnimalManagementPanel({ API_BASE_URL, authToken, userRol
                 })
             });
 
+            // Check content type before parsing
+            const contentType = response.headers.get('content-type');
+            if (!contentType || !contentType.includes('application/json')) {
+                throw new Error('Invalid response from server');
+            }
+
             const data = await response.json();
             if (!response.ok) throw new Error(data.error || data.message);
 
@@ -203,7 +225,7 @@ export default function AnimalManagementPanel({ API_BASE_URL, authToken, userRol
             fetchAnimals();
             setTimeout(() => setSuccess(''), 3000);
         } catch (err) {
-            setError(err.message);
+            setError(err.message || 'Failed to update animal');
         }
     };
 
@@ -223,6 +245,12 @@ export default function AnimalManagementPanel({ API_BASE_URL, authToken, userRol
                 body: JSON.stringify({ reason: actionReason })
             });
 
+            // Check content type before parsing
+            const contentType = response.headers.get('content-type');
+            if (!contentType || !contentType.includes('application/json')) {
+                throw new Error('Invalid response from server');
+            }
+
             const data = await response.json();
             if (!response.ok) throw new Error(data.error);
 
@@ -232,6 +260,8 @@ export default function AnimalManagementPanel({ API_BASE_URL, authToken, userRol
             fetchAnimals();
             setTimeout(() => setSuccess(''), 3000);
         } catch (err) {
+            setError(err.message || 'Failed to hide animal');
+        }
             setError(err.message);
         }
     };
@@ -252,6 +282,12 @@ export default function AnimalManagementPanel({ API_BASE_URL, authToken, userRol
                 body: JSON.stringify({ reason: actionReason })
             });
 
+            // Check content type before parsing
+            const contentType = response.headers.get('content-type');
+            if (!contentType || !contentType.includes('application/json')) {
+                throw new Error('Invalid response from server');
+            }
+
             const data = await response.json();
             if (!response.ok) throw new Error(data.error || data.message);
 
@@ -262,7 +298,7 @@ export default function AnimalManagementPanel({ API_BASE_URL, authToken, userRol
             fetchAnimals();
             setTimeout(() => setSuccess(''), 3000);
         } catch (err) {
-            setError(err.message);
+            setError(err.message || 'Failed to remove image');
         }
     };
 
@@ -282,6 +318,12 @@ export default function AnimalManagementPanel({ API_BASE_URL, authToken, userRol
                 body: JSON.stringify({ reason: actionReason })
             });
 
+            // Check content type before parsing
+            const contentType = response.headers.get('content-type');
+            if (!contentType || !contentType.includes('application/json')) {
+                throw new Error('Invalid response from server');
+            }
+
             const data = await response.json();
             if (!response.ok) throw new Error(data.error);
 
@@ -292,7 +334,7 @@ export default function AnimalManagementPanel({ API_BASE_URL, authToken, userRol
             fetchAnimals();
             setTimeout(() => setSuccess(''), 3000);
         } catch (err) {
-            setError(err.message);
+            setError(err.message || 'Failed to delete animal');
         }
     };
 
