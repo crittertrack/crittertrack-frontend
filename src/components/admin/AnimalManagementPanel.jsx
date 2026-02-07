@@ -182,20 +182,30 @@ export default function AnimalManagementPanel({ API_BASE_URL, authToken, userRol
             return;
         }
 
-        // If owner is being changed, also set ownerId (backend ObjectId will be resolved)
+        // If owner is being changed, resolve ownerId (backend ObjectId)
+        // The Animal model requires both ownerId (ObjectId) and ownerId_public (string)
         if (changedFields.ownerId_public) {
             const selectedUser = users.find(u => u.id_public === changedFields.ownerId_public);
             if (selectedUser) {
                 changedFields.ownerId = selectedUser._id;
+                // ownerId_public is already in changedFields from the form
+            } else {
+                setError('Selected owner not found');
+                return;
             }
         }
 
-        // If breeder is being changed, also set breederId (backend ObjectId will be resolved)
-        if (changedFields.breederId_public) {
-            const selectedUser = users.find(u => u.id_public === changedFields.breederId_public);
-            if (selectedUser) {
-                changedFields.breederId = selectedUser._id;
-            }
+        // Note: breederId_public is already in changedFields from the form
+        // There is no breederId ObjectId field in the Animal model
+        
+        // If manual breeder name is being set, ensure breederId_public is cleared
+        if (changedFields.manualBreederName && changedFields.manualBreederName.trim() !== '') {
+            changedFields.breederId_public = null;
+        }
+        
+        // If breeder user is being selected, ensure manualBreederName is cleared
+        if (changedFields.breederId_public && changedFields.breederId_public.trim() !== '') {
+            changedFields.manualBreederName = null;
         }
 
         try {
@@ -725,11 +735,19 @@ export default function AnimalManagementPanel({ API_BASE_URL, authToken, userRol
                                 </div>
                                 <div className="form-row">
                                     <label>Status</label>
-                                    <input
-                                        type="text"
+                                    <select
                                         value={editForm.status}
                                         onChange={(e) => setEditForm({...editForm, status: e.target.value})}
-                                    />
+                                    >
+                                        <option value="Pet">Pet</option>
+                                        <option value="Breeder">Breeder</option>
+                                        <option value="Available">Available</option>
+                                        <option value="Booked">Booked</option>
+                                        <option value="Retired">Retired</option>
+                                        <option value="Deceased">Deceased</option>
+                                        <option value="Rehomed">Rehomed</option>
+                                        <option value="Unknown">Unknown</option>
+                                    </select>
                                 </div>
                                 <div className="form-row">
                                     <label>Sire ID</label>
