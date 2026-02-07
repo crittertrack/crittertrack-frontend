@@ -22,6 +22,7 @@ export default function AnimalManagementPanel({ API_BASE_URL, authToken, userRol
     const [speciesFilter, setSpeciesFilter] = useState('');
     const [publicFilter, setPublicFilter] = useState('');
     const [reportsFilter, setReportsFilter] = useState('');
+    const [ownerFilter, setOwnerFilter] = useState('');
     const [speciesList, setSpeciesList] = useState([]);
     
     // Users list for owner transfer
@@ -59,6 +60,7 @@ export default function AnimalManagementPanel({ API_BASE_URL, authToken, userRol
                 species: speciesFilter,
                 isPublic: publicFilter,
                 hasReports: reportsFilter,
+                owner: ownerFilter,
                 sortBy: 'createdAt',
                 sortOrder: 'desc'
             });
@@ -84,7 +86,7 @@ export default function AnimalManagementPanel({ API_BASE_URL, authToken, userRol
         } finally {
             setLoading(false);
         }
-    }, [API_BASE_URL, authToken, page, search, speciesFilter, publicFilter, reportsFilter]);
+    }, [API_BASE_URL, authToken, page, search, speciesFilter, publicFilter, reportsFilter, ownerFilter]);
 
     useEffect(() => {
         fetchAnimals();
@@ -486,6 +488,18 @@ export default function AnimalManagementPanel({ API_BASE_URL, authToken, userRol
                         <option value="">All Reports Status</option>
                         <option value="true">Has Pending Reports</option>
                         <option value="false">No Reports</option>
+                    </select>
+
+                    <select 
+                        value={ownerFilter} 
+                        onChange={(e) => { setOwnerFilter(e.target.value); setPage(1); }}
+                    >
+                        <option value="">All Owners</option>
+                        {users.map(user => (
+                            <option key={user._id} value={user.id_public}>
+                                {user.personalName || user.username || user.email}
+                            </option>
+                        ))}
                     </select>
 
                     <button 
