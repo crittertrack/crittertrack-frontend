@@ -12950,7 +12950,7 @@ const BreederDirectory = ({ authToken, API_BASE_URL, onBack }) => {
                                     className="bg-white rounded-lg border border-gray-200 p-6 hover:shadow-md transition"
                                 >
                                     {/* Header Row */}
-                                    <div className="flex items-start gap-4 mb-4">
+                                    <div className="flex flex-col sm:flex-row items-start gap-4 mb-4">
                                         {/* Profile Picture */}
                                         <div className="flex-shrink-0">
                                             <div className="w-20 h-20 bg-gray-100 rounded-full overflow-hidden">
@@ -12987,7 +12987,7 @@ const BreederDirectory = ({ authToken, API_BASE_URL, onBack }) => {
                                         {/* View Profile Button */}
                                         <button
                                             onClick={() => navigate(`/user/${breeder.id_public}`)}
-                                            className="px-4 py-2 bg-primary hover:bg-primary/80 text-black text-sm font-medium rounded transition flex-shrink-0"
+                                            className="px-4 py-2 bg-primary hover:bg-primary/80 text-black text-sm font-medium rounded transition flex-shrink-0 w-full sm:w-auto"
                                         >
                                             View Profile
                                         </button>
