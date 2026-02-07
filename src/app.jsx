@@ -10516,7 +10516,7 @@ const AnimalForm = ({
                                                 }}
                                                 className="ml-2 text-black hover:text-gray-600"
                                             >
-                                            X
+                                            <Trash2 size={12} />
                                             </button>
                                         </span>
                                     ))}
