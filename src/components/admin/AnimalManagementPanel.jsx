@@ -24,6 +24,9 @@ export default function AnimalManagementPanel({ API_BASE_URL, authToken, userRol
     const [reportsFilter, setReportsFilter] = useState('');
     const [speciesList, setSpeciesList] = useState([]);
     
+    // Users list for owner transfer
+    const [users, setUsers] = useState([]);
+    
     // Modals
     const [selectedAnimal, setSelectedAnimal] = useState(null);
     const [showDetailModal, setShowDetailModal] = useState(false);
@@ -32,6 +35,7 @@ export default function AnimalManagementPanel({ API_BASE_URL, authToken, userRol
     
     // Edit form
     const [editForm, setEditForm] = useState({});
+    const [originalEditForm, setOriginalEditForm] = useState({}); // Store original values
     const [editReason, setEditReason] = useState('');
     const [actionReason, setActionReason] = useState('');
 
@@ -76,7 +80,28 @@ export default function AnimalManagementPanel({ API_BASE_URL, authToken, userRol
 
     useEffect(() => {
         fetchAnimals();
+        fetchUsers();
     }, [fetchAnimals]);
+
+    const fetchUsers = async () => {
+        try {
+            const response = await fetch(`${API_BASE_URL}/admin/users`, {
+                headers: { 'Authorization': `Bearer ${authToken}` }
+            });
+            const data = await response.json();
+            if (!response.ok) throw new Error(data.error);
+            
+            // Sort users by name for easier selection
+            const sortedUsers = (data || []).sort((a, b) => {
+                const nameA = a.personalName || a.username || a.email || '';
+                const nameB = b.personalName || b.username || b.email || '';
+                return nameA.localeCompare(nameB);
+            });
+            setUsers(sortedUsers);
+        } catch (err) {
+            console.error('Failed to fetch users:', err);
+        }
+    };
 
     const handleSearch = (e) => {
         e.preventDefault();
@@ -100,7 +125,7 @@ export default function AnimalManagementPanel({ API_BASE_URL, authToken, userRol
     };
 
     const openEditModal = (animal) => {
-        setEditForm({
+        const formData = {
             name: animal.name || '',
             prefix: animal.prefix || '',
             suffix: animal.suffix || '',
@@ -109,8 +134,11 @@ export default function AnimalManagementPanel({ API_BASE_URL, authToken, userRol
             status: animal.status || '',
             remarks: animal.remarks || '',
             sireId_public: animal.sireId_public || '',
-            damId_public: animal.damId_public || ''
-        });
+            damId_public: animal.damId_public || '',
+            ownerId_public: animal.ownerId_public || ''
+        };
+        setEditForm(formData);
+        setOriginalEditForm(formData); // Store original values for comparison
         setEditReason('');
         setSelectedAnimal(animal);
         setShowEditModal(true);
@@ -122,6 +150,28 @@ export default function AnimalManagementPanel({ API_BASE_URL, authToken, userRol
             return;
         }
 
+        // Only send fields that were actually changed
+        const changedFields = {};
+        for (const key in editForm) {
+            if (editForm[key] !== originalEditForm[key]) {
+                changedFields[key] = editForm[key];
+            }
+        }
+
+        // If no fields were changed, show error
+        if (Object.keys(changedFields).length === 0) {
+            setError('No fields were modified');
+            return;
+        }
+
+        // If owner is being changed, also set ownerId (backend ObjectId will be resolved)
+        if (changedFields.ownerId_public) {
+            const selectedUser = users.find(u => u.id_public === changedFields.ownerId_public);
+            if (selectedUser) {
+                changedFields.ownerId = selectedUser._id;
+            }
+        }
+
         try {
             const response = await fetch(`${API_BASE_URL}/moderation/content/animal/${selectedAnimal._id}/edit`, {
                 method: 'PATCH',
@@ -130,7 +180,7 @@ export default function AnimalManagementPanel({ API_BASE_URL, authToken, userRol
                     'Authorization': `Bearer ${authToken}`
                 },
                 body: JSON.stringify({
-                    fieldEdits: editForm,
+                    fieldEdits: changedFields,
                     reason: editReason
                 })
             });
@@ -648,6 +698,20 @@ export default function AnimalManagementPanel({ API_BASE_URL, authToken, userRol
                                         onChange={(e) => setEditForm({...editForm, damId_public: e.target.value})}
                                         placeholder="CTC###"
                                     />
+                                </div>
+                                <div className="form-row full-width">
+                                    <label>Owner</label>
+                                    <select
+                                        value={editForm.ownerId_public}
+                                        onChange={(e) => setEditForm({...editForm, ownerId_public: e.target.value})}
+                                    >
+                                        <option value="">-- Select Owner --</option>
+                                        {users.map(user => (
+                                            <option key={user._id} value={user.id_public}>
+                                                {user.personalName || user.username || user.email} ({user.id_public})
+                                            </option>
+                                        ))}
+                                    </select>
                                 </div>
                                 <div className="form-row full-width">
                                     <label>Remarks</label>
