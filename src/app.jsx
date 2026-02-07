@@ -1737,6 +1737,11 @@ const UserSearchModal = ({ onClose, showModalMessage, onSelectUser, API_BASE_URL
                         {animal.species} • {animal.gender} • <span className="font-mono">{animal.id_public}</span>
                     </p>
                     {animal.color && <p className="text-xs text-gray-500 mt-1">{animal.color}</p>}
+                    {(animal.manualBreederName || animal.breederName) && (
+                        <p className="text-xs text-gray-500 mt-1">
+                            Breeder: {animal.manualBreederName || animal.breederName}
+                        </p>
+                    )}
                 </div>
             </div>
         </div>
@@ -19989,7 +19994,9 @@ const App = () => {
                                                     <h3 className="text-lg font-semibold text-gray-700 mb-3">Breeder Info</h3>
                                                     <div className="text-sm">
                                                         <strong>Breeder:</strong>{' '}
-                                                        {animalToView.breederId_public ? (
+                                                        {animalToView.manualBreederName ? (
+                                                            <span>{animalToView.manualBreederName}</span>
+                                                        ) : animalToView.breederId_public ? (
                                                             viewAnimalBreederInfo ? (
                                                                 <span>
                                                                     {(() => {
