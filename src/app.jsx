@@ -2555,6 +2555,17 @@ const PrivateAnimalDetail = ({ animal, onClose, onEdit, API_BASE_URL, authToken,
                                                 <p className="mt-1 whitespace-pre-wrap">{animal.remarks}</p>
                                             </div>
                                         )}
+
+                                        {/* Tags - Bottom Right */}
+                                        {animal.tags && animal.tags.length > 0 && (
+                                            <div className="absolute bottom-4 right-4 flex flex-wrap gap-1.5 justify-end max-w-xs">
+                                                {animal.tags.map((tag, idx) => (
+                                                    <span key={idx} className="bg-blue-100 text-blue-800 px-2 py-1 rounded text-xs">
+                                                        {tag}
+                                                    </span>
+                                                ))}
+                                            </div>
+                                        )}
                                     </div>
                                 </div>
                             </div>
