@@ -38,6 +38,14 @@ export default function AnimalManagementPanel({ API_BASE_URL, authToken, userRol
     const [originalEditForm, setOriginalEditForm] = useState({}); // Store original values
     const [editReason, setEditReason] = useState('');
     const [actionReason, setActionReason] = useState('');
+    
+    // Owner and Breeder selection
+    const [showOwnerSearch, setShowOwnerSearch] = useState(false);
+    const [showBreederSearch, setShowBreederSearch] = useState(false);
+    const [ownerSearchQuery, setOwnerSearchQuery] = useState('');
+    const [breederSearchQuery, setBreederSearchQuery] = useState('');
+    const [ownerSearchResults, setOwnerSearchResults] = useState([]);
+    const [breederSearchResults, setBreederSearchResults] = useState([]);
 
     const fetchAnimals = useCallback(async () => {
         setLoading(true);
@@ -160,6 +168,73 @@ export default function AnimalManagementPanel({ API_BASE_URL, authToken, userRol
         setEditReason('');
         setSelectedAnimal(animal);
         setShowEditModal(true);
+        setShowOwnerSearch(false);
+        setShowBreederSearch(false);
+        setOwnerSearchQuery('');
+        setBreederSearchQuery('');
+    };
+    
+    const searchUsers = async (query, type) => {
+        if (!query.trim()) {
+            if (type === 'owner') setOwnerSearchResults([]);
+            else setBreederSearchResults([]);
+            return;
+        }
+        
+        try {
+            const filtered = users.filter(user => {
+                const searchText = query.toLowerCase();
+                const personalName = (user.personalName || '').toLowerCase();
+                const username = (user.username || '').toLowerCase();
+                const email = (user.email || '').toLowerCase();
+                const idPublic = (user.id_public || '').toLowerCase();
+                return personalName.includes(searchText) || 
+                       username.includes(searchText) || 
+                       email.includes(searchText) ||
+                       idPublic.includes(searchText);
+            }).slice(0, 10);
+            
+            if (type === 'owner') setOwnerSearchResults(filtered);
+            else setBreederSearchResults(filtered);
+        } catch (err) {
+            console.error('Search error:', err);
+        }
+    };
+    
+    const selectOwner = (user) => {
+        setEditForm(prev => ({ ...prev, ownerId_public: user.id_public }));
+        setShowOwnerSearch(false);
+        setOwnerSearchQuery('');
+        setOwnerSearchResults([]);
+    };
+    
+    const selectBreeder = (user) => {
+        setEditForm(prev => ({ ...prev, breederId_public: user.id_public, manualBreederName: '' }));
+        setShowBreederSearch(false);
+        setBreederSearchQuery('');
+        setBreederSearchResults([]);
+    };
+    
+    const clearOwner = () => {
+        setEditForm(prev => ({ ...prev, ownerId_public: '' }));
+    };
+    
+    const clearBreeder = () => {
+        setEditForm(prev => ({ ...prev, breederId_public: '', manualBreederName: '' }));
+    };
+    
+    const getOwnerDisplay = () => {
+        if (!editForm.ownerId_public) return 'Click to Select Owner';
+        const owner = users.find(u => u.id_public === editForm.ownerId_public);
+        if (!owner) return editForm.ownerId_public;
+        return `${owner.personalName || owner.username || owner.email} (${owner.id_public})`;
+    };
+    
+    const getBreederDisplay = () => {
+        if (!editForm.breederId_public) return 'Click to Select Breeder';
+        const breeder = users.find(u => u.id_public === editForm.breederId_public);
+        if (!breeder) return editForm.breederId_public;
+        return `${breeder.personalName || breeder.username || breeder.email} (${breeder.id_public})`;
     };
 
     const handleSaveEdit = async () => {
@@ -769,31 +844,175 @@ export default function AnimalManagementPanel({ API_BASE_URL, authToken, userRol
                                 </div>
                                 <div className="form-row full-width">
                                     <label>Owner</label>
-                                    <select
-                                        value={editForm.ownerId_public}
-                                        onChange={(e) => setEditForm({...editForm, ownerId_public: e.target.value})}
-                                    >
-                                        <option value="">-- Select Owner --</option>
-                                        {users.map(user => (
-                                            <option key={user._id} value={user.id_public}>
-                                                {user.personalName || user.username || user.email} ({user.id_public})
-                                            </option>
-                                        ))}
-                                    </select>
+                                    <div style={{ position: 'relative' }}>
+                                        <div 
+                                            onClick={() => setShowOwnerSearch(!showOwnerSearch)}
+                                            style={{
+                                                padding: '8px 12px',
+                                                border: '1px solid #ccc',
+                                                borderRadius: '4px',
+                                                backgroundColor: '#fff',
+                                                cursor: 'pointer',
+                                                display: 'flex',
+                                                justifyContent: 'space-between',
+                                                alignItems: 'center'
+                                            }}
+                                        >
+                                            <span style={{ color: editForm.ownerId_public ? '#000' : '#999' }}>
+                                                {getOwnerDisplay()}
+                                            </span>
+                                            {editForm.ownerId_public && (
+                                                <X 
+                                                    size={16} 
+                                                    onClick={(e) => { e.stopPropagation(); clearOwner(); }}
+                                                    style={{ color: '#ef4444', cursor: 'pointer' }}
+                                                />
+                                            )}
+                                        </div>
+                                        {showOwnerSearch && (
+                                            <div style={{
+                                                position: 'absolute',
+                                                top: '100%',
+                                                left: 0,
+                                                right: 0,
+                                                backgroundColor: '#fff',
+                                                border: '1px solid #ccc',
+                                                borderRadius: '4px',
+                                                marginTop: '4px',
+                                                maxHeight: '300px',
+                                                overflowY: 'auto',
+                                                zIndex: 1000,
+                                                boxShadow: '0 4px 6px rgba(0,0,0,0.1)'
+                                            }}>
+                                                <input
+                                                    type="text"
+                                                    value={ownerSearchQuery}
+                                                    onChange={(e) => {
+                                                        setOwnerSearchQuery(e.target.value);
+                                                        searchUsers(e.target.value, 'owner');
+                                                    }}
+                                                    placeholder="Search users..."
+                                                    style={{
+                                                        width: '100%',
+                                                        padding: '8px',
+                                                        border: 'none',
+                                                        borderBottom: '1px solid #eee',
+                                                        outline: 'none'
+                                                    }}
+                                                    autoFocus
+                                                />
+                                                <div>
+                                                    {(ownerSearchQuery ? ownerSearchResults : users.slice(0, 10)).map(user => (
+                                                        <div
+                                                            key={user._id}
+                                                            onClick={() => selectOwner(user)}
+                                                            style={{
+                                                                padding: '8px 12px',
+                                                                cursor: 'pointer',
+                                                                borderBottom: '1px solid #eee',
+                                                                backgroundColor: editForm.ownerId_public === user.id_public ? '#f3f4f6' : '#fff'
+                                                            }}
+                                                            onMouseEnter={(e) => e.target.style.backgroundColor = '#f9fafb'}
+                                                            onMouseLeave={(e) => e.target.style.backgroundColor = editForm.ownerId_public === user.id_public ? '#f3f4f6' : '#fff'}
+                                                        >
+                                                            <div style={{ fontWeight: '500' }}>
+                                                                {user.personalName || user.username || user.email}
+                                                            </div>
+                                                            <div style={{ fontSize: '0.875rem', color: '#666' }}>
+                                                                {user.id_public}
+                                                            </div>
+                                                        </div>
+                                                    ))}
+                                                </div>
+                                            </div>
+                                        )}
+                                    </div>
                                 </div>
                                 <div className="form-row full-width">
                                     <label>Breeder (User)</label>
-                                    <select
-                                        value={editForm.breederId_public}
-                                        onChange={(e) => setEditForm({...editForm, breederId_public: e.target.value, manualBreederName: ''})}
-                                    >
-                                        <option value="">-- Select Breeder --</option>
-                                        {users.map(user => (
-                                            <option key={user._id} value={user.id_public}>
-                                                {user.personalName || user.username || user.email} ({user.id_public})
-                                            </option>
-                                        ))}
-                                    </select>
+                                    <div style={{ position: 'relative' }}>
+                                        <div 
+                                            onClick={() => setShowBreederSearch(!showBreederSearch)}
+                                            style={{
+                                                padding: '8px 12px',
+                                                border: '1px solid #ccc',
+                                                borderRadius: '4px',
+                                                backgroundColor: '#fff',
+                                                cursor: 'pointer',
+                                                display: 'flex',
+                                                justifyContent: 'space-between',
+                                                alignItems: 'center'
+                                            }}
+                                        >
+                                            <span style={{ color: editForm.breederId_public ? '#000' : '#999' }}>
+                                                {getBreederDisplay()}
+                                            </span>
+                                            {editForm.breederId_public && (
+                                                <X 
+                                                    size={16} 
+                                                    onClick={(e) => { e.stopPropagation(); clearBreeder(); }}
+                                                    style={{ color: '#ef4444', cursor: 'pointer' }}
+                                                />
+                                            )}
+                                        </div>
+                                        {showBreederSearch && (
+                                            <div style={{
+                                                position: 'absolute',
+                                                top: '100%',
+                                                left: 0,
+                                                right: 0,
+                                                backgroundColor: '#fff',
+                                                border: '1px solid #ccc',
+                                                borderRadius: '4px',
+                                                marginTop: '4px',
+                                                maxHeight: '300px',
+                                                overflowY: 'auto',
+                                                zIndex: 1000,
+                                                boxShadow: '0 4px 6px rgba(0,0,0,0.1)'
+                                            }}>
+                                                <input
+                                                    type="text"
+                                                    value={breederSearchQuery}
+                                                    onChange={(e) => {
+                                                        setBreederSearchQuery(e.target.value);
+                                                        searchUsers(e.target.value, 'breeder');
+                                                    }}
+                                                    placeholder="Search users..."
+                                                    style={{
+                                                        width: '100%',
+                                                        padding: '8px',
+                                                        border: 'none',
+                                                        borderBottom: '1px solid #eee',
+                                                        outline: 'none'
+                                                    }}
+                                                    autoFocus
+                                                />
+                                                <div>
+                                                    {(breederSearchQuery ? breederSearchResults : users.slice(0, 10)).map(user => (
+                                                        <div
+                                                            key={user._id}
+                                                            onClick={() => selectBreeder(user)}
+                                                            style={{
+                                                                padding: '8px 12px',
+                                                                cursor: 'pointer',
+                                                                borderBottom: '1px solid #eee',
+                                                                backgroundColor: editForm.breederId_public === user.id_public ? '#f3f4f6' : '#fff'
+                                                            }}
+                                                            onMouseEnter={(e) => e.target.style.backgroundColor = '#f9fafb'}
+                                                            onMouseLeave={(e) => e.target.style.backgroundColor = editForm.breederId_public === user.id_public ? '#f3f4f6' : '#fff'}
+                                                        >
+                                                            <div style={{ fontWeight: '500' }}>
+                                                                {user.personalName || user.username || user.email}
+                                                            </div>
+                                                            <div style={{ fontSize: '0.875rem', color: '#666' }}>
+                                                                {user.id_public}
+                                                            </div>
+                                                        </div>
+                                                    ))}
+                                                </div>
+                                            </div>
+                                        )}
+                                    </div>
                                 </div>
                                 <div className="form-row full-width">
                                     <label>Or Manual Breeder Name</label>
