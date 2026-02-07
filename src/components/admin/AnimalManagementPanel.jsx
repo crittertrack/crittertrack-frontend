@@ -135,7 +135,9 @@ export default function AnimalManagementPanel({ API_BASE_URL, authToken, userRol
             remarks: animal.remarks || '',
             sireId_public: animal.sireId_public || '',
             damId_public: animal.damId_public || '',
-            ownerId_public: animal.ownerId_public || ''
+            ownerId_public: animal.ownerId_public || '',
+            breederId_public: animal.breederId_public || '',
+            manualBreederName: animal.manualBreederName || ''
         };
         setEditForm(formData);
         setOriginalEditForm(formData); // Store original values for comparison
@@ -169,6 +171,14 @@ export default function AnimalManagementPanel({ API_BASE_URL, authToken, userRol
             const selectedUser = users.find(u => u.id_public === changedFields.ownerId_public);
             if (selectedUser) {
                 changedFields.ownerId = selectedUser._id;
+            }
+        }
+
+        // If breeder is being changed, also set breederId (backend ObjectId will be resolved)
+        if (changedFields.breederId_public) {
+            const selectedUser = users.find(u => u.id_public === changedFields.breederId_public);
+            if (selectedUser) {
+                changedFields.breederId = selectedUser._id;
             }
         }
 
@@ -712,6 +722,29 @@ export default function AnimalManagementPanel({ API_BASE_URL, authToken, userRol
                                             </option>
                                         ))}
                                     </select>
+                                </div>
+                                <div className="form-row full-width">
+                                    <label>Breeder (User)</label>
+                                    <select
+                                        value={editForm.breederId_public}
+                                        onChange={(e) => setEditForm({...editForm, breederId_public: e.target.value, manualBreederName: ''})}
+                                    >
+                                        <option value="">-- Select Breeder --</option>
+                                        {users.map(user => (
+                                            <option key={user._id} value={user.id_public}>
+                                                {user.personalName || user.username || user.email} ({user.id_public})
+                                            </option>
+                                        ))}
+                                    </select>
+                                </div>
+                                <div className="form-row full-width">
+                                    <label>Or Manual Breeder Name</label>
+                                    <input
+                                        type="text"
+                                        value={editForm.manualBreederName}
+                                        onChange={(e) => setEditForm({...editForm, manualBreederName: e.target.value, breederId_public: ''})}
+                                        placeholder="Enter breeder name if not a registered user"
+                                    />
                                 </div>
                                 <div className="form-row full-width">
                                     <label>Remarks</label>
