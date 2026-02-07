@@ -264,6 +264,9 @@ export default function AnimalManagementPanel({ API_BASE_URL, authToken, userRol
             if (selectedUser) {
                 changedFields.ownerId = selectedUser._id;
                 // ownerId_public is already in changedFields from the form
+                // Set animal as owned and public when owner changes
+                changedFields.isOwned = true;
+                changedFields.showOnPublicProfile = true;
             } else {
                 setError('Selected owner not found');
                 return;
