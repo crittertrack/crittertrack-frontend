@@ -421,7 +421,7 @@ export default function AnimalManagementPanel({ API_BASE_URL, authToken, userRol
         }
     };
 
-    const getOwnerDisplay = (animal) => {
+    const getAnimalOwnerDisplay = (animal) => {
         if (animal.ownerId?.personalName) {
             return `${animal.ownerId.personalName} (${animal.ownerId.id_public || animal.ownerId.email})`;
         }
@@ -536,7 +536,7 @@ export default function AnimalManagementPanel({ API_BASE_URL, authToken, userRol
                                     </td>
                                     <td>{animal.species}</td>
                                     <td className="animal-owner">
-                                        <span title={getOwnerDisplay(animal)}>
+                                        <span title={getAnimalOwnerDisplay(animal)}>
                                             {animal.ownerId?.personalName || animal.ownerId?.email?.split('@')[0] || 'Unknown'}
                                         </span>
                                     </td>
