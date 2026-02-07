@@ -262,8 +262,6 @@ export default function AnimalManagementPanel({ API_BASE_URL, authToken, userRol
         } catch (err) {
             setError(err.message || 'Failed to hide animal');
         }
-            setError(err.message);
-        }
     };
 
     const handleRemoveImage = async (animal) => {
