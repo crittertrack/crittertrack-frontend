@@ -391,6 +391,41 @@ export default function AnimalManagementPanel({ API_BASE_URL, authToken, userRol
         }
     };
 
+    const handleSetPublic = async (animal) => {
+        if (!actionReason.trim()) {
+            setError('Please provide a reason');
+            return;
+        }
+
+        try {
+            const response = await fetch(`${API_BASE_URL}/admin/animals/${animal._id}/set-public`, {
+                method: 'PATCH',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Authorization': `Bearer ${authToken}`
+                },
+                body: JSON.stringify({ reason: actionReason })
+            });
+
+            // Check content type before parsing
+            const contentType = response.headers.get('content-type');
+            if (!contentType || !contentType.includes('application/json')) {
+                throw new Error('Invalid response from server');
+            }
+
+            const data = await response.json();
+            if (!response.ok) throw new Error(data.error);
+
+            setSuccess('Animal set to public');
+            setShowDetailModal(false);
+            setActionReason('');
+            fetchAnimals();
+            setTimeout(() => setSuccess(''), 3000);
+        } catch (err) {
+            setError(err.message || 'Failed to set animal public');
+        }
+    };
+
     const handleRemoveImage = async (animal) => {
         if (!actionReason.trim()) {
             setError('Please provide a reason');
@@ -858,12 +893,19 @@ export default function AnimalManagementPanel({ API_BASE_URL, authToken, userRol
                                     >
                                         <Edit size={14} /> Edit Fields
                                     </button>
-                                    {selectedAnimal.showOnPublicProfile && (
+                                    {selectedAnimal.showOnPublicProfile ? (
                                         <button 
                                             className="btn-warning"
                                             onClick={() => handleHideAnimal(selectedAnimal)}
                                         >
                                             <EyeOff size={14} /> Hide from Public
+                                        </button>
+                                    ) : (
+                                        <button 
+                                            className="btn-success"
+                                            onClick={() => handleSetPublic(selectedAnimal)}
+                                        >
+                                            <Eye size={14} /> Set Public
                                         </button>
                                     )}
                                     {userRole === 'admin' && (
