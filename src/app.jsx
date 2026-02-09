@@ -14839,14 +14839,14 @@ const AnimalList = ({ authToken, showModalMessage, onEditAnimal, onViewAnimal, f
                     </div>
                     
                     {/* Prefix / Name under image */}
-                    <div className="w-full text-center px-1 sm:px-2 pb-0.5 sm:pb-1">
+                    <div className="w-full text-center px-1 sm:px-2 pb-0.5 sm:pb-1 flex-grow">
                         <div className="text-[11px] sm:text-xs md:text-sm font-semibold text-gray-800 line-clamp-2 leading-tight">{animal.prefix ? `${animal.prefix} ` : ''}{animal.name}{animal.suffix ? ` ${animal.suffix}` : ''}</div>
                     </div>
 
                     {/* Edit is available when viewing full card; remove inline edit icon from dashboard cards */}
 
                     {/* ID bottom-right */}
-                    <div className="w-full px-1 sm:px-2 pb-1 sm:pb-2 flex justify-between items-center">
+                    <div className="w-full px-1 sm:px-2 pb-1 sm:pb-2 flex justify-between items-center mt-auto">
                         {/* Privacy and Owned toggles bottom-left */}
                         {!isSelectable && (
                             <div className="flex items-center gap-1">
