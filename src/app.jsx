@@ -16976,6 +16976,24 @@ const App = () => {
         }
     }, [showModalMessage, authToken, API_BASE_URL, userProfile]);
 
+    const handleImageDownload = async (imageUrl) => {
+        try {
+            const response = await fetch(imageUrl);
+            const blob = await response.blob();
+            const blobUrl = window.URL.createObjectURL(blob);
+            const link = document.createElement('a');
+            link.href = blobUrl;
+            link.download = `crittertrack-image-${Date.now()}.jpg`;
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
+            window.URL.revokeObjectURL(blobUrl);
+        } catch (error) {
+            console.error('Failed to download image:', error);
+            showModalMessage('Download Failed', 'Could not download the image. Please try right-clicking and "Save image as..."');
+        }
+    };
+
     const resetIdleTimer = useCallback(() => {
         if (timeoutRef.current) {
             clearTimeout(timeoutRef.current);
@@ -20888,7 +20906,7 @@ const App = () => {
             
             {/* Transfer Animal Modal */}
             {showTransferModal && transferAnimal && (
-                <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
+                <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-[80] p-4">
                     <div className="bg-white rounded-xl shadow-2xl max-w-md w-full p-6">
                         <div className="flex justify-between items-center mb-6">
                             <h2 className="text-xl font-bold text-gray-800 flex items-center gap-2">
@@ -21083,7 +21101,7 @@ const App = () => {
             {/* Image Modal */}
             {showImageModal && enlargedImageUrl && (
                 <div 
-                    className="fixed inset-0 bg-black bg-opacity-90 flex items-center justify-center z-50 p-4"
+                    className="fixed inset-0 bg-black bg-opacity-90 flex items-center justify-center z-[90] p-4"
                     onClick={() => setShowImageModal(false)}
                 >
                     <div className="relative max-w-7xl max-h-full flex flex-col items-center gap-4">
@@ -21102,15 +21120,16 @@ const App = () => {
                             className="max-w-full max-h-[75vh] object-contain"
                             onClick={(e) => e.stopPropagation()}
                         />
-                        <a
-                            href={enlargedImageUrl}
-                            download
+                        <button
+                            onClick={(e) => {
+                                e.stopPropagation();
+                                handleImageDownload(enlargedImageUrl);
+                            }}
                             className="bg-blue-600 hover:bg-blue-700 text-white px-6 py-2 rounded-lg flex items-center gap-2 transition"
-                            onClick={(e) => e.stopPropagation()}
                         >
                             <Download size={20} />
                             Download Image
-                        </a>
+                        </button>
                     </div>
                 </div>
             )}
@@ -21166,6 +21185,23 @@ const PublicAnimalPage = () => {
         } else {
             // Default to home
             navigate('/');
+        }
+    };
+
+    const handleImageDownload = async (imageUrl) => {
+        try {
+            const response = await fetch(imageUrl);
+            const blob = await response.blob();
+            const blobUrl = window.URL.createObjectURL(blob);
+            const link = document.createElement('a');
+            link.href = blobUrl;
+            link.download = `crittertrack-image-${Date.now()}.jpg`;
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
+            window.URL.revokeObjectURL(blobUrl);
+        } catch (error) {
+            console.error('Failed to download image:', error);
         }
     };
 
@@ -21280,7 +21316,7 @@ const PublicAnimalPage = () => {
             {/* Image Modal */}
             {showImageModal && enlargedImageUrl && (
                 <div 
-                    className="fixed inset-0 bg-black bg-opacity-90 flex items-center justify-center z-50 p-4"
+                    className="fixed inset-0 bg-black bg-opacity-90 flex items-center justify-center z-[90] p-4"
                     onClick={() => setShowImageModal(false)}
                 >
                     <div className="relative max-w-7xl max-h-full flex flex-col items-center gap-4">
@@ -21299,15 +21335,16 @@ const PublicAnimalPage = () => {
                             className="max-w-full max-h-[75vh] object-contain"
                             onClick={(e) => e.stopPropagation()}
                         />
-                        <a
-                            href={enlargedImageUrl}
-                            download
+                        <button
+                            onClick={(e) => {
+                                e.stopPropagation();
+                                handleImageDownload(enlargedImageUrl);
+                            }}
                             className="bg-blue-600 hover:bg-blue-700 text-white px-6 py-2 rounded-lg flex items-center gap-2 transition"
-                            onClick={(e) => e.stopPropagation()}
                         >
                             <Download size={20} />
                             Download Image
-                        </a>
+                        </button>
                     </div>
                 </div>
             )}
