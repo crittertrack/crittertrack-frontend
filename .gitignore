@@ -24,3 +24,6 @@ misc
 npm-debug.log*
 yarn-debug.log*
 yarn-error.log*
+# backups
+app_backup_*.jsx
+*.backup-*
