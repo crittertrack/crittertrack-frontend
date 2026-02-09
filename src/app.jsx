@@ -2624,12 +2624,14 @@ const PrivateAnimalDetail = ({ animal, onClose, onEdit, API_BASE_URL, authToken,
                                         parentType="Sire"
                                         API_BASE_URL={API_BASE_URL}
                                         onViewAnimal={onViewAnimal}
+                                        authToken={authToken}
                                     />
                                     <ViewOnlyParentCard 
                                         parentId={animal.motherId_public || animal.damId_public} 
                                         parentType="Dam"
                                         API_BASE_URL={API_BASE_URL}
                                         onViewAnimal={onViewAnimal}
+                                        authToken={authToken}
                                     />
                                 </div>
                             </div>
@@ -2787,12 +2789,14 @@ const PrivateAnimalDetail = ({ animal, onClose, onEdit, API_BASE_URL, authToken,
                                         parentType="Sire"
                                         API_BASE_URL={API_BASE_URL}
                                         onViewAnimal={onViewAnimal}
+                                        authToken={authToken}
                                     />
                                     <ViewOnlyParentCard 
                                         parentId={animal.motherId_public || animal.damId_public} 
                                         parentType="Dam"
                                         API_BASE_URL={API_BASE_URL}
                                         onViewAnimal={onViewAnimal}
+                                        authToken={authToken}
                                     />
                                 </div>
                             </div>
@@ -3519,12 +3523,14 @@ const ViewOnlyPrivateAnimalDetail = ({ animal, onClose, API_BASE_URL, authToken,
                                         parentType="Sire"
                                         API_BASE_URL={API_BASE_URL}
                                         onViewAnimal={onViewAnimal}
+                                        authToken={authToken}
                                     />
                                     <ViewOnlyParentCard 
                                         parentId={animal.motherId_public || animal.damId_public} 
                                         parentType="Dam"
                                         API_BASE_URL={API_BASE_URL}
                                         onViewAnimal={onViewAnimal}
+                                        authToken={authToken}
                                     />
                                 </div>
                             </div>
@@ -3682,12 +3688,14 @@ const ViewOnlyPrivateAnimalDetail = ({ animal, onClose, API_BASE_URL, authToken,
                                         parentType="Sire"
                                         API_BASE_URL={API_BASE_URL}
                                         onViewAnimal={onViewAnimal}
+                                        authToken={authToken}
                                     />
                                     <ViewOnlyParentCard 
                                         parentId={animal.motherId_public || animal.damId_public} 
                                         parentType="Dam"
                                         API_BASE_URL={API_BASE_URL}
                                         onViewAnimal={onViewAnimal}
+                                        authToken={authToken}
                                     />
                                 </div>
                             </div>
@@ -4507,6 +4515,7 @@ const ViewOnlyAnimalDetail = ({ animal, onClose, API_BASE_URL, onViewProfile, au
                                                     window.handleViewPublicAnimal(parent);
                                                 }
                                             }}
+                                            authToken={authToken}
                                         />
                                         <ViewOnlyParentCard 
                                             parentId={animal.motherId_public || animal.damId_public} 
@@ -4517,6 +4526,7 @@ const ViewOnlyAnimalDetail = ({ animal, onClose, API_BASE_URL, onViewProfile, au
                                                     window.handleViewPublicAnimal(parent);
                                                 }
                                             }}
+                                            authToken={authToken}
                                         />
                                     </div>
                                 </div>
@@ -4644,6 +4654,7 @@ const ViewOnlyAnimalDetail = ({ animal, onClose, API_BASE_URL, onViewProfile, au
                                                 window.handleViewPublicAnimal(parent);
                                             }
                                         }}
+                                        authToken={authToken}
                                     />
                                     <ViewOnlyParentCard 
                                         parentId={animal.motherId_public || animal.damId_public} 
@@ -4654,6 +4665,7 @@ const ViewOnlyAnimalDetail = ({ animal, onClose, API_BASE_URL, onViewProfile, au
                                                 window.handleViewPublicAnimal(parent);
                                             }
                                         }}
+                                        authToken={authToken}
                                     />
                                 </div>
                             </div>
@@ -5160,7 +5172,7 @@ const ViewOnlyAnimalDetail = ({ animal, onClose, API_BASE_URL, onViewProfile, au
 };
 
 // View-Only Parent Card Component
-const ViewOnlyParentCard = ({ parentId, parentType, API_BASE_URL, onViewAnimal }) => {
+const ViewOnlyParentCard = ({ parentId, parentType, API_BASE_URL, onViewAnimal, authToken }) => {
     const [parentData, setParentData] = useState(null);
     const [loading, setLoading] = useState(false);
     const [notFound, setNotFound] = useState(false);
@@ -5194,7 +5206,7 @@ const ViewOnlyParentCard = ({ parentId, parentType, API_BASE_URL, onViewAnimal }
         };
 
         fetchParent();
-    }, [parentId, parentType, API_BASE_URL]);
+    }, [parentId, parentType, API_BASE_URL, authToken]);
 
     if (!parentId || notFound) {
         return (
@@ -5389,7 +5401,8 @@ const OffspringSection = ({ animalId, API_BASE_URL, authToken = null, onViewAnim
                                     parent={litter.otherParentType === 'sire' ? litter.otherParent : currentAnimal}
                                     label="Father"
                                     onViewAnimal={onViewAnimal}
-                                />
+                                        authToken={authToken}
+                                    />
                             )}
                             
                             {/* Mother Card */}
@@ -5398,7 +5411,8 @@ const OffspringSection = ({ animalId, API_BASE_URL, authToken = null, onViewAnim
                                     parent={litter.otherParentType === 'dam' ? litter.otherParent : currentAnimal}
                                     label="Mother"
                                     onViewAnimal={onViewAnimal}
-                                />
+                                        authToken={authToken}
+                                    />
                             )}
                         </div>
 
