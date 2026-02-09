@@ -2229,7 +2229,7 @@ const PublicProfileView = ({ profile, onBack, onViewAnimal, API_BASE_URL, onStar
 // ==================== PRIVATE ANIMAL DETAIL (OWNER VIEW) ====================
 // Shows ALL data for animal owners viewing their own animals (ignores privacy toggles)
 // Accessed from: MY ANIMALS LIST
-const PrivateAnimalDetail = ({ animal, onClose, onEdit, API_BASE_URL, authToken, setShowImageModal, setEnlargedImageUrl, onUpdateAnimal, onHideAnimal, showModalMessage, onTransfer, onViewAnimal }) => {
+const PrivateAnimalDetail = ({ animal, onClose, onEdit, API_BASE_URL, authToken, setShowImageModal, setEnlargedImageUrl, onUpdateAnimal, onHideAnimal, showModalMessage, onTransfer, onViewAnimal, onToggleOwned }) => {
     const [breederInfo, setBreederInfo] = useState(null);
     const [showPedigree, setShowPedigree] = useState(false);
     const [detailViewTab, setDetailViewTab] = useState(1);
@@ -2438,29 +2438,48 @@ const PrivateAnimalDetail = ({ animal, onClose, onEdit, API_BASE_URL, authToken,
                                         </div>
                                     </div>
 
-                                    <div className="w-full md:w-2/3 p-4 sm:p-6 flex flex-col border-t md:border-t-0 md:border-l border-gray-300 space-y-3 relative">
-                                        {/* Public Profile Toggle - Top Right */}
-                                        <button
-                                            onClick={() => {
-                                                const newIsDisplay = !animal.isDisplay;
-                                                axios.put(`${API_BASE_URL}/animals/${animal.id_public}`, { isDisplay: newIsDisplay }, {
-                                                    headers: { Authorization: `Bearer ${authToken}` }
-                                                }).then(() => {
-                                                    // Update animal state directly without closing modal
-                                                    if (onUpdateAnimal) {
-                                                        onUpdateAnimal({ ...animal, isDisplay: newIsDisplay });
-                                                    }
-                                                }).catch(err => {
-                                                    console.error('Failed to update isDisplay:', err);
-                                                });
-                                            }}
-                                            data-tutorial-target="detail-private-toggle"
-                                            className={`absolute top-4 right-4 flex items-center gap-2 px-3 py-1.5 rounded-lg font-medium transition ${animal.isDisplay ? 'bg-green-100 text-green-800 hover:bg-green-200' : 'bg-gray-100 text-gray-800 hover:bg-gray-200'}`}
-                                            title="Toggle public profile visibility"
-                                        >
-                                            {animal.isDisplay ? <Eye size={16} /> : <EyeOff size={16} />}
-                                            <span>{animal.isDisplay ? 'Public' : 'Private'}</span>
-                                        </button>
+                                    <div className="w-full md:w-2/3 p-4 sm:p-6 flex flex-col border-t md:border-t-0 md:border-l border-gray-300 space-y-3">
+                                        {/* Toggle Controls - Top */}
+                                        <div className="flex flex-col sm:flex-row gap-2 sm:gap-2 sm:justify-end mb-2">
+                                            {/* Owned Toggle */}
+                                            <button
+                                                onClick={() => {
+                                                    onToggleOwned && onToggleOwned(animal.id_public, !animal.isOwned);
+                                                }}
+                                                className={`flex items-center justify-center gap-2 px-3 py-1.5 rounded-lg font-medium text-sm transition ${
+                                                    animal.isOwned 
+                                                        ? 'bg-red-100 text-red-800 hover:bg-red-200' 
+                                                        : 'bg-gray-100 text-gray-800 hover:bg-gray-200'
+                                                }`}
+                                                title="Toggle owned status"
+                                            >
+                                                {animal.isOwned ? <Heart size={16} /> : <HeartOff size={16} />}
+                                                <span>{animal.isOwned ? 'Owned' : 'Not Owned'}</span>
+                                            </button>
+
+                                            {/* Public Profile Toggle */}
+                                            <button
+                                                onClick={() => {
+                                                    const newIsDisplay = !animal.isDisplay;
+                                                    axios.put(`${API_BASE_URL}/animals/${animal.id_public}`, { isDisplay: newIsDisplay }, {
+                                                        headers: { Authorization: `Bearer ${authToken}` }
+                                                    }).then(() => {
+                                                        // Update animal state directly without closing modal
+                                                        if (onUpdateAnimal) {
+                                                            onUpdateAnimal({ ...animal, isDisplay: newIsDisplay });
+                                                        }
+                                                    }).catch(err => {
+                                                        console.error('Failed to update isDisplay:', err);
+                                                    });
+                                                }}
+                                                data-tutorial-target="detail-private-toggle"
+                                                className={`flex items-center justify-center gap-2 px-3 py-1.5 rounded-lg font-medium text-sm transition ${animal.isDisplay ? 'bg-green-100 text-green-800 hover:bg-green-200' : 'bg-gray-100 text-gray-800 hover:bg-gray-200'}`}
+                                                title="Toggle public profile visibility"
+                                            >
+                                                {animal.isDisplay ? <Eye size={16} /> : <EyeOff size={16} />}
+                                                <span>{animal.isDisplay ? 'Public' : 'Private'}</span>
+                                            </button>
+                                        </div>
 
 {/* Species/Breed/Strain/CTC - At Top */}
                                         <p className="text-sm text-gray-600">
@@ -14585,6 +14604,51 @@ const AnimalList = ({ authToken, showModalMessage, onEditAnimal, onViewAnimal, f
         }
     };
 
+    const toggleAnimalOwned = async (animalId, newOwnedValue) => {
+        // Update local state immediately for instant UI feedback
+        const updatedAnimals = animals.map(animal => 
+            animal.id_public === animalId 
+                ? { ...animal, isOwned: newOwnedValue }
+                : animal
+        );
+        setAnimals(updatedAnimals);
+
+        // Update database in the background
+        try {
+            const response = await fetch(`${API_BASE_URL}/animals/${animalId}`, {
+                method: 'PUT',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Authorization': `Bearer ${authToken}`
+                },
+                body: JSON.stringify({ 
+                    isOwned: newOwnedValue
+                })
+            });
+
+            if (!response.ok) {
+                // Revert on failure
+                const revertedAnimals = animals.map(animal => 
+                    animal.id_public === animalId 
+                        ? { ...animal, isOwned: !newOwnedValue }
+                        : animal
+                );
+                setAnimals(revertedAnimals);
+                showModalMessage('Error', 'Failed to update owned status.');
+            }
+        } catch (error) {
+            console.error('Error updating owned status:', error);
+            // Revert on error
+            const revertedAnimals = animals.map(animal => 
+                animal.id_public === animalId 
+                    ? { ...animal, isOwned: !newOwnedValue }
+                    : animal
+            );
+            setAnimals(revertedAnimals);
+            showModalMessage('Error', 'Failed to update owned status.');
+        }
+    };
+
     const toggleBulkPrivacy = async (species, makePublic) => {
         const speciesAnimals = groupedAnimals[species] || [];
         const animalIds = speciesAnimals.map(animal => animal.id_public);
@@ -14707,7 +14771,7 @@ const AnimalList = ({ authToken, showModalMessage, onEditAnimal, onViewAnimal, f
         }
     };
 
-    const AnimalCard = ({ animal, onEditAnimal, species, isSelectable, isSelected, onToggleSelect, onTogglePrivacy }) => {
+    const AnimalCard = ({ animal, onEditAnimal, species, isSelectable, isSelected, onToggleSelect, onTogglePrivacy, onToggleOwned }) => {
         const birth = animal.birthDate ? formatDate(animal.birthDate) : '';
         const imgSrc = animal.imageUrl || animal.photoUrl || null;
 
@@ -14723,7 +14787,7 @@ const AnimalList = ({ authToken, showModalMessage, onEditAnimal, onViewAnimal, f
             <div className="w-full flex justify-center">
                 <div
                     onClick={handleClick}
-                    className={`relative bg-white rounded-lg sm:rounded-xl shadow-sm w-full max-w-[110px] sm:max-w-[140px] md:max-w-[176px] h-40 sm:h-48 md:h-56 flex flex-col items-center overflow-hidden cursor-pointer hover:shadow-md transition border-2 pt-2 sm:pt-3 ${
+                    className={`relative bg-white rounded-lg sm:rounded-xl shadow-sm w-full max-w-[165px] sm:max-w-[140px] md:max-w-[176px] h-44 sm:h-48 md:h-56 flex flex-col items-center overflow-hidden cursor-pointer hover:shadow-md transition border-2 pt-2 sm:pt-3 ${
                         isSelected ? 'border-red-500' : animal.isViewOnly ? 'border-gray-400 bg-gray-50' : 'border-gray-300'
                     }`}
                 >
@@ -14759,68 +14823,80 @@ const AnimalList = ({ authToken, showModalMessage, onEditAnimal, onViewAnimal, f
                     )}
 
                     {/* Centered profile image */}
-                    <div className="flex items-center justify-center w-full px-1 sm:px-2 mt-0.5 sm:mt-1 h-16 sm:h-20 md:h-28">
+                    <div className="flex items-center justify-center w-full px-1 sm:px-2 mt-0.5 sm:mt-1 h-20 sm:h-20 md:h-28">
                         {imgSrc ? (
-                            <img src={imgSrc} alt={animal.name} className="max-w-14 max-h-14 sm:max-w-20 sm:max-h-20 md:max-w-24 md:max-h-24 w-auto h-auto object-contain rounded-md" />
+                            <img src={imgSrc} alt={animal.name} className="max-w-20 max-h-20 sm:max-w-20 sm:max-h-20 md:max-w-24 md:max-h-24 w-auto h-auto object-contain rounded-md" />
                         ) : (
-                            <div className="w-14 h-14 sm:w-20 sm:h-20 md:w-24 md:h-24 bg-gray-100 rounded-md flex items-center justify-center text-gray-400">
-                                <Cat className="w-6 h-6 sm:w-8 sm:h-8 md:w-9 md:h-9" />
+                            <div className="w-20 h-20 sm:w-20 sm:h-20 md:w-24 md:h-24 bg-gray-100 rounded-md flex items-center justify-center text-gray-400">
+                                <Cat className="w-8 h-8 sm:w-8 sm:h-8 md:w-9 md:h-9" />
                             </div>
                         )}
                     </div>
                     
                     {/* Icon row */}
                     <div className="w-full flex justify-center items-center space-x-1 sm:space-x-2 py-0.5 sm:py-1">
-                        {animal.isOwned ? (
-                            <Heart className="w-3 h-3 sm:w-3.5 sm:h-3.5 text-black" />
-                        ) : (
-                            <HeartOff className="w-3 h-3 sm:w-3.5 sm:h-3.5 text-black" />
-                        )}
-                        {animal.showOnPublicProfile ? (
-                            <Eye className="w-3 h-3 sm:w-3.5 sm:h-3.5 text-black" />
-                        ) : (
-                            <EyeOff className="w-3 h-3 sm:w-3.5 sm:h-3.5 text-black" />
-                        )}
                         {animal.isInMating && <Hourglass className="w-3 h-3 sm:w-3.5 sm:h-3.5 text-black" />}
                         {animal.isPregnant && <Bean className="w-3 h-3 sm:w-3.5 sm:h-3.5 text-black" />}
                         {animal.isNursing && <Milk className="w-3 h-3 sm:w-3.5 sm:h-3.5 text-black" />}
                     </div>
                     
                     {/* Prefix / Name under image */}
-                    <div className="w-full text-center px-1 sm:px-2 pb-0.5 sm:pb-1">
+                    <div className="w-full text-center px-1 sm:px-2 pb-0.5 sm:pb-1 flex-grow">
                         <div className="text-[11px] sm:text-xs md:text-sm font-semibold text-gray-800 line-clamp-2 leading-tight">{animal.prefix ? `${animal.prefix} ` : ''}{animal.name}{animal.suffix ? ` ${animal.suffix}` : ''}</div>
                     </div>
 
                     {/* Edit is available when viewing full card; remove inline edit icon from dashboard cards */}
 
                     {/* ID bottom-right */}
-                    <div className="w-full px-1 sm:px-2 pb-1 sm:pb-2 flex justify-between items-center">
-                        {/* Privacy toggle bottom-left */}
+                    <div className="w-full px-1 sm:px-2 pb-1 sm:pb-2 flex justify-between items-center mt-auto">
+                        {/* Privacy and Owned toggles bottom-left */}
                         {!isSelectable && (
-                            <button
-                                type="button"
-                                onClick={(e) => {
-                                    e.stopPropagation();
-                                    e.preventDefault();
-                                    onTogglePrivacy && onTogglePrivacy(animal.id_public, !animal.showOnPublicProfile);
-                                }}
-                                className={`relative inline-flex h-4 w-7 sm:h-5 sm:w-9 items-center rounded-full transition-colors duration-200 ease-in-out focus:outline-none ${
-                                    animal.showOnPublicProfile 
-                                        ? 'bg-green-500' 
-                                        : 'bg-gray-300'
-                                }`}
-                                title={animal.showOnPublicProfile ? "Click to make Private" : "Click to make Public"}
-                            >
-                                <span
-                                    className={`inline-block h-3 w-3 sm:h-4 sm:w-4 transform rounded-full bg-white transition-transform duration-200 ease-in-out ${
-                                        animal.showOnPublicProfile 
-                                            ? 'translate-x-3.5 sm:translate-x-4' 
-                                            : 'translate-x-0.5'
+                            <div className="flex items-center gap-1">
+                                {/* Owned toggle */}
+                                <button
+                                    type="button"
+                                    onClick={(e) => {
+                                        e.stopPropagation();
+                                        e.preventDefault();
+                                        onToggleOwned && onToggleOwned(animal.id_public, !animal.isOwned);
+                                    }}
+                                    className={`p-0.5 sm:p-1 rounded transition-colors ${
+                                        animal.isOwned 
+                                            ? 'bg-red-100 hover:bg-red-200' 
+                                            : 'bg-gray-100 hover:bg-gray-200'
                                     }`}
-                                />
-                            </button>
+                                    title={animal.isOwned ? "Click to mark as Not Owned" : "Click to mark as Owned"}
+                                >
+                                    {animal.isOwned ? (
+                                        <Heart className="w-3 h-3 sm:w-4 sm:h-4 text-red-600" />
+                                    ) : (
+                                        <HeartOff className="w-3 h-3 sm:w-4 sm:h-4 text-gray-500" />
+                                    )}
+                                </button>
+                                {/* Privacy toggle */}
+                                <button
+                                    type="button"
+                                    onClick={(e) => {
+                                        e.stopPropagation();
+                                        e.preventDefault();
+                                        onTogglePrivacy && onTogglePrivacy(animal.id_public, !animal.showOnPublicProfile);
+                                    }}
+                                    className={`p-0.5 sm:p-1 rounded transition-colors ${
+                                        animal.showOnPublicProfile 
+                                            ? 'bg-green-100 hover:bg-green-200' 
+                                            : 'bg-gray-100 hover:bg-gray-200'
+                                    }`}
+                                    title={animal.showOnPublicProfile ? "Click to make Private" : "Click to make Public"}
+                                >
+                                    {animal.showOnPublicProfile ? (
+                                        <Eye className="w-3 h-3 sm:w-4 sm:h-4 text-green-600" />
+                                    ) : (
+                                        <EyeOff className="w-3 h-3 sm:w-4 sm:h-4 text-gray-500" />
+                                    )}
+                                </button>
+                            </div>
                         )}
-                        {/* Spacer if no privacy toggle (in selection mode) */}
+                        {/* Spacer if no toggles (in selection mode) */}
                         {isSelectable && <div></div>}
                         <div className="text-[9px] sm:text-[10px] md:text-xs text-gray-500">{animal.id_public}</div>
                     </div>
@@ -15152,7 +15228,7 @@ const AnimalList = ({ authToken, showModalMessage, onEditAnimal, onViewAnimal, f
                             </div>
                             {/* Collapsible content - always show on desktop, toggle on mobile */}
                             <div className={`${isCollapsed ? 'hidden' : 'block'} sm:block`}>
-                                <div className="p-1.5 sm:p-4 grid grid-cols-3 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-1.5 sm:gap-4">
+                                <div className="p-1.5 sm:p-4 grid grid-cols-2 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-2 sm:gap-4">
                                     {groupedAnimals[species].map(animal => (
                                         <AnimalCard 
                                             key={animal.id_public} 
@@ -15163,6 +15239,7 @@ const AnimalList = ({ authToken, showModalMessage, onEditAnimal, onViewAnimal, f
                                             isSelected={selected.includes(animal.id_public)}
                                             onToggleSelect={toggleAnimalSelection}
                                             onTogglePrivacy={toggleAnimalPrivacy}
+                                            onToggleOwned={toggleAnimalOwned}
                                         />
                                     ))}
                                 </div>
@@ -17971,6 +18048,27 @@ const App = () => {
         }
     };
 
+    const toggleAnimalOwned = async (animalId, newOwnedValue) => {
+        try {
+            const response = await axios.put(`${API_BASE_URL}/animals/${animalId}`, {
+                isOwned: newOwnedValue
+            }, {
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Authorization': `Bearer ${authToken}`
+                }
+            });
+
+            // Update animalToView if this is the currently viewed animal
+            if (animalToView && animalToView.id_public === animalId) {
+                setAnimalToView({ ...animalToView, isOwned: newOwnedValue });
+            }
+        } catch (error) {
+            console.error('Error updating owned status:', error);
+            showModalMessage('Error', 'Failed to update owned status.');
+        }
+    };
+
     const handleRestoreViewOnlyAnimal = async (id_public) => {
         try {
             await axios.post(`${API_BASE_URL}/animals/${id_public}/restore`, {}, {
@@ -19440,6 +19538,7 @@ const App = () => {
                                             setShowTransferModal(true);
                                         }}
                                         onViewAnimal={handleViewAnimal}
+                                        onToggleOwned={toggleAnimalOwned}
                                     />
                                 );
                             } else {
