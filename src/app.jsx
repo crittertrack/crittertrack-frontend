@@ -2331,30 +2331,6 @@ const PrivateAnimalDetail = ({ animal, onClose, onEdit, API_BASE_URL, authToken,
                             <span className="text-xs bg-green-100 text-green-800 px-2 py-1 rounded font-medium">
                                 👁️ OWNER VIEW - All Data Visible
                             </span>
-                            <div className="flex items-center gap-1.5 px-2 py-1 bg-gray-50 border border-gray-300 rounded-lg">
-                                <span className="text-xs font-medium text-gray-700">Owned:</span>
-                                <button
-                                    type="button"
-                                    onClick={(e) => {
-                                        e.stopPropagation();
-                                        onToggleOwned && onToggleOwned(animal.id_public, !animal.isOwned);
-                                    }}
-                                    className={`relative inline-flex h-4 w-7 items-center rounded-full transition-colors duration-200 ease-in-out focus:outline-none ${
-                                        animal.isOwned 
-                                            ? 'bg-green-500' 
-                                            : 'bg-gray-300'
-                                    }`}
-                                    title={animal.isOwned ? "Click to mark as Not Owned" : "Click to mark as Owned"}
-                                >
-                                    <span
-                                        className={`inline-block h-3 w-3 transform rounded-full bg-white transition-transform duration-200 ease-in-out ${
-                                            animal.isOwned 
-                                                ? 'translate-x-3.5' 
-                                                : 'translate-x-0.5'
-                                        }`}
-                                    />
-                                </button>
-                            </div>
                             <button
                                 onClick={handleShare}
                                 className="px-3 py-1.5 bg-primary hover:bg-primary/90 text-black font-semibold rounded-lg transition flex items-center gap-2"
@@ -2463,6 +2439,22 @@ const PrivateAnimalDetail = ({ animal, onClose, onEdit, API_BASE_URL, authToken,
                                     </div>
 
                                     <div className="w-full md:w-2/3 p-4 sm:p-6 flex flex-col border-t md:border-t-0 md:border-l border-gray-300 space-y-3 relative">
+                                        {/* Owned Toggle - Top Right (before Public toggle) */}
+                                        <button
+                                            onClick={() => {
+                                                onToggleOwned && onToggleOwned(animal.id_public, !animal.isOwned);
+                                            }}
+                                            className={`absolute top-4 right-32 flex items-center gap-2 px-3 py-1.5 rounded-lg font-medium transition ${
+                                                animal.isOwned 
+                                                    ? 'bg-red-100 text-red-800 hover:bg-red-200' 
+                                                    : 'bg-gray-100 text-gray-800 hover:bg-gray-200'
+                                            }`}
+                                            title="Toggle owned status"
+                                        >
+                                            {animal.isOwned ? <Heart size={16} /> : <HeartOff size={16} />}
+                                            <span>{animal.isOwned ? 'Owned' : 'Not Owned'}</span>
+                                        </button>
+
                                         {/* Public Profile Toggle - Top Right */}
                                         <button
                                             onClick={() => {
