@@ -5190,6 +5190,23 @@ const ViewOnlyParentCard = ({ parentId, parentType, API_BASE_URL, onViewAnimal, 
             setLoading(true);
             setNotFound(false);
             try {
+                // If authToken is available, try fetching from owned animals first
+                if (authToken) {
+                    try {
+                        const ownedResponse = await axios.get(`${API_BASE_URL}/animals/${parentId}`, {
+                            headers: { Authorization: `Bearer ${authToken}` }
+                        });
+                        if (ownedResponse.data) {
+                            setParentData(ownedResponse.data);
+                            setLoading(false);
+                            return;
+                        }
+                    } catch (ownedError) {
+                        // Not in owned animals, try public database
+                        console.log(`${parentType} not in owned animals, checking public database`);
+                    }
+                }
+
                 // Try fetching from global public animals database
                 const publicResponse = await axios.get(`${API_BASE_URL}/public/global/animals?id_public=${parentId}`);
                 if (publicResponse.data && publicResponse.data.length > 0) {
