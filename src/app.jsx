@@ -209,14 +209,21 @@ const PedigreeChart = ({ animalId, animalData, onClose, API_BASE_URL, authToken 
                     // Try to fetch from owned animals first if authToken is available
                     if (authToken) {
                         try {
-                            // Use /animals/any endpoint which returns owned, public, OR related animals
-                            const response = await axios.get(`${API_BASE_URL}/animals/any/${id}`, {
+                            // First try /animals endpoint for owned animals (includes private)
+                            const response = await axios.get(`${API_BASE_URL}/animals/${id}`, {
                                 headers: { Authorization: `Bearer ${authToken}` }
                             });
                             animalInfo = response.data;
                         } catch (error) {
-                            // Not owned/public/related, will skip this animal
-                            console.log(`Animal ${id} not accessible:`, error.message);
+                            // Not owned, try /animals/any endpoint for related/accessible animals
+                            try {
+                                const response = await axios.get(`${API_BASE_URL}/animals/any/${id}`, {
+                                    headers: { Authorization: `Bearer ${authToken}` }
+                                });
+                                animalInfo = response.data;
+                            } catch (error2) {
+                                console.log(`Animal ${id} not accessible via owned or related endpoints:`, error2.message);
+                            }
                         }
                     }
 
@@ -228,12 +235,13 @@ const PedigreeChart = ({ animalId, animalData, onClose, API_BASE_URL, authToken 
                                 animalInfo = publicResponse.data[0];
                             }
                         } catch (error) {
-                            console.error(`Failed to fetch animal ${id}:`, error);
-                            return null;
+                            console.log(`Animal ${id} not found in public database:`, error.message);
+                            // Don't return null here - continue to check if we should show hidden marker
                         }
                     }
 
                     // If animal exists but is not public/accessible (has ID but no data), return hidden marker
+                    // This ensures parents always show even if they're private
                     if (!animalInfo && id) {
                         return { isHidden: true, id_public: id };
                     }
