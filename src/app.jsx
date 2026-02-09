@@ -14879,20 +14879,18 @@ const AnimalList = ({ authToken, showModalMessage, onEditAnimal, onViewAnimal, f
                                         e.preventDefault();
                                         onTogglePrivacy && onTogglePrivacy(animal.id_public, !animal.showOnPublicProfile);
                                     }}
-                                    className={`relative inline-flex h-4 w-7 sm:h-5 sm:w-9 items-center rounded-full transition-colors duration-200 ease-in-out focus:outline-none ${
+                                    className={`p-0.5 sm:p-1 rounded transition-colors ${
                                         animal.showOnPublicProfile 
-                                            ? 'bg-green-500' 
-                                            : 'bg-gray-300'
+                                            ? 'bg-green-100 hover:bg-green-200' 
+                                            : 'bg-gray-100 hover:bg-gray-200'
                                     }`}
                                     title={animal.showOnPublicProfile ? "Click to make Private" : "Click to make Public"}
                                 >
-                                    <span
-                                        className={`inline-block h-3 w-3 sm:h-4 sm:w-4 transform rounded-full bg-white transition-transform duration-200 ease-in-out ${
-                                            animal.showOnPublicProfile 
-                                                ? 'translate-x-3.5 sm:translate-x-4' 
-                                                : 'translate-x-0.5'
-                                        }`}
-                                    />
+                                    {animal.showOnPublicProfile ? (
+                                        <Eye className="w-3 h-3 sm:w-4 sm:h-4 text-green-600" />
+                                    ) : (
+                                        <EyeOff className="w-3 h-3 sm:w-4 sm:h-4 text-gray-500" />
+                                    )}
                                 </button>
                             </div>
                         )}
