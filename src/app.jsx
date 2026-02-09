@@ -14785,7 +14785,7 @@ const AnimalList = ({ authToken, showModalMessage, onEditAnimal, onViewAnimal, f
             <div className="w-full flex justify-center">
                 <div
                     onClick={handleClick}
-                    className={`relative bg-white rounded-lg sm:rounded-xl shadow-sm w-full max-w-[110px] sm:max-w-[140px] md:max-w-[176px] h-40 sm:h-48 md:h-56 flex flex-col items-center overflow-hidden cursor-pointer hover:shadow-md transition border-2 pt-2 sm:pt-3 ${
+                    className={`relative bg-white rounded-lg sm:rounded-xl shadow-sm w-full max-w-[165px] sm:max-w-[140px] md:max-w-[176px] h-44 sm:h-48 md:h-56 flex flex-col items-center overflow-hidden cursor-pointer hover:shadow-md transition border-2 pt-2 sm:pt-3 ${
                         isSelected ? 'border-red-500' : animal.isViewOnly ? 'border-gray-400 bg-gray-50' : 'border-gray-300'
                     }`}
                 >
@@ -14821,12 +14821,12 @@ const AnimalList = ({ authToken, showModalMessage, onEditAnimal, onViewAnimal, f
                     )}
 
                     {/* Centered profile image */}
-                    <div className="flex items-center justify-center w-full px-1 sm:px-2 mt-0.5 sm:mt-1 h-16 sm:h-20 md:h-28">
+                    <div className="flex items-center justify-center w-full px-1 sm:px-2 mt-0.5 sm:mt-1 h-20 sm:h-20 md:h-28">
                         {imgSrc ? (
-                            <img src={imgSrc} alt={animal.name} className="max-w-14 max-h-14 sm:max-w-20 sm:max-h-20 md:max-w-24 md:max-h-24 w-auto h-auto object-contain rounded-md" />
+                            <img src={imgSrc} alt={animal.name} className="max-w-20 max-h-20 sm:max-w-20 sm:max-h-20 md:max-w-24 md:max-h-24 w-auto h-auto object-contain rounded-md" />
                         ) : (
-                            <div className="w-14 h-14 sm:w-20 sm:h-20 md:w-24 md:h-24 bg-gray-100 rounded-md flex items-center justify-center text-gray-400">
-                                <Cat className="w-6 h-6 sm:w-8 sm:h-8 md:w-9 md:h-9" />
+                            <div className="w-20 h-20 sm:w-20 sm:h-20 md:w-24 md:h-24 bg-gray-100 rounded-md flex items-center justify-center text-gray-400">
+                                <Cat className="w-8 h-8 sm:w-8 sm:h-8 md:w-9 md:h-9" />
                             </div>
                         )}
                     </div>
