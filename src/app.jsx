@@ -15226,7 +15226,7 @@ const AnimalList = ({ authToken, showModalMessage, onEditAnimal, onViewAnimal, f
                             </div>
                             {/* Collapsible content - always show on desktop, toggle on mobile */}
                             <div className={`${isCollapsed ? 'hidden' : 'block'} sm:block`}>
-                                <div className="p-1.5 sm:p-4 grid grid-cols-2 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-2 sm:gap-4">
+                                <div className="p-1.5 sm:p-4 grid grid-cols-2 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-2 sm:gap-4">
                                     {groupedAnimals[species].map(animal => (
                                         <AnimalCard 
                                             key={animal.id_public} 
