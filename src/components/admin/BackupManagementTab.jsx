@@ -327,7 +327,7 @@ const BackupManagementTab = ({ authToken }) => {
                             </div>
                             <div className="schedule-item">
                                 <span className="schedule-label">Saved Backups:</span>
-                                <span className="schedule-value">{schedule.backupCount || 0} / 30</span>
+                                <span className="schedule-value">{schedule.backupCount || 0} / 10</span>
                             </div>
                             <div className="schedule-item">
                                 <span className="schedule-label">Timezone:</span>
