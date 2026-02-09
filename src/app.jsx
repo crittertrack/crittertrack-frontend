@@ -18059,6 +18059,27 @@ const App = () => {
         }
     };
 
+    const toggleAnimalOwned = async (animalId, newOwnedValue) => {
+        try {
+            const response = await axios.put(`${API_BASE_URL}/animals/${animalId}`, {
+                isOwned: newOwnedValue
+            }, {
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Authorization': `Bearer ${authToken}`
+                }
+            });
+
+            // Update animalToView if this is the currently viewed animal
+            if (animalToView && animalToView.id_public === animalId) {
+                setAnimalToView({ ...animalToView, isOwned: newOwnedValue });
+            }
+        } catch (error) {
+            console.error('Error updating owned status:', error);
+            showModalMessage('Error', 'Failed to update owned status.');
+        }
+    };
+
     const handleRestoreViewOnlyAnimal = async (id_public) => {
         try {
             await axios.post(`${API_BASE_URL}/animals/${id_public}/restore`, {}, {
