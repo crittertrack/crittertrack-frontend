@@ -16792,7 +16792,7 @@ const App = () => {
         localStorage.removeItem('moderationAuthenticated');
         navigate('/');
         if (expired) {
-            showModalMessage('Session Expired', 'You were logged out due to 15 minutes of inactivity.');
+            showModalMessage('Session Expired', 'You were logged out due to 30 minutes of inactivity.');
         }
     }, [showModalMessage]);
 
@@ -17462,6 +17462,9 @@ const App = () => {
     }, [authToken, navigate, location.pathname]);
 
     const fetchUserProfile = useCallback(async (token) => {
+        // Don't fetch if no token (already logged out)
+        if (!token) return;
+        
         try {
             const response = await axios.get(`${API_BASE_URL}/users/profile`, { headers: { Authorization: `Bearer ${token}` } });
             // Normalize profile image keys for UI compatibility and add a cache-busting query
@@ -17476,10 +17479,18 @@ const App = () => {
             setUserProfile(user);
         } catch (error) {
             console.error('Failed to fetch user profile:', error);
-            showModalMessage('Authentication Error', 'Could not load user profile. Please log in again.');
-            setAuthToken(null);
+            // Only show error modal if we still have a token (not already logged out)
+            if (authToken) {
+                // Check if it's a 401 (token expired/invalid)
+                if (error.response?.status === 401) {
+                    showModalMessage('Session Expired', 'Your session has expired. Please log in again.');
+                } else {
+                    showModalMessage('Connection Error', 'Could not load user profile. Please check your connection and try again.');
+                }
+                setAuthToken(null);
+            }
         }
-    }, [showModalMessage]);
+    }, [showModalMessage, authToken]);
 
     // Periodically refresh user profile to catch warning/suspension changes
     useEffect(() => {
@@ -18952,8 +18963,8 @@ const App = () => {
             {showBugReportModal && (
                 <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
                     <div className="bg-white rounded-xl shadow-2xl max-w-lg w-full p-6">
-                        <div className="flex justify-between items-center mb-4">
-                            <h2 className="text-xl font-bold text-gray-800">Report Issue / Bug</h2>
+                        <div className="flex justify-between items-center mb-2">
+                            <h2 className="text-xl font-bold text-gray-800">Share Your Feedback</h2>
                             <button 
                                 onClick={() => setShowBugReportModal(false)}
                                 className="text-gray-500 hover:text-gray-700 transition"
@@ -18961,6 +18972,10 @@ const App = () => {
                                 <X size={24} />
                             </button>
                         </div>
+                        
+                        <p className="text-sm text-gray-600 mb-4">
+                            Report bugs, request new features, or share general feedback to help us improve CritterTrack.
+                        </p>
                         
                         <form onSubmit={handleBugReportSubmit} className="space-y-4">
                             <div>
@@ -18981,7 +18996,7 @@ const App = () => {
                                 <textarea
                                     value={bugReportDescription}
                                     onChange={(e) => setBugReportDescription(e.target.value)}
-                                    placeholder="Please describe the issue or feedback in detail..."
+                                    placeholder="Describe your bug report, feature request, or feedback in detail. Include steps to reproduce if reporting a bug."
                                     rows={6}
                                     required
                                     className="w-full p-3 border border-gray-300 rounded-lg focus:ring-primary focus:border-primary resize-none"
@@ -21918,7 +21933,7 @@ const AppWithTutorial = () => {
 };
 
 export default AppRouter;
-
+2
 
 
 

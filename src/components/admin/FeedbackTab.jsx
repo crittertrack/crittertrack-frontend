@@ -21,7 +21,7 @@ const FeedbackTab = ({ API_BASE_URL, authToken }) => {
         setLoading(true);
         setError(null);
         try {
-            console.log('Fetching feedback from:', `${API_BASE_URL}/genetics-feedback/admin`);
+            console.log('Fetching genetics feedback from:', `${API_BASE_URL}/genetics-feedback/admin`);
             
             const response = await fetch(`${API_BASE_URL}/genetics-feedback/admin`, {
                 headers: {
@@ -29,7 +29,7 @@ const FeedbackTab = ({ API_BASE_URL, authToken }) => {
                 }
             });
             
-            console.log('Feedback fetch response status:', response.status);
+            console.log('Genetics feedback response status:', response.status);
             
             if (!response.ok) {
                 const errorData = await response.json().catch(() => ({}));
@@ -46,7 +46,7 @@ const FeedbackTab = ({ API_BASE_URL, authToken }) => {
             }
             
             const data = await response.json();
-            console.log('Feedback data received:', data);
+            console.log('Genetics feedback data received:', data);
             setFeedback(data);
         } catch (err) {
             console.error('Error fetching feedback:', err);
@@ -98,6 +98,8 @@ const FeedbackTab = ({ API_BASE_URL, authToken }) => {
     const filteredFeedback = feedback.filter(item => {
         const matchesSearch = 
             item.phenotype?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+            item.genotype?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+            item.feedback?.toLowerCase().includes(searchTerm.toLowerCase());
             item.genotype?.toLowerCase().includes(searchTerm.toLowerCase()) ||
             item.feedback?.toLowerCase().includes(searchTerm.toLowerCase()) ||
             item.User?.username?.toLowerCase().includes(searchTerm.toLowerCase()) ||

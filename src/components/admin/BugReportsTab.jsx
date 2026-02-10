@@ -140,7 +140,7 @@ const BugReportsTab = ({ API_BASE_URL, authToken }) => {
         return (
             <div className="bug-reports-loading">
                 <Loader2 className="spin" size={32} />
-                <p>Loading bug reports...</p>
+                <p>Loading reports...</p>
             </div>
         );
     }
@@ -151,8 +151,8 @@ const BugReportsTab = ({ API_BASE_URL, authToken }) => {
                 <div className="bug-reports-title">
                     <Bug size={28} />
                     <div>
-                        <h2>Bug Reports</h2>
-                        <p>Review and manage user-submitted bug reports</p>
+                        <h2>Bug Reports & Feedback</h2>
+                        <p>Review and manage user-submitted reports</p>
                     </div>
                 </div>
                 <button 
