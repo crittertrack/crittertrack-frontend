@@ -8527,6 +8527,9 @@ const AnimalForm = ({
     });
     
     // Health Records with Dates
+    // Tag input state (for typing tags before adding them)
+    const [tagInput, setTagInput] = useState('');
+    
     const [vaccinationRecords, setVaccinationRecords] = useState(() => {
         // Try to parse from database field 'vaccinations' first, then fallback to 'vaccinationRecords'
         const data = animalToEdit?.vaccinations || animalToEdit?.vaccinationRecords;
@@ -10552,12 +10555,29 @@ const AnimalForm = ({
                             <label className="block text-sm font-medium text-gray-700 mb-2">Tags (Lines, Enclosures, etc)</label>
                             <input 
                                 type="text" 
-                                placeholder="Enter tags separated by commas (e.g., Line A, Enclosure 1)" 
-                                value={formData.tags.join(', ')} 
-                                onChange={(e) => {
-                                    const tagString = e.target.value;
-                                    const newTags = tagString.split(',').map(tag => tag.trim()).filter(tag => tag.length > 0);
-                                    setFormData({ ...formData, tags: newTags });
+                                placeholder="Type and press Enter or comma to add tags" 
+                                value={tagInput} 
+                                onChange={(e) => setTagInput(e.target.value)}
+                                onKeyDown={(e) => {
+                                    if (e.key === 'Enter' || e.key === ',') {
+                                        e.preventDefault();
+                                        const trimmed = tagInput.trim();
+                                        if (trimmed && !formData.tags.includes(trimmed)) {
+                                            setFormData({ ...formData, tags: [...formData.tags, trimmed] });
+                                            setTagInput('');
+                                        }
+                                    } else if (e.key === 'Backspace' && !tagInput && formData.tags.length > 0) {
+                                        // Remove last tag if backspace on empty input
+                                        setFormData({ ...formData, tags: formData.tags.slice(0, -1) });
+                                    }
+                                }}
+                                onBlur={() => {
+                                    // Add tag on blur if there's content
+                                    const trimmed = tagInput.trim();
+                                    if (trimmed && !formData.tags.includes(trimmed)) {
+                                        setFormData({ ...formData, tags: [...formData.tags, trimmed] });
+                                        setTagInput('');
+                                    }
                                 }}
                                 className="block w-full p-2 border border-gray-300 rounded-md shadow-sm focus:ring-primary focus:border-primary" 
                             />
