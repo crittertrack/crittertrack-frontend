@@ -27,3 +27,6 @@ yarn-error.log*
 # backups
 app_backup_*.jsx
 *.backup-*
+
+# Visual Studio packages
+Microsoft.VisualStudio.Services.VSIXPackage
