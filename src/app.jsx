@@ -21933,7 +21933,6 @@ const AppWithTutorial = () => {
 };
 
 export default AppRouter;
-2
 
 
 
