@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { DollarSign, Plus, Edit, Trash2, Search, X, Calendar, Filter, Download, TrendingUp, TrendingDown, Info } from 'lucide-react';
 import axios from 'axios';
+import DatePicker from './DatePicker';
 
 const BudgetingTab = ({ authToken, API_BASE_URL, showModalMessage, preSelectedAnimal = null, preSelectedType = null, onAddModalOpen = null }) => {
     const [transactions, setTransactions] = useState([]);
@@ -395,7 +396,7 @@ const BudgetingTab = ({ authToken, API_BASE_URL, showModalMessage, preSelectedAn
     const exportToCSV = () => {
         const headers = ['Date', 'Type', 'Animal ID', 'Animal Name', 'Price', 'Buyer', 'Seller', 'Notes'];
         const rows = filteredTransactions.map(t => [
-            new Date(t.date).toLocaleDateString(),
+            new Date(t.date).toLocaleDateString('en-GB'),
             t.type === 'sale' ? 'Sale' : 'Purchase',
             t.animalId || '',
             t.animalName || '',
@@ -609,7 +610,7 @@ const BudgetingTab = ({ authToken, API_BASE_URL, showModalMessage, preSelectedAn
                                 {filteredTransactions.map((transaction) => (
                                     <tr key={transaction._id} className="hover:bg-gray-50">
                                         <td className="px-4 py-3 text-sm text-gray-700">
-                                            {new Date(transaction.date).toLocaleDateString()}
+                                            {new Date(transaction.date).toLocaleDateString('en-GB')}
                                         </td>
                                         <td className="px-4 py-3 text-sm">
                                             <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${
@@ -824,13 +825,10 @@ const BudgetingTab = ({ authToken, API_BASE_URL, showModalMessage, preSelectedAn
                                 <label className="block text-sm font-medium text-gray-700 mb-2">
                                     Date *
                                 </label>
-                                <input
-                                    type="date"
+                                <DatePicker
                                     value={formData.date}
                                     onChange={(e) => setFormData({ ...formData, date: e.target.value })}
-                                    className="w-full p-2 border border-gray-300 rounded-lg focus:ring-primary focus:border-primary"
-                                    min="1900-01-01"
-                                    max={new Date().toISOString().split('T')[0]}
+                                    maxDate={new Date()}
                                     required
                                 />
                             </div>

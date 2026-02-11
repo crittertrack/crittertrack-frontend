@@ -18,6 +18,7 @@ import MaintenanceMode from './MaintenanceMode';
 import { TutorialProvider, useTutorial } from './contexts/TutorialContext';
 import { TutorialOverlay, TutorialHighlight } from './components/TutorialOverlay';
 import { TUTORIAL_LESSONS } from './data/tutorialLessonsNew';
+import DatePicker from './components/DatePicker';
 import InfoTab from './components/InfoTab';
 import WelcomeBanner from './components/WelcomeBanner';
 import ReportButton from './components/ReportButton';
@@ -1672,8 +1673,8 @@ const UserSearchModal = ({ onClose, showModalMessage, onSelectUser, API_BASE_URL
 
     const UserResultCard = ({ user }) => {
         const memberSince = user.createdAt 
-            ? new Intl.DateTimeFormat('en-US', { year: 'numeric', month: 'long', day: 'numeric' }).format(new Date(user.createdAt))
-            : (user.updatedAt ? new Intl.DateTimeFormat('en-US', { year: 'numeric', month: 'long', day: 'numeric' }).format(new Date(user.updatedAt)) : null);
+            ? new Intl.DateTimeFormat('en-GB', { year: 'numeric', month: 'long', day: 'numeric' }).format(new Date(user.createdAt))
+            : (user.updatedAt ? new Intl.DateTimeFormat('en-GB', { year: 'numeric', month: 'long', day: 'numeric' }).format(new Date(user.updatedAt)) : null);
         
         // Determine display name(s) - respect privacy settings
         const showPersonalName = user.showPersonalName ?? false;
@@ -1919,8 +1920,8 @@ const PublicProfileView = ({ profile, onBack, onViewAnimal, API_BASE_URL, onStar
     }, [profile, API_BASE_URL]);
 
     const memberSince = (freshProfile?.createdAt || profile.createdAt)
-        ? new Intl.DateTimeFormat('en-US', { year: 'numeric', month: 'long', day: 'numeric' }).format(new Date(freshProfile?.createdAt || profile.createdAt))
-        : ((freshProfile?.updatedAt || profile.updatedAt) ? new Intl.DateTimeFormat('en-US', { year: 'numeric', month: 'long', day: 'numeric' }).format(new Date(freshProfile?.updatedAt || profile.updatedAt)) : 'Unknown');
+        ? new Intl.DateTimeFormat('en-GB', { year: 'numeric', month: 'long', day: 'numeric' }).format(new Date(freshProfile?.createdAt || profile.createdAt))
+        : ((freshProfile?.updatedAt || profile.updatedAt) ? new Intl.DateTimeFormat('en-GB', { year: 'numeric', month: 'long', day: 'numeric' }).format(new Date(freshProfile?.updatedAt || profile.updatedAt)) : 'Unknown');
 
     // Determine display name(s) - respect privacy settings
     const showPersonalName = (freshProfile?.showPersonalName ?? profile.showPersonalName ?? false);
@@ -6602,11 +6603,10 @@ const LitterManagement = ({ authToken, API_BASE_URL, userProfile, showModalMessa
                             <label className="block text-sm font-medium text-gray-700 mb-1">
                                 Pairing Date (Optional)
                             </label>
-                            <input
-                                type="date"
+                            <DatePicker
                                 value={formData.pairingDate}
                                 onChange={(e) => setFormData({...formData, pairingDate: e.target.value})}
-                                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent"
+                                className="px-3 py-2"
                             />
                         </div>
                     </div>
@@ -6671,13 +6671,11 @@ const LitterManagement = ({ authToken, API_BASE_URL, userProfile, showModalMessa
                             <label className="block text-sm font-medium text-gray-700 mb-1">
                                 Birth Date (Optional)
                             </label>
-                            <input
-                                type="date"
+                            <DatePicker
                                 value={formData.birthDate}
                                 onChange={(e) => setFormData({...formData, birthDate: e.target.value})}
-                                min="1800-01-01"
-                                max={new Date().toISOString().split('T')[0]}
-                                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent"
+                                maxDate={new Date()}
+                                className="px-3 py-2"
                             />
                         </div>
 
@@ -8767,11 +8765,14 @@ const AnimalForm = ({
 
     const handleChange = (e) => {
         const { name, value, type, checked } = e.target;
+        console.log('[AnimalForm] handleChange called:', { name, value, type, checked });
         setFormData(prev => {
             const updated = {
                 ...prev,
                 [name]: type === 'checkbox' ? checked : value
             };
+            
+            console.log('[AnimalForm] Updated formData:', updated);
             
             // If deceased date is being set, automatically set status to Deceased
             if (name === 'deceasedDate' && value) {
@@ -9680,9 +9681,9 @@ const AnimalForm = ({
                                 
                                 <div>
                                     <label className="block text-sm font-medium text-gray-700">Date of Birth*</label>
-                                    <input type="date" name="birthDate" value={formData.birthDate} onChange={handleChange} min="1800-01-01" max={new Date().toISOString().split('T')[0]} required 
+                                    <DatePicker name="birthDate" value={formData.birthDate} onChange={handleChange} maxDate={new Date()} required
                                         data-tutorial-target="animal-birthdate-input"
-                                        className="mt-1 block w-full p-2 border border-gray-300 rounded-md shadow-sm focus:ring-primary focus:border-primary" />
+                                        className="mt-1 p-2" />
                                 </div>
                                 
                                 <div className="md:col-span-2">
@@ -10266,11 +10267,10 @@ const AnimalForm = ({
                                     <div className={`grid gap-3 ${(formData.species === 'Dog' || formData.species === 'Cat') ? 'grid-cols-1 md:grid-cols-4' : 'grid-cols-1 md:grid-cols-3'}`}>
                                         <div>
                                             <label className="block text-xs font-medium text-gray-700">Date</label>
-                                            <input 
-                                                type="date" 
+                                            <DatePicker 
                                                 value={newMeasurement.date}
                                                 onChange={(e) => setNewMeasurement({...newMeasurement, date: e.target.value})}
-                                                className="mt-1 block w-full p-2 text-sm border border-gray-300 rounded-md shadow-sm focus:ring-primary focus:border-primary" 
+                                                className="mt-1 p-2 text-sm"
                                             />
                                         </div>
                                         <div>
@@ -10861,13 +10861,13 @@ const AnimalForm = ({
                                     
                                     <div>
                                         <label className="block text-sm font-medium text-gray-700 mb-2">Last Heat Date</label>
-                                        <input type="date" name="lastHeatDate" value={formData.lastHeatDate} onChange={handleChange}
-                                            className="block w-full p-2 border border-gray-300 rounded-md shadow-sm focus:ring-primary focus:border-primary" />
+                                        <DatePicker value={formData.lastHeatDate} onChange={(e) => handleChange({ target: { name: 'lastHeatDate', value: e.target.value } })}
+                                            className="p-2" />
                                     </div>
                                     
                                     <div>
                                         <label className="block text-sm font-medium text-gray-700 mb-2">Ovulation Date</label>
-                                        <input type="date" name="ovulationDate" value={formData.ovulationDate} onChange={handleChange}
+                                        <DatePicker value={formData.ovulationDate} onChange={(e) => handleChange({ target: { name: 'ovulationDate', value: e.target.value } })}
                                             className="block w-full p-2 border border-gray-300 rounded-md shadow-sm focus:ring-primary focus:border-primary" />
                                     </div>
                                     
@@ -10891,7 +10891,7 @@ const AnimalForm = ({
                                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                                     <div className="md:col-span-2">
                                         <label className="block text-sm font-medium text-gray-700 mb-2">Mating Date</label>
-                                        <input type="date" name="matingDates" value={formData.matingDates} onChange={handleChange} 
+                                        <DatePicker value={formData.matingDates} onChange={(e) => handleChange({ target: { name: 'matingDates', value: e.target.value } })} 
                                             disabled={formData.isNeutered}
                                             className={`block w-full p-2 border rounded-md shadow-sm focus:ring-primary focus:border-primary ${formData.isNeutered ? 'bg-gray-100 border-gray-200' : 'border-gray-300'}`}
                                             placeholder="e.g., 2025-01-15" />
@@ -11006,7 +11006,7 @@ const AnimalForm = ({
                                             </div>
                                             <div>
                                                 <label className="block text-sm font-medium text-gray-700 mb-2">{formData.species === 'Dog' ? 'Whelping Date' : 'Queening Date'}</label>
-                                                <input type="date" name={formData.species === 'Dog' ? 'whelpingDate' : 'queeningDate'} 
+                                                <DatePicker name={formData.species === 'Dog' ? 'whelpingDate' : 'queeningDate'} 
                                                     value={formData.species === 'Dog' ? (formData.whelpingDate || '') : (formData.queeningDate || '')} 
                                                     onChange={handleChange} 
                                                     className="block w-full p-2 border border-gray-300 rounded-md shadow-sm focus:ring-primary focus:border-primary" />
@@ -11069,9 +11069,9 @@ const AnimalForm = ({
                                         <>
                                             <div>
                                                 <label className="block text-sm font-medium text-gray-700 mb-2">Last Mating Date <span className="text-xs text-gray-500 font-normal">(Sire)</span></label>
-                                                <input type="date" name="lastMatingDate" value={formData.lastMatingDate} onChange={handleChange} 
-                                                    max={new Date().toISOString().split('T')[0]}
-                                                    className="block w-full p-2 border border-blue-200 rounded-md shadow-sm focus:ring-primary focus:border-primary" />
+                                                <DatePicker value={formData.lastMatingDate} onChange={(e) => handleChange({ target: { name: 'lastMatingDate', value: e.target.value } })}
+                                                    maxDate={new Date()}
+                                                    className="p-2 border-blue-200" />
                                             </div>
                                             
                                             <div>
@@ -11088,9 +11088,9 @@ const AnimalForm = ({
                                         <>
                                             <div>
                                                 <label className="block text-sm font-medium text-gray-700 mb-2">Last Pregnancy Date <span className="text-xs text-gray-500 font-normal">(Dam)</span></label>
-                                                <input type="date" name="lastPregnancyDate" value={formData.lastPregnancyDate || ''} onChange={handleChange} 
-                                                    max={new Date().toISOString().split('T')[0]}
-                                                    className="block w-full p-2 border border-blue-200 rounded-md shadow-sm focus:ring-primary focus:border-primary" />
+                                                <DatePicker value={formData.lastPregnancyDate || ''} onChange={(e) => handleChange({ target: { name: 'lastPregnancyDate', value: e.target.value } })}
+                                                    maxDate={new Date()}
+                                                    className="p-2 border-blue-200" />
                                             </div>
                                             
                                             <div>
@@ -11130,8 +11130,8 @@ const AnimalForm = ({
                                     <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
                                         <div>
                                             <label className="block text-xs font-medium text-gray-700">Date</label>
-                                            <input type="date" value={newVaccination.date} onChange={(e) => setNewVaccination({...newVaccination, date: e.target.value})}
-                                                className="mt-1 block w-full p-2 text-sm border border-gray-300 rounded-md shadow-sm focus:ring-primary focus:border-primary" />
+                                            <DatePicker value={newVaccination.date} onChange={(e) => setNewVaccination({...newVaccination, date: e.target.value})}
+                                                className="mt-1 p-2 text-sm" />
                                         </div>
                                         <div>
                                             <label className="block text-xs font-medium text-gray-700">Vaccination Name</label>
@@ -11171,8 +11171,8 @@ const AnimalForm = ({
                                     <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
                                         <div>
                                             <label className="block text-xs font-medium text-gray-700">Date</label>
-                                            <input type="date" value={newDeworming.date} onChange={(e) => setNewDeworming({...newDeworming, date: e.target.value})}
-                                                className="mt-1 block w-full p-2 text-sm border border-gray-300 rounded-md shadow-sm focus:ring-primary focus:border-primary" />
+                                            <DatePicker value={newDeworming.date} onChange={(e) => setNewDeworming({...newDeworming, date: e.target.value})}
+                                                className="mt-1 p-2 text-sm" />
                                         </div>
                                         <div>
                                             <label className="block text-xs font-medium text-gray-700">Medication</label>
@@ -11212,8 +11212,8 @@ const AnimalForm = ({
                                     <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
                                         <div>
                                             <label className="block text-xs font-medium text-gray-700">Date</label>
-                                            <input type="date" value={newParasiteControl.date} onChange={(e) => setNewParasiteControl({...newParasiteControl, date: e.target.value})}
-                                                className="mt-1 block w-full p-2 text-sm border border-gray-300 rounded-md shadow-sm focus:ring-primary focus:border-primary" />
+                                            <DatePicker value={newParasiteControl.date} onChange={(e) => setNewParasiteControl({...newParasiteControl, date: e.target.value})}
+                                                className="mt-1 p-2 text-sm" />
                                         </div>
                                         <div>
                                             <label className="block text-xs font-medium text-gray-700">Treatment</label>
@@ -11258,8 +11258,8 @@ const AnimalForm = ({
                                     <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
                                         <div>
                                             <label className="block text-xs font-medium text-gray-700">Date</label>
-                                            <input type="date" value={newProcedure.date} onChange={(e) => setNewProcedure({...newProcedure, date: e.target.value})}
-                                                className="mt-1 block w-full p-2 text-sm border border-gray-300 rounded-md shadow-sm focus:ring-primary focus:border-primary" />
+                                            <DatePicker value={newProcedure.date} onChange={(e) => setNewProcedure({...newProcedure, date: e.target.value})}
+                                                className="mt-1 p-2 text-sm" />
                                         </div>
                                         <div>
                                             <label className="block text-xs font-medium text-gray-700">Procedure Name</label>
@@ -11299,8 +11299,8 @@ const AnimalForm = ({
                                     <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
                                         <div>
                                             <label className="block text-xs font-medium text-gray-700">Date</label>
-                                            <input type="date" value={newLabResult.date} onChange={(e) => setNewLabResult({...newLabResult, date: e.target.value})}
-                                                className="mt-1 block w-full p-2 text-sm border border-gray-300 rounded-md shadow-sm focus:ring-primary focus:border-primary" />
+                                            <DatePicker value={newLabResult.date} onChange={(e) => setNewLabResult({...newLabResult, date: e.target.value})}
+                                                className="mt-1 p-2 text-sm" />
                                         </div>
                                         <div>
                                             <label className="block text-xs font-medium text-gray-700">Test Name</label>
@@ -11458,8 +11458,8 @@ const AnimalForm = ({
                                         <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                                             <div>
                                                 <label className="block text-xs font-medium text-gray-700">Spay/Neuter Date</label>
-                                                <input type="date" name="spayNeuterDate" value={formData.spayNeuterDate || ''} onChange={handleChange} 
-                                                    className="mt-1 block w-full p-2 border border-gray-300 rounded-md shadow-sm focus:ring-primary focus:border-primary" />
+                                                <DatePicker value={formData.spayNeuterDate || ''} onChange={(e) => handleChange({ target: { name: 'spayNeuterDate', value: e.target.value } })}
+                                                    className="mt-1 p-2" />
                                             </div>
                                             <div>
                                                 <label className="block text-xs font-medium text-gray-700">Heartworm Status</label>
@@ -11529,8 +11529,8 @@ const AnimalForm = ({
                                         <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
                                             <div>
                                                 <label className="block text-xs font-medium text-gray-700">Date</label>
-                                                <input type="date" value={newVetVisit.date} onChange={(e) => setNewVetVisit({...newVetVisit, date: e.target.value})}
-                                                    className="mt-1 block w-full p-2 text-sm border border-gray-300 rounded-md shadow-sm focus:ring-primary focus:border-primary" />
+                                                <DatePicker value={newVetVisit.date} onChange={(e) => setNewVetVisit({...newVetVisit, date: e.target.value})}
+                                                    className="mt-1 p-2 text-sm" />
                                             </div>
                                             <div>
                                                 <label className="block text-xs font-medium text-gray-700">Visit Reason</label>
@@ -11875,9 +11875,9 @@ const AnimalForm = ({
                             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                                 <div>
                                     <label className="block text-sm font-medium text-gray-700 mb-2">Date of Death</label>
-                                    <input type="date" name="deceasedDate" value={formData.deceasedDate || ''} onChange={handleChange} data-tutorial-target="date-of-death-input"
-                                        min="1800-01-01" max={new Date().toISOString().split('T')[0]} 
-                                        className="block w-full p-2 border border-gray-300 rounded-md shadow-sm focus:ring-primary focus:border-primary" />
+                                    <DatePicker value={formData.deceasedDate || ''} onChange={(e) => handleChange({ target: { name: 'deceasedDate', value: e.target.value } })} data-tutorial-target="date-of-death-input"
+                                        maxDate={new Date()}
+                                        className="p-2" />
                                 </div>
                                 
                                 <div>
@@ -12093,7 +12093,7 @@ const UserProfileCard = ({ userProfile }) => {
     if (!userProfile) return null;
 
     const formattedCreationDate = userProfile.creationDate
-        ? new Intl.DateTimeFormat('en-US', { year: 'numeric', month: 'long', day: 'numeric' }).format(new Date(userProfile.creationDate))
+        ? new Intl.DateTimeFormat('en-GB', { year: 'numeric', month: 'long', day: 'numeric' }).format(new Date(userProfile.creationDate))
         : 'N/A';
 
     const isPersonalNameVisible = userProfile.showPersonalName ?? true;
@@ -15477,11 +15477,11 @@ const MessagesView = ({ authToken, API_BASE_URL, onClose, showModalMessage, sele
         const diffInHours = (now - date) / (1000 * 60 * 60);
         
         if (diffInHours < 24) {
-            return date.toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit' });
+            return date.toLocaleTimeString('en-GB', { hour: 'numeric', minute: '2-digit' });
         } else if (diffInHours < 168) { // Less than a week
-            return date.toLocaleDateString('en-US', { weekday: 'short', hour: 'numeric', minute: '2-digit' });
+            return date.toLocaleDateString('en-GB', { weekday: 'short', hour: 'numeric', minute: '2-digit' });
         } else {
-            return date.toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
+            return date.toLocaleDateString('en-GB', { month: 'short', day: 'numeric' });
         }
     };
 
@@ -15768,7 +15768,7 @@ const WarningBanner = ({ authToken, API_BASE_URL, userProfile }) => {
                                         <div key={index} className="bg-yellow-100 p-2 rounded text-xs">
                                             <p className="font-semibold">Warning #{index + 1}</p>
                                             <p className="mt-1"><strong>Reason:</strong> {warning.reason}</p>
-                                            <p className="mt-1"><strong>Date:</strong> {new Date(warning.date).toLocaleString()}</p>
+                                            <p className="mt-1"><strong>Date:</strong> {new Date(warning.date).toLocaleString('en-GB')}</p>
                                             {warning.category && <p className="mt-1"><strong>Category:</strong> {warning.category}</p>}
                                         </div>
                                     ))}
@@ -15902,7 +15902,7 @@ const BroadcastPoll = ({ poll, onVote, isVoting, styles }) => {
                 <span>Total votes: {getTotalVotes()}</span>
                 {poll.pollEndsAt && (
                     <span>
-                        {hasEnded ? 'Poll ended' : `Ends: ${new Date(poll.pollEndsAt).toLocaleDateString()}`}
+                        {hasEnded ? 'Poll ended' : `Ends: ${new Date(poll.pollEndsAt).toLocaleDateString('en-GB')}`}
                     </span>
                 )}
             </div>
@@ -16109,7 +16109,7 @@ const BroadcastBanner = ({ authToken, API_BASE_URL }) => {
                                     )}
                                     
                                     <p className={`mt-1.5 ${styles.subtitle} text-xs`}>
-                                        {new Date(broadcast.createdAt).toLocaleString()}
+                                        {new Date(broadcast.createdAt).toLocaleString('en-GB')}
                                     </p>
                                 </div>
                             </div>
@@ -16194,7 +16194,7 @@ const UrgentBroadcastPopup = ({ authToken, API_BASE_URL }) => {
                             {urgentBroadcast.message}
                         </p>
                         <p className={`mt-3 text-xs ${iconColor}`}>
-                            {new Date(urgentBroadcast.createdAt).toLocaleString()}
+                            {new Date(urgentBroadcast.createdAt).toLocaleString('en-GB')}
                         </p>
                         <button
                             onClick={handleAcknowledge}
@@ -16439,7 +16439,7 @@ const NotificationPanel = ({ authToken, API_BASE_URL, onClose, showModalMessage,
                                                 <div className="flex-1">
                                                     <p className="text-sm text-gray-700">{notification.message}</p>
                                                     <p className="text-xs text-gray-500 mt-1">
-                                                        {new Date(notification.createdAt).toLocaleString()}
+                                                        {new Date(notification.createdAt).toLocaleString('en-GB')}
                                                     </p>
                                                 </div>
                                             </div>
@@ -16567,7 +16567,7 @@ const NotificationPanel = ({ authToken, API_BASE_URL, onClose, showModalMessage,
                                                 <div className="flex-grow">
                                                     <p className="text-sm text-gray-700 mb-1">{notification.message}</p>
                                                     <p className="text-xs text-gray-500">
-                                                        {new Date(notification.createdAt).toLocaleString()} ? 
+                                                        {new Date(notification.createdAt).toLocaleString('en-GB')} ? 
                                                         <span className={`ml-1 ${notification.status === 'approved' ? 'text-green-600' : 'text-red-600'}`}>
                                                             {notification.status}
                                                         </span>
@@ -19610,7 +19610,7 @@ const App = () => {
                                     return Array.isArray(data) ? data : [];
                                 };
                                 const formattedBirthDate = animalToView.birthDate
-                                    ? new Intl.DateTimeFormat('en-US', { year: 'numeric', month: 'long', day: 'numeric' }).format(new Date(animalToView.birthDate))
+                                    ? new Intl.DateTimeFormat('en-GB', { year: 'numeric', month: 'long', day: 'numeric' }).format(new Date(animalToView.birthDate))
                                     : '';
                                 const handleShareAnimal = () => {
                                     const url = `${window.location.origin}/animal/${animalToView.id_public}`;

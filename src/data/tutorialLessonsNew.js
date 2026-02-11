@@ -202,7 +202,7 @@ const GETTING_STARTED_LESSONS = [
         highlightElement: '[data-tutorial-target="animal-birthdate-input"]',
         actionType: 'click',
         tips: [
-          'Format: YYYY-MM-DD',
+          'Format: DD/MM/YYYY (displayed)',
           'Use your best estimate if exact date unknown',
           'This affects the animal\'s life stage'
         ]
@@ -431,7 +431,7 @@ const GETTING_STARTED_LESSONS = [
       {
         stepNumber: 11,
         title: 'Add First Measurement',
-        content: 'Now let\'s add a tutorial measurement. Enter the date 1/1/2026, weight 450, and length 20. Then click Add Measurement.',
+        content: 'Now let\'s add a tutorial measurement. Enter the date 01/01/2026, weight 450, and length 20. Then click Add Measurement.',
         highlightElement: '[data-tutorial-target="add-measurement-btn"]',
         tips: [
           'Date: Use recent or estimated date',

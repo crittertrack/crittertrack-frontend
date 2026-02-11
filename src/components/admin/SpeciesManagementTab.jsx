@@ -459,7 +459,7 @@ const SpeciesManagementTab = ({ API_BASE_URL, authToken }) => {
                             </div>
                             <div className="species-info-row">
                                 <span className="species-info-label">Created:</span>
-                                <span className="species-info-value">{selectedSpecies.createdAt ? new Date(selectedSpecies.createdAt).toLocaleDateString() : 'Unknown'}</span>
+                                <span className="species-info-value">{selectedSpecies.createdAt ? new Date(selectedSpecies.createdAt).toLocaleDateString('en-GB') : 'Unknown'}</span>
                             </div>
                         </div>
                         <div className="species-modal-footer">

@@ -1,0 +1,97 @@
+/* Date Input Component Styles */
+
+.date-input {
+    width: 100%;
+    padding: 0.5rem 0.75rem;
+    border: 1px solid #d1d5db;
+    border-radius: 0.5rem;
+    font-size: 1rem;
+    line-height: 1.5rem;
+    transition: all 0.15s ease-in-out;
+    box-sizing: border-box;
+}
+
+.date-input:hover {
+    border-color: #9ca3af;
+}
+
+.date-input:focus {
+    outline: none;
+    border-color: #6366f1;
+    ring: 2px;
+    ring-color: #6366f1;
+    box-shadow: 0 0 0 2px rgba(99, 102, 241, 0.1);
+}
+
+.date-input:disabled {
+    background-color: #f3f4f6;
+    cursor: not-allowed;
+    opacity: 0.6;
+}
+
+/* React DatePicker wrapper */
+.react-datepicker-wrapper {
+    width: 100%;
+}
+
+.react-datepicker__input-container {
+    width: 100%;
+}
+
+/* Calendar popup styling */
+.react-datepicker {
+    font-family: inherit;
+    border: 1px solid #d1d5db;
+    border-radius: 0.5rem;
+    box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+}
+
+.react-datepicker__header {
+    background-color: #6366f1;
+    border-bottom: none;
+    border-radius: 0.5rem 0.5rem 0 0;
+    padding-top: 0.5rem;
+}
+
+.react-datepicker__current-month,
+.react-datepicker__day-name {
+    color: white;
+}
+
+.react-datepicker__day--selected,
+.react-datepicker__day--keyboard-selected {
+    background-color: #6366f1 !important;
+    color: white !important;
+}
+
+.react-datepicker__day:hover {
+    background-color: #e0e7ff;
+}
+
+.react-datepicker__day--disabled {
+    color: #d1d5db;
+    cursor: not-allowed;
+}
+
+.react-datepicker__close-icon::after {
+    background-color: #6366f1;
+    font-size: 1rem;
+}
+
+/* Month and year dropdowns */
+.react-datepicker__month-dropdown,
+.react-datepicker__year-dropdown {
+    background-color: white;
+    border: 1px solid #d1d5db;
+}
+
+.react-datepicker__month-option:hover,
+.react-datepicker__year-option:hover {
+    background-color: #e0e7ff;
+}
+
+.react-datepicker__month-option--selected,
+.react-datepicker__year-option--selected {
+    background-color: #6366f1;
+    color: white;
+}

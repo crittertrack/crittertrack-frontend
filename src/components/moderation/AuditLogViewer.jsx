@@ -5,6 +5,7 @@ import {
 } from 'lucide-react';
 import axios from 'axios';
 import './AuditLogViewer.css';
+import DatePicker from '../DatePicker';
 
 const API_URL = process.env.REACT_APP_API_URL || '/api';
 
@@ -274,7 +275,7 @@ const AuditLogViewer = () => {
 
     const formatDate = (date) => {
         if (!date) return 'N/A';
-        return new Date(date).toLocaleString('en-US', {
+        return new Date(date).toLocaleString('en-GB', {
             year: 'numeric',
             month: 'short',
             day: 'numeric',
@@ -337,15 +338,13 @@ const AuditLogViewer = () => {
                     {filters.datePreset === 'custom' && (
                         <div className="filter-group">
                             <Calendar size={16} />
-                            <input
-                                type="date"
+                            <DatePicker
                                 value={filters.startDate}
                                 onChange={(e) => handleFilterChange('startDate', e.target.value)}
                                 placeholder="Start Date"
                             />
                             <span className="date-separator">to</span>
-                            <input
-                                type="date"
+                            <DatePicker
                                 value={filters.endDate}
                                 onChange={(e) => handleFilterChange('endDate', e.target.value)}
                                 placeholder="End Date"

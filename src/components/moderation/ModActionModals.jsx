@@ -728,7 +728,7 @@ export const LiftWarningModal = ({ isOpen, onClose, onSubmit, context, currentWa
                                                 Warning #{actualIndex + 1}
                                             </div>
                                             <div style={{ fontSize: '0.875rem', color: '#666' }}>
-                                                <strong>Date:</strong> {new Date(warning.date).toLocaleString()}
+                                                <strong>Date:</strong> {new Date(warning.date).toLocaleString('en-GB')}
                                             </div>
                                             <div style={{ fontSize: '0.875rem', color: '#666' }}>
                                                 <strong>Reason:</strong> {warning.reason}

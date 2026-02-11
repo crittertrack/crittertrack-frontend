@@ -245,7 +245,7 @@ const FeedbackTab = ({ API_BASE_URL, authToken }) => {
                                 </div>
                                 <span className="feedback-date">
                                     <Calendar size={14} />
-                                    {new Date(item.createdAt).toLocaleDateString()}
+                                    {new Date(item.createdAt).toLocaleDateString('en-GB')}
                                 </span>
                             </div>
                             
@@ -299,7 +299,7 @@ const FeedbackTab = ({ API_BASE_URL, authToken }) => {
                                     {item.reviewedAt && (
                                         <div className="feedback-reviewed-info">
                                             <Clock size={14} />
-                                            <span>Last reviewed: {new Date(item.reviewedAt).toLocaleString()}</span>
+                                            <span>Last reviewed: {new Date(item.reviewedAt).toLocaleString('en-GB')}</span>
                                         </div>
                                     )}
                                     

@@ -151,7 +151,7 @@ export default function ModChatTab({ API_BASE_URL, authToken, currentUserId }) {
 
         if (isToday) return time;
         if (isYesterday) return `Yesterday ${time}`;
-        return `${date.toLocaleDateString()} ${time}`;
+        return `${date.toLocaleDateString('en-GB')} ${time}`;
     };
 
     const getRoleBadge = (role) => {

@@ -104,7 +104,7 @@ const LoginTracking = ({ authToken, API_BASE_URL }) => {
                                     >
                                         <td className="px-6 py-4 text-sm text-gray-800">
                                             <div>
-                                                <p className="font-medium">{new Date(entry.timestamp).toLocaleString()}</p>
+                                                <p className="font-medium">{new Date(entry.timestamp).toLocaleString('en-GB')}</p>
                                                 <p className="text-xs text-gray-500">{new Date(entry.timestamp).toTimeString().split(' ')[1]}</p>
                                             </div>
                                         </td>

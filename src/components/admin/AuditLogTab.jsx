@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import './AuditLogTab.css';
+import DatePicker from '../DatePicker';
 
 export default function AuditLogTab({ API_BASE_URL, authToken }) {
     const [logs, setLogs] = useState([]);
@@ -144,15 +145,13 @@ export default function AuditLogTab({ API_BASE_URL, authToken }) {
                     ))}
                 </select>
 
-                <input
-                    type="date"
+                <DatePicker
                     value={filterStartDate}
                     onChange={(e) => setFilterStartDate(e.target.value)}
                     placeholder="Start Date"
                 />
 
-                <input
-                    type="date"
+                <DatePicker
                     value={filterEndDate}
                     onChange={(e) => setFilterEndDate(e.target.value)}
                     placeholder="End Date"
@@ -188,7 +187,7 @@ export default function AuditLogTab({ API_BASE_URL, authToken }) {
                             <tbody>
                                 {logs.map((log, idx) => (
                                     <tr key={idx}>
-                                        <td>{new Date(log.createdAt).toLocaleString()}</td>
+                                        <td>{new Date(log.createdAt).toLocaleString('en-GB')}</td>
                                         <td>
                                             <span 
                                                 className="action-badge"
