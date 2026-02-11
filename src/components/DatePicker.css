@@ -1,0 +1,108 @@
+/* DatePicker styles to match existing input styling */
+
+.date-picker-input {
+    width: 100%;
+    padding: 0.75rem;
+    border: 1px solid #d1d5db;
+    border-radius: 0.5rem;
+    font-size: 1rem;
+    transition: all 0.2s;
+    box-sizing: border-box;
+}
+
+.date-picker-input:focus {
+    outline: none;
+    border-color: #8b5cf6;
+    ring: 2px;
+    ring-color: #8b5cf6;
+    box-shadow: 0 0 0 2px rgba(139, 92, 246, 0.2);
+}
+
+.date-picker-input:disabled {
+    background-color: #f3f4f6;
+    cursor: not-allowed;
+    opacity: 0.6;
+}
+
+/* React DatePicker calendar styling */
+.react-datepicker {
+    font-family: inherit;
+    border: 1px solid #d1d5db;
+    border-radius: 0.5rem;
+    box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+}
+
+.react-datepicker__header {
+    background-color: #8b5cf6;
+    border-bottom: none;
+    border-radius: 0.5rem 0.5rem 0 0;
+}
+
+.react-datepicker__current-month,
+.react-datepicker__day-name {
+    color: white;
+}
+
+.react-datepicker__day--selected,
+.react-datepicker__day--keyboard-selected {
+    background-color: #8b5cf6;
+    color: white;
+}
+
+.react-datepicker__day:hover {
+    background-color: #ede9fe;
+}
+
+.react-datepicker__day--disabled {
+    color: #d1d5db;
+    cursor: not-allowed;
+}
+
+.react-datepicker__day--disabled:hover {
+    background-color: transparent;
+}
+
+/* Dropdown selectors */
+.react-datepicker__month-dropdown,
+.react-datepicker__year-dropdown {
+    background-color: white;
+    border: 1px solid #d1d5db;
+    border-radius: 0.25rem;
+}
+
+.react-datepicker__month-option:hover,
+.react-datepicker__year-option:hover {
+    background-color: #ede9fe;
+}
+
+.react-datepicker__month-option--selected,
+.react-datepicker__year-option--selected {
+    background-color: #8b5cf6;
+    color: white;
+}
+
+/* Navigation arrows */
+.react-datepicker__navigation {
+    top: 0.75rem;
+}
+
+.react-datepicker__navigation--previous {
+    border-right-color: white;
+}
+
+.react-datepicker__navigation--next {
+    border-left-color: white;
+}
+
+.react-datepicker__navigation:hover {
+    opacity: 0.8;
+}
+
+/* Wrapper */
+.react-datepicker-wrapper {
+    width: 100%;
+}
+
+.react-datepicker__input-container {
+    width: 100%;
+}

@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import './CommunicationTab.css';
+import DatePicker from '../DatePicker';
 
 export default function CommunicationTab({ API_BASE_URL, authToken }) {
     const [activeView, setActiveView] = useState('broadcast'); // broadcast, history, direct, poll-results
@@ -509,11 +510,10 @@ export default function CommunicationTab({ API_BASE_URL, authToken }) {
                             <div className="schedule-fields">
                                 <div className="form-group">
                                     <label>Date *</label>
-                                    <input
-                                        type="date"
+                                    <DatePicker
                                         value={scheduledDate}
                                         onChange={(e) => setScheduledDate(e.target.value)}
-                                        min={new Date().toISOString().split('T')[0]}
+                                        minDate={new Date()}
                                         disabled={loading}
                                     />
                                 </div>
