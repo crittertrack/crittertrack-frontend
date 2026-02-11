@@ -924,6 +924,12 @@ export default function AnimalManagementPanel({ API_BASE_URL, authToken, userRol
                                 Health
                             </button>
                             <button 
+                                className={`tab ${viewActiveTab === 'care' ? 'active' : ''}`}
+                                onClick={() => setViewActiveTab('care')}
+                            >
+                                Care
+                            </button>
+                            <button 
                                 className={`tab ${viewActiveTab === 'breeding' ? 'active' : ''}`}
                                 onClick={() => setViewActiveTab('breeding')}
                             >
@@ -1027,6 +1033,9 @@ export default function AnimalManagementPanel({ API_BASE_URL, authToken, userRol
                                             <div className="detail-grid">
                                                 <div><strong>Color:</strong> {selectedAnimal.color || '-'}</div>
                                                 <div><strong>Pattern:</strong> {selectedAnimal.pattern || '-'}</div>
+                                                <div><strong>Coat:</strong> {selectedAnimal.coat || '-'}</div>
+                                                <div><strong>Coat Pattern:</strong> {selectedAnimal.coatPattern || '-'}</div>
+                                                <div><strong>Earset:</strong> {selectedAnimal.earset || '-'}</div>
                                                 <div><strong>Eye Color:</strong> {selectedAnimal.eyeColor || '-'}</div>
                                                 <div><strong>Weight:</strong> {selectedAnimal.weight ? `${selectedAnimal.weight} ${selectedAnimal.weightUnit || ''}` : '-'}</div>
                                                 <div><strong>Height:</strong> {selectedAnimal.height ? `${selectedAnimal.height} ${selectedAnimal.heightUnit || ''}` : '-'}</div>
@@ -1067,6 +1076,64 @@ export default function AnimalManagementPanel({ API_BASE_URL, authToken, userRol
                                             </div>
                                         </div>
 
+                                        {(selectedAnimal.vaccinations || selectedAnimal.dewormingRecords || selectedAnimal.parasiteControl || selectedAnimal.parasitePreventionSchedule || selectedAnimal.heartwormStatus) && (
+                                            <div className="animal-detail-section">
+                                                <h4>Preventive Care</h4>
+                                                <div className="detail-grid">
+                                                    {selectedAnimal.vaccinations && (
+                                                        <div><strong>Vaccinations:</strong> {selectedAnimal.vaccinations}</div>
+                                                    )}
+                                                    {selectedAnimal.dewormingRecords && (
+                                                        <div><strong>Deworming Records:</strong> {selectedAnimal.dewormingRecords}</div>
+                                                    )}
+                                                    {selectedAnimal.parasiteControl && (
+                                                        <div><strong>Parasite Control:</strong> {selectedAnimal.parasiteControl}</div>
+                                                    )}
+                                                    {selectedAnimal.parasitePreventionSchedule && (
+                                                        <div><strong>Parasite Prevention Schedule:</strong> {selectedAnimal.parasitePreventionSchedule}</div>
+                                                    )}
+                                                    {selectedAnimal.heartwormStatus && (
+                                                        <div><strong>Heartworm Status:</strong> {selectedAnimal.heartwormStatus}</div>
+                                                    )}
+                                                </div>
+                                            </div>
+                                        )}
+
+                                        {(selectedAnimal.medicalConditions || selectedAnimal.chronicConditions || selectedAnimal.geneticTestResults || selectedAnimal.eyeClearance || selectedAnimal.cardiacClearance || selectedAnimal.hipElbowScores || selectedAnimal.dentalRecords) && (
+                                            <div className="animal-detail-section">
+                                                <h4>Medical Conditions & Clearances</h4>
+                                                {selectedAnimal.medicalConditions && (
+                                                    <div className="detail-item">
+                                                        <strong>Medical Conditions:</strong>
+                                                        <p className="remarks-text">{selectedAnimal.medicalConditions}</p>
+                                                    </div>
+                                                )}
+                                                {selectedAnimal.chronicConditions && (
+                                                    <div className="detail-item">
+                                                        <strong>Chronic Conditions:</strong>
+                                                        <p className="remarks-text">{selectedAnimal.chronicConditions}</p>
+                                                    </div>
+                                                )}
+                                                <div className="detail-grid">
+                                                    {selectedAnimal.geneticTestResults && (
+                                                        <div><strong>Genetic Test Results:</strong> {selectedAnimal.geneticTestResults}</div>
+                                                    )}
+                                                    {selectedAnimal.eyeClearance && (
+                                                        <div><strong>Eye Clearance:</strong> {selectedAnimal.eyeClearance}</div>
+                                                    )}
+                                                    {selectedAnimal.cardiacClearance && (
+                                                        <div><strong>Cardiac Clearance:</strong> {selectedAnimal.cardiacClearance}</div>
+                                                    )}
+                                                    {selectedAnimal.hipElbowScores && (
+                                                        <div><strong>Hip/Elbow Scores:</strong> {selectedAnimal.hipElbowScores}</div>
+                                                    )}
+                                                    {selectedAnimal.dentalRecords && (
+                                                        <div><strong>Dental Records:</strong> {selectedAnimal.dentalRecords}</div>
+                                                    )}
+                                                </div>
+                                            </div>
+                                        )}
+
                                         {(selectedAnimal.geneticTestResults || selectedAnimal.healthClearances) && (
                                             <div className="animal-detail-section">
                                                 <h4>Genetic Testing & Clearances</h4>
@@ -1101,6 +1168,85 @@ export default function AnimalManagementPanel({ API_BASE_URL, authToken, userRol
                                     </div>
                                 )}
 
+                                {/* Care Tab (Husbandry & Behavior) */}
+                                {viewActiveTab === 'care' && (
+                                    <div className="tab-panel">
+                                        {(selectedAnimal.dietType || selectedAnimal.feedingSchedule || selectedAnimal.supplements) && (
+                                            <div className="animal-detail-section">
+                                                <h4>Nutrition</h4>
+                                                <div className="detail-grid">
+                                                    {selectedAnimal.dietType && (
+                                                        <div><strong>Diet Type:</strong> {selectedAnimal.dietType}</div>
+                                                    )}
+                                                    {selectedAnimal.feedingSchedule && (
+                                                        <div><strong>Feeding Schedule:</strong> {selectedAnimal.feedingSchedule}</div>
+                                                    )}
+                                                    {selectedAnimal.supplements && (
+                                                        <div><strong>Supplements:</strong> {selectedAnimal.supplements}</div>
+                                                    )}
+                                                </div>
+                                            </div>
+                                        )}
+
+                                        {(selectedAnimal.housingType || selectedAnimal.bedding || selectedAnimal.enrichment) && (
+                                            <div className="animal-detail-section">
+                                                <h4>Husbandry</h4>
+                                                <div className="detail-grid">
+                                                    {selectedAnimal.housingType && (
+                                                        <div><strong>Housing Type:</strong> {selectedAnimal.housingType}</div>
+                                                    )}
+                                                    {selectedAnimal.bedding && (
+                                                        <div><strong>Bedding:</strong> {selectedAnimal.bedding}</div>
+                                                    )}
+                                                    {selectedAnimal.enrichment && (
+                                                        <div><strong>Enrichment:</strong> {selectedAnimal.enrichment}</div>
+                                                    )}
+                                                </div>
+                                            </div>
+                                        )}
+
+                                        {(selectedAnimal.temperatureRange || selectedAnimal.humidity || selectedAnimal.lighting || selectedAnimal.noise) && (
+                                            <div className="animal-detail-section">
+                                                <h4>Environment</h4>
+                                                <div className="detail-grid">
+                                                    {selectedAnimal.temperatureRange && (
+                                                        <div><strong>Temperature Range:</strong> {selectedAnimal.temperatureRange}</div>
+                                                    )}
+                                                    {selectedAnimal.humidity && (
+                                                        <div><strong>Humidity:</strong> {selectedAnimal.humidity}</div>
+                                                    )}
+                                                    {selectedAnimal.lighting && (
+                                                        <div><strong>Lighting:</strong> {selectedAnimal.lighting}</div>
+                                                    )}
+                                                    {selectedAnimal.noise && (
+                                                        <div><strong>Noise Level:</strong> {selectedAnimal.noise}</div>
+                                                    )}
+                                                </div>
+                                            </div>
+                                        )}
+
+                                        {(selectedAnimal.temperament || selectedAnimal.handlingTolerance || selectedAnimal.socialStructure || selectedAnimal.activityCycle) && (
+                                            <div className="animal-detail-section">
+                                                <h4>Behavior</h4>
+                                                <div className="detail-grid">
+                                                    {selectedAnimal.temperament && (
+                                                        <div><strong>Temperament:</strong> {selectedAnimal.temperament}</div>
+                                                    )}
+                                                    {selectedAnimal.handlingTolerance && (
+                                                        <div><strong>Handling Tolerance:</strong> {selectedAnimal.handlingTolerance}</div>
+                                                    )}
+                                                    {selectedAnimal.socialStructure && (
+                                                        <div><strong>Social Structure:</strong> {selectedAnimal.socialStructure}</div>
+                                                    )}
+                                                    {selectedAnimal.activityCycle && (
+                                                        <div><strong>Activity Cycle:</strong> {selectedAnimal.activityCycle}</div>
+                                                    )}
+                                                </div>
+                                            </div>
+                                        )}
+                                    </div>
+                                )}
+
                                 {/* Breeding Tab */}
                                 {viewActiveTab === 'breeding' && (
                                     <div className="tab-panel">
@@ -1110,8 +1256,116 @@ export default function AnimalManagementPanel({ API_BASE_URL, authToken, userRol
                                                 <div><strong>Breeding Rights:</strong> {selectedAnimal.breedingRights || '-'}</div>
                                                 <div><strong>Breeding Quality:</strong> {selectedAnimal.breedingQuality || '-'}</div>
                                                 <div><strong>Breeding Status:</strong> {selectedAnimal.breedingStatus || '-'}</div>
+                                                <div><strong>Neutered/Spayed:</strong> {selectedAnimal.isNeutered ? 'Yes' : 'No'}</div>
+                                                <div><strong>Infertile:</strong> {selectedAnimal.isInfertile ? 'Yes' : 'No'}</div>
+                                                <div><strong>In Mating:</strong> {selectedAnimal.isInMating ? 'Yes' : 'No'}</div>
                                             </div>
                                         </div>
+
+                                        {(selectedAnimal.isPregnant || selectedAnimal.isNursing || selectedAnimal.heatStatus || selectedAnimal.lastHeatDate || selectedAnimal.ovulationDate || selectedAnimal.estrusCycleLength || selectedAnimal.matingDates || selectedAnimal.expectedDueDate || selectedAnimal.artificialInseminationUsed) && (
+                                            <div className="animal-detail-section">
+                                                <h4>Reproductive Status</h4>
+                                                <div className="detail-grid">
+                                                    {selectedAnimal.isPregnant !== undefined && (
+                                                        <div><strong>Pregnant:</strong> {selectedAnimal.isPregnant ? 'Yes' : 'No'}</div>
+                                                    )}
+                                                    {selectedAnimal.isNursing !== undefined && (
+                                                        <div><strong>Nursing:</strong> {selectedAnimal.isNursing ? 'Yes' : 'No'}</div>
+                                                    )}
+                                                    {selectedAnimal.heatStatus && (
+                                                        <div><strong>Heat Status:</strong> {selectedAnimal.heatStatus}</div>
+                                                    )}
+                                                    {selectedAnimal.lastHeatDate && (
+                                                        <div><strong>Last Heat Date:</strong> {formatDate(selectedAnimal.lastHeatDate)}</div>
+                                                    )}
+                                                    {selectedAnimal.ovulationDate && (
+                                                        <div><strong>Ovulation Date:</strong> {formatDate(selectedAnimal.ovulationDate)}</div>
+                                                    )}
+                                                    {selectedAnimal.estrusCycleLength && (
+                                                        <div><strong>Estrus Cycle Length:</strong> {selectedAnimal.estrusCycleLength}</div>
+                                                    )}
+                                                    {selectedAnimal.matingDates && (
+                                                        <div><strong>Mating Dates:</strong> {selectedAnimal.matingDates}</div>
+                                                    )}
+                                                    {selectedAnimal.expectedDueDate && (
+                                                        <div><strong>Expected Due Date:</strong> {formatDate(selectedAnimal.expectedDueDate)}</div>
+                                                    )}
+                                                    {selectedAnimal.artificialInseminationUsed !== undefined && (
+                                                        <div><strong>Artificial Insemination:</strong> {selectedAnimal.artificialInseminationUsed ? 'Yes' : 'No'}</div>
+                                                    )}
+                                                </div>
+                                            </div>
+                                        )}
+
+                                        {(selectedAnimal.isStudAnimal || selectedAnimal.availableForBreeding || selectedAnimal.fertilityStatus || selectedAnimal.lastMatingDate || selectedAnimal.successfulMatings || selectedAnimal.fertilityNotes) && (
+                                            <div className="animal-detail-section">
+                                                <h4>Stud Information</h4>
+                                                <div className="detail-grid">
+                                                    {selectedAnimal.isStudAnimal !== undefined && (
+                                                        <div><strong>Stud Animal:</strong> {selectedAnimal.isStudAnimal ? 'Yes' : 'No'}</div>
+                                                    )}
+                                                    {selectedAnimal.availableForBreeding !== undefined && (
+                                                        <div><strong>Available for Breeding:</strong> {selectedAnimal.availableForBreeding ? 'Yes' : 'No'}</div>
+                                                    )}
+                                                    {selectedAnimal.fertilityStatus && (
+                                                        <div><strong>Fertility Status:</strong> {selectedAnimal.fertilityStatus}</div>
+                                                    )}
+                                                    {selectedAnimal.lastMatingDate && (
+                                                        <div><strong>Last Mating Date:</strong> {formatDate(selectedAnimal.lastMatingDate)}</div>
+                                                    )}
+                                                    {selectedAnimal.successfulMatings && (
+                                                        <div><strong>Successful Matings:</strong> {selectedAnimal.successfulMatings}</div>
+                                                    )}
+                                                </div>
+                                                {selectedAnimal.fertilityNotes && (
+                                                    <p className="remarks-text">{selectedAnimal.fertilityNotes}</p>
+                                                )}
+                                            </div>
+                                        )}
+
+                                        {(selectedAnimal.isDamAnimal || selectedAnimal.damFertilityStatus || selectedAnimal.lastPregnancyDate || selectedAnimal.litterCount || selectedAnimal.offspringCount || selectedAnimal.damFertilityNotes || selectedAnimal.gestationLength || selectedAnimal.deliveryMethod || selectedAnimal.whelpingDate || selectedAnimal.queeningDate || selectedAnimal.nursingStartDate || selectedAnimal.weaningDate) && (
+                                            <div className="animal-detail-section">
+                                                <h4>Dam Information</h4>
+                                                <div className="detail-grid">
+                                                    {selectedAnimal.isDamAnimal !== undefined && (
+                                                        <div><strong>Dam Animal:</strong> {selectedAnimal.isDamAnimal ? 'Yes' : 'No'}</div>
+                                                    )}
+                                                    {selectedAnimal.damFertilityStatus && (
+                                                        <div><strong>Dam Fertility Status:</strong> {selectedAnimal.damFertilityStatus}</div>
+                                                    )}
+                                                    {selectedAnimal.lastPregnancyDate && (
+                                                        <div><strong>Last Pregnancy Date:</strong> {formatDate(selectedAnimal.lastPregnancyDate)}</div>
+                                                    )}
+                                                    {selectedAnimal.litterCount && (
+                                                        <div><strong>Litter Count:</strong> {selectedAnimal.litterCount}</div>
+                                                    )}
+                                                    {selectedAnimal.offspringCount && (
+                                                        <div><strong>Total Offspring:</strong> {selectedAnimal.offspringCount}</div>
+                                                    )}
+                                                    {selectedAnimal.gestationLength && (
+                                                        <div><strong>Gestation Length:</strong> {selectedAnimal.gestationLength}</div>
+                                                    )}
+                                                    {selectedAnimal.deliveryMethod && (
+                                                        <div><strong>Delivery Method:</strong> {selectedAnimal.deliveryMethod}</div>
+                                                    )}
+                                                    {selectedAnimal.whelpingDate && (
+                                                        <div><strong>Whelping Date:</strong> {formatDate(selectedAnimal.whelpingDate)}</div>
+                                                    )}
+                                                    {selectedAnimal.queeningDate && (
+                                                        <div><strong>Queening Date:</strong> {formatDate(selectedAnimal.queeningDate)}</div>
+                                                    )}
+                                                    {selectedAnimal.nursingStartDate && (
+                                                        <div><strong>Nursing Start Date:</strong> {formatDate(selectedAnimal.nursingStartDate)}</div>
+                                                    )}
+                                                    {selectedAnimal.weaningDate && (
+                                                        <div><strong>Weaning Date:</strong> {formatDate(selectedAnimal.weaningDate)}</div>
+                                                    )}
+                                                </div>
+                                                {selectedAnimal.damFertilityNotes && (
+                                                    <p className="remarks-text">{selectedAnimal.damFertilityNotes}</p>
+                                                )}
+                                            </div>
+                                        )}
 
                                         {(selectedAnimal.progenyCount || selectedAnimal.litterHistory) && (
                                             <div className="animal-detail-section">
@@ -1173,6 +1427,13 @@ export default function AnimalManagementPanel({ API_BASE_URL, authToken, userRol
                                                         <p className="remarks-text">{selectedAnimal.performanceScores}</p>
                                                     </div>
                                                 )}
+                                            </div>
+                                        )}
+
+                                        {selectedAnimal.judgeComments && (
+                                            <div className="animal-detail-section">
+                                                <h4>Judge Comments</h4>
+                                                <p className="remarks-text">{selectedAnimal.judgeComments}</p>
                                             </div>
                                         )}
 
@@ -1269,9 +1530,37 @@ export default function AnimalManagementPanel({ API_BASE_URL, authToken, userRol
                                                 </div>
                                             </div>
                                         ) : (
-                                            <div className="animal-detail-section">
-                                                <p className="no-data">No reports for this animal.</p>
-                                            </div>
+                                            <>
+                                                <div className="animal-detail-section">
+                                                    <p className="no-data">No reports for this animal.</p>
+                                                </div>
+
+                                                {(selectedAnimal.deceasedDate || selectedAnimal.causeOfDeath || selectedAnimal.necropsyResults || selectedAnimal.endOfLifeCareNotes) && (
+                                                    <div className="animal-detail-section">
+                                                        <h4>End of Life</h4>
+                                                        <div className="detail-grid">
+                                                            {selectedAnimal.deceasedDate && (
+                                                                <div><strong>Deceased Date:</strong> {formatDate(selectedAnimal.deceasedDate)}</div>
+                                                            )}
+                                                            {selectedAnimal.causeOfDeath && (
+                                                                <div><strong>Cause of Death:</strong> {selectedAnimal.causeOfDeath}</div>
+                                                            )}
+                                                        </div>
+                                                        {selectedAnimal.necropsyResults && (
+                                                            <div className="detail-item">
+                                                                <strong>Necropsy Results:</strong>
+                                                                <p className="remarks-text">{selectedAnimal.necropsyResults}</p>
+                                                            </div>
+                                                        )}
+                                                        {selectedAnimal.endOfLifeCareNotes && (
+                                                            <div className="detail-item">
+                                                                <strong>End of Life Care Notes:</strong>
+                                                                <p className="remarks-text">{selectedAnimal.endOfLifeCareNotes}</p>
+                                                            </div>
+                                                        )}
+                                                    </div>
+                                                )}
+                                            </>
                                         )}
                                     </div>
                                 )}
@@ -1580,6 +1869,30 @@ export default function AnimalManagementPanel({ API_BASE_URL, authToken, userRol
                                                     />
                                                 </div>
                                                 <div className="form-row">
+                                                    <label>Coat</label>
+                                                    <input
+                                                        type="text"
+                                                        value={editForm.coat || ''}
+                                                        onChange={(e) => setEditForm({...editForm, coat: e.target.value})}
+                                                    />
+                                                </div>
+                                                <div className="form-row">
+                                                    <label>Coat Pattern</label>
+                                                    <input
+                                                        type="text"
+                                                        value={editForm.coatPattern || ''}
+                                                        onChange={(e) => setEditForm({...editForm, coatPattern: e.target.value})}
+                                                    />
+                                                </div>
+                                                <div className="form-row">
+                                                    <label>Earset</label>
+                                                    <input
+                                                        type="text"
+                                                        value={editForm.earset || ''}
+                                                        onChange={(e) => setEditForm({...editForm, earset: e.target.value})}
+                                                    />
+                                                </div>
+                                                <div className="form-row">
                                                     <label>Eye Color</label>
                                                     <input
                                                         type="text"
@@ -1816,50 +2129,157 @@ export default function AnimalManagementPanel({ API_BASE_URL, authToken, userRol
                         <div className="tab-panel">
                             <div className="edit-form">
                                 <div className="form-section">
-                                    <h4 className="section-title">Care & Environment</h4>
+                                    <h4 className="section-title">Nutrition</h4>
                                     <div className="form-row full-width">
-                                        <label>Diet/Nutrition</label>
+                                        <label>Diet Type</label>
                                         <textarea
-                                            value={editForm.diet || ''}
-                                            onChange={(e) => setEditForm({...editForm, diet: e.target.value})}
+                                            value={editForm.dietType || ''}
+                                            onChange={(e) => setEditForm({...editForm, dietType: e.target.value})}
                                             rows={3}
-                                            placeholder="Feeding schedule, food types, dietary needs..."
+                                            placeholder="Primary diet, brands, food types..."
                                         />
                                     </div>
                                     <div className="form-row full-width">
-                                        <label>Habitat/Housing</label>
+                                        <label>Feeding Schedule</label>
                                         <textarea
-                                            value={editForm.habitat || ''}
-                                            onChange={(e) => setEditForm({...editForm, habitat: e.target.value})}
+                                            value={editForm.feedingSchedule || ''}
+                                            onChange={(e) => setEditForm({...editForm, feedingSchedule: e.target.value})}
                                             rows={3}
-                                            placeholder="Enclosure type, size, environmental conditions..."
+                                            placeholder="Feeding times, quantities..."
                                         />
                                     </div>
                                     <div className="form-row full-width">
-                                        <label>Special Care Requirements</label>
+                                        <label>Supplements</label>
                                         <textarea
-                                            value={editForm.specialCareRequirements || ''}
-                                            onChange={(e) => setEditForm({...editForm, specialCareRequirements: e.target.value})}
-                                            rows={3}
-                                            placeholder="Special handling, environmental needs, care instructions..."
+                                            value={editForm.supplements || ''}
+                                            onChange={(e) => setEditForm({...editForm, supplements: e.target.value})}
+                                            rows={2}
+                                            placeholder="Vitamins, supplements, treats..."
                                         />
                                     </div>
+                                </div>
+
+                                <div className="form-section">
+                                    <h4 className="section-title">Husbandry & Environment</h4>
+                                    <div className="form-row full-width">
+                                        <label>Housing Type</label>
+                                        <textarea
+                                            value={editForm.housingType || ''}
+                                            onChange={(e) => setEditForm({...editForm, housingType: e.target.value})}
+                                            rows={3}
+                                            placeholder="Enclosure type, size, layout..."
+                                        />
+                                    </div>
+                                    <div className="form-row full-width">
+                                        <label>Bedding</label>
+                                        <textarea
+                                            value={editForm.bedding || ''}
+                                            onChange={(e) => setEditForm({...editForm, bedding: e.target.value})}
+                                            rows={2}
+                                            placeholder="Substrate, nesting materials..."
+                                        />
+                                    </div>
+                                    <div className="form-row full-width">
+                                        <label>Enrichment</label>
+                                        <textarea
+                                            value={editForm.enrichment || ''}
+                                            onChange={(e) => setEditForm({...editForm, enrichment: e.target.value})}
+                                            rows={2}
+                                            placeholder="Toys, activities, social enrichment..."
+                                        />
+                                    </div>
+                                    <div className="form-row full-width">
+                                        <label>Temperature Range</label>
+                                        <input
+                                            type="text"
+                                            value={editForm.temperatureRange || ''}
+                                            onChange={(e) => setEditForm({...editForm, temperatureRange: e.target.value})}
+                                            placeholder="e.g. 20-24°C"
+                                        />
+                                    </div>
+                                    <div className="form-row full-width">
+                                        <label>Humidity</label>
+                                        <input
+                                            type="text"
+                                            value={editForm.humidity || ''}
+                                            onChange={(e) => setEditForm({...editForm, humidity: e.target.value})}
+                                            placeholder="e.g. 40-60%"
+                                        />
+                                    </div>
+                                    <div className="form-row full-width">
+                                        <label>Lighting</label>
+                                        <input
+                                            type="text"
+                                            value={editForm.lighting || ''}
+                                            onChange={(e) => setEditForm({...editForm, lighting: e.target.value})}
+                                            placeholder="Natural/Artificial, schedule..."
+                                        />
+                                    </div>
+                                    <div className="form-row full-width">
+                                        <label>Noise Level</label>
+                                        <input
+                                            type="text"
+                                            value={editForm.noise || ''}
+                                            onChange={(e) => setEditForm({...editForm, noise: e.target.value})}
+                                            placeholder="Typical noise exposure..."
+                                        />
+                                    </div>
+                                </div>
+
+                                <div className="form-section">
+                                    <h4 className="section-title">Behavior & Temperament</h4>
                                     <div className="form-row full-width">
                                         <label>Temperament</label>
                                         <textarea
                                             value={editForm.temperament || ''}
                                             onChange={(e) => setEditForm({...editForm, temperament: e.target.value})}
                                             rows={3}
-                                            placeholder="Personality traits, behavioral characteristics..."
+                                            placeholder="Personality traits, typical behavior..."
                                         />
                                     </div>
                                     <div className="form-row full-width">
-                                        <label>Behavioral Notes</label>
+                                        <label>Handling Tolerance</label>
                                         <textarea
-                                            value={editForm.behavioralNotes || ''}
-                                            onChange={(e) => setEditForm({...editForm, behavioralNotes: e.target.value})}
-                                            rows={3}
-                                            placeholder="Behavioral observations, quirks, preferences..."
+                                            value={editForm.handlingTolerance || ''}
+                                            onChange={(e) => setEditForm({...editForm, handlingTolerance: e.target.value})}
+                                            rows={2}
+                                            placeholder="How well the animal tolerates handling..."
+                                        />
+                                    </div>
+                                    <div className="form-row full-width">
+                                        <label>Social Structure</label>
+                                        <textarea
+                                            value={editForm.socialStructure || ''}
+                                            onChange={(e) => setEditForm({...editForm, socialStructure: e.target.value})}
+                                            rows={2}
+                                            placeholder="Solo/Group housing, social dynamics..."
+                                        />
+                                    </div>
+                                    <div className="form-row full-width">
+                                        <label>Activity Cycle</label>
+                                        <textarea
+                                            value={editForm.activityCycle || ''}
+                                            onChange={(e) => setEditForm({...editForm, activityCycle: e.target.value})}
+                                            rows={2}
+                                            placeholder="Diurnal/nocturnal/crepuscular, routine..."
+                                        />
+                                    </div>
+                                    <div className="form-row full-width">
+                                        <label>Behavioral Issues</label>
+                                        <textarea
+                                            value={editForm.behavioralIssues || ''}
+                                            onChange={(e) => setEditForm({...editForm, behavioralIssues: e.target.value})}
+                                            rows={2}
+                                            placeholder="Biting, reactivity, other concerns..."
+                                        />
+                                    </div>
+                                    <div className="form-row full-width">
+                                        <label>Reactivity Notes</label>
+                                        <textarea
+                                            value={editForm.reactivityNotes || ''}
+                                            onChange={(e) => setEditForm({...editForm, reactivityNotes: e.target.value})}
+                                            rows={2}
+                                            placeholder="Triggers, stress signals, management tips..."
                                         />
                                     </div>
                                 </div>
@@ -1874,21 +2294,39 @@ export default function AnimalManagementPanel({ API_BASE_URL, authToken, userRol
                                 <div className="form-section">
                                     <h4 className="section-title">Show & Competition</h4>
                                     <div className="form-row full-width">
-                                        <label>Show Record</label>
+                                        <label>Show Titles</label>
                                         <textarea
-                                            value={editForm.showRecord || ''}
-                                            onChange={(e) => setEditForm({...editForm, showRecord: e.target.value})}
-                                            rows={4}
-                                            placeholder="Competition history, placements, wins..."
+                                            value={editForm.showTitles || ''}
+                                            onChange={(e) => setEditForm({...editForm, showTitles: e.target.value})}
+                                            rows={3}
+                                            placeholder="Championships and titles earned..."
                                         />
                                     </div>
                                     <div className="form-row full-width">
-                                        <label>Titles & Awards</label>
+                                        <label>Show Ratings</label>
                                         <textarea
-                                            value={editForm.titlesAwards || ''}
-                                            onChange={(e) => setEditForm({...editForm, titlesAwards: e.target.value})}
+                                            value={editForm.showRatings || ''}
+                                            onChange={(e) => setEditForm({...editForm, showRatings: e.target.value})}
+                                            rows={2}
+                                            placeholder="Judge ratings, scores..."
+                                        />
+                                    </div>
+                                    <div className="form-row full-width">
+                                        <label>Judge Comments</label>
+                                        <textarea
+                                            value={editForm.judgeComments || ''}
+                                            onChange={(e) => setEditForm({...editForm, judgeComments: e.target.value})}
                                             rows={3}
-                                            placeholder="Championships, certifications, awards earned..."
+                                            placeholder="Judge notes and critiques..."
+                                        />
+                                    </div>
+                                    <div className="form-row full-width">
+                                        <label>Working Titles</label>
+                                        <textarea
+                                            value={editForm.workingTitles || ''}
+                                            onChange={(e) => setEditForm({...editForm, workingTitles: e.target.value})}
+                                            rows={3}
+                                            placeholder="Working titles and roles..."
                                         />
                                     </div>
                                     <div className="form-row full-width">
@@ -1896,7 +2334,7 @@ export default function AnimalManagementPanel({ API_BASE_URL, authToken, userRol
                                         <textarea
                                             value={editForm.performanceScores || ''}
                                             onChange={(e) => setEditForm({...editForm, performanceScores: e.target.value})}
-                                            rows={2}
+                                            rows={3}
                                             placeholder="Competition scores, performance metrics..."
                                         />
                                     </div>
@@ -1963,6 +2401,33 @@ export default function AnimalManagementPanel({ API_BASE_URL, authToken, userRol
                                             onChange={(e) => setEditForm({...editForm, exportRestrictions: e.target.value})}
                                             rows={2}
                                             placeholder="International transfer restrictions..."
+                                        />
+                                    </div>
+                                    <div className="form-row full-width">
+                                        <label>Cause of Death</label>
+                                        <textarea
+                                            value={editForm.causeOfDeath || ''}
+                                            onChange={(e) => setEditForm({...editForm, causeOfDeath: e.target.value})}
+                                            rows={2}
+                                            placeholder="If deceased, cause of death..."
+                                        />
+                                    </div>
+                                    <div className="form-row full-width">
+                                        <label>Necropsy Results</label>
+                                        <textarea
+                                            value={editForm.necropsyResults || ''}
+                                            onChange={(e) => setEditForm({...editForm, necropsyResults: e.target.value})}
+                                            rows={3}
+                                            placeholder="Post-mortem findings, lab results..."
+                                        />
+                                    </div>
+                                    <div className="form-row full-width">
+                                        <label>End of Life Care Notes</label>
+                                        <textarea
+                                            value={editForm.endOfLifeCareNotes || ''}
+                                            onChange={(e) => setEditForm({...editForm, endOfLifeCareNotes: e.target.value})}
+                                            rows={3}
+                                            placeholder="Palliative care, euthanasia details, etc..."
                                         />
                                     </div>
                                 </div>

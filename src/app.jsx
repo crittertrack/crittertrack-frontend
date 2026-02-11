@@ -26,8 +26,8 @@ import ModerationAuthModal from './components/moderation/ModerationAuthModal';
 import ModOversightPanel from './components/moderation/ModOversightPanel';
 import ModeratorActionSidebar from './components/moderation/ModeratorActionSidebar';
 import Marketplace from './components/Marketplace';
-import FamilyTree from './components/FamilyTree';
-import AnimalTree from './components/AnimalTree';
+// import FamilyTree from './components/FamilyTree';
+// import AnimalTree from './components/AnimalTree';
 
 // const API_BASE_URL = 'http://localhost:5000/api'; // Local development
 // const API_BASE_URL = 'https://crittertrack-pedigree-production.up.railway.app/api'; // Direct Railway (for testing)
@@ -19377,7 +19377,26 @@ const App = () => {
                             }}
                         />
                     } />
-                    <Route path="/family-tree" element={
+                    {/* <Route path="/family-tree" element={
+                        userProfile?.id_public === 'CTU2' ? (
+                            <FamilyTree
+                                authToken={authToken}
+                                userProfile={userProfile}
+                                showModalMessage={showModalMessage}
+                                onViewAnimal={handleViewAnimal}
+                                onBack={() => navigate('/')}
+                            />
+                        ) : (
+                            <div style={{ padding: '20px', textAlign: 'center' }}>
+                                <h2>Access Restricted</h2>
+                                <p>The Family Tree feature is currently in testing and only available to select users.</p>
+                                <button onClick={() => navigate('/')} style={{ marginTop: '20px', padding: '10px 20px', cursor: 'pointer' }}>
+                                    Back to Home
+                                </button>
+                            </div>
+                        )
+                    } /> */}
+                    {/* <Route path="/family-tree" element={
                         userProfile?.id_public === 'CTU2' ? (
                             <FamilyTree
                                 authToken={authToken}
@@ -19396,26 +19415,7 @@ const App = () => {
                             </div>
                         )
                     } />
-                    <Route path="/family-tree" element={
-                        userProfile?.id_public === 'CTU2' ? (
-                            <FamilyTree
-                                authToken={authToken}
-                                userProfile={userProfile}
-                                showModalMessage={showModalMessage}
-                                onViewAnimal={handleViewAnimal}
-                                onBack={() => navigate('/')}
-                            />
-                        ) : (
-                            <div style={{ padding: '20px', textAlign: 'center' }}>
-                                <h2>Access Restricted</h2>
-                                <p>The Family Tree feature is currently in testing and only available to select users.</p>
-                                <button onClick={() => navigate('/')} style={{ marginTop: '20px', padding: '10px 20px', cursor: 'pointer' }}>
-                                    Back to Home
-                                </button>
-                            </div>
-                        )
-                    } />
-                    <Route path="/animal-tree/:species" element={
+                    {/* <Route path="/animal-tree/:species" element={
                         <AnimalTree
                             authToken={authToken}
                             userProfile={userProfile}
@@ -19423,7 +19423,7 @@ const App = () => {
                             onViewAnimal={handleViewAnimal}
                             onBack={() => navigate('/')}
                         />
-                    } />
+                    } /> */}
                     <Route path="/profile" element={<ProfileView userProfile={userProfile} showModalMessage={showModalMessage} fetchUserProfile={fetchUserProfile} authToken={authToken} onProfileUpdated={setUserProfile} onProfileEditButtonClicked={setProfileEditButtonClicked} />} />
                     <Route path="/breeder-directory" element={
                         <BreederDirectory
