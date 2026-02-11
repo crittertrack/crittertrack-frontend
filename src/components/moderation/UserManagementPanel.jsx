@@ -189,7 +189,7 @@ const UserManagementPanel = () => {
 
     const formatDate = (date) => {
         if (!date) return 'N/A';
-        return new Date(date).toLocaleString('en-US', {
+        return new Date(date).toLocaleString('en-GB', {
             year: 'numeric',
             month: 'short',
             day: 'numeric',
@@ -722,7 +722,7 @@ const UserHistoryModal = ({ user, onClose, onLiftWarning, onRefresh }) => {
     
     const formatDate = (date) => {
         if (!date) return 'N/A';
-        return new Date(date).toLocaleString('en-US', {
+        return new Date(date).toLocaleString('en-GB', {
             year: 'numeric',
             month: 'short',
             day: 'numeric',

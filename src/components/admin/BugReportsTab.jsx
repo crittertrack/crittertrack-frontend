@@ -260,7 +260,7 @@ const BugReportsTab = ({ API_BASE_URL, authToken }) => {
                                 </div>
                                 <span className="bug-report-date">
                                     <Calendar size={14} />
-                                    {new Date(report.createdAt).toLocaleDateString()}
+                                    {new Date(report.createdAt).toLocaleDateString('en-GB')}
                                 </span>
                             </div>
                             

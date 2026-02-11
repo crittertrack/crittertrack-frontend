@@ -1672,8 +1672,8 @@ const UserSearchModal = ({ onClose, showModalMessage, onSelectUser, API_BASE_URL
 
     const UserResultCard = ({ user }) => {
         const memberSince = user.createdAt 
-            ? new Intl.DateTimeFormat('en-US', { year: 'numeric', month: 'long', day: 'numeric' }).format(new Date(user.createdAt))
-            : (user.updatedAt ? new Intl.DateTimeFormat('en-US', { year: 'numeric', month: 'long', day: 'numeric' }).format(new Date(user.updatedAt)) : null);
+            ? new Intl.DateTimeFormat('en-GB', { year: 'numeric', month: 'long', day: 'numeric' }).format(new Date(user.createdAt))
+            : (user.updatedAt ? new Intl.DateTimeFormat('en-GB', { year: 'numeric', month: 'long', day: 'numeric' }).format(new Date(user.updatedAt)) : null);
         
         // Determine display name(s) - respect privacy settings
         const showPersonalName = user.showPersonalName ?? false;
@@ -1919,8 +1919,8 @@ const PublicProfileView = ({ profile, onBack, onViewAnimal, API_BASE_URL, onStar
     }, [profile, API_BASE_URL]);
 
     const memberSince = (freshProfile?.createdAt || profile.createdAt)
-        ? new Intl.DateTimeFormat('en-US', { year: 'numeric', month: 'long', day: 'numeric' }).format(new Date(freshProfile?.createdAt || profile.createdAt))
-        : ((freshProfile?.updatedAt || profile.updatedAt) ? new Intl.DateTimeFormat('en-US', { year: 'numeric', month: 'long', day: 'numeric' }).format(new Date(freshProfile?.updatedAt || profile.updatedAt)) : 'Unknown');
+        ? new Intl.DateTimeFormat('en-GB', { year: 'numeric', month: 'long', day: 'numeric' }).format(new Date(freshProfile?.createdAt || profile.createdAt))
+        : ((freshProfile?.updatedAt || profile.updatedAt) ? new Intl.DateTimeFormat('en-GB', { year: 'numeric', month: 'long', day: 'numeric' }).format(new Date(freshProfile?.updatedAt || profile.updatedAt)) : 'Unknown');
 
     // Determine display name(s) - respect privacy settings
     const showPersonalName = (freshProfile?.showPersonalName ?? profile.showPersonalName ?? false);
@@ -12091,7 +12091,7 @@ const UserProfileCard = ({ userProfile }) => {
     if (!userProfile) return null;
 
     const formattedCreationDate = userProfile.creationDate
-        ? new Intl.DateTimeFormat('en-US', { year: 'numeric', month: 'long', day: 'numeric' }).format(new Date(userProfile.creationDate))
+        ? new Intl.DateTimeFormat('en-GB', { year: 'numeric', month: 'long', day: 'numeric' }).format(new Date(userProfile.creationDate))
         : 'N/A';
 
     const isPersonalNameVisible = userProfile.showPersonalName ?? true;
@@ -15475,11 +15475,11 @@ const MessagesView = ({ authToken, API_BASE_URL, onClose, showModalMessage, sele
         const diffInHours = (now - date) / (1000 * 60 * 60);
         
         if (diffInHours < 24) {
-            return date.toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit' });
+            return date.toLocaleTimeString('en-GB', { hour: 'numeric', minute: '2-digit' });
         } else if (diffInHours < 168) { // Less than a week
-            return date.toLocaleDateString('en-US', { weekday: 'short', hour: 'numeric', minute: '2-digit' });
+            return date.toLocaleDateString('en-GB', { weekday: 'short', hour: 'numeric', minute: '2-digit' });
         } else {
-            return date.toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
+            return date.toLocaleDateString('en-GB', { month: 'short', day: 'numeric' });
         }
     };
 
@@ -15766,7 +15766,7 @@ const WarningBanner = ({ authToken, API_BASE_URL, userProfile }) => {
                                         <div key={index} className="bg-yellow-100 p-2 rounded text-xs">
                                             <p className="font-semibold">Warning #{index + 1}</p>
                                             <p className="mt-1"><strong>Reason:</strong> {warning.reason}</p>
-                                            <p className="mt-1"><strong>Date:</strong> {new Date(warning.date).toLocaleString()}</p>
+                                            <p className="mt-1"><strong>Date:</strong> {new Date(warning.date).toLocaleString('en-GB')}</p>
                                             {warning.category && <p className="mt-1"><strong>Category:</strong> {warning.category}</p>}
                                         </div>
                                     ))}
@@ -15900,7 +15900,7 @@ const BroadcastPoll = ({ poll, onVote, isVoting, styles }) => {
                 <span>Total votes: {getTotalVotes()}</span>
                 {poll.pollEndsAt && (
                     <span>
-                        {hasEnded ? 'Poll ended' : `Ends: ${new Date(poll.pollEndsAt).toLocaleDateString()}`}
+                        {hasEnded ? 'Poll ended' : `Ends: ${new Date(poll.pollEndsAt).toLocaleDateString('en-GB')}`}
                     </span>
                 )}
             </div>
@@ -16107,7 +16107,7 @@ const BroadcastBanner = ({ authToken, API_BASE_URL }) => {
                                     )}
                                     
                                     <p className={`mt-1.5 ${styles.subtitle} text-xs`}>
-                                        {new Date(broadcast.createdAt).toLocaleString()}
+                                        {new Date(broadcast.createdAt).toLocaleString('en-GB')}
                                     </p>
                                 </div>
                             </div>
@@ -16192,7 +16192,7 @@ const UrgentBroadcastPopup = ({ authToken, API_BASE_URL }) => {
                             {urgentBroadcast.message}
                         </p>
                         <p className={`mt-3 text-xs ${iconColor}`}>
-                            {new Date(urgentBroadcast.createdAt).toLocaleString()}
+                            {new Date(urgentBroadcast.createdAt).toLocaleString('en-GB')}
                         </p>
                         <button
                             onClick={handleAcknowledge}
@@ -16437,7 +16437,7 @@ const NotificationPanel = ({ authToken, API_BASE_URL, onClose, showModalMessage,
                                                 <div className="flex-1">
                                                     <p className="text-sm text-gray-700">{notification.message}</p>
                                                     <p className="text-xs text-gray-500 mt-1">
-                                                        {new Date(notification.createdAt).toLocaleString()}
+                                                        {new Date(notification.createdAt).toLocaleString('en-GB')}
                                                     </p>
                                                 </div>
                                             </div>
@@ -16565,7 +16565,7 @@ const NotificationPanel = ({ authToken, API_BASE_URL, onClose, showModalMessage,
                                                 <div className="flex-grow">
                                                     <p className="text-sm text-gray-700 mb-1">{notification.message}</p>
                                                     <p className="text-xs text-gray-500">
-                                                        {new Date(notification.createdAt).toLocaleString()} ? 
+                                                        {new Date(notification.createdAt).toLocaleString('en-GB')} ? 
                                                         <span className={`ml-1 ${notification.status === 'approved' ? 'text-green-600' : 'text-red-600'}`}>
                                                             {notification.status}
                                                         </span>
@@ -19608,7 +19608,7 @@ const App = () => {
                                     return Array.isArray(data) ? data : [];
                                 };
                                 const formattedBirthDate = animalToView.birthDate
-                                    ? new Intl.DateTimeFormat('en-US', { year: 'numeric', month: 'long', day: 'numeric' }).format(new Date(animalToView.birthDate))
+                                    ? new Intl.DateTimeFormat('en-GB', { year: 'numeric', month: 'long', day: 'numeric' }).format(new Date(animalToView.birthDate))
                                     : '';
                                 const handleShareAnimal = () => {
                                     const url = `${window.location.origin}/animal/${animalToView.id_public}`;

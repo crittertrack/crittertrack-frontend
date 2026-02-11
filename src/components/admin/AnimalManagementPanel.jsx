@@ -472,7 +472,7 @@ export default function AnimalManagementPanel({ API_BASE_URL, authToken, userRol
 
     const formatDate = (date) => {
         if (!date) return '-';
-        return new Date(date).toLocaleDateString();
+        return new Date(date).toLocaleDateString('en-GB');
     };
 
     return (

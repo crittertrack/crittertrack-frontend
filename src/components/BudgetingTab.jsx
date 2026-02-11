@@ -395,7 +395,7 @@ const BudgetingTab = ({ authToken, API_BASE_URL, showModalMessage, preSelectedAn
     const exportToCSV = () => {
         const headers = ['Date', 'Type', 'Animal ID', 'Animal Name', 'Price', 'Buyer', 'Seller', 'Notes'];
         const rows = filteredTransactions.map(t => [
-            new Date(t.date).toLocaleDateString(),
+            new Date(t.date).toLocaleDateString('en-GB'),
             t.type === 'sale' ? 'Sale' : 'Purchase',
             t.animalId || '',
             t.animalName || '',
@@ -609,7 +609,7 @@ const BudgetingTab = ({ authToken, API_BASE_URL, showModalMessage, preSelectedAn
                                 {filteredTransactions.map((transaction) => (
                                     <tr key={transaction._id} className="hover:bg-gray-50">
                                         <td className="px-4 py-3 text-sm text-gray-700">
-                                            {new Date(transaction.date).toLocaleDateString()}
+                                            {new Date(transaction.date).toLocaleDateString('en-GB')}
                                         </td>
                                         <td className="px-4 py-3 text-sm">
                                             <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${

@@ -232,7 +232,7 @@ export default function CommunicationTab({ API_BASE_URL, authToken }) {
             }
 
             if (scheduledFor) {
-                setSuccess(`${broadcastType === 'poll' ? 'Poll' : 'Broadcast'} scheduled for ${scheduledFor.toLocaleString()} - will be sent to ${data.recipientCount} users`);
+                setSuccess(`${broadcastType === 'poll' ? 'Poll' : 'Broadcast'} scheduled for ${scheduledFor.toLocaleString('en-GB')} - will be sent to ${data.recipientCount} users`);
             } else {
                 setSuccess(`${broadcastType === 'poll' ? 'Poll' : 'Broadcast'} sent successfully to ${data.recipientCount} users!`);
             }
@@ -561,7 +561,7 @@ export default function CommunicationTab({ API_BASE_URL, authToken }) {
                                     <div className="broadcast-header">
                                         <strong>{broadcast.details?.title || 'Broadcast'}</strong>
                                         <span className="broadcast-date">
-                                            {new Date(broadcast.createdAt).toLocaleString()}
+                                            {new Date(broadcast.createdAt).toLocaleString('en-GB')}
                                         </span>
                                     </div>
                                     <div className="broadcast-meta">
@@ -569,7 +569,7 @@ export default function CommunicationTab({ API_BASE_URL, authToken }) {
                                         <span>Recipients: {broadcast.details?.recipientCount || 0}</span>
                                         <span>Type: {broadcast.details?.type || 'info'}</span>
                                         {broadcast.details?.scheduled && (
-                                            <span>Scheduled: {new Date(broadcast.details.scheduledFor).toLocaleString()}</span>
+                                            <span>Scheduled: {new Date(broadcast.details.scheduledFor).toLocaleString('en-GB')}</span>
                                         )}
                                     </div>
                                 </div>
@@ -608,7 +608,7 @@ export default function CommunicationTab({ API_BASE_URL, authToken }) {
                                         <div className="poll-header">
                                             <strong>{poll.title}</strong>
                                             <span className="poll-date">
-                                                {new Date(poll.createdAt).toLocaleString()}
+                                                {new Date(poll.createdAt).toLocaleString('en-GB')}
                                             </span>
                                         </div>
                                         
@@ -621,7 +621,7 @@ export default function CommunicationTab({ API_BASE_URL, authToken }) {
                                             <span>Type: {poll.allowMultipleChoices ? 'Multiple Choice' : 'Single Choice'}</span>
                                             {poll.pollEndsAt && (
                                                 <span className={hasEnded ? 'ended' : 'active'}>
-                                                    {hasEnded ? '🔴 Ended' : '🟢 Active'} - {new Date(poll.pollEndsAt).toLocaleString()}
+                                                    {hasEnded ? '🔴 Ended' : '🟢 Active'} - {new Date(poll.pollEndsAt).toLocaleString('en-GB')}
                                                 </span>
                                             )}
                                         </div>

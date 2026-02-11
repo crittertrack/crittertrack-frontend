@@ -97,10 +97,10 @@ const AnalyticsTab = ({ API_BASE_URL, authToken }) => {
         if (dateStr.includes('-') && dateStr.length === 7) {
             // Month format: 2024-01
             const [year, month] = dateStr.split('-');
-            return new Date(year, month - 1).toLocaleDateString('en-US', { month: 'short', year: '2-digit' });
+            return new Date(year, month - 1).toLocaleDateString('en-GB', { month: 'short', year: '2-digit' });
         }
         const date = new Date(dateStr);
-        return date.toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
+        return date.toLocaleDateString('en-GB', { month: 'short', day: 'numeric' });
     };
 
     if (loading) {
@@ -513,7 +513,7 @@ const AnalyticsTab = ({ API_BASE_URL, authToken }) => {
                                         </td>
                                         <td className="py-3 px-4 text-right text-gray-500 text-xs">
                                             {mod.lastActive 
-                                                ? new Date(mod.lastActive).toLocaleDateString('en-US', {
+                                                ? new Date(mod.lastActive).toLocaleDateString('en-GB', {
                                                     month: 'short',
                                                     day: 'numeric',
                                                     hour: '2-digit',
