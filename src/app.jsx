@@ -14497,7 +14497,11 @@ const AnimalList = ({ authToken, showModalMessage, onEditAnimal, onViewAnimal, f
         return a.localeCompare(b);
     });
 
-    const handleStatusFilterChange = (e) => setStatusFilter(e.target.value);
+    const handleStatusFilterChange = (e) => {
+        setStatusFilter(e.target.value);
+        setSearchInput('');
+        setAppliedNameFilter('');
+    };
     const handleSearchInputChange = (e) => {
         const value = e.target.value;
         setSearchInput(value);
@@ -14512,6 +14516,8 @@ const AnimalList = ({ authToken, showModalMessage, onEditAnimal, onViewAnimal, f
                 ? prev.filter(g => g !== gender) 
                 : [...prev, gender]
         );
+        setSearchInput('');
+        setAppliedNameFilter('');
     };
     const toggleSpecies = (species) => {
         setSelectedSpecies(prev => 
@@ -14519,10 +14525,30 @@ const AnimalList = ({ authToken, showModalMessage, onEditAnimal, onViewAnimal, f
                 ? prev.filter(s => s !== species)
                 : [...prev, species]
         );
+        setSearchInput('');
+        setAppliedNameFilter('');
     };
-    const handleFilterPregnant = () => { setStatusFilterPregnant(prev => !prev); setStatusFilterNursing(false); setStatusFilterMating(false); };
-    const handleFilterNursing = () => { setStatusFilterNursing(prev => !prev); setStatusFilterPregnant(false); setStatusFilterMating(false); };
-    const handleFilterMating = () => { setStatusFilterMating(prev => !prev); setStatusFilterPregnant(false); setStatusFilterNursing(false); };
+    const handleFilterPregnant = () => { 
+        setStatusFilterPregnant(prev => !prev); 
+        setStatusFilterNursing(false); 
+        setStatusFilterMating(false); 
+        setSearchInput('');
+        setAppliedNameFilter('');
+    };
+    const handleFilterNursing = () => { 
+        setStatusFilterNursing(prev => !prev); 
+        setStatusFilterPregnant(false); 
+        setStatusFilterMating(false); 
+        setSearchInput('');
+        setAppliedNameFilter('');
+    };
+    const handleFilterMating = () => { 
+        setStatusFilterMating(prev => !prev); 
+        setStatusFilterPregnant(false); 
+        setStatusFilterNursing(false); 
+        setSearchInput('');
+        setAppliedNameFilter('');
+    };
     
     const handleRefresh = async () => {
         try {
@@ -14572,31 +14598,6 @@ const AnimalList = ({ authToken, showModalMessage, onEditAnimal, onViewAnimal, f
             return;
         }
         setAppliedNameFilter(term);
-    };
-
-    const hasActiveFilters = () => {
-        return appliedNameFilter || 
-               statusFilter || 
-               selectedSpecies.length !== speciesNames.length || 
-               selectedGenders.length !== 4 || 
-               publicFilter || 
-               statusFilterPregnant || 
-               statusFilterNursing || 
-               statusFilterMating || 
-               !ownedFilterActive;
-    };
-
-    const clearAllFilters = () => {
-        setSearchInput('');
-        setAppliedNameFilter('');
-        setStatusFilter('');
-        setSelectedSpecies([...speciesNames]);
-        setSelectedGenders(['Male', 'Female', 'Intersex', 'Unknown']);
-        setPublicFilter('');
-        setStatusFilterPregnant(false);
-        setStatusFilterNursing(false);
-        setStatusFilterMating(false);
-        setOwnedFilterActive(true);
     };
 
     const hasActiveFilters = () => {
@@ -15103,6 +15104,8 @@ const AnimalList = ({ authToken, showModalMessage, onEditAnimal, onViewAnimal, f
                                 } else {
                                     setSelectedSpecies([value]);
                                 }
+                                setSearchInput('');
+                                setAppliedNameFilter('');
                             }}
                             className="p-1.5 sm:p-2 text-xs sm:text-sm border border-gray-300 rounded-lg shadow-sm focus:ring-primary focus:border-primary transition min-w-[120px] sm:min-w-[160px]"
                         >
@@ -15173,7 +15176,11 @@ const AnimalList = ({ authToken, showModalMessage, onEditAnimal, onViewAnimal, f
                             const value = option === 'All' ? '' : option.toLowerCase();
                             const isSelected = publicFilter === value;
                             return (
-                                <button key={option} onClick={() => setPublicFilter(value)}
+                                <button key={option} onClick={() => {
+                                    setPublicFilter(value);
+                                    setSearchInput('');
+                                    setAppliedNameFilter('');
+                                }}
                                     className={`px-2 sm:px-3 py-1 sm:py-1.5 text-xs sm:text-sm font-semibold rounded-lg transition duration-150 shadow-sm ${ 
                                         isSelected ? 'bg-primary text-black' : 'bg-gray-200 text-gray-700 hover:bg-gray-300'
                                     }`}
@@ -15189,7 +15196,11 @@ const AnimalList = ({ authToken, showModalMessage, onEditAnimal, onViewAnimal, f
                 <div className="flex justify-center items-center gap-1 sm:gap-2" data-tutorial-target="collection-filters">
                     <span className='text-xs sm:text-sm font-medium text-gray-700 whitespace-nowrap'>Show:</span>
                     
-                    <button onClick={() => setOwnedFilterActive(prev => !prev)}
+                    <button onClick={() => {
+                        setOwnedFilterActive(prev => !prev);
+                        setSearchInput('');
+                        setAppliedNameFilter('');
+                    }}
                         className={`px-2 sm:px-3 py-1 sm:py-1.5 text-xs sm:text-sm font-semibold rounded-lg transition duration-150 shadow-sm flex items-center gap-1 ${ 
                             ownedFilterActive ? 'bg-primary text-black' : 'bg-gray-200 text-gray-700 hover:bg-gray-300'
                         }`}
