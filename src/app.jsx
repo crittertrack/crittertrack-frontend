@@ -14985,7 +14985,7 @@ const AnimalList = ({ authToken, showModalMessage, onEditAnimal, onViewAnimal, f
                         </span>
                     )}
                 </div>
-                <div className="flex items-center gap-1 sm:gap-2 flex-wrap justify-end" data-tutorial-target="bulk-privacy-controls">
+                <div className="flex items-center gap-1 sm:gap-2 flex-wrap justify-center" data-tutorial-target="bulk-privacy-controls">
                     {hasActiveFilters() && (
                         <button 
                             onClick={clearAllFilters}
