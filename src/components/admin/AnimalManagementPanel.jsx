@@ -169,6 +169,9 @@ export default function AnimalManagementPanel({ API_BASE_URL, authToken, userRol
             ownerId_public: animal.ownerId_public || '',
             breederId_public: animal.breederId_public || '',
             manualBreederName: animal.manualBreederName || '',
+            // Basic identification
+            breederyId: animal.breederyId || animal.registryCode || '',
+            tags: animal.tags || [],
             // Ownership & Display
             isOwned: animal.isOwned ?? true,
             isDisplay: animal.isDisplay ?? false,
@@ -182,11 +185,13 @@ export default function AnimalManagementPanel({ API_BASE_URL, authToken, userRol
             coat: animal.coat || '',
             earset: animal.earset || '',
             coatPattern: animal.coatPattern || '',
-            // Physical
+            // Physical Measurements
             bodyWeight: animal.bodyWeight || '',
             bodyLength: animal.bodyLength || '',
             heightAtWithers: animal.heightAtWithers || '',
             bodyConditionScore: animal.bodyConditionScore || '',
+            chestGirth: animal.chestGirth || '',
+            adultWeight: animal.adultWeight || '',
             // Identification
             microchipNumber: animal.microchipNumber || '',
             pedigreeRegistrationId: animal.pedigreeRegistrationId || '',
@@ -194,14 +199,32 @@ export default function AnimalManagementPanel({ API_BASE_URL, authToken, userRol
             strain: animal.strain || '',
             geneticCode: animal.geneticCode || '',
             origin: animal.origin || 'Captive-bred',
+            // Dog/Cat specific identification
+            licenseNumber: animal.licenseNumber || '',
+            licenseJurisdiction: animal.licenseJurisdiction || '',
+            rabiesTagNumber: animal.rabiesTagNumber || '',
+            tattooId: animal.tattooId || '',
+            akcRegistrationNumber: animal.akcRegistrationNumber || '',
+            fciRegistrationNumber: animal.fciRegistrationNumber || '',
+            cfaRegistrationNumber: animal.cfaRegistrationNumber || '',
+            workingRegistryIds: animal.workingRegistryIds || '',
             // Health Status
             isNeutered: animal.isNeutered || false,
             isInfertile: animal.isInfertile || false,
+            spayNeuterDate: animal.spayNeuterDate ? new Date(animal.spayNeuterDate).toISOString().substring(0, 10) : '',
             medicalConditions: animal.medicalConditions || '',
             allergies: animal.allergies || '',
             medications: animal.medications || '',
             vetVisits: animal.vetVisits || '',
             primaryVet: animal.primaryVet || '',
+            chronicConditions: animal.chronicConditions || '',
+            parasitePreventionSchedule: animal.parasitePreventionSchedule || '',
+            heartwormStatus: animal.heartwormStatus || '',
+            hipElbowScores: animal.hipElbowScores || '',
+            geneticTestResults: animal.geneticTestResults || '',
+            eyeClearance: animal.eyeClearance || '',
+            cardiacClearance: animal.cardiacClearance || '',
+            dentalRecords: animal.dentalRecords || '',
             // Care & Environment
             dietType: animal.dietType || '',
             feedingSchedule: animal.feedingSchedule || '',
@@ -211,13 +234,30 @@ export default function AnimalManagementPanel({ API_BASE_URL, authToken, userRol
             temperatureRange: animal.temperatureRange || '',
             humidity: animal.humidity || '',
             lighting: animal.lighting || '',
+            noise: animal.noise || '',
             enrichment: animal.enrichment || '',
+            // Dog/Cat specific husbandry
+            exerciseRequirements: animal.exerciseRequirements || '',
+            dailyExerciseMinutes: animal.dailyExerciseMinutes || '',
+            groomingNeeds: animal.groomingNeeds || '',
+            sheddingLevel: animal.sheddingLevel || '',
+            crateTrained: animal.crateTrained || false,
+            litterTrained: animal.litterTrained || false,
+            leashTrained: animal.leashTrained || false,
             // Behavior
             temperament: animal.temperament || '',
             handlingTolerance: animal.handlingTolerance || '',
             socialStructure: animal.socialStructure || '',
             activityCycle: animal.activityCycle || '',
             lifeStage: animal.lifeStage || '',
+            // Training & Behavior
+            trainingLevel: animal.trainingLevel || '',
+            trainingDisciplines: animal.trainingDisciplines || '',
+            certifications: animal.certifications || '',
+            workingRole: animal.workingRole || '',
+            behavioralIssues: animal.behavioralIssues || '',
+            biteHistory: animal.biteHistory || '',
+            reactivityNotes: animal.reactivityNotes || '',
             // Breeding Status
             isPregnant: animal.isPregnant || false,
             isNursing: animal.isNursing || false,
@@ -231,6 +271,15 @@ export default function AnimalManagementPanel({ API_BASE_URL, authToken, userRol
             litterCount: animal.litterCount || '',
             nursingStartDate: animal.nursingStartDate ? new Date(animal.nursingStartDate).toISOString().substring(0, 10) : '',
             weaningDate: animal.weaningDate ? new Date(animal.weaningDate).toISOString().substring(0, 10) : '',
+            // Reproduction specific
+            estrusCycleLength: animal.estrusCycleLength || '',
+            gestationLength: animal.gestationLength || '',
+            artificialInseminationUsed: animal.artificialInseminationUsed || false,
+            whelpingDate: animal.whelpingDate ? new Date(animal.whelpingDate).toISOString().substring(0, 10) : '',
+            queeningDate: animal.queeningDate ? new Date(animal.queeningDate).toISOString().substring(0, 10) : '',
+            deliveryMethod: animal.deliveryMethod || '',
+            reproductiveComplications: animal.reproductiveComplications || '',
+            reproductiveClearances: animal.reproductiveClearances || '',
             // Stud/Fertility (sire role)
             isStudAnimal: animal.isStudAnimal || false,
             availableForBreeding: animal.availableForBreeding || false,
@@ -255,11 +304,18 @@ export default function AnimalManagementPanel({ API_BASE_URL, authToken, userRol
             showRatings: animal.showRatings || '',
             judgeComments: animal.judgeComments || '',
             workingTitles: animal.workingTitles || '',
+            performanceScores: animal.performanceScores || '',
             // Legal/Death
             causeOfDeath: animal.causeOfDeath || '',
             necropsyResults: animal.necropsyResults || '',
             insurance: animal.insurance || '',
-            legalStatus: animal.legalStatus || ''
+            legalStatus: animal.legalStatus || '',
+            endOfLifeCareNotes: animal.endOfLifeCareNotes || '',
+            coOwnership: animal.coOwnership || '',
+            transferHistory: animal.transferHistory || '',
+            breedingRestrictions: animal.breedingRestrictions || '',
+            exportRestrictions: animal.exportRestrictions || '',
+            ownershipHistory: animal.ownershipHistory || []
         };
         setEditForm(formData);
         setOriginalEditForm(formData); // Store original values for comparison
@@ -1093,9 +1149,18 @@ export default function AnimalManagementPanel({ API_BASE_URL, authToken, userRol
                                     </div>
                                 </div>
 
-                                {/* IDENTIFICATION */}
+                                {/* IDENTIFICATION & GENETICS */}
                                 <div className="form-section">
                                     <h4 className="section-title">Identification & Genetics</h4>
+                                    <div className="form-row">
+                                        <label>Registry/Breeder ID</label>
+                                        <input
+                                            type="text"
+                                            value={editForm.breederyId || ''}
+                                            onChange={(e) => setEditForm({...editForm, breederyId: e.target.value})}
+                                            placeholder="Registry or breeder identification code"
+                                        />
+                                    </div>
                                     <div className="form-row">
                                         <label>Microchip Number</label>
                                         <input
@@ -1150,6 +1215,76 @@ export default function AnimalManagementPanel({ API_BASE_URL, authToken, userRol
                                     </div>
                                 </div>
 
+                                {/* DOG/CAT SPECIFIC IDENTIFICATION */}
+                                <div className="form-section">
+                                    <h4 className="section-title">Registration & Documentation</h4>
+                                    <div className="form-row">
+                                        <label>License Number</label>
+                                        <input
+                                            type="text"
+                                            value={editForm.licenseNumber || ''}
+                                            onChange={(e) => setEditForm({...editForm, licenseNumber: e.target.value})}
+                                        />
+                                    </div>
+                                    <div className="form-row">
+                                        <label>License Jurisdiction</label>
+                                        <input
+                                            type="text"
+                                            value={editForm.licenseJurisdiction || ''}
+                                            onChange={(e) => setEditForm({...editForm, licenseJurisdiction: e.target.value})}
+                                        />
+                                    </div>
+                                    <div className="form-row">
+                                        <label>Rabies Tag Number</label>
+                                        <input
+                                            type="text"
+                                            value={editForm.rabiesTagNumber || ''}
+                                            onChange={(e) => setEditForm({...editForm, rabiesTagNumber: e.target.value})}
+                                        />
+                                    </div>
+                                    <div className="form-row">
+                                        <label>Tattoo ID</label>
+                                        <input
+                                            type="text"
+                                            value={editForm.tattooId || ''}
+                                            onChange={(e) => setEditForm({...editForm, tattooId: e.target.value})}
+                                        />
+                                    </div>
+                                    <div className="form-row">
+                                        <label>AKC Registration Number</label>
+                                        <input
+                                            type="text"
+                                            value={editForm.akcRegistrationNumber || ''}
+                                            onChange={(e) => setEditForm({...editForm, akcRegistrationNumber: e.target.value})}
+                                        />
+                                    </div>
+                                    <div className="form-row">
+                                        <label>FCI Registration Number</label>
+                                        <input
+                                            type="text"
+                                            value={editForm.fciRegistrationNumber || ''}
+                                            onChange={(e) => setEditForm({...editForm, fciRegistrationNumber: e.target.value})}
+                                        />
+                                    </div>
+                                    <div className="form-row">
+                                        <label>CFA Registration Number</label>
+                                        <input
+                                            type="text"
+                                            value={editForm.cfaRegistrationNumber || ''}
+                                            onChange={(e) => setEditForm({...editForm, cfaRegistrationNumber: e.target.value})}
+                                        />
+                                    </div>
+                                    <div className="form-row">
+                                        <label>Working Registry IDs</label>
+                                        <input
+                                            type="text"
+                                            value={editForm.workingRegistryIds || ''}
+                                            onChange={(e) => setEditForm({...editForm, workingRegistryIds: e.target.value})}
+                                            placeholder="Service, therapy, working dog registrations"
+                                        />
+                                    </div>
+                                </div>
+
                                 {/* APPEARANCE */}
                                 <div className="form-section">
                                     <h4 className="section-title">Appearance</h4>
@@ -1200,6 +1335,15 @@ export default function AnimalManagementPanel({ API_BASE_URL, authToken, userRol
                                         />
                                     </div>
                                     <div className="form-row">
+                                        <label>Adult Weight (Expected/Mature)</label>
+                                        <input
+                                            type="text"
+                                            value={editForm.adultWeight || ''}
+                                            onChange={(e) => setEditForm({...editForm, adultWeight: e.target.value})}
+                                            placeholder="e.g., 25kg"
+                                        />
+                                    </div>
+                                    <div className="form-row">
                                         <label>Body Length</label>
                                         <input
                                             type="text"
@@ -1215,6 +1359,15 @@ export default function AnimalManagementPanel({ API_BASE_URL, authToken, userRol
                                             value={editForm.heightAtWithers || ''}
                                             onChange={(e) => setEditForm({...editForm, heightAtWithers: e.target.value})}
                                             placeholder="e.g., 25cm"
+                                        />
+                                    </div>
+                                    <div className="form-row">
+                                        <label>Chest Girth</label>
+                                        <input
+                                            type="text"
+                                            value={editForm.chestGirth || ''}
+                                            onChange={(e) => setEditForm({...editForm, chestGirth: e.target.value})}
+                                            placeholder="e.g., 40cm"
                                         />
                                     </div>
                                     <div className="form-row">
@@ -1495,6 +1648,14 @@ export default function AnimalManagementPanel({ API_BASE_URL, authToken, userRol
                                         </label>
                                     </div>
                                     <div className="form-row">
+                                        <label>Spay/Neuter Date</label>
+                                        <input
+                                            type="date"
+                                            value={editForm.spayNeuterDate || ''}
+                                            onChange={(e) => setEditForm({...editForm, spayNeuterDate: e.target.value})}
+                                        />
+                                    </div>
+                                    <div className="form-row">
                                         <label style={{ display: 'flex', alignItems: 'center', gap: '8px', cursor: 'pointer' }}>
                                             <input
                                                 type="checkbox"
@@ -1512,6 +1673,15 @@ export default function AnimalManagementPanel({ API_BASE_URL, authToken, userRol
                                             onChange={(e) => setEditForm({...editForm, medicalConditions: e.target.value})}
                                             rows={3}
                                             placeholder="List any known medical conditions..."
+                                        />
+                                    </div>
+                                    <div className="form-row full-width">
+                                        <label>Chronic Conditions</label>
+                                        <textarea
+                                            value={editForm.chronicConditions || ''}
+                                            onChange={(e) => setEditForm({...editForm, chronicConditions: e.target.value})}
+                                            rows={3}
+                                            placeholder="Long-term health conditions..."
                                         />
                                     </div>
                                     <div className="form-row full-width">
@@ -1548,6 +1718,73 @@ export default function AnimalManagementPanel({ API_BASE_URL, authToken, userRol
                                             onChange={(e) => setEditForm({...editForm, vetVisits: e.target.value})}
                                             rows={3}
                                             placeholder="Recent vet visits and treatments..."
+                                        />
+                                    </div>
+                                    <div className="form-row">
+                                        <label>Parasite Prevention Schedule</label>
+                                        <input
+                                            type="text"
+                                            value={editForm.parasitePreventionSchedule || ''}
+                                            onChange={(e) => setEditForm({...editForm, parasitePreventionSchedule: e.target.value})}
+                                            placeholder="Flea, tick, heartworm prevention"
+                                        />
+                                    </div>
+                                    <div className="form-row">
+                                        <label>Heartworm Status</label>
+                                        <select
+                                            value={editForm.heartwormStatus || ''}
+                                            onChange={(e) => setEditForm({...editForm, heartwormStatus: e.target.value})}
+                                        >
+                                            <option value="">Select...</option>
+                                            <option value="Negative">Negative</option>
+                                            <option value="Positive">Positive</option>
+                                            <option value="Under Treatment">Under Treatment</option>
+                                            <option value="Not Tested">Not Tested</option>
+                                        </select>
+                                    </div>
+                                    <div className="form-row full-width">
+                                        <label>Hip/Elbow Scores</label>
+                                        <textarea
+                                            value={editForm.hipElbowScores || ''}
+                                            onChange={(e) => setEditForm({...editForm, hipElbowScores: e.target.value})}
+                                            rows={2}
+                                            placeholder="Hip dysplasia, elbow dysplasia scores..."
+                                        />
+                                    </div>
+                                    <div className="form-row full-width">
+                                        <label>Genetic Test Results</label>
+                                        <textarea
+                                            value={editForm.geneticTestResults || ''}
+                                            onChange={(e) => setEditForm({...editForm, geneticTestResults: e.target.value})}
+                                            rows={3}
+                                            placeholder="DNA panels, genetic disease testing..."
+                                        />
+                                    </div>
+                                    <div className="form-row">
+                                        <label>Eye Clearance</label>
+                                        <input
+                                            type="text"
+                                            value={editForm.eyeClearance || ''}
+                                            onChange={(e) => setEditForm({...editForm, eyeClearance: e.target.value})}
+                                            placeholder="CERF, ophthalmologist clearance"
+                                        />
+                                    </div>
+                                    <div className="form-row">
+                                        <label>Cardiac Clearance</label>
+                                        <input
+                                            type="text"
+                                            value={editForm.cardiacClearance || ''}
+                                            onChange={(e) => setEditForm({...editForm, cardiacClearance: e.target.value})}
+                                            placeholder="Heart exam, echocardiogram results"
+                                        />
+                                    </div>
+                                    <div className="form-row full-width">
+                                        <label>Dental Records</label>
+                                        <textarea
+                                            value={editForm.dentalRecords || ''}
+                                            onChange={(e) => setEditForm({...editForm, dentalRecords: e.target.value})}
+                                            rows={2}
+                                            placeholder="Dental cleanings, extractions, oral health notes..."
                                         />
                                     </div>
                                 </div>
@@ -1627,6 +1864,15 @@ export default function AnimalManagementPanel({ API_BASE_URL, authToken, userRol
                                             placeholder="e.g., UV lamp, Natural light"
                                         />
                                     </div>
+                                    <div className="form-row">
+                                        <label>Noise Level</label>
+                                        <input
+                                            type="text"
+                                            value={editForm.noise || ''}
+                                            onChange={(e) => setEditForm({...editForm, noise: e.target.value})}
+                                            placeholder="e.g., Quiet, Moderate, Loud"
+                                        />
+                                    </div>
                                     <div className="form-row full-width">
                                         <label>Environmental Enrichment</label>
                                         <textarea
@@ -1638,7 +1884,90 @@ export default function AnimalManagementPanel({ API_BASE_URL, authToken, userRol
                                     </div>
                                 </div>
 
-                                {/* BEHAVIOR */}
+                                {/* HUSBANDRY (DOG/CAT SPECIFIC) */}
+                                <div className="form-section">
+                                    <h4 className="section-title">Husbandry & Exercise</h4>
+                                    <div className="form-row full-width">
+                                        <label>Exercise Requirements</label>
+                                        <textarea
+                                            value={editForm.exerciseRequirements || ''}
+                                            onChange={(e) => setEditForm({...editForm, exerciseRequirements: e.target.value})}
+                                            rows={2}
+                                            placeholder="Activity level, exercise needs..."
+                                        />
+                                    </div>
+                                    <div className="form-row">
+                                        <label>Daily Exercise Minutes</label>
+                                        <input
+                                            type="number"
+                                            value={editForm.dailyExerciseMinutes || ''}
+                                            onChange={(e) => setEditForm({...editForm, dailyExerciseMinutes: e.target.value})}
+                                            placeholder="Minutes per day"
+                                        />
+                                    </div>
+                                    <div className="form-row">
+                                        <label>Grooming Needs</label>
+                                        <select
+                                            value={editForm.groomingNeeds || ''}
+                                            onChange={(e) => setEditForm({...editForm, groomingNeeds: e.target.value})}
+                                        >
+                                            <option value="">Select...</option>
+                                            <option value="Low">Low</option>
+                                            <option value="Moderate">Moderate</option>
+                                            <option value="High">High</option>
+                                            <option value="Professional">Professional</option>
+                                        </select>
+                                    </div>
+                                    <div className="form-row">
+                                        <label>Shedding Level</label>
+                                        <select
+                                            value={editForm.sheddingLevel || ''}
+                                            onChange={(e) => setEditForm({...editForm, sheddingLevel: e.target.value})}
+                                        >
+                                            <option value="">Select...</option>
+                                            <option value="Minimal">Minimal</option>
+                                            <option value="Low">Low</option>
+                                            <option value="Moderate">Moderate</option>
+                                            <option value="High">High</option>
+                                            <option value="Very High">Very High</option>
+                                        </select>
+                                    </div>
+                                    <div className="form-row">
+                                        <label style={{ display: 'flex', alignItems: 'center', gap: '8px', cursor: 'pointer' }}>
+                                            <input
+                                                type="checkbox"
+                                                checked={editForm.crateTrained || false}
+                                                onChange={(e) => setEditForm({...editForm, crateTrained: e.target.checked})}
+                                                style={{ width: 'auto', cursor: 'pointer' }}
+                                            />
+                                            <span>Crate Trained</span>
+                                        </label>
+                                    </div>
+                                    <div className="form-row">
+                                        <label style={{ display: 'flex', alignItems: 'center', gap: '8px', cursor: 'pointer' }}>
+                                            <input
+                                                type="checkbox"
+                                                checked={editForm.litterTrained || false}
+                                                onChange={(e) => setEditForm({...editForm, litterTrained: e.target.checked})}
+                                                style={{ width: 'auto', cursor: 'pointer' }}
+                                            />
+                                            <span>Litter Trained</span>
+                                        </label>
+                                    </div>
+                                    <div className="form-row">
+                                        <label style={{ display: 'flex', alignItems: 'center', gap: '8px', cursor: 'pointer' }}>
+                                            <input
+                                                type="checkbox"
+                                                checked={editForm.leashTrained || false}
+                                                onChange={(e) => setEditForm({...editForm, leashTrained: e.target.checked})}
+                                                style={{ width: 'auto', cursor: 'pointer' }}
+                                            />
+                                            <span>Leash Trained</span>
+                                        </label>
+                                    </div>
+                                </div>
+
+                                {/* BEHAVIOR & TEMPERAMENT */}
                                 <div className="form-section">
                                     <h4 className="section-title">Behavior & Temperament</h4>
                                     <div className="form-row">
@@ -1686,11 +2015,79 @@ export default function AnimalManagementPanel({ API_BASE_URL, authToken, userRol
                                             <option value="Cathemeral">Cathemeral (Variable)</option>
                                         </select>
                                     </div>
+                                    <div className="form-row">
+                                        <label>Training Level</label>
+                                        <select
+                                            value={editForm.trainingLevel || ''}
+                                            onChange={(e) => setEditForm({...editForm, trainingLevel: e.target.value})}
+                                        >
+                                            <option value="">Select...</option>
+                                            <option value="None">None</option>
+                                            <option value="Basic">Basic</option>
+                                            <option value="Intermediate">Intermediate</option>
+                                            <option value="Advanced">Advanced</option>
+                                            <option value="Professional">Professional</option>
+                                        </select>
+                                    </div>
+                                    <div className="form-row full-width">
+                                        <label>Training Disciplines</label>
+                                        <textarea
+                                            value={editForm.trainingDisciplines || ''}
+                                            onChange={(e) => setEditForm({...editForm, trainingDisciplines: e.target.value})}
+                                            rows={2}
+                                            placeholder="Obedience, agility, therapy, service, etc..."
+                                        />
+                                    </div>
+                                    <div className="form-row full-width">
+                                        <label>Certifications</label>
+                                        <textarea
+                                            value={editForm.certifications || ''}
+                                            onChange={(e) => setEditForm({...editForm, certifications: e.target.value})}
+                                            rows={2}
+                                            placeholder="Training certificates, titles, achievements..."
+                                        />
+                                    </div>
+                                    <div className="form-row">
+                                        <label>Working Role</label>
+                                        <input
+                                            type="text"
+                                            value={editForm.workingRole || ''}
+                                            onChange={(e) => setEditForm({...editForm, workingRole: e.target.value})}
+                                            placeholder="Service, therapy, hunting, herding, etc."
+                                        />
+                                    </div>
+                                    <div className="form-row full-width">
+                                        <label>Behavioral Issues</label>
+                                        <textarea
+                                            value={editForm.behavioralIssues || ''}
+                                            onChange={(e) => setEditForm({...editForm, behavioralIssues: e.target.value})}
+                                            rows={3}
+                                            placeholder="Known behavioral problems, triggers, management..."
+                                        />
+                                    </div>
+                                    <div className="form-row full-width">
+                                        <label>Bite History</label>
+                                        <textarea
+                                            value={editForm.biteHistory || ''}
+                                            onChange={(e) => setEditForm({...editForm, biteHistory: e.target.value})}
+                                            rows={2}
+                                            placeholder="Any incidents of biting or aggression..."
+                                        />
+                                    </div>
+                                    <div className="form-row full-width">
+                                        <label>Reactivity Notes</label>
+                                        <textarea
+                                            value={editForm.reactivityNotes || ''}
+                                            onChange={(e) => setEditForm({...editForm, reactivityNotes: e.target.value})}
+                                            rows={3}
+                                            placeholder="Fear, anxiety, reactivity to people, animals, sounds..."
+                                        />
+                                    </div>
                                 </div>
 
-                                {/* BREEDING STATUS */}
+                                {/* BREEDING STATUS & REPRODUCTION */}
                                 <div className="form-section">
-                                    <h4 className="section-title">Breeding Status</h4>
+                                    <h4 className="section-title">Breeding & Reproduction</h4>
                                     <div className="form-row">
                                         <label>Breeding Role</label>
                                         <select
@@ -1758,11 +2155,43 @@ export default function AnimalManagementPanel({ API_BASE_URL, authToken, userRol
                                         />
                                     </div>
                                     <div className="form-row">
+                                        <label>Ovulation Date</label>
+                                        <input
+                                            type="date"
+                                            value={editForm.ovulationDate || ''}
+                                            onChange={(e) => setEditForm({...editForm, ovulationDate: e.target.value})}
+                                        />
+                                    </div>
+                                    <div className="form-row">
                                         <label>Expected Due Date</label>
                                         <input
                                             type="date"
                                             value={editForm.expectedDueDate || ''}
                                             onChange={(e) => setEditForm({...editForm, expectedDueDate: e.target.value})}
+                                        />
+                                    </div>
+                                    <div className="form-row">
+                                        <label>Whelping/Queening Date</label>
+                                        <input
+                                            type="date"
+                                            value={editForm.whelpingDate || editForm.queeningDate || ''}
+                                            onChange={(e) => setEditForm({...editForm, whelpingDate: e.target.value, queeningDate: e.target.value})}
+                                        />
+                                    </div>
+                                    <div className="form-row">
+                                        <label>Nursing Start Date</label>
+                                        <input
+                                            type="date"
+                                            value={editForm.nursingStartDate || ''}
+                                            onChange={(e) => setEditForm({...editForm, nursingStartDate: e.target.value})}
+                                        />
+                                    </div>
+                                    <div className="form-row">
+                                        <label>Weaning Date</label>
+                                        <input
+                                            type="date"
+                                            value={editForm.weaningDate || ''}
+                                            onChange={(e) => setEditForm({...editForm, weaningDate: e.target.value})}
                                         />
                                     </div>
                                     <div className="form-row">
@@ -1781,6 +2210,74 @@ export default function AnimalManagementPanel({ API_BASE_URL, authToken, userRol
                                             value={editForm.offspringCount || ''}
                                             onChange={(e) => setEditForm({...editForm, offspringCount: e.target.value})}
                                             placeholder="Lifetime offspring count"
+                                        />
+                                    </div>
+                                    <div className="form-row">
+                                        <label>Estrus Cycle Length (days)</label>
+                                        <input
+                                            type="number"
+                                            value={editForm.estrusCycleLength || ''}
+                                            onChange={(e) => setEditForm({...editForm, estrusCycleLength: e.target.value})}
+                                            placeholder="21"
+                                        />
+                                    </div>
+                                    <div className="form-row">
+                                        <label>Gestation Length (days)</label>
+                                        <input
+                                            type="number"
+                                            value={editForm.gestationLength || ''}
+                                            onChange={(e) => setEditForm({...editForm, gestationLength: e.target.value})}
+                                            placeholder="63"
+                                        />
+                                    </div>
+                                    <div className="form-row">
+                                        <label style={{ display: 'flex', alignItems: 'center', gap: '8px', cursor: 'pointer' }}>
+                                            <input
+                                                type="checkbox"
+                                                checked={editForm.artificialInseminationUsed || false}
+                                                onChange={(e) => setEditForm({...editForm, artificialInseminationUsed: e.target.checked})}
+                                                style={{ width: 'auto', cursor: 'pointer' }}
+                                            />
+                                            <span>Artificial Insemination Used</span>
+                                        </label>
+                                    </div>
+                                    <div className="form-row">
+                                        <label>Delivery Method</label>
+                                        <select
+                                            value={editForm.deliveryMethod || ''}
+                                            onChange={(e) => setEditForm({...editForm, deliveryMethod: e.target.value})}
+                                        >
+                                            <option value="">Select...</option>
+                                            <option value="Natural">Natural</option>
+                                            <option value="Assisted">Assisted</option>
+                                            <option value="C-Section">C-Section</option>
+                                        </select>
+                                    </div>
+                                    <div className="form-row full-width">
+                                        <label>Mating Dates</label>
+                                        <textarea
+                                            value={editForm.matingDates || ''}
+                                            onChange={(e) => setEditForm({...editForm, matingDates: e.target.value})}
+                                            rows={2}
+                                            placeholder="Record of mating dates and partners..."
+                                        />
+                                    </div>
+                                    <div className="form-row full-width">
+                                        <label>Reproductive Complications</label>
+                                        <textarea
+                                            value={editForm.reproductiveComplications || ''}
+                                            onChange={(e) => setEditForm({...editForm, reproductiveComplications: e.target.value})}
+                                            rows={3}
+                                            placeholder="Delivery complications, reproductive issues..."
+                                        />
+                                    </div>
+                                    <div className="form-row full-width">
+                                        <label>Reproductive Clearances</label>
+                                        <textarea
+                                            value={editForm.reproductiveClearances || ''}
+                                            onChange={(e) => setEditForm({...editForm, reproductiveClearances: e.target.value})}
+                                            rows={2}
+                                            placeholder="Breeding soundness exams, fertility tests..."
                                         />
                                     </div>
                                 </div>
@@ -1946,11 +2443,20 @@ export default function AnimalManagementPanel({ API_BASE_URL, authToken, userRol
                                             placeholder="Working or performance titles..."
                                         />
                                     </div>
+                                    <div className="form-row full-width">
+                                        <label>Performance Scores</label>
+                                        <textarea
+                                            value={editForm.performanceScores || ''}
+                                            onChange={(e) => setEditForm({...editForm, performanceScores: e.target.value})}
+                                            rows={2}
+                                            placeholder="Competition scores, performance metrics..."
+                                        />
+                                    </div>
                                 </div>
 
-                                {/* LEGAL & DEATH */}
+                                {/* LEGAL & OWNERSHIP */}
                                 <div className="form-section">
-                                    <h4 className="section-title">Legal & Death Information</h4>
+                                    <h4 className="section-title">Legal & Ownership</h4>
                                     <div className="form-row">
                                         <label>Legal Status</label>
                                         <input
@@ -1970,6 +2476,42 @@ export default function AnimalManagementPanel({ API_BASE_URL, authToken, userRol
                                         />
                                     </div>
                                     <div className="form-row full-width">
+                                        <label>Co-ownership</label>
+                                        <textarea
+                                            value={editForm.coOwnership || ''}
+                                            onChange={(e) => setEditForm({...editForm, coOwnership: e.target.value})}
+                                            rows={2}
+                                            placeholder="Co-ownership agreements, shared ownership details..."
+                                        />
+                                    </div>
+                                    <div className="form-row full-width">
+                                        <label>Transfer History</label>
+                                        <textarea
+                                            value={editForm.transferHistory || ''}
+                                            onChange={(e) => setEditForm({...editForm, transferHistory: e.target.value})}
+                                            rows={3}
+                                            placeholder="History of ownership transfers..."
+                                        />
+                                    </div>
+                                    <div className="form-row full-width">
+                                        <label>Breeding Restrictions</label>
+                                        <textarea
+                                            value={editForm.breedingRestrictions || ''}
+                                            onChange={(e) => setEditForm({...editForm, breedingRestrictions: e.target.value})}
+                                            rows={2}
+                                            placeholder="Contractual breeding limitations, agreements..."
+                                        />
+                                    </div>
+                                    <div className="form-row full-width">
+                                        <label>Export Restrictions</label>
+                                        <textarea
+                                            value={editForm.exportRestrictions || ''}
+                                            onChange={(e) => setEditForm({...editForm, exportRestrictions: e.target.value})}
+                                            rows={2}
+                                            placeholder="International transfer restrictions..."
+                                        />
+                                    </div>
+                                    <div className="form-row full-width">
                                         <label>Cause of Death</label>
                                         <textarea
                                             value={editForm.causeOfDeath || ''}
@@ -1985,6 +2527,15 @@ export default function AnimalManagementPanel({ API_BASE_URL, authToken, userRol
                                             onChange={(e) => setEditForm({...editForm, necropsyResults: e.target.value})}
                                             rows={3}
                                             placeholder="Post-mortem examination results..."
+                                        />
+                                    </div>
+                                    <div className="form-row full-width">
+                                        <label>End of Life Care Notes</label>
+                                        <textarea
+                                            value={editForm.endOfLifeCareNotes || ''}
+                                            onChange={(e) => setEditForm({...editForm, endOfLifeCareNotes: e.target.value})}
+                                            rows={3}
+                                            placeholder="Palliative care, euthanasia considerations..."
                                         />
                                     </div>
                                 </div>
