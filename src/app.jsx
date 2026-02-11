@@ -17853,6 +17853,10 @@ const App = () => {
                 newest = newest.filter(u => u.id_public && u.accountStatus !== 'banned');
                 active = active.filter(u => u.id_public && u.accountStatus !== 'banned');
                 
+                // Filter out debug breeder CTU1
+                newest = newest.filter(u => u.id_public !== 'CTU1');
+                active = active.filter(u => u.id_public !== 'CTU1');
+                
                 // Filter out anonymous users (those who don't have a visible name)
                 const hasVisibleName = (u) => (u.showBreederName && u.breederName) || (u.showPersonalName && u.personalName);
                 newest = newest.filter(hasVisibleName);
