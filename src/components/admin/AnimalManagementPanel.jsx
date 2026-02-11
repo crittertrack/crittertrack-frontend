@@ -4,7 +4,7 @@ import {
     ChevronLeft, ChevronRight, X, ExternalLink, Image, User,
     RefreshCw, FileText
 } from 'lucide-react';
-import './AnimalManagementPanel.css';
+import './AnimalManagementPanel.css';\nimport './AnimalManagementTabs.css';
 
 export default function AnimalManagementPanel({ API_BASE_URL, authToken, userRole }) {
     const [animals, setAnimals] = useState([]);
@@ -47,6 +47,10 @@ export default function AnimalManagementPanel({ API_BASE_URL, authToken, userRol
     const [breederSearchQuery, setBreederSearchQuery] = useState('');
     const [ownerSearchResults, setOwnerSearchResults] = useState([]);
     const [breederSearchResults, setBreederSearchResults] = useState([]);
+    
+    // Modal tabs
+    const [viewActiveTab, setViewActiveTab] = useState('basic');
+    const [editActiveTab, setEditActiveTab] = useState('basic');
     
     // Owner Filter (Main Filters)
     const [showOwnerFilterDropdown, setShowOwnerFilterDropdown] = useState(false);
@@ -883,120 +887,399 @@ export default function AnimalManagementPanel({ API_BASE_URL, authToken, userRol
             {/* Detail Modal */}
             {showDetailModal && selectedAnimal && (
                 <div className="animal-modal-overlay" onClick={() => setShowDetailModal(false)}>
-                    <div className="animal-modal" onClick={e => e.stopPropagation()}>
+                    <div className="animal-modal large-modal" onClick={e => e.stopPropagation()}>
                         <div className="animal-modal-header">
-                            <h3>
-                                {selectedAnimal.prefix && `${selectedAnimal.prefix} `}
-                                {selectedAnimal.name}
-                                {selectedAnimal.suffix && ` ${selectedAnimal.suffix}`}
-                            </h3>
-                            <span className="animal-modal-id">{selectedAnimal.id_public}</span>
+                            <div className="modal-title-section">
+                                <h3>
+                                    {selectedAnimal.prefix && `${selectedAnimal.prefix} `}
+                                    {selectedAnimal.name}
+                                    {selectedAnimal.suffix && ` ${selectedAnimal.suffix}`}
+                                </h3>
+                                <span className="animal-modal-id">{selectedAnimal.id_public}</span>
+                            </div>
                             <button className="modal-close" onClick={() => setShowDetailModal(false)}>
                                 <X size={20} />
                             </button>
                         </div>
 
+                        {/* Tab Navigation */}
+                        <div className="modal-tabs">
+                            <button 
+                                className={`tab ${viewActiveTab === 'basic' ? 'active' : ''}`}
+                                onClick={() => setViewActiveTab('basic')}
+                            >
+                                Basic Info
+                            </button>
+                            <button 
+                                className={`tab ${viewActiveTab === 'physical' ? 'active' : ''}`}
+                                onClick={() => setViewActiveTab('physical')}
+                            >
+                                Physical
+                            </button>
+                            <button 
+                                className={`tab ${viewActiveTab === 'health' ? 'active' : ''}`}
+                                onClick={() => setViewActiveTab('health')}
+                            >
+                                Health
+                            </button>
+                            <button 
+                                className={`tab ${viewActiveTab === 'breeding' ? 'active' : ''}`}
+                                onClick={() => setViewActiveTab('breeding')}
+                            >
+                                Breeding
+                            </button>
+                            <button 
+                                className={`tab ${viewActiveTab === 'performance' ? 'active' : ''}`}
+                                onClick={() => setViewActiveTab('performance')}
+                            >
+                                Performance
+                            </button>
+                            <button 
+                                className={`tab ${viewActiveTab === 'legal' ? 'active' : ''}`}
+                                onClick={() => setViewActiveTab('legal')}
+                            >
+                                Legal
+                            </button>
+                            <button 
+                                className={`tab ${viewActiveTab === 'reports' ? 'active' : ''}`}
+                                onClick={() => setViewActiveTab('reports')}
+                            >
+                                Reports
+                            </button>
+                        </div>
+
                         <div className="animal-modal-body">
-                            {/* Image Section */}
-                            {selectedAnimal.imageUrl && (
-                                <div className="animal-detail-section">
-                                    <h4>Image</h4>
-                                    <div className="animal-image-preview">
-                                        <img src={selectedAnimal.imageUrl} alt={selectedAnimal.name} />
-                                        <div className="image-action-row">
-                                            <input
-                                                type="text"
-                                                placeholder="Reason for removal..."
-                                                value={actionReason}
-                                                onChange={(e) => setActionReason(e.target.value)}
-                                            />
-                                            <button 
-                                                className="btn-danger"
-                                                onClick={() => handleRemoveImage(selectedAnimal)}
-                                            >
-                                                <Image size={14} /> Remove Image
-                                            </button>
+                            <div className="tab-content scrollable-content">
+                                {/* Basic Info Tab */}
+                                {viewActiveTab === 'basic' && (
+                                    <div className="tab-panel">
+                                        {/* Image Section */}
+                                        {selectedAnimal.imageUrl && (
+                                            <div className="animal-detail-section">
+                                                <h4>Image</h4>
+                                                <div className="animal-image-preview">
+                                                    <img src={selectedAnimal.imageUrl} alt={selectedAnimal.name} />
+                                                    <div className="image-action-row">
+                                                        <input
+                                                            type="text"
+                                                            placeholder="Reason for removal..."
+                                                            value={actionReason}
+                                                            onChange={(e) => setActionReason(e.target.value)}
+                                                        />
+                                                        <button 
+                                                            className="btn-danger"
+                                                            onClick={() => handleRemoveImage(selectedAnimal)}
+                                                        >
+                                                            <Image size={14} /> Remove Image
+                                                        </button>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        )}
+
+                                        <div className="animal-detail-section">
+                                            <h4>Basic Information</h4>
+                                            <div className="detail-grid">
+                                                <div><strong>Species:</strong> {selectedAnimal.species || '-'}</div>
+                                                <div><strong>Breed:</strong> {selectedAnimal.breed || '-'}</div>
+                                                <div><strong>Gender:</strong> {selectedAnimal.gender || '-'}</div>
+                                                <div><strong>Status:</strong> {selectedAnimal.status || '-'}</div>
+                                                <div><strong>Life Stage:</strong> {selectedAnimal.lifeStage || '-'}</div>
+                                                <div><strong>Birth Date:</strong> {selectedAnimal.birthDate ? formatDate(selectedAnimal.birthDate) : '-'}</div>
+                                                <div><strong>Deceased Date:</strong> {selectedAnimal.deceasedDate ? formatDate(selectedAnimal.deceasedDate) : '-'}</div>
+                                                <div><strong>Created:</strong> {formatDate(selectedAnimal.createdAt)}</div>
+                                            </div>
                                         </div>
-                                    </div>
-                                </div>
-                            )}
 
-                            {/* Basic Info */}
-                            <div className="animal-detail-section">
-                                <h4>Basic Information</h4>
-                                <div className="detail-grid">
-                                    <div><strong>Species:</strong> {selectedAnimal.species}</div>
-                                    <div><strong>Gender:</strong> {selectedAnimal.gender}</div>
-                                    <div><strong>Status:</strong> {selectedAnimal.status || '-'}</div>
-                                    <div><strong>Created:</strong> {formatDate(selectedAnimal.createdAt)}</div>
-                                </div>
-                            </div>
+                                        <div className="animal-detail-section">
+                                            <h4>Identification</h4>
+                                            <div className="detail-grid">
+                                                <div><strong>Registry ID:</strong> {selectedAnimal.breederyId || '-'}</div>
+                                                <div><strong>Microchip:</strong> {selectedAnimal.microchipNumber || '-'}</div>
+                                                <div><strong>Pedigree ID:</strong> {selectedAnimal.pedigreeRegistrationId || '-'}</div>
+                                                <div><strong>Genetic Code:</strong> {selectedAnimal.geneticCode || '-'}</div>
+                                            </div>
+                                        </div>
 
-                            {/* Ownership */}
-                            <div className="animal-detail-section">
-                                <h4>Ownership</h4>
-                                <div className="detail-grid">
-                                    <div>
-                                        <strong>Current Owner:</strong>{' '}
-                                        {selectedAnimal.ownerId?.personalName || selectedAnimal.ownerId?.email || 'Unknown'}
-                                        {selectedAnimal.ownerId?.id_public && (
-                                            <span className="owner-id"> ({selectedAnimal.ownerId.id_public})</span>
+                                        <div className="animal-detail-section">
+                                            <h4>Lineage</h4>
+                                            <div className="detail-grid">
+                                                <div><strong>Sire:</strong> {selectedAnimal.sireId_public || '-'}</div>
+                                                <div><strong>Dam:</strong> {selectedAnimal.damId_public || '-'}</div>
+                                            </div>
+                                        </div>
+
+                                        {selectedAnimal.remarks && (
+                                            <div className="animal-detail-section">
+                                                <h4>Remarks</h4>
+                                                <p className="remarks-text">{selectedAnimal.remarks}</p>
+                                            </div>
                                         )}
                                     </div>
-                                    {selectedAnimal.originalOwnerId && selectedAnimal.originalOwnerId._id !== selectedAnimal.ownerId?._id && (
-                                        <div>
-                                            <strong>Original Breeder:</strong>{' '}
-                                            {selectedAnimal.originalOwnerId.personalName || selectedAnimal.originalOwnerId.email}
-                                        </div>
-                                    )}
-                                    {selectedAnimal.soldStatus && (
-                                        <div><strong>Transfer Status:</strong> {selectedAnimal.soldStatus}</div>
-                                    )}
-                                </div>
-                            </div>
+                                )}
 
-                            {/* Lineage */}
-                            <div className="animal-detail-section">
-                                <h4>Lineage</h4>
-                                <div className="detail-grid">
-                                    <div><strong>Sire:</strong> {selectedAnimal.sireId_public || '-'}</div>
-                                    <div><strong>Dam:</strong> {selectedAnimal.damId_public || '-'}</div>
-                                </div>
-                            </div>
-
-                            {/* Remarks */}
-                            {selectedAnimal.remarks && (
-                                <div className="animal-detail-section">
-                                    <h4>Remarks</h4>
-                                    <p className="remarks-text">{selectedAnimal.remarks}</p>
-                                </div>
-                            )}
-
-                            {/* Reports */}
-                            {selectedAnimal.reports && selectedAnimal.reports.length > 0 && (
-                                <div className="animal-detail-section reports-section">
-                                    <h4><AlertTriangle size={16} /> Reports ({selectedAnimal.reports.length})</h4>
-                                    <div className="reports-list">
-                                        {selectedAnimal.reports.map(report => (
-                                            <div key={report._id} className={`report-item ${report.status}`}>
-                                                <div className="report-header">
-                                                    <span className={`report-status ${report.status}`}>{report.status}</span>
-                                                    <span className="report-date">{formatDate(report.createdAt)}</span>
-                                                </div>
-                                                <p className="report-reason">{report.reason}</p>
-                                                <p className="report-by">
-                                                    Reported by: {report.reporterId?.personalName || report.reporterId?.email || 'Unknown'}
-                                                </p>
+                                {/* Physical Tab */}
+                                {viewActiveTab === 'physical' && (
+                                    <div className="tab-panel">
+                                        <div className="animal-detail-section">
+                                            <h4>Physical Characteristics</h4>
+                                            <div className="detail-grid">
+                                                <div><strong>Color:</strong> {selectedAnimal.color || '-'}</div>
+                                                <div><strong>Pattern:</strong> {selectedAnimal.pattern || '-'}</div>
+                                                <div><strong>Eye Color:</strong> {selectedAnimal.eyeColor || '-'}</div>
+                                                <div><strong>Weight:</strong> {selectedAnimal.weight ? `${selectedAnimal.weight} ${selectedAnimal.weightUnit || ''}` : '-'}</div>
+                                                <div><strong>Height:</strong> {selectedAnimal.height ? `${selectedAnimal.height} ${selectedAnimal.heightUnit || ''}` : '-'}</div>
+                                                <div><strong>Length:</strong> {selectedAnimal.length ? `${selectedAnimal.length} ${selectedAnimal.lengthUnit || ''}` : '-'}</div>
                                             </div>
-                                        ))}
-                                    </div>
-                                </div>
-                            )}
+                                        </div>
 
-                            {/* Actions */}
-                            <div className="animal-detail-section actions-section">
-                                <h4>Actions</h4>
-                                <div className="action-row">
+                                        {selectedAnimal.physicalDescription && (
+                                            <div className="animal-detail-section">
+                                                <h4>Physical Description</h4>
+                                                <p className="remarks-text">{selectedAnimal.physicalDescription}</p>
+                                            </div>
+                                        )}
+
+                                        {(selectedAnimal.markings || selectedAnimal.markingsDescription) && (
+                                            <div className="animal-detail-section">
+                                                <h4>Markings & Distinctive Features</h4>
+                                                {selectedAnimal.markings && (
+                                                    <div><strong>Markings:</strong> {selectedAnimal.markings}</div>
+                                                )}
+                                                {selectedAnimal.markingsDescription && (
+                                                    <p className="remarks-text">{selectedAnimal.markingsDescription}</p>
+                                                )}
+                                            </div>
+                                        )}
+                                    </div>
+                                )}
+
+                                {/* Health Tab */}
+                                {viewActiveTab === 'health' && (
+                                    <div className="tab-panel">
+                                        <div className="animal-detail-section">
+                                            <h4>Health Status</h4>
+                                            <div className="detail-grid">
+                                                <div><strong>Spay/Neuter:</strong> {selectedAnimal.spayNeuterDate ? `Yes - ${formatDate(selectedAnimal.spayNeuterDate)}` : 'No'}</div>
+                                                <div><strong>Health Status:</strong> {selectedAnimal.healthStatus || '-'}</div>
+                                                <div><strong>Health Issues:</strong> {selectedAnimal.healthIssues || '-'}</div>
+                                            </div>
+                                        </div>
+
+                                        {(selectedAnimal.geneticTestResults || selectedAnimal.healthClearances) && (
+                                            <div className="animal-detail-section">
+                                                <h4>Genetic Testing & Clearances</h4>
+                                                {selectedAnimal.geneticTestResults && (
+                                                    <div className="detail-item">
+                                                        <strong>Genetic Test Results:</strong>
+                                                        <p className="remarks-text">{selectedAnimal.geneticTestResults}</p>
+                                                    </div>
+                                                )}
+                                                {selectedAnimal.healthClearances && (
+                                                    <div className="detail-item">
+                                                        <strong>Health Clearances:</strong>
+                                                        <p className="remarks-text">{selectedAnimal.healthClearances}</p>
+                                                    </div>
+                                                )}
+                                            </div>
+                                        )}
+
+                                        {selectedAnimal.medicalHistory && (
+                                            <div className="animal-detail-section">
+                                                <h4>Medical History</h4>
+                                                <p className="remarks-text">{selectedAnimal.medicalHistory}</p>
+                                            </div>
+                                        )}
+
+                                        {selectedAnimal.dietRequirements && (
+                                            <div className="animal-detail-section">
+                                                <h4>Diet & Care</h4>
+                                                <p className="remarks-text">{selectedAnimal.dietRequirements}</p>
+                                            </div>
+                                        )}
+                                    </div>
+                                )}
+
+                                {/* Breeding Tab */}
+                                {viewActiveTab === 'breeding' && (
+                                    <div className="tab-panel">
+                                        <div className="animal-detail-section">
+                                            <h4>Breeding Information</h4>
+                                            <div className="detail-grid">
+                                                <div><strong>Breeding Rights:</strong> {selectedAnimal.breedingRights || '-'}</div>
+                                                <div><strong>Breeding Quality:</strong> {selectedAnimal.breedingQuality || '-'}</div>
+                                                <div><strong>Breeding Status:</strong> {selectedAnimal.breedingStatus || '-'}</div>
+                                            </div>
+                                        </div>
+
+                                        {(selectedAnimal.progenyCount || selectedAnimal.litterHistory) && (
+                                            <div className="animal-detail-section">
+                                                <h4>Reproductive History</h4>
+                                                {selectedAnimal.progenyCount && (
+                                                    <div><strong>Progeny Count:</strong> {selectedAnimal.progenyCount}</div>
+                                                )}
+                                                {selectedAnimal.litterHistory && (
+                                                    <div className="detail-item">
+                                                        <strong>Litter History:</strong>
+                                                        <p className="remarks-text">{selectedAnimal.litterHistory}</p>
+                                                    </div>
+                                                )}
+                                            </div>
+                                        )}
+
+                                        {selectedAnimal.breedingRestrictions && (
+                                            <div className="animal-detail-section">
+                                                <h4>Breeding Restrictions</h4>
+                                                <p className="remarks-text">{selectedAnimal.breedingRestrictions}</p>
+                                            </div>
+                                        )}
+                                    </div>
+                                )}
+
+                                {/* Performance Tab */}
+                                {viewActiveTab === 'performance' && (
+                                    <div className="tab-panel">
+                                        {(selectedAnimal.showTitles || selectedAnimal.showRatings) && (
+                                            <div className="animal-detail-section">
+                                                <h4>Show Achievements</h4>
+                                                {selectedAnimal.showTitles && (
+                                                    <div className="detail-item">
+                                                        <strong>Show Titles:</strong>
+                                                        <p className="remarks-text">{selectedAnimal.showTitles}</p>
+                                                    </div>
+                                                )}
+                                                {selectedAnimal.showRatings && (
+                                                    <div className="detail-item">
+                                                        <strong>Show Ratings:</strong>
+                                                        <p className="remarks-text">{selectedAnimal.showRatings}</p>
+                                                    </div>
+                                                )}
+                                            </div>
+                                        )}
+
+                                        {(selectedAnimal.workingTitles || selectedAnimal.performanceScores) && (
+                                            <div className="animal-detail-section">
+                                                <h4>Working & Performance</h4>
+                                                {selectedAnimal.workingTitles && (
+                                                    <div className="detail-item">
+                                                        <strong>Working Titles:</strong>
+                                                        <p className="remarks-text">{selectedAnimal.workingTitles}</p>
+                                                    </div>
+                                                )}
+                                                {selectedAnimal.performanceScores && (
+                                                    <div className="detail-item">
+                                                        <strong>Performance Scores:</strong>
+                                                        <p className="remarks-text">{selectedAnimal.performanceScores}</p>
+                                                    </div>
+                                                )}
+                                            </div>
+                                        )}
+
+                                        {selectedAnimal.temperament && (
+                                            <div className="animal-detail-section">
+                                                <h4>Temperament</h4>
+                                                <p className="remarks-text">{selectedAnimal.temperament}</p>
+                                            </div>
+                                        )}
+                                    </div>
+                                )}
+
+                                {/* Legal Tab */}
+                                {viewActiveTab === 'legal' && (
+                                    <div className="tab-panel">
+                                        <div className="animal-detail-section">
+                                            <h4>Ownership</h4>
+                                            <div className="detail-grid">
+                                                <div>
+                                                    <strong>Current Owner:</strong>{' '}
+                                                    {selectedAnimal.ownerId?.personalName || selectedAnimal.ownerId?.email || 'Unknown'}
+                                                    {selectedAnimal.ownerId?.id_public && (
+                                                        <span className="owner-id"> ({selectedAnimal.ownerId.id_public})</span>
+                                                    )}
+                                                </div>
+                                                {selectedAnimal.originalOwnerId && selectedAnimal.originalOwnerId._id !== selectedAnimal.ownerId?._id && (
+                                                    <div>
+                                                        <strong>Original Breeder:</strong>{' '}
+                                                        {selectedAnimal.originalOwnerId.personalName || selectedAnimal.originalOwnerId.email}
+                                                    </div>
+                                                )}
+                                                {selectedAnimal.soldStatus && (
+                                                    <div><strong>Transfer Status:</strong> {selectedAnimal.soldStatus}</div>
+                                                )}
+                                            </div>
+                                        </div>
+
+                                        {(selectedAnimal.coOwnership || selectedAnimal.transferHistory) && (
+                                            <div className="animal-detail-section">
+                                                <h4>Ownership History</h4>
+                                                {selectedAnimal.coOwnership && (
+                                                    <div className="detail-item">
+                                                        <strong>Co-ownership:</strong>
+                                                        <p className="remarks-text">{selectedAnimal.coOwnership}</p>
+                                                    </div>
+                                                )}
+                                                {selectedAnimal.transferHistory && (
+                                                    <div className="detail-item">
+                                                        <strong>Transfer History:</strong>
+                                                        <p className="remarks-text">{selectedAnimal.transferHistory}</p>
+                                                    </div>
+                                                )}
+                                            </div>
+                                        )}
+
+                                        {(selectedAnimal.legalStatus || selectedAnimal.insurance) && (
+                                            <div className="animal-detail-section">
+                                                <h4>Legal Status</h4>
+                                                <div className="detail-grid">
+                                                    <div><strong>Legal Status:</strong> {selectedAnimal.legalStatus || '-'}</div>
+                                                    <div><strong>Insurance:</strong> {selectedAnimal.insurance || '-'}</div>
+                                                </div>
+                                            </div>
+                                        )}
+
+                                        {selectedAnimal.exportRestrictions && (
+                                            <div className="animal-detail-section">
+                                                <h4>Restrictions</h4>
+                                                <p className="remarks-text">{selectedAnimal.exportRestrictions}</p>
+                                            </div>
+                                        )}
+                                    </div>
+                                )}
+
+                                {/* Reports Tab */}
+                                {viewActiveTab === 'reports' && (
+                                    <div className="tab-panel">
+                                        {selectedAnimal.reports && selectedAnimal.reports.length > 0 ? (
+                                            <div className="animal-detail-section reports-section">
+                                                <h4><AlertTriangle size={16} /> Reports ({selectedAnimal.reports.length})</h4>
+                                                <div className="reports-list">
+                                                    {selectedAnimal.reports.map(report => (
+                                                        <div key={report._id} className={`report-item ${report.status}`}>
+                                                            <div className="report-header">
+                                                                <span className={`report-status ${report.status}`}>{report.status}</span>
+                                                                <span className="report-date">{formatDate(report.createdAt)}</span>
+                                                            </div>
+                                                            <p className="report-reason">{report.reason}</p>
+                                                            <p className="report-by">
+                                                                Reported by: {report.reporterId?.personalName || report.reporterId?.email || 'Unknown'}
+                                                            </p>
+                                                        </div>
+                                                    ))}
+                                                </div>
+                                            </div>
+                                        ) : (
+                                            <div className="animal-detail-section">
+                                                <p className="no-data">No reports for this animal.</p>
+                                            </div>
+                                        )}
+                                    </div>
+                                )}
+                            </div>
+                        </div>
+
+                        <div className="animal-modal-footer">
+                            <div className="action-row">
+                                <input
                                     <input
                                         type="text"
                                         placeholder="Reason for action..."
@@ -1038,31 +1321,370 @@ export default function AnimalManagementPanel({ API_BASE_URL, authToken, userRol
             {/* Edit Modal */}
             {showEditModal && selectedAnimal && (
                 <div className="animal-modal-overlay" onClick={() => setShowEditModal(false)}>
-                    <div className="animal-modal edit-modal" onClick={e => e.stopPropagation()}>
+                    <div className="animal-modal large-modal edit-modal" onClick={e => e.stopPropagation()}>
                         <div className="animal-modal-header">
-                            <h3>Edit Animal: {selectedAnimal.id_public}</h3>
+                            <div className="modal-title-section">
+                                <h3>Edit Animal: {selectedAnimal.id_public}</h3>
+                            </div>
                             <button className="modal-close" onClick={() => setShowEditModal(false)}>
                                 <X size={20} />
                             </button>
                         </div>
 
+                        {/* Tab Navigation */}
+                        <div className="modal-tabs">
+                            <button 
+                                className={`tab ${editActiveTab === 'basic' ? 'active' : ''}`}
+                                onClick={() => setEditActiveTab('basic')}
+                            >
+                                Basic Info
+                            </button>
+                            <button 
+                                className={`tab ${editActiveTab === 'physical' ? 'active' : ''}`}
+                                onClick={() => setEditActiveTab('physical')}
+                            >
+                                Physical
+                            </button>
+                            <button 
+                                className={`tab ${editActiveTab === 'health' ? 'active' : ''}`}
+                                onClick={() => setEditActiveTab('health')}
+                            >
+                                Health
+                            </button>
+                            <button 
+                                className={`tab ${editActiveTab === 'breeding' ? 'active' : ''}`}
+                                onClick={() => setEditActiveTab('breeding')}
+                            >
+                                Breeding
+                            </button>
+                            <button 
+                                className={`tab ${editActiveTab === 'care' ? 'active' : ''}`}
+                                onClick={() => setEditActiveTab('care')}
+                            >
+                                Care
+                            </button>
+                            <button 
+                                className={`tab ${editActiveTab === 'performance' ? 'active' : ''}`}
+                                onClick={() => setEditActiveTab('performance')}
+                            >
+                                Performance
+                            </button>
+                            <button 
+                                className={`tab ${editActiveTab === 'legal' ? 'active' : ''}`}
+                                onClick={() => setEditActiveTab('legal')}
+                            >
+                                Legal
+                            </button>
+                        </div>
+
                         <div className="animal-modal-body">
-                            <div className="edit-form" style={{maxHeight: '70vh', overflowY: 'auto', padding: '20px'}}>
-                                {/* BASIC INFORMATION */}
-                                <div className="form-section">
-                                    <h4 className="section-title">Basic Information</h4>
-                                    <div className="form-row">
-                                        <label>Prefix</label>
-                                        <input
-                                            type="text"
-                                            value={editForm.prefix || ''}
-                                            onChange={(e) => setEditForm({...editForm, prefix: e.target.value})}
-                                        />
+                            <div className="tab-content scrollable-content">
+                                {/* Basic Info Tab */}
+                                {editActiveTab === 'basic' && (
+                                    <div className="tab-panel">
+                                        <div className="edit-form">
+                                            {/* BASIC INFORMATION */}
+                                            <div className="form-section">
+                                                <h4 className="section-title">Basic Information</h4>
+                                                <div className="form-row">
+                                                    <label>Prefix</label>
+                                                    <input
+                                                        type="text"
+                                                        value={editForm.prefix || ''}
+                                                        onChange={(e) => setEditForm({...editForm, prefix: e.target.value})}
+                                                    />
+                                                </div>
+                                                <div className="form-row">
+                                                    <label>Name *</label>
+                                                    <input
+                                                        type="text"
+                                                        value={editForm.name || ''}
+                                                        onChange={(e) => setEditForm({...editForm, name: e.target.value})}
+                                                    />
+                                                </div>
+                                                <div className="form-row">
+                                                    <label>Suffix</label>
+                                                    <input
+                                                        type="text"
+                                                        value={editForm.suffix || ''}
+                                                        onChange={(e) => setEditForm({...editForm, suffix: e.target.value})}
+                                                    />
+                                                </div>
+                                                <div className="form-row">
+                                                    <label>Species</label>
+                                                    <input
+                                                        type="text"
+                                                        value={editForm.species || ''}
+                                                        onChange={(e) => setEditForm({...editForm, species: e.target.value})}
+                                                    />
+                                                </div>
+                                                <div className="form-row">
+                                                    <label>Breed</label>
+                                                    <input
+                                                        type="text"
+                                                        value={editForm.breed || ''}
+                                                        onChange={(e) => setEditForm({...editForm, breed: e.target.value})}
+                                                    />
+                                                </div>
+                                                <div className="form-row">
+                                                    <label>Gender</label>
+                                                    <select
+                                                        value={editForm.gender || ''}
+                                                        onChange={(e) => setEditForm({...editForm, gender: e.target.value})}
+                                                    >
+                                                        <option value="">Select...</option>
+                                                        <option value="Male">Male</option>
+                                                        <option value="Female">Female</option>
+                                                        <option value="Intersex">Intersex</option>
+                                                        <option value="Unknown">Unknown</option>
+                                                    </select>
+                                                </div>
+                                                <div className="form-row">
+                                                    <label>Life Stage</label>
+                                                    <select
+                                                        value={editForm.lifeStage || ''}
+                                                        onChange={(e) => setEditForm({...editForm, lifeStage: e.target.value})}
+                                                    >
+                                                        <option value="">Select...</option>
+                                                        <option value="Newborn">Newborn</option>
+                                                        <option value="Kit/Pup">Kit/Pup</option>
+                                                        <option value="Juvenile">Juvenile</option>
+                                                        <option value="Adult">Adult</option>
+                                                        <option value="Senior">Senior</option>
+                                                        <option value="Geriatric">Geriatric</option>
+                                                    </select>
+                                                </div>
+                                                <div className="form-row">
+                                                    <label>Status</label>
+                                                    <select
+                                                        value={editForm.status || ''}
+                                                        onChange={(e) => setEditForm({...editForm, status: e.target.value})}
+                                                    >
+                                                        <option value="Pet">Pet</option>
+                                                        <option value="Breeder">Breeder</option>
+                                                        <option value="Available">Available</option>
+                                                        <option value="Booked">Booked</option>
+                                                        <option value="Retired">Retired</option>
+                                                        <option value="Deceased">Deceased</option>
+                                                        <option value="Rehomed">Rehomed</option>
+                                                        <option value="Unknown">Unknown</option>
+                                                    </select>
+                                                </div>
+                                            </div>
+
+                                            {/* DATES */}
+                                            <div className="form-section">
+                                                <h4 className="section-title">Important Dates</h4>
+                                                <div className="form-row">
+                                                    <label>Birth Date</label>
+                                                    <input
+                                                        type="date"
+                                                        value={editForm.birthDate || ''}
+                                                        onChange={(e) => setEditForm({...editForm, birthDate: e.target.value})}
+                                                    />
+                                                </div>
+                                                <div className="form-row">
+                                                    <label>Deceased Date</label>
+                                                    <input
+                                                        type="date"
+                                                        value={editForm.deceasedDate || ''}
+                                                        onChange={(e) => setEditForm({...editForm, deceasedDate: e.target.value})}
+                                                    />
+                                                </div>
+                                            </div>
+
+                                            {/* IDENTIFICATION */}
+                                            <div className="form-section">
+                                                <h4 className="section-title">Identification</h4>
+                                                <div className="form-row">
+                                                    <label>Registry/Breeder ID</label>
+                                                    <input
+                                                        type="text"
+                                                        value={editForm.breederyId || ''}
+                                                        onChange={(e) => setEditForm({...editForm, breederyId: e.target.value})}
+                                                        placeholder="Registry or breeder identification code"
+                                                    />
+                                                </div>
+                                                <div className="form-row">
+                                                    <label>Microchip Number</label>
+                                                    <input
+                                                        type="text"
+                                                        value={editForm.microchipNumber || ''}
+                                                        onChange={(e) => setEditForm({...editForm, microchipNumber: e.target.value})}
+                                                    />
+                                                </div>
+                                                <div className="form-row">
+                                                    <label>Pedigree Registration ID</label>
+                                                    <input
+                                                        type="text"
+                                                        value={editForm.pedigreeRegistrationId || ''}
+                                                        onChange={(e) => setEditForm({...editForm, pedigreeRegistrationId: e.target.value})}
+                                                    />
+                                                </div>
+                                                <div className="form-row">
+                                                    <label>Genetic Code</label>
+                                                    <input
+                                                        type="text"
+                                                        value={editForm.geneticCode || ''}
+                                                        onChange={(e) => setEditForm({...editForm, geneticCode: e.target.value})}
+                                                    />
+                                                </div>
+                                            </div>
+
+                                            {/* LINEAGE */}
+                                            <div className="form-section">
+                                                <h4 className="section-title">Lineage</h4>
+                                                <div className="form-row">
+                                                    <label>Sire (Father) ID</label>
+                                                    <input
+                                                        type="text"
+                                                        value={editForm.sireId_public || ''}
+                                                        onChange={(e) => setEditForm({...editForm, sireId_public: e.target.value})}
+                                                        placeholder="Father's ID"
+                                                    />
+                                                </div>
+                                                <div className="form-row">
+                                                    <label>Dam (Mother) ID</label>
+                                                    <input
+                                                        type="text"
+                                                        value={editForm.damId_public || ''}
+                                                        onChange={(e) => setEditForm({...editForm, damId_public: e.target.value})}
+                                                        placeholder="Mother's ID"
+                                                    />
+                                                </div>
+                                            </div>
+                                        </div>
                                     </div>
-                                    <div className="form-row">
-                                        <label>Name *</label>
-                                        <input
-                                            type="text"
+                                )}
+
+                                {/* Physical Tab */}
+                                {editActiveTab === 'physical' && (
+                                    <div className="tab-panel">
+                                        <div className="edit-form">
+                                            {/* PHYSICAL CHARACTERISTICS */}
+                                            <div className="form-section">
+                                                <h4 className="section-title">Physical Characteristics</h4>
+                                                <div className="form-row">
+                                                    <label>Color</label>
+                                                    <input
+                                                        type="text"
+                                                        value={editForm.color || ''}
+                                                        onChange={(e) => setEditForm({...editForm, color: e.target.value})}
+                                                    />
+                                                </div>
+                                                <div className="form-row">
+                                                    <label>Pattern</label>
+                                                    <input
+                                                        type="text"
+                                                        value={editForm.pattern || ''}
+                                                        onChange={(e) => setEditForm({...editForm, pattern: e.target.value})}
+                                                    />
+                                                </div>
+                                                <div className="form-row">
+                                                    <label>Eye Color</label>
+                                                    <input
+                                                        type="text"
+                                                        value={editForm.eyeColor || ''}
+                                                        onChange={(e) => setEditForm({...editForm, eyeColor: e.target.value})}
+                                                    />
+                                                </div>
+                                                <div className="form-row">
+                                                    <label>Weight</label>
+                                                    <div className="measurement-row">
+                                                        <input
+                                                            type="number"
+                                                            step="0.1"
+                                                            value={editForm.weight || ''}
+                                                            onChange={(e) => setEditForm({...editForm, weight: e.target.value})}
+                                                            placeholder="0.0"
+                                                        />
+                                                        <select
+                                                            value={editForm.weightUnit || 'kg'}
+                                                            onChange={(e) => setEditForm({...editForm, weightUnit: e.target.value})}
+                                                        >
+                                                            <option value="kg">kg</option>
+                                                            <option value="lb">lb</option>
+                                                            <option value="g">g</option>
+                                                            <option value="oz">oz</option>
+                                                        </select>
+                                                    </div>
+                                                </div>
+                                                <div className="form-row">
+                                                    <label>Height</label>
+                                                    <div className="measurement-row">
+                                                        <input
+                                                            type="number"
+                                                            step="0.1"
+                                                            value={editForm.height || ''}
+                                                            onChange={(e) => setEditForm({...editForm, height: e.target.value})}
+                                                            placeholder="0.0"
+                                                        />
+                                                        <select
+                                                            value={editForm.heightUnit || 'cm'}
+                                                            onChange={(e) => setEditForm({...editForm, heightUnit: e.target.value})}
+                                                        >
+                                                            <option value="cm">cm</option>
+                                                            <option value="in">in</option>
+                                                            <option value="mm">mm</option>
+                                                        </select>
+                                                    </div>
+                                                </div>
+                                                <div className="form-row">
+                                                    <label>Length</label>
+                                                    <div className="measurement-row">
+                                                        <input
+                                                            type="number"
+                                                            step="0.1"
+                                                            value={editForm.length || ''}
+                                                            onChange={(e) => setEditForm({...editForm, length: e.target.value})}
+                                                            placeholder="0.0"
+                                                        />
+                                                        <select
+                                                            value={editForm.lengthUnit || 'cm'}
+                                                            onChange={(e) => setEditForm({...editForm, lengthUnit: e.target.value})}
+                                                        >
+                                                            <option value="cm">cm</option>
+                                                            <option value="in">in</option>
+                                                            <option value="mm">mm</option>
+                                                        </select>
+                                                    </div>
+                                                </div>
+                                            </div>
+
+                                            {/* MARKINGS & DESCRIPTION */}
+                                            <div className="form-section">
+                                                <h4 className="section-title">Markings & Description</h4>
+                                                <div className="form-row">
+                                                    <label>Markings</label>
+                                                    <input
+                                                        type="text"
+                                                        value={editForm.markings || ''}
+                                                        onChange={(e) => setEditForm({...editForm, markings: e.target.value})}
+                                                        placeholder="Notable markings or distinctive features"
+                                                    />
+                                                </div>
+                                                <div className="form-row full-width">
+                                                    <label>Markings Description</label>
+                                                    <textarea
+                                                        value={editForm.markingsDescription || ''}
+                                                        onChange={(e) => setEditForm({...editForm, markingsDescription: e.target.value})}
+                                                        rows={3}
+                                                        placeholder="Detailed description of markings..."
+                                                    />
+                                                </div>
+                                                <div className="form-row full-width">
+                                                    <label>Physical Description</label>
+                                                    <textarea
+                                                        value={editForm.physicalDescription || ''}
+                                                        onChange={(e) => setEditForm({...editForm, physicalDescription: e.target.value})}
+                                                        rows={4}
+                                                        placeholder="Overall physical description..."
+                                                    />
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                )}
                                             value={editForm.name || ''}
                                             onChange={(e) => setEditForm({...editForm, name: e.target.value})}
                                         />
