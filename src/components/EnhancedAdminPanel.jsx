@@ -348,15 +348,36 @@ const EnhancedAdminPanel = ({ isOpen, onClose, authToken, API_BASE_URL, userRole
 
     const fetchDashboardStats = async () => {
         try {
-            const response = await fetch(`${API_BASE_URL}/admin/dashboard-stats`, {
+            // Fetch dashboard stats
+            const dashboardResponse = await fetch(`${API_BASE_URL}/admin/dashboard-stats`, {
                 headers: { 'Authorization': `Bearer ${authToken}` }
             });
-            if (response.ok) {
-                const data = await response.json();
-                setDashboardStats(data);
+            
+            // Fetch backup data for consistent "Last Backup" timing
+            const backupResponse = await fetch(`${API_BASE_URL}/api/admin/backups`, {
+                headers: { 'Authorization': `Bearer ${authToken}` }
+            });
+            
+            let dashboardData = {};
+            let backupData = {};
+            
+            if (dashboardResponse.ok) {
+                dashboardData = await dashboardResponse.json();
             } else {
-                console.warn('Dashboard stats endpoint not available:', response.status);
+                console.warn('Dashboard stats endpoint not available:', dashboardResponse.status);
             }
+            
+            if (backupResponse.ok) {
+                backupData = await backupResponse.json();
+            } else {
+                console.warn('Backup endpoint not available:', backupResponse.status);
+            }
+            
+            // Merge data, prioritizing backup endpoint for lastBackup time
+            setDashboardStats({
+                ...dashboardData,
+                lastBackup: backupData.lastAutoBackup || dashboardData.lastBackup
+            });
         } catch (error) {
             console.error('Error fetching dashboard stats:', error);
             // Don't break the UI if stats fail to load
