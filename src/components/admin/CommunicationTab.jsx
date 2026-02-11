@@ -923,6 +923,16 @@ export default function CommunicationTab({ API_BASE_URL, authToken }) {
                             <div className="info-card">
                                 <h4>Moderator Message Conversations</h4>
                                 <p>View and manage all conversations initiated by moderators. Messages appear to users as from "Moderator" but logs show which admin/mod sent them.</p>
+                                <div className="conversation-controls">
+                                    <button 
+                                        className="btn-refresh"
+                                        onClick={() => fetchModConversations()}
+                                        disabled={loading}
+                                        title="Refresh conversations (auto-refreshes every 5 seconds)"
+                                    >
+                                        🔄 Refresh
+                                    </button>
+                                </div>
                             </div>
 
                             {loading ? (
@@ -990,12 +1000,22 @@ export default function CommunicationTab({ API_BASE_URL, authToken }) {
                                     <strong>{selectedModConversation.otherUser?.displayName || selectedModConversation.otherUser?.breederName || selectedModConversation.otherUser?.personalName || `User ${selectedModConversation.otherUserId}`}</strong>
                                     <span className="user-id">{selectedModConversation.otherUserId}</span>
                                 </div>
-                                <button 
-                                    className="btn-close-thread"
-                                    onClick={() => handleCloseModConversation(selectedModConversation._id, selectedModConversation.otherUserId)}
-                                >
-                                    🗑️ Close Conversation
-                                </button>
+                                <div className="thread-actions">
+                                    <button 
+                                        className="btn-refresh"
+                                        onClick={() => fetchConversationMessagesQuiet(selectedModConversation.otherUserId)}
+                                        disabled={loading}
+                                        title="Refresh messages (auto-refreshes every 3 seconds)"
+                                    >
+                                        🔄
+                                    </button>
+                                    <button 
+                                        className="btn-close-thread"
+                                        onClick={() => handleCloseModConversation(selectedModConversation._id, selectedModConversation.otherUserId)}
+                                    >
+                                        🗑️ Close Conversation
+                                    </button>
+                                </div>
                             </div>
 
                             <div className="messages-container">

@@ -664,6 +664,7 @@
 .btn-view,
 .btn-close,
 .btn-back,
+.btn-refresh,
 .btn-close-thread {
     padding: 8px 16px;
     border: none;
@@ -699,6 +700,20 @@
 
 .btn-back:hover {
     background: #5a6268;
+}
+
+.btn-refresh {
+    background: #28a745;
+    color: white;
+}
+
+.btn-refresh:hover:not(:disabled) {
+    background: #218838;
+}
+
+.btn-refresh:disabled {
+    background: #6c757d;
+    cursor: not-allowed;
 }
 
 .btn-close-thread {
@@ -848,4 +863,18 @@
 .char-count {
     font-size: 12px;
     color: #666;
+}
+
+/* Conversation Controls */
+.conversation-controls {
+    margin-top: 12px;
+    display: flex;
+    justify-content: flex-end;
+}
+
+/* Thread Actions */
+.thread-actions {
+    display: flex;
+    gap: 8px;
+    align-items: center;
 }
