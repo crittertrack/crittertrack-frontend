@@ -15372,6 +15372,12 @@ const MessagesView = ({ authToken, API_BASE_URL, onClose, showModalMessage, sele
 
     const getDisplayName = (user) => {
         if (!user) return 'Unknown User';
+        
+        // If this is a staff member with displayName set (e.g., 'Crittertrack'), use that
+        if (user.displayName) {
+            return user.displayName;
+        }
+        
         return (user.showBreederName && user.breederName) 
             ? user.breederName 
             : (user.showPersonalName ? user.personalName : `User ${user.id_public}`);
@@ -15522,7 +15528,9 @@ const MessagesView = ({ authToken, API_BASE_URL, onClose, showModalMessage, sele
                                 >
                                     <div className="flex items-center gap-2 sm:gap-3">
                                         <div className="w-8 h-8 sm:w-10 sm:h-10 bg-gray-200 rounded-full overflow-hidden flex-shrink-0">
-                                            {conv.otherUser?.profileImage ? (
+                                            {conv.otherUser?.isStaff ? (
+                                                <img src="/logo.png" alt="CritterTrack" className="w-full h-full object-cover" />
+                                            ) : conv.otherUser?.profileImage ? (
                                                 <img src={conv.otherUser.profileImage} alt="" className="w-full h-full object-cover" />
                                             ) : (
                                                 <div className="w-full h-full flex items-center justify-center text-gray-400">
@@ -15570,7 +15578,9 @@ const MessagesView = ({ authToken, API_BASE_URL, onClose, showModalMessage, sele
                                                 <ArrowLeft size={20} />
                                             </button>
                                             <div className="w-10 h-10 bg-gray-200 rounded-full overflow-hidden">
-                                                {selectedConversation.otherUser?.profileImage ? (
+                                                {selectedConversation.otherUser?.isStaff ? (
+                                                    <img src="/logo.png" alt="CritterTrack" className="w-full h-full object-cover" />
+                                                ) : selectedConversation.otherUser?.profileImage ? (
                                                     <img src={selectedConversation.otherUser.profileImage} alt="" className="w-full h-full object-cover" />
                                                 ) : (
                                                     <div className="w-full h-full flex items-center justify-center text-gray-400">

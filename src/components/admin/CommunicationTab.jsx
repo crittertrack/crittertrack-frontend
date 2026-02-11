@@ -926,7 +926,7 @@ export default function CommunicationTab({ API_BASE_URL, authToken }) {
                                     ← Back to Conversations
                                 </button>
                                 <div className="thread-info">
-                                    <strong>{selectedModConversation.otherUser?.breederName || selectedModConversation.otherUser?.personalName || `User ${selectedModConversation.otherUserId}`}</strong>
+                                    <strong>{selectedModConversation.otherUser?.displayName || selectedModConversation.otherUser?.breederName || selectedModConversation.otherUser?.personalName || `User ${selectedModConversation.otherUserId}`}</strong>
                                     <span className="user-id">{selectedModConversation.otherUserId}</span>
                                 </div>
                                 <button 
