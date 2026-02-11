@@ -405,7 +405,7 @@ export default function CommunicationTab({ API_BASE_URL, authToken }) {
     };
 
     const handleCloseModConversation = async (conversationId, otherUserId) => {
-        if (!confirm('Are you sure you want to close this conversation? This will delete all messages.')) {
+        if (!window.confirm('Are you sure you want to close this conversation? This will delete all messages.')) {
             return;
         }
 
