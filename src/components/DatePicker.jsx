@@ -19,10 +19,14 @@ const DatePicker = ({
     ...props 
 }) => {
     // Convert string value to Date object if needed
-    const dateValue = value ? new Date(value) : null;
+    // Handle empty strings and invalid dates
+    const dateValue = (value && value !== '') ? new Date(value) : null;
+    const isValidDate = dateValue && !isNaN(dateValue.getTime());
 
     const handleChange = (date) => {
+        console.log('[DatePicker] handleChange called with:', date);
         if (!date) {
+            console.log('[DatePicker] Empty date, clearing value');
             onChange({ target: { value: '' } });
             return;
         }
@@ -33,13 +37,14 @@ const DatePicker = ({
         const day = String(date.getDate()).padStart(2, '0');
         const isoDate = `${year}-${month}-${day}`;
         
+        console.log('[DatePicker] Calling onChange with:', isoDate);
         // Mimic input onChange event structure
         onChange({ target: { value: isoDate } });
     };
 
     return (
         <ReactDatePicker
-            selected={dateValue}
+            selected={isValidDate ? dateValue : null}
             onChange={handleChange}
             dateFormat="dd/MM/yyyy"
             placeholderText={placeholder}
