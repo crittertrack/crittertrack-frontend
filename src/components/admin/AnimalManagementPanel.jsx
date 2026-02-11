@@ -1686,559 +1686,46 @@ export default function AnimalManagementPanel({ API_BASE_URL, authToken, userRol
                                     </div>
                                 )}
 
-                                {/* BASIC INFORMATION */}
-                                <div className="form-section">\n                                    <h4 className="section-title">Important Dates</h4>
-                                    <div className="form-row">
-                                        <label>Birth Date</label>
-                                        <input
-                                            type="date"
-                                            value={editForm.birthDate || ''}
-                                            onChange={(e) => setEditForm({...editForm, birthDate: e.target.value})}
-                                        />
-                                    </div>
-                                    <div className="form-row">
-                                        <label>Deceased Date</label>
-                                        <input
-                                            type="date"
-                                            value={editForm.deceasedDate || ''}
-                                            onChange={(e) => setEditForm({...editForm, deceasedDate: e.target.value})}
-                                        />
-                                    </div>
-                                </div>
-
-                                {/* IDENTIFICATION & GENETICS */}
+                    {/* Health Tab */}
+                    {editActiveTab === 'health' && (
+                        <div className="tab-panel">
+                            <div className="edit-form">
                                 <div className="form-section">
-                                    <h4 className="section-title">Identification & Genetics</h4>
+                                    <h4 className="section-title">Health Status & Medical</h4>
                                     <div className="form-row">
-                                        <label>Registry/Breeder ID</label>
+                                        <label>Health Status</label>
                                         <input
                                             type="text"
-                                            value={editForm.breederyId || ''}
-                                            onChange={(e) => setEditForm({...editForm, breederyId: e.target.value})}
-                                            placeholder="Registry or breeder identification code"
-                                        />
-                                    </div>
-                                    <div className="form-row">
-                                        <label>Microchip Number</label>
-                                        <input
-                                            type="text"
-                                            value={editForm.microchipNumber || ''}
-                                            onChange={(e) => setEditForm({...editForm, microchipNumber: e.target.value})}
-                                        />
-                                    </div>
-                                    <div className="form-row">
-                                        <label>Pedigree Registration ID</label>
-                                        <input
-                                            type="text"
-                                            value={editForm.pedigreeRegistrationId || ''}
-                                            onChange={(e) => setEditForm({...editForm, pedigreeRegistrationId: e.target.value})}
-                                        />
-                                    </div>
-                                    <div className="form-row">
-                                        <label>Genetic Code</label>
-                                        <input
-                                            type="text"
-                                            value={editForm.geneticCode || ''}
-                                            onChange={(e) => setEditForm({...editForm, geneticCode: e.target.value})}
-                                        />
-                                    </div>
-                                    <div className="form-row">
-                                        <label>Breed</label>
-                                        <input
-                                            type="text"
-                                            value={editForm.breed || ''}
-                                            onChange={(e) => setEditForm({...editForm, breed: e.target.value})}
-                                        />
-                                    </div>
-                                    <div className="form-row">
-                                        <label>Strain</label>
-                                        <input
-                                            type="text"
-                                            value={editForm.strain || ''}
-                                            onChange={(e) => setEditForm({...editForm, strain: e.target.value})}
-                                        />
-                                    </div>
-                                    <div className="form-row">
-                                        <label>Origin</label>
-                                        <select
-                                            value={editForm.origin || ''}
-                                            onChange={(e) => setEditForm({...editForm, origin: e.target.value})}
-                                        >
-                                            <option value="Captive-bred">Captive-bred</option>
-                                            <option value="Wild-caught">Wild-caught</option>
-                                            <option value="Rescued">Rescued</option>
-                                            <option value="Unknown">Unknown</option>
-                                        </select>
-                                    </div>
-                                </div>
-
-                                {/* DOG/CAT SPECIFIC IDENTIFICATION */}
-                                <div className="form-section">
-                                    <h4 className="section-title">Registration & Documentation</h4>
-                                    <div className="form-row">
-                                        <label>License Number</label>
-                                        <input
-                                            type="text"
-                                            value={editForm.licenseNumber || ''}
-                                            onChange={(e) => setEditForm({...editForm, licenseNumber: e.target.value})}
-                                        />
-                                    </div>
-                                    <div className="form-row">
-                                        <label>License Jurisdiction</label>
-                                        <input
-                                            type="text"
-                                            value={editForm.licenseJurisdiction || ''}
-                                            onChange={(e) => setEditForm({...editForm, licenseJurisdiction: e.target.value})}
-                                        />
-                                    </div>
-                                    <div className="form-row">
-                                        <label>Rabies Tag Number</label>
-                                        <input
-                                            type="text"
-                                            value={editForm.rabiesTagNumber || ''}
-                                            onChange={(e) => setEditForm({...editForm, rabiesTagNumber: e.target.value})}
-                                        />
-                                    </div>
-                                    <div className="form-row">
-                                        <label>Tattoo ID</label>
-                                        <input
-                                            type="text"
-                                            value={editForm.tattooId || ''}
-                                            onChange={(e) => setEditForm({...editForm, tattooId: e.target.value})}
-                                        />
-                                    </div>
-                                    <div className="form-row">
-                                        <label>AKC Registration Number</label>
-                                        <input
-                                            type="text"
-                                            value={editForm.akcRegistrationNumber || ''}
-                                            onChange={(e) => setEditForm({...editForm, akcRegistrationNumber: e.target.value})}
-                                        />
-                                    </div>
-                                    <div className="form-row">
-                                        <label>FCI Registration Number</label>
-                                        <input
-                                            type="text"
-                                            value={editForm.fciRegistrationNumber || ''}
-                                            onChange={(e) => setEditForm({...editForm, fciRegistrationNumber: e.target.value})}
-                                        />
-                                    </div>
-                                    <div className="form-row">
-                                        <label>CFA Registration Number</label>
-                                        <input
-                                            type="text"
-                                            value={editForm.cfaRegistrationNumber || ''}
-                                            onChange={(e) => setEditForm({...editForm, cfaRegistrationNumber: e.target.value})}
-                                        />
-                                    </div>
-                                    <div className="form-row">
-                                        <label>Working Registry IDs</label>
-                                        <input
-                                            type="text"
-                                            value={editForm.workingRegistryIds || ''}
-                                            onChange={(e) => setEditForm({...editForm, workingRegistryIds: e.target.value})}
-                                            placeholder="Service, therapy, working dog registrations"
-                                        />
-                                    </div>
-                                </div>
-
-                                {/* APPEARANCE */}
-                                <div className="form-section">
-                                    <h4 className="section-title">Appearance</h4>
-                                    <div className="form-row">
-                                        <label>Color</label>
-                                        <input
-                                            type="text"
-                                            value={editForm.color || ''}
-                                            onChange={(e) => setEditForm({...editForm, color: e.target.value})}
-                                        />
-                                    </div>
-                                    <div className="form-row">
-                                        <label>Coat</label>
-                                        <input
-                                            type="text"
-                                            value={editForm.coat || ''}
-                                            onChange={(e) => setEditForm({...editForm, coat: e.target.value})}
-                                        />
-                                    </div>
-                                    <div className="form-row">
-                                        <label>Coat Pattern</label>
-                                        <input
-                                            type="text"
-                                            value={editForm.coatPattern || ''}
-                                            onChange={(e) => setEditForm({...editForm, coatPattern: e.target.value})}
-                                        />
-                                    </div>
-                                    <div className="form-row">
-                                        <label>Ear Set</label>
-                                        <input
-                                            type="text"
-                                            value={editForm.earset || ''}
-                                            onChange={(e) => setEditForm({...editForm, earset: e.target.value})}
-                                        />
-                                    </div>
-                                </div>
-
-                                {/* PHYSICAL MEASUREMENTS */}
-                                <div className="form-section">
-                                    <h4 className="section-title">Physical Measurements</h4>
-                                    <div className="form-row">
-                                        <label>Body Weight</label>
-                                        <input
-                                            type="text"
-                                            value={editForm.bodyWeight || ''}
-                                            onChange={(e) => setEditForm({...editForm, bodyWeight: e.target.value})}
-                                            placeholder="e.g., 2.5kg"
-                                        />
-                                    </div>
-                                    <div className="form-row">
-                                        <label>Adult Weight (Expected/Mature)</label>
-                                        <input
-                                            type="text"
-                                            value={editForm.adultWeight || ''}
-                                            onChange={(e) => setEditForm({...editForm, adultWeight: e.target.value})}
-                                            placeholder="e.g., 25kg"
-                                        />
-                                    </div>
-                                    <div className="form-row">
-                                        <label>Body Length</label>
-                                        <input
-                                            type="text"
-                                            value={editForm.bodyLength || ''}
-                                            onChange={(e) => setEditForm({...editForm, bodyLength: e.target.value})}
-                                            placeholder="e.g., 30cm"
-                                        />
-                                    </div>
-                                    <div className="form-row">
-                                        <label>Height at Withers</label>
-                                        <input
-                                            type="text"
-                                            value={editForm.heightAtWithers || ''}
-                                            onChange={(e) => setEditForm({...editForm, heightAtWithers: e.target.value})}
-                                            placeholder="e.g., 25cm"
-                                        />
-                                    </div>
-                                    <div className="form-row">
-                                        <label>Chest Girth</label>
-                                        <input
-                                            type="text"
-                                            value={editForm.chestGirth || ''}
-                                            onChange={(e) => setEditForm({...editForm, chestGirth: e.target.value})}
-                                            placeholder="e.g., 40cm"
-                                        />
-                                    </div>
-                                    <div className="form-row">
-                                        <label>Body Condition Score</label>
-                                        <select
-                                            value={editForm.bodyConditionScore || ''}
-                                            onChange={(e) => setEditForm({...editForm, bodyConditionScore: e.target.value})}
-                                        >
-                                            <option value="">Select...</option>
-                                            <option value="1">1 - Emaciated</option>
-                                            <option value="2">2 - Underweight</option>
-                                            <option value="3">3 - Ideal</option>
-                                            <option value="4">4 - Overweight</option>
-                                            <option value="5">5 - Obese</option>
-                                        </select>
-                                    </div>
-                                </div>
-
-                                {/* PARENTAGE */}
-                                <div className="form-section">
-                                    <h4 className="section-title">Parentage</h4>
-                                    <div className="form-row">
-                                        <label>Sire ID</label>
-                                        <input
-                                            type="text"
-                                            value={editForm.sireId_public || ''}
-                                            onChange={(e) => setEditForm({...editForm, sireId_public: e.target.value})}
-                                            placeholder="CTC###"
-                                        />
-                                    </div>
-                                    <div className="form-row">
-                                        <label>Dam ID</label>
-                                        <input
-                                            type="text"
-                                            value={editForm.damId_public || ''}
-                                            onChange={(e) => setEditForm({...editForm, damId_public: e.target.value})}
-                                            placeholder="CTC###"
-                                        />
-                                    </div>
-                                </div>
-                                <div className="form-row full-width">
-                                    <label>Owner</label>
-                                    <div style={{ position: 'relative' }}>
-                                        <div 
-                                            onClick={() => setShowOwnerSearch(!showOwnerSearch)}
-                                            style={{
-                                                padding: '8px 12px',
-                                                border: '1px solid #ccc',
-                                                borderRadius: '4px',
-                                                backgroundColor: '#fff',
-                                                cursor: 'pointer',
-                                                display: 'flex',
-                                                justifyContent: 'space-between',
-                                                alignItems: 'center'
-                                            }}
-                                        >
-                                            <span style={{ color: editForm.ownerId_public ? '#000' : '#999' }}>
-                                                {getOwnerDisplay()}
-                                            </span>
-                                            {editForm.ownerId_public && (
-                                                <X 
-                                                    size={16} 
-                                                    onClick={(e) => { e.stopPropagation(); clearOwner(); }}
-                                                    style={{ color: '#ef4444', cursor: 'pointer' }}
-                                                />
-                                            )}
-                                        </div>
-                                        {showOwnerSearch && (
-                                            <div style={{
-                                                position: 'absolute',
-                                                top: '100%',
-                                                left: 0,
-                                                right: 0,
-                                                backgroundColor: '#fff',
-                                                border: '1px solid #ccc',
-                                                borderRadius: '4px',
-                                                marginTop: '4px',
-                                                maxHeight: '300px',
-                                                overflowY: 'auto',
-                                                zIndex: 1000,
-                                                boxShadow: '0 4px 6px rgba(0,0,0,0.1)'
-                                            }}>
-                                                <input
-                                                    type="text"
-                                                    value={ownerSearchQuery}
-                                                    onChange={(e) => {
-                                                        setOwnerSearchQuery(e.target.value);
-                                                        searchUsers(e.target.value, 'owner');
-                                                    }}
-                                                    placeholder="Search users..."
-                                                    style={{
-                                                        width: '100%',
-                                                        padding: '8px',
-                                                        border: 'none',
-                                                        borderBottom: '1px solid #eee',
-                                                        outline: 'none'
-                                                    }}
-                                                    autoFocus
-                                                />
-                                                <div>
-                                                    {(ownerSearchQuery ? ownerSearchResults : users.slice(0, 10)).map(user => (
-                                                        <div
-                                                            key={user._id}
-                                                            onClick={() => selectOwner(user)}
-                                                            style={{
-                                                                padding: '8px 12px',
-                                                                cursor: 'pointer',
-                                                                borderBottom: '1px solid #eee',
-                                                                backgroundColor: editForm.ownerId_public === user.id_public ? '#f3f4f6' : '#fff'
-                                                            }}
-                                                            onMouseEnter={(e) => e.target.style.backgroundColor = '#f9fafb'}
-                                                            onMouseLeave={(e) => e.target.style.backgroundColor = editForm.ownerId_public === user.id_public ? '#f3f4f6' : '#fff'}
-                                                        >
-                                                            <div style={{ fontWeight: '500' }}>
-                                                                {user.personalName || user.username || user.email}
-                                                            </div>
-                                                            <div style={{ fontSize: '0.875rem', color: '#666' }}>
-                                                                {user.id_public}
-                                                            </div>
-                                                        </div>
-                                                    ))}
-                                                </div>
-                                            </div>
-                                        )}
-                                    </div>
-                                </div>
-                                <div className="form-row full-width">
-                                    <label>Breeder (User)</label>
-                                    <div style={{ position: 'relative' }}>
-                                        <div 
-                                            onClick={() => setShowBreederSearch(!showBreederSearch)}
-                                            style={{
-                                                padding: '8px 12px',
-                                                border: '1px solid #ccc',
-                                                borderRadius: '4px',
-                                                backgroundColor: '#fff',
-                                                cursor: 'pointer',
-                                                display: 'flex',
-                                                justifyContent: 'space-between',
-                                                alignItems: 'center'
-                                            }}
-                                        >
-                                            <span style={{ color: editForm.breederId_public ? '#000' : '#999' }}>
-                                                {getBreederDisplay()}
-                                            </span>
-                                            {editForm.breederId_public && (
-                                                <X 
-                                                    size={16} 
-                                                    onClick={(e) => { e.stopPropagation(); clearBreeder(); }}
-                                                    style={{ color: '#ef4444', cursor: 'pointer' }}
-                                                />
-                                            )}
-                                        </div>
-                                        {showBreederSearch && (
-                                            <div style={{
-                                                position: 'absolute',
-                                                top: '100%',
-                                                left: 0,
-                                                right: 0,
-                                                backgroundColor: '#fff',
-                                                border: '1px solid #ccc',
-                                                borderRadius: '4px',
-                                                marginTop: '4px',
-                                                maxHeight: '300px',
-                                                overflowY: 'auto',
-                                                zIndex: 1000,
-                                                boxShadow: '0 4px 6px rgba(0,0,0,0.1)'
-                                            }}>
-                                                <input
-                                                    type="text"
-                                                    value={breederSearchQuery}
-                                                    onChange={(e) => {
-                                                        setBreederSearchQuery(e.target.value);
-                                                        searchUsers(e.target.value, 'breeder');
-                                                    }}
-                                                    placeholder="Search users..."
-                                                    style={{
-                                                        width: '100%',
-                                                        padding: '8px',
-                                                        border: 'none',
-                                                        borderBottom: '1px solid #eee',
-                                                        outline: 'none'
-                                                    }}
-                                                    autoFocus
-                                                />
-                                                <div>
-                                                    {(breederSearchQuery ? breederSearchResults : users.slice(0, 10)).map(user => (
-                                                        <div
-                                                            key={user._id}
-                                                            onClick={() => selectBreeder(user)}
-                                                            style={{
-                                                                padding: '8px 12px',
-                                                                cursor: 'pointer',
-                                                                borderBottom: '1px solid #eee',
-                                                                backgroundColor: editForm.breederId_public === user.id_public ? '#f3f4f6' : '#fff'
-                                                            }}
-                                                            onMouseEnter={(e) => e.target.style.backgroundColor = '#f9fafb'}
-                                                            onMouseLeave={(e) => e.target.style.backgroundColor = editForm.breederId_public === user.id_public ? '#f3f4f6' : '#fff'}
-                                                        >
-                                                            <div style={{ fontWeight: '500' }}>
-                                                                {user.personalName || user.username || user.email}
-                                                            </div>
-                                                            <div style={{ fontSize: '0.875rem', color: '#666' }}>
-                                                                {user.id_public}
-                                                            </div>
-                                                        </div>
-                                                    ))}
-                                                </div>
-                                            </div>
-                                        )}
-                                    </div>
-                                </div>
-                                <div className="form-row full-width">
-                                    <label>Or Manual Breeder Name</label>
-                                    <input
-                                        type="text"
-                                        value={editForm.manualBreederName || ''}
-                                        onChange={(e) => setEditForm({...editForm, manualBreederName: e.target.value, breederId_public: ''})}
-                                        placeholder="Enter breeder name if not a registered user"
-                                    />
-                                </div>
-                                
-                                {/* OWNERSHIP */}
-                                <div className="form-section">
-                                    <h4 className="section-title">Ownership & Display</h4>
-                                    <div className="form-row">
-                                        <label style={{ display: 'flex', alignItems: 'center', gap: '8px', cursor: 'pointer' }}>
-                                            <input
-                                                type="checkbox"
-                                                checked={editForm.isOwned ?? true}
-                                                onChange={(e) => setEditForm({...editForm, isOwned: e.target.checked})}
-                                                style={{ width: 'auto', cursor: 'pointer' }}
-                                            />
-                                            <span>Currently Owned</span>
-                                        </label>
-                                    </div>
-                                    <div className="form-row">
-                                        <label style={{ display: 'flex', alignItems: 'center', gap: '8px', cursor: 'pointer' }}>
-                                            <input
-                                                type="checkbox"
-                                                checked={editForm.isDisplay ?? false}
-                                                onChange={(e) => setEditForm({...editForm, isDisplay: e.target.checked})}
-                                                style={{ width: 'auto', cursor: 'pointer' }}
-                                            />
-                                            <span>Display Animal (Show/Exhibition)</span>
-                                        </label>
-                                    </div>
-                                    <div className="form-row">
-                                        <label>Current Owner Name</label>
-                                        <input
-                                            type="text"
-                                            value={editForm.currentOwner || ''}
-                                            onChange={(e) => setEditForm({...editForm, currentOwner: e.target.value})}
-                                        />
-                                    </div>
-                                    <div className="form-row">
-                                        <label>Owner Display Name</label>
-                                        <input
-                                            type="text"
-                                            value={editForm.ownerName || ''}
-                                            onChange={(e) => setEditForm({...editForm, ownerName: e.target.value})}
-                                        />
-                                    </div>
-                                </div>
-
-                                {/* HEALTH STATUS */}
-                                <div className="form-section">
-                                    <h4 className="section-title">Health Status</h4>
-                                    <div className="form-row">
-                                        <label style={{ display: 'flex', alignItems: 'center', gap: '8px', cursor: 'pointer' }}>
-                                            <input
-                                                type="checkbox"
-                                                checked={editForm.isNeutered || false}
-                                                onChange={(e) => setEditForm({...editForm, isNeutered: e.target.checked})}
-                                                style={{ width: 'auto', cursor: 'pointer' }}
-                                            />
-                                            <span>Spayed/Neutered</span>
-                                        </label>
-                                    </div>
-                                    <div className="form-row">
-                                        <label>Spay/Neuter Date</label>
-                                        <input
-                                            type="date"
-                                            value={editForm.spayNeuterDate || ''}
-                                            onChange={(e) => setEditForm({...editForm, spayNeuterDate: e.target.value})}
-                                        />
-                                    </div>
-                                    <div className="form-row">
-                                        <label style={{ display: 'flex', alignItems: 'center', gap: '8px', cursor: 'pointer' }}>
-                                            <input
-                                                type="checkbox"
-                                                checked={editForm.isInfertile || false}
-                                                onChange={(e) => setEditForm({...editForm, isInfertile: e.target.checked})}
-                                                style={{ width: 'auto', cursor: 'pointer' }}
-                                            />
-                                            <span>Infertile/Sterile</span>
-                                        </label>
-                                    </div>
-                                    <div className="form-row full-width">
-                                        <label>Medical Conditions</label>
-                                        <textarea
-                                            value={editForm.medicalConditions || ''}
-                                            onChange={(e) => setEditForm({...editForm, medicalConditions: e.target.value})}
-                                            rows={3}
-                                            placeholder="List any known medical conditions..."
+                                            value={editForm.healthStatus || ''}
+                                            onChange={(e) => setEditForm({...editForm, healthStatus: e.target.value})}
+                                            placeholder="Overall health condition"
                                         />
                                     </div>
                                     <div className="form-row full-width">
-                                        <label>Chronic Conditions</label>
+                                        <label>Vaccination Records</label>
                                         <textarea
-                                            value={editForm.chronicConditions || ''}
-                                            onChange={(e) => setEditForm({...editForm, chronicConditions: e.target.value})}
+                                            value={editForm.vaccinationRecords || ''}
+                                            onChange={(e) => setEditForm({...editForm, vaccinationRecords: e.target.value})}
                                             rows={3}
-                                            placeholder="Long-term health conditions..."
+                                            placeholder="Vaccination history and schedule..."
+                                        />
+                                    </div>
+                                    <div className="form-row full-width">
+                                        <label>Medical History</label>
+                                        <textarea
+                                            value={editForm.medicalHistory || ''}
+                                            onChange={(e) => setEditForm({...editForm, medicalHistory: e.target.value})}
+                                            rows={4}
+                                            placeholder="Past illnesses, surgeries, treatments..."
+                                        />
+                                    </div>
+                                    <div className="form-row full-width">
+                                        <label>Current Medications</label>
+                                        <textarea
+                                            value={editForm.currentMedications || ''}
+                                            onChange={(e) => setEditForm({...editForm, currentMedications: e.target.value})}
+                                            rows={3}
+                                            placeholder="Current medications, dosages, schedules..."
                                         />
                                     </div>
                                     <div className="form-row full-width">
@@ -2247,757 +1734,162 @@ export default function AnimalManagementPanel({ API_BASE_URL, authToken, userRol
                                             value={editForm.allergies || ''}
                                             onChange={(e) => setEditForm({...editForm, allergies: e.target.value})}
                                             rows={2}
-                                            placeholder="List any known allergies..."
+                                            placeholder="Known allergies or sensitivities..."
                                         />
                                     </div>
                                     <div className="form-row full-width">
-                                        <label>Current Medications</label>
+                                        <label>Veterinarian Contact</label>
                                         <textarea
-                                            value={editForm.medications || ''}
-                                            onChange={(e) => setEditForm({...editForm, medications: e.target.value})}
+                                            value={editForm.veterinarianContact || ''}
+                                            onChange={(e) => setEditForm({...editForm, veterinarianContact: e.target.value})}
                                             rows={2}
-                                            placeholder="List current medications..."
-                                        />
-                                    </div>
-                                    <div className="form-row">
-                                        <label>Primary Veterinarian</label>
-                                        <input
-                                            type="text"
-                                            value={editForm.primaryVet || ''}
-                                            onChange={(e) => setEditForm({...editForm, primaryVet: e.target.value})}
-                                            placeholder="Vet clinic name"
-                                        />
-                                    </div>
-                                    <div className="form-row full-width">
-                                        <label>Vet Visit History</label>
-                                        <textarea
-                                            value={editForm.vetVisits || ''}
-                                            onChange={(e) => setEditForm({...editForm, vetVisits: e.target.value})}
-                                            rows={3}
-                                            placeholder="Recent vet visits and treatments..."
-                                        />
-                                    </div>
-                                    <div className="form-row">
-                                        <label>Parasite Prevention Schedule</label>
-                                        <input
-                                            type="text"
-                                            value={editForm.parasitePreventionSchedule || ''}
-                                            onChange={(e) => setEditForm({...editForm, parasitePreventionSchedule: e.target.value})}
-                                            placeholder="Flea, tick, heartworm prevention"
-                                        />
-                                    </div>
-                                    <div className="form-row">
-                                        <label>Heartworm Status</label>
-                                        <select
-                                            value={editForm.heartwormStatus || ''}
-                                            onChange={(e) => setEditForm({...editForm, heartwormStatus: e.target.value})}
-                                        >
-                                            <option value="">Select...</option>
-                                            <option value="Negative">Negative</option>
-                                            <option value="Positive">Positive</option>
-                                            <option value="Under Treatment">Under Treatment</option>
-                                            <option value="Not Tested">Not Tested</option>
-                                        </select>
-                                    </div>
-                                    <div className="form-row full-width">
-                                        <label>Hip/Elbow Scores</label>
-                                        <textarea
-                                            value={editForm.hipElbowScores || ''}
-                                            onChange={(e) => setEditForm({...editForm, hipElbowScores: e.target.value})}
-                                            rows={2}
-                                            placeholder="Hip dysplasia, elbow dysplasia scores..."
-                                        />
-                                    </div>
-                                    <div className="form-row full-width">
-                                        <label>Genetic Test Results</label>
-                                        <textarea
-                                            value={editForm.geneticTestResults || ''}
-                                            onChange={(e) => setEditForm({...editForm, geneticTestResults: e.target.value})}
-                                            rows={3}
-                                            placeholder="DNA panels, genetic disease testing..."
-                                        />
-                                    </div>
-                                    <div className="form-row">
-                                        <label>Eye Clearance</label>
-                                        <input
-                                            type="text"
-                                            value={editForm.eyeClearance || ''}
-                                            onChange={(e) => setEditForm({...editForm, eyeClearance: e.target.value})}
-                                            placeholder="CERF, ophthalmologist clearance"
-                                        />
-                                    </div>
-                                    <div className="form-row">
-                                        <label>Cardiac Clearance</label>
-                                        <input
-                                            type="text"
-                                            value={editForm.cardiacClearance || ''}
-                                            onChange={(e) => setEditForm({...editForm, cardiacClearance: e.target.value})}
-                                            placeholder="Heart exam, echocardiogram results"
-                                        />
-                                    </div>
-                                    <div className="form-row full-width">
-                                        <label>Dental Records</label>
-                                        <textarea
-                                            value={editForm.dentalRecords || ''}
-                                            onChange={(e) => setEditForm({...editForm, dentalRecords: e.target.value})}
-                                            rows={2}
-                                            placeholder="Dental cleanings, extractions, oral health notes..."
+                                            placeholder="Primary veterinarian name, clinic, contact info..."
                                         />
                                     </div>
                                 </div>
+                            </div>
+                        </div>
+                    )}
 
-                                {/* CARE & ENVIRONMENT */}
-                                <div className="form-section">
-                                    <h4 className="section-title">Care & Environment</h4>
-                                    <div className="form-row">
-                                        <label>Diet Type</label>
-                                        <input
-                                            type="text"
-                                            value={editForm.dietType || ''}
-                                            onChange={(e) => setEditForm({...editForm, dietType: e.target.value})}
-                                            placeholder="e.g., Commercial pellets, Natural diet"
-                                        />
-                                    </div>
-                                    <div className="form-row full-width">
-                                        <label>Feeding Schedule</label>
-                                        <textarea
-                                            value={editForm.feedingSchedule || ''}
-                                            onChange={(e) => setEditForm({...editForm, feedingSchedule: e.target.value})}
-                                            rows={2}
-                                            placeholder="Feeding times and amounts..."
-                                        />
-                                    </div>
-                                    <div className="form-row full-width">
-                                        <label>Supplements</label>
-                                        <textarea
-                                            value={editForm.supplements || ''}
-                                            onChange={(e) => setEditForm({...editForm, supplements: e.target.value})}
-                                            rows={2}
-                                            placeholder="Vitamins, minerals, other supplements..."
-                                        />
-                                    </div>
-                                    <div className="form-row">
-                                        <label>Housing Type</label>
-                                        <input
-                                            type="text"
-                                            value={editForm.housingType || ''}
-                                            onChange={(e) => setEditForm({...editForm, housingType: e.target.value})}
-                                            placeholder="e.g., Cage, Hutch, Free-range"
-                                        />
-                                    </div>
-                                    <div className="form-row">
-                                        <label>Bedding</label>
-                                        <input
-                                            type="text"
-                                            value={editForm.bedding || ''}
-                                            onChange={(e) => setEditForm({...editForm, bedding: e.target.value})}
-                                            placeholder="e.g., Wood shavings, Paper"
-                                        />
-                                    </div>
-                                    <div className="form-row">
-                                        <label>Temperature Range</label>
-                                        <input
-                                            type="text"
-                                            value={editForm.temperatureRange || ''}
-                                            onChange={(e) => setEditForm({...editForm, temperatureRange: e.target.value})}
-                                            placeholder="e.g., 18-22°C"
-                                        />
-                                    </div>
-                                    <div className="form-row">
-                                        <label>Humidity</label>
-                                        <input
-                                            type="text"
-                                            value={editForm.humidity || ''}
-                                            onChange={(e) => setEditForm({...editForm, humidity: e.target.value})}
-                                            placeholder="e.g., 50-60%"
-                                        />
-                                    </div>
-                                    <div className="form-row">
-                                        <label>Lighting</label>
-                                        <input
-                                            type="text"
-                                            value={editForm.lighting || ''}
-                                            onChange={(e) => setEditForm({...editForm, lighting: e.target.value})}
-                                            placeholder="e.g., UV lamp, Natural light"
-                                        />
-                                    </div>
-                                    <div className="form-row">
-                                        <label>Noise Level</label>
-                                        <input
-                                            type="text"
-                                            value={editForm.noise || ''}
-                                            onChange={(e) => setEditForm({...editForm, noise: e.target.value})}
-                                            placeholder="e.g., Quiet, Moderate, Loud"
-                                        />
-                                    </div>
-                                    <div className="form-row full-width">
-                                        <label>Environmental Enrichment</label>
-                                        <textarea
-                                            value={editForm.enrichment || ''}
-                                            onChange={(e) => setEditForm({...editForm, enrichment: e.target.value})}
-                                            rows={2}
-                                            placeholder="Toys, activities, enrichment items..."
-                                        />
-                                    </div>
-                                </div>
-
-                                {/* HUSBANDRY (DOG/CAT SPECIFIC) */}
-                                <div className="form-section">
-                                    <h4 className="section-title">Husbandry & Exercise</h4>
-                                    <div className="form-row full-width">
-                                        <label>Exercise Requirements</label>
-                                        <textarea
-                                            value={editForm.exerciseRequirements || ''}
-                                            onChange={(e) => setEditForm({...editForm, exerciseRequirements: e.target.value})}
-                                            rows={2}
-                                            placeholder="Activity level, exercise needs..."
-                                        />
-                                    </div>
-                                    <div className="form-row">
-                                        <label>Daily Exercise Minutes</label>
-                                        <input
-                                            type="number"
-                                            value={editForm.dailyExerciseMinutes || ''}
-                                            onChange={(e) => setEditForm({...editForm, dailyExerciseMinutes: e.target.value})}
-                                            placeholder="Minutes per day"
-                                        />
-                                    </div>
-                                    <div className="form-row">
-                                        <label>Grooming Needs</label>
-                                        <select
-                                            value={editForm.groomingNeeds || ''}
-                                            onChange={(e) => setEditForm({...editForm, groomingNeeds: e.target.value})}
-                                        >
-                                            <option value="">Select...</option>
-                                            <option value="Low">Low</option>
-                                            <option value="Moderate">Moderate</option>
-                                            <option value="High">High</option>
-                                            <option value="Professional">Professional</option>
-                                        </select>
-                                    </div>
-                                    <div className="form-row">
-                                        <label>Shedding Level</label>
-                                        <select
-                                            value={editForm.sheddingLevel || ''}
-                                            onChange={(e) => setEditForm({...editForm, sheddingLevel: e.target.value})}
-                                        >
-                                            <option value="">Select...</option>
-                                            <option value="Minimal">Minimal</option>
-                                            <option value="Low">Low</option>
-                                            <option value="Moderate">Moderate</option>
-                                            <option value="High">High</option>
-                                            <option value="Very High">Very High</option>
-                                        </select>
-                                    </div>
-                                    <div className="form-row">
-                                        <label style={{ display: 'flex', alignItems: 'center', gap: '8px', cursor: 'pointer' }}>
-                                            <input
-                                                type="checkbox"
-                                                checked={editForm.crateTrained || false}
-                                                onChange={(e) => setEditForm({...editForm, crateTrained: e.target.checked})}
-                                                style={{ width: 'auto', cursor: 'pointer' }}
-                                            />
-                                            <span>Crate Trained</span>
-                                        </label>
-                                    </div>
-                                    <div className="form-row">
-                                        <label style={{ display: 'flex', alignItems: 'center', gap: '8px', cursor: 'pointer' }}>
-                                            <input
-                                                type="checkbox"
-                                                checked={editForm.litterTrained || false}
-                                                onChange={(e) => setEditForm({...editForm, litterTrained: e.target.checked})}
-                                                style={{ width: 'auto', cursor: 'pointer' }}
-                                            />
-                                            <span>Litter Trained</span>
-                                        </label>
-                                    </div>
-                                    <div className="form-row">
-                                        <label style={{ display: 'flex', alignItems: 'center', gap: '8px', cursor: 'pointer' }}>
-                                            <input
-                                                type="checkbox"
-                                                checked={editForm.leashTrained || false}
-                                                onChange={(e) => setEditForm({...editForm, leashTrained: e.target.checked})}
-                                                style={{ width: 'auto', cursor: 'pointer' }}
-                                            />
-                                            <span>Leash Trained</span>
-                                        </label>
-                                    </div>
-                                </div>
-
-                                {/* BEHAVIOR & TEMPERAMENT */}
-                                <div className="form-section">
-                                    <h4 className="section-title">Behavior & Temperament</h4>
-                                    <div className="form-row">
-                                        <label>Temperament</label>
-                                        <input
-                                            type="text"
-                                            value={editForm.temperament || ''}
-                                            onChange={(e) => setEditForm({...editForm, temperament: e.target.value})}
-                                            placeholder="e.g., Calm, Active, Aggressive"
-                                        />
-                                    </div>
-                                    <div className="form-row">
-                                        <label>Handling Tolerance</label>
-                                        <select
-                                            value={editForm.handlingTolerance || ''}
-                                            onChange={(e) => setEditForm({...editForm, handlingTolerance: e.target.value})}
-                                        >
-                                            <option value="">Select...</option>
-                                            <option value="Excellent">Excellent</option>
-                                            <option value="Good">Good</option>
-                                            <option value="Fair">Fair</option>
-                                            <option value="Poor">Poor</option>
-                                            <option value="Aggressive">Aggressive</option>
-                                        </select>
-                                    </div>
-                                    <div className="form-row">
-                                        <label>Social Structure</label>
-                                        <input
-                                            type="text"
-                                            value={editForm.socialStructure || ''}
-                                            onChange={(e) => setEditForm({...editForm, socialStructure: e.target.value})}
-                                            placeholder="e.g., Solitary, Pair-bonded, Group"
-                                        />
-                                    </div>
-                                    <div className="form-row">
-                                        <label>Activity Cycle</label>
-                                        <select
-                                            value={editForm.activityCycle || ''}
-                                            onChange={(e) => setEditForm({...editForm, activityCycle: e.target.value})}
-                                        >
-                                            <option value="">Select...</option>
-                                            <option value="Diurnal">Diurnal (Day active)</option>
-                                            <option value="Nocturnal">Nocturnal (Night active)</option>
-                                            <option value="Crepuscular">Crepuscular (Dawn/Dusk active)</option>
-                                            <option value="Cathemeral">Cathemeral (Variable)</option>
-                                        </select>
-                                    </div>
-                                    <div className="form-row">
-                                        <label>Training Level</label>
-                                        <select
-                                            value={editForm.trainingLevel || ''}
-                                            onChange={(e) => setEditForm({...editForm, trainingLevel: e.target.value})}
-                                        >
-                                            <option value="">Select...</option>
-                                            <option value="None">None</option>
-                                            <option value="Basic">Basic</option>
-                                            <option value="Intermediate">Intermediate</option>
-                                            <option value="Advanced">Advanced</option>
-                                            <option value="Professional">Professional</option>
-                                        </select>
-                                    </div>
-                                    <div className="form-row full-width">
-                                        <label>Training Disciplines</label>
-                                        <textarea
-                                            value={editForm.trainingDisciplines || ''}
-                                            onChange={(e) => setEditForm({...editForm, trainingDisciplines: e.target.value})}
-                                            rows={2}
-                                            placeholder="Obedience, agility, therapy, service, etc..."
-                                        />
-                                    </div>
-                                    <div className="form-row full-width">
-                                        <label>Certifications</label>
-                                        <textarea
-                                            value={editForm.certifications || ''}
-                                            onChange={(e) => setEditForm({...editForm, certifications: e.target.value})}
-                                            rows={2}
-                                            placeholder="Training certificates, titles, achievements..."
-                                        />
-                                    </div>
-                                    <div className="form-row">
-                                        <label>Working Role</label>
-                                        <input
-                                            type="text"
-                                            value={editForm.workingRole || ''}
-                                            onChange={(e) => setEditForm({...editForm, workingRole: e.target.value})}
-                                            placeholder="Service, therapy, hunting, herding, etc."
-                                        />
-                                    </div>
-                                    <div className="form-row full-width">
-                                        <label>Behavioral Issues</label>
-                                        <textarea
-                                            value={editForm.behavioralIssues || ''}
-                                            onChange={(e) => setEditForm({...editForm, behavioralIssues: e.target.value})}
-                                            rows={3}
-                                            placeholder="Known behavioral problems, triggers, management..."
-                                        />
-                                    </div>
-                                    <div className="form-row full-width">
-                                        <label>Bite History</label>
-                                        <textarea
-                                            value={editForm.biteHistory || ''}
-                                            onChange={(e) => setEditForm({...editForm, biteHistory: e.target.value})}
-                                            rows={2}
-                                            placeholder="Any incidents of biting or aggression..."
-                                        />
-                                    </div>
-                                    <div className="form-row full-width">
-                                        <label>Reactivity Notes</label>
-                                        <textarea
-                                            value={editForm.reactivityNotes || ''}
-                                            onChange={(e) => setEditForm({...editForm, reactivityNotes: e.target.value})}
-                                            rows={3}
-                                            placeholder="Fear, anxiety, reactivity to people, animals, sounds..."
-                                        />
-                                    </div>
-                                </div>
-
-                                {/* BREEDING STATUS & REPRODUCTION */}
+                    {/* Breeding Tab */}
+                    {editActiveTab === 'breeding' && (
+                        <div className="tab-panel">
+                            <div className="edit-form">
                                 <div className="form-section">
                                     <h4 className="section-title">Breeding & Reproduction</h4>
                                     <div className="form-row">
-                                        <label>Breeding Role</label>
+                                        <label>Reproductive Status</label>
                                         <select
-                                            value={editForm.breedingRole || 'both'}
-                                            onChange={(e) => setEditForm({...editForm, breedingRole: e.target.value})}
+                                            value={editForm.reproductiveStatus || ''}
+                                            onChange={(e) => setEditForm({...editForm, reproductiveStatus: e.target.value})}
                                         >
-                                            <option value="both">Both (Sire & Dam)</option>
-                                            <option value="sire">Sire Only</option>
-                                            <option value="dam">Dam Only</option>
-                                            <option value="neither">Not for Breeding</option>
+                                            <option value="">Select Status...</option>
+                                            <option value="intact">Intact</option>
+                                            <option value="neutered">Neutered/Spayed</option>
+                                            <option value="breeding">Active Breeding</option>
+                                            <option value="retired">Retired from Breeding</option>
                                         </select>
                                     </div>
                                     <div className="form-row">
-                                        <label style={{ display: 'flex', alignItems: 'center', gap: '8px', cursor: 'pointer' }}>
-                                            <input
-                                                type="checkbox"
-                                                checked={editForm.isPregnant || false}
-                                                onChange={(e) => setEditForm({...editForm, isPregnant: e.target.checked})}
-                                                style={{ width: 'auto', cursor: 'pointer' }}
-                                            />
-                                            <span>Currently Pregnant</span>
-                                        </label>
-                                    </div>
-                                    <div className="form-row">
-                                        <label style={{ display: 'flex', alignItems: 'center', gap: '8px', cursor: 'pointer' }}>
-                                            <input
-                                                type="checkbox"
-                                                checked={editForm.isNursing || false}
-                                                onChange={(e) => setEditForm({...editForm, isNursing: e.target.checked})}
-                                                style={{ width: 'auto', cursor: 'pointer' }}
-                                            />
-                                            <span>Currently Nursing</span>
-                                        </label>
-                                    </div>
-                                    <div className="form-row">
-                                        <label style={{ display: 'flex', alignItems: 'center', gap: '8px', cursor: 'pointer' }}>
-                                            <input
-                                                type="checkbox"
-                                                checked={editForm.isInMating || false}
-                                                onChange={(e) => setEditForm({...editForm, isInMating: e.target.checked})}
-                                                style={{ width: 'auto', cursor: 'pointer' }}
-                                            />
-                                            <span>Currently in Mating Process</span>
-                                        </label>
-                                    </div>
-                                    <div className="form-row">
-                                        <label>Heat Status</label>
-                                        <select
-                                            value={editForm.heatStatus || ''}
-                                            onChange={(e) => setEditForm({...editForm, heatStatus: e.target.value})}
-                                        >
-                                            <option value="">Select...</option>
-                                            <option value="Not in heat">Not in heat</option>
-                                            <option value="Pre-heat">Pre-heat</option>
-                                            <option value="In heat">In heat</option>
-                                            <option value="Post-heat">Post-heat</option>
-                                        </select>
-                                    </div>
-                                    <div className="form-row">
-                                        <label>Last Heat Date</label>
+                                        <label>Breeding Status</label>
                                         <input
-                                            type="date"
-                                            value={editForm.lastHeatDate || ''}
-                                            onChange={(e) => setEditForm({...editForm, lastHeatDate: e.target.value})}
+                                            type="text"
+                                            value={editForm.breedingStatus || ''}
+                                            onChange={(e) => setEditForm({...editForm, breedingStatus: e.target.value})}
+                                            placeholder="Current breeding status"
                                         />
-                                    </div>
-                                    <div className="form-row">
-                                        <label>Ovulation Date</label>
-                                        <input
-                                            type="date"
-                                            value={editForm.ovulationDate || ''}
-                                            onChange={(e) => setEditForm({...editForm, ovulationDate: e.target.value})}
-                                        />
-                                    </div>
-                                    <div className="form-row">
-                                        <label>Expected Due Date</label>
-                                        <input
-                                            type="date"
-                                            value={editForm.expectedDueDate || ''}
-                                            onChange={(e) => setEditForm({...editForm, expectedDueDate: e.target.value})}
-                                        />
-                                    </div>
-                                    <div className="form-row">
-                                        <label>Whelping/Queening Date</label>
-                                        <input
-                                            type="date"
-                                            value={editForm.whelpingDate || editForm.queeningDate || ''}
-                                            onChange={(e) => setEditForm({...editForm, whelpingDate: e.target.value, queeningDate: e.target.value})}
-                                        />
-                                    </div>
-                                    <div className="form-row">
-                                        <label>Nursing Start Date</label>
-                                        <input
-                                            type="date"
-                                            value={editForm.nursingStartDate || ''}
-                                            onChange={(e) => setEditForm({...editForm, nursingStartDate: e.target.value})}
-                                        />
-                                    </div>
-                                    <div className="form-row">
-                                        <label>Weaning Date</label>
-                                        <input
-                                            type="date"
-                                            value={editForm.weaningDate || ''}
-                                            onChange={(e) => setEditForm({...editForm, weaningDate: e.target.value})}
-                                        />
-                                    </div>
-                                    <div className="form-row">
-                                        <label>Litter Count</label>
-                                        <input
-                                            type="number"
-                                            value={editForm.litterCount || ''}
-                                            onChange={(e) => setEditForm({...editForm, litterCount: e.target.value})}
-                                            placeholder="Number of offspring"
-                                        />
-                                    </div>
-                                    <div className="form-row">
-                                        <label>Total Offspring Count</label>
-                                        <input
-                                            type="number"
-                                            value={editForm.offspringCount || ''}
-                                            onChange={(e) => setEditForm({...editForm, offspringCount: e.target.value})}
-                                            placeholder="Lifetime offspring count"
-                                        />
-                                    </div>
-                                    <div className="form-row">
-                                        <label>Estrus Cycle Length (days)</label>
-                                        <input
-                                            type="number"
-                                            value={editForm.estrusCycleLength || ''}
-                                            onChange={(e) => setEditForm({...editForm, estrusCycleLength: e.target.value})}
-                                            placeholder="21"
-                                        />
-                                    </div>
-                                    <div className="form-row">
-                                        <label>Gestation Length (days)</label>
-                                        <input
-                                            type="number"
-                                            value={editForm.gestationLength || ''}
-                                            onChange={(e) => setEditForm({...editForm, gestationLength: e.target.value})}
-                                            placeholder="63"
-                                        />
-                                    </div>
-                                    <div className="form-row">
-                                        <label style={{ display: 'flex', alignItems: 'center', gap: '8px', cursor: 'pointer' }}>
-                                            <input
-                                                type="checkbox"
-                                                checked={editForm.artificialInseminationUsed || false}
-                                                onChange={(e) => setEditForm({...editForm, artificialInseminationUsed: e.target.checked})}
-                                                style={{ width: 'auto', cursor: 'pointer' }}
-                                            />
-                                            <span>Artificial Insemination Used</span>
-                                        </label>
-                                    </div>
-                                    <div className="form-row">
-                                        <label>Delivery Method</label>
-                                        <select
-                                            value={editForm.deliveryMethod || ''}
-                                            onChange={(e) => setEditForm({...editForm, deliveryMethod: e.target.value})}
-                                        >
-                                            <option value="">Select...</option>
-                                            <option value="Natural">Natural</option>
-                                            <option value="Assisted">Assisted</option>
-                                            <option value="C-Section">C-Section</option>
-                                        </select>
                                     </div>
                                     <div className="form-row full-width">
-                                        <label>Mating Dates</label>
+                                        <label>Breeding History</label>
                                         <textarea
-                                            value={editForm.matingDates || ''}
-                                            onChange={(e) => setEditForm({...editForm, matingDates: e.target.value})}
+                                            value={editForm.breedingHistory || ''}
+                                            onChange={(e) => setEditForm({...editForm, breedingHistory: e.target.value})}
+                                            rows={4}
+                                            placeholder="Past breeding pairings, offspring, breeding notes..."
+                                        />
+                                    </div>
+                                    <div className="form-row">
+                                        <label>Stud Fee</label>
+                                        <input
+                                            type="number"
+                                            value={editForm.studFee || ''}
+                                            onChange={(e) => setEditForm({...editForm, studFee: e.target.value})}
+                                            step="0.01"
+                                            placeholder="Breeding fee"
+                                        />
+                                    </div>
+                                    <div className="form-row full-width">
+                                        <label>Breeding Availability</label>
+                                        <textarea
+                                            value={editForm.breedingAvailability || ''}
+                                            onChange={(e) => setEditForm({...editForm, breedingAvailability: e.target.value})}
                                             rows={2}
-                                            placeholder="Record of mating dates and partners..."
-                                        />
-                                    </div>
-                                    <div className="form-row full-width">
-                                        <label>Reproductive Complications</label>
-                                        <textarea
-                                            value={editForm.reproductiveComplications || ''}
-                                            onChange={(e) => setEditForm({...editForm, reproductiveComplications: e.target.value})}
-                                            rows={3}
-                                            placeholder="Delivery complications, reproductive issues..."
-                                        />
-                                    </div>
-                                    <div className="form-row full-width">
-                                        <label>Reproductive Clearances</label>
-                                        <textarea
-                                            value={editForm.reproductiveClearances || ''}
-                                            onChange={(e) => setEditForm({...editForm, reproductiveClearances: e.target.value})}
-                                            rows={2}
-                                            placeholder="Breeding soundness exams, fertility tests..."
+                                            placeholder="Available for breeding, conditions, restrictions..."
                                         />
                                     </div>
                                 </div>
+                            </div>
+                        </div>
+                    )}
 
-                                {/* STUD/FERTILITY */}
+                    {/* Care Tab */}
+                    {editActiveTab === 'care' && (
+                        <div className="tab-panel">
+                            <div className="edit-form">
                                 <div className="form-section">
-                                    <h4 className="section-title">Stud & Fertility</h4>
-                                    <div className="form-row">
-                                        <label style={{ display: 'flex', alignItems: 'center', gap: '8px', cursor: 'pointer' }}>
-                                            <input
-                                                type="checkbox"
-                                                checked={editForm.isStudAnimal || false}
-                                                onChange={(e) => setEditForm({...editForm, isStudAnimal: e.target.checked})}
-                                                style={{ width: 'auto', cursor: 'pointer' }}
-                                            />
-                                            <span>Available as Stud</span>
-                                        </label>
-                                    </div>
-                                    <div className="form-row">
-                                        <label style={{ display: 'flex', alignItems: 'center', gap: '8px', cursor: 'pointer' }}>
-                                            <input
-                                                type="checkbox"
-                                                checked={editForm.availableForBreeding || false}
-                                                onChange={(e) => setEditForm({...editForm, availableForBreeding: e.target.checked})}
-                                                style={{ width: 'auto', cursor: 'pointer' }}
-                                            />
-                                            <span>Available for Breeding</span>
-                                        </label>
-                                    </div>
-                                    <div className="form-row">
-                                        <label>Stud Fee Currency</label>
-                                        <select
-                                            value={editForm.studFeeCurrency || 'USD'}
-                                            onChange={(e) => setEditForm({...editForm, studFeeCurrency: e.target.value})}
-                                        >
-                                            <option value="USD">USD</option>
-                                            <option value="EUR">EUR</option>
-                                            <option value="GBP">GBP</option>
-                                            <option value="Other">Other</option>
-                                        </select>
-                                    </div>
-                                    <div className="form-row">
-                                        <label>Stud Fee Amount</label>
-                                        <input
-                                            type="number"
-                                            value={editForm.studFeeAmount || ''}
-                                            onChange={(e) => setEditForm({...editForm, studFeeAmount: e.target.value})}
-                                            placeholder="0.00"
-                                        />
-                                    </div>
-                                    <div className="form-row">
-                                        <label>Fertility Status</label>
-                                        <select
-                                            value={editForm.fertilityStatus || 'Unknown'}
-                                            onChange={(e) => setEditForm({...editForm, fertilityStatus: e.target.value})}
-                                        >
-                                            <option value="Unknown">Unknown</option>
-                                            <option value="Proven Fertile">Proven Fertile</option>
-                                            <option value="Assumed Fertile">Assumed Fertile</option>
-                                            <option value="Questionable">Questionable</option>
-                                            <option value="Infertile">Infertile</option>
-                                        </select>
-                                    </div>
-                                    <div className="form-row">
-                                        <label>Last Mating Date</label>
-                                        <input
-                                            type="date"
-                                            value={editForm.lastMatingDate || ''}
-                                            onChange={(e) => setEditForm({...editForm, lastMatingDate: e.target.value})}
-                                        />
-                                    </div>
-                                    <div className="form-row">
-                                        <label>Successful Matings</label>
-                                        <input
-                                            type="number"
-                                            value={editForm.successfulMatings || ''}
-                                            onChange={(e) => setEditForm({...editForm, successfulMatings: e.target.value})}
+                                    <h4 className="section-title">Care & Environment</h4>
+                                    <div className="form-row full-width">
+                                        <label>Diet/Nutrition</label>
+                                        <textarea
+                                            value={editForm.diet || ''}
+                                            onChange={(e) => setEditForm({...editForm, diet: e.target.value})}
+                                            rows={3}
+                                            placeholder="Feeding schedule, food types, dietary needs..."
                                         />
                                     </div>
                                     <div className="form-row full-width">
-                                        <label>Fertility Notes</label>
+                                        <label>Habitat/Housing</label>
                                         <textarea
-                                            value={editForm.fertilityNotes || ''}
-                                            onChange={(e) => setEditForm({...editForm, fertilityNotes: e.target.value})}
+                                            value={editForm.habitat || ''}
+                                            onChange={(e) => setEditForm({...editForm, habitat: e.target.value})}
                                             rows={3}
+                                            placeholder="Enclosure type, size, environmental conditions..."
+                                        />
+                                    </div>
+                                    <div className="form-row full-width">
+                                        <label>Special Care Requirements</label>
+                                        <textarea
+                                            value={editForm.specialCareRequirements || ''}
+                                            onChange={(e) => setEditForm({...editForm, specialCareRequirements: e.target.value})}
+                                            rows={3}
+                                            placeholder="Special handling, environmental needs, care instructions..."
+                                        />
+                                    </div>
+                                    <div className="form-row full-width">
+                                        <label>Temperament</label>
+                                        <textarea
+                                            value={editForm.temperament || ''}
+                                            onChange={(e) => setEditForm({...editForm, temperament: e.target.value})}
+                                            rows={3}
+                                            placeholder="Personality traits, behavioral characteristics..."
+                                        />
+                                    </div>
+                                    <div className="form-row full-width">
+                                        <label>Behavioral Notes</label>
+                                        <textarea
+                                            value={editForm.behavioralNotes || ''}
+                                            onChange={(e) => setEditForm({...editForm, behavioralNotes: e.target.value})}
+                                            rows={3}
+                                            placeholder="Behavioral observations, quirks, preferences..."
                                         />
                                     </div>
                                 </div>
+                            </div>
+                        </div>
+                    )}
 
-                                {/* SALE INFORMATION */}
-                                <div className="form-section">
-                                    <h4 className="section-title">Sale Information</h4>
-                                    <div className="form-row">
-                                        <label style={{ display: 'flex', alignItems: 'center', gap: '8px', cursor: 'pointer' }}>
-                                            <input
-                                                type="checkbox"
-                                                checked={editForm.isForSale || false}
-                                                onChange={(e) => setEditForm({...editForm, isForSale: e.target.checked})}
-                                                style={{ width: 'auto', cursor: 'pointer' }}
-                                            />
-                                            <span>Currently for Sale</span>
-                                        </label>
-                                    </div>
-                                    <div className="form-row">
-                                        <label>Sale Price Currency</label>
-                                        <select
-                                            value={editForm.salePriceCurrency || 'USD'}
-                                            onChange={(e) => setEditForm({...editForm, salePriceCurrency: e.target.value})}
-                                        >
-                                            <option value="USD">USD</option>
-                                            <option value="EUR">EUR</option>
-                                            <option value="GBP">GBP</option>
-                                            <option value="Other">Other</option>
-                                        </select>
-                                    </div>
-                                    <div className="form-row">
-                                        <label>Sale Price Amount</label>
-                                        <input
-                                            type="number"
-                                            value={editForm.salePriceAmount || ''}
-                                            onChange={(e) => setEditForm({...editForm, salePriceAmount: e.target.value})}
-                                            placeholder="0.00"
-                                        />
-                                    </div>
-                                </div>
-
-                                {/* SHOW & COMPETITION */}
+                    {/* Performance Tab */}
+                    {editActiveTab === 'performance' && (
+                        <div className="tab-panel">
+                            <div className="edit-form">
                                 <div className="form-section">
                                     <h4 className="section-title">Show & Competition</h4>
                                     <div className="form-row full-width">
-                                        <label>Show Titles</label>
+                                        <label>Show Record</label>
                                         <textarea
-                                            value={editForm.showTitles || ''}
-                                            onChange={(e) => setEditForm({...editForm, showTitles: e.target.value})}
-                                            rows={2}
-                                            placeholder="Awards and titles earned..."
+                                            value={editForm.showRecord || ''}
+                                            onChange={(e) => setEditForm({...editForm, showRecord: e.target.value})}
+                                            rows={4}
+                                            placeholder="Competition history, placements, wins..."
                                         />
                                     </div>
                                     <div className="form-row full-width">
-                                        <label>Show Ratings</label>
+                                        <label>Titles & Awards</label>
                                         <textarea
-                                            value={editForm.showRatings || ''}
-                                            onChange={(e) => setEditForm({...editForm, showRatings: e.target.value})}
-                                            rows={2}
-                                            placeholder="Show ratings and scores..."
-                                        />
-                                    </div>
-                                    <div className="form-row full-width">
-                                        <label>Judge Comments</label>
-                                        <textarea
-                                            value={editForm.judgeComments || ''}
-                                            onChange={(e) => setEditForm({...editForm, judgeComments: e.target.value})}
+                                            value={editForm.titlesAwards || ''}
+                                            onChange={(e) => setEditForm({...editForm, titlesAwards: e.target.value})}
                                             rows={3}
-                                            placeholder="Comments from judges..."
-                                        />
-                                    </div>
-                                    <div className="form-row full-width">
-                                        <label>Working Titles</label>
-                                        <textarea
-                                            value={editForm.workingTitles || ''}
-                                            onChange={(e) => setEditForm({...editForm, workingTitles: e.target.value})}
-                                            rows={2}
-                                            placeholder="Working or performance titles..."
+                                            placeholder="Championships, certifications, awards earned..."
                                         />
                                     </div>
                                     <div className="form-row full-width">
@@ -3010,8 +1902,14 @@ export default function AnimalManagementPanel({ API_BASE_URL, authToken, userRol
                                         />
                                     </div>
                                 </div>
+                            </div>
+                        </div>
+                    )}
 
-                                {/* LEGAL & OWNERSHIP */}
+                    {/* Legal Tab */}
+                    {editActiveTab === 'legal' && (
+                        <div className="tab-panel">
+                            <div className="edit-form">
                                 <div className="form-section">
                                     <h4 className="section-title">Legal & Ownership</h4>
                                     <div className="form-row">
@@ -3068,75 +1966,23 @@ export default function AnimalManagementPanel({ API_BASE_URL, authToken, userRol
                                             placeholder="International transfer restrictions..."
                                         />
                                     </div>
-                                    <div className="form-row full-width">
-                                        <label>Cause of Death</label>
-                                        <textarea
-                                            value={editForm.causeOfDeath || ''}
-                                            onChange={(e) => setEditForm({...editForm, causeOfDeath: e.target.value})}
-                                            rows={2}
-                                            placeholder="If deceased, cause of death..."
-                                        />
-                                    </div>
-                                    <div className="form-row full-width">
-                                        <label>Necropsy Results</label>
-                                        <textarea
-                                            value={editForm.necropsyResults || ''}
-                                            onChange={(e) => setEditForm({...editForm, necropsyResults: e.target.value})}
-                                            rows={3}
-                                            placeholder="Post-mortem examination results..."
-                                        />
-                                    </div>
-                                    <div className="form-row full-width">
-                                        <label>End of Life Care Notes</label>
-                                        <textarea
-                                            value={editForm.endOfLifeCareNotes || ''}
-                                            onChange={(e) => setEditForm({...editForm, endOfLifeCareNotes: e.target.value})}
-                                            rows={3}
-                                            placeholder="Palliative care, euthanasia considerations..."
-                                        />
-                                    </div>
-                                </div>
-
-                                {/* NOTES & REMARKS */}
-                                <div className="form-section">
-                                    <h4 className="section-title">Notes & Remarks</h4>
-                                    <div className="form-row full-width">
-                                        <label>Remarks</label>
-                                        <textarea
-                                            value={editForm.remarks || ''}
-                                            onChange={(e) => setEditForm({...editForm, remarks: e.target.value})}
-                                            rows={4}
-                                            placeholder="General notes and remarks..."
-                                        />
-                                    </div>
-                                    <div className="form-row full-width">
-                                        <label style={{ display: 'flex', alignItems: 'center', gap: '8px', cursor: 'pointer' }}>
-                                            <input
-                                                type="checkbox"
-                                                checked={editForm.showOnPublicProfile || false}
-                                                onChange={(e) => setEditForm({...editForm, showOnPublicProfile: e.target.checked})}
-                                                style={{ width: 'auto', cursor: 'pointer' }}
-                                            />
-                                            <span>Show on Public Profile (Make Public)</span>
-                                        </label>
-                                    </div>
-                                </div>
-                                <div className="form-row full-width">
-                                    <label>Reason for Edit *</label>
-                                    <input
-                                        type="text"
-                                        value={editReason}
-                                        onChange={(e) => setEditReason(e.target.value)}
-                                        placeholder="Why are you making this edit?"
-                                    />
                                 </div>
                             </div>
+                        </div>
+                    )}
 
-                            <div className="modal-actions">
-                                <button className="btn-secondary" onClick={() => setShowEditModal(false)}>
-                                    Cancel
-                                </button>
-                                <button className="btn-primary" onClick={handleSaveEdit}>
+                    {/* Edit Reason (shown on all tabs) */}
+                    <div className="edit-form">
+                        <div className="form-row full-width">
+                            <label>Reason for Edit *</label>
+                            <input
+                                type="text"
+                                value={editReason}
+                                onChange={(e) => setEditReason(e.target.value)}
+                                placeholder="Why are you making this edit?"
+                            />
+                        </div>
+                    </div>
                                     Save Changes
                                 </button>
                             </div>
