@@ -17495,7 +17495,7 @@ const App = () => {
         }
     }, [authToken, navigate, location.pathname]);
 
-    const fetchUserProfile = useCallback(async (token) => {
+    const fetchUserProfile = useCallback(async (token, silent = false) => {
         // Don't fetch if no token (already logged out)
         if (!token) return;
         
@@ -17513,16 +17513,22 @@ const App = () => {
             setUserProfile(user);
         } catch (error) {
             console.error('Failed to fetch user profile:', error);
-            // Only show error modal if we still have a token (not already logged out)
-            if (authToken) {
+            // Only show error modal and logout if we still have a token AND it's not a silent background refresh
+            if (authToken && !silent) {
                 // Check if it's a 401 (token expired/invalid)
                 if (error.response?.status === 401) {
                     showModalMessage('Session Expired', 'Your session has expired. Please log in again.');
+                    setAuthToken(null);
                 } else {
                     showModalMessage('Connection Error', 'Could not load user profile. Please check your connection and try again.');
+                    setAuthToken(null);
                 }
+            } else if (authToken && silent && error.response?.status === 401) {
+                // For silent refreshes, only logout on 401 (invalid token), not network errors
+                console.log('[AUTH] Silent profile refresh failed with 401 - logging out');
                 setAuthToken(null);
             }
+            // For silent refreshes with network errors (not 401), just log and continue - don't logout
         }
     }, [showModalMessage, authToken]);
 
@@ -17530,12 +17536,12 @@ const App = () => {
     useEffect(() => {
         if (!authToken) return;
         
-        // Fetch immediately, then set up periodic refetch
-        fetchUserProfile(authToken);
+        // Fetch immediately (non-silent for initial load)
+        fetchUserProfile(authToken, false);
         
-        // Refetch user profile every 10 seconds to catch warning/suspension updates
+        // Refetch user profile every 10 seconds to catch warning/suspension updates (silent mode)
         const interval = setInterval(() => {
-            fetchUserProfile(authToken);
+            fetchUserProfile(authToken, true); // Silent refresh - don't show errors or logout on network issues
         }, 10000);
         
         return () => clearInterval(interval);

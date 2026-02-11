@@ -905,78 +905,82 @@ export default function AnimalManagementPanel({ API_BASE_URL, authToken, userRol
 
                         {/* Tab Navigation */}
                         <div className="modal-tabs">
-                            <button 
-                                className={`tab ${viewActiveTab === 'overview' ? 'active' : ''}`}
-                                onClick={() => setViewActiveTab('overview')}
-                            >
-                                📋 Overview
-                            </button>
-                            <button 
-                                className={`tab ${viewActiveTab === 'status' ? 'active' : ''}`}
-                                onClick={() => setViewActiveTab('status')}
-                            >
-                                🔒 Status
-                            </button>
-                            <button 
-                                className={`tab ${viewActiveTab === 'physical' ? 'active' : ''}`}
-                                onClick={() => setViewActiveTab('physical')}
-                            >
-                                🎨 Physical
-                            </button>
-                            <button 
-                                className={`tab ${viewActiveTab === 'identification' ? 'active' : ''}`}
-                                onClick={() => setViewActiveTab('identification')}
-                            >
-                                🏷️ Identification
-                            </button>
-                            <button 
-                                className={`tab ${viewActiveTab === 'lineage' ? 'active' : ''}`}
-                                onClick={() => setViewActiveTab('lineage')}
-                            >
-                                🌳 Lineage
-                            </button>
-                            <button 
-                                className={`tab ${viewActiveTab === 'breeding' ? 'active' : ''}`}
-                                onClick={() => setViewActiveTab('breeding')}
-                            >
-                                🫘 Breeding
-                            </button>
-                            <button 
-                                className={`tab ${viewActiveTab === 'health' ? 'active' : ''}`}
-                                onClick={() => setViewActiveTab('health')}
-                            >
-                                🏥 Health
-                            </button>
-                            <button 
-                                className={`tab ${viewActiveTab === 'husbandry' ? 'active' : ''}`}
-                                onClick={() => setViewActiveTab('husbandry')}
-                            >
-                                🏠 Husbandry
-                            </button>
-                            <button 
-                                className={`tab ${viewActiveTab === 'behavior' ? 'active' : ''}`}
-                                onClick={() => setViewActiveTab('behavior')}
-                            >
-                                🧠 Behavior
-                            </button>
-                            <button 
-                                className={`tab ${viewActiveTab === 'records' ? 'active' : ''}`}
-                                onClick={() => setViewActiveTab('records')}
-                            >
-                                📝 Records
-                            </button>
-                            <button 
-                                className={`tab ${viewActiveTab === 'endoflife' ? 'active' : ''}`}
-                                onClick={() => setViewActiveTab('endoflife')}
-                            >
-                                ⚖️ End of Life
-                            </button>
-                            <button 
-                                className={`tab ${viewActiveTab === 'reports' ? 'active' : ''}`}
-                                onClick={() => setViewActiveTab('reports')}
-                            >
-                                ⚠️ Reports
-                            </button>
+                            <div className="modal-tabs-row">
+                                <button 
+                                    className={`tab ${viewActiveTab === 'overview' ? 'active' : ''}`}
+                                    onClick={() => setViewActiveTab('overview')}
+                                >
+                                    📋 Overview
+                                </button>
+                                <button 
+                                    className={`tab ${viewActiveTab === 'status' ? 'active' : ''}`}
+                                    onClick={() => setViewActiveTab('status')}
+                                >
+                                    🔒 Status
+                                </button>
+                                <button 
+                                    className={`tab ${viewActiveTab === 'physical' ? 'active' : ''}`}
+                                    onClick={() => setViewActiveTab('physical')}
+                                >
+                                    🎨 Physical
+                                </button>
+                                <button 
+                                    className={`tab ${viewActiveTab === 'identification' ? 'active' : ''}`}
+                                    onClick={() => setViewActiveTab('identification')}
+                                >
+                                    🏷️ Identification
+                                </button>
+                                <button 
+                                    className={`tab ${viewActiveTab === 'lineage' ? 'active' : ''}`}
+                                    onClick={() => setViewActiveTab('lineage')}
+                                >
+                                    🌳 Lineage
+                                </button>
+                                <button 
+                                    className={`tab ${viewActiveTab === 'breeding' ? 'active' : ''}`}
+                                    onClick={() => setViewActiveTab('breeding')}
+                                >
+                                    🫘 Breeding
+                                </button>
+                            </div>
+                            <div className="modal-tabs-row">
+                                <button 
+                                    className={`tab ${viewActiveTab === 'health' ? 'active' : ''}`}
+                                    onClick={() => setViewActiveTab('health')}
+                                >
+                                    🏥 Health
+                                </button>
+                                <button 
+                                    className={`tab ${viewActiveTab === 'husbandry' ? 'active' : ''}`}
+                                    onClick={() => setViewActiveTab('husbandry')}
+                                >
+                                    🏠 Husbandry
+                                </button>
+                                <button 
+                                    className={`tab ${viewActiveTab === 'behavior' ? 'active' : ''}`}
+                                    onClick={() => setViewActiveTab('behavior')}
+                                >
+                                    🧠 Behavior
+                                </button>
+                                <button 
+                                    className={`tab ${viewActiveTab === 'records' ? 'active' : ''}`}
+                                    onClick={() => setViewActiveTab('records')}
+                                >
+                                    📝 Records
+                                </button>
+                                <button 
+                                    className={`tab ${viewActiveTab === 'endoflife' ? 'active' : ''}`}
+                                    onClick={() => setViewActiveTab('endoflife')}
+                                >
+                                    ⚖️ End of Life
+                                </button>
+                                <button 
+                                    className={`tab ${viewActiveTab === 'reports' ? 'active' : ''}`}
+                                    onClick={() => setViewActiveTab('reports')}
+                                >
+                                    ⚠️ Reports
+                                </button>
+                            </div>
                         </div>
 
                         <div className="animal-modal-body">
@@ -1627,78 +1631,82 @@ export default function AnimalManagementPanel({ API_BASE_URL, authToken, userRol
 
                         {/* Tab Navigation */}
                         <div className="modal-tabs">
-                            <button 
-                                className={`tab ${editActiveTab === 'overview' ? 'active' : ''}`}
-                                onClick={() => setEditActiveTab('overview')}
-                            >
-                                📋 Overview
-                            </button>
-                            <button 
-                                className={`tab ${editActiveTab === 'status' ? 'active' : ''}`}
-                                onClick={() => setEditActiveTab('status')}
-                            >
-                                🔒 Status
-                            </button>
-                            <button 
-                                className={`tab ${editActiveTab === 'physical' ? 'active' : ''}`}
-                                onClick={() => setEditActiveTab('physical')}
-                            >
-                                🎨 Physical
-                            </button>
-                            <button 
-                                className={`tab ${editActiveTab === 'identification' ? 'active' : ''}`}
-                                onClick={() => setEditActiveTab('identification')}
-                            >
-                                🏷️ Identification
-                            </button>
-                            <button 
-                                className={`tab ${editActiveTab === 'lineage' ? 'active' : ''}`}
-                                onClick={() => setEditActiveTab('lineage')}
-                            >
-                                🌳 Lineage
-                            </button>
-                            <button 
-                                className={`tab ${editActiveTab === 'breeding' ? 'active' : ''}`}
-                                onClick={() => setEditActiveTab('breeding')}
-                            >
-                                🫘 Breeding
-                            </button>
-                            <button 
-                                className={`tab ${editActiveTab === 'health' ? 'active' : ''}`}
-                                onClick={() => setEditActiveTab('health')}
-                            >
-                                🏥 Health
-                            </button>
-                            <button 
-                                className={`tab ${editActiveTab === 'husbandry' ? 'active' : ''}`}
-                                onClick={() => setEditActiveTab('husbandry')}
-                            >
-                                🏠 Husbandry
-                            </button>
-                            <button 
-                                className={`tab ${editActiveTab === 'behavior' ? 'active' : ''}`}
-                                onClick={() => setEditActiveTab('behavior')}
-                            >
-                                🧠 Behavior
-                            </button>
-                            <button 
-                                className={`tab ${editActiveTab === 'records' ? 'active' : ''}`}
-                                onClick={() => setEditActiveTab('records')}
-                            >
-                                📝 Records
-                            </button>
-                            <button 
-                                className={`tab ${editActiveTab === 'endoflife' ? 'active' : ''}`}
-                                onClick={() => setEditActiveTab('endoflife')}
-                            >
-                                ⚖️ End of Life
-                            </button>
-                            <button 
-                                className={`tab ${editActiveTab === 'show' ? 'active' : ''}`}
-                                onClick={() => setEditActiveTab('show')}
-                            >
-                                🏆 Show
-                            </button>
+                            <div className="modal-tabs-row">
+                                <button 
+                                    className={`tab ${editActiveTab === 'overview' ? 'active' : ''}`}
+                                    onClick={() => setEditActiveTab('overview')}
+                                >
+                                    📋 Overview
+                                </button>
+                                <button 
+                                    className={`tab ${editActiveTab === 'status' ? 'active' : ''}`}
+                                    onClick={() => setEditActiveTab('status')}
+                                >
+                                    🔒 Status
+                                </button>
+                                <button 
+                                    className={`tab ${editActiveTab === 'physical' ? 'active' : ''}`}
+                                    onClick={() => setEditActiveTab('physical')}
+                                >
+                                    🎨 Physical
+                                </button>
+                                <button 
+                                    className={`tab ${editActiveTab === 'identification' ? 'active' : ''}`}
+                                    onClick={() => setEditActiveTab('identification')}
+                                >
+                                    🏷️ Identification
+                                </button>
+                                <button 
+                                    className={`tab ${editActiveTab === 'lineage' ? 'active' : ''}`}
+                                    onClick={() => setEditActiveTab('lineage')}
+                                >
+                                    🌳 Lineage
+                                </button>
+                                <button 
+                                    className={`tab ${editActiveTab === 'breeding' ? 'active' : ''}`}
+                                    onClick={() => setEditActiveTab('breeding')}
+                                >
+                                    🫘 Breeding
+                                </button>
+                            </div>
+                            <div className="modal-tabs-row">
+                                <button 
+                                    className={`tab ${editActiveTab === 'health' ? 'active' : ''}`}
+                                    onClick={() => setEditActiveTab('health')}
+                                >
+                                    🏥 Health
+                                </button>
+                                <button 
+                                    className={`tab ${editActiveTab === 'husbandry' ? 'active' : ''}`}
+                                    onClick={() => setEditActiveTab('husbandry')}
+                                >
+                                    🏠 Husbandry
+                                </button>
+                                <button 
+                                    className={`tab ${editActiveTab === 'behavior' ? 'active' : ''}`}
+                                    onClick={() => setEditActiveTab('behavior')}
+                                >
+                                    🧠 Behavior
+                                </button>
+                                <button 
+                                    className={`tab ${editActiveTab === 'records' ? 'active' : ''}`}
+                                    onClick={() => setEditActiveTab('records')}
+                                >
+                                    📝 Records
+                                </button>
+                                <button 
+                                    className={`tab ${editActiveTab === 'endoflife' ? 'active' : ''}`}
+                                    onClick={() => setEditActiveTab('endoflife')}
+                                >
+                                    ⚖️ End of Life
+                                </button>
+                                <button 
+                                    className={`tab ${editActiveTab === 'show' ? 'active' : ''}`}
+                                    onClick={() => setEditActiveTab('show')}
+                                >
+                                    🏆 Show
+                                </button>
+                            </div>
                         </div>
 
                         <div className="animal-modal-body">
