@@ -14498,7 +14498,14 @@ const AnimalList = ({ authToken, showModalMessage, onEditAnimal, onViewAnimal, f
     });
 
     const handleStatusFilterChange = (e) => setStatusFilter(e.target.value);
-    const handleSearchInputChange = (e) => setSearchInput(e.target.value);
+    const handleSearchInputChange = (e) => {
+        const value = e.target.value;
+        setSearchInput(value);
+        // Auto-clear the applied filter when search is emptied
+        if (!value.trim()) {
+            setAppliedNameFilter('');
+        }
+    };
     const toggleGender = (gender) => {
         setSelectedGenders(prev => 
             prev.includes(gender) 
@@ -14520,6 +14527,10 @@ const AnimalList = ({ authToken, showModalMessage, onEditAnimal, onViewAnimal, f
     const handleRefresh = async () => {
         try {
             setLoading(true);
+            
+            // Clear search filter while keeping other filters
+            setSearchInput('');
+            setAppliedNameFilter('');
             
             // Fetch animals first
             const currentAnimals = await axios.get(`${API_BASE_URL}/animals`, {
@@ -14561,6 +14572,56 @@ const AnimalList = ({ authToken, showModalMessage, onEditAnimal, onViewAnimal, f
             return;
         }
         setAppliedNameFilter(term);
+    };
+
+    const hasActiveFilters = () => {
+        return appliedNameFilter || 
+               statusFilter || 
+               selectedSpecies.length !== speciesNames.length || 
+               selectedGenders.length !== 4 || 
+               publicFilter || 
+               statusFilterPregnant || 
+               statusFilterNursing || 
+               statusFilterMating || 
+               !ownedFilterActive;
+    };
+
+    const clearAllFilters = () => {
+        setSearchInput('');
+        setAppliedNameFilter('');
+        setStatusFilter('');
+        setSelectedSpecies([...speciesNames]);
+        setSelectedGenders(['Male', 'Female', 'Intersex', 'Unknown']);
+        setPublicFilter('');
+        setStatusFilterPregnant(false);
+        setStatusFilterNursing(false);
+        setStatusFilterMating(false);
+        setOwnedFilterActive(true);
+    };
+
+    const hasActiveFilters = () => {
+        return appliedNameFilter || 
+               statusFilter || 
+               selectedSpecies.length !== speciesNames.length || 
+               selectedGenders.length !== 4 || 
+               publicFilter || 
+               statusFilterPregnant || 
+               statusFilterNursing || 
+               statusFilterMating || 
+               !ownedFilterActive;
+    };
+
+    const clearAllFilters = () => {
+        setSearchInput('');
+        setAppliedNameFilter('');
+        setStatusFilter('');
+        setSelectedSpecies([...speciesNames]);
+        setSelectedGenders(['Male', 'Female', 'Intersex', 'Unknown']);
+        setPublicFilter('');
+        setStatusFilterPregnant(false);
+        setStatusFilterNursing(false);
+        setStatusFilterMating(false);
+        setOwnedFilterActive(true);
     };
 
     const toggleBulkDeleteMode = (species) => {
@@ -14799,6 +14860,9 @@ const AnimalList = ({ authToken, showModalMessage, onEditAnimal, onViewAnimal, f
             if (isSelectable) {
                 onToggleSelect(species, animal.id_public);
             } else {
+                // Clear search filter when viewing an animal, keeping other filters
+                setSearchInput('');
+                setAppliedNameFilter('');
                 onViewAnimal(animal);
             }
         };
@@ -14937,11 +15001,26 @@ const AnimalList = ({ authToken, showModalMessage, onEditAnimal, onViewAnimal, f
     return (
         <div className="w-full max-w-5xl bg-white p-6 rounded-xl shadow-lg">
             <h2 className="text-2xl sm:text-3xl font-bold text-gray-800 mb-6 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3">
-                <div className='flex items-center'>
+                <div className='flex items-center gap-2'>
                     <ClipboardList size={20} className="sm:w-6 sm:h-6 mr-2 sm:mr-3 text-primary-dark" />
-                    My Animals ({animals.length})
+                    <span>My Animals ({animals.length})</span>
+                    {hasActiveFilters() && (
+                        <span className="px-2 py-0.5 bg-accent text-white text-xs font-semibold rounded-full" title="Active filters applied">
+                            Filtered
+                        </span>
+                    )}
                 </div>
                 <div className="flex items-center gap-1 sm:gap-2 flex-wrap" data-tutorial-target="bulk-privacy-controls">
+                    {hasActiveFilters() && (
+                        <button 
+                            onClick={clearAllFilters}
+                            className="text-gray-600 hover:text-accent transition flex items-center gap-1 px-2 sm:px-3 py-1 sm:py-1.5 rounded-lg hover:bg-gray-100 text-xs sm:text-sm font-medium"
+                            title="Clear all filters"
+                        >
+                            <X size={14} className="sm:w-4 sm:h-4" />
+                            <span className="hidden sm:inline">Clear Filters</span>
+                        </button>
+                    )}
                     <button
                         onClick={() => toggleAllAnimalsPrivacy(true)}
                         className="text-green-600 hover:text-green-700 transition flex items-center gap-0.5 sm:gap-1 px-2 sm:px-3 py-1 sm:py-1.5 rounded-lg hover:bg-green-50 text-xs sm:text-sm"
