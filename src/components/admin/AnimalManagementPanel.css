@@ -325,10 +325,6 @@
     flex-direction: column;
 }
 
-.animal-modal.edit-modal {
-    max-width: 600px;
-}
-
 .animal-modal.confirm-modal {
     max-width: 450px;
 }
