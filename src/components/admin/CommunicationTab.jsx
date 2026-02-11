@@ -3,7 +3,7 @@ import './CommunicationTab.css';
 import DatePicker from '../DatePicker';
 
 export default function CommunicationTab({ API_BASE_URL, authToken }) {
-    const [activeView, setActiveView] = useState('broadcast'); // broadcast, history, direct, poll-results
+    const [activeView, setActiveView] = useState('broadcast'); // broadcast, history, direct, poll-results, mod-conversations
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState('');
     const [success, setSuccess] = useState('');
@@ -37,12 +37,20 @@ export default function CommunicationTab({ API_BASE_URL, authToken }) {
     const [targetUserId, setTargetUserId] = useState('');
     const [targetUserEmail, setTargetUserEmail] = useState('');
     const [directMessage, setDirectMessage] = useState('');
+    
+    // Moderator conversations state
+    const [modConversations, setModConversations] = useState([]);
+    const [selectedModConversation, setSelectedModConversation] = useState(null);
+    const [conversationMessages, setConversationMessages] = useState([]);
+    const [newModMessage, setNewModMessage] = useState('');
 
     useEffect(() => {
         if (activeView === 'history') {
             fetchBroadcastHistory();
         } else if (activeView === 'poll-results') {
             fetchPollResults();
+        } else if (activeView === 'mod-conversations') {
+            fetchModConversations();
         }
     }, [activeView]);
 
@@ -271,15 +279,18 @@ export default function CommunicationTab({ API_BASE_URL, authToken }) {
         }
 
         try {
-            const response = await fetch(`${API_BASE_URL}/admin/message-user`, {
+            // Send as a real direct message with admin override to bypass privacy settings
+            const response = await fetch(`${API_BASE_URL}/messages/send`, {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
                     'Authorization': `Bearer ${authToken}`
                 },
                 body: JSON.stringify({
-                    userId: targetUserId,
-                    message: directMessage
+                    receiverId: targetUserId,
+                    message: directMessage,
+                    adminOverride: true, // Bypass privacy settings
+                    isModeratorMessage: true // Mark as official moderator communication
                 })
             });
 
@@ -294,10 +305,131 @@ export default function CommunicationTab({ API_BASE_URL, authToken }) {
                 throw new Error(data.error || 'Failed to send message');
             }
 
-            setSuccess('Message sent successfully!');
+            setSuccess('Direct message sent successfully! User can reply to continue the conversation.');
             setTargetUserId('');
             setTargetUserEmail('');
             setDirectMessage('');
+        } catch (err) {
+            setError(err.message);
+        } finally {
+            setLoading(false);
+        }
+    };
+
+    const fetchModConversations = async () => {
+        setLoading(true);
+        setError('');
+
+        try {
+            const response = await fetch(`${API_BASE_URL}/admin/moderator-conversations`, {
+                headers: {
+                    'Authorization': `Bearer ${authToken}`
+                }
+            });
+
+            const data = await response.json();
+
+            if (!response.ok) {
+                throw new Error(data.error || 'Failed to fetch moderator conversations');
+            }
+
+            setModConversations(data.conversations || []);
+        } catch (err) {
+            setError(err.message);
+        } finally {
+            setLoading(false);
+        }
+    };
+
+    const handleViewModConversation = async (conversationId, otherUserId) => {
+        setLoading(true);
+        setError('');
+
+        try {
+            const response = await fetch(`${API_BASE_URL}/messages/conversation/${otherUserId}`, {
+                headers: {
+                    'Authorization': `Bearer ${authToken}`
+                }
+            });
+
+            const data = await response.json();
+
+            if (!response.ok) {
+                throw new Error(data.error || 'Failed to fetch conversation');
+            }
+
+            setConversationMessages(data.messages || []);
+            setSelectedModConversation({ _id: conversationId, otherUserId, ...data });
+        } catch (err) {
+            setError(err.message);
+        } finally {
+            setLoading(false);
+        }
+    };
+
+    const handleSendModMessage = async (e) => {
+        e.preventDefault();
+        if (!newModMessage.trim() || !selectedModConversation) return;
+
+        setLoading(true);
+        setError('');
+
+        try {
+            const response = await fetch(`${API_BASE_URL}/messages/send`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Authorization': `Bearer ${authToken}`
+                },
+                body: JSON.stringify({
+                    receiverId: selectedModConversation.otherUserId,
+                    message: newModMessage.trim(),
+                    adminOverride: true,
+                    isModeratorMessage: true
+                })
+            });
+
+            const data = await response.json();
+
+            if (!response.ok) {
+                throw new Error(data.error || 'Failed to send message');
+            }
+
+            setNewModMessage('');
+            await handleViewModConversation(selectedModConversation._id, selectedModConversation.otherUserId);
+        } catch (err) {
+            setError(err.message);
+        } finally {
+            setLoading(false);
+        }
+    };
+
+    const handleCloseModConversation = async (conversationId, otherUserId) => {
+        if (!confirm('Are you sure you want to close this conversation? This will delete all messages.')) {
+            return;
+        }
+
+        setLoading(true);
+        setError('');
+
+        try {
+            const response = await fetch(`${API_BASE_URL}/admin/close-conversation/${otherUserId}`, {
+                method: 'DELETE',
+                headers: {
+                    'Authorization': `Bearer ${authToken}`
+                }
+            });
+
+            const data = await response.json();
+
+            if (!response.ok) {
+                throw new Error(data.error || 'Failed to close conversation');
+            }
+
+            setSuccess('Conversation closed successfully');
+            setSelectedModConversation(null);
+            setConversationMessages([]);
+            await fetchModConversations();
         } catch (err) {
             setError(err.message);
         } finally {
@@ -333,6 +465,12 @@ export default function CommunicationTab({ API_BASE_URL, authToken }) {
                         onClick={() => setActiveView('direct')}
                     >
                         ✉️ Direct Message
+                    </button>
+                    <button
+                        className={activeView === 'mod-conversations' ? 'active' : ''}
+                        onClick={() => setActiveView('mod-conversations')}
+                    >
+                        💬 Mod Conversations
                     </button>
                 </div>
             </div>
@@ -666,7 +804,7 @@ export default function CommunicationTab({ API_BASE_URL, authToken }) {
                 <div className="direct-message-view">
                     <div className="info-card">
                         <h4>Send Direct Message</h4>
-                        <p>Send a notification message to a specific user. You can get the User ID from the User Management tab.</p>
+                        <p>Send a direct message to a specific user. This creates a real conversation that allows the user to reply. Messages sent here bypass privacy settings.</p>
                     </div>
 
                     <form onSubmit={handleSendDirectMessage} className="direct-message-form">
@@ -699,6 +837,133 @@ export default function CommunicationTab({ API_BASE_URL, authToken }) {
                             {loading ? 'Sending...' : '✉️ Send Message'}
                         </button>
                     </form>
+                </div>
+            )}
+
+            {/* Moderator Conversations View */}
+            {activeView === 'mod-conversations' && (
+                <div className="mod-conversations-view">
+                    {!selectedModConversation ? (
+                        <>
+                            <div className="info-card">
+                                <h4>Moderator Message Conversations</h4>
+                                <p>View and manage all conversations initiated by moderators. Messages appear to users as from "Moderator" but logs show which admin/mod sent them.</p>
+                            </div>
+
+                            {loading ? (
+                                <div className="loading">Loading conversations...</div>
+                            ) : modConversations.length === 0 ? (
+                                <div className="no-results">No moderator conversations yet</div>
+                            ) : (
+                                <div className="conversations-list">
+                                    {modConversations.map((conv) => (
+                                        <div key={conv._id} className="conversation-card">
+                                            <div className="conversation-header">
+                                                <div className="conversation-user">
+                                                    <strong>{conv.otherUser?.breederName || conv.otherUser?.personalName || `User ${conv.otherUserId}`}</strong>
+                                                    <span className="user-id">{conv.otherUserId}</span>
+                                                </div>
+                                                <span className="last-message-date">
+                                                    {new Date(conv.lastMessageAt).toLocaleString('en-GB')}
+                                                </span>
+                                            </div>
+                                            <div className="conversation-details">
+                                                <div className="last-message">
+                                                    {conv.lastMessage?.substring(0, 100)}
+                                                    {conv.lastMessage?.length > 100 ? '...' : ''}
+                                                </div>
+                                                <div className="conversation-meta">
+                                                    <span>Messages: {conv.messageCount || 0}</span>
+                                                    {conv.initiatedBy && (
+                                                        <span className="initiated-by">Started by: {conv.initiatedBy}</span>
+                                                    )}
+                                                </div>
+                                            </div>
+                                            <div className="conversation-actions">
+                                                <button 
+                                                    className="btn-view"
+                                                    onClick={() => handleViewModConversation(conv._id, conv.otherUserId)}
+                                                >
+                                                    📖 View
+                                                </button>
+                                                <button 
+                                                    className="btn-close"
+                                                    onClick={() => handleCloseModConversation(conv._id, conv.otherUserId)}
+                                                >
+                                                    🗑️ Close
+                                                </button>
+                                            </div>
+                                        </div>
+                                    ))}
+                                </div>
+                            )}
+                        </>
+                    ) : (
+                        <div className="conversation-thread">
+                            <div className="thread-header">
+                                <button 
+                                    className="btn-back"
+                                    onClick={() => {
+                                        setSelectedModConversation(null);
+                                        setConversationMessages([]);
+                                        fetchModConversations();
+                                    }}
+                                >
+                                    ← Back to Conversations
+                                </button>
+                                <div className="thread-info">
+                                    <strong>{selectedModConversation.otherUser?.breederName || selectedModConversation.otherUser?.personalName || `User ${selectedModConversation.otherUserId}`}</strong>
+                                    <span className="user-id">{selectedModConversation.otherUserId}</span>
+                                </div>
+                                <button 
+                                    className="btn-close-thread"
+                                    onClick={() => handleCloseModConversation(selectedModConversation._id, selectedModConversation.otherUserId)}
+                                >
+                                    🗑️ Close Conversation
+                                </button>
+                            </div>
+
+                            <div className="messages-container">
+                                {conversationMessages.map((msg, idx) => (
+                                    <div 
+                                        key={msg._id || idx} 
+                                        className={`message ${msg.senderId === selectedModConversation.otherUserId ? 'received' : 'sent'}`}
+                                    >
+                                        <div className="message-content">
+                                            <div className="message-text">{msg.message}</div>
+                                            <div className="message-meta">
+                                                <span className="message-time">
+                                                    {new Date(msg.createdAt).toLocaleString('en-GB')}
+                                                </span>
+                                                {msg.sentBy && (
+                                                    <span className="sent-by-mod">
+                                                        (Internal: Sent by {msg.sentBy})
+                                                    </span>
+                                                )}
+                                            </div>
+                                        </div>
+                                    </div>
+                                ))}
+                            </div>
+
+                            <form onSubmit={handleSendModMessage} className="reply-form">
+                                <textarea
+                                    value={newModMessage}
+                                    onChange={(e) => setNewModMessage(e.target.value)}
+                                    placeholder="Reply as Moderator..."
+                                    disabled={loading}
+                                    rows="3"
+                                    maxLength="1000"
+                                />
+                                <div className="reply-actions">
+                                    <span className="char-count">{newModMessage.length}/1000</span>
+                                    <button type="submit" className="btn-send" disabled={loading || !newModMessage.trim()}>
+                                        {loading ? 'Sending...' : '📤 Send Reply'}
+                                    </button>
+                                </div>
+                            </form>
+                        </div>
+                    )}
                 </div>
             )}
         </div>
