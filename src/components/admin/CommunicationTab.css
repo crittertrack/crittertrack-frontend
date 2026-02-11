@@ -704,7 +704,8 @@
 
 .btn-refresh {
     background: #28a745;
-    color: white;
+    color: #000000;
+    font-weight: 600;
 }
 
 .btn-refresh:hover:not(:disabled) {
