@@ -4,7 +4,8 @@ import {
     ChevronLeft, ChevronRight, X, ExternalLink, Image, User,
     RefreshCw, FileText
 } from 'lucide-react';
-import './AnimalManagementPanel.css';\nimport './AnimalManagementTabs.css';
+import './AnimalManagementPanel.css';
+import './AnimalManagementTabs.css';
 
 export default function AnimalManagementPanel({ API_BASE_URL, authToken, userRole }) {
     const [animals, setAnimals] = useState([]);
