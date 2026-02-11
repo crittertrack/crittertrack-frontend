@@ -8763,11 +8763,14 @@ const AnimalForm = ({
 
     const handleChange = (e) => {
         const { name, value, type, checked } = e.target;
+        console.log('[AnimalForm] handleChange called:', { name, value, type, checked });
         setFormData(prev => {
             const updated = {
                 ...prev,
                 [name]: type === 'checkbox' ? checked : value
             };
+            
+            console.log('[AnimalForm] Updated formData:', updated);
             
             // If deceased date is being set, automatically set status to Deceased
             if (name === 'deceasedDate' && value) {
