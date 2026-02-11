@@ -14993,7 +14993,7 @@ const AnimalList = ({ authToken, showModalMessage, onEditAnimal, onViewAnimal, f
                             title="Clear all filters"
                         >
                             <X size={14} className="sm:w-4 sm:h-4" />
-                            <span className="hidden sm:inline">Clear Filters</span>
+                            <span>Clear Filters</span>
                         </button>
                     )}
                     <button
@@ -15002,7 +15002,7 @@ const AnimalList = ({ authToken, showModalMessage, onEditAnimal, onViewAnimal, f
                         title="Make All Animals Public"
                     >
                         <Eye size={14} className="sm:w-4 sm:h-4" />
-                        <span className="hidden sm:inline font-medium">All Public</span>
+                        <span className="font-medium">All Public</span>
                     </button>
                     <button
                         onClick={() => toggleAllAnimalsPrivacy(false)}
@@ -15010,7 +15010,7 @@ const AnimalList = ({ authToken, showModalMessage, onEditAnimal, onViewAnimal, f
                         title="Make All Animals Private"
                     >
                         <EyeOff size={14} className="sm:w-4 sm:h-4" />
-                        <span className="hidden sm:inline font-medium">All Private</span>
+                        <span className="font-medium">All Private</span>
                     </button>
                     <button 
                         onClick={() => { navigate('/hidden-animals'); fetchHiddenAnimals(); }}
@@ -15019,7 +15019,7 @@ const AnimalList = ({ authToken, showModalMessage, onEditAnimal, onViewAnimal, f
                         title="View Hidden Animals"
                     >
                         <Archive size={14} className="sm:w-[18px] sm:h-[18px]" />
-                        <span className="hidden sm:inline font-medium">Hidden</span>
+                        <span className="font-medium">Hidden</span>
                     </button>
                     <button 
                         onClick={handleRefresh} 
