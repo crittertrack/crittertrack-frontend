@@ -1685,74 +1685,9 @@ export default function AnimalManagementPanel({ API_BASE_URL, authToken, userRol
                                         </div>
                                     </div>
                                 )}
-                                            value={editForm.name || ''}
-                                            onChange={(e) => setEditForm({...editForm, name: e.target.value})}
-                                        />
-                                    </div>
-                                    <div className="form-row">
-                                        <label>Suffix</label>
-                                        <input
-                                            type="text"
-                                            value={editForm.suffix || ''}
-                                            onChange={(e) => setEditForm({...editForm, suffix: e.target.value})}
-                                        />
-                                    </div>
-                                    <div className="form-row">
-                                        <label>Species</label>
-                                        <input
-                                            type="text"
-                                            value={editForm.species || ''}
-                                            onChange={(e) => setEditForm({...editForm, species: e.target.value})}
-                                        />
-                                    </div>
-                                    <div className="form-row">
-                                        <label>Gender</label>
-                                        <select
-                                            value={editForm.gender || ''}
-                                            onChange={(e) => setEditForm({...editForm, gender: e.target.value})}
-                                        >
-                                            <option value="Male">Male</option>
-                                            <option value="Female">Female</option>
-                                            <option value="Intersex">Intersex</option>
-                                            <option value="Unknown">Unknown</option>
-                                        </select>
-                                    </div>
-                                    <div className="form-row">
-                                        <label>Status</label>
-                                        <select
-                                            value={editForm.status || ''}
-                                            onChange={(e) => setEditForm({...editForm, status: e.target.value})}
-                                        >
-                                            <option value="Pet">Pet</option>
-                                            <option value="Breeder">Breeder</option>
-                                            <option value="Available">Available</option>
-                                            <option value="Booked">Booked</option>
-                                            <option value="Retired">Retired</option>
-                                            <option value="Deceased">Deceased</option>
-                                            <option value="Rehomed">Rehomed</option>
-                                            <option value="Unknown">Unknown</option>
-                                        </select>
-                                    </div>
-                                    <div className="form-row">
-                                        <label>Life Stage</label>
-                                        <select
-                                            value={editForm.lifeStage || ''}
-                                            onChange={(e) => setEditForm({...editForm, lifeStage: e.target.value})}
-                                        >
-                                            <option value="">Select...</option>
-                                            <option value="Newborn">Newborn</option>
-                                            <option value="Kit/Pup">Kit/Pup</option>
-                                            <option value="Juvenile">Juvenile</option>
-                                            <option value="Adult">Adult</option>
-                                            <option value="Senior">Senior</option>
-                                            <option value="Geriatric">Geriatric</option>
-                                        </select>
-                                    </div>
-                                </div>
 
-                                {/* DATES */}
-                                <div className="form-section">
-                                    <h4 className="section-title">Important Dates</h4>
+                                {/* BASIC INFORMATION */}
+                                <div className="form-section">\n                                    <h4 className="section-title">Important Dates</h4>
                                     <div className="form-row">
                                         <label>Birth Date</label>
                                         <input
