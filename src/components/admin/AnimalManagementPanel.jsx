@@ -1970,19 +1970,26 @@ export default function AnimalManagementPanel({ API_BASE_URL, authToken, userRol
                             </div>
                         </div>
                     )}
+                            </div>
 
-                    {/* Edit Reason (shown on all tabs) */}
-                    <div className="edit-form">
-                        <div className="form-row full-width">
-                            <label>Reason for Edit *</label>
-                            <input
-                                type="text"
-                                value={editReason}
-                                onChange={(e) => setEditReason(e.target.value)}
-                                placeholder="Why are you making this edit?"
-                            />
-                        </div>
-                    </div>
+                            {/* Edit Reason (shown on all tabs) */}
+                            <div className="edit-form">
+                                <div className="form-row full-width">
+                                    <label>Reason for Edit *</label>
+                                    <input
+                                        type="text"
+                                        value={editReason}
+                                        onChange={(e) => setEditReason(e.target.value)}
+                                        placeholder="Why are you making this edit?"
+                                    />
+                                </div>
+                            </div>
+
+                            <div className="modal-actions">
+                                <button className="btn-secondary" onClick={() => setShowEditModal(false)}>
+                                    Cancel
+                                </button>
+                                <button className="btn-primary" onClick={handleSaveEdit}>
                                     Save Changes
                                 </button>
                             </div>
