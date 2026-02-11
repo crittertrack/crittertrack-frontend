@@ -54,6 +54,28 @@ export default function CommunicationTab({ API_BASE_URL, authToken }) {
         }
     }, [activeView]);
 
+    // Polling for mod conversations list when tab is active
+    useEffect(() => {
+        if (activeView !== 'mod-conversations') return;
+        
+        const interval = setInterval(() => {
+            fetchModConversationsQuiet();
+        }, 5000); // Poll every 5 seconds
+        
+        return () => clearInterval(interval);
+    }, [activeView]);
+
+    // Polling for specific conversation messages when viewing a conversation
+    useEffect(() => {
+        if (!selectedModConversation) return;
+        
+        const interval = setInterval(() => {
+            fetchConversationMessagesQuiet(selectedModConversation.otherUserId);
+        }, 3000); // Poll every 3 seconds for new messages
+        
+        return () => clearInterval(interval);
+    }, [selectedModConversation]);
+
     const addPollOption = () => {
         if (pollOptions.length < 10) {
             setPollOptions([...pollOptions, '']);
@@ -352,6 +374,45 @@ export default function CommunicationTab({ API_BASE_URL, authToken }) {
             setError(err.message);
         } finally {
             setLoading(false);
+        }
+    };
+
+    // Quiet versions for polling (don't set loading state to avoid UI flickering)
+    const fetchModConversationsQuiet = async () => {
+        try {
+            const response = await fetch(`${API_BASE_URL}/admin/moderator-conversations`, {
+                headers: {
+                    'Authorization': `Bearer ${authToken}`
+                }
+            });
+
+            const data = await response.json();
+
+            if (response.ok) {
+                setModConversations(data.conversations || []);
+            }
+        } catch (err) {
+            // Silently fail during polling
+            console.error('Polling error for mod conversations:', err);
+        }
+    };
+
+    const fetchConversationMessagesQuiet = async (otherUserId) => {
+        try {
+            const response = await fetch(`${API_BASE_URL}/messages/conversation/${otherUserId}`, {
+                headers: {
+                    'Authorization': `Bearer ${authToken}`
+                }
+            });
+
+            const data = await response.json();
+
+            if (response.ok) {
+                setConversationMessages(data.messages || []);
+            }
+        } catch (err) {
+            // Silently fail during polling
+            console.error('Polling error for conversation messages:', err);
         }
     };
 
