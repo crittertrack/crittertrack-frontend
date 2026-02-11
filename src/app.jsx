@@ -9676,7 +9676,7 @@ const AnimalForm = ({
                                 
                                 <div>
                                     <label className="block text-sm font-medium text-gray-700">Date of Birth*</label>
-                                    <DatePicker value={formData.birthDate} onChange={handleChange} maxDate={new Date()} required
+                                    <DatePicker name="birthDate" value={formData.birthDate} onChange={handleChange} maxDate={new Date()} required
                                         data-tutorial-target="animal-birthdate-input"
                                         className="mt-1 p-2" />
                                 </div>
