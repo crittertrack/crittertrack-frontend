@@ -1281,14 +1281,13 @@ export default function AnimalManagementPanel({ API_BASE_URL, authToken, userRol
                         <div className="animal-modal-footer">
                             <div className="action-row">
                                 <input
-                                    <input
-                                        type="text"
-                                        placeholder="Reason for action..."
-                                        value={actionReason}
-                                        onChange={(e) => setActionReason(e.target.value)}
-                                        className="action-reason-input"
-                                    />
-                                </div>
+                                    type="text"
+                                    placeholder="Reason for action..."
+                                    value={actionReason}
+                                    onChange={(e) => setActionReason(e.target.value)}
+                                    className="action-reason-input"
+                                />
+                            </div>
                                 <div className="action-buttons">
                                     <button 
                                         className="btn-secondary"
