@@ -1288,30 +1288,29 @@ export default function AnimalManagementPanel({ API_BASE_URL, authToken, userRol
                                     className="action-reason-input"
                                 />
                             </div>
-                                <div className="action-buttons">
+                            <div className="action-buttons">
+                                <button 
+                                    className="btn-secondary"
+                                    onClick={() => openEditModal(selectedAnimal)}
+                                >
+                                    <Edit size={14} /> Edit Fields
+                                </button>
+                                {selectedAnimal.showOnPublicProfile && (
                                     <button 
-                                        className="btn-secondary"
-                                        onClick={() => openEditModal(selectedAnimal)}
+                                        className="btn-warning"
+                                        onClick={() => handleHideAnimal(selectedAnimal)}
                                     >
-                                        <Edit size={14} /> Edit Fields
+                                        <EyeOff size={14} /> Hide from Public
                                     </button>
-                                    {selectedAnimal.showOnPublicProfile && (
-                                        <button 
-                                            className="btn-warning"
-                                            onClick={() => handleHideAnimal(selectedAnimal)}
-                                        >
-                                            <EyeOff size={14} /> Hide from Public
-                                        </button>
-                                    )}
-                                    {userRole === 'admin' && (
-                                        <button 
-                                            className="btn-danger"
-                                            onClick={() => setShowDeleteConfirm(true)}
-                                        >
-                                            <Trash2 size={14} /> Delete Animal
-                                        </button>
-                                    )}
-                                </div>
+                                )}
+                                {userRole === 'admin' && (
+                                    <button 
+                                        className="btn-danger"
+                                        onClick={() => setShowDeleteConfirm(true)}
+                                    >
+                                        <Trash2 size={14} /> Delete Animal
+                                    </button>
+                                )}
                             </div>
                         </div>
                     </div>
