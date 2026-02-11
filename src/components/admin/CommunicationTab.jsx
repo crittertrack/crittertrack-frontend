@@ -279,6 +279,20 @@ export default function CommunicationTab({ API_BASE_URL, authToken }) {
         }
 
         try {
+            // First, resolve the CTUID to backend user ID
+            const resolveResponse = await fetch(`${API_BASE_URL}/messages/resolve/${targetUserId}`, {
+                headers: {
+                    'Authorization': `Bearer ${authToken}`
+                }
+            });
+
+            if (!resolveResponse.ok) {
+                const resolveData = await resolveResponse.json();
+                throw new Error(resolveData.error || 'User not found');
+            }
+
+            const { userId: backendUserId } = await resolveResponse.json();
+
             // Send as a real direct message with admin override to bypass privacy settings
             const response = await fetch(`${API_BASE_URL}/messages/send`, {
                 method: 'POST',
@@ -287,7 +301,7 @@ export default function CommunicationTab({ API_BASE_URL, authToken }) {
                     'Authorization': `Bearer ${authToken}`
                 },
                 body: JSON.stringify({
-                    receiverId: targetUserId,
+                    receiverId: backendUserId, // Use resolved backend ID
                     message: directMessage,
                     adminOverride: true, // Bypass privacy settings
                     isModeratorMessage: true // Mark as official moderator communication
