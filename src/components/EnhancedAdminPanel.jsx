@@ -195,6 +195,7 @@ const EnhancedAdminPanel = ({ isOpen, onClose, authToken, API_BASE_URL, userRole
         activeUsers: 0,
         totalAnimals: 0,
         pendingReports: 0,
+        newModReplies: 0,
         systemHealth: 'good',
         lastBackup: null
     });
@@ -627,11 +628,12 @@ const EnhancedAdminPanel = ({ isOpen, onClose, authToken, API_BASE_URL, userRole
                         {activeSection === 'dashboard' && (
                             <div className="p-8">
                                 <h3 className="text-2xl font-bold text-gray-800 mb-6">Dashboard Overview</h3>
-                                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
+                                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5 gap-6 mb-8">
                                     <StatCard label="Total Users" value={dashboardStats.totalUsers} icon={Users} />
                                     <StatCard label="Currently Active" value={dashboardStats.activeUsers} icon={Users} />
                                     <StatCard label="Total Animals" value={dashboardStats.totalAnimals} icon={Shield} />
                                     <StatCard label="Pending Reports" value={dashboardStats.pendingReports} icon={AlertTriangle} color="red" />
+                                    <StatCard label="New Mod Replies" value={dashboardStats.newModReplies} icon={MessageSquare} color="blue" />
                                 </div>
 
                                 <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
