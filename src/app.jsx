@@ -15590,7 +15590,9 @@ const MessagesView = ({ authToken, API_BASE_URL, onClose, showModalMessage, sele
                                             </div>
                                             <div>
                                                 <p className="font-semibold">{getDisplayName(selectedConversation.otherUser)}</p>
-                                                <p className="text-xs text-gray-500">{selectedConversation.otherUser?.id_public}</p>
+                                                {!selectedConversation.otherUser?.isStaff && (
+                                                    <p className="text-xs text-gray-500">{selectedConversation.otherUser?.id_public}</p>
+                                                )}
                                             </div>
                                         </div>
                                         <div className="flex gap-2">
