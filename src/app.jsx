@@ -2307,7 +2307,7 @@ const PrivateAnimalDetail = ({ animal, onClose, onEdit, API_BASE_URL, authToken,
                                     Edit
                                 </button>
                             )}
-                            {onTransfer && (
+                            {onTransfer && !animal.isViewOnly && (
                                 <button
                                     onClick={() => onTransfer(animal)}
                                     className="px-2 py-1 bg-blue-100 hover:bg-blue-200 text-blue-700 font-semibold rounded-lg transition flex items-center gap-1 text-xs"
@@ -2350,7 +2350,7 @@ const PrivateAnimalDetail = ({ animal, onClose, onEdit, API_BASE_URL, authToken,
                                     Edit
                                 </button>
                             )}
-                            {onTransfer && (
+                            {onTransfer && !animal.isViewOnly && (
                                 <button
                                     onClick={() => onTransfer(animal)}
                                     className="px-3 py-1.5 bg-blue-100 hover:bg-blue-200 text-blue-700 font-semibold rounded-lg transition flex items-center gap-2"
@@ -15309,7 +15309,7 @@ const AnimalList = ({ authToken, showModalMessage, onEditAnimal, onViewAnimal, f
                                             animal={animal} 
                                             onEditAnimal={onEditAnimal}
                                             species={species}
-                                            isSelectable={isBulkMode}
+                                            isSelectable={isBulkMode && !animal.isViewOnly}
                                             isSelected={selected.includes(animal.id_public)}
                                             onToggleSelect={toggleAnimalSelection}
                                             onTogglePrivacy={toggleAnimalPrivacy}
@@ -17844,47 +17844,43 @@ const App = () => {
             try {
                 const [newestResponse, activeResponse] = await Promise.all([
                     axios.get(`${API_BASE_URL}/public/users/newest?limit=10`),
-                    axios.get(`${API_BASE_URL}/public/users/active?minutes=15`)
+                    axios.get(`${API_BASE_URL}/public/users/active?minutes=360`) // 6 hours
                 ]);
                 let newest = newestResponse.data || [];
                 let active = activeResponse.data || [];
                 
-                // Filter out banned/deleted users (those without id_public or marked as deleted)
-                newest = newest.filter(u => u.id_public && u.accountStatus !== 'banned');
-                active = active.filter(u => u.id_public && u.accountStatus !== 'banned');
+                // Filter out banned/deleted users, CTU1, and anonymous users
+                const filterUser = (u) => {
+                    if (!u.id_public || u.accountStatus === 'banned' || u.id_public === 'CTU1') return false;
+                    return (u.showBreederName && u.breederName) || (u.showPersonalName && u.personalName);
+                };
                 
-                // Filter out debug breeder CTU1
-                newest = newest.filter(u => u.id_public !== 'CTU1');
-                active = active.filter(u => u.id_public !== 'CTU1');
+                newest = newest.filter(filterUser);
+                active = active.filter(filterUser);
                 
-                // Filter out anonymous users (those who don't have a visible name)
-                const hasVisibleName = (u) => (u.showBreederName && u.breederName) || (u.showPersonalName && u.personalName);
-                newest = newest.filter(hasVisibleName);
-                active = active.filter(hasVisibleName);
-                
-                // Combine: active first (most recently active), then newest, removing duplicates
+                // Remove duplicates between active and newest (prioritize showing user once)
                 const seenIds = new Set();
-                const combined = [];
+                const finalActive = [];
+                const finalNewest = [];
                 
-                // Add active users first (priority)
+                // Add up to 3 active users
                 for (const user of active) {
-                    if (!seenIds.has(user.id_public) && combined.length < 5) {
+                    if (!seenIds.has(user.id_public) && finalActive.length < 3) {
                         seenIds.add(user.id_public);
-                        combined.push({ ...user, isActive: true });
+                        finalActive.push(user);
                     }
                 }
                 
-                // Fill remaining slots with newest users
+                // Add up to 2 newest users (skip if already in active)
                 for (const user of newest) {
-                    if (!seenIds.has(user.id_public) && combined.length < 5) {
+                    if (!seenIds.has(user.id_public) && finalNewest.length < 2) {
                         seenIds.add(user.id_public);
-                        combined.push({ ...user, isActive: false });
+                        finalNewest.push(user);
                     }
                 }
                 
-                // Split back into categories for display styling
-                setNewestUsers(combined.filter(u => !u.isActive));
-                setActiveUsers(combined.filter(u => u.isActive));
+                setActiveUsers(finalActive);
+                setNewestUsers(finalNewest);
             } catch (error) {
                 console.error('Error fetching community users:', error);
             }
