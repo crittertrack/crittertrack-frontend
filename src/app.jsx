@@ -4688,6 +4688,7 @@ const ViewOnlyAnimalDetail = ({ animal, onClose, API_BASE_URL, onViewProfile, on
                             <OffspringSection
                                 animalId={animal.id_public}
                                 API_BASE_URL={API_BASE_URL}
+                                authToken={authToken}
                                 onViewAnimal={onViewAnimal}
                             />
                         </div>
