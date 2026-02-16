@@ -16731,11 +16731,19 @@ const App = () => {
     const [viewingPublicAnimal, setViewingPublicAnimal] = useState(null);
     const [viewAnimalBreederInfo, setViewAnimalBreederInfo] = useState(null);
     const [animalToView, setAnimalToView] = useState(null);
+    const [animalViewHistory, setAnimalViewHistory] = useState([]); // Navigation history stack for animals
     const [detailViewTab, setDetailViewTab] = useState(1); // Tab for detail view
     const [showTabs, setShowTabs] = useState(true); // Toggle for collapsible tabs panel
     const [sireData, setSireData] = useState(null);
     const [damData, setDamData] = useState(null);
     const [offspringData, setOffspringData] = useState([]);
+    
+    // Clear history when animal view is completely closed
+    React.useEffect(() => {
+        if (!animalToView) {
+            setAnimalViewHistory([]);
+        }
+    }, [animalToView]);
     
     // Fetch parent animals when viewing an animal
     React.useEffect(() => {
@@ -17998,6 +18006,12 @@ const App = () => {
     const handleViewAnimal = async (animal) => {
         console.log('[handleViewAnimal] Viewing animal:', animal);
         
+        // If we're already viewing an animal, push it to history before navigating to new one
+        if (animalToView) {
+            setAnimalViewHistory(prev => [...prev, animalToView]);
+            console.log('[handleViewAnimal] Pushed current animal to history, stack size:', animalViewHistory.length + 1);
+        }
+        
         // Fetch latest animal data from backend to ensure privacy settings are current
         let currentAnimal = animal;
         if (authToken) {
@@ -18047,6 +18061,23 @@ const App = () => {
             .catch(error => {
                 console.log(`Could not calculate COI for animal ${normalizedAnimal.id_public}:`, error);
             });
+        }
+    };
+
+    // Handle back navigation from animal detail view
+    const handleBackFromAnimal = () => {
+        if (animalViewHistory.length > 0) {
+            // Pop the last animal from history and view it
+            const previousAnimal = animalViewHistory[animalViewHistory.length - 1];
+            setAnimalViewHistory(prev => prev.slice(0, -1));
+            setAnimalToView(previousAnimal);
+            console.log('[handleBackFromAnimal] Navigating back to previous animal, remaining history:', animalViewHistory.length - 1);
+        } else {
+            // No history, close the detail view entirely
+            setAnimalToView(null);
+            setAnimalViewHistory([]);
+            navigate('/');
+            console.log('[handleBackFromAnimal] No history, closing detail view');
         }
     };
 
@@ -19636,7 +19667,7 @@ const App = () => {
                                 return (
                                     <PrivateAnimalDetail
                                         animal={animalToView}
-                                        onClose={() => navigate('/')}
+                                        onClose={handleBackFromAnimal}
                                         onEdit={handleEditAnimal}
                                         API_BASE_URL={API_BASE_URL}
                                         authToken={authToken}
@@ -19658,7 +19689,7 @@ const App = () => {
                                 return (
                                     <ViewOnlyPrivateAnimalDetail
                                         animal={animalToView}
-                                        onClose={() => navigate('/')}
+                                        onClose={handleBackFromAnimal}
                                         API_BASE_URL={API_BASE_URL}
                                         authToken={authToken}
                                         setShowImageModal={setShowImageModal}
