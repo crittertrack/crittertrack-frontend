@@ -5600,10 +5600,8 @@ const LitterManagement = ({ authToken, API_BASE_URL, userProfile, showModalMessa
     const [searchQuery, setSearchQuery] = useState('');
     const [speciesFilter, setSpeciesFilter] = useState('');
     const [yearFilter, setYearFilter] = useState('');
-    // COI calculation state (feature in development - UI display pending)
-    // eslint-disable-next-line no-unused-vars
+    // COI calculation state
     const [predictedCOI, setPredictedCOI] = useState(null);
-    // eslint-disable-next-line no-unused-vars
     const [calculatingCOI, setCalculatingCOI] = useState(false);
     const [addingOffspring, setAddingOffspring] = useState(null);
     const [newOffspringData, setNewOffspringData] = useState({
@@ -6663,6 +6661,27 @@ const LitterManagement = ({ authToken, API_BASE_URL, userProfile, showModalMessa
                             </button>
                         </div>
                     </div>
+
+                    {/* Predicted COI Display */}
+                    {formData.sireId_public && formData.damId_public && (
+                        <div className="mb-4 bg-blue-50 border border-blue-200 rounded-lg p-4">
+                            <div className="flex items-center gap-2">
+                                <span className="text-sm font-medium text-gray-700">Predicted COI (Coefficient of Inbreeding):</span>
+                                {calculatingCOI ? (
+                                    <span className="text-sm text-gray-500 italic">Calculating...</span>
+                                ) : predictedCOI != null ? (
+                                    <span className="text-sm font-bold text-gray-900">
+                                        {predictedCOI.toFixed(2)}%
+                                    </span>
+                                ) : (
+                                    <span className="text-sm text-gray-500 italic">-</span>
+                                )}
+                            </div>
+                            <p className="text-xs text-gray-600 mt-2">
+                                This shows the expected inbreeding level based on the selected parents' pedigrees.
+                            </p>
+                        </div>
+                    )}
 
                     {/* Birth Date & Counts */}
                     <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-4" data-tutorial-target="litter-dates-counts">
