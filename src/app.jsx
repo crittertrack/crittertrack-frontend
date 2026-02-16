@@ -16729,6 +16729,7 @@ const App = () => {
     const [showUserSearchModal, setShowUserSearchModal] = useState(false);
     const [viewingPublicProfile, setViewingPublicProfile] = useState(null);
     const [viewingPublicAnimal, setViewingPublicAnimal] = useState(null);
+    const [publicAnimalViewHistory, setPublicAnimalViewHistory] = useState([]); // Navigation history for public animals
     const [viewAnimalBreederInfo, setViewAnimalBreederInfo] = useState(null);
     const [animalToView, setAnimalToView] = useState(null);
     const [animalViewHistory, setAnimalViewHistory] = useState([]); // Navigation history stack for animals
@@ -16744,6 +16745,13 @@ const App = () => {
             setAnimalViewHistory([]);
         }
     }, [animalToView]);
+    
+    // Clear history when public animal view is completely closed
+    React.useEffect(() => {
+        if (!viewingPublicAnimal) {
+            setPublicAnimalViewHistory([]);
+        }
+    }, [viewingPublicAnimal]);
     
     // Fetch parent animals when viewing an animal
     React.useEffect(() => {
@@ -18080,16 +18088,45 @@ const App = () => {
             console.log('[handleBackFromAnimal] No history, closing detail view');
         }
     };
+    
+    // Handle viewing public animals with history support
+    const handleViewPublicAnimal = (animal) => {
+        console.log('[handleViewPublicAnimal] Viewing public animal:', animal);
+        
+        // If we're already viewing a public animal, push it to history before navigating to new one
+        if (viewingPublicAnimal) {
+            setPublicAnimalViewHistory(prev => [...prev, viewingPublicAnimal]);
+            console.log('[handleViewPublicAnimal] Pushed current animal to history, stack size:', publicAnimalViewHistory.length + 1);
+        }
+        
+        setViewingPublicAnimal(animal);
+    };
+    
+    // Handle back navigation from public animal detail view
+    const handleBackFromPublicAnimal = () => {
+        if (publicAnimalViewHistory.length > 0) {
+            // Pop the last animal from history and view it
+            const previousAnimal = publicAnimalViewHistory[publicAnimalViewHistory.length - 1];
+            setPublicAnimalViewHistory(prev => prev.slice(0, -1));
+            setViewingPublicAnimal(previousAnimal);
+            console.log('[handleBackFromPublicAnimal] Navigating back to previous animal, remaining history:', publicAnimalViewHistory.length - 1);
+        } else {
+            // No history, close the detail view entirely
+            setViewingPublicAnimal(null);
+            setPublicAnimalViewHistory([]);
+            console.log('[handleBackFromPublicAnimal] No history, closing detail view');
+        }
+    };
 
     // Set up global handler for viewing public animals from search modal
     useEffect(() => {
         window.handleViewPublicAnimal = (animal) => {
-            setViewingPublicAnimal(animal);
+            handleViewPublicAnimal(animal);
         };
         return () => {
             delete window.handleViewPublicAnimal;
         };
-    }, []);
+    }, [viewingPublicAnimal, publicAnimalViewHistory]);
 
     const handleSaveAnimal = async (method, url, data) => {
         if (userProfile && !data.ownerId_public) {
@@ -18307,11 +18344,11 @@ const App = () => {
                     {viewingPublicAnimal && (
                         <ViewOnlyAnimalDetail 
                             animal={viewingPublicAnimal}
-                            onClose={() => setViewingPublicAnimal(null)}
+                            onClose={handleBackFromPublicAnimal}
                             API_BASE_URL={API_BASE_URL}
                             authToken={authToken}
                             onViewProfile={(user) => setViewingPublicProfile(user)}
-                            onViewAnimal={(animal) => setViewingPublicAnimal(animal)}
+                            onViewAnimal={handleViewPublicAnimal}
                             setModCurrentContext={setModCurrentContext}
                         />
                     )}
@@ -18372,7 +18409,7 @@ const App = () => {
                     <PublicProfileView 
                         profile={viewingPublicProfile}
                         onBack={() => { setViewingPublicProfile(null); navigate('/'); }}
-                        onViewAnimal={(animal) => setViewingPublicAnimal(animal)}
+                        onViewAnimal={handleViewPublicAnimal}
                         API_BASE_URL={API_BASE_URL}
                         authToken={authToken}
                         setModCurrentContext={setModCurrentContext}
@@ -18437,11 +18474,11 @@ const App = () => {
                     {viewingPublicAnimal && (
                         <ViewOnlyAnimalDetail 
                             animal={viewingPublicAnimal}
-                            onClose={() => setViewingPublicAnimal(null)}
+                            onClose={handleBackFromPublicAnimal}
                             API_BASE_URL={API_BASE_URL}
                             authToken={authToken}
                             onViewProfile={(user) => setViewingPublicProfile(user)}
-                            onViewAnimal={(animal) => setViewingPublicAnimal(animal)}
+                            onViewAnimal={handleViewPublicAnimal}
                             setModCurrentContext={setModCurrentContext}
                             setShowImageModal={setShowImageModal}
                             setEnlargedImageUrl={setEnlargedImageUrl}
@@ -18499,12 +18536,12 @@ const App = () => {
                 {viewingPublicAnimal && (
                     <ViewOnlyAnimalDetail 
                         animal={viewingPublicAnimal}
-                        onClose={() => setViewingPublicAnimal(null)}
+                        onClose={handleBackFromPublicAnimal}
                         API_BASE_URL={API_BASE_URL}
                         authToken={authToken}
                         setModCurrentContext={setModCurrentContext}
                         onViewProfile={(user) => setViewingPublicProfile(user)}
-                        onViewAnimal={(animal) => setViewingPublicAnimal(animal)}
+                        onViewAnimal={handleViewPublicAnimal}
                         setShowImageModal={setShowImageModal}
                         setEnlargedImageUrl={setEnlargedImageUrl}
                     />
@@ -18795,12 +18832,12 @@ const App = () => {
             {viewingPublicAnimal && (
                 <ViewOnlyAnimalDetail 
                     animal={viewingPublicAnimal}
-                    onClose={() => setViewingPublicAnimal(null)}
+                    onClose={handleBackFromPublicAnimal}
                     API_BASE_URL={API_BASE_URL}
                     setModCurrentContext={setModCurrentContext}
                     authToken={authToken}
                     onViewProfile={(user) => navigate(`/user/${user.id_public}`)}
-                    onViewAnimal={(animal) => navigate(`/animal/${animal.id_public}`)}
+                    onViewAnimal={handleViewPublicAnimal}
                     setShowImageModal={setShowImageModal}
                     setEnlargedImageUrl={setEnlargedImageUrl}
                 />
