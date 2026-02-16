@@ -4106,7 +4106,7 @@ const ViewOnlyPrivateAnimalDetail = ({ animal, onClose, API_BASE_URL, authToken,
 // ==================== PUBLIC ANIMAL DETAIL (VIEW-ONLY FOR OTHERS) ====================
 // Respects privacy toggles - only shows public sections
 // Accessed from: Global search, user profiles, offspring links
-const ViewOnlyAnimalDetail = ({ animal, onClose, API_BASE_URL, onViewProfile, authToken, setModCurrentContext, setShowImageModal, setEnlargedImageUrl }) => {
+const ViewOnlyAnimalDetail = ({ animal, onClose, API_BASE_URL, onViewProfile, onViewAnimal, authToken, setModCurrentContext, setShowImageModal, setEnlargedImageUrl }) => {
     const [breederInfo, setBreederInfo] = useState(null);
     const [showPedigree, setShowPedigree] = useState(false);
     const [copySuccess, setCopySuccess] = useState(false);
@@ -4532,22 +4532,14 @@ const ViewOnlyAnimalDetail = ({ animal, onClose, API_BASE_URL, onViewProfile, au
                                             parentId={animal.fatherId_public || animal.sireId_public} 
                                             parentType="Sire"
                                             API_BASE_URL={API_BASE_URL}
-                                            onViewAnimal={(parent) => {
-                                                if (window.handleViewPublicAnimal) {
-                                                    window.handleViewPublicAnimal(parent);
-                                                }
-                                            }}
+                                            onViewAnimal={onViewAnimal}
                                             authToken={authToken}
                                         />
                                         <ViewOnlyParentCard 
                                             parentId={animal.motherId_public || animal.damId_public} 
                                             parentType="Dam"
                                             API_BASE_URL={API_BASE_URL}
-                                            onViewAnimal={(parent) => {
-                                                if (window.handleViewPublicAnimal) {
-                                                    window.handleViewPublicAnimal(parent);
-                                                }
-                                            }}
+                                            onViewAnimal={onViewAnimal}
                                             authToken={authToken}
                                         />
                                     </div>
@@ -4671,22 +4663,14 @@ const ViewOnlyAnimalDetail = ({ animal, onClose, API_BASE_URL, onViewProfile, au
                                         parentId={animal.fatherId_public || animal.sireId_public} 
                                         parentType="Sire"
                                         API_BASE_URL={API_BASE_URL}
-                                        onViewAnimal={(parent) => {
-                                            if (window.handleViewPublicAnimal) {
-                                                window.handleViewPublicAnimal(parent);
-                                            }
-                                        }}
+                                        onViewAnimal={onViewAnimal}
                                         authToken={authToken}
                                     />
                                     <ViewOnlyParentCard 
                                         parentId={animal.motherId_public || animal.damId_public} 
                                         parentType="Dam"
                                         API_BASE_URL={API_BASE_URL}
-                                        onViewAnimal={(parent) => {
-                                            if (window.handleViewPublicAnimal) {
-                                                window.handleViewPublicAnimal(parent);
-                                            }
-                                        }}
+                                        onViewAnimal={onViewAnimal}
                                         authToken={authToken}
                                     />
                                 </div>
@@ -4704,11 +4688,7 @@ const ViewOnlyAnimalDetail = ({ animal, onClose, API_BASE_URL, onViewProfile, au
                             <OffspringSection
                                 animalId={animal.id_public}
                                 API_BASE_URL={API_BASE_URL}
-                                onViewAnimal={(offspring) => {
-                                    if (window.handleViewPublicAnimal) {
-                                        window.handleViewPublicAnimal(offspring);
-                                    }
-                                }}
+                                onViewAnimal={onViewAnimal}
                             />
                         </div>
                     )}                    {/* Tab 6: Breeding */}
@@ -5377,13 +5357,18 @@ const OffspringSection = ({ animalId, API_BASE_URL, authToken = null, onViewAnim
             try {
                 const headers = authToken ? { Authorization: `Bearer ${authToken}` } : {};
                 
-                // Fetch offspring - only available for authenticated users
+                // Fetch offspring - available for both authenticated and unauthenticated users
+                // Authenticated: gets all offspring including private
+                // Unauthenticated: gets only public offspring
+                const offspringEndpoint = authToken 
+                    ? `${API_BASE_URL}/animals/${animalId}/offspring`
+                    : `${API_BASE_URL}/public/animal/${animalId}/offspring`;
+                
+                const offspringResponse = await axios.get(offspringEndpoint, { headers });
+                setOffspring(offspringResponse.data || []);
+                
+                // Fetch current animal to know which parent we are
                 if (authToken) {
-                    const offspringEndpoint = `${API_BASE_URL}/animals/${animalId}/offspring`;
-                    const offspringResponse = await axios.get(offspringEndpoint, { headers });
-                    setOffspring(offspringResponse.data || []);
-                    
-                    // Fetch current animal to know which parent we are
                     try {
                         const animalResponse = await axios.get(
                             `${API_BASE_URL}/animals/any/${animalId}`,
@@ -5394,11 +5379,7 @@ const OffspringSection = ({ animalId, API_BASE_URL, authToken = null, onViewAnim
                         console.error('Error fetching current animal:', err);
                     }
                 } else {
-                    // For unauthenticated users, offspring data is not available via API
-                    // The backend doesn't expose a public offspring endpoint for privacy reasons
-                    setOffspring([]);
-                    
-                    // Still fetch the current animal for display
+                    // Fetch public animal
                     try {
                         const publicResponse = await axios.get(
                             `${API_BASE_URL}/public/global/animals?id_public=${animalId}`
@@ -5427,7 +5408,7 @@ const OffspringSection = ({ animalId, API_BASE_URL, authToken = null, onViewAnim
                     <Loader2 size={24} className="animate-spin text-gray-400" />
                 </div>
             ) : (!offspring || offspring.length === 0) ? (
-                <p className="text-gray-500 text-sm italic">Offspring are not public or no offspring recorded.</p>
+                <p className="text-gray-500 text-sm italic">No offspring recorded{authToken ? '' : ' or all offspring are private'}.</p>
             ) : (
                 <div className="space-y-6">
                     {offspring.map((litter, index) => (
@@ -18298,6 +18279,7 @@ const App = () => {
                             API_BASE_URL={API_BASE_URL}
                             authToken={authToken}
                             onViewProfile={(user) => setViewingPublicProfile(user)}
+                            onViewAnimal={(animal) => setViewingPublicAnimal(animal)}
                             setModCurrentContext={setModCurrentContext}
                         />
                     )}
@@ -18427,6 +18409,7 @@ const App = () => {
                             API_BASE_URL={API_BASE_URL}
                             authToken={authToken}
                             onViewProfile={(user) => setViewingPublicProfile(user)}
+                            onViewAnimal={(animal) => setViewingPublicAnimal(animal)}
                             setModCurrentContext={setModCurrentContext}
                             setShowImageModal={setShowImageModal}
                             setEnlargedImageUrl={setEnlargedImageUrl}
@@ -18489,6 +18472,7 @@ const App = () => {
                         authToken={authToken}
                         setModCurrentContext={setModCurrentContext}
                         onViewProfile={(user) => setViewingPublicProfile(user)}
+                        onViewAnimal={(animal) => setViewingPublicAnimal(animal)}
                         setShowImageModal={setShowImageModal}
                         setEnlargedImageUrl={setEnlargedImageUrl}
                     />
@@ -18784,6 +18768,7 @@ const App = () => {
                     setModCurrentContext={setModCurrentContext}
                     authToken={authToken}
                     onViewProfile={(user) => navigate(`/user/${user.id_public}`)}
+                    onViewAnimal={(animal) => navigate(`/animal/${animal.id_public}`)}
                     setShowImageModal={setShowImageModal}
                     setEnlargedImageUrl={setEnlargedImageUrl}
                 />
@@ -21572,6 +21557,7 @@ const PublicAnimalPage = () => {
                 API_BASE_URL={API_BASE_URL}
                 authToken={authToken}
                 onViewProfile={(user) => navigate(`/user/${user.id_public}`)}
+                onViewAnimal={(animal) => navigate(`/animal/${animal.id_public}`)}
                 setModCurrentContext={setModCurrentContext}
                 setShowImageModal={setShowImageModal}
                 setEnlargedImageUrl={setEnlargedImageUrl}
