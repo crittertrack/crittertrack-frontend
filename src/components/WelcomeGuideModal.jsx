@@ -3,8 +3,8 @@ import { User, MapPin, Users, ShoppingBag, HelpCircle } from 'lucide-react';
 
 const WelcomeGuideModal = ({ onClose }) => {
     return (
-        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4 overflow-y-auto">
-            <div className="bg-white rounded-lg shadow-xl max-w-2xl w-full my-8">
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
+            <div className="bg-white rounded-lg shadow-xl max-w-4xl w-full">
                 {/* Header */}
                 <div className="sticky top-0 bg-gradient-to-r from-accent to-primary text-white p-6 rounded-t-lg">
                     <div>
