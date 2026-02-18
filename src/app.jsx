@@ -15998,35 +15998,6 @@ const BroadcastBanner = ({ authToken, API_BASE_URL }) => {
         setBroadcasts(prev => prev.filter(b => b._id !== id));
     };
 
-    const handleDismissWelcomeGuide = async () => {
-        try {
-            console.log('[WELCOME GUIDE] Dismissing...');
-            
-            // Save to database
-            await axios.post(
-                `${API_BASE_URL}/users/dismiss-profile-setup-guide`,
-                {},
-                { headers: { Authorization: `Bearer ${authToken}` } }
-            );
-            
-            console.log('[WELCOME GUIDE] Saved to database');
-            
-            // Update state
-            setHasSeenWelcomeGuide(true);
-            setShowWelcomeGuide(false);
-            
-            // Save to localStorage as backup
-            if (userProfile?._id) {
-                localStorage.setItem(`${userProfile._id}_hasSeenWelcomeGuide`, 'true');
-                console.log('[WELCOME GUIDE] Saved to localStorage');
-            }
-        } catch (error) {
-            console.error('[WELCOME GUIDE] Failed to dismiss:', error);
-            // Still hide the modal even if save failed
-            setShowWelcomeGuide(false);
-        }
-    };
-
     const handlePollVote = async (notificationId, selectedOptions) => {
         if (!authToken || votingInProgress[notificationId]) return;
         
@@ -18083,6 +18054,35 @@ const App = () => {
         }
     };
     
+    const handleDismissWelcomeGuide = async () => {
+        try {
+            console.log('[WELCOME GUIDE] Dismissing...');
+            
+            // Save to database
+            await axios.post(
+                `${API_BASE_URL}/users/dismiss-profile-setup-guide`,
+                {},
+                { headers: { Authorization: `Bearer ${authToken}` } }
+            );
+            
+            console.log('[WELCOME GUIDE] Saved to database');
+            
+            // Update state
+            setHasSeenWelcomeGuide(true);
+            setShowWelcomeGuide(false);
+            
+            // Save to localStorage as backup
+            if (userProfile?._id) {
+                localStorage.setItem(`${userProfile._id}_hasSeenWelcomeGuide`, 'true');
+                console.log('[WELCOME GUIDE] Saved to localStorage');
+            }
+        } catch (error) {
+            console.error('[WELCOME GUIDE] Failed to dismiss:', error);
+            // Still hide the modal even if save failed
+            setShowWelcomeGuide(false);
+        }
+    };
+
     const handleLoginSuccess = (token) => {
         setAuthToken(token);
         try {
