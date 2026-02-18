@@ -14230,8 +14230,9 @@ const AnimalList = ({ authToken, showModalMessage, onEditAnimal, onViewAnimal, f
     const [selectedSpecies, setSelectedSpecies] = useState(() => {
         try {
             const saved = localStorage.getItem('animalList_selectedSpecies');
-            return saved ? JSON.parse(saved) : [...DEFAULT_SPECIES_OPTIONS];
-        } catch { return [...DEFAULT_SPECIES_OPTIONS]; }
+            // Start with empty array - will be synced to user's actual species on load
+            return saved ? JSON.parse(saved) : [];
+        } catch { return []; }
     });
     const [statusFilterPregnant, setStatusFilterPregnant] = useState(() => {
         try {
@@ -14323,6 +14324,26 @@ const AnimalList = ({ authToken, showModalMessage, onEditAnimal, onViewAnimal, f
             localStorage.setItem('animalList_publicFilter', publicFilter);
         } catch (e) { console.warn('Failed to save publicFilter', e); }
     }, [publicFilter]);
+    
+    // Sync selectedSpecies with actual species user has animals for
+    // Ensures "All" is shown by default when animals are first loaded
+    useEffect(() => {
+        if (animals.length > 0 && speciesNames.length > 0) {
+            // If empty (initial state), set to all species user has
+            if (selectedSpecies.length === 0) {
+                console.log('[Species Filter] Initial load - setting to all user species:', speciesNames);
+                setSelectedSpecies([...speciesNames]);
+                return;
+            }
+            
+            // Filter out any species user no longer has animals for
+            const validSelected = selectedSpecies.filter(s => speciesNames.includes(s));
+            if (validSelected.length !== selectedSpecies.length) {
+                console.log('[Species Filter] Removing invalid species from filter');
+                setSelectedSpecies(validSelected.length > 0 ? validSelected : [...speciesNames]);
+            }
+        }
+    }, [animals.length, speciesNames.length]); // Only run when animals are loaded/changed
     
     const fetchAnimals = useCallback(async () => {
         setLoading(true);
@@ -14505,7 +14526,7 @@ const AnimalList = ({ authToken, showModalMessage, onEditAnimal, onViewAnimal, f
         appliedNameFilter !== '' ||
         searchInput !== '' ||
         selectedGenders.length !== 4 ||
-        selectedSpecies.length !== speciesNames.length ||
+        !speciesNames.every(species => selectedSpecies.includes(species)) ||
         statusFilterPregnant ||
         statusFilterNursing ||
         statusFilterMating ||
@@ -15040,7 +15061,12 @@ const AnimalList = ({ authToken, showModalMessage, onEditAnimal, onViewAnimal, f
                     <div className="flex gap-1 sm:gap-2 items-center" data-tutorial-target="species-filter">
                         <span className='text-xs sm:text-sm font-medium text-gray-700 whitespace-nowrap'>Species:</span>
                         <select 
-                            value={selectedSpecies.length === speciesNames.length ? '' : selectedSpecies[0] || ''}
+                            value={
+                                // Show "All" if all available species are selected
+                                speciesNames.every(species => selectedSpecies.includes(species)) ? '' : 
+                                // Otherwise show first selected species (or empty)
+                                (selectedSpecies.find(s => speciesNames.includes(s)) || '')
+                            }
                             onChange={(e) => {
                                 const value = e.target.value;
                                 if (value === '') {
