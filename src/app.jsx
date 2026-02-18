@@ -15998,6 +15998,35 @@ const BroadcastBanner = ({ authToken, API_BASE_URL }) => {
         setBroadcasts(prev => prev.filter(b => b._id !== id));
     };
 
+    const handleDismissWelcomeGuide = async () => {
+        try {
+            console.log('[WELCOME GUIDE] Dismissing...');
+            
+            // Save to database
+            await axios.post(
+                `${API_BASE_URL}/users/dismiss-profile-setup-guide`,
+                {},
+                { headers: { Authorization: `Bearer ${authToken}` } }
+            );
+            
+            console.log('[WELCOME GUIDE] Saved to database');
+            
+            // Update state
+            setHasSeenWelcomeGuide(true);
+            setShowWelcomeGuide(false);
+            
+            // Save to localStorage as backup
+            if (userProfile?._id) {
+                localStorage.setItem(`${userProfile._id}_hasSeenWelcomeGuide`, 'true');
+                console.log('[WELCOME GUIDE] Saved to localStorage');
+            }
+        } catch (error) {
+            console.error('[WELCOME GUIDE] Failed to dismiss:', error);
+            // Still hide the modal even if save failed
+            setShowWelcomeGuide(false);
+        }
+    };
+
     const handlePollVote = async (notificationId, selectedOptions) => {
         if (!authToken || votingInProgress[notificationId]) return;
         
@@ -16833,6 +16862,9 @@ const App = () => {
     const [feedbackText, setFeedbackText] = useState('');
     const [feedbackSubmitting, setFeedbackSubmitting] = useState(false);
     
+    const [showWelcomeGuide, setShowWelcomeGuide] = useState(false);
+    const [hasSeenWelcomeGuide, setHasSeenWelcomeGuide] = useState(false);
+    
     const [hasSeenDonationHighlight, setHasSeenDonationHighlight] = useState(() => {
         return localStorage.getItem('hasSeenDonationHighlight') === 'true';
     });
@@ -17655,6 +17687,32 @@ const App = () => {
                 });
         }
     }, [authToken, userProfile, showModalMessage]);
+
+    // Check if user has seen welcome guide
+    useEffect(() => {
+        const checkWelcomeGuide = async () => {
+            if (!authToken || !userProfile) return;
+            
+            try {
+                const response = await axios.get(`${API_BASE_URL}/users/tutorial-progress`, {
+                    headers: { Authorization: `Bearer ${authToken}` }
+                });
+                
+                const hasSeen = response.data.hasSeenProfileSetupGuide || false;
+                console.log('[WELCOME GUIDE] Loaded from database:', hasSeen);
+                setHasSeenWelcomeGuide(hasSeen);
+                
+                // Show modal if they haven't seen it
+                if (!hasSeen) {
+                    setShowWelcomeGuide(true);
+                }
+            } catch (error) {
+                console.error('[WELCOME GUIDE] Failed to load status:', error);
+            }
+        };
+        
+        checkWelcomeGuide();
+    }, [authToken, userProfile, API_BASE_URL]);
 
     // Fetch animals for genetics calculator when needed
     useEffect(() => {
@@ -18819,9 +18877,9 @@ const App = () => {
             
             
             {/* Welcome Guide Modal - Shows once to brand new users on first login */}
-            {authToken && !hasSeenProfileSetupGuide && !tutorialLoading && userProfile && (
+            {showWelcomeGuide && (
                 <WelcomeGuideModal 
-                    onClose={dismissProfileSetupGuide}
+                    onClose={handleDismissWelcomeGuide}
                 />
             )}
 
