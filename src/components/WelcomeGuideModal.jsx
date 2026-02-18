@@ -47,7 +47,7 @@ const WelcomeGuideModal = ({ onClose }) => {
                                 <h3 className="font-semibold text-gray-800 text-sm mb-1">Country Location</h3>
                                 <p className="text-xs text-gray-600 leading-relaxed">
                                     Setting your <strong>Country</strong> helps buyers find local breeders! When you list animals for sale or stud services, users can filter the marketplace by country. 
-                                    This filter also exists for the Breeder Registry.
+                                    This filter also exists for the Breeders Registry.
                                 </p>
                             </div>
                         </div>
