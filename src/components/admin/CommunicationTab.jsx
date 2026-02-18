@@ -142,9 +142,18 @@ export default function CommunicationTab({ API_BASE_URL, authToken }) {
             const response = await fetch(`${API_BASE_URL}/moderation/broadcasts/${broadcastId}`, {
                 method: 'DELETE',
                 headers: {
-                    'Authorization': `Bearer ${authToken}`
+                    'Authorization': `Bearer ${authToken}`,
+                    'Content-Type': 'application/json'
                 }
             });
+
+            // Check content type before parsing
+            const contentType = response.headers.get('content-type');
+            if (!contentType || !contentType.includes('application/json')) {
+                const text = await response.text();
+                console.error('Non-JSON response:', text);
+                throw new Error('Server returned invalid response. The endpoint may not be deployed.');
+            }
 
             const data = await response.json();
 
