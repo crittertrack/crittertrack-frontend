@@ -74,10 +74,10 @@ const WelcomeGuideModal = ({ onClose }) => {
                                 </div>
                             </div>
                             <div className="flex-1">
-                                <h3 className="font-semibold text-gray-800 text-sm mb-1">Breeder Registry</h3>
+                                <h3 className="font-semibold text-gray-800 text-sm mb-1">Breeders Registry</h3>
                                 <p className="text-xs text-gray-600 leading-relaxed">
                                     In profile settings, select your breeding status (Owner, Active Breeder, or Retired Breeder) 
-                                    for any <strong>species you have animals for</strong> on the site. This adds you to the public <strong>Breeders</strong> Directory.
+                                    for any <strong>species you have animals for</strong> on the site. This adds you to the public <strong>Breeders Registry</strong>.
                                 </p>
                             </div>
                         </div>

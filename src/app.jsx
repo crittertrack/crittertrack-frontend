@@ -1183,7 +1183,7 @@ const BreederDirectorySettings = ({ authToken, API_BASE_URL, showModalMessage, u
             <div className="mb-8 p-4 sm:p-6 border rounded-lg bg-gray-50 overflow-x-hidden">
                 <h3 className="text-xl font-semibold text-gray-800 border-b pb-2 mb-4">Species & Breeding Status</h3>
                 <p className="text-sm text-gray-600">
-                    Add some animals to your collection to manage your breeding status and appear in the Breeders directory.
+                    Add some animals to your collection to manage your breeding status and appear in the Breeders Registry.
                 </p>
             </div>
         );
@@ -1193,7 +1193,7 @@ const BreederDirectorySettings = ({ authToken, API_BASE_URL, showModalMessage, u
         <div className="mb-8 p-4 sm:p-6 border rounded-lg bg-gray-50 overflow-x-hidden" data-tutorial-target="breeding-status-section">
             <h3 className="text-xl font-semibold text-gray-800 border-b pb-2 mb-4">Species & Breeding Status</h3>
             <p className="text-sm text-gray-600 mb-1">
-                Set your breeding status for each species. Marking yourself as an <strong>Active Breeder</strong> or <strong>Retired Breeder</strong> will make you visible in the Breeders directory.
+                Set your breeding status for each species. Marking yourself as an <strong>Active Breeder</strong> or <strong>Retired Breeder</strong> will make you visible in the Breeders Registry.
             </p>
             <p className="text-xs text-gray-500 mb-4">
                 Note: Species marked as Active or Retired will remain in your list even if you have no animals of that species.
@@ -12932,7 +12932,7 @@ const BreederDirectory = ({ authToken, API_BASE_URL, onBack }) => {
                         </button>
                         <h1 className="text-xl font-bold text-gray-800 flex items-center gap-2">
                             <Star size={24} className="text-primary" />
-                            Breeder Directory
+                            Breeders Registry
                         </h1>
                     </div>
 

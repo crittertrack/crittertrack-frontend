@@ -1483,7 +1483,7 @@ const KEY_FEATURES_LESSONS = [
       {
         stepNumber: 9,
         title: 'Breeding Status',
-        content: 'Set your breeding status for each species you work with. Choose Owner (not breeding), Active Breeder, or Retired Breeder. Active and Retired breeders are visible in the public Breeders Directory.',
+        content: 'Set your breeding status for each species you work with. Choose Owner (not breeding), Active Breeder, or Retired Breeder. Active and Retired breeders are visible in the public Breeders Registry.',
         highlightElement: '[data-tutorial-target="breeding-status-section"]',
         tips: [
           'Owner: You have animals but don\'t breed',
@@ -2117,15 +2117,15 @@ const ADVANCED_FEATURES_LESSONS = [
 
   {
     id: 'af-breeder-directory',
-    title: '5. Breeder Directory',
+    title: '5. Breeders Registry',
     description: 'Discover and connect with breeders around the world',
     tour: 'advanced-features',
     tourOrder: 5,
     steps: [
       {
         stepNumber: 1,
-        title: 'Breeder Directory Overview',
-        content: 'The Breeder Directory helps you find active breeders of specific species. Click the star/moon icon in the header to access it. Breeders can mark themselves as "Active Breeder" or "Retired Breeder" for each species in their settings.',
+        title: 'Breeders Registry Overview',
+        content: 'The Breeders Registry helps you find active breeders of specific species. Click the star/moon icon in the header to access it. Breeders can mark themselves as "Active Breeder" or "Retired Breeder" for each species in their settings.',
         highlightElement: '[data-tutorial-target="breeders-btn"]',
         tips: [
           'Find breeders by species',
