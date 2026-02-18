@@ -14325,26 +14325,6 @@ const AnimalList = ({ authToken, showModalMessage, onEditAnimal, onViewAnimal, f
         } catch (e) { console.warn('Failed to save publicFilter', e); }
     }, [publicFilter]);
     
-    // Sync selectedSpecies with actual species user has animals for
-    // Ensures "All" is shown by default when animals are first loaded
-    useEffect(() => {
-        if (animals.length > 0 && speciesNames.length > 0) {
-            // If empty (initial state), set to all species user has
-            if (selectedSpecies.length === 0) {
-                console.log('[Species Filter] Initial load - setting to all user species:', speciesNames);
-                setSelectedSpecies([...speciesNames]);
-                return;
-            }
-            
-            // Filter out any species user no longer has animals for
-            const validSelected = selectedSpecies.filter(s => speciesNames.includes(s));
-            if (validSelected.length !== selectedSpecies.length) {
-                console.log('[Species Filter] Removing invalid species from filter');
-                setSelectedSpecies(validSelected.length > 0 ? validSelected : [...speciesNames]);
-            }
-        }
-    }, [animals.length, speciesNames.length]); // Only run when animals are loaded/changed
-    
     const fetchAnimals = useCallback(async () => {
         setLoading(true);
         try {
@@ -14397,8 +14377,8 @@ const AnimalList = ({ authToken, showModalMessage, onEditAnimal, onViewAnimal, f
                 });
             }
 
-            // Filter by selected species (if not all are selected)
-            if (selectedSpecies.length > 0 && selectedSpecies.length < DEFAULT_SPECIES_OPTIONS.length) {
+            // Filter by selected species (if any species are selected)
+            if (selectedSpecies.length > 0) {
                 data = data.filter(a => selectedSpecies.includes(a.species));
             }
 
@@ -14499,6 +14479,25 @@ const AnimalList = ({ authToken, showModalMessage, onEditAnimal, onViewAnimal, f
         // Otherwise, alphabetical sort
         return a.localeCompare(b);
     });
+
+    // Initialize species filter to "All" on first load only
+    // Also add any new species that appear (e.g., after creating a new animal)
+    useEffect(() => {
+        if (!loading && speciesNames.length > 0) {
+            // First load: selectedSpecies is empty, set to all species
+            if (selectedSpecies.length === 0) {
+                console.log('[Species Filter] Initial load - setting to all user species:', speciesNames);
+                setSelectedSpecies([...speciesNames]);
+            } else {
+                // Check if there are new species not in selectedSpecies
+                const newSpecies = speciesNames.filter(s => !selectedSpecies.includes(s));
+                if (newSpecies.length > 0) {
+                    console.log('[Species Filter] Adding new species to filter:', newSpecies);
+                    setSelectedSpecies(prev => [...prev, ...newSpecies]);
+                }
+            }
+        }
+    }, [speciesNames.length, loading]); // Runs when number of species changes
 
     const handleStatusFilterChange = (e) => setStatusFilter(e.target.value);
     const handleSearchInputChange = (e) => setSearchInput(e.target.value);
