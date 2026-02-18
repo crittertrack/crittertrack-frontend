@@ -112,7 +112,7 @@ export default function CommunicationTab({ API_BASE_URL, authToken }) {
     };
 
     const handleDeleteBroadcast = async (broadcastId) => {
-        if (!confirm('Are you sure you want to delete this broadcast from history? This action cannot be undone.')) {
+        if (!confirm('Are you sure you want to delete this broadcast from history? This will also remove it from all users\' notifications. This action cannot be undone.')) {
             return;
         }
 
@@ -130,7 +130,8 @@ export default function CommunicationTab({ API_BASE_URL, authToken }) {
                 throw new Error(data.error || 'Failed to delete broadcast');
             }
 
-            setSuccess('Broadcast deleted successfully');
+            const notificationCount = data.deletedNotificationsCount || 0;
+            setSuccess(`Broadcast deleted successfully. Removed from ${notificationCount} user notification(s).`);
             // Refresh the list
             fetchBroadcastHistory();
         } catch (err) {
