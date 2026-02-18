@@ -34,7 +34,7 @@ import AnimalTree from './components/AnimalTree';
 const API_BASE_URL = '/api'; // Production via Vercel proxy - v2
 
 // App version for cache invalidation - increment to force cache clear
-const APP_VERSION = '7.0.0';
+const APP_VERSION = '7.0.1';
 
 const GENDER_OPTIONS = ['Male', 'Female', 'Intersex', 'Unknown'];
 const STATUS_OPTIONS = ['Pet', 'Breeder', 'Available', 'Booked', 'Sold', 'Retired', 'Deceased', 'Rehomed', 'Unknown']; 
@@ -14227,13 +14227,9 @@ const AnimalList = ({ authToken, showModalMessage, onEditAnimal, onViewAnimal, f
             return saved ? JSON.parse(saved) : ['Male', 'Female', 'Intersex', 'Unknown'];
         } catch { return ['Male', 'Female', 'Intersex', 'Unknown']; }
     });
-    const [selectedSpecies, setSelectedSpecies] = useState(() => {
-        try {
-            const saved = localStorage.getItem('animalList_selectedSpecies');
-            // Start with empty array - will be synced to user's actual species on load
-            return saved ? JSON.parse(saved) : [];
-        } catch { return []; }
-    });
+    // Always start with all species selected (empty array = show all)
+    // Don't persist this filter to prevent newly created animals from being hidden
+    const [selectedSpecies, setSelectedSpecies] = useState([]);
     const [statusFilterPregnant, setStatusFilterPregnant] = useState(() => {
         try {
             return localStorage.getItem('animalList_statusFilterPregnant') === 'true';
@@ -14289,11 +14285,8 @@ const AnimalList = ({ authToken, showModalMessage, onEditAnimal, onViewAnimal, f
         } catch (e) { console.warn('Failed to save selectedGenders', e); }
     }, [selectedGenders]);
     
-    useEffect(() => {
-        try {
-            localStorage.setItem('animalList_selectedSpecies', JSON.stringify(selectedSpecies));
-        } catch (e) { console.warn('Failed to save selectedSpecies', e); }
-    }, [selectedSpecies]);
+    // Removed selectedSpecies persistence - always default to showing all species
+    // This prevents confusion when users create new animals and they don't appear due to cached filters
     
     useEffect(() => {
         try {
@@ -14492,8 +14485,8 @@ const AnimalList = ({ authToken, showModalMessage, onEditAnimal, onViewAnimal, f
                 // Check if there are new species not in selectedSpecies
                 const newSpecies = speciesNames.filter(s => !selectedSpecies.includes(s));
                 if (newSpecies.length > 0) {
-                    console.log('[Species Filter] Adding new species to filter:', newSpecies);
-                    setSelectedSpecies(prev => [...prev, ...newSpecies]);
+                    console.log('[Species Filter] New species detected - resetting filter to show all species:', speciesNames);
+                    setSelectedSpecies([...speciesNames]);
                 }
             }
         }
