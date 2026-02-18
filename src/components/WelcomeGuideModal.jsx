@@ -109,8 +109,8 @@ const WelcomeGuideModal = ({ onClose }) => {
                                 <h3 className="font-semibold text-gray-800 text-sm mb-1">🚀 Beta Testing & Your Feedback</h3>
                                 <p className="text-xs text-gray-600">
                                     CritterTrack is currently in <strong>beta</strong> and actively improving! We're working on bug fixes and new features. 
-                                    Don't hesitate to use the <strong className="text-purple-700">purple feedback button on the left sidebar</strong> to share your thoughts, 
-                                    report issues, request species customisation, or suggest improvements. Your feedback helps shape the platform!
+                                    Throughout the platform, you'll see <strong className="text-purple-700">purple features</strong> — these are for beta feedback and suggestions. 
+                                    Don't hesitate to use them to share your thoughts, report issues, or suggest improvements. Your feedback helps shape the platform!
                                 </p>
                             </div>
                         </div>
