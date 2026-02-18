@@ -112,7 +112,7 @@ export default function CommunicationTab({ API_BASE_URL, authToken }) {
     };
 
     const handleDeleteBroadcast = async (broadcastId) => {
-        if (!confirm('Are you sure you want to delete this broadcast from history? This will also remove it from all users\' notifications. This action cannot be undone.')) {
+        if (!window.confirm('Are you sure you want to delete this broadcast from history? This will also remove it from all users\' notifications. This action cannot be undone.')) {
             return;
         }
 
