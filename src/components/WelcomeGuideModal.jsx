@@ -92,7 +92,7 @@ const WelcomeGuideModal = ({ onClose }) => {
                             <div className="flex-1">
                                 <h3 className="font-semibold text-gray-800 text-sm mb-1">Need Help Getting Started?</h3>
                                 <p className="text-xs text-gray-600">
-                                    Interactive tutorials are available anytime through the <strong>Help button (?) in the header</strong>. 
+                                    Interactive tutorials are available anytime through the <strong>Help button in the header</strong>. 
                                     Learn about adding animals, tracking genetics, budgeting, and more!
                                 </p>
                             </div>
