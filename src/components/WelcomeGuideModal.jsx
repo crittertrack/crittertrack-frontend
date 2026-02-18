@@ -74,8 +74,8 @@ const WelcomeGuideModal = ({ onClose }) => {
                             <div className="flex-1">
                                 <h3 className="font-semibold text-gray-800 mb-1">Community Activity</h3>
                                 <p className="text-sm text-gray-600">
-                                    Your public animals and activities will appear in the <strong>Community Feed</strong>, helping 
-                                    you connect with other breeders and showcase your work.
+                                    The <strong>Community Feed</strong> showcases recent activity from the newest and most active breeders, 
+                                    helping you connect with others and discover what's happening in the community.
                                 </p>
                             </div>
                         </div>
