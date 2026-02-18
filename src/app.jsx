@@ -26,12 +26,15 @@ import ModerationAuthModal from './components/moderation/ModerationAuthModal';
 import ModOversightPanel from './components/moderation/ModOversightPanel';
 import ModeratorActionSidebar from './components/moderation/ModeratorActionSidebar';
 import Marketplace from './components/Marketplace';
-// import FamilyTree from './components/FamilyTree';
-// import AnimalTree from './components/AnimalTree';
+import FamilyTree from './components/FamilyTree';
+import AnimalTree from './components/AnimalTree';
 
 // const API_BASE_URL = 'http://localhost:5000/api'; // Local development
 // const API_BASE_URL = 'https://crittertrack-pedigree-production.up.railway.app/api'; // Direct Railway (for testing)
 const API_BASE_URL = '/api'; // Production via Vercel proxy - v2
+
+// App version for cache invalidation - increment to force cache clear
+const APP_VERSION = '7.0.1';
 
 const GENDER_OPTIONS = ['Male', 'Female', 'Intersex', 'Unknown'];
 const STATUS_OPTIONS = ['Pet', 'Breeder', 'Available', 'Booked', 'Sold', 'Retired', 'Deceased', 'Rehomed', 'Unknown']; 
@@ -1673,8 +1676,8 @@ const UserSearchModal = ({ onClose, showModalMessage, onSelectUser, API_BASE_URL
 
     const UserResultCard = ({ user }) => {
         const memberSince = user.createdAt 
-            ? new Intl.DateTimeFormat('en-GB', { year: 'numeric', month: 'long', day: 'numeric' }).format(new Date(user.createdAt))
-            : (user.updatedAt ? new Intl.DateTimeFormat('en-GB', { year: 'numeric', month: 'long', day: 'numeric' }).format(new Date(user.updatedAt)) : null);
+            ? new Intl.DateTimeFormat(undefined, { year: 'numeric', month: 'long', day: 'numeric' }).format(new Date(user.createdAt))
+            : (user.updatedAt ? new Intl.DateTimeFormat(undefined, { year: 'numeric', month: 'long', day: 'numeric' }).format(new Date(user.updatedAt)) : null);
         
         // Determine display name(s) - respect privacy settings
         const showPersonalName = user.showPersonalName ?? false;
@@ -1920,8 +1923,8 @@ const PublicProfileView = ({ profile, onBack, onViewAnimal, API_BASE_URL, onStar
     }, [profile, API_BASE_URL]);
 
     const memberSince = (freshProfile?.createdAt || profile.createdAt)
-        ? new Intl.DateTimeFormat('en-GB', { year: 'numeric', month: 'long', day: 'numeric' }).format(new Date(freshProfile?.createdAt || profile.createdAt))
-        : ((freshProfile?.updatedAt || profile.updatedAt) ? new Intl.DateTimeFormat('en-GB', { year: 'numeric', month: 'long', day: 'numeric' }).format(new Date(freshProfile?.updatedAt || profile.updatedAt)) : 'Unknown');
+        ? new Intl.DateTimeFormat(undefined, { year: 'numeric', month: 'long', day: 'numeric' }).format(new Date(freshProfile?.createdAt || profile.createdAt))
+        : ((freshProfile?.updatedAt || profile.updatedAt) ? new Intl.DateTimeFormat(undefined, { year: 'numeric', month: 'long', day: 'numeric' }).format(new Date(freshProfile?.updatedAt || profile.updatedAt)) : 'Unknown');
 
     // Determine display name(s) - respect privacy settings
     const showPersonalName = (freshProfile?.showPersonalName ?? profile.showPersonalName ?? false);
@@ -2307,7 +2310,7 @@ const PrivateAnimalDetail = ({ animal, onClose, onEdit, API_BASE_URL, authToken,
                                     Edit
                                 </button>
                             )}
-                            {onTransfer && !animal.isViewOnly && (
+                            {onTransfer && (
                                 <button
                                     onClick={() => onTransfer(animal)}
                                     className="px-2 py-1 bg-blue-100 hover:bg-blue-200 text-blue-700 font-semibold rounded-lg transition flex items-center gap-1 text-xs"
@@ -2350,7 +2353,7 @@ const PrivateAnimalDetail = ({ animal, onClose, onEdit, API_BASE_URL, authToken,
                                     Edit
                                 </button>
                             )}
-                            {onTransfer && !animal.isViewOnly && (
+                            {onTransfer && (
                                 <button
                                     onClick={() => onTransfer(animal)}
                                     className="px-3 py-1.5 bg-blue-100 hover:bg-blue-200 text-blue-700 font-semibold rounded-lg transition flex items-center gap-2"
@@ -4406,13 +4409,11 @@ const ViewOnlyAnimalDetail = ({ animal, onClose, API_BASE_URL, onViewProfile, on
                             </div>
 
                             {/* Breeder Section */}
-                            {(animal.manualBreederName || animal.breederId_public) && (
+                            {animal.breederId_public && (
                                 <div className="bg-gray-50 p-4 rounded-lg border border-gray-200">
                                     <h3 className="text-lg font-semibold text-gray-700 border-b pb-2 mb-3">Breeder</h3>
                                     <p className="text-gray-700">
-                                        {animal.manualBreederName ? (
-                                            <span className="font-medium">{animal.manualBreederName}</span>
-                                        ) : breederInfo ? (
+                                        {breederInfo ? (
                                             <button
                                                 onClick={() => onViewProfile && onViewProfile(breederInfo)}
                                                 className="text-primary hover:underline font-medium"
@@ -5358,18 +5359,13 @@ const OffspringSection = ({ animalId, API_BASE_URL, authToken = null, onViewAnim
             try {
                 const headers = authToken ? { Authorization: `Bearer ${authToken}` } : {};
                 
-                // Fetch offspring - available for both authenticated and unauthenticated users
-                // Authenticated: gets all offspring including private
-                // Unauthenticated: gets only public offspring
-                const offspringEndpoint = authToken 
-                    ? `${API_BASE_URL}/animals/${animalId}/offspring`
-                    : `${API_BASE_URL}/public/animal/${animalId}/offspring`;
-                
-                const offspringResponse = await axios.get(offspringEndpoint, { headers });
-                setOffspring(offspringResponse.data || []);
-                
-                // Fetch current animal to know which parent we are
+                // Fetch offspring - only available for authenticated users
                 if (authToken) {
+                    const offspringEndpoint = `${API_BASE_URL}/animals/${animalId}/offspring`;
+                    const offspringResponse = await axios.get(offspringEndpoint, { headers });
+                    setOffspring(offspringResponse.data || []);
+                    
+                    // Fetch current animal to know which parent we are
                     try {
                         const animalResponse = await axios.get(
                             `${API_BASE_URL}/animals/any/${animalId}`,
@@ -5380,7 +5376,11 @@ const OffspringSection = ({ animalId, API_BASE_URL, authToken = null, onViewAnim
                         console.error('Error fetching current animal:', err);
                     }
                 } else {
-                    // Fetch public animal
+                    // For unauthenticated users, offspring data is not available via API
+                    // The backend doesn't expose a public offspring endpoint for privacy reasons
+                    setOffspring([]);
+                    
+                    // Still fetch the current animal for display
                     try {
                         const publicResponse = await axios.get(
                             `${API_BASE_URL}/public/global/animals?id_public=${animalId}`
@@ -5409,7 +5409,7 @@ const OffspringSection = ({ animalId, API_BASE_URL, authToken = null, onViewAnim
                     <Loader2 size={24} className="animate-spin text-gray-400" />
                 </div>
             ) : (!offspring || offspring.length === 0) ? (
-                <p className="text-gray-500 text-sm italic">No offspring recorded{authToken ? '' : ' or all offspring are private'}.</p>
+                <p className="text-gray-500 text-sm italic">Offspring are not public or no offspring recorded.</p>
             ) : (
                 <div className="space-y-6">
                     {offspring.map((litter, index) => (
@@ -5582,8 +5582,10 @@ const LitterManagement = ({ authToken, API_BASE_URL, userProfile, showModalMessa
     const [searchQuery, setSearchQuery] = useState('');
     const [speciesFilter, setSpeciesFilter] = useState('');
     const [yearFilter, setYearFilter] = useState('');
-    // COI calculation state
+    // COI calculation state (feature in development - UI display pending)
+    // eslint-disable-next-line no-unused-vars
     const [predictedCOI, setPredictedCOI] = useState(null);
+    // eslint-disable-next-line no-unused-vars
     const [calculatingCOI, setCalculatingCOI] = useState(false);
     const [addingOffspring, setAddingOffspring] = useState(null);
     const [newOffspringData, setNewOffspringData] = useState({
@@ -6643,27 +6645,6 @@ const LitterManagement = ({ authToken, API_BASE_URL, userProfile, showModalMessa
                             </button>
                         </div>
                     </div>
-
-                    {/* Predicted COI Display */}
-                    {formData.sireId_public && formData.damId_public && (
-                        <div className="mb-4 bg-blue-50 border border-blue-200 rounded-lg p-4">
-                            <div className="flex items-center gap-2">
-                                <span className="text-sm font-medium text-gray-700">Predicted COI (Coefficient of Inbreeding):</span>
-                                {calculatingCOI ? (
-                                    <span className="text-sm text-gray-500 italic">Calculating...</span>
-                                ) : predictedCOI != null ? (
-                                    <span className="text-sm font-bold text-gray-900">
-                                        {predictedCOI.toFixed(2)}%
-                                    </span>
-                                ) : (
-                                    <span className="text-sm text-gray-500 italic">-</span>
-                                )}
-                            </div>
-                            <p className="text-xs text-gray-600 mt-2">
-                                This shows the expected inbreeding level based on the selected parents' pedigrees.
-                            </p>
-                        </div>
-                    )}
 
                     {/* Birth Date & Counts */}
                     <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-4" data-tutorial-target="litter-dates-counts">
@@ -14246,12 +14227,9 @@ const AnimalList = ({ authToken, showModalMessage, onEditAnimal, onViewAnimal, f
             return saved ? JSON.parse(saved) : ['Male', 'Female', 'Intersex', 'Unknown'];
         } catch { return ['Male', 'Female', 'Intersex', 'Unknown']; }
     });
-    const [selectedSpecies, setSelectedSpecies] = useState(() => {
-        try {
-            const saved = localStorage.getItem('animalList_selectedSpecies');
-            return saved ? JSON.parse(saved) : [...DEFAULT_SPECIES_OPTIONS];
-        } catch { return [...DEFAULT_SPECIES_OPTIONS]; }
-    });
+    // Always start with all species selected (empty array = show all)
+    // Don't persist this filter to prevent newly created animals from being hidden
+    const [selectedSpecies, setSelectedSpecies] = useState([]);
     const [statusFilterPregnant, setStatusFilterPregnant] = useState(() => {
         try {
             return localStorage.getItem('animalList_statusFilterPregnant') === 'true';
@@ -14307,11 +14285,8 @@ const AnimalList = ({ authToken, showModalMessage, onEditAnimal, onViewAnimal, f
         } catch (e) { console.warn('Failed to save selectedGenders', e); }
     }, [selectedGenders]);
     
-    useEffect(() => {
-        try {
-            localStorage.setItem('animalList_selectedSpecies', JSON.stringify(selectedSpecies));
-        } catch (e) { console.warn('Failed to save selectedSpecies', e); }
-    }, [selectedSpecies]);
+    // Removed selectedSpecies persistence - always default to showing all species
+    // This prevents confusion when users create new animals and they don't appear due to cached filters
     
     useEffect(() => {
         try {
@@ -14395,8 +14370,8 @@ const AnimalList = ({ authToken, showModalMessage, onEditAnimal, onViewAnimal, f
                 });
             }
 
-            // Filter by selected species (if not all are selected)
-            if (selectedSpecies.length > 0 && selectedSpecies.length < DEFAULT_SPECIES_OPTIONS.length) {
+            // Filter by selected species (if any species are selected)
+            if (selectedSpecies.length > 0) {
                 data = data.filter(a => selectedSpecies.includes(a.species));
             }
 
@@ -14498,15 +14473,27 @@ const AnimalList = ({ authToken, showModalMessage, onEditAnimal, onViewAnimal, f
         return a.localeCompare(b);
     });
 
-    const handleStatusFilterChange = (e) => setStatusFilter(e.target.value);
-    const handleSearchInputChange = (e) => {
-        const value = e.target.value;
-        setSearchInput(value);
-        // Auto-clear the applied filter when search is emptied
-        if (!value.trim()) {
-            setAppliedNameFilter('');
+    // Initialize species filter to "All" on first load only
+    // Also add any new species that appear (e.g., after creating a new animal)
+    useEffect(() => {
+        if (!loading && speciesNames.length > 0) {
+            // First load: selectedSpecies is empty, set to all species
+            if (selectedSpecies.length === 0) {
+                console.log('[Species Filter] Initial load - setting to all user species:', speciesNames);
+                setSelectedSpecies([...speciesNames]);
+            } else {
+                // Check if there are new species not in selectedSpecies
+                const newSpecies = speciesNames.filter(s => !selectedSpecies.includes(s));
+                if (newSpecies.length > 0) {
+                    console.log('[Species Filter] New species detected - resetting filter to show all species:', speciesNames);
+                    setSelectedSpecies([...speciesNames]);
+                }
+            }
         }
-    };
+    }, [speciesNames.length, loading]); // Runs when number of species changes
+
+    const handleStatusFilterChange = (e) => setStatusFilter(e.target.value);
+    const handleSearchInputChange = (e) => setSearchInput(e.target.value);
     const toggleGender = (gender) => {
         setSelectedGenders(prev => 
             prev.includes(gender) 
@@ -14525,13 +14512,36 @@ const AnimalList = ({ authToken, showModalMessage, onEditAnimal, onViewAnimal, f
     const handleFilterNursing = () => { setStatusFilterNursing(prev => !prev); setStatusFilterPregnant(false); setStatusFilterMating(false); };
     const handleFilterMating = () => { setStatusFilterMating(prev => !prev); setStatusFilterPregnant(false); setStatusFilterNursing(false); };
     
+    // Check if any filters are active (different from defaults)
+    const hasActiveFilters = (
+        statusFilter !== '' ||
+        appliedNameFilter !== '' ||
+        searchInput !== '' ||
+        selectedGenders.length !== 4 ||
+        !speciesNames.every(species => selectedSpecies.includes(species)) ||
+        statusFilterPregnant ||
+        statusFilterNursing ||
+        statusFilterMating ||
+        !ownedFilterActive ||
+        publicFilter !== ''
+    );
+    
+    const handleClearFilters = () => {
+        setStatusFilter('');
+        setSearchInput('');
+        setAppliedNameFilter('');
+        setSelectedGenders(['Male', 'Female', 'Intersex', 'Unknown']);
+        setSelectedSpecies([...speciesNames]);
+        setStatusFilterPregnant(false);
+        setStatusFilterNursing(false);
+        setStatusFilterMating(false);
+        setOwnedFilterActive(true);
+        setPublicFilter('');
+    };
+    
     const handleRefresh = async () => {
         try {
             setLoading(true);
-            
-            // Clear search filter while keeping other filters
-            setSearchInput('');
-            setAppliedNameFilter('');
             
             // Fetch animals first
             const currentAnimals = await axios.get(`${API_BASE_URL}/animals`, {
@@ -14573,31 +14583,6 @@ const AnimalList = ({ authToken, showModalMessage, onEditAnimal, onViewAnimal, f
             return;
         }
         setAppliedNameFilter(term);
-    };
-
-    const hasActiveFilters = () => {
-        return appliedNameFilter || 
-               statusFilter || 
-               selectedSpecies.length !== speciesNames.length || 
-               selectedGenders.length !== 4 || 
-               publicFilter || 
-               statusFilterPregnant || 
-               statusFilterNursing || 
-               statusFilterMating || 
-               !ownedFilterActive;
-    };
-
-    const clearAllFilters = () => {
-        setSearchInput('');
-        setAppliedNameFilter('');
-        setStatusFilter('');
-        setSelectedSpecies([...speciesNames]);
-        setSelectedGenders(['Male', 'Female', 'Intersex', 'Unknown']);
-        setPublicFilter('');
-        setStatusFilterPregnant(false);
-        setStatusFilterNursing(false);
-        setStatusFilterMating(false);
-        setOwnedFilterActive(true);
     };
 
     const toggleBulkDeleteMode = (species) => {
@@ -14836,9 +14821,6 @@ const AnimalList = ({ authToken, showModalMessage, onEditAnimal, onViewAnimal, f
             if (isSelectable) {
                 onToggleSelect(species, animal.id_public);
             } else {
-                // Clear search filter when viewing an animal, keeping other filters
-                setSearchInput('');
-                setAppliedNameFilter('');
                 onViewAnimal(animal);
             }
         };
@@ -14979,22 +14961,22 @@ const AnimalList = ({ authToken, showModalMessage, onEditAnimal, onViewAnimal, f
             <h2 className="text-2xl sm:text-3xl font-bold text-gray-800 mb-6 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3">
                 <div className='flex items-center gap-2'>
                     <ClipboardList size={20} className="sm:w-6 sm:h-6 mr-2 sm:mr-3 text-primary-dark" />
-                    <span>My Animals ({animals.length})</span>
-                    {hasActiveFilters() && (
-                        <span className="px-2 py-0.5 bg-accent text-white text-xs font-semibold rounded-full" title="Active filters applied">
+                    My Animals ({animals.length})
+                    {hasActiveFilters && (
+                        <span className="bg-pink-500 text-white text-xs font-semibold px-2 py-1 rounded-full">
                             Filtered
                         </span>
                     )}
                 </div>
-                <div className="flex items-center gap-1 sm:gap-2 flex-wrap justify-center" data-tutorial-target="bulk-privacy-controls">
-                    {hasActiveFilters() && (
-                        <button 
-                            onClick={clearAllFilters}
-                            className="text-gray-600 hover:text-accent transition flex items-center gap-1 px-2 sm:px-3 py-1 sm:py-1.5 rounded-lg hover:bg-gray-100 text-xs sm:text-sm font-medium"
-                            title="Clear all filters"
+                <div className="flex items-center gap-1 sm:gap-2 flex-wrap" data-tutorial-target="bulk-privacy-controls">
+                    {hasActiveFilters && (
+                        <button
+                            onClick={handleClearFilters}
+                            className="text-gray-600 hover:text-gray-800 transition flex items-center gap-0.5 sm:gap-1 px-2 sm:px-3 py-1 sm:py-1.5 rounded-lg hover:bg-gray-100 text-xs sm:text-sm"
+                            title="Clear All Filters"
                         >
                             <X size={14} className="sm:w-4 sm:h-4" />
-                            <span>Clear Filters</span>
+                            <span className="font-medium">Clear Filters</span>
                         </button>
                     )}
                     <button
@@ -15003,7 +14985,7 @@ const AnimalList = ({ authToken, showModalMessage, onEditAnimal, onViewAnimal, f
                         title="Make All Animals Public"
                     >
                         <Eye size={14} className="sm:w-4 sm:h-4" />
-                        <span className="font-medium">Set All Public</span>
+                        <span className="font-medium">All Public</span>
                     </button>
                     <button
                         onClick={() => toggleAllAnimalsPrivacy(false)}
@@ -15011,7 +14993,7 @@ const AnimalList = ({ authToken, showModalMessage, onEditAnimal, onViewAnimal, f
                         title="Make All Animals Private"
                     >
                         <EyeOff size={14} className="sm:w-4 sm:h-4" />
-                        <span className="font-medium">Set All Private</span>
+                        <span className="font-medium">All Private</span>
                     </button>
                     <button 
                         onClick={() => { navigate('/hidden-animals'); fetchHiddenAnimals(); }}
@@ -15071,7 +15053,12 @@ const AnimalList = ({ authToken, showModalMessage, onEditAnimal, onViewAnimal, f
                     <div className="flex gap-1 sm:gap-2 items-center" data-tutorial-target="species-filter">
                         <span className='text-xs sm:text-sm font-medium text-gray-700 whitespace-nowrap'>Species:</span>
                         <select 
-                            value={selectedSpecies.length === speciesNames.length ? '' : selectedSpecies[0] || ''}
+                            value={
+                                // Show "All" if all available species are selected
+                                speciesNames.every(species => selectedSpecies.includes(species)) ? '' : 
+                                // Otherwise show first selected species (or empty)
+                                (selectedSpecies.find(s => speciesNames.includes(s)) || '')
+                            }
                             onChange={(e) => {
                                 const value = e.target.value;
                                 if (value === '') {
@@ -15310,7 +15297,7 @@ const AnimalList = ({ authToken, showModalMessage, onEditAnimal, onViewAnimal, f
                                             animal={animal} 
                                             onEditAnimal={onEditAnimal}
                                             species={species}
-                                            isSelectable={isBulkMode && !animal.isViewOnly}
+                                            isSelectable={isBulkMode}
                                             isSelected={selected.includes(animal.id_public)}
                                             onToggleSelect={toggleAnimalSelection}
                                             onTogglePrivacy={toggleAnimalPrivacy}
@@ -15427,12 +15414,6 @@ const MessagesView = ({ authToken, API_BASE_URL, onClose, showModalMessage, sele
 
     const getDisplayName = (user) => {
         if (!user) return 'Unknown User';
-        
-        // If this is a staff member with displayName set (e.g., 'Crittertrack'), use that
-        if (user.displayName) {
-            return user.displayName;
-        }
-        
         return (user.showBreederName && user.breederName) 
             ? user.breederName 
             : (user.showPersonalName ? user.personalName : `User ${user.id_public}`);
@@ -15583,9 +15564,7 @@ const MessagesView = ({ authToken, API_BASE_URL, onClose, showModalMessage, sele
                                 >
                                     <div className="flex items-center gap-2 sm:gap-3">
                                         <div className="w-8 h-8 sm:w-10 sm:h-10 bg-gray-200 rounded-full overflow-hidden flex-shrink-0">
-                                            {conv.otherUser?.isStaff ? (
-                                                <img src="/logo.png" alt="CritterTrack" className="w-full h-full object-cover" />
-                                            ) : conv.otherUser?.profileImage ? (
+                                            {conv.otherUser?.profileImage ? (
                                                 <img src={conv.otherUser.profileImage} alt="" className="w-full h-full object-cover" />
                                             ) : (
                                                 <div className="w-full h-full flex items-center justify-center text-gray-400">
@@ -15633,9 +15612,7 @@ const MessagesView = ({ authToken, API_BASE_URL, onClose, showModalMessage, sele
                                                 <ArrowLeft size={20} />
                                             </button>
                                             <div className="w-10 h-10 bg-gray-200 rounded-full overflow-hidden">
-                                                {selectedConversation.otherUser?.isStaff ? (
-                                                    <img src="/logo.png" alt="CritterTrack" className="w-full h-full object-cover" />
-                                                ) : selectedConversation.otherUser?.profileImage ? (
+                                                {selectedConversation.otherUser?.profileImage ? (
                                                     <img src={selectedConversation.otherUser.profileImage} alt="" className="w-full h-full object-cover" />
                                                 ) : (
                                                     <div className="w-full h-full flex items-center justify-center text-gray-400">
@@ -15645,9 +15622,7 @@ const MessagesView = ({ authToken, API_BASE_URL, onClose, showModalMessage, sele
                                             </div>
                                             <div>
                                                 <p className="font-semibold">{getDisplayName(selectedConversation.otherUser)}</p>
-                                                {!selectedConversation.otherUser?.isStaff && (
-                                                    <p className="text-xs text-gray-500">{selectedConversation.otherUser?.id_public}</p>
-                                                )}
+                                                <p className="text-xs text-gray-500">{selectedConversation.otherUser?.id_public}</p>
                                             </div>
                                         </div>
                                         <div className="flex gap-2">
@@ -15725,11 +15700,11 @@ const MessagesView = ({ authToken, API_BASE_URL, onClose, showModalMessage, sele
 
                                 {/* Send Message Form */}
                                 <form onSubmit={handleSendMessage} className="p-4 border-t bg-gray-50">
-                                    {userProfile?.allowMessages === false && !selectedConversation.otherUser?.isStaff ? (
+                                    {userProfile?.allowMessages === false ? (
                                         <div className="text-center py-2 text-sm text-gray-500">
                                             You have disabled messages. Enable them in your profile settings to send messages.
                                         </div>
-                                    ) : selectedConversation.otherUser?.allowMessages === false && !selectedConversation.otherUser?.isStaff ? (
+                                    ) : selectedConversation.otherUser?.allowMessages === false ? (
                                         <div className="text-center py-2 text-sm text-gray-500">
                                             This user has disabled messages
                                         </div>
@@ -16678,6 +16653,37 @@ const App = () => {
         return () => window.removeEventListener('resize', handleResize);
     }, []);
     
+    // Version check - clear localStorage cache if version changed
+    React.useEffect(() => {
+        const storedVersion = localStorage.getItem('appVersion');
+        if (storedVersion !== APP_VERSION) {
+            console.log(`[Cache Clear] App version changed from ${storedVersion} to ${APP_VERSION}`);
+            
+            // Clear all filter-related localStorage items
+            const filterKeys = [
+                'animalList_statusFilter',
+                'animalList_searchInput',
+                'animalList_appliedNameFilter',
+                'animalList_selectedGenders',
+                'animalList_selectedSpecies',
+                'animalList_statusFilterPregnant',
+                'animalList_statusFilterNursing',
+                'animalList_statusFilterMating',
+                'animalList_ownedFilterActive',
+                'animalList_publicFilter'
+            ];
+            
+            filterKeys.forEach(key => {
+                localStorage.removeItem(key);
+                console.log(`[Cache Clear] Removed ${key}`);
+            });
+            
+            // Update stored version
+            localStorage.setItem('appVersion', APP_VERSION);
+            console.log('[Cache Clear] Cache cleared successfully');
+        }
+    }, []);
+    
     // Fetch and display user count on login/register screen
     useEffect(() => {
         const fetchUserCount = async () => {
@@ -17566,7 +17572,7 @@ const App = () => {
         }
     }, [authToken, navigate, location.pathname]);
 
-    const fetchUserProfile = useCallback(async (token, silent = false) => {
+    const fetchUserProfile = useCallback(async (token) => {
         // Don't fetch if no token (already logged out)
         if (!token) return;
         
@@ -17584,22 +17590,16 @@ const App = () => {
             setUserProfile(user);
         } catch (error) {
             console.error('Failed to fetch user profile:', error);
-            // Only show error modal and logout if we still have a token AND it's not a silent background refresh
-            if (authToken && !silent) {
+            // Only show error modal if we still have a token (not already logged out)
+            if (authToken) {
                 // Check if it's a 401 (token expired/invalid)
                 if (error.response?.status === 401) {
                     showModalMessage('Session Expired', 'Your session has expired. Please log in again.');
-                    setAuthToken(null);
                 } else {
                     showModalMessage('Connection Error', 'Could not load user profile. Please check your connection and try again.');
-                    setAuthToken(null);
                 }
-            } else if (authToken && silent && error.response?.status === 401) {
-                // For silent refreshes, only logout on 401 (invalid token), not network errors
-                console.log('[AUTH] Silent profile refresh failed with 401 - logging out');
                 setAuthToken(null);
             }
-            // For silent refreshes with network errors (not 401), just log and continue - don't logout
         }
     }, [showModalMessage, authToken]);
 
@@ -17607,12 +17607,12 @@ const App = () => {
     useEffect(() => {
         if (!authToken) return;
         
-        // Fetch immediately (non-silent for initial load)
-        fetchUserProfile(authToken, false);
+        // Fetch immediately, then set up periodic refetch
+        fetchUserProfile(authToken);
         
-        // Refetch user profile every 10 seconds to catch warning/suspension updates (silent mode)
+        // Refetch user profile every 10 seconds to catch warning/suspension updates
         const interval = setInterval(() => {
-            fetchUserProfile(authToken, true); // Silent refresh - don't show errors or logout on network issues
+            fetchUserProfile(authToken);
         }, 10000);
         
         return () => clearInterval(interval);
@@ -17861,43 +17861,43 @@ const App = () => {
             try {
                 const [newestResponse, activeResponse] = await Promise.all([
                     axios.get(`${API_BASE_URL}/public/users/newest?limit=10`),
-                    axios.get(`${API_BASE_URL}/public/users/active?minutes=360`) // 6 hours
+                    axios.get(`${API_BASE_URL}/public/users/active?minutes=15`)
                 ]);
                 let newest = newestResponse.data || [];
                 let active = activeResponse.data || [];
                 
-                // Filter out banned/deleted users, CTU1, and anonymous users
-                const filterUser = (u) => {
-                    if (!u.id_public || u.accountStatus === 'banned' || u.id_public === 'CTU1') return false;
-                    return (u.showBreederName && u.breederName) || (u.showPersonalName && u.personalName);
-                };
+                // Filter out banned/deleted users (those without id_public or marked as deleted)
+                newest = newest.filter(u => u.id_public && u.accountStatus !== 'banned');
+                active = active.filter(u => u.id_public && u.accountStatus !== 'banned');
                 
-                newest = newest.filter(filterUser);
-                active = active.filter(filterUser);
+                // Filter out anonymous users (those who don't have a visible name)
+                const hasVisibleName = (u) => (u.showBreederName && u.breederName) || (u.showPersonalName && u.personalName);
+                newest = newest.filter(hasVisibleName);
+                active = active.filter(hasVisibleName);
                 
-                // Remove duplicates between active and newest (prioritize showing user once)
+                // Combine: active first (most recently active), then newest, removing duplicates
                 const seenIds = new Set();
-                const finalActive = [];
-                const finalNewest = [];
+                const combined = [];
                 
-                // Add up to 3 active users
+                // Add active users first (priority)
                 for (const user of active) {
-                    if (!seenIds.has(user.id_public) && finalActive.length < 3) {
+                    if (!seenIds.has(user.id_public) && combined.length < 5) {
                         seenIds.add(user.id_public);
-                        finalActive.push(user);
+                        combined.push({ ...user, isActive: true });
                     }
                 }
                 
-                // Add up to 2 newest users (skip if already in active)
+                // Fill remaining slots with newest users
                 for (const user of newest) {
-                    if (!seenIds.has(user.id_public) && finalNewest.length < 2) {
+                    if (!seenIds.has(user.id_public) && combined.length < 5) {
                         seenIds.add(user.id_public);
-                        finalNewest.push(user);
+                        combined.push({ ...user, isActive: false });
                     }
                 }
                 
-                setActiveUsers(finalActive);
-                setNewestUsers(finalNewest);
+                // Split back into categories for display styling
+                setNewestUsers(combined.filter(u => !u.isActive));
+                setActiveUsers(combined.filter(u => u.isActive));
             } catch (error) {
                 console.error('Error fetching community users:', error);
             }
@@ -19510,26 +19510,7 @@ const App = () => {
                             }}
                         />
                     } />
-                    {/* <Route path="/family-tree" element={
-                        userProfile?.id_public === 'CTU2' ? (
-                            <FamilyTree
-                                authToken={authToken}
-                                userProfile={userProfile}
-                                showModalMessage={showModalMessage}
-                                onViewAnimal={handleViewAnimal}
-                                onBack={() => navigate('/')}
-                            />
-                        ) : (
-                            <div style={{ padding: '20px', textAlign: 'center' }}>
-                                <h2>Access Restricted</h2>
-                                <p>The Family Tree feature is currently in testing and only available to select users.</p>
-                                <button onClick={() => navigate('/')} style={{ marginTop: '20px', padding: '10px 20px', cursor: 'pointer' }}>
-                                    Back to Home
-                                </button>
-                            </div>
-                        )
-                    } /> */}
-                    {/* <Route path="/family-tree" element={
+                    <Route path="/family-tree" element={
                         userProfile?.id_public === 'CTU2' ? (
                             <FamilyTree
                                 authToken={authToken}
@@ -19548,7 +19529,26 @@ const App = () => {
                             </div>
                         )
                     } />
-                    {/* <Route path="/animal-tree/:species" element={
+                    <Route path="/family-tree" element={
+                        userProfile?.id_public === 'CTU2' ? (
+                            <FamilyTree
+                                authToken={authToken}
+                                userProfile={userProfile}
+                                showModalMessage={showModalMessage}
+                                onViewAnimal={handleViewAnimal}
+                                onBack={() => navigate('/')}
+                            />
+                        ) : (
+                            <div style={{ padding: '20px', textAlign: 'center' }}>
+                                <h2>Access Restricted</h2>
+                                <p>The Family Tree feature is currently in testing and only available to select users.</p>
+                                <button onClick={() => navigate('/')} style={{ marginTop: '20px', padding: '10px 20px', cursor: 'pointer' }}>
+                                    Back to Home
+                                </button>
+                            </div>
+                        )
+                    } />
+                    <Route path="/animal-tree/:species" element={
                         <AnimalTree
                             authToken={authToken}
                             userProfile={userProfile}
@@ -19556,7 +19556,7 @@ const App = () => {
                             onViewAnimal={handleViewAnimal}
                             onBack={() => navigate('/')}
                         />
-                    } /> */}
+                    } />
                     <Route path="/profile" element={<ProfileView userProfile={userProfile} showModalMessage={showModalMessage} fetchUserProfile={fetchUserProfile} authToken={authToken} onProfileUpdated={setUserProfile} onProfileEditButtonClicked={setProfileEditButtonClicked} />} />
                     <Route path="/breeder-directory" element={
                         <BreederDirectory
