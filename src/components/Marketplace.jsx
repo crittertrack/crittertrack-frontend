@@ -58,10 +58,12 @@ const Marketplace = ({ onViewAnimal, onViewProfile, authToken, userProfile, onSt
     const [searchQuery, setSearchQuery] = useState('');
     const [selectedSpecies, setSelectedSpecies] = useState('');
     const [selectedGender, setSelectedGender] = useState('');
+    const [selectedCountry, setSelectedCountry] = useState('');
     const [showFilters, setShowFilters] = useState(false);
     
     // Available filter options
     const [speciesOptions, setSpeciesOptions] = useState([]);
+    const [countryOptions, setCountryOptions] = useState([]);
     
     // Pagination
     const [pagination, setPagination] = useState({
@@ -71,17 +73,21 @@ const Marketplace = ({ onViewAnimal, onViewProfile, authToken, userProfile, onSt
         totalPages: 0
     });
 
-    // Fetch available species for filter
+    // Fetch available species and countries for filters
     useEffect(() => {
-        const fetchSpecies = async () => {
+        const fetchFilterOptions = async () => {
             try {
-                const response = await axios.get(`${API_BASE_URL}/public/marketplace/species`);
-                setSpeciesOptions(response.data || []);
+                const [speciesResponse, countriesResponse] = await Promise.all([
+                    axios.get(`${API_BASE_URL}/public/marketplace/species`),
+                    axios.get(`${API_BASE_URL}/public/marketplace/countries`)
+                ]);
+                setSpeciesOptions(speciesResponse.data || []);
+                setCountryOptions(countriesResponse.data || []);
             } catch (err) {
-                console.error('Failed to fetch species:', err);
+                console.error('Failed to fetch filter options:', err);
             }
         };
-        fetchSpecies();
+        fetchFilterOptions();
     }, []);
 
     // Fetch marketplace animals
@@ -104,6 +110,9 @@ const Marketplace = ({ onViewAnimal, onViewProfile, authToken, userProfile, onSt
             if (selectedGender) {
                 params.append('gender', selectedGender);
             }
+            if (selectedCountry) {
+                params.append('country', selectedCountry);
+            }
 
             const response = await axios.get(`${API_BASE_URL}/public/marketplace?${params.toString()}`, {
                 headers: {
@@ -120,12 +129,12 @@ const Marketplace = ({ onViewAnimal, onViewProfile, authToken, userProfile, onSt
         } finally {
             setLoading(false);
         }
-    }, [listingType, searchQuery, selectedSpecies, selectedGender, pagination.limit]);
+    }, [listingType, searchQuery, selectedSpecies, selectedGender, selectedCountry, pagination.limit]);
 
     // Fetch on mount and filter changes
     useEffect(() => {
         fetchAnimals(1);
-    }, [listingType, selectedSpecies, selectedGender]);
+    }, [listingType, selectedSpecies, selectedGender, selectedCountry]);
 
     // Handle search submit
     const handleSearch = (e) => {
@@ -146,10 +155,11 @@ const Marketplace = ({ onViewAnimal, onViewProfile, authToken, userProfile, onSt
         setSearchQuery('');
         setSelectedSpecies('');
         setSelectedGender('');
+        setSelectedCountry('');
         setListingType('all');
     };
 
-    const hasActiveFilters = searchQuery || selectedSpecies || selectedGender || listingType !== 'all';
+    const hasActiveFilters = searchQuery || selectedSpecies || selectedGender || selectedCountry || listingType !== 'all';
 
     // Handle opening inquiry modal
     const handleOpenInquiry = (animal) => {
@@ -321,7 +331,7 @@ const Marketplace = ({ onViewAnimal, onViewProfile, authToken, userProfile, onSt
             {/* Filters Panel */}
             {showFilters && (
                 <div className="bg-gray-50 rounded-lg p-4 mb-4 border">
-                    <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+                    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
                         <div>
                             <label className="block text-sm font-medium text-gray-700 mb-1">Species</label>
                             <select
@@ -345,6 +355,21 @@ const Marketplace = ({ onViewAnimal, onViewProfile, authToken, userProfile, onSt
                                 <option value="">Any Gender</option>
                                 <option value="Male">Male</option>
                                 <option value="Female">Female</option>
+                            </select>
+                        </div>
+                        <div>
+                            <label className="block text-sm font-medium text-gray-700 mb-1">Country</label>
+                            <select
+                                value={selectedCountry}
+                                onChange={(e) => setSelectedCountry(e.target.value)}
+                                className="w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-accent focus:border-accent"
+                            >
+                                <option value="">All Countries</option>
+                                {countryOptions.map((country) => (
+                                    <option key={country.code} value={country.code}>
+                                        {country.flag} {country.name}
+                                    </option>
+                                ))}
                             </select>
                         </div>
                         <div className="flex items-end">
