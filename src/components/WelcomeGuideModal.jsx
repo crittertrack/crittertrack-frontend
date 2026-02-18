@@ -1,7 +1,19 @@
-import React from 'react';
-import { User, MapPin, Users, ShoppingBag, HelpCircle, MessageSquare } from 'lucide-react';
+import React, { useState } from 'react';
+import { User, MapPin, Users, ShoppingBag, HelpCircle, MessageSquare, Loader2 } from 'lucide-react';
 
 const WelcomeGuideModal = ({ onClose }) => {
+    const [isClosing, setIsClosing] = useState(false);
+
+    const handleClose = async () => {
+        setIsClosing(true);
+        try {
+            await onClose();
+        } catch (error) {
+            console.error('Error closing welcome modal:', error);
+            // Close anyway
+        }
+    };
+
     return (
         <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
             <div className="bg-white rounded-lg shadow-xl max-w-5xl w-full max-h-[90vh]">
@@ -119,10 +131,18 @@ const WelcomeGuideModal = ({ onClose }) => {
                     {/* Action Button */}
                     <div className="flex justify-end pt-1">
                         <button
-                            onClick={onClose}
-                            className="px-6 py-2.5 bg-accent text-white rounded-lg hover:bg-accent/90 transition font-medium text-sm"
+                            onClick={handleClose}
+                            disabled={isClosing}
+                            className="px-6 py-2.5 bg-accent text-white rounded-lg hover:bg-accent/90 transition font-medium text-sm disabled:opacity-50 flex items-center gap-2"
                         >
-                            Got it, let's get started!
+                            {isClosing ? (
+                                <>
+                                    <Loader2 size={16} className="animate-spin" />
+                                    <span>Saving...</span>
+                                </>
+                            ) : (
+                                'Got it, let\'s get started!'
+                            )}
                         </button>
                     </div>
                 </div>
