@@ -43,7 +43,8 @@ export const TutorialProvider = ({ children, userId, authToken, API_BASE_URL }) 
           headers: { Authorization: `Bearer ${authToken}` }
         });
         
-        console.log('Tutorial progress loaded from backend:', response.data);
+        console.log('[TUTORIAL CONTEXT] Tutorial progress loaded from backend:', response.data);
+        console.log('[TUTORIAL CONTEXT] hasSeenProfileSetupGuide value:', response.data.hasSeenProfileSetupGuide);
         
         setCompletedTutorials(response.data.completedTutorials || []);
         setHasCompletedOnboarding(response.data.hasCompletedOnboarding || false);
@@ -51,13 +52,15 @@ export const TutorialProvider = ({ children, userId, authToken, API_BASE_URL }) 
         setHasSeenWelcomeBanner(response.data.hasSeenWelcomeBanner || false);
         setHasSeenProfileSetupGuide(response.data.hasSeenProfileSetupGuide || false);
         
+        console.log('[TUTORIAL CONTEXT] State set - hasSeenProfileSetupGuide:', response.data.hasSeenProfileSetupGuide);
+        
         // Also sync with localStorage for offline support
         const userStoragePrefix = `${userId}_`;
         localStorage.setItem(userStoragePrefix + STORAGE_KEYS.COMPLETED_TUTORIALS, JSON.stringify(response.data.completedTutorials || []));
         localStorage.setItem(userStoragePrefix + STORAGE_KEYS.HAS_SEEN_TUTORIAL, JSON.stringify(response.data.hasCompletedOnboarding || false));
         localStorage.setItem(userStoragePrefix + 'hasSeenProfileSetupGuide', JSON.stringify(response.data.hasSeenProfileSetupGuide || false));
         
-        console.log('Tutorial state synced to localStorage for user:', userId);
+        console.log('[TUTORIAL CONTEXT] Tutorial state synced to localStorage for user:', userId);
       } catch (error) {
         console.error('Failed to load tutorial progress from backend:', error);
         
