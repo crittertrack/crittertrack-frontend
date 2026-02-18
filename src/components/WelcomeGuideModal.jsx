@@ -1,5 +1,5 @@
 import React from 'react';
-import { User, MapPin, Users, ShoppingBag, HelpCircle } from 'lucide-react';
+import { User, MapPin, Users, ShoppingBag, HelpCircle, MessageSquare } from 'lucide-react';
 
 const WelcomeGuideModal = ({ onClose }) => {
     return (
@@ -94,6 +94,23 @@ const WelcomeGuideModal = ({ onClose }) => {
                                 <p className="text-xs text-gray-600">
                                     Interactive tutorials are available anytime through the <strong>Help button in the header</strong>. 
                                     Learn about adding animals, tracking genetics, budgeting, and more!
+                                </p>
+                            </div>
+                        </div>
+                    </div>
+
+                    {/* Beta Testing Message */}
+                    <div className="bg-gradient-to-r from-purple-50 to-purple-100 border border-purple-300 rounded-lg p-3">
+                        <div className="flex gap-3 items-start">
+                            <div className="flex-shrink-0">
+                                <MessageSquare className="text-purple-600" size={20} />
+                            </div>
+                            <div className="flex-1">
+                                <h3 className="font-semibold text-gray-800 text-sm mb-1">🚀 Beta Testing & Your Feedback</h3>
+                                <p className="text-xs text-gray-600">
+                                    CritterTrack is currently in <strong>beta</strong> and actively improving! We're working on bug fixes and new features. 
+                                    Don't hesitate to use the <strong className="text-purple-700">purple feedback buttons on the left sidebar</strong> (like "Beta Feedback" 
+                                    and "Request Species Customisation") to share your thoughts, report issues, or suggest improvements. Your feedback helps shape the platform!
                                 </p>
                             </div>
                         </div>
