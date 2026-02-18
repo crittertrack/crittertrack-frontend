@@ -19072,12 +19072,27 @@ const App = () => {
             {/* Urgent Broadcast Popup (warning/alert) */}
             <UrgentBroadcastPopup authToken={authToken} API_BASE_URL={API_BASE_URL} />
 
+            {/* Species Customization Request Button */}
+            {!inModeratorMode && (
+                <button
+                    onClick={() => setShowFeedbackModal(true)}
+                    className="fixed left-0 z-40 bg-gradient-to-r from-purple-500 to-indigo-500 hover:from-purple-600 hover:to-indigo-600 text-white px-2 py-4 rounded-r-lg shadow-lg transition-all duration-200 hover:px-3 group"
+                    style={{ writingMode: 'vertical-rl', textOrientation: 'mixed', top: 'calc(50% - 60px)' }}
+                    title="Request species field customization"
+                >
+                    <span className="flex items-center gap-2 text-sm font-medium">
+                        <Mail size={16} className="rotate-90" />
+                        <span>Species Customization</span>
+                    </span>
+                </button>
+            )}
+
             {/* Beta Feedback Button - Temporary prominent feedback access for beta users */}
             {!inModeratorMode && (
                 <button
                     onClick={() => setShowBugReportModal(true)}
-                    className="fixed left-0 top-1/2 -translate-y-1/2 z-40 bg-gradient-to-r from-purple-600 to-indigo-600 hover:from-purple-700 hover:to-indigo-700 text-white px-2 py-4 rounded-r-lg shadow-lg transition-all duration-200 hover:px-3 group"
-                    style={{ writingMode: 'vertical-rl', textOrientation: 'mixed' }}
+                    className="fixed left-0 z-40 bg-gradient-to-r from-purple-600 to-indigo-600 hover:from-purple-700 hover:to-indigo-700 text-white px-2 py-4 rounded-r-lg shadow-lg transition-all duration-200 hover:px-3 group"
+                    style={{ writingMode: 'vertical-rl', textOrientation: 'mixed', top: 'calc(50% + 60px)' }}
                     title="Share feedback or report issues"
                 >
                     <span className="flex items-center gap-2 text-sm font-medium">
