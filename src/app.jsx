@@ -18786,17 +18786,7 @@ const App = () => {
             
             
             {/* Welcome Guide Modal - Shows once to brand new users on first login */}
-            {(() => {
-                const shouldShow = authToken && !hasSeenProfileSetupGuide && !tutorialLoading && userProfile;
-                console.log('[WelcomeGuideModal Debug]', {
-                    authToken: !!authToken,
-                    hasSeenProfileSetupGuide,
-                    tutorialLoading,
-                    userProfile: !!userProfile,
-                    shouldShow
-                });
-                return shouldShow;
-            })() && (
+            {authToken && !hasSeenProfileSetupGuide && !tutorialLoading && userProfile && (
                 <WelcomeGuideModal 
                     onClose={dismissProfileSetupGuide}
                 />
