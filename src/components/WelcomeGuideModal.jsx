@@ -90,7 +90,7 @@ const WelcomeGuideModal = ({ onClose }) => {
                                 <h3 className="font-semibold text-gray-800 mb-1">Breeder Registry</h3>
                                 <p className="text-sm text-gray-600">
                                     In your profile settings, you can select which <strong>Species you breed</strong> and your 
-                                    breeding status (Breeder, Hobbyist, or Retired). This will add you to the public Breeder Directory, 
+                                    breeding status (Owner, Active Breeder, or Retired Breeder). This will add you to the public Breeder Directory, 
                                     making it easier for others to find you.
                                 </p>
                             </div>
