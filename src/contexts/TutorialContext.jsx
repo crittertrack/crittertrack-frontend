@@ -25,6 +25,7 @@ export const TutorialProvider = ({ children, userId, authToken, API_BASE_URL }) 
   const [hasCompletedOnboarding, setHasCompletedOnboarding] = useState(false);
   const [hasCompletedAdvancedFeatures, setHasCompletedAdvancedFeatures] = useState(false);
   const [hasSeenWelcomeBanner, setHasSeenWelcomeBanner] = useState(false);
+  const [hasSeenProfileSetupGuide, setHasSeenProfileSetupGuide] = useState(false);
 
   // Load tutorial state from backend when user logs in
   useEffect(() => {
@@ -48,6 +49,7 @@ export const TutorialProvider = ({ children, userId, authToken, API_BASE_URL }) 
         setHasCompletedOnboarding(response.data.hasCompletedOnboarding || false);
         setHasCompletedAdvancedFeatures(response.data.hasCompletedAdvancedFeatures || false);
         setHasSeenWelcomeBanner(response.data.hasSeenWelcomeBanner || false);
+        setHasSeenProfileSetupGuide(response.data.hasSeenProfileSetupGuide || false);
         
         // Also sync with localStorage for offline support
         const userStoragePrefix = `${userId}_`;
@@ -234,6 +236,25 @@ export const TutorialProvider = ({ children, userId, authToken, API_BASE_URL }) 
     }
   }, [authToken, API_BASE_URL]);
 
+  // Dismiss profile setup guide
+  const dismissProfileSetupGuide = useCallback(async () => {
+    if (authToken && API_BASE_URL) {
+      try {
+        await axios.post(`${API_BASE_URL}/users/dismiss-profile-setup-guide`, {}, {
+          headers: { Authorization: `Bearer ${authToken}` }
+        });
+        setHasSeenProfileSetupGuide(true);
+        console.log('Profile setup guide dismissed');
+      } catch (error) {
+        console.error('Failed to dismiss profile setup guide:', error);
+        // Still update local state even if backend fails
+        setHasSeenProfileSetupGuide(true);
+      }
+    } else {
+      setHasSeenProfileSetupGuide(true);
+    }
+  }, [authToken, API_BASE_URL]);
+
   const value = {
     // State
     hasSeenInitialTutorial,
@@ -243,12 +264,14 @@ export const TutorialProvider = ({ children, userId, authToken, API_BASE_URL }) 
     hasCompletedOnboarding,
     hasCompletedAdvancedFeatures,
     hasSeenWelcomeBanner,
+    hasSeenProfileSetupGuide,
 
     // Actions
     markInitialTutorialSeen,
     markTutorialCompleted,
     isTutorialCompleted,
     dismissWelcomeBanner,
+    dismissProfileSetupGuide,
     resetAllTutorials,
     restartTutorial,
     setCurrentTutorial,

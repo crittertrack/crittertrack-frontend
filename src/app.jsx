@@ -21,6 +21,7 @@ import { TUTORIAL_LESSONS } from './data/tutorialLessonsNew';
 import DatePicker from './components/DatePicker';
 import InfoTab from './components/InfoTab';
 import WelcomeBanner from './components/WelcomeBanner';
+import WelcomeGuideModal from './components/WelcomeGuideModal';
 import ReportButton from './components/ReportButton';
 import ModerationAuthModal from './components/moderation/ModerationAuthModal';
 import ModOversightPanel from './components/moderation/ModOversightPanel';
@@ -16710,7 +16711,7 @@ const App = () => {
     }, [API_BASE_URL, setUserCount]);
     
     // Tutorial context hook
-    const { hasSeenInitialTutorial, markInitialTutorialSeen, hasCompletedOnboarding, isLoading: tutorialLoading, markTutorialCompleted, completedTutorials, isTutorialCompleted, hasSeenWelcomeBanner, dismissWelcomeBanner } = useTutorial(); 
+    const { hasSeenInitialTutorial, markInitialTutorialSeen, hasCompletedOnboarding, isLoading: tutorialLoading, markTutorialCompleted, completedTutorials, isTutorialCompleted, hasSeenWelcomeBanner, dismissWelcomeBanner, hasSeenProfileSetupGuide, dismissProfileSetupGuide } = useTutorial(); 
     const [animalToEdit, setAnimalToEdit] = useState(null);
     const [speciesToAdd, setSpeciesToAdd] = useState(null); 
     const [speciesOptions, setSpeciesOptions] = useState([]); 
@@ -17412,12 +17413,9 @@ const App = () => {
         return () => clearInterval(statusPollInterval);
     }, [authToken, API_BASE_URL, handleLogout, showModalMessage]);
 
-    useEffect(() => {
-        if (authToken && !hasCompletedOnboarding && !tutorialLoading && userProfile) {
-            // Show the initial welcome tutorial
-            // This will automatically trigger the InitialTutorialModal through the tutorial context
-        }
-    }, [authToken, hasCompletedOnboarding, tutorialLoading, userProfile]);
+    // Note: Onboarding tutorial is no longer auto-triggered for new users
+    // Instead, users see a one-time WelcomeGuideModal that explains profile setup
+    // Tutorials are available manually via the Help button (?) in the header
 
     // Auto-advance tutorial when view changes (indicating step completion)
     useEffect(() => {
@@ -18787,6 +18785,13 @@ const App = () => {
             )}
             
             
+            {/* Welcome Guide Modal - Shows once to brand new users on first login */}
+            {authToken && !hasSeenProfileSetupGuide && !tutorialLoading && userProfile && (
+                <WelcomeGuideModal 
+                    onClose={dismissProfileSetupGuide}
+                />
+            )}
+
             {/* Welcome Banner - Shows once to new users within first month */}
             {authToken && !hasSeenWelcomeBanner && !tutorialLoading && userProfile && (() => {
                 // Check if account is less than 30 days old
