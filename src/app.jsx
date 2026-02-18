@@ -19389,18 +19389,18 @@ const App = () => {
                 />
             )}
 
-            {/* Profile Card and Community Activity - shown only on list view */}
+            {/* Profile Card and Community Feed - shown only on list view */}
             {currentView === 'list' && (
                 <div className="w-full max-w-5xl mb-6 flex flex-col sm:flex-row gap-4">
                     {/* Profile Card - Hidden on mobile */}
                     {currentView !== 'profile' && userProfile && <div className="hidden sm:block"><UserProfileCard userProfile={userProfile} /></div>}
                     
-                    {/* Community Activity Banner */}
+                    {/* Community Feed Banner */}
                     {(newestUsers.length > 0 || activeUsers.length > 0) && (
                         <div className="flex-1 min-w-0 bg-gradient-to-r from-primary/20 to-accent/20 p-3 rounded-lg border border-primary/30" data-tutorial-target="community-activity">
                             <h3 className="text-xs font-semibold text-gray-800 mb-2 flex items-center justify-center">
                                 <Users size={14} className="mr-2 text-primary-dark" />
-                                Community Activity
+                                Community Feed
                             </h3>
                             <div 
                                 ref={scrollContainerRef}
