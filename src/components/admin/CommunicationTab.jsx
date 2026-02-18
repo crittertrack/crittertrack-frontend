@@ -133,6 +133,34 @@ export default function CommunicationTab({ API_BASE_URL, authToken }) {
         }
     };
 
+    const handleDeleteBroadcast = async (broadcastId) => {
+        if (!window.confirm('Are you sure you want to delete this broadcast from history? This will also remove it from all users\' notifications. This action cannot be undone.')) {
+            return;
+        }
+
+        try {
+            const response = await fetch(`${API_BASE_URL}/moderation/broadcasts/${broadcastId}`, {
+                method: 'DELETE',
+                headers: {
+                    'Authorization': `Bearer ${authToken}`
+                }
+            });
+
+            const data = await response.json();
+
+            if (!response.ok) {
+                throw new Error(data.error || 'Failed to delete broadcast');
+            }
+
+            const notificationCount = data.deletedNotificationsCount || 0;
+            setSuccess(`Broadcast deleted successfully. Removed from ${notificationCount} user notification(s).`);
+            // Refresh the list
+            fetchBroadcastHistory();
+        } catch (err) {
+            setError(err.message);
+        }
+    };
+
     const fetchPollResults = async () => {
         setLoading(true);
         setError('');
@@ -773,9 +801,30 @@ export default function CommunicationTab({ API_BASE_URL, authToken }) {
                                 <div key={idx} className="broadcast-card">
                                     <div className="broadcast-header">
                                         <strong>{broadcast.details?.title || 'Broadcast'}</strong>
-                                        <span className="broadcast-date">
-                                            {new Date(broadcast.createdAt).toLocaleString('en-GB')}
-                                        </span>
+                                        <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                                            <span className="broadcast-date">
+                                                {new Date(broadcast.createdAt).toLocaleString('en-GB')}
+                                            </span>
+                                            <button 
+                                                onClick={() => handleDeleteBroadcast(broadcast._id)}
+                                                className="delete-broadcast-btn"
+                                                title="Delete broadcast"
+                                                style={{
+                                                    background: '#ef4444',
+                                                    color: 'white',
+                                                    border: 'none',
+                                                    borderRadius: '4px',
+                                                    padding: '4px 8px',
+                                                    cursor: 'pointer',
+                                                    fontSize: '12px',
+                                                    fontWeight: '500'
+                                                }}
+                                                onMouseOver={(e) => e.target.style.background = '#dc2626'}
+                                                onMouseOut={(e) => e.target.style.background = '#ef4444'}
+                                            >
+                                                🗑️ Delete
+                                            </button>
+                                        </div>
                                     </div>
                                     <div className="broadcast-meta">
                                         <span>By: {broadcast.moderatorEmail}</span>
