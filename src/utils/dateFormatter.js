@@ -1,6 +1,6 @@
 /**
  * Date formatting utility for consistent date display across the application
- * Format: DD/MM/YYYY
+ * Uses browser's locale for formatting
  */
 
 export const formatDate = (date) => {
@@ -9,11 +9,11 @@ export const formatDate = (date) => {
     const d = new Date(date);
     if (isNaN(d.getTime())) return '';
     
-    const day = String(d.getDate()).padStart(2, '0');
-    const month = String(d.getMonth() + 1).padStart(2, '0');
-    const year = d.getFullYear();
-    
-    return `${day}/${month}/${year}`;
+    return new Intl.DateTimeFormat(undefined, {
+        year: 'numeric',
+        month: '2-digit',
+        day: '2-digit'
+    }).format(d);
 };
 
 export const formatDateShort = (date) => {
@@ -22,7 +22,9 @@ export const formatDateShort = (date) => {
     const d = new Date(date);
     if (isNaN(d.getTime())) return '';
     
-    const months = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
-    
-    return `${d.getDate()} ${months[d.getMonth()]} ${d.getFullYear()}`;
+    return new Intl.DateTimeFormat(undefined, {
+        year: 'numeric',
+        month: 'short',
+        day: 'numeric'
+    }).format(d);
 };

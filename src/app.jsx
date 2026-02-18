@@ -1673,8 +1673,8 @@ const UserSearchModal = ({ onClose, showModalMessage, onSelectUser, API_BASE_URL
 
     const UserResultCard = ({ user }) => {
         const memberSince = user.createdAt 
-            ? new Intl.DateTimeFormat('en-GB', { year: 'numeric', month: 'long', day: 'numeric' }).format(new Date(user.createdAt))
-            : (user.updatedAt ? new Intl.DateTimeFormat('en-GB', { year: 'numeric', month: 'long', day: 'numeric' }).format(new Date(user.updatedAt)) : null);
+            ? new Intl.DateTimeFormat(undefined, { year: 'numeric', month: 'long', day: 'numeric' }).format(new Date(user.createdAt))
+            : (user.updatedAt ? new Intl.DateTimeFormat(undefined, { year: 'numeric', month: 'long', day: 'numeric' }).format(new Date(user.updatedAt)) : null);
         
         // Determine display name(s) - respect privacy settings
         const showPersonalName = user.showPersonalName ?? false;
@@ -1920,8 +1920,8 @@ const PublicProfileView = ({ profile, onBack, onViewAnimal, API_BASE_URL, onStar
     }, [profile, API_BASE_URL]);
 
     const memberSince = (freshProfile?.createdAt || profile.createdAt)
-        ? new Intl.DateTimeFormat('en-GB', { year: 'numeric', month: 'long', day: 'numeric' }).format(new Date(freshProfile?.createdAt || profile.createdAt))
-        : ((freshProfile?.updatedAt || profile.updatedAt) ? new Intl.DateTimeFormat('en-GB', { year: 'numeric', month: 'long', day: 'numeric' }).format(new Date(freshProfile?.updatedAt || profile.updatedAt)) : 'Unknown');
+        ? new Intl.DateTimeFormat(undefined, { year: 'numeric', month: 'long', day: 'numeric' }).format(new Date(freshProfile?.createdAt || profile.createdAt))
+        : ((freshProfile?.updatedAt || profile.updatedAt) ? new Intl.DateTimeFormat(undefined, { year: 'numeric', month: 'long', day: 'numeric' }).format(new Date(freshProfile?.updatedAt || profile.updatedAt)) : 'Unknown');
 
     // Determine display name(s) - respect privacy settings
     const showPersonalName = (freshProfile?.showPersonalName ?? profile.showPersonalName ?? false);
