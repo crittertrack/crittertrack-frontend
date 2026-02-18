@@ -33,6 +33,9 @@ import AnimalTree from './components/AnimalTree';
 // const API_BASE_URL = 'https://crittertrack-pedigree-production.up.railway.app/api'; // Direct Railway (for testing)
 const API_BASE_URL = '/api'; // Production via Vercel proxy - v2
 
+// App version for cache invalidation - increment to force cache clear
+const APP_VERSION = '7.0.0';
+
 const GENDER_OPTIONS = ['Male', 'Female', 'Intersex', 'Unknown'];
 const STATUS_OPTIONS = ['Pet', 'Breeder', 'Available', 'Booked', 'Sold', 'Retired', 'Deceased', 'Rehomed', 'Unknown']; 
 
@@ -14496,6 +14499,33 @@ const AnimalList = ({ authToken, showModalMessage, onEditAnimal, onViewAnimal, f
     const handleFilterNursing = () => { setStatusFilterNursing(prev => !prev); setStatusFilterPregnant(false); setStatusFilterMating(false); };
     const handleFilterMating = () => { setStatusFilterMating(prev => !prev); setStatusFilterPregnant(false); setStatusFilterNursing(false); };
     
+    // Check if any filters are active (different from defaults)
+    const hasActiveFilters = (
+        statusFilter !== '' ||
+        appliedNameFilter !== '' ||
+        searchInput !== '' ||
+        selectedGenders.length !== 4 ||
+        selectedSpecies.length !== speciesNames.length ||
+        statusFilterPregnant ||
+        statusFilterNursing ||
+        statusFilterMating ||
+        !ownedFilterActive ||
+        publicFilter !== ''
+    );
+    
+    const handleClearFilters = () => {
+        setStatusFilter('');
+        setSearchInput('');
+        setAppliedNameFilter('');
+        setSelectedGenders(['Male', 'Female', 'Intersex', 'Unknown']);
+        setSelectedSpecies([...speciesNames]);
+        setStatusFilterPregnant(false);
+        setStatusFilterNursing(false);
+        setStatusFilterMating(false);
+        setOwnedFilterActive(true);
+        setPublicFilter('');
+    };
+    
     const handleRefresh = async () => {
         try {
             setLoading(true);
@@ -14916,11 +14946,26 @@ const AnimalList = ({ authToken, showModalMessage, onEditAnimal, onViewAnimal, f
     return (
         <div className="w-full max-w-5xl bg-white p-6 rounded-xl shadow-lg">
             <h2 className="text-2xl sm:text-3xl font-bold text-gray-800 mb-6 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3">
-                <div className='flex items-center'>
+                <div className='flex items-center gap-2'>
                     <ClipboardList size={20} className="sm:w-6 sm:h-6 mr-2 sm:mr-3 text-primary-dark" />
                     My Animals ({animals.length})
+                    {hasActiveFilters && (
+                        <span className="bg-pink-500 text-white text-xs font-semibold px-2 py-1 rounded-full">
+                            Filtered
+                        </span>
+                    )}
                 </div>
                 <div className="flex items-center gap-1 sm:gap-2 flex-wrap" data-tutorial-target="bulk-privacy-controls">
+                    {hasActiveFilters && (
+                        <button
+                            onClick={handleClearFilters}
+                            className="text-gray-600 hover:text-gray-800 transition flex items-center gap-0.5 sm:gap-1 px-2 sm:px-3 py-1 sm:py-1.5 rounded-lg hover:bg-gray-100 text-xs sm:text-sm"
+                            title="Clear All Filters"
+                        >
+                            <X size={14} className="sm:w-4 sm:h-4" />
+                            <span className="font-medium">Clear Filters</span>
+                        </button>
+                    )}
                     <button
                         onClick={() => toggleAllAnimalsPrivacy(true)}
                         className="text-green-600 hover:text-green-700 transition flex items-center gap-0.5 sm:gap-1 px-2 sm:px-3 py-1 sm:py-1.5 rounded-lg hover:bg-green-50 text-xs sm:text-sm"
@@ -16588,6 +16633,37 @@ const App = () => {
         const handleResize = () => setIsMobile(window.innerWidth < 768);
         window.addEventListener('resize', handleResize);
         return () => window.removeEventListener('resize', handleResize);
+    }, []);
+    
+    // Version check - clear localStorage cache if version changed
+    React.useEffect(() => {
+        const storedVersion = localStorage.getItem('appVersion');
+        if (storedVersion !== APP_VERSION) {
+            console.log(`[Cache Clear] App version changed from ${storedVersion} to ${APP_VERSION}`);
+            
+            // Clear all filter-related localStorage items
+            const filterKeys = [
+                'animalList_statusFilter',
+                'animalList_searchInput',
+                'animalList_appliedNameFilter',
+                'animalList_selectedGenders',
+                'animalList_selectedSpecies',
+                'animalList_statusFilterPregnant',
+                'animalList_statusFilterNursing',
+                'animalList_statusFilterMating',
+                'animalList_ownedFilterActive',
+                'animalList_publicFilter'
+            ];
+            
+            filterKeys.forEach(key => {
+                localStorage.removeItem(key);
+                console.log(`[Cache Clear] Removed ${key}`);
+            });
+            
+            // Update stored version
+            localStorage.setItem('appVersion', APP_VERSION);
+            console.log('[Cache Clear] Cache cleared successfully');
+        }
     }, []);
     
     // Fetch and display user count on login/register screen
