@@ -47,7 +47,7 @@ const WelcomeGuideModal = ({ onClose }) => {
                                 <h3 className="font-semibold text-gray-800 text-sm mb-1">Country Location</h3>
                                 <p className="text-xs text-gray-600 leading-relaxed">
                                     Setting your <strong>Country</strong> helps buyers find local breeders! When you list animals for sale or stud services, users can filter the marketplace by country. 
-                                    This filter also exists for the Breeders Registry.
+                                    This filter also exists for the <strong>Breeders</strong> Registry.
                                 </p>
                             </div>
                         </div>
@@ -77,7 +77,7 @@ const WelcomeGuideModal = ({ onClose }) => {
                                 <h3 className="font-semibold text-gray-800 text-sm mb-1">Breeders Registry</h3>
                                 <p className="text-xs text-gray-600 leading-relaxed">
                                     In profile settings, select your breeding status (Owner, Active Breeder, or Retired Breeder) 
-                                    for any <strong>species you have animals for</strong> on the site. This adds you to the public <strong>Breeders Registry</strong>.
+                                    for any <strong>species you have animals for</strong> on the site. This adds you to the public <strong>Breeders</strong> Registry.
                                 </p>
                             </div>
                         </div>
