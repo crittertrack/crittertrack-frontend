@@ -25,6 +25,7 @@ export const TutorialProvider = ({ children, userId, authToken, API_BASE_URL }) 
   const [hasCompletedOnboarding, setHasCompletedOnboarding] = useState(false);
   const [hasCompletedAdvancedFeatures, setHasCompletedAdvancedFeatures] = useState(false);
   const [hasSeenWelcomeBanner, setHasSeenWelcomeBanner] = useState(false);
+  const [hasSeenProfileSetupGuide, setHasSeenProfileSetupGuide] = useState(false);
 
   // Load tutorial state from backend when user logs in
   useEffect(() => {
@@ -42,19 +43,24 @@ export const TutorialProvider = ({ children, userId, authToken, API_BASE_URL }) 
           headers: { Authorization: `Bearer ${authToken}` }
         });
         
-        console.log('Tutorial progress loaded from backend:', response.data);
+        console.log('[TUTORIAL CONTEXT] Tutorial progress loaded from backend:', response.data);
+        console.log('[TUTORIAL CONTEXT] hasSeenProfileSetupGuide value:', response.data.hasSeenProfileSetupGuide);
         
         setCompletedTutorials(response.data.completedTutorials || []);
         setHasCompletedOnboarding(response.data.hasCompletedOnboarding || false);
         setHasCompletedAdvancedFeatures(response.data.hasCompletedAdvancedFeatures || false);
         setHasSeenWelcomeBanner(response.data.hasSeenWelcomeBanner || false);
+        setHasSeenProfileSetupGuide(response.data.hasSeenProfileSetupGuide || false);
+        
+        console.log('[TUTORIAL CONTEXT] State set - hasSeenProfileSetupGuide:', response.data.hasSeenProfileSetupGuide);
         
         // Also sync with localStorage for offline support
         const userStoragePrefix = `${userId}_`;
         localStorage.setItem(userStoragePrefix + STORAGE_KEYS.COMPLETED_TUTORIALS, JSON.stringify(response.data.completedTutorials || []));
         localStorage.setItem(userStoragePrefix + STORAGE_KEYS.HAS_SEEN_TUTORIAL, JSON.stringify(response.data.hasCompletedOnboarding || false));
+        localStorage.setItem(userStoragePrefix + 'hasSeenProfileSetupGuide', JSON.stringify(response.data.hasSeenProfileSetupGuide || false));
         
-        console.log('Tutorial state synced to localStorage for user:', userId);
+        console.log('[TUTORIAL CONTEXT] Tutorial state synced to localStorage for user:', userId);
       } catch (error) {
         console.error('Failed to load tutorial progress from backend:', error);
         
@@ -63,6 +69,7 @@ export const TutorialProvider = ({ children, userId, authToken, API_BASE_URL }) 
         try {
           const savedCompletedTutorials = localStorage.getItem(userStoragePrefix + STORAGE_KEYS.COMPLETED_TUTORIALS);
           const savedHasSeenTutorial = localStorage.getItem(userStoragePrefix + STORAGE_KEYS.HAS_SEEN_TUTORIAL);
+          const savedHasSeenProfileSetupGuide = localStorage.getItem(userStoragePrefix + 'hasSeenProfileSetupGuide');
           
           if (savedCompletedTutorials) {
             const tutorials = JSON.parse(savedCompletedTutorials);
@@ -74,6 +81,12 @@ export const TutorialProvider = ({ children, userId, authToken, API_BASE_URL }) 
             const hasCompleted = JSON.parse(savedHasSeenTutorial);
             setHasSeenInitialTutorial(hasCompleted);
             setHasCompletedOnboarding(hasCompleted);
+          }
+          
+          if (savedHasSeenProfileSetupGuide !== null) {
+            const hasSeen = JSON.parse(savedHasSeenProfileSetupGuide);
+            setHasSeenProfileSetupGuide(hasSeen);
+            console.log('Profile setup guide status loaded from localStorage:', hasSeen);
           }
         } catch (err) {
           console.error('Failed to load tutorial state from localStorage:', err);
@@ -234,6 +247,44 @@ export const TutorialProvider = ({ children, userId, authToken, API_BASE_URL }) 
     }
   }, [authToken, API_BASE_URL]);
 
+  // Dismiss profile setup guide
+  const dismissProfileSetupGuide = useCallback(async () => {
+    if (authToken && API_BASE_URL) {
+      try {
+        await axios.post(`${API_BASE_URL}/users/dismiss-profile-setup-guide`, {}, {
+          headers: { Authorization: `Bearer ${authToken}` }
+        });
+        setHasSeenProfileSetupGuide(true);
+        
+        // Also save to localStorage as backup
+        if (userId) {
+          const userStoragePrefix = `${userId}_`;
+          localStorage.setItem(userStoragePrefix + 'hasSeenProfileSetupGuide', JSON.stringify(true));
+        }
+        
+        console.log('Profile setup guide dismissed and saved to backend and localStorage');
+      } catch (error) {
+        console.error('Failed to dismiss profile setup guide:', error);
+        // Still update local state even if backend fails
+        setHasSeenProfileSetupGuide(true);
+        
+        // Save to localStorage as fallback
+        if (userId) {
+          const userStoragePrefix = `${userId}_`;
+          localStorage.setItem(userStoragePrefix + 'hasSeenProfileSetupGuide', JSON.stringify(true));
+        }
+      }
+    } else {
+      setHasSeenProfileSetupGuide(true);
+      
+      // Save to localStorage
+      if (userId) {
+        const userStoragePrefix = `${userId}_`;
+        localStorage.setItem(userStoragePrefix + 'hasSeenProfileSetupGuide', JSON.stringify(true));
+      }
+    }
+  }, [authToken, API_BASE_URL, userId]);
+
   const value = {
     // State
     hasSeenInitialTutorial,
@@ -243,12 +294,14 @@ export const TutorialProvider = ({ children, userId, authToken, API_BASE_URL }) 
     hasCompletedOnboarding,
     hasCompletedAdvancedFeatures,
     hasSeenWelcomeBanner,
+    hasSeenProfileSetupGuide,
 
     // Actions
     markInitialTutorialSeen,
     markTutorialCompleted,
     isTutorialCompleted,
     dismissWelcomeBanner,
+    dismissProfileSetupGuide,
     resetAllTutorials,
     restartTutorial,
     setCurrentTutorial,

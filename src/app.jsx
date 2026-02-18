@@ -21,6 +21,7 @@ import { TUTORIAL_LESSONS } from './data/tutorialLessonsNew';
 import DatePicker from './components/DatePicker';
 import InfoTab from './components/InfoTab';
 import WelcomeBanner from './components/WelcomeBanner';
+import WelcomeGuideModal from './components/WelcomeGuideModal';
 import ReportButton from './components/ReportButton';
 import ModerationAuthModal from './components/moderation/ModerationAuthModal';
 import ModOversightPanel from './components/moderation/ModOversightPanel';
@@ -1182,7 +1183,7 @@ const BreederDirectorySettings = ({ authToken, API_BASE_URL, showModalMessage, u
             <div className="mb-8 p-4 sm:p-6 border rounded-lg bg-gray-50 overflow-x-hidden">
                 <h3 className="text-xl font-semibold text-gray-800 border-b pb-2 mb-4">Species & Breeding Status</h3>
                 <p className="text-sm text-gray-600">
-                    Add some animals to your collection to manage your breeding status and appear in the Breeders directory.
+                    Add some animals to your collection to manage your breeding status and appear in the Breeders Registry.
                 </p>
             </div>
         );
@@ -1192,7 +1193,7 @@ const BreederDirectorySettings = ({ authToken, API_BASE_URL, showModalMessage, u
         <div className="mb-8 p-4 sm:p-6 border rounded-lg bg-gray-50 overflow-x-hidden" data-tutorial-target="breeding-status-section">
             <h3 className="text-xl font-semibold text-gray-800 border-b pb-2 mb-4">Species & Breeding Status</h3>
             <p className="text-sm text-gray-600 mb-1">
-                Set your breeding status for each species. Marking yourself as an <strong>Active Breeder</strong> or <strong>Retired Breeder</strong> will make you visible in the Breeders directory.
+                Set your breeding status for each species. Marking yourself as an <strong>Active Breeder</strong> or <strong>Retired Breeder</strong> will make you visible in the Breeders Registry.
             </p>
             <p className="text-xs text-gray-500 mb-4">
                 Note: Species marked as Active or Retired will remain in your list even if you have no animals of that species.
@@ -12931,7 +12932,7 @@ const BreederDirectory = ({ authToken, API_BASE_URL, onBack }) => {
                         </button>
                         <h1 className="text-xl font-bold text-gray-800 flex items-center gap-2">
                             <Star size={24} className="text-primary" />
-                            Breeder Directory
+                            Breeders Registry
                         </h1>
                     </div>
 
@@ -16710,7 +16711,7 @@ const App = () => {
     }, [API_BASE_URL, setUserCount]);
     
     // Tutorial context hook
-    const { hasSeenInitialTutorial, markInitialTutorialSeen, hasCompletedOnboarding, isLoading: tutorialLoading, markTutorialCompleted, completedTutorials, isTutorialCompleted, hasSeenWelcomeBanner, dismissWelcomeBanner } = useTutorial(); 
+    const { hasSeenInitialTutorial, markInitialTutorialSeen, hasCompletedOnboarding, isLoading: tutorialLoading, markTutorialCompleted, completedTutorials, isTutorialCompleted, hasSeenWelcomeBanner, dismissWelcomeBanner, hasSeenProfileSetupGuide, dismissProfileSetupGuide } = useTutorial(); 
     const [animalToEdit, setAnimalToEdit] = useState(null);
     const [speciesToAdd, setSpeciesToAdd] = useState(null); 
     const [speciesOptions, setSpeciesOptions] = useState([]); 
@@ -16826,6 +16827,14 @@ const App = () => {
     const [bugReportCategory, setBugReportCategory] = useState('Bug');
     const [bugReportDescription, setBugReportDescription] = useState('');
     const [bugReportSubmitting, setBugReportSubmitting] = useState(false);
+    
+    const [showFeedbackModal, setShowFeedbackModal] = useState(false);
+    const [feedbackSpecies, setFeedbackSpecies] = useState('');
+    const [feedbackText, setFeedbackText] = useState('');
+    const [feedbackSubmitting, setFeedbackSubmitting] = useState(false);
+    
+    const [showWelcomeGuide, setShowWelcomeGuide] = useState(false);
+    const [hasSeenWelcomeGuide, setHasSeenWelcomeGuide] = useState(false);
     
     const [hasSeenDonationHighlight, setHasSeenDonationHighlight] = useState(() => {
         return localStorage.getItem('hasSeenDonationHighlight') === 'true';
@@ -17412,12 +17421,9 @@ const App = () => {
         return () => clearInterval(statusPollInterval);
     }, [authToken, API_BASE_URL, handleLogout, showModalMessage]);
 
-    useEffect(() => {
-        if (authToken && !hasCompletedOnboarding && !tutorialLoading && userProfile) {
-            // Show the initial welcome tutorial
-            // This will automatically trigger the InitialTutorialModal through the tutorial context
-        }
-    }, [authToken, hasCompletedOnboarding, tutorialLoading, userProfile]);
+    // Note: Onboarding tutorial is no longer auto-triggered for new users
+    // Instead, users see a one-time WelcomeGuideModal that explains profile setup
+    // Tutorials are available manually via the Help button (?) in the header
 
     // Auto-advance tutorial when view changes (indicating step completion)
     useEffect(() => {
@@ -17652,6 +17658,32 @@ const App = () => {
                 });
         }
     }, [authToken, userProfile, showModalMessage]);
+
+    // Check if user has seen welcome guide
+    useEffect(() => {
+        const checkWelcomeGuide = async () => {
+            if (!authToken || !userProfile) return;
+            
+            try {
+                const response = await axios.get(`${API_BASE_URL}/users/tutorial-progress`, {
+                    headers: { Authorization: `Bearer ${authToken}` }
+                });
+                
+                const hasSeen = response.data.hasSeenProfileSetupGuide || false;
+                console.log('[WELCOME GUIDE] Loaded from database:', hasSeen);
+                setHasSeenWelcomeGuide(hasSeen);
+                
+                // Show modal if they haven't seen it
+                if (!hasSeen) {
+                    setShowWelcomeGuide(true);
+                }
+            } catch (error) {
+                console.error('[WELCOME GUIDE] Failed to load status:', error);
+            }
+        };
+        
+        checkWelcomeGuide();
+    }, [authToken, userProfile, API_BASE_URL]);
 
     // Fetch animals for genetics calculator when needed
     useEffect(() => {
@@ -17994,6 +18026,63 @@ const App = () => {
         }
     };
     
+    const handleSubmitFeedback = async (e) => {
+        e.preventDefault();
+        if (!feedbackSpecies || !feedbackText.trim()) return;
+        
+        setFeedbackSubmitting(true);
+        try {
+            await axios.post(
+                `${API_BASE_URL}/feedback/species`,
+                {
+                    species: feedbackSpecies,
+                    feedback: feedbackText.trim(),
+                    type: 'species-customization'
+                },
+                { headers: { Authorization: `Bearer ${authToken}` } }
+            );
+            
+            showModalMessage('Feedback Sent', 'Thank you! Your feedback will help us improve species customization.');
+            setShowFeedbackModal(false);
+            setFeedbackSpecies('');
+            setFeedbackText('');
+        } catch (error) {
+            console.error('Failed to submit feedback:', error);
+            showModalMessage('Error', 'Failed to submit feedback. Please try again.');
+        } finally {
+            setFeedbackSubmitting(false);
+        }
+    };
+    
+    const handleDismissWelcomeGuide = async () => {
+        try {
+            console.log('[WELCOME GUIDE] Dismissing...');
+            
+            // Save to database
+            await axios.post(
+                `${API_BASE_URL}/users/dismiss-profile-setup-guide`,
+                {},
+                { headers: { Authorization: `Bearer ${authToken}` } }
+            );
+            
+            console.log('[WELCOME GUIDE] Saved to database');
+            
+            // Update state
+            setHasSeenWelcomeGuide(true);
+            setShowWelcomeGuide(false);
+            
+            // Save to localStorage as backup
+            if (userProfile?._id) {
+                localStorage.setItem(`${userProfile._id}_hasSeenWelcomeGuide`, 'true');
+                console.log('[WELCOME GUIDE] Saved to localStorage');
+            }
+        } catch (error) {
+            console.error('[WELCOME GUIDE] Failed to dismiss:', error);
+            // Still hide the modal even if save failed
+            setShowWelcomeGuide(false);
+        }
+    };
+
     const handleLoginSuccess = (token) => {
         setAuthToken(token);
         try {
@@ -18787,6 +18876,13 @@ const App = () => {
             )}
             
             
+            {/* Welcome Guide Modal - Shows once to brand new users on first login */}
+            {showWelcomeGuide && (
+                <WelcomeGuideModal 
+                    onClose={handleDismissWelcomeGuide}
+                />
+            )}
+
             {/* Welcome Banner - Shows once to new users within first month */}
             {authToken && !hasSeenWelcomeBanner && !tutorialLoading && userProfile && (() => {
                 // Check if account is less than 30 days old
@@ -19067,12 +19163,27 @@ const App = () => {
             {/* Urgent Broadcast Popup (warning/alert) */}
             <UrgentBroadcastPopup authToken={authToken} API_BASE_URL={API_BASE_URL} />
 
+            {/* Species Customization Request Button */}
+            {!inModeratorMode && (
+                <button
+                    onClick={() => setShowFeedbackModal(true)}
+                    className="fixed left-0 z-40 bg-gradient-to-r from-purple-500 to-indigo-500 hover:from-purple-600 hover:to-indigo-600 text-white px-2 py-4 rounded-r-lg shadow-lg transition-all duration-200 hover:px-3 group"
+                    style={{ writingMode: 'vertical-rl', textOrientation: 'mixed', top: 'calc(50% - 120px)' }}
+                    title="Request species field customization"
+                >
+                    <span className="flex items-center gap-2 text-sm font-medium">
+                        <Mail size={16} className="rotate-90" />
+                        <span>Species Customization</span>
+                    </span>
+                </button>
+            )}
+
             {/* Beta Feedback Button - Temporary prominent feedback access for beta users */}
             {!inModeratorMode && (
                 <button
                     onClick={() => setShowBugReportModal(true)}
-                    className="fixed left-0 top-1/2 -translate-y-1/2 z-40 bg-gradient-to-r from-purple-600 to-indigo-600 hover:from-purple-700 hover:to-indigo-700 text-white px-2 py-4 rounded-r-lg shadow-lg transition-all duration-200 hover:px-3 group"
-                    style={{ writingMode: 'vertical-rl', textOrientation: 'mixed' }}
+                    className="fixed left-0 z-40 bg-gradient-to-r from-purple-600 to-indigo-600 hover:from-purple-700 hover:to-indigo-700 text-white px-2 py-4 rounded-r-lg shadow-lg transition-all duration-200 hover:px-3 group"
+                    style={{ writingMode: 'vertical-rl', textOrientation: 'mixed', top: 'calc(50% + 120px)' }}
                     title="Share feedback or report issues"
                 >
                     <span className="flex items-center gap-2 text-sm font-medium">
@@ -19191,6 +19302,79 @@ const App = () => {
                                     ) : (
                                         'Submit Report'
                                     )}
+                                </button>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            )}
+
+            {/* Species Customization Feedback Modal */}
+            {showFeedbackModal && (
+                <div className="fixed inset-0 bg-gray-600 bg-opacity-75 flex items-center justify-center p-4 z-50">
+                    <div className="bg-white rounded-xl shadow-2xl p-6 w-full max-w-lg">
+                        <div className="flex justify-between items-center mb-2">
+                            <h3 className="text-xl font-bold text-gray-800">Request Species Customization</h3>
+                            <button 
+                                onClick={() => setShowFeedbackModal(false)}
+                                className="text-gray-500 hover:text-gray-700 transition"
+                            >
+                                <X size={24} />
+                            </button>
+                        </div>
+                        <p className="text-sm text-gray-600 mb-4">
+                            Let us know if a species needs different or additional fields (e.g., "Morph" instead of "Color/Coat" for snakes, or missing fields like "Pattern")
+                        </p>
+                        
+                        <form onSubmit={handleSubmitFeedback} className="space-y-4">
+                            <div>
+                                <label className="block text-sm font-medium text-gray-700 mb-1">Species</label>
+                                <select
+                                    value={feedbackSpecies}
+                                    onChange={(e) => setFeedbackSpecies(e.target.value)}
+                                    required
+                                    className="w-full p-2 border border-gray-300 rounded-lg"
+                                >
+                                    <option value="">Select a species...</option>
+                                    {speciesOptions.map(s => (
+                                        <option key={s._id || s.name} value={s.name}>{s.name}</option>
+                                    ))}
+                                </select>
+                            </div>
+                            
+                            <div>
+                                <label className="block text-sm font-medium text-gray-700 mb-1">
+                                    What fields need to be different or added?
+                                </label>
+                                <textarea
+                                    value={feedbackText}
+                                    onChange={(e) => setFeedbackText(e.target.value)}
+                                    required
+                                    rows={4}
+                                    placeholder='Example: For snakes, replace "Color" and "Coat" with "Morph", and add a "Pattern" field'
+                                    className="w-full p-2 border border-gray-300 rounded-lg"
+                                />
+                            </div>
+                            
+                            <div className="flex gap-3">
+                                <button
+                                    type="button"
+                                    onClick={() => {
+                                        setShowFeedbackModal(false);
+                                        setFeedbackSpecies('');
+                                        setFeedbackText('');
+                                    }}
+                                    className="flex-1 px-4 py-2 bg-gray-200 hover:bg-gray-300 text-gray-700 rounded-lg transition"
+                                >
+                                    Cancel
+                                </button>
+                                <button
+                                    type="submit"
+                                    disabled={feedbackSubmitting}
+                                    className="flex-1 px-4 py-2 bg-accent hover:bg-accent/80 text-white rounded-lg transition disabled:opacity-50 flex items-center justify-center"
+                                >
+                                    {feedbackSubmitting ? <Loader2 className="animate-spin mr-2" size={18} /> : <Mail size={18} className="mr-2" />}
+                                    {feedbackSubmitting ? 'Sending...' : 'Send Feedback'}
                                 </button>
                             </div>
                         </form>
@@ -19384,18 +19568,18 @@ const App = () => {
                 />
             )}
 
-            {/* Profile Card and Community Activity - shown only on list view */}
+            {/* Profile Card and Community Feed - shown only on list view */}
             {currentView === 'list' && (
                 <div className="w-full max-w-5xl mb-6 flex flex-col sm:flex-row gap-4">
                     {/* Profile Card - Hidden on mobile */}
                     {currentView !== 'profile' && userProfile && <div className="hidden sm:block"><UserProfileCard userProfile={userProfile} /></div>}
                     
-                    {/* Community Activity Banner */}
+                    {/* Community Feed Banner */}
                     {(newestUsers.length > 0 || activeUsers.length > 0) && (
                         <div className="flex-1 min-w-0 bg-gradient-to-r from-primary/20 to-accent/20 p-3 rounded-lg border border-primary/30" data-tutorial-target="community-activity">
                             <h3 className="text-xs font-semibold text-gray-800 mb-2 flex items-center justify-center">
                                 <Users size={14} className="mr-2 text-primary-dark" />
-                                Community Activity
+                                Community Feed
                             </h3>
                             <div 
                                 ref={scrollContainerRef}
