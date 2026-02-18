@@ -1,5 +1,5 @@
 import React from 'react';
-import { X, User, MapPin, Users, ShoppingBag, HelpCircle } from 'lucide-react';
+import { User, MapPin, Users, ShoppingBag, HelpCircle } from 'lucide-react';
 
 const WelcomeGuideModal = ({ onClose }) => {
     return (
@@ -7,18 +7,9 @@ const WelcomeGuideModal = ({ onClose }) => {
             <div className="bg-white rounded-lg shadow-xl max-w-2xl w-full max-h-[90vh] overflow-y-auto">
                 {/* Header */}
                 <div className="sticky top-0 bg-gradient-to-r from-accent to-primary text-white p-6 rounded-t-lg">
-                    <div className="flex justify-between items-start">
-                        <div>
-                            <h2 className="text-2xl font-bold mb-2">Welcome to CritterTrack! 🎉</h2>
-                            <p className="text-white/90">Let's get your profile set up for success</p>
-                        </div>
-                        <button
-                            onClick={onClose}
-                            className="text-white/90 hover:text-white transition p-1"
-                            aria-label="Close"
-                        >
-                            <X size={24} />
-                        </button>
+                    <div>
+                        <h2 className="text-2xl font-bold mb-2">Welcome to CritterTrack! 🎉</h2>
+                        <p className="text-white/90">Let's get your profile set up for success</p>
                     </div>
                 </div>
 
