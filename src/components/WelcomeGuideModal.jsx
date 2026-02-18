@@ -36,7 +36,9 @@ const WelcomeGuideModal = ({ onClose }) => {
                                 <p className="text-sm text-gray-600">
                                     Set your <strong>Breeder Name</strong> in your profile settings. You can choose to display 
                                     either your personal name or breeder name publicly. This is what other users will see when 
-                                    viewing your animals or in the community.
+                                    viewing your animals or in the community. <strong>Note:</strong> You'll only be visible if you 
+                                    have either of these names set to public. Completely anonymous accounts will not show up anywhere, 
+                                    nor will their animals.
                                 </p>
                             </div>
                         </div>
