@@ -408,27 +408,27 @@ const PedigreeChart = ({ animalId, animalData, onClose, API_BASE_URL, authToken 
             pedigreeRef.current.style.aspectRatio = 'unset';
             pedigreeRef.current.style.minHeight = 'unset';
 
-            // Hide all images before PDF generation
-            const imageContainers = pedigreeRef.current.querySelectorAll('.hide-for-pdf');
-            imageContainers.forEach(el => el.style.display = 'none');
+            // Wait a moment for layout to stabilize
+            await new Promise(resolve => setTimeout(resolve, 100));
 
             const canvas = await html2canvas(pedigreeRef.current, {
-                scale: 3,
+                scale: 2,
                 backgroundColor: '#ffffff',
                 logging: false,
                 useCORS: true,
                 allowTaint: true,
                 letterRendering: true,
                 windowWidth: 1123,
-                windowHeight: 794
+                windowHeight: 794,
+                imageTimeout: 0,
+                removeContainer: true
             });
 
-            // Restore original styles and elements
+            // Restore original styles
             pedigreeRef.current.style.width = originalWidth;
             pedigreeRef.current.style.height = originalHeight;
             pedigreeRef.current.style.aspectRatio = originalAspectRatio;
             pedigreeRef.current.style.minHeight = originalMinHeight;
-            imageContainers.forEach(el => el.style.display = '');
 
             const imgData = canvas.toDataURL('image/png');
             const pdf = new jsPDF({
@@ -627,9 +627,9 @@ const PedigreeChart = ({ animalId, animalData, onClose, API_BASE_URL, authToken 
         if (!animal) {
             return (
                 <div className={`border ${getBorderColor(null)} rounded p-1.5 ${bgColor} flex gap-1.5 h-full items-center relative`}>
-                    {/* Image placeholder - 1/3 width */}
-                    <div className="hide-for-pdf w-1/3 aspect-square bg-gray-100 rounded-lg border-2 border-gray-900 overflow-hidden flex items-center justify-center flex-shrink-0">
-                        <Cat size={20} className="text-gray-400" />
+                    {/* Image placeholder - 1/4 width */}
+                    <div className="hide-for-pdf w-1/4 aspect-square bg-gray-100 rounded-lg border-2 border-gray-900 overflow-hidden flex items-center justify-center flex-shrink-0">
+                        <Cat size={18} className="text-gray-400" />
                     </div>
                     {/* Text */}
                     <div className="flex-1 flex items-center justify-start">
@@ -645,9 +645,9 @@ const PedigreeChart = ({ animalId, animalData, onClose, API_BASE_URL, authToken 
         if (animal.isHidden) {
             return (
                 <div className={`border ${getBorderColor(animal)} rounded p-1.5 ${bgColor} flex gap-1.5 h-full items-center relative`}>
-                    {/* Icon placeholder - 1/3 width */}
-                    <div className="hide-for-pdf w-1/3 aspect-square bg-gray-100 rounded-lg border-2 border-gray-900 overflow-hidden flex items-center justify-center flex-shrink-0">
-                        <EyeOff size={20} className="text-gray-500" />
+                    {/* Icon placeholder - 1/4 width */}
+                    <div className="hide-for-pdf w-1/4 aspect-square bg-gray-100 rounded-lg border-2 border-gray-900 overflow-hidden flex items-center justify-center flex-shrink-0">
+                        <EyeOff size={18} className="text-gray-500" />
                     </div>
                     {/* Text */}
                     <div className="flex-1 flex items-center justify-start">
@@ -668,10 +668,10 @@ const PedigreeChart = ({ animalId, animalData, onClose, API_BASE_URL, authToken 
                 className={`border ${getBorderColor(animal)} rounded p-1 ${bgColor} relative flex gap-1.5 h-full items-center ${onClick ? 'cursor-pointer hover:opacity-80 transition' : ''}`}
                 onClick={onClick ? () => onClick(animal) : undefined}
             >
-                {/* Image - 1/3 width */}
-                <div className="hide-for-pdf w-1/3 aspect-square bg-gray-100 rounded-lg border-2 border-gray-900 overflow-hidden flex items-center justify-center flex-shrink-0 pointer-events-none">
+                {/* Image - 1/4 width */}
+                <div className="hide-for-pdf w-1/4 aspect-square bg-gray-100 rounded-lg border-2 border-gray-900 overflow-hidden flex items-center justify-center flex-shrink-0 pointer-events-none">
                     {imgSrc ? (
-                        <AnimalImage src={imgSrc} alt={animal.name} className="w-full h-full object-cover" iconSize={20} />
+                        <AnimalImage src={imgSrc} alt={animal.name} className="w-full h-full object-cover" iconSize={18} />
                     ) : (
                         <Cat size={20} className="text-gray-400" />
                     )}
