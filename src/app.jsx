@@ -404,7 +404,7 @@ const PedigreeChart = ({ animalId, animalData, onClose, API_BASE_URL, authToken 
 
             // Set fixed dimensions for PDF generation
             pedigreeRef.current.style.width = '1400px';
-            pedigreeRef.current.style.height = '1000px';
+            pedigreeRef.current.style.height = '1100px';
             pedigreeRef.current.style.aspectRatio = 'unset';
             pedigreeRef.current.style.minHeight = 'unset';
             pedigreeRef.current.style.overflow = 'visible';
@@ -420,7 +420,7 @@ const PedigreeChart = ({ animalId, animalData, onClose, API_BASE_URL, authToken 
                 allowTaint: true,
                 letterRendering: true,
                 windowWidth: 1400,
-                windowHeight: 1000,
+                windowHeight: 1100,
                 imageTimeout: 15000,
                 removeContainer: true,
                 scrollX: 0,
@@ -437,11 +437,11 @@ const PedigreeChart = ({ animalId, animalData, onClose, API_BASE_URL, authToken 
             const pdf = new jsPDF({
                 orientation: 'landscape',
                 unit: 'px',
-                format: [1400, 1000]
+                format: [1400, 1100]
             });
 
             // Add image at exact dimensions without scaling
-            pdf.addImage(imgData, 'PNG', 0, 0, 1400, 1000);
+            pdf.addImage(imgData, 'PNG', 0, 0, 1400, 1100);
             pdf.save(`pedigree-${pedigreeData?.name || 'chart'}.pdf`);
         } catch (error) {
             console.error('Error generating PDF:', error);
@@ -1061,7 +1061,7 @@ const PedigreeChart = ({ animalId, animalData, onClose, API_BASE_URL, authToken 
                             </div>
 
                             {/* Footer - Inside scrollable content */}
-                            <div className="mt-2 sm:mt-4 pt-1 sm:pt-3 border-t-2 border-gray-300 flex justify-between items-center text-xs sm:text-sm text-gray-600">
+                            <div className="mt-4 pt-3 pb-4 border-t-2 border-gray-300 flex justify-between items-center text-sm text-gray-600">
                                 <div>
                                     {getOwnerDisplayInfoBottomLeft()}
                                 </div>
