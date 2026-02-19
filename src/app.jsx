@@ -409,7 +409,7 @@ const PedigreeChart = ({ animalId, animalData, onClose, API_BASE_URL, authToken 
             pedigreeRef.current.style.aspectRatio = 'unset';
             pedigreeRef.current.style.minHeight = 'unset';
             pedigreeRef.current.style.overflow = 'visible';
-            pedigreeRef.current.style.padding = '16px';
+            pedigreeRef.current.style.padding = '40px 20px 20px 20px'; // More top padding
 
             // Wait for layout to stabilize and images to load
             await new Promise(resolve => setTimeout(resolve, 500));
