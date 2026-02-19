@@ -490,6 +490,14 @@ const PedigreeChart = ({ animalId, animalData, onClose, API_BASE_URL, authToken 
                         {colorCoat}
                     </div>
                     
+                    {/* Genetic Code */}
+                    {animal.geneticCode && (
+                        <div className="text-xs text-gray-900 leading-tight" style={{lineHeight: '1.2'}}>
+                            <span className="font-semibold">Code: </span>
+                            {animal.geneticCode}
+                        </div>
+                    )}
+                    
                     {/* Birth Date */}
                     <div className="text-xs text-gray-900 leading-tight" style={{lineHeight: '1.2'}}>
                         <span className="font-semibold">Birthdate: </span>
@@ -586,6 +594,14 @@ const PedigreeChart = ({ animalId, animalData, onClose, API_BASE_URL, authToken 
                         <span className="font-semibold">Variety: </span>
                         {colorCoat}
                     </div>
+                    
+                    {/* Genetic Code */}
+                    {animal.geneticCode && (
+                        <div className="text-xs text-gray-900 leading-tight" style={{lineHeight: '1.2'}}>
+                            <span className="font-semibold">Genotype: </span>
+                            {animal.geneticCode}
+                        </div>
+                    )}
                     
                     {/* Birth Date */}
                     <div className="text-xs text-gray-900 leading-tight" style={{lineHeight: '1.2'}}>
@@ -689,6 +705,14 @@ const PedigreeChart = ({ animalId, animalData, onClose, API_BASE_URL, authToken 
                         <span className="font-semibold">Variety: </span>
                         {colorCoat}
                     </div>
+                    
+                    {/* Genetic Code */}
+                    {animal.geneticCode && (
+                        <div className="text-gray-900 leading-tight" style={{fontSize: '0.65rem', lineHeight: '1.2'}}>
+                            <span className="font-semibold">Genotype: </span>
+                            {animal.geneticCode}
+                        </div>
+                    )}
                     
                     {/* Birth Date */}
                     <div className="text-gray-900 leading-tight" style={{fontSize: '0.65rem', lineHeight: '1.2'}}>
