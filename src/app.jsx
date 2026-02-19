@@ -2380,7 +2380,7 @@ const PrivateAnimalDetail = ({ animal, onClose, onEdit, API_BASE_URL, authToken,
                             { id: 3, label: 'Physical', icon: '🎨' },
                             { id: 4, label: 'Identification', icon: '🏷️' },
                             { id: 5, label: 'Lineage', icon: '🌳' },
-                            { id: 6, label: 'Breeding', icon: '🫘' },
+                            { id: 6, label: 'Breeding', icon: '🥚' },
                             { id: 7, label: 'Health', icon: '🏥' },
                             { id: 8, label: 'Husbandry', icon: '🏠' },
                             { id: 9, label: 'Behavior', icon: '🧠' },
@@ -3325,7 +3325,7 @@ const ViewOnlyPrivateAnimalDetail = ({ animal, onClose, API_BASE_URL, authToken,
                             { id: 3, label: 'Physical', icon: '🎨' },
                             { id: 4, label: 'Identification', icon: '🏷️' },
                             { id: 5, label: 'Lineage', icon: '🌳' },
-                            { id: 6, label: 'Breeding', icon: '🫘' },
+                            { id: 6, label: 'Breeding', icon: '🥚' },
                             { id: 7, label: 'Health', icon: '🏥' },
                             { id: 8, label: 'Husbandry', icon: '🏠' },
                             { id: 9, label: 'Behavior', icon: '🧠' },
@@ -4242,7 +4242,7 @@ const ViewOnlyAnimalDetail = ({ animal, onClose, API_BASE_URL, onViewProfile, on
                             { id: 1, label: 'Overview', icon: '📋' },
                             { id: 3, label: 'Physical', icon: '🎨' },
                             { id: 5, label: 'Lineage', icon: '🌳' },
-                            { id: 6, label: 'Breeding', icon: '🫘' },
+                            { id: 6, label: 'Breeding', icon: '🥚' },
                             { id: 7, label: 'Health', icon: '🏥' },
                             { id: 8, label: 'Husbandry', icon: '🏠' },
                             { id: 9, label: 'Behavior', icon: '🧠' },
@@ -9555,7 +9555,7 @@ const AnimalForm = ({
                             { id: 3, label: 'Physical', icon: '🎨' },
                             { id: 4, label: 'Identification', icon: '🏷️' },
                             { id: 5, label: 'Lineage', icon: '🌳' },
-                            { id: 6, label: 'Breeding', icon: '🫘' },
+                            { id: 6, label: 'Breeding', icon: '🥚' },
                             { id: 7, label: 'Health', icon: '🏥' },
                             { id: 8, label: 'Husbandry', icon: '🏠' },
                             { id: 9, label: 'Behavior', icon: '🧠' },
@@ -9832,7 +9832,7 @@ const AnimalForm = ({
                                 <div className="flex items-center space-x-2">
                                     <input type="checkbox" name="availableForBreeding" checked={formData.availableForBreeding} onChange={handleChange} 
                                         className="form-checkbox h-5 w-5 text-primary rounded focus:ring-primary" />
-                                    <span className="text-sm font-medium text-gray-700">🫘 Available for Stud</span>
+                                    <span className="text-sm font-medium text-gray-700">🥚 Available for Stud</span>
                                 </div>
                                 {formData.availableForBreeding && (
                                     <div className="ml-7 flex gap-2">
@@ -18893,7 +18893,7 @@ const App = () => {
                                     <><span></span> For Sale</>
                                 )}
                                 {availableAnimals[currentAvailableIndex].availableForBreeding && (
-                                    <><span>🫘</span> For Stud</>
+                                    <><span>🥚</span> For Stud</>
                                 )}
                                 {availableAnimals[currentAvailableIndex].isForSale && availableAnimals[currentAvailableIndex].availableForBreeding && (
                                     <span className="text-xs">?</span>
@@ -20109,7 +20109,7 @@ const App = () => {
                             { id: 3, label: 'Physical', icon: '🎨' },
                             { id: 4, label: 'Identification', icon: '🏷️' },
                             { id: 5, label: 'Lineage', icon: '🌳' },
-                            { id: 6, label: 'Breeding', icon: '🫘' },
+                            { id: 6, label: 'Breeding', icon: '🥚' },
                             { id: 7, label: 'Health', icon: '🏥' },
                             { id: 8, label: 'Husbandry', icon: '🏠' },
                             { id: 11, label: 'Show', icon: '🏆' }
