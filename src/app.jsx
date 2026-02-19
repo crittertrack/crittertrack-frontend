@@ -17673,8 +17673,8 @@ const App = () => {
                 console.log('[WELCOME GUIDE] Loaded from database:', hasSeen);
                 setHasSeenWelcomeGuide(hasSeen);
                 
-                // Show modal if they haven't seen it (or force show for CTU2 for testing)
-                if (!hasSeen || userProfile?.id_public === 'CTU2') {
+                // Show modal if they haven't seen it
+                if (!hasSeen) {
                     setShowWelcomeGuide(true);
                 }
             } catch (error) {
