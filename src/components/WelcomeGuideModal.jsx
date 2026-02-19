@@ -15,33 +15,33 @@ const WelcomeGuideModal = ({ onClose }) => {
     };
 
     return (
-        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
-            <div className="bg-white rounded-lg shadow-xl max-w-5xl w-full max-h-[90vh]">
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-2 sm:p-4">
+            <div className="bg-white rounded-lg shadow-xl max-w-5xl w-full max-h-[95vh] sm:max-h-[90vh] flex flex-col">
                 {/* Header */}
-                <div className="bg-gradient-to-r from-accent to-primary text-white p-4 rounded-t-lg">
-                    <h2 className="text-xl font-bold">Welcome to CritterTrack! 🎉</h2>
-                    <p className="text-sm text-white/90">Let's get your profile set up for success</p>
+                <div className="bg-gradient-to-r from-accent to-primary text-white p-3 sm:p-4 rounded-t-lg flex-shrink-0">
+                    <h2 className="text-lg sm:text-xl font-bold">Welcome to CritterTrack! 🎉</h2>
+                    <p className="text-xs sm:text-sm text-white/90">Let's get your profile set up for success</p>
                 </div>
 
-                {/* Content */}
-                <div className="p-5 space-y-4">
+                {/* Content - Scrollable */}
+                <div className="p-3 sm:p-5 space-y-3 sm:space-y-4 overflow-y-auto flex-1">
                     {/* Intro */}
-                    <div className="bg-blue-50 border-l-4 border-blue-500 p-3 rounded">
-                        <p className="text-sm text-gray-700">
+                    <div className="bg-blue-50 border-l-4 border-blue-500 p-2.5 sm:p-3 rounded">
+                        <p className="text-xs sm:text-sm text-gray-700">
                             To make the most of CritterTrack's community features, we recommend setting up your profile information.
                         </p>
                     </div>
 
-                    {/* Profile Settings - 2 Columns */}
-                    <div className="grid grid-cols-2 gap-4">
-                        <div className="flex gap-3">
+                    {/* Profile Settings - Responsive Grid */}
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-3 sm:gap-4">
+                        <div className="flex gap-2 sm:gap-3">
                             <div className="flex-shrink-0">
-                                <div className="w-9 h-9 bg-purple-100 rounded-full flex items-center justify-center">
-                                    <User className="text-purple-600" size={18} />
+                                <div className="w-8 h-8 sm:w-9 sm:h-9 bg-purple-100 rounded-full flex items-center justify-center">
+                                    <User className="text-purple-600" size={16} />
                                 </div>
                             </div>
                             <div className="flex-1">
-                                <h3 className="font-semibold text-gray-800 text-sm mb-1">Breeder Name & Privacy</h3>
+                                <h3 className="font-semibold text-gray-800 text-xs sm:text-sm mb-0.5 sm:mb-1">Breeder Name & Privacy</h3>
                                 <p className="text-xs text-gray-600 leading-relaxed">
                                     Set your <strong>Breeder Name</strong> in profile settings. Choose to display your personal name or breeder name publicly. 
                                     <strong> Note:</strong> You'll only be visible if you have either name set to public. Completely anonymous accounts won't show up anywhere, nor will their animals.
@@ -49,14 +49,14 @@ const WelcomeGuideModal = ({ onClose }) => {
                             </div>
                         </div>
 
-                        <div className="flex gap-3">
+                        <div className="flex gap-2 sm:gap-3">
                             <div className="flex-shrink-0">
-                                <div className="w-9 h-9 bg-green-100 rounded-full flex items-center justify-center">
-                                    <MapPin className="text-green-600" size={18} />
+                                <div className="w-8 h-8 sm:w-9 sm:h-9 bg-green-100 rounded-full flex items-center justify-center">
+                                    <MapPin className="text-green-600" size={16} />
                                 </div>
                             </div>
                             <div className="flex-1">
-                                <h3 className="font-semibold text-gray-800 text-sm mb-1">Country Location</h3>
+                                <h3 className="font-semibold text-gray-800 text-xs sm:text-sm mb-0.5 sm:mb-1">Country Location</h3>
                                 <p className="text-xs text-gray-600 leading-relaxed">
                                     Setting your <strong>Country</strong> helps buyers find local breeders! When you list animals for sale or stud services, users can filter the marketplace by country. 
                                     This filter also exists for the <strong>Breeders</strong> Registry.
@@ -64,14 +64,14 @@ const WelcomeGuideModal = ({ onClose }) => {
                             </div>
                         </div>
 
-                        <div className="flex gap-3">
+                        <div className="flex gap-2 sm:gap-3">
                             <div className="flex-shrink-0">
-                                <div className="w-9 h-9 bg-orange-100 rounded-full flex items-center justify-center">
-                                    <Users className="text-orange-600" size={18} />
+                                <div className="w-8 h-8 sm:w-9 sm:h-9 bg-orange-100 rounded-full flex items-center justify-center">
+                                    <Users className="text-orange-600" size={16} />
                                 </div>
                             </div>
                             <div className="flex-1">
-                                <h3 className="font-semibold text-gray-800 text-sm mb-1">Community Activity</h3>
+                                <h3 className="font-semibold text-gray-800 text-xs sm:text-sm mb-0.5 sm:mb-1">Community Activity</h3>
                                 <p className="text-xs text-gray-600 leading-relaxed">
                                     The <strong>Community Feed</strong> showcases the newest and most active breeders, 
                                     helping you connect with others and discover what's happening in the community.
@@ -79,14 +79,14 @@ const WelcomeGuideModal = ({ onClose }) => {
                             </div>
                         </div>
 
-                        <div className="flex gap-3">
+                        <div className="flex gap-2 sm:gap-3">
                             <div className="flex-shrink-0">
-                                <div className="w-9 h-9 bg-blue-100 rounded-full flex items-center justify-center">
-                                    <ShoppingBag className="text-blue-600" size={18} />
+                                <div className="w-8 h-8 sm:w-9 sm:h-9 bg-blue-100 rounded-full flex items-center justify-center">
+                                    <ShoppingBag className="text-blue-600" size={16} />
                                 </div>
                             </div>
                             <div className="flex-1">
-                                <h3 className="font-semibold text-gray-800 text-sm mb-1">Breeders Registry</h3>
+                                <h3 className="font-semibold text-gray-800 text-xs sm:text-sm mb-0.5 sm:mb-1">Breeders Registry</h3>
                                 <p className="text-xs text-gray-600 leading-relaxed">
                                     In profile settings, select your breeding status (Owner, Active Breeder, or Retired Breeder) 
                                     for any <strong>species you have animals for</strong> on the site. This adds you to the public <strong>Breeders</strong> Registry.
@@ -96,13 +96,13 @@ const WelcomeGuideModal = ({ onClose }) => {
                     </div>
 
                     {/* Help Section */}
-                    <div className="bg-gradient-to-r from-accent/10 to-primary/10 border border-accent/20 rounded-lg p-3">
-                        <div className="flex gap-3 items-start">
+                    <div className="bg-gradient-to-r from-accent/10 to-primary/10 border border-accent/20 rounded-lg p-2.5 sm:p-3">
+                        <div className="flex gap-2 sm:gap-3 items-start">
                             <div className="flex-shrink-0">
-                                <HelpCircle className="text-accent" size={20} />
+                                <HelpCircle className="text-accent" size={18} />
                             </div>
                             <div className="flex-1">
-                                <h3 className="font-semibold text-gray-800 text-sm mb-1">Need Help Getting Started?</h3>
+                                <h3 className="font-semibold text-gray-800 text-xs sm:text-sm mb-0.5 sm:mb-1">Need Help Getting Started?</h3>
                                 <p className="text-xs text-gray-600">
                                     Interactive tutorials are available anytime through the <strong>Help button in the header</strong>. 
                                     Learn about adding animals, tracking genetics, budgeting, and more!
@@ -112,13 +112,13 @@ const WelcomeGuideModal = ({ onClose }) => {
                     </div>
 
                     {/* Beta Testing Message */}
-                    <div className="bg-gradient-to-r from-purple-50 to-purple-100 border border-purple-300 rounded-lg p-3">
-                        <div className="flex gap-3 items-start">
+                    <div className="bg-gradient-to-r from-purple-50 to-purple-100 border border-purple-300 rounded-lg p-2.5 sm:p-3">
+                        <div className="flex gap-2 sm:gap-3 items-start">
                             <div className="flex-shrink-0">
-                                <MessageSquare className="text-purple-600" size={20} />
+                                <MessageSquare className="text-purple-600" size={18} />
                             </div>
                             <div className="flex-1">
-                                <h3 className="font-semibold text-gray-800 text-sm mb-1">🚀 Beta Testing & Your Feedback</h3>
+                                <h3 className="font-semibold text-gray-800 text-xs sm:text-sm mb-0.5 sm:mb-1">🚀 Beta Testing & Your Feedback</h3>
                                 <p className="text-xs text-gray-600">
                                     CritterTrack is currently in <strong>beta</strong> and actively improving! We're working on bug fixes and new features. 
                                     Throughout the platform, you'll see <strong className="text-purple-700">purple features</strong> (like the purple "Beta Feedback" button on the left side of the screen) — 
@@ -128,12 +128,12 @@ const WelcomeGuideModal = ({ onClose }) => {
                         </div>
                     </div>
 
-                    {/* Action Button */}
-                    <div className="flex justify-end pt-1">
+                    {/* Action Button - Sticky for mobile */}
+                    <div className="flex justify-end pt-2 sm:pt-1 sticky bottom-0 bg-white pb-2 sm:pb-0 sm:static">
                         <button
                             onClick={handleClose}
                             disabled={isClosing}
-                            className="px-6 py-2.5 bg-accent text-white rounded-lg hover:bg-accent/90 transition font-medium text-sm disabled:opacity-50 flex items-center gap-2"
+                            className="w-full sm:w-auto px-4 sm:px-6 py-2.5 bg-accent text-white rounded-lg hover:bg-accent/90 transition font-medium text-sm disabled:opacity-50 flex items-center justify-center gap-2"
                         >
                             {isClosing ? (
                                 <>
