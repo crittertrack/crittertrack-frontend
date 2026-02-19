@@ -845,64 +845,66 @@ const PedigreeChart = ({ animalId, animalData, onClose, API_BASE_URL, authToken 
         // Responsive heights - reasonable mobile sizing
         const isMobile = window.innerWidth < 640; // sm breakpoint
         const contentHeight = isMobile ? 450 : 600; // Increased height to fit text
-        const parentHeight = contentHeight / 2;
-        const grandparentHeight = contentHeight / 4;
-        const greatGrandparentHeight = contentHeight / 8;
         const gap = isMobile ? 4 : 8; // gap-1 = 4px, gap-2 = 8px
         const gapClass = isMobile ? 'gap-1' : 'gap-2';
+        
+        // Calculate card heights accounting for gaps to ensure equal total column heights
+        const parentHeight = (contentHeight - gap) / 2; // 2 cards, 1 gap
+        const grandparentHeight = (contentHeight - (3 * gap)) / 4; // 4 cards, 3 gaps
+        const greatGrandparentHeight = (contentHeight - (7 * gap)) / 8; // 8 cards, 7 gaps
 
         return (
             <div className={`flex ${gapClass} w-full`} style={{height: `${contentHeight}px`, minWidth: isMobile ? '600px' : 'auto'}}>
                     {/* Column 1: Parents (2 rows, each takes 1/2 height) */}
                     <div className={`w-1/3 flex flex-col ${gapClass}`}>
-                        <div style={{height: `${parentHeight - (gap * 2)}px`}}>
+                        <div style={{height: `${parentHeight}px`}}>
                             {renderParentCard(father, true, handleCardClick)}
                         </div>
-                        <div style={{height: `${parentHeight - (gap * 2)}px`}}>
+                        <div style={{height: `${parentHeight}px`}}>
                             {renderParentCard(mother, false, handleCardClick)}
                         </div>
                     </div>
 
                     {/* Column 2: Grandparents (4 rows, each takes 1/4 height) */}
                     <div className={`w-1/3 flex flex-col ${gapClass}`}>
-                        <div style={{height: `${grandparentHeight - (8 * 0.75)}px`}}>
+                        <div style={{height: `${grandparentHeight}px`}}>
                             {renderGrandparentCard(paternalGrandfather, true, handleCardClick)}
                         </div>
-                        <div style={{height: `${grandparentHeight - (8 * 0.75)}px`}}>
+                        <div style={{height: `${grandparentHeight}px`}}>
                             {renderGrandparentCard(paternalGrandmother, false, handleCardClick)}
                         </div>
-                        <div style={{height: `${grandparentHeight - (8 * 0.75)}px`}}>
+                        <div style={{height: `${grandparentHeight}px`}}>
                             {renderGrandparentCard(maternalGrandfather, true, handleCardClick)}
                         </div>
-                        <div style={{height: `${grandparentHeight - (8 * 0.75)}px`}}>
+                        <div style={{height: `${grandparentHeight}px`}}>
                             {renderGrandparentCard(maternalGrandmother, false, handleCardClick)}
                         </div>
                     </div>
 
                     {/* Column 3: Great-Grandparents (8 rows, each takes 1/8 height) */}
                     <div className={`w-1/3 flex flex-col ${gapClass}`}>
-                        <div style={{height: `${greatGrandparentHeight - (8 * 0.375)}px`}}>
+                        <div style={{height: `${greatGrandparentHeight}px`}}>
                             {renderGreatGrandparentCard(pgfFather, true, handleCardClick)}
                         </div>
-                        <div style={{height: `${greatGrandparentHeight - (8 * 0.375)}px`}}>
+                        <div style={{height: `${greatGrandparentHeight}px`}}>
                             {renderGreatGrandparentCard(pgfMother, false, handleCardClick)}
                         </div>
-                        <div style={{height: `${greatGrandparentHeight - (8 * 0.375)}px`}}>
+                        <div style={{height: `${greatGrandparentHeight}px`}}>
                             {renderGreatGrandparentCard(pgmFather, true, handleCardClick)}
                         </div>
-                        <div style={{height: `${greatGrandparentHeight - (8 * 0.375)}px`}}>
+                        <div style={{height: `${greatGrandparentHeight}px`}}>
                             {renderGreatGrandparentCard(pgmMother, false, handleCardClick)}
                         </div>
-                        <div style={{height: `${greatGrandparentHeight - (8 * 0.375)}px`}}>
+                        <div style={{height: `${greatGrandparentHeight}px`}}>
                             {renderGreatGrandparentCard(mgfFather, true, handleCardClick)}
                         </div>
-                        <div style={{height: `${greatGrandparentHeight - (8 * 0.375)}px`}}>
+                        <div style={{height: `${greatGrandparentHeight}px`}}>
                             {renderGreatGrandparentCard(mgfMother, false, handleCardClick)}
                         </div>
-                        <div style={{height: `${greatGrandparentHeight - (8 * 0.375)}px`}}>
+                        <div style={{height: `${greatGrandparentHeight}px`}}>
                             {renderGreatGrandparentCard(mgmFather, true, handleCardClick)}
                         </div>
-                        <div style={{height: `${greatGrandparentHeight - (8 * 0.375)}px`}}>
+                        <div style={{height: `${greatGrandparentHeight}px`}}>
                             {renderGreatGrandparentCard(mgmMother, false, handleCardClick)}
                         </div>
                     </div>
