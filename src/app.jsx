@@ -17674,9 +17674,10 @@ const App = () => {
                 setHasSeenWelcomeGuide(hasSeen);
                 
                 // Show modal if they haven't seen it
-                if (!hasSeen) {
-                    setShowWelcomeGuide(true);
-                }
+                // TEMPORARILY DISABLED - mobile stuck issue
+                // if (!hasSeen) {
+                //     setShowWelcomeGuide(true);
+                // }
             } catch (error) {
                 console.error('[WELCOME GUIDE] Failed to load status:', error);
             }
