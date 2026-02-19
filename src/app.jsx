@@ -17673,11 +17673,10 @@ const App = () => {
                 console.log('[WELCOME GUIDE] Loaded from database:', hasSeen);
                 setHasSeenWelcomeGuide(hasSeen);
                 
-                // Show modal if they haven't seen it
-                // TEMPORARILY DISABLED - mobile stuck issue
-                // if (!hasSeen) {
-                //     setShowWelcomeGuide(true);
-                // }
+                // Show modal if they haven't seen it (or force show for CTU2 for testing)
+                if (!hasSeen || userProfile?.id_public === 'CTU2') {
+                    setShowWelcomeGuide(true);
+                }
             } catch (error) {
                 console.error('[WELCOME GUIDE] Failed to load status:', error);
             }
