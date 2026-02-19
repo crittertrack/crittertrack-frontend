@@ -2,7 +2,7 @@
 import React, { useState, useEffect, useCallback, useRef, useMemo } from 'react';
 import { useParams, useNavigate, useLocation, Routes, Route, Link as RouterLink } from 'react-router-dom';
 import axios from 'axios';
-import { LogOut, Cat, UserPlus, LogIn, ChevronLeft, Trash2, Edit, Save, PlusCircle, Plus, ArrowLeft, Loader2, RefreshCw, User, Users, ClipboardList, BookOpen, Settings, Mail, Globe, Bean, Milk, Search, X, Mars, Venus, Eye, EyeOff, Heart, HeartOff, HeartHandshake, Bell, XCircle, CheckCircle, Download, FileText, Link, AlertCircle, DollarSign, Archive, ArrowLeftRight, RotateCcw, Info, Hourglass, MessageSquare, Ban, Flag, Scissors, VenusAndMars, Circle, Shield, Lock, AlertTriangle, ShoppingBag, Check, Star, Moon, MoonStar, Calculator, Network } from 'lucide-react';
+import { LogOut, Cat, UserPlus, LogIn, ChevronLeft, ChevronUp, ChevronDown, Trash2, Edit, Save, PlusCircle, Plus, ArrowLeft, Loader2, RefreshCw, User, Users, ClipboardList, BookOpen, Settings, Mail, Globe, Bean, Milk, Search, X, Mars, Venus, Eye, EyeOff, Heart, HeartOff, HeartHandshake, Bell, XCircle, CheckCircle, Download, FileText, Link, AlertCircle, DollarSign, Archive, ArrowLeftRight, RotateCcw, Info, Hourglass, MessageSquare, Ban, Flag, Scissors, VenusAndMars, Circle, Shield, Lock, AlertTriangle, ShoppingBag, Check, Star, Moon, MoonStar, Calculator, Network } from 'lucide-react';
 import jsPDF from 'jspdf';
 import html2canvas from 'html2canvas';
 import 'flag-icons/css/flag-icons.min.css';
@@ -14260,6 +14260,7 @@ const AnimalList = ({ authToken, showModalMessage, onEditAnimal, onViewAnimal, f
     const [bulkDeleteMode, setBulkDeleteMode] = useState({}); // { species: true/false }
     const [selectedAnimals, setSelectedAnimals] = useState({}); // { species: [id1, id2, ...] }
     const [collapsedSpecies, setCollapsedSpecies] = useState({}); // { species: true/false } - for mobile collapse
+    const [userSpeciesOrder, setUserSpeciesOrder] = useState([]); // User's custom species order
     
     // Save filters to localStorage whenever they change
     useEffect(() => {
@@ -14448,6 +14449,25 @@ const AnimalList = ({ authToken, showModalMessage, onEditAnimal, onViewAnimal, f
         return () => window.removeEventListener('animals-changed', handleAnimalsChanged);
     }, [fetchAnimals]);
 
+    // Fetch user's custom species order on mount
+    useEffect(() => {
+        const fetchSpeciesOrder = async () => {
+            try {
+                const response = await axios.get(`${API_BASE_URL}/users/species-order`, {
+                    headers: { Authorization: `Bearer ${authToken}` }
+                });
+                if (response.data && Array.isArray(response.data.speciesOrder)) {
+                    setUserSpeciesOrder(response.data.speciesOrder);
+                }
+            } catch (error) {
+                console.error('[SPECIES ORDER] Error fetching:', error);
+            }
+        };
+        if (authToken) {
+            fetchSpeciesOrder();
+        }
+    }, [authToken, API_BASE_URL]);
+
     const groupedAnimals = useMemo(() => {
         return animals.reduce((groups, animal) => {
             const species = animal.species || 'Unspecified Species';
@@ -14459,20 +14479,34 @@ const AnimalList = ({ authToken, showModalMessage, onEditAnimal, onViewAnimal, f
         }, {});
     }, [animals]);
     
-    const speciesNames = Object.keys(groupedAnimals).sort((a, b) => {
-        const order = ['Mouse', 'Rat', 'Hamster'];
-        const aIndex = order.indexOf(a);
-        const bIndex = order.indexOf(b);
-        
-        // If both are in the base order, sort by their position
-        if (aIndex !== -1 && bIndex !== -1) return aIndex - bIndex;
-        // If only a is in base order, it comes first
-        if (aIndex !== -1) return -1;
-        // If only b is in base order, it comes first
-        if (bIndex !== -1) return 1;
-        // Otherwise, alphabetical sort
-        return a.localeCompare(b);
-    });
+    const speciesNames = useMemo(() => {
+        return Object.keys(groupedAnimals).sort((a, b) => {
+            // Use user's custom order if available
+            if (userSpeciesOrder.length > 0) {
+                const aIndex = userSpeciesOrder.indexOf(a);
+                const bIndex = userSpeciesOrder.indexOf(b);
+                
+                // Both are in user's custom order
+                if (aIndex !== -1 && bIndex !== -1) return aIndex - bIndex;
+                // Only a is in custom order, it comes first
+                if (aIndex !== -1) return -1;
+                // Only b is in custom order, it comes first
+                if (bIndex !== -1) return 1;
+                // Neither in custom order, use alphabetical
+                return a.localeCompare(b);
+            }
+            
+            // Fallback to default order (Mouse, Rat, Hamster, then alphabetical)
+            const order = ['Mouse', 'Rat', 'Hamster'];
+            const aIndex = order.indexOf(a);
+            const bIndex = order.indexOf(b);
+            
+            if (aIndex !== -1 && bIndex !== -1) return aIndex - bIndex;
+            if (aIndex !== -1) return -1;
+            if (bIndex !== -1) return 1;
+            return a.localeCompare(b);
+        });
+    }, [groupedAnimals, userSpeciesOrder]);
 
     // Initialize species filter to "All" on first load only
     // Also add any new species that appear (e.g., after creating a new animal)
@@ -14689,6 +14723,34 @@ const AnimalList = ({ authToken, showModalMessage, onEditAnimal, onViewAnimal, f
             );
             setAnimals(revertedAnimals);
             showModalMessage('Error', 'Failed to update owned status.');
+        }
+    };
+
+    const moveSpecies = async (species, direction) => {
+        const currentIndex = speciesNames.indexOf(species);
+        if (currentIndex === -1) return;
+
+        const newOrder = [...speciesNames];
+        const newIndex = direction === 'up' ? currentIndex - 1 : currentIndex + 1;
+
+        // Check bounds
+        if (newIndex < 0 || newIndex >= newOrder.length) return;
+
+        // Swap
+        [newOrder[newIndex], newOrder[currentIndex]] = [newOrder[currentIndex], newOrder[newIndex]];
+
+        // Update local state immediately
+        setUserSpeciesOrder(newOrder);
+
+        // Save to backend
+        try {
+            await axios.post(`${API_BASE_URL}/users/species-order`, 
+                { speciesOrder: newOrder },
+                { headers: { Authorization: `Bearer ${authToken}` } }
+            );
+        } catch (error) {
+            console.error('[SPECIES ORDER] Error saving:', error);
+            showModalMessage('Error', 'Failed to save species order.');
         }
     };
 
@@ -15255,6 +15317,23 @@ const AnimalList = ({ authToken, showModalMessage, onEditAnimal, onViewAnimal, f
                                     )}
                                     {!isBulkMode && (
                                         <>
+                                            {/* Move species order buttons */}
+                                            <button
+                                                onClick={() => moveSpecies(species, 'up')}
+                                                disabled={speciesNames.indexOf(species) === 0}
+                                                className="p-1 sm:p-2 hover:bg-gray-200 rounded-lg transition disabled:opacity-30 disabled:cursor-not-allowed"
+                                                title="Move Up"
+                                            >
+                                                <ChevronUp className="w-3.5 h-3.5 sm:w-[18px] sm:h-[18px] text-gray-600" />
+                                            </button>
+                                            <button
+                                                onClick={() => moveSpecies(species, 'down')}
+                                                disabled={speciesNames.indexOf(species) === speciesNames.length - 1}
+                                                className="p-1 sm:p-2 hover:bg-gray-200 rounded-lg transition disabled:opacity-30 disabled:cursor-not-allowed"
+                                                title="Move Down"
+                                            >
+                                                <ChevronDown className="w-3.5 h-3.5 sm:w-[18px] sm:h-[18px] text-gray-600" />
+                                            </button>
                                             <button
                                                 onClick={() => navigate(`/animal-tree/${encodeURIComponent(species)}`)}
                                                 className="p-1 sm:p-2 hover:bg-gray-200 rounded-lg transition"
