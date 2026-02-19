@@ -15281,11 +15281,32 @@ const AnimalList = ({ authToken, showModalMessage, onEditAnimal, onViewAnimal, f
                                     }
                                 }}
                             >
-                                <div className="flex items-center gap-2">
+                                <div className="flex items-center gap-1 sm:gap-2">
                                     {/* Collapse indicator - mobile only */}
                                     <ChevronLeft 
                                         className={`w-4 h-4 text-gray-500 transition-transform sm:hidden ${isCollapsed ? '-rotate-90' : 'rotate-90'}`}
                                     />
+                                    {/* Move species order buttons - left side before title */}
+                                    {!isBulkMode && (
+                                        <>
+                                            <button
+                                                onClick={(e) => { e.stopPropagation(); moveSpecies(species, 'up'); }}
+                                                disabled={speciesNames.indexOf(species) === 0}
+                                                className="p-1 hover:bg-gray-200 rounded transition disabled:opacity-30 disabled:cursor-not-allowed"
+                                                title="Move Up"
+                                            >
+                                                <ChevronUp className="w-4 h-4 sm:w-5 sm:h-5 text-gray-800" />
+                                            </button>
+                                            <button
+                                                onClick={(e) => { e.stopPropagation(); moveSpecies(species, 'down'); }}
+                                                disabled={speciesNames.indexOf(species) === speciesNames.length - 1}
+                                                className="p-1 hover:bg-gray-200 rounded transition disabled:opacity-30 disabled:cursor-not-allowed"
+                                                title="Move Down"
+                                            >
+                                                <ChevronDown className="w-4 h-4 sm:w-5 sm:h-5 text-gray-800" />
+                                            </button>
+                                        </>
+                                    )}
                                     <h3 className="text-sm sm:text-lg font-bold text-gray-700">
                                         {getSpeciesDisplayName(species)} ({groupedAnimals[species].length})
                                     </h3>
@@ -15317,23 +15338,6 @@ const AnimalList = ({ authToken, showModalMessage, onEditAnimal, onViewAnimal, f
                                     )}
                                     {!isBulkMode && (
                                         <>
-                                            {/* Move species order buttons */}
-                                            <button
-                                                onClick={() => moveSpecies(species, 'up')}
-                                                disabled={speciesNames.indexOf(species) === 0}
-                                                className="p-1 sm:p-2 hover:bg-gray-200 rounded-lg transition disabled:opacity-30 disabled:cursor-not-allowed"
-                                                title="Move Up"
-                                            >
-                                                <ChevronUp className="w-3.5 h-3.5 sm:w-[18px] sm:h-[18px] text-gray-600" />
-                                            </button>
-                                            <button
-                                                onClick={() => moveSpecies(species, 'down')}
-                                                disabled={speciesNames.indexOf(species) === speciesNames.length - 1}
-                                                className="p-1 sm:p-2 hover:bg-gray-200 rounded-lg transition disabled:opacity-30 disabled:cursor-not-allowed"
-                                                title="Move Down"
-                                            >
-                                                <ChevronDown className="w-3.5 h-3.5 sm:w-[18px] sm:h-[18px] text-gray-600" />
-                                            </button>
                                             <button
                                                 onClick={() => navigate(`/animal-tree/${encodeURIComponent(species)}`)}
                                                 className="p-1 sm:p-2 hover:bg-gray-200 rounded-lg transition"
