@@ -578,10 +578,7 @@ const PedigreeChart = ({ animalId, animalData, onClose, API_BASE_URL, authToken 
                 <div className="flex-1 min-w-0 flex flex-col justify-start gap-1.5 py-1 pointer-events-none">
                     {/* Name */}
                     <div className="text-xs text-gray-900 leading-tight" style={{lineHeight: '1.2'}}>
-                        <span className="font-semibold">Name: </span>
-                        <span>
-                            {animal.prefix && `${animal.prefix} `}{animal.name}{animal.suffix && ` ${animal.suffix}`}
-                        </span>
+                        <span className="font-semibold">Name: </span>{animal.prefix && `${animal.prefix} `}{animal.name}{animal.suffix && ` ${animal.suffix}`}
                     </div>
                     
                     {/* Variety */}
@@ -684,10 +681,7 @@ const PedigreeChart = ({ animalId, animalData, onClose, API_BASE_URL, authToken 
                 <div className="flex-1 min-w-0 flex flex-col justify-start gap-1 py-0.5 pointer-events-none">
                     {/* Name */}
                     <div className="text-gray-900 leading-tight" style={{fontSize: '0.65rem', lineHeight: '1.2'}}>
-                        <span className="font-semibold">Name: </span>
-                        <span>
-                            {animal.prefix && `${animal.prefix} `}{animal.name}{animal.suffix && ` ${animal.suffix}`}
-                        </span>
+                        <span className="font-semibold">Name: </span>{animal.prefix && `${animal.prefix} `}{animal.name}{animal.suffix && ` ${animal.suffix}`}
                     </div>
                     
                     {/* Variety */}
