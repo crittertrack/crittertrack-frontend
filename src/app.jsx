@@ -404,7 +404,7 @@ const PedigreeChart = ({ animalId, animalData, onClose, API_BASE_URL, authToken 
 
             // Set fixed dimensions for PDF generation
             pedigreeRef.current.style.width = '1400px';
-            pedigreeRef.current.style.height = '900px';
+            pedigreeRef.current.style.height = '1000px';
             pedigreeRef.current.style.aspectRatio = 'unset';
             pedigreeRef.current.style.minHeight = 'unset';
             pedigreeRef.current.style.overflow = 'visible';
@@ -420,7 +420,7 @@ const PedigreeChart = ({ animalId, animalData, onClose, API_BASE_URL, authToken 
                 allowTaint: true,
                 letterRendering: true,
                 windowWidth: 1400,
-                windowHeight: 900,
+                windowHeight: 1000,
                 imageTimeout: 15000,
                 removeContainer: true,
                 scrollX: 0,
@@ -437,11 +437,11 @@ const PedigreeChart = ({ animalId, animalData, onClose, API_BASE_URL, authToken 
             const pdf = new jsPDF({
                 orientation: 'landscape',
                 unit: 'px',
-                format: [1400, 900]
+                format: [1400, 1000]
             });
 
             // Add image at exact dimensions without scaling
-            pdf.addImage(imgData, 'PNG', 0, 0, 1400, 900);
+            pdf.addImage(imgData, 'PNG', 0, 0, 1400, 1000);
             pdf.save(`pedigree-${pedigreeData?.name || 'chart'}.pdf`);
         } catch (error) {
             console.error('Error generating PDF:', error);
@@ -506,7 +506,7 @@ const PedigreeChart = ({ animalId, animalData, onClose, API_BASE_URL, authToken 
                 </div>
                 
                 {/* CT ID - Bottom Right */}
-                <div className="absolute bottom-1 right-2 text-xs font-mono text-gray-700">
+                <div className="absolute bottom-2 right-2 text-xs font-mono text-gray-700">
                     {animal.id_public}
                 </div>
             </div>
@@ -603,7 +603,7 @@ const PedigreeChart = ({ animalId, animalData, onClose, API_BASE_URL, authToken 
                 </div>
                 
                 {/* CT ID - Bottom Right */}
-                <div className="absolute bottom-1 right-2 text-xs font-mono text-gray-700 pointer-events-none">
+                <div className="absolute bottom-2 right-2 text-xs font-mono text-gray-700 pointer-events-none">
                     {animal.id_public}
                 </div>
             </div>
@@ -706,7 +706,7 @@ const PedigreeChart = ({ animalId, animalData, onClose, API_BASE_URL, authToken 
                 </div>
                 
                 {/* CT ID - Bottom Right */}
-                <div className="absolute bottom-1 right-1 text-xs font-mono text-gray-700 pointer-events-none">
+                <div className="absolute bottom-2 right-1 text-xs font-mono text-gray-700 pointer-events-none">
                     {animal.id_public}
                 </div>
             </div>
@@ -796,7 +796,7 @@ const PedigreeChart = ({ animalId, animalData, onClose, API_BASE_URL, authToken 
                 </div>
                 
                 {/* CT ID - Bottom Right */}
-                <div className="absolute bottom-0.5 right-0.5 text-xs font-mono text-gray-700 pointer-events-none">
+                <div className="absolute bottom-1.5 right-0.5 text-xs font-mono text-gray-700 pointer-events-none">
                     {animal.id_public}
                 </div>
             </div>
