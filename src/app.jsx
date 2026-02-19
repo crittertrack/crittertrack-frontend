@@ -403,25 +403,28 @@ const PedigreeChart = ({ animalId, animalData, onClose, API_BASE_URL, authToken 
             const originalMinHeight = pedigreeRef.current.style.minHeight;
 
             // Set fixed dimensions for PDF generation
-            pedigreeRef.current.style.width = '1123px';
-            pedigreeRef.current.style.height = '794px';
+            pedigreeRef.current.style.width = '1400px';
+            pedigreeRef.current.style.height = '900px';
             pedigreeRef.current.style.aspectRatio = 'unset';
             pedigreeRef.current.style.minHeight = 'unset';
+            pedigreeRef.current.style.overflow = 'visible';
 
-            // Wait a moment for layout to stabilize
-            await new Promise(resolve => setTimeout(resolve, 100));
+            // Wait for layout to stabilize and images to load
+            await new Promise(resolve => setTimeout(resolve, 500));
 
             const canvas = await html2canvas(pedigreeRef.current, {
-                scale: 2,
+                scale: 3,
                 backgroundColor: '#ffffff',
                 logging: false,
                 useCORS: true,
                 allowTaint: true,
                 letterRendering: true,
-                windowWidth: 1123,
-                windowHeight: 794,
-                imageTimeout: 0,
-                removeContainer: true
+                windowWidth: 1400,
+                windowHeight: 900,
+                imageTimeout: 15000,
+                removeContainer: true,
+                scrollX: 0,
+                scrollY: 0
             });
 
             // Restore original styles
@@ -434,11 +437,11 @@ const PedigreeChart = ({ animalId, animalData, onClose, API_BASE_URL, authToken 
             const pdf = new jsPDF({
                 orientation: 'landscape',
                 unit: 'px',
-                format: [1123, 794]
+                format: [1400, 900]
             });
 
             // Add image at exact dimensions without scaling
-            pdf.addImage(imgData, 'PNG', 0, 0, 1123, 794);
+            pdf.addImage(imgData, 'PNG', 0, 0, 1400, 900);
             pdf.save(`pedigree-${pedigreeData?.name || 'chart'}.pdf`);
         } catch (error) {
             console.error('Error generating PDF:', error);
