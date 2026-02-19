@@ -459,7 +459,7 @@ const PedigreeChart = ({ animalId, animalData, onClose, API_BASE_URL, authToken 
         if (!animal) return null;
         
         const imgSrc = animal.imageUrl || animal.photoUrl || null;
-        const colorCoat = [animal.color, animal.pattern, animal.coat].filter(Boolean).join(' ') || 'N/A';
+        const colorCoat = [animal.color, animal.coatPattern, animal.coat].filter(Boolean).join(' ') || 'N/A';
         
         // Determine gender-based styling
         const isMale = animal.gender === 'Male';
@@ -558,7 +558,7 @@ const PedigreeChart = ({ animalId, animalData, onClose, API_BASE_URL, authToken 
         }
         
         const imgSrc = animal.imageUrl || animal.photoUrl || null;
-        const colorCoat = [animal.color, animal.pattern, animal.coat].filter(Boolean).join(' ') || 'N/A';
+        const colorCoat = [animal.color, animal.coatPattern, animal.coat].filter(Boolean).join(' ') || 'N/A';
         
         return (
             <div 
@@ -661,7 +661,7 @@ const PedigreeChart = ({ animalId, animalData, onClose, API_BASE_URL, authToken 
         }
         
         const imgSrc = animal.imageUrl || animal.photoUrl || null;
-        const colorCoat = [animal.color, animal.pattern, animal.coat].filter(Boolean).join(' ') || 'N/A';
+        const colorCoat = [animal.color, animal.coatPattern, animal.coat].filter(Boolean).join(' ') || 'N/A';
         
         return (
             <div 
@@ -757,7 +757,7 @@ const PedigreeChart = ({ animalId, animalData, onClose, API_BASE_URL, authToken 
         }
         
         const imgSrc = animal.imageUrl || animal.photoUrl || null;
-        const colorCoat = [animal.color, animal.pattern, animal.coat].filter(Boolean).join(' ') || 'N/A';
+        const colorCoat = [animal.color, animal.coatPattern, animal.coat].filter(Boolean).join(' ') || 'N/A';
         
         return (
             <div 
