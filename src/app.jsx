@@ -4690,13 +4690,16 @@ const ViewOnlyAnimalDetail = ({ animal, onClose, API_BASE_URL, onViewProfile, on
                         {[
                             { id: 1, label: 'Overview', icon: '📋' },
                             { id: 3, label: 'Physical', icon: '🎨' },
+                            { id: 4, label: 'Identification', icon: '🔖' },
                             { id: 5, label: 'Lineage', icon: '🌳' },
                             { id: 6, label: 'Breeding', icon: '🥚' },
                             { id: 7, label: 'Health', icon: '🏥' },
                             { id: 8, label: 'Husbandry', icon: '🏠' },
                             { id: 9, label: 'Behavior', icon: '🧠' },
                             { id: 10, label: 'Records', icon: '📝' },
-                            { id: 11, label: 'Show', icon: '🏆' }
+                            { id: 11, label: 'End of Life', icon: '🕊️' },
+                            { id: 12, label: 'Show', icon: '🏆' },
+                            { id: 13, label: 'Legal', icon: '📄' }
                         ].map(tab => (
                             <button
                                 key={tab.id}
@@ -5001,96 +5004,129 @@ const ViewOnlyAnimalDetail = ({ animal, onClose, API_BASE_URL, onViewProfile, on
 
                     {/* Tab 3: Physical */}
                     {detailViewTab === 3 && (
-                        <div className="space-y-4">
-                            {/* Variety Section */}
-            <div className="bg-gray-50 p-4 rounded-lg border border-gray-200">
-                <h3 className="text-lg font-semibold text-gray-700 border-b pb-2 mb-3">Variety</h3>
-                <p className="text-sm"><span className="font-medium">Variety:</span> {[
-                    animal.color,
-                    animal.coatPattern,
-                    animal.coat,
-                    animal.earset
-                ].filter(Boolean).join(' ') || ''}</p>
-            </div>
-            {animal.geneticCode && (
-            <div className="bg-gray-50 p-4 rounded-lg border border-gray-200">
-                <h3 className="text-lg font-semibold text-gray-700 border-b pb-2 mb-3">Genetic Code</h3>
-                <p className="text-gray-700 font-mono text-sm break-all">{animal.geneticCode || ''}</p>
-            </div>
-            )}
-                            {/* Life Stage Section */}
-                            {animal.lifeStage && (
-            <div className="bg-gray-50 p-4 rounded-lg border border-gray-200">
-                <h3 className="text-lg font-semibold text-gray-700 border-b pb-2 mb-3">Life Stage</h3>
-                <p className="text-gray-700">{animal.lifeStage || ''}</p>
-            </div>
-                            )}
-                            {/* Current Measurements Section */}
+                        <div className="space-y-6">
+                            {/* Appearance */}
                             {(() => {
-                                // Compute current measurements from growth records if available, otherwise use stored fields
-                                let currentWeight = null;
-                                let currentLength = null;
-                                
-                                if (animal.growthRecords && Array.isArray(animal.growthRecords) && animal.growthRecords.length > 0) {
-                                    const sorted = [...animal.growthRecords].sort((a, b) => new Date(b.date) - new Date(a.date));
-                                    currentWeight = sorted[0].weight;
-                                    const withLength = sorted.find(r => r.length);
-                                    currentLength = withLength ? withLength.length : null;
-                                } else {
-                                    currentWeight = animal.weight;
-                                    currentLength = animal.length;
-                                }
-                                
-                                return (currentWeight || currentLength || animal.heightAtShoulder) && (
-                                    <div className="bg-gray-50 p-4 rounded-lg border border-gray-200">
-                                        <h3 className="text-lg font-semibold text-gray-700 border-b pb-2 mb-3">Current Measurements</h3>
-                                        <div className="space-y-2">
-                                            {currentWeight && <p className="text-sm"><span className="font-medium">Weight:</span> {currentWeight}</p>}
-                                            {currentLength && <p className="text-sm"><span className="font-medium">Length:</span> {currentLength}</p>}
-                                            {animal.heightAtShoulder && <p className="text-sm"><span className="font-medium">Height at Shoulder:</span> {animal.heightAtShoulder}</p>}
+                                const fields = [
+                                    { key: 'color', label: 'Color' },
+                                    { key: 'coatPattern', label: 'Pattern' },
+                                    { key: 'coat', label: 'Coat Type' },
+                                    { key: 'earset', label: 'Earset' },
+                                    { key: 'phenotype', label: 'Phenotype' },
+                                    { key: 'morph', label: 'Morph' },
+                                    { key: 'markings', label: 'Markings' },
+                                    { key: 'eyeColor', label: 'Eye Color' },
+                                    { key: 'nailColor', label: 'Nail/Claw Color' },
+                                    { key: 'carrierTraits', label: 'Carrier Traits' },
+                                ].filter(f => fieldTemplate?.fields?.[f.key]?.enabled !== false && animal[f.key]);
+                                return fields.length > 0 && (
+                                    <div className="bg-gray-50 p-4 rounded-lg border border-gray-200 space-y-4">
+                                        <h3 className="text-lg font-semibold text-gray-700">Appearance</h3>
+                                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm">
+                                            {fields.map(f => (
+                                                <div key={f.key}><span className="text-gray-600">{getLabel(f.key, f.label)}:</span> <strong>{animal[f.key]}</strong></div>
+                                            ))}
                                         </div>
                                     </div>
                                 );
                             })()}
 
-                            {/* Growth Records Section */}
+                            {/* Genetic Code */}
+                            {fieldTemplate?.fields?.geneticCode?.enabled !== false && animal.geneticCode && (
+                                <div className="bg-gray-50 p-4 rounded-lg border border-gray-200 space-y-4">
+                                    <h3 className="text-lg font-semibold text-gray-700">{getLabel('geneticCode', 'Genetic Code')}</h3>
+                                    <p className="text-gray-700 font-mono text-sm break-all">{animal.geneticCode}</p>
+                                </div>
+                            )}
+
+                            {/* Life Stage */}
+                            {fieldTemplate?.fields?.lifeStage?.enabled !== false && animal.lifeStage && (
+                                <div className="bg-gray-50 p-4 rounded-lg border border-gray-200 space-y-4">
+                                    <h3 className="text-lg font-semibold text-gray-700">{getLabel('lifeStage', 'Life Stage')}</h3>
+                                    <p className="text-gray-700 text-sm">{animal.lifeStage}</p>
+                                </div>
+                            )}
+
+                            {/* Measurements */}
                             {(() => {
-                                let growthRecords = animal.growthRecords;
-                                if (typeof growthRecords === 'string') {
-                                    try {
-                                        growthRecords = JSON.parse(growthRecords);
-                                    } catch (e) {
-                                        growthRecords = [];
-                                    }
-                                }
-                                return growthRecords && Array.isArray(growthRecords) && growthRecords.length > 0 && (
-                                    <div className="bg-gray-50 p-4 rounded-lg border border-gray-200">
-                                        <h3 className="text-lg font-semibold text-gray-700 border-b pb-2 mb-3">Growth History</h3>
-                                        <div className="overflow-x-auto">
-                                            <table className="w-full text-sm">
-                                                <thead className="border-b border-gray-300">
-                                                    <tr>
-                                                        <th className="text-left py-2 px-2">Date</th>
-                                                        <th className="text-left py-2 px-2">Weight</th>
-                                                        <th className="text-left py-2 px-2">Length</th>
-                                                        <th className="text-left py-2 px-2">BCS</th>
-                                                    </tr>
-                                                </thead>
-                                                <tbody>
-                                                    {growthRecords.map((record, idx) => (
-                                                        <tr key={idx} className="border-b border-gray-200">
-                                                            <td className="py-2 px-2">{record.date ? formatDate(record.date) : '-'}</td>
-                                                            <td className="py-2 px-2">{record.weight ? `${record.weight} ${animal.measurementUnits?.weight || 'g'}` : '-'}</td>
-                                                            <td className="py-2 px-2">{record.length ? `${record.length} ${animal.measurementUnits?.length || 'cm'}` : '-'}</td>
-                                                            <td className="py-2 px-2">{record.bcs || '-'}</td>
-                                                        </tr>
-                                                    ))}
-                                                </tbody>
-                                            </table>
+                                const mFields = [
+                                    { key: 'bodyWeight', label: 'Weight' },
+                                    { key: 'bodyLength', label: 'Body Length' },
+                                    { key: 'heightAtWithers', label: 'Height at Withers' },
+                                    { key: 'chestGirth', label: 'Chest Girth' },
+                                    { key: 'adultWeight', label: 'Adult Weight' },
+                                    { key: 'bodyConditionScore', label: 'Body Condition Score' },
+                                    { key: 'length', label: 'Length' },
+                                ].filter(f => fieldTemplate?.fields?.[f.key]?.enabled !== false && animal[f.key]);
+                                return mFields.length > 0 && (
+                                    <div className="bg-gray-50 p-4 rounded-lg border border-gray-200 space-y-4">
+                                        <h3 className="text-lg font-semibold text-gray-700">Measurements</h3>
+                                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm">
+                                            {mFields.map(f => (
+                                                <div key={f.key}><span className="text-gray-600">{getLabel(f.key, f.label)}:</span> <strong>{animal[f.key]}</strong></div>
+                                            ))}
                                         </div>
                                     </div>
                                 );
                             })()}
+                        </div>
+                    )}
+
+                    {/* Tab 4: Identification */}
+                    {detailViewTab === 4 && (
+                        <div className="space-y-6">
+                            {/* Identification Numbers */}
+                            {(() => {
+                                const idFields = [
+                                    { key: 'breederyId', label: 'Breeder ID' },
+                                    { key: 'microchipNumber', label: 'Microchip Number' },
+                                    { key: 'pedigreeRegistrationId', label: 'Pedigree Registration ID' },
+                                    { key: 'colonyId', label: 'Colony ID' },
+                                    { key: 'rabiesTagNumber', label: 'Rabies Tag Number' },
+                                    { key: 'tattooId', label: 'Tattoo ID' },
+                                    { key: 'akcRegistrationNumber', label: 'AKC Registration #' },
+                                    { key: 'fciRegistrationNumber', label: 'FCI Registration #' },
+                                    { key: 'cfaRegistrationNumber', label: 'CFA Registration #' },
+                                    { key: 'workingRegistryIds', label: 'Working Registry IDs' },
+                                ].filter(f => fieldTemplate?.fields?.[f.key]?.enabled !== false && animal[f.key]);
+                                return (
+                                    <div className="bg-gray-50 p-4 rounded-lg border border-gray-200 space-y-4">
+                                        <h3 className="text-lg font-semibold text-gray-700">Identification Numbers</h3>
+                                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm">
+                                            <div><span className="text-gray-600">CritterTrack ID:</span> <strong>{animal.id_public || ''}</strong></div>
+                                            {idFields.map(f => (
+                                                <div key={f.key}><span className="text-gray-600">{getLabel(f.key, f.label)}:</span> <strong>{animal[f.key]}</strong></div>
+                                            ))}
+                                        </div>
+                                    </div>
+                                );
+                            })()}
+
+                            {/* Classification */}
+                            <div className="bg-gray-50 p-4 rounded-lg border border-gray-200 space-y-4">
+                                <h3 className="text-lg font-semibold text-gray-700">Classification</h3>
+                                <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm">
+                                    <div><span className="text-gray-600">Species:</span> <strong>{animal.species || ''}</strong></div>
+                                    {fieldTemplate?.fields?.breed?.enabled !== false && animal.breed && (
+                                        <div><span className="text-gray-600">{getLabel('breed', 'Breed')}:</span> <strong>{animal.breed}</strong></div>
+                                    )}
+                                    {fieldTemplate?.fields?.strain?.enabled !== false && animal.strain && (
+                                        <div><span className="text-gray-600">{getLabel('strain', 'Strain')}:</span> <strong>{animal.strain}</strong></div>
+                                    )}
+                                </div>
+                            </div>
+
+                            {/* Tags */}
+                            {animal.tags && animal.tags.length > 0 && (
+                                <div className="bg-gray-50 p-4 rounded-lg border border-gray-200 space-y-4">
+                                    <h3 className="text-lg font-semibold text-gray-700">Tags</h3>
+                                    <div className="flex flex-wrap gap-2">
+                                        {animal.tags.map((tag, idx) => (
+                                            <span key={idx} className="bg-blue-100 text-blue-800 px-2 py-1 rounded text-sm">{tag}</span>
+                                        ))}
+                                    </div>
+                                </div>
+                            )}
                         </div>
                     )}
 
@@ -5509,68 +5545,37 @@ const ViewOnlyAnimalDetail = ({ animal, onClose, API_BASE_URL, onViewProfile, on
                         </div>
                     )}
 
-                    {/* Tab 10: Records (Combined with End of Life for public view) */}
+                    {/* Tab 10: Records */}
                     {detailViewTab === 10 && (
                         <div className="space-y-6">
-                            {/* Current Owner Section */}
-                            {(animal.currentOwnerDisplay || animal.currentOwner) && (
-                                <div className="bg-gray-50 p-4 rounded-lg border border-gray-200">
-                                    <h3 className="text-lg font-semibold text-gray-700 border-b pb-2 mb-3">Current Owner</h3>
-                                    <p className="text-gray-700">{animal.currentOwnerDisplay || animal.currentOwner || ''}</p>
-                                    {animal.coOwnership && (
-                                        <p className="text-gray-700 mt-2"><span className="text-gray-600">Co-Ownership:</span> {animal.coOwnership}</p>
-                                    )}
-                                </div>
-                            )}
-                            
-                            {/* Remarks & Notes Section */}
-                            {animal.remarks && (
-                                <div className="bg-gray-50 p-4 rounded-lg border border-gray-200">
-                                    <h3 className="text-lg font-semibold text-gray-700">Remarks & Notes</h3>
-                                    <p className="text-sm text-gray-700 whitespace-pre-wrap mt-3">{animal.remarks}</p>
-                                </div>
-                            )}
-                            
-                            {/* End of Life Information Section */}
-                            {(animal.deceasedDate || animal.causeOfDeath || animal.necropsyResults) && (
-                                <div className="bg-gray-50 p-4 rounded-lg border border-gray-200 space-y-4">
-                                    <h3 className="text-lg font-semibold text-gray-700">Information</h3>
-                                    <div className="space-y-2 text-sm">
-                                        {animal.deceasedDate && (
-                                            <div><span className="text-gray-600">Deceased Date:</span> <strong>{formatDate(animal.deceasedDate)}</strong></div>
-                                        )}
-                                        {animal.causeOfDeath && (
-                                            <div><span className="text-gray-600">Cause of Death:</span> <strong>{animal.causeOfDeath}</strong></div>
-                                        )}
-                                        {animal.necropsyResults && (
-                                            <div><span className="text-gray-600">Necropsy Results:</span> <strong>{animal.necropsyResults}</strong></div>
-                                        )}
-                                    </div>
-                                </div>
-                            )}
-
-                            {/* Legal/Administrative Section */}
-                            {(animal.insurance || animal.legalStatus) && (
-                                <div className="bg-gray-50 p-4 rounded-lg border border-gray-200 space-y-4">
-                                    <h3 className="text-lg font-semibold text-gray-700">Legal/Administrative</h3>
-                                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm">
-                                        {animal.insurance && <div><span className="text-gray-600">Insurance:</span> <strong>{animal.insurance}</strong></div>}
-                                        {animal.legalStatus && <div><span className="text-gray-600">Legal Status:</span> <strong>{animal.legalStatus}</strong></div>}
-                                    </div>
-                                </div>
-                            )}
-                            
-                            {/* Show message if no data in any section */}
-                            {!animal.remarks && !animal.deceasedDate && !animal.causeOfDeath && !animal.necropsyResults && !animal.insurance && !animal.legalStatus && (
-                                <div className="bg-gray-50 p-4 rounded-lg border border-gray-200 text-center text-gray-500">
-                                    <p>No records or end-of-life information available</p>
-                                </div>
-                            )}
+                            {/* Remarks & Notes */}
+                            <div className="bg-gray-50 p-4 rounded-lg border border-gray-200 space-y-4">
+                                <h3 className="text-lg font-semibold text-gray-700">Remarks & Notes</h3>
+                                <p className="text-sm text-gray-700 whitespace-pre-wrap">{animal.remarks || ''}</p>
+                            </div>
                         </div>
                     )}
 
-                    {/* Tab 11: Show */}
+                    {/* Tab 11: End of Life */}
                     {detailViewTab === 11 && (
+                        <div className="space-y-6">
+                            {/* Information */}
+                            <div className="bg-gray-50 p-4 rounded-lg border border-gray-200 space-y-4">
+                                <h3 className="text-lg font-semibold text-gray-700">Information</h3>
+                                <div className="space-y-3 text-sm">
+                                    <div><span className="text-gray-600">Deceased Date:</span> <strong>{animal.deceasedDate ? formatDate(animal.deceasedDate) : ''}</strong></div>
+                                    <div><span className="text-gray-600">Cause of Death:</span> <strong>{animal.causeOfDeath || ''}</strong></div>
+                                    <div><span className="text-gray-600">Necropsy Results:</span> <strong>{animal.necropsyResults || ''}</strong></div>
+                                    {animal.endOfLifeCareNotes && (
+                                        <div><span className="text-gray-600">{getLabel('endOfLifeCareNotes', 'End of Life Care Notes')}:</span> <p className="text-gray-700 mt-1 whitespace-pre-wrap">{animal.endOfLifeCareNotes}</p></div>
+                                    )}
+                                </div>
+                            </div>
+                        </div>
+                    )}
+
+                    {/* Tab 12: Show */}
+                    {detailViewTab === 12 && (
                         <div className="space-y-6">
                             {/* Show Titles & Ratings */}
                             <div className="bg-gray-50 p-4 rounded-lg border border-gray-200 space-y-4">
@@ -5597,6 +5602,63 @@ const ViewOnlyAnimalDetail = ({ animal, onClose, API_BASE_URL, onViewProfile, on
                             {!animal.showTitles && !animal.showRatings && !animal.judgeComments && !(animal.workingTitles || animal.performanceScores) && (
                                 <div className="bg-gray-50 p-4 rounded-lg border border-gray-200 text-center text-gray-500">
                                     <p>No show information available</p>
+                                </div>
+                            )}
+                        </div>
+                    )}
+
+                    {/* Tab 13: Legal & Documentation */}
+                    {detailViewTab === 13 && (
+                        <div className="space-y-6">
+                            {/* Licensing & Permits */}
+                            {(animal.licenseNumber || animal.licenseJurisdiction) && (
+                            <div className="bg-gray-50 p-4 rounded-lg border border-gray-200 space-y-4">
+                                <h3 className="text-lg font-semibold text-gray-700">Licensing & Permits</h3>
+                                <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm">
+                                    {fieldTemplate?.fields?.licenseNumber?.enabled !== false && animal.licenseNumber && (
+                                        <div><span className="text-gray-600">{getLabel('licenseNumber', 'License Number')}:</span> <strong>{animal.licenseNumber}</strong></div>
+                                    )}
+                                    {fieldTemplate?.fields?.licenseJurisdiction?.enabled !== false && animal.licenseJurisdiction && (
+                                        <div><span className="text-gray-600">{getLabel('licenseJurisdiction', 'License Jurisdiction')}:</span> <strong>{animal.licenseJurisdiction}</strong></div>
+                                    )}
+                                </div>
+                            </div>
+                            )}
+
+                            {/* Legal / Administrative */}
+                            {(animal.insurance || animal.legalStatus) && (
+                            <div className="bg-gray-50 p-4 rounded-lg border border-gray-200 space-y-4">
+                                <h3 className="text-lg font-semibold text-gray-700">Legal / Administrative</h3>
+                                <div className="space-y-3 text-sm">
+                                    {fieldTemplate?.fields?.insurance?.enabled !== false && animal.insurance && (
+                                        <div><span className="text-gray-600">{getLabel('insurance', 'Insurance')}:</span> <p className="text-gray-700 mt-1 whitespace-pre-wrap">{animal.insurance}</p></div>
+                                    )}
+                                    {fieldTemplate?.fields?.legalStatus?.enabled !== false && animal.legalStatus && (
+                                        <div><span className="text-gray-600">{getLabel('legalStatus', 'Legal Status')}:</span> <p className="text-gray-700 mt-1 whitespace-pre-wrap">{animal.legalStatus}</p></div>
+                                    )}
+                                </div>
+                            </div>
+                            )}
+
+                            {/* Restrictions */}
+                            {(animal.breedingRestrictions || animal.exportRestrictions) && (
+                            <div className="bg-gray-50 p-4 rounded-lg border border-gray-200 space-y-4">
+                                <h3 className="text-lg font-semibold text-gray-700">Restrictions</h3>
+                                <div className="space-y-3 text-sm">
+                                    {animal.breedingRestrictions && (
+                                        <div><span className="text-gray-600">{getLabel('breedingRestrictions', 'Breeding Restrictions')}:</span> <p className="text-gray-700 mt-1 whitespace-pre-wrap">{animal.breedingRestrictions}</p></div>
+                                    )}
+                                    {animal.exportRestrictions && (
+                                        <div><span className="text-gray-600">{getLabel('exportRestrictions', 'Export Restrictions')}:</span> <p className="text-gray-700 mt-1 whitespace-pre-wrap">{animal.exportRestrictions}</p></div>
+                                    )}
+                                </div>
+                            </div>
+                            )}
+
+                            {/* No data fallback */}
+                            {!animal.licenseNumber && !animal.licenseJurisdiction && !animal.insurance && !animal.legalStatus && !animal.breedingRestrictions && !animal.exportRestrictions && (
+                                <div className="bg-gray-50 p-4 rounded-lg border border-gray-200 text-center text-gray-500">
+                                    <p>No legal or documentation records</p>
                                 </div>
                             )}
                         </div>
