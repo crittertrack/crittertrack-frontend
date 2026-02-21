@@ -11211,7 +11211,7 @@ const AnimalForm = ({
                                 
                                 {!isFieldHidden('strain') && (
                                     <div className="md:col-span-2">
-                                        <label className="block text-sm font-medium text-gray-700">{getFieldLabel('strain', 'Strain')} {!speciesConfigs?.[formData.species]?.fieldReplacements?.strain && <span className="text-xs text-gray-500">(small mammals)</span>}</label>
+                                        <label className="block text-sm font-medium text-gray-700">{getFieldLabel('strain', 'Strain')} {!fieldTemplate?.fields?.strain?.label && !speciesConfigs?.[formData.species]?.fieldReplacements?.strain && <span className="text-xs text-gray-500">(small mammals)</span>}</label>
                                         <input type="text" name="strain" value={formData.strain} onChange={handleChange} 
                                             data-tutorial-target="strain-input"
                                             className="mt-1 block w-full p-2 border border-gray-300 rounded-md shadow-sm focus:ring-primary focus:border-primary" 
@@ -11444,7 +11444,7 @@ const AnimalForm = ({
                                             onChange={handleChange}
                                             className="form-checkbox h-5 w-5 text-primary rounded focus:ring-primary"
                                         />
-                                        <span className="text-sm font-medium text-gray-700">In Mating</span>
+                                        <span className="text-sm font-medium text-gray-700">{getFieldLabel('isInMating', 'In Mating')}</span>
                                     </label>
                                 )}
 
@@ -11470,7 +11470,7 @@ const AnimalForm = ({
                                             onChange={handleChange}
                                             className="form-checkbox h-5 w-5 text-primary rounded focus:ring-primary"
                                         />
-                                        <span className="text-sm font-medium text-gray-700">Pregnant</span>
+                                        <span className="text-sm font-medium text-gray-700">{getFieldLabel('isPregnant', 'Pregnant')}</span>
                                     </label>
                                 )}
 
@@ -11483,7 +11483,7 @@ const AnimalForm = ({
                                             onChange={handleChange}
                                             className="form-checkbox h-5 w-5 text-primary rounded focus:ring-primary"
                                         />
-                                        <span className="text-sm font-medium text-gray-700">Nursing</span>
+                                        <span className="text-sm font-medium text-gray-700">{getFieldLabel('isNursing', 'Nursing')}</span>
                                     </label>
                                 )}
 
@@ -12488,10 +12488,17 @@ const AnimalForm = ({
                                                 <select name="groomingNeeds" value={formData.groomingNeeds || ''} onChange={handleChange} 
                                                     className="mt-1 block w-full p-2 border border-gray-300 rounded-md shadow-sm focus:ring-primary focus:border-primary">
                                                     <option value="">Select...</option>
-                                                    <option value="Low">Low - minimal brushing</option>
-                                                    <option value="Moderate">Moderate - weekly grooming</option>
-                                                    <option value="High">High - daily brushing</option>
-                                                    <option value="Professional">Professional - regular groomer</option>
+                                                    {getFieldLabel('groomingNeeds', 'Grooming Needs').toLowerCase().includes('shed') ? <>
+                                                        <option value="Normal">Normal (clean sheds)</option>
+                                                        <option value="Occasional">Occasional stuck shed</option>
+                                                        <option value="Frequent">Frequent stuck shed (dysecdysis)</option>
+                                                        <option value="Requires soaking">Requires soaking during shed</option>
+                                                    </> : <>
+                                                        <option value="Low">Low - minimal brushing</option>
+                                                        <option value="Moderate">Moderate - weekly grooming</option>
+                                                        <option value="High">High - daily brushing</option>
+                                                        <option value="Professional">Professional - regular groomer</option>
+                                                    </>}
                                                 </select>
                                             </div>
                                             )}
