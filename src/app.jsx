@@ -16171,18 +16171,17 @@ const AnimalList = ({ authToken, showModalMessage, onEditAnimal, onViewAnimal, f
                         return (
                         <div key={species} className="border border-gray-200 rounded-xl overflow-hidden shadow-sm">
                             <div 
-                                className="flex items-center justify-between bg-gray-100 px-2 py-2 sm:p-4 border-b cursor-pointer sm:cursor-default"
+                                className="flex items-center justify-between bg-gray-100 px-2 py-2 sm:p-4 border-b cursor-pointer"
                                 onClick={() => {
-                                    // Only toggle collapse on mobile (when not in bulk mode)
-                                    if (window.innerWidth < 640 && !isBulkMode) {
+                                    if (!isBulkMode) {
                                         setCollapsedSpecies(prev => ({ ...prev, [species]: !prev[species] }));
                                     }
                                 }}
                             >
                                 <div className="flex items-center gap-1 sm:gap-2">
-                                    {/* Collapse indicator - mobile only */}
+                                    {/* Collapse indicator */}
                                     <ChevronLeft 
-                                        className={`w-4 h-4 text-gray-500 transition-transform sm:hidden ${isCollapsed ? '-rotate-90' : 'rotate-90'}`}
+                                        className={`w-4 h-4 text-gray-500 transition-transform ${isCollapsed ? '-rotate-90' : 'rotate-90'}`}
                                     />
                                     {/* Move species order buttons - left side before title */}
                                     {!isBulkMode && (
@@ -16270,8 +16269,8 @@ const AnimalList = ({ authToken, showModalMessage, onEditAnimal, onViewAnimal, f
                                     )}
                                 </div>
                             </div>
-                            {/* Collapsible content - always show on desktop, toggle on mobile */}
-                            <div className={`${isCollapsed ? 'hidden' : 'block'} sm:block`}>
+                            {/* Collapsible content */}
+                            <div className={isCollapsed ? 'hidden' : 'block'}>
                                 <div className="p-1.5 sm:p-4 grid grid-cols-2 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-2 sm:gap-4">
                                     {groupedAnimals[species].map(animal => (
                                         <AnimalCard 
