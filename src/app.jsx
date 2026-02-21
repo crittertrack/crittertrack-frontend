@@ -11003,7 +11003,7 @@ const AnimalForm = ({
                         </div>
                         )}
 
-                        {/* Estrus/Cycle - Only for females when not neutered */}}
+                        {/* Estrus/Cycle - Only for females when not neutered */}
                         {!isFieldHidden('heatStatus') && (formData.gender === 'Female' || formData.gender === 'Intersex' || formData.gender === 'Unknown') && !formData.isNeutered && (
                             <div className="bg-gray-50 p-4 rounded-lg border border-gray-200 space-y-4" data-tutorial-target="estrus-cycle-section">
                                 <h3 className="text-lg font-semibold text-gray-700 mb-4">Estrus/Cycle</h3>
@@ -11047,8 +11047,8 @@ const AnimalForm = ({
                             </div>
                         )}
 
-                        {/* Mating - Hidden when neutered/spayed */}
-                        {!formData.isNeutered && !formData.isInfertile && (formData.gender === 'Female' || formData.gender === 'Intersex' || formData.gender === 'Unknown' || formData.gender === 'Male') && (
+                        {/* Mating - Hidden when neutered/spayed and when all mating fields are hidden */}
+                        {!formData.isNeutered && !formData.isInfertile && (!isFieldHidden('matingDates') || !isFieldHidden('artificialInseminationUsed')) && (formData.gender === 'Female' || formData.gender === 'Intersex' || formData.gender === 'Unknown' || formData.gender === 'Male') && (
                             <div className="bg-gray-50 p-4 rounded-lg border border-gray-200 space-y-4">
                                 <h3 className="text-lg font-semibold text-gray-700 mb-4">Mating {formData.isNeutered && <span className="text-xs font-normal text-gray-500">(History)</span>}</h3>
                                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
