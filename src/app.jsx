@@ -8262,6 +8262,8 @@ const AnimalForm = ({
             breederId_public: animalToEdit.breederId_public || null,
             ownerName: animalToEdit.ownerName || '',
             currentOwner: animalToEdit.currentOwner || '',
+            currentOwnerDisplay: animalToEdit.currentOwnerDisplay || '',
+            groupRole: animalToEdit.groupRole || '',
             isPregnant: animalToEdit.isPregnant || false,
             isNursing: animalToEdit.isNursing || false,
             isInMating: animalToEdit.isInMating || false,
@@ -8271,9 +8273,16 @@ const AnimalForm = ({
             // New fields for comprehensive mammal profile
             microchipNumber: animalToEdit.microchipNumber || '',
             pedigreeRegistrationId: animalToEdit.pedigreeRegistrationId || '',
+            colonyId: animalToEdit.colonyId || '',
             breed: animalToEdit.breed || '',
             strain: animalToEdit.strain || '',
             coatPattern: animalToEdit.coatPattern || '',
+            phenotype: animalToEdit.phenotype || '',
+            morph: animalToEdit.morph || '',
+            markings: animalToEdit.markings || '',
+            eyeColor: animalToEdit.eyeColor || '',
+            nailColor: animalToEdit.nailColor || '',
+            carrierTraits: animalToEdit.carrierTraits || '',
             bodyWeight: animalToEdit.bodyWeight || '',
             bodyLength: animalToEdit.bodyLength || '',
             heightAtWithers: animalToEdit.heightAtWithers || '',
@@ -8287,6 +8296,9 @@ const AnimalForm = ({
             matingDates: animalToEdit.matingDates || '',
             expectedDueDate: animalToEdit.expectedDueDate ? new Date(animalToEdit.expectedDueDate).toISOString().substring(0, 10) : '',
             litterCount: animalToEdit.litterCount || '',
+            litterSizeBorn: animalToEdit.litterSizeBorn || '',
+            litterSizeWeaned: animalToEdit.litterSizeWeaned || '',
+            stillbornCount: animalToEdit.stillbornCount || '',
             nursingStartDate: animalToEdit.nursingStartDate ? new Date(animalToEdit.nursingStartDate).toISOString().substring(0, 10) : '',
             weaningDate: animalToEdit.weaningDate ? new Date(animalToEdit.weaningDate).toISOString().substring(0, 10) : '',
             // Stud/Fertility fields (sire role)
@@ -8416,6 +8428,8 @@ const AnimalForm = ({
             breederId_public: null,
             ownerName: '',
             currentOwner: '',
+            currentOwnerDisplay: '',
+            groupRole: '',
             isPregnant: false,
             isNursing: false,
             isInMating: false,
@@ -8425,9 +8439,16 @@ const AnimalForm = ({
             // New fields defaults
             microchipNumber: '',
             pedigreeRegistrationId: '',
+            colonyId: '',
             breed: '',
             strain: '',
             coatPattern: '',
+            phenotype: '',
+            morph: '',
+            markings: '',
+            eyeColor: '',
+            nailColor: '',
+            carrierTraits: '',
             bodyWeight: '',
             bodyLength: '',
             heightAtWithers: '',
@@ -8441,6 +8462,9 @@ const AnimalForm = ({
             matingDates: '',
             expectedDueDate: '',
             litterCount: '',
+            litterSizeBorn: '',
+            litterSizeWeaned: '',
+            stillbornCount: '',
             nursingStartDate: '',
             weaningDate: '',
             // Stud/Fertility fields (sire role)
@@ -9863,17 +9887,42 @@ const AnimalForm = ({
                                     <span className="text-sm font-medium text-gray-700">Currently Owned by Me</span>
                                 </label>
                             </div>
-                            <div>
-                                <label className='block text-sm font-medium text-gray-700 mb-2'>Owner Name</label>
-                                <input 
-                                    type="text" 
-                                    name="currentOwner" 
-                                    value={formData.currentOwner} 
-                                    onChange={handleChange}
-                                    placeholder="Name of current owner"
-                                    className="block w-full p-2 border border-gray-300 rounded-md shadow-sm focus:ring-primary focus:border-primary" 
-                                />
-                                <p className="text-xs text-gray-500 mt-1">Records owner changes in ownership history.</p>
+                            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                <div>
+                                    <label className='block text-sm font-medium text-gray-700 mb-2'>{getFieldLabel('currentOwner', 'Owner Name')}</label>
+                                    <input 
+                                        type="text" 
+                                        name="currentOwner" 
+                                        value={formData.currentOwner} 
+                                        onChange={handleChange}
+                                        placeholder="Name of current owner"
+                                        className="block w-full p-2 border border-gray-300 rounded-md shadow-sm focus:ring-primary focus:border-primary" 
+                                    />
+                                    <p className="text-xs text-gray-500 mt-1">Records owner changes in ownership history.</p>
+                                </div>
+                                <div>
+                                    <label className='block text-sm font-medium text-gray-700 mb-2'>{getFieldLabel('currentOwnerDisplay', 'Owner Display Name')}</label>
+                                    <input 
+                                        type="text" 
+                                        name="currentOwnerDisplay" 
+                                        value={formData.currentOwnerDisplay || ''} 
+                                        onChange={handleChange}
+                                        placeholder="Public display name for owner"
+                                        className="block w-full p-2 border border-gray-300 rounded-md shadow-sm focus:ring-primary focus:border-primary" 
+                                    />
+                                </div>
+                                <div>
+                                    <label className='block text-sm font-medium text-gray-700 mb-2'>{getFieldLabel('groupRole', 'Group Role')}</label>
+                                    <input 
+                                        type="text" 
+                                        name="groupRole" 
+                                        value={formData.groupRole || ''} 
+                                        onChange={handleChange}
+                                        placeholder="e.g., Alpha, Beta, Omega"
+                                        className="block w-full p-2 border border-gray-300 rounded-md shadow-sm focus:ring-primary focus:border-primary" 
+                                    />
+                                    <p className="text-xs text-gray-500 mt-1">Role in group or colony (for social species).</p>
+                                </div>
                             </div>
 
                             {/* Dog/Cat Co-ownership */}
@@ -9955,13 +10004,13 @@ const AnimalForm = ({
                             <h3 className="text-lg font-semibold text-gray-700 border-b pb-2">Appearance</h3>
                             <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                                 <div>
-                                    <label className="block text-sm font-medium text-gray-700">Color</label>
+                                    <label className="block text-sm font-medium text-gray-700">{getFieldLabel('color', 'Color')}</label>
                                     <input type="text" name="color" value={formData.color} onChange={handleChange} 
                                         className="mt-1 block w-full p-2 border border-gray-300 rounded-md shadow-sm focus:ring-primary focus:border-primary" />
                                 </div>
                                 
                                 <div>
-                                    <label className="block text-sm font-medium text-gray-700">Pattern</label>
+                                    <label className="block text-sm font-medium text-gray-700">{getFieldLabel('coatPattern', 'Pattern')}</label>
                                     <input type="text" name="coatPattern" value={formData.coatPattern} onChange={handleChange} 
                                         className="mt-1 block w-full p-2 border border-gray-300 rounded-md shadow-sm focus:ring-primary focus:border-primary" 
                                         placeholder="e.g., Solid, Hooded, Brindle" />
@@ -9984,6 +10033,48 @@ const AnimalForm = ({
                                             placeholder="e.g., Standard, Dumbo" />
                                     </div>
                                 )}
+                                
+                                <div>
+                                    <label className="block text-sm font-medium text-gray-700">{getFieldLabel('phenotype', 'Phenotype')}</label>
+                                    <input type="text" name="phenotype" value={formData.phenotype || ''} onChange={handleChange} 
+                                        className="mt-1 block w-full p-2 border border-gray-300 rounded-md shadow-sm focus:ring-primary focus:border-primary" 
+                                        placeholder="Observable traits" />
+                                </div>
+                                
+                                <div>
+                                    <label className="block text-sm font-medium text-gray-700">{getFieldLabel('morph', 'Morph')}</label>
+                                    <input type="text" name="morph" value={formData.morph || ''} onChange={handleChange} 
+                                        className="mt-1 block w-full p-2 border border-gray-300 rounded-md shadow-sm focus:ring-primary focus:border-primary" 
+                                        placeholder="Mutation/Morph" />
+                                </div>
+                                
+                                <div>
+                                    <label className="block text-sm font-medium text-gray-700">{getFieldLabel('markings', 'Markings')}</label>
+                                    <input type="text" name="markings" value={formData.markings || ''} onChange={handleChange} 
+                                        className="mt-1 block w-full p-2 border border-gray-300 rounded-md shadow-sm focus:ring-primary focus:border-primary" 
+                                        placeholder="Body markings/patterns" />
+                                </div>
+                                
+                                <div>
+                                    <label className="block text-sm font-medium text-gray-700">{getFieldLabel('eyeColor', 'Eye Color')}</label>
+                                    <input type="text" name="eyeColor" value={formData.eyeColor || ''} onChange={handleChange} 
+                                        className="mt-1 block w-full p-2 border border-gray-300 rounded-md shadow-sm focus:ring-primary focus:border-primary" 
+                                        placeholder="Eye color" />
+                                </div>
+                                
+                                <div>
+                                    <label className="block text-sm font-medium text-gray-700">{getFieldLabel('nailColor', 'Nail Color')}</label>
+                                    <input type="text" name="nailColor" value={formData.nailColor || ''} onChange={handleChange} 
+                                        className="mt-1 block w-full p-2 border border-gray-300 rounded-md shadow-sm focus:ring-primary focus:border-primary" 
+                                        placeholder="Nail/claw color" />
+                                </div>
+                                
+                                <div>
+                                    <label className="block text-sm font-medium text-gray-700">{getFieldLabel('carrierTraits', 'Carrier Traits')}</label>
+                                    <input type="text" name="carrierTraits" value={formData.carrierTraits || ''} onChange={handleChange} 
+                                        className="mt-1 block w-full p-2 border border-gray-300 rounded-md shadow-sm focus:ring-primary focus:border-primary" 
+                                        placeholder="Genetic traits carried" />
+                                </div>
                             </div>
 
 
@@ -10521,15 +10612,22 @@ const AnimalForm = ({
                                 </div>
                                 
                                 <div data-tutorial-target="microchip-input">
-                                    <label className="block text-sm font-medium text-gray-700">Microchip Number</label>
+                                    <label className="block text-sm font-medium text-gray-700">{getFieldLabel('microchipNumber', 'Microchip Number')}</label>
                                     <input type="text" name="microchipNumber" value={formData.microchipNumber} onChange={handleChange} 
                                         className="mt-1 block w-full p-2 border border-gray-300 rounded-md shadow-sm focus:ring-primary focus:border-primary" />
                                 </div>
                                 
-                                <div className="md:col-span-2" data-tutorial-target="registration-id-input">
-                                    <label className="block text-sm font-medium text-gray-700">Pedigree Registration ID</label>
+                                <div data-tutorial-target="registration-id-input">
+                                    <label className="block text-sm font-medium text-gray-700">{getFieldLabel('pedigreeRegistrationId', 'Pedigree Registration ID')}</label>
                                     <input type="text" name="pedigreeRegistrationId" value={formData.pedigreeRegistrationId} onChange={handleChange} 
                                         className="mt-1 block w-full p-2 border border-gray-300 rounded-md shadow-sm focus:ring-primary focus:border-primary" />
+                                </div>
+                                
+                                <div>
+                                    <label className="block text-sm font-medium text-gray-700">{getFieldLabel('colonyId', 'Colony ID')}</label>
+                                    <input type="text" name="colonyId" value={formData.colonyId || ''} onChange={handleChange} 
+                                        className="mt-1 block w-full p-2 border border-gray-300 rounded-md shadow-sm focus:ring-primary focus:border-primary" 
+                                        placeholder="Colony or group identifier" />
                                 </div>
 
                                 {/* Dog/Cat Licensing - integrated */}
@@ -11170,10 +11268,31 @@ const AnimalForm = ({
                                             </div>
                                             
                                             <div>
-                                                <label className="block text-sm font-medium text-gray-700 mb-2">Litter Count</label>
+                                                <label className="block text-sm font-medium text-gray-700 mb-2">{getFieldLabel('litterCount', 'Litter Count')}</label>
                                                 <input type="number" name="litterCount" value={formData.litterCount} onChange={handleChange} 
                                                     className="block w-full p-2 border border-blue-200 rounded-md shadow-sm focus:ring-primary focus:border-primary" 
                                                     placeholder="Total number of litters" />
+                                            </div>
+                                            
+                                            <div>
+                                                <label className="block text-sm font-medium text-gray-700 mb-2">{getFieldLabel('litterSizeBorn', 'Litter Size Born')}</label>
+                                                <input type="number" name="litterSizeBorn" value={formData.litterSizeBorn || ''} onChange={handleChange} 
+                                                    className="block w-full p-2 border border-blue-200 rounded-md shadow-sm focus:ring-primary focus:border-primary" 
+                                                    placeholder="Number born" min="0" />
+                                            </div>
+                                            
+                                            <div>
+                                                <label className="block text-sm font-medium text-gray-700 mb-2">{getFieldLabel('litterSizeWeaned', 'Litter Size Weaned')}</label>
+                                                <input type="number" name="litterSizeWeaned" value={formData.litterSizeWeaned || ''} onChange={handleChange} 
+                                                    className="block w-full p-2 border border-blue-200 rounded-md shadow-sm focus:ring-primary focus:border-primary" 
+                                                    placeholder="Number weaned" min="0" />
+                                            </div>
+                                            
+                                            <div>
+                                                <label className="block text-sm font-medium text-gray-700 mb-2">{getFieldLabel('stillbornCount', 'Stillborn Count')}</label>
+                                                <input type="number" name="stillbornCount" value={formData.stillbornCount || ''} onChange={handleChange} 
+                                                    className="block w-full p-2 border border-blue-200 rounded-md shadow-sm focus:ring-primary focus:border-primary" 
+                                                    placeholder="Stillborn" min="0" />
                                             </div>
                                         </>
                                     )}
