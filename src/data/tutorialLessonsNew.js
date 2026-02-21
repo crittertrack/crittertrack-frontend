@@ -60,7 +60,7 @@ const GETTING_STARTED_LESSONS = [
       {
         stepNumber: 3,
         title: 'Species Search Bar',
-        content: 'Use the search bar to find species by name. You can also filter by category (Rodent, Mammal, Reptile, etc.) to narrow down your options.',
+        content: 'Use the search bar to find species by name. You can also filter by category (Mammal, Reptile, Bird, etc.) to narrow down your options.',
         highlightElement: '[data-tutorial-target="species-search-section"]',
         tips: [
           'Search is case-insensitive',
@@ -94,7 +94,7 @@ const GETTING_STARTED_LESSONS = [
       {
         stepNumber: 6,
         title: 'Category Selection',
-        content: 'Select a category that best fits your species. This helps organize your species list and makes searching easier. Categories include Rodent, Mammal, Reptile, Bird, Amphibian, Fish, Invertebrate, and Other.',
+        content: 'Select a category that best fits your species. This helps organize your species list and makes searching easier. Categories include Mammal, Reptile, Bird, Amphibian, Fish, Invertebrate, and Other.',
         highlightElement: '[data-tutorial-target="species-category-dropdown"]',
         actionType: 'click',
         tips: [

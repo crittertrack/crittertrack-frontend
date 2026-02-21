@@ -5,7 +5,7 @@ import {
 } from 'lucide-react';
 import './SpeciesManagementTab.css';
 
-const CATEGORIES = ['Rodent', 'Reptile', 'Bird', 'Fish', 'Amphibian', 'Mammal', 'Invertebrate', 'Other'];
+const CATEGORIES = ['Mammal', 'Reptile', 'Bird', 'Fish', 'Amphibian', 'Invertebrate', 'Other'];
 
 const SpeciesManagementTab = ({ API_BASE_URL, authToken }) => {
     const [species, setSpecies] = useState([]);
@@ -23,7 +23,7 @@ const SpeciesManagementTab = ({ API_BASE_URL, authToken }) => {
     const [saving, setSaving] = useState(false);
     
     // Form states
-    const [newSpecies, setNewSpecies] = useState({ name: '', latinName: '', category: 'Rodent', isDefault: false });
+    const [newSpecies, setNewSpecies] = useState({ name: '', latinName: '', category: 'Mammal', isDefault: false });
     const [editForm, setEditForm] = useState({ name: '', latinName: '', category: '', isDefault: false });
     const [replacementSpecies, setReplacementSpecies] = useState('');
 
@@ -77,7 +77,7 @@ const SpeciesManagementTab = ({ API_BASE_URL, authToken }) => {
             
             await fetchSpecies();
             setShowAddModal(false);
-            setNewSpecies({ name: '', latinName: '', category: 'Rodent', isDefault: false });
+            setNewSpecies({ name: '', latinName: '', category: 'Mammal', isDefault: false });
         } catch (err) {
             alert(err.message);
         } finally {

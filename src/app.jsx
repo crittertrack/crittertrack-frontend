@@ -7420,7 +7420,7 @@ const SpeciesManager = ({ speciesOptions, setSpeciesOptions, onCancel, showModal
     const [feedbackText, setFeedbackText] = useState('');
     const [feedbackSubmitting, setFeedbackSubmitting] = useState(false);
     
-    const categories = ['Rodent', 'Mammal', 'Reptile', 'Bird', 'Amphibian', 'Fish', 'Invertebrate', 'Other'];
+    const categories = ['Mammal', 'Reptile', 'Bird', 'Amphibian', 'Fish', 'Invertebrate', 'Other'];
     
     // const customSpecies = speciesOptions.filter(s => !s.isDefault);
     // const defaultSpecies = speciesOptions.filter(s => s.isDefault);
@@ -7682,7 +7682,7 @@ const SpeciesManager = ({ speciesOptions, setSpeciesOptions, onCancel, showModal
 };
 
 const SpeciesSelector = ({ speciesOptions, onSelectSpecies, onManageSpecies, searchTerm, setSearchTerm, categoryFilter, setCategoryFilter }) => {
-    const categories = ['All', 'Rodent', 'Mammal', 'Reptile', 'Bird', 'Amphibian', 'Fish', 'Invertebrate', 'Other'];
+    const categories = ['All', 'Mammal', 'Reptile', 'Bird', 'Amphibian', 'Fish', 'Invertebrate', 'Other'];
     
     // Filter species by category and search
     const filteredSpecies = speciesOptions.filter(s => {
@@ -10548,7 +10548,7 @@ const AnimalForm = ({
                                 
                                 {!isFieldHidden('strain') && (
                                     <div className="md:col-span-2">
-                                        <label className="block text-sm font-medium text-gray-700">{getFieldLabel('strain', 'Strain')} {!speciesConfigs?.[formData.species]?.fieldReplacements?.strain && <span className="text-xs text-gray-500">(rodents)</span>}</label>
+                                        <label className="block text-sm font-medium text-gray-700">{getFieldLabel('strain', 'Strain')} {!speciesConfigs?.[formData.species]?.fieldReplacements?.strain && <span className="text-xs text-gray-500">(small mammals)</span>}</label>
                                         <input type="text" name="strain" value={formData.strain} onChange={handleChange} 
                                             data-tutorial-target="strain-input"
                                             className="mt-1 block w-full p-2 border border-gray-300 rounded-md shadow-sm focus:ring-primary focus:border-primary" 
@@ -17998,13 +17998,13 @@ const App = () => {
                 console.error('Failed to fetch species:', error);
                 // Fallback to defaults if API fails
                 setSpeciesOptions([
-                    { name: 'Fancy Mouse', category: 'Rodent', isDefault: true },
-                    { name: 'Fancy Rat', category: 'Rodent', isDefault: true },
-                    { name: 'Russian Dwarf Hamster', category: 'Rodent', isDefault: true },
-                    { name: 'Campbells Dwarf Hamster', category: 'Rodent', isDefault: true },
-                    { name: 'Chinese Dwarf Hamster', category: 'Rodent', isDefault: true },
-                    { name: 'Syrian Hamster', category: 'Rodent', isDefault: true },
-                    { name: 'Guinea Pig', category: 'Rodent', isDefault: true }
+                    { name: 'Fancy Mouse', category: 'Mammal', isDefault: true },
+                    { name: 'Fancy Rat', category: 'Mammal', isDefault: true },
+                    { name: 'Russian Dwarf Hamster', category: 'Mammal', isDefault: true },
+                    { name: 'Campbells Dwarf Hamster', category: 'Mammal', isDefault: true },
+                    { name: 'Chinese Dwarf Hamster', category: 'Mammal', isDefault: true },
+                    { name: 'Syrian Hamster', category: 'Mammal', isDefault: true },
+                    { name: 'Guinea Pig', category: 'Mammal', isDefault: true }
                 ]);
                 setSpeciesConfigs({});
             }
