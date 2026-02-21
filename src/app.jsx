@@ -16171,19 +16171,24 @@ const AnimalList = ({ authToken, showModalMessage, onEditAnimal, onViewAnimal, f
                         return (
                         <div key={species} className="border border-gray-200 rounded-xl overflow-hidden shadow-sm">
                             <div 
-                                className="flex items-center justify-between bg-gray-100 px-2 py-2 sm:p-4 border-b cursor-pointer"
+                                className="relative flex items-center justify-between bg-gray-100 px-2 py-2 sm:p-4 border-b cursor-pointer"
                                 onClick={() => {
                                     if (!isBulkMode) {
                                         setCollapsedSpecies(prev => ({ ...prev, [species]: !prev[species] }));
                                     }
                                 }}
                             >
+                                {/* Collapse indicator — centered, up/down chevron */}
+                                {!isBulkMode && (
+                                    <div className="absolute left-1/2 -translate-x-1/2 pointer-events-none">
+                                        {isCollapsed
+                                            ? <ChevronDown className="w-4 h-4 text-gray-400" />
+                                            : <ChevronUp className="w-4 h-4 text-gray-400" />
+                                        }
+                                    </div>
+                                )}
                                 <div className="flex items-center gap-1 sm:gap-2">
-                                    {/* Collapse indicator */}
-                                    <ChevronLeft 
-                                        className={`w-4 h-4 text-gray-400 transition-transform ${isCollapsed ? '-rotate-90' : 'rotate-90'}`}
-                                    />
-                                    {/* Reorder buttons — bordered pill group, visually distinct from the collapse chevron */}
+                                    {/* Reorder buttons — left side, bordered pill */}
                                     {!isBulkMode && (
                                         <div className="flex items-center border border-gray-300 rounded-lg overflow-hidden" onClick={(e) => e.stopPropagation()}>
                                             <button
