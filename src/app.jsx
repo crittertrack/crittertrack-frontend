@@ -10443,7 +10443,7 @@ const AnimalForm = ({
                                             />
                                         </div>
                                         <div>
-                                            <label className="block text-xs font-medium text-gray-700">Body Length ({measurementUnits.length}) - optional</label>
+                                            <label className="block text-xs font-medium text-gray-700">{getFieldLabel('length', 'Body Length')} ({measurementUnits.length}) - optional</label>
                                             <input 
                                                 type="number" 
                                                 step="0.1"
@@ -10900,6 +10900,7 @@ const AnimalForm = ({
                 {activeTab === 6 && (
                     <div className="space-y-6">
                         {/* Reproductive Status - Key Status Indicators */}
+                        {(!isFieldHidden('isNeutered') || !isFieldHidden('isInfertile') || !isFieldHidden('isPregnant') || !isFieldHidden('isNursing') || !isFieldHidden('isInMating')) && (
                         <div className="bg-gray-50 p-4 rounded-lg border border-gray-200 space-y-4" data-tutorial-target="reproductive-status-section">
                             <h3 className="text-lg font-semibold text-gray-700 border-b pb-2"> Reproductive Status</h3>
                             <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
@@ -11000,8 +11001,9 @@ const AnimalForm = ({
 
                             </div>
                         </div>
+                        )}
 
-                        {/* Estrus/Cycle - Only for females when not neutered */}
+                        {/* Estrus/Cycle - Only for females when not neutered */}}
                         {!isFieldHidden('heatStatus') && (formData.gender === 'Female' || formData.gender === 'Intersex' || formData.gender === 'Unknown') && !formData.isNeutered && (
                             <div className="bg-gray-50 p-4 rounded-lg border border-gray-200 space-y-4" data-tutorial-target="estrus-cycle-section">
                                 <h3 className="text-lg font-semibold text-gray-700 mb-4">Estrus/Cycle</h3>
@@ -11073,13 +11075,13 @@ const AnimalForm = ({
                         {!formData.isNeutered && !formData.isInfertile && (formData.gender === 'Male' || formData.gender === 'Intersex' || formData.gender === 'Unknown') && (
                             <div className="bg-gray-50 p-4 rounded-lg border border-gray-200 space-y-4" data-tutorial-target="stud-info-section">
                                 <div className="mb-4">
-                                    <h3 className="text-lg font-semibold text-gray-700">Stud Information <span className="text-xs font-normal text-gray-500">(Active Status)</span></h3>
-                                    {formData.gender === 'Unknown' && <span className="text-xs bg-blue-100 text-blue-700 px-2 py-1 rounded mt-1 inline-block">Sperm Fertility</span>}
+                                    <h3 className="text-lg font-semibold text-gray-700">Sire Information <span className="text-xs font-normal text-gray-500">(Active Status)</span></h3>
+                                    {formData.gender === 'Unknown' && <span className="text-xs bg-blue-100 text-blue-700 px-2 py-1 rounded mt-1 inline-block">Fertility</span>}
                                     {formData.gender === 'Intersex' && <span className="text-xs bg-purple-100 text-purple-700 px-2 py-1 rounded mt-1 inline-block">Sire Role</span>}
                                 </div>
                                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                                     <div>
-                                        <label className="block text-sm font-medium text-gray-700 mb-2">Sire Fertility Status <span className="text-xs text-gray-500 font-normal">(Sperm Production)</span></label>
+                                        <label className="block text-sm font-medium text-gray-700 mb-2">{getFieldLabel('fertilityStatus', 'Sire Fertility Status')}</label>
                                         <select name="fertilityStatus" value={formData.fertilityStatus} onChange={handleChange} 
                                             className="block w-full p-2 border border-gray-300 rounded-md shadow-sm focus:ring-primary focus:border-primary">
                                             <option value="Unknown">Unknown</option>
@@ -11089,7 +11091,7 @@ const AnimalForm = ({
                                     </div>
                                     
                                     <div className="md:col-span-2">
-                                        <label className="block text-sm font-medium text-gray-700 mb-2">Stud Fertility Notes</label>
+                                        <label className="block text-sm font-medium text-gray-700 mb-2">{getFieldLabel('fertilityNotes', 'Fertility Notes')}</label>
                                         <textarea name="fertilityNotes" value={formData.fertilityNotes} onChange={handleChange} 
                                             className="block w-full p-2 border border-gray-300 rounded-md shadow-sm focus:ring-primary focus:border-primary" 
                                             placeholder="e.g., Any genetic concerns, fertility issues, or special breeding notes for sire role"
@@ -11141,7 +11143,7 @@ const AnimalForm = ({
                                     </div>
                                     
                                     <div className="md:col-span-2">
-                                        <label className="block text-sm font-medium text-gray-700 mb-2">Dam Fertility Notes</label>
+                                        <label className="block text-sm font-medium text-gray-700 mb-2">{getFieldLabel('damFertilityNotes', 'Dam Fertility Notes')}</label>
                                         <textarea name="damFertilityNotes" value={formData.damFertilityNotes || ''} onChange={handleChange} 
                                             className="block w-full p-2 border border-gray-300 rounded-md shadow-sm focus:ring-primary focus:border-primary" 
                                             placeholder="e.g., Any genetic concerns, fertility issues, or special breeding notes for dam role"
@@ -11247,14 +11249,14 @@ const AnimalForm = ({
                                     {(formData.gender === 'Male' || formData.gender === 'Intersex' || (formData.gender === 'Unknown' && (formData.breedingRole === 'sire' || formData.breedingRole === 'both'))) && (
                                         <>
                                             <div>
-                                                <label className="block text-sm font-medium text-gray-700 mb-2">Last Mating Date <span className="text-xs text-gray-500 font-normal">(Sire)</span></label>
+                                                <label className="block text-sm font-medium text-gray-700 mb-2">{getFieldLabel('lastMatingDate', 'Last Mating Date')} <span className="text-xs text-gray-500 font-normal">(Sire)</span></label>
                                                 <DatePicker value={formData.lastMatingDate} onChange={(e) => handleChange({ target: { name: 'lastMatingDate', value: e.target.value } })}
                                                     maxDate={new Date()}
                                                     className="p-2 border-blue-200" />
                                             </div>
                                             
                                             <div>
-                                                <label className="block text-sm font-medium text-gray-700 mb-2">Successful Matings (Count)</label>
+                                                <label className="block text-sm font-medium text-gray-700 mb-2">{getFieldLabel('successfulMatings', 'Successful Matings')}</label>
                                                 <input type="number" name="successfulMatings" value={formData.successfulMatings} onChange={handleChange} 
                                                     className="block w-full p-2 border border-blue-200 rounded-md shadow-sm focus:ring-primary focus:border-primary" 
                                                     placeholder="Number of successful breedings" min="0" />
@@ -11266,7 +11268,7 @@ const AnimalForm = ({
                                     {(formData.gender === 'Female' || formData.gender === 'Intersex' || (formData.gender === 'Unknown' && (formData.breedingRole === 'dam' || formData.breedingRole === 'both'))) && (
                                         <>
                                             <div>
-                                                <label className="block text-sm font-medium text-gray-700 mb-2">Last Pregnancy Date <span className="text-xs text-gray-500 font-normal">(Dam)</span></label>
+                                                <label className="block text-sm font-medium text-gray-700 mb-2">{getFieldLabel('lastPregnancyDate', 'Last Pregnancy Date')} <span className="text-xs text-gray-500 font-normal">(Dam)</span></label>
                                                 <DatePicker value={formData.lastPregnancyDate || ''} onChange={(e) => handleChange({ target: { name: 'lastPregnancyDate', value: e.target.value } })}
                                                     maxDate={new Date()}
                                                     className="p-2 border-blue-200" />
@@ -11310,7 +11312,7 @@ const AnimalForm = ({
                                     
                                     {/* Total Offspring - shown once at the end */}
                                     <div className={formData.gender === 'Intersex' || formData.gender === 'Unknown' ? 'md:col-span-2' : ''}>
-                                        <label className="block text-sm font-medium text-gray-700 mb-2">Total Offspring Produced</label>
+                                        <label className="block text-sm font-medium text-gray-700 mb-2">{getFieldLabel('offspringCount', 'Total Offspring Produced')}</label>
                                         <input type="number" name="offspringCount" value={formData.offspringCount} onChange={handleChange} 
                                             className="block w-full p-2 border border-blue-200 rounded-md shadow-sm focus:ring-primary focus:border-primary" 
                                             placeholder="Total number of offspring" min="0" />
@@ -11791,6 +11793,15 @@ const AnimalForm = ({
                                         className="block w-full p-2 border border-gray-300 rounded-md shadow-sm focus:ring-primary focus:border-primary" 
                                         placeholder="e.g., Dr. Smith, ABC Veterinary Clinic" />
                                 </div>
+
+                                {!isFieldHidden('parasitePreventionSchedule') && (
+                                <div>
+                                    <label className="block text-sm font-medium text-gray-700 mb-2">{getFieldLabel('parasitePreventionSchedule', 'Parasite Prevention Schedule')}</label>
+                                    <textarea name="parasitePreventionSchedule" value={formData.parasitePreventionSchedule || ''} onChange={handleChange} rows="2"
+                                        className="block w-full p-2 border border-gray-300 rounded-md shadow-sm focus:ring-primary focus:border-primary"
+                                        placeholder="e.g., Ivermectin every 3 months, flea/tick monthly" />
+                                </div>
+                                )}
 
 
                             </div>
