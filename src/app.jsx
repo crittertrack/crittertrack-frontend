@@ -16744,7 +16744,14 @@ const NotificationPanel = ({ authToken, API_BASE_URL, onClose, showModalMessage,
 const App = () => {
     const navigate = useNavigate();
     const location = useLocation();
-    const [authToken, setAuthToken] = useState(localStorage.getItem('authToken') || null);
+    const [authToken, setAuthToken] = useState(() => {
+        try {
+            return localStorage.getItem('authToken') || null;
+        } catch (e) {
+            console.warn('Could not read authToken from localStorage', e);
+            return null;
+        }
+    });
     const [userProfile, setUserProfile] = useState(null);
     const [hasSkippedTutorialThisSession, setHasSkippedTutorialThisSession] = useState(false);
     const [isMobile, setIsMobile] = useState(window.innerWidth < 768);
@@ -17702,16 +17709,27 @@ const App = () => {
             setUserProfile(user);
         } catch (error) {
             console.error('Failed to fetch user profile:', error);
-            // Only show error modal if we still have a token (not already logged out)
-            if (authToken) {
-                // Check if it's a 401 (token expired/invalid)
-                if (error.response?.status === 401) {
+            // Only log out if it's a 401 or 403 (token expired/invalid/forbidden), not for network errors
+            if (error.response?.status === 401 || error.response?.status === 403) {
+                // Only show error modal if we still have a token (not already logged out)
+                if (authToken) {
                     showModalMessage('Session Expired', 'Your session has expired. Please log in again.');
-                } else {
-                    showModalMessage('Connection Error', 'Could not load user profile. Please check your connection and try again.');
+                    setAuthToken(null);
+                    try {
+                        localStorage.removeItem('authToken');
+                        localStorage.removeItem('userId');
+                    } catch (e) {
+                        console.warn('Could not clear auth from localStorage', e);
+                    }
                 }
-                setAuthToken(null);
+            } else if (error.code === 'ERR_NETWORK' || !error.response) {
+                // Network error - don't log out, just log it
+                console.warn('Network error fetching profile, will retry automatically');
+            } else {
+                // Other unexpected errors - log but don't force logout
+                console.error('Unexpected error fetching profile:', error.response?.status, error.message);
             }
+            // For network/other errors, don't log out - the periodic refresh will retry
         }
     }, [showModalMessage, authToken]);
 
@@ -22380,10 +22398,28 @@ const AppRouter = () => {
 
 // Wrapper component - TutorialProvider is now inside App to access auth state
 const AppWithTutorial = () => {
+    const getUserId = () => {
+        try {
+            return localStorage.getItem('userId');
+        } catch (e) {
+            console.warn('Could not read userId from localStorage', e);
+            return null;
+        }
+    };
+    
+    const getAuthToken = () => {
+        try {
+            return localStorage.getItem('authToken');
+        } catch (e) {
+            console.warn('Could not read authToken from localStorage', e);
+            return null;
+        }
+    };
+    
     return (
         <TutorialProvider 
-            userId={localStorage.getItem('userId')}
-            authToken={localStorage.getItem('authToken')}
+            userId={getUserId()}
+            authToken={getAuthToken()}
             API_BASE_URL={API_BASE_URL}
         >
             <App />
