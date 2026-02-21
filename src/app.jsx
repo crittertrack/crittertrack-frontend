@@ -9888,6 +9888,7 @@ const AnimalForm = ({
                                 </label>
                             </div>
                             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                {!isFieldHidden('currentOwner') && (
                                 <div>
                                     <label className='block text-sm font-medium text-gray-700 mb-2'>{getFieldLabel('currentOwner', 'Owner Name')}</label>
                                     <input 
@@ -9900,6 +9901,7 @@ const AnimalForm = ({
                                     />
                                     <p className="text-xs text-gray-500 mt-1">Records owner changes in ownership history.</p>
                                 </div>
+                                )}
                                 {!isFieldHidden('currentOwnerDisplay') && (
                                 <div>
                                     <label className='block text-sm font-medium text-gray-700 mb-2'>{getFieldLabel('currentOwnerDisplay', 'Owner Display Name')}</label>
@@ -10648,32 +10650,36 @@ const AnimalForm = ({
                                 </div>
                                 )}
 
-                                {/* Dog/Cat Licensing - integrated */}
-                                {(formData.species === 'Dog' || formData.species === 'Cat') && (
-                                    <>
-                                        <div>
-                                            <label className="block text-sm font-medium text-gray-700">License Number</label>
-                                            <input type="text" name="licenseNumber" value={formData.licenseNumber || ''} onChange={handleChange} 
-                                                className="mt-1 block w-full p-2 border border-gray-300 rounded-md shadow-sm focus:ring-primary focus:border-primary" 
-                                                placeholder="City/County license #" />
-                                        </div>
-                                        <div>
-                                            <label className="block text-sm font-medium text-gray-700">License Jurisdiction</label>
-                                            <input type="text" name="licenseJurisdiction" value={formData.licenseJurisdiction || ''} onChange={handleChange} 
-                                                className="mt-1 block w-full p-2 border border-gray-300 rounded-md shadow-sm focus:ring-primary focus:border-primary" 
-                                                placeholder="e.g., Los Angeles County" />
-                                        </div>
-                                        <div>
-                                            <label className="block text-sm font-medium text-gray-700">Rabies Tag Number</label>
-                                            <input type="text" name="rabiesTagNumber" value={formData.rabiesTagNumber || ''} onChange={handleChange} 
-                                                className="mt-1 block w-full p-2 border border-gray-300 rounded-md shadow-sm focus:ring-primary focus:border-primary" />
-                                        </div>
-                                        <div>
-                                            <label className="block text-sm font-medium text-gray-700">Tattoo ID</label>
-                                            <input type="text" name="tattooId" value={formData.tattooId || ''} onChange={handleChange} 
-                                                className="mt-1 block w-full p-2 border border-gray-300 rounded-md shadow-sm focus:ring-primary focus:border-primary" />
-                                        </div>
-                                    </>
+                                {/* Licensing - Template controlled */}
+                                {!isFieldHidden('licenseNumber') && (
+                                    <div>
+                                        <label className="block text-sm font-medium text-gray-700">{getFieldLabel('licenseNumber', 'License Number')}</label>
+                                        <input type="text" name="licenseNumber" value={formData.licenseNumber || ''} onChange={handleChange} 
+                                            className="mt-1 block w-full p-2 border border-gray-300 rounded-md shadow-sm focus:ring-primary focus:border-primary" 
+                                            placeholder={getFieldLabel('licenseNumber', 'City/County license #')} />
+                                    </div>
+                                )}
+                                {!isFieldHidden('licenseJurisdiction') && (
+                                    <div>
+                                        <label className="block text-sm font-medium text-gray-700">{getFieldLabel('licenseJurisdiction', 'License Jurisdiction')}</label>
+                                        <input type="text" name="licenseJurisdiction" value={formData.licenseJurisdiction || ''} onChange={handleChange} 
+                                            className="mt-1 block w-full p-2 border border-gray-300 rounded-md shadow-sm focus:ring-primary focus:border-primary" 
+                                            placeholder="e.g., Los Angeles County" />
+                                    </div>
+                                )}
+                                {!isFieldHidden('rabiesTagNumber') && (
+                                    <div>
+                                        <label className="block text-sm font-medium text-gray-700">Rabies Tag Number</label>
+                                        <input type="text" name="rabiesTagNumber" value={formData.rabiesTagNumber || ''} onChange={handleChange} 
+                                            className="mt-1 block w-full p-2 border border-gray-300 rounded-md shadow-sm focus:ring-primary focus:border-primary" />
+                                    </div>
+                                )}
+                                {!isFieldHidden('tattooId') && (
+                                    <div>
+                                        <label className="block text-sm font-medium text-gray-700">Tattoo ID</label>
+                                        <input type="text" name="tattooId" value={formData.tattooId || ''} onChange={handleChange} 
+                                            className="mt-1 block w-full p-2 border border-gray-300 rounded-md shadow-sm focus:ring-primary focus:border-primary" />
+                                    </div>
                                 )}
                             </div>
 
