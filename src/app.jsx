@@ -4464,10 +4464,10 @@ const ViewOnlyAnimalDetail = ({ animal, onClose, API_BASE_URL, onViewProfile, on
                             )}
 
                             {/* Current Owner Section */}
-                            {animal.currentOwner && (
+                            {(animal.currentOwnerDisplay || animal.currentOwner) && (
                                 <div className="bg-gray-50 p-4 rounded-lg border border-gray-200">
                                     <h3 className="text-lg font-semibold text-gray-700 border-b pb-2 mb-3">Current Owner</h3>
-                                    <p className="text-gray-700">{animal.currentOwner}</p>
+                                    <p className="text-gray-700">{animal.currentOwnerDisplay || animal.currentOwner}</p>
                                     {(animal.species === 'Dog' || animal.species === 'Cat') && animal.coOwnership && (
                                         <p className="text-gray-700 mt-2"><span className="text-gray-600">Co-Ownership:</span> {animal.coOwnership}</p>
                                     )}
@@ -5095,10 +5095,10 @@ const ViewOnlyAnimalDetail = ({ animal, onClose, API_BASE_URL, onViewProfile, on
                     {detailViewTab === 10 && (
                         <div className="space-y-6">
                             {/* Current Owner Section */}
-                            {animal.currentOwner && (
+                            {(animal.currentOwnerDisplay || animal.currentOwner) && (
                                 <div className="bg-gray-50 p-4 rounded-lg border border-gray-200">
                                     <h3 className="text-lg font-semibold text-gray-700 border-b pb-2 mb-3">Current Owner</h3>
-                                    <p className="text-gray-700">{animal.currentOwner || ''}</p>
+                                    <p className="text-gray-700">{animal.currentOwnerDisplay || animal.currentOwner || ''}</p>
                                     {(animal.species === 'Dog' || animal.species === 'Cat') && animal.coOwnership && (
                                         <p className="text-gray-700 mt-2"><span className="text-gray-600">Co-Ownership:</span> {animal.coOwnership}</p>
                                     )}
@@ -8393,6 +8393,7 @@ const AnimalForm = ({
             crateTrained: animalToEdit.crateTrained || false,
             litterTrained: animalToEdit.litterTrained || false,
             leashTrained: animalToEdit.leashTrained || false,
+            freeFlightTrained: animalToEdit.freeFlightTrained || false,
             // Dog/Cat specific - Training & Behavior
             trainingLevel: animalToEdit.trainingLevel || '',
             trainingDisciplines: animalToEdit.trainingDisciplines || '',
@@ -8559,7 +8560,7 @@ const AnimalForm = ({
             crateTrained: false,
             litterTrained: false,
             leashTrained: false,
-            // Dog/Cat specific - Training & Behavior
+            freeFlightTrained: false,
             trainingLevel: '',
             trainingDisciplines: '',
             certifications: '',
@@ -9389,9 +9390,9 @@ const AnimalForm = ({
             });
             
             // Update ownership history only when saving (not on every form change)
-            if (formData.currentOwner) {
+            if (formData.currentOwnerDisplay) {
                 const ownershipHistory = payloadToSave.ownershipHistory || [];
-                const existingIndex = ownershipHistory.findIndex(h => h.name === formData.currentOwner);
+                const existingIndex = ownershipHistory.findIndex(h => h.name === formData.currentOwnerDisplay);
                 
                 if (existingIndex >= 0) {
                     // Update existing entry - set endDate to empty (current owner)
@@ -9403,7 +9404,7 @@ const AnimalForm = ({
                     // Add new owner to history with today's date
                     const today = new Date().toISOString().substring(0, 10);
                     ownershipHistory.push({
-                        name: formData.currentOwner,
+                        name: formData.currentOwnerDisplay,
                         startDate: today,
                         endDate: null
                     });
@@ -9676,7 +9677,8 @@ const AnimalForm = ({
                             { id: 9, label: 'Behavior', icon: '🧠' },
                             { id: 10, label: 'Records', icon: '📝' },
                             { id: 11, label: 'End of Life', icon: '⚖️' },
-                            { id: 12, label: 'Show', icon: '🏆' }
+                            { id: 12, label: 'Show', icon: '🏆' },
+                            { id: 13, label: 'Legal', icon: '📄' }
                         ].map(tab => (
                             <button
                                 key={tab.id}
@@ -9888,47 +9890,18 @@ const AnimalForm = ({
                                 </label>
                             </div>
                             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                                {!isFieldHidden('currentOwner') && (
                                 <div>
-                                    <label className='block text-sm font-medium text-gray-700 mb-2'>{getFieldLabel('currentOwner', 'Owner Name')}</label>
+                                    <label className='block text-sm font-medium text-gray-700 mb-2'>{getFieldLabel('currentOwnerDisplay', 'Current Owner')}</label>
                                     <input 
                                         type="text" 
-                                        name="currentOwner" 
-                                        value={formData.currentOwner} 
+                                        name="currentOwnerDisplay" 
+                                        value={formData.currentOwnerDisplay || ''} 
                                         onChange={handleChange}
                                         placeholder="Name of current owner"
                                         className="block w-full p-2 border border-gray-300 rounded-md shadow-sm focus:ring-primary focus:border-primary" 
                                     />
                                     <p className="text-xs text-gray-500 mt-1">Records owner changes in ownership history.</p>
                                 </div>
-                                )}
-                                {!isFieldHidden('currentOwnerDisplay') && (
-                                <div>
-                                    <label className='block text-sm font-medium text-gray-700 mb-2'>{getFieldLabel('currentOwnerDisplay', 'Owner Display Name')}</label>
-                                    <input 
-                                        type="text" 
-                                        name="currentOwnerDisplay" 
-                                        value={formData.currentOwnerDisplay || ''} 
-                                        onChange={handleChange}
-                                        placeholder="Public display name for owner"
-                                        className="block w-full p-2 border border-gray-300 rounded-md shadow-sm focus:ring-primary focus:border-primary" 
-                                    />
-                                </div>
-                                )}
-                                {!isFieldHidden('groupRole') && (
-                                <div>
-                                    <label className='block text-sm font-medium text-gray-700 mb-2'>{getFieldLabel('groupRole', 'Group Role')}</label>
-                                    <input 
-                                        type="text" 
-                                        name="groupRole" 
-                                        value={formData.groupRole || ''} 
-                                        onChange={handleChange}
-                                        placeholder="e.g., Alpha, Beta, Omega"
-                                        className="block w-full p-2 border border-gray-300 rounded-md shadow-sm focus:ring-primary focus:border-primary" 
-                                    />
-                                    <p className="text-xs text-gray-500 mt-1">Role in group or colony (for social species).</p>
-                                </div>
-                                )}
                             </div>
 
                             {/* Co-ownership - Template controlled */}
@@ -10650,23 +10623,7 @@ const AnimalForm = ({
                                 </div>
                                 )}
 
-                                {/* Licensing - Template controlled */}
-                                {!isFieldHidden('licenseNumber') && (
-                                    <div>
-                                        <label className="block text-sm font-medium text-gray-700">{getFieldLabel('licenseNumber', 'License Number')}</label>
-                                        <input type="text" name="licenseNumber" value={formData.licenseNumber || ''} onChange={handleChange} 
-                                            className="mt-1 block w-full p-2 border border-gray-300 rounded-md shadow-sm focus:ring-primary focus:border-primary" 
-                                            placeholder={getFieldLabel('licenseNumber', 'City/County license #')} />
-                                    </div>
-                                )}
-                                {!isFieldHidden('licenseJurisdiction') && (
-                                    <div>
-                                        <label className="block text-sm font-medium text-gray-700">{getFieldLabel('licenseJurisdiction', 'License Jurisdiction')}</label>
-                                        <input type="text" name="licenseJurisdiction" value={formData.licenseJurisdiction || ''} onChange={handleChange} 
-                                            className="mt-1 block w-full p-2 border border-gray-300 rounded-md shadow-sm focus:ring-primary focus:border-primary" 
-                                            placeholder="e.g., Los Angeles County" />
-                                    </div>
-                                )}
+                                {/* Licensing fields moved to Tab 13: Legal & Documentation */}
                                 {!isFieldHidden('rabiesTagNumber') && (
                                     <div>
                                         <label className="block text-sm font-medium text-gray-700">Rabies Tag Number</label>
@@ -10946,6 +10903,7 @@ const AnimalForm = ({
                         <div className="bg-gray-50 p-4 rounded-lg border border-gray-200 space-y-4" data-tutorial-target="reproductive-status-section">
                             <h3 className="text-lg font-semibold text-gray-700 border-b pb-2"> Reproductive Status</h3>
                             <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+                                {!isFieldHidden('isNeutered') && (
                                 <label className="flex items-center space-x-2 cursor-pointer p-3 border rounded-lg bg-white hover:bg-gray-50 transition">
                                     <input
                                         type="checkbox"
@@ -10958,8 +10916,9 @@ const AnimalForm = ({
                                         {formData.gender === 'Female' ? 'Spayed' : (formData.gender === 'Intersex' || formData.gender === 'Unknown') ? 'Neutered / Spayed' : 'Neutered'}
                                     </span>
                                 </label>
+                                )}
                                 
-                                {!formData.isNeutered && !formData.isInfertile && (
+                                {!isFieldHidden('isInMating') && !formData.isNeutered && !formData.isInfertile && (
                                     <label className="flex items-center space-x-2 cursor-pointer p-3 border rounded-lg bg-white hover:bg-gray-50 transition" data-tutorial-target="mating-pregnancy-checkbox">
                                         <input
                                             type="checkbox"
@@ -10972,6 +10931,7 @@ const AnimalForm = ({
                                     </label>
                                 )}
 
+                                {!isFieldHidden('isInfertile') && (
                                 <label className="flex items-center space-x-2 cursor-pointer p-3 border rounded-lg bg-white hover:bg-gray-50 transition">
                                     <input
                                         type="checkbox"
@@ -10982,8 +10942,9 @@ const AnimalForm = ({
                                     />
                                     <span className="text-sm font-medium text-gray-700">Infertile</span>
                                 </label>
+                                )}
 
-                                {(formData.gender === 'Female' || formData.gender === 'Intersex' || formData.gender === 'Unknown') && !formData.isNeutered && !formData.isInfertile && (
+                                {!isFieldHidden('isPregnant') && (formData.gender === 'Female' || formData.gender === 'Intersex' || formData.gender === 'Unknown') && !formData.isNeutered && !formData.isInfertile && (
                                     <label className="flex items-center space-x-2 cursor-pointer p-3 border rounded-lg bg-white hover:bg-gray-50 transition" data-tutorial-target="mating-pregnancy-checkbox">
                                         <input
                                             type="checkbox"
@@ -10996,7 +10957,7 @@ const AnimalForm = ({
                                     </label>
                                 )}
 
-                                {(formData.gender === 'Female' || formData.gender === 'Intersex' || formData.gender === 'Unknown') && (
+                                {!isFieldHidden('isNursing') && (formData.gender === 'Female' || formData.gender === 'Intersex' || formData.gender === 'Unknown') && (
                                     <label className="flex items-center space-x-2 cursor-pointer p-3 border rounded-lg bg-white hover:bg-gray-50 transition" data-tutorial-target="nursing-checkbox">
                                         <input
                                             type="checkbox"
@@ -11041,7 +11002,7 @@ const AnimalForm = ({
                         </div>
 
                         {/* Estrus/Cycle - Only for females when not neutered */}
-                        {(formData.gender === 'Female' || formData.gender === 'Intersex' || formData.gender === 'Unknown') && !formData.isNeutered && (
+                        {!isFieldHidden('heatStatus') && (formData.gender === 'Female' || formData.gender === 'Intersex' || formData.gender === 'Unknown') && !formData.isNeutered && (
                             <div className="bg-gray-50 p-4 rounded-lg border border-gray-200 space-y-4" data-tutorial-target="estrus-cycle-section">
                                 <h3 className="text-lg font-semibold text-gray-700 mb-4">Estrus/Cycle</h3>
                                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -12008,6 +11969,13 @@ const AnimalForm = ({
                                                     <span className="text-sm font-medium text-gray-700">{getFieldLabel('leashTrained', 'Leash Trained')}</span>
                                                 </div>
                                             )}
+                                            {!isFieldHidden('freeFlightTrained') && (
+                                                <div className="flex items-center space-x-2">
+                                                    <input type="checkbox" name="freeFlightTrained" checked={formData.freeFlightTrained || false} onChange={handleChange} 
+                                                        className="form-checkbox h-5 w-5 text-primary rounded focus:ring-primary" />
+                                                    <span className="text-sm font-medium text-gray-700">{getFieldLabel('freeFlightTrained', 'Free Flight Trained')}</span>
+                                                </div>
+                                            )}
                                         </div>
                                     </>
                                 )}
@@ -12190,50 +12158,6 @@ const AnimalForm = ({
                             </div>
                         </div>
 
-                        {/* Legal / Administrative */}
-                        <div className="bg-gray-50 p-4 rounded-lg border border-gray-200 space-y-4" data-tutorial-target="legal-admin-section">
-                            <h3 className="text-lg font-semibold text-gray-700 mb-4">Legal / Administrative</h3>
-                            <div className="space-y-4">
-                                <div>
-                                    <label className="block text-sm font-medium text-gray-700 mb-2">Insurance</label>
-                                    <textarea name="insurance" value={formData.insurance} onChange={handleChange} rows="2"
-                                        className="block w-full p-2 border border-gray-300 rounded-md shadow-sm focus:ring-primary focus:border-primary" 
-                                        placeholder="e.g., Pet insurance policy details, provider, coverage" />
-                                </div>
-                                
-                                <div>
-                                    <label className="block text-sm font-medium text-gray-700 mb-2">Legal Status</label>
-                                    <textarea name="legalStatus" value={formData.legalStatus} onChange={handleChange} rows="2"
-                                        className="block w-full p-2 border border-gray-300 rounded-md shadow-sm focus:ring-primary focus:border-primary" 
-                                        placeholder="e.g., Ownership documents, permits, registration" />
-                                </div>
-                            </div>
-
-                            {/* Ownership & Legal Restrictions - Template controlled */}
-                            {(!isFieldHidden('breedingRestrictions') || !isFieldHidden('exportRestrictions')) && (
-                                <>
-                                    <h4 className="text-md font-semibold text-gray-600 mt-4 pt-4 border-t border-gray-200">Restrictions</h4>
-                                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                                        {!isFieldHidden('breedingRestrictions') && (
-                                        <div>
-                                            <label className="block text-sm font-medium text-gray-700">{getFieldLabel('breedingRestrictions', 'Breeding Restrictions')}</label>
-                                            <textarea name="breedingRestrictions" value={formData.breedingRestrictions || ''} onChange={handleChange} rows="2"
-                                                className="mt-1 block w-full p-2 border border-gray-300 rounded-md shadow-sm focus:ring-primary focus:border-primary" 
-                                                placeholder="Limited registration, spay/neuter contract" />
-                                        </div>
-                                        )}
-                                        {!isFieldHidden('exportRestrictions') && (
-                                        <div>
-                                            <label className="block text-sm font-medium text-gray-700">{getFieldLabel('exportRestrictions', 'Export Restrictions')}</label>
-                                            <textarea name="exportRestrictions" value={formData.exportRestrictions || ''} onChange={handleChange} rows="2"
-                                                className="mt-1 block w-full p-2 border border-gray-300 rounded-md shadow-sm focus:ring-primary focus:border-primary" 
-                                                placeholder="Country restrictions, registry limitations" />
-                                        </div>
-                                        )}
-                                    </div>
-                                </>
-                            )}
-                        </div>
                     </div>
                 )}
 
@@ -12269,28 +12193,123 @@ const AnimalForm = ({
                             </div>
                         </div>
 
-                        {/* Working & Performance - Dog only */}
-                        {formData.species === 'Dog' && (
+                        {/* Working & Performance - Template controlled */}
+                        {!isFieldHidden('workingTitles') && (
                             <div className="bg-gray-50 p-4 rounded-lg border border-gray-200 space-y-4">
                                 <h3 className="text-lg font-semibold text-gray-700 border-b pb-2">Working & Performance</h3>
                                 <div className="space-y-4">
                                     <div>
-                                        <label className="block text-sm font-medium text-gray-700 mb-2">Working Titles</label>
+                                        <label className="block text-sm font-medium text-gray-700 mb-2">{getFieldLabel('workingTitles', 'Working Titles')}</label>
                                         <textarea name="workingTitles" value={formData.workingTitles || ''} onChange={handleChange} rows="3"
                                             className="block w-full p-2 border border-gray-300 rounded-md shadow-sm focus:ring-primary focus:border-primary" 
                                             placeholder="e.g., CGC (Canine Good Citizen), TKN (Trick Dog Novice), HT (Herding Tested)" />
                                         <p className="text-xs text-gray-500 mt-1">Working, obedience, agility, or performance titles</p>
                                     </div>
-                                    
+                                    {!isFieldHidden('performanceScores') && (
                                     <div>
-                                        <label className="block text-sm font-medium text-gray-700 mb-2">Performance Scores</label>
+                                        <label className="block text-sm font-medium text-gray-700 mb-2">{getFieldLabel('performanceScores', 'Performance Scores')}</label>
                                         <textarea name="performanceScores" value={formData.performanceScores || ''} onChange={handleChange} rows="3"
                                             className="block w-full p-2 border border-gray-300 rounded-md shadow-sm focus:ring-primary focus:border-primary" 
                                             placeholder="e.g., Agility Q scores, obedience scores, rally scores" />
                                         <p className="text-xs text-gray-500 mt-1">Scores from performance events and trials</p>
                                     </div>
+                                    )}
                                 </div>
                             </div>
+                        )}
+                    </div>
+                )}
+
+                {/* Tab 13: Legal & Documentation */}
+                {activeTab === 13 && (
+                    <div className="space-y-6">
+                        {/* Licensing */}
+                        {(!isFieldHidden('licenseNumber') || !isFieldHidden('licenseJurisdiction')) && (
+                        <div className="bg-gray-50 p-4 rounded-lg border border-gray-200 space-y-4">
+                            <h3 className="text-lg font-semibold text-gray-700 mb-4">Licensing & Permits</h3>
+                            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                {!isFieldHidden('licenseNumber') && (
+                                <div>
+                                    <label className="block text-sm font-medium text-gray-700">{getFieldLabel('licenseNumber', 'License Number')}</label>
+                                    <input type="text" name="licenseNumber" value={formData.licenseNumber || ''} onChange={handleChange}
+                                        className="mt-1 block w-full p-2 border border-gray-300 rounded-md shadow-sm focus:ring-primary focus:border-primary"
+                                        placeholder={getFieldLabel('licenseNumber', 'License / permit number')} />
+                                </div>
+                                )}
+                                {!isFieldHidden('licenseJurisdiction') && (
+                                <div>
+                                    <label className="block text-sm font-medium text-gray-700">{getFieldLabel('licenseJurisdiction', 'License Jurisdiction')}</label>
+                                    <input type="text" name="licenseJurisdiction" value={formData.licenseJurisdiction || ''} onChange={handleChange}
+                                        className="mt-1 block w-full p-2 border border-gray-300 rounded-md shadow-sm focus:ring-primary focus:border-primary"
+                                        placeholder="e.g., Los Angeles County" />
+                                </div>
+                                )}
+                            </div>
+                        </div>
+                        )}
+
+                        {/* Insurance & Legal Status */}
+                        <div className="bg-gray-50 p-4 rounded-lg border border-gray-200 space-y-4" data-tutorial-target="legal-admin-section">
+                            <h3 className="text-lg font-semibold text-gray-700 mb-4">Legal / Administrative</h3>
+                            <div className="space-y-4">
+                                {!isFieldHidden('insurance') && (
+                                <div>
+                                    <label className="block text-sm font-medium text-gray-700 mb-2">{getFieldLabel('insurance', 'Insurance')}</label>
+                                    <textarea name="insurance" value={formData.insurance || ''} onChange={handleChange} rows="2"
+                                        className="block w-full p-2 border border-gray-300 rounded-md shadow-sm focus:ring-primary focus:border-primary"
+                                        placeholder="e.g., Pet insurance policy details, provider, coverage" />
+                                </div>
+                                )}
+                                {!isFieldHidden('legalStatus') && (
+                                <div>
+                                    <label className="block text-sm font-medium text-gray-700 mb-2">{getFieldLabel('legalStatus', 'Legal Status')}</label>
+                                    <textarea name="legalStatus" value={formData.legalStatus || ''} onChange={handleChange} rows="2"
+                                        className="block w-full p-2 border border-gray-300 rounded-md shadow-sm focus:ring-primary focus:border-primary"
+                                        placeholder="e.g., Ownership documents, permits, CITES registration" />
+                                </div>
+                                )}
+                                {!isFieldHidden('transferHistory') && (
+                                <div>
+                                    <label className="block text-sm font-medium text-gray-700 mb-2">{getFieldLabel('transferHistory', 'Transfer History')}</label>
+                                    <textarea name="transferHistory" value={formData.transferHistory || ''} onChange={handleChange} rows="2"
+                                        className="block w-full p-2 border border-gray-300 rounded-md shadow-sm focus:ring-primary focus:border-primary"
+                                        placeholder="Previous ownership transfers" />
+                                </div>
+                                )}
+                                {!isFieldHidden('coOwnership') && (
+                                <div>
+                                    <label className="block text-sm font-medium text-gray-700 mb-2">{getFieldLabel('coOwnership', 'Co-Ownership')}</label>
+                                    <textarea name="coOwnership" value={formData.coOwnership || ''} onChange={handleChange} rows="2"
+                                        className="block w-full p-2 border border-gray-300 rounded-md shadow-sm focus:ring-primary focus:border-primary"
+                                        placeholder="Co-owner details and agreement" />
+                                </div>
+                                )}
+                            </div>
+                        </div>
+
+                        {/* Restrictions */}
+                        {(!isFieldHidden('breedingRestrictions') || !isFieldHidden('exportRestrictions')) && (
+                        <div className="bg-gray-50 p-4 rounded-lg border border-gray-200 space-y-4">
+                            <h3 className="text-lg font-semibold text-gray-700 mb-4">Restrictions</h3>
+                            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                {!isFieldHidden('breedingRestrictions') && (
+                                <div>
+                                    <label className="block text-sm font-medium text-gray-700">{getFieldLabel('breedingRestrictions', 'Breeding Restrictions')}</label>
+                                    <textarea name="breedingRestrictions" value={formData.breedingRestrictions || ''} onChange={handleChange} rows="2"
+                                        className="mt-1 block w-full p-2 border border-gray-300 rounded-md shadow-sm focus:ring-primary focus:border-primary"
+                                        placeholder="Limited registration, spay/neuter contract" />
+                                </div>
+                                )}
+                                {!isFieldHidden('exportRestrictions') && (
+                                <div>
+                                    <label className="block text-sm font-medium text-gray-700">{getFieldLabel('exportRestrictions', 'Export Restrictions')}</label>
+                                    <textarea name="exportRestrictions" value={formData.exportRestrictions || ''} onChange={handleChange} rows="2"
+                                        className="mt-1 block w-full p-2 border border-gray-300 rounded-md shadow-sm focus:ring-primary focus:border-primary"
+                                        placeholder="Country restrictions, registry limitations" />
+                                </div>
+                                )}
+                            </div>
+                        </div>
                         )}
                     </div>
                 )}
@@ -20904,7 +20923,7 @@ const App = () => {
                                                         </div>
                                                         <div>
                                                             <span className="text-sm text-gray-600">Current Owner</span>
-                                                            <p className="font-medium">{animalToView.currentOwner || ''}</p>
+                                                            <p className="font-medium">{animalToView.currentOwnerDisplay || animalToView.currentOwner || ''}</p>
                                                         </div>
                                                         <div>
                                                             <span className="text-sm text-gray-600">Public Profile</span>
