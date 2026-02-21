@@ -8263,6 +8263,27 @@ const AnimalForm = ({
             beakColor: animalToEdit.beakColor || '',
             legColor: animalToEdit.legColor || '',
             wingspan: animalToEdit.wingspan || '',
+            // Fish-specific fields
+            finType: animalToEdit.finType || '',
+            bodyShape: animalToEdit.bodyShape || '',
+            finDamage: animalToEdit.finDamage || '',
+            gillHealth: animalToEdit.gillHealth || '',
+            waterType: animalToEdit.waterType || '',
+            tankSize: animalToEdit.tankSize || '',
+            // Amphibian-specific fields
+            skinTexture: animalToEdit.skinTexture || '',
+            skinMoisture: animalToEdit.skinMoisture || '',
+            skinDamage: animalToEdit.skinDamage || '',
+            metamorphosisStage: animalToEdit.metamorphosisStage || '',
+            aquaticHabitat: animalToEdit.aquaticHabitat || '',
+            territorialBehavior: animalToEdit.territorialBehavior || '',
+            // Invertebrate-specific fields
+            exoskeletonType: animalToEdit.exoskeletonType || '',
+            bodySegmentation: animalToEdit.bodySegmentation || '',
+            limbDamage: animalToEdit.limbDamage || '',
+            molt: animalToEdit.molt || '',
+            colonySize: animalToEdit.colonySize || '',
+            venomType: animalToEdit.venomType || '',
             // Lineage
             fatherId_public: animalToEdit.fatherId_public || null,
             motherId_public: animalToEdit.motherId_public || null,
@@ -8424,6 +8445,27 @@ const AnimalForm = ({
             beakColor: '',
             legColor: '',
             wingspan: '',
+            // Fish-specific fields
+            finType: '',
+            bodyShape: '',
+            finDamage: '',
+            gillHealth: '',
+            waterType: '',
+            tankSize: '',
+            // Amphibian-specific fields
+            skinTexture: '',
+            skinMoisture: '',
+            skinDamage: '',
+            metamorphosisStage: '',
+            aquaticHabitat: '',
+            territorialBehavior: '',
+            // Invertebrate-specific fields
+            exoskeletonType: '',
+            bodySegmentation: '',
+            limbDamage: '',
+            molt: '',
+            colonySize: '',
+            venomType: '',
             // Lineage
             fatherId_public: null,
             motherId_public: null,
@@ -10029,6 +10071,170 @@ const AnimalForm = ({
                                         <label className="block text-sm font-medium text-gray-700">{getFieldLabel('wingspan', 'Wingspan (cm)')}</label>
                                         <input type="text" name="wingspan" value={formData.wingspan || ''} onChange={handleChange} 
                                             className="mt-1 block w-full p-2 border border-gray-300 rounded-md shadow-sm focus:ring-primary focus:border-primary" />
+                                    </div>
+                                )}
+                                
+                                {/* Fish-specific fields */}
+                                {!isFieldHidden('finType') && (
+                                    <div>
+                                        <label className="block text-sm font-medium text-gray-700">{getFieldLabel('finType', 'Fin Type')}</label>
+                                        <input type="text" name="finType" value={formData.finType || ''} onChange={handleChange} 
+                                            className="mt-1 block w-full p-2 border border-gray-300 rounded-md shadow-sm focus:ring-primary focus:border-primary" 
+                                            placeholder="e.g., Veil Tail, Half Moon, Crown" />
+                                    </div>
+                                )}
+                                
+                                {!isFieldHidden('bodyShape') && (
+                                    <div>
+                                        <label className="block text-sm font-medium text-gray-700">{getFieldLabel('bodyShape', 'Body Shape')}</label>
+                                        <input type="text" name="bodyShape" value={formData.bodyShape || ''} onChange={handleChange} 
+                                            className="mt-1 block w-full p-2 border border-gray-300 rounded-md shadow-sm focus:ring-primary focus:border-primary" 
+                                            placeholder="e.g., Streamlined, Compact, Torpedo" />
+                                    </div>
+                                )}
+                                
+                                {!isFieldHidden('finDamage') && (
+                                    <div>
+                                        <label className="block text-sm font-medium text-gray-700">{getFieldLabel('finDamage', 'Fin Damage/Condition')}</label>
+                                        <input type="text" name="finDamage" value={formData.finDamage || ''} onChange={handleChange} 
+                                            className="mt-1 block w-full p-2 border border-gray-300 rounded-md shadow-sm focus:ring-primary focus:border-primary" 
+                                            placeholder="e.g., Intact, Torn, Frayed" />
+                                    </div>
+                                )}
+                                
+                                {!isFieldHidden('gillHealth') && (
+                                    <div>
+                                        <label className="block text-sm font-medium text-gray-700">{getFieldLabel('gillHealth', 'Gill Health')}</label>
+                                        <input type="text" name="gillHealth" value={formData.gillHealth || ''} onChange={handleChange} 
+                                            className="mt-1 block w-full p-2 border border-gray-300 rounded-md shadow-sm focus:ring-primary focus:border-primary" 
+                                            placeholder="e.g., Healthy, Inflamed, Pale" />
+                                    </div>
+                                )}
+                                
+                                {!isFieldHidden('waterType') && (
+                                    <div>
+                                        <label className="block text-sm font-medium text-gray-700">{getFieldLabel('waterType', 'Water Type')}</label>
+                                        <input type="text" name="waterType" value={formData.waterType || ''} onChange={handleChange} 
+                                            className="mt-1 block w-full p-2 border border-gray-300 rounded-md shadow-sm focus:ring-primary focus:border-primary" 
+                                            placeholder="e.g., Freshwater, Saltwater, Brackish" />
+                                    </div>
+                                )}
+                                
+                                {!isFieldHidden('tankSize') && (
+                                    <div>
+                                        <label className="block text-sm font-medium text-gray-700">{getFieldLabel('tankSize', 'Tank Size (L)')}</label>
+                                        <input type="text" name="tankSize" value={formData.tankSize || ''} onChange={handleChange} 
+                                            className="mt-1 block w-full p-2 border border-gray-300 rounded-md shadow-sm focus:ring-primary focus:border-primary" />
+                                    </div>
+                                )}
+                                
+                                {/* Amphibian-specific fields */}
+                                {!isFieldHidden('skinTexture') && (
+                                    <div>
+                                        <label className="block text-sm font-medium text-gray-700">{getFieldLabel('skinTexture', 'Skin Texture')}</label>
+                                        <input type="text" name="skinTexture" value={formData.skinTexture || ''} onChange={handleChange} 
+                                            className="mt-1 block w-full p-2 border border-gray-300 rounded-md shadow-sm focus:ring-primary focus:border-primary" 
+                                            placeholder="e.g., Smooth, Warty, Granular" />
+                                    </div>
+                                )}
+                                
+                                {!isFieldHidden('skinMoisture') && (
+                                    <div>
+                                        <label className="block text-sm font-medium text-gray-700">{getFieldLabel('skinMoisture', 'Skin Moisture')}</label>
+                                        <input type="text" name="skinMoisture" value={formData.skinMoisture || ''} onChange={handleChange} 
+                                            className="mt-1 block w-full p-2 border border-gray-300 rounded-md shadow-sm focus:ring-primary focus:border-primary" 
+                                            placeholder="e.g., Moist, Dry, Slimy" />
+                                    </div>
+                                )}
+                                
+                                {!isFieldHidden('skinDamage') && (
+                                    <div>
+                                        <label className="block text-sm font-medium text-gray-700">{getFieldLabel('skinDamage', 'Skin Damage/Condition')}</label>
+                                        <input type="text" name="skinDamage" value={formData.skinDamage || ''} onChange={handleChange} 
+                                            className="mt-1 block w-full p-2 border border-gray-300 rounded-md shadow-sm focus:ring-primary focus:border-primary" 
+                                            placeholder="e.g., Intact, Lesions, Shedding Issues" />
+                                    </div>
+                                )}
+                                
+                                {!isFieldHidden('metamorphosisStage') && (
+                                    <div>
+                                        <label className="block text-sm font-medium text-gray-700">{getFieldLabel('metamorphosisStage', 'Metamorphosis Stage')}</label>
+                                        <input type="text" name="metamorphosisStage" value={formData.metamorphosisStage || ''} onChange={handleChange} 
+                                            className="mt-1 block w-full p-2 border border-gray-300 rounded-md shadow-sm focus:ring-primary focus:border-primary" 
+                                            placeholder="e.g., Tadpole, Metamorph, Adult" />
+                                    </div>
+                                )}
+                                
+                                {!isFieldHidden('aquaticHabitat') && (
+                                    <div>
+                                        <label className="block text-sm font-medium text-gray-700">{getFieldLabel('aquaticHabitat', 'Aquatic Habitat')}</label>
+                                        <input type="text" name="aquaticHabitat" value={formData.aquaticHabitat || ''} onChange={handleChange} 
+                                            className="mt-1 block w-full p-2 border border-gray-300 rounded-md shadow-sm focus:ring-primary focus:border-primary" 
+                                            placeholder="e.g., Fully Aquatic, Semi-aquatic, Terrestrial" />
+                                    </div>
+                                )}
+                                
+                                {!isFieldHidden('territorialBehavior') && (
+                                    <div>
+                                        <label className="block text-sm font-medium text-gray-700">{getFieldLabel('territorialBehavior', 'Territorial Behavior')}</label>
+                                        <input type="text" name="territorialBehavior" value={formData.territorialBehavior || ''} onChange={handleChange} 
+                                            className="mt-1 block w-full p-2 border border-gray-300 rounded-md shadow-sm focus:ring-primary focus:border-primary" 
+                                            placeholder="e.g., Aggressive, Docile, Solitary" />
+                                    </div>
+                                )}
+                                
+                                {/* Invertebrate-specific fields */}
+                                {!isFieldHidden('exoskeletonType') && (
+                                    <div>
+                                        <label className="block text-sm font-medium text-gray-700">{getFieldLabel('exoskeletonType', 'Exoskeleton Type')}</label>
+                                        <input type="text" name="exoskeletonType" value={formData.exoskeletonType || ''} onChange={handleChange} 
+                                            className="mt-1 block w-full p-2 border border-gray-300 rounded-md shadow-sm focus:ring-primary focus:border-primary" 
+                                            placeholder="e.g., Soft, Hard, Calcified" />
+                                    </div>
+                                )}
+                                
+                                {!isFieldHidden('bodySegmentation') && (
+                                    <div>
+                                        <label className="block text-sm font-medium text-gray-700">{getFieldLabel('bodySegmentation', 'Body Segmentation')}</label>
+                                        <input type="text" name="bodySegmentation" value={formData.bodySegmentation || ''} onChange={handleChange} 
+                                            className="mt-1 block w-full p-2 border border-gray-300 rounded-md shadow-sm focus:ring-primary focus:border-primary" 
+                                            placeholder="e.g., Distinct, Fused, Multiple" />
+                                    </div>
+                                )}
+                                
+                                {!isFieldHidden('limbDamage') && (
+                                    <div>
+                                        <label className="block text-sm font-medium text-gray-700">{getFieldLabel('limbDamage', 'Limb Damage/Condition')}</label>
+                                        <input type="text" name="limbDamage" value={formData.limbDamage || ''} onChange={handleChange} 
+                                            className="mt-1 block w-full p-2 border border-gray-300 rounded-md shadow-sm focus:ring-primary focus:border-primary" 
+                                            placeholder="e.g., All Intact, Missing Legs, Regenerating" />
+                                    </div>
+                                )}
+                                
+                                {!isFieldHidden('molt') && (
+                                    <div>
+                                        <label className="block text-sm font-medium text-gray-700">{getFieldLabel('molt', 'Molt Status')}</label>
+                                        <input type="text" name="molt" value={formData.molt || ''} onChange={handleChange} 
+                                            className="mt-1 block w-full p-2 border border-gray-300 rounded-md shadow-sm focus:ring-primary focus:border-primary" 
+                                            placeholder="e.g., Pre-molt, Post-molt, Between Molts" />
+                                    </div>
+                                )}
+                                
+                                {!isFieldHidden('colonySize') && (
+                                    <div>
+                                        <label className="block text-sm font-medium text-gray-700">{getFieldLabel('colonySize', 'Colony Size')}</label>
+                                        <input type="text" name="colonySize" value={formData.colonySize || ''} onChange={handleChange} 
+                                            className="mt-1 block w-full p-2 border border-gray-300 rounded-md shadow-sm focus:ring-primary focus:border-primary" 
+                                            placeholder="e.g., Solitary, Small, Large" />
+                                    </div>
+                                )}
+                                
+                                {!isFieldHidden('venomType') && (
+                                    <div>
+                                        <label className="block text-sm font-medium text-gray-700">{getFieldLabel('venomType', 'Venom Type')}</label>
+                                        <input type="text" name="venomType" value={formData.venomType || ''} onChange={handleChange} 
+                                            className="mt-1 block w-full p-2 border border-gray-300 rounded-md shadow-sm focus:ring-primary focus:border-primary" 
+                                            placeholder="e.g., None, Neurotoxin, Hemotoxin" />
                                     </div>
                                 )}
                                 
