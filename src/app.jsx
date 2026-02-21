@@ -8228,7 +8228,11 @@ const AnimalForm = ({
         // For new animals or empty fields, use the field template
         const fieldConfig = fieldTemplate.fields?.[fieldName];
         if (fieldConfig) {
-            return fieldConfig.enabled === false;
+            const isHidden = fieldConfig.enabled === false;
+            if (fieldName === 'coat' || fieldName === 'earset' || fieldName === 'strain') {
+                console.log(`[AnimalForm] Field ${fieldName}:`, { enabled: fieldConfig.enabled, isHidden });
+            }
+            return isHidden;
         }
         
         // If field not in template, show it (fail-safe for backward compatibility)
@@ -8559,13 +8563,18 @@ const AnimalForm = ({
                     `${API_BASE_URL}/species/with-template/${encodeURIComponent(formData.species)}`
                 );
                 
+                console.log('[AnimalForm] Field template response:', response.data);
+                
                 if (response.data?.fieldTemplate) {
                     setFieldTemplate(response.data.fieldTemplate);
+                    console.log('[AnimalForm] Field template loaded:', response.data.fieldTemplate.name);
+                    console.log('[AnimalForm] Template fields structure:', Object.keys(response.data.fieldTemplate.fields || {}).length + ' fields');
                 } else {
                     setFieldTemplate(null); // No template - show all fields
+                    console.log('[AnimalForm] No field template available for species:', formData.species);
                 }
             } catch (error) {
-                console.error('Error fetching field template:', error);
+                console.error('[AnimalForm] Error fetching field template:', error);
                 setFieldTemplate(null); // On error, show all fields for safety
             } finally {
                 setLoadingTemplate(false);
