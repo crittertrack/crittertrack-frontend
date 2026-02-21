@@ -1,4 +1,4 @@
-// CritterTrack Frontend Application
+﻿// CritterTrack Frontend Application
 import React, { useState, useEffect, useCallback, useRef, useMemo } from 'react';
 import { useParams, useNavigate, useLocation, Routes, Route, Link as RouterLink } from 'react-router-dom';
 import axios from 'axios';
@@ -2269,6 +2269,26 @@ const useDetailFieldTemplate = (species, API_BASE_URL) => {
     return { fieldTemplate, getLabel };
 };
 
+// ==================== DETAIL VIEW HELPERS ====================
+const parseJsonField = (data) => {
+    if (!data) return [];
+    if (Array.isArray(data)) return data;
+    try { return JSON.parse(data); } catch { return []; }
+};
+
+const DetailJsonList = ({ label, data, renderItem }) => {
+    const items = parseJsonField(data);
+    if (!items.length) return null;
+    return (
+        <div>
+            <strong className="text-sm text-gray-700">{label}:</strong>
+            <ul className="text-sm mt-1 list-disc list-inside space-y-1">
+                {items.map((item, i) => <li key={i} className="text-gray-700">{renderItem(item)}</li>)}
+            </ul>
+        </div>
+    );
+};
+
 // ==================== PRIVATE ANIMAL DETAIL (OWNER VIEW) ====================
 // Shows ALL data for animal owners viewing their own animals (ignores privacy toggles)
 // Accessed from: MY ANIMALS LIST
@@ -2424,7 +2444,9 @@ const PrivateAnimalDetail = ({ animal, onClose, onEdit, API_BASE_URL, authToken,
                             { id: 8, label: 'Husbandry', icon: '🏠' },
                             { id: 9, label: 'Behavior', icon: '🧠' },
                             { id: 10, label: 'Records', icon: '📝' },
-                            { id: 11, label: 'End of Life', icon: '⚖️' }
+                            { id: 11, label: 'End of Life', icon: '⚖️' },
+                            { id: 12, label: 'Show', icon: '🏆' },
+                            { id: 13, label: 'Legal', icon: '📄' }
                         ].map(tab => (
                             <button
                                 key={tab.id}
@@ -2760,74 +2782,128 @@ const PrivateAnimalDetail = ({ animal, onClose, onEdit, API_BASE_URL, authToken,
                     {/* Tab 3: Physical */}
                     {detailViewTab === 3 && (
                         <div className="space-y-6">
-                            <div className="bg-gray-50 p-4 rounded-lg border border-gray-200 space-y-4">
-                                <h3 className="text-lg font-semibold text-gray-700">Variety</h3>
-                                <div className="text-sm">
-                                    <span className="text-gray-600">Variety:</span> <strong>{[
-                                        animal.color,
-                                        animal.coatPattern,
-                                        animal.coat,
-                                        animal.earset
-                                    ].filter(Boolean).join(' ') || ''}</strong>
+                            {/* Appearance */}
+                            {(() => {
+                                const fields = [
+                                    { key: 'color', label: 'Color' },
+                                    { key: 'coatPattern', label: 'Pattern' },
+                                    { key: 'coat', label: 'Coat Type' },
+                                    { key: 'earset', label: 'Earset' },
+                                    { key: 'phenotype', label: 'Phenotype' },
+                                    { key: 'morph', label: 'Morph' },
+                                    { key: 'markings', label: 'Markings' },
+                                    { key: 'eyeColor', label: 'Eye Color' },
+                                    { key: 'nailColor', label: 'Nail/Claw Color' },
+                                    { key: 'carrierTraits', label: 'Carrier Traits' },
+                                ].filter(f => fieldTemplate?.fields?.[f.key]?.enabled !== false && animal[f.key]);
+                                return fields.length > 0 && (
+                                    <div className="bg-gray-50 p-4 rounded-lg border border-gray-200 space-y-4">
+                                        <h3 className="text-lg font-semibold text-gray-700">Appearance</h3>
+                                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm">
+                                            {fields.map(f => (
+                                                <div key={f.key}><span className="text-gray-600">{getLabel(f.key, f.label)}:</span> <strong>{animal[f.key]}</strong></div>
+                                            ))}
+                                        </div>
+                                    </div>
+                                );
+                            })()}
+
+                            {/* Genetic Code */}
+                            {fieldTemplate?.fields?.geneticCode?.enabled !== false && animal.geneticCode && (
+                                <div className="bg-gray-50 p-4 rounded-lg border border-gray-200 space-y-4">
+                                    <h3 className="text-lg font-semibold text-gray-700">{getLabel('geneticCode', 'Genetic Code')}</h3>
+                                    <p className="text-gray-700 font-mono text-sm break-all">{animal.geneticCode}</p>
                                 </div>
-                            </div>
-                            <div className="bg-gray-50 p-4 rounded-lg border border-gray-200 space-y-4">
-                                <h3 className="text-lg font-semibold text-gray-700">Genetic Code</h3>
-                                <p className="text-gray-700 font-mono text-sm break-all">{animal.geneticCode || ''}</p>
-                            </div>
-                            <div className="bg-gray-50 p-4 rounded-lg border border-gray-200 space-y-4">
-                                <h3 className="text-lg font-semibold text-gray-700">Life Stage</h3>
-                                <p className="text-gray-700 text-sm">{animal.lifeStage || ''}</p>
-                            </div>
-                            <div className="bg-gray-50 p-4 rounded-lg border border-gray-200 space-y-4">
-                                <h3 className="text-lg font-semibold text-gray-700">Measurements</h3>
-                                <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm">
-                                    <div><span className="text-gray-600">Weight:</span> <strong>{animal.bodyWeight || ''}</strong></div>
-                                    <div><span className="text-gray-600">Length:</span> <strong>{animal.bodyLength || ''}</strong></div>
-                                    <div><span className="text-gray-600">Height:</span> <strong>{animal.heightAtWithers || ''}</strong></div>
-                                    <div><span className="text-gray-600">Body Condition:</span> <strong>{animal.bodyConditionScore || ''}</strong></div>
+                            )}
+
+                            {/* Life Stage */}
+                            {fieldTemplate?.fields?.lifeStage?.enabled !== false && animal.lifeStage && (
+                                <div className="bg-gray-50 p-4 rounded-lg border border-gray-200 space-y-4">
+                                    <h3 className="text-lg font-semibold text-gray-700">{getLabel('lifeStage', 'Life Stage')}</h3>
+                                    <p className="text-gray-700 text-sm">{animal.lifeStage}</p>
                                 </div>
-                            </div>
+                            )}
+
+                            {/* Measurements */}
+                            {(() => {
+                                const mFields = [
+                                    { key: 'bodyWeight', label: 'Weight' },
+                                    { key: 'bodyLength', label: 'Body Length' },
+                                    { key: 'heightAtWithers', label: 'Height at Withers' },
+                                    { key: 'chestGirth', label: 'Chest Girth' },
+                                    { key: 'adultWeight', label: 'Adult Weight' },
+                                    { key: 'bodyConditionScore', label: 'Body Condition Score' },
+                                    { key: 'length', label: 'Length' },
+                                ].filter(f => fieldTemplate?.fields?.[f.key]?.enabled !== false && animal[f.key]);
+                                return mFields.length > 0 && (
+                                    <div className="bg-gray-50 p-4 rounded-lg border border-gray-200 space-y-4">
+                                        <h3 className="text-lg font-semibold text-gray-700">Measurements</h3>
+                                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm">
+                                            {mFields.map(f => (
+                                                <div key={f.key}><span className="text-gray-600">{getLabel(f.key, f.label)}:</span> <strong>{animal[f.key]}</strong></div>
+                                            ))}
+                                        </div>
+                                    </div>
+                                );
+                            })()}
                         </div>
                     )}
 
                     {/* Tab 4: Identification */}
                     {detailViewTab === 4 && (
                         <div className="space-y-6">
-                            {/* 1st Section: Identification Numbers */}
-                            <div className="bg-gray-50 p-4 rounded-lg border border-gray-200 space-y-4">
-                                <h3 className="text-lg font-semibold text-gray-700">Identification Numbers</h3>
-                                <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm">
-                                    <div><span className="text-gray-600">CritterTrack ID:</span> <strong>{animal.id_public || ''}</strong></div>
-                                    <div><span className="text-gray-600">Identification:</span> <strong>{animal.breederyId || ''}</strong></div>
-                                    <div><span className="text-gray-600">Microchip Number:</span> <strong>{animal.microchipNumber || ''}</strong></div>
-                                    <div><span className="text-gray-600">Pedigree Registration ID:</span> <strong>{animal.pedigreeRegistrationId || ''}</strong></div>
-                                </div>
-                            </div>
+                            {/* Identification Numbers */}
+                            {(() => {
+                                const idFields = [
+                                    { key: 'breederyId', label: 'Breeder ID' },
+                                    { key: 'microchipNumber', label: 'Microchip Number' },
+                                    { key: 'pedigreeRegistrationId', label: 'Pedigree Registration ID' },
+                                    { key: 'colonyId', label: 'Colony ID' },
+                                    { key: 'rabiesTagNumber', label: 'Rabies Tag Number' },
+                                    { key: 'tattooId', label: 'Tattoo ID' },
+                                    { key: 'akcRegistrationNumber', label: 'AKC Registration #' },
+                                    { key: 'fciRegistrationNumber', label: 'FCI Registration #' },
+                                    { key: 'cfaRegistrationNumber', label: 'CFA Registration #' },
+                                    { key: 'workingRegistryIds', label: 'Working Registry IDs' },
+                                ].filter(f => fieldTemplate?.fields?.[f.key]?.enabled !== false && animal[f.key]);
+                                return (
+                                    <div className="bg-gray-50 p-4 rounded-lg border border-gray-200 space-y-4">
+                                        <h3 className="text-lg font-semibold text-gray-700">Identification Numbers</h3>
+                                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm">
+                                            <div><span className="text-gray-600">CritterTrack ID:</span> <strong>{animal.id_public || ''}</strong></div>
+                                            {idFields.map(f => (
+                                                <div key={f.key}><span className="text-gray-600">{getLabel(f.key, f.label)}:</span> <strong>{animal[f.key]}</strong></div>
+                                            ))}
+                                        </div>
+                                    </div>
+                                );
+                            })()}
 
-                            {/* 2nd Section: Classification */}
+                            {/* Classification */}
                             <div className="bg-gray-50 p-4 rounded-lg border border-gray-200 space-y-4">
                                 <h3 className="text-lg font-semibold text-gray-700">Classification</h3>
                                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm">
                                     <div><span className="text-gray-600">Species:</span> <strong>{animal.species || ''}</strong></div>
-                                    <div><span className="text-gray-600">{getLabel('breed', 'Breed')}:</span> <strong>{animal.breed || ''}</strong></div>
-                                    <div><span className="text-gray-600">{getLabel('strain', 'Strain')}:</span> <strong>{animal.strain || ''}</strong></div>
+                                    {fieldTemplate?.fields?.breed?.enabled !== false && animal.breed && (
+                                        <div><span className="text-gray-600">{getLabel('breed', 'Breed')}:</span> <strong>{animal.breed}</strong></div>
+                                    )}
+                                    {fieldTemplate?.fields?.strain?.enabled !== false && animal.strain && (
+                                        <div><span className="text-gray-600">{getLabel('strain', 'Strain')}:</span> <strong>{animal.strain}</strong></div>
+                                    )}
                                 </div>
                             </div>
 
-                            {/* 3rd Section: Tags */}
-                            <div className="bg-gray-50 p-4 rounded-lg border border-gray-200 space-y-4">
-                                <h3 className="text-lg font-semibold text-gray-700">Tags</h3>
-                                {animal.tags && animal.tags.length > 0 ? (
+                            {/* Tags */}
+                            {animal.tags && animal.tags.length > 0 && (
+                                <div className="bg-gray-50 p-4 rounded-lg border border-gray-200 space-y-4">
+                                    <h3 className="text-lg font-semibold text-gray-700">Tags</h3>
                                     <div className="flex flex-wrap gap-2">
                                         {animal.tags.map((tag, idx) => (
-                                            <span key={idx} className="bg-blue-100 text-blue-800 px-2 py-1 rounded text-sm">
-                                                {tag}
-                                            </span>
+                                            <span key={idx} className="bg-blue-100 text-blue-800 px-2 py-1 rounded text-sm">{tag}</span>
                                         ))}
                                     </div>
-                                ) : <p className="text-gray-700 text-sm"></p>}
-                            </div>
+                                </div>
+                            )}
                         </div>
                     )}
 
@@ -3014,79 +3090,124 @@ const PrivateAnimalDetail = ({ animal, onClose, onEdit, API_BASE_URL, authToken,
                     {detailViewTab === 7 && (
                         <div className="space-y-6">
                             {/* 1st Section: Preventive Care */}
+                            {(animal.vaccinations || animal.dewormingRecords || animal.parasiteControl || animal.parasitePreventionSchedule) && (
                             <div className="bg-gray-50 p-4 rounded-lg border border-gray-200 space-y-4">
                                 <h3 className="text-lg font-semibold text-gray-700">Preventive Care</h3>
-                                <div className="space-y-3 text-sm">
-                                    <div><span className="text-gray-600">{getLabel('vaccinations', 'Vaccinations')}:</span> <strong>{animal.vaccinations || ''}</strong></div>
-                                    <div><span className="text-gray-600">Deworming Records:</span> <strong>{animal.dewormingRecords || ''}</strong></div>
-                                    <div><span className="text-gray-600">Parasite Control:</span> <strong>{animal.parasiteControl || ''}</strong></div>
+                                <div className="space-y-4">
+                                    {animal.vaccinations && (
+                                        <DetailJsonList
+                                            label={getLabel('vaccinations', 'Vaccinations')}
+                                            data={animal.vaccinations}
+                                            renderItem={v => <>{v.name} {v.date && `(${formatDate(v.date)})`}{v.notes && <span className="text-gray-600"> - {v.notes}</span>}</>}
+                                        />
+                                    )}
+                                    {animal.dewormingRecords && (
+                                        <DetailJsonList
+                                            label="Deworming Records"
+                                            data={animal.dewormingRecords}
+                                            renderItem={r => <>{r.medication} {r.date && `(${formatDate(r.date)})`}{r.notes && <span className="text-gray-600"> - {r.notes}</span>}</>}
+                                        />
+                                    )}
+                                    {animal.parasiteControl && (
+                                        <DetailJsonList
+                                            label="Parasite Control"
+                                            data={animal.parasiteControl}
+                                            renderItem={r => <>{r.treatment} {r.date && `(${formatDate(r.date)})`}{r.notes && <span className="text-gray-600"> - {r.notes}</span>}</>}
+                                        />
+                                    )}
+                                    {fieldTemplate?.fields?.parasitePreventionSchedule?.enabled !== false && animal.parasitePreventionSchedule && (
+                                        <div className="text-sm">
+                                            <span className="text-gray-600">{getLabel('parasitePreventionSchedule', 'Parasite Prevention Schedule')}:</span>
+                                            <p className="text-gray-700 mt-1 whitespace-pre-wrap">{animal.parasitePreventionSchedule}</p>
+                                        </div>
+                                    )}
                                 </div>
                             </div>
+                            )}
 
                             {/* 2nd Section: Procedures & Diagnostics */}
+                            {(animal.medicalProcedures || animal.labResults || animal.laboratoryResults) && (
                             <div className="bg-gray-50 p-4 rounded-lg border border-gray-200 space-y-4">
                                 <h3 className="text-lg font-semibold text-gray-700">Procedures & Diagnostics</h3>
-                                <div className="space-y-3 text-sm">
-                                    <div><span className="text-gray-600">Medical Procedures:</span> <strong>{animal.medicalProcedures && (
-                                    <div>
-                                        <strong className="text-sm">Medical Procedures:</strong>
-                                        <ul className="text-sm mt-1 list-disc list-inside space-y-1">
-                                            {(() => {
-                                                const data = animal.medicalProcedures;
-                                                const parsed = typeof data === 'string' ? (() => { try { return JSON.parse(data); } catch { return []; } })() : Array.isArray(data) ? data : [];
-                                                return parsed.map((proc, idx) => (
-                                                    <li key={idx} className="text-gray-700">
-                                                        {proc.name} {proc.date && `(${formatDate(proc.date)})`}
-                                                        {proc.notes && <span className="text-gray-600"> - {proc.notes}</span>}
-                                                    </li>
-                                                ));
-                                            })()}
-                                        </ul>
-                                    </div>
-                                )}</strong></div>
-                                    <div><span className="text-gray-600">Laboratory Results:</span> <strong>{animal.laboratoryResults || ''}</strong></div>
+                                <div className="space-y-4">
+                                    {animal.medicalProcedures && (
+                                        <DetailJsonList
+                                            label="Medical Procedures"
+                                            data={animal.medicalProcedures}
+                                            renderItem={p => <>{p.name} {p.date && `(${formatDate(p.date)})`}{p.notes && <span className="text-gray-600"> - {p.notes}</span>}</>}
+                                        />
+                                    )}
+                                    {(animal.labResults || animal.laboratoryResults) && (
+                                        <DetailJsonList
+                                            label="Laboratory Results"
+                                            data={animal.labResults || animal.laboratoryResults}
+                                            renderItem={r => <>{r.testName} - {r.result} {r.date && `(${formatDate(r.date)})`}{r.notes && <span className="text-gray-600"> - {r.notes}</span>}</>}
+                                        />
+                                    )}
                                 </div>
                             </div>
+                            )}
 
                             {/* 3rd Section: Active Medical Records */}
+                            {(animal.medicalConditions || animal.allergies || animal.medications) && (
                             <div className="bg-gray-50 p-4 rounded-lg border border-gray-200 space-y-4">
                                 <h3 className="text-lg font-semibold text-gray-700">Active Medical Records</h3>
                                 <div className="space-y-3">
-                                    <div>
-                                        <span className="text-gray-600 text-sm font-semibold">Medical Conditions:</span>
-                                        <p className="text-sm text-gray-700 mt-1 whitespace-pre-wrap">{animal.medicalConditions || ''}</p>
-                                    </div>
+                                    {animal.medicalConditions && (
+                                        <div>
+                                            <span className="text-gray-600 text-sm font-semibold">Medical Conditions:</span>
+                                            <p className="text-sm text-gray-700 mt-1 whitespace-pre-wrap">{animal.medicalConditions}</p>
+                                        </div>
+                                    )}
                                     <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm">
-                                        <div><span className="text-gray-600">Allergies:</span> <strong>{animal.allergies || ''}</strong></div>
-                                        <div><span className="text-gray-600">Current Medications:</span> <strong>{animal.medications || ''}</strong></div>
+                                        {animal.allergies && <div><span className="text-gray-600">Allergies:</span> <strong>{animal.allergies}</strong></div>}
+                                        {animal.medications && <div><span className="text-gray-600">Current Medications:</span> <strong>{animal.medications}</strong></div>}
                                     </div>
                                 </div>
                             </div>
+                            )}
 
-                            {/* 4th Section: Veterinary Care */}
+                            {/* 4th Section: Health Clearances & Screening */}
+                            {(() => {
+                                const clearanceFields = [
+                                    { key: 'heartwormStatus', label: 'Heartworm Status' },
+                                    { key: 'hipElbowScores', label: 'Hip/Elbow Scores' },
+                                    { key: 'eyeClearance', label: 'Eye Clearance' },
+                                    { key: 'cardiacClearance', label: 'Cardiac Clearance' },
+                                    { key: 'dentalRecords', label: 'Dental Records' },
+                                    { key: 'geneticTestResults', label: 'Genetic Test Results' },
+                                    { key: 'chronicConditions', label: 'Chronic Conditions' },
+                                ].filter(f => fieldTemplate?.fields?.[f.key]?.enabled !== false && animal[f.key]);
+                                const spayDate = fieldTemplate?.fields?.spayNeuterDate?.enabled !== false && animal.spayNeuterDate;
+                                return (clearanceFields.length > 0 || spayDate) && (
+                                    <div className="bg-gray-50 p-4 rounded-lg border border-gray-200 space-y-4">
+                                        <h3 className="text-lg font-semibold text-gray-700">Health Clearances & Screening</h3>
+                                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm">
+                                            {spayDate && <div><span className="text-gray-600">{getLabel('spayNeuterDate', 'Spay/Neuter Date')}:</span> <strong>{formatDate(animal.spayNeuterDate)}</strong></div>}
+                                            {clearanceFields.map(f => (
+                                                <div key={f.key}><span className="text-gray-600">{getLabel(f.key, f.label)}:</span> <strong>{animal[f.key]}</strong></div>
+                                            ))}
+                                        </div>
+                                    </div>
+                                );
+                            })()}
+
+                            {/* 5th Section: Veterinary Care */}
+                            {(animal.primaryVet || animal.vetVisits) && (
                             <div className="bg-gray-50 p-4 rounded-lg border border-gray-200 space-y-4">
                                 <h3 className="text-lg font-semibold text-gray-700">Veterinary Care</h3>
-                                <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm">
-                                    <div><span className="text-gray-600">Primary Veterinarian:</span> <strong>{animal.primaryVet || ''}</strong></div>
-                                    <div><span className="text-gray-600">Veterinary Visits:</span> <strong>{animal.vetVisits && (
-                                    <div>
-                                        <strong className="text-sm">Veterinary Visits:</strong>
-                                        <ul className="text-sm mt-1 list-disc list-inside space-y-1">
-                                            {(() => {
-                                                const data = animal.vetVisits;
-                                                const parsed = typeof data === 'string' ? (() => { try { return JSON.parse(data); } catch { return []; } })() : Array.isArray(data) ? data : [];
-                                                return parsed.map((visit, idx) => (
-                                                    <li key={idx} className="text-gray-700">
-                                                        {visit.reason} {visit.date && `(${formatDate(visit.date)})`}
-                                                        {visit.notes && <span className="text-gray-600"> - {visit.notes}</span>}
-                                                    </li>
-                                                ));
-                                            })()}
-                                        </ul>
-                                    </div>
-                                )}</strong></div>
+                                <div className="space-y-4 text-sm">
+                                    {animal.primaryVet && <div><span className="text-gray-600">Primary Veterinarian:</span> <strong>{animal.primaryVet}</strong></div>}
+                                    {animal.vetVisits && (
+                                        <DetailJsonList
+                                            label="Veterinary Visits"
+                                            data={animal.vetVisits}
+                                            renderItem={v => <>{v.reason} {v.date && `(${formatDate(v.date)})`}{v.notes && <span className="text-gray-600"> - {v.notes}</span>}</>}
+                                        />
+                                    )}
                                 </div>
                             </div>
+                            )}
                         </div>
                     )}
 
@@ -3094,35 +3215,76 @@ const PrivateAnimalDetail = ({ animal, onClose, onEdit, API_BASE_URL, authToken,
                     {detailViewTab === 8 && (
                         <div className="space-y-6">
                             {/* 1st Section: Nutrition */}
+                            {(animal.dietType || animal.feedingSchedule || animal.supplements) && (
                             <div className="bg-gray-50 p-4 rounded-lg border border-gray-200 space-y-4">
                                 <h3 className="text-lg font-semibold text-gray-700">Nutrition</h3>
                                 <div className="space-y-3 text-sm">
-                                    <div><span className="text-gray-600">Diet Type:</span> <strong>{animal.dietType || ''}</strong></div>
-                                    <div><span className="text-gray-600">Feeding Schedule:</span> <strong>{animal.feedingSchedule || ''}</strong></div>
-                                    <div><span className="text-gray-600">Supplements:</span> <strong>{animal.supplements || ''}</strong></div>
+                                    {animal.dietType && <div><span className="text-gray-600">Diet Type:</span> <strong>{animal.dietType}</strong></div>}
+                                    {animal.feedingSchedule && <div><span className="text-gray-600">Feeding Schedule:</span> <strong>{animal.feedingSchedule}</strong></div>}
+                                    {animal.supplements && <div><span className="text-gray-600">Supplements:</span> <strong>{animal.supplements}</strong></div>}
                                 </div>
                             </div>
+                            )}
 
                             {/* 2nd Section: Husbandry */}
+                            {(animal.housingType || animal.bedding || animal.enrichment) && (
                             <div className="bg-gray-50 p-4 rounded-lg border border-gray-200 space-y-4">
                                 <h3 className="text-lg font-semibold text-gray-700">Husbandry</h3>
                                 <div className="space-y-3 text-sm">
-                                    <div><span className="text-gray-600">{getLabel('housingType', 'Housing Type')}:</span> <strong>{animal.housingType || ''}</strong></div>
-                                    <div><span className="text-gray-600">{getLabel('bedding', 'Bedding')}:</span> <strong>{animal.bedding || ''}</strong></div>
-                                    <div><span className="text-gray-600">Enrichment:</span> <strong>{animal.enrichment || ''}</strong></div>
+                                    {fieldTemplate?.fields?.housingType?.enabled !== false && animal.housingType && <div><span className="text-gray-600">{getLabel('housingType', 'Housing Type')}:</span> <strong>{animal.housingType}</strong></div>}
+                                    {fieldTemplate?.fields?.bedding?.enabled !== false && animal.bedding && <div><span className="text-gray-600">{getLabel('bedding', 'Bedding')}:</span> <strong>{animal.bedding}</strong></div>}
+                                    {animal.enrichment && <div><span className="text-gray-600">Enrichment:</span> <strong>{animal.enrichment}</strong></div>}
                                 </div>
                             </div>
+                            )}
 
                             {/* 3rd Section: Environment */}
+                            {(animal.temperatureRange || animal.humidity || animal.lighting || animal.noise) && (
                             <div className="bg-gray-50 p-4 rounded-lg border border-gray-200 space-y-4">
                                 <h3 className="text-lg font-semibold text-gray-700">Environment</h3>
                                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm">
-                                    <div><span className="text-gray-600">Temperature Range:</span> <strong>{animal.temperatureRange || ''}</strong></div>
-                                    <div><span className="text-gray-600">{getLabel('humidity', 'Humidity')}:</span> <strong>{animal.humidity || ''}</strong></div>
-                                    <div><span className="text-gray-600">Lighting:</span> <strong>{animal.lighting || ''}</strong></div>
-                                    <div><span className="text-gray-600">{getLabel('noise', 'Noise Level')}:</span> <strong>{animal.noise || ''}</strong></div>
+                                    {animal.temperatureRange && <div><span className="text-gray-600">Temperature Range:</span> <strong>{animal.temperatureRange}</strong></div>}
+                                    {fieldTemplate?.fields?.humidity?.enabled !== false && animal.humidity && <div><span className="text-gray-600">{getLabel('humidity', 'Humidity')}:</span> <strong>{animal.humidity}</strong></div>}
+                                    {animal.lighting && <div><span className="text-gray-600">Lighting:</span> <strong>{animal.lighting}</strong></div>}
+                                    {fieldTemplate?.fields?.noise?.enabled !== false && animal.noise && <div><span className="text-gray-600">{getLabel('noise', 'Noise Level')}:</span> <strong>{animal.noise}</strong></div>}
                                 </div>
                             </div>
+                            )}
+
+                            {/* 4th Section: Exercise & Grooming */}
+                            {(() => {
+                                const egFields = [
+                                    { key: 'exerciseRequirements', label: 'Exercise Requirements' },
+                                    { key: 'dailyExerciseMinutes', label: 'Daily Exercise (min)' },
+                                    { key: 'groomingNeeds', label: 'Grooming Needs' },
+                                    { key: 'sheddingLevel', label: 'Shedding Level' },
+                                ].filter(f => fieldTemplate?.fields?.[f.key]?.enabled !== false && animal[f.key]);
+                                const trainFlags = [
+                                    { key: 'crateTrained', label: 'Crate Trained' },
+                                    { key: 'litterTrained', label: 'Litter Trained' },
+                                    { key: 'leashTrained', label: 'Leash Trained' },
+                                    { key: 'freeFlightTrained', label: 'Free Flight Trained' },
+                                ].filter(f => fieldTemplate?.fields?.[f.key]?.enabled !== false && animal[f.key]);
+                                return (egFields.length > 0 || trainFlags.length > 0) && (
+                                    <div className="bg-gray-50 p-4 rounded-lg border border-gray-200 space-y-4">
+                                        <h3 className="text-lg font-semibold text-gray-700">Exercise & Grooming</h3>
+                                        {egFields.length > 0 && (
+                                            <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm">
+                                                {egFields.map(f => (
+                                                    <div key={f.key}><span className="text-gray-600">{getLabel(f.key, f.label)}:</span> <strong>{animal[f.key]}</strong></div>
+                                                ))}
+                                            </div>
+                                        )}
+                                        {trainFlags.length > 0 && (
+                                            <div className="flex flex-wrap gap-3 text-sm">
+                                                {trainFlags.map(f => (
+                                                    <span key={f.key} className="inline-flex items-center bg-green-100 text-green-800 px-2 py-1 rounded text-xs font-semibold">&#x2713; {getLabel(f.key, f.label)}</span>
+                                                ))}
+                                            </div>
+                                        )}
+                                    </div>
+                                );
+                            })()}
                         </div>
                     )}
 
@@ -3130,22 +3292,49 @@ const PrivateAnimalDetail = ({ animal, onClose, onEdit, API_BASE_URL, authToken,
                     {detailViewTab === 9 && (
                         <div className="space-y-6">
                             {/* 1st Section: Behavior */}
+                            {(animal.temperament || animal.handlingTolerance || animal.socialStructure) && (
                             <div className="bg-gray-50 p-4 rounded-lg border border-gray-200 space-y-4">
                                 <h3 className="text-lg font-semibold text-gray-700">Behavior</h3>
                                 <div className="space-y-3 text-sm">
-                                    <div><span className="text-gray-600">Temperament:</span> <strong>{animal.temperament || ''}</strong></div>
-                                    <div><span className="text-gray-600">{getLabel('handlingTolerance', 'Handling Tolerance')}:</span> <strong>{animal.handlingTolerance || ''}</strong></div>
-                                    <div><span className="text-gray-600">Social Structure:</span> <strong>{animal.socialStructure || ''}</strong></div>
+                                    {animal.temperament && <div><span className="text-gray-600">Temperament:</span> <strong>{animal.temperament}</strong></div>}
+                                    {fieldTemplate?.fields?.handlingTolerance?.enabled !== false && animal.handlingTolerance && <div><span className="text-gray-600">{getLabel('handlingTolerance', 'Handling Tolerance')}:</span> <strong>{animal.handlingTolerance}</strong></div>}
+                                    {animal.socialStructure && <div><span className="text-gray-600">Social Structure:</span> <strong>{animal.socialStructure}</strong></div>}
                                 </div>
                             </div>
+                            )}
 
                             {/* 2nd Section: Activity */}
+                            {animal.activityCycle && (
                             <div className="bg-gray-50 p-4 rounded-lg border border-gray-200 space-y-4">
                                 <h3 className="text-lg font-semibold text-gray-700">Activity</h3>
                                 <div className="space-y-3 text-sm">
-                                    <div><span className="text-gray-600">Activity Cycle:</span> <strong>{animal.activityCycle || ''}</strong></div>
+                                    <div><span className="text-gray-600">Activity Cycle:</span> <strong>{animal.activityCycle}</strong></div>
                                 </div>
                             </div>
+                            )}
+
+                            {/* 3rd Section: Training & Working */}
+                            {(() => {
+                                const trainFields = [
+                                    { key: 'trainingLevel', label: 'Training Level' },
+                                    { key: 'trainingDisciplines', label: 'Training Disciplines' },
+                                    { key: 'workingRole', label: 'Working Role' },
+                                    { key: 'certifications', label: 'Certifications' },
+                                    { key: 'behavioralIssues', label: 'Behavioral Issues' },
+                                    { key: 'biteHistory', label: 'Bite History' },
+                                    { key: 'reactivityNotes', label: 'Reactivity Notes' },
+                                ].filter(f => fieldTemplate?.fields?.[f.key]?.enabled !== false && animal[f.key]);
+                                return trainFields.length > 0 && (
+                                    <div className="bg-gray-50 p-4 rounded-lg border border-gray-200 space-y-4">
+                                        <h3 className="text-lg font-semibold text-gray-700">Training & Working</h3>
+                                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm">
+                                            {trainFields.map(f => (
+                                                <div key={f.key}><span className="text-gray-600">{getLabel(f.key, f.label)}:</span> <strong>{animal[f.key]}</strong></div>
+                                            ))}
+                                        </div>
+                                    </div>
+                                );
+                            })()}
                         </div>
                     )}
 
@@ -3161,7 +3350,7 @@ const PrivateAnimalDetail = ({ animal, onClose, onEdit, API_BASE_URL, authToken,
                     )}                    {/* Tab 11: End of Life */}
                     {detailViewTab === 11 && (
                         <div className="space-y-6">
-                            {/* 1st Section: Information */}
+                            {/* Information */}
                             <div className="bg-gray-50 p-4 rounded-lg border border-gray-200 space-y-4">
                                 <h3 className="text-lg font-semibold text-gray-700">Information</h3>
                                 <div className="space-y-3 text-sm">
@@ -3169,34 +3358,10 @@ const PrivateAnimalDetail = ({ animal, onClose, onEdit, API_BASE_URL, authToken,
                                     <div><span className="text-gray-600">Cause of Death:</span> <strong>{animal.causeOfDeath || ''}</strong></div>
                                     <div><span className="text-gray-600">Necropsy Results:</span> <strong>{animal.necropsyResults || ''}</strong></div>
                                     {animal.endOfLifeCareNotes && (
-                                        <div><span className="text-gray-600">End of Life Care Notes:</span> <p className="text-gray-700 mt-1 whitespace-pre-wrap">{animal.endOfLifeCareNotes}</p></div>
+                                        <div><span className="text-gray-600">{getLabel('endOfLifeCareNotes', 'End of Life Care Notes')}:</span> <p className="text-gray-700 mt-1 whitespace-pre-wrap">{animal.endOfLifeCareNotes}</p></div>
                                     )}
                                 </div>
                             </div>
-
-                            {/* 2nd Section: Legal/Administrative */}
-                            <div className="bg-gray-50 p-4 rounded-lg border border-gray-200 space-y-4">
-                                <h3 className="text-lg font-semibold text-gray-700">Legal/Administrative</h3>
-                                <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm">
-                                    <div><span className="text-gray-600">Insurance:</span> <strong>{animal.insurance || ''}</strong></div>
-                                    <div><span className="text-gray-600">Legal Status:</span> <strong>{animal.legalStatus || ''}</strong></div>
-                                </div>
-                            </div>
-
-                            {/* 3rd Section: Restrictions */}
-                            {(animal.breedingRestrictions || animal.exportRestrictions) && (
-                                <div className="bg-gray-50 p-4 rounded-lg border border-gray-200 space-y-4">
-                                    <h3 className="text-lg font-semibold text-gray-700">Restrictions</h3>
-                                    <div className="space-y-3 text-sm">
-                                        {animal.breedingRestrictions && (
-                                            <div><span className="text-gray-600">Breeding Restrictions:</span> <p className="text-gray-700 mt-1 whitespace-pre-wrap">{animal.breedingRestrictions}</p></div>
-                                        )}
-                                        {animal.exportRestrictions && (
-                                            <div><span className="text-gray-600">Export Restrictions:</span> <p className="text-gray-700 mt-1 whitespace-pre-wrap">{animal.exportRestrictions}</p></div>
-                                        )}
-                                    </div>
-                                </div>
-                            )}
                         </div>
                     )}
 
@@ -3221,6 +3386,63 @@ const PrivateAnimalDetail = ({ animal, onClose, onEdit, API_BASE_URL, authToken,
                                         <div><span className="text-gray-600">Working Titles:</span> <strong>{animal.workingTitles || ''}</strong></div>
                                         <div><span className="text-gray-600">Performance Scores:</span> <strong>{animal.performanceScores || ''}</strong></div>
                                     </div>
+                                </div>
+                            )}
+                        </div>
+                    )}
+
+                    {/* Tab 13: Legal & Documentation */}
+                    {detailViewTab === 13 && (
+                        <div className="space-y-6">
+                            {/* Licensing & Permits */}
+                            {(animal.licenseNumber || animal.licenseJurisdiction) && (
+                            <div className="bg-gray-50 p-4 rounded-lg border border-gray-200 space-y-4">
+                                <h3 className="text-lg font-semibold text-gray-700">Licensing & Permits</h3>
+                                <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm">
+                                    {fieldTemplate?.fields?.licenseNumber?.enabled !== false && animal.licenseNumber && (
+                                        <div><span className="text-gray-600">{getLabel('licenseNumber', 'License Number')}:</span> <strong>{animal.licenseNumber}</strong></div>
+                                    )}
+                                    {fieldTemplate?.fields?.licenseJurisdiction?.enabled !== false && animal.licenseJurisdiction && (
+                                        <div><span className="text-gray-600">{getLabel('licenseJurisdiction', 'License Jurisdiction')}:</span> <strong>{animal.licenseJurisdiction}</strong></div>
+                                    )}
+                                </div>
+                            </div>
+                            )}
+
+                            {/* Legal / Administrative */}
+                            {(animal.insurance || animal.legalStatus) && (
+                            <div className="bg-gray-50 p-4 rounded-lg border border-gray-200 space-y-4">
+                                <h3 className="text-lg font-semibold text-gray-700">Legal / Administrative</h3>
+                                <div className="space-y-3 text-sm">
+                                    {fieldTemplate?.fields?.insurance?.enabled !== false && animal.insurance && (
+                                        <div><span className="text-gray-600">{getLabel('insurance', 'Insurance')}:</span> <p className="text-gray-700 mt-1 whitespace-pre-wrap">{animal.insurance}</p></div>
+                                    )}
+                                    {fieldTemplate?.fields?.legalStatus?.enabled !== false && animal.legalStatus && (
+                                        <div><span className="text-gray-600">{getLabel('legalStatus', 'Legal Status')}:</span> <p className="text-gray-700 mt-1 whitespace-pre-wrap">{animal.legalStatus}</p></div>
+                                    )}
+                                </div>
+                            </div>
+                            )}
+
+                            {/* Restrictions */}
+                            {(animal.breedingRestrictions || animal.exportRestrictions) && (
+                            <div className="bg-gray-50 p-4 rounded-lg border border-gray-200 space-y-4">
+                                <h3 className="text-lg font-semibold text-gray-700">Restrictions</h3>
+                                <div className="space-y-3 text-sm">
+                                    {animal.breedingRestrictions && (
+                                        <div><span className="text-gray-600">{getLabel('breedingRestrictions', 'Breeding Restrictions')}:</span> <p className="text-gray-700 mt-1 whitespace-pre-wrap">{animal.breedingRestrictions}</p></div>
+                                    )}
+                                    {animal.exportRestrictions && (
+                                        <div><span className="text-gray-600">{getLabel('exportRestrictions', 'Export Restrictions')}:</span> <p className="text-gray-700 mt-1 whitespace-pre-wrap">{animal.exportRestrictions}</p></div>
+                                    )}
+                                </div>
+                            </div>
+                            )}
+
+                            {/* No data fallback */}
+                            {!animal.licenseNumber && !animal.licenseJurisdiction && !animal.insurance && !animal.legalStatus && !animal.breedingRestrictions && !animal.exportRestrictions && (
+                                <div className="bg-gray-50 p-4 rounded-lg border border-gray-200 text-center text-gray-500">
+                                    <p>No legal or documentation records</p>
                                 </div>
                             )}
                         </div>
@@ -3362,7 +3584,9 @@ const ViewOnlyPrivateAnimalDetail = ({ animal, onClose, API_BASE_URL, authToken,
                             { id: 8, label: 'Husbandry', icon: '🏠' },
                             { id: 9, label: 'Behavior', icon: '🧠' },
                             { id: 10, label: 'Records', icon: '📝' },
-                            { id: 11, label: 'End of Life', icon: '⚖️' }
+                            { id: 11, label: 'End of Life', icon: '⚖️' },
+                            { id: 12, label: 'Show', icon: '🏆' },
+                            { id: 13, label: 'Legal', icon: '📄' }
                         ].map(tab => (
                             <button
                                 key={tab.id}
@@ -3652,74 +3876,128 @@ const ViewOnlyPrivateAnimalDetail = ({ animal, onClose, API_BASE_URL, authToken,
                     {/* Tab 3: Physical */}
                     {detailViewTab === 3 && (
                         <div className="space-y-6">
-                            <div className="bg-gray-50 p-4 rounded-lg border border-gray-200 space-y-4">
-                                <h3 className="text-lg font-semibold text-gray-700">Variety</h3>
-                                <div className="text-sm">
-                                    <span className="text-gray-600">Variety:</span> <strong>{[
-                                        animal.color,
-                                        animal.coatPattern,
-                                        animal.coat,
-                                        animal.earset
-                                    ].filter(Boolean).join(' ') || ''}</strong>
+                            {/* Appearance */}
+                            {(() => {
+                                const fields = [
+                                    { key: 'color', label: 'Color' },
+                                    { key: 'coatPattern', label: 'Pattern' },
+                                    { key: 'coat', label: 'Coat Type' },
+                                    { key: 'earset', label: 'Earset' },
+                                    { key: 'phenotype', label: 'Phenotype' },
+                                    { key: 'morph', label: 'Morph' },
+                                    { key: 'markings', label: 'Markings' },
+                                    { key: 'eyeColor', label: 'Eye Color' },
+                                    { key: 'nailColor', label: 'Nail/Claw Color' },
+                                    { key: 'carrierTraits', label: 'Carrier Traits' },
+                                ].filter(f => fieldTemplate?.fields?.[f.key]?.enabled !== false && animal[f.key]);
+                                return fields.length > 0 && (
+                                    <div className="bg-gray-50 p-4 rounded-lg border border-gray-200 space-y-4">
+                                        <h3 className="text-lg font-semibold text-gray-700">Appearance</h3>
+                                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm">
+                                            {fields.map(f => (
+                                                <div key={f.key}><span className="text-gray-600">{getLabel(f.key, f.label)}:</span> <strong>{animal[f.key]}</strong></div>
+                                            ))}
+                                        </div>
+                                    </div>
+                                );
+                            })()}
+
+                            {/* Genetic Code */}
+                            {fieldTemplate?.fields?.geneticCode?.enabled !== false && animal.geneticCode && (
+                                <div className="bg-gray-50 p-4 rounded-lg border border-gray-200 space-y-4">
+                                    <h3 className="text-lg font-semibold text-gray-700">{getLabel('geneticCode', 'Genetic Code')}</h3>
+                                    <p className="text-gray-700 font-mono text-sm break-all">{animal.geneticCode}</p>
                                 </div>
-                            </div>
-                            <div className="bg-gray-50 p-4 rounded-lg border border-gray-200 space-y-4">
-                                <h3 className="text-lg font-semibold text-gray-700">Genetic Code</h3>
-                                <p className="text-gray-700 font-mono text-sm break-all">{animal.geneticCode || ''}</p>
-                            </div>
-                            <div className="bg-gray-50 p-4 rounded-lg border border-gray-200 space-y-4">
-                                <h3 className="text-lg font-semibold text-gray-700">Life Stage</h3>
-                                <p className="text-gray-700 text-sm">{animal.lifeStage || ''}</p>
-                            </div>
-                            <div className="bg-gray-50 p-4 rounded-lg border border-gray-200 space-y-4">
-                                <h3 className="text-lg font-semibold text-gray-700">Measurements</h3>
-                                <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm">
-                                    <div><span className="text-gray-600">Weight:</span> <strong>{animal.bodyWeight || ''}</strong></div>
-                                    <div><span className="text-gray-600">Length:</span> <strong>{animal.bodyLength || ''}</strong></div>
-                                    <div><span className="text-gray-600">Height:</span> <strong>{animal.heightAtWithers || ''}</strong></div>
-                                    <div><span className="text-gray-600">Body Condition:</span> <strong>{animal.bodyConditionScore || ''}</strong></div>
+                            )}
+
+                            {/* Life Stage */}
+                            {fieldTemplate?.fields?.lifeStage?.enabled !== false && animal.lifeStage && (
+                                <div className="bg-gray-50 p-4 rounded-lg border border-gray-200 space-y-4">
+                                    <h3 className="text-lg font-semibold text-gray-700">{getLabel('lifeStage', 'Life Stage')}</h3>
+                                    <p className="text-gray-700 text-sm">{animal.lifeStage}</p>
                                 </div>
-                            </div>
+                            )}
+
+                            {/* Measurements */}
+                            {(() => {
+                                const mFields = [
+                                    { key: 'bodyWeight', label: 'Weight' },
+                                    { key: 'bodyLength', label: 'Body Length' },
+                                    { key: 'heightAtWithers', label: 'Height at Withers' },
+                                    { key: 'chestGirth', label: 'Chest Girth' },
+                                    { key: 'adultWeight', label: 'Adult Weight' },
+                                    { key: 'bodyConditionScore', label: 'Body Condition Score' },
+                                    { key: 'length', label: 'Length' },
+                                ].filter(f => fieldTemplate?.fields?.[f.key]?.enabled !== false && animal[f.key]);
+                                return mFields.length > 0 && (
+                                    <div className="bg-gray-50 p-4 rounded-lg border border-gray-200 space-y-4">
+                                        <h3 className="text-lg font-semibold text-gray-700">Measurements</h3>
+                                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm">
+                                            {mFields.map(f => (
+                                                <div key={f.key}><span className="text-gray-600">{getLabel(f.key, f.label)}:</span> <strong>{animal[f.key]}</strong></div>
+                                            ))}
+                                        </div>
+                                    </div>
+                                );
+                            })()}
                         </div>
                     )}
 
                     {/* Tab 4: Identification */}
                     {detailViewTab === 4 && (
                         <div className="space-y-6">
-                            {/* 1st Section: Identification Numbers */}
-                            <div className="bg-gray-50 p-4 rounded-lg border border-gray-200 space-y-4">
-                                <h3 className="text-lg font-semibold text-gray-700">Identification Numbers</h3>
-                                <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm">
-                                    <div><span className="text-gray-600">CritterTrack ID:</span> <strong>{animal.id_public || ''}</strong></div>
-                                    <div><span className="text-gray-600">Identification:</span> <strong>{animal.breederyId || ''}</strong></div>
-                                    <div><span className="text-gray-600">Microchip Number:</span> <strong>{animal.microchipNumber || ''}</strong></div>
-                                    <div><span className="text-gray-600">Pedigree Registration ID:</span> <strong>{animal.pedigreeRegistrationId || ''}</strong></div>
-                                </div>
-                            </div>
+                            {/* Identification Numbers */}
+                            {(() => {
+                                const idFields = [
+                                    { key: 'breederyId', label: 'Breeder ID' },
+                                    { key: 'microchipNumber', label: 'Microchip Number' },
+                                    { key: 'pedigreeRegistrationId', label: 'Pedigree Registration ID' },
+                                    { key: 'colonyId', label: 'Colony ID' },
+                                    { key: 'rabiesTagNumber', label: 'Rabies Tag Number' },
+                                    { key: 'tattooId', label: 'Tattoo ID' },
+                                    { key: 'akcRegistrationNumber', label: 'AKC Registration #' },
+                                    { key: 'fciRegistrationNumber', label: 'FCI Registration #' },
+                                    { key: 'cfaRegistrationNumber', label: 'CFA Registration #' },
+                                    { key: 'workingRegistryIds', label: 'Working Registry IDs' },
+                                ].filter(f => fieldTemplate?.fields?.[f.key]?.enabled !== false && animal[f.key]);
+                                return (
+                                    <div className="bg-gray-50 p-4 rounded-lg border border-gray-200 space-y-4">
+                                        <h3 className="text-lg font-semibold text-gray-700">Identification Numbers</h3>
+                                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm">
+                                            <div><span className="text-gray-600">CritterTrack ID:</span> <strong>{animal.id_public || ''}</strong></div>
+                                            {idFields.map(f => (
+                                                <div key={f.key}><span className="text-gray-600">{getLabel(f.key, f.label)}:</span> <strong>{animal[f.key]}</strong></div>
+                                            ))}
+                                        </div>
+                                    </div>
+                                );
+                            })()}
 
-                            {/* 2nd Section: Classification */}
+                            {/* Classification */}
                             <div className="bg-gray-50 p-4 rounded-lg border border-gray-200 space-y-4">
                                 <h3 className="text-lg font-semibold text-gray-700">Classification</h3>
                                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm">
                                     <div><span className="text-gray-600">Species:</span> <strong>{animal.species || ''}</strong></div>
-                                    <div><span className="text-gray-600">{getLabel('breed', 'Breed')}:</span> <strong>{animal.breed || ''}</strong></div>
-                                    <div><span className="text-gray-600">{getLabel('strain', 'Strain')}:</span> <strong>{animal.strain || ''}</strong></div>
+                                    {fieldTemplate?.fields?.breed?.enabled !== false && animal.breed && (
+                                        <div><span className="text-gray-600">{getLabel('breed', 'Breed')}:</span> <strong>{animal.breed}</strong></div>
+                                    )}
+                                    {fieldTemplate?.fields?.strain?.enabled !== false && animal.strain && (
+                                        <div><span className="text-gray-600">{getLabel('strain', 'Strain')}:</span> <strong>{animal.strain}</strong></div>
+                                    )}
                                 </div>
                             </div>
 
-                            {/* 3rd Section: Tags */}
-                            <div className="bg-gray-50 p-4 rounded-lg border border-gray-200 space-y-4">
-                                <h3 className="text-lg font-semibold text-gray-700">Tags</h3>
-                                {animal.tags && animal.tags.length > 0 ? (
+                            {/* Tags */}
+                            {animal.tags && animal.tags.length > 0 && (
+                                <div className="bg-gray-50 p-4 rounded-lg border border-gray-200 space-y-4">
+                                    <h3 className="text-lg font-semibold text-gray-700">Tags</h3>
                                     <div className="flex flex-wrap gap-2">
                                         {animal.tags.map((tag, idx) => (
-                                            <span key={idx} className="bg-blue-100 text-blue-800 px-2 py-1 rounded text-sm">
-                                                {tag}
-                                            </span>
+                                            <span key={idx} className="bg-blue-100 text-blue-800 px-2 py-1 rounded text-sm">{tag}</span>
                                         ))}
                                     </div>
-                                ) : <p className="text-gray-700 text-sm"></p>}
-                            </div>
+                                </div>
+                            )}
                         </div>
                     )}
 
@@ -3904,79 +4182,124 @@ const ViewOnlyPrivateAnimalDetail = ({ animal, onClose, API_BASE_URL, authToken,
                     {detailViewTab === 7 && (
                         <div className="space-y-6">
                             {/* 1st Section: Preventive Care */}
+                            {(animal.vaccinations || animal.dewormingRecords || animal.parasiteControl || animal.parasitePreventionSchedule) && (
                             <div className="bg-gray-50 p-4 rounded-lg border border-gray-200 space-y-4">
                                 <h3 className="text-lg font-semibold text-gray-700">Preventive Care</h3>
-                                <div className="space-y-3 text-sm">
-                                    <div><span className="text-gray-600">{getLabel('vaccinations', 'Vaccinations')}:</span> <strong>{animal.vaccinations || ''}</strong></div>
-                                    <div><span className="text-gray-600">Deworming Records:</span> <strong>{animal.dewormingRecords || ''}</strong></div>
-                                    <div><span className="text-gray-600">Parasite Control:</span> <strong>{animal.parasiteControl || ''}</strong></div>
+                                <div className="space-y-4">
+                                    {animal.vaccinations && (
+                                        <DetailJsonList
+                                            label={getLabel('vaccinations', 'Vaccinations')}
+                                            data={animal.vaccinations}
+                                            renderItem={v => <>{v.name} {v.date && `(${formatDate(v.date)})`}{v.notes && <span className="text-gray-600"> - {v.notes}</span>}</>}
+                                        />
+                                    )}
+                                    {animal.dewormingRecords && (
+                                        <DetailJsonList
+                                            label="Deworming Records"
+                                            data={animal.dewormingRecords}
+                                            renderItem={r => <>{r.medication} {r.date && `(${formatDate(r.date)})`}{r.notes && <span className="text-gray-600"> - {r.notes}</span>}</>}
+                                        />
+                                    )}
+                                    {animal.parasiteControl && (
+                                        <DetailJsonList
+                                            label="Parasite Control"
+                                            data={animal.parasiteControl}
+                                            renderItem={r => <>{r.treatment} {r.date && `(${formatDate(r.date)})`}{r.notes && <span className="text-gray-600"> - {r.notes}</span>}</>}
+                                        />
+                                    )}
+                                    {fieldTemplate?.fields?.parasitePreventionSchedule?.enabled !== false && animal.parasitePreventionSchedule && (
+                                        <div className="text-sm">
+                                            <span className="text-gray-600">{getLabel('parasitePreventionSchedule', 'Parasite Prevention Schedule')}:</span>
+                                            <p className="text-gray-700 mt-1 whitespace-pre-wrap">{animal.parasitePreventionSchedule}</p>
+                                        </div>
+                                    )}
                                 </div>
                             </div>
+                            )}
 
                             {/* 2nd Section: Procedures & Diagnostics */}
+                            {(animal.medicalProcedures || animal.labResults || animal.laboratoryResults) && (
                             <div className="bg-gray-50 p-4 rounded-lg border border-gray-200 space-y-4">
                                 <h3 className="text-lg font-semibold text-gray-700">Procedures & Diagnostics</h3>
-                                <div className="space-y-3 text-sm">
-                                    <div><span className="text-gray-600">Medical Procedures:</span> <strong>{animal.medicalProcedures && (
-                                    <div>
-                                        <strong className="text-sm">Medical Procedures:</strong>
-                                        <ul className="text-sm mt-1 list-disc list-inside space-y-1">
-                                            {(() => {
-                                                const data = animal.medicalProcedures;
-                                                const parsed = typeof data === 'string' ? (() => { try { return JSON.parse(data); } catch { return []; } })() : Array.isArray(data) ? data : [];
-                                                return parsed.map((proc, idx) => (
-                                                    <li key={idx} className="text-gray-700">
-                                                        {proc.name} {proc.date && `(${formatDate(proc.date)})`}
-                                                        {proc.notes && <span className="text-gray-600"> - {proc.notes}</span>}
-                                                    </li>
-                                                ));
-                                            })()}
-                                        </ul>
-                                    </div>
-                                )}</strong></div>
-                                    <div><span className="text-gray-600">Laboratory Results:</span> <strong>{animal.laboratoryResults || ''}</strong></div>
+                                <div className="space-y-4">
+                                    {animal.medicalProcedures && (
+                                        <DetailJsonList
+                                            label="Medical Procedures"
+                                            data={animal.medicalProcedures}
+                                            renderItem={p => <>{p.name} {p.date && `(${formatDate(p.date)})`}{p.notes && <span className="text-gray-600"> - {p.notes}</span>}</>}
+                                        />
+                                    )}
+                                    {(animal.labResults || animal.laboratoryResults) && (
+                                        <DetailJsonList
+                                            label="Laboratory Results"
+                                            data={animal.labResults || animal.laboratoryResults}
+                                            renderItem={r => <>{r.testName} - {r.result} {r.date && `(${formatDate(r.date)})`}{r.notes && <span className="text-gray-600"> - {r.notes}</span>}</>}
+                                        />
+                                    )}
                                 </div>
                             </div>
+                            )}
 
                             {/* 3rd Section: Active Medical Records */}
+                            {(animal.medicalConditions || animal.allergies || animal.medications) && (
                             <div className="bg-gray-50 p-4 rounded-lg border border-gray-200 space-y-4">
                                 <h3 className="text-lg font-semibold text-gray-700">Active Medical Records</h3>
                                 <div className="space-y-3">
-                                    <div>
-                                        <span className="text-gray-600 text-sm font-semibold">Medical Conditions:</span>
-                                        <p className="text-sm text-gray-700 mt-1 whitespace-pre-wrap">{animal.medicalConditions || ''}</p>
-                                    </div>
+                                    {animal.medicalConditions && (
+                                        <div>
+                                            <span className="text-gray-600 text-sm font-semibold">Medical Conditions:</span>
+                                            <p className="text-sm text-gray-700 mt-1 whitespace-pre-wrap">{animal.medicalConditions}</p>
+                                        </div>
+                                    )}
                                     <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm">
-                                        <div><span className="text-gray-600">Allergies:</span> <strong>{animal.allergies || ''}</strong></div>
-                                        <div><span className="text-gray-600">Current Medications:</span> <strong>{animal.medications || ''}</strong></div>
+                                        {animal.allergies && <div><span className="text-gray-600">Allergies:</span> <strong>{animal.allergies}</strong></div>}
+                                        {animal.medications && <div><span className="text-gray-600">Current Medications:</span> <strong>{animal.medications}</strong></div>}
                                     </div>
                                 </div>
                             </div>
+                            )}
 
-                            {/* 4th Section: Veterinary Care */}
+                            {/* 4th Section: Health Clearances & Screening */}
+                            {(() => {
+                                const clearanceFields = [
+                                    { key: 'heartwormStatus', label: 'Heartworm Status' },
+                                    { key: 'hipElbowScores', label: 'Hip/Elbow Scores' },
+                                    { key: 'eyeClearance', label: 'Eye Clearance' },
+                                    { key: 'cardiacClearance', label: 'Cardiac Clearance' },
+                                    { key: 'dentalRecords', label: 'Dental Records' },
+                                    { key: 'geneticTestResults', label: 'Genetic Test Results' },
+                                    { key: 'chronicConditions', label: 'Chronic Conditions' },
+                                ].filter(f => fieldTemplate?.fields?.[f.key]?.enabled !== false && animal[f.key]);
+                                const spayDate = fieldTemplate?.fields?.spayNeuterDate?.enabled !== false && animal.spayNeuterDate;
+                                return (clearanceFields.length > 0 || spayDate) && (
+                                    <div className="bg-gray-50 p-4 rounded-lg border border-gray-200 space-y-4">
+                                        <h3 className="text-lg font-semibold text-gray-700">Health Clearances & Screening</h3>
+                                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm">
+                                            {spayDate && <div><span className="text-gray-600">{getLabel('spayNeuterDate', 'Spay/Neuter Date')}:</span> <strong>{formatDate(animal.spayNeuterDate)}</strong></div>}
+                                            {clearanceFields.map(f => (
+                                                <div key={f.key}><span className="text-gray-600">{getLabel(f.key, f.label)}:</span> <strong>{animal[f.key]}</strong></div>
+                                            ))}
+                                        </div>
+                                    </div>
+                                );
+                            })()}
+
+                            {/* 5th Section: Veterinary Care */}
+                            {(animal.primaryVet || animal.vetVisits) && (
                             <div className="bg-gray-50 p-4 rounded-lg border border-gray-200 space-y-4">
                                 <h3 className="text-lg font-semibold text-gray-700">Veterinary Care</h3>
-                                <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm">
-                                    <div><span className="text-gray-600">Primary Veterinarian:</span> <strong>{animal.primaryVet || ''}</strong></div>
-                                    <div><span className="text-gray-600">Veterinary Visits:</span> <strong>{animal.vetVisits && (
-                                    <div>
-                                        <strong className="text-sm">Veterinary Visits:</strong>
-                                        <ul className="text-sm mt-1 list-disc list-inside space-y-1">
-                                            {(() => {
-                                                const data = animal.vetVisits;
-                                                const parsed = typeof data === 'string' ? (() => { try { return JSON.parse(data); } catch { return []; } })() : Array.isArray(data) ? data : [];
-                                                return parsed.map((visit, idx) => (
-                                                    <li key={idx} className="text-gray-700">
-                                                        {visit.reason} {visit.date && `(${formatDate(visit.date)})`}
-                                                        {visit.notes && <span className="text-gray-600"> - {visit.notes}</span>}
-                                                    </li>
-                                                ));
-                                            })()}
-                                        </ul>
-                                    </div>
-                                )}</strong></div>
+                                <div className="space-y-4 text-sm">
+                                    {animal.primaryVet && <div><span className="text-gray-600">Primary Veterinarian:</span> <strong>{animal.primaryVet}</strong></div>}
+                                    {animal.vetVisits && (
+                                        <DetailJsonList
+                                            label="Veterinary Visits"
+                                            data={animal.vetVisits}
+                                            renderItem={v => <>{v.reason} {v.date && `(${formatDate(v.date)})`}{v.notes && <span className="text-gray-600"> - {v.notes}</span>}</>}
+                                        />
+                                    )}
                                 </div>
                             </div>
+                            )}
                         </div>
                     )}
 
@@ -3984,35 +4307,76 @@ const ViewOnlyPrivateAnimalDetail = ({ animal, onClose, API_BASE_URL, authToken,
                     {detailViewTab === 8 && (
                         <div className="space-y-6">
                             {/* 1st Section: Nutrition */}
+                            {(animal.dietType || animal.feedingSchedule || animal.supplements) && (
                             <div className="bg-gray-50 p-4 rounded-lg border border-gray-200 space-y-4">
                                 <h3 className="text-lg font-semibold text-gray-700">Nutrition</h3>
                                 <div className="space-y-3 text-sm">
-                                    <div><span className="text-gray-600">Diet Type:</span> <strong>{animal.dietType || ''}</strong></div>
-                                    <div><span className="text-gray-600">Feeding Schedule:</span> <strong>{animal.feedingSchedule || ''}</strong></div>
-                                    <div><span className="text-gray-600">Supplements:</span> <strong>{animal.supplements || ''}</strong></div>
+                                    {animal.dietType && <div><span className="text-gray-600">Diet Type:</span> <strong>{animal.dietType}</strong></div>}
+                                    {animal.feedingSchedule && <div><span className="text-gray-600">Feeding Schedule:</span> <strong>{animal.feedingSchedule}</strong></div>}
+                                    {animal.supplements && <div><span className="text-gray-600">Supplements:</span> <strong>{animal.supplements}</strong></div>}
                                 </div>
                             </div>
+                            )}
 
                             {/* 2nd Section: Husbandry */}
+                            {(animal.housingType || animal.bedding || animal.enrichment) && (
                             <div className="bg-gray-50 p-4 rounded-lg border border-gray-200 space-y-4">
                                 <h3 className="text-lg font-semibold text-gray-700">Husbandry</h3>
                                 <div className="space-y-3 text-sm">
-                                    <div><span className="text-gray-600">{getLabel('housingType', 'Housing Type')}:</span> <strong>{animal.housingType || ''}</strong></div>
-                                    <div><span className="text-gray-600">{getLabel('bedding', 'Bedding')}:</span> <strong>{animal.bedding || ''}</strong></div>
-                                    <div><span className="text-gray-600">Enrichment:</span> <strong>{animal.enrichment || ''}</strong></div>
+                                    {fieldTemplate?.fields?.housingType?.enabled !== false && animal.housingType && <div><span className="text-gray-600">{getLabel('housingType', 'Housing Type')}:</span> <strong>{animal.housingType}</strong></div>}
+                                    {fieldTemplate?.fields?.bedding?.enabled !== false && animal.bedding && <div><span className="text-gray-600">{getLabel('bedding', 'Bedding')}:</span> <strong>{animal.bedding}</strong></div>}
+                                    {animal.enrichment && <div><span className="text-gray-600">Enrichment:</span> <strong>{animal.enrichment}</strong></div>}
                                 </div>
                             </div>
+                            )}
 
                             {/* 3rd Section: Environment */}
+                            {(animal.temperatureRange || animal.humidity || animal.lighting || animal.noise) && (
                             <div className="bg-gray-50 p-4 rounded-lg border border-gray-200 space-y-4">
                                 <h3 className="text-lg font-semibold text-gray-700">Environment</h3>
                                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm">
-                                    <div><span className="text-gray-600">Temperature Range:</span> <strong>{animal.temperatureRange || ''}</strong></div>
-                                    <div><span className="text-gray-600">{getLabel('humidity', 'Humidity')}:</span> <strong>{animal.humidity || ''}</strong></div>
-                                    <div><span className="text-gray-600">Lighting:</span> <strong>{animal.lighting || ''}</strong></div>
-                                    <div><span className="text-gray-600">{getLabel('noise', 'Noise Level')}:</span> <strong>{animal.noise || ''}</strong></div>
+                                    {animal.temperatureRange && <div><span className="text-gray-600">Temperature Range:</span> <strong>{animal.temperatureRange}</strong></div>}
+                                    {fieldTemplate?.fields?.humidity?.enabled !== false && animal.humidity && <div><span className="text-gray-600">{getLabel('humidity', 'Humidity')}:</span> <strong>{animal.humidity}</strong></div>}
+                                    {animal.lighting && <div><span className="text-gray-600">Lighting:</span> <strong>{animal.lighting}</strong></div>}
+                                    {fieldTemplate?.fields?.noise?.enabled !== false && animal.noise && <div><span className="text-gray-600">{getLabel('noise', 'Noise Level')}:</span> <strong>{animal.noise}</strong></div>}
                                 </div>
                             </div>
+                            )}
+
+                            {/* 4th Section: Exercise & Grooming */}
+                            {(() => {
+                                const egFields = [
+                                    { key: 'exerciseRequirements', label: 'Exercise Requirements' },
+                                    { key: 'dailyExerciseMinutes', label: 'Daily Exercise (min)' },
+                                    { key: 'groomingNeeds', label: 'Grooming Needs' },
+                                    { key: 'sheddingLevel', label: 'Shedding Level' },
+                                ].filter(f => fieldTemplate?.fields?.[f.key]?.enabled !== false && animal[f.key]);
+                                const trainFlags = [
+                                    { key: 'crateTrained', label: 'Crate Trained' },
+                                    { key: 'litterTrained', label: 'Litter Trained' },
+                                    { key: 'leashTrained', label: 'Leash Trained' },
+                                    { key: 'freeFlightTrained', label: 'Free Flight Trained' },
+                                ].filter(f => fieldTemplate?.fields?.[f.key]?.enabled !== false && animal[f.key]);
+                                return (egFields.length > 0 || trainFlags.length > 0) && (
+                                    <div className="bg-gray-50 p-4 rounded-lg border border-gray-200 space-y-4">
+                                        <h3 className="text-lg font-semibold text-gray-700">Exercise & Grooming</h3>
+                                        {egFields.length > 0 && (
+                                            <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm">
+                                                {egFields.map(f => (
+                                                    <div key={f.key}><span className="text-gray-600">{getLabel(f.key, f.label)}:</span> <strong>{animal[f.key]}</strong></div>
+                                                ))}
+                                            </div>
+                                        )}
+                                        {trainFlags.length > 0 && (
+                                            <div className="flex flex-wrap gap-3 text-sm">
+                                                {trainFlags.map(f => (
+                                                    <span key={f.key} className="inline-flex items-center bg-green-100 text-green-800 px-2 py-1 rounded text-xs font-semibold">&#x2713; {getLabel(f.key, f.label)}</span>
+                                                ))}
+                                            </div>
+                                        )}
+                                    </div>
+                                );
+                            })()}
                         </div>
                     )}
 
@@ -4020,22 +4384,49 @@ const ViewOnlyPrivateAnimalDetail = ({ animal, onClose, API_BASE_URL, authToken,
                     {detailViewTab === 9 && (
                         <div className="space-y-6">
                             {/* 1st Section: Behavior */}
+                            {(animal.temperament || animal.handlingTolerance || animal.socialStructure) && (
                             <div className="bg-gray-50 p-4 rounded-lg border border-gray-200 space-y-4">
                                 <h3 className="text-lg font-semibold text-gray-700">Behavior</h3>
                                 <div className="space-y-3 text-sm">
-                                    <div><span className="text-gray-600">Temperament:</span> <strong>{animal.temperament || ''}</strong></div>
-                                    <div><span className="text-gray-600">{getLabel('handlingTolerance', 'Handling Tolerance')}:</span> <strong>{animal.handlingTolerance || ''}</strong></div>
-                                    <div><span className="text-gray-600">Social Structure:</span> <strong>{animal.socialStructure || ''}</strong></div>
+                                    {animal.temperament && <div><span className="text-gray-600">Temperament:</span> <strong>{animal.temperament}</strong></div>}
+                                    {fieldTemplate?.fields?.handlingTolerance?.enabled !== false && animal.handlingTolerance && <div><span className="text-gray-600">{getLabel('handlingTolerance', 'Handling Tolerance')}:</span> <strong>{animal.handlingTolerance}</strong></div>}
+                                    {animal.socialStructure && <div><span className="text-gray-600">Social Structure:</span> <strong>{animal.socialStructure}</strong></div>}
                                 </div>
                             </div>
+                            )}
 
                             {/* 2nd Section: Activity */}
+                            {animal.activityCycle && (
                             <div className="bg-gray-50 p-4 rounded-lg border border-gray-200 space-y-4">
                                 <h3 className="text-lg font-semibold text-gray-700">Activity</h3>
                                 <div className="space-y-3 text-sm">
-                                    <div><span className="text-gray-600">Activity Cycle:</span> <strong>{animal.activityCycle || ''}</strong></div>
+                                    <div><span className="text-gray-600">Activity Cycle:</span> <strong>{animal.activityCycle}</strong></div>
                                 </div>
                             </div>
+                            )}
+
+                            {/* 3rd Section: Training & Working */}
+                            {(() => {
+                                const trainFields = [
+                                    { key: 'trainingLevel', label: 'Training Level' },
+                                    { key: 'trainingDisciplines', label: 'Training Disciplines' },
+                                    { key: 'workingRole', label: 'Working Role' },
+                                    { key: 'certifications', label: 'Certifications' },
+                                    { key: 'behavioralIssues', label: 'Behavioral Issues' },
+                                    { key: 'biteHistory', label: 'Bite History' },
+                                    { key: 'reactivityNotes', label: 'Reactivity Notes' },
+                                ].filter(f => fieldTemplate?.fields?.[f.key]?.enabled !== false && animal[f.key]);
+                                return trainFields.length > 0 && (
+                                    <div className="bg-gray-50 p-4 rounded-lg border border-gray-200 space-y-4">
+                                        <h3 className="text-lg font-semibold text-gray-700">Training & Working</h3>
+                                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm">
+                                            {trainFields.map(f => (
+                                                <div key={f.key}><span className="text-gray-600">{getLabel(f.key, f.label)}:</span> <strong>{animal[f.key]}</strong></div>
+                                            ))}
+                                        </div>
+                                    </div>
+                                );
+                            })()}
                         </div>
                     )}
 
@@ -4051,7 +4442,7 @@ const ViewOnlyPrivateAnimalDetail = ({ animal, onClose, API_BASE_URL, authToken,
                     )}                    {/* Tab 11: End of Life */}
                     {detailViewTab === 11 && (
                         <div className="space-y-6">
-                            {/* 1st Section: Information */}
+                            {/* Information */}
                             <div className="bg-gray-50 p-4 rounded-lg border border-gray-200 space-y-4">
                                 <h3 className="text-lg font-semibold text-gray-700">Information</h3>
                                 <div className="space-y-3 text-sm">
@@ -4059,34 +4450,10 @@ const ViewOnlyPrivateAnimalDetail = ({ animal, onClose, API_BASE_URL, authToken,
                                     <div><span className="text-gray-600">Cause of Death:</span> <strong>{animal.causeOfDeath || ''}</strong></div>
                                     <div><span className="text-gray-600">Necropsy Results:</span> <strong>{animal.necropsyResults || ''}</strong></div>
                                     {animal.endOfLifeCareNotes && (
-                                        <div><span className="text-gray-600">End of Life Care Notes:</span> <p className="text-gray-700 mt-1 whitespace-pre-wrap">{animal.endOfLifeCareNotes}</p></div>
+                                        <div><span className="text-gray-600">{getLabel('endOfLifeCareNotes', 'End of Life Care Notes')}:</span> <p className="text-gray-700 mt-1 whitespace-pre-wrap">{animal.endOfLifeCareNotes}</p></div>
                                     )}
                                 </div>
                             </div>
-
-                            {/* 2nd Section: Legal/Administrative */}
-                            <div className="bg-gray-50 p-4 rounded-lg border border-gray-200 space-y-4">
-                                <h3 className="text-lg font-semibold text-gray-700">Legal/Administrative</h3>
-                                <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm">
-                                    <div><span className="text-gray-600">Insurance:</span> <strong>{animal.insurance || ''}</strong></div>
-                                    <div><span className="text-gray-600">Legal Status:</span> <strong>{animal.legalStatus || ''}</strong></div>
-                                </div>
-                            </div>
-
-                            {/* 3rd Section: Restrictions */}
-                            {(animal.breedingRestrictions || animal.exportRestrictions) && (
-                                <div className="bg-gray-50 p-4 rounded-lg border border-gray-200 space-y-4">
-                                    <h3 className="text-lg font-semibold text-gray-700">Restrictions</h3>
-                                    <div className="space-y-3 text-sm">
-                                        {animal.breedingRestrictions && (
-                                            <div><span className="text-gray-600">Breeding Restrictions:</span> <p className="text-gray-700 mt-1 whitespace-pre-wrap">{animal.breedingRestrictions}</p></div>
-                                        )}
-                                        {animal.exportRestrictions && (
-                                            <div><span className="text-gray-600">Export Restrictions:</span> <p className="text-gray-700 mt-1 whitespace-pre-wrap">{animal.exportRestrictions}</p></div>
-                                        )}
-                                    </div>
-                                </div>
-                            )}
                         </div>
                     )}
 
@@ -4111,6 +4478,63 @@ const ViewOnlyPrivateAnimalDetail = ({ animal, onClose, API_BASE_URL, authToken,
                                         <div><span className="text-gray-600">Working Titles:</span> <strong>{animal.workingTitles || ''}</strong></div>
                                         <div><span className="text-gray-600">Performance Scores:</span> <strong>{animal.performanceScores || ''}</strong></div>
                                     </div>
+                                </div>
+                            )}
+                        </div>
+                    )}
+
+                    {/* Tab 13: Legal & Documentation */}
+                    {detailViewTab === 13 && (
+                        <div className="space-y-6">
+                            {/* Licensing & Permits */}
+                            {(animal.licenseNumber || animal.licenseJurisdiction) && (
+                            <div className="bg-gray-50 p-4 rounded-lg border border-gray-200 space-y-4">
+                                <h3 className="text-lg font-semibold text-gray-700">Licensing & Permits</h3>
+                                <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm">
+                                    {fieldTemplate?.fields?.licenseNumber?.enabled !== false && animal.licenseNumber && (
+                                        <div><span className="text-gray-600">{getLabel('licenseNumber', 'License Number')}:</span> <strong>{animal.licenseNumber}</strong></div>
+                                    )}
+                                    {fieldTemplate?.fields?.licenseJurisdiction?.enabled !== false && animal.licenseJurisdiction && (
+                                        <div><span className="text-gray-600">{getLabel('licenseJurisdiction', 'License Jurisdiction')}:</span> <strong>{animal.licenseJurisdiction}</strong></div>
+                                    )}
+                                </div>
+                            </div>
+                            )}
+
+                            {/* Legal / Administrative */}
+                            {(animal.insurance || animal.legalStatus) && (
+                            <div className="bg-gray-50 p-4 rounded-lg border border-gray-200 space-y-4">
+                                <h3 className="text-lg font-semibold text-gray-700">Legal / Administrative</h3>
+                                <div className="space-y-3 text-sm">
+                                    {fieldTemplate?.fields?.insurance?.enabled !== false && animal.insurance && (
+                                        <div><span className="text-gray-600">{getLabel('insurance', 'Insurance')}:</span> <p className="text-gray-700 mt-1 whitespace-pre-wrap">{animal.insurance}</p></div>
+                                    )}
+                                    {fieldTemplate?.fields?.legalStatus?.enabled !== false && animal.legalStatus && (
+                                        <div><span className="text-gray-600">{getLabel('legalStatus', 'Legal Status')}:</span> <p className="text-gray-700 mt-1 whitespace-pre-wrap">{animal.legalStatus}</p></div>
+                                    )}
+                                </div>
+                            </div>
+                            )}
+
+                            {/* Restrictions */}
+                            {(animal.breedingRestrictions || animal.exportRestrictions) && (
+                            <div className="bg-gray-50 p-4 rounded-lg border border-gray-200 space-y-4">
+                                <h3 className="text-lg font-semibold text-gray-700">Restrictions</h3>
+                                <div className="space-y-3 text-sm">
+                                    {animal.breedingRestrictions && (
+                                        <div><span className="text-gray-600">{getLabel('breedingRestrictions', 'Breeding Restrictions')}:</span> <p className="text-gray-700 mt-1 whitespace-pre-wrap">{animal.breedingRestrictions}</p></div>
+                                    )}
+                                    {animal.exportRestrictions && (
+                                        <div><span className="text-gray-600">{getLabel('exportRestrictions', 'Export Restrictions')}:</span> <p className="text-gray-700 mt-1 whitespace-pre-wrap">{animal.exportRestrictions}</p></div>
+                                    )}
+                                </div>
+                            </div>
+                            )}
+
+                            {/* No data fallback */}
+                            {!animal.licenseNumber && !animal.licenseJurisdiction && !animal.insurance && !animal.legalStatus && !animal.breedingRestrictions && !animal.exportRestrictions && (
+                                <div className="bg-gray-50 p-4 rounded-lg border border-gray-200 text-center text-gray-500">
+                                    <p>No legal or documentation records</p>
                                 </div>
                             )}
                         </div>
