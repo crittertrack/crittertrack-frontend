@@ -8167,7 +8167,7 @@ const AnimalForm = ({
     showModalMessage, 
     API_BASE_URL,          // Ensure these are passed from the parent component (App)
     userProfile,           // Current user profile for default breeder
-    speciesConfigs,        // Field replacements per species
+    speciesConfigs,        // Field replacements per species (legacy - to be phased out)
     X, 
     Search, 
     Loader2, 
@@ -8176,6 +8176,10 @@ const AnimalForm = ({
     GENDER_OPTIONS, STATUS_OPTIONS,
     AnimalImageUpload // Assuming this component is defined elsewhere
 }) => {
+    
+    // State for field template (new system)
+    const [fieldTemplate, setFieldTemplate] = useState(null);
+    const [loadingTemplate, setLoadingTemplate] = useState(false);
     
     // Default field labels - can be overridden by species config
     const defaultFieldLabels = {
@@ -8189,19 +8193,73 @@ const AnimalForm = ({
         geneticCode: 'Genetic Code'
     };
     
-    // Get field label - uses species config override if available
+    // Fetch field template when species changes
+    useEffect(() => {
+        if (!formData.species) return;
+        
+        const fetchFieldTemplate = async () => {
+            try {
+                setLoadingTemplate(true);
+                const response = await axios.get(
+                    `${API_BASE_URL}/species/with-template/${encodeURIComponent(formData.species)}`
+                );
+                
+                if (response.data?.fieldTemplate) {
+                    setFieldTemplate(response.data.fieldTemplate);
+                } else {
+                    setFieldTemplate(null); // No template - show all fields
+                }
+            } catch (error) {
+                console.error('Error fetching field template:', error);
+                setFieldTemplate(null); // On error, show all fields for safety
+            } finally {
+                setLoadingTemplate(false);
+            }
+        };
+        
+        fetchFieldTemplate();
+    }, [formData.species, API_BASE_URL]);
+    
+    // Get field label - uses field template, then species config, then default
     const getFieldLabel = (fieldName, defaultLabel) => {
+        // Priority 1: Field template (new system)
+        if (fieldTemplate?.fields?.[fieldName]?.label) {
+            return fieldTemplate.fields[fieldName].label;
+        }
+        
+        // Priority 2: Species config (legacy system)
         const config = speciesConfigs?.[formData.species];
         if (config?.fieldReplacements?.[fieldName]) {
             return config.fieldReplacements[fieldName];
         }
+        
+        // Priority 3: Default labels
         return defaultLabel || defaultFieldLabels[fieldName] || fieldName;
     };
     
     // Check if a field is hidden for the current species
+    // CRITICAL: Never hide fields that have existing data (backward compatibility)
     const isFieldHidden = (fieldName) => {
-        const config = speciesConfigs?.[formData.species];
-        return config?.hiddenFields?.includes(fieldName) || false;
+        // SAFETY CHECK 1: If editing an existing animal and the field has data, NEVER hide it
+        if (animalToEdit && formData[fieldName] && formData[fieldName] !== '' && formData[fieldName] !== null) {
+            return false; // Always show fields with existing data
+        }
+        
+        // SAFETY CHECK 2: If no template is loaded, show all fields (fail-safe)
+        if (!fieldTemplate) {
+            // Fall back to old SpeciesConfig system
+            const config = speciesConfigs?.[formData.species];
+            return config?.hiddenFields?.includes(fieldName) || false;
+        }
+        
+        // For new animals or empty fields, use the field template
+        const fieldConfig = fieldTemplate.fields?.[fieldName];
+        if (fieldConfig) {
+            return fieldConfig.enabled === false;
+        }
+        
+        // If field not in template, show it (fail-safe for backward compatibility)
+        return false;
     };
     
     // Initial state setup (using the passed props for options)
