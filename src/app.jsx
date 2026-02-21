@@ -10971,7 +10971,7 @@ const AnimalForm = ({
                                     </label>
                                 )}
 
-                                {formData.gender === 'Male' && !formData.isNeutered && !formData.isInfertile && (
+                                {!isFieldHidden('isStudAnimal') && formData.gender === 'Male' && !formData.isNeutered && !formData.isInfertile && (
                                     <label className="flex items-center space-x-2 cursor-pointer p-3 border rounded-lg bg-white hover:bg-gray-50 transition">
                                         <input
                                             type="checkbox"
@@ -10985,7 +10985,7 @@ const AnimalForm = ({
                                     </label>
                                 )}
 
-                                {formData.gender === 'Female' && !formData.isNeutered && !formData.isInfertile && (
+                                {!isFieldHidden('isDamAnimal') && formData.gender === 'Female' && !formData.isNeutered && !formData.isInfertile && (
                                     <label className="flex items-center space-x-2 cursor-pointer p-3 border rounded-lg bg-white hover:bg-gray-50 transition">
                                         <input
                                             type="checkbox"
@@ -11026,11 +11026,13 @@ const AnimalForm = ({
                                             className="p-2" />
                                     </div>
                                     
+                                    {!isFieldHidden('ovulationDate') && (
                                     <div>
                                         <label className="block text-sm font-medium text-gray-700 mb-2">Ovulation Date</label>
                                         <DatePicker value={formData.ovulationDate} onChange={(e) => handleChange({ target: { name: 'ovulationDate', value: e.target.value } })}
                                             className="block w-full p-2 border border-gray-300 rounded-md shadow-sm focus:ring-primary focus:border-primary" />
                                     </div>
+                                    )}
                                     
                                     {/* Estrus Cycle Length */}
                                     {!isFieldHidden('estrusCycleLength') && (
@@ -11050,6 +11052,7 @@ const AnimalForm = ({
                             <div className="bg-gray-50 p-4 rounded-lg border border-gray-200 space-y-4">
                                 <h3 className="text-lg font-semibold text-gray-700 mb-4">Mating {formData.isNeutered && <span className="text-xs font-normal text-gray-500">(History)</span>}</h3>
                                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                    {!isFieldHidden('matingDates') && (
                                     <div className="md:col-span-2">
                                         <label className="block text-sm font-medium text-gray-700 mb-2">Mating Date</label>
                                         <DatePicker value={formData.matingDates} onChange={(e) => handleChange({ target: { name: 'matingDates', value: e.target.value } })} 
@@ -11057,6 +11060,7 @@ const AnimalForm = ({
                                             className={`block w-full p-2 border rounded-md shadow-sm focus:ring-primary focus:border-primary ${formData.isNeutered ? 'bg-gray-100 border-gray-200' : 'border-gray-300'}`}
                                             placeholder="e.g., 2025-01-15" />
                                     </div>
+                                    )}
                                     
                                     {/* Artificial Insemination */}
                                     {!isFieldHidden('artificialInseminationUsed') && (
@@ -11087,6 +11091,7 @@ const AnimalForm = ({
                                             <option value="Unknown">Unknown</option>
                                             <option value="Fertile">Fertile</option>
                                             <option value="Subfertile">Subfertile</option>
+                                            <option value="Infertile">Infertile</option>
                                         </select>
                                     </div>
                                     
@@ -11139,6 +11144,7 @@ const AnimalForm = ({
                                             <option value="Unknown">Unknown</option>
                                             <option value="Fertile">Fertile</option>
                                             <option value="Subfertile">Subfertile</option>
+                                            <option value="Infertile">Infertile</option>
                                         </select>
                                     </div>
                                     
@@ -12277,22 +12283,6 @@ const AnimalForm = ({
                                     <textarea name="legalStatus" value={formData.legalStatus || ''} onChange={handleChange} rows="2"
                                         className="block w-full p-2 border border-gray-300 rounded-md shadow-sm focus:ring-primary focus:border-primary"
                                         placeholder="e.g., Ownership documents, permits, CITES registration" />
-                                </div>
-                                )}
-                                {!isFieldHidden('transferHistory') && (
-                                <div>
-                                    <label className="block text-sm font-medium text-gray-700 mb-2">{getFieldLabel('transferHistory', 'Transfer History')}</label>
-                                    <textarea name="transferHistory" value={formData.transferHistory || ''} onChange={handleChange} rows="2"
-                                        className="block w-full p-2 border border-gray-300 rounded-md shadow-sm focus:ring-primary focus:border-primary"
-                                        placeholder="Previous ownership transfers" />
-                                </div>
-                                )}
-                                {!isFieldHidden('coOwnership') && (
-                                <div>
-                                    <label className="block text-sm font-medium text-gray-700 mb-2">{getFieldLabel('coOwnership', 'Co-Ownership')}</label>
-                                    <textarea name="coOwnership" value={formData.coOwnership || ''} onChange={handleChange} rows="2"
-                                        className="block w-full p-2 border border-gray-300 rounded-md shadow-sm focus:ring-primary focus:border-primary"
-                                        placeholder="Co-owner details and agreement" />
                                 </div>
                                 )}
                             </div>
