@@ -8257,6 +8257,13 @@ const AnimalForm = ({
             remarks: animalToEdit.remarks || '',
             tags: animalToEdit.tags || [],
             geneticCode: animalToEdit.geneticCode || '',
+            // Bird-specific fields
+            featherType: animalToEdit.featherType || '',
+            crestType: animalToEdit.crestType || '',
+            beakColor: animalToEdit.beakColor || '',
+            legColor: animalToEdit.legColor || '',
+            wingspan: animalToEdit.wingspan || '',
+            // Lineage
             fatherId_public: animalToEdit.fatherId_public || null,
             motherId_public: animalToEdit.motherId_public || null,
             breederId_public: animalToEdit.breederId_public || null,
@@ -8411,6 +8418,13 @@ const AnimalForm = ({
             remarks: '',
             tags: [],
             geneticCode: '',
+            // Bird-specific fields
+            featherType: '',
+            crestType: '',
+            beakColor: '',
+            legColor: '',
+            wingspan: '',
+            // Lineage
             fatherId_public: null,
             motherId_public: null,
             breederId_public: null,
@@ -9967,12 +9981,56 @@ const AnimalForm = ({
                                         placeholder="e.g., Solid, Hooded, Brindle" />
                                 </div>
                                 
-                                <div>
-                                    <label className="block text-sm font-medium text-gray-700">Coat Type</label>
-                                    <input type="text" name="coat" value={formData.coat} onChange={handleChange} 
-                                        className="mt-1 block w-full p-2 border border-gray-300 rounded-md shadow-sm focus:ring-primary focus:border-primary" 
-                                        placeholder="e.g., Short, Long, Rex" />
-                                </div>
+                                {!isFieldHidden('coat') && (
+                                    <div>
+                                        <label className="block text-sm font-medium text-gray-700">{getFieldLabel('coat', 'Coat Type')}</label>
+                                        <input type="text" name="coat" value={formData.coat} onChange={handleChange} 
+                                            className="mt-1 block w-full p-2 border border-gray-300 rounded-md shadow-sm focus:ring-primary focus:border-primary" 
+                                            placeholder="e.g., Short, Long, Rex" />
+                                    </div>
+                                )}
+                                
+                                {!isFieldHidden('featherType') && (
+                                    <div>
+                                        <label className="block text-sm font-medium text-gray-700">{getFieldLabel('featherType', 'Feather Type')}</label>
+                                        <input type="text" name="featherType" value={formData.featherType || ''} onChange={handleChange} 
+                                            className="mt-1 block w-full p-2 border border-gray-300 rounded-md shadow-sm focus:ring-primary focus:border-primary" 
+                                            placeholder="e.g., Normal, Crested, Frill" />
+                                    </div>
+                                )}
+                                
+                                {!isFieldHidden('crestType') && (
+                                    <div>
+                                        <label className="block text-sm font-medium text-gray-700">{getFieldLabel('crestType', 'Crest Type')}</label>
+                                        <input type="text" name="crestType" value={formData.crestType || ''} onChange={handleChange} 
+                                            className="mt-1 block w-full p-2 border border-gray-300 rounded-md shadow-sm focus:ring-primary focus:border-primary" 
+                                            placeholder="e.g., Full, Half, None" />
+                                    </div>
+                                )}
+                                
+                                {!isFieldHidden('beakColor') && (
+                                    <div>
+                                        <label className="block text-sm font-medium text-gray-700">{getFieldLabel('beakColor', 'Beak Color')}</label>
+                                        <input type="text" name="beakColor" value={formData.beakColor || ''} onChange={handleChange} 
+                                            className="mt-1 block w-full p-2 border border-gray-300 rounded-md shadow-sm focus:ring-primary focus:border-primary" />
+                                    </div>
+                                )}
+                                
+                                {!isFieldHidden('legColor') && (
+                                    <div>
+                                        <label className="block text-sm font-medium text-gray-700">{getFieldLabel('legColor', 'Leg Color')}</label>
+                                        <input type="text" name="legColor" value={formData.legColor || ''} onChange={handleChange} 
+                                            className="mt-1 block w-full p-2 border border-gray-300 rounded-md shadow-sm focus:ring-primary focus:border-primary" />
+                                    </div>
+                                )}
+                                
+                                {!isFieldHidden('wingspan') && (
+                                    <div>
+                                        <label className="block text-sm font-medium text-gray-700">{getFieldLabel('wingspan', 'Wingspan (cm)')}</label>
+                                        <input type="text" name="wingspan" value={formData.wingspan || ''} onChange={handleChange} 
+                                            className="mt-1 block w-full p-2 border border-gray-300 rounded-md shadow-sm focus:ring-primary focus:border-primary" />
+                                    </div>
+                                )}
                                 
                                 {!isFieldHidden('earset') && (formData.species === 'Rat' || formData.species === 'Fancy Rat') && (
                                     <div>
