@@ -16181,28 +16181,28 @@ const AnimalList = ({ authToken, showModalMessage, onEditAnimal, onViewAnimal, f
                                 <div className="flex items-center gap-1 sm:gap-2">
                                     {/* Collapse indicator */}
                                     <ChevronLeft 
-                                        className={`w-4 h-4 text-gray-500 transition-transform ${isCollapsed ? '-rotate-90' : 'rotate-90'}`}
+                                        className={`w-4 h-4 text-gray-400 transition-transform ${isCollapsed ? '-rotate-90' : 'rotate-90'}`}
                                     />
-                                    {/* Move species order buttons - left side before title */}
+                                    {/* Reorder buttons — bordered pill group, visually distinct from the collapse chevron */}
                                     {!isBulkMode && (
-                                        <>
+                                        <div className="flex items-center border border-gray-300 rounded-lg overflow-hidden" onClick={(e) => e.stopPropagation()}>
                                             <button
                                                 onClick={(e) => { e.stopPropagation(); moveSpecies(species, 'up'); }}
                                                 disabled={speciesNames.indexOf(species) === 0}
-                                                className="p-1 hover:bg-gray-200 rounded transition disabled:opacity-30 disabled:cursor-not-allowed"
+                                                className="p-1 sm:p-1.5 hover:bg-gray-200 transition disabled:opacity-30 disabled:cursor-not-allowed border-r border-gray-300"
                                                 title="Move Up"
                                             >
-                                                <ChevronUp className="w-4 h-4 sm:w-5 sm:h-5 text-gray-800" />
+                                                <ChevronUp className="w-3.5 h-3.5 sm:w-4 sm:h-4 text-gray-600" />
                                             </button>
                                             <button
                                                 onClick={(e) => { e.stopPropagation(); moveSpecies(species, 'down'); }}
                                                 disabled={speciesNames.indexOf(species) === speciesNames.length - 1}
-                                                className="p-1 hover:bg-gray-200 rounded transition disabled:opacity-30 disabled:cursor-not-allowed"
+                                                className="p-1 sm:p-1.5 hover:bg-gray-200 transition disabled:opacity-30 disabled:cursor-not-allowed"
                                                 title="Move Down"
                                             >
-                                                <ChevronDown className="w-4 h-4 sm:w-5 sm:h-5 text-gray-800" />
+                                                <ChevronDown className="w-3.5 h-3.5 sm:w-4 sm:h-4 text-gray-600" />
                                             </button>
-                                        </>
+                                        </div>
                                     )}
                                     <h3 className="text-sm sm:text-lg font-bold text-gray-700">
                                         {getSpeciesDisplayName(species)} ({groupedAnimals[species].length})
