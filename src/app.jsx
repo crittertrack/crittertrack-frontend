@@ -8193,33 +8193,6 @@ const AnimalForm = ({
         geneticCode: 'Genetic Code'
     };
     
-    // Fetch field template when species changes
-    useEffect(() => {
-        if (!formData.species) return;
-        
-        const fetchFieldTemplate = async () => {
-            try {
-                setLoadingTemplate(true);
-                const response = await axios.get(
-                    `${API_BASE_URL}/species/with-template/${encodeURIComponent(formData.species)}`
-                );
-                
-                if (response.data?.fieldTemplate) {
-                    setFieldTemplate(response.data.fieldTemplate);
-                } else {
-                    setFieldTemplate(null); // No template - show all fields
-                }
-            } catch (error) {
-                console.error('Error fetching field template:', error);
-                setFieldTemplate(null); // On error, show all fields for safety
-            } finally {
-                setLoadingTemplate(false);
-            }
-        };
-        
-        fetchFieldTemplate();
-    }, [formData.species, API_BASE_URL]);
-    
     // Get field label - uses field template, then species config, then default
     const getFieldLabel = (fieldName, defaultLabel) => {
         // Priority 1: Field template (new system)
@@ -8574,6 +8547,34 @@ const AnimalForm = ({
             exportRestrictions: '',
         }
     );
+    
+    // Fetch field template when species changes
+    useEffect(() => {
+        if (!formData.species) return;
+        
+        const fetchFieldTemplate = async () => {
+            try {
+                setLoadingTemplate(true);
+                const response = await axios.get(
+                    `${API_BASE_URL}/species/with-template/${encodeURIComponent(formData.species)}`
+                );
+                
+                if (response.data?.fieldTemplate) {
+                    setFieldTemplate(response.data.fieldTemplate);
+                } else {
+                    setFieldTemplate(null); // No template - show all fields
+                }
+            } catch (error) {
+                console.error('Error fetching field template:', error);
+                setFieldTemplate(null); // On error, show all fields for safety
+            } finally {
+                setLoadingTemplate(false);
+            }
+        };
+        
+        fetchFieldTemplate();
+    }, [formData.species, API_BASE_URL]);
+    
     // Growth tracking state
     const [growthRecords, setGrowthRecords] = useState(
         animalToEdit?.growthRecords || []
