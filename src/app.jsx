@@ -9900,6 +9900,7 @@ const AnimalForm = ({
                                     />
                                     <p className="text-xs text-gray-500 mt-1">Records owner changes in ownership history.</p>
                                 </div>
+                                {!isFieldHidden('currentOwnerDisplay') && (
                                 <div>
                                     <label className='block text-sm font-medium text-gray-700 mb-2'>{getFieldLabel('currentOwnerDisplay', 'Owner Display Name')}</label>
                                     <input 
@@ -9911,6 +9912,8 @@ const AnimalForm = ({
                                         className="block w-full p-2 border border-gray-300 rounded-md shadow-sm focus:ring-primary focus:border-primary" 
                                     />
                                 </div>
+                                )}
+                                {!isFieldHidden('groupRole') && (
                                 <div>
                                     <label className='block text-sm font-medium text-gray-700 mb-2'>{getFieldLabel('groupRole', 'Group Role')}</label>
                                     <input 
@@ -9923,12 +9926,13 @@ const AnimalForm = ({
                                     />
                                     <p className="text-xs text-gray-500 mt-1">Role in group or colony (for social species).</p>
                                 </div>
+                                )}
                             </div>
 
-                            {/* Dog/Cat Co-ownership */}
-                            {(formData.species === 'Dog' || formData.species === 'Cat') && (
+                            {/* Co-ownership - Template controlled */}
+                            {!isFieldHidden('coOwnership') && (
                                 <div>
-                                    <label className="block text-sm font-medium text-gray-700 mb-2">Co-Ownership</label>
+                                    <label className="block text-sm font-medium text-gray-700 mb-2">{getFieldLabel('coOwnership', 'Co-Ownership')}</label>
                                     <textarea name="coOwnership" value={formData.coOwnership || ''} onChange={handleChange} rows="2"
                                         className="block w-full p-2 border border-gray-300 rounded-md shadow-sm focus:ring-primary focus:border-primary" 
                                         placeholder="Co-owner name, terms, breeding rights" />
@@ -10034,47 +10038,59 @@ const AnimalForm = ({
                                     </div>
                                 )}
                                 
+                                {!isFieldHidden('phenotype') && (
                                 <div>
                                     <label className="block text-sm font-medium text-gray-700">{getFieldLabel('phenotype', 'Phenotype')}</label>
                                     <input type="text" name="phenotype" value={formData.phenotype || ''} onChange={handleChange} 
                                         className="mt-1 block w-full p-2 border border-gray-300 rounded-md shadow-sm focus:ring-primary focus:border-primary" 
                                         placeholder="Observable traits" />
                                 </div>
+                                )}
                                 
+                                {!isFieldHidden('morph') && (
                                 <div>
                                     <label className="block text-sm font-medium text-gray-700">{getFieldLabel('morph', 'Morph')}</label>
                                     <input type="text" name="morph" value={formData.morph || ''} onChange={handleChange} 
                                         className="mt-1 block w-full p-2 border border-gray-300 rounded-md shadow-sm focus:ring-primary focus:border-primary" 
                                         placeholder="Mutation/Morph" />
                                 </div>
+                                )}
                                 
+                                {!isFieldHidden('markings') && (
                                 <div>
                                     <label className="block text-sm font-medium text-gray-700">{getFieldLabel('markings', 'Markings')}</label>
                                     <input type="text" name="markings" value={formData.markings || ''} onChange={handleChange} 
                                         className="mt-1 block w-full p-2 border border-gray-300 rounded-md shadow-sm focus:ring-primary focus:border-primary" 
                                         placeholder="Body markings/patterns" />
                                 </div>
+                                )}
                                 
+                                {!isFieldHidden('eyeColor') && (
                                 <div>
                                     <label className="block text-sm font-medium text-gray-700">{getFieldLabel('eyeColor', 'Eye Color')}</label>
                                     <input type="text" name="eyeColor" value={formData.eyeColor || ''} onChange={handleChange} 
                                         className="mt-1 block w-full p-2 border border-gray-300 rounded-md shadow-sm focus:ring-primary focus:border-primary" 
                                         placeholder="Eye color" />
                                 </div>
+                                )}
                                 
+                                {!isFieldHidden('nailColor') && (
                                 <div>
                                     <label className="block text-sm font-medium text-gray-700">{getFieldLabel('nailColor', 'Nail Color')}</label>
                                     <input type="text" name="nailColor" value={formData.nailColor || ''} onChange={handleChange} 
                                         className="mt-1 block w-full p-2 border border-gray-300 rounded-md shadow-sm focus:ring-primary focus:border-primary" 
                                         placeholder="Nail/claw color" />
                                 </div>
+                                )}
                                 
+                                {!isFieldHidden('carrierTraits') && (
                                 <div>
                                     <label className="block text-sm font-medium text-gray-700">{getFieldLabel('carrierTraits', 'Carrier Traits')}</label>
                                     <input type="text" name="carrierTraits" value={formData.carrierTraits || ''} onChange={handleChange} 
                                         className="mt-1 block w-full p-2 border border-gray-300 rounded-md shadow-sm focus:ring-primary focus:border-primary" 
                                         placeholder="Genetic traits carried" />
                                 </div>
+                                )}
                             </div>
 
 
@@ -10623,12 +10639,14 @@ const AnimalForm = ({
                                         className="mt-1 block w-full p-2 border border-gray-300 rounded-md shadow-sm focus:ring-primary focus:border-primary" />
                                 </div>
                                 
+                                {!isFieldHidden('colonyId') && (
                                 <div>
                                     <label className="block text-sm font-medium text-gray-700">{getFieldLabel('colonyId', 'Colony ID')}</label>
                                     <input type="text" name="colonyId" value={formData.colonyId || ''} onChange={handleChange} 
                                         className="mt-1 block w-full p-2 border border-gray-300 rounded-md shadow-sm focus:ring-primary focus:border-primary" 
                                         placeholder="Colony or group identifier" />
                                 </div>
+                                )}
 
                                 {/* Dog/Cat Licensing - integrated */}
                                 {(formData.species === 'Dog' || formData.species === 'Cat') && (
@@ -11045,13 +11063,13 @@ const AnimalForm = ({
                                             className="block w-full p-2 border border-gray-300 rounded-md shadow-sm focus:ring-primary focus:border-primary" />
                                     </div>
                                     
-                                    {/* Dog/Cat Estrus Cycle Length */}
-                                    {(formData.species === 'Dog' || formData.species === 'Cat') && (
+                                    {/* Estrus Cycle Length */}
+                                    {!isFieldHidden('estrusCycleLength') && (
                                         <div>
-                                            <label className="block text-sm font-medium text-gray-700 mb-2">Estrus Cycle Length (days)</label>
+                                            <label className="block text-sm font-medium text-gray-700 mb-2">{getFieldLabel('estrusCycleLength', 'Estrus Cycle Length (days)')}</label>
                                             <input type="number" name="estrusCycleLength" value={formData.estrusCycleLength || ''} onChange={handleChange} 
                                                 className="block w-full p-2 border border-gray-300 rounded-md shadow-sm focus:ring-primary focus:border-primary" 
-                                                placeholder={formData.species === 'Dog' ? '~21 days' : '~14-21 days'} />
+                                                placeholder="Cycle length in days" />
                                         </div>
                                     )}
                                 </div>
@@ -11071,12 +11089,12 @@ const AnimalForm = ({
                                             placeholder="e.g., 2025-01-15" />
                                     </div>
                                     
-                                    {/* Artificial Insemination - Dog/Cat */}
-                                    {(formData.species === 'Dog' || formData.species === 'Cat') && (
+                                    {/* Artificial Insemination */}
+                                    {!isFieldHidden('artificialInseminationUsed') && (
                                         <div className="md:col-span-2 flex items-center space-x-2 pt-2">
                                             <input type="checkbox" name="artificialInseminationUsed" checked={formData.artificialInseminationUsed || false} onChange={handleChange} 
                                                 className="form-checkbox h-5 w-5 text-primary rounded focus:ring-primary" />
-                                            <span className="text-sm font-medium text-gray-700">Artificial Insemination (AI) Used</span>
+                                            <span className="text-sm font-medium text-gray-700">{getFieldLabel('artificialInseminationUsed', 'Artificial Insemination (AI) Used')}</span>
                                         </div>
                                     )}
                                 </div>
@@ -11111,21 +11129,25 @@ const AnimalForm = ({
                                             rows="3" />
                                     </div>
                                     
-                                    {/* Reproductive Clearances & Complications - Dog/Cat */}
-                                    {(formData.species === 'Dog' || formData.species === 'Cat') && (
+                                    {/* Reproductive Clearances & Complications */}
+                                    {(!isFieldHidden('reproductiveClearances') || !isFieldHidden('reproductiveComplications')) && (
                                         <>
+                                            {!isFieldHidden('reproductiveClearances') && (
                                             <div className="md:col-span-2">
-                                                <label className="block text-sm font-medium text-gray-700 mb-2">Reproductive Clearances</label>
+                                                <label className="block text-sm font-medium text-gray-700 mb-2">{getFieldLabel('reproductiveClearances', 'Reproductive Clearances')}</label>
                                                 <textarea name="reproductiveClearances" value={formData.reproductiveClearances || ''} onChange={handleChange} rows="2"
                                                     className="block w-full p-2 border border-gray-300 rounded-md shadow-sm focus:ring-primary focus:border-primary" 
                                                     placeholder="Brucellosis test, progesterone timing, etc." />
                                             </div>
+                                            )}
+                                            {!isFieldHidden('reproductiveComplications') && (
                                             <div className="md:col-span-2">
-                                                <label className="block text-sm font-medium text-gray-700 mb-2">Reproductive Complications</label>
+                                                <label className="block text-sm font-medium text-gray-700 mb-2">{getFieldLabel('reproductiveComplications', 'Reproductive Complications')}</label>
                                                 <textarea name="reproductiveComplications" value={formData.reproductiveComplications || ''} onChange={handleChange} rows="2"
                                                     className="block w-full p-2 border border-gray-300 rounded-md shadow-sm focus:ring-primary focus:border-primary" 
                                                     placeholder="Any complications during breeding" />
                                             </div>
+                                            )}
                                         </>
                                     )}
                                 </div>
@@ -11160,16 +11182,20 @@ const AnimalForm = ({
                                     </div>
                                     
                                     {/* Dog/Cat Pregnancy & Delivery Details */}
-                                    {(formData.species === 'Dog' || formData.species === 'Cat') && (
+                                    {/* Gestation, Delivery, Dates - Template controlled */}
+                                    {(!isFieldHidden('gestationLength') || !isFieldHidden('deliveryMethod') || !isFieldHidden('whelpingDate') || !isFieldHidden('queeningDate') || !isFieldHidden('reproductiveClearances') || !isFieldHidden('reproductiveComplications')) && (
                                         <>
+                                            {!isFieldHidden('gestationLength') && (
                                             <div>
-                                                <label className="block text-sm font-medium text-gray-700 mb-2">Gestation Length (days)</label>
+                                                <label className="block text-sm font-medium text-gray-700 mb-2">{getFieldLabel('gestationLength', 'Gestation Length (days)')}</label>
                                                 <input type="number" name="gestationLength" value={formData.gestationLength || ''} onChange={handleChange} 
                                                     className="block w-full p-2 border border-gray-300 rounded-md shadow-sm focus:ring-primary focus:border-primary" 
-                                                    placeholder={formData.species === 'Dog' ? '~63 days' : '~65 days'} />
+                                                    placeholder="Length in days" />
                                             </div>
+                                            )}
+                                            {!isFieldHidden('deliveryMethod') && (
                                             <div>
-                                                <label className="block text-sm font-medium text-gray-700 mb-2">Delivery Method</label>
+                                                <label className="block text-sm font-medium text-gray-700 mb-2">{getFieldLabel('deliveryMethod', 'Delivery Method')}</label>
                                                 <select name="deliveryMethod" value={formData.deliveryMethod || ''} onChange={handleChange} 
                                                     className="block w-full p-2 border border-gray-300 rounded-md shadow-sm focus:ring-primary focus:border-primary">
                                                     <option value="">Select...</option>
@@ -11178,25 +11204,37 @@ const AnimalForm = ({
                                                     <option value="Assisted">Assisted</option>
                                                 </select>
                                             </div>
+                                            )}
+                                            {!isFieldHidden('whelpingDate') && (
                                             <div>
-                                                <label className="block text-sm font-medium text-gray-700 mb-2">{formData.species === 'Dog' ? 'Whelping Date' : 'Queening Date'}</label>
-                                                <DatePicker name={formData.species === 'Dog' ? 'whelpingDate' : 'queeningDate'} 
-                                                    value={formData.species === 'Dog' ? (formData.whelpingDate || '') : (formData.queeningDate || '')} 
-                                                    onChange={handleChange} 
+                                                <label className="block text-sm font-medium text-gray-700 mb-2">{getFieldLabel('whelpingDate', 'Whelping Date')}</label>
+                                                <DatePicker name="whelpingDate" value={formData.whelpingDate || ''} onChange={handleChange} 
                                                     className="block w-full p-2 border border-gray-300 rounded-md shadow-sm focus:ring-primary focus:border-primary" />
                                             </div>
+                                            )}
+                                            {!isFieldHidden('queeningDate') && (
+                                            <div>
+                                                <label className="block text-sm font-medium text-gray-700 mb-2">{getFieldLabel('queeningDate', 'Queening Date')}</label>
+                                                <DatePicker name="queeningDate" value={formData.queeningDate || ''} onChange={handleChange} 
+                                                    className="block w-full p-2 border border-gray-300 rounded-md shadow-sm focus:ring-primary focus:border-primary" />
+                                            </div>
+                                            )}
+                                            {!isFieldHidden('reproductiveClearances') && (
                                             <div className="md:col-span-2">
-                                                <label className="block text-sm font-medium text-gray-700 mb-2">Reproductive Clearances</label>
+                                                <label className="block text-sm font-medium text-gray-700 mb-2">{getFieldLabel('reproductiveClearances', 'Reproductive Clearances')}</label>
                                                 <textarea name="reproductiveClearances" value={formData.reproductiveClearances || ''} onChange={handleChange} rows="2"
                                                     className="block w-full p-2 border border-gray-300 rounded-md shadow-sm focus:ring-primary focus:border-primary" 
                                                     placeholder="Brucellosis test, progesterone timing, etc." />
                                             </div>
+                                            )}
+                                            {!isFieldHidden('reproductiveComplications') && (
                                             <div className="md:col-span-2">
-                                                <label className="block text-sm font-medium text-gray-700 mb-2">Reproductive Complications</label>
+                                                <label className="block text-sm font-medium text-gray-700 mb-2">{getFieldLabel('reproductiveComplications', 'Reproductive Complications')}</label>
                                                 <textarea name="reproductiveComplications" value={formData.reproductiveComplications || ''} onChange={handleChange} rows="2"
                                                     className="block w-full p-2 border border-gray-300 rounded-md shadow-sm focus:ring-primary focus:border-primary" 
                                                     placeholder="Any complications during breeding/delivery" />
                                             </div>
+                                            )}
                                         </>
                                     )}
                                 </div>
@@ -11274,26 +11312,32 @@ const AnimalForm = ({
                                                     placeholder="Total number of litters" />
                                             </div>
                                             
+                                            {!isFieldHidden('litterSizeBorn') && (
                                             <div>
                                                 <label className="block text-sm font-medium text-gray-700 mb-2">{getFieldLabel('litterSizeBorn', 'Litter Size Born')}</label>
                                                 <input type="number" name="litterSizeBorn" value={formData.litterSizeBorn || ''} onChange={handleChange} 
                                                     className="block w-full p-2 border border-blue-200 rounded-md shadow-sm focus:ring-primary focus:border-primary" 
                                                     placeholder="Number born" min="0" />
                                             </div>
+                                            )}
                                             
+                                            {!isFieldHidden('litterSizeWeaned') && (
                                             <div>
                                                 <label className="block text-sm font-medium text-gray-700 mb-2">{getFieldLabel('litterSizeWeaned', 'Litter Size Weaned')}</label>
                                                 <input type="number" name="litterSizeWeaned" value={formData.litterSizeWeaned || ''} onChange={handleChange} 
                                                     className="block w-full p-2 border border-blue-200 rounded-md shadow-sm focus:ring-primary focus:border-primary" 
                                                     placeholder="Number weaned" min="0" />
                                             </div>
+                                            )}
                                             
+                                            {!isFieldHidden('stillbornCount') && (
                                             <div>
                                                 <label className="block text-sm font-medium text-gray-700 mb-2">{getFieldLabel('stillbornCount', 'Stillborn Count')}</label>
                                                 <input type="number" name="stillbornCount" value={formData.stillbornCount || ''} onChange={handleChange} 
                                                     className="block w-full p-2 border border-blue-200 rounded-md shadow-sm focus:ring-primary focus:border-primary" 
                                                     placeholder="Stillborn" min="0" />
                                             </div>
+                                            )}
                                         </>
                                     )}
                                     
@@ -11647,17 +11691,20 @@ const AnimalForm = ({
                                 </div>
                                 
                                 {/* Health Clearances & Screening - Dog/Cat */}
-                                {(formData.species === 'Dog' || formData.species === 'Cat') && (
+                                {(!isFieldHidden('spayNeuterDate') || !isFieldHidden('heartwormStatus') || !isFieldHidden('hipElbowScores') || !isFieldHidden('eyeClearance') || !isFieldHidden('cardiacClearance') || !isFieldHidden('dentalRecords') || !isFieldHidden('geneticTestResults') || !isFieldHidden('chronicConditions')) && (
                                     <div className="space-y-3 border-t border-gray-200 pt-4">
                                         <h4 className="text-sm font-semibold text-gray-700">Health Clearances & Screening</h4>
                                         <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                                            {!isFieldHidden('spayNeuterDate') && (
                                             <div>
-                                                <label className="block text-xs font-medium text-gray-700">Spay/Neuter Date</label>
+                                                <label className="block text-xs font-medium text-gray-700">{getFieldLabel('spayNeuterDate', 'Spay/Neuter Date')}</label>
                                                 <DatePicker value={formData.spayNeuterDate || ''} onChange={(e) => handleChange({ target: { name: 'spayNeuterDate', value: e.target.value } })}
                                                     className="mt-1 p-2" />
                                             </div>
+                                            )}
+                                            {!isFieldHidden('heartwormStatus') && (
                                             <div>
-                                                <label className="block text-xs font-medium text-gray-700">Heartworm Status</label>
+                                                <label className="block text-xs font-medium text-gray-700">{getFieldLabel('heartwormStatus', 'Heartworm Status')}</label>
                                                 <select name="heartwormStatus" value={formData.heartwormStatus || ''} onChange={handleChange} 
                                                     className="mt-1 block w-full p-2 border border-gray-300 rounded-md shadow-sm focus:ring-primary focus:border-primary">
                                                     <option value="">Select...</option>
@@ -11667,46 +11714,59 @@ const AnimalForm = ({
                                                     <option value="Unknown">Unknown</option>
                                                 </select>
                                             </div>
+                                            )}
                                         </div>
                                         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                            {!isFieldHidden('hipElbowScores') && (
                                             <div>
-                                                <label className="block text-xs font-medium text-gray-700">Hip/Elbow Scores</label>
+                                                <label className="block text-xs font-medium text-gray-700">{getFieldLabel('hipElbowScores', 'Hip/Elbow Scores')}</label>
                                                 <input type="text" name="hipElbowScores" value={formData.hipElbowScores || ''} onChange={handleChange} 
                                                     className="mt-1 block w-full p-2 border border-gray-300 rounded-md shadow-sm focus:ring-primary focus:border-primary" 
                                                     placeholder="e.g., OFA Good, PennHIP 0.32" />
                                             </div>
+                                            )}
+                                            {!isFieldHidden('eyeClearance') && (
                                             <div>
-                                                <label className="block text-xs font-medium text-gray-700">Eye Clearance</label>
+                                                <label className="block text-xs font-medium text-gray-700">{getFieldLabel('eyeClearance', 'Eye Clearance')}</label>
                                                 <input type="text" name="eyeClearance" value={formData.eyeClearance || ''} onChange={handleChange} 
                                                     className="mt-1 block w-full p-2 border border-gray-300 rounded-md shadow-sm focus:ring-primary focus:border-primary" 
                                                     placeholder="e.g., CAER Clear 2024" />
                                             </div>
+                                            )}
+                                            {!isFieldHidden('cardiacClearance') && (
                                             <div>
-                                                <label className="block text-xs font-medium text-gray-700">Cardiac Clearance</label>
+                                                <label className="block text-xs font-medium text-gray-700">{getFieldLabel('cardiacClearance', 'Cardiac Clearance')}</label>
                                                 <input type="text" name="cardiacClearance" value={formData.cardiacClearance || ''} onChange={handleChange} 
                                                     className="mt-1 block w-full p-2 border border-gray-300 rounded-md shadow-sm focus:ring-primary focus:border-primary" 
                                                     placeholder="e.g., OFA Cardiac Normal" />
                                             </div>
+                                            )}
+                                            {!isFieldHidden('dentalRecords') && (
                                             <div>
-                                                <label className="block text-xs font-medium text-gray-700">Dental Records</label>
+                                                <label className="block text-xs font-medium text-gray-700">{getFieldLabel('dentalRecords', 'Dental Records')}</label>
                                                 <input type="text" name="dentalRecords" value={formData.dentalRecords || ''} onChange={handleChange} 
                                                     className="mt-1 block w-full p-2 border border-gray-300 rounded-md shadow-sm focus:ring-primary focus:border-primary" 
                                                     placeholder="e.g., Last cleaning 01/2024" />
                                             </div>
+                                            )}
                                         </div>
                                         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                            {!isFieldHidden('geneticTestResults') && (
                                             <div>
-                                                <label className="block text-xs font-medium text-gray-700">Genetic Test Results</label>
+                                                <label className="block text-xs font-medium text-gray-700">{getFieldLabel('geneticTestResults', 'Genetic Test Results')}</label>
                                                 <textarea name="geneticTestResults" value={formData.geneticTestResults || ''} onChange={handleChange} rows="2"
                                                     className="mt-1 block w-full p-2 border border-gray-300 rounded-md shadow-sm focus:ring-primary focus:border-primary" 
                                                     placeholder="e.g., Embark: Clear for DM, vWD, DCM" />
                                             </div>
+                                            )}
+                                            {!isFieldHidden('chronicConditions') && (
                                             <div>
-                                                <label className="block text-xs font-medium text-gray-700">Chronic Conditions</label>
+                                                <label className="block text-xs font-medium text-gray-700">{getFieldLabel('chronicConditions', 'Chronic Conditions')}</label>
                                                 <textarea name="chronicConditions" value={formData.chronicConditions || ''} onChange={handleChange} rows="2"
                                                     className="mt-1 block w-full p-2 border border-gray-300 rounded-md shadow-sm focus:ring-primary focus:border-primary" 
                                                     placeholder="e.g., Allergies, arthritis, epilepsy" />
                                             </div>
+                                            )}
                                         </div>
                                     </div>
                                 )}
@@ -11867,12 +11927,13 @@ const AnimalForm = ({
                                 )}
 
                                 {/* Dog/Cat Care Details - integrated */}
-                                {(formData.species === 'Dog' || formData.species === 'Cat') && (
+                                {(!isFieldHidden('exerciseRequirements') || !isFieldHidden('dailyExerciseMinutes') || !isFieldHidden('groomingNeeds') || !isFieldHidden('sheddingLevel') || !isFieldHidden('crateTrained') || !isFieldHidden('litterTrained') || !isFieldHidden('leashTrained')) && (
                                     <>
                                         <h4 className="text-md font-medium text-gray-600 border-t pt-3 mt-3">Exercise & Grooming</h4>
                                         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                            {!isFieldHidden('exerciseRequirements') && (
                                             <div>
-                                                <label className="block text-sm font-medium text-gray-700">Exercise Requirements</label>
+                                                <label className="block text-sm font-medium text-gray-700">{getFieldLabel('exerciseRequirements', 'Exercise Requirements')}</label>
                                                 <select name="exerciseRequirements" value={formData.exerciseRequirements || ''} onChange={handleChange} 
                                                     className="mt-1 block w-full p-2 border border-gray-300 rounded-md shadow-sm focus:ring-primary focus:border-primary">
                                                     <option value="">Select...</option>
@@ -11882,14 +11943,18 @@ const AnimalForm = ({
                                                     <option value="Very High">Very High</option>
                                                 </select>
                                             </div>
+                                            )}
+                                            {!isFieldHidden('dailyExerciseMinutes') && (
                                             <div>
-                                                <label className="block text-sm font-medium text-gray-700">Daily Exercise (minutes)</label>
+                                                <label className="block text-sm font-medium text-gray-700">{getFieldLabel('dailyExerciseMinutes', 'Daily Exercise (minutes)')}</label>
                                                 <input type="number" name="dailyExerciseMinutes" value={formData.dailyExerciseMinutes || ''} onChange={handleChange} 
                                                     className="mt-1 block w-full p-2 border border-gray-300 rounded-md shadow-sm focus:ring-primary focus:border-primary" 
                                                     placeholder="e.g., 60" />
                                             </div>
+                                            )}
+                                            {!isFieldHidden('groomingNeeds') && (
                                             <div>
-                                                <label className="block text-sm font-medium text-gray-700">Grooming Needs</label>
+                                                <label className="block text-sm font-medium text-gray-700">{getFieldLabel('groomingNeeds', 'Grooming Needs')}</label>
                                                 <select name="groomingNeeds" value={formData.groomingNeeds || ''} onChange={handleChange} 
                                                     className="mt-1 block w-full p-2 border border-gray-300 rounded-md shadow-sm focus:ring-primary focus:border-primary">
                                                     <option value="">Select...</option>
@@ -11899,8 +11964,10 @@ const AnimalForm = ({
                                                     <option value="Professional">Professional - regular groomer</option>
                                                 </select>
                                             </div>
+                                            )}
+                                            {!isFieldHidden('sheddingLevel') && (
                                             <div>
-                                                <label className="block text-sm font-medium text-gray-700">Shedding Level</label>
+                                                <label className="block text-sm font-medium text-gray-700">{getFieldLabel('sheddingLevel', 'Shedding Level')}</label>
                                                 <select name="sheddingLevel" value={formData.sheddingLevel || ''} onChange={handleChange} 
                                                     className="mt-1 block w-full p-2 border border-gray-300 rounded-md shadow-sm focus:ring-primary focus:border-primary">
                                                     <option value="">Select...</option>
@@ -11911,25 +11978,28 @@ const AnimalForm = ({
                                                     <option value="Seasonal">Seasonal blowouts</option>
                                                 </select>
                                             </div>
+                                            )}
                                         </div>
                                         <div className="flex flex-wrap gap-6 pt-2">
+                                            {!isFieldHidden('crateTrained') && (
                                             <div className="flex items-center space-x-2">
                                                 <input type="checkbox" name="crateTrained" checked={formData.crateTrained || false} onChange={handleChange} 
                                                     className="form-checkbox h-5 w-5 text-primary rounded focus:ring-primary" />
-                                                <span className="text-sm font-medium text-gray-700">Crate Trained</span>
+                                                <span className="text-sm font-medium text-gray-700">{getFieldLabel('crateTrained', 'Crate Trained')}</span>
                                             </div>
-                                            {formData.species === 'Cat' && (
+                                            )}
+                                            {!isFieldHidden('litterTrained') && (
                                                 <div className="flex items-center space-x-2">
                                                     <input type="checkbox" name="litterTrained" checked={formData.litterTrained || false} onChange={handleChange} 
                                                         className="form-checkbox h-5 w-5 text-primary rounded focus:ring-primary" />
-                                                    <span className="text-sm font-medium text-gray-700">Litter Trained</span>
+                                                    <span className="text-sm font-medium text-gray-700">{getFieldLabel('litterTrained', 'Litter Trained')}</span>
                                                 </div>
                                             )}
-                                            {formData.species === 'Dog' && (
+                                            {!isFieldHidden('leashTrained') && (
                                                 <div className="flex items-center space-x-2">
                                                     <input type="checkbox" name="leashTrained" checked={formData.leashTrained || false} onChange={handleChange} 
                                                         className="form-checkbox h-5 w-5 text-primary rounded focus:ring-primary" />
-                                                    <span className="text-sm font-medium text-gray-700">Leash Trained</span>
+                                                    <span className="text-sm font-medium text-gray-700">{getFieldLabel('leashTrained', 'Leash Trained')}</span>
                                                 </div>
                                             )}
                                         </div>
@@ -11984,13 +12054,14 @@ const AnimalForm = ({
                                 </select>
                             </div>
 
-                            {/* Dog/Cat Training & Behavior - Integrated */}
-                            {(formData.species === 'Dog' || formData.species === 'Cat') && (
+                            {/* Training & Behavior - Template controlled */}
+                            {(!isFieldHidden('trainingLevel') || !isFieldHidden('trainingDisciplines') || !isFieldHidden('workingRole') || !isFieldHidden('certifications') || !isFieldHidden('behavioralIssues') || !isFieldHidden('biteHistory') || !isFieldHidden('reactivityNotes')) && (
                                 <>
                                     <h4 className="text-md font-semibold text-gray-600 mt-4 pt-4 border-t border-gray-200">🎓 Training & Working</h4>
                                     <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                                        {!isFieldHidden('trainingLevel') && (
                                         <div>
-                                            <label className="block text-sm font-medium text-gray-700">Training Level</label>
+                                            <label className="block text-sm font-medium text-gray-700">{getFieldLabel('trainingLevel', 'Training Level')}</label>
                                             <select name="trainingLevel" value={formData.trainingLevel || ''} onChange={handleChange} 
                                                 className="mt-1 block w-full p-2 border border-gray-300 rounded-md shadow-sm focus:ring-primary focus:border-primary">
                                                 <option value="">Select...</option>
@@ -12001,46 +12072,59 @@ const AnimalForm = ({
                                                 <option value="Competition">Competition level</option>
                                             </select>
                                         </div>
+                                        )}
+                                        {!isFieldHidden('trainingDisciplines') && (
                                         <div>
-                                            <label className="block text-sm font-medium text-gray-700">Training Disciplines</label>
+                                            <label className="block text-sm font-medium text-gray-700">{getFieldLabel('trainingDisciplines', 'Training Disciplines')}</label>
                                             <input type="text" name="trainingDisciplines" value={formData.trainingDisciplines || ''} onChange={handleChange} 
                                                 className="mt-1 block w-full p-2 border border-gray-300 rounded-md shadow-sm focus:ring-primary focus:border-primary" 
                                                 placeholder="e.g., Agility, Rally, Herding, Nosework" />
                                         </div>
+                                        )}
+                                        {!isFieldHidden('workingRole') && (
                                         <div>
-                                            <label className="block text-sm font-medium text-gray-700">Working Role</label>
+                                            <label className="block text-sm font-medium text-gray-700">{getFieldLabel('workingRole', 'Working Role')}</label>
                                             <input type="text" name="workingRole" value={formData.workingRole || ''} onChange={handleChange} 
                                                 className="mt-1 block w-full p-2 border border-gray-300 rounded-md shadow-sm focus:ring-primary focus:border-primary" 
                                                 placeholder="e.g., Service Dog, Therapy, SAR" />
                                         </div>
+                                        )}
                                     </div>
                                     <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                        {!isFieldHidden('certifications') && (
                                         <div>
-                                            <label className="block text-sm font-medium text-gray-700">Certifications</label>
+                                            <label className="block text-sm font-medium text-gray-700">{getFieldLabel('certifications', 'Certifications')}</label>
                                             <textarea name="certifications" value={formData.certifications || ''} onChange={handleChange} rows="2"
                                                 className="mt-1 block w-full p-2 border border-gray-300 rounded-md shadow-sm focus:ring-primary focus:border-primary" 
                                                 placeholder="e.g., CGC, TDI, AKC titles" />
                                         </div>
+                                        )}
+                                        {!isFieldHidden('behavioralIssues') && (
                                         <div>
-                                            <label className="block text-sm font-medium text-gray-700">Behavioral Issues</label>
+                                            <label className="block text-sm font-medium text-gray-700">{getFieldLabel('behavioralIssues', 'Behavioral Issues')}</label>
                                             <textarea name="behavioralIssues" value={formData.behavioralIssues || ''} onChange={handleChange} rows="2"
                                                 className="mt-1 block w-full p-2 border border-gray-300 rounded-md shadow-sm focus:ring-primary focus:border-primary" 
                                                 placeholder="e.g., Resource guarding, separation anxiety" />
                                         </div>
+                                        )}
                                     </div>
                                     <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                        {!isFieldHidden('biteHistory') && (
                                         <div>
-                                            <label className="block text-sm font-medium text-gray-700">Bite History</label>
+                                            <label className="block text-sm font-medium text-gray-700">{getFieldLabel('biteHistory', 'Bite History')}</label>
                                             <textarea name="biteHistory" value={formData.biteHistory || ''} onChange={handleChange} rows="2"
                                                 className="mt-1 block w-full p-2 border border-gray-300 rounded-md shadow-sm focus:ring-primary focus:border-primary" 
                                                 placeholder="Any bite incidents, context, and outcome" />
                                         </div>
+                                        )}
+                                        {!isFieldHidden('reactivityNotes') && (
                                         <div>
-                                            <label className="block text-sm font-medium text-gray-700">Reactivity Notes</label>
+                                            <label className="block text-sm font-medium text-gray-700">{getFieldLabel('reactivityNotes', 'Reactivity Notes')}</label>
                                             <textarea name="reactivityNotes" value={formData.reactivityNotes || ''} onChange={handleChange} rows="2"
                                                 className="mt-1 block w-full p-2 border border-gray-300 rounded-md shadow-sm focus:ring-primary focus:border-primary" 
                                                 placeholder="Triggers, thresholds, management strategies" />
                                         </div>
+                                        )}
                                     </div>
                                 </>
                             )}
@@ -12089,10 +12173,9 @@ const AnimalForm = ({
                                         placeholder="Post-mortem examination findings..." />
                                 </div>
 
-                                {/* Dog/Cat End of Life Care Notes */}
-                                {(formData.species === 'Dog' || formData.species === 'Cat') && (
+                                {!isFieldHidden('endOfLifeCareNotes') && (
                                     <div className="md:col-span-2">
-                                        <label className="block text-sm font-medium text-gray-700 mb-2">End of Life Care Notes</label>
+                                        <label className="block text-sm font-medium text-gray-700 mb-2">{getFieldLabel('endOfLifeCareNotes', 'End of Life Care Notes')}</label>
                                         <textarea name="endOfLifeCareNotes" value={formData.endOfLifeCareNotes || ''} onChange={handleChange} rows="2"
                                             className="block w-full p-2 border border-gray-300 rounded-md shadow-sm focus:ring-primary focus:border-primary" 
                                             placeholder="Wishes for cremation, burial, memorial" />
@@ -12120,23 +12203,27 @@ const AnimalForm = ({
                                 </div>
                             </div>
 
-                            {/* Dog/Cat Ownership & Legal Details - Integrated */}
-                            {(formData.species === 'Dog' || formData.species === 'Cat') && (
+                            {/* Ownership & Legal Restrictions - Template controlled */}
+                            {(!isFieldHidden('breedingRestrictions') || !isFieldHidden('exportRestrictions')) && (
                                 <>
                                     <h4 className="text-md font-semibold text-gray-600 mt-4 pt-4 border-t border-gray-200">Restrictions</h4>
                                     <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                        {!isFieldHidden('breedingRestrictions') && (
                                         <div>
-                                            <label className="block text-sm font-medium text-gray-700">Breeding Restrictions</label>
+                                            <label className="block text-sm font-medium text-gray-700">{getFieldLabel('breedingRestrictions', 'Breeding Restrictions')}</label>
                                             <textarea name="breedingRestrictions" value={formData.breedingRestrictions || ''} onChange={handleChange} rows="2"
                                                 className="mt-1 block w-full p-2 border border-gray-300 rounded-md shadow-sm focus:ring-primary focus:border-primary" 
                                                 placeholder="Limited registration, spay/neuter contract" />
                                         </div>
+                                        )}
+                                        {!isFieldHidden('exportRestrictions') && (
                                         <div>
-                                            <label className="block text-sm font-medium text-gray-700">Export Restrictions</label>
+                                            <label className="block text-sm font-medium text-gray-700">{getFieldLabel('exportRestrictions', 'Export Restrictions')}</label>
                                             <textarea name="exportRestrictions" value={formData.exportRestrictions || ''} onChange={handleChange} rows="2"
                                                 className="mt-1 block w-full p-2 border border-gray-300 rounded-md shadow-sm focus:ring-primary focus:border-primary" 
                                                 placeholder="Country restrictions, registry limitations" />
                                         </div>
+                                        )}
                                     </div>
                                 </>
                             )}
@@ -17987,10 +18074,9 @@ const App = () => {
                 setHasSeenWelcomeGuide(hasSeen);
                 
                 // Show modal if they haven't seen it
-                // TEMPORARILY DISABLED - mobile stuck issue
-                // if (!hasSeen) {
-                //     setShowWelcomeGuide(true);
-                // }
+                if (!hasSeen) {
+                    setShowWelcomeGuide(true);
+                }
             } catch (error) {
                 console.error('[WELCOME GUIDE] Failed to load status:', error);
             }
