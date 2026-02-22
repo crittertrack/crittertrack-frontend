@@ -1,4 +1,4 @@
-// CritterTrack Frontend Application
+﻿// CritterTrack Frontend Application
 import React, { useState, useEffect, useCallback, useRef, useMemo } from 'react';
 import { useParams, useNavigate, useLocation, Routes, Route, Link as RouterLink } from 'react-router-dom';
 import axios from 'axios';
@@ -15228,6 +15228,8 @@ const AnimalList = ({ authToken, showModalMessage, onEditAnimal, onViewAnimal, f
     // Always start with all species selected (empty array = show all)
     // Don't persist this filter to prevent newly created animals from being hidden
     const [selectedSpecies, setSelectedSpecies] = useState([]);
+    // Master species list — all species the user has ANY animal for, never filtered
+    const [allUserSpecies, setAllUserSpecies] = useState([]);
     const [statusFilterPregnant, setStatusFilterPregnant] = useState(() => {
         try {
             return localStorage.getItem('animalList_statusFilterPregnant') === 'true';
@@ -15444,6 +15446,18 @@ const AnimalList = ({ authToken, showModalMessage, onEditAnimal, onViewAnimal, f
         }
     }, [authToken, statusFilter, selectedGenders, selectedSpecies, appliedNameFilter, statusFilterPregnant, statusFilterNursing, statusFilterMating, ownedFilterActive, publicFilter, showModalMessage]);
 
+    // Fetch ALL user species (no filters) — master list for filter UI and group headers
+    const fetchAllSpecies = useCallback(async () => {
+        if (!authToken) return;
+        try {
+            const res = await axios.get(`${API_BASE_URL}/animals`, {
+                headers: { Authorization: `Bearer ${authToken}` }
+            });
+            const species = [...new Set((res.data || []).map(a => a.species).filter(Boolean))];
+            setAllUserSpecies(species);
+        } catch (err) { console.error('[fetchAllSpecies]', err); }
+    }, [authToken, API_BASE_URL]);
+
     useEffect(() => {
         fetchAnimals();
     }, [fetchAnimals]);
@@ -15452,10 +15466,13 @@ const AnimalList = ({ authToken, showModalMessage, onEditAnimal, onViewAnimal, f
     useEffect(() => {
         const handleAnimalsChanged = () => {
             try { fetchAnimals(); } catch (e) { /* ignore */ }
+            try { fetchAllSpecies(); } catch (e) { /* ignore */ }
         };
         window.addEventListener('animals-changed', handleAnimalsChanged);
         return () => window.removeEventListener('animals-changed', handleAnimalsChanged);
-    }, [fetchAnimals]);
+    }, [fetchAnimals, fetchAllSpecies]);
+
+    useEffect(() => { fetchAllSpecies(); }, [fetchAllSpecies]);
 
     // Fetch user's enclosures
     const fetchEnclosures = useCallback(async () => {
@@ -15499,7 +15516,7 @@ const AnimalList = ({ authToken, showModalMessage, onEditAnimal, onViewAnimal, f
     }, [animals]);
     
     const speciesNames = useMemo(() => {
-        return Object.keys(groupedAnimals).sort((a, b) => {
+        return [...allUserSpecies].sort((a, b) => {
             // Use user's custom order if available
             if (userSpeciesOrder.length > 0) {
                 const aIndex = userSpeciesOrder.indexOf(a);
@@ -15525,26 +15542,24 @@ const AnimalList = ({ authToken, showModalMessage, onEditAnimal, onViewAnimal, f
             if (bIndex !== -1) return 1;
             return a.localeCompare(b);
         });
-    }, [groupedAnimals, userSpeciesOrder]);
+    }, [allUserSpecies, userSpeciesOrder]);
 
     // Initialize species filter to "All" on first load only
     // Also add any new species that appear (e.g., after creating a new animal)
+    // Keep selectedSpecies in sync with allUserSpecies (the unfiltered master list)
     useEffect(() => {
-        if (!loading && speciesNames.length > 0) {
-            // First load: selectedSpecies is empty, set to all species
-            if (selectedSpecies.length === 0) {
-                console.log('[Species Filter] Initial load - setting to all user species:', speciesNames);
-                setSelectedSpecies([...speciesNames]);
-            } else {
-                // Check if there are new species not in selectedSpecies
-                const newSpecies = speciesNames.filter(s => !selectedSpecies.includes(s));
-                if (newSpecies.length > 0) {
-                    console.log('[Species Filter] New species detected - resetting filter to show all species:', speciesNames);
-                    setSelectedSpecies([...speciesNames]);
-                }
+        if (allUserSpecies.length === 0) return;
+        if (selectedSpecies.length === 0) {
+            // First load: select everything
+            setSelectedSpecies([...allUserSpecies]);
+        } else {
+            // Add any newly-seen species so they aren't silently hidden
+            const newSpecies = allUserSpecies.filter(s => !selectedSpecies.includes(s));
+            if (newSpecies.length > 0) {
+                setSelectedSpecies(prev => [...prev, ...newSpecies]);
             }
         }
-    }, [speciesNames.length, loading]); // Runs when number of species changes
+    }, [allUserSpecies]); // eslint-disable-line react-hooks/exhaustive-deps
 
     const handleStatusFilterChange = (e) => setStatusFilter(e.target.value);
     const handleSearchInputChange = (e) => setSearchInput(e.target.value);
@@ -16190,11 +16205,20 @@ const AnimalList = ({ authToken, showModalMessage, onEditAnimal, onViewAnimal, f
                         </div>
                     )}
                     <div className="min-w-0">
-                        <div className="font-semibold text-sm text-gray-800 truncate">{animal.name || 'Unnamed'}</div>
+                        <div className="font-semibold text-sm text-gray-800 truncate">
+                            {[animal.prefix, animal.name || 'Unnamed', animal.suffix].filter(Boolean).join(' ')}
+                        </div>
                         <div className="text-xs text-gray-500 truncate">
                             {getSpeciesDisplayName(animal.species)}{animal.gender ? ` · ${animal.gender}` : ''}
                             {animal.dateOfBirth ? ` · ${formatDateShort(animal.dateOfBirth)}` : ''}
                         </div>
+                        {(() => {
+                            const variety = [animal.color, animal.coatPattern, animal.coat, animal.earset].filter(Boolean).join(' ');
+                            const parts = [animal.status, variety].filter(Boolean);
+                            return parts.length > 0 ? (
+                                <div className="text-xs text-gray-400 truncate">{parts.join(' · ')}</div>
+                            ) : null;
+                        })()}
                     </div>
                 </div>
                 {extras}
@@ -16909,6 +16933,8 @@ const AnimalList = ({ authToken, showModalMessage, onEditAnimal, onViewAnimal, f
                         const isBulkMode = bulkDeleteMode[species] || false;
                         const selected = selectedAnimals[species] || [];
                         const isCollapsed = collapsedSpecies[species] || false;
+                        // Skip species that have no visible animals under current filters
+                        if (!groupedAnimals[species]?.length) return null;
                         
                         return (
                         <div key={species} className="border border-gray-200 rounded-xl overflow-hidden shadow-sm">
