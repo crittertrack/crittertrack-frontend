@@ -17111,17 +17111,6 @@ const AnimalList = ({ authToken, showModalMessage, onEditAnimal, onViewAnimal, f
             } catch (err) { console.error('Unquarantine failed:', err); }
         };
 
-        const handleUnquarantine = async (e, animal) => {
-            e.stopPropagation();
-            if (!window.confirm(`Release ${animal.name || 'this animal'} from quarantine?`)) return;
-            try {
-                await axios.put(`${API_BASE_URL}/animals/${animal.id_public}`, { isQuarantine: false },
-                    { headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${authToken}` } });
-                logManagementActivity('quarantine_released', animal.id_public, { name: animal.name, species: animal.species });
-                fetchAnimals();
-            } catch (err) { console.error('Unquarantine failed:', err); }
-        };
-
         const handleReproStatusUpdate = async (e, animal, patch) => {
             e.stopPropagation();
             try {
