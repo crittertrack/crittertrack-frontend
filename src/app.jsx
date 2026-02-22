@@ -16190,6 +16190,11 @@ const AnimalList = ({ authToken, showModalMessage, onEditAnimal, onViewAnimal, f
             parseArrayField(a.medicalConditions).length > 0 || parseArrayField(a.medications).length > 0
         ));
 
+        // ── Shared helpers ────────────────────────────────────────────────────────
+        // All appearance fields that make up "Variety" — same set as Tab 3 / Appearance section
+        const VARIETY_KEYS = ['color', 'coatPattern', 'coat', 'earset', 'phenotype', 'morph', 'markings', 'eyeColor', 'nailColor', 'carrierTraits'];
+        const getAnimalVariety = (a) => VARIETY_KEYS.map(k => a[k]).filter(Boolean).join(' ');
+
         // ── Shared card + group components ───────────────────────────────────────
         const MgmtAnimalCard = ({ animal, extras }) => (
             <div
@@ -16213,7 +16218,7 @@ const AnimalList = ({ authToken, showModalMessage, onEditAnimal, onViewAnimal, f
                             {animal.dateOfBirth ? ` · ${formatDateShort(animal.dateOfBirth)}` : ''}
                         </div>
                         {(() => {
-                            const variety = [animal.color, animal.coatPattern, animal.coat, animal.earset].filter(Boolean).join(' ');
+                            const variety = getAnimalVariety(animal);
                             const parts = [animal.status, variety].filter(Boolean);
                             return parts.length > 0 ? (
                                 <div className="text-xs text-gray-400 truncate">{parts.join(' · ')}</div>
