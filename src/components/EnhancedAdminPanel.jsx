@@ -3,7 +3,7 @@ import {
     X, Users, Settings, BarChart3, Mail, Shield, AlertTriangle, Lock,
     Loader2, Save, Plus, Trash2, Edit, Eye, Search, Download, Upload,
     ChevronDown, ChevronRight, ChevronLeft, CheckCircle, Clock, Flag, MessageSquare, FileText,
-    Bug, Dna, PawPrint, Wrench, Database, PanelLeftClose, PanelLeft, LogOut
+    Bug, Dna, PawPrint, Wrench, Database, PanelLeftClose, PanelLeft, LogOut, Layers
 } from 'lucide-react';
 import ModOversightPanel from './moderation/ModOversightPanel';
 import UserManagementPanel from './moderation/UserManagementPanel';
@@ -15,6 +15,7 @@ import AnimalManagementPanel from './admin/AnimalManagementPanel';
 import BugReportsTab from './admin/BugReportsTab';
 import FeedbackTab from './admin/FeedbackTab';
 import SpeciesManagementTab from './admin/SpeciesManagementTab';
+import FieldTemplateManagement from './admin/FieldTemplateManagement';
 import GeneticsBuilderTab from './admin/GeneticsBuilderTab';
 import BackupManagementTab from './admin/BackupManagementTab';
 import AnalyticsTab from './admin/AnalyticsTab';
@@ -632,6 +633,7 @@ const EnhancedAdminPanel = ({ isOpen, onClose, authToken, API_BASE_URL, userRole
                                 sidebarCollapsed={sidebarCollapsed}
                                 items={[
                                     { id: 'species-management', label: 'Species Management', icon: PawPrint, requiredRole: 'admin' },
+                                    { id: 'field-templates', label: 'Field Templates', icon: Layers, requiredRole: 'admin' },
                                     { id: 'feedback', label: 'Calculator Feedback', icon: Dna },
                                     { id: 'genetics-builder', label: 'Genetics Builder', icon: Wrench, requiredRole: 'admin' },
                                     { id: 'system-settings', label: 'System Settings', icon: Settings, requiredRole: 'admin' }
@@ -771,6 +773,16 @@ const EnhancedAdminPanel = ({ isOpen, onClose, authToken, API_BASE_URL, userRole
                         {activeSection === 'species-management' && (
                             <div className="p-8">
                                 <SpeciesManagementTab
+                                    API_BASE_URL={API_BASE_URL}
+                                    authToken={authToken}
+                                />
+                            </div>
+                        )}
+
+                        {/* Field Templates */}
+                        {activeSection === 'field-templates' && (
+                            <div className="p-8">
+                                <FieldTemplateManagement
                                     API_BASE_URL={API_BASE_URL}
                                     authToken={authToken}
                                 />
