@@ -15367,7 +15367,7 @@ const AuthView = ({ onLoginSuccess, showModalMessage, isRegister, setIsRegister,
 
 const AnimalList = ({ authToken, showModalMessage, onEditAnimal, onViewAnimal, fetchHiddenAnimals, navigate }) => {
     const [animals, setAnimals] = useState([]);
-    const [allAnimals, setAllAnimals] = useState([]); // Unfiltered — used by Management View
+    const [allAnimalsRaw, setAllAnimalsRaw] = useState([]); // Unfiltered — used by Management View
     const [loading, setLoading] = useState(true);
     
     // Load filters from localStorage or use defaults
@@ -15658,7 +15658,7 @@ const AnimalList = ({ authToken, showModalMessage, onEditAnimal, onViewAnimal, f
                 headers: { Authorization: `Bearer ${authToken}` },
                 params: { isOwned: 'true' }
             });
-            setAllAnimals(res.data || []);
+            setAllAnimalsRaw(res.data || []);
         } catch (err) { console.error('[fetchAllAnimals]', err); }
     }, [authToken, API_BASE_URL]);
 
@@ -17035,6 +17035,9 @@ const AnimalList = ({ authToken, showModalMessage, onEditAnimal, onViewAnimal, f
         };
 
         // -- Section data ---------------------------------------------------------
+        // Exclude deceased animals from all management sections
+        // Exclude deceased animals from all management sections
+        const allAnimals = allAnimalsRaw.filter(a => a.status !== 'Deceased');
         // 1. Enclosures — grouped by named enclosure (enclosureId)
         const enclosureAnimalMap = {}; // { enclosureId: [animals] }
         const unassignedAnimals = [];
