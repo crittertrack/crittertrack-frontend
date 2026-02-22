@@ -17006,26 +17006,26 @@ const AnimalList = ({ authToken, showModalMessage, onEditAnimal, onViewAnimal, f
             } catch (err) { console.error('Assign enclosure failed:', err); }
         };
 
-        const handleMarkFed = async (e, animal) => {
+        const handleMarkFed = (e, animal) => {
             e.stopPropagation();
-            try {
-                await axios.put(`${API_BASE_URL}/animals/${animal.id_public}`,
-                    { lastFedDate: new Date().toISOString() },
-                    { headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${authToken}` } });
-                logManagementActivity('animal_fed', animal.id_public, { name: animal.name, species: animal.species });
-                fetchAnimals();
-            } catch (err) { console.error('Mark fed failed:', err); }
+            const now = new Date().toISOString();
+            setAllAnimalsRaw(prev => prev.map(a => a.id_public === animal.id_public ? { ...a, lastFedDate: now } : a));
+            axios.put(`${API_BASE_URL}/animals/${animal.id_public}`,
+                { lastFedDate: now },
+                { headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${authToken}` } })
+                .then(() => logManagementActivity('animal_fed', animal.id_public, { name: animal.name, species: animal.species }))
+                .catch(err => { console.error('Mark fed failed:', err); setAllAnimalsRaw(prev => prev.map(a => a.id_public === animal.id_public ? { ...a, lastFedDate: animal.lastFedDate } : a)); });
         };
 
-        const handleMarkMaintDone = async (e, animal) => {
+        const handleMarkMaintDone = (e, animal) => {
             e.stopPropagation();
-            try {
-                await axios.put(`${API_BASE_URL}/animals/${animal.id_public}`,
-                    { lastMaintenanceDate: new Date().toISOString() },
-                    { headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${authToken}` } });
-                logManagementActivity('care_task_done', animal.id_public, { name: animal.name, taskName: 'General maintenance' });
-                fetchAnimals();
-            } catch (err) { console.error('Mark maintenance failed:', err); }
+            const now = new Date().toISOString();
+            setAllAnimalsRaw(prev => prev.map(a => a.id_public === animal.id_public ? { ...a, lastMaintenanceDate: now } : a));
+            axios.put(`${API_BASE_URL}/animals/${animal.id_public}`,
+                { lastMaintenanceDate: now },
+                { headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${authToken}` } })
+                .then(() => logManagementActivity('care_task_done', animal.id_public, { name: animal.name, taskName: 'General maintenance' }))
+                .catch(err => { console.error('Mark maintenance failed:', err); setAllAnimalsRaw(prev => prev.map(a => a.id_public === animal.id_public ? { ...a, lastMaintenanceDate: animal.lastMaintenanceDate } : a)); });
         };
 
         const parseArrayField = (val) => {
@@ -17035,7 +17035,6 @@ const AnimalList = ({ authToken, showModalMessage, onEditAnimal, onViewAnimal, f
         };
 
         // -- Section data ---------------------------------------------------------
-        // Exclude deceased animals from all management sections
         // Exclude deceased animals from all management sections
         const allAnimals = allAnimalsRaw.filter(a => a.status !== 'Deceased');
         // 1. Enclosures — grouped by named enclosure (enclosureId)
@@ -17082,52 +17081,54 @@ const AnimalList = ({ authToken, showModalMessage, onEditAnimal, onViewAnimal, f
             e.stopPropagation();
             const updated = [...(enc.cleaningTasks || [])];
             updated[taskIdx] = { ...updated[taskIdx], lastDoneDate: new Date().toISOString() };
-            try {
-                await axios.put(`${API_BASE_URL}/enclosures/${enc._id}`,
-                    { name: enc.name, enclosureType: enc.enclosureType || '', size: enc.size || '', notes: enc.notes || '', cleaningTasks: updated },
-                    { headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${authToken}` } });
-                logManagementActivity('enclosure_task_done', null, { name: enc.name, taskName: updated[taskIdx]?.taskName || 'Cleaning task' });
-                fetchEnclosures();
-            } catch (err) { console.error('Mark enclosure task done failed:', err); }
+            // Optimistic update
+            setEnclosures(prev => prev.map(ex => ex._id === enc._id ? { ...ex, cleaningTasks: updated } : ex));
+            axios.put(`${API_BASE_URL}/enclosures/${enc._id}`,
+                { name: enc.name, enclosureType: enc.enclosureType || '', size: enc.size || '', notes: enc.notes || '', cleaningTasks: updated },
+                { headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${authToken}` } })
+                .then(() => logManagementActivity('enclosure_task_done', null, { name: enc.name, taskName: updated[taskIdx]?.taskName || 'Cleaning task' }))
+                .catch(err => { console.error('Mark enclosure task done failed:', err); fetchEnclosures(); });
         };
 
-        const handleMarkAnimalCareTaskDone = async (e, animal, taskIdx) => {
+        const handleMarkAnimalCareTaskDone = (e, animal, taskIdx) => {
             e.stopPropagation();
             const updated = [...(animal.careTasks || [])];
             updated[taskIdx] = { ...updated[taskIdx], lastDoneDate: new Date().toISOString() };
-            try {
-                await axios.put(`${API_BASE_URL}/animals/${animal.id_public}`, { careTasks: updated },
-                    { headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${authToken}` } });
-                logManagementActivity('care_task_done', animal.id_public, { name: animal.name, taskName: updated[taskIdx]?.taskName || 'Care task' });
-                fetchAnimals();
-            } catch (err) { console.error('Mark animal care task done failed:', err); }
+            // Optimistic update
+            setAllAnimalsRaw(prev => prev.map(a => a.id_public === animal.id_public ? { ...a, careTasks: updated } : a));
+            axios.put(`${API_BASE_URL}/animals/${animal.id_public}`, { careTasks: updated },
+                { headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${authToken}` } })
+                .then(() => logManagementActivity('care_task_done', animal.id_public, { name: animal.name, taskName: updated[taskIdx]?.taskName || 'Care task' }))
+                .catch(err => { console.error('Mark animal care task done failed:', err); fetchAllAnimals(); });
         };
 
-        const handleUnquarantine = async (e, animal) => {
+        const handleUnquarantine = (e, animal) => {
             e.stopPropagation();
             if (!window.confirm(`Release ${animal.name || 'this animal'} from quarantine?`)) return;
-            try {
-                await axios.put(`${API_BASE_URL}/animals/${animal.id_public}`, { isQuarantine: false },
-                    { headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${authToken}` } });
-                logManagementActivity('quarantine_released', animal.id_public, { name: animal.name, species: animal.species });
-                fetchAnimals();
-            } catch (err) { console.error('Unquarantine failed:', err); }
+            // Optimistic update
+            setAllAnimalsRaw(prev => prev.map(a => a.id_public === animal.id_public ? { ...a, isQuarantine: false } : a));
+            axios.put(`${API_BASE_URL}/animals/${animal.id_public}`, { isQuarantine: false },
+                { headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${authToken}` } })
+                .then(() => logManagementActivity('quarantine_released', animal.id_public, { name: animal.name, species: animal.species }))
+                .catch(err => { console.error('Unquarantine failed:', err); setAllAnimalsRaw(prev => prev.map(a => a.id_public === animal.id_public ? { ...a, isQuarantine: true } : a)); });
         };
 
-        const handleReproStatusUpdate = async (e, animal, patch) => {
+        const handleReproStatusUpdate = (e, animal, patch) => {
             e.stopPropagation();
-            try {
-                await axios.put(`${API_BASE_URL}/animals/${animal.id_public}`, patch,
-                    { headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${authToken}` } });
-                let reproStatus = 'Status changed';
-                if (patch.isInMating === false && patch.isPregnant === true) reproStatus = 'Confirmed Pregnant';
-                else if (patch.isPregnant === false && patch.isNursing === true) reproStatus = 'Started Nursing';
-                else if (patch.isInMating === false) reproStatus = 'Cleared Mating';
-                else if (patch.isPregnant === false) reproStatus = 'Cleared Pregnancy';
-                else if (patch.isNursing === false) reproStatus = 'Cleared Nursing';
-                logManagementActivity('reproduction_update', animal.id_public, { name: animal.name, species: animal.species, status: reproStatus });
-                fetchAnimals();
-            } catch (err) { console.error('Repro status update failed:', err); }
+            // Optimistic update
+            setAllAnimalsRaw(prev => prev.map(a => a.id_public === animal.id_public ? { ...a, ...patch } : a));
+            axios.put(`${API_BASE_URL}/animals/${animal.id_public}`, patch,
+                { headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${authToken}` } })
+                .then(() => {
+                    let reproStatus = 'Status changed';
+                    if (patch.isInMating === false && patch.isPregnant === true) reproStatus = 'Confirmed Pregnant';
+                    else if (patch.isPregnant === false && patch.isNursing === true) reproStatus = 'Started Nursing';
+                    else if (patch.isInMating === false) reproStatus = 'Cleared Mating';
+                    else if (patch.isPregnant === false) reproStatus = 'Cleared Pregnancy';
+                    else if (patch.isNursing === false) reproStatus = 'Cleared Nursing';
+                    logManagementActivity('reproduction_update', animal.id_public, { name: animal.name, species: animal.species, status: reproStatus });
+                })
+                .catch(err => { console.error('Repro status update failed:', err); setAllAnimalsRaw(prev => prev.map(a => a.id_public === animal.id_public ? { ...a, ...Object.fromEntries(Object.keys(patch).map(k => [k, animal[k]])) } : a)); });
         };
 
         // -- Shared helpers --------------------------------------------------------
