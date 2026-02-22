@@ -15430,7 +15430,7 @@ const AnimalList = ({ authToken, showModalMessage, onEditAnimal, onViewAnimal, f
     const [collapsedSpecies, setCollapsedSpecies] = useState({}); // { species: true/false } - for mobile collapse
     const [userSpeciesOrder, setUserSpeciesOrder] = useState([]); // User's custom species order
     const [animalView, setAnimalView] = useState('list'); // 'list' | 'management'
-    const [collapsedMgmtSections, setCollapsedMgmtSections] = useState({}); // { sectionKey: bool }
+    const [collapsedMgmtSections, setCollapsedMgmtSections] = useState({ enclosures: true }); // { sectionKey: bool }
     const [collapsedMgmtGroups, setCollapsedMgmtGroups] = useState({}); // { groupKey: bool }
 
     // Activity Log state
