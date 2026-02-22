@@ -19306,7 +19306,8 @@ const App = () => {
     const [showInfoTab, setShowInfoTab] = useState(false);
     const [showAdminPanel, setShowAdminPanel] = useState(false);
     const [showProfileMenu, setShowProfileMenu] = useState(false);
-    const profileMenuRef = useRef(null);
+    const profileMenuDesktopRef = useRef(null);
+    const profileMenuMobileRef = useRef(null);
     const [showModReportQueue, setShowModReportQueue] = useState(false);
     const [modCurrentContext, setModCurrentContext] = useState(null);
     const [inModeratorMode, setInModeratorMode] = useState(() => {
@@ -20318,9 +20319,9 @@ const App = () => {
     // Close profile dropdown when clicking outside
     useEffect(() => {
         const handleClickOutside = (e) => {
-            if (profileMenuRef.current && !profileMenuRef.current.contains(e.target)) {
-                setShowProfileMenu(false);
-            }
+            const inDesktop = profileMenuDesktopRef.current?.contains(e.target);
+            const inMobile = profileMenuMobileRef.current?.contains(e.target);
+            if (!inDesktop && !inMobile) setShowProfileMenu(false);
         };
         if (showProfileMenu) document.addEventListener('mousedown', handleClickOutside);
         return () => document.removeEventListener('mousedown', handleClickOutside);
@@ -21482,15 +21483,15 @@ const App = () => {
                         </button>
                         
                         {/* Avatar / Profile Dropdown */}
-                        <div className="relative" ref={profileMenuRef}>
+                        <div className="relative" ref={profileMenuDesktopRef}>
                             <button
                                 onClick={() => setShowProfileMenu(p => !p)}
                                 className="w-10 h-10 rounded-full bg-primary flex items-center justify-center text-sm font-bold text-black hover:ring-2 hover:ring-primary/60 transition overflow-hidden flex-shrink-0 shadow-md"
                                 title="Account"
                             >
-                                {userProfile?.profilePicUrl
-                                    ? <img src={userProfile.profilePicUrl} alt="" className="w-full h-full object-cover" />
-                                    : (userProfile?.username || 'U').slice(0, 2).toUpperCase()
+                                {(userProfile?.profileImage || userProfile?.profileImageUrl)
+                                    ? <img src={userProfile.profileImage || userProfile.profileImageUrl} alt="" className="w-full h-full object-cover" />
+                                    : (userProfile?.personalName || userProfile?.breederName || '?').slice(0, 2).toUpperCase()
                                 }
                             </button>
                             {showProfileMenu && (
@@ -21569,15 +21570,15 @@ const App = () => {
                             </button>
                             
                             {/* Avatar / Profile Dropdown (mobile) */}
-                            <div className="relative" ref={profileMenuRef}>
+                            <div className="relative" ref={profileMenuMobileRef}>
                                 <button
                                     onClick={() => setShowProfileMenu(p => !p)}
                                     className="w-9 h-9 rounded-full bg-primary flex items-center justify-center text-sm font-bold text-black hover:ring-2 hover:ring-primary/60 transition overflow-hidden flex-shrink-0 shadow-md"
                                     title="Account"
                                 >
-                                    {userProfile?.profilePicUrl
-                                        ? <img src={userProfile.profilePicUrl} alt="" className="w-full h-full object-cover" />
-                                        : (userProfile?.username || 'U').slice(0, 2).toUpperCase()
+                                    {(userProfile?.profileImage || userProfile?.profileImageUrl)
+                                        ? <img src={userProfile.profileImage || userProfile.profileImageUrl} alt="" className="w-full h-full object-cover" />
+                                        : (userProfile?.personalName || userProfile?.breederName || '?').slice(0, 2).toUpperCase()
                                     }
                                 </button>
                                 {showProfileMenu && (
