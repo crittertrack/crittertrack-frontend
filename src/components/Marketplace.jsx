@@ -42,6 +42,31 @@ const getCountryName = (countryCode) => {
     return countryNames[countryCode] || countryCode;
 };
 
+const US_STATES = [
+    { code: 'AL', name: 'Alabama' }, { code: 'AK', name: 'Alaska' }, { code: 'AZ', name: 'Arizona' },
+    { code: 'AR', name: 'Arkansas' }, { code: 'CA', name: 'California' }, { code: 'CO', name: 'Colorado' },
+    { code: 'CT', name: 'Connecticut' }, { code: 'DC', name: 'District of Columbia' }, { code: 'DE', name: 'Delaware' },
+    { code: 'FL', name: 'Florida' }, { code: 'GA', name: 'Georgia' }, { code: 'HI', name: 'Hawaii' },
+    { code: 'ID', name: 'Idaho' }, { code: 'IL', name: 'Illinois' }, { code: 'IN', name: 'Indiana' },
+    { code: 'IA', name: 'Iowa' }, { code: 'KS', name: 'Kansas' }, { code: 'KY', name: 'Kentucky' },
+    { code: 'LA', name: 'Louisiana' }, { code: 'ME', name: 'Maine' }, { code: 'MD', name: 'Maryland' },
+    { code: 'MA', name: 'Massachusetts' }, { code: 'MI', name: 'Michigan' }, { code: 'MN', name: 'Minnesota' },
+    { code: 'MS', name: 'Mississippi' }, { code: 'MO', name: 'Missouri' }, { code: 'MT', name: 'Montana' },
+    { code: 'NE', name: 'Nebraska' }, { code: 'NV', name: 'Nevada' }, { code: 'NH', name: 'New Hampshire' },
+    { code: 'NJ', name: 'New Jersey' }, { code: 'NM', name: 'New Mexico' }, { code: 'NY', name: 'New York' },
+    { code: 'NC', name: 'North Carolina' }, { code: 'ND', name: 'North Dakota' }, { code: 'OH', name: 'Ohio' },
+    { code: 'OK', name: 'Oklahoma' }, { code: 'OR', name: 'Oregon' }, { code: 'PA', name: 'Pennsylvania' },
+    { code: 'RI', name: 'Rhode Island' }, { code: 'SC', name: 'South Carolina' }, { code: 'SD', name: 'South Dakota' },
+    { code: 'TN', name: 'Tennessee' }, { code: 'TX', name: 'Texas' }, { code: 'UT', name: 'Utah' },
+    { code: 'VT', name: 'Vermont' }, { code: 'VA', name: 'Virginia' }, { code: 'WA', name: 'Washington' },
+    { code: 'WV', name: 'West Virginia' }, { code: 'WI', name: 'Wisconsin' }, { code: 'WY', name: 'Wyoming' }
+];
+
+const getStateName = (stateCode) => {
+    const found = US_STATES.find(s => s.code === stateCode);
+    return found ? found.name : stateCode;
+};
+
 const Marketplace = ({ onViewAnimal, onViewProfile, authToken, userProfile, onStartConversation, showModalMessage }) => {
     const [animals, setAnimals] = useState([]);
     const [loading, setLoading] = useState(true);
@@ -59,6 +84,7 @@ const Marketplace = ({ onViewAnimal, onViewProfile, authToken, userProfile, onSt
     const [selectedSpecies, setSelectedSpecies] = useState('');
     const [selectedGender, setSelectedGender] = useState('');
     const [selectedCountry, setSelectedCountry] = useState('');
+    const [selectedState, setSelectedState] = useState('');
     const [showFilters, setShowFilters] = useState(false);
     
     // Available filter options
@@ -113,6 +139,9 @@ const Marketplace = ({ onViewAnimal, onViewProfile, authToken, userProfile, onSt
             if (selectedCountry) {
                 params.append('country', selectedCountry);
             }
+            if (selectedCountry === 'US' && selectedState) {
+                params.append('state', selectedState);
+            }
 
             const response = await axios.get(`${API_BASE_URL}/public/marketplace?${params.toString()}`, {
                 headers: {
@@ -129,12 +158,12 @@ const Marketplace = ({ onViewAnimal, onViewProfile, authToken, userProfile, onSt
         } finally {
             setLoading(false);
         }
-    }, [listingType, searchQuery, selectedSpecies, selectedGender, selectedCountry, pagination.limit]);
+    }, [listingType, searchQuery, selectedSpecies, selectedGender, selectedCountry, selectedState, pagination.limit]);
 
     // Fetch on mount and filter changes
     useEffect(() => {
         fetchAnimals(1);
-    }, [listingType, selectedSpecies, selectedGender, selectedCountry]);
+    }, [listingType, selectedSpecies, selectedGender, selectedCountry, selectedState]);
 
     // Handle search submit
     const handleSearch = (e) => {
@@ -156,10 +185,11 @@ const Marketplace = ({ onViewAnimal, onViewProfile, authToken, userProfile, onSt
         setSelectedSpecies('');
         setSelectedGender('');
         setSelectedCountry('');
+        setSelectedState('');
         setListingType('all');
     };
 
-    const hasActiveFilters = searchQuery || selectedSpecies || selectedGender || selectedCountry || listingType !== 'all';
+    const hasActiveFilters = searchQuery || selectedSpecies || selectedGender || selectedCountry || selectedState || listingType !== 'all';
 
     // Handle opening inquiry modal
     const handleOpenInquiry = (animal) => {
@@ -361,7 +391,7 @@ const Marketplace = ({ onViewAnimal, onViewProfile, authToken, userProfile, onSt
                             <label className="block text-sm font-medium text-gray-700 mb-1">Country</label>
                             <select
                                 value={selectedCountry}
-                                onChange={(e) => setSelectedCountry(e.target.value)}
+                                onChange={(e) => { setSelectedCountry(e.target.value); if (e.target.value !== 'US') setSelectedState(''); }}
                                 className="w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-accent focus:border-accent"
                             >
                                 <option value="">All Countries</option>
@@ -372,6 +402,21 @@ const Marketplace = ({ onViewAnimal, onViewProfile, authToken, userProfile, onSt
                                 ))}
                             </select>
                         </div>
+                        {selectedCountry === 'US' && (
+                            <div>
+                                <label className="block text-sm font-medium text-gray-700 mb-1">State</label>
+                                <select
+                                    value={selectedState}
+                                    onChange={(e) => setSelectedState(e.target.value)}
+                                    className="w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-accent focus:border-accent"
+                                >
+                                    <option value="">All States</option>
+                                    {US_STATES.map((s) => (
+                                        <option key={s.code} value={s.code}>{s.name}</option>
+                                    ))}
+                                </select>
+                            </div>
+                        )}
                         <div className="flex items-end">
                             {hasActiveFilters && (
                                 <button
@@ -563,7 +608,7 @@ const Marketplace = ({ onViewAnimal, onViewProfile, authToken, userProfile, onSt
                                     {inquiryAnimal.ownerInfo.country && (
                                         <span className="ml-2 text-gray-500">
                                             <MapPin size={12} className="inline mr-1" />
-                                            {getCountryName(inquiryAnimal.ownerInfo.country)}
+                                            {getCountryName(inquiryAnimal.ownerInfo.country)}{inquiryAnimal.ownerInfo.country === 'US' && inquiryAnimal.ownerInfo.state ? `, ${getStateName(inquiryAnimal.ownerInfo.state)}` : ''}
                                         </span>
                                     )}
                                 </div>
@@ -777,7 +822,7 @@ const AnimalCard = ({ animal, onViewAnimal, onViewProfile, onContactOwner, isOwn
                         {animal.ownerInfo.country && (
                             <div className="flex items-center gap-2 text-xs text-gray-500 mt-1 ml-8">
                                 <span className={`${getCountryFlag(animal.ownerInfo.country)} inline-block h-3 w-4`}></span>
-                                <span>{getCountryName(animal.ownerInfo.country)}</span>
+                                <span>{getCountryName(animal.ownerInfo.country)}{animal.ownerInfo.country === 'US' && animal.ownerInfo.state ? `, ${getStateName(animal.ownerInfo.state)}` : ''}</span>
                             </div>
                         )}
                     </div>

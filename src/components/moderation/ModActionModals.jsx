@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+﻿import React, { useState, useEffect } from 'react';
 import axios from 'axios';
 import { X, AlertTriangle, Eye, MessageSquare, UserX, Ban, Flag, TrendingDown, Check } from 'lucide-react';
 import './ModActionModals.css';
@@ -103,7 +103,7 @@ export const EditContentModal = ({ isOpen, onClose, onSubmit, context }) => {
                 { value: 'name', label: 'Animal Name (required)', clearable: false },
                 { value: 'prefix', label: 'Prefix', clearable: true },
                 { value: 'suffix', label: 'Suffix', clearable: true },
-                { value: 'breederyId', label: 'Breedery ID', clearable: true },
+                { value: 'breederAssignedId', label: 'Breedery ID', clearable: true },
                 
                 // Images
                 { value: 'imageUrl', label: 'Animal Image', clearable: true, removeOnly: true },
