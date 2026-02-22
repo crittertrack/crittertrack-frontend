@@ -2,7 +2,7 @@
 import React, { useState, useEffect, useCallback, useRef, useMemo } from 'react';
 import { useParams, useNavigate, useLocation, Routes, Route, Link as RouterLink } from 'react-router-dom';
 import axios from 'axios';
-import { LogOut, Cat, UserPlus, LogIn, ChevronLeft, ChevronUp, ChevronDown, Trash2, Edit, Save, PlusCircle, Plus, ArrowLeft, Loader2, RefreshCw, User, Users, ClipboardList, BookOpen, Settings, Mail, Globe, Bean, Milk, Search, X, Mars, Venus, Eye, EyeOff, Heart, HeartOff, HeartHandshake, Bell, XCircle, CheckCircle, Download, FileText, Link, AlertCircle, DollarSign, Archive, ArrowLeftRight, RotateCcw, Info, Hourglass, MessageSquare, Ban, Flag, Scissors, VenusAndMars, Circle, Shield, Lock, AlertTriangle, ShoppingBag, Check, Star, Moon, MoonStar, Calculator, Network, LayoutGrid, Home, Utensils, Wrench, Activity } from 'lucide-react';
+import { LogOut, Cat, UserPlus, LogIn, ChevronLeft, ChevronUp, ChevronDown, Trash2, Edit, Save, PlusCircle, Plus, ArrowLeft, Loader2, RefreshCw, User, Users, ClipboardList, BookOpen, Settings, Mail, Globe, Bean, Milk, Search, X, Mars, Venus, Eye, EyeOff, Heart, HeartOff, HeartHandshake, Bell, XCircle, CheckCircle, Download, FileText, Link, AlertCircle, DollarSign, Archive, ArrowLeftRight, RotateCcw, Info, Hourglass, MessageSquare, Ban, Flag, Scissors, VenusAndMars, Circle, Shield, Lock, AlertTriangle, ShoppingBag, Check, Star, Moon, MoonStar, Calculator, Network, LayoutGrid, Home, Utensils, Wrench, Activity, ScrollText } from 'lucide-react';
 import jsPDF from 'jspdf';
 import html2canvas from 'html2canvas';
 import 'flag-icons/css/flag-icons.min.css';
@@ -144,6 +144,70 @@ const formatDateDisplay = (dateString) => {
     } catch (e) {
         return dateString; // Return as-is if parsing fails
     }
+};
+
+// Formats a date/ISO string as a relative time phrase (e.g. "2 hours ago")
+const formatTimeAgo = (dateStr) => {
+    if (!dateStr) return '';
+    const now = new Date();
+    const then = new Date(dateStr);
+    if (isNaN(then.getTime())) return '';
+    const diffMs = now - then;
+    const diffSec = Math.floor(diffMs / 1000);
+    if (diffSec < 60) return 'just now';
+    const diffMin = Math.floor(diffSec / 60);
+    if (diffMin < 60) return `${diffMin}m ago`;
+    const diffHr = Math.floor(diffMin / 60);
+    if (diffHr < 24) return `${diffHr}h ago`;
+    const diffDays = Math.floor(diffHr / 24);
+    if (diffDays < 30) return `${diffDays}d ago`;
+    const diffMo = Math.floor(diffDays / 30);
+    if (diffMo < 12) return `${diffMo}mo ago`;
+    return `${Math.floor(diffMo / 12)}y ago`;
+};
+
+// Maps an activity action code to a human-readable label
+const getActionLabel = (action) => {
+    const labels = {
+        login: 'Logged in',
+        logout: 'Logged out',
+        password_change: 'Changed password',
+        profile_update: 'Updated profile',
+        profile_image_change: 'Changed profile photo',
+        privacy_settings_change: 'Updated privacy settings',
+        animal_create: 'Added a new animal',
+        animal_update: 'Updated animal',
+        animal_delete: 'Deleted animal',
+        animal_image_upload: 'Uploaded animal photo',
+        animal_image_delete: 'Deleted animal photo',
+        animal_visibility_change: 'Changed animal visibility',
+        animal_transfer_initiate: 'Initiated animal transfer',
+        animal_transfer_accept: 'Accepted animal transfer',
+        animal_transfer_reject: 'Rejected animal transfer',
+        litter_create: 'Recorded a new litter',
+        litter_update: 'Updated litter',
+        litter_delete: 'Deleted litter',
+        message_send: 'Sent a message',
+        message_delete: 'Deleted a message',
+        report_submit: 'Submitted a report',
+        transaction_create: 'Added a budget transaction',
+        transaction_delete: 'Deleted a budget transaction',
+    };
+    return labels[action] || action?.replace(/_/g, ' ') || 'Unknown action';
+};
+
+// Maps an activity action code to a Tailwind bg color class for indicator dots
+const getActionColor = (action) => {
+    if (!action) return 'bg-gray-300';
+    if (action.startsWith('animal_')) return 'bg-accent';
+    if (action.startsWith('litter_')) return 'bg-purple-400';
+    if (action.startsWith('litter_')) return 'bg-purple-400';
+    if (action.startsWith('transaction_')) return 'bg-emerald-400';
+    if (action.startsWith('message_')) return 'bg-blue-400';
+    if (action === 'login' || action === 'logout') return 'bg-gray-400';
+    if (action.startsWith('profile_') || action.startsWith('privacy_')) return 'bg-yellow-400';
+    if (action === 'report_submit') return 'bg-red-400';
+    return 'bg-gray-300';
 };
 
 const ModalMessage = ({ title, message, onClose }) => (
@@ -15368,7 +15432,11 @@ const AnimalList = ({ authToken, showModalMessage, onEditAnimal, onViewAnimal, f
     const [collapsedMgmtSections, setCollapsedMgmtSections] = useState({}); // { sectionKey: bool }
     const [collapsedMgmtGroups, setCollapsedMgmtGroups] = useState({}); // { groupKey: bool }
 
-    // Enclosure management state
+    // Activity Log state (used by Logs section in Management View)
+    const [activityLogs, setActivityLogs] = useState([]);
+    const [logsLoading, setLogsLoading] = useState(false);
+    const [logsPagination, setLogsPagination] = useState({ page: 1, totalPages: 1, total: 0 });
+    const [logsLoaded, setLogsLoaded] = useState(false);
     const [enclosures, setEnclosures] = useState([]);
     const [enclosureFormVisible, setEnclosureFormVisible] = useState(false);
     const [enclosureFormData, setEnclosureFormData] = useState({ name: '', enclosureType: '', size: '', notes: '', cleaningTasks: [] });
@@ -15593,7 +15661,35 @@ const AnimalList = ({ authToken, showModalMessage, onEditAnimal, onViewAnimal, f
     useEffect(() => { fetchAllSpecies(); }, [fetchAllSpecies]);
     useEffect(() => { fetchAllAnimals(); }, [fetchAllAnimals]);
 
-    // Fetch user's enclosures
+    // Fetch the current user's activity log (lazy — only when management view opens)
+    const fetchActivityLogs = useCallback(async (page = 1) => {
+        if (!authToken) return;
+        setLogsLoading(true);
+        try {
+            const res = await axios.get(`${API_BASE_URL}/activity-logs?page=${page}&limit=30`, {
+                headers: { Authorization: `Bearer ${authToken}` }
+            });
+            if (page === 1) {
+                setActivityLogs(res.data.logs || []);
+            } else {
+                setActivityLogs(prev => [...prev, ...(res.data.logs || [])]);
+            }
+            setLogsPagination(res.data);
+            setLogsLoaded(true);
+        } catch (err) {
+            console.error('[fetchActivityLogs]', err);
+        } finally {
+            setLogsLoading(false);
+        }
+    }, [authToken, API_BASE_URL]);
+
+    // Auto-fetch logs when the user first switches to management view
+    useEffect(() => {
+        if (animalView === 'management' && !logsLoaded && !logsLoading) {
+            fetchActivityLogs(1);
+        }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, [animalView]);
     const fetchEnclosures = useCallback(async () => {
         try {
             const res = await axios.get(`${API_BASE_URL}/enclosures`, {
@@ -16905,6 +17001,66 @@ const AnimalList = ({ authToken, showModalMessage, onEditAnimal, onViewAnimal, f
                                     )}
                                 </>
                             }
+                        </div>
+                    )}
+                </div>
+
+                {/* -- 6. ACTIVITY LOG ---------------------------------------- */}
+                <div className="border border-gray-200 rounded-xl overflow-hidden shadow-sm">
+                    <SectionHeader sectionKey="logs"
+                        icon={<ScrollText size={18} className="text-indigo-600" />}
+                        title="Activity Log" count={logsPagination.total || 0} bgClass="bg-indigo-50" />
+                    {!collapsedMgmtSections['logs'] && (
+                        <div className="p-3">
+                            {logsLoading && activityLogs.length === 0 ? (
+                                <div className="flex items-center justify-center py-6 text-gray-400 gap-2">
+                                    <Loader2 size={16} className="animate-spin" />
+                                    <span className="text-sm">Loading activity log...</span>
+                                </div>
+                            ) : activityLogs.length === 0 ? (
+                                <div className="text-sm text-gray-400 text-center py-4">No activity recorded yet.</div>
+                            ) : (
+                                <div className="space-y-1">
+                                    {activityLogs.map((log) => (
+                                        <div key={log._id} className="flex items-start gap-3 py-2 border-b border-gray-100 last:border-0">
+                                            <span className={`mt-1.5 w-2 h-2 rounded-full flex-shrink-0 ${getActionColor(log.action)}`} />
+                                            <div className="flex-1 min-w-0">
+                                                <div className="text-sm text-gray-800">
+                                                    {getActionLabel(log.action)}
+                                                    {log.details?.name && <span className="text-gray-500"> — <span className="font-medium">{log.details.name}</span></span>}
+                                                    {log.details?.species && !log.details?.name && <span className="text-gray-500"> ({log.details.species})</span>}
+                                                </div>
+                                                {log.targetId_public && (
+                                                    <div className="text-xs text-gray-400">{log.targetId_public}</div>
+                                                )}
+                                            </div>
+                                            <div className="text-xs text-gray-400 flex-shrink-0 text-right">
+                                                <div>{formatTimeAgo(log.createdAt)}</div>
+                                                {log.success === false && <div className="text-red-400 font-medium">failed</div>}
+                                            </div>
+                                        </div>
+                                    ))}
+                                    {logsPagination.page < logsPagination.totalPages && (
+                                        <button
+                                            onClick={() => fetchActivityLogs(logsPagination.page + 1)}
+                                            disabled={logsLoading}
+                                            className="w-full mt-2 py-2 text-xs text-indigo-600 hover:text-indigo-800 hover:bg-indigo-50 rounded-lg transition flex items-center justify-center gap-1 disabled:opacity-50"
+                                        >
+                                            {logsLoading ? <><Loader2 size={12} className="animate-spin" /> Loading...</> : 'Load more'}
+                                        </button>
+                                    )}
+                                </div>
+                            )}
+                            {activityLogs.length > 0 && (
+                                <button
+                                    onClick={() => { setLogsLoaded(false); fetchActivityLogs(1); }}
+                                    disabled={logsLoading}
+                                    className="mt-2 flex items-center gap-1 text-xs text-gray-400 hover:text-gray-600 transition disabled:opacity-50"
+                                >
+                                    <RefreshCw size={11} />
+                                    Refresh
+                                </button>
+                            )}
                         </div>
                     )}
                 </div>
