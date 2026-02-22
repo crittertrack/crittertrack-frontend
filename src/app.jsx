@@ -21408,7 +21408,7 @@ const App = () => {
                 />
             )}
             
-            <header className="w-full bg-white p-3 sm:p-4 rounded-xl shadow-lg mb-6 max-w-5xl overflow-hidden">
+            <header className="w-full bg-white p-3 sm:p-4 rounded-xl shadow-lg mb-6 max-w-5xl overflow-visible">
                 {/* Desktop: Single row layout */}
                 <div className="hidden md:flex justify-between items-center">
                     <CustomAppLogo size="w-10 h-10" />
@@ -21523,7 +21523,7 @@ const App = () => {
                 </div>
 
                 {/* Mobile: Three row layout */}
-                <div className="md:hidden overflow-x-hidden">
+                <div className="md:hidden overflow-x-visible">
                     {/* First row: Logo and action buttons */}
                     <div className="flex justify-between items-center mb-3 gap-2">
                         <CustomAppLogo size="w-8 h-8" className="flex-shrink-0" />
