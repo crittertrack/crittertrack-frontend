@@ -2,7 +2,7 @@
 import React, { useState, useEffect, useCallback, useRef, useMemo } from 'react';
 import { useParams, useNavigate, useLocation, Routes, Route, Link as RouterLink } from 'react-router-dom';
 import axios from 'axios';
-import { LogOut, Cat, UserPlus, LogIn, ChevronLeft, ChevronUp, ChevronDown, Trash2, Edit, Save, PlusCircle, Plus, ArrowLeft, Loader2, RefreshCw, User, Users, ClipboardList, BookOpen, Settings, Mail, Globe, Bean, Milk, Search, X, Mars, Venus, Eye, EyeOff, Heart, HeartOff, HeartHandshake, Bell, XCircle, CheckCircle, Download, FileText, Link, AlertCircle, DollarSign, Archive, ArrowLeftRight, RotateCcw, Info, Hourglass, MessageSquare, Ban, Flag, Scissors, VenusAndMars, Circle, Shield, Lock, AlertTriangle, ShoppingBag, Check, Star, Moon, MoonStar, Calculator, Network } from 'lucide-react';
+import { LogOut, Cat, UserPlus, LogIn, ChevronLeft, ChevronUp, ChevronDown, Trash2, Edit, Save, PlusCircle, Plus, ArrowLeft, Loader2, RefreshCw, User, Users, ClipboardList, BookOpen, Settings, Mail, Globe, Bean, Milk, Search, X, Mars, Venus, Eye, EyeOff, Heart, HeartOff, HeartHandshake, Bell, XCircle, CheckCircle, Download, FileText, Link, AlertCircle, DollarSign, Archive, ArrowLeftRight, RotateCcw, Info, Hourglass, MessageSquare, Ban, Flag, Scissors, VenusAndMars, Circle, Shield, Lock, AlertTriangle, ShoppingBag, Check, Star, Moon, MoonStar, Calculator, Network, LayoutGrid, Home, Utensils, Wrench, Activity } from 'lucide-react';
 import jsPDF from 'jspdf';
 import html2canvas from 'html2canvas';
 import 'flag-icons/css/flag-icons.min.css';
@@ -8747,6 +8747,11 @@ const AnimalForm = ({
             isPregnant: animalToEdit.isPregnant || false,
             isNursing: animalToEdit.isNursing || false,
             isInMating: animalToEdit.isInMating || false,
+            isQuarantine: animalToEdit.isQuarantine || false,
+            lastFedDate: animalToEdit.lastFedDate ? new Date(animalToEdit.lastFedDate).toISOString().split('T')[0] : '',
+            feedingFrequencyDays: animalToEdit.feedingFrequencyDays || '',
+            lastMaintenanceDate: animalToEdit.lastMaintenanceDate ? new Date(animalToEdit.lastMaintenanceDate).toISOString().split('T')[0] : '',
+            maintenanceFrequencyDays: animalToEdit.maintenanceFrequencyDays || '',
             breedingRole: animalToEdit.breedingRole || 'both',
             isOwned: animalToEdit.isOwned ?? true,
             isDisplay: animalToEdit.isDisplay ?? false,
@@ -8914,6 +8919,11 @@ const AnimalForm = ({
             isPregnant: false,
             isNursing: false,
             isInMating: false,
+            isQuarantine: false,
+            lastFedDate: '',
+            feedingFrequencyDays: '',
+            lastMaintenanceDate: '',
+            maintenanceFrequencyDays: '',
             breedingRole: 'both',
             isOwned: true,
             isDisplay: true,
@@ -12086,8 +12096,19 @@ const AnimalForm = ({
                         {/* Active Medical Records */}
                         <div className="bg-gray-50 p-4 rounded-lg border border-gray-200 space-y-4" data-tutorial-target="medical-history-section">
                             <h3 className="text-lg font-semibold text-gray-700 mb-4">Active Medical Records</h3>
+                            {/* Quarantine toggle */}
+                            <label className="flex items-center gap-3 cursor-pointer p-3 border rounded-lg bg-white hover:bg-orange-50 transition">
+                                <input
+                                    type="checkbox"
+                                    name="isQuarantine"
+                                    checked={formData.isQuarantine || false}
+                                    onChange={handleChange}
+                                    className="form-checkbox h-5 w-5 text-orange-500 rounded focus:ring-orange-400"
+                                />
+                                <span className="text-sm font-medium text-gray-700">In Quarantine / Isolation</span>
+                            </label>
                             <div className="space-y-4">
-                                {/* Medical Conditions */}
+                                {/* Medical Conditions */}}
                                 <div className="space-y-3">
                                     <h4 className="text-sm font-semibold text-gray-700">Medical Conditions</h4>
                                     <div className="bg-white p-3 rounded-lg border border-gray-200 space-y-3">
@@ -12371,6 +12392,21 @@ const AnimalForm = ({
                                         placeholder="e.g., Morning and evening, free feeding" />
                                 </div>
                                 )}
+
+                                {/* Feeding tracking — powers Management view */}
+                                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                    <div>
+                                        <label className="block text-sm font-medium text-gray-700 mb-2">Last Fed Date</label>
+                                        <input type="date" name="lastFedDate" value={formData.lastFedDate || ''} onChange={handleChange}
+                                            className="block w-full p-2 border border-gray-300 rounded-md shadow-sm focus:ring-primary focus:border-primary" />
+                                    </div>
+                                    <div>
+                                        <label className="block text-sm font-medium text-gray-700 mb-2">Feeding Every (days)</label>
+                                        <input type="number" name="feedingFrequencyDays" value={formData.feedingFrequencyDays || ''} onChange={handleChange}
+                                            min="1" className="block w-full p-2 border border-gray-300 rounded-md shadow-sm focus:ring-primary focus:border-primary"
+                                            placeholder="e.g. 1 = daily, 3 = every 3 days" />
+                                    </div>
+                                </div>
                                 
                                 {!isFieldHidden('supplements') && (
                                 <div>
@@ -12395,6 +12431,21 @@ const AnimalForm = ({
                                             placeholder="e.g., Wire cage, glass aquarium, multi-level enclosure" />
                                     </div>
                                 )}
+
+                                {/* Maintenance tracking — powers Management view */}
+                                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                    <div>
+                                        <label className="block text-sm font-medium text-gray-700 mb-2">Last Maintenance Date</label>
+                                        <input type="date" name="lastMaintenanceDate" value={formData.lastMaintenanceDate || ''} onChange={handleChange}
+                                            className="block w-full p-2 border border-gray-300 rounded-md shadow-sm focus:ring-primary focus:border-primary" />
+                                    </div>
+                                    <div>
+                                        <label className="block text-sm font-medium text-gray-700 mb-2">Maintenance Every (days)</label>
+                                        <input type="number" name="maintenanceFrequencyDays" value={formData.maintenanceFrequencyDays || ''} onChange={handleChange}
+                                            min="1" className="block w-full p-2 border border-gray-300 rounded-md shadow-sm focus:ring-primary focus:border-primary"
+                                            placeholder="e.g. 7 = weekly, 30 = monthly" />
+                                    </div>
+                                </div>
                                 
                                 {!isFieldHidden('bedding') && (
                                     <div>
@@ -15159,6 +15210,9 @@ const AnimalList = ({ authToken, showModalMessage, onEditAnimal, onViewAnimal, f
     const [selectedAnimals, setSelectedAnimals] = useState({}); // { species: [id1, id2, ...] }
     const [collapsedSpecies, setCollapsedSpecies] = useState({}); // { species: true/false } - for mobile collapse
     const [userSpeciesOrder, setUserSpeciesOrder] = useState([]); // User's custom species order
+    const [animalView, setAnimalView] = useState('list'); // 'list' | 'management'
+    const [collapsedMgmtSections, setCollapsedMgmtSections] = useState({}); // { sectionKey: bool }
+    const [collapsedMgmtGroups, setCollapsedMgmtGroups] = useState({}); // { groupKey: bool }
     
     // Save filters to localStorage whenever they change
     useEffect(() => {
@@ -15917,6 +15971,386 @@ const AnimalList = ({ authToken, showModalMessage, onEditAnimal, onViewAnimal, f
         );
     };
 
+    // ── Management View ──────────────────────────────────────────────────────────
+    const renderManagementView = () => {
+        const today = new Date();
+        today.setHours(0, 0, 0, 0);
+
+        const daysSince = (dateStr) => {
+            if (!dateStr) return null;
+            const d = new Date(dateStr);
+            d.setHours(0, 0, 0, 0);
+            return Math.floor((today - d) / 86400000);
+        };
+
+        const isDue = (lastDate, freqDays) => {
+            if (!freqDays) return false;
+            if (!lastDate) return true;
+            const ds = daysSince(lastDate);
+            return ds !== null && ds >= Number(freqDays);
+        };
+
+        const toggleSection = (key) => setCollapsedMgmtSections(prev => ({ ...prev, [key]: !prev[key] }));
+        const toggleGroup = (key) => setCollapsedMgmtGroups(prev => ({ ...prev, [key]: !prev[key] }));
+
+        const handleMarkFed = async (e, animal) => {
+            e.stopPropagation();
+            try {
+                await axios.put(`${API_BASE_URL}/animals/${animal.id_public}`,
+                    { lastFedDate: new Date().toISOString() },
+                    { headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${authToken}` } });
+                fetchAnimals();
+            } catch (err) { console.error('Mark fed failed:', err); }
+        };
+
+        const handleMarkMaintDone = async (e, animal) => {
+            e.stopPropagation();
+            try {
+                await axios.put(`${API_BASE_URL}/animals/${animal.id_public}`,
+                    { lastMaintenanceDate: new Date().toISOString() },
+                    { headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${authToken}` } });
+                fetchAnimals();
+            } catch (err) { console.error('Mark maintenance failed:', err); }
+        };
+
+        const parseArrayField = (val) => {
+            if (!val) return [];
+            if (Array.isArray(val)) return val;
+            try { return JSON.parse(val); } catch { return [{ name: String(val) }]; }
+        };
+
+        // ── Section data ─────────────────────────────────────────────────────────
+        // 1. Enclosures
+        const enclosureMap = {};
+        animals.forEach(a => {
+            const key = (a.housingType?.trim()) || 'Unassigned';
+            if (!enclosureMap[key]) enclosureMap[key] = [];
+            enclosureMap[key].push(a);
+        });
+        const enclosureGroups = Object.entries(enclosureMap).sort(([a], [b]) =>
+            a === 'Unassigned' ? 1 : b === 'Unassigned' ? -1 : a.localeCompare(b));
+
+        // 2. Reproduction
+        const matingList = animals.filter(a => a.isInMating);
+        const pregnantList = animals.filter(a => a.isPregnant && !a.isInMating);
+        const nursingList = animals.filter(a => a.isNursing);
+        const reproTotal = animals.filter(a => a.isInMating || a.isPregnant || a.isNursing).length;
+
+        // 3. Feeding
+        const feedDue = animals.filter(a => isDue(a.lastFedDate, a.feedingFrequencyDays));
+        const feedOk = animals.filter(a => a.feedingFrequencyDays && !isDue(a.lastFedDate, a.feedingFrequencyDays));
+        const feedNone = animals.filter(a => !a.feedingFrequencyDays);
+
+        // 4. Maintenance — group by enclosure, flag if due
+        const maintMap = {};
+        animals.forEach(a => {
+            const key = (a.housingType?.trim()) || 'Unassigned';
+            if (!maintMap[key]) maintMap[key] = { animals: [], anyDue: false };
+            maintMap[key].animals.push(a);
+            if (isDue(a.lastMaintenanceDate, a.maintenanceFrequencyDays)) maintMap[key].anyDue = true;
+        });
+        const maintDueGroups = Object.entries(maintMap).filter(([, g]) => g.anyDue)
+            .sort(([a], [b]) => a === 'Unassigned' ? 1 : b === 'Unassigned' ? -1 : a.localeCompare(b));
+        const maintOkGroups = Object.entries(maintMap).filter(([, g]) => !g.anyDue)
+            .sort(([a], [b]) => a === 'Unassigned' ? 1 : b === 'Unassigned' ? -1 : a.localeCompare(b));
+        const maintDueCount = maintDueGroups.reduce((acc, [, g]) =>
+            acc + g.animals.filter(a => isDue(a.lastMaintenanceDate, a.maintenanceFrequencyDays)).length, 0);
+
+        // 5. Medical
+        const quarantineList = animals.filter(a => a.isQuarantine);
+        const treatmentList = animals.filter(a => !a.isQuarantine && (
+            parseArrayField(a.medicalConditions).length > 0 || parseArrayField(a.medications).length > 0
+        ));
+
+        // ── Shared card + group components ───────────────────────────────────────
+        const MgmtAnimalCard = ({ animal, extras }) => (
+            <div
+                className="flex items-center justify-between bg-white border border-gray-200 rounded-lg px-3 py-2 hover:bg-gray-50 cursor-pointer gap-2"
+                onClick={() => onViewAnimal && onViewAnimal(animal)}
+            >
+                <div className="flex items-center gap-2 min-w-0">
+                    {animal.imageUrl ? (
+                        <img src={animal.imageUrl} alt={animal.name} className="w-8 h-8 rounded-full object-cover flex-shrink-0" />
+                    ) : (
+                        <div className="w-8 h-8 rounded-full bg-gray-200 flex items-center justify-center flex-shrink-0">
+                            <Cat size={14} className="text-gray-400" />
+                        </div>
+                    )}
+                    <div className="min-w-0">
+                        <div className="font-semibold text-sm text-gray-800 truncate">{animal.name || 'Unnamed'}</div>
+                        <div className="text-xs text-gray-500 truncate">
+                            {getSpeciesDisplayName(animal.species)}{animal.gender ? ` · ${animal.gender}` : ''}
+                            {animal.dateOfBirth ? ` · ${formatDateShort(animal.dateOfBirth)}` : ''}
+                        </div>
+                    </div>
+                </div>
+                {extras}
+            </div>
+        );
+
+        const MgmtGroup = ({ groupKey, label, groupAnimals, headerClass, renderExtras }) => {
+            const isGrpCollapsed = collapsedMgmtGroups[groupKey] || false;
+            return (
+                <div className="border border-gray-200 rounded-lg overflow-hidden">
+                    <div
+                        className={`relative flex items-center justify-between ${headerClass} px-3 py-2 cursor-pointer`}
+                        onClick={() => toggleGroup(groupKey)}
+                    >
+                        <div className="absolute left-1/2 -translate-x-1/2 pointer-events-none">
+                            {isGrpCollapsed
+                                ? <ChevronDown className="w-3.5 h-3.5 text-gray-400" />
+                                : <ChevronUp className="w-3.5 h-3.5 text-gray-400" />}
+                        </div>
+                        <span className="font-medium text-sm text-gray-800">{label}</span>
+                        <span className="text-xs text-gray-500 bg-white/70 px-2 py-0.5 rounded-full">{groupAnimals.length}</span>
+                    </div>
+                    {!isGrpCollapsed && (
+                        <div className="p-2 space-y-1.5 bg-white">
+                            {groupAnimals.length === 0
+                                ? <div className="text-sm text-gray-400 text-center py-2">None</div>
+                                : groupAnimals.map(a => (
+                                    <MgmtAnimalCard key={a._id || a.id_public} animal={a} extras={renderExtras ? renderExtras(a) : null} />
+                                ))
+                            }
+                        </div>
+                    )}
+                </div>
+            );
+        };
+
+        const SectionHeader = ({ sectionKey, icon, title, count, bgClass }) => {
+            const collapsed = collapsedMgmtSections[sectionKey] || false;
+            return (
+                <div
+                    className={`relative flex items-center justify-between ${bgClass} px-3 py-2.5 sm:px-4 sm:py-3 border-b cursor-pointer`}
+                    onClick={() => toggleSection(sectionKey)}
+                >
+                    <div className="absolute left-1/2 -translate-x-1/2 pointer-events-none">
+                        {collapsed
+                            ? <ChevronDown className="w-4 h-4 text-gray-400" />
+                            : <ChevronUp className="w-4 h-4 text-gray-400" />}
+                    </div>
+                    <div className="flex items-center gap-2">
+                        {icon}
+                        <span className="font-semibold text-gray-800">{title}</span>
+                        <span className="text-xs text-gray-500 bg-white/70 px-2 py-0.5 rounded-full">{count}</span>
+                    </div>
+                    <div />
+                </div>
+            );
+        };
+
+        return (
+            <div className="space-y-3 sm:space-y-4 mt-4">
+
+                {/* ── 1. ENCLOSURES ────────────────────────────────────────── */}
+                <div className="border border-gray-200 rounded-xl overflow-hidden shadow-sm">
+                    <SectionHeader sectionKey="enclosures"
+                        icon={<Home size={18} className="text-blue-600" />}
+                        title="Enclosures" count={animals.length} bgClass="bg-blue-50" />
+                    {!collapsedMgmtSections['enclosures'] && (
+                        <div className="p-3 space-y-2">
+                            {enclosureGroups.length === 0
+                                ? <div className="text-sm text-gray-400 text-center py-4">No housing type set on any animal.</div>
+                                : enclosureGroups.map(([name, group]) => (
+                                    <MgmtGroup key={name} groupKey={`enc_${name}`} label={name}
+                                        groupAnimals={group} headerClass="bg-blue-50/60"
+                                        renderExtras={(a) => <div className="text-xs text-gray-400 shrink-0">{a.status || ''}</div>}
+                                    />
+                                ))}
+                        </div>
+                    )}
+                </div>
+
+                {/* ── 2. REPRODUCTION ──────────────────────────────────────── */}
+                <div className="border border-gray-200 rounded-xl overflow-hidden shadow-sm">
+                    <SectionHeader sectionKey="reproduction"
+                        icon={<Bean size={18} className="text-pink-600" />}
+                        title="Reproduction" count={reproTotal} bgClass="bg-pink-50" />
+                    {!collapsedMgmtSections['reproduction'] && (
+                        <div className="p-3 space-y-2">
+                            {reproTotal === 0
+                                ? <div className="text-sm text-gray-400 text-center py-4">No animals currently in a reproductive state.</div>
+                                : <>
+                                    {matingList.length > 0 && (
+                                        <MgmtGroup groupKey="repro_mating" label="In Mating"
+                                            groupAnimals={matingList} headerClass="bg-purple-50"
+                                            renderExtras={(a) => a.matingDate
+                                                ? <div className="text-xs text-gray-400 shrink-0">Since {formatDateShort(a.matingDate)}</div>
+                                                : null} />
+                                    )}
+                                    {pregnantList.length > 0 && (
+                                        <MgmtGroup groupKey="repro_pregnant" label="Pregnant / Gravid"
+                                            groupAnimals={pregnantList} headerClass="bg-pink-50"
+                                            renderExtras={(a) => a.expectedDueDate
+                                                ? <div className="text-xs text-gray-400 shrink-0">Due {formatDateShort(a.expectedDueDate)}</div>
+                                                : null} />
+                                    )}
+                                    {nursingList.length > 0 && (
+                                        <MgmtGroup groupKey="repro_nursing" label="Nursing / Brooding"
+                                            groupAnimals={nursingList} headerClass="bg-blue-50"
+                                            renderExtras={() => null} />
+                                    )}
+                                </>
+                            }
+                        </div>
+                    )}
+                </div>
+
+                {/* ── 3. FEEDING SCHEDULE ──────────────────────────────────── */}
+                <div className="border border-gray-200 rounded-xl overflow-hidden shadow-sm">
+                    <SectionHeader sectionKey="feeding"
+                        icon={<Utensils size={18} className="text-green-600" />}
+                        title="Feeding Schedule" count={animals.length} bgClass="bg-green-50" />
+                    {!collapsedMgmtSections['feeding'] && (
+                        <div className="p-3 space-y-2">
+                            {feedDue.length > 0 && (
+                                <MgmtGroup groupKey="feed_due" label="Due Today / Overdue"
+                                    groupAnimals={feedDue} headerClass="bg-red-50"
+                                    renderExtras={(a) => (
+                                        <div className="flex items-center gap-2 shrink-0" onClick={e => e.stopPropagation()}>
+                                            <div className="text-xs text-gray-400 text-right whitespace-nowrap hidden sm:block">
+                                                {a.dietType && <div>{a.dietType}</div>}
+                                                {a.lastFedDate
+                                                    ? <div>Last: {formatDateShort(a.lastFedDate)}</div>
+                                                    : <div className="text-orange-500">Never fed</div>}
+                                                {a.feedingFrequencyDays && <div>Every {a.feedingFrequencyDays}d</div>}
+                                            </div>
+                                            <button onClick={(e) => handleMarkFed(e, a)}
+                                                className="bg-green-500 hover:bg-green-600 text-white text-xs font-medium px-2 py-1 rounded-lg whitespace-nowrap">
+                                                ✓ Fed
+                                            </button>
+                                        </div>
+                                    )} />
+                            )}
+                            {feedOk.length > 0 && (
+                                <MgmtGroup groupKey="feed_ok" label="Up to Date"
+                                    groupAnimals={feedOk} headerClass="bg-green-50"
+                                    renderExtras={(a) => (
+                                        <div className="text-xs text-gray-400 text-right whitespace-nowrap shrink-0">
+                                            {a.lastFedDate && <div>Last: {formatDateShort(a.lastFedDate)}</div>}
+                                            {a.feedingFrequencyDays && <div>Every {a.feedingFrequencyDays}d</div>}
+                                        </div>
+                                    )} />
+                            )}
+                            {feedNone.length > 0 && (
+                                <MgmtGroup groupKey="feed_none" label="No Schedule Set"
+                                    groupAnimals={feedNone} headerClass="bg-gray-100"
+                                    renderExtras={(a) => a.dietType
+                                        ? <div className="text-xs text-gray-400 shrink-0 truncate max-w-[100px]">{a.dietType}</div>
+                                        : null} />
+                            )}
+                            {feedDue.length === 0 && feedOk.length === 0 && feedNone.length === 0 && (
+                                <div className="text-sm text-gray-400 text-center py-4">No animals.</div>
+                            )}
+                        </div>
+                    )}
+                </div>
+
+                {/* ── 4. MAINTENANCE ───────────────────────────────────────── */}
+                <div className="border border-gray-200 rounded-xl overflow-hidden shadow-sm">
+                    <SectionHeader sectionKey="maintenance"
+                        icon={<Wrench size={18} className="text-amber-600" />}
+                        title="Maintenance" count={`${maintDueCount} due today`} bgClass="bg-amber-50" />
+                    {!collapsedMgmtSections['maintenance'] && (
+                        <div className="p-3 space-y-2">
+                            {maintDueGroups.length === 0 && maintOkGroups.length === 0 ? (
+                                <div className="text-sm text-gray-400 text-center py-4">No maintenance schedules set. Edit animals to add frequency.</div>
+                            ) : (
+                                <>
+                                    {maintDueGroups.length > 0 && (
+                                        <div className="space-y-1.5">
+                                            <div className="text-xs font-semibold text-red-600 px-1 pb-0.5">Due Today / Overdue</div>
+                                            {maintDueGroups.map(([encName, g]) => (
+                                                <MgmtGroup key={`maint_due_${encName}`} groupKey={`maint_due_${encName}`}
+                                                    label={encName}
+                                                    groupAnimals={g.animals.filter(a => isDue(a.lastMaintenanceDate, a.maintenanceFrequencyDays))}
+                                                    headerClass="bg-red-50"
+                                                    renderExtras={(a) => (
+                                                        <div className="flex items-center gap-2 shrink-0" onClick={e => e.stopPropagation()}>
+                                                            <div className="text-xs text-gray-400 text-right whitespace-nowrap hidden sm:block">
+                                                                {a.lastMaintenanceDate
+                                                                    ? <div>Last: {formatDateShort(a.lastMaintenanceDate)}</div>
+                                                                    : <div className="text-orange-500">Never</div>}
+                                                                {a.maintenanceFrequencyDays && <div>Every {a.maintenanceFrequencyDays}d</div>}
+                                                            </div>
+                                                            <button onClick={(e) => handleMarkMaintDone(e, a)}
+                                                                className="bg-amber-500 hover:bg-amber-600 text-white text-xs font-medium px-2 py-1 rounded-lg whitespace-nowrap">
+                                                                ✓ Done
+                                                            </button>
+                                                        </div>
+                                                    )} />
+                                            ))}
+                                        </div>
+                                    )}
+                                    {maintOkGroups.length > 0 && (
+                                        <div className="space-y-1.5">
+                                            <div className="text-xs font-semibold text-green-600 px-1 pb-0.5">Up to Date</div>
+                                            {maintOkGroups.map(([encName, g]) => (
+                                                <MgmtGroup key={`maint_ok_${encName}`} groupKey={`maint_ok_${encName}`}
+                                                    label={encName} groupAnimals={g.animals}
+                                                    headerClass="bg-green-50/60"
+                                                    renderExtras={(a) => (
+                                                        <div className="text-xs text-gray-400 text-right shrink-0 whitespace-nowrap">
+                                                            {a.lastMaintenanceDate
+                                                                ? <div>Last: {formatDateShort(a.lastMaintenanceDate)}</div>
+                                                                : <div>—</div>}
+                                                            {a.maintenanceFrequencyDays && <div>Every {a.maintenanceFrequencyDays}d</div>}
+                                                        </div>
+                                                    )} />
+                                            ))}
+                                        </div>
+                                    )}
+                                </>
+                            )}
+                        </div>
+                    )}
+                </div>
+
+                {/* ── 5. MEDICAL / QUARANTINE ──────────────────────────────── */}
+                <div className="border border-gray-200 rounded-xl overflow-hidden shadow-sm">
+                    <SectionHeader sectionKey="medical"
+                        icon={<Activity size={18} className="text-red-600" />}
+                        title="Medical / Quarantine" count={quarantineList.length + treatmentList.length} bgClass="bg-red-50" />
+                    {!collapsedMgmtSections['medical'] && (
+                        <div className="p-3 space-y-2">
+                            {quarantineList.length === 0 && treatmentList.length === 0
+                                ? <div className="text-sm text-gray-400 text-center py-4">No animals in quarantine or under treatment.</div>
+                                : <>
+                                    {quarantineList.length > 0 && (
+                                        <MgmtGroup groupKey="med_quarantine" label="Quarantine / Isolation"
+                                            groupAnimals={quarantineList} headerClass="bg-orange-50"
+                                            renderExtras={(a) => {
+                                                const conds = parseArrayField(a.medicalConditions);
+                                                return conds.length > 0
+                                                    ? <div className="text-xs text-orange-600 shrink-0 max-w-[120px] truncate">{conds.map(c => c.name || c).join(', ')}</div>
+                                                    : <span className="text-xs text-orange-400 shrink-0">Quarantine</span>;
+                                            }} />
+                                    )}
+                                    {treatmentList.length > 0 && (
+                                        <MgmtGroup groupKey="med_treatment" label="Under Treatment"
+                                            groupAnimals={treatmentList} headerClass="bg-red-50"
+                                            renderExtras={(a) => {
+                                                const conds = parseArrayField(a.medicalConditions);
+                                                const meds = parseArrayField(a.medications);
+                                                return (
+                                                    <div className="text-xs text-right shrink-0 max-w-[140px]">
+                                                        {conds.length > 0 && <div className="text-gray-500 truncate">{conds.map(c => c.name || c).join(', ')}</div>}
+                                                        {meds.length > 0 && <div className="text-blue-500 truncate">{meds.map(m => m.name || m).join(', ')}</div>}
+                                                    </div>
+                                                );
+                                            }} />
+                                    )}
+                                </>
+                            }
+                        </div>
+                    )}
+                </div>
+
+            </div>
+        );
+    };
+
     return (
         <div className="w-full max-w-5xl bg-white p-6 rounded-xl shadow-lg">
             <h2 className="text-2xl sm:text-3xl font-bold text-gray-800 mb-6 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3">
@@ -15976,6 +16410,29 @@ const AnimalList = ({ authToken, showModalMessage, onEditAnimal, onViewAnimal, f
                 </div>
             </h2>
 
+            {/* View Toggle: My Animals / Management */}
+            <div className="flex border border-gray-200 rounded-xl overflow-hidden shadow-sm mb-4">
+                <button
+                    onClick={() => setAnimalView('list')}
+                    className={`flex-1 flex items-center justify-center gap-2 py-2 px-4 text-sm font-semibold transition ${
+                        animalView === 'list' ? 'bg-primary text-black' : 'bg-white text-gray-600 hover:bg-gray-50'
+                    }`}
+                >
+                    <ClipboardList size={15} />
+                    <span>My Animals</span>
+                </button>
+                <button
+                    onClick={() => setAnimalView('management')}
+                    className={`flex-1 flex items-center justify-center gap-2 py-2 px-4 text-sm font-semibold transition ${
+                        animalView === 'management' ? 'bg-primary text-black' : 'bg-white text-gray-600 hover:bg-gray-50'
+                    }`}
+                >
+                    <LayoutGrid size={15} />
+                    <span>Management</span>
+                </button>
+            </div>
+
+            {animalView === 'list' && (
             <div className="mb-4 sm:mb-6 p-2 sm:p-4 border rounded-lg bg-gray-50 space-y-2 sm:space-y-3">
                 {/* Search and Add buttons - Stack on mobile */}
                 <div className="flex flex-col sm:flex-row gap-2 sm:gap-3">
@@ -16152,8 +16609,11 @@ const AnimalList = ({ authToken, showModalMessage, onEditAnimal, onViewAnimal, f
                     </button>
                 </div>
             </div>
+            )}
 
-            {loading ? (
+            {animalView === 'management' ? (
+                loading ? <LoadingSpinner /> : renderManagementView()
+            ) : loading ? (
                 <LoadingSpinner />
             ) : animals.length === 0 ? (
                 <div className="text-center p-8 bg-gray-50 rounded-lg">
