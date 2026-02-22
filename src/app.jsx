@@ -96,6 +96,27 @@ const getCountryName = (countryCode) => {
     return countryNames[countryCode] || countryCode;
 };
 
+const US_STATES = [
+    {code:'AL',name:'Alabama'},{code:'AK',name:'Alaska'},{code:'AZ',name:'Arizona'},{code:'AR',name:'Arkansas'},
+    {code:'CA',name:'California'},{code:'CO',name:'Colorado'},{code:'CT',name:'Connecticut'},{code:'DE',name:'Delaware'},
+    {code:'FL',name:'Florida'},{code:'GA',name:'Georgia'},{code:'HI',name:'Hawaii'},{code:'ID',name:'Idaho'},
+    {code:'IL',name:'Illinois'},{code:'IN',name:'Indiana'},{code:'IA',name:'Iowa'},{code:'KS',name:'Kansas'},
+    {code:'KY',name:'Kentucky'},{code:'LA',name:'Louisiana'},{code:'ME',name:'Maine'},{code:'MD',name:'Maryland'},
+    {code:'MA',name:'Massachusetts'},{code:'MI',name:'Michigan'},{code:'MN',name:'Minnesota'},{code:'MS',name:'Mississippi'},
+    {code:'MO',name:'Missouri'},{code:'MT',name:'Montana'},{code:'NE',name:'Nebraska'},{code:'NV',name:'Nevada'},
+    {code:'NH',name:'New Hampshire'},{code:'NJ',name:'New Jersey'},{code:'NM',name:'New Mexico'},{code:'NY',name:'New York'},
+    {code:'NC',name:'North Carolina'},{code:'ND',name:'North Dakota'},{code:'OH',name:'Ohio'},{code:'OK',name:'Oklahoma'},
+    {code:'OR',name:'Oregon'},{code:'PA',name:'Pennsylvania'},{code:'RI',name:'Rhode Island'},{code:'SC',name:'South Carolina'},
+    {code:'SD',name:'South Dakota'},{code:'TN',name:'Tennessee'},{code:'TX',name:'Texas'},{code:'UT',name:'Utah'},
+    {code:'VT',name:'Vermont'},{code:'VA',name:'Virginia'},{code:'WA',name:'Washington'},{code:'WV',name:'West Virginia'},
+    {code:'WI',name:'Wisconsin'},{code:'WY',name:'Wyoming'},{code:'DC',name:'Washington D.C.'}
+];
+const getStateName = (stateCode) => {
+    if (!stateCode) return '';
+    const found = US_STATES.find(s => s.code === stateCode);
+    return found ? found.name : stateCode;
+};
+
 // Get currency symbol from currency code
 const getCurrencySymbol = (currencyCode) => {
     const currencySymbols = {
@@ -2052,7 +2073,7 @@ const PublicProfileView = ({ profile, onBack, onViewAnimal, API_BASE_URL, onStar
                     {(freshProfile?.country || profile.country) && (
                         <p className="text-sm text-gray-600 mt-1 flex items-center gap-2">
                             <span className={`${getCountryFlag(freshProfile?.country || profile.country)} inline-block h-5 w-7 flex-shrink-0`}></span>
-                            <span>{getCountryName(freshProfile?.country || profile.country)}</span>
+                            <span>{getCountryName(freshProfile?.country || profile.country)}{(freshProfile?.country || profile.country) === 'US' && (freshProfile?.state || profile.state) ? `, ${getStateName(freshProfile?.state || profile.state)}` : ''}</span>
                         </p>
                     )}
                     
@@ -13180,6 +13201,7 @@ const ProfileEditForm = ({ userProfile, showModalMessage, onSaveSuccess, onCance
     const [allowMessages, setAllowMessages] = useState(userProfile.allowMessages === undefined ? true : !!userProfile.allowMessages);
     const [emailNotificationPreference, setEmailNotificationPreference] = useState(userProfile.emailNotificationPreference || 'none');
     const [country, setCountry] = useState(userProfile.country || '');
+    const [usState, setUsState] = useState(userProfile.state || '');
 
     // Keep allowMessages in sync if userProfile updates (e.g., after save or refetch)
     useEffect(() => {
@@ -13188,7 +13210,8 @@ const ProfileEditForm = ({ userProfile, showModalMessage, onSaveSuccess, onCance
         // Also sync email notification preference and country
         setEmailNotificationPreference(userProfile.emailNotificationPreference || 'none');
         setCountry(userProfile.country || '');
-    }, [userProfile.allowMessages, userProfile.emailNotificationPreference, userProfile.country]);
+        setUsState(userProfile.country === 'US' ? (userProfile.state || '') : '');
+    }, [userProfile.allowMessages, userProfile.emailNotificationPreference, userProfile.country, userProfile.state]);
     
     console.log('[ProfileEditForm] Initial allowMessages state:', allowMessages);
 
@@ -13254,6 +13277,7 @@ const ProfileEditForm = ({ userProfile, showModalMessage, onSaveSuccess, onCance
             allowMessages: allowMessages,
             emailNotificationPreference: emailNotificationPreference,
             country: country || null,
+            state: country === 'US' ? (usState || null) : null,
         };
         
         console.log('[PROFILE UPDATE] allowMessages being sent:', allowMessages, 'Type:', typeof allowMessages);
@@ -13464,7 +13488,7 @@ const ProfileEditForm = ({ userProfile, showModalMessage, onSaveSuccess, onCance
                         />
                         {bio && <p className="text-xs text-gray-500 mt-1">{bio.length}/500 characters</p>}
 
-                        <select value={country} onChange={(e) => setCountry(e.target.value)}
+                        <select value={country} onChange={(e) => { setCountry(e.target.value); if (e.target.value !== 'US') setUsState(''); }}
                         className="w-full p-3 border border-gray-300 rounded-lg focus:ring-primary focus:border-primary transition box-border" disabled={profileLoading}>
                         <option value="">Select Country (Optional)</option>
                         <option value="US">United States</option>
@@ -13486,22 +13510,31 @@ const ProfileEditForm = ({ userProfile, showModalMessage, onSaveSuccess, onCance
                         <option value="PL">Poland</option>
                         <option value="CZ">Czech Republic</option>
                         <option value="IE">Ireland</option>
-                        <option value="PT">? Portugal</option>
-                        <option value="GR">? Greece</option>
-                        <option value="RU">? Russia</option>
-                        <option value="JP">? Japan</option>
-                        <option value="KR">? South Korea</option>
-                        <option value="CN">? China</option>
-                        <option value="IN">? India</option>
-                        <option value="BR">? Brazil</option>
-                        <option value="MX">? Mexico</option>
-                        <option value="ZA">? South Africa</option>
-                        <option value="NZ">? New Zealand</option>
-                        <option value="SG">? Singapore</option>
-                        <option value="HK">? Hong Kong</option>
-                        <option value="MY">? Malaysia</option>
-                        <option value="TH">? Thailand</option>
+                        <option value="PT">Portugal</option>
+                        <option value="GR">Greece</option>
+                        <option value="RU">Russia</option>
+                        <option value="JP">Japan</option>
+                        <option value="KR">South Korea</option>
+                        <option value="CN">China</option>
+                        <option value="IN">India</option>
+                        <option value="BR">Brazil</option>
+                        <option value="MX">Mexico</option>
+                        <option value="ZA">South Africa</option>
+                        <option value="SG">Singapore</option>
+                        <option value="HK">Hong Kong</option>
+                        <option value="MY">Malaysia</option>
+                        <option value="TH">Thailand</option>
                         </select>
+
+                        {country === 'US' && (
+                            <select value={usState} onChange={(e) => setUsState(e.target.value)}
+                            className="w-full p-3 border border-gray-300 rounded-lg focus:ring-primary focus:border-primary transition box-border mt-2" disabled={profileLoading}>
+                                <option value="">Select State (Optional)</option>
+                                {US_STATES.map(s => (
+                                    <option key={s.code} value={s.code}>{s.name}</option>
+                                ))}
+                            </select>
+                        )}
                     </div>
 
                     <div data-tutorial-target="public-visibility-checkboxes" className="pt-2 space-y-2">
@@ -13870,8 +13903,10 @@ const BreederDirectory = ({ authToken, API_BASE_URL, onBack }) => {
     const [searchQuery, setSearchQuery] = useState('');
     const [selectedSpecies, setSelectedSpecies] = useState('');
     const [selectedCountry, setSelectedCountry] = useState('');
+    const [selectedState, setSelectedState] = useState('');
     const [availableSpecies, setAvailableSpecies] = useState([]);
     const [availableCountries, setAvailableCountries] = useState([]);
+    const [availableStates, setAvailableStates] = useState([]);
 
     // Fetch breeders on mount
     useEffect(() => {
@@ -13907,6 +13942,15 @@ const BreederDirectory = ({ authToken, API_BASE_URL, onBack }) => {
                 }
             });
             setAvailableCountries(Array.from(countrySet).sort());
+
+            // Extract unique US states from US breeders
+            const stateSet = new Set();
+            response.data.forEach(breeder => {
+                if (breeder.country === 'US' && breeder.state) {
+                    stateSet.add(breeder.state);
+                }
+            });
+            setAvailableStates(Array.from(stateSet).sort());
         } catch (error) {
             console.error('Failed to fetch breeders:', error);
         } finally {
@@ -13950,8 +13994,13 @@ const BreederDirectory = ({ authToken, API_BASE_URL, onBack }) => {
             result = result.filter(breeder => breeder.country === selectedCountry);
         }
 
+        // Filter by selected US state
+        if (selectedState) {
+            result = result.filter(breeder => breeder.state === selectedState);
+        }
+
         return result;
-    }, [breeders, searchQuery, selectedSpecies, selectedCountry]);
+    }, [breeders, searchQuery, selectedSpecies, selectedCountry, selectedState]);
 
     return (
         <div className="min-h-screen bg-gray-50 pb-20">
@@ -14002,7 +14051,7 @@ const BreederDirectory = ({ authToken, API_BASE_URL, onBack }) => {
                         <div className="flex-1">
                             <select
                                 value={selectedCountry}
-                                onChange={(e) => setSelectedCountry(e.target.value)}
+                                onChange={(e) => { setSelectedCountry(e.target.value); if (e.target.value !== 'US') setSelectedState(''); }}
                                 className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary text-sm"
                             >
                                 <option value="">All Countries</option>
@@ -14013,6 +14062,22 @@ const BreederDirectory = ({ authToken, API_BASE_URL, onBack }) => {
                                 ))}
                             </select>
                         </div>
+                        {selectedCountry === 'US' && availableStates.length > 0 && (
+                            <div className="flex-1">
+                                <select
+                                    value={selectedState}
+                                    onChange={(e) => setSelectedState(e.target.value)}
+                                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary text-sm"
+                                >
+                                    <option value="">All States</option>
+                                    {availableStates.map(stateCode => (
+                                        <option key={stateCode} value={stateCode}>
+                                            {getStateName(stateCode)}
+                                        </option>
+                                    ))}
+                                </select>
+                            </div>
+                        )}
                     </div>
                 </div>
             </div>
@@ -14027,12 +14092,13 @@ const BreederDirectory = ({ authToken, API_BASE_URL, onBack }) => {
                     <div className="text-center py-20">
                         <Star size={48} className="mx-auto text-gray-300 mb-3" />
                         <p className="text-gray-600">No breeders found</p>
-                        {(searchQuery || selectedSpecies || selectedCountry) && (
+                        {(searchQuery || selectedSpecies || selectedCountry || selectedState) && (
                             <button
                                 onClick={() => {
                                     setSearchQuery('');
                                     setSelectedSpecies('');
                                     setSelectedCountry('');
+                                    setSelectedState('');
                                 }}
                                 className="mt-3 text-primary hover:underline"
                             >
@@ -14092,7 +14158,7 @@ const BreederDirectory = ({ authToken, API_BASE_URL, onBack }) => {
                                                 {breeder.country && (
                                                     <div className="flex items-center gap-2 text-sm text-gray-600">
                                                         <span className={`${getCountryFlag(breeder.country)} inline-block h-4 w-6 flex-shrink-0`}></span>
-                                                        <span>{getCountryName(breeder.country)}</span>
+                                                        <span>{getCountryName(breeder.country)}{breeder.country === 'US' && breeder.state ? `, ${getStateName(breeder.state)}` : ''}</span>
                                                     </div>
                                                 )}
                                             </div>
