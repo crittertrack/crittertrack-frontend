@@ -16190,6 +16190,15 @@ const AnimalList = ({ authToken, showModalMessage, onEditAnimal, onViewAnimal, f
             parseArrayField(a.medicalConditions).length > 0 || parseArrayField(a.medications).length > 0
         ));
 
+        const handleReproStatusUpdate = async (e, animal, patch) => {
+            e.stopPropagation();
+            try {
+                await axios.put(`${API_BASE_URL}/animals/${animal.id_public}`, patch,
+                    { headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${authToken}` } });
+                fetchAnimals();
+            } catch (err) { console.error('Repro status update failed:', err); }
+        };
+
         // ── Shared helpers ────────────────────────────────────────────────────────
         // All appearance fields that make up "Variety" — same set as Tab 3 / Appearance section
         const VARIETY_KEYS = ['color', 'coatPattern', 'coat', 'earset', 'phenotype', 'morph', 'markings', 'eyeColor', 'nailColor', 'carrierTraits'];
@@ -16487,21 +16496,38 @@ const AnimalList = ({ authToken, showModalMessage, onEditAnimal, onViewAnimal, f
                                     {matingList.length > 0 && (
                                         <MgmtGroup groupKey="repro_mating" label="In Mating"
                                             groupAnimals={matingList} headerClass="bg-purple-50"
-                                            renderExtras={(a) => a.matingDate
-                                                ? <div className="text-xs text-gray-400 shrink-0">Since {formatDateShort(a.matingDate)}</div>
-                                                : null} />
+                                            renderExtras={(a) => (
+                                                <div className="flex items-center gap-1 shrink-0" onClick={e => e.stopPropagation()}>
+                                                    {a.matingDate && <div className="text-xs text-gray-400 hidden sm:block">Since {formatDateShort(a.matingDate)}</div>}
+                                                    <button onClick={(e) => handleReproStatusUpdate(e, a, { isInMating: false, isPregnant: true })}
+                                                        className="text-xs px-1.5 py-0.5 rounded bg-pink-100 text-pink-700 hover:bg-pink-200 border border-pink-200 whitespace-nowrap">→ Pregnant</button>
+                                                    <button onClick={(e) => handleReproStatusUpdate(e, a, { isInMating: false })}
+                                                        className="text-xs px-1.5 py-0.5 rounded bg-gray-100 text-gray-600 hover:bg-gray-200 border border-gray-200">Clear</button>
+                                                </div>
+                                            )} />
                                     )}
                                     {pregnantList.length > 0 && (
                                         <MgmtGroup groupKey="repro_pregnant" label="Pregnant / Gravid"
                                             groupAnimals={pregnantList} headerClass="bg-pink-50"
-                                            renderExtras={(a) => a.expectedDueDate
-                                                ? <div className="text-xs text-gray-400 shrink-0">Due {formatDateShort(a.expectedDueDate)}</div>
-                                                : null} />
+                                            renderExtras={(a) => (
+                                                <div className="flex items-center gap-1 shrink-0" onClick={e => e.stopPropagation()}>
+                                                    {a.expectedDueDate && <div className="text-xs text-gray-400 hidden sm:block">Due {formatDateShort(a.expectedDueDate)}</div>}
+                                                    <button onClick={(e) => handleReproStatusUpdate(e, a, { isPregnant: false, isNursing: true })}
+                                                        className="text-xs px-1.5 py-0.5 rounded bg-blue-100 text-blue-700 hover:bg-blue-200 border border-blue-200 whitespace-nowrap">→ Nursing</button>
+                                                    <button onClick={(e) => handleReproStatusUpdate(e, a, { isPregnant: false })}
+                                                        className="text-xs px-1.5 py-0.5 rounded bg-gray-100 text-gray-600 hover:bg-gray-200 border border-gray-200">Clear</button>
+                                                </div>
+                                            )} />
                                     )}
                                     {nursingList.length > 0 && (
                                         <MgmtGroup groupKey="repro_nursing" label="Nursing / Brooding"
                                             groupAnimals={nursingList} headerClass="bg-blue-50"
-                                            renderExtras={() => null} />
+                                            renderExtras={(a) => (
+                                                <div className="flex items-center gap-1 shrink-0" onClick={e => e.stopPropagation()}>
+                                                    <button onClick={(e) => handleReproStatusUpdate(e, a, { isNursing: false })}
+                                                        className="text-xs px-1.5 py-0.5 rounded bg-gray-100 text-gray-600 hover:bg-gray-200 border border-gray-200">Done</button>
+                                                </div>
+                                            )} />
                                     )}
                                 </>
                             }
