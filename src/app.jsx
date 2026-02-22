@@ -15673,6 +15673,7 @@ const AnimalList = ({ authToken, showModalMessage, onEditAnimal, onViewAnimal, f
         setLogsLoading(true);
         try {
             const params = new URLSearchParams({ page, limit: 30 });
+            if (filters.targetType) params.set('targetType', filters.targetType);
             if (filters.action) params.set('action', filters.action);
             if (filters.search) params.set('search', filters.search);
             if (filters.startDate) params.set('startDate', filters.startDate);
@@ -15697,7 +15698,7 @@ const AnimalList = ({ authToken, showModalMessage, onEditAnimal, onViewAnimal, f
     // Auto-fetch logs when the activity log screen opens for the first time
     useEffect(() => {
         if (showActivityLogScreen && !logsLoaded && !logsLoading) {
-            fetchActivityLogs(1);
+            fetchActivityLogs(1, { targetType: 'management' });
         }
     // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [showActivityLogScreen]);
@@ -15706,6 +15707,19 @@ const AnimalList = ({ authToken, showModalMessage, onEditAnimal, onViewAnimal, f
     useEffect(() => {
         if (animalView !== 'management') setShowActivityLogScreen(false);
     }, [animalView]);
+
+    // Fire-and-forget management activity logger (called from management handlers)
+    const logManagementActivity = useCallback(async (action, targetId_public, details = {}) => {
+        if (!authToken) return;
+        try {
+            await axios.post(`${API_BASE_URL}/activity-logs`,
+                { action, targetId_public: targetId_public || null, details },
+                { headers: { Authorization: `Bearer ${authToken}` } }
+            );
+        } catch (err) {
+            // Non-critical — don't surface logging failures to the user
+        }
+    }, [authToken, API_BASE_URL]);
     const fetchEnclosures = useCallback(async () => {
         try {
             const res = await axios.get(`${API_BASE_URL}/enclosures`, {
@@ -16288,9 +16302,12 @@ const AnimalList = ({ authToken, showModalMessage, onEditAnimal, onViewAnimal, f
     const getActionColor = (action) => {
         if (!action) return 'bg-gray-300';
         if (action.includes('delete') || action.includes('failed')) return 'bg-red-400';
+        if (action === 'animal_fed') return 'bg-green-400';
+        if (action === 'reproduction_update') return 'bg-pink-400';
+        if (action.includes('task_done')) return 'bg-amber-400';
+        if (action.includes('assign') || action.includes('transfer')) return 'bg-purple-400';
         if (action.includes('create') || action.includes('login')) return 'bg-green-400';
         if (action.includes('update') || action.includes('change') || action.includes('upload')) return 'bg-blue-400';
-        if (action.includes('transfer')) return 'bg-purple-400';
         if (action.includes('visibility')) return 'bg-yellow-400';
         return 'bg-gray-400';
     };
@@ -16320,6 +16337,16 @@ const AnimalList = ({ authToken, showModalMessage, onEditAnimal, onViewAnimal, f
             report_submit: 'Submitted report',
             transaction_create: 'Created transaction',
             transaction_delete: 'Deleted transaction',
+            // Management panel
+            enclosure_create: 'Created enclosure',
+            enclosure_update: 'Updated enclosure',
+            enclosure_delete: 'Deleted enclosure',
+            enclosure_assign: 'Assigned to enclosure',
+            enclosure_unassign: 'Removed from enclosure',
+            animal_fed: 'Marked as fed',
+            care_task_done: 'Care task completed',
+            enclosure_task_done: 'Cleaning task completed',
+            reproduction_update: 'Reproductive status updated',
         };
         if (!action) return 'Unknown action';
         const key = action.replace(/_failed$/, '');
@@ -16340,26 +16367,20 @@ const AnimalList = ({ authToken, showModalMessage, onEditAnimal, onViewAnimal, f
     // -- Activity Log Screen ------------------------------------------------------
     const renderActivityLogScreen = () => {
         const ACTION_OPTIONS = [
-            { value: '', label: 'All Actions' },
-            { value: 'login', label: 'Login' },
-            { value: 'logout', label: 'Logout' },
-            { value: 'animal_create', label: 'Added Animal' },
-            { value: 'animal_update', label: 'Updated Animal' },
-            { value: 'animal_delete', label: 'Deleted Animal' },
-            { value: 'animal_image_upload', label: 'Uploaded Image' },
-            { value: 'animal_image_delete', label: 'Deleted Image' },
-            { value: 'animal_visibility_change', label: 'Changed Visibility' },
-            { value: 'animal_transfer_initiate', label: 'Transfer Initiated' },
-            { value: 'animal_transfer_accept', label: 'Transfer Accepted' },
-            { value: 'animal_transfer_reject', label: 'Transfer Rejected' },
-            { value: 'litter_create', label: 'Created Litter' },
-            { value: 'litter_update', label: 'Updated Litter' },
-            { value: 'litter_delete', label: 'Deleted Litter' },
-            { value: 'profile_update', label: 'Updated Profile' },
-            { value: 'password_change', label: 'Changed Password' },
+            { value: '', label: 'All Management Actions' },
+            { value: 'enclosure_create', label: 'Created Enclosure' },
+            { value: 'enclosure_update', label: 'Updated Enclosure' },
+            { value: 'enclosure_delete', label: 'Deleted Enclosure' },
+            { value: 'enclosure_assign', label: 'Assigned to Enclosure' },
+            { value: 'enclosure_unassign', label: 'Removed from Enclosure' },
+            { value: 'animal_fed', label: 'Marked as Fed' },
+            { value: 'care_task_done', label: 'Care Task Completed' },
+            { value: 'enclosure_task_done', label: 'Cleaning Task Completed' },
+            { value: 'reproduction_update', label: 'Reproductive Status Updated' },
         ];
 
-        const currentFilters = { action: logFilterAction, search: logFilterSearch, startDate: logFilterStartDate, endDate: logFilterEndDate };
+        // targetType: 'management' is always included to scope logs to management panel only
+        const currentFilters = { targetType: 'management', action: logFilterAction, search: logFilterSearch, startDate: logFilterStartDate, endDate: logFilterEndDate };
 
         const handleApplyFilters = () => {
             setActivityLogs([]);
@@ -16374,7 +16395,7 @@ const AnimalList = ({ authToken, showModalMessage, onEditAnimal, onViewAnimal, f
             setLogFilterEndDate('');
             setActivityLogs([]);
             setLogsLoaded(false);
-            fetchActivityLogs(1, {});
+            fetchActivityLogs(1, { targetType: 'management' });
         };
 
         return (
@@ -16484,16 +16505,17 @@ const AnimalList = ({ authToken, showModalMessage, onEditAnimal, onViewAnimal, f
                                     <div className="flex-1 min-w-0">
                                         <div className="text-sm text-gray-800 font-medium">
                                             {getActionLabel(log.action)}
-                                            {log.details?.name && <span className="text-gray-500 font-normal"> — <span className="font-medium text-gray-700">{log.details.name}</span></span>}
+                                            {(log.details?.name || log.details?.enclosureName) && <span className="text-gray-500 font-normal"> — <span className="font-medium text-gray-700">{log.details.name || log.details.enclosureName}</span></span>}
                                             {log.details?.species && !log.details?.name && <span className="text-gray-500 font-normal"> ({log.details.species})</span>}
+                                            {log.details?.status && <span className="text-indigo-500 font-normal text-xs ml-1">({log.details.status})</span>}
                                         </div>
                                         {log.targetId_public && (
                                             <div className="text-xs text-gray-400 mt-0.5">{log.targetId_public}</div>
                                         )}
-                                        {log.details && Object.keys(log.details).filter(k => !['name', 'species'].includes(k)).length > 0 && (
+                                        {log.details && Object.keys(log.details).filter(k => !['name', 'species', 'status', 'enclosureName'].includes(k)).length > 0 && (
                                             <div className="text-xs text-gray-400 mt-0.5">
                                                 {Object.entries(log.details)
-                                                    .filter(([k]) => !['name', 'species'].includes(k))
+                                                    .filter(([k]) => !['name', 'species', 'status', 'enclosureName'].includes(k))
                                                     .slice(0, 3)
                                                     .map(([k, v]) => `${k}: ${v}`)
                                                     .join(' · ')
@@ -16556,9 +16578,11 @@ const AnimalList = ({ authToken, showModalMessage, onEditAnimal, onViewAnimal, f
                 if (editingEnclosureId) {
                     await axios.put(`${API_BASE_URL}/enclosures/${editingEnclosureId}`, enclosureFormData,
                         { headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${authToken}` } });
+                    logManagementActivity('enclosure_update', null, { name: enclosureFormData.name.trim() });
                 } else {
                     await axios.post(`${API_BASE_URL}/enclosures`, enclosureFormData,
                         { headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${authToken}` } });
+                    logManagementActivity('enclosure_create', null, { name: enclosureFormData.name.trim() });
                 }
                 setEnclosureFormVisible(false);
                 setEditingEnclosureId(null);
@@ -16571,9 +16595,11 @@ const AnimalList = ({ authToken, showModalMessage, onEditAnimal, onViewAnimal, f
 
         const handleDeleteEnclosure = async (encId) => {
             if (!window.confirm('Delete this enclosure? Animals inside will become unassigned.')) return;
+            const encToDelete = enclosures.find(e => e._id === encId);
             try {
                 await axios.delete(`${API_BASE_URL}/enclosures/${encId}`,
                     { headers: { 'Authorization': `Bearer ${authToken}` } });
+                logManagementActivity('enclosure_delete', null, { name: encToDelete?.name || encId });
                 fetchEnclosures();
                 fetchAnimals();
             } catch (err) {
@@ -16586,6 +16612,12 @@ const AnimalList = ({ authToken, showModalMessage, onEditAnimal, onViewAnimal, f
                 await axios.put(`${API_BASE_URL}/animals/${animalIdPublic}`,
                     { enclosureId: enclosureId || null },
                     { headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${authToken}` } });
+                const encName = enclosureId ? (enclosures.find(e => e._id === enclosureId)?.name || enclosureId) : null;
+                logManagementActivity(
+                    enclosureId ? 'enclosure_assign' : 'enclosure_unassign',
+                    animalIdPublic,
+                    enclosureId ? { enclosureName: encName } : {}
+                );
                 fetchAnimals();
             } catch (err) { console.error('Assign enclosure failed:', err); }
         };
@@ -16596,6 +16628,7 @@ const AnimalList = ({ authToken, showModalMessage, onEditAnimal, onViewAnimal, f
                 await axios.put(`${API_BASE_URL}/animals/${animal.id_public}`,
                     { lastFedDate: new Date().toISOString() },
                     { headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${authToken}` } });
+                logManagementActivity('animal_fed', animal.id_public, { name: animal.name, species: animal.species });
                 fetchAnimals();
             } catch (err) { console.error('Mark fed failed:', err); }
         };
@@ -16606,6 +16639,7 @@ const AnimalList = ({ authToken, showModalMessage, onEditAnimal, onViewAnimal, f
                 await axios.put(`${API_BASE_URL}/animals/${animal.id_public}`,
                     { lastMaintenanceDate: new Date().toISOString() },
                     { headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${authToken}` } });
+                logManagementActivity('care_task_done', animal.id_public, { name: animal.name, taskName: 'General maintenance' });
                 fetchAnimals();
             } catch (err) { console.error('Mark maintenance failed:', err); }
         };
@@ -16660,6 +16694,7 @@ const AnimalList = ({ authToken, showModalMessage, onEditAnimal, onViewAnimal, f
                 await axios.put(`${API_BASE_URL}/enclosures/${enc._id}`,
                     { name: enc.name, enclosureType: enc.enclosureType || '', size: enc.size || '', notes: enc.notes || '', cleaningTasks: updated },
                     { headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${authToken}` } });
+                logManagementActivity('enclosure_task_done', null, { name: enc.name, taskName: updated[taskIdx]?.taskName || 'Cleaning task' });
                 fetchEnclosures();
             } catch (err) { console.error('Mark enclosure task done failed:', err); }
         };
@@ -16671,6 +16706,7 @@ const AnimalList = ({ authToken, showModalMessage, onEditAnimal, onViewAnimal, f
             try {
                 await axios.put(`${API_BASE_URL}/animals/${animal.id_public}`, { careTasks: updated },
                     { headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${authToken}` } });
+                logManagementActivity('care_task_done', animal.id_public, { name: animal.name, taskName: updated[taskIdx]?.taskName || 'Care task' });
                 fetchAnimals();
             } catch (err) { console.error('Mark animal care task done failed:', err); }
         };
@@ -16680,6 +16716,13 @@ const AnimalList = ({ authToken, showModalMessage, onEditAnimal, onViewAnimal, f
             try {
                 await axios.put(`${API_BASE_URL}/animals/${animal.id_public}`, patch,
                     { headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${authToken}` } });
+                let reproStatus = 'Status changed';
+                if (patch.isInMating === false && patch.isPregnant === true) reproStatus = 'Confirmed Pregnant';
+                else if (patch.isPregnant === false && patch.isNursing === true) reproStatus = 'Started Nursing';
+                else if (patch.isInMating === false) reproStatus = 'Cleared Mating';
+                else if (patch.isPregnant === false) reproStatus = 'Cleared Pregnancy';
+                else if (patch.isNursing === false) reproStatus = 'Cleared Nursing';
+                logManagementActivity('reproduction_update', animal.id_public, { name: animal.name, species: animal.species, status: reproStatus });
                 fetchAnimals();
             } catch (err) { console.error('Repro status update failed:', err); }
         };
