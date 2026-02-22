@@ -15367,6 +15367,7 @@ const AuthView = ({ onLoginSuccess, showModalMessage, isRegister, setIsRegister,
 
 const AnimalList = ({ authToken, showModalMessage, onEditAnimal, onViewAnimal, fetchHiddenAnimals, navigate }) => {
     const [animals, setAnimals] = useState([]);
+    const [allAnimals, setAllAnimals] = useState([]); // Unfiltered — used by Management View
     const [loading, setLoading] = useState(true);
     
     // Load filters from localStorage or use defaults
@@ -16266,6 +16267,59 @@ const AnimalList = ({ authToken, showModalMessage, onEditAnimal, onViewAnimal, f
                 </div>
             </div>
         );
+    };
+
+    // -- Activity log helpers -----------------------------------------------------
+    const getActionColor = (action) => {
+        if (!action) return 'bg-gray-300';
+        if (action.includes('delete') || action.includes('failed')) return 'bg-red-400';
+        if (action.includes('create') || action.includes('login')) return 'bg-green-400';
+        if (action.includes('update') || action.includes('change') || action.includes('upload')) return 'bg-blue-400';
+        if (action.includes('transfer')) return 'bg-purple-400';
+        if (action.includes('visibility')) return 'bg-yellow-400';
+        return 'bg-gray-400';
+    };
+
+    const getActionLabel = (action) => {
+        const labels = {
+            login: 'Logged in',
+            logout: 'Logged out',
+            password_change: 'Changed password',
+            profile_update: 'Updated profile',
+            profile_image_change: 'Changed profile image',
+            privacy_settings_change: 'Changed privacy settings',
+            animal_create: 'Added animal',
+            animal_update: 'Updated animal',
+            animal_delete: 'Deleted animal',
+            animal_image_upload: 'Uploaded animal image',
+            animal_image_delete: 'Deleted animal image',
+            animal_visibility_change: 'Changed animal visibility',
+            animal_transfer_initiate: 'Initiated animal transfer',
+            animal_transfer_accept: 'Accepted animal transfer',
+            animal_transfer_reject: 'Rejected animal transfer',
+            litter_create: 'Created litter',
+            litter_update: 'Updated litter',
+            litter_delete: 'Deleted litter',
+            message_send: 'Sent message',
+            message_delete: 'Deleted message',
+            report_submit: 'Submitted report',
+            transaction_create: 'Created transaction',
+            transaction_delete: 'Deleted transaction',
+        };
+        if (!action) return 'Unknown action';
+        const key = action.replace(/_failed$/, '');
+        const base = labels[key] || action.replace(/_/g, ' ').replace(/\b\w/g, c => c.toUpperCase());
+        return action.endsWith('_failed') ? `${base} (failed)` : base;
+    };
+
+    const formatTimeAgo = (dateStr) => {
+        if (!dateStr) return '';
+        const diff = Math.floor((Date.now() - new Date(dateStr)) / 1000);
+        if (diff < 60) return `${diff}s ago`;
+        if (diff < 3600) return `${Math.floor(diff / 60)}m ago`;
+        if (diff < 86400) return `${Math.floor(diff / 3600)}h ago`;
+        if (diff < 604800) return `${Math.floor(diff / 86400)}d ago`;
+        return formatDateDisplay(dateStr);
     };
 
     // -- Management View ----------------------------------------------------------
