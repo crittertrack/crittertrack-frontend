@@ -2864,7 +2864,7 @@ const PrivateAnimalDetail = ({ animal, onClose, onEdit, API_BASE_URL, authToken,
                             {/* Identification Numbers */}
                             {(() => {
                                 const idFields = [
-                                    { key: 'breederAssignedId', label: 'Breeder ID' },
+                                    { key: 'breederAssignedId', label: 'Identification' },
                                     { key: 'microchipNumber', label: 'Microchip Number' },
                                     { key: 'pedigreeRegistrationId', label: 'Pedigree Registration ID' },
                                     { key: 'colonyId', label: 'Colony ID' },
@@ -3968,7 +3968,7 @@ const ViewOnlyPrivateAnimalDetail = ({ animal, onClose, API_BASE_URL, authToken,
                             {/* Identification Numbers */}
                             {(() => {
                                 const idFields = [
-                                    { key: 'breederAssignedId', label: 'Breeder ID' },
+                                    { key: 'breederAssignedId', label: 'Identification' },
                                     { key: 'microchipNumber', label: 'Microchip Number' },
                                     { key: 'pedigreeRegistrationId', label: 'Pedigree Registration ID' },
                                     { key: 'colonyId', label: 'Colony ID' },
@@ -5098,7 +5098,7 @@ const ViewOnlyAnimalDetail = ({ animal, onClose, API_BASE_URL, onViewProfile, on
                             {/* Identification Numbers */}
                             {(() => {
                                 const idFields = [
-                                    { key: 'breederAssignedId', label: 'Breeder ID' },
+                                    { key: 'breederAssignedId', label: 'Identification' },
                                     { key: 'microchipNumber', label: 'Microchip Number' },
                                     { key: 'pedigreeRegistrationId', label: 'Pedigree Registration ID' },
                                     { key: 'colonyId', label: 'Colony ID' },
@@ -8694,7 +8694,7 @@ const AnimalForm = ({
     
     // Default field labels - can be overridden by species config
     const defaultFieldLabels = {
-        breederAssignedId: 'Breeder ID / Registry Code',
+        breederAssignedId: 'Identification',
         strain: 'Strain',
         heatStatus: 'Heat Status',
         earset: 'Ear Set',
@@ -11144,7 +11144,7 @@ const AnimalForm = ({
                                     <label className="block text-sm font-medium text-gray-700">{getFieldLabel('breederAssignedId', 'Identification')}</label>
                                     <input type="text" name="breederAssignedId" value={formData.breederAssignedId} onChange={handleChange} 
                                         className="mt-1 block w-full p-2 border border-gray-300 rounded-md shadow-sm focus:ring-primary focus:border-primary" 
-                                        placeholder={getFieldLabel('breederAssignedId', 'Breeder ID or Registry Code')} />
+                                        placeholder={getFieldLabel('breederAssignedId', 'Identification')} />
                                 </div>
                                 )}
                                 
