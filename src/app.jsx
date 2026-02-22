@@ -8660,6 +8660,15 @@ const AnimalForm = ({
     // State for field template (new system)
     const [fieldTemplate, setFieldTemplate] = useState(null);
     const [loadingTemplate, setLoadingTemplate] = useState(false);
+    const [enclosureOptions, setEnclosureOptions] = useState([]);
+
+    // Fetch user's enclosures for the dropdown
+    useEffect(() => {
+        if (!authToken) return;
+        axios.get(`${API_BASE_URL}/enclosures`, { headers: { Authorization: `Bearer ${authToken}` } })
+            .then(res => setEnclosureOptions(res.data))
+            .catch(() => {});
+    }, [authToken, API_BASE_URL]);
     
     // Default field labels - can be overridden by species config
     const defaultFieldLabels = {
@@ -8744,10 +8753,11 @@ const AnimalForm = ({
             currentOwner: animalToEdit.currentOwner || '',
             currentOwnerDisplay: animalToEdit.currentOwnerDisplay || '',
             groupRole: animalToEdit.groupRole || '',
-            isPregnant: animalToEdit.isPregnant || false,
+                isPregnant: animalToEdit.isPregnant || false,
             isNursing: animalToEdit.isNursing || false,
             isInMating: animalToEdit.isInMating || false,
             isQuarantine: animalToEdit.isQuarantine || false,
+            enclosureId: animalToEdit.enclosureId || '',
             lastFedDate: animalToEdit.lastFedDate ? new Date(animalToEdit.lastFedDate).toISOString().split('T')[0] : '',
             feedingFrequencyDays: animalToEdit.feedingFrequencyDays || '',
             lastMaintenanceDate: animalToEdit.lastMaintenanceDate ? new Date(animalToEdit.lastMaintenanceDate).toISOString().split('T')[0] : '',
@@ -8920,6 +8930,7 @@ const AnimalForm = ({
             isNursing: false,
             isInMating: false,
             isQuarantine: false,
+            enclosureId: '',
             lastFedDate: '',
             feedingFrequencyDays: '',
             lastMaintenanceDate: '',
@@ -12108,7 +12119,7 @@ const AnimalForm = ({
                                 <span className="text-sm font-medium text-gray-700">In Quarantine / Isolation</span>
                             </label>
                             <div className="space-y-4">
-                                {/* Medical Conditions */}}
+                                {/* Medical Conditions */}
                                 <div className="space-y-3">
                                     <h4 className="text-sm font-semibold text-gray-700">Medical Conditions</h4>
                                     <div className="bg-white p-3 rounded-lg border border-gray-200 space-y-3">
@@ -12423,6 +12434,23 @@ const AnimalForm = ({
                         <div className="bg-gray-50 p-4 rounded-lg border border-gray-200 space-y-4" data-tutorial-target="husbandry-details-section">
                             <h3 className="text-lg font-semibold text-gray-700 mb-4">Husbandry</h3>
                             <div className="space-y-4">
+                                {/* Enclosure assignment */}
+                                <div>
+                                    <label className="block text-sm font-medium text-gray-700 mb-2">Assigned Enclosure</label>
+                                    <select name="enclosureId" value={formData.enclosureId || ''} onChange={handleChange}
+                                        className="block w-full p-2 border border-gray-300 rounded-md shadow-sm focus:ring-primary focus:border-primary">
+                                        <option value="">— None / Unassigned —</option>
+                                        {enclosureOptions.map(enc => (
+                                            <option key={enc._id} value={enc._id}>
+                                                {enc.name}{enc.enclosureType ? ` (${enc.enclosureType})` : ''}{enc.size ? ` · ${enc.size}` : ''}
+                                            </option>
+                                        ))}
+                                    </select>
+                                    {enclosureOptions.length === 0 && (
+                                        <p className="text-xs text-gray-400 mt-1">No enclosures created yet. Create them in the Management view.</p>
+                                    )}
+                                </div>
+
                                 {!isFieldHidden('housingType') && (
                                     <div>
                                         <label className="block text-sm font-medium text-gray-700 mb-2">{getFieldLabel('housingType', 'Housing Type')}</label>
@@ -15213,6 +15241,14 @@ const AnimalList = ({ authToken, showModalMessage, onEditAnimal, onViewAnimal, f
     const [animalView, setAnimalView] = useState('list'); // 'list' | 'management'
     const [collapsedMgmtSections, setCollapsedMgmtSections] = useState({}); // { sectionKey: bool }
     const [collapsedMgmtGroups, setCollapsedMgmtGroups] = useState({}); // { groupKey: bool }
+
+    // Enclosure management state
+    const [enclosures, setEnclosures] = useState([]);
+    const [enclosureFormVisible, setEnclosureFormVisible] = useState(false);
+    const [enclosureFormData, setEnclosureFormData] = useState({ name: '', enclosureType: '', size: '', notes: '' });
+    const [editingEnclosureId, setEditingEnclosureId] = useState(null);
+    const [enclosureSaving, setEnclosureSaving] = useState(false);
+    const [assigningAnimalId, setAssigningAnimalId] = useState(null);
     
     // Save filters to localStorage whenever they change
     useEffect(() => {
@@ -15400,6 +15436,17 @@ const AnimalList = ({ authToken, showModalMessage, onEditAnimal, onViewAnimal, f
         window.addEventListener('animals-changed', handleAnimalsChanged);
         return () => window.removeEventListener('animals-changed', handleAnimalsChanged);
     }, [fetchAnimals]);
+
+    // Fetch user's enclosures
+    const fetchEnclosures = useCallback(async () => {
+        try {
+            const res = await axios.get(`${API_BASE_URL}/enclosures`, {
+                headers: { Authorization: `Bearer ${authToken}` }
+            });
+            setEnclosures(res.data);
+        } catch (err) { console.error('[fetchEnclosures]', err); }
+    }, [authToken]);
+    useEffect(() => { fetchEnclosures(); }, [fetchEnclosures]);
 
     // Fetch user's custom species order on mount
     useEffect(() => {
@@ -15993,6 +16040,48 @@ const AnimalList = ({ authToken, showModalMessage, onEditAnimal, onViewAnimal, f
         const toggleSection = (key) => setCollapsedMgmtSections(prev => ({ ...prev, [key]: !prev[key] }));
         const toggleGroup = (key) => setCollapsedMgmtGroups(prev => ({ ...prev, [key]: !prev[key] }));
 
+        // Enclosure CRUD handlers
+        const handleSaveEnclosure = async () => {
+            if (enclosureSaving || !enclosureFormData.name.trim()) return;
+            setEnclosureSaving(true);
+            try {
+                if (editingEnclosureId) {
+                    await axios.put(`${API_BASE_URL}/enclosures/${editingEnclosureId}`, enclosureFormData,
+                        { headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${authToken}` } });
+                } else {
+                    await axios.post(`${API_BASE_URL}/enclosures`, enclosureFormData,
+                        { headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${authToken}` } });
+                }
+                setEnclosureFormVisible(false);
+                setEditingEnclosureId(null);
+                setEnclosureFormData({ name: '', enclosureType: '', size: '', notes: '' });
+                fetchEnclosures();
+            } catch (err) {
+                showModalMessage('Error', err.response?.data?.message || 'Failed to save enclosure');
+            } finally { setEnclosureSaving(false); }
+        };
+
+        const handleDeleteEnclosure = async (encId) => {
+            if (!window.confirm('Delete this enclosure? Animals inside will become unassigned.')) return;
+            try {
+                await axios.delete(`${API_BASE_URL}/enclosures/${encId}`,
+                    { headers: { 'Authorization': `Bearer ${authToken}` } });
+                fetchEnclosures();
+                fetchAnimals();
+            } catch (err) {
+                showModalMessage('Error', err.response?.data?.message || 'Failed to delete enclosure');
+            }
+        };
+
+        const handleAssignAnimalToEnclosure = async (animalIdPublic, enclosureId) => {
+            try {
+                await axios.put(`${API_BASE_URL}/animals/${animalIdPublic}`,
+                    { enclosureId: enclosureId || null },
+                    { headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${authToken}` } });
+                fetchAnimals();
+            } catch (err) { console.error('Assign enclosure failed:', err); }
+        };
+
         const handleMarkFed = async (e, animal) => {
             e.stopPropagation();
             try {
@@ -16020,15 +16109,17 @@ const AnimalList = ({ authToken, showModalMessage, onEditAnimal, onViewAnimal, f
         };
 
         // ── Section data ─────────────────────────────────────────────────────────
-        // 1. Enclosures
-        const enclosureMap = {};
+        // 1. Enclosures — grouped by named enclosure (enclosureId)
+        const enclosureAnimalMap = {}; // { enclosureId: [animals] }
+        const unassignedAnimals = [];
         animals.forEach(a => {
-            const key = (a.housingType?.trim()) || 'Unassigned';
-            if (!enclosureMap[key]) enclosureMap[key] = [];
-            enclosureMap[key].push(a);
+            if (a.enclosureId) {
+                if (!enclosureAnimalMap[a.enclosureId]) enclosureAnimalMap[a.enclosureId] = [];
+                enclosureAnimalMap[a.enclosureId].push(a);
+            } else {
+                unassignedAnimals.push(a);
+            }
         });
-        const enclosureGroups = Object.entries(enclosureMap).sort(([a], [b]) =>
-            a === 'Unassigned' ? 1 : b === 'Unassigned' ? -1 : a.localeCompare(b));
 
         // 2. Reproduction
         const matingList = animals.filter(a => a.isInMating);
@@ -16041,18 +16132,20 @@ const AnimalList = ({ authToken, showModalMessage, onEditAnimal, onViewAnimal, f
         const feedOk = animals.filter(a => a.feedingFrequencyDays && !isDue(a.lastFedDate, a.feedingFrequencyDays));
         const feedNone = animals.filter(a => !a.feedingFrequencyDays);
 
-        // 4. Maintenance — group by enclosure, flag if due
+        // 4. Maintenance — grouped by named enclosure (enclosureId)
         const maintMap = {};
         animals.forEach(a => {
-            const key = (a.housingType?.trim()) || 'Unassigned';
-            if (!maintMap[key]) maintMap[key] = { animals: [], anyDue: false };
+            const enc = enclosures.find(e => e._id === a.enclosureId);
+            const key = enc ? enc._id : '__none__';
+            const label = enc ? enc.name : 'No Enclosure';
+            if (!maintMap[key]) maintMap[key] = { label, animals: [], anyDue: false };
             maintMap[key].animals.push(a);
             if (isDue(a.lastMaintenanceDate, a.maintenanceFrequencyDays)) maintMap[key].anyDue = true;
         });
         const maintDueGroups = Object.entries(maintMap).filter(([, g]) => g.anyDue)
-            .sort(([a], [b]) => a === 'Unassigned' ? 1 : b === 'Unassigned' ? -1 : a.localeCompare(b));
+            .sort(([, a], [, b]) => a.label === 'No Enclosure' ? 1 : b.label === 'No Enclosure' ? -1 : a.label.localeCompare(b.label));
         const maintOkGroups = Object.entries(maintMap).filter(([, g]) => !g.anyDue)
-            .sort(([a], [b]) => a === 'Unassigned' ? 1 : b === 'Unassigned' ? -1 : a.localeCompare(b));
+            .sort(([, a], [, b]) => a.label === 'No Enclosure' ? 1 : b.label === 'No Enclosure' ? -1 : a.label.localeCompare(b.label));
         const maintDueCount = maintDueGroups.reduce((acc, [, g]) =>
             acc + g.animals.filter(a => isDue(a.lastMaintenanceDate, a.maintenanceFrequencyDays)).length, 0);
 
@@ -16145,19 +16238,188 @@ const AnimalList = ({ authToken, showModalMessage, onEditAnimal, onViewAnimal, f
 
                 {/* ── 1. ENCLOSURES ────────────────────────────────────────── */}
                 <div className="border border-gray-200 rounded-xl overflow-hidden shadow-sm">
-                    <SectionHeader sectionKey="enclosures"
-                        icon={<Home size={18} className="text-blue-600" />}
-                        title="Enclosures" count={animals.length} bgClass="bg-blue-50" />
+                    {/* Section header — collapse on left content click, Add button on right */}
+                    <div className="relative flex items-center justify-between bg-blue-50 px-3 py-2.5 sm:px-4 sm:py-3 border-b">
+                        <div className="absolute left-1/2 -translate-x-1/2 pointer-events-none">
+                            {collapsedMgmtSections['enclosures']
+                                ? <ChevronDown className="w-4 h-4 text-gray-400" />
+                                : <ChevronUp className="w-4 h-4 text-gray-400" />}
+                        </div>
+                        <div className="flex items-center gap-2 cursor-pointer" onClick={() => toggleSection('enclosures')}>
+                            <Home size={18} className="text-blue-600" />
+                            <span className="font-semibold text-gray-800">Enclosures</span>
+                            <span className="text-xs text-gray-500 bg-white/70 px-2 py-0.5 rounded-full">{enclosures.length}</span>
+                        </div>
+                        <button
+                            onClick={() => {
+                                if (editingEnclosureId) { setEditingEnclosureId(null); setEnclosureFormVisible(false); }
+                                else { setEnclosureFormData({ name: '', enclosureType: '', size: '', notes: '' }); setEnclosureFormVisible(v => !v); }
+                            }}
+                            className="flex items-center gap-1 text-xs font-medium text-blue-600 hover:text-blue-800 bg-white border border-blue-200 px-2 py-1 rounded-lg"
+                        >
+                            <Plus size={13} /> {enclosureFormVisible && !editingEnclosureId ? 'Cancel' : 'Add'}
+                        </button>
+                    </div>
+
+                    {/* Inline create / edit form */}
+                    {enclosureFormVisible && (
+                        <div className="p-3 border-b bg-blue-50/40 space-y-2">
+                            <div className="text-xs font-semibold text-blue-700 mb-1">{editingEnclosureId ? 'Edit Enclosure' : 'New Enclosure'}</div>
+                            <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
+                                <div>
+                                    <label className="block text-xs font-medium text-gray-600 mb-1">Name *</label>
+                                    <input type="text" value={enclosureFormData.name}
+                                        onChange={e => setEnclosureFormData(p => ({...p, name: e.target.value}))}
+                                        placeholder="e.g. Tank 1, Vivarium A, Colony Room 3"
+                                        className="block w-full p-2 text-sm border border-gray-300 rounded-md focus:ring-blue-400 focus:border-blue-400" />
+                                </div>
+                                <div>
+                                    <label className="block text-xs font-medium text-gray-600 mb-1">Type</label>
+                                    <input type="text" value={enclosureFormData.enclosureType}
+                                        onChange={e => setEnclosureFormData(p => ({...p, enclosureType: e.target.value}))}
+                                        placeholder="e.g. Tank, Cage, Vivarium, Pond, Room"
+                                        className="block w-full p-2 text-sm border border-gray-300 rounded-md focus:ring-blue-400 focus:border-blue-400" />
+                                </div>
+                                <div>
+                                    <label className="block text-xs font-medium text-gray-600 mb-1">Size</label>
+                                    <input type="text" value={enclosureFormData.size}
+                                        onChange={e => setEnclosureFormData(p => ({...p, size: e.target.value}))}
+                                        placeholder="e.g. 40 gallon, 48×24×24, 10 sq ft"
+                                        className="block w-full p-2 text-sm border border-gray-300 rounded-md focus:ring-blue-400 focus:border-blue-400" />
+                                </div>
+                                <div>
+                                    <label className="block text-xs font-medium text-gray-600 mb-1">Notes</label>
+                                    <input type="text" value={enclosureFormData.notes}
+                                        onChange={e => setEnclosureFormData(p => ({...p, notes: e.target.value}))}
+                                        placeholder="Optional notes"
+                                        className="block w-full p-2 text-sm border border-gray-300 rounded-md focus:ring-blue-400 focus:border-blue-400" />
+                                </div>
+                            </div>
+                            <div className="flex justify-end gap-2">
+                                <button onClick={() => { setEnclosureFormVisible(false); setEditingEnclosureId(null); }}
+                                    className="text-xs px-3 py-1.5 border border-gray-300 rounded-lg text-gray-600 hover:bg-gray-50">
+                                    Cancel
+                                </button>
+                                <button onClick={handleSaveEnclosure} disabled={enclosureSaving || !enclosureFormData.name.trim()}
+                                    className="text-xs px-3 py-1.5 bg-blue-600 hover:bg-blue-700 text-white rounded-lg font-medium disabled:opacity-50">
+                                    {enclosureSaving ? 'Saving...' : (editingEnclosureId ? 'Save Changes' : 'Create Enclosure')}
+                                </button>
+                            </div>
+                        </div>
+                    )}
+
                     {!collapsedMgmtSections['enclosures'] && (
                         <div className="p-3 space-y-2">
-                            {enclosureGroups.length === 0
-                                ? <div className="text-sm text-gray-400 text-center py-4">No housing type set on any animal.</div>
-                                : enclosureGroups.map(([name, group]) => (
-                                    <MgmtGroup key={name} groupKey={`enc_${name}`} label={name}
-                                        groupAnimals={group} headerClass="bg-blue-50/60"
-                                        renderExtras={(a) => <div className="text-xs text-gray-400 shrink-0">{a.status || ''}</div>}
-                                    />
-                                ))}
+                            {enclosures.length === 0 && unassignedAnimals.length === 0 ? (
+                                <div className="text-sm text-gray-400 text-center py-4">No enclosures yet. Click Add to create your first enclosure.</div>
+                            ) : (
+                                <>
+                                    {/* Named enclosures */}
+                                    {enclosures.map(enc => {
+                                        const occupants = enclosureAnimalMap[enc._id] || [];
+                                        const isGrpCollapsed = collapsedMgmtGroups[`enc_${enc._id}`] || false;
+                                        return (
+                                            <div key={enc._id} className="border border-gray-200 rounded-lg overflow-hidden">
+                                                {/* Enclosure header */}
+                                                <div className="relative flex items-center bg-blue-50/60 px-3 py-2 cursor-pointer"
+                                                    onClick={() => toggleGroup(`enc_${enc._id}`)}
+                                                >
+                                                    <div className="absolute left-1/2 -translate-x-1/2 pointer-events-none">
+                                                        {isGrpCollapsed
+                                                            ? <ChevronDown className="w-3.5 h-3.5 text-gray-400" />
+                                                            : <ChevronUp className="w-3.5 h-3.5 text-gray-400" />}
+                                                    </div>
+                                                    <div className="flex items-center gap-2 flex-1 min-w-0">
+                                                        <span className="font-semibold text-sm text-gray-800 truncate">{enc.name}</span>
+                                                        {enc.enclosureType && <span className="text-xs bg-blue-100 text-blue-700 px-2 py-0.5 rounded-full whitespace-nowrap shrink-0">{enc.enclosureType}</span>}
+                                                        {enc.size && <span className="text-xs text-gray-400 whitespace-nowrap hidden sm:inline shrink-0">{enc.size}</span>}
+                                                        <span className="text-xs text-gray-500 bg-white/70 px-1.5 py-0.5 rounded-full shrink-0">{occupants.length}</span>
+                                                    </div>
+                                                    <div className="flex items-center gap-1 ml-2 shrink-0" onClick={e => e.stopPropagation()}>
+                                                        <button
+                                                            onClick={() => {
+                                                                setEnclosureFormData({ name: enc.name, enclosureType: enc.enclosureType || '', size: enc.size || '', notes: enc.notes || '' });
+                                                                setEditingEnclosureId(enc._id);
+                                                                setEnclosureFormVisible(true);
+                                                                setCollapsedMgmtSections(p => ({...p, enclosures: false}));
+                                                            }}
+                                                            className="p-1 text-gray-400 hover:text-blue-600 rounded" title="Edit"
+                                                        ><Edit size={13} /></button>
+                                                        <button onClick={() => handleDeleteEnclosure(enc._id)}
+                                                            className="p-1 text-gray-400 hover:text-red-500 rounded" title="Delete"
+                                                        ><Trash2 size={13} /></button>
+                                                    </div>
+                                                </div>
+                                                {!isGrpCollapsed && enc.notes && (
+                                                    <div className="px-3 py-1.5 bg-gray-50 text-xs text-gray-500 border-b border-gray-100">{enc.notes}</div>
+                                                )}
+                                                {!isGrpCollapsed && (
+                                                    <div className="p-2 space-y-1.5 bg-white">
+                                                        {occupants.length === 0
+                                                            ? <div className="text-xs text-gray-400 text-center py-2">No animals assigned yet</div>
+                                                            : occupants.map(a => (
+                                                                <MgmtAnimalCard key={a._id || a.id_public} animal={a}
+                                                                    extras={
+                                                                        <button onClick={(e) => { e.stopPropagation(); handleAssignAnimalToEnclosure(a.id_public, ''); }}
+                                                                            className="text-xs text-gray-400 hover:text-red-500 border border-gray-200 hover:border-red-200 rounded px-1.5 py-0.5 shrink-0">
+                                                                            Remove
+                                                                        </button>
+                                                                    }
+                                                                />
+                                                            ))
+                                                        }
+                                                    </div>
+                                                )}
+                                            </div>
+                                        );
+                                    })}
+
+                                    {/* Unassigned animals */}
+                                    {unassignedAnimals.length > 0 && (
+                                        <div className="border border-dashed border-gray-300 rounded-lg overflow-hidden">
+                                            <div className="relative flex items-center justify-between bg-gray-50 px-3 py-2 cursor-pointer"
+                                                onClick={() => toggleGroup('enc_unassigned')}
+                                            >
+                                                <div className="absolute left-1/2 -translate-x-1/2 pointer-events-none">
+                                                    {collapsedMgmtGroups['enc_unassigned']
+                                                        ? <ChevronDown className="w-3.5 h-3.5 text-gray-400" />
+                                                        : <ChevronUp className="w-3.5 h-3.5 text-gray-400" />}
+                                                </div>
+                                                <span className="font-medium text-sm text-gray-500">Unassigned</span>
+                                                <span className="text-xs text-gray-400 bg-white/70 px-2 py-0.5 rounded-full">{unassignedAnimals.length}</span>
+                                            </div>
+                                            {!collapsedMgmtGroups['enc_unassigned'] && (
+                                                <div className="p-2 space-y-1.5 bg-white">
+                                                    {unassignedAnimals.map(a => (
+                                                        <MgmtAnimalCard key={a._id || a.id_public} animal={a}
+                                                            extras={
+                                                                enclosures.length > 0 ? (
+                                                                    assigningAnimalId === a.id_public ? (
+                                                                        <div className="flex items-center gap-1 shrink-0" onClick={e => e.stopPropagation()}>
+                                                                            <select autoFocus defaultValue=""
+                                                                                onChange={e => { if (e.target.value) { handleAssignAnimalToEnclosure(a.id_public, e.target.value); } setAssigningAnimalId(null); }}
+                                                                                onBlur={() => setAssigningAnimalId(null)}
+                                                                                className="text-xs border border-blue-300 rounded p-1 max-w-[130px]">
+                                                                                <option value="" disabled>Select enclosure...</option>
+                                                                                {enclosures.map(enc => <option key={enc._id} value={enc._id}>{enc.name}</option>)}
+                                                                            </select>
+                                                                        </div>
+                                                                    ) : (
+                                                                        <button onClick={(e) => { e.stopPropagation(); setAssigningAnimalId(a.id_public); }}
+                                                                            className="text-xs text-blue-500 hover:text-blue-700 border border-blue-200 rounded px-1.5 py-0.5 shrink-0 whitespace-nowrap">
+                                                                            Assign
+                                                                        </button>
+                                                                    )
+                                                                ) : null
+                                                            }
+                                                        />
+                                                    ))}
+                                                </div>
+                                            )}
+                                        </div>
+                                    )}
+                                </>
+                            )}
                         </div>
                     )}
                 </div>
@@ -16261,9 +16523,9 @@ const AnimalList = ({ authToken, showModalMessage, onEditAnimal, onViewAnimal, f
                                     {maintDueGroups.length > 0 && (
                                         <div className="space-y-1.5">
                                             <div className="text-xs font-semibold text-red-600 px-1 pb-0.5">Due Today / Overdue</div>
-                                            {maintDueGroups.map(([encName, g]) => (
-                                                <MgmtGroup key={`maint_due_${encName}`} groupKey={`maint_due_${encName}`}
-                                                    label={encName}
+                                            {maintDueGroups.map(([encKey, g]) => (
+                                                <MgmtGroup key={`maint_due_${encKey}`} groupKey={`maint_due_${encKey}`}
+                                                    label={g.label}
                                                     groupAnimals={g.animals.filter(a => isDue(a.lastMaintenanceDate, a.maintenanceFrequencyDays))}
                                                     headerClass="bg-red-50"
                                                     renderExtras={(a) => (
@@ -16286,9 +16548,9 @@ const AnimalList = ({ authToken, showModalMessage, onEditAnimal, onViewAnimal, f
                                     {maintOkGroups.length > 0 && (
                                         <div className="space-y-1.5">
                                             <div className="text-xs font-semibold text-green-600 px-1 pb-0.5">Up to Date</div>
-                                            {maintOkGroups.map(([encName, g]) => (
-                                                <MgmtGroup key={`maint_ok_${encName}`} groupKey={`maint_ok_${encName}`}
-                                                    label={encName} groupAnimals={g.animals}
+                                            {maintOkGroups.map(([encKey, g]) => (
+                                                <MgmtGroup key={`maint_ok_${encKey}`} groupKey={`maint_ok_${encKey}`}
+                                                    label={g.label} groupAnimals={g.animals}
                                                     headerClass="bg-green-50/60"
                                                     renderExtras={(a) => (
                                                         <div className="text-xs text-gray-400 text-right shrink-0 whitespace-nowrap">
