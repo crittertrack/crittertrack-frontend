@@ -2383,6 +2383,8 @@ const PrivateAnimalDetail = ({ animal, onClose, onEdit, API_BASE_URL, authToken,
     const [detailViewTab, setDetailViewTab] = useState(1);
     const [copySuccess, setCopySuccess] = useState(false);
     const [enclosureInfo, setEnclosureInfo] = useState(null);
+    const [animalLogs, setAnimalLogs] = useState(null); // null = not yet fetched
+    const [animalLogsLoading, setAnimalLogsLoading] = useState(false);
     const { fieldTemplate, getLabel } = useDetailFieldTemplate(animal?.species, API_BASE_URL);
 
     // Fetch assigned enclosure info
@@ -2392,6 +2394,16 @@ const PrivateAnimalDetail = ({ animal, onClose, onEdit, API_BASE_URL, authToken,
             .then(res => setEnclosureInfo(res.data.find(e => e._id === animal.enclosureId) || null))
             .catch(() => setEnclosureInfo(null));
     }, [animal?.enclosureId, authToken, API_BASE_URL]);
+
+    // Fetch logs when Logs tab is opened (lazy, once per animal)
+    React.useEffect(() => {
+        if (detailViewTab !== 14 || animalLogs !== null || !animal?.id_public || !authToken) return;
+        setAnimalLogsLoading(true);
+        axios.get(`${API_BASE_URL}/animals/${animal.id_public}/logs`, { headers: { Authorization: `Bearer ${authToken}` } })
+            .then(res => setAnimalLogs(res.data || []))
+            .catch(() => setAnimalLogs([]))
+            .finally(() => setAnimalLogsLoading(false));
+    }, [detailViewTab, animal?.id_public, authToken, API_BASE_URL, animalLogs]);
     
     const handleShare = () => {
         const url = `${window.location.origin}/animal/${animal.id_public}`;
@@ -2540,7 +2552,8 @@ const PrivateAnimalDetail = ({ animal, onClose, onEdit, API_BASE_URL, authToken,
                             { id: 10, label: 'Records', icon: '📝' },
                             { id: 11, label: 'End of Life', icon: '⚖️' },
                             { id: 12, label: 'Show', icon: '🏆' },
-                            { id: 13, label: 'Legal', icon: '📄' }
+                            { id: 13, label: 'Legal', icon: '📄' },
+                            { id: 14, label: 'Logs', icon: '📜' }
                         ].map(tab => (
                             <button
                                 key={tab.id}
@@ -3542,6 +3555,83 @@ const PrivateAnimalDetail = ({ animal, onClose, onEdit, API_BASE_URL, authToken,
                             )}
                         </div>
                     )}
+
+                {/* ── TAB 14 · Logs ─────────────────────────────────────────────────── */}
+                {detailViewTab === 14 && (
+                    <div className="space-y-6 p-1">
+                        {animalLogsLoading ? (
+                            <div className="flex items-center justify-center py-12 text-gray-400 gap-2">
+                                <svg className="animate-spin h-5 w-5" viewBox="0 0 24 24" fill="none"><circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"/><path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v8z"/></svg>
+                                Loading logs...
+                            </div>
+                        ) : !animalLogs || animalLogs.length === 0 ? (
+                            <div className="text-center py-12 text-gray-400 text-sm">No changes recorded yet. Logs are created when you edit this animal.</div>
+                        ) : (() => {
+                            const careLogs  = animalLogs.filter(l => l.category === 'care');
+                            const fieldLogs = animalLogs.filter(l => l.category === 'field');
+                            const fmtVal = v => v === null || v === undefined ? '—' : typeof v === 'boolean' ? (v ? 'Yes' : 'No') : String(v).slice(0, 80);
+                            return (
+                                <>
+                                    {/* Care Schedule Updates */}
+                                    {careLogs.length > 0 && (
+                                        <div className="space-y-3">
+                                            <div className="flex items-center gap-2 pb-1 border-b border-blue-200">
+                                                <span className="text-base">🏠</span>
+                                                <h3 className="font-semibold text-gray-700 text-sm uppercase tracking-wide">Care Schedule Updates</h3>
+                                                <span className="text-xs text-gray-400 bg-gray-100 px-2 py-0.5 rounded-full">{careLogs.length}</span>
+                                            </div>
+                                            {careLogs.map(log => (
+                                                <div key={log._id} className="bg-blue-50 border border-blue-100 rounded-lg p-3 space-y-1.5">
+                                                    <span className="text-xs font-medium text-blue-500">{new Date(log.createdAt).toLocaleString()}</span>
+                                                    {log.changes.map((c, i) => (
+                                                        <div key={i} className="text-sm">
+                                                            <span className="font-medium text-gray-700">{c.label}:</span>{' '}
+                                                            {c.field === 'careTasks' ? (
+                                                                <span className="text-gray-500">Task list updated</span>
+                                                            ) : c.field === 'careTaskDone' ? (
+                                                                <span className="text-green-600">✓ Completed: {c.newValue}</span>
+                                                            ) : (
+                                                                <span className="text-gray-500">
+                                                                    {c.oldValue != null ? <span className="line-through text-red-400 mr-1">{fmtVal(c.oldValue)}</span> : <span className="text-gray-400 mr-1">none</span>}
+                                                                    → <span className="text-green-600">{fmtVal(c.newValue)}</span>
+                                                                </span>
+                                                            )}
+                                                        </div>
+                                                    ))}
+                                                </div>
+                                            ))}
+                                        </div>
+                                    )}
+
+                                    {/* Field Edits */}
+                                    {fieldLogs.length > 0 && (
+                                        <div className="space-y-3">
+                                            <div className="flex items-center gap-2 pb-1 border-b border-gray-200">
+                                                <span className="text-base">✏️</span>
+                                                <h3 className="font-semibold text-gray-700 text-sm uppercase tracking-wide">Field Edits</h3>
+                                                <span className="text-xs text-gray-400 bg-gray-100 px-2 py-0.5 rounded-full">{fieldLogs.length}</span>
+                                            </div>
+                                            {fieldLogs.map(log => (
+                                                <div key={log._id} className="bg-gray-50 border border-gray-200 rounded-lg p-3 space-y-1.5">
+                                                    <span className="text-xs font-medium text-gray-500">{new Date(log.createdAt).toLocaleString()}</span>
+                                                    {log.changes.map((c, i) => (
+                                                        <div key={i} className="text-sm flex items-start gap-1.5 flex-wrap">
+                                                            <span className="font-medium text-gray-700 shrink-0">{c.label}:</span>
+                                                            <span className="text-gray-500">
+                                                                {c.oldValue != null ? <span className="line-through text-red-400 mr-1">{fmtVal(c.oldValue)}</span> : <span className="text-gray-400 mr-1">—</span>}
+                                                                → <span className="text-green-600">{fmtVal(c.newValue)}</span>
+                                                            </span>
+                                                        </div>
+                                                    ))}
+                                                </div>
+                                            ))}
+                                        </div>
+                                    )}
+                                </>
+                            );
+                        })()}
+                    </div>
+                )}
 
                 {/* Pedigree Chart Modal */}
                 {showPedigree && (
