@@ -17206,6 +17206,22 @@ const AnimalList = ({ authToken, showModalMessage, onEditAnimal, onViewAnimal, f
             }
         };
 
+        const handleSkipFeeding = async (e, animal) => {
+            e.stopPropagation();
+            const now = new Date().toISOString();
+            // Optimistic: advance lastFedDate so it clears the overdue state
+            setAllAnimalsRaw(prev => prev.map(a => a.id_public === animal.id_public ? { ...a, lastFedDate: now } : a));
+            try {
+                await axios.post(`${API_BASE_URL}/animals/${animal.id_public}/feeding`,
+                    { skipped: true },
+                    { headers: { Authorization: `Bearer ${authToken}` } });
+                logManagementActivity('feeding_skipped', animal.id_public, { name: animal.name, species: animal.species });
+            } catch (err) {
+                console.error('Skip feeding failed:', err);
+                setAllAnimalsRaw(prev => prev.map(a => a.id_public === animal.id_public ? { ...a, lastFedDate: animal.lastFedDate } : a));
+            }
+        };
+
         const handleMarkMaintDone = (e, animal) => {
             e.stopPropagation();
             const now = new Date().toISOString();
@@ -17279,6 +17295,20 @@ const AnimalList = ({ authToken, showModalMessage, onEditAnimal, onViewAnimal, f
                 .catch(err => { console.error('Mark enclosure task done failed:', err); fetchEnclosures(); });
         };
 
+        const handleSkipEnclosureTask = async (e, enc, taskIdx) => {
+            e.stopPropagation();
+            const updated = [...(enc.cleaningTasks || [])];
+            const taskName = updated[taskIdx]?.taskName || 'Cleaning task';
+            updated[taskIdx] = { ...updated[taskIdx], lastDoneDate: new Date().toISOString(), lastSkipped: true };
+            // Optimistic update
+            setEnclosures(prev => prev.map(ex => ex._id === enc._id ? { ...ex, cleaningTasks: updated } : ex));
+            axios.put(`${API_BASE_URL}/enclosures/${enc._id}`,
+                { name: enc.name, enclosureType: enc.enclosureType || '', size: enc.size || '', notes: enc.notes || '', cleaningTasks: updated },
+                { headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${authToken}` } })
+                .then(() => logManagementActivity('enclosure_task_skipped', null, { name: enc.name, taskName }))
+                .catch(err => { console.error('Skip enclosure task failed:', err); fetchEnclosures(); });
+        };
+
         const handleMarkAnimalCareTaskDone = (e, animal, taskIdx) => {
             e.stopPropagation();
             const updated = [...(animal.careTasks || [])];
@@ -17289,6 +17319,19 @@ const AnimalList = ({ authToken, showModalMessage, onEditAnimal, onViewAnimal, f
                 { headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${authToken}` } })
                 .then(() => logManagementActivity('care_task_done', animal.id_public, { name: animal.name, taskName: updated[taskIdx]?.taskName || 'Care task' }))
                 .catch(err => { console.error('Mark animal care task done failed:', err); fetchAllAnimals(); });
+        };
+
+        const handleSkipAnimalCareTask = (e, animal, taskIdx) => {
+            e.stopPropagation();
+            const updated = [...(animal.careTasks || [])];
+            const taskName = updated[taskIdx]?.taskName || 'Care task';
+            updated[taskIdx] = { ...updated[taskIdx], lastDoneDate: new Date().toISOString(), lastSkipped: true };
+            // Optimistic update
+            setAllAnimalsRaw(prev => prev.map(a => a.id_public === animal.id_public ? { ...a, careTasks: updated } : a));
+            axios.put(`${API_BASE_URL}/animals/${animal.id_public}`, { careTasks: updated },
+                { headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${authToken}` } })
+                .then(() => logManagementActivity('care_task_skipped', animal.id_public, { name: animal.name, taskName }))
+                .catch(err => { console.error('Skip animal care task failed:', err); fetchAllAnimals(); });
         };
 
         const handleUnquarantine = (e, animal) => {
@@ -17711,6 +17754,10 @@ const AnimalList = ({ authToken, showModalMessage, onEditAnimal, onViewAnimal, f
                                                         className="bg-green-500 hover:bg-green-600 text-white text-xs font-medium px-2 py-1 rounded-lg whitespace-nowrap">
                                                         ✓ Fed
                                                     </button>
+                                                    <button onClick={(e) => handleSkipFeeding(e, a)}
+                                                        className="bg-gray-100 hover:bg-gray-200 text-gray-500 text-xs font-medium px-2 py-1 rounded-lg whitespace-nowrap border border-gray-200">
+                                                        ↷ Skip
+                                                    </button>
                                                 </div>
                                             )} />
                                     )}
@@ -17779,6 +17826,10 @@ const AnimalList = ({ authToken, showModalMessage, onEditAnimal, onViewAnimal, f
                                                                         className={`ml-1 text-xs px-2 py-0.5 rounded font-medium border ${due ? 'bg-amber-500 text-white hover:bg-amber-600 border-amber-500' : 'bg-gray-100 text-gray-600 hover:bg-gray-200 border-gray-200'}`}>
                                                                         ✓ Done
                                                                     </button>
+                                                                    <button onClick={(e) => handleSkipAnimalCareTask(e, a, idx)}
+                                                                        className="ml-1 text-xs px-2 py-0.5 rounded font-medium border bg-gray-100 text-gray-400 hover:bg-gray-200 border-gray-200">
+                                                                        ↷ Skip
+                                                                    </button>
                                                                 </div>
                                                             </div>
                                                         );
@@ -17838,6 +17889,10 @@ const AnimalList = ({ authToken, showModalMessage, onEditAnimal, onViewAnimal, f
                                                                     <button onClick={(e) => handleMarkEnclosureTaskDone(e, enc, idx)}
                                                                         className={`ml-1 text-xs px-2 py-0.5 rounded font-medium border ${due ? 'bg-amber-500 text-white hover:bg-amber-600 border-amber-500' : 'bg-gray-100 text-gray-600 hover:bg-gray-200 border-gray-200'}`}>
                                                                         ✓ Done
+                                                                    </button>
+                                                                    <button onClick={(e) => handleSkipEnclosureTask(e, enc, idx)}
+                                                                        className="ml-1 text-xs px-2 py-0.5 rounded font-medium border bg-gray-100 text-gray-400 hover:bg-gray-200 border-gray-200">
+                                                                        ↷ Skip
                                                                     </button>
                                                                 </div>
                                                             </div>
