@@ -1,4 +1,4 @@
-import React, { useEffect, useMemo, useState } from 'react';
+﻿import React, { useEffect, useMemo, useState } from 'react';
 import { 
     AlertCircle, RefreshCw, Search, Filter, Clock, CheckCircle, 
     Loader2, Flag, Calendar, Tag, Eye, ChevronUp, ChevronDown,
@@ -190,7 +190,7 @@ const getAnimalDetails = (report = {}) => {
             id_public: animal.id_public || null,
             prefix: animal.prefix || null,
             suffix: animal.suffix || null,
-            breederyId: animal.breederyId || null,
+            breederAssignedId: animal.breederAssignedId || null,
             species: animal.species || null,
             gender: animal.gender || null,
             status: animal.status || null,
@@ -1155,7 +1155,7 @@ export default function ModOversightPanel({
                                                     </p>
                                                     <p style={{ margin: '4px 0', fontSize: '13px', color: '#666' }}>
                                                         ID: <span style={{ fontFamily: 'monospace' }}>{animal.id_public || 'N/A'}</span>
-                                                        {animal.breederyId && <span> · Breedery: {animal.breederyId}</span>}
+                                                        {animal.breederAssignedId && <span> · Breedery: {animal.breederAssignedId}</span>}
                                                     </p>
                                                     <div style={{ display: 'flex', gap: '8px', flexWrap: 'wrap', marginTop: '8px' }}>
                                                         {animal.species && (
