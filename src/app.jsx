@@ -15643,7 +15643,8 @@ const AnimalList = ({ authToken, showModalMessage, onEditAnimal, onViewAnimal, f
         if (!authToken) return;
         try {
             const res = await axios.get(`${API_BASE_URL}/animals`, {
-                headers: { Authorization: `Bearer ${authToken}` }
+                headers: { Authorization: `Bearer ${authToken}` },
+                params: { isOwned: 'true' }
             });
             setAllAnimals(res.data || []);
         } catch (err) { console.error('[fetchAllAnimals]', err); }
