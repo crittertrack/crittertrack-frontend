@@ -2,7 +2,7 @@
 import React, { useState, useEffect, useCallback, useRef, useMemo } from 'react';
 import { useParams, useNavigate, useLocation, Routes, Route, Link as RouterLink } from 'react-router-dom';
 import axios from 'axios';
-import { LogOut, Cat, UserPlus, LogIn, ChevronLeft, ChevronUp, ChevronDown, Trash2, Edit, Save, PlusCircle, Plus, ArrowLeft, Loader2, RefreshCw, User, Users, ClipboardList, BookOpen, Settings, Mail, Globe, Bean, Milk, Search, X, Mars, Venus, Eye, EyeOff, Heart, HeartOff, HeartHandshake, Bell, XCircle, CheckCircle, Download, FileText, Link, AlertCircle, DollarSign, Archive, ArrowLeftRight, RotateCcw, Info, Hourglass, MessageSquare, Ban, Flag, Scissors, VenusAndMars, Circle, Shield, Lock, AlertTriangle, ShoppingBag, Check, Star, Moon, MoonStar, Calculator, Network, LayoutGrid, Home, Utensils, Wrench, Activity, ScrollText, Package } from 'lucide-react';
+import { LogOut, Cat, UserPlus, LogIn, ChevronLeft, ChevronUp, ChevronDown, Trash2, Edit, Save, PlusCircle, Plus, ArrowLeft, Loader2, RefreshCw, User, Users, ClipboardList, BookOpen, Settings, Mail, Globe, Bean, Milk, Search, X, Mars, Venus, Eye, EyeOff, Heart, HeartOff, HeartHandshake, Bell, XCircle, CheckCircle, Download, FileText, Link, AlertCircle, DollarSign, Archive, ArrowLeftRight, RotateCcw, Info, Hourglass, MessageSquare, Ban, Flag, Scissors, VenusAndMars, Circle, Shield, Lock, AlertTriangle, ShoppingBag, Check, Star, Moon, MoonStar, Calculator, Network, LayoutGrid, Home, Utensils, Wrench, Activity, ScrollText, Package, Calendar } from 'lucide-react';
 import jsPDF from 'jspdf';
 import html2canvas from 'html2canvas';
 import 'flag-icons/css/flag-icons.min.css';
@@ -15447,7 +15447,7 @@ const AnimalList = ({ authToken, showModalMessage, onEditAnimal, onViewAnimal, f
     const [showSuppliesScreen, setShowSuppliesScreen] = useState(false);
     const [supplies, setSupplies] = useState([]);
     const [suppliesLoading, setSuppliesLoading] = useState(false);
-    const [supplyForm, setSupplyForm] = useState({ name: '', category: 'Other', currentStock: '', unit: '', reorderThreshold: '', notes: '', isFeederAnimal: false, feederType: '', feederSize: '', costPerUnit: '' });
+    const [supplyForm, setSupplyForm] = useState({ name: '', category: 'Other', currentStock: '', unit: '', reorderThreshold: '', notes: '', isFeederAnimal: false, feederType: '', feederSize: '', costPerUnit: '', nextOrderDate: '', orderFrequency: '', orderFrequencyUnit: 'months' });
     const [supplyFormVisible, setSupplyFormVisible] = useState(false);
     const [editingSupplyId, setEditingSupplyId] = useState(null);
     const [supplySaving, setSupplySaving] = useState(false);
@@ -16586,8 +16586,14 @@ const AnimalList = ({ authToken, showModalMessage, onEditAnimal, onViewAnimal, f
         // Map supply category → budget expense category
         const BUDGET_CATEGORY_MAP = { Food: 'food', Bedding: 'housing', Medication: 'medical', Other: 'other' };
         const isLow = (item) => item.reorderThreshold != null && item.currentStock <= item.reorderThreshold;
+        const today = new Date(); today.setHours(0, 0, 0, 0);
+        const isOverdue = (item) => item.nextOrderDate && new Date(item.nextOrderDate) < today;
+        const isDueSoon = (item) => { if (!item.nextOrderDate) return false; const d = new Date(item.nextOrderDate); const diff = (d - today) / (1000 * 60 * 60 * 24); return diff >= 0 && diff <= 14; };
+        const needsAttention = (item) => isLow(item) || isOverdue(item);
         const filtered = supplyCategoryFilter === 'All' ? supplies : supplies.filter(s => s.category === supplyCategoryFilter);
         const lowStockItems = supplies.filter(isLow);
+        const overdueItems = supplies.filter(isOverdue);
+        const attentionItems = supplies.filter(needsAttention);
 
         const handleSupplySubmit = async () => {
             if (!supplyForm.name.trim()) return;
@@ -16600,7 +16606,7 @@ const AnimalList = ({ authToken, showModalMessage, onEditAnimal, onViewAnimal, f
                     const res = await axios.post(`${API_BASE_URL}/supplies`, supplyForm, { headers: { Authorization: `Bearer ${authToken}` } });
                     setSupplies(prev => [...prev, res.data]);
                 }
-                setSupplyForm({ name: '', category: 'Other', currentStock: '', unit: '', reorderThreshold: '', notes: '', isFeederAnimal: false, feederType: '', feederSize: '', costPerUnit: '' });
+                setSupplyForm({ name: '', category: 'Other', currentStock: '', unit: '', reorderThreshold: '', notes: '', isFeederAnimal: false, feederType: '', feederSize: '', costPerUnit: '', nextOrderDate: '', orderFrequency: '', orderFrequencyUnit: 'months' });
                 setSupplyFormVisible(false);
                 setEditingSupplyId(null);
             } catch (err) { console.error(err); }
@@ -16627,6 +16633,9 @@ const AnimalList = ({ authToken, showModalMessage, onEditAnimal, onViewAnimal, f
                 feederType: item.feederType || '',
                 feederSize: item.feederSize || '',
                 costPerUnit: item.costPerUnit ?? '',
+                nextOrderDate: item.nextOrderDate ? new Date(item.nextOrderDate).toISOString().split('T')[0] : '',
+                orderFrequency: item.orderFrequency ?? '',
+                orderFrequencyUnit: item.orderFrequencyUnit || 'months',
             });
             setEditingSupplyId(item._id);
             setSupplyFormVisible(true);
@@ -16647,11 +16656,19 @@ const AnimalList = ({ authToken, showModalMessage, onEditAnimal, onViewAnimal, f
             if (!qty || qty <= 0 || !restockForm.cost || cost < 0) return;
             setRestockSaving(true);
             try {
-                // 1. Update supply stock
+                // 1. Update supply stock (and advance next order date if a schedule is set)
                 const newStock = (item.currentStock || 0) + qty;
+                const stockPatch = { currentStock: newStock };
+                if (item.orderFrequency && item.orderFrequencyUnit) {
+                    const base = new Date();
+                    if (item.orderFrequencyUnit === 'days') base.setDate(base.getDate() + Number(item.orderFrequency));
+                    else if (item.orderFrequencyUnit === 'weeks') base.setDate(base.getDate() + Number(item.orderFrequency) * 7);
+                    else if (item.orderFrequencyUnit === 'months') base.setMonth(base.getMonth() + Number(item.orderFrequency));
+                    stockPatch.nextOrderDate = base.toISOString().split('T')[0];
+                }
                 const supplyRes = await axios.patch(
                     `${API_BASE_URL}/supplies/${item._id}`,
-                    { currentStock: newStock },
+                    stockPatch,
                     { headers: { Authorization: `Bearer ${authToken}` } }
                 );
                 setSupplies(prev => prev.map(s => s._id === item._id ? supplyRes.data : s));
@@ -16702,7 +16719,7 @@ const AnimalList = ({ authToken, showModalMessage, onEditAnimal, onViewAnimal, f
                         <span className="text-xs bg-emerald-100 text-emerald-700 px-2 py-0.5 rounded-full">{supplies.length} item{supplies.length !== 1 ? 's' : ''}</span>
                     </div>
                     <button
-                        onClick={() => { setSupplyForm({ name: '', category: 'Other', currentStock: '', unit: '', reorderThreshold: '', notes: '', isFeederAnimal: false, feederType: '', feederSize: '', costPerUnit: '' }); setEditingSupplyId(null); setSupplyFormVisible(v => !v); }}
+                        onClick={() => { setSupplyForm({ name: '', category: 'Other', currentStock: '', unit: '', reorderThreshold: '', notes: '', isFeederAnimal: false, feederType: '', feederSize: '', costPerUnit: '', nextOrderDate: '', orderFrequency: '', orderFrequencyUnit: 'months' }); setEditingSupplyId(null); setSupplyFormVisible(v => !v); }}
                         className="flex items-center gap-1 px-3 py-1.5 bg-emerald-600 hover:bg-emerald-700 text-white text-sm rounded-lg font-medium transition"
                     >
                         <Plus size={14} /> Add Item
@@ -16710,12 +16727,12 @@ const AnimalList = ({ authToken, showModalMessage, onEditAnimal, onViewAnimal, f
                 </div>
 
                 {/* Low stock alert */}
-                {lowStockItems.length > 0 && (
+                {attentionItems.length > 0 && (
                     <div className="flex items-start gap-2 bg-amber-50 border border-amber-200 rounded-xl p-3">
                         <AlertTriangle size={16} className="text-amber-500 mt-0.5 shrink-0" />
-                        <div className="text-sm text-amber-700">
-                            <span className="font-semibold">{lowStockItems.length} item{lowStockItems.length !== 1 ? 's' : ''} need restocking:</span>{' '}
-                            {lowStockItems.map(i => i.name).join(', ')}
+                        <div className="text-sm text-amber-700 space-y-0.5">
+                            {lowStockItems.length > 0 && <div><span className="font-semibold">Low stock:</span> {lowStockItems.map(i => i.name).join(', ')}</div>}
+                            {overdueItems.length > 0 && <div><span className="font-semibold">Order overdue:</span> {overdueItems.map(i => i.name).join(', ')}</div>}
                         </div>
                     </div>
                 )}
@@ -16754,6 +16771,29 @@ const AnimalList = ({ authToken, showModalMessage, onEditAnimal, onViewAnimal, f
                             <div>
                                 <label className="text-xs font-medium text-gray-600 mb-1 block">Notes</label>
                                 <input type="text" value={supplyForm.notes} onChange={e => setSupplyForm(f => ({ ...f, notes: e.target.value }))} placeholder="Optional notes" className="w-full text-sm border border-gray-300 rounded-lg px-3 py-1.5 focus:outline-none focus:ring-1 focus:ring-emerald-400 focus:border-emerald-400" />
+                            </div>
+                        </div>
+                        {/* Schedule-based reorder */}
+                        <div className="border-t border-emerald-200 pt-3 space-y-2">
+                            <p className="text-xs font-semibold text-gray-600">Reorder Schedule <span className="font-normal text-gray-400">(optional — for bulk or timed items)</span></p>
+                            <p className="text-[11px] text-gray-400">Set a date &amp; repeat frequency for items ordered on a schedule, regardless of stock count — e.g. a 650 L bedding pallet every 3 months.</p>
+                            <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
+                                <div>
+                                    <label className="text-xs font-medium text-gray-600 mb-1 block">Next order date</label>
+                                    <input type="date" value={supplyForm.nextOrderDate} onChange={e => setSupplyForm(f => ({ ...f, nextOrderDate: e.target.value }))} className="w-full text-sm border border-gray-300 rounded-lg px-3 py-1.5 focus:outline-none focus:ring-1 focus:ring-emerald-400" />
+                                </div>
+                                <div>
+                                    <label className="text-xs font-medium text-gray-600 mb-1 block">Repeat every</label>
+                                    <input type="number" min="1" value={supplyForm.orderFrequency} onChange={e => setSupplyForm(f => ({ ...f, orderFrequency: e.target.value }))} placeholder="e.g. 3" className="w-full text-sm border border-gray-300 rounded-lg px-3 py-1.5 focus:outline-none focus:ring-1 focus:ring-emerald-400" />
+                                </div>
+                                <div>
+                                    <label className="text-xs font-medium text-gray-600 mb-1 block">Frequency unit</label>
+                                    <select value={supplyForm.orderFrequencyUnit} onChange={e => setSupplyForm(f => ({ ...f, orderFrequencyUnit: e.target.value }))} className="w-full text-sm border border-gray-300 rounded-lg px-3 py-1.5 bg-white focus:outline-none focus:ring-1 focus:ring-emerald-400">
+                                        <option value="days">Days</option>
+                                        <option value="weeks">Weeks</option>
+                                        <option value="months">Months</option>
+                                    </select>
+                                </div>
                             </div>
                         </div>
                         {/* Feeder animal toggle (Food only) */}
@@ -16810,9 +16850,11 @@ const AnimalList = ({ authToken, showModalMessage, onEditAnimal, onViewAnimal, f
                         {filtered.map(item => (
                             <div key={item._id} className={`border rounded-xl p-3 bg-white flex flex-col gap-1.5 shadow-sm ${isLow(item) ? 'border-amber-300' : 'border-gray-200'}`}>
                                 <div className="flex items-start justify-between gap-2">
-                                    <div className="flex items-center gap-2 min-w-0">
+                                    <div className="flex items-center gap-1.5 flex-wrap min-w-0">
                                         <span className="font-semibold text-sm text-gray-800 truncate">{item.name}</span>
-                                        {isLow(item) && <span className="text-xs bg-amber-100 text-amber-700 px-1.5 py-0.5 rounded-full font-medium shrink-0">Reorder</span>}
+                                        {isLow(item) && <span className="text-xs bg-amber-100 text-amber-700 px-1.5 py-0.5 rounded-full font-medium shrink-0">Low Stock</span>}
+                                        {isOverdue(item) && <span className="text-xs bg-red-100 text-red-700 px-1.5 py-0.5 rounded-full font-medium shrink-0">Order Due</span>}
+                                        {!isOverdue(item) && isDueSoon(item) && <span className="text-xs bg-blue-100 text-blue-700 px-1.5 py-0.5 rounded-full font-medium shrink-0">Order Soon</span>}
                                     </div>
                                     <span className={`text-xs px-2 py-0.5 rounded-full font-medium shrink-0 ${CATEGORY_COLORS[item.category] || CATEGORY_COLORS.Other}`}>{item.category}</span>
                                 </div>
@@ -16822,11 +16864,18 @@ const AnimalList = ({ authToken, showModalMessage, onEditAnimal, onViewAnimal, f
                                     {item.reorderThreshold != null && <span className="text-gray-400 text-xs ml-auto">Reorder at {item.reorderThreshold}</span>}
                                 </div>
                                 {item.notes && <p className="text-xs text-gray-400 truncate">{item.notes}</p>}
-                                {item.isFeederAnimal && (
+                                {(item.isFeederAnimal || item.costPerUnit != null) && (
                                     <div className="flex flex-wrap gap-1.5 mt-0.5">
-                                        {item.feederType && <span className="text-xs bg-green-100 text-green-700 px-2 py-0.5 rounded-full">{item.feederType}</span>}
-                                        {item.feederSize && <span className="text-xs bg-green-100 text-green-700 px-2 py-0.5 rounded-full">{item.feederSize}</span>}
-                                        {item.costPerUnit != null && <span className="text-xs text-gray-400">${Number(item.costPerUnit).toFixed(2)} each</span>}
+                                        {item.isFeederAnimal && item.feederType && <span className="text-xs bg-green-100 text-green-700 px-2 py-0.5 rounded-full">{item.feederType}</span>}
+                                        {item.isFeederAnimal && item.feederSize && <span className="text-xs bg-green-100 text-green-700 px-2 py-0.5 rounded-full">{item.feederSize}</span>}
+                                        {item.costPerUnit != null && <span className="text-xs text-gray-400">${Number(item.costPerUnit).toFixed(2)} / {item.unit || 'unit'}</span>}
+                                    </div>
+                                )}
+                                {item.nextOrderDate && (
+                                    <div className={`flex items-center gap-1.5 text-xs rounded-lg px-2 py-1.5 mt-0.5 ${isOverdue(item) ? 'bg-red-50 text-red-600' : isDueSoon(item) ? 'bg-blue-50 text-blue-600' : 'bg-gray-50 text-gray-500'}`}>
+                                        <Calendar size={11} className="shrink-0" />
+                                        <span>Next order: {new Date(item.nextOrderDate).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })}</span>
+                                        {item.orderFrequency && <span className="opacity-60">· every {item.orderFrequency} {item.orderFrequencyUnit}</span>}
                                     </div>
                                 )}
 
@@ -17598,7 +17647,7 @@ const AnimalList = ({ authToken, showModalMessage, onEditAnimal, onViewAnimal, f
                                     <span>Supplies &amp; Inventory</span>
                                     {suppliesLoading
                                         ? <Loader2 size={11} className="animate-spin text-gray-400" />
-                                        : <span className="text-gray-400 font-normal normal-case">{supplies.length} item{supplies.length !== 1 ? 's' : ''}{supplies.filter(s => s.reorderThreshold != null && s.currentStock <= s.reorderThreshold).length > 0 && <span className="ml-1 text-amber-600">· {supplies.filter(s => s.reorderThreshold != null && s.currentStock <= s.reorderThreshold).length} to reorder</span>}</span>
+                                        : <span className="text-gray-400 font-normal normal-case">{supplies.length} item{supplies.length !== 1 ? 's' : ''}{supplies.filter(s => (s.reorderThreshold != null && s.currentStock <= s.reorderThreshold) || (s.nextOrderDate && new Date(s.nextOrderDate) < new Date())).length > 0 && <span className="ml-1 text-amber-600">· {supplies.filter(s => (s.reorderThreshold != null && s.currentStock <= s.reorderThreshold) || (s.nextOrderDate && new Date(s.nextOrderDate) < new Date())).length} to reorder</span>}</span>
                                     }
                                 </div>
                                 <div className="px-3 py-3 flex items-center justify-between">
@@ -17726,7 +17775,7 @@ const AnimalList = ({ authToken, showModalMessage, onEditAnimal, onViewAnimal, f
                     )}
                     {animalView === 'management' && !showActivityLogScreen && !showSuppliesScreen && (
                         <button
-                            onClick={() => { setSupplyForm({ name: '', category: 'Other', currentStock: '', unit: '', reorderThreshold: '', notes: '' }); setEditingSupplyId(null); setSupplyFormVisible(false); setShowSuppliesScreen(true); }}
+                            onClick={() => { setSupplyForm({ name: '', category: 'Other', currentStock: '', unit: '', reorderThreshold: '', notes: '', isFeederAnimal: false, feederType: '', feederSize: '', costPerUnit: '', nextOrderDate: '', orderFrequency: '', orderFrequencyUnit: 'months' }); setEditingSupplyId(null); setSupplyFormVisible(false); setShowSuppliesScreen(true); }}
                             className="flex items-center gap-1 px-2 sm:px-3 py-1 sm:py-1.5 text-xs sm:text-sm text-emerald-600 hover:text-emerald-800 hover:bg-emerald-50 border border-emerald-200 rounded-lg transition font-medium"
                             title="Supplies & Inventory"
                         >
