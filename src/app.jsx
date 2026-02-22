@@ -19305,6 +19305,8 @@ const App = () => {
     // Tutorial modal states
     const [showInfoTab, setShowInfoTab] = useState(false);
     const [showAdminPanel, setShowAdminPanel] = useState(false);
+    const [showProfileMenu, setShowProfileMenu] = useState(false);
+    const profileMenuRef = useRef(null);
     const [showModReportQueue, setShowModReportQueue] = useState(false);
     const [modCurrentContext, setModCurrentContext] = useState(null);
     const [inModeratorMode, setInModeratorMode] = useState(() => {
@@ -20312,6 +20314,17 @@ const App = () => {
             return () => clearTimeout(timer);
         }
     }, [authToken, hasSeenDonationHighlight]);
+
+    // Close profile dropdown when clicking outside
+    useEffect(() => {
+        const handleClickOutside = (e) => {
+            if (profileMenuRef.current && !profileMenuRef.current.contains(e.target)) {
+                setShowProfileMenu(false);
+            }
+        };
+        if (showProfileMenu) document.addEventListener('mousedown', handleClickOutside);
+        return () => document.removeEventListener('mousedown', handleClickOutside);
+    }, [showProfileMenu]);
 	
     // Fetch global species list and configs
     useEffect(() => {
@@ -21423,33 +21436,6 @@ const App = () => {
                             <MoonStar size={18} className="mb-1" />
                             <span>Breeders</span>
                         </button>
-                        <button onClick={() => navigate('/profile')} data-tutorial-target="profile-btn" className={`px-4 py-2 text-xs font-medium rounded-lg transition duration-150 flex flex-col items-center ${currentView === 'profile' ? 'bg-primary text-black shadow-md' : 'text-gray-600 hover:bg-gray-100'}`}>
-                            <User size={18} className="mb-1" />
-                            <span>Profile</span>
-                        </button>
-                        {!isMobile && (
-                            <button onClick={() => setShowInfoTab(true)} data-tutorial-target="help-btn" className={`px-4 py-2 text-xs font-medium rounded-lg transition duration-150 flex flex-col items-center text-gray-600 hover:bg-gray-100`} title="Tutorials & Help">
-                                <BookOpen size={18} className="mb-1" />
-                                <span>Help</span>
-                            </button>
-                        )}
-                        {['admin', 'moderator'].includes(userProfile?.role) && !isMobile && (
-                            <>
-                                {!inModeratorMode ? (
-                                    <button onClick={() => setShowModerationAuthModal(true)} className={`px-4 py-2 text-xs font-medium rounded-lg transition duration-150 flex flex-col items-center text-red-600 hover:bg-red-50`} title="Enter Moderation Mode">
-                                        <Lock size={18} className="mb-1" />
-                                        <span>Moderation</span>
-                                    </button>
-                                ) : (
-                                    <>
-                                        <button onClick={() => setShowAdminPanel(!showAdminPanel)} className={`px-4 py-2 text-xs font-medium rounded-lg transition duration-150 flex flex-col items-center ${showAdminPanel ? 'text-red-600 bg-red-50' : 'text-red-600 hover:bg-red-50'}`} title="Open Moderation Panel">
-                                            <Shield size={18} className="mb-1" />
-                                            <span>Panel</span>
-                                        </button>
-                                    </>
-                                )}
-                            </>
-                        )}
                     </nav>
 
                     <div className="flex items-center space-x-3">
@@ -21495,14 +21481,42 @@ const App = () => {
                             )}
                         </button>
                         
-                        <button 
-                            onClick={() => handleLogout(false)} 
-                            title="Log Out"
-                            className="bg-accent hover:bg-accent/80 text-white font-semibold py-2 px-3 rounded-lg transition duration-150 shadow-md flex flex-col items-center"
-                        >
-                            <LogOut size={18} className="mb-1" />
-                            <span className="text-xs">Logout</span>
-                        </button>
+                        {/* Avatar / Profile Dropdown */}
+                        <div className="relative" ref={profileMenuRef}>
+                            <button
+                                onClick={() => setShowProfileMenu(p => !p)}
+                                className="w-10 h-10 rounded-full bg-primary flex items-center justify-center text-sm font-bold text-black hover:ring-2 hover:ring-primary/60 transition overflow-hidden flex-shrink-0 shadow-md"
+                                title="Account"
+                            >
+                                {userProfile?.profilePicUrl
+                                    ? <img src={userProfile.profilePicUrl} alt="" className="w-full h-full object-cover" />
+                                    : (userProfile?.username || 'U').slice(0, 2).toUpperCase()
+                                }
+                            </button>
+                            {showProfileMenu && (
+                                <div className="absolute right-0 top-full mt-2 w-48 bg-white rounded-xl shadow-xl border border-gray-200 py-1 z-50">
+                                    <button onClick={() => { navigate('/profile'); setShowProfileMenu(false); }}
+                                        className="w-full flex items-center gap-2 px-4 py-2.5 text-sm text-gray-700 hover:bg-gray-100">
+                                        <User size={15} /> Profile
+                                    </button>
+                                    <button onClick={() => { setShowInfoTab(true); setShowProfileMenu(false); }}
+                                        className="w-full flex items-center gap-2 px-4 py-2.5 text-sm text-gray-700 hover:bg-gray-100">
+                                        <BookOpen size={15} /> Help &amp; Tutorials
+                                    </button>
+                                    {['admin', 'moderator'].includes(userProfile?.role) && (
+                                        <button onClick={() => { inModeratorMode ? setShowAdminPanel(!showAdminPanel) : setShowModerationAuthModal(true); setShowProfileMenu(false); }}
+                                            className="w-full flex items-center gap-2 px-4 py-2.5 text-sm text-red-600 hover:bg-red-50">
+                                            <Shield size={15} /> {inModeratorMode ? 'Panel' : 'Moderation'}
+                                        </button>
+                                    )}
+                                    <hr className="my-1 border-gray-200" />
+                                    <button onClick={() => handleLogout(false)}
+                                        className="w-full flex items-center gap-2 px-4 py-2.5 text-sm text-red-600 hover:bg-red-50">
+                                        <LogOut size={15} /> Logout
+                                    </button>
+                                </div>
+                            )}
+                        </div>
                     </div>
                 </div>
 
@@ -21554,13 +21568,42 @@ const App = () => {
                                 )}
                             </button>
                             
-                            <button 
-                                onClick={() => handleLogout(false)} 
-                                title="Log Out"
-                                className="bg-accent hover:bg-accent/80 text-white font-semibold p-2 rounded-lg transition duration-150 shadow-md"
-                            >
-                                <LogOut size={18} />
-                            </button>
+                            {/* Avatar / Profile Dropdown (mobile) */}
+                            <div className="relative" ref={profileMenuRef}>
+                                <button
+                                    onClick={() => setShowProfileMenu(p => !p)}
+                                    className="w-9 h-9 rounded-full bg-primary flex items-center justify-center text-sm font-bold text-black hover:ring-2 hover:ring-primary/60 transition overflow-hidden flex-shrink-0 shadow-md"
+                                    title="Account"
+                                >
+                                    {userProfile?.profilePicUrl
+                                        ? <img src={userProfile.profilePicUrl} alt="" className="w-full h-full object-cover" />
+                                        : (userProfile?.username || 'U').slice(0, 2).toUpperCase()
+                                    }
+                                </button>
+                                {showProfileMenu && (
+                                    <div className="absolute right-0 top-full mt-2 w-48 bg-white rounded-xl shadow-xl border border-gray-200 py-1 z-50">
+                                        <button onClick={() => { navigate('/profile'); setShowProfileMenu(false); }}
+                                            className="w-full flex items-center gap-2 px-4 py-2.5 text-sm text-gray-700 hover:bg-gray-100">
+                                            <User size={15} /> Profile
+                                        </button>
+                                        <button onClick={() => { setShowInfoTab(true); setShowProfileMenu(false); }}
+                                            className="w-full flex items-center gap-2 px-4 py-2.5 text-sm text-gray-700 hover:bg-gray-100">
+                                            <BookOpen size={15} /> Help &amp; Tutorials
+                                        </button>
+                                        {['admin', 'moderator'].includes(userProfile?.role) && (
+                                            <button onClick={() => { inModeratorMode ? setShowAdminPanel(!showAdminPanel) : setShowModerationAuthModal(true); setShowProfileMenu(false); }}
+                                                className="w-full flex items-center gap-2 px-4 py-2.5 text-sm text-red-600 hover:bg-red-50">
+                                                <Shield size={15} /> {inModeratorMode ? 'Panel' : 'Moderation'}
+                                            </button>
+                                        )}
+                                        <hr className="my-1 border-gray-200" />
+                                        <button onClick={() => handleLogout(false)}
+                                            className="w-full flex items-center gap-2 px-4 py-2.5 text-sm text-red-600 hover:bg-red-50">
+                                            <LogOut size={15} /> Logout
+                                        </button>
+                                    </div>
+                                )}
+                            </div>
                         </div>
                     </div>
 
@@ -21584,8 +21627,8 @@ const App = () => {
                         </button>
                     </nav>
 
-                    {/* Third row: Navigation row 2 (4 buttons) */}
-                    <nav className="grid grid-cols-4 gap-1">
+                    {/* Third row: Navigation row 2 (2 buttons) */}
+                    <nav className="grid grid-cols-2 gap-1">
                         <button onClick={() => navigate('/genetics-calculator')} data-tutorial-target="genetics-btn" className={`px-2 py-2 text-xs font-medium rounded-lg transition duration-150 flex flex-col items-center ${currentView === 'genetics-calculator' ? 'bg-primary text-black shadow-md' : 'text-gray-600 hover:bg-gray-100'}`}>
                             <Calculator size={18} className="mb-0.5" />
                             <span>Calculator</span>
@@ -21593,14 +21636,6 @@ const App = () => {
                         <button onClick={() => navigate('/breeder-directory')} data-tutorial-target="breeders-btn" className={`px-2 py-2 text-xs font-medium rounded-lg transition duration-150 flex flex-col items-center ${currentView === 'breeder-directory' ? 'bg-primary text-black shadow-md' : 'text-gray-600 hover:bg-gray-100'}`}>
                             <MoonStar size={18} className="mb-0.5" />
                             <span>Breeders</span>
-                        </button>
-                        <button onClick={() => navigate('/profile')} data-tutorial-target="profile-btn" className={`px-2 py-2 text-xs font-medium rounded-lg transition duration-150 flex flex-col items-center ${currentView === 'profile' ? 'bg-primary text-black shadow-md' : 'text-gray-600 hover:bg-gray-100'}`}>
-                            <User size={18} className="mb-0.5" />
-                            <span>Profile</span>
-                        </button>
-                        <button onClick={() => setShowInfoTab(true)} className={`px-2 py-2 text-xs font-medium rounded-lg transition duration-150 flex flex-col items-center text-gray-600 hover:bg-gray-100`}>
-                            <BookOpen size={18} className="mb-0.5" />
-                            <span>Help</span>
                         </button>
                     </nav>
                 </div>
