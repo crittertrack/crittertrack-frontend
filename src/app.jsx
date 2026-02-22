@@ -2,7 +2,7 @@
 import React, { useState, useEffect, useCallback, useRef, useMemo } from 'react';
 import { useParams, useNavigate, useLocation, Routes, Route, Link as RouterLink } from 'react-router-dom';
 import axios from 'axios';
-import { LogOut, Cat, UserPlus, LogIn, ChevronLeft, ChevronUp, ChevronDown, Trash2, Edit, Save, PlusCircle, Plus, ArrowLeft, Loader2, RefreshCw, User, Users, ClipboardList, BookOpen, Settings, Mail, Globe, Bean, Milk, Search, X, Mars, Venus, Eye, EyeOff, Heart, HeartOff, HeartHandshake, Bell, XCircle, CheckCircle, Download, FileText, Link, AlertCircle, DollarSign, Archive, ArrowLeftRight, RotateCcw, Info, Hourglass, MessageSquare, Ban, Flag, Scissors, VenusAndMars, Circle, Shield, Lock, AlertTriangle, ShoppingBag, Check, Star, Moon, MoonStar, Calculator, Network, LayoutGrid, Home, Utensils, Wrench, Activity, ScrollText } from 'lucide-react';
+import { LogOut, Cat, UserPlus, LogIn, ChevronLeft, ChevronUp, ChevronDown, Trash2, Edit, Save, PlusCircle, Plus, ArrowLeft, Loader2, RefreshCw, User, Users, ClipboardList, BookOpen, Settings, Mail, Globe, Bean, Milk, Search, X, Mars, Venus, Eye, EyeOff, Heart, HeartOff, HeartHandshake, Bell, XCircle, CheckCircle, Download, FileText, Link, AlertCircle, DollarSign, Archive, ArrowLeftRight, RotateCcw, Info, Hourglass, MessageSquare, Ban, Flag, Scissors, VenusAndMars, Circle, Shield, Lock, AlertTriangle, ShoppingBag, Check, Star, Moon, MoonStar, Calculator, Network, LayoutGrid, Home, Utensils, Wrench, Activity, ScrollText, Package } from 'lucide-react';
 import jsPDF from 'jspdf';
 import html2canvas from 'html2canvas';
 import 'flag-icons/css/flag-icons.min.css';
@@ -15443,6 +15443,15 @@ const AnimalList = ({ authToken, showModalMessage, onEditAnimal, onViewAnimal, f
     const [logFilterSearch, setLogFilterSearch] = useState('');
     const [logFilterStartDate, setLogFilterStartDate] = useState('');
     const [logFilterEndDate, setLogFilterEndDate] = useState('');
+    // Supplies & Inventory state
+    const [showSuppliesScreen, setShowSuppliesScreen] = useState(false);
+    const [supplies, setSupplies] = useState([]);
+    const [suppliesLoading, setSuppliesLoading] = useState(false);
+    const [supplyForm, setSupplyForm] = useState({ name: '', category: 'Other', currentStock: '', unit: '', reorderThreshold: '', notes: '' });
+    const [supplyFormVisible, setSupplyFormVisible] = useState(false);
+    const [editingSupplyId, setEditingSupplyId] = useState(null);
+    const [supplySaving, setSupplySaving] = useState(false);
+    const [supplyCategoryFilter, setSupplyCategoryFilter] = useState('All');
     const [enclosures, setEnclosures] = useState([]);
     const [enclosureFormVisible, setEnclosureFormVisible] = useState(false);
     const [enclosureFormData, setEnclosureFormData] = useState({ name: '', enclosureType: '', size: '', notes: '', cleaningTasks: [] });
@@ -15706,7 +15715,7 @@ const AnimalList = ({ authToken, showModalMessage, onEditAnimal, onViewAnimal, f
 
     // Reset log screen when navigating away from management view
     useEffect(() => {
-        if (animalView !== 'management') setShowActivityLogScreen(false);
+        if (animalView !== 'management') { setShowActivityLogScreen(false); setShowSuppliesScreen(false); setSupplyFormVisible(false); }
     }, [animalView]);
 
     // Fire-and-forget management activity logger (called from management handlers)
@@ -15730,6 +15739,19 @@ const AnimalList = ({ authToken, showModalMessage, onEditAnimal, onViewAnimal, f
         } catch (err) { console.error('[fetchEnclosures]', err); }
     }, [authToken]);
     useEffect(() => { fetchEnclosures(); }, [fetchEnclosures]);
+
+    const fetchSupplies = useCallback(async () => {
+        if (!authToken) return;
+        setSuppliesLoading(true);
+        try {
+            const res = await axios.get(`${API_BASE_URL}/supplies`, {
+                headers: { Authorization: `Bearer ${authToken}` }
+            });
+            setSupplies(res.data || []);
+        } catch (err) { console.error('[fetchSupplies]', err); }
+        setSuppliesLoading(false);
+    }, [authToken, API_BASE_URL]);
+    useEffect(() => { fetchSupplies(); }, [fetchSupplies]);
 
     // Fetch user's custom species order on mount
     useEffect(() => {
@@ -16549,6 +16571,188 @@ const AnimalList = ({ authToken, showModalMessage, onEditAnimal, onViewAnimal, f
         );
     };
 
+    // -- Supplies & Inventory Screen ---------------------------------------------
+    const renderSuppliesScreen = () => {
+        const CATEGORIES = ['Food', 'Bedding', 'Medication', 'Other'];
+        const CATEGORY_COLORS = {
+            Food: 'bg-green-100 text-green-700',
+            Bedding: 'bg-yellow-100 text-yellow-700',
+            Medication: 'bg-red-100 text-red-700',
+            Other: 'bg-gray-100 text-gray-600',
+        };
+        const isLow = (item) => item.reorderThreshold != null && item.currentStock <= item.reorderThreshold;
+        const filtered = supplyCategoryFilter === 'All' ? supplies : supplies.filter(s => s.category === supplyCategoryFilter);
+        const lowStockItems = supplies.filter(isLow);
+
+        const handleSupplySubmit = async () => {
+            if (!supplyForm.name.trim()) return;
+            setSupplySaving(true);
+            try {
+                if (editingSupplyId) {
+                    const res = await axios.patch(`${API_BASE_URL}/supplies/${editingSupplyId}`, supplyForm, { headers: { Authorization: `Bearer ${authToken}` } });
+                    setSupplies(prev => prev.map(s => s._id === editingSupplyId ? res.data : s));
+                } else {
+                    const res = await axios.post(`${API_BASE_URL}/supplies`, supplyForm, { headers: { Authorization: `Bearer ${authToken}` } });
+                    setSupplies(prev => [...prev, res.data]);
+                }
+                setSupplyForm({ name: '', category: 'Other', currentStock: '', unit: '', reorderThreshold: '', notes: '' });
+                setSupplyFormVisible(false);
+                setEditingSupplyId(null);
+            } catch (err) { console.error(err); }
+            setSupplySaving(false);
+        };
+
+        const handleSupplyDelete = async (id) => {
+            if (!window.confirm('Delete this supply item?')) return;
+            try {
+                await axios.delete(`${API_BASE_URL}/supplies/${id}`, { headers: { Authorization: `Bearer ${authToken}` } });
+                setSupplies(prev => prev.filter(s => s._id !== id));
+            } catch (err) { console.error(err); }
+        };
+
+        const handleSupplyEdit = (item) => {
+            setSupplyForm({
+                name: item.name,
+                category: item.category,
+                currentStock: item.currentStock ?? '',
+                unit: item.unit || '',
+                reorderThreshold: item.reorderThreshold ?? '',
+                notes: item.notes || '',
+            });
+            setEditingSupplyId(item._id);
+            setSupplyFormVisible(true);
+        };
+
+        return (
+            <div className="mt-4 space-y-4">
+                {/* Back + Refresh */}
+                <div className="flex items-center justify-between">
+                    <button
+                        onClick={() => { setShowSuppliesScreen(false); setSupplyFormVisible(false); setEditingSupplyId(null); }}
+                        className="flex items-center gap-1.5 text-sm text-gray-600 hover:text-gray-800 transition"
+                    >
+                        <ChevronLeft size={16} />
+                        Back to Management
+                    </button>
+                    <button onClick={fetchSupplies} disabled={suppliesLoading}
+                        className="flex items-center gap-1 text-xs text-gray-400 hover:text-gray-600 transition disabled:opacity-50">
+                        <RefreshCw size={12} /> Refresh
+                    </button>
+                </div>
+
+                {/* Title + Add button */}
+                <div className="flex items-center justify-between">
+                    <div className="flex items-center gap-2">
+                        <Package size={18} className="text-emerald-600" />
+                        <h3 className="text-lg font-semibold text-gray-800">Supplies &amp; Inventory</h3>
+                        <span className="text-xs bg-emerald-100 text-emerald-700 px-2 py-0.5 rounded-full">{supplies.length} item{supplies.length !== 1 ? 's' : ''}</span>
+                    </div>
+                    <button
+                        onClick={() => { setSupplyForm({ name: '', category: 'Other', currentStock: '', unit: '', reorderThreshold: '', notes: '' }); setEditingSupplyId(null); setSupplyFormVisible(v => !v); }}
+                        className="flex items-center gap-1 px-3 py-1.5 bg-emerald-600 hover:bg-emerald-700 text-white text-sm rounded-lg font-medium transition"
+                    >
+                        <Plus size={14} /> Add Item
+                    </button>
+                </div>
+
+                {/* Low stock alert */}
+                {lowStockItems.length > 0 && (
+                    <div className="flex items-start gap-2 bg-amber-50 border border-amber-200 rounded-xl p-3">
+                        <AlertTriangle size={16} className="text-amber-500 mt-0.5 shrink-0" />
+                        <div className="text-sm text-amber-700">
+                            <span className="font-semibold">{lowStockItems.length} item{lowStockItems.length !== 1 ? 's' : ''} need restocking:</span>{' '}
+                            {lowStockItems.map(i => i.name).join(', ')}
+                        </div>
+                    </div>
+                )}
+
+                {/* Add / Edit form */}
+                {supplyFormVisible && (
+                    <div className="bg-emerald-50 border border-emerald-200 rounded-xl p-4 space-y-3">
+                        <h4 className="text-sm font-semibold text-emerald-800">{editingSupplyId ? 'Edit Item' : 'New Supply Item'}</h4>
+                        <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                            <div>
+                                <label className="text-xs font-medium text-gray-600 mb-1 block">Name *</label>
+                                <input type="text" value={supplyForm.name} onChange={e => setSupplyForm(f => ({ ...f, name: e.target.value }))} placeholder="e.g. Rat blocks" className="w-full text-sm border border-gray-300 rounded-lg px-3 py-1.5 focus:outline-none focus:ring-1 focus:ring-emerald-400 focus:border-emerald-400" />
+                            </div>
+                            <div>
+                                <label className="text-xs font-medium text-gray-600 mb-1 block">Category</label>
+                                <select value={supplyForm.category} onChange={e => setSupplyForm(f => ({ ...f, category: e.target.value }))} className="w-full text-sm border border-gray-300 rounded-lg px-3 py-1.5 bg-white focus:outline-none focus:ring-1 focus:ring-emerald-400 focus:border-emerald-400">
+                                    {CATEGORIES.map(c => <option key={c} value={c}>{c}</option>)}
+                                </select>
+                            </div>
+                            <div>
+                                <label className="text-xs font-medium text-gray-600 mb-1 block">Current Stock</label>
+                                <input type="number" min="0" value={supplyForm.currentStock} onChange={e => setSupplyForm(f => ({ ...f, currentStock: e.target.value }))} placeholder="0" className="w-full text-sm border border-gray-300 rounded-lg px-3 py-1.5 focus:outline-none focus:ring-1 focus:ring-emerald-400 focus:border-emerald-400" />
+                            </div>
+                            <div>
+                                <label className="text-xs font-medium text-gray-600 mb-1 block">Unit (e.g. bags, kg, boxes)</label>
+                                <input type="text" value={supplyForm.unit} onChange={e => setSupplyForm(f => ({ ...f, unit: e.target.value }))} placeholder="bags" className="w-full text-sm border border-gray-300 rounded-lg px-3 py-1.5 focus:outline-none focus:ring-1 focus:ring-emerald-400 focus:border-emerald-400" />
+                            </div>
+                            <div>
+                                <label className="text-xs font-medium text-gray-600 mb-1 block">Reorder when stock reaches</label>
+                                <input type="number" min="0" value={supplyForm.reorderThreshold} onChange={e => setSupplyForm(f => ({ ...f, reorderThreshold: e.target.value }))} placeholder="e.g. 2" className="w-full text-sm border border-gray-300 rounded-lg px-3 py-1.5 focus:outline-none focus:ring-1 focus:ring-emerald-400 focus:border-emerald-400" />
+                            </div>
+                            <div>
+                                <label className="text-xs font-medium text-gray-600 mb-1 block">Notes</label>
+                                <input type="text" value={supplyForm.notes} onChange={e => setSupplyForm(f => ({ ...f, notes: e.target.value }))} placeholder="Optional notes" className="w-full text-sm border border-gray-300 rounded-lg px-3 py-1.5 focus:outline-none focus:ring-1 focus:ring-emerald-400 focus:border-emerald-400" />
+                            </div>
+                        </div>
+                        <div className="flex gap-2 justify-end pt-1">
+                            <button onClick={() => { setSupplyFormVisible(false); setEditingSupplyId(null); }} className="px-3 py-1.5 text-sm text-gray-600 hover:bg-gray-100 rounded-lg transition">Cancel</button>
+                            <button onClick={handleSupplySubmit} disabled={supplySaving || !supplyForm.name.trim()} className="px-3 py-1.5 bg-emerald-600 hover:bg-emerald-700 text-white text-sm rounded-lg font-medium transition disabled:opacity-50 flex items-center gap-1.5">
+                                {supplySaving ? <Loader2 size={13} className="animate-spin" /> : <Save size={13} />}
+                                {editingSupplyId ? 'Save Changes' : 'Add Item'}
+                            </button>
+                        </div>
+                    </div>
+                )}
+
+                {/* Category filter pills */}
+                <div className="flex gap-1.5 flex-wrap">
+                    {['All', ...CATEGORIES].map(cat => (
+                        <button key={cat} onClick={() => setSupplyCategoryFilter(cat)}
+                            className={`px-3 py-1 text-xs rounded-full font-medium transition ${supplyCategoryFilter === cat ? 'bg-emerald-600 text-white' : 'bg-gray-100 text-gray-600 hover:bg-gray-200'}`}
+                        >{cat}</button>
+                    ))}
+                </div>
+
+                {/* Items grid */}
+                {suppliesLoading ? (
+                    <div className="flex items-center justify-center py-12 text-gray-400 gap-2"><Loader2 size={20} className="animate-spin" /> Loading...</div>
+                ) : filtered.length === 0 ? (
+                    <div className="text-center py-12 text-gray-400 text-sm">
+                        {supplies.length === 0 ? 'No supplies added yet. Click "Add Item" to get started.' : `No ${supplyCategoryFilter} items.`}
+                    </div>
+                ) : (
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                        {filtered.map(item => (
+                            <div key={item._id} className={`border rounded-xl p-3 bg-white flex flex-col gap-1.5 shadow-sm ${isLow(item) ? 'border-amber-300' : 'border-gray-200'}`}>
+                                <div className="flex items-start justify-between gap-2">
+                                    <div className="flex items-center gap-2 min-w-0">
+                                        <span className="font-semibold text-sm text-gray-800 truncate">{item.name}</span>
+                                        {isLow(item) && <span className="text-xs bg-amber-100 text-amber-700 px-1.5 py-0.5 rounded-full font-medium shrink-0">Reorder</span>}
+                                    </div>
+                                    <span className={`text-xs px-2 py-0.5 rounded-full font-medium shrink-0 ${CATEGORY_COLORS[item.category] || CATEGORY_COLORS.Other}`}>{item.category}</span>
+                                </div>
+                                <div className="flex items-baseline gap-2">
+                                    <span className={`text-lg font-bold ${isLow(item) ? 'text-amber-600' : 'text-gray-800'}`}>{item.currentStock}</span>
+                                    {item.unit && <span className="text-gray-500 text-xs">{item.unit}</span>}
+                                    {item.reorderThreshold != null && <span className="text-gray-400 text-xs ml-auto">Reorder at {item.reorderThreshold}</span>}
+                                </div>
+                                {item.notes && <p className="text-xs text-gray-400 truncate">{item.notes}</p>}
+                                <div className="flex gap-2 justify-end mt-0.5">
+                                    <button onClick={() => handleSupplyEdit(item)} className="flex items-center gap-1 text-xs text-gray-500 hover:text-gray-700 hover:bg-gray-100 px-2 py-1 rounded-lg transition"><Edit size={11} /> Edit</button>
+                                    <button onClick={() => handleSupplyDelete(item._id)} className="flex items-center gap-1 text-xs text-red-500 hover:text-red-700 hover:bg-red-50 px-2 py-1 rounded-lg transition"><Trash2 size={11} /> Delete</button>
+                                </div>
+                            </div>
+                        ))}
+                    </div>
+                )}
+            </div>
+        );
+    };
+
     // -- Management View ----------------------------------------------------------
     const renderManagementView = () => {
         const today = new Date();
@@ -17260,8 +17464,21 @@ const AnimalList = ({ authToken, showModalMessage, onEditAnimal, onViewAnimal, f
 
                             {/* -- Supplies & Inventory -- */}
                             <div>
-                                <div className="px-3 py-2 text-xs font-semibold text-gray-500 bg-gray-50 uppercase tracking-wide">Supplies &amp; Inventory</div>
-                                <div className="px-3 py-4 text-xs text-gray-400 text-center">Inventory tracking coming soon — food, bedding, medication stock and reorder reminders.</div>
+                                <div className="px-3 py-2 text-xs font-semibold text-gray-500 bg-gray-50 uppercase tracking-wide flex items-center justify-between">
+                                    <span>Supplies &amp; Inventory</span>
+                                    {suppliesLoading
+                                        ? <Loader2 size={11} className="animate-spin text-gray-400" />
+                                        : <span className="text-gray-400 font-normal normal-case">{supplies.length} item{supplies.length !== 1 ? 's' : ''}{supplies.filter(s => s.reorderThreshold != null && s.currentStock <= s.reorderThreshold).length > 0 && <span className="ml-1 text-amber-600">· {supplies.filter(s => s.reorderThreshold != null && s.currentStock <= s.reorderThreshold).length} to reorder</span>}</span>
+                                    }
+                                </div>
+                                <div className="px-3 py-3 flex items-center justify-between">
+                                    <span className="text-xs text-gray-500">
+                                        {supplies.length === 0 ? 'No items tracked yet.' : `${supplies.length} item${supplies.length !== 1 ? 's' : ''} tracked`}
+                                    </span>
+                                    <button onClick={() => { setSupplyFormVisible(false); setEditingSupplyId(null); setShowSuppliesScreen(true); }} className="flex items-center gap-1 text-xs text-emerald-600 hover:text-emerald-800 font-medium transition">
+                                        <Package size={12} /> View All
+                                    </button>
+                                </div>
                             </div>
                         </div>
                     )}
@@ -17318,7 +17535,7 @@ const AnimalList = ({ authToken, showModalMessage, onEditAnimal, onViewAnimal, f
             <h2 className="text-2xl sm:text-3xl font-bold text-gray-800 mb-6 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3">
                 <div className='flex items-center gap-2'>
                     <ClipboardList size={20} className="sm:w-6 sm:h-6 mr-2 sm:mr-3 text-primary-dark" />
-                    {animalView === 'list' ? `My Animals (${animals.length})` : showActivityLogScreen ? 'Activity Log' : 'Management View'}
+                    {animalView === 'list' ? `My Animals (${animals.length})` : showActivityLogScreen ? 'Activity Log' : showSuppliesScreen ? 'Supplies & Inventory' : 'Management View'}
                     {animalView === 'list' && hasActiveFilters && (
                         <span className="bg-pink-500 text-white text-xs font-semibold px-2 py-1 rounded-full">
                             Filtered
@@ -17363,7 +17580,7 @@ const AnimalList = ({ authToken, showModalMessage, onEditAnimal, onViewAnimal, f
                         <span className="font-medium">Hidden</span>
                     </button>
                     </>)}
-                    {animalView === 'management' && !showActivityLogScreen && (
+                    {animalView === 'management' && !showActivityLogScreen && !showSuppliesScreen && (
                         <button
                             onClick={() => {
                                 setActivityLogs([]);
@@ -17375,6 +17592,16 @@ const AnimalList = ({ authToken, showModalMessage, onEditAnimal, onViewAnimal, f
                         >
                             <ScrollText size={14} className="sm:w-4 sm:h-4" />
                             <span className="font-medium">Activity Log</span>
+                        </button>
+                    )}
+                    {animalView === 'management' && !showActivityLogScreen && !showSuppliesScreen && (
+                        <button
+                            onClick={() => { setSupplyForm({ name: '', category: 'Other', currentStock: '', unit: '', reorderThreshold: '', notes: '' }); setEditingSupplyId(null); setSupplyFormVisible(false); setShowSuppliesScreen(true); }}
+                            className="flex items-center gap-1 px-2 sm:px-3 py-1 sm:py-1.5 text-xs sm:text-sm text-emerald-600 hover:text-emerald-800 hover:bg-emerald-50 border border-emerald-200 rounded-lg transition font-medium"
+                            title="Supplies & Inventory"
+                        >
+                            <Package size={14} className="sm:w-4 sm:h-4" />
+                            <span className="font-medium">Supplies</span>
                         </button>
                     )}
                     <button 
@@ -17590,7 +17817,7 @@ const AnimalList = ({ authToken, showModalMessage, onEditAnimal, onViewAnimal, f
             )}
 
             {animalView === 'management' ? (
-                loading ? <LoadingSpinner /> : showActivityLogScreen ? renderActivityLogScreen() : renderManagementView()
+                loading ? <LoadingSpinner /> : showActivityLogScreen ? renderActivityLogScreen() : showSuppliesScreen ? renderSuppliesScreen() : renderManagementView()
             ) : loading ? (
                 <LoadingSpinner />
             ) : animals.length === 0 ? (
