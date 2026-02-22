@@ -19123,6 +19123,7 @@ const App = () => {
     const [profileEditButtonClicked, setProfileEditButtonClicked] = useState(false);
 
     const timeoutRef = useRef(null);
+    const consecutiveAuthErrors = useRef(0);
     const activeEvents = ['mousemove', 'keydown', 'scroll', 'click'];
 
     const showModalMessage = useCallback((title, message) => {
@@ -19587,6 +19588,7 @@ const App = () => {
                 const response = await axios.get(`${API_BASE_URL}/auth/status`, {
                     headers: { Authorization: `Bearer ${authToken}` }
                 });
+                consecutiveAuthErrors.current = 0; // reset on successful response
                 const data = response.data;
                 
                 // Check if suspension was recently lifted (within 24 hours)
@@ -19620,8 +19622,9 @@ const App = () => {
                     showModalMessage(title, message);
                 }
             } catch (error) {
-                // If we get a 403 with forceLogout flag, handle it
+                // If we get a 403 with forceLogout flag, handle it immediately
                 if (error.response?.status === 403 && error.response?.data?.forceLogout) {
+                    consecutiveAuthErrors.current = 0;
                     const accountStatus = error.response?.data?.accountStatus;
                     const message = error.response?.data?.message || 'Your account status has changed.';
                     
@@ -19632,9 +19635,18 @@ const App = () => {
                         message
                     );
                 } else if (error.response?.status === 401) {
-                    // Token expired or invalid
-                    console.log('[AUTH] Token validation failed during status check');
-                    handleLogout();
+                    // Token may appear invalid transiently on network reconnection.
+                    // Only logout after 3 consecutive 401s to avoid spurious sign-outs.
+                    consecutiveAuthErrors.current += 1;
+                    console.log(`[AUTH] Status check 401 (${consecutiveAuthErrors.current}/3)`);
+                    if (consecutiveAuthErrors.current >= 3) {
+                        console.log('[AUTH] Persistent 401 — logging out');
+                        consecutiveAuthErrors.current = 0;
+                        handleLogout();
+                    }
+                } else {
+                    // Network error or 5xx — transient, reset counter and stay silent
+                    consecutiveAuthErrors.current = 0;
                 }
                 // Other errors are non-critical (network, server errors) - don't logout
             }
