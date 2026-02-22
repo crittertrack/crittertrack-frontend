@@ -16744,6 +16744,10 @@ const AnimalList = ({ authToken, showModalMessage, onEditAnimal, onViewAnimal, f
                                 <input type="text" value={supplyForm.unit} onChange={e => setSupplyForm(f => ({ ...f, unit: e.target.value }))} placeholder="bags" className="w-full text-sm border border-gray-300 rounded-lg px-3 py-1.5 focus:outline-none focus:ring-1 focus:ring-emerald-400 focus:border-emerald-400" />
                             </div>
                             <div>
+                                <label className="text-xs font-medium text-gray-600 mb-1 block">Cost per unit</label>
+                                <input type="number" min="0" step="0.01" value={supplyForm.costPerUnit} onChange={e => setSupplyForm(f => ({ ...f, costPerUnit: e.target.value }))} placeholder="0.00" className="w-full text-sm border border-gray-300 rounded-lg px-3 py-1.5 focus:outline-none focus:ring-1 focus:ring-emerald-400 focus:border-emerald-400" />
+                            </div>
+                            <div>
                                 <label className="text-xs font-medium text-gray-600 mb-1 block">Reorder when stock reaches</label>
                                 <input type="number" min="0" value={supplyForm.reorderThreshold} onChange={e => setSupplyForm(f => ({ ...f, reorderThreshold: e.target.value }))} placeholder="e.g. 2" className="w-full text-sm border border-gray-300 rounded-lg px-3 py-1.5 focus:outline-none focus:ring-1 focus:ring-emerald-400 focus:border-emerald-400" />
                             </div>
@@ -16762,7 +16766,7 @@ const AnimalList = ({ authToken, showModalMessage, onEditAnimal, onViewAnimal, f
                             </div>
                         )}
                         {supplyForm.category === 'Food' && supplyForm.isFeederAnimal && (
-                            <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 bg-green-50 border border-green-200 rounded-lg p-3">
+                            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 bg-green-50 border border-green-200 rounded-lg p-3">
                                 <div>
                                     <label className="text-xs font-medium text-gray-600 mb-1 block">Feeder Type</label>
                                     <input type="text" value={supplyForm.feederType} onChange={e => setSupplyForm(f => ({ ...f, feederType: e.target.value }))} list="feeder-type-list" placeholder="e.g. Mice, Rats" className="w-full text-sm border border-gray-300 rounded-lg px-3 py-1.5 focus:outline-none focus:ring-1 focus:ring-emerald-400" />
@@ -16772,10 +16776,6 @@ const AnimalList = ({ authToken, showModalMessage, onEditAnimal, onViewAnimal, f
                                     <label className="text-xs font-medium text-gray-600 mb-1 block">Size</label>
                                     <input type="text" value={supplyForm.feederSize} onChange={e => setSupplyForm(f => ({ ...f, feederSize: e.target.value }))} list="feeder-size-list" placeholder="e.g. Pinky, Adult" className="w-full text-sm border border-gray-300 rounded-lg px-3 py-1.5 focus:outline-none focus:ring-1 focus:ring-emerald-400" />
                                     <datalist id="feeder-size-list"><option value="Pinky" /><option value="Fuzzy" /><option value="Hopper" /><option value="Weaned" /><option value="Adult" /><option value="Small" /><option value="Medium" /><option value="Large" /><option value="XL" /></datalist>
-                                </div>
-                                <div>
-                                    <label className="text-xs font-medium text-gray-600 mb-1 block">Cost each</label>
-                                    <input type="number" min="0" step="0.01" value={supplyForm.costPerUnit} onChange={e => setSupplyForm(f => ({ ...f, costPerUnit: e.target.value }))} placeholder="0.00" className="w-full text-sm border border-gray-300 rounded-lg px-3 py-1.5 focus:outline-none focus:ring-1 focus:ring-emerald-400" />
                                 </div>
                             </div>
                         )}
@@ -16839,7 +16839,7 @@ const AnimalList = ({ authToken, showModalMessage, onEditAnimal, onViewAnimal, f
                                                 <label className="text-[10px] font-medium text-gray-500 block mb-0.5">Qty received *</label>
                                                 <input type="number" min="0.01" step="any" value={restockForm.qty} onChange={e => {
                                                     const q = e.target.value;
-                                                    const autoCost = item.isFeederAnimal && item.costPerUnit && q ? (parseFloat(q) * item.costPerUnit).toFixed(2) : restockForm.cost;
+                                                    const autoCost = item.costPerUnit && q ? (parseFloat(q) * item.costPerUnit).toFixed(2) : restockForm.cost;
                                                     setRestockForm(f => ({ ...f, qty: q, cost: autoCost }));
                                                 }} placeholder="e.g. 5" className="w-full text-sm border border-gray-300 rounded-lg px-2 py-1 focus:outline-none focus:ring-1 focus:ring-blue-400" />
                                             </div>
