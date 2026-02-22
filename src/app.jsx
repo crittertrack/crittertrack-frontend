@@ -1,4 +1,4 @@
-﻿// CritterTrack Frontend Application
+// CritterTrack Frontend Application
 import React, { useState, useEffect, useCallback, useRef, useMemo } from 'react';
 import { useParams, useNavigate, useLocation, Routes, Route, Link as RouterLink } from 'react-router-dom';
 import axios from 'axios';
@@ -99,13 +99,13 @@ const getCountryName = (countryCode) => {
 // Get currency symbol from currency code
 const getCurrencySymbol = (currencyCode) => {
     const currencySymbols = {
-        'USD': '$', 'EUR': '€', 'GBP': '£', 'JPY': '¥', 'CNY': '¥', 'KRW': '₩',
+        'USD': '$', 'EUR': '�', 'GBP': '�', 'JPY': '�', 'CNY': '�', 'KRW': '?',
         'CAD': 'C$', 'AUD': 'A$', 'CHF': 'CHF', 'SEK': 'kr', 'NOK': 'kr', 'DKK': 'kr',
-        'PLN': 'zł', 'CZK': 'Kč', 'HUF': 'Ft', 'RON': 'lei', 'BGN': 'лв', 'HRK': 'kn',
-        'RUB': '₽', 'UAH': '₴', 'TRY': '₺', 'ILS': '₪', 'AED': 'د.إ', 'SAR': 'ر.س',
-        'INR': '₹', 'PKR': '₨', 'BDT': '৳', 'LKR': 'Rs', 'THB': '฿', 'VND': '₫',
-        'IDR': 'Rp', 'MYR': 'RM', 'SGD': 'S$', 'PHP': '₱', 'HKD': 'HK$', 'TWD': 'NT$',
-        'NZD': 'NZ$', 'ZAR': 'R', 'EGP': 'E£', 'NGN': '₦', 'KES': 'Sh', 'GHS': '₵',
+        'PLN': 'zl', 'CZK': 'Kc', 'HUF': 'Ft', 'RON': 'lei', 'BGN': '??', 'HRK': 'kn',
+        'RUB': '?', 'UAH': '?', 'TRY': '?', 'ILS': '?', 'AED': '?.?', 'SAR': '?.?',
+        'INR': '?', 'PKR': '?', 'BDT': '?', 'LKR': 'Rs', 'THB': '?', 'VND': '?',
+        'IDR': 'Rp', 'MYR': 'RM', 'SGD': 'S$', 'PHP': '?', 'HKD': 'HK$', 'TWD': 'NT$',
+        'NZD': 'NZ$', 'ZAR': 'R', 'EGP': 'E�', 'NGN': '?', 'KES': 'Sh', 'GHS': '?',
         'BRL': 'R$', 'ARS': '$', 'CLP': '$', 'COP': '$', 'PEN': 'S/', 'MXN': '$'
     };
     return currencySymbols[currencyCode] || currencyCode || '';
@@ -1239,9 +1239,9 @@ const BreederDirectorySettings = ({ authToken, API_BASE_URL, showModalMessage, u
                                 className="px-3 py-1.5 border border-gray-300 rounded-lg focus:ring-primary focus:border-primary text-sm"
                                 disabled={loading}
                             >
-                                <option value="owner">🏠 Owner</option>
-                                <option value="breeder">⭐ Active Breeder</option>
-                                <option value="retired">🌙 Retired Breeder</option>
+                                <option value="owner">?? Owner</option>
+                                <option value="breeder">? Active Breeder</option>
+                                <option value="retired">?? Retired Breeder</option>
                             </select>
                         </div>
                     );
@@ -1339,7 +1339,7 @@ const ParentSearchModal = ({
                     </p>
                     <p className="text-xs text-gray-500">{animal.id_public}</p>
                     <p className="text-sm text-gray-600">
-                        {animal.species} • {animal.gender} • {animal.status || 'Unknown'}
+                        {animal.species} � {animal.gender} � {animal.status || 'Unknown'}
                     </p>
                     {getSpeciesLatinName(animal.species) && (
                         <p className="text-xs italic text-gray-500">{getSpeciesLatinName(animal.species)}</p>
@@ -1770,7 +1770,7 @@ const UserSearchModal = ({ onClose, showModalMessage, onSelectUser, API_BASE_URL
                         {animal.prefix && `${animal.prefix} `}{animal.name}{animal.suffix && ` ${animal.suffix}`}
                     </p>
                     <p className="text-sm text-gray-600">
-                        {animal.species} • {animal.gender} • <span className="font-mono">{animal.id_public}</span>
+                        {animal.species} � {animal.gender} � <span className="font-mono">{animal.id_public}</span>
                     </p>
                     {animal.color && <p className="text-xs text-gray-500 mt-1">{animal.color}</p>}
                     {(animal.manualBreederName || animal.breederName) && (
@@ -1789,7 +1789,7 @@ const UserSearchModal = ({ onClose, showModalMessage, onSelectUser, API_BASE_URL
         <div className="fixed inset-0 bg-gray-600 bg-opacity-75 flex items-center justify-center p-4 z-50">
             <div className="bg-white rounded-xl shadow-2xl p-6 w-full max-w-xl max-h-[90vh] flex flex-col">
                 <div className="flex justify-between items-center border-b pb-3 mb-4">
-                    <h3 className="text-xl font-bold text-gray-800">Global Search 🔎</h3>
+                    <h3 className="text-xl font-bold text-gray-800">Global Search ??</h3>
                     <button onClick={onClose} className="text-gray-500 hover:text-gray-800"><X size={24} /></button>
                 </div>
 
@@ -2402,7 +2402,7 @@ const PrivateAnimalDetail = ({ animal, onClose, onEdit, API_BASE_URL, authToken,
                         </button>
                         <div className="flex items-center gap-2">
                             <span className="text-xs bg-green-100 text-green-800 px-2 py-1 rounded font-medium">
-                                👁️ OWNER VIEW - All Data Visible
+                                ??? OWNER VIEW - All Data Visible
                             </span>
                             <button
                                 onClick={handleShare}
@@ -2443,19 +2443,19 @@ const PrivateAnimalDetail = ({ animal, onClose, onEdit, API_BASE_URL, authToken,
                 <div className="bg-white border-b border-gray-300 px-2 sm:px-6 pt-2 sm:pt-4">
                     <div className="flex flex-wrap gap-1 sm:gap-1 pb-2 sm:pb-4">
                         {[
-                            { id: 1, label: 'Overview', icon: '📋' },
-                            { id: 2, label: 'Status & Privacy', icon: '🔒' },
-                            { id: 3, label: 'Physical', icon: '🎨' },
-                            { id: 4, label: 'Identification', icon: '🏷️' },
-                            { id: 5, label: 'Lineage', icon: '🌳' },
-                            { id: 6, label: 'Breeding', icon: '🥚' },
-                            { id: 7, label: 'Health', icon: '🏥' },
-                            { id: 8, label: 'Husbandry', icon: '🏠' },
-                            { id: 9, label: 'Behavior', icon: '🧠' },
-                            { id: 10, label: 'Records', icon: '📝' },
-                            { id: 11, label: 'End of Life', icon: '⚖️' },
-                            { id: 12, label: 'Show', icon: '🏆' },
-                            { id: 13, label: 'Legal', icon: '📄' }
+                            { id: 1, label: 'Overview', icon: '??' },
+                            { id: 2, label: 'Status & Privacy', icon: '??' },
+                            { id: 3, label: 'Physical', icon: '??' },
+                            { id: 4, label: 'Identification', icon: '???' },
+                            { id: 5, label: 'Lineage', icon: '??' },
+                            { id: 6, label: 'Breeding', icon: '??' },
+                            { id: 7, label: 'Health', icon: '??' },
+                            { id: 8, label: 'Animal Care', icon: '??' },
+                            { id: 9, label: 'Behavior', icon: '??' },
+                            { id: 10, label: 'Records', icon: '??' },
+                            { id: 11, label: 'End of Life', icon: '??' },
+                            { id: 12, label: 'Show', icon: '??' },
+                            { id: 13, label: 'Legal', icon: '??' }
                         ].map(tab => (
                             <button
                                 key={tab.id}
@@ -2559,9 +2559,9 @@ const PrivateAnimalDetail = ({ animal, onClose, onEdit, API_BASE_URL, authToken,
 {/* Species/Breed/Strain/CTC - At Top */}
                                         <p className="text-sm text-gray-600">
                                             {animal.species || 'Unknown'}
-                                            {animal.breed && ` • ${animal.breed}`}
-                                            {animal.strain && ` • ${animal.strain}`}
-                                            {animal.id_public && ` • ${animal.id_public}`}
+                                            {animal.breed && ` � ${animal.breed}`}
+                                            {animal.strain && ` � ${animal.strain}`}
+                                            {animal.id_public && ` � ${animal.id_public}`}
                                         </p>
 
                                         {/* Full Name */}
@@ -3530,7 +3530,7 @@ const ViewOnlyPrivateAnimalDetail = ({ animal, onClose, API_BASE_URL, authToken,
                                 <ArrowLeft size={16} className="mr-1" /> Back
                             </button>
                             <span className="text-[10px] bg-orange-100 text-orange-800 px-1.5 py-0.5 rounded font-medium">
-                                📋 VIEW-ONLY
+                                ?? VIEW-ONLY
                             </span>
                             <button onClick={onClose} className="text-gray-500 hover:text-gray-800">
                                 <X size={24} />
@@ -3565,7 +3565,7 @@ const ViewOnlyPrivateAnimalDetail = ({ animal, onClose, API_BASE_URL, authToken,
                         </button>
                         <div className="flex items-center gap-2">
                             <span className="text-xs bg-orange-100 text-orange-800 px-2 py-1 rounded font-medium">
-                                📋 VIEW-ONLY - Read Only Access
+                                ?? VIEW-ONLY - Read Only Access
                             </span>
                             {onHideAnimal && (
                                 <button
@@ -3593,19 +3593,19 @@ const ViewOnlyPrivateAnimalDetail = ({ animal, onClose, API_BASE_URL, authToken,
                 <div className="bg-white border-b border-gray-300 px-6 pt-4">
                     <div className="flex flex-wrap gap-1 pb-4">
                         {[
-                            { id: 1, label: 'Overview', icon: '📋' },
-                            { id: 2, label: 'Status & Privacy', icon: '🔒' },
-                            { id: 3, label: 'Physical', icon: '🎨' },
-                            { id: 4, label: 'Identification', icon: '🏷️' },
-                            { id: 5, label: 'Lineage', icon: '🌳' },
-                            { id: 6, label: 'Breeding', icon: '🥚' },
-                            { id: 7, label: 'Health', icon: '🏥' },
-                            { id: 8, label: 'Husbandry', icon: '🏠' },
-                            { id: 9, label: 'Behavior', icon: '🧠' },
-                            { id: 10, label: 'Records', icon: '📝' },
-                            { id: 11, label: 'End of Life', icon: '⚖️' },
-                            { id: 12, label: 'Show', icon: '🏆' },
-                            { id: 13, label: 'Legal', icon: '📄' }
+                            { id: 1, label: 'Overview', icon: '??' },
+                            { id: 2, label: 'Status & Privacy', icon: '??' },
+                            { id: 3, label: 'Physical', icon: '??' },
+                            { id: 4, label: 'Identification', icon: '???' },
+                            { id: 5, label: 'Lineage', icon: '??' },
+                            { id: 6, label: 'Breeding', icon: '??' },
+                            { id: 7, label: 'Health', icon: '??' },
+                            { id: 8, label: 'Animal Care', icon: '??' },
+                            { id: 9, label: 'Behavior', icon: '??' },
+                            { id: 10, label: 'Records', icon: '??' },
+                            { id: 11, label: 'End of Life', icon: '??' },
+                            { id: 12, label: 'Show', icon: '??' },
+                            { id: 13, label: 'Legal', icon: '??' }
                         ].map(tab => (
                             <button
                                 key={tab.id}
@@ -3674,9 +3674,9 @@ const ViewOnlyPrivateAnimalDetail = ({ animal, onClose, API_BASE_URL, authToken,
                                         {/* Species/Breed/Strain/CTC - At Top (NO PRIVACY TOGGLE) */}
                                         <p className="text-sm text-gray-600">
                                             {animal.species || 'Unknown'}
-                                            {animal.breed && ` • ${animal.breed}`}
-                                            {animal.strain && ` • ${animal.strain}`}
-                                            {animal.id_public && ` • ${animal.id_public}`}
+                                            {animal.breed && ` � ${animal.breed}`}
+                                            {animal.strain && ` � ${animal.strain}`}
+                                            {animal.id_public && ` � ${animal.id_public}`}
                                         </p>
 
                                         {/* Full Name */}
@@ -4708,18 +4708,18 @@ const ViewOnlyAnimalDetail = ({ animal, onClose, API_BASE_URL, onViewProfile, on
                 <div className="bg-white border-b border-gray-300">
                     <div className="flex flex-wrap">
                         {[
-                            { id: 1, label: 'Overview', icon: '📋' },
-                            { id: 3, label: 'Physical', icon: '🎨' },
-                            { id: 4, label: 'Identification', icon: '🔖' },
-                            { id: 5, label: 'Lineage', icon: '🌳' },
-                            { id: 6, label: 'Breeding', icon: '🥚' },
-                            { id: 7, label: 'Health', icon: '🏥' },
-                            { id: 8, label: 'Husbandry', icon: '🏠' },
-                            { id: 9, label: 'Behavior', icon: '🧠' },
-                            { id: 10, label: 'Records', icon: '📝' },
-                            { id: 11, label: 'End of Life', icon: '🕊️' },
-                            { id: 12, label: 'Show', icon: '🏆' },
-                            { id: 13, label: 'Legal', icon: '📄' }
+                            { id: 1, label: 'Overview', icon: '??' },
+                            { id: 3, label: 'Physical', icon: '??' },
+                            { id: 4, label: 'Identification', icon: '??' },
+                            { id: 5, label: 'Lineage', icon: '??' },
+                            { id: 6, label: 'Breeding', icon: '??' },
+                            { id: 7, label: 'Health', icon: '??' },
+                            { id: 8, label: 'Animal Care', icon: '??' },
+                            { id: 9, label: 'Behavior', icon: '??' },
+                            { id: 10, label: 'Records', icon: '??' },
+                            { id: 11, label: 'End of Life', icon: '???' },
+                            { id: 12, label: 'Show', icon: '??' },
+                            { id: 13, label: 'Legal', icon: '??' }
                         ].map(tab => (
                             <button
                                 key={tab.id}
@@ -4790,9 +4790,9 @@ const ViewOnlyAnimalDetail = ({ animal, onClose, API_BASE_URL, onViewProfile, on
                                         {/* Species/Breed/Strain/CTC - At Top */}
                                         <p className="text-sm text-gray-600">
                                             {animal.species}
-                                            {animal.breed && ` • ${animal.breed}`}
-                                            {animal.strain && ` • ${animal.strain}`}
-                                            {animal.id_public && ` • ${animal.id_public}`}
+                                            {animal.breed && ` � ${animal.breed}`}
+                                            {animal.strain && ` � ${animal.strain}`}
+                                            {animal.id_public && ` � ${animal.id_public}`}
                                         </p>
 
                                         {/* Full Name */}
@@ -4809,7 +4809,7 @@ const ViewOnlyAnimalDetail = ({ animal, onClose, API_BASE_URL, onViewProfile, on
                                                 <div>
                                                     <p className="text-sm font-semibold text-gray-700">For Sale</p>
                                                     <p className="text-sm text-gray-600">
-                                                        {animal.salePriceCurrency === 'Negotiable' ? 'Negotiable' : `${animal.salePriceCurrency === 'USD' ? '$' : animal.salePriceCurrency === 'EUR' ? '€' : animal.salePriceCurrency === 'GBP' ? '£' : animal.salePriceCurrency === 'CAD' ? 'C$' : animal.salePriceCurrency === 'AUD' ? 'A$' : animal.salePriceCurrency === 'JPY' ? '¥' : animal.salePriceCurrency}${animal.salePriceAmount ? ` ${animal.salePriceAmount}` : ''}`}
+                                                        {animal.salePriceCurrency === 'Negotiable' ? 'Negotiable' : `${animal.salePriceCurrency === 'USD' ? '$' : animal.salePriceCurrency === 'EUR' ? '�' : animal.salePriceCurrency === 'GBP' ? '�' : animal.salePriceCurrency === 'CAD' ? 'C$' : animal.salePriceCurrency === 'AUD' ? 'A$' : animal.salePriceCurrency === 'JPY' ? '�' : animal.salePriceCurrency}${animal.salePriceAmount ? ` ${animal.salePriceAmount}` : ''}`}
                                                     </p>
                                                 </div>
                                             </div>
@@ -7774,7 +7774,7 @@ const LitterManagement = ({ authToken, API_BASE_URL, userProfile, showModalMessa
                                                     </div>
                                                 </div>
                                                 <div className="text-xs text-gray-500 mb-3">
-                                                    Autofilled: Species ({sire?.species}), Birth Date ({formatDate(litter.birthDate)}), Parents ({litter.sireId_public} • {litter.damId_public})
+                                                    Autofilled: Species ({sire?.species}), Birth Date ({formatDate(litter.birthDate)}), Parents ({litter.sireId_public} � {litter.damId_public})
                                                 </div>
                                                 <div className="flex gap-2">
                                                     <button
@@ -8055,7 +8055,7 @@ const SpeciesManager = ({ speciesOptions, setSpeciesOptions, onCancel, showModal
                         {loading ? 'Adding...' : 'Add'}
                     </button>
                 </div>
-                <p className="text-xs text-gray-500">💡 Species you add will be available to all users globally! Include the scientific name if known. </p>
+                <p className="text-xs text-gray-500">?? Species you add will be available to all users globally! Include the scientific name if known. </p>
             </form>
 
             <div className="mb-4 flex flex-col sm:flex-row gap-2 sm:space-x-3 overflow-x-hidden">
@@ -8207,7 +8207,7 @@ const SpeciesSelector = ({ speciesOptions, onSelectSpecies, onManageSpecies, sea
             
             <div className="mb-4 p-4 bg-yellow-50 border-l-4 border-yellow-400 rounded-lg">
                 <p className="text-sm text-yellow-800">
-                    <span className="font-semibold">⚠️ Work in Progress:</span> All species can be selected, but species-specific details (traits, colors, coat types, etc.) are not yet implemented. Currently optimized for Mouse, Rat, and Hamster.
+                    <span className="font-semibold">?? Work in Progress:</span> All species can be selected, but species-specific details (traits, colors, coat types, etc.) are not yet implemented. Currently optimized for Mouse, Rat, and Hamster.
                 </p>
             </div>
             
@@ -10190,19 +10190,19 @@ const AnimalForm = ({
                 <div className="border border-gray-300 -mx-6 px-6 pt-4">
                     <div className="flex flex-wrap gap-1 pb-px">
                         {[
-                            { id: 1, label: 'Overview', icon: '📋' },
-                            { id: 2, label: 'Status & Privacy', icon: '🔒' },
-                            { id: 3, label: 'Physical', icon: '🎨' },
-                            { id: 4, label: 'Identification', icon: '🏷️' },
-                            { id: 5, label: 'Lineage', icon: '🌳' },
-                            { id: 6, label: 'Breeding', icon: '🥚' },
-                            { id: 7, label: 'Health', icon: '🏥' },
-                            { id: 8, label: 'Husbandry', icon: '🏠' },
-                            { id: 9, label: 'Behavior', icon: '🧠' },
-                            { id: 10, label: 'Records', icon: '📝' },
-                            { id: 11, label: 'End of Life', icon: '⚖️' },
-                            { id: 12, label: 'Show', icon: '🏆' },
-                            { id: 13, label: 'Legal', icon: '📄' }
+                            { id: 1, label: 'Overview', icon: '??' },
+                            { id: 2, label: 'Status & Privacy', icon: '??' },
+                            { id: 3, label: 'Physical', icon: '??' },
+                            { id: 4, label: 'Identification', icon: '???' },
+                            { id: 5, label: 'Lineage', icon: '??' },
+                            { id: 6, label: 'Breeding', icon: '??' },
+                            { id: 7, label: 'Health', icon: '??' },
+                            { id: 8, label: 'Animal Care', icon: '??' },
+                            { id: 9, label: 'Behavior', icon: '??' },
+                            { id: 10, label: 'Records', icon: '??' },
+                            { id: 11, label: 'End of Life', icon: '??' },
+                            { id: 12, label: 'Show', icon: '??' },
+                            { id: 13, label: 'Legal', icon: '??' }
                         ].map(tab => (
                             <button
                                 key={tab.id}
@@ -10460,18 +10460,18 @@ const AnimalForm = ({
                                 <div className="flex items-center space-x-2">
                                     <input type="checkbox" name="isForSale" checked={formData.isForSale} onChange={handleChange} 
                                         className="form-checkbox h-5 w-5 text-primary rounded focus:ring-primary" />
-                                    <span className="text-sm font-medium text-gray-700">🏷️ Available for Sale</span>
+                                    <span className="text-sm font-medium text-gray-700">??? Available for Sale</span>
                                 </div>
                                 {formData.isForSale && (
                                     <div className="ml-7 flex gap-2">
                                         <select name="salePriceCurrency" value={formData.salePriceCurrency} onChange={handleChange} 
                                             className="block w-24 p-2 border border-gray-300 rounded-md shadow-sm focus:ring-primary focus:border-primary">
                                             <option value="USD">USD ($)</option>
-                                            <option value="EUR">EUR (€)</option>
-                                            <option value="GBP">GBP (£)</option>
+                                            <option value="EUR">EUR (�)</option>
+                                            <option value="GBP">GBP (�)</option>
                                             <option value="CAD">CAD (C$)</option>
                                             <option value="AUD">AUD (A$)</option>
-                                            <option value="JPY">JPY (¥)</option>
+                                            <option value="JPY">JPY (�)</option>
                                             <option value="Negotiable">Negotiable</option>
                                         </select>
                                         <input type="number" name="salePriceAmount" value={formData.salePriceAmount || ''} onChange={handleChange} 
@@ -10488,18 +10488,18 @@ const AnimalForm = ({
                                 <div className="flex items-center space-x-2">
                                     <input type="checkbox" name="availableForBreeding" checked={formData.availableForBreeding} onChange={handleChange} 
                                         className="form-checkbox h-5 w-5 text-primary rounded focus:ring-primary" />
-                                    <span className="text-sm font-medium text-gray-700">🥚 Available for Stud</span>
+                                    <span className="text-sm font-medium text-gray-700">?? Available for Stud</span>
                                 </div>
                                 {formData.availableForBreeding && (
                                     <div className="ml-7 flex gap-2">
                                         <select name="studFeeCurrency" value={formData.studFeeCurrency || 'USD'} onChange={handleChange} 
                                             className="block w-24 p-2 border border-gray-300 rounded-md shadow-sm focus:ring-primary focus:border-primary">
                                             <option value="USD">USD ($)</option>
-                                            <option value="EUR">EUR (€)</option>
-                                            <option value="GBP">GBP (£)</option>
+                                            <option value="EUR">EUR (�)</option>
+                                            <option value="GBP">GBP (�)</option>
                                             <option value="CAD">CAD (C$)</option>
                                             <option value="AUD">AUD (A$)</option>
-                                            <option value="JPY">JPY (¥)</option>
+                                            <option value="JPY">JPY (�)</option>
                                             <option value="Negotiable">Negotiable</option>
                                         </select>
                                         <input type="number" name="studFeeAmount" value={formData.studFeeAmount || ''} onChange={handleChange} 
@@ -12402,12 +12402,12 @@ const AnimalForm = ({
                     </div>
                 )}
 
-                {/* Tab 8: Husbandry */}
+                {/* Tab 8: Animal Care */}
                 {activeTab === 8 && (
                     <div className="space-y-6">
-                        {/* 1st Section: Nutrition */}
+                        {/* 1st Section: Daily / Routine Care */}
                         <div className="bg-gray-50 p-4 rounded-lg border border-gray-200 space-y-4" data-tutorial-target="nutrition-section">
-                            <h3 className="text-lg font-semibold text-gray-700 mb-4">Nutrition</h3>
+                            <h3 className="text-lg font-semibold text-gray-700 mb-4">Daily / Routine Care</h3>
                             <div className="space-y-4">
                                 {!isFieldHidden('dietType') && (
                                 <div>
@@ -12427,7 +12427,7 @@ const AnimalForm = ({
                                 </div>
                                 )}
 
-                                {/* Feeding tracking — powers Management view */}
+                                {/* Feeding tracking � powers Management view */}
                                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                                     <div>
                                         <label className="block text-sm font-medium text-gray-700 mb-2">Last Fed Date</label>
@@ -12453,19 +12453,19 @@ const AnimalForm = ({
                             </div>
                         </div>
 
-                        {/* 2nd Section: Husbandry */}
+                        {/* 2nd Section: Scheduled Care */}
                         <div className="bg-gray-50 p-4 rounded-lg border border-gray-200 space-y-4" data-tutorial-target="husbandry-details-section">
-                            <h3 className="text-lg font-semibold text-gray-700 mb-4">Husbandry</h3>
+                            <h3 className="text-lg font-semibold text-gray-700 mb-4">Scheduled Care</h3>
                             <div className="space-y-4">
                                 {/* Enclosure assignment */}
                                 <div>
                                     <label className="block text-sm font-medium text-gray-700 mb-2">Assigned Enclosure</label>
                                     <select name="enclosureId" value={formData.enclosureId || ''} onChange={handleChange}
                                         className="block w-full p-2 border border-gray-300 rounded-md shadow-sm focus:ring-primary focus:border-primary">
-                                        <option value="">— None / Unassigned —</option>
+                                        <option value="">� None / Unassigned �</option>
                                         {enclosureOptions.map(enc => (
                                             <option key={enc._id} value={enc._id}>
-                                                {enc.name}{enc.enclosureType ? ` (${enc.enclosureType})` : ''}{enc.size ? ` · ${enc.size}` : ''}
+                                                {enc.name}{enc.enclosureType ? ` (${enc.enclosureType})` : ''}{enc.size ? ` � ${enc.size}` : ''}
                                             </option>
                                         ))}
                                     </select>
@@ -12483,7 +12483,7 @@ const AnimalForm = ({
                                     </div>
                                 )}
 
-                                {/* Maintenance tracking — powers Management view */}
+                                {/* Maintenance tracking � powers Management view */}
                                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                                     <div>
                                         <label className="block text-sm font-medium text-gray-700 mb-2">Last Maintenance Date</label>
@@ -12498,7 +12498,7 @@ const AnimalForm = ({
                                     </div>
                                 </div>
 
-                                {/* Care Tasks — flexible recurring tasks for this animal */}
+                                {/* Care Tasks � flexible recurring tasks for this animal */}
                                 <div className="border border-gray-200 rounded-lg p-3 bg-white space-y-2">
                                     <div className="flex items-center justify-between mb-1">
                                         <label className="text-sm font-medium text-gray-700">Care Tasks</label>
@@ -12513,7 +12513,7 @@ const AnimalForm = ({
                                                     <span className="flex-1 font-medium text-gray-700">{task.taskName}</span>
                                                     {task.frequencyDays && <span className="text-xs text-gray-400">Every {task.frequencyDays}d</span>}
                                                     {task.lastDoneDate && <span className="text-xs text-gray-400">Last: {new Date(task.lastDoneDate).toLocaleDateString()}</span>}
-                                                    <button type="button" onClick={() => setFormData(prev => ({ ...prev, careTasks: (prev.careTasks || []).filter((_, i) => i !== idx) }))} className="text-red-400 hover:text-red-600 font-bold leading-none">×</button>
+                                                    <button type="button" onClick={() => setFormData(prev => ({ ...prev, careTasks: (prev.careTasks || []).filter((_, i) => i !== idx) }))} className="text-red-400 hover:text-red-600 font-bold leading-none">�</button>
                                                 </div>
                                             ))}
                                         </div>
@@ -12746,7 +12746,7 @@ const AnimalForm = ({
                             {/* Training & Behavior - Template controlled */}
                             {(!isFieldHidden('trainingLevel') || !isFieldHidden('trainingDisciplines') || !isFieldHidden('workingRole') || !isFieldHidden('certifications') || !isFieldHidden('behavioralIssues') || !isFieldHidden('biteHistory') || !isFieldHidden('reactivityNotes')) && (
                                 <>
-                                    <h4 className="text-md font-semibold text-gray-600 mt-4 pt-4 border-t border-gray-200">🎓 Training & Working</h4>
+                                    <h4 className="text-md font-semibold text-gray-600 mt-4 pt-4 border-t border-gray-200">?? Training & Working</h4>
                                     <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                                         {!isFieldHidden('trainingLevel') && (
                                         <div>
@@ -13855,7 +13855,7 @@ const DonationView = ({ onBack }) => {
             {/* Thank You */}
             <div className="mt-6 text-center">
                 <p className="text-sm text-gray-500 italic">
-                    Thank you for considering supporting CritterTrack. Your generosity is deeply appreciated! ❤️
+                    Thank you for considering supporting CritterTrack. Your generosity is deeply appreciated! ??
                 </p>
             </div>
         </div>
@@ -14826,7 +14826,7 @@ const AuthView = ({ onLoginSuccess, showModalMessage, isRegister, setIsRegister,
                     
                     {forgotPasswordStep === 2 && (
                         <div>
-                            <p className="text-sm text-gray-600 mb-4">✉️ Check your email for a password reset button. Click it to proceed with resetting your password.</p>
+                            <p className="text-sm text-gray-600 mb-4">?? Check your email for a password reset button. Click it to proceed with resetting your password.</p>
                             <p className="text-xs text-gray-500 bg-blue-50 p-3 rounded border border-blue-200">The reset link will expire in 1 hour.</p>
                         </div>
                     )}
@@ -14941,7 +14941,7 @@ const AuthView = ({ onLoginSuccess, showModalMessage, isRegister, setIsRegister,
                                     <CheckCircle className="h-5 w-5 text-green-500" />
                                 </div>
                                 <div className="ml-3 w-full">
-                                    <p className="text-sm font-bold text-green-900">Good News! 🎉</p>
+                                    <p className="text-sm font-bold text-green-900">Good News! ??</p>
                                     <p className="text-sm text-green-800 mt-2">Your suspension has been lifted. You can now log in to your account.</p>
                                     <p className="text-xs text-green-600 mt-2">This message will disappear in 24 hours.</p>
                                 </div>
@@ -15266,7 +15266,7 @@ const AnimalList = ({ authToken, showModalMessage, onEditAnimal, onViewAnimal, f
     // Always start with all species selected (empty array = show all)
     // Don't persist this filter to prevent newly created animals from being hidden
     const [selectedSpecies, setSelectedSpecies] = useState([]);
-    // Master species list — all species the user has ANY animal for, never filtered
+    // Master species list � all species the user has ANY animal for, never filtered
     const [allUserSpecies, setAllUserSpecies] = useState([]);
     const [statusFilterPregnant, setStatusFilterPregnant] = useState(() => {
         try {
@@ -15486,7 +15486,7 @@ const AnimalList = ({ authToken, showModalMessage, onEditAnimal, onViewAnimal, f
         }
     }, [authToken, statusFilter, selectedGenders, selectedSpecies, appliedNameFilter, statusFilterPregnant, statusFilterNursing, statusFilterMating, ownedFilterActive, publicFilter, showModalMessage]);
 
-    // Fetch ALL user species (no filters) — master list for filter UI and group headers
+    // Fetch ALL user species (no filters) � master list for filter UI and group headers
     const fetchAllSpecies = useCallback(async () => {
         if (!authToken) return;
         try {
@@ -16093,7 +16093,7 @@ const AnimalList = ({ authToken, showModalMessage, onEditAnimal, onViewAnimal, f
         );
     };
 
-    // ── Management View ──────────────────────────────────────────────────────────
+    // -- Management View ----------------------------------------------------------
     const renderManagementView = () => {
         const today = new Date();
         today.setHours(0, 0, 0, 0);
@@ -16183,8 +16183,8 @@ const AnimalList = ({ authToken, showModalMessage, onEditAnimal, onViewAnimal, f
             try { return JSON.parse(val); } catch { return [{ name: String(val) }]; }
         };
 
-        // ── Section data ─────────────────────────────────────────────────────────
-        // 1. Enclosures — grouped by named enclosure (enclosureId)
+        // -- Section data ---------------------------------------------------------
+        // 1. Enclosures � grouped by named enclosure (enclosureId)
         const enclosureAnimalMap = {}; // { enclosureId: [animals] }
         const unassignedAnimals = [];
         animals.forEach(a => {
@@ -16207,12 +16207,11 @@ const AnimalList = ({ authToken, showModalMessage, onEditAnimal, onViewAnimal, f
         const feedOk = animals.filter(a => a.feedingFrequencyDays && !isDue(a.lastFedDate, a.feedingFrequencyDays));
         const feedNone = animals.filter(a => !a.feedingFrequencyDays);
 
-        // 4. Maintenance — enclosure cleaning tasks + animal care tasks
+        // 4. Maintenance � enclosure cleaning tasks only
         const enclosuresWithCleaningTasks = enclosures.filter(enc => enc.cleaningTasks?.length > 0);
         const animalsWithCareTasks = animals.filter(a => a.careTasks?.length > 0);
-        const maintTotalDue =
-            enclosuresWithCleaningTasks.reduce((sum, enc) => sum + enc.cleaningTasks.filter(t => isDue(t.lastDoneDate, t.frequencyDays)).length, 0) +
-            animalsWithCareTasks.reduce((sum, a) => sum + (a.careTasks || []).filter(t => isDue(t.lastDoneDate, t.frequencyDays)).length, 0);
+        const maintTotalDue = enclosuresWithCleaningTasks.reduce((sum, enc) => sum + enc.cleaningTasks.filter(t => isDue(t.lastDoneDate, t.frequencyDays)).length, 0);
+        const animalCareDue = feedDue.length + animalsWithCareTasks.reduce((sum, a) => sum + (a.careTasks || []).filter(t => isDue(t.lastDoneDate, t.frequencyDays)).length, 0);
 
         // 5. Medical
         const quarantineList = animals.filter(a => a.isQuarantine);
@@ -16252,12 +16251,12 @@ const AnimalList = ({ authToken, showModalMessage, onEditAnimal, onViewAnimal, f
             } catch (err) { console.error('Repro status update failed:', err); }
         };
 
-        // ── Shared helpers ────────────────────────────────────────────────────────
-        // All appearance fields that make up "Variety" — same set as Tab 3 / Appearance section
+        // -- Shared helpers --------------------------------------------------------
+        // All appearance fields that make up "Variety" � same set as Tab 3 / Appearance section
         const VARIETY_KEYS = ['color', 'coatPattern', 'coat', 'earset', 'phenotype', 'morph', 'markings', 'eyeColor', 'nailColor', 'carrierTraits'];
         const getAnimalVariety = (a) => VARIETY_KEYS.map(k => a[k]).filter(Boolean).join(' ');
 
-        // ── Shared card + group components ───────────────────────────────────────
+        // -- Shared card + group components ---------------------------------------
         const MgmtAnimalCard = ({ animal, extras }) => (
             <div
                 className="flex items-center justify-between bg-white border border-gray-200 rounded-lg px-3 py-2 hover:bg-gray-50 cursor-pointer gap-2"
@@ -16276,14 +16275,14 @@ const AnimalList = ({ authToken, showModalMessage, onEditAnimal, onViewAnimal, f
                             {[animal.prefix, animal.name || 'Unnamed', animal.suffix].filter(Boolean).join(' ')}
                         </div>
                         <div className="text-xs text-gray-500 truncate">
-                            {getSpeciesDisplayName(animal.species)}{animal.gender ? ` · ${animal.gender}` : ''}
-                            {animal.dateOfBirth ? ` · ${formatDateShort(animal.dateOfBirth)}` : ''}
+                            {getSpeciesDisplayName(animal.species)}{animal.gender ? ` � ${animal.gender}` : ''}
+                            {animal.dateOfBirth ? ` � ${formatDateShort(animal.dateOfBirth)}` : ''}
                         </div>
                         {(() => {
                             const variety = getAnimalVariety(animal);
                             const parts = [animal.status, variety].filter(Boolean);
                             return parts.length > 0 ? (
-                                <div className="text-xs text-gray-400 truncate">{parts.join(' · ')}</div>
+                                <div className="text-xs text-gray-400 truncate">{parts.join(' � ')}</div>
                             ) : null;
                         })()}
                     </div>
@@ -16347,9 +16346,9 @@ const AnimalList = ({ authToken, showModalMessage, onEditAnimal, onViewAnimal, f
         return (
             <div className="space-y-3 sm:space-y-4 mt-4">
 
-                {/* ── 1. ENCLOSURES ────────────────────────────────────────── */}
+                {/* -- 1. ENCLOSURES ------------------------------------------ */}
                 <div className="border border-gray-200 rounded-xl overflow-hidden shadow-sm">
-                    {/* Section header — collapse on click, Add button on right */}
+                    {/* Section header � collapse on click, Add button on right */}
                     <div className="relative flex items-center justify-between bg-blue-50 px-3 py-2.5 sm:px-4 sm:py-3 border-b cursor-pointer" onClick={() => toggleSection('enclosures')}>
                         <div className="absolute left-1/2 -translate-x-1/2 pointer-events-none">
                             {collapsedMgmtSections['enclosures']
@@ -16396,7 +16395,7 @@ const AnimalList = ({ authToken, showModalMessage, onEditAnimal, onViewAnimal, f
                                     <label className="block text-xs font-medium text-gray-600 mb-1">Size</label>
                                     <input type="text" value={enclosureFormData.size}
                                         onChange={e => setEnclosureFormData(p => ({...p, size: e.target.value}))}
-                                        placeholder="e.g. 40 gallon, 48×24×24, 10 sq ft"
+                                        placeholder="e.g. 40 gallon, 48�24�24, 10 sq ft"
                                         className="block w-full p-2 text-sm border border-gray-300 rounded-md focus:ring-blue-400 focus:border-blue-400" />
                                 </div>
                                 <div>
@@ -16415,7 +16414,7 @@ const AnimalList = ({ authToken, showModalMessage, onEditAnimal, onViewAnimal, f
                                                 <div key={idx} className="flex items-center gap-2 text-xs bg-white rounded border border-gray-200 px-2 py-1.5">
                                                     <span className="flex-1 font-medium text-gray-700">{task.taskName}</span>
                                                     {task.frequencyDays && <span className="text-gray-400">Every {task.frequencyDays}d</span>}
-                                                    <button type="button" onClick={() => setEnclosureFormData(p => ({ ...p, cleaningTasks: (p.cleaningTasks || []).filter((_, i) => i !== idx) }))} className="text-red-400 hover:text-red-600 font-bold text-sm leading-none">×</button>
+                                                    <button type="button" onClick={() => setEnclosureFormData(p => ({ ...p, cleaningTasks: (p.cleaningTasks || []).filter((_, i) => i !== idx) }))} className="text-red-400 hover:text-red-600 font-bold text-sm leading-none">�</button>
                                                 </div>
                                             ))}
                                         </div>
@@ -16564,7 +16563,7 @@ const AnimalList = ({ authToken, showModalMessage, onEditAnimal, onViewAnimal, f
                     )}
                 </div>
 
-                {/* ── 2. REPRODUCTION ──────────────────────────────────────── */}
+                {/* -- 2. REPRODUCTION ---------------------------------------- */}
                 <div className="border border-gray-200 rounded-xl overflow-hidden shadow-sm">
                     <SectionHeader sectionKey="reproduction"
                         icon={<Bean size={18} className="text-pink-600" />}
@@ -16581,7 +16580,7 @@ const AnimalList = ({ authToken, showModalMessage, onEditAnimal, onViewAnimal, f
                                                 <div className="flex items-center gap-1 shrink-0" onClick={e => e.stopPropagation()}>
                                                     {a.matingDate && <div className="text-xs text-gray-400 hidden sm:block">Since {formatDateShort(a.matingDate)}</div>}
                                                     <button onClick={(e) => handleReproStatusUpdate(e, a, { isInMating: false, isPregnant: true })}
-                                                        className="text-xs px-1.5 py-0.5 rounded bg-pink-100 text-pink-700 hover:bg-pink-200 border border-pink-200 whitespace-nowrap">→ Pregnant</button>
+                                                        className="text-xs px-1.5 py-0.5 rounded bg-pink-100 text-pink-700 hover:bg-pink-200 border border-pink-200 whitespace-nowrap">? Pregnant</button>
                                                     <button onClick={(e) => handleReproStatusUpdate(e, a, { isInMating: false })}
                                                         className="text-xs px-1.5 py-0.5 rounded bg-gray-100 text-gray-600 hover:bg-gray-200 border border-gray-200">Clear</button>
                                                 </div>
@@ -16594,7 +16593,7 @@ const AnimalList = ({ authToken, showModalMessage, onEditAnimal, onViewAnimal, f
                                                 <div className="flex items-center gap-1 shrink-0" onClick={e => e.stopPropagation()}>
                                                     {a.expectedDueDate && <div className="text-xs text-gray-400 hidden sm:block">Due {formatDateShort(a.expectedDueDate)}</div>}
                                                     <button onClick={(e) => handleReproStatusUpdate(e, a, { isPregnant: false, isNursing: true })}
-                                                        className="text-xs px-1.5 py-0.5 rounded bg-blue-100 text-blue-700 hover:bg-blue-200 border border-blue-200 whitespace-nowrap">→ Nursing</button>
+                                                        className="text-xs px-1.5 py-0.5 rounded bg-blue-100 text-blue-700 hover:bg-blue-200 border border-blue-200 whitespace-nowrap">? Nursing</button>
                                                     <button onClick={(e) => handleReproStatusUpdate(e, a, { isPregnant: false })}
                                                         className="text-xs px-1.5 py-0.5 rounded bg-gray-100 text-gray-600 hover:bg-gray-200 border border-gray-200">Clear</button>
                                                 </div>
@@ -16616,118 +16615,63 @@ const AnimalList = ({ authToken, showModalMessage, onEditAnimal, onViewAnimal, f
                     )}
                 </div>
 
-                {/* ── 3. FEEDING SCHEDULE ──────────────────────────────────── */}
+                {/* -- 3. ANIMAL CARE ----------------------------------------- */}
                 <div className="border border-gray-200 rounded-xl overflow-hidden shadow-sm">
                     <SectionHeader sectionKey="feeding"
                         icon={<Utensils size={18} className="text-green-600" />}
-                        title="Feeding Schedule" count={animals.length} bgClass="bg-green-50" />
+                        title="Animal Care" count={animalCareDue > 0 ? `${animalCareDue} due` : animals.length} bgClass="bg-green-50" />
                     {!collapsedMgmtSections['feeding'] && (
-                        <div className="p-3 space-y-2">
-                            {feedDue.length > 0 && (
-                                <MgmtGroup groupKey="feed_due" label="Due Today / Overdue"
-                                    groupAnimals={feedDue} headerClass="bg-red-50"
-                                    renderExtras={(a) => (
-                                        <div className="flex items-center gap-2 shrink-0" onClick={e => e.stopPropagation()}>
-                                            <div className="text-xs text-gray-400 text-right whitespace-nowrap hidden sm:block">
-                                                {a.dietType && <div>{a.dietType}</div>}
-                                                {a.lastFedDate
-                                                    ? <div>Last: {formatDateShort(a.lastFedDate)}</div>
-                                                    : <div className="text-orange-500">Never fed</div>}
-                                                {a.feedingFrequencyDays && <div>Every {a.feedingFrequencyDays}d</div>}
-                                            </div>
-                                            <button onClick={(e) => handleMarkFed(e, a)}
-                                                className="bg-green-500 hover:bg-green-600 text-white text-xs font-medium px-2 py-1 rounded-lg whitespace-nowrap">
-                                                ✓ Fed
-                                            </button>
-                                        </div>
-                                    )} />
-                            )}
-                            {feedOk.length > 0 && (
-                                <MgmtGroup groupKey="feed_ok" label="Up to Date"
-                                    groupAnimals={feedOk} headerClass="bg-green-50"
-                                    renderExtras={(a) => (
-                                        <div className="text-xs text-gray-400 text-right whitespace-nowrap shrink-0">
-                                            {a.lastFedDate && <div>Last: {formatDateShort(a.lastFedDate)}</div>}
-                                            {a.feedingFrequencyDays && <div>Every {a.feedingFrequencyDays}d</div>}
-                                        </div>
-                                    )} />
-                            )}
-                            {feedNone.length > 0 && (
-                                <MgmtGroup groupKey="feed_none" label="No Schedule Set"
-                                    groupAnimals={feedNone} headerClass="bg-gray-100"
-                                    renderExtras={(a) => a.dietType
-                                        ? <div className="text-xs text-gray-400 shrink-0 truncate max-w-[100px]">{a.dietType}</div>
-                                        : null} />
-                            )}
-                            {feedDue.length === 0 && feedOk.length === 0 && feedNone.length === 0 && (
-                                <div className="text-sm text-gray-400 text-center py-4">No animals.</div>
-                            )}
-                        </div>
-                    )}
-                </div>
-
-                {/* ── 4. MAINTENANCE ───────────────────────────────────────── */}
-                <div className="border border-gray-200 rounded-xl overflow-hidden shadow-sm">
-                    <SectionHeader sectionKey="maintenance"
-                        icon={<Wrench size={18} className="text-amber-600" />}
-                        title="Maintenance" count={`${maintTotalDue} due`} bgClass="bg-amber-50" />
-                    {!collapsedMgmtSections['maintenance'] && (
                         <div className="divide-y divide-gray-100">
-                            {/* ── Enclosure Cleaning ── */}
+                            {/* -- Daily / Routine -- */}
                             <div>
-                                <div className="px-3 py-2 text-xs font-semibold text-gray-500 bg-gray-50 uppercase tracking-wide">Enclosure Cleaning</div>
-                                {enclosuresWithCleaningTasks.length === 0 ? (
-                                    <div className="px-3 py-4 text-xs text-gray-400 text-center">No cleaning tasks defined. Edit an enclosure above and add tasks.</div>
-                                ) : enclosuresWithCleaningTasks.map(enc => {
-                                    const grpKey = `maint_enc_${enc._id}`;
-                                    const isGrpCollapsed = collapsedMgmtGroups[grpKey] || false;
-                                    const dueTasks = enc.cleaningTasks.filter(t => isDue(t.lastDoneDate, t.frequencyDays));
-                                    return (
-                                        <div key={enc._id} className="border-b border-gray-100 last:border-0">
-                                            <div className="flex items-center justify-between px-3 py-2 bg-amber-50/40 cursor-pointer" onClick={() => toggleGroup(grpKey)}>
-                                                <div className="flex items-center gap-2">
-                                                    {isGrpCollapsed ? <ChevronDown size={14} className="text-gray-400" /> : <ChevronUp size={14} className="text-gray-400" />}
-                                                    <span className="text-sm font-medium text-gray-800">{enc.name}</span>
-                                                    {enc.enclosureType && <span className="text-xs text-gray-400">({enc.enclosureType})</span>}
+                                <div className="px-3 py-2 text-xs font-semibold text-gray-500 bg-gray-50 uppercase tracking-wide">Daily / Routine</div>
+                                <div className="p-3 space-y-2">
+                                    {feedDue.length > 0 && (
+                                        <MgmtGroup groupKey="feed_due" label="Due Today / Overdue"
+                                            groupAnimals={feedDue} headerClass="bg-red-50"
+                                            renderExtras={(a) => (
+                                                <div className="flex items-center gap-2 shrink-0" onClick={e => e.stopPropagation()}>
+                                                    <div className="text-xs text-gray-400 text-right whitespace-nowrap hidden sm:block">
+                                                        {a.dietType && <div>{a.dietType}</div>}
+                                                        {a.lastFedDate
+                                                            ? <div>Last: {formatDateShort(a.lastFedDate)}</div>
+                                                            : <div className="text-orange-500">Never fed</div>}
+                                                        {a.feedingFrequencyDays && <div>Every {a.feedingFrequencyDays}d</div>}
+                                                    </div>
+                                                    <button onClick={(e) => handleMarkFed(e, a)}
+                                                        className="bg-green-500 hover:bg-green-600 text-white text-xs font-medium px-2 py-1 rounded-lg whitespace-nowrap">
+                                                        ? Fed
+                                                    </button>
                                                 </div>
-                                                {dueTasks.length > 0 && <span className="text-xs bg-red-100 text-red-600 px-2 py-0.5 rounded-full font-medium">{dueTasks.length} due</span>}
-                                            </div>
-                                            {!isGrpCollapsed && (
-                                                <div className="px-4 py-2 space-y-2">
-                                                    {enc.cleaningTasks.map((task, idx) => {
-                                                        const due = isDue(task.lastDoneDate, task.frequencyDays);
-                                                        const daysAgo = task.lastDoneDate ? daysSince(task.lastDoneDate) : null;
-                                                        const daysLeft = task.frequencyDays && daysAgo !== null ? task.frequencyDays - daysAgo : null;
-                                                        const soon = !due && daysLeft !== null && daysLeft <= 2;
-                                                        return (
-                                                            <div key={idx} className="flex items-center justify-between gap-2 text-sm" onClick={e => e.stopPropagation()}>
-                                                                <div className="flex items-center gap-2 min-w-0">
-                                                                    <span className={`w-2 h-2 rounded-full flex-shrink-0 ${due ? 'bg-red-500' : soon ? 'bg-orange-400' : task.frequencyDays ? 'bg-green-500' : 'bg-gray-300'}`} />
-                                                                    <span className="text-gray-700 truncate">{task.taskName}</span>
-                                                                </div>
-                                                                <div className="flex items-center gap-1.5 shrink-0 text-xs text-gray-400">
-                                                                    {task.frequencyDays && <span>Every {task.frequencyDays}d</span>}
-                                                                    {task.lastDoneDate ? <span>· Last: {formatDateShort(task.lastDoneDate)}</span> : <span className="text-orange-500">· Never done</span>}
-                                                                    <button onClick={(e) => handleMarkEnclosureTaskDone(e, enc, idx)}
-                                                                        className={`ml-1 text-xs px-2 py-0.5 rounded font-medium border ${due ? 'bg-amber-500 text-white hover:bg-amber-600 border-amber-500' : 'bg-gray-100 text-gray-600 hover:bg-gray-200 border-gray-200'}`}>
-                                                                        ✓ Done
-                                                                    </button>
-                                                                </div>
-                                                            </div>
-                                                        );
-                                                    })}
+                                            )} />
+                                    )}
+                                    {feedOk.length > 0 && (
+                                        <MgmtGroup groupKey="feed_ok" label="Up to Date"
+                                            groupAnimals={feedOk} headerClass="bg-green-50"
+                                            renderExtras={(a) => (
+                                                <div className="text-xs text-gray-400 text-right whitespace-nowrap shrink-0">
+                                                    {a.lastFedDate && <div>Last: {formatDateShort(a.lastFedDate)}</div>}
+                                                    {a.feedingFrequencyDays && <div>Every {a.feedingFrequencyDays}d</div>}
                                                 </div>
-                                            )}
-                                        </div>
-                                    );
-                                })}
+                                            )} />
+                                    )}
+                                    {feedNone.length > 0 && (
+                                        <MgmtGroup groupKey="feed_none" label="No Schedule Set"
+                                            groupAnimals={feedNone} headerClass="bg-gray-100"
+                                            renderExtras={(a) => a.dietType
+                                                ? <div className="text-xs text-gray-400 shrink-0 truncate max-w-[100px]">{a.dietType}</div>
+                                                : null} />
+                                    )}
+                                    {feedDue.length === 0 && feedOk.length === 0 && feedNone.length === 0 && (
+                                        <div className="text-sm text-gray-400 text-center py-4">No animals with a feeding schedule.</div>
+                                    )}
+                                </div>
                             </div>
-
-                            {/* ── Animal Care Tasks ── */}
+                            {/* -- Scheduled Care -- */}
                             <div>
-                                <div className="px-3 py-2 text-xs font-semibold text-gray-500 bg-gray-50 uppercase tracking-wide">Animal Care Tasks</div>
+                                <div className="px-3 py-2 text-xs font-semibold text-gray-500 bg-gray-50 uppercase tracking-wide">Scheduled Care</div>
                                 {animalsWithCareTasks.length === 0 ? (
-                                    <div className="px-3 py-4 text-xs text-gray-400 text-center">No animal care tasks. Edit an animal and add tasks in the Husbandry tab.</div>
+                                    <div className="px-3 py-4 text-xs text-gray-400 text-center">No scheduled care tasks. Edit an animal and add tasks in the Animal Care tab.</div>
                                 ) : animalsWithCareTasks.map(a => {
                                     const grpKey = `maint_animal_${a.id_public}`;
                                     const isGrpCollapsed = collapsedMgmtGroups[grpKey] || false;
@@ -16761,10 +16705,10 @@ const AnimalList = ({ authToken, showModalMessage, onEditAnimal, onViewAnimal, f
                                                                 </div>
                                                                 <div className="flex items-center gap-1.5 shrink-0 text-xs text-gray-400">
                                                                     {task.frequencyDays && <span>Every {task.frequencyDays}d</span>}
-                                                                    {task.lastDoneDate ? <span>· Last: {formatDateShort(task.lastDoneDate)}</span> : <span className="text-orange-500">· Never done</span>}
+                                                                    {task.lastDoneDate ? <span>� Last: {formatDateShort(task.lastDoneDate)}</span> : <span className="text-orange-500">� Never done</span>}
                                                                     <button onClick={(e) => handleMarkAnimalCareTaskDone(e, a, idx)}
                                                                         className={`ml-1 text-xs px-2 py-0.5 rounded font-medium border ${due ? 'bg-amber-500 text-white hover:bg-amber-600 border-amber-500' : 'bg-gray-100 text-gray-600 hover:bg-gray-200 border-gray-200'}`}>
-                                                                        ✓ Done
+                                                                        ? Done
                                                                     </button>
                                                                 </div>
                                                             </div>
@@ -16780,7 +16724,73 @@ const AnimalList = ({ authToken, showModalMessage, onEditAnimal, onViewAnimal, f
                     )}
                 </div>
 
-                {/* ── 5. MEDICAL / QUARANTINE ──────────────────────────────── */}
+                {/* -- 4. MAINTENANCE ----------------------------------------- */}
+                <div className="border border-gray-200 rounded-xl overflow-hidden shadow-sm">
+                    <SectionHeader sectionKey="maintenance"
+                        icon={<Wrench size={18} className="text-amber-600" />}
+                        title="Maintenance" count={`${maintTotalDue} due`} bgClass="bg-amber-50" />
+                    {!collapsedMgmtSections['maintenance'] && (
+                        <div className="divide-y divide-gray-100">
+                            {/* -- Enclosure Cleaning -- */}
+                            <div>
+                                <div className="px-3 py-2 text-xs font-semibold text-gray-500 bg-gray-50 uppercase tracking-wide">Enclosure Cleaning</div>
+                                {enclosuresWithCleaningTasks.length === 0 ? (
+                                    <div className="px-3 py-4 text-xs text-gray-400 text-center">No cleaning tasks defined. Edit an enclosure above and add tasks.</div>
+                                ) : enclosuresWithCleaningTasks.map(enc => {
+                                    const grpKey = `maint_enc_${enc._id}`;
+                                    const isGrpCollapsed = collapsedMgmtGroups[grpKey] || false;
+                                    const dueTasks = enc.cleaningTasks.filter(t => isDue(t.lastDoneDate, t.frequencyDays));
+                                    return (
+                                        <div key={enc._id} className="border-b border-gray-100 last:border-0">
+                                            <div className="flex items-center justify-between px-3 py-2 bg-amber-50/40 cursor-pointer" onClick={() => toggleGroup(grpKey)}>
+                                                <div className="flex items-center gap-2">
+                                                    {isGrpCollapsed ? <ChevronDown size={14} className="text-gray-400" /> : <ChevronUp size={14} className="text-gray-400" />}
+                                                    <span className="text-sm font-medium text-gray-800">{enc.name}</span>
+                                                    {enc.enclosureType && <span className="text-xs text-gray-400">({enc.enclosureType})</span>}
+                                                </div>
+                                                {dueTasks.length > 0 && <span className="text-xs bg-red-100 text-red-600 px-2 py-0.5 rounded-full font-medium">{dueTasks.length} due</span>}
+                                            </div>
+                                            {!isGrpCollapsed && (
+                                                <div className="px-4 py-2 space-y-2">
+                                                    {enc.cleaningTasks.map((task, idx) => {
+                                                        const due = isDue(task.lastDoneDate, task.frequencyDays);
+                                                        const daysAgo = task.lastDoneDate ? daysSince(task.lastDoneDate) : null;
+                                                        const daysLeft = task.frequencyDays && daysAgo !== null ? task.frequencyDays - daysAgo : null;
+                                                        const soon = !due && daysLeft !== null && daysLeft <= 2;
+                                                        return (
+                                                            <div key={idx} className="flex items-center justify-between gap-2 text-sm" onClick={e => e.stopPropagation()}>
+                                                                <div className="flex items-center gap-2 min-w-0">
+                                                                    <span className={`w-2 h-2 rounded-full flex-shrink-0 ${due ? 'bg-red-500' : soon ? 'bg-orange-400' : task.frequencyDays ? 'bg-green-500' : 'bg-gray-300'}`} />
+                                                                    <span className="text-gray-700 truncate">{task.taskName}</span>
+                                                                </div>
+                                                                <div className="flex items-center gap-1.5 shrink-0 text-xs text-gray-400">
+                                                                    {task.frequencyDays && <span>Every {task.frequencyDays}d</span>}
+                                                                    {task.lastDoneDate ? <span>� Last: {formatDateShort(task.lastDoneDate)}</span> : <span className="text-orange-500">� Never done</span>}
+                                                                    <button onClick={(e) => handleMarkEnclosureTaskDone(e, enc, idx)}
+                                                                        className={`ml-1 text-xs px-2 py-0.5 rounded font-medium border ${due ? 'bg-amber-500 text-white hover:bg-amber-600 border-amber-500' : 'bg-gray-100 text-gray-600 hover:bg-gray-200 border-gray-200'}`}>
+                                                                        ? Done
+                                                                    </button>
+                                                                </div>
+                                                            </div>
+                                                        );
+                                                    })}
+                                                </div>
+                                            )}
+                                        </div>
+                                    );
+                                })}
+                            </div>
+
+                            {/* -- Supplies & Inventory -- */}
+                            <div>
+                                <div className="px-3 py-2 text-xs font-semibold text-gray-500 bg-gray-50 uppercase tracking-wide">Supplies &amp; Inventory</div>
+                                <div className="px-3 py-4 text-xs text-gray-400 text-center">Inventory tracking coming soon � food, bedding, medication stock and reorder reminders.</div>
+                            </div>
+                        </div>
+                    )}
+                </div>
+
+                {/* -- 5. MEDICAL / QUARANTINE -------------------------------- */}
                 <div className="border border-gray-200 rounded-xl overflow-hidden shadow-sm">
                     <SectionHeader sectionKey="medical"
                         icon={<Activity size={18} className="text-red-600" />}
@@ -17113,7 +17123,7 @@ const AnimalList = ({ authToken, showModalMessage, onEditAnimal, onViewAnimal, f
                                     }
                                 }}
                             >
-                                {/* Collapse indicator — centered, up/down chevron */}
+                                {/* Collapse indicator � centered, up/down chevron */}
                                 {!isBulkMode && (
                                     <div className="absolute left-1/2 -translate-x-1/2 pointer-events-none">
                                         {isCollapsed
@@ -17123,7 +17133,7 @@ const AnimalList = ({ authToken, showModalMessage, onEditAnimal, onViewAnimal, f
                                     </div>
                                 )}
                                 <div className="flex items-center gap-1 sm:gap-2">
-                                    {/* Reorder buttons — left side, bordered pill */}
+                                    {/* Reorder buttons � left side, bordered pill */}
                                     {!isBulkMode && (
                                         <div className="flex items-center border border-gray-300 rounded-lg overflow-hidden" onClick={(e) => e.stopPropagation()}>
                                             <button
@@ -17721,7 +17731,7 @@ const WarningBanner = ({ authToken, API_BASE_URL, userProfile }) => {
                             <AlertCircle className="h-6 w-6 text-yellow-400" />
                         </div>
                         <div className="ml-3 flex-1">
-                            <h3 className="text-lg font-bold text-yellow-800">⚠️ Official Warning{warnings.length !== 1 ? 's' : ''} from Moderation Team</h3>
+                            <h3 className="text-lg font-bold text-yellow-800">?? Official Warning{warnings.length !== 1 ? 's' : ''} from Moderation Team</h3>
                             <div className="mt-3 text-yellow-700">
                                 <p className="text-sm font-semibold mb-2">
                                     You have {warnings.length} active warning{warnings.length !== 1 ? 's' : ''}:
@@ -17738,7 +17748,7 @@ const WarningBanner = ({ authToken, API_BASE_URL, userProfile }) => {
                                 </div>
                                 {warnings.length >= 3 && (
                                     <p className="text-xs mt-3 text-red-600 font-semibold">
-                                        ⚠️ You have reached 3 warnings - your account is suspended. Contact moderators for appeal.
+                                        ?? You have reached 3 warnings - your account is suspended. Contact moderators for appeal.
                                     </p>
                                 )}
                             </div>
@@ -18001,7 +18011,7 @@ const BroadcastBanner = ({ authToken, API_BASE_URL }) => {
                 text: 'text-purple-700',
                 subtitle: 'text-purple-500',
                 dismissBtn: 'text-purple-400 hover:text-purple-600',
-                emoji: '📣',
+                emoji: '??',
                 label: 'Announcement'
             };
         }
@@ -18015,7 +18025,7 @@ const BroadcastBanner = ({ authToken, API_BASE_URL }) => {
                 text: 'text-green-700',
                 subtitle: 'text-green-500',
                 dismissBtn: 'text-green-400 hover:text-green-600',
-                emoji: '📊',
+                emoji: '??',
                 label: 'Poll',
                 button: 'bg-green-500 hover:bg-green-600 text-white',
                 optionBg: 'bg-green-100 hover:bg-green-200',
@@ -18031,7 +18041,7 @@ const BroadcastBanner = ({ authToken, API_BASE_URL }) => {
             text: 'text-blue-700',
             subtitle: 'text-blue-500',
             dismissBtn: 'text-blue-400 hover:text-blue-600',
-            emoji: 'ℹ️',
+            emoji: '??',
             label: 'Info'
         };
     };
@@ -18148,7 +18158,7 @@ const UrgentBroadcastPopup = ({ authToken, API_BASE_URL }) => {
                     </div>
                     <div className="ml-4 flex-1">
                         <h3 className={`text-xl font-bold ${textColor}`}>
-                            {isAlert ? '🚨 URGENT ALERT' : '⚠️ Important Notice'}
+                            {isAlert ? '?? URGENT ALERT' : '?? Important Notice'}
                         </h3>
                         <h4 className={`text-lg font-semibold ${textColor} mt-2`}>
                             {urgentBroadcast.title || 'System Message'}
@@ -18363,7 +18373,7 @@ const NotificationPanel = ({ authToken, API_BASE_URL, onClose, showModalMessage,
                                             {/* Moderation Notice Header */}
                                             {notification.type === 'content_edited' && (
                                                 <div className="flex items-center text-orange-700 font-semibold mb-2">
-                                                    <span className="mr-2">⚠️</span>
+                                                    <span className="mr-2">??</span>
                                                     <span>Moderation Notice</span>
                                                 </div>
                                             )}
@@ -20722,7 +20732,7 @@ const App = () => {
                 {!hasSeenDonationHighlight && (
                     <div className="absolute top-full mt-2 left-0 bg-gray-900 text-white text-xs px-3 py-2 rounded-lg shadow-xl whitespace-nowrap animate-bounce">
                         <div className="absolute bottom-full left-4 w-0 h-0 border-l-4 border-l-transparent border-r-4 border-r-transparent border-b-4 border-b-gray-900"></div>
-                        💝 Support CritterTrack
+                        ?? Support CritterTrack
                     </div>
                 )}
             </div>
@@ -20747,7 +20757,7 @@ const App = () => {
                                     <><span></span> For Sale</>
                                 )}
                                 {availableAnimals[currentAvailableIndex].availableForBreeding && (
-                                    <><span>🥚</span> For Stud</>
+                                    <><span>??</span> For Stud</>
                                 )}
                                 {availableAnimals[currentAvailableIndex].isForSale && availableAnimals[currentAvailableIndex].availableForBreeding && (
                                     <span className="text-xs">?</span>
@@ -20794,12 +20804,12 @@ const App = () => {
                             <div className="mt-1 space-y-1">
                                 {availableAnimals[currentAvailableIndex].isForSale && availableAnimals[currentAvailableIndex].salePriceAmount && (
                                     <p className="text-xs text-green-600 font-semibold">
-                                        Fee: {availableAnimals[currentAvailableIndex].salePriceCurrency === 'Negotiable' ? 'Negotiable' : `${availableAnimals[currentAvailableIndex].salePriceCurrency === 'USD' ? '$' : availableAnimals[currentAvailableIndex].salePriceCurrency === 'EUR' ? '€' : ''}${availableAnimals[currentAvailableIndex].salePriceAmount}`}
+                                        Fee: {availableAnimals[currentAvailableIndex].salePriceCurrency === 'Negotiable' ? 'Negotiable' : `${availableAnimals[currentAvailableIndex].salePriceCurrency === 'USD' ? '$' : availableAnimals[currentAvailableIndex].salePriceCurrency === 'EUR' ? '�' : ''}${availableAnimals[currentAvailableIndex].salePriceAmount}`}
                                     </p>
                                 )}
                                 {availableAnimals[currentAvailableIndex].availableForBreeding && availableAnimals[currentAvailableIndex].studFeeAmount && (
                                     <p className="text-xs text-purple-600 font-semibold">
-                                        Fee: {availableAnimals[currentAvailableIndex].studFeeCurrency === 'Negotiable' ? 'Negotiable' : `${availableAnimals[currentAvailableIndex].studFeeCurrency === 'USD' ? '$' : availableAnimals[currentAvailableIndex].studFeeCurrency === 'EUR' ? '€' : ''}${availableAnimals[currentAvailableIndex].studFeeAmount}`}
+                                        Fee: {availableAnimals[currentAvailableIndex].studFeeCurrency === 'Negotiable' ? 'Negotiable' : `${availableAnimals[currentAvailableIndex].studFeeCurrency === 'USD' ? '$' : availableAnimals[currentAvailableIndex].studFeeCurrency === 'EUR' ? '�' : ''}${availableAnimals[currentAvailableIndex].studFeeAmount}`}
                                     </p>
                                 )}
                             </div>
@@ -21958,15 +21968,15 @@ const App = () => {
                                             {showTabs && (
                                                 <div className="px-4 py-3 flex flex-wrap gap-2">
                                                     {[
-                            { id: 1, label: 'Overview', icon: '📋' },
-                            { id: 2, label: 'Status & Privacy', icon: '🔒' },
-                            { id: 3, label: 'Physical', icon: '🎨' },
-                            { id: 4, label: 'Identification', icon: '🏷️' },
-                            { id: 5, label: 'Lineage', icon: '🌳' },
-                            { id: 6, label: 'Breeding', icon: '🥚' },
-                            { id: 7, label: 'Health', icon: '🏥' },
-                            { id: 8, label: 'Husbandry', icon: '🏠' },
-                            { id: 11, label: 'Show', icon: '🏆' }
+                            { id: 1, label: 'Overview', icon: '??' },
+                            { id: 2, label: 'Status & Privacy', icon: '??' },
+                            { id: 3, label: 'Physical', icon: '??' },
+                            { id: 4, label: 'Identification', icon: '???' },
+                            { id: 5, label: 'Lineage', icon: '??' },
+                            { id: 6, label: 'Breeding', icon: '??' },
+                            { id: 7, label: 'Health', icon: '??' },
+                            { id: 8, label: 'Animal Care', icon: '??' },
+                            { id: 11, label: 'Show', icon: '??' }
                                                     ].map(tab => (
                                                         <button
                                                             key={tab.id}
@@ -23287,7 +23297,7 @@ const App = () => {
                                                         {animal.prefix ? `${animal.prefix} ` : ''}{animal.name}{animal.suffix ? ` ${animal.suffix}` : ''}
                                                     </h3>
                                                     <p className="text-sm text-gray-600">{animal.id_public}</p>
-                                                    <p className="text-xs text-gray-500">{animal.species} • {animal.gender}</p>
+                                                    <p className="text-xs text-gray-500">{animal.species} � {animal.gender}</p>
                                                 </div>
                                             </div>
                                             <div className="flex gap-2">
@@ -23502,7 +23512,7 @@ const App = () => {
                                 <div className="flex items-start gap-2">
                                     <Info className="w-4 h-4 text-blue-600 mt-0.5 flex-shrink-0" />
                                     <div className="text-xs text-blue-800">
-                                        <p className="font-semibold mb-1">🎉 How Transfer Works</p>
+                                        <p className="font-semibold mb-1">?? How Transfer Works</p>
                                         <p>The buyer will receive a notification to accept the transfer. Once accepted, the animal will be transferred to their account and you'll keep view-only access to track lineage.</p>
                                     </div>
                                 </div>
