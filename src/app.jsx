@@ -17100,6 +17100,28 @@ const AnimalList = ({ authToken, showModalMessage, onEditAnimal, onViewAnimal, f
             } catch (err) { console.error('Mark animal care task done failed:', err); }
         };
 
+        const handleUnquarantine = async (e, animal) => {
+            e.stopPropagation();
+            if (!window.confirm(`Release ${animal.name || 'this animal'} from quarantine?`)) return;
+            try {
+                await axios.put(`${API_BASE_URL}/animals/${animal.id_public}`, { isQuarantine: false },
+                    { headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${authToken}` } });
+                logManagementActivity('quarantine_released', animal.id_public, { name: animal.name, species: animal.species });
+                fetchAnimals();
+            } catch (err) { console.error('Unquarantine failed:', err); }
+        };
+
+        const handleUnquarantine = async (e, animal) => {
+            e.stopPropagation();
+            if (!window.confirm(`Release ${animal.name || 'this animal'} from quarantine?`)) return;
+            try {
+                await axios.put(`${API_BASE_URL}/animals/${animal.id_public}`, { isQuarantine: false },
+                    { headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${authToken}` } });
+                logManagementActivity('quarantine_released', animal.id_public, { name: animal.name, species: animal.species });
+                fetchAnimals();
+            } catch (err) { console.error('Unquarantine failed:', err); }
+        };
+
         const handleReproStatusUpdate = async (e, animal, patch) => {
             e.stopPropagation();
             try {
@@ -17712,9 +17734,20 @@ const AnimalList = ({ authToken, showModalMessage, onEditAnimal, onViewAnimal, f
                                             groupAnimals={quarantineList} headerClass="bg-orange-50"
                                             renderExtras={(a) => {
                                                 const conds = parseArrayField(a.medicalConditions);
-                                                return conds.length > 0
-                                                    ? <div className="text-xs text-orange-600 shrink-0 max-w-[120px] truncate">{conds.map(c => c.name || c).join(', ')}</div>
-                                                    : <span className="text-xs text-orange-400 shrink-0">Quarantine</span>;
+                                                return (
+                                                    <div className="flex items-center gap-1.5 shrink-0">
+                                                        {conds.length > 0
+                                                            ? <div className="text-xs text-orange-600 max-w-[100px] truncate">{conds.map(c => c.name || c).join(', ')}</div>
+                                                            : <span className="text-xs text-orange-400">Quarantine</span>}
+                                                        <button
+                                                            onClick={(e) => handleUnquarantine(e, a)}
+                                                            className="text-xs px-2 py-0.5 rounded font-medium border bg-green-500 text-white hover:bg-green-600 border-green-500 whitespace-nowrap"
+                                                            title="Release from quarantine"
+                                                        >
+                                                            ✓ Release
+                                                        </button>
+                                                    </div>
+                                                );
                                             }} />
                                     )}
                                     {treatmentList.length > 0 && (
