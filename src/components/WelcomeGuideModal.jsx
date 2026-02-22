@@ -43,7 +43,7 @@ const WelcomeGuideModal = ({ onClose }) => {
                             <div className="flex-1">
                                 <h3 className="font-semibold text-gray-800 text-sm mb-1">Breeder Name & Privacy</h3>
                                 <p className="text-xs text-gray-600 leading-relaxed">
-                                    Set your <strong>Breeder Name</strong> in profile settings. Choose to display your personal name or breeder name publicly. 
+                                    Access profile settings by clicking your <strong>profile image circle</strong> in the top-right corner, then selecting <strong>Profile</strong>. Set your Breeder Name and choose what's displayed publicly.
                                     <strong> Note:</strong> You'll only be visible if you have either name set to public. Completely anonymous accounts won't show up anywhere, nor will their animals.
                                 </p>
                             </div>
@@ -88,7 +88,7 @@ const WelcomeGuideModal = ({ onClose }) => {
                             <div className="flex-1">
                                 <h3 className="font-semibold text-gray-800 text-sm mb-1">Breeders Registry</h3>
                                 <p className="text-xs text-gray-600 leading-relaxed">
-                                    In profile settings, select your breeding status (Owner, Active Breeder, or Retired Breeder) 
+                                    In <strong>Profile</strong> (profile image circle → Profile), select your breeding status (Owner, Active Breeder, or Retired Breeder) 
                                     for any <strong>species you have animals for</strong> on the site. This adds you to the public <strong>Breeders</strong> Registry.
                                 </p>
                             </div>
@@ -104,7 +104,7 @@ const WelcomeGuideModal = ({ onClose }) => {
                             <div className="flex-1">
                                 <h3 className="font-semibold text-gray-800 text-sm mb-1">Need Help Getting Started?</h3>
                                 <p className="text-xs text-gray-600">
-                                    Interactive tutorials are available anytime through the <strong>Help button in the header</strong>. 
+                                    Interactive tutorials are available anytime — click your <strong>profile image circle</strong> in the top-right corner and select <strong>Help</strong>. 
                                     Learn about adding animals, the <strong>Management View</strong> for daily feeding &amp; care tracking, 
                                     <strong> Supplies &amp; Inventory</strong>, per-animal <strong>Logs</strong>, genetics, budgeting, and more!
                                 </p>
