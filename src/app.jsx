@@ -15447,7 +15447,7 @@ const AnimalList = ({ authToken, showModalMessage, onEditAnimal, onViewAnimal, f
     const [showSuppliesScreen, setShowSuppliesScreen] = useState(false);
     const [supplies, setSupplies] = useState([]);
     const [suppliesLoading, setSuppliesLoading] = useState(false);
-    const [supplyForm, setSupplyForm] = useState({ name: '', category: 'Other', currentStock: '', unit: '', reorderThreshold: '', notes: '' });
+    const [supplyForm, setSupplyForm] = useState({ name: '', category: 'Other', currentStock: '', unit: '', reorderThreshold: '', notes: '', isFeederAnimal: false, feederType: '', feederSize: '', costPerUnit: '' });
     const [supplyFormVisible, setSupplyFormVisible] = useState(false);
     const [editingSupplyId, setEditingSupplyId] = useState(null);
     const [supplySaving, setSupplySaving] = useState(false);
@@ -16600,7 +16600,7 @@ const AnimalList = ({ authToken, showModalMessage, onEditAnimal, onViewAnimal, f
                     const res = await axios.post(`${API_BASE_URL}/supplies`, supplyForm, { headers: { Authorization: `Bearer ${authToken}` } });
                     setSupplies(prev => [...prev, res.data]);
                 }
-                setSupplyForm({ name: '', category: 'Other', currentStock: '', unit: '', reorderThreshold: '', notes: '' });
+                setSupplyForm({ name: '', category: 'Other', currentStock: '', unit: '', reorderThreshold: '', notes: '', isFeederAnimal: false, feederType: '', feederSize: '', costPerUnit: '' });
                 setSupplyFormVisible(false);
                 setEditingSupplyId(null);
             } catch (err) { console.error(err); }
@@ -16623,6 +16623,10 @@ const AnimalList = ({ authToken, showModalMessage, onEditAnimal, onViewAnimal, f
                 unit: item.unit || '',
                 reorderThreshold: item.reorderThreshold ?? '',
                 notes: item.notes || '',
+                isFeederAnimal: item.isFeederAnimal || false,
+                feederType: item.feederType || '',
+                feederSize: item.feederSize || '',
+                costPerUnit: item.costPerUnit ?? '',
             });
             setEditingSupplyId(item._id);
             setSupplyFormVisible(true);
@@ -16630,12 +16634,14 @@ const AnimalList = ({ authToken, showModalMessage, onEditAnimal, onViewAnimal, f
 
         const openRestock = (item) => {
             setRestockingSupplyId(item._id);
-            setRestockForm({ qty: '', cost: '', date: new Date().toISOString().slice(0, 10), notes: '' });
+            // Auto-suggest cost from costPerUnit if it's a feeder animal
+            const suggestCost = item.isFeederAnimal && item.costPerUnit ? '' : '';
+            setRestockForm({ qty: '', cost: suggestCost, date: new Date().toISOString().slice(0, 10), notes: '' });
             setSupplyFormVisible(false);
             setEditingSupplyId(null);
         };
 
-        const handleRestockSubmit = async (item) => {
+                        const handleRestockSubmit = async (item) => {
             const qty = parseFloat(restockForm.qty);
             const cost = parseFloat(restockForm.cost);
             if (!qty || qty <= 0 || !restockForm.cost || cost < 0) return;
@@ -16651,6 +16657,9 @@ const AnimalList = ({ authToken, showModalMessage, onEditAnimal, onViewAnimal, f
                 setSupplies(prev => prev.map(s => s._id === item._id ? supplyRes.data : s));
 
                 // 2. Log budget expense
+                const feederLabel = item.isFeederAnimal && (item.feederType || item.feederSize)
+                    ? ` — ${[item.feederType, item.feederSize].filter(Boolean).join(' ')}`
+                    : '';
                 await axios.post(
                     `${API_BASE_URL}/budget/transactions`,
                     {
@@ -16658,7 +16667,7 @@ const AnimalList = ({ authToken, showModalMessage, onEditAnimal, onViewAnimal, f
                         price: cost,
                         date: restockForm.date || new Date().toISOString().slice(0, 10),
                         category: BUDGET_CATEGORY_MAP[item.category] || 'other',
-                        description: `Supplies restock: ${item.name} (×${qty}${item.unit ? ' ' + item.unit : ''})`,
+                        description: `Supplies restock: ${item.name}${feederLabel} (×${qty}${item.unit ? ' ' + item.unit : ''})`,
                         notes: restockForm.notes || null,
                     },
                     { headers: { Authorization: `Bearer ${authToken}` } }
@@ -16693,7 +16702,7 @@ const AnimalList = ({ authToken, showModalMessage, onEditAnimal, onViewAnimal, f
                         <span className="text-xs bg-emerald-100 text-emerald-700 px-2 py-0.5 rounded-full">{supplies.length} item{supplies.length !== 1 ? 's' : ''}</span>
                     </div>
                     <button
-                        onClick={() => { setSupplyForm({ name: '', category: 'Other', currentStock: '', unit: '', reorderThreshold: '', notes: '' }); setEditingSupplyId(null); setSupplyFormVisible(v => !v); }}
+                        onClick={() => { setSupplyForm({ name: '', category: 'Other', currentStock: '', unit: '', reorderThreshold: '', notes: '', isFeederAnimal: false, feederType: '', feederSize: '', costPerUnit: '' }); setEditingSupplyId(null); setSupplyFormVisible(v => !v); }}
                         className="flex items-center gap-1 px-3 py-1.5 bg-emerald-600 hover:bg-emerald-700 text-white text-sm rounded-lg font-medium transition"
                     >
                         <Plus size={14} /> Add Item
@@ -16722,7 +16731,7 @@ const AnimalList = ({ authToken, showModalMessage, onEditAnimal, onViewAnimal, f
                             </div>
                             <div>
                                 <label className="text-xs font-medium text-gray-600 mb-1 block">Category</label>
-                                <select value={supplyForm.category} onChange={e => setSupplyForm(f => ({ ...f, category: e.target.value }))} className="w-full text-sm border border-gray-300 rounded-lg px-3 py-1.5 bg-white focus:outline-none focus:ring-1 focus:ring-emerald-400 focus:border-emerald-400">
+                                <select value={supplyForm.category} onChange={e => setSupplyForm(f => ({ ...f, category: e.target.value, isFeederAnimal: e.target.value === 'Food' ? f.isFeederAnimal : false }))} className="w-full text-sm border border-gray-300 rounded-lg px-3 py-1.5 bg-white focus:outline-none focus:ring-1 focus:ring-emerald-400 focus:border-emerald-400">
                                     {CATEGORIES.map(c => <option key={c} value={c}>{c}</option>)}
                                 </select>
                             </div>
@@ -16743,6 +16752,33 @@ const AnimalList = ({ authToken, showModalMessage, onEditAnimal, onViewAnimal, f
                                 <input type="text" value={supplyForm.notes} onChange={e => setSupplyForm(f => ({ ...f, notes: e.target.value }))} placeholder="Optional notes" className="w-full text-sm border border-gray-300 rounded-lg px-3 py-1.5 focus:outline-none focus:ring-1 focus:ring-emerald-400 focus:border-emerald-400" />
                             </div>
                         </div>
+                        {/* Feeder animal toggle (Food only) */}
+                        {supplyForm.category === 'Food' && (
+                            <div className="col-span-2">
+                                <label className="flex items-center gap-2 cursor-pointer select-none">
+                                    <input type="checkbox" checked={supplyForm.isFeederAnimal} onChange={e => setSupplyForm(f => ({ ...f, isFeederAnimal: e.target.checked }))} className="w-4 h-4 accent-emerald-600" />
+                                    <span className="text-sm font-medium text-gray-700">This is a feeder animal (mice, rats, crickets, etc.)</span>
+                                </label>
+                            </div>
+                        )}
+                        {supplyForm.category === 'Food' && supplyForm.isFeederAnimal && (
+                            <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 bg-green-50 border border-green-200 rounded-lg p-3">
+                                <div>
+                                    <label className="text-xs font-medium text-gray-600 mb-1 block">Feeder Type</label>
+                                    <input type="text" value={supplyForm.feederType} onChange={e => setSupplyForm(f => ({ ...f, feederType: e.target.value }))} list="feeder-type-list" placeholder="e.g. Mice, Rats" className="w-full text-sm border border-gray-300 rounded-lg px-3 py-1.5 focus:outline-none focus:ring-1 focus:ring-emerald-400" />
+                                    <datalist id="feeder-type-list"><option value="Mice" /><option value="Rats" /><option value="Gerbils" /><option value="Crickets" /><option value="Dubia Roaches" /><option value="Mealworms" /><option value="Superworms" /><option value="Waxworms" /><option value="Hornworms" /><option value="Fish" /></datalist>
+                                </div>
+                                <div>
+                                    <label className="text-xs font-medium text-gray-600 mb-1 block">Size</label>
+                                    <input type="text" value={supplyForm.feederSize} onChange={e => setSupplyForm(f => ({ ...f, feederSize: e.target.value }))} list="feeder-size-list" placeholder="e.g. Pinky, Adult" className="w-full text-sm border border-gray-300 rounded-lg px-3 py-1.5 focus:outline-none focus:ring-1 focus:ring-emerald-400" />
+                                    <datalist id="feeder-size-list"><option value="Pinky" /><option value="Fuzzy" /><option value="Hopper" /><option value="Weaned" /><option value="Adult" /><option value="Small" /><option value="Medium" /><option value="Large" /><option value="XL" /></datalist>
+                                </div>
+                                <div>
+                                    <label className="text-xs font-medium text-gray-600 mb-1 block">Cost each</label>
+                                    <input type="number" min="0" step="0.01" value={supplyForm.costPerUnit} onChange={e => setSupplyForm(f => ({ ...f, costPerUnit: e.target.value }))} placeholder="0.00" className="w-full text-sm border border-gray-300 rounded-lg px-3 py-1.5 focus:outline-none focus:ring-1 focus:ring-emerald-400" />
+                                </div>
+                            </div>
+                        )}
                         <div className="flex gap-2 justify-end pt-1">
                             <button onClick={() => { setSupplyFormVisible(false); setEditingSupplyId(null); }} className="px-3 py-1.5 text-sm text-gray-600 hover:bg-gray-100 rounded-lg transition">Cancel</button>
                             <button onClick={handleSupplySubmit} disabled={supplySaving || !supplyForm.name.trim()} className="px-3 py-1.5 bg-emerald-600 hover:bg-emerald-700 text-white text-sm rounded-lg font-medium transition disabled:opacity-50 flex items-center gap-1.5">
@@ -16786,15 +16822,26 @@ const AnimalList = ({ authToken, showModalMessage, onEditAnimal, onViewAnimal, f
                                     {item.reorderThreshold != null && <span className="text-gray-400 text-xs ml-auto">Reorder at {item.reorderThreshold}</span>}
                                 </div>
                                 {item.notes && <p className="text-xs text-gray-400 truncate">{item.notes}</p>}
+                                {item.isFeederAnimal && (
+                                    <div className="flex flex-wrap gap-1.5 mt-0.5">
+                                        {item.feederType && <span className="text-xs bg-green-100 text-green-700 px-2 py-0.5 rounded-full">{item.feederType}</span>}
+                                        {item.feederSize && <span className="text-xs bg-green-100 text-green-700 px-2 py-0.5 rounded-full">{item.feederSize}</span>}
+                                        {item.costPerUnit != null && <span className="text-xs text-gray-400">${Number(item.costPerUnit).toFixed(2)} each</span>}
+                                    </div>
+                                )}
 
                                 {/* Inline restock form */}
                                 {restockingSupplyId === item._id && (
                                     <div className="bg-blue-50 border border-blue-200 rounded-lg p-2.5 mt-1 space-y-2">
-                                        <p className="text-xs font-semibold text-blue-700">Restock — logs an expense in Budget</p>
+                                        <p className="text-xs font-semibold text-blue-700">Restock — logs an expense in Budget{item.isFeederAnimal ? ` · ${[item.feederType, item.feederSize].filter(Boolean).join(' ')}` : ''}</p>
                                         <div className="grid grid-cols-2 gap-2">
                                             <div>
                                                 <label className="text-[10px] font-medium text-gray-500 block mb-0.5">Qty received *</label>
-                                                <input type="number" min="0.01" step="any" value={restockForm.qty} onChange={e => setRestockForm(f => ({ ...f, qty: e.target.value }))} placeholder="e.g. 5" className="w-full text-sm border border-gray-300 rounded-lg px-2 py-1 focus:outline-none focus:ring-1 focus:ring-blue-400" />
+                                                <input type="number" min="0.01" step="any" value={restockForm.qty} onChange={e => {
+                                                    const q = e.target.value;
+                                                    const autoCost = item.isFeederAnimal && item.costPerUnit && q ? (parseFloat(q) * item.costPerUnit).toFixed(2) : restockForm.cost;
+                                                    setRestockForm(f => ({ ...f, qty: q, cost: autoCost }));
+                                                }} placeholder="e.g. 5" className="w-full text-sm border border-gray-300 rounded-lg px-2 py-1 focus:outline-none focus:ring-1 focus:ring-blue-400" />
                                             </div>
                                             <div>
                                                 <label className="text-[10px] font-medium text-gray-500 block mb-0.5">Cost paid *</label>
