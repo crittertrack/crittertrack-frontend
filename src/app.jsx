@@ -43,6 +43,44 @@ const STATUS_OPTIONS = ['Pet', 'Breeder', 'Available', 'Booked', 'Sold', 'Retire
 const DEFAULT_SPECIES_OPTIONS = ['Fancy Mouse', 'Fancy Rat', 'Russian Dwarf Hamster', 'Campbells Dwarf Hamster', 'Chinese Dwarf Hamster', 'Syrian Hamster', 'Guinea Pig'];
 
 // Helper function to get plural/display names for species
+const getSpeciesEmoji = (speciesName) => {
+    const emojiMap = {
+        // Small mammals
+        'Fancy Mouse': '🐭', 'Mouse': '🐭',
+        'Fancy Rat': '🐀', 'Rat': '🐀',
+        'Syrian Hamster': '🐹', 'Roborovski Dwarf Hamster': '🐹',
+        'Russian Dwarf Hamster': '🐹', 'Campbells Dwarf Hamster': '🐹', 'Chinese Dwarf Hamster': '🐹', 'Hamster': '🐹',
+        'Guinea Pig': '🐾', 'Gerbil': '🐭', 'Fat-tailed Gerbil': '🐭', 'Fat-tailed gerbil': '🐭',
+        'Degu': '🐾', 'Chinchilla': '🐭', 'African Pygmy Mouse': '🐭', 'African Pygmy Dormouse': '🐭',
+        // Full mammals
+        'Rabbit': '🐰', 'Ferret': '🦦', 'Hedgehog': '🦔', 'Sugar Glider': '🐿️',
+        'Prairie Dog': '🐾', 'Cat': '🐱', 'Dog': '🐶',
+        // Reptiles
+        'Leopard Gecko': '🦎', 'Crested Gecko': '🦎', 'Gargoyle Gecko': '🦎',
+        'Bearded Dragon': '🦎', 'Blue-Tongued Skink': '🦎', 'Chameleon': '🦎',
+        'Ball Python': '🐍', 'Corn Snake': '🐍', 'Cape African House Snake': '🐍',
+        'Red-Eared Slider': '🐢', 'Russian Tortoise': '🐢',
+        // Birds
+        'Budgie': '🦜', 'Budgerigar': '🦜', 'Cockatiel': '🦜', 'Lovebird': '🦜',
+        'Conure': '🦜', 'African Grey Parrot': '🦜', 'Macaw': '🦜', 'Cockatoo': '🦜',
+        'Canary': '🐦', 'Zebra Finch': '🐦', 'Dove': '🕊️',
+        // Amphibians
+        'Axolotl': '🐾', 'Pacman Frog': '🐸', 'Dart Poison Frog': '🐸',
+        "White's Tree Frog": '🐸', 'Fire-Bellied Toad': '🐸', 'Tomato Frog': '🐸', 'Tiger Salamander': '🦎',
+        // Fish
+        'Betta Fish': '🐠', 'Guppy': '🐠', 'Platy': '🐠',
+        'Fancy Goldfish': '🐟', 'Koi': '🐟', 'Discus': '🐟', 'Angelfish': '🐟', 'Corydoras': '🐟', 'Oscar': '🐟',
+        // Invertebrates
+        'Tarantula': '🕷️', 'Jumping Spider': '🕷️', 'Scorpion': '🦂',
+        'Giant African Millipede': '🐛', 'Praying Mantis': '🦗', 'Stick Insect': '🦗',
+        'Hissing Cockroach': '🪳', 'Hermit Crab': '🦀', 'Land Snail': '🐌',
+        'Honey Bee': '🐝', 'Bumble Bee': '🐝',
+        // Default
+        'Other': '🐾',
+    };
+    return emojiMap[speciesName] || '🐾';
+};
+
 const getSpeciesDisplayName = (species) => {
     const displayNames = {
         'Fancy Mouse': 'Fancy Mice',
@@ -8459,7 +8497,7 @@ const SpeciesSelector = ({ speciesOptions, onSelectSpecies, onManageSpecies, sea
                                 <p className={`text-xs italic mt-1 ${species.isDefault ? 'text-gray-600' : 'text-white/80'}`}>{species.latinName}</p>
                             )}
                             {species.isDefault && (
-                                <span className="absolute top-1 right-1 text-xs bg-white text-primary-dark px-1.5 py-0.5 rounded">?</span>
+                                <span className="absolute top-1 right-1 text-base leading-none">{getSpeciesEmoji(species.name)}</span>
                             )}
                         </button>
                     ))
