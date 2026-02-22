@@ -15564,6 +15564,17 @@ const AnimalList = ({ authToken, showModalMessage, onEditAnimal, onViewAnimal, f
         } catch (err) { console.error('[fetchAllSpecies]', err); }
     }, [authToken, API_BASE_URL]);
 
+    // Fetch ALL user animals (no client-side filters) — used by Management View
+    const fetchAllAnimals = useCallback(async () => {
+        if (!authToken) return;
+        try {
+            const res = await axios.get(`${API_BASE_URL}/animals`, {
+                headers: { Authorization: `Bearer ${authToken}` }
+            });
+            setAllAnimals(res.data || []);
+        } catch (err) { console.error('[fetchAllAnimals]', err); }
+    }, [authToken, API_BASE_URL]);
+
     useEffect(() => {
         fetchAnimals();
     }, [fetchAnimals]);
@@ -15573,12 +15584,14 @@ const AnimalList = ({ authToken, showModalMessage, onEditAnimal, onViewAnimal, f
         const handleAnimalsChanged = () => {
             try { fetchAnimals(); } catch (e) { /* ignore */ }
             try { fetchAllSpecies(); } catch (e) { /* ignore */ }
+            try { fetchAllAnimals(); } catch (e) { /* ignore */ }
         };
         window.addEventListener('animals-changed', handleAnimalsChanged);
         return () => window.removeEventListener('animals-changed', handleAnimalsChanged);
-    }, [fetchAnimals, fetchAllSpecies]);
+    }, [fetchAnimals, fetchAllSpecies, fetchAllAnimals]);
 
     useEffect(() => { fetchAllSpecies(); }, [fetchAllSpecies]);
+    useEffect(() => { fetchAllAnimals(); }, [fetchAllAnimals]);
 
     // Fetch user's enclosures
     const fetchEnclosures = useCallback(async () => {
@@ -16253,7 +16266,7 @@ const AnimalList = ({ authToken, showModalMessage, onEditAnimal, onViewAnimal, f
         // 1. Enclosures — grouped by named enclosure (enclosureId)
         const enclosureAnimalMap = {}; // { enclosureId: [animals] }
         const unassignedAnimals = [];
-        animals.forEach(a => {
+        allAnimals.forEach(a => {
             if (a.enclosureId) {
                 if (!enclosureAnimalMap[a.enclosureId]) enclosureAnimalMap[a.enclosureId] = [];
                 enclosureAnimalMap[a.enclosureId].push(a);
@@ -16263,25 +16276,25 @@ const AnimalList = ({ authToken, showModalMessage, onEditAnimal, onViewAnimal, f
         });
 
         // 2. Reproduction
-        const matingList = animals.filter(a => a.isInMating);
-        const pregnantList = animals.filter(a => a.isPregnant && !a.isInMating);
-        const nursingList = animals.filter(a => a.isNursing);
-        const reproTotal = animals.filter(a => a.isInMating || a.isPregnant || a.isNursing).length;
+        const matingList = allAnimals.filter(a => a.isInMating);
+        const pregnantList = allAnimals.filter(a => a.isPregnant && !a.isInMating);
+        const nursingList = allAnimals.filter(a => a.isNursing);
+        const reproTotal = allAnimals.filter(a => a.isInMating || a.isPregnant || a.isNursing).length;
 
         // 3. Feeding
-        const feedDue = animals.filter(a => isDue(a.lastFedDate, a.feedingFrequencyDays));
-        const feedOk = animals.filter(a => a.feedingFrequencyDays && !isDue(a.lastFedDate, a.feedingFrequencyDays));
-        const feedNone = animals.filter(a => !a.feedingFrequencyDays);
+        const feedDue = allAnimals.filter(a => isDue(a.lastFedDate, a.feedingFrequencyDays));
+        const feedOk = allAnimals.filter(a => a.feedingFrequencyDays && !isDue(a.lastFedDate, a.feedingFrequencyDays));
+        const feedNone = allAnimals.filter(a => !a.feedingFrequencyDays);
 
         // 4. Maintenance — enclosure cleaning tasks only
         const enclosuresWithCleaningTasks = enclosures.filter(enc => enc.cleaningTasks?.length > 0);
-        const animalsWithCareTasks = animals.filter(a => a.careTasks?.length > 0);
+        const animalsWithCareTasks = allAnimals.filter(a => a.careTasks?.length > 0);
         const maintTotalDue = enclosuresWithCleaningTasks.reduce((sum, enc) => sum + enc.cleaningTasks.filter(t => isDue(t.lastDoneDate, t.frequencyDays)).length, 0);
         const animalCareDue = feedDue.length + animalsWithCareTasks.reduce((sum, a) => sum + (a.careTasks || []).filter(t => isDue(t.lastDoneDate, t.frequencyDays)).length, 0);
 
         // 5. Medical — quarantine and treatment
-        const quarantineList = animals.filter(a => a.isQuarantine);
-        const treatmentList = animals.filter(a => !a.isQuarantine && (
+        const quarantineList = allAnimals.filter(a => a.isQuarantine);
+        const treatmentList = allAnimals.filter(a => !a.isQuarantine && (
             parseArrayField(a.medicalConditions).length > 0 || parseArrayField(a.medications).length > 0
         ));
 
@@ -16905,15 +16918,15 @@ const AnimalList = ({ authToken, showModalMessage, onEditAnimal, onViewAnimal, f
             <h2 className="text-2xl sm:text-3xl font-bold text-gray-800 mb-6 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3">
                 <div className='flex items-center gap-2'>
                     <ClipboardList size={20} className="sm:w-6 sm:h-6 mr-2 sm:mr-3 text-primary-dark" />
-                    My Animals ({animals.length})
-                    {hasActiveFilters && (
+                    {animalView === 'list' ? `My Animals (${animals.length})` : 'Management View'}
+                    {animalView === 'list' && hasActiveFilters && (
                         <span className="bg-pink-500 text-white text-xs font-semibold px-2 py-1 rounded-full">
                             Filtered
                         </span>
                     )}
                 </div>
                 <div className="flex items-center gap-1 sm:gap-2 flex-wrap" data-tutorial-target="bulk-privacy-controls">
-                    {hasActiveFilters && (
+                    {animalView === 'list' && hasActiveFilters && (
                         <button
                             onClick={handleClearFilters}
                             className="text-gray-600 hover:text-gray-800 transition flex items-center gap-0.5 sm:gap-1 px-2 sm:px-3 py-1 sm:py-1.5 rounded-lg hover:bg-gray-100 text-xs sm:text-sm"
@@ -16923,6 +16936,7 @@ const AnimalList = ({ authToken, showModalMessage, onEditAnimal, onViewAnimal, f
                             <span className="font-medium">Clear Filters</span>
                         </button>
                     )}
+                    {animalView === 'list' && (<>
                     <button
                         onClick={() => toggleAllAnimalsPrivacy(true)}
                         className="text-green-600 hover:text-green-700 transition flex items-center gap-0.5 sm:gap-1 px-2 sm:px-3 py-1 sm:py-1.5 rounded-lg hover:bg-green-50 text-xs sm:text-sm"
@@ -16948,6 +16962,7 @@ const AnimalList = ({ authToken, showModalMessage, onEditAnimal, onViewAnimal, f
                         <Archive size={14} className="sm:w-[18px] sm:h-[18px]" />
                         <span className="font-medium">Hidden</span>
                     </button>
+                    </>)}
                     <button 
                         onClick={handleRefresh} 
                         disabled={loading}
