@@ -15452,6 +15452,9 @@ const AnimalList = ({ authToken, showModalMessage, onEditAnimal, onViewAnimal, f
     const [editingSupplyId, setEditingSupplyId] = useState(null);
     const [supplySaving, setSupplySaving] = useState(false);
     const [supplyCategoryFilter, setSupplyCategoryFilter] = useState('All');
+    const [restockingSupplyId, setRestockingSupplyId] = useState(null);
+    const [restockForm, setRestockForm] = useState({ qty: '', cost: '', date: new Date().toISOString().slice(0, 10), notes: '' });
+    const [restockSaving, setRestockSaving] = useState(false);
     const [enclosures, setEnclosures] = useState([]);
     const [enclosureFormVisible, setEnclosureFormVisible] = useState(false);
     const [enclosureFormData, setEnclosureFormData] = useState({ name: '', enclosureType: '', size: '', notes: '', cleaningTasks: [] });
@@ -16580,6 +16583,8 @@ const AnimalList = ({ authToken, showModalMessage, onEditAnimal, onViewAnimal, f
             Medication: 'bg-red-100 text-red-700',
             Other: 'bg-gray-100 text-gray-600',
         };
+        // Map supply category → budget expense category
+        const BUDGET_CATEGORY_MAP = { Food: 'food', Bedding: 'housing', Medication: 'medical', Other: 'other' };
         const isLow = (item) => item.reorderThreshold != null && item.currentStock <= item.reorderThreshold;
         const filtered = supplyCategoryFilter === 'All' ? supplies : supplies.filter(s => s.category === supplyCategoryFilter);
         const lowStockItems = supplies.filter(isLow);
@@ -16621,6 +16626,46 @@ const AnimalList = ({ authToken, showModalMessage, onEditAnimal, onViewAnimal, f
             });
             setEditingSupplyId(item._id);
             setSupplyFormVisible(true);
+        };
+
+        const openRestock = (item) => {
+            setRestockingSupplyId(item._id);
+            setRestockForm({ qty: '', cost: '', date: new Date().toISOString().slice(0, 10), notes: '' });
+            setSupplyFormVisible(false);
+            setEditingSupplyId(null);
+        };
+
+        const handleRestockSubmit = async (item) => {
+            const qty = parseFloat(restockForm.qty);
+            const cost = parseFloat(restockForm.cost);
+            if (!qty || qty <= 0 || !restockForm.cost || cost < 0) return;
+            setRestockSaving(true);
+            try {
+                // 1. Update supply stock
+                const newStock = (item.currentStock || 0) + qty;
+                const supplyRes = await axios.patch(
+                    `${API_BASE_URL}/supplies/${item._id}`,
+                    { currentStock: newStock },
+                    { headers: { Authorization: `Bearer ${authToken}` } }
+                );
+                setSupplies(prev => prev.map(s => s._id === item._id ? supplyRes.data : s));
+
+                // 2. Log budget expense
+                await axios.post(
+                    `${API_BASE_URL}/budget/transactions`,
+                    {
+                        type: 'expense',
+                        price: cost,
+                        date: restockForm.date || new Date().toISOString().slice(0, 10),
+                        category: BUDGET_CATEGORY_MAP[item.category] || 'other',
+                        description: `Supplies restock: ${item.name} (×${qty}${item.unit ? ' ' + item.unit : ''})`,
+                        notes: restockForm.notes || null,
+                    },
+                    { headers: { Authorization: `Bearer ${authToken}` } }
+                );
+                setRestockingSupplyId(null);
+            } catch (err) { console.error(err); }
+            setRestockSaving(false);
         };
 
         return (
@@ -16741,7 +16786,45 @@ const AnimalList = ({ authToken, showModalMessage, onEditAnimal, onViewAnimal, f
                                     {item.reorderThreshold != null && <span className="text-gray-400 text-xs ml-auto">Reorder at {item.reorderThreshold}</span>}
                                 </div>
                                 {item.notes && <p className="text-xs text-gray-400 truncate">{item.notes}</p>}
+
+                                {/* Inline restock form */}
+                                {restockingSupplyId === item._id && (
+                                    <div className="bg-blue-50 border border-blue-200 rounded-lg p-2.5 mt-1 space-y-2">
+                                        <p className="text-xs font-semibold text-blue-700">Restock — logs an expense in Budget</p>
+                                        <div className="grid grid-cols-2 gap-2">
+                                            <div>
+                                                <label className="text-[10px] font-medium text-gray-500 block mb-0.5">Qty received *</label>
+                                                <input type="number" min="0.01" step="any" value={restockForm.qty} onChange={e => setRestockForm(f => ({ ...f, qty: e.target.value }))} placeholder="e.g. 5" className="w-full text-sm border border-gray-300 rounded-lg px-2 py-1 focus:outline-none focus:ring-1 focus:ring-blue-400" />
+                                            </div>
+                                            <div>
+                                                <label className="text-[10px] font-medium text-gray-500 block mb-0.5">Cost paid *</label>
+                                                <input type="number" min="0" step="0.01" value={restockForm.cost} onChange={e => setRestockForm(f => ({ ...f, cost: e.target.value }))} placeholder="0.00" className="w-full text-sm border border-gray-300 rounded-lg px-2 py-1 focus:outline-none focus:ring-1 focus:ring-blue-400" />
+                                            </div>
+                                            <div>
+                                                <label className="text-[10px] font-medium text-gray-500 block mb-0.5">Date</label>
+                                                <input type="date" value={restockForm.date} onChange={e => setRestockForm(f => ({ ...f, date: e.target.value }))} className="w-full text-sm border border-gray-300 rounded-lg px-2 py-1 focus:outline-none focus:ring-1 focus:ring-blue-400" />
+                                            </div>
+                                            <div>
+                                                <label className="text-[10px] font-medium text-gray-500 block mb-0.5">Notes</label>
+                                                <input type="text" value={restockForm.notes} onChange={e => setRestockForm(f => ({ ...f, notes: e.target.value }))} placeholder="Optional" className="w-full text-sm border border-gray-300 rounded-lg px-2 py-1 focus:outline-none focus:ring-1 focus:ring-blue-400" />
+                                            </div>
+                                        </div>
+                                        <div className="flex gap-2 justify-end">
+                                            <button onClick={() => setRestockingSupplyId(null)} className="px-2.5 py-1 text-xs text-gray-600 hover:bg-gray-100 rounded-lg transition">Cancel</button>
+                                            <button
+                                                onClick={() => handleRestockSubmit(item)}
+                                                disabled={restockSaving || !restockForm.qty || !restockForm.cost}
+                                                className="px-2.5 py-1 bg-blue-600 hover:bg-blue-700 text-white text-xs rounded-lg font-medium transition disabled:opacity-50 flex items-center gap-1"
+                                            >
+                                                {restockSaving ? <Loader2 size={11} className="animate-spin" /> : <ShoppingBag size={11} />}
+                                                Log Restock
+                                            </button>
+                                        </div>
+                                    </div>
+                                )}
+
                                 <div className="flex gap-2 justify-end mt-0.5">
+                                    <button onClick={() => openRestock(item)} className="flex items-center gap-1 text-xs text-blue-600 hover:text-blue-800 hover:bg-blue-50 px-2 py-1 rounded-lg transition font-medium"><ShoppingBag size={11} /> Restock</button>
                                     <button onClick={() => handleSupplyEdit(item)} className="flex items-center gap-1 text-xs text-gray-500 hover:text-gray-700 hover:bg-gray-100 px-2 py-1 rounded-lg transition"><Edit size={11} /> Edit</button>
                                     <button onClick={() => handleSupplyDelete(item._id)} className="flex items-center gap-1 text-xs text-red-500 hover:text-red-700 hover:bg-red-50 px-2 py-1 rounded-lg transition"><Trash2 size={11} /> Delete</button>
                                 </div>
