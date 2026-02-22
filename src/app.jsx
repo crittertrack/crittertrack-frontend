@@ -15579,7 +15579,7 @@ const AnimalList = ({ authToken, showModalMessage, onEditAnimal, onViewAnimal, f
     const [restockForm, setRestockForm] = useState({ qty: '', cost: '', date: new Date().toISOString().slice(0, 10), notes: '' });
     const [restockSaving, setRestockSaving] = useState(false);
     const [feedingModal, setFeedingModal] = useState(null); // { animal } when open
-    const [feedingForm, setFeedingForm] = useState({ supplyId: '', qty: '1', notes: '' });
+    const [feedingForm, setFeedingForm] = useState({ supplyId: '', qty: '1', notes: '', updateStock: true });
     const [enclosures, setEnclosures] = useState([]);
     const [enclosureFormVisible, setEnclosureFormVisible] = useState(false);
     const [enclosureFormData, setEnclosureFormData] = useState({ name: '', enclosureType: '', size: '', notes: '', cleaningTasks: [] });
@@ -17134,7 +17134,7 @@ const AnimalList = ({ authToken, showModalMessage, onEditAnimal, onViewAnimal, f
         const handleMarkFed = (e, animal) => {
             e.stopPropagation();
             // Open the feeding modal; form resets each time
-            setFeedingForm({ supplyId: '', qty: '1', notes: '' });
+            setFeedingForm({ supplyId: '', qty: '1', notes: '', updateStock: true });
             setFeedingModal({ animal });
         };
 
@@ -17149,7 +17149,7 @@ const AnimalList = ({ authToken, showModalMessage, onEditAnimal, onViewAnimal, f
                 const body = {};
                 if (feedingForm.supplyId) {
                     body.supplyId = feedingForm.supplyId;
-                    body.quantity = Number(feedingForm.qty) || 1;
+                    if (feedingForm.updateStock) body.quantity = Number(feedingForm.qty) || 1;
                 }
                 if (feedingForm.notes.trim()) body.notes = feedingForm.notes.trim();
                 const res = await axios.post(`${API_BASE_URL}/animals/${animal.id_public}/feeding`, body,
@@ -17948,19 +17948,36 @@ const AnimalList = ({ authToken, showModalMessage, onEditAnimal, onViewAnimal, f
                                 </select>
                             </div>
 
-                            {/* Quantity — only shown when a supply is selected */}
+                            {/* Quantity + stock deduction — only shown when a supply is selected */}
                             {feedingForm.supplyId && (() => {
                                 const s = supplies.find(x => x._id === feedingForm.supplyId);
+                                const stockAfter = Math.round((s.currentStock - Number(feedingForm.qty || 0)) * 100) / 100;
                                 return (
-                                    <div className="space-y-1.5">
-                                        <label className="block text-xs font-semibold text-gray-500 uppercase tracking-wide">Quantity{s?.unit ? ` (${s.unit})` : ''}</label>
-                                        <input
-                                            type="number" min="0.1" step="0.1"
-                                            value={feedingForm.qty}
-                                            onChange={e => setFeedingForm(f => ({ ...f, qty: e.target.value }))}
-                                            className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-primary/40 focus:border-primary"
-                                        />
-                                        {s && <p className="text-xs text-gray-400">Stock after: {s.currentStock} → <span className={s.currentStock - Number(feedingForm.qty || 0) < 0 ? 'text-red-500 font-medium' : 'text-gray-600'}>{Math.round((s.currentStock - Number(feedingForm.qty || 0)) * 100) / 100} {s.unit}</span></p>}
+                                    <div className="space-y-2">
+                                        {/* Deduct from stock toggle */}
+                                        <label className="flex items-center gap-2 cursor-pointer select-none">
+                                            <input
+                                                type="checkbox"
+                                                checked={feedingForm.updateStock}
+                                                onChange={e => setFeedingForm(f => ({ ...f, updateStock: e.target.checked }))}
+                                                className="w-4 h-4 rounded accent-green-500"
+                                            />
+                                            <span className="text-sm text-gray-700">Deduct from stock</span>
+                                            {s && <span className="text-xs text-gray-400">(current: {s.currentStock} {s.unit})</span>}
+                                        </label>
+                                        {/* Quantity input — only when deducting */}
+                                        {feedingForm.updateStock && (
+                                            <div className="space-y-1">
+                                                <label className="block text-xs font-semibold text-gray-500 uppercase tracking-wide">Quantity{s?.unit ? ` (${s.unit})` : ''}</label>
+                                                <input
+                                                    type="number" min="0.1" step="0.1"
+                                                    value={feedingForm.qty}
+                                                    onChange={e => setFeedingForm(f => ({ ...f, qty: e.target.value }))}
+                                                    className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-primary/40 focus:border-primary"
+                                                />
+                                                {s && <p className="text-xs text-gray-400">Stock after: {s.currentStock} → <span className={stockAfter < 0 ? 'text-red-500 font-medium' : 'text-gray-600'}>{stockAfter} {s.unit}</span></p>}
+                                            </div>
+                                        )}
                                     </div>
                                 );
                             })()}
