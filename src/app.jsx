@@ -17058,10 +17058,15 @@ const AnimalList = ({ authToken, showModalMessage, onEditAnimal, onViewAnimal, f
         const feedOk = allAnimals.filter(a => a.feedingFrequencyDays && !isDue(a.lastFedDate, a.feedingFrequencyDays));
         const feedNone = allAnimals.filter(a => !a.feedingFrequencyDays);
 
-        // 4. Maintenance — enclosure cleaning tasks only
+        // 4. Maintenance — enclosure cleaning tasks + supply reorders
         const enclosuresWithCleaningTasks = enclosures.filter(enc => enc.cleaningTasks?.length > 0);
         const animalsWithCareTasks = allAnimals.filter(a => a.careTasks?.length > 0);
-        const maintTotalDue = enclosuresWithCleaningTasks.reduce((sum, enc) => sum + enc.cleaningTasks.filter(t => isDue(t.lastDoneDate, t.frequencyDays)).length, 0);
+        const todayMaint = new Date(); todayMaint.setHours(0, 0, 0, 0);
+        const supplyReorderDue = supplies.filter(s =>
+            (s.reorderThreshold != null && s.currentStock <= s.reorderThreshold) ||
+            (s.nextOrderDate && new Date(s.nextOrderDate) < todayMaint)
+        );
+        const maintTotalDue = enclosuresWithCleaningTasks.reduce((sum, enc) => sum + enc.cleaningTasks.filter(t => isDue(t.lastDoneDate, t.frequencyDays)).length, 0) + supplyReorderDue.length;
         const animalCareDue = feedDue.length + animalsWithCareTasks.reduce((sum, a) => sum + (a.careTasks || []).filter(t => isDue(t.lastDoneDate, t.frequencyDays)).length, 0);
 
         // 5. Medical — quarantine and treatment
@@ -17647,17 +17652,46 @@ const AnimalList = ({ authToken, showModalMessage, onEditAnimal, onViewAnimal, f
                                     <span>Supplies &amp; Inventory</span>
                                     {suppliesLoading
                                         ? <Loader2 size={11} className="animate-spin text-gray-400" />
-                                        : <span className="text-gray-400 font-normal normal-case">{supplies.length} item{supplies.length !== 1 ? 's' : ''}{supplies.filter(s => (s.reorderThreshold != null && s.currentStock <= s.reorderThreshold) || (s.nextOrderDate && new Date(s.nextOrderDate) < new Date())).length > 0 && <span className="ml-1 text-amber-600">· {supplies.filter(s => (s.reorderThreshold != null && s.currentStock <= s.reorderThreshold) || (s.nextOrderDate && new Date(s.nextOrderDate) < new Date())).length} to reorder</span>}</span>
+                                        : <span className="text-gray-400 font-normal normal-case">
+                                            {supplies.length} item{supplies.length !== 1 ? 's' : ''}
+                                            {supplyReorderDue.length > 0 && <span className="ml-1 text-amber-600 font-semibold">· {supplyReorderDue.length} to reorder</span>}
+                                          </span>
                                     }
                                 </div>
-                                <div className="px-3 py-3 flex items-center justify-between">
-                                    <span className="text-xs text-gray-500">
-                                        {supplies.length === 0 ? 'No items tracked yet.' : `${supplies.length} item${supplies.length !== 1 ? 's' : ''} tracked`}
-                                    </span>
-                                    <button onClick={() => { setSupplyFormVisible(false); setEditingSupplyId(null); setShowSuppliesScreen(true); }} className="flex items-center gap-1 text-xs text-emerald-600 hover:text-emerald-800 font-medium transition">
-                                        <Package size={12} /> View All
-                                    </button>
-                                </div>
+                                {supplies.length === 0 ? (
+                                    <div className="px-3 py-3 flex items-center justify-between">
+                                        <span className="text-xs text-gray-400">No items tracked yet.</span>
+                                        <button onClick={() => { setSupplyFormVisible(false); setEditingSupplyId(null); setShowSuppliesScreen(true); }} className="flex items-center gap-1 text-xs text-emerald-600 hover:text-emerald-800 font-medium transition"><Package size={12} /> View All</button>
+                                    </div>
+                                ) : (
+                                    <div className="px-3 py-2 space-y-1.5">
+                                        {supplyReorderDue.length > 0 ? (
+                                            supplyReorderDue.map(s => {
+                                                const isDate = s.nextOrderDate && new Date(s.nextOrderDate) < todayMaint;
+                                                const isStock = s.reorderThreshold != null && s.currentStock <= s.reorderThreshold;
+                                                return (
+                                                    <div key={s._id} className="flex items-center justify-between gap-2 text-sm">
+                                                        <div className="flex items-center gap-2 min-w-0">
+                                                            <span className="w-2 h-2 rounded-full flex-shrink-0 bg-red-500" />
+                                                            <span className="text-gray-700 truncate">{s.name}</span>
+                                                            {s.unit && <span className="text-gray-400 text-xs">{s.unit}</span>}
+                                                        </div>
+                                                        <div className="flex items-center gap-1.5 shrink-0">
+                                                            {isStock && <span className="text-xs bg-amber-100 text-amber-700 px-1.5 py-0.5 rounded-full">Low stock: {s.currentStock}</span>}
+                                                            {isDate && <span className="text-xs bg-red-100 text-red-700 px-1.5 py-0.5 rounded-full">Order due</span>}
+                                                            <button onClick={() => { setSupplyFormVisible(false); setEditingSupplyId(null); setShowSuppliesScreen(true); }} className="text-xs px-2 py-0.5 rounded font-medium border bg-amber-500 text-white hover:bg-amber-600 border-amber-500">Reorder</button>
+                                                        </div>
+                                                    </div>
+                                                );
+                                            })
+                                        ) : (
+                                            <p className="text-xs text-gray-400 py-1">{supplies.length} item{supplies.length !== 1 ? 's' : ''} tracked — all stocked</p>
+                                        )}
+                                        <div className="flex justify-end pt-0.5">
+                                            <button onClick={() => { setSupplyFormVisible(false); setEditingSupplyId(null); setShowSuppliesScreen(true); }} className="flex items-center gap-1 text-xs text-emerald-600 hover:text-emerald-800 font-medium transition"><Package size={12} /> View All</button>
+                                        </div>
+                                    </div>
+                                )}
                             </div>
                         </div>
                     )}
