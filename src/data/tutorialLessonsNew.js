@@ -870,13 +870,13 @@ const GETTING_STARTED_LESSONS = [
       },
       {
         stepNumber: 6,
-        title: 'Move to Husbandry Tab',
-        content: 'Let\'s continue to the Husbandry tab to document care and living conditions. Click the "Husbandry" tab.',
+        title: 'Move to Animal Care Tab',
+        content: 'Let\'s continue to the Animal Care tab to document feeding schedules, care tasks, and living conditions. Click the "Animal Care" tab.',
         highlightElement: '[data-tutorial-target="husbandry-tab"]',
         actionType: 'click',
         tips: [
-          'Husbandry is how you care for the animal',
-          'Important for quality of life',
+          'Animal Care tracks feeding & routine tasks',
+          'Important for daily management',
           'Helps maintain good practices'
         ]
       }
@@ -885,48 +885,48 @@ const GETTING_STARTED_LESSONS = [
 
   {
     id: 'gs-husbandry',
-    title: '10. Husbandry & Care Conditions',
-    description: 'Document nutrition, housing, and environment',
+    title: '10. Animal Care Tab — Feeding & Daily Care',
+    description: 'Set up feeding schedules, care tasks, and housing details for your animal',
     tour: 'getting-started',
     tourOrder: 10,
     steps: [
       {
         stepNumber: 1,
-        title: 'Husbandry Tab',
-        content: 'This tab documents how you care for your animal - nutrition, housing, and environmental conditions. Good records here ensure consistent quality care.',
+        title: 'Animal Care Tab',
+        content: 'This tab is your hub for daily care — feeding schedules, routine care tasks, housing & environment details. Setting these up here is what powers the Management View\'s automated due-date tracking.',
         highlightElement: '[data-tutorial-target="husbandry-tab"]',
         tips: [
-          'Consistent care improves animal welfare',
+          'Feeding & care schedules set here drive Management View alerts',
           'Helps if you ever need to rehome',
           'Documents your care practices'
         ]
       },
       {
         stepNumber: 2,
-        title: 'Nutrition',
-        content: 'Document your animal\'s diet: what food brands you use, feeding schedules, supplements, and any dietary restrictions or preferences.',
+        title: 'Feeding Schedule',
+        content: 'Set your animal\'s diet type, feeding frequency (in days), and last fed date. Once set, the Management View will automatically flag this animal as "Due" or "Overdue" when feeding time arrives.',
         highlightElement: '[data-tutorial-target="nutrition-section"]',
         tips: [
-          'Consistent nutrition is important',
-          'Track what works for your animal',
-          'Useful for new caretakers'
+          'Feeding frequency drives Management View alerts',
+          'Set last fed date to start tracking from today',
+          'Works with Supplies & Inventory to log food used'
         ]
       },
       {
         stepNumber: 3,
-        title: 'Husbandry Details',
-        content: 'Record cage/enclosure setup, bedding type, and any other husbandry details specific to your care method. (Temperature, humidity, and lighting schedule are tracked in the Environment section.)',
+        title: 'Scheduled Care Tasks',
+        content: 'Add custom recurring tasks like "Weigh", "Clean water bottle", or "Nail trim" with a frequency in days. Each task gets its own due-date tracking in the Management View.',
         highlightElement: '[data-tutorial-target="husbandry-details-section"]',
         tips: [
-          'Species-specific requirements vary',
-          'Consistency helps animal thrive',
-          'Important for breeding animals'
+          'Each task tracked independently',
+          'Mark done from Management View instantly',
+          'Great for multi-step care routines'
         ]
       },
       {
         stepNumber: 4,
-        title: 'Environment',
-        content: 'Document the broader environmental conditions: room temperature, humidity levels, lighting (day/night cycle), and any special environmental enrichment.',
+        title: 'Environment & Housing Details',
+        content: 'Document cage/enclosure setup, bedding type, temperature, humidity, and lighting schedule. This completes the care record and is useful for handover to new owners.',
         highlightElement: '[data-tutorial-target="environment-section"]',
         tips: [
           'Environment affects behavior and health',
@@ -2300,12 +2300,215 @@ const ADVANCED_FEATURES_LESSONS = [
       {
         stepNumber: 7,
         title: 'Tutorial Complete!',
-        content: 'Congratulations! You\'ve completed all CritterTrack tutorials. You now know how to manage your entire breeding program - from adding animals to tracking genetics and finances. You can always revisit these tutorials from the Help section in the header. Thank you for taking the time to learn all that CritterTrack has to offer!',
+        content: 'Congratulations! You\'ve completed all CritterTrack tutorials. You now know how to manage your entire breeding program — from adding animals to tracking genetics and finances, daily feeding management in the Management View, Supplies & Inventory, and per-animal Logs. You can always revisit these tutorials from the Help section in the header. Thank you for taking the time to learn all that CritterTrack has to offer!',
         highlightElement: '[data-tutorial-target="help-btn"]',
         tips: [
           'Access tutorials anytime from Help',
-          'All features are at your fingertips',
+          'Check Management View for daily operations',
+          'Use the Logs tab on any animal for full history',
           'Happy breeding!'
+        ]
+      }
+    ]
+  },
+
+  {
+    id: 'af-management-view',
+    title: '9. Management View — Daily Operations',
+    description: 'Use the Management View to handle daily feeding, care tasks, enclosures, and reproduction tracking',
+    tour: 'advanced-features',
+    tourOrder: 9,
+    steps: [
+      {
+        stepNumber: 1,
+        title: 'What Is the Management View?',
+        content: 'The Management View is a separate mode in My Animals designed for daily operations. Switch to it using the grid/management icon at the top of your My Animals page. Instead of browsing individual records, it gives you a live dashboard of everything that needs attention today.',
+        tips: [
+          'Switch between List view and Management view at the top of My Animals',
+          'Deceased animals are automatically excluded',
+          'Sections collapse/expand to reduce clutter',
+          'All actions update instantly with no page reload'
+        ]
+      },
+      {
+        stepNumber: 2,
+        title: 'Feeding Section — Due & Overdue',
+        content: 'The Animal Care section shows three groups: Due Today / Overdue (red), Up to Date (green), and No Schedule Set. Animals appear here based on the feeding frequency you set in their Animal Care tab. The badge in the section header counts how many animals need attention.',
+        tips: [
+          'Set feeding frequency on the animal\'s Animal Care tab',
+          'Animals move groups automatically as dates change',
+          'Red badge on section shows total items needing feeding'
+        ]
+      },
+      {
+        stepNumber: 3,
+        title: 'Recording a Feeding',
+        content: 'Click the green "✓ Fed" button next to any animal to record a feeding. A modal opens where you can optionally select which food item from your Supplies was used, enter the quantity fed (which automatically deducts from your stock), and add notes. You can also skip food selection and just mark the animal as fed.',
+        tips: [
+          'Food selection is optional — just click Record Feeding to mark as fed',
+          'Selecting a supply + quantity deducts from your stock automatically',
+          'Uncheck "Deduct from stock" for bulk items tracked by date only',
+          'Feeding events are logged in the animal\'s Logs tab'
+        ]
+      },
+      {
+        stepNumber: 4,
+        title: 'Scheduled Care Tasks',
+        content: 'Below feeding, you\'ll see Scheduled Care Tasks — custom recurring tasks you\'ve set on individual animals (like weighing or nail trims). Each has its own due date. Click "✓ Done" to mark a task complete; it resets the countdown based on the task\'s frequency.',
+        tips: [
+          'Tasks are set per-animal in the Animal Care tab',
+          'Each task tracks independently',
+          'Done state is logged in the animal\'s Logs tab'
+        ]
+      },
+      {
+        stepNumber: 5,
+        title: 'Enclosures Section',
+        content: 'The Enclosures section shows all your enclosures with their assigned animals and any cleaning tasks that are due. You can see which animals are in which enclosure, and mark cleaning tasks done directly from Management View. Create enclosures and assign animals to them from within this section.',
+        tips: [
+          'Create enclosures from the Enclosures section add button',
+          'Assign animals to enclosures in their Animal Care tab',
+          'Add cleaning task schedules per enclosure for automatic due tracking'
+        ]
+      },
+      {
+        stepNumber: 6,
+        title: 'Quarantine & Reproduction Tracking',
+        content: 'The Health & Reproduction section shows animals in quarantine (with a "✓ Release" button to un-quarantine directly), and animals with active reproductive statuses. Reproductive statuses (In Mating → Pregnant → Nursing → Done) can be advanced inline without opening the full edit form.',
+        tips: [
+          'Set quarantine on an animal via their Status & Privacy tab',
+          'Release button instantly removes quarantine status',
+          'Repro status buttons update immediately — no save needed'
+        ]
+      },
+      {
+        stepNumber: 7,
+        title: 'Activity Log',
+        content: 'Every action you take in Management View — feeding, care tasks, enclosure tasks, quarantine releases, repro changes — is recorded in the Activity Log. Access it via the log button in the Management View header. You can filter by action type, animal, or date range to review what was done and when.',
+        tips: [
+          'Great for accountability and handover to other caretakers',
+          'Filter by action type to find specific events',
+          'Feeding events show which food and quantity was used'
+        ]
+      }
+    ]
+  },
+
+  {
+    id: 'af-supplies-inventory',
+    title: '10. Supplies & Inventory',
+    description: 'Track food, bedding, medication, and feeder animals — with automatic reorder alerts',
+    tour: 'advanced-features',
+    tourOrder: 10,
+    steps: [
+      {
+        stepNumber: 1,
+        title: 'Accessing Supplies & Inventory',
+        content: 'Supplies & Inventory is accessed via the supplies button in the Management View header. It\'s a dedicated screen for tracking everything you use to care for your animals, from food and bedding to medication and feeder animals.',
+        tips: [
+          'Accessible from within Management View',
+          'Separate from the main animal list',
+          'Filter by category: Food, Bedding, Medication, Other'
+        ]
+      },
+      {
+        stepNumber: 2,
+        title: 'Adding a Supply Item',
+        content: 'Click "Add Item" to create a new supply. Give it a name, select a category (Food, Bedding, Medication, Other), and enter the current stock amount and unit (e.g. "15 bags" or "200 grams"). Optionally set a Cost Per Unit for budget tracking.',
+        tips: [
+          'Name: e.g. "Timothy Hay", "Deli Nature Premium", "Adult Mice"',
+          'Units can be anything: bags, grams, kg, pieces',
+          'Cost Per Unit flows into budget expenses on restock'
+        ]
+      },
+      {
+        stepNumber: 3,
+        title: 'Feeder Animal Items',
+        content: 'Food items can be marked as "Feeder Animal" to unlock extra fields: Feeder Type (e.g. Mice, Rats, Crickets) and Feeder Size (e.g. Pinky, Fuzzy, Adult, Large). These details appear in feeding logs when you select the item during a feeding event.',
+        tips: [
+          'Only available for Food category items',
+          'Feeder type and size shown in feeding log entries',
+          'Useful for reptile and amphibian keepers'
+        ]
+      },
+      {
+        stepNumber: 4,
+        title: 'Reorder Thresholds',
+        content: 'Set a "Reorder when stock reaches" threshold so you\'re alerted automatically. When current stock drops to or below this number, the item appears in the Management View\'s maintenance section and the maintenance badge count increases.',
+        tips: [
+          'Good starting point: 1-2 weeks\' worth of supply',
+          'Badge on Management View section changes color when reorder is due',
+          'Restock button lets you quickly add stock and optionally log the cost'
+        ]
+      },
+      {
+        stepNumber: 5,
+        title: 'Schedule-Based Reorder',
+        content: 'For bulk items where stock count isn\'t practical (like hay bales or substrate bags), use schedule-based reordering. Set a "Next Order Date" and an order frequency (e.g. every 2 months). The item will appear in alerts when the next order date arrives, independent of stock count.',
+        tips: [
+          'Great for subscription feeds or regular bulk orders',
+          'Frequency: days, weeks, or months',
+          'Next Order Date auto-advances when you restock'
+        ]
+      },
+      {
+        stepNumber: 6,
+        title: 'Restocking',
+        content: 'Click "Restock" on any item to add to your running stock. Enter the quantity received and optionally the cost paid — this automatically creates a budget expense entry. After restocking, any overdue reorder date is automatically advanced to the next cycle.',
+        tips: [
+          'Restock logs a budget expense automatically',
+          'You can edit or delete transactions later in Budget',
+          'Stock level updates immediately'
+        ]
+      }
+    ]
+  },
+
+  {
+    id: 'af-animal-logs',
+    title: '11. Animal Logs Tab — Per-Animal History',
+    description: 'View the full history of feedings, care changes, and field edits on any individual animal',
+    tour: 'advanced-features',
+    tourOrder: 11,
+    steps: [
+      {
+        stepNumber: 1,
+        title: 'What Is the Logs Tab?',
+        content: 'Every animal has a "Logs 📜" tab in their detail view. This is a complete, automatically-generated history of everything that has happened to that animal — feedings recorded, care schedule changes, and any field edits made. You don\'t need to do anything special — it builds itself as you use the app.',
+        tips: [
+          'Find it as the last tab in any animal\'s detail view',
+          'Loads lazily — only fetched when you open the tab',
+          'Entries are created automatically, not manually'
+        ]
+      },
+      {
+        stepNumber: 2,
+        title: 'Feeding History Section',
+        content: 'The first section (green cards) shows every recorded feeding event with the food item used, feeder type and size (for feeder animals), quantity, date, and any notes you entered in the feeding modal. Great for spotting patterns like a snake refusing prey over several feedings.',
+        tips: [
+          'Each ✓ Fed action from Management View creates an entry',
+          'Shows food name, quantity, and notes',
+          'No food selected = entry still recorded with date only'
+        ]
+      },
+      {
+        stepNumber: 3,
+        title: 'Care Schedule Updates Section',
+        content: 'The second section (blue cards) logs any changes to the animal\'s care schedule: feeding frequency changes, maintenance frequency changes, care task list edits, and care tasks marked as done. Old and new values are shown for frequency changes.',
+        tips: [
+          'Useful for tracking when you adjusted care routines',
+          'Shows which task was completed when marking a care task done',
+          'Old → new values shown for frequency changes'
+        ]
+      },
+      {
+        stepNumber: 4,
+        title: 'Field Edits Section',
+        content: 'The third section (grey cards) logs changes to the animal\'s core record fields — name, species, status, morph, genetics, breeder, parents, quarantine status, and more. Each entry shows the exact old value → new value, timestamped. Useful for auditing changes and understanding your animal\'s history.',
+        tips: [
+          'Covers 27+ tracked fields automatically',
+          'Old value shown in red strikethrough, new in green',
+          'Changes from any edit — including quick management actions'
         ]
       }
     ]

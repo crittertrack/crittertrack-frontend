@@ -105,7 +105,8 @@ const WelcomeGuideModal = ({ onClose }) => {
                                 <h3 className="font-semibold text-gray-800 text-sm mb-1">Need Help Getting Started?</h3>
                                 <p className="text-xs text-gray-600">
                                     Interactive tutorials are available anytime through the <strong>Help button in the header</strong>. 
-                                    Learn about adding animals, tracking genetics, budgeting, and more!
+                                    Learn about adding animals, the <strong>Management View</strong> for daily feeding &amp; care tracking, 
+                                    <strong> Supplies &amp; Inventory</strong>, per-animal <strong>Logs</strong>, genetics, budgeting, and more!
                                 </p>
                             </div>
                         </div>
