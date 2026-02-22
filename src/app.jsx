@@ -3565,13 +3565,46 @@ const PrivateAnimalDetail = ({ animal, onClose, onEdit, API_BASE_URL, authToken,
                                 Loading logs...
                             </div>
                         ) : !animalLogs || animalLogs.length === 0 ? (
-                            <div className="text-center py-12 text-gray-400 text-sm">No changes recorded yet. Logs are created when you edit this animal.</div>
+                            <div className="text-center py-12 text-gray-400 text-sm">No changes recorded yet. Logs are created when you edit or feed this animal.</div>
                         ) : (() => {
-                            const careLogs  = animalLogs.filter(l => l.category === 'care');
-                            const fieldLogs = animalLogs.filter(l => l.category === 'field');
+                            const feedingLogs = animalLogs.filter(l => l.category === 'feeding');
+                            const careLogs    = animalLogs.filter(l => l.category === 'care');
+                            const fieldLogs   = animalLogs.filter(l => l.category === 'field');
                             const fmtVal = v => v === null || v === undefined ? '—' : typeof v === 'boolean' ? (v ? 'Yes' : 'No') : String(v).slice(0, 80);
                             return (
                                 <>
+                                    {/* Feeding History */}
+                                    {feedingLogs.length > 0 && (
+                                        <div className="space-y-3">
+                                            <div className="flex items-center gap-2 pb-1 border-b border-green-200">
+                                                <span className="text-base">🍽️</span>
+                                                <h3 className="font-semibold text-gray-700 text-sm uppercase tracking-wide">Feeding History</h3>
+                                                <span className="text-xs text-gray-400 bg-gray-100 px-2 py-0.5 rounded-full">{feedingLogs.length}</span>
+                                            </div>
+                                            {feedingLogs.map(log => {
+                                                const ev = log.changes?.[0]?.newValue || {};
+                                                const foodLabel = ev.supplyName
+                                                    ? `${ev.supplyName}${ev.feederType ? ` (${ev.feederType}${ev.feederSize ? ` · ${ev.feederSize}` : ''})` : ''}`
+                                                    : null;
+                                                const qtyLabel = ev.quantity != null ? `${ev.quantity}${ev.unit ? ` ${ev.unit}` : ''}` : null;
+                                                return (
+                                                    <div key={log._id} className="bg-green-50 border border-green-100 rounded-lg p-3">
+                                                        <div className="flex items-center justify-between gap-2 flex-wrap">
+                                                            <div className="flex items-center gap-2 flex-wrap">
+                                                                <span className="text-green-600 font-medium text-sm">✓ Fed</span>
+                                                                {foodLabel && <span className="text-gray-700 text-sm font-medium">{foodLabel}</span>}
+                                                                {qtyLabel && <span className="text-xs bg-green-100 text-green-700 px-2 py-0.5 rounded-full font-medium">×{qtyLabel}</span>}
+                                                            </div>
+                                                            <span className="text-xs text-gray-400">{new Date(log.createdAt).toLocaleString()}</span>
+                                                        </div>
+                                                        {!foodLabel && <p className="text-xs text-gray-400 mt-1">No food recorded</p>}
+                                                        {ev.notes && <p className="text-xs text-gray-500 mt-1 italic">"{ev.notes}"</p>}
+                                                    </div>
+                                                );
+                                            })}
+                                        </div>
+                                    )}
+
                                     {/* Care Schedule Updates */}
                                     {careLogs.length > 0 && (
                                         <div className="space-y-3">
@@ -15545,6 +15578,8 @@ const AnimalList = ({ authToken, showModalMessage, onEditAnimal, onViewAnimal, f
     const [restockingSupplyId, setRestockingSupplyId] = useState(null);
     const [restockForm, setRestockForm] = useState({ qty: '', cost: '', date: new Date().toISOString().slice(0, 10), notes: '' });
     const [restockSaving, setRestockSaving] = useState(false);
+    const [feedingModal, setFeedingModal] = useState(null); // { animal } when open
+    const [feedingForm, setFeedingForm] = useState({ supplyId: '', qty: '1', notes: '' });
     const [enclosures, setEnclosures] = useState([]);
     const [enclosureFormVisible, setEnclosureFormVisible] = useState(false);
     const [enclosureFormData, setEnclosureFormData] = useState({ name: '', enclosureType: '', size: '', notes: '', cleaningTasks: [] });
@@ -17098,13 +17133,39 @@ const AnimalList = ({ authToken, showModalMessage, onEditAnimal, onViewAnimal, f
 
         const handleMarkFed = (e, animal) => {
             e.stopPropagation();
+            // Open the feeding modal; form resets each time
+            setFeedingForm({ supplyId: '', qty: '1', notes: '' });
+            setFeedingModal({ animal });
+        };
+
+        const handleFeedingSubmit = async () => {
+            if (!feedingModal) return;
+            const { animal } = feedingModal;
             const now = new Date().toISOString();
+            setFeedingModal(null);
+            // Optimistic: update lastFedDate immediately
             setAllAnimalsRaw(prev => prev.map(a => a.id_public === animal.id_public ? { ...a, lastFedDate: now } : a));
-            axios.put(`${API_BASE_URL}/animals/${animal.id_public}`,
-                { lastFedDate: now },
-                { headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${authToken}` } })
-                .then(() => logManagementActivity('animal_fed', animal.id_public, { name: animal.name, species: animal.species }))
-                .catch(err => { console.error('Mark fed failed:', err); setAllAnimalsRaw(prev => prev.map(a => a.id_public === animal.id_public ? { ...a, lastFedDate: animal.lastFedDate } : a)); });
+            try {
+                const body = {};
+                if (feedingForm.supplyId) {
+                    body.supplyId = feedingForm.supplyId;
+                    body.quantity = Number(feedingForm.qty) || 1;
+                }
+                if (feedingForm.notes.trim()) body.notes = feedingForm.notes.trim();
+                const res = await axios.post(`${API_BASE_URL}/animals/${animal.id_public}/feeding`, body,
+                    { headers: { Authorization: `Bearer ${authToken}` } });
+                // Update supply stock in state
+                if (res.data.supply) setSupplies(prev => prev.map(s => s._id === res.data.supply._id ? res.data.supply : s));
+                const supplyItem = feedingForm.supplyId ? supplies.find(s => s._id === feedingForm.supplyId) : null;
+                logManagementActivity('animal_fed', animal.id_public, {
+                    name: animal.name,
+                    species: animal.species,
+                    ...(supplyItem ? { food: supplyItem.name, qty: `${feedingForm.qty} ${supplyItem.unit || ''}`.trim() } : {})
+                });
+            } catch (err) {
+                console.error('Feeding failed:', err);
+                setAllAnimalsRaw(prev => prev.map(a => a.id_public === animal.id_public ? { ...a, lastFedDate: animal.lastFedDate } : a));
+            }
         };
 
         const handleMarkMaintDone = (e, animal) => {
@@ -17854,6 +17915,85 @@ const AnimalList = ({ authToken, showModalMessage, onEditAnimal, onViewAnimal, f
                 </div>
 
                 {/* -- 6. ACTIVITY LOG — now a separate screen, accessed via button in header -- */}
+
+                {/* ── Feeding Modal ─────────────────────────────────────────────────────── */}
+                {feedingModal && (
+                    <div className="fixed inset-0 bg-black/50 z-[300] flex items-center justify-center p-4" onClick={() => setFeedingModal(null)}>
+                        <div className="bg-white rounded-xl shadow-2xl w-full max-w-sm p-5 space-y-4" onClick={e => e.stopPropagation()}>
+                            <div className="flex items-start justify-between">
+                                <div>
+                                    <h3 className="font-bold text-gray-800 text-base">Record Feeding</h3>
+                                    <p className="text-sm text-gray-500 mt-0.5">{feedingModal.animal.name}</p>
+                                </div>
+                                <button onClick={() => setFeedingModal(null)} className="text-gray-400 hover:text-gray-600 p-1 rounded"><X size={18} /></button>
+                            </div>
+
+                            {/* Food / Supply selector */}
+                            <div className="space-y-1.5">
+                                <label className="block text-xs font-semibold text-gray-500 uppercase tracking-wide">Food / Supply <span className="font-normal normal-case text-gray-400">(optional)</span></label>
+                                <select
+                                    value={feedingForm.supplyId}
+                                    onChange={e => setFeedingForm(f => ({ ...f, supplyId: e.target.value, qty: '1' }))}
+                                    className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-primary/40 focus:border-primary"
+                                >
+                                    <option value="">— No food selected —</option>
+                                    {supplies.filter(s => s.category === 'Food').map(s => (
+                                        <option key={s._id} value={s._id}>
+                                            {s.name}{s.feederType ? ` (${s.feederType}${s.feederSize ? ` · ${s.feederSize}` : ''})` : ''}{s.currentStock != null ? ` — ${s.currentStock} ${s.unit || 'in stock'}` : ''}
+                                        </option>
+                                    ))}
+                                    {supplies.filter(s => s.category === 'Food').length === 0 && (
+                                        <option disabled>No food items in supply — add some in Supplies & Inventory</option>
+                                    )}
+                                </select>
+                            </div>
+
+                            {/* Quantity — only shown when a supply is selected */}
+                            {feedingForm.supplyId && (() => {
+                                const s = supplies.find(x => x._id === feedingForm.supplyId);
+                                return (
+                                    <div className="space-y-1.5">
+                                        <label className="block text-xs font-semibold text-gray-500 uppercase tracking-wide">Quantity{s?.unit ? ` (${s.unit})` : ''}</label>
+                                        <input
+                                            type="number" min="0.1" step="0.1"
+                                            value={feedingForm.qty}
+                                            onChange={e => setFeedingForm(f => ({ ...f, qty: e.target.value }))}
+                                            className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-primary/40 focus:border-primary"
+                                        />
+                                        {s && <p className="text-xs text-gray-400">Stock after: {s.currentStock} → <span className={s.currentStock - Number(feedingForm.qty || 0) < 0 ? 'text-red-500 font-medium' : 'text-gray-600'}>{Math.round((s.currentStock - Number(feedingForm.qty || 0)) * 100) / 100} {s.unit}</span></p>}
+                                    </div>
+                                );
+                            })()}
+
+                            {/* Notes */}
+                            <div className="space-y-1.5">
+                                <label className="block text-xs font-semibold text-gray-500 uppercase tracking-wide">Notes <span className="font-normal normal-case text-gray-400">(optional)</span></label>
+                                <input
+                                    type="text"
+                                    value={feedingForm.notes}
+                                    onChange={e => setFeedingForm(f => ({ ...f, notes: e.target.value }))}
+                                    placeholder="e.g. Refused once, ate second attempt"
+                                    className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-primary/40 focus:border-primary"
+                                />
+                            </div>
+
+                            <div className="flex gap-2 pt-1">
+                                <button
+                                    onClick={handleFeedingSubmit}
+                                    className="flex-1 bg-green-500 hover:bg-green-600 text-white font-semibold py-2 px-4 rounded-lg text-sm transition"
+                                >
+                                    ✓ Record Feeding
+                                </button>
+                                <button
+                                    onClick={() => setFeedingModal(null)}
+                                    className="px-4 py-2 text-sm text-gray-600 hover:text-gray-800 border border-gray-300 rounded-lg hover:bg-gray-50 transition"
+                                >
+                                    Cancel
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                )}
 
             </div>
         );
