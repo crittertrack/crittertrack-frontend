@@ -1,4 +1,4 @@
-﻿// CritterTrack Frontend Application
+// CritterTrack Frontend Application
 import React, { useState, useEffect, useCallback, useRef, useMemo } from 'react';
 import { useParams, useNavigate, useLocation, Routes, Route, Link as RouterLink } from 'react-router-dom';
 import axios from 'axios';
@@ -2297,7 +2297,16 @@ const PrivateAnimalDetail = ({ animal, onClose, onEdit, API_BASE_URL, authToken,
     const [showPedigree, setShowPedigree] = useState(false);
     const [detailViewTab, setDetailViewTab] = useState(1);
     const [copySuccess, setCopySuccess] = useState(false);
+    const [enclosureInfo, setEnclosureInfo] = useState(null);
     const { fieldTemplate, getLabel } = useDetailFieldTemplate(animal?.species, API_BASE_URL);
+
+    // Fetch assigned enclosure info
+    React.useEffect(() => {
+        if (!animal?.enclosureId || !authToken) { setEnclosureInfo(null); return; }
+        axios.get(`${API_BASE_URL}/enclosures`, { headers: { Authorization: `Bearer ${authToken}` } })
+            .then(res => setEnclosureInfo(res.data.find(e => e._id === animal.enclosureId) || null))
+            .catch(() => setEnclosureInfo(null));
+    }, [animal?.enclosureId, authToken, API_BASE_URL]);
     
     const handleShare = () => {
         const url = `${window.location.origin}/animal/${animal.id_public}`;
@@ -3227,10 +3236,11 @@ const PrivateAnimalDetail = ({ animal, onClose, onEdit, API_BASE_URL, authToken,
                             )}
 
                             {/* 2nd Section: Husbandry */}
-                            {(animal.housingType || animal.bedding || animal.enrichment) && (
+                            {(animal.enclosureId || animal.housingType || animal.bedding || animal.enrichment) && (
                             <div className="bg-gray-50 p-4 rounded-lg border border-gray-200 space-y-4">
                                 <h3 className="text-lg font-semibold text-gray-700">Husbandry</h3>
                                 <div className="space-y-3 text-sm">
+                                    {enclosureInfo && (<div><span className="text-gray-600">Enclosure:</span> <strong>{enclosureInfo.name}</strong></div>)}
                                     {fieldTemplate?.fields?.housingType?.enabled !== false && animal.housingType && <div><span className="text-gray-600">{getLabel('housingType', 'Housing Type')}:</span> <strong>{animal.housingType}</strong></div>}
                                     {fieldTemplate?.fields?.bedding?.enabled !== false && animal.bedding && <div><span className="text-gray-600">{getLabel('bedding', 'Bedding')}:</span> <strong>{animal.bedding}</strong></div>}
                                     {animal.enrichment && <div><span className="text-gray-600">Enrichment:</span> <strong>{animal.enrichment}</strong></div>}
@@ -3470,7 +3480,16 @@ const ViewOnlyPrivateAnimalDetail = ({ animal, onClose, API_BASE_URL, authToken,
     const [breederInfo, setBreederInfo] = useState(null);
     const [showPedigree, setShowPedigree] = useState(false);
     const [detailViewTab, setDetailViewTab] = useState(1);
+    const [enclosureInfo, setEnclosureInfo] = useState(null);
     const { fieldTemplate, getLabel } = useDetailFieldTemplate(animal?.species, API_BASE_URL);
+
+    // Fetch assigned enclosure info
+    React.useEffect(() => {
+        if (!animal?.enclosureId || !authToken) { setEnclosureInfo(null); return; }
+        axios.get(`${API_BASE_URL}/enclosures`, { headers: { Authorization: `Bearer ${authToken}` } })
+            .then(res => setEnclosureInfo(res.data.find(e => e._id === animal.enclosureId) || null))
+            .catch(() => setEnclosureInfo(null));
+    }, [animal?.enclosureId, authToken, API_BASE_URL]);
     
     // Fetch breeder info when component mounts or animal changes
     React.useEffect(() => {
@@ -4319,10 +4338,11 @@ const ViewOnlyPrivateAnimalDetail = ({ animal, onClose, API_BASE_URL, authToken,
                             )}
 
                             {/* 2nd Section: Husbandry */}
-                            {(animal.housingType || animal.bedding || animal.enrichment) && (
+                            {(animal.enclosureId || animal.housingType || animal.bedding || animal.enrichment) && (
                             <div className="bg-gray-50 p-4 rounded-lg border border-gray-200 space-y-4">
                                 <h3 className="text-lg font-semibold text-gray-700">Husbandry</h3>
                                 <div className="space-y-3 text-sm">
+                                    {enclosureInfo && (<div><span className="text-gray-600">Enclosure:</span> <strong>{enclosureInfo.name}</strong></div>)}
                                     {fieldTemplate?.fields?.housingType?.enabled !== false && animal.housingType && <div><span className="text-gray-600">{getLabel('housingType', 'Housing Type')}:</span> <strong>{animal.housingType}</strong></div>}
                                     {fieldTemplate?.fields?.bedding?.enabled !== false && animal.bedding && <div><span className="text-gray-600">{getLabel('bedding', 'Bedding')}:</span> <strong>{animal.bedding}</strong></div>}
                                     {animal.enrichment && <div><span className="text-gray-600">Enrichment:</span> <strong>{animal.enrichment}</strong></div>}
