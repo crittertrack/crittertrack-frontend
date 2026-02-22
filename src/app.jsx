@@ -15433,11 +15433,16 @@ const AnimalList = ({ authToken, showModalMessage, onEditAnimal, onViewAnimal, f
     const [collapsedMgmtSections, setCollapsedMgmtSections] = useState({}); // { sectionKey: bool }
     const [collapsedMgmtGroups, setCollapsedMgmtGroups] = useState({}); // { groupKey: bool }
 
-    // Activity Log state (used by Logs section in Management View)
+    // Activity Log state
     const [activityLogs, setActivityLogs] = useState([]);
     const [logsLoading, setLogsLoading] = useState(false);
     const [logsPagination, setLogsPagination] = useState({ page: 1, totalPages: 1, total: 0 });
     const [logsLoaded, setLogsLoaded] = useState(false);
+    const [showActivityLogScreen, setShowActivityLogScreen] = useState(false);
+    const [logFilterAction, setLogFilterAction] = useState('');
+    const [logFilterSearch, setLogFilterSearch] = useState('');
+    const [logFilterStartDate, setLogFilterStartDate] = useState('');
+    const [logFilterEndDate, setLogFilterEndDate] = useState('');
     const [enclosures, setEnclosures] = useState([]);
     const [enclosureFormVisible, setEnclosureFormVisible] = useState(false);
     const [enclosureFormData, setEnclosureFormData] = useState({ name: '', enclosureType: '', size: '', notes: '', cleaningTasks: [] });
@@ -15662,12 +15667,17 @@ const AnimalList = ({ authToken, showModalMessage, onEditAnimal, onViewAnimal, f
     useEffect(() => { fetchAllSpecies(); }, [fetchAllSpecies]);
     useEffect(() => { fetchAllAnimals(); }, [fetchAllAnimals]);
 
-    // Fetch the current user's activity log (lazy — only when management view opens)
-    const fetchActivityLogs = useCallback(async (page = 1) => {
+    // Fetch the current user's activity log (lazy — only when log screen opens)
+    const fetchActivityLogs = useCallback(async (page = 1, filters = {}) => {
         if (!authToken) return;
         setLogsLoading(true);
         try {
-            const res = await axios.get(`${API_BASE_URL}/activity-logs?page=${page}&limit=30`, {
+            const params = new URLSearchParams({ page, limit: 30 });
+            if (filters.action) params.set('action', filters.action);
+            if (filters.search) params.set('search', filters.search);
+            if (filters.startDate) params.set('startDate', filters.startDate);
+            if (filters.endDate) params.set('endDate', filters.endDate);
+            const res = await axios.get(`${API_BASE_URL}/activity-logs?${params}`, {
                 headers: { Authorization: `Bearer ${authToken}` }
             });
             if (page === 1) {
@@ -15684,12 +15694,17 @@ const AnimalList = ({ authToken, showModalMessage, onEditAnimal, onViewAnimal, f
         }
     }, [authToken, API_BASE_URL]);
 
-    // Auto-fetch logs when the user first switches to management view
+    // Auto-fetch logs when the activity log screen opens for the first time
     useEffect(() => {
-        if (animalView === 'management' && !logsLoaded && !logsLoading) {
+        if (showActivityLogScreen && !logsLoaded && !logsLoading) {
             fetchActivityLogs(1);
         }
     // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, [showActivityLogScreen]);
+
+    // Reset log screen when navigating away from management view
+    useEffect(() => {
+        if (animalView !== 'management') setShowActivityLogScreen(false);
     }, [animalView]);
     const fetchEnclosures = useCallback(async () => {
         try {
@@ -16320,6 +16335,195 @@ const AnimalList = ({ authToken, showModalMessage, onEditAnimal, onViewAnimal, f
         if (diff < 86400) return `${Math.floor(diff / 3600)}h ago`;
         if (diff < 604800) return `${Math.floor(diff / 86400)}d ago`;
         return formatDateDisplay(dateStr);
+    };
+
+    // -- Activity Log Screen ------------------------------------------------------
+    const renderActivityLogScreen = () => {
+        const ACTION_OPTIONS = [
+            { value: '', label: 'All Actions' },
+            { value: 'login', label: 'Login' },
+            { value: 'logout', label: 'Logout' },
+            { value: 'animal_create', label: 'Added Animal' },
+            { value: 'animal_update', label: 'Updated Animal' },
+            { value: 'animal_delete', label: 'Deleted Animal' },
+            { value: 'animal_image_upload', label: 'Uploaded Image' },
+            { value: 'animal_image_delete', label: 'Deleted Image' },
+            { value: 'animal_visibility_change', label: 'Changed Visibility' },
+            { value: 'animal_transfer_initiate', label: 'Transfer Initiated' },
+            { value: 'animal_transfer_accept', label: 'Transfer Accepted' },
+            { value: 'animal_transfer_reject', label: 'Transfer Rejected' },
+            { value: 'litter_create', label: 'Created Litter' },
+            { value: 'litter_update', label: 'Updated Litter' },
+            { value: 'litter_delete', label: 'Deleted Litter' },
+            { value: 'profile_update', label: 'Updated Profile' },
+            { value: 'password_change', label: 'Changed Password' },
+        ];
+
+        const currentFilters = { action: logFilterAction, search: logFilterSearch, startDate: logFilterStartDate, endDate: logFilterEndDate };
+
+        const handleApplyFilters = () => {
+            setActivityLogs([]);
+            setLogsLoaded(false);
+            fetchActivityLogs(1, currentFilters);
+        };
+
+        const handleResetFilters = () => {
+            setLogFilterAction('');
+            setLogFilterSearch('');
+            setLogFilterStartDate('');
+            setLogFilterEndDate('');
+            setActivityLogs([]);
+            setLogsLoaded(false);
+            fetchActivityLogs(1, {});
+        };
+
+        return (
+            <div className="mt-4 space-y-4">
+                {/* Back + Refresh row */}
+                <div className="flex items-center justify-between">
+                    <button
+                        onClick={() => setShowActivityLogScreen(false)}
+                        className="flex items-center gap-1.5 text-sm text-gray-600 hover:text-gray-800 transition"
+                    >
+                        <ChevronLeft size={16} />
+                        Back to Management
+                    </button>
+                    <button
+                        onClick={() => { setLogsLoaded(false); fetchActivityLogs(1, currentFilters); }}
+                        disabled={logsLoading}
+                        className="flex items-center gap-1 text-xs text-gray-400 hover:text-gray-600 transition disabled:opacity-50"
+                    >
+                        <RefreshCw size={12} />
+                        Refresh
+                    </button>
+                </div>
+
+                {/* Title + total */}
+                <div className="flex items-center gap-2">
+                    <ScrollText size={18} className="text-indigo-600" />
+                    <h3 className="text-lg font-semibold text-gray-800">Activity Log</h3>
+                    <span className="text-xs bg-indigo-100 text-indigo-700 px-2 py-0.5 rounded-full">{logsPagination.total || 0} entries</span>
+                </div>
+
+                {/* Filter bar */}
+                <div className="bg-indigo-50 border border-indigo-100 rounded-xl p-3 space-y-2">
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
+                        <div>
+                            <label className="block text-xs font-medium text-gray-600 mb-1">Action Type</label>
+                            <select
+                                value={logFilterAction}
+                                onChange={e => setLogFilterAction(e.target.value)}
+                                className="w-full text-sm border border-gray-300 rounded-lg px-2 py-1.5 bg-white focus:ring-indigo-400 focus:border-indigo-400"
+                            >
+                                {ACTION_OPTIONS.map(opt => (
+                                    <option key={opt.value} value={opt.value}>{opt.label}</option>
+                                ))}
+                            </select>
+                        </div>
+                        <div>
+                            <label className="block text-xs font-medium text-gray-600 mb-1">Search (animal name / ID)</label>
+                            <input
+                                type="text"
+                                value={logFilterSearch}
+                                onChange={e => setLogFilterSearch(e.target.value)}
+                                onKeyPress={e => { if (e.key === 'Enter') handleApplyFilters(); }}
+                                placeholder="e.g. Pixie or CT-00123"
+                                className="w-full text-sm border border-gray-300 rounded-lg px-2 py-1.5 bg-white focus:ring-indigo-400 focus:border-indigo-400"
+                            />
+                        </div>
+                        <div>
+                            <label className="block text-xs font-medium text-gray-600 mb-1">From Date</label>
+                            <input
+                                type="date"
+                                value={logFilterStartDate}
+                                onChange={e => setLogFilterStartDate(e.target.value)}
+                                className="w-full text-sm border border-gray-300 rounded-lg px-2 py-1.5 bg-white focus:ring-indigo-400 focus:border-indigo-400"
+                            />
+                        </div>
+                        <div>
+                            <label className="block text-xs font-medium text-gray-600 mb-1">To Date</label>
+                            <input
+                                type="date"
+                                value={logFilterEndDate}
+                                onChange={e => setLogFilterEndDate(e.target.value)}
+                                className="w-full text-sm border border-gray-300 rounded-lg px-2 py-1.5 bg-white focus:ring-indigo-400 focus:border-indigo-400"
+                            />
+                        </div>
+                    </div>
+                    <div className="flex gap-2 justify-end">
+                        <button
+                            onClick={handleResetFilters}
+                            className="text-xs px-3 py-1.5 border border-gray-300 rounded-lg text-gray-600 hover:bg-gray-50"
+                        >
+                            Reset
+                        </button>
+                        <button
+                            onClick={handleApplyFilters}
+                            disabled={logsLoading}
+                            className="text-xs px-4 py-1.5 bg-indigo-600 hover:bg-indigo-700 text-white rounded-lg font-medium disabled:opacity-50"
+                        >
+                            {logsLoading ? 'Loading...' : 'Apply Filters'}
+                        </button>
+                    </div>
+                </div>
+
+                {/* Log entries */}
+                <div className="border border-gray-200 rounded-xl overflow-hidden shadow-sm">
+                    {logsLoading && activityLogs.length === 0 ? (
+                        <div className="flex items-center justify-center py-10 text-gray-400 gap-2">
+                            <Loader2 size={18} className="animate-spin" />
+                            <span className="text-sm">Loading activity log...</span>
+                        </div>
+                    ) : activityLogs.length === 0 ? (
+                        <div className="text-sm text-gray-400 text-center py-10">No activity found for the selected filters.</div>
+                    ) : (
+                        <div className="divide-y divide-gray-100">
+                            {activityLogs.map((log) => (
+                                <div key={log._id} className="flex items-start gap-3 px-4 py-3 hover:bg-gray-50">
+                                    <span className={`mt-1.5 w-2.5 h-2.5 rounded-full flex-shrink-0 ${getActionColor(log.action)}`} />
+                                    <div className="flex-1 min-w-0">
+                                        <div className="text-sm text-gray-800 font-medium">
+                                            {getActionLabel(log.action)}
+                                            {log.details?.name && <span className="text-gray-500 font-normal"> — <span className="font-medium text-gray-700">{log.details.name}</span></span>}
+                                            {log.details?.species && !log.details?.name && <span className="text-gray-500 font-normal"> ({log.details.species})</span>}
+                                        </div>
+                                        {log.targetId_public && (
+                                            <div className="text-xs text-gray-400 mt-0.5">{log.targetId_public}</div>
+                                        )}
+                                        {log.details && Object.keys(log.details).filter(k => !['name', 'species'].includes(k)).length > 0 && (
+                                            <div className="text-xs text-gray-400 mt-0.5">
+                                                {Object.entries(log.details)
+                                                    .filter(([k]) => !['name', 'species'].includes(k))
+                                                    .slice(0, 3)
+                                                    .map(([k, v]) => `${k}: ${v}`)
+                                                    .join(' · ')
+                                                }
+                                            </div>
+                                        )}
+                                    </div>
+                                    <div className="text-xs text-gray-400 flex-shrink-0 text-right ml-2">
+                                        <div className="font-medium">{formatTimeAgo(log.createdAt)}</div>
+                                        <div className="text-gray-300">{log.createdAt ? new Date(log.createdAt).toLocaleDateString() : ''}</div>
+                                        {log.success === false && <div className="text-red-400 font-medium mt-0.5">failed</div>}
+                                    </div>
+                                </div>
+                            ))}
+                            {logsPagination.page < logsPagination.totalPages && (
+                                <div className="p-3">
+                                    <button
+                                        onClick={() => fetchActivityLogs(logsPagination.page + 1, currentFilters)}
+                                        disabled={logsLoading}
+                                        className="w-full py-2 text-xs text-indigo-600 hover:text-indigo-800 hover:bg-indigo-50 rounded-lg transition flex items-center justify-center gap-1 disabled:opacity-50"
+                                    >
+                                        {logsLoading ? <><Loader2 size={12} className="animate-spin" /> Loading...</> : `Load more (${activityLogs.length} of ${logsPagination.total})`}
+                                    </button>
+                                </div>
+                            )}
+                        </div>
+                    )}
+                </div>
+            </div>
+        );
     };
 
     // -- Management View ----------------------------------------------------------
@@ -17059,65 +17263,7 @@ const AnimalList = ({ authToken, showModalMessage, onEditAnimal, onViewAnimal, f
                     )}
                 </div>
 
-                {/* -- 6. ACTIVITY LOG ---------------------------------------- */}
-                <div className="border border-gray-200 rounded-xl overflow-hidden shadow-sm">
-                    <SectionHeader sectionKey="logs"
-                        icon={<ScrollText size={18} className="text-indigo-600" />}
-                        title="Activity Log" count={logsPagination.total || 0} bgClass="bg-indigo-50" />
-                    {!collapsedMgmtSections['logs'] && (
-                        <div className="p-3">
-                            {logsLoading && activityLogs.length === 0 ? (
-                                <div className="flex items-center justify-center py-6 text-gray-400 gap-2">
-                                    <Loader2 size={16} className="animate-spin" />
-                                    <span className="text-sm">Loading activity log...</span>
-                                </div>
-                            ) : activityLogs.length === 0 ? (
-                                <div className="text-sm text-gray-400 text-center py-4">No activity recorded yet.</div>
-                            ) : (
-                                <div className="space-y-1">
-                                    {activityLogs.map((log) => (
-                                        <div key={log._id} className="flex items-start gap-3 py-2 border-b border-gray-100 last:border-0">
-                                            <span className={`mt-1.5 w-2 h-2 rounded-full flex-shrink-0 ${getActionColor(log.action)}`} />
-                                            <div className="flex-1 min-w-0">
-                                                <div className="text-sm text-gray-800">
-                                                    {getActionLabel(log.action)}
-                                                    {log.details?.name && <span className="text-gray-500"> — <span className="font-medium">{log.details.name}</span></span>}
-                                                    {log.details?.species && !log.details?.name && <span className="text-gray-500"> ({log.details.species})</span>}
-                                                </div>
-                                                {log.targetId_public && (
-                                                    <div className="text-xs text-gray-400">{log.targetId_public}</div>
-                                                )}
-                                            </div>
-                                            <div className="text-xs text-gray-400 flex-shrink-0 text-right">
-                                                <div>{formatTimeAgo(log.createdAt)}</div>
-                                                {log.success === false && <div className="text-red-400 font-medium">failed</div>}
-                                            </div>
-                                        </div>
-                                    ))}
-                                    {logsPagination.page < logsPagination.totalPages && (
-                                        <button
-                                            onClick={() => fetchActivityLogs(logsPagination.page + 1)}
-                                            disabled={logsLoading}
-                                            className="w-full mt-2 py-2 text-xs text-indigo-600 hover:text-indigo-800 hover:bg-indigo-50 rounded-lg transition flex items-center justify-center gap-1 disabled:opacity-50"
-                                        >
-                                            {logsLoading ? <><Loader2 size={12} className="animate-spin" /> Loading...</> : 'Load more'}
-                                        </button>
-                                    )}
-                                </div>
-                            )}
-                            {activityLogs.length > 0 && (
-                                <button
-                                    onClick={() => { setLogsLoaded(false); fetchActivityLogs(1); }}
-                                    disabled={logsLoading}
-                                    className="mt-2 flex items-center gap-1 text-xs text-gray-400 hover:text-gray-600 transition disabled:opacity-50"
-                                >
-                                    <RefreshCw size={11} />
-                                    Refresh
-                                </button>
-                            )}
-                        </div>
-                    )}
-                </div>
+                {/* -- 6. ACTIVITY LOG — now a separate screen, accessed via button in header -- */}
 
             </div>
         );
@@ -17128,7 +17274,7 @@ const AnimalList = ({ authToken, showModalMessage, onEditAnimal, onViewAnimal, f
             <h2 className="text-2xl sm:text-3xl font-bold text-gray-800 mb-6 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3">
                 <div className='flex items-center gap-2'>
                     <ClipboardList size={20} className="sm:w-6 sm:h-6 mr-2 sm:mr-3 text-primary-dark" />
-                    {animalView === 'list' ? `My Animals (${animals.length})` : 'Management View'}
+                    {animalView === 'list' ? `My Animals (${animals.length})` : showActivityLogScreen ? 'Activity Log' : 'Management View'}
                     {animalView === 'list' && hasActiveFilters && (
                         <span className="bg-pink-500 text-white text-xs font-semibold px-2 py-1 rounded-full">
                             Filtered
@@ -17173,6 +17319,20 @@ const AnimalList = ({ authToken, showModalMessage, onEditAnimal, onViewAnimal, f
                         <span className="font-medium">Hidden</span>
                     </button>
                     </>)}
+                    {animalView === 'management' && !showActivityLogScreen && (
+                        <button
+                            onClick={() => {
+                                setActivityLogs([]);
+                                setLogsLoaded(false);
+                                setShowActivityLogScreen(true);
+                            }}
+                            className="flex items-center gap-1 px-2 sm:px-3 py-1 sm:py-1.5 text-xs sm:text-sm text-indigo-600 hover:text-indigo-800 hover:bg-indigo-50 border border-indigo-200 rounded-lg transition font-medium"
+                            title="View Activity Log"
+                        >
+                            <ScrollText size={14} className="sm:w-4 sm:h-4" />
+                            <span className="font-medium">Activity Log</span>
+                        </button>
+                    )}
                     <button 
                         onClick={handleRefresh} 
                         disabled={loading}
@@ -17386,7 +17546,7 @@ const AnimalList = ({ authToken, showModalMessage, onEditAnimal, onViewAnimal, f
             )}
 
             {animalView === 'management' ? (
-                loading ? <LoadingSpinner /> : renderManagementView()
+                loading ? <LoadingSpinner /> : showActivityLogScreen ? renderActivityLogScreen() : renderManagementView()
             ) : loading ? (
                 <LoadingSpinner />
             ) : animals.length === 0 ? (
