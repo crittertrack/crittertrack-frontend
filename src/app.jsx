@@ -21188,7 +21188,7 @@ const App = () => {
                 }
 
                 // Fill remaining slots (max 2) with newest members not already shown
-                const fourteenDaysAgo = new Date(Date.now() - 14 * 24 * 60 * 60 * 1000);
+                const fourteenDaysAgo = new Date(Date.now() - 7 * 24 * 60 * 60 * 1000);
                 for (const user of newest) {
                     if (!seenIds.has(user.id_public) && combined.length < 7) {
                         seenIds.add(user.id_public);
