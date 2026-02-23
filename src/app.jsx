@@ -8970,30 +8970,29 @@ const AnimalForm = ({
     // Check if a field is hidden for the current species
     // CRITICAL: Never hide fields that have existing data (backward compatibility)
     const isFieldHidden = (fieldName) => {
-        // SAFETY CHECK 1: If editing an existing animal and the field has data, NEVER hide it
-        if (animalToEdit && formData[fieldName] && formData[fieldName] !== '' && formData[fieldName] !== null) {
-            return false; // Always show fields with existing data
-        }
-        
-        // SAFETY CHECK 2: If no template is loaded, show all fields (fail-safe)
-        if (!fieldTemplate) {
-            // Fall back to old SpeciesConfig system
-            const config = speciesConfigs?.[formData.species];
-            return config?.hiddenFields?.includes(fieldName) || false;
-        }
-        
-        // For new animals or empty fields, use the field template
-        const fieldConfig = fieldTemplate.fields?.[fieldName];
-        if (fieldConfig) {
-            const isHidden = fieldConfig.enabled === false;
-            if (fieldName === 'coat' || fieldName === 'earset' || fieldName === 'strain') {
-                console.log(`[AnimalForm] Field ${fieldName}:`, { enabled: fieldConfig.enabled, isHidden });
+        // Template takes priority — if field is explicitly disabled, always hide it
+        // (even if the animal has existing data in that field)
+        if (fieldTemplate) {
+            const fieldConfig = fieldTemplate.fields?.[fieldName];
+            if (fieldConfig) {
+                const isHidden = fieldConfig.enabled === false;
+                if (fieldName === 'coat' || fieldName === 'earset' || fieldName === 'strain') {
+                    console.log(`[AnimalForm] Field ${fieldName}:`, { enabled: fieldConfig.enabled, isHidden });
+                }
+                return isHidden;
             }
-            return isHidden;
+            // Field not listed in template — show it (fail-safe)
+            return false;
         }
-        
-        // If field not in template, show it (fail-safe for backward compatibility)
-        return false;
+
+        // No template loaded — fall back to "has data" safety check for edit mode
+        if (animalToEdit && formData[fieldName] && formData[fieldName] !== '' && formData[fieldName] !== null) {
+            return false; // Always show fields with existing data when no template
+        }
+
+        // Fall back to old SpeciesConfig system
+        const config = speciesConfigs?.[formData.species];
+        return config?.hiddenFields?.includes(fieldName) || false;
     };
     
     // Initial state setup (using the passed props for options)
