@@ -20102,8 +20102,7 @@ const App = () => {
     const [transferNotes, setTransferNotes] = useState('');
     
     // Community banner states
-    const [newestUsers, setNewestUsers] = useState([]);
-    const [activeUsers, setActiveUsers] = useState([]);
+    const [communityUsers, setCommunityUsers] = useState([]);
     const scrollContainerRef = useRef(null);
     const tutorialOverlayRef = useRef(null);
     const litterFormDataRef = useRef(null);
@@ -21161,57 +21160,52 @@ const App = () => {
         fetchSpeciesAndConfigs();
     }, [API_BASE_URL]);
 	
-    // Fetch community users (newest + active)
+    // Fetch community users (active-first, topped up with recent new members)
     useEffect(() => {
         const fetchCommunityUsers = async () => {
             try {
                 const [newestResponse, activeResponse] = await Promise.all([
                     axios.get(`${API_BASE_URL}/public/users/newest?limit=10`),
-                    axios.get(`${API_BASE_URL}/public/users/active?minutes=15`)
+                    axios.get(`${API_BASE_URL}/public/users/active?minutes=30`)
                 ]);
                 let newest = newestResponse.data || [];
                 let active = activeResponse.data || [];
-                
-                // Filter out banned/deleted users (those without id_public or marked as deleted)
-                newest = newest.filter(u => u.id_public && u.accountStatus !== 'banned');
-                active = active.filter(u => u.id_public && u.accountStatus !== 'banned');
-                
-                // Filter out anonymous users (those who don't have a visible name)
+
                 const hasVisibleName = (u) => (u.showBreederName && u.breederName) || (u.showPersonalName && u.personalName);
-                newest = newest.filter(hasVisibleName);
-                active = active.filter(hasVisibleName);
-                
-                // Combine: active first (most recently active), then newest, removing duplicates
+                const clean = (arr) => arr.filter(u => u.id_public && u.accountStatus !== 'banned' && hasVisibleName(u));
+                newest = clean(newest);
+                active = clean(active);
+
                 const seenIds = new Set();
                 const combined = [];
-                
-                // Add active users first (priority)
+
+                // Active users fill up to 5 slots (already sorted most-recently-active first by backend)
                 for (const user of active) {
                     if (!seenIds.has(user.id_public) && combined.length < 5) {
                         seenIds.add(user.id_public);
-                        combined.push({ ...user, isActive: true });
+                        combined.push({ ...user, isActive: true, isNew: false });
                     }
                 }
-                
-                // Fill remaining slots with newest users
+
+                // Fill remaining slots (max 2) with newest members not already shown
+                const fourteenDaysAgo = new Date(Date.now() - 14 * 24 * 60 * 60 * 1000);
                 for (const user of newest) {
-                    if (!seenIds.has(user.id_public) && combined.length < 5) {
+                    if (!seenIds.has(user.id_public) && combined.length < 7) {
                         seenIds.add(user.id_public);
-                        combined.push({ ...user, isActive: false });
+                        const isNew = user.createdAt && new Date(user.createdAt) > fourteenDaysAgo;
+                        combined.push({ ...user, isActive: false, isNew: !!isNew });
                     }
                 }
-                
-                // Split back into categories for display styling
-                setNewestUsers(combined.filter(u => !u.isActive));
-                setActiveUsers(combined.filter(u => u.isActive));
+
+                setCommunityUsers(combined);
             } catch (error) {
                 console.error('Error fetching community users:', error);
             }
         };
-        
+
         if (authToken) {
             fetchCommunityUsers();
-            // Refresh community users every 2 minutes
+            // Refresh every 2 minutes
             const interval = setInterval(fetchCommunityUsers, 120000);
             return () => clearInterval(interval);
         }
@@ -21220,7 +21214,7 @@ const App = () => {
     // Auto-scroll effect for community banner - back and forth on desktop
     useEffect(() => {
         const scrollContainer = scrollContainerRef.current;
-        if (!scrollContainer || (!newestUsers.length && !activeUsers.length)) return;
+        if (!scrollContainer || !communityUsers.length) return;
         
         // Disable auto-scroll on mobile to prevent jittery behavior
         const isMobile = window.innerWidth < 768;
@@ -21269,7 +21263,7 @@ const App = () => {
             scrollContainer?.removeEventListener('mouseenter', handleMouseEnter);
             scrollContainer?.removeEventListener('mouseleave', handleMouseLeave);
         };
-    }, [newestUsers, activeUsers]);
+    }, [communityUsers]);
 	
     const handleBugReportSubmit = async (e) => {
         e.preventDefault();
@@ -22871,30 +22865,34 @@ const App = () => {
                     {currentView !== 'profile' && userProfile && <div className="hidden sm:block"><UserProfileCard userProfile={userProfile} /></div>}
                     
                     {/* Community Feed Banner */}
-                    {(newestUsers.length > 0 || activeUsers.length > 0) && (
+                    {communityUsers.length > 0 && (
                         <div className="flex-1 min-w-0 bg-gradient-to-r from-primary/20 to-accent/20 p-3 rounded-lg border border-primary/30" data-tutorial-target="community-activity">
                             <h3 className="text-xs font-semibold text-gray-800 mb-2 flex items-center justify-center">
                                 <Users size={14} className="mr-2 text-primary-dark" />
                                 Community Feed
                             </h3>
-                            <div 
+                            <div
                                 ref={scrollContainerRef}
                                 className="flex flex-wrap justify-center gap-3 pb-2"
                             >
-                                {/* Newest Members */}
-                                {newestUsers.map(user => {
-                                    const displayName = (user.showBreederName && user.breederName) 
-                                        ? user.breederName 
+                                {communityUsers.map(user => {
+                                    const displayName = (user.showBreederName && user.breederName)
+                                        ? user.breederName
                                         : ((user.showPersonalName ?? false) ? user.personalName : 'Anonymous');
-                                    
                                     return (
-                                        <div 
-                                            key={`new-${user.id_public}`}
-                                            className="flex-shrink-0 bg-white rounded-lg p-2 shadow-sm border-2 border-primary/40 hover:shadow-md transition cursor-pointer min-w-[120px]"
-                                            onClick={() => {
-                                                navigate(`/user/${user.id_public}`);
-                                            }}
+                                        <div
+                                            key={user.id_public}
+                                            className="relative flex-shrink-0 bg-white rounded-lg p-2 shadow-sm border-2 border-primary/40 hover:shadow-md transition cursor-pointer min-w-[120px]"
+                                            onClick={() => navigate(`/user/${user.id_public}`)}
                                         >
+                                            {/* Active green dot */}
+                                            {user.isActive && (
+                                                <span className="absolute top-1.5 right-1.5 w-2.5 h-2.5 bg-green-400 border-2 border-white rounded-full" title="Recently active" />
+                                            )}
+                                            {/* New member badge */}
+                                            {!user.isActive && user.isNew && (
+                                                <span className="absolute top-1 right-1 text-[9px] font-bold bg-blue-100 text-blue-600 px-1 rounded">NEW</span>
+                                            )}
                                             <div className="w-10 h-10 bg-gray-100 rounded-full overflow-hidden mx-auto mb-1">
                                                 {user.profileImage ? (
                                                     <img src={user.profileImage} alt={displayName} className="w-full h-full object-cover" />
@@ -22904,40 +22902,7 @@ const App = () => {
                                                     </div>
                                                 )}
                                             </div>
-                                            <p className="text-xs font-semibold text-gray-800 text-center truncate">
-                                                {displayName}
-                                            </p>
-                                            <p className="text-xs text-gray-500 text-center truncate">{user.id_public}</p>
-                                        </div>
-                                    );
-                                })}
-                                
-                                {/* Active Users */}
-                                {activeUsers.map(user => {
-                                    const displayName = (user.showBreederName && user.breederName) 
-                                        ? user.breederName 
-                                        : ((user.showPersonalName ?? false) ? user.personalName : 'Anonymous');
-                                    
-                                    return (
-                                        <div 
-                                            key={`active-${user.id_public}`}
-                                            className="flex-shrink-0 bg-white rounded-lg p-2 shadow-sm border-2 border-accent/40 hover:shadow-md transition cursor-pointer min-w-[120px]"
-                                            onClick={() => {
-                                                navigate(`/user/${user.id_public}`);
-                                            }}
-                                        >
-                                            <div className="w-10 h-10 bg-gray-100 rounded-full overflow-hidden mx-auto mb-1">
-                                                {user.profileImage ? (
-                                                    <img src={user.profileImage} alt={displayName} className="w-full h-full object-cover" />
-                                                ) : (
-                                                    <div className="w-full h-full flex items-center justify-center text-gray-400">
-                                                        <User size={20} />
-                                                    </div>
-                                                )}
-                                            </div>
-                                            <p className="text-xs font-semibold text-gray-800 text-center truncate">
-                                                {displayName}
-                                            </p>
+                                            <p className="text-xs font-semibold text-gray-800 text-center truncate">{displayName}</p>
                                             <p className="text-xs text-gray-500 text-center truncate">{user.id_public}</p>
                                         </div>
                                     );
