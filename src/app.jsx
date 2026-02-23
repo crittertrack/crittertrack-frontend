@@ -8451,9 +8451,9 @@ const SpeciesSelector = ({ speciesOptions, onSelectSpecies, onManageSpecies, sea
                 Select Species for New Animal
             </h2>
             
-            <div className="mb-4 p-4 bg-blue-50 border-l-4 border-blue-400 rounded-lg">
-                <p className="text-sm text-blue-800">
-                    <span className="font-semibold">💡 Tip:</span> Some default species are intentionally broad — for example, <span className="italic">Theraphosidae sp.</span> covers the family as a whole. We encourage adding and using your specific species where possible: e.g. <span className="italic">Theraphosidae Poecilotheria metallica</span> or <span className="italic">Theraphosidae Brachypelma hamorii</span>. Don't see fields you need? You can request them to be added through the species customisation!
+            <div className="mb-4 p-4 bg-yellow-50 border-l-4 border-yellow-400 rounded-lg">
+                <p className="text-sm text-yellow-800">
+                    <span className="font-semibold">⚠️ Work in Progress:</span> Some default species are intentionally broad — for example, <span className="italic">Theraphosidae sp.</span> covers the family as a whole. We encourage adding and using your specific species where possible: e.g. <span className="italic">Theraphosidae Poecilotheria metallica</span> or <span className="italic">Theraphosidae Brachypelma hamorii</span>. Don't see fields you need? You can request them to be added through the species customisation!
                 </p>
             </div>
             
