@@ -8453,7 +8453,7 @@ const SpeciesSelector = ({ speciesOptions, onSelectSpecies, onManageSpecies, sea
             
             <div className="mb-4 p-4 bg-blue-50 border-l-4 border-blue-400 rounded-lg">
                 <p className="text-sm text-blue-800">
-                    <span className="font-semibold">💡 Tip:</span> Some default species are intentionally broad — for example, <span className="italic">Theraphosidae sp.</span> covers the family as a whole. For the best experience, we encourage adding your specific species instead: e.g. <span className="italic">Theraphosidae Poecilotheria metallica</span> or <span className="italic">Theraphosidae Brachypelma hamorii</span>. More specific entries unlock tailored traits, colors, and care fields.
+                    <span className="font-semibold">💡 Tip:</span> Some default species are intentionally broad — for example, <span className="italic">Theraphosidae sp.</span> covers the family as a whole. We encourage using your specific species where possible: e.g. <span className="italic">Theraphosidae Poecilotheria metallica</span> or <span className="italic">Theraphosidae Brachypelma hamorii</span>. Don't see your species? You can request it to be added!
                 </p>
             </div>
             
