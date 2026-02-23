@@ -11491,7 +11491,7 @@ const AnimalForm = ({
                                 
                                 {!isFieldHidden('breed') && (
                                 <div>
-                                    <label className="block text-sm font-medium text-gray-700">Breed</label>
+                                    <label className="block text-sm font-medium text-gray-700">{getFieldLabel('breed', 'Breed')}</label>
                                     <input type="text" name="breed" value={formData.breed} onChange={handleChange} 
                                         data-tutorial-target="breed-select"
                                         className="mt-1 block w-full p-2 border border-gray-300 rounded-md shadow-sm focus:ring-primary focus:border-primary" />
