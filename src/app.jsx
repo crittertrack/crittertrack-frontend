@@ -10894,6 +10894,15 @@ const AnimalForm = ({
                                         placeholder="Genetic traits carried" />
                                 </div>
                                 )}
+
+                                {!isFieldHidden('size') && (
+                                <div>
+                                    <label className="block text-sm font-medium text-gray-700">{getFieldLabel('size', 'Size')}</label>
+                                    <input type="text" name="size" value={formData.size || ''} onChange={handleChange} 
+                                        className="mt-1 block w-full p-2 border border-gray-300 rounded-md shadow-sm focus:ring-primary focus:border-primary" 
+                                        placeholder="e.g., Small, Medium, Large" />
+                                </div>
+                                )}
                             </div>
 
 
@@ -17405,7 +17414,7 @@ const AnimalList = ({ authToken, showModalMessage, onEditAnimal, onViewAnimal, f
 
         // -- Shared helpers --------------------------------------------------------
         // All appearance fields that make up "Variety" — same set as Tab 3 / Appearance section
-        const VARIETY_KEYS = ['color', 'coatPattern', 'coat', 'earset', 'phenotype', 'morph', 'markings', 'eyeColor', 'nailColor', 'carrierTraits'];
+        const VARIETY_KEYS = ['color', 'coatPattern', 'coat', 'earset', 'phenotype', 'morph', 'markings', 'eyeColor', 'nailColor', 'carrierTraits', 'size'];
         const getAnimalVariety = (a) => VARIETY_KEYS.map(k => a[k]).filter(Boolean).join(' ');
 
         // -- Shared card + group components ---------------------------------------
