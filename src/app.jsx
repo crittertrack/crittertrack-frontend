@@ -7423,12 +7423,7 @@ const LitterManagement = ({ authToken, API_BASE_URL, userProfile, showModalMessa
                                     <Loader2 className="w-4 h-4 animate-spin" /> Calculating...
                                 </span>
                             ) : predictedCOI != null ? (
-                                <span className={`text-sm font-bold ${
-                                    predictedCOI === 0 ? 'text-green-600' :
-                                    predictedCOI < 6.25 ? 'text-green-500' :
-                                    predictedCOI < 12.5 ? 'text-yellow-600' :
-                                    'text-red-600'
-                                }`}>
+                                <span className="text-sm font-bold text-gray-800">
                                     {predictedCOI.toFixed(2)}%
                                 </span>
                             ) : (
