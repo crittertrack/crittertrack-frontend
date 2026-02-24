@@ -7699,6 +7699,11 @@ const LitterManagement = ({ authToken, API_BASE_URL, userProfile, showModalMessa
                                         <p className="text-[10px] text-gray-500 mt-0.5">
                                             {formatDate(litter.birthDate)}
                                         </p>
+                                        {litter.inbreedingCoefficient != null && (
+                                            <p className="text-[10px] text-gray-500 mt-0.5">
+                                                <span className="font-medium">COI:</span> {litter.inbreedingCoefficient.toFixed(2)}%
+                                            </p>
+                                        )}
                                     </div>
                                     
                                     {/* Desktop layout: grid */}
@@ -7720,7 +7725,7 @@ const LitterManagement = ({ authToken, API_BASE_URL, userProfile, showModalMessa
                                         <div className="text-sm font-semibold text-gray-700">
                                             {litter.numberBorn} offspring
                                         </div>
-                                        <div className="text-sm hidden md:block">
+                                        <div className="text-sm">
                                             <span className="text-gray-600">COI:</span> {litter.inbreedingCoefficient != null ? `${litter.inbreedingCoefficient.toFixed(2)}%` : 'N/A'}
                                         </div>
                                     </div>
