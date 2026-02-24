@@ -10048,6 +10048,26 @@ const AnimalForm = ({
 
     const handleSubmit = async (e) => {
         e.preventDefault();
+        setLoading(false);
+
+        // Validate all required fields regardless of which tab is currently active.
+        // Tab switching does not submit the form so HTML5 `required` attributes are
+        // bypassed — we must enforce these explicitly before any network call.
+        const missingFields = [];
+        if (!formData.name?.trim())    missingFields.push('Name (Overview tab)');
+        if (!formData.species?.trim()) missingFields.push('Species (Overview tab)');
+        if (!formData.gender?.trim())  missingFields.push('Gender (Overview tab)');
+        if (!formData.birthDate)       missingFields.push('Date of Birth (Overview tab)');
+        if (!formData.status?.trim())  missingFields.push('Status (Overview tab)');
+
+        if (missingFields.length > 0) {
+            showModalMessage(
+                'Required Fields Missing',
+                `Please fill in the following required fields before saving:\n\n• ${missingFields.join('\n• ')}`
+            );
+            return;
+        }
+
         setLoading(true);
         
         const method = animalToEdit ? 'put' : 'post';
