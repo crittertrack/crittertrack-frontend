@@ -6352,10 +6352,8 @@ const LitterManagement = ({ authToken, API_BASE_URL, userProfile, showModalMessa
     const [searchQuery, setSearchQuery] = useState('');
     const [speciesFilter, setSpeciesFilter] = useState('');
     const [yearFilter, setYearFilter] = useState('');
-    // COI calculation state (feature in development - UI display pending)
-    // eslint-disable-next-line no-unused-vars
+    // COI calculation state
     const [predictedCOI, setPredictedCOI] = useState(null);
-    // eslint-disable-next-line no-unused-vars
     const [calculatingCOI, setCalculatingCOI] = useState(false);
     const [addingOffspring, setAddingOffspring] = useState(null);
     const [newOffspringData, setNewOffspringData] = useState({
@@ -6661,7 +6659,7 @@ const LitterManagement = ({ authToken, API_BASE_URL, userProfile, showModalMessa
 
             // Calculate inbreeding coefficient for this pairing
             try {
-                const coiResponse = await axios.get(`${API_BASE_URL}/inbreeding/pairing`, {
+                const coiResponse = await axios.get(`${API_BASE_URL}/animals/inbreeding/pairing`, {
                     params: {
                         sireId: formData.sireId_public,
                         damId: formData.damId_public,
@@ -6765,7 +6763,7 @@ const LitterManagement = ({ authToken, API_BASE_URL, userProfile, showModalMessa
 
             // Recalculate litter COI after adding offspring
             try {
-                const coiResponse = await axios.get(`${API_BASE_URL}/inbreeding/pairing`, {
+                const coiResponse = await axios.get(`${API_BASE_URL}/animals/inbreeding/pairing`, {
                     params: {
                         sireId: formData.sireId_public,
                         damId: formData.damId_public,
@@ -7415,6 +7413,29 @@ const LitterManagement = ({ authToken, API_BASE_URL, userProfile, showModalMessa
                             </button>
                         </div>
                     </div>
+
+                    {/* Predicted COI Display */}
+                    {(formData.sireId_public && formData.damId_public) && (
+                        <div className="mb-4 p-3 rounded-lg border bg-gray-50 flex items-center gap-2">
+                            <span className="text-sm font-medium text-gray-700">Predicted COI for this pairing:</span>
+                            {calculatingCOI ? (
+                                <span className="text-sm text-gray-500 flex items-center gap-1">
+                                    <Loader2 className="w-4 h-4 animate-spin" /> Calculating...
+                                </span>
+                            ) : predictedCOI != null ? (
+                                <span className={`text-sm font-bold ${
+                                    predictedCOI === 0 ? 'text-green-600' :
+                                    predictedCOI < 6.25 ? 'text-green-500' :
+                                    predictedCOI < 12.5 ? 'text-yellow-600' :
+                                    'text-red-600'
+                                }`}>
+                                    {predictedCOI.toFixed(2)}%
+                                </span>
+                            ) : (
+                                <span className="text-sm text-gray-400 italic">—</span>
+                            )}
+                        </div>
+                    )}
 
                     {/* Birth Date & Counts */}
                     <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-4" data-tutorial-target="litter-dates-counts">
