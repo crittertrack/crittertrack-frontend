@@ -2976,7 +2976,7 @@ const PrivateAnimalDetail = ({ animal, onClose, onCloseAll, onEdit, API_BASE_URL
                     {/* Tab 3: Physical */}
                     {detailViewTab === 3 && (
                         <div className="space-y-6">
-                            {/* Appearance */}
+                            {/* Appearance - Always show */}
                             {(() => {
                                 const fields = [
                                     { key: 'color', label: 'Color' },
@@ -2990,56 +2990,82 @@ const PrivateAnimalDetail = ({ animal, onClose, onCloseAll, onEdit, API_BASE_URL
                                     { key: 'nailColor', label: 'Nail/Claw Color' },
                                     { key: 'carrierTraits', label: 'Carrier Traits' },
                                 ].filter(f => fieldTemplate?.fields?.[f.key]?.enabled !== false && animal[f.key]);
-                                return fields.length > 0 && (
+                                return (
                                     <div className="bg-gray-50 p-4 rounded-lg border border-gray-200 space-y-4">
                                         <h3 className="text-lg font-semibold text-gray-700">Appearance</h3>
-                                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm">
-                                            {fields.map(f => (
-                                                <div key={f.key}><span className="text-gray-600">{getLabel(f.key, f.label)}:</span> <strong>{animal[f.key]}</strong></div>
-                                            ))}
-                                        </div>
+                                        {fields.length > 0 ? (
+                                            <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm">
+                                                {fields.map(f => (
+                                                    <div key={f.key}><span className="text-gray-600">{getLabel(f.key, f.label)}:</span> <strong>{animal[f.key]}</strong></div>
+                                                ))}
+                                            </div>
+                                        ) : (
+                                            <div className="text-sm text-gray-500">No appearance data recorded yet.</div>
+                                        )}
                                     </div>
                                 );
                             })()}
 
-                            {/* Genetic Code */}
-                            {fieldTemplate?.fields?.geneticCode?.enabled !== false && animal.geneticCode && (
+                            {/* Genetic Code - Always show */}
+                            {fieldTemplate?.fields?.geneticCode?.enabled !== false && (
                                 <div className="bg-gray-50 p-4 rounded-lg border border-gray-200 space-y-4">
                                     <h3 className="text-lg font-semibold text-gray-700">{getLabel('geneticCode', 'Genetic Code')}</h3>
-                                    <p className="text-gray-700 font-mono text-sm break-all">{animal.geneticCode}</p>
+                                    <p className="text-gray-700 font-mono text-sm break-all">{animal.geneticCode || 'Not specified'}</p>
                                 </div>
                             )}
 
-                            {/* Life Stage */}
-                            {fieldTemplate?.fields?.lifeStage?.enabled !== false && animal.lifeStage && (
+                            {/* Life Stage - Always show */}
+                            {fieldTemplate?.fields?.lifeStage?.enabled !== false && (
                                 <div className="bg-gray-50 p-4 rounded-lg border border-gray-200 space-y-4">
                                     <h3 className="text-lg font-semibold text-gray-700">{getLabel('lifeStage', 'Life Stage')}</h3>
-                                    <p className="text-gray-700 text-sm">{animal.lifeStage}</p>
+                                    <p className="text-gray-700 text-sm">{animal.lifeStage || 'Not specified'}</p>
                                 </div>
                             )}
 
-                            {/* Measurements */}
-                            {(() => {
-                                const mFields = [
-                                    { key: 'bodyWeight', label: 'Weight' },
-                                    { key: 'bodyLength', label: 'Body Length' },
-                                    { key: 'heightAtWithers', label: 'Height at Withers' },
-                                    { key: 'chestGirth', label: 'Chest Girth' },
-                                    { key: 'adultWeight', label: 'Adult Weight' },
-                                    { key: 'bodyConditionScore', label: 'Body Condition Score' },
-                                    { key: 'length', label: 'Length' },
-                                ].filter(f => fieldTemplate?.fields?.[f.key]?.enabled !== false && animal[f.key]);
-                                return mFields.length > 0 && (
-                                    <div className="bg-gray-50 p-4 rounded-lg border border-gray-200 space-y-4">
-                                        <h3 className="text-lg font-semibold text-gray-700">Measurements</h3>
+                            {/* Current Measurements & Growth Tracking - Always show */}
+                            <div className="bg-gray-50 p-4 rounded-lg border border-gray-200 space-y-4">
+                                <h3 className="text-lg font-semibold text-gray-700">Measurements & Growth Tracking</h3>
+                                {(() => {
+                                    let growthRecords = animal.growthRecords;
+                                    if (typeof growthRecords === 'string') {
+                                        try { growthRecords = JSON.parse(growthRecords); } catch (e) { growthRecords = []; }
+                                    }
+                                    if (!Array.isArray(growthRecords)) growthRecords = [];
+                                    
+                                    if (growthRecords.length > 0) {
+                                        const sorted = [...growthRecords].sort((a, b) => new Date(b.date) - new Date(a.date));
+                                        const latest = sorted[0];
+                                        return (
+                                            <div className="text-sm space-y-1">
+                                                <p><span className="text-gray-600">Latest Weight:</span> <strong>{latest.weight} {animal.measurementUnits?.weight || 'g'}</strong></p>
+                                                {latest.length && <p><span className="text-gray-600">Latest Length:</span> <strong>{latest.length} {animal.measurementUnits?.length || 'cm'}</strong></p>}
+                                                {latest.height && <p><span className="text-gray-600">Latest Height:</span> <strong>{latest.height} {animal.measurementUnits?.length || 'cm'}</strong></p>}
+                                                <p className="text-gray-600 text-xs mt-2">Total measurements: {growthRecords.length} entries</p>
+                                            </div>
+                                        );
+                                    }
+                                    
+                                    const mFields = [
+                                        { key: 'bodyWeight', label: 'Weight' },
+                                        { key: 'bodyLength', label: 'Body Length' },
+                                        { key: 'heightAtWithers', label: 'Height at Withers' },
+                                        { key: 'chestGirth', label: 'Chest Girth' },
+                                        { key: 'adultWeight', label: 'Adult Weight' },
+                                        { key: 'bodyConditionScore', label: 'Body Condition Score' },
+                                        { key: 'length', label: 'Length' },
+                                    ].filter(f => fieldTemplate?.fields?.[f.key]?.enabled !== false && animal[f.key]);
+                                    
+                                    return mFields.length > 0 ? (
                                         <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm">
                                             {mFields.map(f => (
                                                 <div key={f.key}><span className="text-gray-600">{getLabel(f.key, f.label)}:</span> <strong>{animal[f.key]}</strong></div>
                                             ))}
                                         </div>
-                                    </div>
-                                );
-                            })()}
+                                    ) : (
+                                        <div className="text-sm text-gray-500">No measurements recorded yet.</div>
+                                    );
+                                })()}
+                            </div>
                         </div>
                     )}
 
@@ -23923,25 +23949,33 @@ const App = () => {
                                         {/* Tab 3: Physical Profile */}
                                         {detailViewTab === 3 && (
                                             <div className="space-y-6">
-                                                {/* Debug info */}
-                                                <div className="bg-yellow-100 border border-yellow-300 p-2 text-xs rounded">
-                                                    <strong>Debug:</strong> animalToView exists: {animalToView ? 'YES' : 'NO'}, 
-                                                    color: {animalToView?.color || 'none'}, 
-                                                    geneticCode: {animalToView?.geneticCode ? 'exists' : 'none'},
-                                                    lifeStage: {animalToView?.lifeStage || 'none'}
-                                                </div>
-                                                
-                                                {/* Variety Section - Always show */}
+                                                {/* Appearance - Always show */}
                                                 <div className="bg-gray-50 p-4 rounded-lg border border-gray-200 space-y-4">
-                                                    <h3 className="text-lg font-semibold text-gray-700">Variety</h3>
-                                                    <div className="text-sm">
-                                                        <span className="text-gray-600">Variety:</span> <strong>{[
-                                                            animalToView.color,
-                                                            animalToView.coatPattern,
-                                                            animalToView.coat,
-                                                            animalToView.earset
-                                                        ].filter(Boolean).join(' ') || 'Not specified'}</strong>
-                                                    </div>
+                                                    <h3 className="text-lg font-semibold text-gray-700">Appearance</h3>
+                                                    {(() => {
+                                                        const fields = [
+                                                            { key: 'color', label: 'Color' },
+                                                            { key: 'coatPattern', label: 'Pattern' },
+                                                            { key: 'coat', label: 'Coat Type' },
+                                                            { key: 'earset', label: 'Earset' },
+                                                            { key: 'phenotype', label: 'Phenotype' },
+                                                            { key: 'morph', label: 'Morph' },
+                                                            { key: 'markings', label: 'Markings' },
+                                                            { key: 'eyeColor', label: 'Eye Color' },
+                                                            { key: 'nailColor', label: 'Nail/Claw Color' },
+                                                            { key: 'carrierTraits', label: 'Carrier Traits' },
+                                                        ].filter(f => animalToView[f.key]);
+                                                        
+                                                        return fields.length > 0 ? (
+                                                            <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm">
+                                                                {fields.map(f => (
+                                                                    <div key={f.key}><span className="text-gray-600">{f.label}:</span> <strong>{animalToView[f.key]}</strong></div>
+                                                                ))}
+                                                            </div>
+                                                        ) : (
+                                                            <div className="text-sm text-gray-500">No appearance data recorded yet.</div>
+                                                        );
+                                                    })()}
                                                 </div>
                                                 
                                                 {/* Genetic Code - Always show */}
