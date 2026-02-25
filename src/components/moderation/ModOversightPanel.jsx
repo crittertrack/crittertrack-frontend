@@ -558,6 +558,14 @@ export default function ModOversightPanel({
 
     const handleUpdateStatus = async (nextStatus) => {
         if (!selectedReport || !nextStatus) return;
+        
+        console.log('[ModOversightPanel] Updating status:', { 
+            nextStatus, 
+            type: typeof nextStatus,
+            reportId: selectedReport._id,
+            reportType 
+        });
+        
         setActionLoading(true);
         setError('');
 
