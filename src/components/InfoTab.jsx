@@ -15,10 +15,6 @@ export const InfoTab = ({ onClose }) => {
   const featureLessons = TUTORIAL_LESSONS.features;
   const advancedLessons = TUTORIAL_LESSONS.advanced;
 
-  const onboardingLessons = TUTORIAL_LESSONS.onboarding;
-  const featureLessons = TUTORIAL_LESSONS.features;
-  const advancedLessons = TUTORIAL_LESSONS.advanced;
-
   const toggleSection = (section) => {
     setExpandedSection(expandedSection === section ? null : section);
   };
