@@ -920,6 +920,17 @@ const GETTING_STARTED_LESSONS = [
           'Important for breeding schedules',
           'Examples: Mice are nocturnal, hamsters are crepuscular'
         ]
+      },
+      {
+        stepNumber: 4,
+        title: 'Training & Working',
+        content: 'This section documents training achievements and working roles. Record Training Level (basic to competition), Training Disciplines (agility, obedience, etc.), Working Role (service, therapy, etc.), Certifications, and any behavioral challenges like Behavioral Issues, Bite History, or Reactivity Notes.',
+        tips: [
+          'Important for working animals',
+          'Track training progress',
+          'Document certifications',
+          'Note behavioral challenges for safety'
+        ]
       }
     ]
   },
