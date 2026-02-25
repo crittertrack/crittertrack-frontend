@@ -6113,7 +6113,7 @@ const ViewOnlyAnimalDetail = ({ animal, onClose, onCloseAll, API_BASE_URL, onVie
                             )}
 
                             {/* 3rd Section: Animal Care */}
-                            {((animal.animalCareTasks && animal.animalCareTasks.length > 0) || animal.handlingNotes || animal.socializationNotes || animal.specialCareRequirements) && (
+                            {(animal.animalCareTasks && animal.animalCareTasks.length > 0) || animal.handlingNotes || animal.socializationNotes || animal.specialCareRequirements ? (
                             <div className="bg-gray-50 p-4 rounded-lg border border-gray-200 space-y-4">
                                 <h3 className="text-lg font-semibold text-gray-700">Animal Care</h3>
                                 {animal.animalCareTasks && animal.animalCareTasks.length > 0 && (
@@ -6138,7 +6138,7 @@ const ViewOnlyAnimalDetail = ({ animal, onClose, onCloseAll, API_BASE_URL, onVie
                                     {animal.specialCareRequirements && <div><strong className="text-sm">Special Care Requirements:</strong> <p className="text-sm mt-1 whitespace-pre-wrap">{animal.specialCareRequirements}</p></div>}
                                 </div>
                             </div>
-                            ))}
+                            ) : null}
 
                             {/* 4th Section: Environment */}
                             {(animal.temperatureRange || animal.humidity || animal.lighting || animal.noise) && (
