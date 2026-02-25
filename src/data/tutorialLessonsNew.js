@@ -704,18 +704,6 @@ const GETTING_STARTED_LESSONS = [
       },
       {
         stepNumber: 5,
-        title: 'Nursing Status',
-        content: 'Check this box if your female is currently nursing offspring. This affects her health needs and breeding availability.',
-        highlightElement: '[data-tutorial-target="nursing-checkbox"]',
-        tips: [
-          'Typically temporary status',
-          'Important for health records',
-          'Affects breeding decisions'
-        ]
-      },
-
-      {
-        stepNumber: 6,
         title: 'Stud Information',
         content: 'This section is available for all male animals to track fertility status and genetics information. To make your animal available for breeding in the showcase, go to the Status & Privacy tab and enable "Available for Stud" with a fee.',
         highlightElement: '[data-tutorial-target="stud-info-section"]',
@@ -727,7 +715,7 @@ const GETTING_STARTED_LESSONS = [
         ]
       },
       {
-        stepNumber: 7,
+        stepNumber: 6,
         title: 'Dam Information',
         content: 'This section is available for all female animals to track fertility status and genetics information. You can fill in fertility status and any genetics or fertility-related notes.',
         highlightElement: '[data-tutorial-target="dam-info-section"]',
@@ -738,7 +726,7 @@ const GETTING_STARTED_LESSONS = [
         ]
       },
       {
-        stepNumber: 8,
+        stepNumber: 7,
         title: 'Breeding History',
         content: 'This section lets you record a brief summary of your animal\'s reproductive events. First select if this animal was a Sire, Dam, or Both. Then fill in mating dates, successful matings count, total offspring produced, total litters, and date of last pregnancy.',
         highlightElement: '[data-tutorial-target="breeding-history-section"]',
