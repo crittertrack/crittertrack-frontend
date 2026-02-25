@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { BookOpen, X, ChevronDown, ChevronUp } from 'lucide-react';
 import { TUTORIAL_LESSONS } from '../data/tutorialLessonsNew';
+import { getStepScreenshot } from '../data/tutorialScreenshots';
 
 /**
  * InfoTab (Help/Lessons)
@@ -164,14 +165,44 @@ export const InfoTab = ({ onClose }) => {
                           </div>
                         </div>
 
-                        {/* Screenshot Placeholder */}
-                        <div className="mt-4 bg-gradient-to-br from-blue-50 to-purple-50 border-2 border-dashed border-blue-300 rounded-lg p-8 flex items-center justify-center">
-                          <div className="text-center">
-                            <div className="text-4xl mb-2">📸</div>
-                            <p className="text-gray-500 text-sm font-medium">Screenshot: {step.title}</p>
-                            <p className="text-gray-400 text-xs mt-1">Visual guide coming soon</p>
-                          </div>
-                        </div>
+                        {/* Screenshot */}
+                        {(() => {
+                          const screenshotUrl = getStepScreenshot(selectedLesson.id, step.stepNumber || idx + 1);
+                          
+                          if (screenshotUrl) {
+                            return (
+                              <div className="mt-4 rounded-lg overflow-hidden border-2 border-gray-300 shadow-sm">
+                                <img 
+                                  src={screenshotUrl} 
+                                  alt={`Screenshot: ${step.title}`}
+                                  className="w-full h-auto"
+                                  onError={(e) => {
+                                    // If image fails to load, show placeholder
+                                    e.target.style.display = 'none';
+                                    e.target.nextElementSibling.style.display = 'flex';
+                                  }}
+                                />
+                                <div className="hidden bg-gradient-to-br from-blue-50 to-purple-50 border-2 border-dashed border-blue-300 rounded-lg p-8 items-center justify-center">
+                                  <div className="text-center">
+                                    <div className="text-4xl mb-2">📸</div>
+                                    <p className="text-gray-500 text-sm font-medium">Screenshot: {step.title}</p>
+                                    <p className="text-gray-400 text-xs mt-1">Image not found</p>
+                                  </div>
+                                </div>
+                              </div>
+                            );
+                          } else {
+                            return (
+                              <div className="mt-4 bg-gradient-to-br from-blue-50 to-purple-50 border-2 border-dashed border-blue-300 rounded-lg p-8 flex items-center justify-center">
+                                <div className="text-center">
+                                  <div className="text-4xl mb-2">📸</div>
+                                  <p className="text-gray-500 text-sm font-medium">Screenshot: {step.title}</p>
+                                  <p className="text-gray-400 text-xs mt-1">Visual guide coming soon</p>
+                                </div>
+                              </div>
+                            );
+                          }
+                        })()}
                       </div>
                     ))}
                   </div>
