@@ -835,24 +835,24 @@ const GETTING_STARTED_LESSONS = [
       },
       {
         stepNumber: 3,
-        title: 'Housing Details',
-        content: 'Assign your animal to an enclosure, document the housing type (wire cage, glass aquarium, etc.), bedding/substrate, and enrichment items like toys and tunnels.',
-        highlightElement: '[data-tutorial-target="husbandry-details-section"]',
+        title: 'Housing & Enclosure',
+        content: 'Assign your animal to an enclosure and document housing details including type, bedding, enrichment, and enclosure maintenance schedule. Add enclosure care tasks like "Deep clean" or "Water change" with frequencies.',
+        highlightElement: '[data-tutorial-target="housing-section"]',
         tips: [
           'Enclosure assignment helps organize animals',
-          'Housing details useful for rehoming',
-          'Track what works best for your animal'
+          'Maintenance tracking powers Management View',
+          'Separate from animal-specific care tasks'
         ]
       },
       {
         stepNumber: 4,
-        title: 'Scheduled Care Tasks',
-        content: 'Add custom recurring tasks like "Weigh", "Clean water bottle", or "Nail trim" with a frequency in days. Each task gets its own due-date tracking in the Management View.',
-        highlightElement: '',
+        title: 'Animal Care',
+        content: 'Track recurring care tasks specific to this animal like weighing, nail trims, health checks, and handling routines. Add notes about handling preferences, socialization, and special care requirements.',
+        highlightElement: '[data-tutorial-target="animal-care-section"]',
         tips: [
           'Each task tracked independently',
-          'Mark done from Management View instantly',
-          'Great for multi-step care routines'
+          'Mark done from Management View',
+          'Document handling and socialization needs'
         ]
       },
       {

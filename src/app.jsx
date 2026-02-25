@@ -9274,6 +9274,8 @@ const AnimalForm = ({
     const [enclosureOptions, setEnclosureOptions] = useState([]);
     const [newCareTaskName, setNewCareTaskName] = useState('');
     const [newCareTaskFreq, setNewCareTaskFreq] = useState('');
+    const [newAnimalCareTaskName, setNewAnimalCareTaskName] = useState('');
+    const [newAnimalCareTaskFreq, setNewAnimalCareTaskFreq] = useState('');
 
     // Fetch user's enclosures for the dropdown
     useEffect(() => {
@@ -13042,9 +13044,9 @@ const AnimalForm = ({
                             </div>
                         </div>
 
-                        {/* 2nd Section: Scheduled Care */}
-                        <div className="bg-gray-50 p-4 rounded-lg border border-gray-200 space-y-4" data-tutorial-target="husbandry-details-section">
-                            <h3 className="text-lg font-semibold text-gray-700 mb-4">Scheduled Care</h3>
+                        {/* 2nd Section: Housing & Enclosure */}
+                        <div className="bg-gray-50 p-4 rounded-lg border border-gray-200 space-y-4" data-tutorial-target="housing-section">
+                            <h3 className="text-lg font-semibold text-gray-700 mb-4">Housing & Enclosure</h3>
                             <div className="space-y-4">
                                 {/* Enclosure assignment */}
                                 <div>
@@ -13072,58 +13074,6 @@ const AnimalForm = ({
                                     </div>
                                 )}
 
-                                {/* Maintenance tracking → powers Management view */}
-                                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                                    <div>
-                                        <label className="block text-sm font-medium text-gray-700 mb-2">Last Maintenance Date</label>
-                                        <input type="date" name="lastMaintenanceDate" value={formData.lastMaintenanceDate || ''} onChange={handleChange}
-                                            className="block w-full p-2 border border-gray-300 rounded-md shadow-sm focus:ring-primary focus:border-primary" />
-                                    </div>
-                                    <div>
-                                        <label className="block text-sm font-medium text-gray-700 mb-2">Maintenance Every (days)</label>
-                                        <input type="number" name="maintenanceFrequencyDays" value={formData.maintenanceFrequencyDays || ''} onChange={handleChange}
-                                            min="1" className="block w-full p-2 border border-gray-300 rounded-md shadow-sm focus:ring-primary focus:border-primary"
-                                            placeholder="e.g. 7 = weekly, 30 = monthly" />
-                                    </div>
-                                </div>
-
-                                {/* Care Tasks → flexible recurring tasks for this animal */}
-                                <div className="border border-gray-200 rounded-lg p-3 bg-white space-y-2">
-                                    <div className="flex items-center justify-between mb-1">
-                                        <label className="text-sm font-medium text-gray-700">Care Tasks</label>
-                                        <span className="text-xs text-gray-400">Nail trim, weigh, health check, etc.</span>
-                                    </div>
-                                    {(formData.careTasks || []).length === 0 ? (
-                                        <p className="text-xs text-gray-400">No care tasks yet.</p>
-                                    ) : (
-                                        <div className="space-y-1">
-                                            {(formData.careTasks || []).map((task, idx) => (
-                                                <div key={idx} className="flex items-center gap-2 text-sm bg-gray-50 rounded px-2 py-1.5">
-                                                    <span className="flex-1 font-medium text-gray-700">{task.taskName}</span>
-                                                    {task.frequencyDays && <span className="text-xs text-gray-400">Every {task.frequencyDays}d</span>}
-                                                    {task.lastDoneDate && <span className="text-xs text-gray-400">Last: {new Date(task.lastDoneDate).toLocaleDateString()}</span>}
-                                                    <button type="button" onClick={() => setFormData(prev => ({ ...prev, careTasks: (prev.careTasks || []).filter((_, i) => i !== idx) }))} className="text-red-400 hover:text-red-600 font-bold leading-none">✕</button>
-                                                </div>
-                                            ))}
-                                        </div>
-                                    )}
-                                    <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-2">
-                                        <input type="text" value={newCareTaskName} onChange={e => setNewCareTaskName(e.target.value)}
-                                            placeholder="Task name (e.g. Nail trim, Weigh)"
-                                            className="flex-1 p-1.5 text-sm border border-gray-300 rounded-md focus:ring-primary focus:border-primary" />
-                                        <div className="flex gap-2">
-                                            <input type="number" value={newCareTaskFreq} onChange={e => setNewCareTaskFreq(e.target.value)}
-                                                placeholder="Days" min="1"
-                                                className="flex-1 sm:w-20 p-1.5 text-sm border border-gray-300 rounded-md focus:ring-primary focus:border-primary" />
-                                            <button type="button" onClick={() => {
-                                                if (!newCareTaskName.trim()) return;
-                                                setFormData(prev => ({ ...prev, careTasks: [...(prev.careTasks || []), { taskName: newCareTaskName.trim(), frequencyDays: newCareTaskFreq ? Number(newCareTaskFreq) : null, lastDoneDate: null }] }));
-                                                setNewCareTaskName(''); setNewCareTaskFreq('');
-                                            }} className="px-3 py-1.5 bg-primary text-black text-sm font-medium rounded-md hover:bg-primary/80 whitespace-nowrap flex-shrink-0">+ Add</button>
-                                        </div>
-                                    </div>
-                                </div>
-                                
                                 {!isFieldHidden('bedding') && (
                                     <div>
                                         <label className="block text-sm font-medium text-gray-700 mb-2">{getFieldLabel('bedding', 'Bedding / Substrate')}</label>
@@ -13141,10 +13091,129 @@ const AnimalForm = ({
                                         placeholder="e.g., Exercise wheel, tunnels, chew toys, hammocks" />
                                 </div>
                                 )}
+
+                                {/* Enclosure Maintenance tracking → powers Management view */}
+                                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                    <div>
+                                        <label className="block text-sm font-medium text-gray-700 mb-2">Last Maintenance Date</label>
+                                        <input type="date" name="lastMaintenanceDate" value={formData.lastMaintenanceDate || ''} onChange={handleChange}
+                                            className="block w-full p-2 border border-gray-300 rounded-md shadow-sm focus:ring-primary focus:border-primary" />
+                                    </div>
+                                    <div>
+                                        <label className="block text-sm font-medium text-gray-700 mb-2">Maintenance Every (days)</label>
+                                        <input type="number" name="maintenanceFrequencyDays" value={formData.maintenanceFrequencyDays || ''} onChange={handleChange}
+                                            min="1" className="block w-full p-2 border border-gray-300 rounded-md shadow-sm focus:ring-primary focus:border-primary"
+                                            placeholder="e.g. 7 = weekly, 30 = monthly" />
+                                    </div>
+                                </div>
+
+                                {/* Enclosure Care Tasks → flexible recurring tasks for enclosure maintenance */}
+                                <div className="border border-gray-200 rounded-lg p-3 bg-white space-y-2">
+                                    <div className="flex items-center justify-between mb-1">
+                                        <label className="text-sm font-medium text-gray-700">Enclosure Care Tasks</label>
+                                        <span className="text-xs text-gray-400">Deep clean, spot clean, water change, etc.</span>
+                                    </div>
+                                    {(formData.careTasks || []).length === 0 ? (
+                                        <p className="text-xs text-gray-400">No enclosure care tasks yet.</p>
+                                    ) : (
+                                        <div className="space-y-1">
+                                            {(formData.careTasks || []).map((task, idx) => (
+                                                <div key={idx} className="flex items-center gap-2 text-sm bg-gray-50 rounded px-2 py-1.5">
+                                                    <span className="flex-1 font-medium text-gray-700">{task.taskName}</span>
+                                                    {task.frequencyDays && <span className="text-xs text-gray-400">Every {task.frequencyDays}d</span>}
+                                                    {task.lastDoneDate && <span className="text-xs text-gray-400">Last: {new Date(task.lastDoneDate).toLocaleDateString()}</span>}
+                                                    <button type="button" onClick={() => setFormData(prev => ({ ...prev, careTasks: (prev.careTasks || []).filter((_, i) => i !== idx) }))} className="text-red-400 hover:text-red-600 font-bold leading-none">✕</button>
+                                                </div>
+                                            ))}
+                                        </div>
+                                    )}
+                                    <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-2">
+                                        <input type="text" value={newCareTaskName} onChange={e => setNewCareTaskName(e.target.value)}
+                                            placeholder="Task name (e.g. Deep clean, Spot clean, Water change)"
+                                            className="flex-1 p-1.5 text-sm border border-gray-300 rounded-md focus:ring-primary focus:border-primary" />
+                                        <div className="flex gap-2">
+                                            <input type="number" value={newCareTaskFreq} onChange={e => setNewCareTaskFreq(e.target.value)}
+                                                placeholder="Days" min="1"
+                                                className="flex-1 sm:w-20 p-1.5 text-sm border border-gray-300 rounded-md focus:ring-primary focus:border-primary" />
+                                            <button type="button" onClick={() => {
+                                                if (!newCareTaskName.trim()) return;
+                                                setFormData(prev => ({ ...prev, careTasks: [...(prev.careTasks || []), { taskName: newCareTaskName.trim(), frequencyDays: newCareTaskFreq ? Number(newCareTaskFreq) : null, lastDoneDate: null }] }));
+                                                setNewCareTaskName(''); setNewCareTaskFreq('');
+                                            }} className="px-3 py-1.5 bg-primary text-black text-sm font-medium rounded-md hover:bg-primary/80 whitespace-nowrap flex-shrink-0">+ Add</button>
+                                        </div>
+                                    </div>
+                                </div>
                             </div>
                         </div>
 
-                        {/* 3rd Section: Environment */}
+                        {/* 3rd Section: Animal Care */}
+                        <div className="bg-gray-50 p-4 rounded-lg border border-gray-200 space-y-4" data-tutorial-target="animal-care-section">
+                            <h3 className="text-lg font-semibold text-gray-700 mb-4">Animal Care</h3>
+                            <div className="space-y-4">
+                                <p className="text-sm text-gray-600">Track recurring care tasks specific to this animal, such as health checks, grooming, weighing, and handling routines.</p>
+
+                                {/* Animal Care Tasks → flexible recurring tasks for animal care */}
+                                <div className="border border-gray-200 rounded-lg p-3 bg-white space-y-2">
+                                    <div className="flex items-center justify-between mb-1">
+                                        <label className="text-sm font-medium text-gray-700">Animal Care Tasks</label>
+                                        <span className="text-xs text-gray-400">Weigh, nail trim, health check, handling, etc.</span>
+                                    </div>
+                                    {(formData.animalCareTasks || []).length === 0 ? (
+                                        <p className="text-xs text-gray-400">No animal care tasks yet.</p>
+                                    ) : (
+                                        <div className="space-y-1">
+                                            {(formData.animalCareTasks || []).map((task, idx) => (
+                                                <div key={idx} className="flex items-center gap-2 text-sm bg-gray-50 rounded px-2 py-1.5">
+                                                    <span className="flex-1 font-medium text-gray-700">{task.taskName}</span>
+                                                    {task.frequencyDays && <span className="text-xs text-gray-400">Every {task.frequencyDays}d</span>}
+                                                    {task.lastDoneDate && <span className="text-xs text-gray-400">Last: {new Date(task.lastDoneDate).toLocaleDateString()}</span>}
+                                                    <button type="button" onClick={() => setFormData(prev => ({ ...prev, animalCareTasks: (prev.animalCareTasks || []).filter((_, i) => i !== idx) }))} className="text-red-400 hover:text-red-600 font-bold leading-none">✕</button>
+                                                </div>
+                                            ))}
+                                        </div>
+                                    )}
+                                    <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-2">
+                                        <input type="text" value={newAnimalCareTaskName} onChange={e => setNewAnimalCareTaskName(e.target.value)}
+                                            placeholder="Task name (e.g. Weigh, Nail trim, Health check)"
+                                            className="flex-1 p-1.5 text-sm border border-gray-300 rounded-md focus:ring-primary focus:border-primary" />
+                                        <div className="flex gap-2">
+                                            <input type="number" value={newAnimalCareTaskFreq} onChange={e => setNewAnimalCareTaskFreq(e.target.value)}
+                                                placeholder="Days" min="1"
+                                                className="flex-1 sm:w-20 p-1.5 text-sm border border-gray-300 rounded-md focus:ring-primary focus:border-primary" />
+                                            <button type="button" onClick={() => {
+                                                if (!newAnimalCareTaskName.trim()) return;
+                                                setFormData(prev => ({ ...prev, animalCareTasks: [...(prev.animalCareTasks || []), { taskName: newAnimalCareTaskName.trim(), frequencyDays: newAnimalCareTaskFreq ? Number(newAnimalCareTaskFreq) : null, lastDoneDate: null }] }));
+                                                setNewAnimalCareTaskName(''); setNewAnimalCareTaskFreq('');
+                                            }} className="px-3 py-1.5 bg-primary text-black text-sm font-medium rounded-md hover:bg-primary/80 whitespace-nowrap flex-shrink-0">+ Add</button>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                {/* Additional Animal Care Fields */}
+                                <div>
+                                    <label className="block text-sm font-medium text-gray-700 mb-2">Handling Notes</label>
+                                    <textarea name="handlingNotes" value={formData.handlingNotes || ''} onChange={handleChange} rows="2"
+                                        className="block w-full p-2 border border-gray-300 rounded-md shadow-sm focus:ring-primary focus:border-primary" 
+                                        placeholder="e.g., Prefers gentle handling, allow time to acclimate, hand-feeds well" />
+                                </div>
+
+                                <div>
+                                    <label className="block text-sm font-medium text-gray-700 mb-2">Socialization Notes</label>
+                                    <textarea name="socializationNotes" value={formData.socializationNotes || ''} onChange={handleChange} rows="2"
+                                        className="block w-full p-2 border border-gray-300 rounded-md shadow-sm focus:ring-primary focus:border-primary" 
+                                        placeholder="e.g., Gets along with cage mates, needs solo time, enjoys interaction" />
+                                </div>
+
+                                <div>
+                                    <label className="block text-sm font-medium text-gray-700 mb-2">Special Care Requirements</label>
+                                    <textarea name="specialCareRequirements" value={formData.specialCareRequirements || ''} onChange={handleChange} rows="3"
+                                        className="block w-full p-2 border border-gray-300 rounded-md shadow-sm focus:ring-primary focus:border-primary" 
+                                        placeholder="e.g., Requires daily medication, sensitive to stress, special diet needs" />
+                                </div>
+                            </div>
+                        </div>
+
+                        {/* 4th Section: Environment */}
                         <div className="bg-gray-50 p-4 rounded-lg border border-gray-200 space-y-4" data-tutorial-target="environment-section">
                             <h3 className="text-lg font-semibold text-gray-700 mb-4">Environment</h3>
                             <div className="space-y-4">
