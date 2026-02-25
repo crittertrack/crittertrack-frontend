@@ -22356,7 +22356,11 @@ const App = () => {
                 <ViewOnlyAnimalDetail 
                     animal={viewingPublicAnimal}
                     onClose={handleBackFromPublicAnimal}
-                            onCloseAll={handleCloseAllPublicAnimals}
+                    onCloseAll={handleCloseAllPublicAnimals}
+                    API_BASE_URL={API_BASE_URL}
+                    authToken={authToken}
+                    setModCurrentContext={setModCurrentContext}
+                    onViewProfile={(user) => navigate(`/user/${user.id_public}`)}
                     onViewAnimal={handleViewPublicAnimal}
                     setShowImageModal={setShowImageModal}
                     setEnlargedImageUrl={setEnlargedImageUrl}
@@ -25226,6 +25230,7 @@ const PublicAnimalPage = () => {
             <ViewOnlyAnimalDetail
                 animal={animal}
                 onClose={handleGoBack}
+                onCloseAll={handleGoBack}
                 API_BASE_URL={API_BASE_URL}
                 authToken={authToken}
                 onViewProfile={(user) => navigate(`/user/${user.id_public}`)}
