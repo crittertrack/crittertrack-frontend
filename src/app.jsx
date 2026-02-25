@@ -3066,6 +3066,215 @@ const PrivateAnimalDetail = ({ animal, onClose, onCloseAll, onEdit, API_BASE_URL
                                     );
                                 })()}
                             </div>
+
+                            {/* Growth Curve Charts */}
+                            {(() => {
+                                let growthRecords = animal.growthRecords;
+                                if (typeof growthRecords === 'string') {
+                                    try { growthRecords = JSON.parse(growthRecords); } catch (e) { growthRecords = []; }
+                                }
+                                if (!Array.isArray(growthRecords)) growthRecords = [];
+                                
+                                if (growthRecords.length < 1) return null;
+                                
+                                const sorted = [...growthRecords].sort((a, b) => new Date(a.date) - new Date(b.date));
+                                const weights = sorted.map(r => parseFloat(r.weight) || 0).filter(w => w > 0);
+                                const lengths = sorted
+                                    .filter(record => record.length && !isNaN(parseFloat(record.length)))
+                                    .map(record => parseFloat(record.length));
+                                const heights = sorted
+                                    .filter(record => record.height && !isNaN(parseFloat(record.height)))
+                                    .map(record => parseFloat(record.height));
+                                
+                                if (weights.length < 1) return null;
+                                
+                                const width = 500;
+                                const height = 250;
+                                const margin = { top: 20, right: 30, bottom: 50, left: 70 };
+                                const graphWidth = width - margin.left - margin.right;
+                                const graphHeight = height - margin.top - margin.bottom;
+                                
+                                // Weight chart setup
+                                const minWeight = Math.min(...weights);
+                                const maxWeight = Math.max(...weights);
+                                const weightPadding = (maxWeight - minWeight) * 0.1 || 5;
+                                const weightChartMin = Math.max(0, minWeight - weightPadding);
+                                const weightChartMax = maxWeight + weightPadding;
+                                const weightRange = weightChartMax - weightChartMin;
+                                
+                                // Length chart setup
+                                const hasLengthData = lengths.length >= 1;
+                                let minLength, maxLength, lengthRange, lengthChartMin, lengthChartMax;
+                                if (hasLengthData) {
+                                    minLength = Math.min(...lengths);
+                                    maxLength = Math.max(...lengths);
+                                    const lengthPadding = (maxLength - minLength) * 0.1 || 1;
+                                    lengthChartMin = Math.max(0, minLength - lengthPadding);
+                                    lengthChartMax = maxLength + lengthPadding;
+                                    lengthRange = lengthChartMax - lengthChartMin;
+                                }
+                                
+                                // Height chart setup
+                                const hasHeightData = heights.length >= 1;
+                                let minHeight, maxHeight, heightRange, heightChartMin, heightChartMax;
+                                if (hasHeightData) {
+                                    minHeight = Math.min(...heights);
+                                    maxHeight = Math.max(...heights);
+                                    const heightPadding = (maxHeight - minHeight) * 0.1 || 1;
+                                    heightChartMin = Math.max(0, minHeight - heightPadding);
+                                    heightChartMax = maxHeight + heightPadding;
+                                    heightRange = heightChartMax - heightChartMin;
+                                }
+                                
+                                // Create points for weight
+                                const weightPoints = sorted.map((record, idx) => ({
+                                    x: margin.left + (idx / Math.max(1, sorted.length - 1)) * graphWidth,
+                                    y: margin.top + graphHeight - ((parseFloat(record.weight) - weightChartMin) / weightRange) * graphHeight,
+                                    weight: record.weight,
+                                    length: record.length,
+                                    height: record.height,
+                                    bcs: record.bcs,
+                                    notes: record.notes,
+                                    date: record.date
+                                }));
+                                
+                                // Create points for length
+                                const lengthPoints = hasLengthData ? sorted.filter(r => r.length).map((record, idx) => ({
+                                    x: margin.left + (sorted.indexOf(record) / Math.max(1, sorted.length - 1)) * graphWidth,
+                                    y: margin.top + graphHeight - ((parseFloat(record.length) - lengthChartMin) / lengthRange) * graphHeight,
+                                    weight: record.weight,
+                                    length: record.length,
+                                    height: record.height,
+                                    bcs: record.bcs,
+                                    notes: record.notes,
+                                    date: record.date
+                                })) : [];
+                                
+                                // Create points for height
+                                const heightPoints = hasHeightData ? sorted.filter(r => r.height).map((record, idx) => ({
+                                    x: margin.left + (sorted.indexOf(record) / Math.max(1, sorted.length - 1)) * graphWidth,
+                                    y: margin.top + graphHeight - ((parseFloat(record.height) - heightChartMin) / heightRange) * graphHeight,
+                                    weight: record.weight,
+                                    length: record.length,
+                                    height: record.height,
+                                    bcs: record.bcs,
+                                    notes: record.notes,
+                                    date: record.date
+                                })) : [];
+                                
+                                const weightPathData = weightPoints.map((p, i) => `${i === 0 ? 'M' : 'L'} ${p.x} ${p.y}`).join(' ');
+                                const lengthPathData = lengthPoints.map((p, i) => `${i === 0 ? 'M' : 'L'} ${p.x} ${p.y}`).join(' ');
+                                const heightPathData = heightPoints.map((p, i) => `${i === 0 ? 'M' : 'L'} ${p.x} ${p.y}`).join(' ');
+                                
+                                const renderChart = (points, label, color, pathData, chartMin, chartMax) => {
+                                    const range = chartMax - chartMin;
+                                    return (
+                                        <svg key={`chart-${label}`} width="100%" height="300" viewBox={`0 0 ${width} ${height}`} style={{ maxWidth: '100%' }} preserveAspectRatio="xMidYMid meet">
+                                            {/* Grid lines */}
+                                            {[0, 0.25, 0.5, 0.75, 1].map((ratio, i) => {
+                                                const y = margin.top + graphHeight * (1 - ratio);
+                                                const axisLabel = (chartMin + range * ratio).toFixed(1);
+                                                return (
+                                                    <g key={`grid-${i}`}>
+                                                        <line x1={margin.left} y1={y} x2={width - margin.right} y2={y} stroke="#e5e7eb" strokeWidth="1" strokeDasharray="4" />
+                                                        <text x={margin.left - 12} y={y} textAnchor="end" dy="0.3em" fontSize="11" fill="#666">{axisLabel}</text>
+                                                    </g>
+                                                );
+                                            })}
+                                            
+                                            {/* Axes */}
+                                            <line x1={margin.left} y1={margin.top} x2={margin.left} y2={height - margin.bottom} stroke={color} strokeWidth="2" />
+                                            <line x1={margin.left} y1={height - margin.bottom} x2={width - margin.right} y2={height - margin.bottom} stroke="#333" strokeWidth="2" />
+                                            
+                                            {/* Y-axis label */}
+                                            <text x={20} y={margin.top + graphHeight / 2} textAnchor="middle" fontSize="12" fill={color} fontWeight="600" transform={`rotate(-90 20 ${margin.top + graphHeight / 2})`}>
+                                                {label} ({label === 'Weight' ? (animal.measurementUnits?.weight || 'g') : (animal.measurementUnits?.length || 'cm')})
+                                            </text>
+                                            
+                                            {/* X-axis label */}
+                                            <text x={margin.left + graphWidth / 2} y={height - 8} textAnchor="middle" fontSize="12" fill="#333" fontWeight="600">
+                                                Date
+                                            </text>
+                                            
+                                            {/* X-axis date labels */}
+                                            {points.map((p, i) => (
+                                                i % Math.max(1, Math.floor(points.length / 5)) === 0 && (
+                                                    <text key={`date-${i}`} x={p.x} y={height - margin.bottom + 25} textAnchor="middle" fontSize="10" fill="#666">
+                                                        {formatDate(p.date)}
+                                                    </text>
+                                                )
+                                            ))}
+                                            
+                                            {/* Curve */}
+                                            <path d={pathData} fill="none" stroke={color} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
+                                            
+                                            {/* Points */}
+                                            {points.map((p, i) => {
+                                                // Color gradient from green (earliest) to red (latest)
+                                                const colorRatio = points.length > 1 ? i / (points.length - 1) : 0;
+                                                let dotColor;
+                                                if (colorRatio < 0.5) {
+                                                    const t = colorRatio * 2;
+                                                    const r = Math.round(144 + (255 - 144) * t);
+                                                    const g = 191;
+                                                    const b = Math.round(71 + (0 - 71) * t);
+                                                    dotColor = `rgb(${r}, ${g}, ${b})`;
+                                                } else {
+                                                    const t = (colorRatio - 0.5) * 2;
+                                                    const r = 255;
+                                                    const g = Math.round(191 - (191) * t);
+                                                    const b = 0;
+                                                    dotColor = `rgb(${r}, ${g}, ${b})`;
+                                                }
+                                                
+                                                return (
+                                                    <circle key={`point-${i}`} cx={p.x} cy={p.y} r="5" fill={dotColor} stroke="#fff" strokeWidth="2">
+                                                        <title>{`Date: ${formatDate(p.date)}\nWeight: ${p.weight} ${animal.measurementUnits?.weight || 'g'}${p.length ? `\nLength: ${p.length} ${animal.measurementUnits?.length || 'cm'}` : ''}${p.bcs ? `\nBCS: ${p.bcs}` : ''}${p.notes ? `\nNotes: ${p.notes}` : ''}`}</title>
+                                                    </circle>
+                                                );
+                                            })}
+                                        </svg>
+                                    );
+                                };
+                                
+                                return (
+                                    <div className="space-y-4">
+                                        {/* Weight Chart */}
+                                        <div className="bg-white p-4 rounded-lg border border-gray-200">
+                                            <h4 className="text-sm font-semibold text-gray-700 mb-3 flex items-center gap-2">
+                                                <span className="inline-block w-3 h-1 bg-blue-500 rounded"></span>
+                                                Weight Growth Curve
+                                            </h4>
+                                            {renderChart(weightPoints, 'Weight', '#3b82f6', weightPathData, weightChartMin, weightChartMax)}
+                                            <p className="text-xs text-gray-500 mt-2">Hover over points to see detailed measurements and notes.</p>
+                                        </div>
+                                        
+                                        {/* Length Chart */}
+                                        {hasLengthData && (
+                                            <div className="bg-white p-4 rounded-lg border border-gray-200">
+                                                <h4 className="text-sm font-semibold text-gray-700 mb-3 flex items-center gap-2">
+                                                    <span className="inline-block w-3 h-1 bg-orange-500 rounded"></span>
+                                                    Body Length Growth Curve
+                                                </h4>
+                                                {renderChart(lengthPoints, 'Length', '#ff8c42', lengthPathData, lengthChartMin, lengthChartMax)}
+                                                <p className="text-xs text-gray-500 mt-2">Hover over points to see detailed measurements and notes.</p>
+                                            </div>
+                                        )}
+                                        
+                                        {/* Height Chart */}
+                                        {hasHeightData && (
+                                            <div className="bg-white p-4 rounded-lg border border-gray-200">
+                                                <h4 className="text-sm font-semibold text-gray-700 mb-3 flex items-center gap-2">
+                                                    <span className="inline-block w-3 h-1 bg-purple-500 rounded"></span>
+                                                    Height Growth Curve
+                                                </h4>
+                                                {renderChart(heightPoints, 'Height', '#9333ea', heightPathData, heightChartMin, heightChartMax)}
+                                                <p className="text-xs text-gray-500 mt-2">Hover over points to see detailed measurements and notes.</p>
+                                            </div>
+                                        )}
+                                    </div>
+                                );
+                            })()}
                         </div>
                     )}
 
