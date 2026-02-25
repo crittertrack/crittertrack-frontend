@@ -672,12 +672,12 @@ const GETTING_STARTED_LESSONS = [
       {
         stepNumber: 2,
         title: 'Reproductive Status',
-        content: 'These checkboxes indicate your animal\'s reproductive status. When checked, they affect how the animal appears in breeding selectors and what features are available.',
+        content: 'This section contains checkboxes for tracking your animal\'s current reproductive status (In Mating, Pregnant, Nursing). These help you monitor active breeding cycles.',
         highlightElement: '[data-tutorial-target="reproductive-status-section"]',
         tips: [
-          'Neutered/Infertile: Cannot breed',
-          'Affects breeding availability',
-          'Can be changed as status changes'
+          'Temporary status indicators',
+          'Update as status changes',
+          'Helps with breeding planning'
         ]
       },
       {
@@ -717,11 +717,11 @@ const GETTING_STARTED_LESSONS = [
       {
         stepNumber: 6,
         title: 'Stud Information',
-        content: 'If your animal is a stud (breeding male), track his fertility status and genetics information here. To make him available for breeding in the showcase, go to the Status & Privacy tab and enable "Available for Stud" with a fee.',
+        content: 'This section is available for all male animals to track fertility status and genetics information. To make your animal available for breeding in the showcase, go to the Status & Privacy tab and enable "Available for Stud" with a fee.',
         highlightElement: '[data-tutorial-target="stud-info-section"]',
         tips: [
-          'Track sire fertility status',
-          'Add genetics/fertility notes',
+          'Available for all males by default',
+          'Track fertility status and genetics',
           'Use Status tab to set "For Stud" and fee',
           'Public + "For Stud" = Appears in showcase'
         ]
@@ -729,12 +729,12 @@ const GETTING_STARTED_LESSONS = [
       {
         stepNumber: 7,
         title: 'Dam Information',
-        content: 'If your animal is a dam (breeding female), fill in her fertility status and any genetics or fertility-related notes about her.',
+        content: 'This section is available for all female animals to track fertility status and genetics information. You can fill in fertility status and any genetics or fertility-related notes.',
         highlightElement: '[data-tutorial-target="dam-info-section"]',
         tips: [
-          'Track fertility status',
-          'Add genetics/fertility notes',
-          'Optional for breeding females'
+          'Available for all females by default',
+          'Track fertility status and genetics',
+          'Optional to complete'
         ]
       },
       {
