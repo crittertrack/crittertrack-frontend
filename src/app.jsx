@@ -11089,7 +11089,7 @@ const AnimalForm = ({
                             })()}
 
                             {/* Growth Curve Charts - Weight, Length, and Height */}
-                            {growthRecords.length > 1 && (() => {
+                            {growthRecords.length > 0 && (() => {
                                 const sorted = [...growthRecords].sort((a, b) => new Date(a.date) - new Date(b.date));
                                 const weights = sorted.map(r => parseFloat(r.weight) || 0).filter(w => w > 0);
                                 const lengths = sorted
@@ -11099,7 +11099,7 @@ const AnimalForm = ({
                                     .filter(record => record.height && !isNaN(parseFloat(record.height)))
                                     .map(record => parseFloat(record.height));
                                 
-                                if (weights.length < 2) return null;
+                                if (weights.length < 1) return null;
                                 
                                 const width = 500;
                                 const height = 250;
@@ -11116,7 +11116,7 @@ const AnimalForm = ({
                                 const weightRange = weightChartMax - weightChartMin;
                                 
                                 // Length chart setup
-                                const hasLengthData = lengths.length >= 2;
+                                const hasLengthData = lengths.length >= 1;
                                 let minLength, maxLength, lengthRange, lengthChartMin, lengthChartMax;
                                 if (hasLengthData) {
                                     minLength = Math.min(...lengths);
@@ -11128,7 +11128,7 @@ const AnimalForm = ({
                                 }
                                 
                                 // Height chart setup
-                                const hasHeightData = heights.length >= 2;
+                                const hasHeightData = heights.length >= 1;
                                 let minHeight, maxHeight, heightRange, heightChartMin, heightChartMax;
                                 if (hasHeightData) {
                                     minHeight = Math.min(...heights);
@@ -11141,33 +11141,31 @@ const AnimalForm = ({
                                 
                                 // Create points for weight
                                 const weightPoints = sorted.map((record, idx) => ({
-                                    x: margin.left + (idx / (sorted.length - 1)) * graphWidth,
-                                    y: margin.top + graphHeight - ((parseFloat(record.weight) - weightChartMin) / weightRange) * graphHeight,
-                                    weight: record.weight,
-                                    length: record.length,
-                                    height: record.height,
-                                    bcs: record.bcs,
-                                    notes: record.notes,
-                                    date: record.date
-                                }));
-                                
-                                // Create points for length
-                                const lengthPoints = hasLengthData ? sorted.filter(r => r.length).map((record, idx) => ({
-                                    x: margin.left + (sorted.indexOf(record) / (sorted.length - 1)) * graphWidth,
-                                    y: margin.top + graphHeight - ((parseFloat(record.length) - lengthChartMin) / lengthRange) * graphHeight,
-                                    weight: record.weight,
-                                    length: record.length,
-                                    height: record.height,
-                                    bcs: record.bcs,
-                                    notes: record.notes,
-                                    date: record.date
-                                })) : [];
-                                
-                                // Create points for height
-                                const heightPoints = hasHeightData ? sorted.filter(r => r.height).map((record, idx) => ({
-                                    x: margin.left + (sorted.indexOf(record) / (sorted.length - 1)) * graphWidth,
-                                    y: margin.top + graphHeight - ((parseFloat(record.height) - heightChartMin) / heightRange) * graphHeight,
-                                    weight: record.weight,
+                    x: margin.left + (idx / Math.max(1, sorted.length - 1)) * graphWidth,
+                    y: margin.top + graphHeight - ((parseFloat(record.weight) - weightChartMin) / weightRange) * graphHeight,
+                    weight: record.weight,
+                    length: record.length,
+                    height: record.height,
+                    bcs: record.bcs,
+                    notes: record.notes,
+                    date: record.date
+                }));
+                
+                // Create points for length
+                const lengthPoints = hasLengthData ? sorted.filter(r => r.length).map((record, idx) => ({
+                    x: margin.left + (sorted.indexOf(record) / Math.max(1, sorted.length - 1)) * graphWidth,
+                    y: margin.top + graphHeight - ((parseFloat(record.length) - lengthChartMin) / lengthRange) * graphHeight,
+                    weight: record.weight,
+                    length: record.length,
+                    height: record.height,
+                    bcs: record.bcs,
+                    notes: record.notes,
+                    date: record.date
+                })) : [];
+                
+                // Create points for height
+                const heightPoints = hasHeightData ? sorted.filter(r => r.height).map((record, idx) => ({
+                    x: margin.left + (sorted.indexOf(record) / Math.max(1, sorted.length - 1)) * graphWidth,
                                     length: record.length,
                                     height: record.height,
                                     bcs: record.bcs,
@@ -23959,20 +23957,23 @@ const App = () => {
                                                         }
                                                     }
                                                     
-                                                    // Compute current weight and length from growth records
+                                                    // Compute current weight, length, and height from growth records
                                                     let currentWeight = null;
                                                     let currentLength = null;
+                                                    let currentHeight = null;
                                                     if (growthRecords && Array.isArray(growthRecords) && growthRecords.length > 0) {
                                                         const sorted = [...growthRecords].sort((a, b) => new Date(b.date) - new Date(a.date));
                                                         currentWeight = sorted[0].weight;
                                                         const withLength = sorted.find(r => r.length);
                                                         currentLength = withLength ? withLength.length : null;
+                                                        const withHeight = sorted.find(r => r.height);
+                                                        currentHeight = withHeight ? withHeight.height : null;
                                                     }
                                                     
                                                     // Fallback to stored values if no growth records
                                                     if (!currentWeight) currentWeight = animalToView.currentWeight;
                                                     
-                                                    return (currentWeight || animalToView.bcs || currentLength) && (
+                                                    return (currentWeight || animalToView.bcs || currentLength || currentHeight) && (
                                                         <div className="bg-gray-50 p-4 rounded-lg border border-gray-200 space-y-4">
                                                             <h3 className="text-lg font-semibold text-gray-700">Current Measurements</h3>
                                                             <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm">
@@ -23984,6 +23985,9 @@ const App = () => {
                                                                 )}
                                                                 {currentLength && (
                                                                     <div><span className="text-gray-600">Length:</span> <strong>{currentLength} {animalToView.measurementUnits?.length || 'cm'}</strong></div>
+                                                                )}
+                                                                {currentHeight && (
+                                                                    <div><span className="text-gray-600">Height:</span> <strong>{currentHeight} {animalToView.measurementUnits?.length || 'cm'}</strong></div>
                                                                 )}
                                                             </div>
                                                         </div>
@@ -24004,8 +24008,8 @@ const App = () => {
                                                     // Ensure growthRecords is an array
                                                     if (!growthRecords) growthRecords = [];
                                                     
-                                                    // If fewer than 2 entries, show empty chart placeholder
-                                                    if (growthRecords.length < 2) {
+                                                    // If fewer than 1 entry, show empty chart placeholder
+                                                    if (growthRecords.length < 1) {
                                                         return (
                                                             <div className="bg-gray-50 p-4 rounded-lg border border-gray-200">
                                                                 <h3 className="text-lg font-semibold text-gray-700 mb-3">Growth Curves</h3>
@@ -24030,20 +24034,23 @@ const App = () => {
                                                                         Add more entries to see growth charts
                                                                     </text>
                                                                 </svg>
-                                                                <p className="text-xs text-gray-500 mt-2">Growth curves will appear once you have 2 or more measurement entries.</p>
+                                                                <p className="text-xs text-gray-500 mt-2">Growth curves will appear once you add measurement entries.</p>
                                                             </div>
                                                         );
                                                     }
                                                     
-                                                    // Full interactive charts with 2+ entries
+                                                    // Full interactive charts with 1+ entries
                                                     return (() => {
                                                         const sorted = [...growthRecords].sort((a, b) => new Date(a.date) - new Date(b.date));
                                                         const weights = sorted.map(r => parseFloat(r.weight) || 0).filter(w => w > 0);
                                                         const lengths = sorted
                                                             .filter(record => record.length && !isNaN(parseFloat(record.length)))
                                                             .map(record => parseFloat(record.length));
+                                                        const heights = sorted
+                                                            .filter(record => record.height && !isNaN(parseFloat(record.height)))
+                                                            .map(record => parseFloat(record.height));
                                                         
-                                                        if (weights.length < 2) return null;
+                                                        if (weights.length < 1) return null;
                                                         
                                                         const width = 500;
                                                         const height = 250;
@@ -24060,7 +24067,7 @@ const App = () => {
                                                         const weightRange = weightChartMax - weightChartMin;
                                                         
                                                         // Length chart setup
-                                                        const hasLengthData = lengths.length >= 2;
+                                                        const hasLengthData = lengths.length >= 1;
                                                         let minLength, maxLength, lengthRange, lengthChartMin, lengthChartMax;
                                                         if (hasLengthData) {
                                                             minLength = Math.min(...lengths);
@@ -24071,12 +24078,25 @@ const App = () => {
                                                             lengthRange = lengthChartMax - lengthChartMin;
                                                         }
                                                         
+                                                        // Height chart setup
+                                                        const hasHeightData = heights.length >= 1;
+                                                        let minHeight, maxHeight, heightRange, heightChartMin, heightChartMax;
+                                                        if (hasHeightData) {
+                                                            minHeight = Math.min(...heights);
+                                                            maxHeight = Math.max(...heights);
+                                                            const heightPadding = (maxHeight - minHeight) * 0.1 || 1;
+                                                            heightChartMin = Math.max(0, minHeight - heightPadding);
+                                                            heightChartMax = maxHeight + heightPadding;
+                                                            heightRange = heightChartMax - heightChartMin;
+                                                        }
+                                                        
                                                         // Create points for weight
                                                         const weightPoints = sorted.map((record, idx) => ({
-                                                            x: margin.left + (idx / (sorted.length - 1)) * graphWidth,
+                                                            x: margin.left + (idx / Math.max(1, sorted.length - 1)) * graphWidth,
                                                             y: margin.top + graphHeight - ((parseFloat(record.weight) - weightChartMin) / weightRange) * graphHeight,
                                                             weight: record.weight,
                                                             length: record.length,
+                                                            height: record.height,
                                                             bcs: record.bcs,
                                                             notes: record.notes,
                                                             date: record.date
@@ -24084,10 +24104,23 @@ const App = () => {
                                                         
                                                         // Create points for length
                                                         const lengthPoints = hasLengthData ? sorted.filter(r => r.length).map((record, idx) => ({
-                                                            x: margin.left + (sorted.indexOf(record) / (sorted.length - 1)) * graphWidth,
+                                                            x: margin.left + (sorted.indexOf(record) / Math.max(1, sorted.length - 1)) * graphWidth,
                                                             y: margin.top + graphHeight - ((parseFloat(record.length) - lengthChartMin) / lengthRange) * graphHeight,
                                                             weight: record.weight,
                                                             length: record.length,
+                                                            height: record.height,
+                                                            bcs: record.bcs,
+                                                            notes: record.notes,
+                                                            date: record.date
+                                                        })) : [];
+                                                        
+                                                        // Create points for height
+                                                        const heightPoints = hasHeightData ? sorted.filter(r => r.height).map((record, idx) => ({
+                                                            x: margin.left + (sorted.indexOf(record) / Math.max(1, sorted.length - 1)) * graphWidth,
+                                                            y: margin.top + graphHeight - ((parseFloat(record.height) - heightChartMin) / heightRange) * graphHeight,
+                                                            weight: record.weight,
+                                                            length: record.length,
+                                                            height: record.height,
                                                             bcs: record.bcs,
                                                             notes: record.notes,
                                                             date: record.date
@@ -24095,6 +24128,7 @@ const App = () => {
                                                         
                                                         const weightPathData = weightPoints.map((p, i) => `${i === 0 ? 'M' : 'L'} ${p.x} ${p.y}`).join(' ');
                                                         const lengthPathData = lengthPoints.map((p, i) => `${i === 0 ? 'M' : 'L'} ${p.x} ${p.y}`).join(' ');
+                                                        const heightPathData = heightPoints.map((p, i) => `${i === 0 ? 'M' : 'L'} ${p.x} ${p.y}`).join(' ');
                                                         
                                                         const getBCSDescription = (bcsValue) => {
                                                             const bcsMap = {
@@ -24206,6 +24240,18 @@ const App = () => {
                                                                             Length Growth Curve
                                                                         </h3>
                                                                         {renderChart(lengthPoints, 'Length', '#ff8c42', lengthPathData, lengthChartMin, lengthChartMax)}
+                                                                        <p className="text-xs text-gray-500 mt-2">Hover over points to see detailed measurements and notes.</p>
+                                                                    </div>
+                                                                )}
+                                                                
+                                                                {/* Height Chart */}
+                                                                {hasHeightData && (
+                                                                    <div className="bg-gray-50 p-4 rounded-lg border border-gray-200">
+                                                                        <h3 className="text-lg font-semibold text-gray-700 mb-3 flex items-center gap-2">
+                                                                            <span className="inline-block w-3 h-1 bg-purple-500 rounded"></span>
+                                                                            Height at Withers Growth Curve
+                                                                        </h3>
+                                                                        {renderChart(heightPoints, 'Height', '#9333ea', heightPathData, heightChartMin, heightChartMax)}
                                                                         <p className="text-xs text-gray-500 mt-2">Hover over points to see detailed measurements and notes.</p>
                                                                     </div>
                                                                 )}
