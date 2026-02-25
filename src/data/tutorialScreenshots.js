@@ -67,6 +67,16 @@ export const TUTORIAL_SCREENSHOTS = {
     8: 'tags-feature.png', // Step 8: Tags Feature
   },
   
+  'gs-lineage': {
+    1: 'lineage-tab.png', // Step 1: Lineage Tab
+    2: 'select-sire-father.png', // Step 2: Select Sire (Father)
+    3: 'parent-search-system.png', // Step 3: Parent Search System
+    4: 'close-sire-selector.png', // Step 4: Close Sire Selector
+    5: 'other-parent-selector.png', // Step 5: Other Parent Selector
+    6: 'origin-information.png', // Step 6: Origin Information
+    7: 'ownership-history.png', // Step 7: Ownership History
+  },
+  
   'create-animals': {
     // Screenshots to be added
   },
