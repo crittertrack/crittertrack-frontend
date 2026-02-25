@@ -16,6 +16,15 @@ export const InfoTab = ({ onClose }) => {
   const featureLessons = TUTORIAL_LESSONS.features;
   const advancedLessons = TUTORIAL_LESSONS.advanced;
 
+  // Convert step title to kebab-case filename
+  const titleToFilename = (title) => {
+    return title
+      .toLowerCase()
+      .replace(/[&]/g, 'and')
+      .replace(/[^a-z0-9]+/g, '-')
+      .replace(/^-+|-+$/g, '');
+  };
+
   const toggleSection = (section) => {
     setExpandedSection(expandedSection === section ? null : section);
   };
@@ -168,6 +177,7 @@ export const InfoTab = ({ onClose }) => {
                         {/* Screenshot */}
                         {(() => {
                           const screenshotUrl = getStepScreenshot(selectedLesson.id, step.stepNumber || idx + 1);
+                          const expectedFilename = titleToFilename(step.title) + '.png';
                           
                           if (screenshotUrl) {
                             return (
@@ -185,7 +195,7 @@ export const InfoTab = ({ onClose }) => {
                                 <div className="hidden bg-gradient-to-br from-blue-50 to-purple-50 border-2 border-dashed border-blue-300 rounded-lg p-8 items-center justify-center">
                                   <div className="text-center">
                                     <div className="text-4xl mb-2">📸</div>
-                                    <p className="text-gray-500 text-sm font-medium">Screenshot: {step.title}</p>
+                                    <p className="text-gray-500 text-sm font-medium">Screenshot: {expectedFilename}</p>
                                     <p className="text-gray-400 text-xs mt-1">Image not found</p>
                                   </div>
                                 </div>
@@ -196,7 +206,7 @@ export const InfoTab = ({ onClose }) => {
                               <div className="mt-4 bg-gradient-to-br from-blue-50 to-purple-50 border-2 border-dashed border-blue-300 rounded-lg p-8 flex items-center justify-center">
                                 <div className="text-center">
                                   <div className="text-4xl mb-2">📸</div>
-                                  <p className="text-gray-500 text-sm font-medium">Screenshot: {step.title}</p>
+                                  <p className="text-gray-500 text-sm font-medium">Screenshot: {expectedFilename}</p>
                                   <p className="text-gray-400 text-xs mt-1">Visual guide coming soon</p>
                                 </div>
                               </div>
