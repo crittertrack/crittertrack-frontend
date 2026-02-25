@@ -210,7 +210,7 @@ const GETTING_STARTED_LESSONS = [
       {
         stepNumber: 6,
         title: 'Status Selection',
-        content: 'Select the current status of your animal. Options include: Pet (living animal in your collection), Breeder (breeding animal), Available (for sale), Booked (reserved/spoken for), Sold (sold to someone else), Retired (no longer breeding), Deceased (passed away), Rehomed (given to another home), or Unknown. Choose what best describes your animal\'s current situation.',
+        content: 'Select the current status of your animal. Options include: Pet (living animal in your collection), Breeder (breeding animal), Available (for sale), Booked (reserved/spoken for), Retired (no longer breeding), Deceased (passed away), Rehomed (given to another home), or Unknown. Choose what best describes your animal\'s current situation. Note: The "Sold" status is automatically assigned by the system when a transfer is completed.',
         highlightElement: '[data-tutorial-target="animal-status-select"]',
         actionType: 'click',
         tips: [

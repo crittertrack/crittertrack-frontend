@@ -22,6 +22,16 @@ export const TUTORIAL_SCREENSHOTS = {
     9: 'select-fancy-mouse.png', // Step 9: Select Fancy Mouse
   },
   
+  'gs-animal-overview': {
+    1: 'welcome-to-animal-overview.png', // Step 1: Welcome to Animal Overview
+    2: 'animal-image.png', // Step 2: Animal Image
+    3: 'name-with-prefixsuffix.png', // Step 3: Name with Prefix/Suffix
+    4: 'gender-selection.png', // Step 4: Gender Selection
+    5: 'date-of-birth.png', // Step 5: Date of Birth
+    6: 'status-selection.png', // Step 6: Status Selection
+    7: 'save-vs-continue.png', // Step 7: Save vs Continue
+  },
+  
   'create-animals': {
     // Screenshots to be added
   },
