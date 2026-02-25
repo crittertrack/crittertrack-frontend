@@ -6138,7 +6138,7 @@ const ViewOnlyAnimalDetail = ({ animal, onClose, onCloseAll, API_BASE_URL, onVie
                                     {animal.specialCareRequirements && <div><strong className="text-sm">Special Care Requirements:</strong> <p className="text-sm mt-1 whitespace-pre-wrap">{animal.specialCareRequirements}</p></div>}
                                 </div>
                             </div>
-                            )}
+                            ))}
 
                             {/* 4th Section: Environment */
                             {(animal.temperatureRange || animal.humidity || animal.lighting || animal.noise) && (
