@@ -1067,7 +1067,7 @@ const GETTING_STARTED_LESSONS = [
       {
         stepNumber: 1,
         title: 'Legal Tab',
-        content: 'This tab manages all legal and administrative documentation for your animal, including insurance, ownership documents, permits, and restrictions.',
+        content: 'This tab manages all legal and administrative documentation for your animal, including licensing, insurance, ownership documents, permits, and restrictions.',
         tips: [
           'Important for compliance',
           'Keep official documents recorded',
@@ -1076,6 +1076,16 @@ const GETTING_STARTED_LESSONS = [
       },
       {
         stepNumber: 2,
+        title: 'Licensing & Permits',
+        content: 'Record License Number and License Jurisdiction for animals that require licensing or permits. This might include kennel licenses, exotic animal permits, or breeding licenses depending on your location and species.',
+        tips: [
+          'Required for some species or jurisdictions',
+          'Keep license numbers up to date',
+          'Check local regulations'
+        ]
+      },
+      {
+        stepNumber: 3,
         title: 'Legal / Administrative',
         content: 'Document insurance details (pet insurance policy, provider, coverage) and legal status (ownership documents, permits, CITES registration for regulated species).',
         highlightElement: '[data-tutorial-target="legal-admin-section"]',
@@ -1086,7 +1096,7 @@ const GETTING_STARTED_LESSONS = [
         ]
       },
       {
-        stepNumber: 3,
+        stepNumber: 4,
         title: 'Restrictions',
         content: 'Record any Breeding Restrictions (limited registration, spay/neuter contracts) or Export Restrictions that apply to this animal.',
         tips: [
