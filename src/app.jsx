@@ -8573,13 +8573,13 @@ const SpeciesSelector = ({ speciesOptions, onSelectSpecies, onManageSpecies, sea
                     placeholder="Search species..."
                     value={searchTerm}
                     onChange={(e) => setSearchTerm(e.target.value)}
-                    className="flex-grow p-2 border border-gray-300 rounded-lg"
+                    className="flex-1 p-2 border border-gray-300 rounded-lg"
                     data-tutorial-target="species-search-input"
                 />
                 <select
                     value={categoryFilter}
                     onChange={(e) => setCategoryFilter(e.target.value)}
-                    className="p-2 border border-gray-300 rounded-lg w-24 flex-shrink-0"
+                    className="p-2 border border-gray-300 rounded-lg w-40 flex-shrink-0"
                 >
                     {categories.map(cat => (
                         <option key={cat} value={cat}>{cat}</option>
