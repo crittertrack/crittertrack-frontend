@@ -835,17 +835,6 @@ const GETTING_STARTED_LESSONS = [
       },
       {
         stepNumber: 3,
-        title: 'Scheduled Care Tasks',
-        content: 'Add custom recurring tasks like "Weigh", "Clean water bottle", or "Nail trim" with a frequency in days. Each task gets its own due-date tracking in the Management View.',
-        highlightElement: '[data-tutorial-target="husbandry-details-section"]',
-        tips: [
-          'Each task tracked independently',
-          'Mark done from Management View instantly',
-          'Great for multi-step care routines'
-        ]
-      },
-      {
-        stepNumber: 4,
         title: 'Environment & Housing Details',
         content: 'Document cage/enclosure setup, bedding type, temperature, humidity, and lighting schedule. This completes the care record and is useful for handover to new owners.',
         highlightElement: '[data-tutorial-target="environment-section"]',
@@ -853,6 +842,17 @@ const GETTING_STARTED_LESSONS = [
           'Environment affects behavior and health',
           'Important for breeding success',
           'Track seasonal variations'
+        ]
+      },
+      {
+        stepNumber: 4,
+        title: 'Scheduled Care Tasks',
+        content: 'Add custom recurring tasks like "Weigh", "Clean water bottle", or "Nail trim" with a frequency in days. Each task gets its own due-date tracking in the Management View.',
+        highlightElement: '[data-tutorial-target="husbandry-details-section"]',
+        tips: [
+          'Each task tracked independently',
+          'Mark done from Management View instantly',
+          'Great for multi-step care routines'
         ]
       }
     ]
