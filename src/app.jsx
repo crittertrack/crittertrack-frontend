@@ -6085,18 +6085,62 @@ const ViewOnlyAnimalDetail = ({ animal, onClose, onCloseAll, API_BASE_URL, onVie
                             </div>
                             )}
 
-                            {/* 2nd Section: Husbandry */}
-                            {(animal.housingType || animal.bedding || animal.enrichment) && (
+                            {/* 2nd Section: Housing & Enclosure */}
+                            {(animal.housingType || animal.bedding || animal.enrichment || (animal.careTasks && animal.careTasks.length > 0)) && (
                             <div className="bg-gray-50 p-4 rounded-lg border border-gray-200 space-y-4">
-                                <h3 className="text-lg font-semibold text-gray-700">Husbandry</h3>
+                                <h3 className="text-lg font-semibold text-gray-700">Housing & Enclosure</h3>
                                 {animal.housingType && <div><strong className="text-sm">{getLabel('housingType', 'Housing Type')}:</strong> <p className="text-sm mt-1">{animal.housingType}</p></div>}
                                 {animal.bedding && <div><strong className="text-sm">{getLabel('bedding', 'Bedding')}:</strong> <p className="text-sm mt-1">{animal.bedding}</p></div>}
                                 {animal.enrichment && <div><strong className="text-sm">Enrichment:</strong> <p className="text-sm mt-1">{animal.enrichment}</p></div>}
                                 {!animal.housingType && !animal.bedding && !animal.enrichment && <p className="text-sm text-gray-600"></p>}
+                                {animal.careTasks && animal.careTasks.length > 0 && (
+                                    <div className="mt-4 pt-3 border-t border-gray-300">
+                                        <h4 className="text-sm font-semibold text-gray-700 mb-2">Enclosure Care Tasks</h4>
+                                        <div className="space-y-1">
+                                            {animal.careTasks.map((task, idx) => (
+                                                <div key={idx} className="flex items-center justify-between text-xs bg-white px-2 py-1.5 rounded border border-gray-200">
+                                                    <span className="font-medium text-gray-700">{task.taskName}</span>
+                                                    <div className="flex items-center gap-2 text-gray-500">
+                                                        {task.frequencyDays && <span>Every {task.frequencyDays}d</span>}
+                                                        {task.lastDoneDate && <span>Last: {formatDateShort(task.lastDoneDate)}</span>}
+                                                    </div>
+                                                </div>
+                                            ))}
+                                        </div>
+                                    </div>
+                                )}
                             </div>
                             )}
 
-                            {/* 3rd Section: Environment */}
+                            {/* 3rd Section: Animal Care */}
+                            {((animal.animalCareTasks && animal.animalCareTasks.length > 0) || animal.handlingNotes || animal.socializationNotes || animal.specialCareRequirements) && (
+                            <div className="bg-gray-50 p-4 rounded-lg border border-gray-200 space-y-4">
+                                <h3 className="text-lg font-semibold text-gray-700">Animal Care</h3>
+                                {animal.animalCareTasks && animal.animalCareTasks.length > 0 && (
+                                    <div>
+                                        <h4 className="text-sm font-semibold text-gray-700 mb-2">Animal Care Tasks</h4>
+                                        <div className="space-y-1">
+                                            {animal.animalCareTasks.map((task, idx) => (
+                                                <div key={idx} className="flex items-center justify-between text-xs bg-white px-2 py-1.5 rounded border border-gray-200">
+                                                    <span className="font-medium text-gray-700">{task.taskName}</span>
+                                                    <div className="flex items-center gap-2 text-gray-500">
+                                                        {task.frequencyDays && <span>Every {task.frequencyDays}d</span>}
+                                                        {task.lastDoneDate && <span>Last: {formatDateShort(task.lastDoneDate)}</span>}
+                                                    </div>
+                                                </div>
+                                            ))}
+                                        </div>
+                                    </div>
+                                )}
+                                <div className="space-y-3 text-sm">
+                                    {animal.handlingNotes && <div><strong className="text-sm">Handling Notes:</strong> <p className="text-sm mt-1 whitespace-pre-wrap">{animal.handlingNotes}</p></div>}
+                                    {animal.socializationNotes && <div><strong className="text-sm">Socialization Notes:</strong> <p className="text-sm mt-1 whitespace-pre-wrap">{animal.socializationNotes}</p></div>}
+                                    {animal.specialCareRequirements && <div><strong className="text-sm">Special Care Requirements:</strong> <p className="text-sm mt-1 whitespace-pre-wrap">{animal.specialCareRequirements}</p></div>}
+                                </div>
+                            </div>
+                            )}
+
+                            {/* 4th Section: Environment */
                             {(animal.temperatureRange || animal.humidity || animal.lighting || animal.noise) && (
                             <div className="bg-gray-50 p-4 rounded-lg border border-gray-200 space-y-4">
                                 <h3 className="text-lg font-semibold text-gray-700">Environment</h3>

@@ -77,6 +77,33 @@ export const TUTORIAL_SCREENSHOTS = {
     7: 'ownership-history.png', // Step 7: Ownership History
   },
   
+  'gs-breeding': {
+    1: 'breeding-tab.png', // Step 1: Breeding Tab
+    2: 'reproductive-status.png', // Step 2: Reproductive Status
+    3: 'estrus-and-cycle-information.png', // Step 3: Estrus & Cycle Information
+    4: 'mating-and-pregnancy.png', // Step 4: Mating & Pregnancy
+    5: 'stud-information.png', // Step 5: Stud Information
+    6: 'dam-information.png', // Step 6: Dam Information
+    7: 'breeding-history.png', // Step 7: Breeding History
+  },
+  
+  'gs-health': {
+    1: 'health-tab.png', // Step 1: Health Tab
+    2: 'preventive-care.png', // Step 2: Preventive Care
+    3: 'procedures-and-diagnostics.png', // Step 3: Procedures & Diagnostics
+    4: 'active-medical-records.png', // Step 4: Active Medical Records
+    5: 'veterinary-care.png', // Step 5: Veterinary Care
+  },
+  
+  'gs-husbandry': {
+    1: 'animal-care-tab.png', // Step 1: Animal Care Tab
+    2: 'feeding-schedule.png', // Step 2: Feeding Schedule
+    3: 'housing-and-enclosure.png', // Step 3: Housing & Enclosure
+    4: 'animal-care.png', // Step 4: Animal Care
+    5: 'environment.png', // Step 5: Environment
+    6: 'exercise-and-grooming.png', // Step 6: Exercise & Grooming
+  },
+  
   'create-animals': {
     // Screenshots to be added
   },
