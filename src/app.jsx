@@ -4926,8 +4926,8 @@ const ViewOnlyAnimalDetail = ({ animal, onClose, API_BASE_URL, onViewProfile, on
     });
 
     return (
-        <div className="fixed inset-0 bg-accent/10 flex items-center justify-center p-4 z-50 overflow-y-auto">
-            <div className="bg-primary rounded-xl shadow-2xl w-full max-w-5xl max-h-[90vh] overflow-y-auto">
+        <div className="fixed inset-0 bg-accent/10 flex items-center justify-center p-2 sm:p-4 z-50 overflow-y-auto">
+            <div className="bg-primary rounded-xl shadow-2xl w-full max-w-5xl max-h-[95vh] sm:max-h-[90vh] overflow-y-auto my-2 sm:my-0">
                 {/* Header */}
                 <div className="bg-white rounded-t-lg p-4 border-b border-gray-300">
                     <div className="flex justify-between items-center">
@@ -4992,7 +4992,7 @@ const ViewOnlyAnimalDetail = ({ animal, onClose, API_BASE_URL, onViewProfile, on
                 </div>
 
                 {/* Tab Content */}
-                <div className="bg-white border border-t-0 border-gray-300 rounded-b-lg p-6 overflow-y-auto max-h-[calc(90vh-180px)]">
+                <div className="bg-white border border-t-0 border-gray-300 rounded-b-lg p-3 sm:p-6 overflow-y-auto max-h-[calc(95vh-160px)] sm:max-h-[calc(90vh-180px)] pb-8">
                     {/* Tab 1: Overview */}
                     {detailViewTab === 1 && (
                         <div className="space-y-4">
@@ -12822,18 +12822,20 @@ const AnimalForm = ({
                                             ))}
                                         </div>
                                     )}
-                                    <div className="flex items-center gap-2">
+                                    <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-2">
                                         <input type="text" value={newCareTaskName} onChange={e => setNewCareTaskName(e.target.value)}
                                             placeholder="Task name (e.g. Nail trim, Weigh)"
                                             className="flex-1 p-1.5 text-sm border border-gray-300 rounded-md focus:ring-primary focus:border-primary" />
-                                        <input type="number" value={newCareTaskFreq} onChange={e => setNewCareTaskFreq(e.target.value)}
-                                            placeholder="Days" min="1"
-                                            className="w-20 p-1.5 text-sm border border-gray-300 rounded-md focus:ring-primary focus:border-primary" />
-                                        <button type="button" onClick={() => {
-                                            if (!newCareTaskName.trim()) return;
-                                            setFormData(prev => ({ ...prev, careTasks: [...(prev.careTasks || []), { taskName: newCareTaskName.trim(), frequencyDays: newCareTaskFreq ? Number(newCareTaskFreq) : null, lastDoneDate: null }] }));
-                                            setNewCareTaskName(''); setNewCareTaskFreq('');
-                                        }} className="px-2 py-1.5 bg-primary text-black text-sm font-medium rounded-md hover:bg-primary/80 whitespace-nowrap">+ Add</button>
+                                        <div className="flex gap-2">
+                                            <input type="number" value={newCareTaskFreq} onChange={e => setNewCareTaskFreq(e.target.value)}
+                                                placeholder="Days" min="1"
+                                                className="flex-1 sm:w-20 p-1.5 text-sm border border-gray-300 rounded-md focus:ring-primary focus:border-primary" />
+                                            <button type="button" onClick={() => {
+                                                if (!newCareTaskName.trim()) return;
+                                                setFormData(prev => ({ ...prev, careTasks: [...(prev.careTasks || []), { taskName: newCareTaskName.trim(), frequencyDays: newCareTaskFreq ? Number(newCareTaskFreq) : null, lastDoneDate: null }] }));
+                                                setNewCareTaskName(''); setNewCareTaskFreq('');
+                                            }} className="px-3 py-1.5 bg-primary text-black text-sm font-medium rounded-md hover:bg-primary/80 whitespace-nowrap flex-shrink-0">+ Add</button>
+                                        </div>
                                     </div>
                                 </div>
                                 
