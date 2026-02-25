@@ -117,7 +117,7 @@ const GETTING_STARTED_LESSONS = [
       {
         stepNumber: 8,
         title: 'Return to Species Selector',
-        content: 'Now let\'s go back to select a default species for your animal. Click the highlighted "Back to Selector" button to return to the species list.',
+        content: 'Now let\'s go back to select a default species for your animal. Click the highlighted "Back" button to return to the species list.',
         highlightElement: '[data-tutorial-target="back-to-selector-btn"]',
         actionType: 'click',
         tips: [
