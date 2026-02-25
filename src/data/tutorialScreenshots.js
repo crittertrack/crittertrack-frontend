@@ -40,6 +40,23 @@ export const TUTORIAL_SCREENSHOTS = {
     5: 'move-to-physical-tab.png', // Step 5: Move to Physical Tab
   },
   
+  'gs-physical': {
+    1: 'physical-characteristics.png', // Step 1: Physical Characteristics
+    2: 'template-based-physical-fields.png', // Step 2: Template-Based Physical Fields
+    3: 'filling-out-physical-fields.png', // Step 3: Filling Out Physical Fields
+    4: 'additional-physical-notes..png', // Step 4: Additional Physical Notes
+    5: 'genetic-code-the-add-button.png', // Step 5: Genetic Code - The ADD Button
+    6: 'genetic-builder-overview.png', // Step 6: Genetic Builder Overview
+    7: 'close-genetic-builder.png', // Step 7: Close Genetic Builder
+    8: 'life-stage.png', // Step 8: Life Stage
+    9: 'measurements-and-growth-tracking.png', // Step 9: Measurements & Growth Tracking
+    10: 'measurement-units.png', // Step 10: Measurement Units
+    11: 'add-first-measurement.png', // Step 11: Add First Measurement
+    12: 'add-second-measurement.png', // Step 12: Add Second Measurement
+    13: 'view-growth-chart.png', // Step 13: View Growth Chart
+    14: 'move-to-identification-tab.png', // Step 14: Move to Identification Tab
+  },
+  
   'create-animals': {
     // Screenshots to be added
   },
