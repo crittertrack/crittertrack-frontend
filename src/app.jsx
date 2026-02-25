@@ -23923,6 +23923,14 @@ const App = () => {
                                         {/* Tab 3: Physical Profile */}
                                         {detailViewTab === 3 && (
                                             <div className="space-y-6">
+                                                {/* Debug info */}
+                                                <div className="bg-yellow-100 border border-yellow-300 p-2 text-xs rounded">
+                                                    <strong>Debug:</strong> animalToView exists: {animalToView ? 'YES' : 'NO'}, 
+                                                    color: {animalToView?.color || 'none'}, 
+                                                    geneticCode: {animalToView?.geneticCode ? 'exists' : 'none'},
+                                                    lifeStage: {animalToView?.lifeStage || 'none'}
+                                                </div>
+                                                
                                                 {/* Variety Section - Always show */}
                                                 <div className="bg-gray-50 p-4 rounded-lg border border-gray-200 space-y-4">
                                                     <h3 className="text-lg font-semibold text-gray-700">Variety</h3>
@@ -23935,12 +23943,12 @@ const App = () => {
                                                         ].filter(Boolean).join(' ') || 'Not specified'}</strong>
                                                     </div>
                                                 </div>
-                                                {animalToView.geneticCode && (
-                                                    <div className="bg-gray-50 p-4 rounded-lg border border-gray-200">
-                                                        <h3 className="text-lg font-semibold text-gray-700 mb-2">Genetic Code</h3>
-                                                        <p className="text-sm font-mono">{animalToView.geneticCode}</p>
-                                                    </div>
-                                                )}
+                                                
+                                                {/* Genetic Code - Always show */}
+                                                <div className="bg-gray-50 p-4 rounded-lg border border-gray-200">
+                                                    <h3 className="text-lg font-semibold text-gray-700 mb-2">Genetic Code</h3>
+                                                    <p className="text-sm font-mono">{animalToView.geneticCode || 'Not specified'}</p>
+                                                </div>
                                                 
                                                 {/* Life Stage - Always show */}
                                                 <div className="bg-gray-50 p-4 rounded-lg border border-gray-200">
