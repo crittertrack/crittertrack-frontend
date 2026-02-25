@@ -22778,15 +22778,10 @@ const App = () => {
                 </div>
             )}
 
-            {/* Tutorial Info Tab Modal */}
+            {/* Help/Lessons Tab Modal */}
             {showInfoTab && (
                 <InfoTab 
                     onClose={() => setShowInfoTab(false)}
-                    isMobile={isMobile}
-                    onStartTutorial={(lessonId) => {
-                        setCurrentTutorialId(lessonId);
-                        setShowTutorialOverlay(true);
-                    }}
                 />
             )}
 
