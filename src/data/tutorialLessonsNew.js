@@ -289,18 +289,6 @@ const GETTING_STARTED_LESSONS = [
           'Requires Public Profile to be enabled (on Overview tab)',
           'Public + For Sale/Stud = appears in Marketplace'
         ]
-      },
-      {
-        stepNumber: 5,
-        title: 'Move to Physical Tab',
-        content: 'Now let\'s continue to the Physical tab to add more details about your animal\'s physical characteristics. Click the "Physical" tab.',
-        highlightElement: '[data-tutorial-target="physical-tab"]',
-        actionType: 'click',
-        tips: [
-          'Each tab adds more specific information',
-          'You can skip tabs and come back',
-          'Everything saves together at the end'
-        ]
       }
     ]
   },
@@ -466,18 +454,6 @@ const GETTING_STARTED_LESSONS = [
           'Shows growth trajectory',
           'Helps identify health concerns'
         ]
-      },
-      {
-        stepNumber: 14,
-        title: 'Move to Identification Tab',
-        content: 'Let\'s continue to the Identification tab to add ID numbers and classification. Click the "Identification" tab.',
-        highlightElement: '[data-tutorial-target="identification-tab"]',
-        actionType: 'click',
-        tips: [
-          'Each tab builds on previous information',
-          'All data is temporary until you Save',
-          'Can navigate freely between tabs'
-        ]
       }
     ]
   },
@@ -578,18 +554,6 @@ const GETTING_STARTED_LESSONS = [
           'Can search and filter by tags',
           'One animal can have multiple tags'
         ]
-      },
-      {
-        stepNumber: 9,
-        title: 'Move to Lineage Tab',
-        content: 'Let\'s continue to the Lineage tab to set up parent information and build your animal\'s pedigree. Click the "Lineage" tab.',
-        highlightElement: '[data-tutorial-target="lineage-tab"]',
-        actionType: 'click',
-        tips: [
-          'Lineage is crucial for breeders',
-          'Helps track pedigree',
-          'Enables COI (Coefficient of Inbreeding) calculations'
-        ]
       }
     ]
   },
@@ -682,18 +646,6 @@ const GETTING_STARTED_LESSONS = [
           'Auto-populated when animal is transferred',
           'Shows all previous owners',
           'Helps verify provenance'
-        ]
-      },
-      {
-        stepNumber: 8,
-        title: 'Move to Breeding Tab',
-        content: 'Let\'s continue to the Breeding tab to learn about reproductive information. Click the "Breeding" tab.',
-        highlightElement: '[data-tutorial-target="breeding-tab"]',
-        actionType: 'click',
-        tips: [
-          'Breeding info is optional for pets',
-          'Important for breeding animals',
-          'Can be filled in later'
         ]
       }
     ]
@@ -795,18 +747,6 @@ const GETTING_STARTED_LESSONS = [
           'Fill in reproductive summary',
           'Helps track breeding productivity'
         ]
-      },
-      {
-        stepNumber: 9,
-        title: 'Move to Health Tab',
-        content: 'Let\'s continue to the Health tab to track medical information. Click the "Health" tab.',
-        highlightElement: '[data-tutorial-target="health-tab"]',
-        actionType: 'click',
-        tips: [
-          'Health is important for all animals',
-          'Track preventive and emergency care',
-          'Helps maintain good records'
-        ]
       }
     ]
   },
@@ -872,18 +812,6 @@ const GETTING_STARTED_LESSONS = [
           'Important for continuity of care',
           'Useful if changing vets'
         ]
-      },
-      {
-        stepNumber: 6,
-        title: 'Move to Animal Care Tab',
-        content: 'Let\'s continue to the Animal Care tab to document feeding schedules, care tasks, and living conditions. Click the "Animal Care" tab.',
-        highlightElement: '[data-tutorial-target="husbandry-tab"]',
-        actionType: 'click',
-        tips: [
-          'Animal Care tracks feeding & routine tasks',
-          'Important for daily management',
-          'Helps maintain good practices'
-        ]
       }
     ]
   },
@@ -938,18 +866,6 @@ const GETTING_STARTED_LESSONS = [
           'Important for breeding success',
           'Track seasonal variations'
         ]
-      },
-      {
-        stepNumber: 5,
-        title: 'Move to Behavior Tab',
-        content: 'Let\'s continue to the Behavior tab to document personality and behavior traits. Click the "Behavior" tab.',
-        highlightElement: '[data-tutorial-target="behavior-tab"]',
-        actionType: 'click',
-        tips: [
-          'Behavior reflects health and temperament',
-          'Important for breeding decisions',
-          'Helps with animal handling'
-        ]
       }
     ]
   },
@@ -993,18 +909,6 @@ const GETTING_STARTED_LESSONS = [
           'Helps plan observation time',
           'Important for breeding schedules',
           'Examples: Mice are nocturnal, hamsters are crepuscular'
-        ]
-      },
-      {
-        stepNumber: 4,
-        title: 'Move to Records Tab',
-        content: 'Let\'s continue to the Records tab to add notes and documentation. Click the "Records" tab.',
-        highlightElement: '[data-tutorial-target="records-tab"]',
-        actionType: 'click',
-        tips: [
-          'Records is where general notes go',
-          'Good place for additional observations',
-          'Final before saving'
         ]
       }
     ]
@@ -1094,18 +998,6 @@ const GETTING_STARTED_LESSONS = [
           'Document disposal method',
           'Keep records for compliance'
         ]
-      },
-      {
-        stepNumber: 8,
-        title: 'Move to Show Tab',
-        content: 'Now let\'s check out the Show tab where you can document titles, ratings, and accomplishments. Click the "Show" tab.',
-        highlightElement: '[data-tutorial-target="show-tab"]',
-        actionType: 'click',
-        tips: [
-          'Track titles and awards',
-          'Record competition results',
-          'Document your animal\'s achievements'
-        ]
       }
     ]
   },
@@ -1150,17 +1042,6 @@ const GETTING_STARTED_LESSONS = [
           'Helps identify strengths',
           'Useful for breeding decisions',
           'Can guide future showing strategy'
-        ]
-      },
-      {
-        stepNumber: 4,
-        title: 'Tutorial Complete!',
-        content: 'Congratulations! You\'ve completed the Getting Started tour and learned about all the tabs and features for documenting your animals in CritterTrack. You can now create and manage your collection with confidence.',
-        tips: [
-          'You can create more animals anytime',
-          'Edit animals at any time',
-          'All information is preserved',
-          'Explore the Key Features tour next'
         ]
       }
     ]
