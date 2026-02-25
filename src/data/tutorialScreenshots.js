@@ -12,6 +12,14 @@ export const TUTORIAL_SCREENSHOTS = {
   
   'gs-select-species': {
     1: 'welcome-to-species-selection.png', // Step 1: Welcome to Species Selection
+    2: 'default-species.png', // Step 2: Default Species
+    3: 'species-search-bar.png', // Step 3: Species Search Bar
+    4: 'add-new-species-button.png', // Step 4: Add New Species Button
+    5: 'species-name.png', // Step 5: Species Name
+    6: 'category-selection.png', // Step 6: Category Selection
+    7: 'latinscientific-name.png', // Step 7: Latin/Scientific Name
+    8: 'return-to-species-selector.png', // Step 8: Return to Species Selector
+    9: 'select-fancy-mouse.png', // Step 9: Select Fancy Mouse
   },
   
   'create-animals': {
