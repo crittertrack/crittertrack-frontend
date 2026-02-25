@@ -32,6 +32,14 @@ export const TUTORIAL_SCREENSHOTS = {
     7: 'save-vs-continue.png', // Step 7: Save vs Continue
   },
   
+  'gs-status-privacy': {
+    1: 'welcome-to-status-and-privacy.png', // Step 1: Welcome to Status & Privacy
+    2: 'breeder-assignment.png', // Step 2: Breeder Assignment
+    3: 'current-owner-section.png', // Step 3: Current Owner Section
+    4: 'availability-for-sale-or-stud.png', // Step 4: Availability for Sale or Stud
+    5: 'move-to-physical-tab.png', // Step 5: Move to Physical Tab
+  },
+  
   'create-animals': {
     // Screenshots to be added
   },
