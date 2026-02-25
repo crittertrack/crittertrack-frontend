@@ -2432,6 +2432,8 @@ const PrivateAnimalDetail = ({ animal, onClose, onEdit, API_BASE_URL, authToken,
     const [enclosureInfo, setEnclosureInfo] = useState(null);
     const [animalLogs, setAnimalLogs] = useState(null); // null = not yet fetched
     const [animalLogsLoading, setAnimalLogsLoading] = useState(false);
+    const [animalCOI, setAnimalCOI] = useState(null);
+    const [loadingCOI, setLoadingCOI] = useState(false);
     const { fieldTemplate, getLabel } = useDetailFieldTemplate(animal?.species, API_BASE_URL);
 
     // Fetch assigned enclosure info
@@ -2451,6 +2453,35 @@ const PrivateAnimalDetail = ({ animal, onClose, onEdit, API_BASE_URL, authToken,
             .catch(() => setAnimalLogs([]))
             .finally(() => setAnimalLogsLoading(false));
     }, [detailViewTab, animal?.id_public, authToken, API_BASE_URL, animalLogs]);
+    
+    // Fetch COI when component mounts or animal changes (if animal has both parents)
+    React.useEffect(() => {
+        const fetchCOI = async () => {
+            const sireId = animal?.fatherId_public || animal?.sireId_public;
+            const damId = animal?.motherId_public || animal?.damId_public;
+            
+            if (animal?.id_public && sireId && damId) {
+                setLoadingCOI(true);
+                try {
+                    const response = await axios.get(
+                        `${API_BASE_URL}/animals/${animal.id_public}/inbreeding`,
+                        { headers: { Authorization: `Bearer ${authToken}` } }
+                    );
+                    if (response.data && response.data.inbreedingCoefficient != null) {
+                        setAnimalCOI(response.data.inbreedingCoefficient);
+                    }
+                } catch (error) {
+                    console.error('Failed to fetch COI:', error);
+                    setAnimalCOI(null);
+                } finally {
+                    setLoadingCOI(false);
+                }
+            } else {
+                setAnimalCOI(null);
+            }
+        };
+        fetchCOI();
+    }, [animal?.id_public, animal?.fatherId_public, animal?.sireId_public, animal?.motherId_public, animal?.damId_public, API_BASE_URL, authToken]);
     
     const handleShare = () => {
         const url = `${window.location.origin}/animal/${animal.id_public}`;
@@ -2856,7 +2887,17 @@ const PrivateAnimalDetail = ({ animal, onClose, onEdit, API_BASE_URL, authToken,
 
                             {/* Parents Section */}
                             <div className="bg-gray-50 p-4 rounded-lg border border-gray-200">
-                                <h3 className="text-lg font-semibold text-gray-700 border-b pb-2 mb-4">Parents</h3>
+                                <div className="flex items-center justify-between border-b pb-2 mb-4">
+                                    <h3 className="text-lg font-semibold text-gray-700">Parents</h3>
+                                    {animalCOI != null && (
+                                        <div className="text-sm text-gray-800">
+                                            <span className="font-medium">COI:</span> {animalCOI.toFixed(2)}%
+                                        </div>
+                                    )}
+                                    {loadingCOI && (
+                                        <div className="text-xs text-gray-400">Calculating...</div>
+                                    )}
+                                </div>
                                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                                     <ViewOnlyParentCard 
                                         parentId={animal.fatherId_public || animal.sireId_public} 
