@@ -618,7 +618,7 @@ const GETTING_STARTED_LESSONS = [
       {
         stepNumber: 5,
         title: 'Other Parent Selector',
-        content: 'This selector is for non-binary, intersex, or agender animals. It works the same way as the Sire selector but allows selection of any gender. This is important for inclusive genetics tracking.',
+        content: 'This selector is for animals with Intersex or Unknown gender. It works the same way as the Sire and Dam selectors but allows selection of any gender. This is important for inclusive genetics tracking.',
         highlightElement: '[data-tutorial-target="select-other-parent-btn"]',
         tips: [
           'Allows selection of Intersex/Unknown genders',
